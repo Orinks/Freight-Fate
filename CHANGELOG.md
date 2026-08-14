@@ -249,6 +249,11 @@
   attached. Brake lights and slow traffic ahead still tell you the speed
   to be ready for, because those do ask you to change yours.
 
+- **CB chatter talks about more than bears again.** Work zones and the
+  scale now get their own reports on the radio instead of every post
+  sounding like a bear sighting: drivers talk about troopers working a
+  work zone, and about logs being checked at the scale.
+
 ### Added
 
 - **Game sound can step back while the road talks.** A new option drops

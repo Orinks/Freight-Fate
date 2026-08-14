@@ -132,10 +132,31 @@ class TripTrafficMixin:
         Terse speech keeps the fact, the distance and the side, and drops the
         advice tail -- that tail is what made the old line eighteen words, and
         therefore longer than the window it had to be heard in.
+
+        The confidence framing (two drivers / one driver / somebody a while
+        back) is the same for every post kind -- that is what the channel's
+        reliability rides on. What differs is what the post actually is: a
+        patrol or speed post still calls a bear, a work zone is drivers
+        talking about enforcement working the zone rather than a trooper
+        sighting, and a scale is chatter about logs being checked. Bear
+        stays CB slang for a trooper on the open road, never for a fixed
+        inspection facility (docs/ontology.md).
         """
         distance = self._distance_text(max(0.0, ahead_mi))
         confidence = self._cb_confidence(post)
         side = self._cb_side(post)
+        if post.kind == KIND_WORK_ZONE:
+            if confidence == "strong":
+                return f"CB chatter, {distance}: two drivers say troopers are working {side}."
+            if confidence == "ordinary":
+                return f"CB chatter, {distance}: a driver says troopers are working {side}."
+            return f"CB chatter: somebody said troopers were working {side} a while back."
+        if post.kind in (KIND_SCALE_APRON, KIND_FIXED_SCALE):
+            if confidence == "strong":
+                return f"CB chatter, {distance}: two drivers say they're checking logs {side}."
+            if confidence == "ordinary":
+                return f"CB chatter, {distance}: a driver says they're checking logs {side}."
+            return f"CB chatter: somebody said they were checking logs {side} a while back."
         if confidence == "strong":
             return f"CB chatter, {distance}: two drivers call a bear {side}."
         if confidence == "ordinary":

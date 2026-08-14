@@ -330,6 +330,56 @@ def test_the_cb_never_says_the_road_is_clear():
         assert "no bear" not in lowered
 
 
+def test_cb_chatter_varies_by_what_the_post_actually_is():
+    """The rewrite that shipped the presence model collapsed every post kind
+    to "a bear {side}" x3 confidence levels. A patrol/speed post still calls
+    a bear; a work zone is drivers talking about enforcement working the
+    zone, not a trooper sighting; a scale is chatter about logs being
+    checked -- and every kind keeps the same confidence framing and the
+    distance/side slots."""
+    trip = _trip()
+    patrol = always_observing_post(at_mi=20.0, kind=KIND_MEDIAN)
+    work_zone = always_observing_post(at_mi=20.0, kind=KIND_WORK_ZONE)
+    scale_apron = always_observing_post(at_mi=20.0, kind=KIND_SCALE_APRON)
+    fixed_scale = always_observing_post(at_mi=20.0, kind=KIND_FIXED_SCALE)
+
+    patrol_line = trip.cb_patrol_message(patrol, 3.0)
+    work_zone_line = trip.cb_patrol_message(work_zone, 3.0)
+    apron_line = trip.cb_patrol_message(scale_apron, 3.0)
+    scale_line = trip.cb_patrol_message(fixed_scale, 3.0)
+
+    # Every line still carries the distance and its own side slot.
+    for line, post in (
+        (patrol_line, patrol),
+        (work_zone_line, work_zone),
+        (apron_line, scale_apron),
+        (scale_line, fixed_scale),
+    ):
+        assert "3.0" in line or "miles" in line or line.startswith("CB chatter:")
+        assert trip._cb_side(post) in line
+
+    # Only the patrol/speed line is a bear report.
+    assert "bear" in patrol_line.lower()
+    assert "bear" not in work_zone_line.lower()
+    assert "bear" not in apron_line.lower()
+    assert "bear" not in scale_line.lower()
+
+    # The work zone talks about enforcement, not a trooper sighting.
+    assert "troopers" in work_zone_line.lower()
+
+    # The scale chatter is about logs, and uses only canonical nouns -- never
+    # the forbidden "chicken coop" synonym.
+    assert "logs" in apron_line.lower()
+    assert "logs" in scale_line.lower()
+    assert "coop" not in apron_line.lower()
+    assert "coop" not in scale_line.lower()
+
+    # The confidence framing (two drivers / a driver / somebody a while
+    # back) is shared across every kind.
+    for line in (patrol_line, work_zone_line, apron_line, scale_line):
+        assert any(marker in line for marker in ("two drivers", "a driver", "somebody"))
+
+
 def test_spoken_cb_lines_are_capped_for_a_whole_run():
     from freight_fate.sim.trip_models import CB_CALLS_PER_RUN
 
