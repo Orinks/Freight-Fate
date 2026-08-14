@@ -403,7 +403,7 @@ class MainMenuState(MenuState):
 
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
-        self.ctx.say("Press Enter on Quit to exit the game.")
+        self.ctx.push_state(ConfirmQuitState(self.ctx))
 
     def presence(self):
         from ..discord_presence import PresenceState
@@ -487,6 +487,25 @@ class MainMenuState(MenuState):
             "That is the log from the previous run.",
             interrupt=True,
         )
+
+
+class ConfirmQuitState(MenuState):
+    """One spoken yes/no gate before Escape at the main menu exits the game."""
+
+    title = "Quit Freight Fate?"
+    open_sound_key = "ui/error"
+
+    def announce_entry(self) -> None:
+        self.ctx.say(f"Quit Freight Fate? {self.current_text()}", review=False)
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("No, stay in Freight Fate", self.go_back),
+            MenuItem("Yes, quit Freight Fate", self._yes),
+        ]
+
+    def _yes(self) -> None:
+        self.ctx.quit()
 
 
 class AchievementCareerState(MenuState):

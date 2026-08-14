@@ -465,3 +465,58 @@ def test_manage_careers_resets_selected_save_to_fresh_profile(monkeypatch):
         assert "Reset Me reset" in spoken[-1]
     finally:
         app.shutdown()
+
+
+def test_escape_at_terminal_leaves_for_main_menu_without_lecturing():
+    """Fix A: Escape at the city terminal used to lecture ('Use Quit to main
+    menu...') instead of acting. It must now take the same quit-to-menu path
+    as the Quit to main menu item -- no confirmation, progress autosaves."""
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import MainMenuState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Esc Driver", current_city="Denver")
+        app.push_state(CityMenuState(app.ctx))
+        assert isinstance(app.state, CityMenuState)
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+
+        assert isinstance(app.state, MainMenuState)
+    finally:
+        app.shutdown()
+
+
+def test_escape_at_main_menu_asks_before_quitting(monkeypatch):
+    """Fix A: Escape at the main menu used to just tell the player to press
+    Enter on Quit. It must now open a spoken yes/no confirmation, and only
+    quit on Yes."""
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import ConfirmQuitState, MainMenuState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        app.push_state(MainMenuState(app.ctx))
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, ConfirmQuitState)
+        assert "Quit Freight Fate?" in spoken[-1]
+
+        # No keeps playing, back at the main menu; nothing has quit.
+        app.running = True
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, MainMenuState)
+        assert app.running is True
+
+        app.push_state(ConfirmQuitState(app.ctx))
+        while app.state.items[app.state.index].text != "Yes, quit Freight Fate":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert app.running is False
+    finally:
+        app.shutdown()

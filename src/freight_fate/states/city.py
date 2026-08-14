@@ -833,9 +833,7 @@ class CityMenuState(MenuState):
 
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
-        self.ctx.say(
-            "Use Quit to main menu to leave the terminal. Progress is saved automatically."
-        )
+        self._to_main_menu()
 
 
 def dispatch_cache_key(p) -> dict:

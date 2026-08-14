@@ -29,6 +29,13 @@
 
 ### Changed
 
+- **Pressing Escape now acts instead of explaining.** At the terminal,
+  Escape used to just tell you to use Quit to main menu -- now it takes
+  you straight back, the same as that menu item, since progress already
+  autosaves. At the main menu, Escape now asks whether you want to quit
+  and does it on your say-so, instead of telling you to go press Enter
+  on Quit yourself.
+
 - **Blowing past an open weigh station now gets you pulled over.** Scale
   officers watch the bypass lane, and a truck that runs an open scale
   instead of pulling in is caught most of the time -- steep odds, not a
