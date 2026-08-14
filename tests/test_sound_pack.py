@@ -183,6 +183,11 @@ def test_verify_sound_assets_passes_in_source_checkout():
 
 
 def _reset_default_pack(monkeypatch, path: Path, music_path: Path | None = None) -> None:
+    # Every caller here is testing pack behavior and wants packs enabled,
+    # regardless of what conftest set based on this machine's loose tree
+    # (it flips this on when assets/sounds/ui exists -- a builder-tree
+    # sentinel these tests must not inherit).
+    monkeypatch.delenv("FREIGHT_FATE_IGNORE_SOUND_PACK", raising=False)
     monkeypatch.setattr(assets_pack, "DEFAULT_PACK_PATH", path)
     monkeypatch.setattr(assets_pack, "_default_pack", None)
     monkeypatch.setattr(assets_pack, "_default_pack_missing", False)
