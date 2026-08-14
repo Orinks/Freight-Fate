@@ -373,7 +373,7 @@ def run_plan_songs(key: str, pool: str, *, force: bool = False) -> None:
     _print_spend(before, after)
 
 
-def run_probe(key: str) -> None:
+def run_probe(key: str, *, force: bool = False) -> None:
     """--probe: generate exactly one song (SONG_PLAN["oldies"][0]),
     measuring its real character cost against GET /v1/user/subscription
     before/after, then project the cost of the rest of the planned batch
@@ -382,25 +382,38 @@ def run_probe(key: str) -> None:
     bills per character, unlike Music generation). Imaging SFX bills by
     duration_seconds, a different unit, so it's reported separately and
     left out of the character projection.
+
+    Resume-friendly like the other runners: if the probe song's output file
+    already exists, a re-run skips regenerating it (unless --force) so a
+    repeated probe never silently re-spends Music credits. The
+    before/after subscription read still runs either way, so a skipped
+    probe reports 0 spend and the same account-remaining figure instead of
+    just doing nothing.
     """
     from radio_content_plan import AD_PLAN, SFX_PROMPTS, SONG_PLAN, STATIONS
 
     song = SONG_PLAN["oldies"][0]
+    out = ASSETS / "music" / f"{song.key}.ogg"
 
     before = _subscription(key)
     before_count = int(before.get("character_count", 0))
     before_limit = int(before.get("character_limit", 0))
     print(f"  before: {before_count:,} / {before_limit:,} characters used", flush=True)
 
-    print(f"  composing probe song {song.key} ({song.length_ms / 1000:.0f}s)...", flush=True)
-    body = {
-        "prompt": song.prompt,
-        "music_length_ms": song.length_ms,
-        "model_id": "music_v1",
-        "force_instrumental": song.instrumental,
-    }
-    mp3 = _post_bytes(MUSIC_API, key, body)
-    _write_ogg(mp3, ASSETS / "music" / f"{song.key}.ogg")
+    if out.exists() and not force:
+        print(
+            f"  skip {song.key} (exists) -- pass --force to regenerate and re-measure", flush=True
+        )
+    else:
+        print(f"  composing probe song {song.key} ({song.length_ms / 1000:.0f}s)...", flush=True)
+        body = {
+            "prompt": song.prompt,
+            "music_length_ms": song.length_ms,
+            "model_id": "music_v1",
+            "force_instrumental": song.instrumental,
+        }
+        mp3 = _post_bytes(MUSIC_API, key, body)
+        _write_ogg(mp3, out)
 
     after = _subscription(key)
     after_count = int(after.get("character_count", 0))

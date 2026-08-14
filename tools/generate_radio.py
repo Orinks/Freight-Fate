@@ -849,6 +849,16 @@ def report_durations() -> None:
         print(f"  {path.stem}: {info.frames / info.samplerate:.1f}s")
 
 
+def _take_flag(argv: list[str], flag: str) -> bool:
+    """Pop a plain boolean flag out of ``argv`` in place -- no value
+    consumption, so a stray token after it is left for the caller to
+    reject instead of being silently swallowed."""
+    if flag not in argv:
+        return False
+    argv.remove(flag)
+    return True
+
+
 def _take_flag_arg(argv: list[str], flag: str) -> tuple[bool, str | None]:
     """Pop ``flag`` out of ``argv`` in place; if the flag is present and the
     token right after it isn't itself a ``--flag``, pop and return that too
@@ -867,14 +877,18 @@ def main(argv: list[str] | None = None) -> int:
 
     plan_hosts, plan_hosts_key = _take_flag_arg(argv, "--plan-hosts")
     plan_ids, plan_ids_key = _take_flag_arg(argv, "--plan-ids")
-    plan_ads, _ = _take_flag_arg(argv, "--plan-ads")
+    plan_ads = _take_flag(argv, "--plan-ads")
     plan_songs, plan_songs_pool = _take_flag_arg(argv, "--plan-songs")
-    probe, _ = _take_flag_arg(argv, "--probe")
-    force, _ = _take_flag_arg(argv, "--force")
+    probe = _take_flag(argv, "--probe")
+    force = _take_flag(argv, "--force")
 
     if plan_hosts or plan_ids or plan_ads or plan_songs or probe:
         if plan_songs and not plan_songs_pool:
             raise SystemExit("--plan-songs requires a POOL argument, e.g. --plan-songs oldies")
+        if argv:
+            raise SystemExit(
+                f"Unrecognized argument(s) with a --plan-*/--probe flag: {' '.join(argv)}"
+            )
         from radio_generate_content import (
             run_plan_ads,
             run_plan_hosts,
@@ -893,7 +907,7 @@ def main(argv: list[str] | None = None) -> int:
         if plan_songs:
             run_plan_songs(key, plan_songs_pool, force=force)
         if probe:
-            run_probe(key)
+            run_probe(key, force=force)
         report_durations()
         return 0
 
