@@ -89,7 +89,8 @@ def _suspension_text(profile, hours: float, verb: str = "suspended") -> str:
     return (
         f"Your CDL is {verb} for {left}. Driving jobs are off the dispatch "
         f"board until it clears, {enforcement.clears_text(profile)}. Your money "
-        "and your truck are safe; rest, repairs, and city services are still open."
+        "and your truck are safe; rest, repairs, the garage, and the truck "
+        "dealer are still open."
     )
 
 
@@ -117,10 +118,11 @@ def _major_offense_text(profile, kind: str, hours: float) -> str:
             "driver will not drive commercially again. Nothing is taken away: "
             f"{name} keeps every dollar, the truck, and the whole record, and "
             "you can open this career any time to look back over it. Rest, "
-            "repairs, and city services still work here, and the dispatch board "
-            "can still be read, but there is no driving work and no date this "
-            "clears. When you want the road again, start a new career from the "
-            "title menu. Everything you learned still applies."
+            "repairs, the garage, and the truck dealer still work here, and "
+            "the dispatch board can still be read, but there is no driving "
+            "work and no date this clears. When you want the road again, "
+            "start a new career from the title menu. Everything you learned "
+            "still applies."
         )
     return (
         "Running from a police stop in a commercial vehicle is a felony, and a "

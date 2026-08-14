@@ -1,8 +1,12 @@
 # Refreshing city-service data (the periodic re-bake)
 
-City services -- the freight market, garage, and truck dealer you drive to in
-each city -- are source-backed from OpenStreetMap at build time and baked into
-three checked-in files the game reads offline:
+City services -- the freight market, garage, and truck dealer attached to
+each city -- are source-backed from OpenStreetMap at build time and baked
+into three checked-in files the game reads offline. The dispatch board opens
+the freight market, the garage and truck dealer are both direct terminal
+menu items, and the truck dealer entry names the source-backed local
+dealer; the local-drive routing that once used these coordinates is
+retired, but the same three checked-in files still back the data:
 
 - `src/freight_fate/data/city_services.json` -- the chosen POI per service.
 - `src/freight_fate/data/local_approaches.json` -- nearest-road approach per

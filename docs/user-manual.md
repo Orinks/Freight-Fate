@@ -261,7 +261,7 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Choice | What It Does |
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
-| Drive to city services | Drive a short local route to the freight market office, garage, or truck dealer. Service names use sourced local data where available, and GPS prefers checked-in local turns or road context when they exist. |
+| Truck dealer | Browse tractors at the local dealer. Owner-operators buy and switch here; company drivers can look at what the fleet may assign next. The intro names the source-backed local dealer where sourced data exists. |
 | Career plan | Review your next realistic career objective after the first dispatch. |
 | Business status | Review company-driver or owner-operator status. |
 | Garage | Refuel, repair, service tires, and wash company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
@@ -323,12 +323,12 @@ factoring costs. Buying a matching trailer lowers the direct-freight trailer
 charge to an owned-trailer reserve. It is a playable business step, not a full
 paperwork or broker-contract simulation.
 
-City service drives are a first step toward more local city driving. Pick a
-service, follow the spoken GPS, stop at the destination, and press Enter to go
-inside. The truck does not enter the service automatically. Current service
-locations are representative city POIs derived from the checked-in freight
-market and terminal data; future map-data passes can make those approaches more
-specific without changing the controls.
+**Truck dealer** opens directly from the terminal menu, naming the
+source-backed local dealer where sourced data exists. The dispatch board
+already opens the freight market, and the garage is its own terminal item, so
+none of the three needs a separate drive to reach. Fuel, food, a break, sleep,
+minor repairs, and paying down what you owe are also available on the road at
+supported truck stops.
 
 The garage can do partial fuel, repair, or tire work when an owner-operator
 cannot afford the full service. Normal miles add slow tire wear and road
@@ -571,7 +571,7 @@ Driving controls are active while the road view is focused:
 | D | Report one safe-speed number for right now. Weather grip, an armed exit ramp, and the next bend are already baked into the number. |
 | G | Report the grade under the wheels: the slope, how far it runs, and whether the truck is holding, pulling, or losing it -- including whether the engine brake has the descent or is about to lose it. G also names the next steep grade ahead, how far off and how long it runs. |
 | I | Turn the lane locator on or off: a soft tock, once a beat, panned to where the truck sits inside its lane. It keeps ticking until you turn it off. Needs lane keeping on partial or off. |
-| Enter | Arrive: go inside a city service you have driven to, or accept a facility arrival once you are fully stopped. |
+| Enter | Arrive: accept a facility arrival once you are fully stopped. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and the one hours-of-service limit that comes first. For the first few presses it also names the three keys below, then stops. |
@@ -1337,7 +1337,7 @@ Escape opens the pause menu during a drive. Public pause choices include:
 Freight Fate saves at terminals, at supported route save points, when quitting
 to the main menu, and during important trip state changes. Continue latest
 career can resume a saved pickup objective, pickup drive, pickup facility visit,
-city service drive, or loaded delivery.
+or loaded delivery.
 
 The main menu can continue the latest career, choose another career, reset a
 career, or delete a career. If a saved career fails its integrity check, the

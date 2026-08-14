@@ -1,9 +1,8 @@
 """The terminal menu opens the truck dealer directly.
 
-The next task deletes the "Drive to city services" driving machinery
-entirely; this only swaps the terminal's menu item for a direct hop into
-``TruckShopState``, and teaches its spoken entry the source-backed dealer
-name when one exists.
+The "Drive to city services" driving machinery is gone; the terminal's
+menu item is a direct hop into ``TruckShopState``, and its spoken entry
+names the source-backed dealer when one exists.
 """
 
 from speech_capture import speech_stub

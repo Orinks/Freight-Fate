@@ -66,6 +66,7 @@ field matching rejects both older and newer builds.
 | Trailer unit | `TrailerUnit` | `models/trailer_yard.py` |
 | Pickup plan | `PickupPlan` | `models/trailer_yard.py` |
 | Delivery plan | `DeliveryPlan` | `models/trailer_yard.py` |
+| Truck dealer (spoken "truck dealer", or the source-backed local dealer name when one exists) | `TruckShopState` | `states/city_business.py` |
 
 A `FleetTier` is what a carrier *assigns* at a level band: a company driver
 does not choose a tractor, they are given one. An owner-operator owns theirs.

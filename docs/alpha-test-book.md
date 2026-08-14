@@ -196,8 +196,9 @@ Chapter 5.
 **Cities are driven, not teleported.** Tier-1 surface streets carry real
 turn-by-turn cues with direction-shaped earcons panned to the maneuver
 side. Arrivals flow off the ramp onto the destination's streets; loaded
-departures drive the streets out to the on-ramp. The terminal's freight
-office, garage, and dealer are short local drives. Chapter 6.
+departures drive the streets out to the on-ramp. The terminal's dispatch
+board, garage, and truck dealer are all direct menu items, naming the
+real local dealer where sourced data exists. Chapter 6.
 
 **The law is watching more than your speed.** Weigh-station blow-pasts
 and severe visible damage draw stops; running from lights escalates to a
@@ -614,7 +615,7 @@ the midnight run flowing free on the same asphalt.
 Pass when: the difference between the two runs is unmistakable by ear
 alone, and rural stretches never fake a jam.
 
-## Chapter 6. Streets, city services, and both ends of the trip
+## Chapter 6. Streets, the truck dealer, and both ends of the trip
 
 ### 6.1 Turn-by-turn on real streets
 
@@ -646,20 +647,18 @@ clock and tolls continuous — no teleport to the interstate.
 Pass when: the outbound chain mirrors the inbound one and the trip
 odometer never jumps.
 
-### 6.3 City services are drives
+### 6.3 The truck dealer is a direct menu item
 
-Setup: any terminal city; a reason to visit the freight office, garage,
-or truck dealer.
+Setup: any terminal city with a source-backed local dealer.
 
-Do: pick a service from the city menu and take the drive; press Enter
-when the arrival is offered.
+Do: open **Truck dealer** from the terminal menu.
 
-Listen for: a short local drive with sourced street names and road
-context — real turns where the data supports them — instead of a menu
-teleport.
+Listen for: the intro naming the real local dealer where sourced data
+exists, with no drive or menu teleport in between -- the dispatch board
+and the garage are the same way, each its own direct terminal item.
 
-Pass when: each service arrives by road and the drive matches the city
-it claims to be.
+Pass when: the dealer name matches the city it claims to be, and the
+menu opens immediately.
 
 ## Chapter 7. Enforcement and the working day
 
