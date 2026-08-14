@@ -580,6 +580,23 @@ def test_the_pause_menu_offers_learn_game_sounds():
         app.shutdown()
 
 
+def test_engine_brake_stages_are_learnable_and_named_by_stage():
+    """Regression pin for the jake stages: the catalog already carries them
+    (sound_catalog.py's ``_ENGINE_BRAKE``), wired into the ordinary category
+    list the screen reads, with the stage named in the spoken label."""
+    from freight_fate.sound_catalog import CATALOG
+
+    category = next(c for c in CATALOG if c.name == "Engine brake, speed and shifting")
+    names = [e.name for e in category.entries]
+    assert names[:3] == [
+        "Engine brake, stage one",
+        "Engine brake, stage two",
+        "Engine brake, stage three",
+    ]
+    for entry in category.entries[:3]:
+        assert entry.plays[0].key == "engine/jake_1600"
+
+
 def test_both_entry_points_push_the_same_screen(monkeypatch):
     from freight_fate.states.learn_sounds import LearnSoundsState
     from freight_fate.states.main_menu import MainMenuState
