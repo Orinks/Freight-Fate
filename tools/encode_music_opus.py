@@ -21,12 +21,23 @@ Two sources, by necessity:
 A WAV is only accepted for a stem when its duration matches within
 ``DURATION_TOLERANCE_S``; anything else is reported and left to the Ogg path,
 so a mislabelled master can never ship under the wrong track name.
+
+The WAV masters zip defaults to the owner's machine and most contributors
+won't have it -- that's fine, the tool falls back to encoding every track
+from the shipped Ogg. Point ``FREIGHT_FATE_WAV_MASTERS`` at your own copy of
+the zip to get the WAV path instead.
+
+Usage: ``uv run --with av python tools/encode_music_opus.py`` (``av`` is not
+a project dependency, so it's supplied per-invocation rather than pinned in
+pyproject). Add ``--write`` to actually encode; without it this only prints
+the plan.
 """
 
 from __future__ import annotations
 
 import argparse
 import io
+import os
 import sys
 import zipfile
 from pathlib import Path
@@ -36,7 +47,11 @@ import av
 ROOT = Path(__file__).resolve().parents[1]
 MUSIC = ROOT / "src" / "freight_fate" / "data" / ".." / "assets" / "sounds" / "music"
 MUSIC = (ROOT / "src" / "freight_fate" / "assets" / "sounds" / "music").resolve()
-WAV_ZIP = Path(r"C:/Users/nrome/Downloads/freight-fate-raw-wavs.zip")
+WAV_ZIP = Path(
+    os.environ.get(
+        "FREIGHT_FATE_WAV_MASTERS", r"C:/Users/nrome/Downloads/freight-fate-raw-wavs.zip"
+    )
+)
 
 BITRATE = 80_000
 DURATION_TOLERANCE_S = 1.0
@@ -54,8 +69,15 @@ def _duration(container: av.container.InputContainer) -> float:
 
 
 def _wav_durations() -> dict[str, tuple[float, bytes]]:
-    """Every music WAV in the master zip: filename -> (seconds, raw bytes)."""
+    """Every music WAV in the master zip: filename -> (seconds, raw bytes).
+
+    Most contributors don't have the zip -- that's expected, not an error.
+    Return empty and let every track fall back to the shipped Ogg.
+    """
     out: dict[str, tuple[float, bytes]] = {}
+    if not WAV_ZIP.exists():
+        print(f"No WAV masters zip at {WAV_ZIP} -- encoding everything from the shipped oggs.")
+        return out
     with zipfile.ZipFile(WAV_ZIP) as archive:
         for info in archive.infolist():
             name = info.filename
@@ -102,7 +124,11 @@ def build_plan() -> tuple[dict[str, tuple[bytes, str]], list[str], list[str]]:
     # Pass 1: the WAV's own name points at a shipped stem, and duration agrees.
     for name, (wdur, data) in wavs.items():
         stem = _normalize(name)
-        if stem in oggs and stem not in wav_for_stem and abs(wdur - oggs[stem]) <= DURATION_TOLERANCE_S:
+        if (
+            stem in oggs
+            and stem not in wav_for_stem
+            and abs(wdur - oggs[stem]) <= DURATION_TOLERANCE_S
+        ):
             wav_for_stem[stem] = (data, f"name+{abs(wdur - oggs[stem]):.1f}s")
             used.add(name)
 
