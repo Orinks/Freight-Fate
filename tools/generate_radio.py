@@ -272,18 +272,17 @@ def provision_voices(key: str, *, dry_run: bool = False) -> dict[str, str]:
 
     resolved: dict[str, str] = {}
     for name, fallbacks in wanted.items():
-        match = None
-        for candidate in (name, *fallbacks):
-            voice_id = _match_account_voice(candidate, voices)
-            if voice_id:
-                match = (candidate, voice_id)
-                break
-        if match:
-            candidate, voice_id = match
+        # Tier 1: the primary cast name is already on the account.
+        voice_id = _match_account_voice(name, voices)
+        if voice_id:
             resolved[name] = voice_id
-            tag = "" if candidate == name else f" (resolved via fallback {candidate})"
-            print(f"  {name} -> {voice_id}{tag}", flush=True)
+            print(f"  {name} -> {voice_id}", flush=True)
             continue
+
+        # Tier 2: the primary cast name is addable from the shared library.
+        # A library add for the exact intended voice outranks settling for
+        # an on-account fallback -- fallbacks are a last resort, not a
+        # shortcut around an approved library add.
         if dry_run:
             hit = _find_in_library(key, name)
             if hit:
@@ -292,13 +291,29 @@ def provision_voices(key: str, *, dry_run: bool = False) -> dict[str, str]:
                     f"(match: {hit.get('name')}, category: {hit.get('category', 'unknown')})",
                     flush=True,
                 )
-            else:
-                print(f"  {name} -> NOT FOUND anywhere", flush=True)
+                continue
+        else:
+            added = _add_from_library(key, name)
+            if added:
+                resolved[name] = added
+                print(f"  {name} -> {added} (added from library)", flush=True)
+                continue
+
+        # Tier 3: fall back to whatever's already on the account.
+        fallback = None
+        for candidate in fallbacks:
+            fallback_id = _match_account_voice(candidate, voices)
+            if fallback_id:
+                fallback = (candidate, fallback_id)
+                break
+        if fallback:
+            candidate, voice_id = fallback
+            resolved[name] = voice_id
+            print(f"  {name} -> {voice_id} (resolved via fallback {candidate})", flush=True)
             continue
-        added = _add_from_library(key, name)
-        if added:
-            resolved[name] = added
-            print(f"  {name} -> {added} (added from library)", flush=True)
+
+        if dry_run:
+            print(f"  {name} -> NOT FOUND anywhere", flush=True)
         else:
             raise SystemExit(f"No voice found for cast '{name}' -- adjust the plan")
 
