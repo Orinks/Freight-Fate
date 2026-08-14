@@ -84,6 +84,26 @@ LIMIT_SHORT_ZONE_MI = 2.5
 LIMIT_SCAN_STRIDE_MI = 0.1
 LIMIT_SCAN_MAX_MI = 3.0
 
+# Why a drop is happening, for the arrival line only ("Speed limit reduced
+# to X ...") -- never the advance "drops to X in ..." pacenote, which stays
+# a plain distance call. A named city is the first and existing reason; when
+# there is none, a road stop close ahead or a real downgrade close ahead can
+# still honestly explain the number, checked in that order. Bare when
+# neither applies -- a guessed reason is worse than none.
+LIMIT_REASON_LOOKAHEAD_MI = 1.5
+# The only RoadStop types this maps are the ones that actually cause a lower
+# posting (weigh stations slow traffic for the scale approach); a rest area
+# or fuel stop never lowers the limit, so they carry no entry here.
+LIMIT_REASON_BY_STOP_TYPE = {
+    "weigh_station": " for the weigh station ahead",
+}
+# A "real hill" by the same bar the grade advisory uses for a steep call
+# (GRADE_WARN_PCT in states/driving_updates.py is 3.0%); this is checked
+# against the average over a forward scan rather than a single sample, and
+# set a little steeper since it is standing in for the road's whole reason.
+LIMIT_DOWNGRADE_PCT = -3.5
+LIMIT_DOWNGRADE_MIN_MI = 0.5
+
 
 # One pluralization rule for every spoken distance in the game: the trip's own
 # readouts and Settings.distance_text/speed_text all go through this.
@@ -2553,6 +2573,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 # reads as a wrong turn (owner-found live, 2026-07-20).
                 direction = "approaching" if city_mp >= self.position_mi else "leaving"
                 where = f" {direction} {get_world().spoken_city(city)}"
+            elif lowered:
+                where = self._lowered_limit_reason()
             # A short lower zone (a village main street) is a passing event,
             # not a new cruising speed: say how long it lasts so the player
             # is not left guessing when the road opens back up.
@@ -2566,6 +2588,45 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 TripEventKind.GPS_CUE,
                 f"Speed limit {verb} {self._speed_value(limit)}{where}{span}.",
             )
+
+    def _lowered_limit_reason(self) -> str:
+        """Why a drop with no city to blame is happening, checked in the
+        order the trip can actually back it up: a road stop just ahead, then
+        a real downgrade just ahead. Bare when neither applies."""
+        stop_reason = self._lowered_limit_stop_reason()
+        if stop_reason:
+            return stop_reason
+        if self._lowered_limit_downgrade_ahead():
+            return " for the downgrade"
+        return ""
+
+    def _lowered_limit_stop_reason(self) -> str:
+        """A road stop that plausibly explains a lower posting, scanning a
+        short lookahead ahead of the truck only -- a stop just passed does
+        not explain a limit dropping now."""
+        end = self.position_mi + LIMIT_REASON_LOOKAHEAD_MI
+        for stop in self.stops:
+            if self.position_mi <= stop.at_mi <= end:
+                reason = LIMIT_REASON_BY_STOP_TYPE.get(stop.type)
+                if reason:
+                    return reason
+        return ""
+
+    def _lowered_limit_downgrade_ahead(self) -> bool:
+        """Whether a sustained downgrade starts here -- steep enough on
+        average over the next half mile to be the road's own reason for the
+        lower number, not one steep sample the profile flattens out again a
+        tenth later."""
+        mi = self.position_mi
+        end = min(self.total_miles, mi + LIMIT_DOWNGRADE_MIN_MI)
+        if end - mi < LIMIT_DOWNGRADE_MIN_MI:
+            return False  # not enough road left to call the downgrade sustained
+        samples = []
+        probe = mi
+        while probe <= end:
+            samples.append(self.grade_at(probe) * 100.0)
+            probe += LIMIT_SCAN_STRIDE_MI
+        return (sum(samples) / len(samples)) <= LIMIT_DOWNGRADE_PCT
 
     def _limit_zone_length(self, limit: float) -> float | None:
         """How far the just-entered corridor limit holds from the current

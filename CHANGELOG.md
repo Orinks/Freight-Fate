@@ -38,6 +38,13 @@
 
 ### Changed
 
+- **A speed limit drop now says why, when the road knows.** "Speed limit
+  reduced to 35" used to leave you guessing. Now, when the trip's own data
+  can honestly explain the drop, it says so: the town you are approaching
+  or leaving, a weigh station just ahead, or a real downgrade starting
+  right there. When none of those fit, it stays the plain number, same as
+  before.
+
 - **Pressing Escape now acts instead of explaining.** At the terminal,
   Escape used to just tell you to use Quit to main menu -- now it takes
   you straight back, the same as that menu item, since progress already

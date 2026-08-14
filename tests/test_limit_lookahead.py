@@ -10,13 +10,13 @@ entry so it reads as a passing event, not a new cruising speed.
 from __future__ import annotations
 
 from freight_fate.data.world import Leg, SpeedLimitSample
-from freight_fate.data.world_models import Route, StateMileage
+from freight_fate.data.world_models import GradeSegment, Route, StateMileage
 from freight_fate.sim import Trip, TruckState, WeatherSystem
 from freight_fate.sim.trip import _spoken_short_miles
-from freight_fate.sim.trip_models import TripEventKind
+from freight_fate.sim.trip_models import RoadStop, TripEventKind
 
 
-def _trip(world, speed_limits, *, imperial=True):
+def _trip(world, speed_limits, *, imperial=True, grade_segments=()):
     """A quiet 100-mile US-highway trip between real cities (the heuristic
     branch needs real city regions), with a synthetic posted profile."""
     leg = Leg(
@@ -28,6 +28,7 @@ def _trip(world, speed_limits, *, imperial=True):
         (),
         state_miles=(StateMileage("South Dakota", 100.0),),
         speed_limits=tuple(speed_limits),
+        grade_segments=tuple(grade_segments),
     )
     route = Route(["aberdeen_sd_us", "pierre_sd_us"], [leg])
     trip = Trip(route, TruckState(), WeatherSystem("upper_midwest", seed=1), seed=2)
@@ -184,6 +185,77 @@ def test_gap_marker_ends_a_village_zone(world):
     )
     assert trip._corridor_limit_at(40.3) == 30.0
     assert trip._corridor_limit_at(45.0) == 65.0
+
+
+def test_lowered_limit_names_a_weigh_station_ahead(world):
+    """No city nearby, but a weigh station sits just past the drop -- the
+    scale is an honest reason the trip's own data can supply."""
+    trip = _trip(
+        world,
+        (SpeedLimitSample(0.0, 65.0), SpeedLimitSample(50.0, 30.0)),
+    )
+    trip.stops = [RoadStop("SD Scale House", 50.5, "weigh_station")]
+    _cues(trip, 40.0, 55.0)  # seed the announced limit at 65, out of lookahead range
+    cues = _cues(trip, 50.05, 30.0)
+    reduced = [c for c in cues if c.startswith("Speed limit reduced")]
+    assert reduced == ["Speed limit reduced to 30 for the weigh station ahead."]
+
+
+def test_lowered_limit_ignores_a_stop_already_passed(world):
+    """A weigh station behind the truck does not explain a limit dropping
+    now -- only a stop still ahead counts."""
+    trip = _trip(
+        world,
+        (SpeedLimitSample(0.0, 65.0), SpeedLimitSample(50.0, 30.0)),
+    )
+    trip.stops = [RoadStop("SD Scale House", 49.0, "weigh_station")]
+    _cues(trip, 40.0, 55.0)
+    cues = _cues(trip, 50.05, 30.0)
+    reduced = [c for c in cues if c.startswith("Speed limit reduced")]
+    assert reduced == ["Speed limit reduced to 30."]
+
+
+def test_lowered_limit_names_a_downgrade_ahead(world):
+    """No city and no stop, but a sustained downgrade starts right where the
+    lower posting begins -- the road's own profile explains the number."""
+    trip = _trip(
+        world,
+        (SpeedLimitSample(0.0, 65.0), SpeedLimitSample(50.0, 30.0)),
+        grade_segments=(GradeSegment(50.0, 55.0, -4.0, "hills"),),
+    )
+    _cues(trip, 40.0, 55.0)
+    cues = _cues(trip, 50.05, 30.0)
+    reduced = [c for c in cues if c.startswith("Speed limit reduced")]
+    assert reduced == ["Speed limit reduced to 30 for the downgrade."]
+
+
+def test_lowered_limit_city_reason_beats_a_stop_ahead(world, monkeypatch):
+    """The named city stays the first and only reason when both a city and a
+    road stop could explain the same drop -- the existing city clause is
+    untouched and still wins."""
+    trip = _trip(
+        world,
+        (SpeedLimitSample(0.0, 65.0), SpeedLimitSample(50.0, 30.0)),
+    )
+    trip.stops = [RoadStop("SD Scale House", 50.5, "weigh_station")]
+    monkeypatch.setattr(trip, "_nearest_urban_city", lambda mile: ("pierre_sd_us", 60.0))
+    _cues(trip, 40.0, 55.0)
+    cues = _cues(trip, 50.05, 30.0)
+    reduced = [c for c in cues if c.startswith("Speed limit reduced")]
+    assert len(reduced) == 1
+    assert "approaching" in reduced[0]
+    assert "weigh station" not in reduced[0]
+
+
+def test_raised_limit_never_gets_a_reason(world):
+    """A raised limit stays bare even with a road stop sitting right at the
+    boundary -- reasons only ever attach to a drop."""
+    trip = _trip(world, VILLAGE)
+    trip.stops = [RoadStop("SD Scale House", 50.7, "weigh_station")]
+    _cues(trip, 49.8, 55.0)
+    _cues(trip, 50.05, 55.0)
+    cues = _cues(trip, 50.65, 55.0)
+    assert "Speed limit raised to 65." in cues
 
 
 def test_spoken_short_miles_units():
