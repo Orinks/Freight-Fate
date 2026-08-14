@@ -3121,6 +3121,14 @@ class DrivingUpdateMixin:
         self._charge_weigh_station_bypass(stop)
 
     def _charge_weigh_station_bypass(self, stop) -> None:
+        # Caught, not certain -- steep, per WEIGH_STATION_BYPASS_CATCH_CHANCE.
+        # Named, seeded, and settled once per scale: a reload cannot re-roll
+        # whether the bypass unit got you. Missing it is silent by design --
+        # getting away with it is part of the tension.
+        key = self._weigh_station_key(stop)
+        roll = random.Random(f"{self.trip_seed}:scale-bypass:{key}").random()
+        if roll >= WEIGH_STATION_BYPASS_CATCH_CHANCE:
+            return
         self._begin_enforcement_pull_over(
             kind="weigh_station_bypass",
             title="Weigh station bypass stop",
@@ -3484,6 +3492,7 @@ class DrivingUpdateMixin:
                     out_of_service=(kind == "hos_out_of_service"),
                     warned=warned,
                     construction_zone=construction_zone,
+                    inspection_on_stop=(kind == "weigh_station_bypass"),
                 )
             )
             self._commit_resolved_stop()

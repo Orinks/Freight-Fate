@@ -401,6 +401,7 @@ class EnforcementStopState(_RoadsideExitMixin, MenuState):
         out_of_service: bool = False,
         warned: bool = False,
         construction_zone: bool = False,
+        inspection_on_stop: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.driving = driving
@@ -420,6 +421,11 @@ class EnforcementStopState(_RoadsideExitMixin, MenuState):
         self.return_message = return_message
         self.out_of_service = out_of_service
         self.warned = warned
+        # A scale bypass got caught precisely because the inspection was
+        # skipped. The trooper does not just write the ticket and wave you on
+        # -- they do the inspection right there, on the shoulder, the same
+        # INSPECTION_MIN the check-in lane would have cost you.
+        self.inspection_on_stop = inspection_on_stop
         self._outcome_text = ""
         self._resolve()
 
@@ -470,6 +476,17 @@ class EnforcementStopState(_RoadsideExitMixin, MenuState):
                 "your hours of service are reset, and you wake rested -- but "
                 "the delivery deadline kept counting the whole time."
                 f"{_wake_air_instruction(d, from_rest_menu=False)}"
+            )
+        if self.inspection_on_stop:
+            # Reuses the same check-in cost the scale itself would have
+            # charged -- the driver dodged the lane, not the inspection.
+            _advance_rest_clock(
+                d, INSPECTION_MIN, "on_duty_not_driving", "weigh station bypass inspection"
+            )
+            d.hos.on_duty(INSPECTION_MIN)
+            self._outcome_text += (
+                " Since you didn't stop at the scale, they run the full inspection "
+                f"right here on the shoulder: {INSPECTION_MIN:.0f} minutes on the clock."
             )
         if self._licence_pulled():
             self._outcome_text += self._suspended_exit_text()

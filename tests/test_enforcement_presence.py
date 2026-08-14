@@ -833,6 +833,9 @@ def _scale_crossing(app, monkeypatch, *, mph, armed):
     from freight_fate.sim.trip import RoadStop
 
     d = _driving(app)
+    # A bypass is caught, not certain (85 percent) -- seed 1 lands under that
+    # chance for this exact scale key, so a bypass here is deterministic.
+    d.trip_seed = 1
     spoken = []
     monkeypatch.setattr(app.ctx, "say", lambda text, *a, **k: spoken.append(text))
     monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: spoken.append(text))

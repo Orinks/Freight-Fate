@@ -733,6 +733,15 @@ FAILURE_TO_STOP_DAMAGE_PCT = 12.0
 FAILURE_TO_STOP_PROCESSING_MIN = 180.0
 WEIGH_STATION_NOTICE_MI = 2.0
 WEIGH_STATION_BYPASS_MPH = 15.0
+# A bypass is caught, not certain. The scale house has plate readers and
+# weigh-in-motion sensors watching the bypass lane, and dispatches a unit up
+# the corridor after a truck that ran it -- but a unit still has to catch up,
+# so real bypass enforcement is steep, not perfect. Same shape as
+# CHAIN_LAW_CHECKPOINT_CHANCE: a flat, named, seeded roll, not a difficulty
+# knob -- the enforcement-presence setting governs ambience only and never
+# reaches this number (owner ruling, 2026-08-14: "pretty steep"). What a
+# caught bypass costs is priced in models/enforcement, with every other fine.
+WEIGH_STATION_BYPASS_CATCH_CHANCE = 0.85
 UNSAFE_DAMAGE_STOP_PCT = 65.0
 AMBIENT_EVENT_SPACING_S = 2.5  # keep low-priority chatter from stacking
 # Once the lights come on, a compliance tracker (0..1) judges whether you are

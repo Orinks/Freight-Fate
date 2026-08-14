@@ -548,11 +548,14 @@ def test_weigh_station_blow_past_starts_enforcement_stop(monkeypatch):
     from freight_fate.app import App
     from freight_fate.models.enforcement import WEIGH_STATION_BYPASS_FINE, citation_fine
     from freight_fate.sim.trip import RoadStop
-    from freight_fate.states.driving import EnforcementStopState
+    from freight_fate.states.driving import INSPECTION_MIN, EnforcementStopState
 
     app = App()
     try:
         d = _driving(app, patrol_intensity=None)
+        # A bypass is caught, not certain -- seed 1 lands under the 85 percent
+        # catch chance for this exact scale key, so the stop is deterministic.
+        d.trip_seed = 1
         _quiet(app, monkeypatch)
         d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
         d.trip.posts = [*d.trip.posts, open_scale_post(d.trip.stops[0])]
@@ -566,6 +569,8 @@ def test_weigh_station_blow_past_starts_enforcement_stop(monkeypatch):
 
         money_before = app.ctx.profile.money
         rep_before = app.ctx.profile.career.reputation
+        citations_before = app.ctx.profile.driving_record.citations
+        minutes_before = d.trip.game_minutes
         d.truck.velocity_mps = 0.0
         d._update_pull_over(1.0)
         assert isinstance(app.state, EnforcementStopState)
@@ -577,6 +582,85 @@ def test_weigh_station_blow_past_starts_enforcement_stop(monkeypatch):
         assert d.ticket_fines_paid == expected
         assert app.ctx.profile.money == money_before - expected
         assert app.ctx.profile.career.reputation < rep_before
+        # Recorded on the driving record like any other citation.
+        assert app.ctx.profile.driving_record.citations == citations_before + 1
+        # Dodging the check-in lane does not dodge the inspection: the trooper
+        # runs it right there, on the same clock the scale itself would cost.
+        assert d.trip.game_minutes == minutes_before + INSPECTION_MIN
+        assert "full inspection" in app.state._outcome_text
+    finally:
+        app.shutdown()
+
+
+def test_weigh_station_bypass_is_not_certain_and_stays_silent_when_missed(monkeypatch):
+    """The scale house watches, but a unit still has to catch up to you.
+
+    Seed 11 rolls over the 85 percent catch chance for this exact scale key,
+    so the same crossing that seed 1 catches gets away clean -- silently, by
+    design. The event is still marked so the scale never re-rolls the miss.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        d.trip_seed = 11
+        _quiet(app, monkeypatch)
+        d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
+        d.trip.posts = [*d.trip.posts, open_scale_post(d.trip.stops[0])]
+        d.trip.position_mi = 10.1
+        d.truck.velocity_mps = 55.0 / 2.23694
+        money_before = app.ctx.profile.money
+        citations_before = app.ctx.profile.driving_record.citations
+
+        d._check_weigh_station_enforcement(9.9)
+
+        assert d._pull_over is None
+        assert d._weigh_station_key(d.trip.stops[0]) in d.enforcement_events
+        assert app.ctx.profile.money == money_before
+        assert app.ctx.profile.driving_record.citations == citations_before
+    finally:
+        app.shutdown()
+
+
+def test_closed_scale_never_charges_a_bypass(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.enforcement_posts import KIND_SCALE_APRON, METHOD_BY_KIND, EnforcementPost
+    from freight_fate.sim.trip import RoadStop
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        d.trip_seed = 1
+        _quiet(app, monkeypatch)
+        stop = RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))
+        d.trip.stops = [stop]
+        # A closed scale still carries an apron post -- state police may be
+        # sitting on it -- but the silence-means-closed rule holds: no scale
+        # bypass charge can ever come from it.
+        d.trip.posts = [
+            *d.trip.posts,
+            EnforcementPost(
+                at_mi=stop.at_mi,
+                kind=KIND_SCALE_APRON,
+                method=METHOD_BY_KIND[KIND_SCALE_APRON],
+                reach_mi=0.5,
+                facing="both",
+                staffed=True,
+                anchor=stop.key,
+                announced=True,
+            ),
+        ]
+        d.trip.position_mi = 10.1
+        d.truck.velocity_mps = 55.0 / 2.23694
+        money_before = app.ctx.profile.money
+
+        d._check_weigh_station_enforcement(9.9)
+
+        assert d._pull_over is None
+        assert not d.enforcement_events
+        assert app.ctx.profile.money == money_before
     finally:
         app.shutdown()
 
@@ -758,6 +842,7 @@ def test_a_scale_bypass_in_roadwork_costs_double_and_says_so(monkeypatch):
     app = App()
     try:
         d = _driving(app, patrol_intensity=None)
+        d.trip_seed = 1  # lands under the 85 percent catch chance; see above
         _quiet(app, monkeypatch)
         _pave_construction(d)
         d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
@@ -793,6 +878,7 @@ def test_a_repeat_scale_bypass_in_roadwork_compounds_rather_than_adds(monkeypatc
     app = App()
     try:
         d = _driving(app, patrol_intensity=None)
+        d.trip_seed = 1  # lands under the 85 percent catch chance; see above
         _quiet(app, monkeypatch)
         _pave_construction(d)
         app.ctx.profile.driving_record.citations = 1

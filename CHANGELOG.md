@@ -29,6 +29,16 @@
 
 ### Changed
 
+- **Blowing past an open weigh station now gets you pulled over.** Scale
+  officers watch the bypass lane, and a truck that runs an open scale
+  instead of pulling in is caught most of the time -- steep odds, not a
+  certainty. Get caught and it is an 1,800 dollar citation on the spot,
+  more if you have priors or you are rolling through roadwork, and it
+  compounds the same way every other repeat citation does. The trooper
+  also runs the full inspection right there on the shoulder, since that is
+  the one you tried to skip. Get away with it and nothing happens at all --
+  you will not know which one it was going to be.
+
 - **The truck dealer is now one menu choice away.** The drive to city
   services is retired: the dealer opens straight from the terminal menu,
   named for the real local dealership where we have one on record. Fuel,

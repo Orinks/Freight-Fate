@@ -412,6 +412,9 @@ def test_pull_over_stands_down_the_armed_exit(monkeypatch):
     app = App()
     try:
         d = _driving(app)
+        # A bypass is caught, not certain (85 percent) -- seed 1 lands under
+        # that chance for this exact scale key, so the stop is deterministic.
+        d.trip_seed = 1
         spoken, _ = _capture(app, monkeypatch)
         scale, plaza = _with_scale(d)
         d.trip.position_mi = 10.1
@@ -437,6 +440,7 @@ def test_pull_over_with_no_armed_exit_says_nothing_about_exits(monkeypatch):
     app = App()
     try:
         d = _driving(app)
+        d.trip_seed = 1  # lands under the 85 percent catch chance; see above
         spoken, _ = _capture(app, monkeypatch)
         scale, _ = _with_scale(d)
         d.trip.position_mi = 10.1
