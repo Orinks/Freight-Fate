@@ -478,7 +478,12 @@ onto exit signalling.
       breaks between songs, with fade timing tuned per slot and a graceful
       fallback to plain host breaks when a pool is empty. The host/ID/ad
       tables themselves are still empty; the next pass fills them with real
-      generated content per the asset contract.
+      generated content per the asset contract. The content plan is now
+      authored (`tools/radio_content_plan.py` + `radio_content_pools.py`):
+      full casting with fallbacks for all 19 stations, 8 host lines and 3
+      IDs each, an 18-spot ad rotation, song batches for four new formats
+      plus top-ups, and imaging SFX prompts -- generation and catalog
+      wiring still to come.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
