@@ -70,7 +70,7 @@ def add_linux_prism_dependency_dir(build_release, build_dir: Path) -> None:
 
 
 def add_sound_pack(build_dir: Path, tmp_path: Path) -> None:
-    """Stage a tiny valid sound pack and credits, as a packaged build has."""
+    """Stage tiny valid sound and music packs and credits, as a packaged build has."""
     from freight_fate import assets_pack
 
     sounds = tmp_path / "pack_sounds_src"
@@ -81,6 +81,12 @@ def add_sound_pack(build_dir: Path, tmp_path: Path) -> None:
     (sounds / "engine_classic").mkdir(exist_ok=True)
     (sounds / "engine_classic" / "idle.ogg").write_bytes(b"fake classic idle")
     assets_pack.write_pack(sounds, build_dir / "freight_fate" / "sounds.pak")
+
+    music = tmp_path / "pack_music_src"
+    (music / "music").mkdir(parents=True, exist_ok=True)
+    (music / "music" / "drive_theme.ogg").write_bytes(b"fake music payload")
+    assets_pack.write_pack(music, build_dir / "freight_fate" / "music.pak")
+
     (build_dir / "SOUND_CREDITS.md").write_text("# Credits\n", encoding="utf-8")
 
 
@@ -274,7 +280,9 @@ def test_encrypted_sound_pack_is_staged_verbatim(tmp_path, monkeypatch):
     credits.parent.mkdir(parents=True)
     credits.write_text("# Sound Credits\n", encoding="utf-8")
     encrypted_pack = b"FFPK1\x00encrypted-test-payload"
+    encrypted_music_pack = b"FFPK1\x00encrypted-music-payload"
     (package_dir / "sounds.pak").write_bytes(encrypted_pack)
+    (package_dir / "music.pak").write_bytes(encrypted_music_pack)
     monkeypatch.setattr(build_release, "PACKAGE_DIR", package_dir)
 
     build_dir = tmp_path / "FreightFate"
@@ -282,6 +290,7 @@ def test_encrypted_sound_pack_is_staged_verbatim(tmp_path, monkeypatch):
     build_release.stage_sound_pack(build_dir)
 
     assert (build_dir / "freight_fate" / "sounds.pak").read_bytes() == encrypted_pack
+    assert (build_dir / "freight_fate" / "music.pak").read_bytes() == encrypted_music_pack
     assert (build_dir / "SOUND_CREDITS.md").read_text(encoding="utf-8") == ("# Sound Credits\n")
 
 
@@ -592,6 +601,7 @@ def release_archive_entries(root: str, exe: str, exe_mode: int = 0o755):
         f"{root}/LICENSE.txt": (b"PolyForm Noncommercial\n", 0o644),
         f"{root}/USER_MANUAL.md": (b"# Manual\n", 0o644),
         f"{root}/freight_fate/sounds.pak": (b"pack", 0o644),
+        f"{root}/freight_fate/music.pak": (b"pack", 0o644),
     }
 
 

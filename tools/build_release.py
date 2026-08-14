@@ -283,16 +283,23 @@ def _load_tool(name: str):
 
 
 def stage_sound_pack(build_dir: Path) -> None:
-    """Stage the approved encrypted pack and keep the credits readable."""
+    """Stage the approved encrypted packs and keep the credits readable."""
     root = runtime_root(build_dir)
     destination = root / "freight_fate" / "sounds.pak"
+    music_destination = root / "freight_fate" / "music.pak"
     committed_pack = PACKAGE_DIR / "sounds.pak"
+    committed_music_pack = PACKAGE_DIR / "music.pak"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    pack_sounds = _load_tool("pack_sounds")
     if committed_pack.exists():
-        destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(committed_pack, destination)
     else:
         # Retain the loose-asset fallback for branches that do not carry a pack.
-        _load_tool("pack_sounds").pack(output=destination)
+        pack_sounds.pack_sounds_only(output=destination)
+    if committed_music_pack.exists():
+        shutil.copy2(committed_music_pack, music_destination)
+    else:
+        pack_sounds.pack_music_only(output=music_destination)
     credits = PACKAGE_DIR / "assets" / "sounds" / "CREDITS.md"
     if not credits.exists():
         raise RuntimeError(f"Sound credits were not found: {credits}")
@@ -528,6 +535,7 @@ def verify_packaged_payload(build_dir: Path) -> None:
         root / "ALPHA_TEST_BOOK.md",
         root / "ALPHA_TEST_BOOK.html",
         root / "freight_fate" / "sounds.pak",
+        root / "freight_fate" / "music.pak",
         root / "SOUND_CREDITS.md",
         root / "sound_lib" / "lib",
         root / "prism" / "_native",
@@ -567,6 +575,10 @@ def verify_packaged_payload(build_dir: Path) -> None:
             "the committed pack with tools/pack_sounds.py on a builder "
             "machine and commit it"
         )
+
+    music_pack_names = assets_pack.SoundPack(root / "freight_fate" / "music.pak").names()
+    if not any(name.startswith("music/") for name in music_pack_names):
+        raise RuntimeError("Packaged music pack contains no music files")
 
     if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
         raise RuntimeError(
@@ -718,7 +730,13 @@ def verify_archive(out: Path) -> None:
             f"Release archive executable lost its executable permission: {exe_entry} in {out.name}"
         )
 
-    required = ("build_info.json", "LICENSE.txt", "USER_MANUAL.md", "freight_fate/sounds.pak")
+    required = (
+        "build_info.json",
+        "LICENSE.txt",
+        "USER_MANUAL.md",
+        "freight_fate/sounds.pak",
+        "freight_fate/music.pak",
+    )
     missing = [name for name in required if f"{root}/{name}" not in entries]
     if missing:
         raise RuntimeError(

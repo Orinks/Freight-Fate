@@ -167,10 +167,19 @@ def test_verify_sound_assets_passes_in_source_checkout():
     audio.verify_sound_assets()
 
 
-def _reset_default_pack(monkeypatch, path: Path) -> None:
+def _reset_default_pack(monkeypatch, path: Path, music_path: Path | None = None) -> None:
     monkeypatch.setattr(assets_pack, "DEFAULT_PACK_PATH", path)
     monkeypatch.setattr(assets_pack, "_default_pack", None)
     monkeypatch.setattr(assets_pack, "_default_pack_missing", False)
+    # Default to a path that is guaranteed not to exist, so a test that only
+    # cares about the sounds side is not accidentally coupled to whatever the
+    # real repo's music.pak happens to be (present or absent) right now.
+    monkeypatch.setattr(
+        assets_pack, "DEFAULT_MUSIC_PACK_PATH", music_path or path.parent / "__no_music_pack__.pak"
+    )
+    monkeypatch.setattr(assets_pack, "_default_music_pack", None)
+    monkeypatch.setattr(assets_pack, "_default_music_pack_missing", False)
+    monkeypatch.setattr(assets_pack, "_default_combined", None)
     monkeypatch.setattr(assets_pack, "_prefetch_started", False)
 
 
@@ -357,3 +366,104 @@ def test_real_assets_tree_round_trips(tmp_path):
     assert sorted(pack.names()) == sorted(path.relative_to(SOUNDS_DIR).as_posix() for path in files)
     sample = next(path for path in files if path.suffix in (".ogg", ".wav"))
     assert pack.read(sample.relative_to(SOUNDS_DIR).as_posix()) == sample.read_bytes()
+
+
+# -- music/sounds pack split (2026-08-14) -------------------------------------
+
+
+def _load_pack_sounds_tool():
+    """Import tools/pack_sounds.py by path (tools is not a package)."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("pack_sounds", ROOT / "tools" / "pack_sounds.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_pack_sounds_tool_splits_music_into_its_own_pack(tmp_path):
+    sounds = tmp_path / "sounds"
+    (sounds / "music").mkdir(parents=True)
+    (sounds / "engine").mkdir()
+    (sounds / "music" / "x.ogg").write_bytes(b"music track bytes")
+    (sounds / "engine" / "y.ogg").write_bytes(b"engine sound bytes")
+    pack_sounds = _load_pack_sounds_tool()
+
+    sounds_out, music_out = pack_sounds.pack(
+        sounds_dir=sounds,
+        output=tmp_path / "out" / "sounds.pak",
+        music_output=tmp_path / "out" / "music.pak",
+        # No overlay dir under this tmp tree, so the split is not at the
+        # mercy of whatever licensed overlay the builder machine happens to have.
+        overlay_dir=tmp_path / "no-overlay-here",
+    )
+
+    sounds_pack = assets_pack.SoundPack(sounds_out)
+    music_pack = assets_pack.SoundPack(music_out)
+    assert sounds_pack.names() == ["engine/y.ogg"]
+    assert music_pack.names() == ["music/x.ogg"]
+    assert sounds_pack.read("engine/y.ogg") == b"engine sound bytes"
+    assert music_pack.read("music/x.ogg") == b"music track bytes"
+
+
+def _write_split_fixture_packs(tmp_path: Path) -> tuple[Path, Path]:
+    """A sounds.pak fixture and a separate music.pak fixture, disjoint keys."""
+    sounds_src = tmp_path / "sounds_src"
+    (sounds_src / "engine").mkdir(parents=True)
+    (sounds_src / "engine" / "y.ogg").write_bytes(b"engine sound bytes")
+    sounds_out = assets_pack.write_pack(sounds_src, tmp_path / "sounds.pak")
+
+    music_src = tmp_path / "music_src"
+    (music_src / "music").mkdir(parents=True)
+    (music_src / "music" / "x.ogg").write_bytes(b"music track bytes")
+    music_out = assets_pack.write_pack(music_src, tmp_path / "music.pak")
+    return sounds_out, music_out
+
+
+def test_loader_routes_music_names_to_music_pack(tmp_path, monkeypatch):
+    sounds_out, music_out = _write_split_fixture_packs(tmp_path)
+    _reset_default_pack(monkeypatch, sounds_out, music_path=music_out)
+
+    combined = assets_pack.open_default()
+    assert combined is not None
+    assert combined.read("music/x.ogg") == b"music track bytes"
+    assert combined.read("engine/y.ogg") == b"engine sound bytes"
+    assert combined.has("music/x.ogg") and not combined.has("engine/x.ogg")
+    assert combined.has("engine/y.ogg") and not combined.has("music/y.ogg")
+    assert sorted(combined.names()) == ["engine/y.ogg", "music/x.ogg"]
+
+
+def test_missing_music_pack_falls_back_while_sounds_pack_still_serves(tmp_path, monkeypatch):
+    # assets_pack-level check: the music side of the combined pack answers
+    # nothing when music.pak itself is missing, while the sounds side is
+    # untouched -- audio._asset_bytes takes it from there to the loose tree.
+    sounds_out, _music_out = _write_split_fixture_packs(tmp_path)
+    missing_music = tmp_path / "no_music_here.pak"
+    _reset_default_pack(monkeypatch, sounds_out, music_path=missing_music)
+
+    combined = assets_pack.open_default()
+    assert combined is not None  # the sounds side is still good
+    assert combined.read("engine/y.ogg") == b"engine sound bytes"
+    assert combined.read("music/x.ogg") is None
+    assert combined.has("music/x.ogg") is False
+
+
+@needs_loose_tree
+def test_missing_music_pack_falls_back_to_loose_music_files(tmp_path, monkeypatch):
+    # End to end through audio._asset_bytes: a real music key falls back to
+    # the loose tree while an unrelated sounds.pak key still comes off the
+    # pack -- the two packs fail independently.
+    sounds = _write_fixture_sounds(tmp_path)
+    sounds_out = assets_pack.write_pack(sounds, tmp_path / "sounds.pak")
+    missing_music = tmp_path / "no_music_here.pak"
+    _reset_default_pack(monkeypatch, sounds_out, music_path=missing_music)
+
+    found = audio._asset_bytes("music/drive_always_around", ("opus", "ogg", "wav"))
+    assert found is not None
+    data, ext = found
+    assert data == (SOUNDS_DIR / "music" / f"drive_always_around.{ext}").read_bytes()
+
+    assert audio._asset_bytes("ui/menu_select", ("ogg", "wav")) == (
+        b"fake ogg for menu select",
+        "ogg",
+    )
