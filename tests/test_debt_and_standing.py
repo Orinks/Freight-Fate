@@ -766,12 +766,17 @@ def test_payoff_options_full_coverage():
 
 
 def test_payoff_options_partial_coverage():
+    """Every option keeps the 200 dollar fuel cushion -- none may exceed it."""
     from freight_fate.models.solvency import out_of_pocket_options
 
-    opts = dict(out_of_pocket_options(_payer(money=800.0, owed=2_000.0)))
+    opts = dict(out_of_pocket_options(_payer(money=800.0, owed=4_170.0)))
     assert "all" not in opts
-    assert opts["half"] == 800.0  # half the balance is 1000, capped at cash
-    assert opts["cushion"] == 600.0  # cash minus the 200 cushion
+    # half the balance is 2085, capped at cash minus the cushion (600), and
+    # the cushion option lands on the same 600 -- the dedup collapses the
+    # duplicate amount, leaving only "half" in the options.
+    assert opts["half"] == 600.0
+    assert "cushion" not in opts
+    assert list(opts.values()) == [600.0]
 
 
 def test_payoff_options_hidden_when_broke_or_clear():
@@ -780,6 +785,43 @@ def test_payoff_options_hidden_when_broke_or_clear():
     assert out_of_pocket_options(_payer(money=9.0, owed=500.0)) == []
     assert out_of_pocket_options(_payer(money=500.0, owed=0.5)) == []
     assert out_of_pocket_options(_payer(money=-50.0, owed=500.0)) == []
+
+
+def test_payoff_options_full_balance_needs_cushion_headroom_too():
+    """Cash covering the whole balance but not the cushion on top of it must
+    not offer "all" -- fuel money outranks a clean slate. The cushion option
+    still moves what it can."""
+    from freight_fate.models.solvency import out_of_pocket_options
+
+    opts = dict(out_of_pocket_options(_payer(money=220.0, owed=50.0)))
+    assert "all" not in opts
+    assert opts["half"] == 20.0
+    assert "cushion" not in opts  # dedup leaves one option
+    assert list(opts.values()) == [20.0]
+
+
+def test_payoff_options_at_the_cushion_floor_offers_nothing_worth_paying():
+    """Cash sitting right at the cushion has nothing to spare -- an empty
+    list is acceptable and the menu (city.PayDebtState) copes with it."""
+    from freight_fate.models.solvency import out_of_pocket_options
+
+    assert out_of_pocket_options(_payer(money=200.0, owed=500.0)) == []
+
+
+def test_payoff_options_never_exceed_the_cushion_headroom():
+    """No option's amount may ever exceed cash minus the cushion, across a
+    spread of cash/balance pairs."""
+    import random
+
+    from freight_fate.models.solvency import PAYOFF_CASH_CUSHION, out_of_pocket_options
+
+    rng = random.Random(2026)
+    for _ in range(200):
+        cash = rng.uniform(0.0, 10_000.0)
+        balance = rng.uniform(0.0, 10_000.0)
+        headroom = cash - PAYOFF_CASH_CUSHION
+        for _, amount in out_of_pocket_options(_payer(money=cash, owed=balance)):
+            assert amount <= headroom + 0.01
 
 
 def test_pay_out_of_pocket_clamps_and_clears():

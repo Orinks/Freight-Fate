@@ -2759,6 +2759,10 @@
   Contributed by corykad ([@corykad](https://github.com/corykad)) in
   [PR #157](https://github.com/Orinks/Freight-Fate/pull/157).
 
+- **Paying down what you owe never empties your wallet anymore.** Every
+  payment option at the yard now keeps two hundred dollars of fuel money in
+  your pocket, so choosing Pay half can no longer leave you at zero.
+
 ## 1.8.8.1 - 2026-08-08
 
 ### Added

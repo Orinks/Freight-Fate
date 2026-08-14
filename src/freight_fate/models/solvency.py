@@ -277,11 +277,12 @@ PAYOFF_MIN_CASH = 10.0
 def out_of_pocket_options(profile) -> list[tuple[str, float]]:
     """Payment options a driver holding cash may put toward the balance right now.
 
-    A driver paying from cash keeps fuel money so the truck can move. The
-    cushion withholds one stop's cost. "All" is offered when cash covers the
-    whole balance. "Half" is half the balance, capped at cash. "Cushion" is
-    everything above the withheld fuel cushion. Amounts under a dollar or
-    duplicating an earlier option are dropped.
+    Every option keeps `PAYOFF_CASH_CUSHION` of fuel money in the driver's
+    pocket -- paying down debt must never strand the truck dry. "All" is
+    offered only when cash covers the whole balance and still leaves the
+    cushion behind. "Half" is half the balance, capped at cash minus the
+    cushion. "Cushion" is everything above the withheld fuel cushion.
+    Amounts under a dollar or duplicating an earlier option are dropped.
     """
     balance = max(0.0, float(getattr(profile, "fines_owed", 0.0) or 0.0))
     cash = float(getattr(profile, "money", 0.0) or 0.0)
@@ -294,9 +295,9 @@ def out_of_pocket_options(profile) -> list[tuple[str, float]]:
         if amount >= 1.0 and all(abs(amount - a) >= 0.01 for _, a in options):
             options.append((kind, amount))
 
-    if cash >= balance:
+    if cash >= balance + PAYOFF_CASH_CUSHION:
         _offer("all", balance)
-    _offer("half", min(balance / 2.0, cash))
+    _offer("half", min(balance / 2.0, cash - PAYOFF_CASH_CUSHION))
     _offer("cushion", min(balance, cash - PAYOFF_CASH_CUSHION))
     return options
 
