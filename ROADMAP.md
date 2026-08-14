@@ -524,6 +524,17 @@ onto exit signalling.
       road zone" never says the keeper exists, is off, or where to turn it
       on (Settings, Gameplay, Controls) -- it cost the owner a settings
       hunt on 2026-08-14. The line should name the setting.
+- [x] **Three tester follow-ups from Darren's 2026-08-14 report -- landed.**
+      The scale gets its own warning earcon -- a procedural low thump-then-
+      beep, `events/weigh_station_warning` -- instead of sharing the
+      inspection cue, so the open-scale notice is unmistakable before a
+      word is spoken. A highway narrowing to one lane now says so whenever
+      the lane-count clamp actually moves you, not only when a construction
+      closure does; already in the surviving lane, it stays silent. And the
+      roadside tableau -- the siren and shoulder pass for a trooper working
+      somebody else -- now reliably says "not you" the moment the siren
+      starts, with a seeded pinch of why (speeding, a log check, a light
+      out) on some occurrences and the bare fact in terse mode.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides

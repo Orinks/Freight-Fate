@@ -15,6 +15,7 @@ from pathlib import Path
 
 import pytest
 from enforcement_helpers import always_observing_post
+from speech_capture import speech_stub
 
 from freight_fate.sim import Trip, TruckState, WeatherSystem
 from freight_fate.sim.enforcement_observe import (
@@ -279,6 +280,101 @@ def test_a_post_that_already_caught_the_player_never_also_runs_its_tableau(monke
         assert "events/police_siren" not in played
         assert "traffic/trooper_pass" not in played
         assert "traffic/car_pass" not in played
+    finally:
+        app.shutdown()
+
+
+def test_the_tableau_intro_line_speaks_once_and_says_it_is_not_the_player(monkeypatch):
+    """The siren cue alone reads like a driver's own stop starting, so it now
+    reliably introduces itself -- every tableau, not a chance draw like the
+    CB flavor line -- and only once, on the siren-lead trigger."""
+    from freight_fate.app import App
+    from freight_fate.sim.enforcement_posts import TABLEAU_SIREN_LEAD_MI
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip_seed = 1
+        events: list[str] = []
+        monkeypatch.setattr(app.ctx, "say", lambda *a, **k: None)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        post = always_observing_post(at_mi=6.0, kind=KIND_MEDIAN)
+        post.tableau = True
+        d.trip.posts = [post]
+
+        d._enforcement_prev_mi = 6.0 - TABLEAU_SIREN_LEAD_MI - 0.1
+        d.trip.position_mi = 6.0 - TABLEAU_SIREN_LEAD_MI + 0.1
+        d._update_enforcement_watch(0.1)
+
+        assert len(events) == 1
+        assert "not you" in events[0]
+        assert "trooper" in events[0].lower()
+
+        # The shoulder pass a little later must not repeat the introduction.
+        d.trip.position_mi = 6.1
+        d._update_enforcement_watch(0.1)
+        assert len(events) == 1
+    finally:
+        app.shutdown()
+
+
+def test_the_tableau_intro_line_stays_silent_while_deferred(monkeypatch):
+    """Same deferral as the tableau audio: never layered on the player's own
+    stop, and not replayed late once the stop clears."""
+    from freight_fate.app import App
+    from freight_fate.sim.enforcement_posts import TABLEAU_SIREN_LEAD_MI
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip_seed = 1
+        events: list[str] = []
+        monkeypatch.setattr(app.ctx, "say", lambda *a, **k: None)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        post = always_observing_post(at_mi=6.0, kind=KIND_MEDIAN)
+        post.tableau = True
+        d.trip.posts = [post]
+
+        d.trip.position_mi = 6.0 - TABLEAU_SIREN_LEAD_MI - 0.1
+        d._enforcement_prev_mi = d.trip.position_mi
+        d._pull_over = "lights"  # the player's own stop is running
+        d.trip.position_mi = 6.0 - TABLEAU_SIREN_LEAD_MI + 0.1
+        d._update_enforcement_watch(0.1)
+        assert events == []
+
+        d._pull_over = None
+        d.trip.position_mi = 6.1
+        d._update_enforcement_watch(0.1)
+        assert events == []  # dropped with the cue it rides, not replayed late
+    finally:
+        app.shutdown()
+
+
+def test_the_tableau_intro_terse_form_keeps_the_bare_fact():
+    """A seeded pinch of why lands on some tableaus and not others, but the
+    terse rendering never carries it -- only the bare "not you" fact."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip_seed = 7
+        bare_seen = flavored_seen = False
+        for i in range(30):
+            post = always_observing_post(at_mi=float(i), kind=KIND_MEDIAN)
+            message = d._tableau_intro_message(post)
+            assert (
+                message.render(True) == "A trooper has somebody stopped on the shoulder -- not you."
+            )
+            if message.normal == message.render(True):
+                bare_seen = True
+            else:
+                flavored_seen = True
+                assert message.normal.startswith("A trooper has somebody stopped on the shoulder ")
+                assert message.normal.endswith("-- not you.")
+        assert bare_seen and flavored_seen
     finally:
         app.shutdown()
 

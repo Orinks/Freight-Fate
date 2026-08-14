@@ -72,6 +72,7 @@ from ..sim.enforcement_posts import (
     post_seed,
 )
 from ..sim.trip_models import ENFORCEMENT_WARNING_MAX_MI, SCALE_WARNING_REAL_S
+from ..speech_text import SpokenMessage
 from .driving_core import *
 from .driving_siren import (
     PASS_MARKER_LEAD_S,
@@ -129,6 +130,14 @@ PASS_TRIGGER_MI = 0.05
 TABLEAU_SHOULDER_PAN = 0.85  # hard right: US traffic keeps the shoulder there
 TABLEAU_SIREN_VOLUME = 0.7
 TABLEAU_PASS_VOLUME = 0.7
+
+# The tableau's own introduction. Testers mistook the siren-and-pass cues
+# for their own stop, so this reliably says whose stop it is -- every
+# tableau, never a chance draw the way the CB flavor line is. Only the
+# reason for the stop is a seeded pinch of colour, landing on some
+# occurrences and not others; terse mode keeps the bare fact either way.
+TABLEAU_INTRO_LINE = "A trooper has somebody stopped on the shoulder -- not you."
+TABLEAU_INTRO_REASONS = ("for speeding", "for a log check", "over a light out")
 
 # One short reminder this close to an announced open scale, if the truck is
 # still over the bypass speed with no scale exit armed. The full notice can
@@ -337,6 +346,24 @@ class EnforcementWatchMixin:
 
     # -- the tableau -----------------------------------------------------
 
+    def _tableau_intro_message(self, post) -> SpokenMessage:
+        """The reliable "not you" line, with a seeded pinch of why.
+
+        Deterministic per tableau (named, seeded like the scale-selection and
+        observation draws elsewhere in this module): a reload never changes
+        whether a given post's line carries a reason or which one. About half
+        the time it names one of a small fixed set of reasons; the rest of
+        the time it stays the bare fact. Terse mode always gets the bare
+        fact -- the reason is colour, not information a terse driver is
+        shortchanged without.
+        """
+        rng = random.Random(post_seed(self.trip_seed, post.id, "tableau_intro"))
+        if rng.random() >= 0.5:
+            return SpokenMessage(TABLEAU_INTRO_LINE)
+        reason = rng.choice(TABLEAU_INTRO_REASONS)
+        normal = f"A trooper has somebody stopped on the shoulder {reason} -- not you."
+        return SpokenMessage(normal, TABLEAU_INTRO_LINE)
+
     def _play_tableau_siren_pass(self, post) -> None:
         """The siren of a trooper working somebody else, heard before you reach them.
 
@@ -344,12 +371,17 @@ class EnforcementWatchMixin:
         then the vehicle -- with the siren asset standing in for the whoosh.
         This is the one enforcement sound that means "not about you": a
         trooper who already has a customer is off the hunt.
+
+        The siren alone reads as easily as a driver's own pull-over starting,
+        so it now says whose stop this is, every time, on top of the audio --
+        a tester mistook it for their own until the line was added.
         """
         volume = min(1.0, TABLEAU_SIREN_VOLUME * min(1.4, self._ambience_scale()))
         self._play_enforcement_marker(volume=volume, pan=TABLEAU_SHOULDER_PAN)
         self._schedule_sound(
             PASS_MARKER_LEAD_S, "events/police_siren", volume, TABLEAU_SHOULDER_PAN
         )
+        self.ctx.say_event(self._tableau_intro_message(post), interrupt=False)
 
     def _play_tableau_pass(self, post) -> None:
         """The stopped pair, panned hard to the shoulder as you go by.
