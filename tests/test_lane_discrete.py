@@ -616,6 +616,68 @@ def test_a_narrowing_road_never_leaves_the_truck_in_the_closed_lane(monkeypatch)
         app.shutdown()
 
 
+def test_a_narrowing_road_with_no_closure_says_the_forced_move(monkeypatch):
+    """Darren's report, 2026-08-14: a highway narrowing to one lane with no
+    work zone at all moved the truck without a word -- LaneKeeping.set_lane_
+    count clamps the lane index silently. This is the same forced-move trap
+    as the closure case above, minus the cones, so it gets the same
+    never-dropped treatment (interrupt=True, the closure call's own
+    mechanism)."""
+    from freight_fate.app import App
+
+    app = App()
+    calls: list[tuple[str, bool]] = []
+    try:
+        d = _driving(app)
+        app.ctx.speech.say_event = speech_stub(calls, with_interrupt=True)
+        _rolling(d, 55.0)
+        d.lane.set_lane_count(2)
+        d.lane.lane = 1  # the left lane, which is about to stop existing
+        d._leave_a_lane_the_road_closed()  # seed the lane count it has seen
+
+        d._lane_before_narrow = d.lane.lane  # what _update_lane captures pre-clamp
+        d.lane.set_lane_count(1)  # the road itself narrows to one lane
+        d._leave_a_lane_the_road_closed()
+
+        assert d.lane.lane == 0
+        assert len(calls) == 1
+        text, interrupt = calls[0]
+        assert "road narrows to one lane" in text
+        assert "right lane" in text
+        assert interrupt is True  # never-dropped, same family as the closure call
+        assert text in [m.text for m in app.ctx.message_log.messages]
+    finally:
+        app.shutdown()
+
+
+def test_a_narrowing_road_stays_silent_when_the_truck_already_survives(monkeypatch):
+    """The clamp only moves a truck sitting in a lane that stops existing.
+    Already in the lane that survives the narrowing, nothing was forced and
+    nothing needs saying."""
+    from freight_fate.app import App
+
+    app = App()
+    calls: list[tuple[str, bool]] = []
+    try:
+        d = _driving(app)
+        app.ctx.speech.say_event = speech_stub(calls, with_interrupt=True)
+        _rolling(d, 55.0)
+        d.lane.set_lane_count(2)
+        d.lane.lane = 0  # already in the right lane, which survives
+        d._leave_a_lane_the_road_closed()  # seed the lane count it has seen
+        before_log = len(app.ctx.message_log.messages)
+
+        d._lane_before_narrow = d.lane.lane
+        d.lane.set_lane_count(1)  # the road narrows, but the truck never moves
+        d._leave_a_lane_the_road_closed()
+
+        assert d.lane.lane == 0
+        assert calls == []
+        assert len(app.ctx.message_log.messages) == before_log
+    finally:
+        app.shutdown()
+
+
 def test_a_lane_the_driver_steered_into_is_still_theirs_to_answer_for(monkeypatch):
     """The rescue above must not become a free pass: with the road unchanged,
     riding the cones still earns the warning and the barrels."""

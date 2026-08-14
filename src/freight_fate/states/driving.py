@@ -543,6 +543,11 @@ class DrivingState(
         # Lanes on our side last tick, so a road that narrows under the truck
         # can be told apart from a driver who steered into the cones.
         self._lane_count_seen: int | None = None
+        # The truck's own lane index the instant before this frame's
+        # set_lane_count clamp ran, so a narrowing road that actually moved
+        # the truck can be told apart from one that merely renumbered a lane
+        # the truck was never in.
+        self._lane_before_narrow: int | None = None
         self._merge_taper_warned: str | None = None
         self._hazard_dodgeable = False
         self._hazard_lane = 0

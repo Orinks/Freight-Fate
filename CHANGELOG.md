@@ -358,6 +358,13 @@
 
 ### Fixed
 
+- **A highway narrowing to one lane now tells you when it moves you.** If
+  the lane you were in stops existing where the road narrows, you used to
+  be shifted over with no warning at all. Now, whenever that actually
+  moves you, you hear it and are told which lane you landed in. Already in
+  the lane that survives, nothing changes -- it stays silent, same as
+  before.
+
 - **A road message that rings its chime now always reaches you -- spoken,
   or at worst waiting for you in message review.** A lane closure, a
   construction taper's merge call, or other roadside colour could ding and

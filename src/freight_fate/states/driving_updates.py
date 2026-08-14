@@ -30,6 +30,15 @@ from .driving_rest_states import (
 # defiance (the research doc's coupled invariant on the R1 demotion).
 LIMIT_DROP_SPEECH_LATENCY_S = EventSpeechPacer.WAIT_BUDGET_S[EventPriority.ROUTE]
 
+# Spoken word for a lane count, used by the road-narrows call
+# (_leave_a_lane_the_road_closed): "one lane" reads better than "1 lane(s)".
+_LANE_COUNT_WORDS = {1: "one lane", 2: "two lanes", 3: "three lanes", 4: "four lanes"}
+
+
+def _lane_count_words(count: int) -> str:
+    return _LANE_COUNT_WORDS.get(count, f"{count} lanes")
+
+
 # Re-crossings inside this window are pinballing, not lane changes.
 LANE_CROSS_REPEAT_S = 4.0
 # One brush against a vehicle alongside is one contact, however many times
@@ -799,6 +808,7 @@ class DrivingUpdateMixin:
                 steer = pad.steering
         self.lane.steering = steer
         # The exit ramp is a single lane; the mainline keeps its leg count.
+        self._lane_before_narrow = self.lane.lane
         self.lane.set_lane_count(1 if self._ramp_mi is not None else self._lane_count_here())
         # A narrowing road renumbers the lanes under the truck, so this has to
         # run the moment the count changes and before anything polices where
@@ -1123,7 +1133,8 @@ class DrivingUpdateMixin:
         return candidate
 
     def _leave_a_lane_the_road_closed(self) -> None:
-        """Move the truck out of a closure it never drove into.
+        """Move the truck out of a closure it never drove into, and say so
+        whenever the road itself -- closure or not -- just forced a move.
 
         The road, not the driver, can put a truck in coned-off lanes: where a
         stretch narrows, the lane count renumbers the lanes under the truck
@@ -1133,6 +1144,14 @@ class DrivingUpdateMixin:
         lane with nothing to do about it. Whenever the road moves the truck
         into a closure it is moved straight back out and told so; only a lane
         the driver steered into is theirs to answer for.
+
+        A narrowing stretch with no work zone at all used to say nothing --
+        ``LaneKeeping.set_lane_count`` clamps the lane index silently, so a
+        driver in the soon-to-vanish lane was simply moved with no warning
+        (Darren, 2026-08-14). That gets the same never-dropped treatment as
+        the closure call above, just without "closed": the road narrowed, not
+        a work zone. Skipped on the exit ramp, whose own single-lane count and
+        its own announcements are a different situation entirely.
         """
         count = self.lane.lane_count
         was = self._lane_count_seen
@@ -1140,22 +1159,40 @@ class DrivingUpdateMixin:
         if was is None or was == count:
             return  # the road did not change under the truck
         closed = self._closed_lane_here()
-        if closed is None or self.lane.lane != closed:
+        if closed is not None and self.lane.lane == closed:
+            open_lane = self._open_lane_beside(closed)
+            if open_lane is None:
+                return
+            open_name = lane_label(open_lane, count)
+            self.lane.lane = open_lane
+            self.lane.offset = 0.0
+            self._lane_change_target = None
+            self._merge_deadline = None
+            self.ctx.audio.play(
+                "vehicle/lane_line_cross", volume=min(1.0, 0.7 * self._cue_loudness())
+            )
+            self.ctx.say_event(
+                f"The {lane_label(closed, count)} lane is closed where the road "
+                f"narrows. You are in the {open_name} lane.",
+                interrupt=True,
+            )
             return
-        open_lane = self._open_lane_beside(closed)
-        if open_lane is None:
-            return
-        open_name = lane_label(open_lane, count)
-        self.lane.lane = open_lane
-        self.lane.offset = 0.0
-        self._lane_change_target = None
-        self._merge_deadline = None
-        self.ctx.audio.play("vehicle/lane_line_cross", volume=min(1.0, 0.7 * self._cue_loudness()))
-        self.ctx.say_event(
-            f"The {lane_label(closed, count)} lane is closed where the road "
-            f"narrows. You are in the {open_name} lane.",
-            interrupt=True,
-        )
+        before_lane = self._lane_before_narrow
+        if (
+            self._ramp_mi is None
+            and before_lane is not None
+            and before_lane >= count
+            and before_lane != self.lane.lane
+        ):
+            open_name = lane_label(self.lane.lane, count)
+            self.ctx.audio.play(
+                "vehicle/lane_line_cross", volume=min(1.0, 0.7 * self._cue_loudness())
+            )
+            self.ctx.say_event(
+                f"The road narrows to {_lane_count_words(count)}. You are "
+                f"moved to the {open_name} lane.",
+                interrupt=True,
+            )
 
     def _update_merge(self, dt: float) -> None:
         """Riding a coned-off lane: one urgent warning, then the barrels win."""
