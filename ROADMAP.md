@@ -115,6 +115,17 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Debt payoff from cash -- SHIPPED.** Whenever a driver carries a
+      balance and has money in hand, the terminal and every truck stop now
+      offer to pay it down: all of it, half, or everything above a 200
+      dollar fuel cushion. Clearing the balance stops settlement collection
+      on the spot.
+- [x] **Truck dealer is a direct terminal menu item -- SHIPPED.** The
+      city-service drive is retired; the dealer now opens straight from the
+      terminal menu, named for the real local dealership where one is on
+      record. Fuel, repairs, rest, and food stay at truck stops and the
+      terminal garage. See the amendment on "Local city service drives"
+      below.
 - [x] **Settings menu reorganized (Variant B) -- SHIPPED.** Gameplay is now a
       category that opens its own submenu of four shorter, spoken screens:
       Driving assistance, Difficulty and hours of service, World and traffic,
@@ -3988,6 +3999,14 @@ Net-new realism candidates, roughly by area:
   events on the major turnpikes, and posted speed limits on every leg.
 
 ## Local city service drives (built for 1.8, releases with 1.9)
+
+**Amended 2026-08-13:** the drive-to-location flow described below is
+retired before 1.9 ships. The truck dealer now opens directly from the
+terminal menu (see the 1.9 in-flight bullet above), reusing the same
+source-backed `city_services.json` data for its name. Fuel, repairs, rest,
+and food stay at truck stops and the terminal garage, as they always did.
+The POI/approach/geometry data foundation below is retained for that
+naming lookup even though the drivable route itself is gone.
 
 The first ATS-style city-layout foundation is in: from the terminal, **Drive to
 city services** lets the player pick the freight market office, terminal

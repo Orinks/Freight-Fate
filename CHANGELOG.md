@@ -2,7 +2,19 @@
 
 ## Unreleased
 
+### Added
+
+- **You can now pay down what you owe from your own cash.** Whenever you
+  carry a balance and have money in hand, the terminal and every truck stop
+  offer to pay it all, half, or everything above a 200 dollar fuel cushion.
+  Clearing the balance stops settlement collection on the spot.
+
 ### Changed
+
+- **The truck dealer is now one menu choice away.** The drive to city
+  services is retired: the dealer opens straight from the terminal menu,
+  named for the real local dealership where we have one on record. Fuel,
+  repairs, rest, and food stay at truck stops and the terminal garage.
 
 - **The road talks at a human pace now.** Speed limit changes, traffic
   calls, and zone chatter used to arrive back to back, because the
