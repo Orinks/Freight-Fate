@@ -7,6 +7,8 @@ follow the asset contract: host_<station>_NN, id_<station>_NN, ad_<slug>.
 
 from __future__ import annotations
 
+import zlib
+
 from .music import MusicTrack, music_track_duration_s
 
 STATION_IDS: dict[str, tuple[MusicTrack, ...]] = {}
@@ -40,3 +42,32 @@ def content_duration_s(key: str) -> float:
 
 def station_ads(playlist: str) -> tuple[MusicTrack, ...]:
     return tuple(spot for spot in AD_SPOTS if playlist in AD_FORMAT_TAGS.get(spot.key, ()))
+
+
+def _pick(pool: tuple[MusicTrack, ...], seed_key: str, index: int) -> str:
+    ordered = sorted(pool, key=lambda t: zlib.crc32(f"{seed_key}|{t.key}".encode()))
+    return ordered[index % len(ordered)].key
+
+
+def plan_break(host: str, playlist: str, seed_key: str, break_index: int) -> tuple[str, ...]:
+    """Asset keys for one break slot. Empty when the station has no voice.
+
+    Slot kinds cycle BREAK_PATTERN; a kind whose pool is empty falls back
+    to a host break so the cadence the player learned never stutters.
+    """
+    from .music import STATION_HOST_SEGMENTS
+
+    hosts = STATION_HOST_SEGMENTS.get(host, ())
+    if not hosts:
+        return ()
+    kind = BREAK_PATTERN[break_index % len(BREAK_PATTERN)]
+    ids = STATION_IDS.get(host, ())
+    ads = station_ads(playlist)
+    if kind == "id" and ids:
+        return (_pick(ids, f"{seed_key}|id", break_index),)
+    if kind == "ad_id" and ads and ids:
+        return (
+            _pick(ads, f"{seed_key}|ad", break_index),
+            _pick(ids, f"{seed_key}|tag", break_index),
+        )
+    return (_pick(hosts, f"{seed_key}|host", break_index),)
