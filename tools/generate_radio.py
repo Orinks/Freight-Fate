@@ -909,11 +909,12 @@ def main(argv: list[str] | None = None) -> int:
         if limit_str is None:
             raise SystemExit("--limit requires a value, e.g. --limit 3")
         try:
-            limit = int(limit_str)
+            parsed_limit = int(limit_str)
         except ValueError:
-            raise SystemExit(f"--limit requires a positive integer, got {limit_str!r}") from None
-        if limit <= 0:
+            parsed_limit = 0  # falls through to the shared "positive integer" error below
+        if parsed_limit <= 0:
             raise SystemExit(f"--limit requires a positive integer, got {limit_str!r}")
+        limit = parsed_limit
 
     if plan_hosts or plan_ids or plan_ads or plan_songs or probe:
         if plan_songs and not plan_songs_pool:

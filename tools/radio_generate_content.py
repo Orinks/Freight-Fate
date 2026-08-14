@@ -349,8 +349,12 @@ def run_plan_songs(key: str, pool: str, *, force: bool = False, limit: int | Non
     ``limit``, when set, caps how many *fresh* generations this call makes
     (a budget-capped wave): songs already on disk still print their usual
     skip line and are resumed past for free -- they don't count against the
-    cap. Once the cap is spent the loop stops and prints how many pool
-    songs are still ungenerated, so a later `--limit` resume is visible.
+    cap. Once the cap is spent the loop stops; either way (cap hit or the
+    pool finished under the cap) one line reports how many pool songs are
+    still missing their output file -- counted across the *whole* pool, not
+    just the songs after the stopping point, so an earlier song that failed
+    its API call (HTTPError, logged and skipped without spending) still
+    shows up as remaining instead of silently vanishing from the count.
     """
     from radio_content_plan import SONG_PLAN
 
@@ -359,20 +363,12 @@ def run_plan_songs(key: str, pool: str, *, force: bool = False, limit: int | Non
     before = credit_usage(key)
     songs = SONG_PLAN[pool]
     generated = 0
-    for i, song in enumerate(songs):
+    for song in songs:
         out = ASSETS / "music" / f"{song.key}.ogg"
         if out.exists() and not force:
             print(f"  skip {song.key} (exists)", flush=True)
             continue
         if limit is not None and generated >= limit:
-            remaining = sum(
-                1 for s in songs[i:] if force or not (ASSETS / "music" / f"{s.key}.ogg").exists()
-            )
-            print(
-                f"  limit {limit} reached, {remaining} of {len(songs)} pool songs "
-                "remain ungenerated",
-                flush=True,
-            )
             break
         print(f"  composing {song.key} ({song.length_ms / 1000:.0f}s)...", flush=True)
         body = {
@@ -389,6 +385,14 @@ def run_plan_songs(key: str, pool: str, *, force: bool = False, limit: int | Non
             continue
         _write_ogg(mp3, ASSETS / "music" / f"{song.key}.ogg")
         generated += 1
+    if limit is not None:
+        remaining = sum(
+            1 for s in songs if force or not (ASSETS / "music" / f"{s.key}.ogg").exists()
+        )
+        print(
+            f"  limit {limit} reached, {remaining} of {len(songs)} pool songs remain ungenerated",
+            flush=True,
+        )
     after = credit_usage(key)
     _print_spend(before, after)
 

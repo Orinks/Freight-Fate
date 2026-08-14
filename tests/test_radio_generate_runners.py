@@ -19,8 +19,11 @@ monkeypatches on the exact module objects the runners actually call into.
 
 from __future__ import annotations
 
+import email.message
+import io
 import json
 import sys
+import urllib.error
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -298,6 +301,57 @@ def test_plan_songs_limit_ignores_already_on_disk(money_path, monkeypatch):
     assert (money_path.music_dir / f"{songs[2].key}.ogg").exists()  # fresh #2
     assert not (money_path.music_dir / f"{songs[3].key}.ogg").exists()
     assert len(money_path.post_calls) == 2  # only the two fresh generations spend
+
+
+def test_plan_songs_limit_remaining_covers_whole_pool_after_httperror(
+    money_path, monkeypatch, capsys
+):
+    """Song 1 fails its API call before the cap is hit -- it never lands on
+    disk and was never counted toward `generated`, but it must still show
+    up in the "remain ungenerated" count alongside song 3, which the cap
+    never let the loop reach at all."""
+    songs = _fake_song_pool(4)
+    monkeypatch.setattr(radio_content_plan, "SONG_PLAN", {"oldies": songs})
+
+    calls = []
+
+    def flaky_post_bytes(url, key, body, timeout=600):
+        calls.append(body["prompt"])
+        if len(calls) == 2:  # song 1's attempt
+            fp = io.BytesIO(b"server error")
+            raise urllib.error.HTTPError(url, 500, "boom", email.message.Message(), fp)
+        return b"FAKE-MP3-BYTES"
+
+    monkeypatch.setattr(rgc, "_post_bytes", flaky_post_bytes)
+
+    rgc.run_plan_songs("fake-key", "oldies", limit=2)
+
+    assert (money_path.music_dir / f"{songs[0].key}.ogg").exists()  # generated #1
+    assert not (money_path.music_dir / f"{songs[1].key}.ogg").exists()  # HTTP-failed
+    assert (money_path.music_dir / f"{songs[2].key}.ogg").exists()  # generated #2, cap hit
+    assert not (money_path.music_dir / f"{songs[3].key}.ogg").exists()  # never attempted
+
+    out = capsys.readouterr().out
+    assert "limit 2 reached, 2 of 4 pool songs remain ungenerated" in out
+
+
+def test_plan_songs_limit_equal_to_pending_still_prints_remaining_line(
+    money_path, monkeypatch, capsys
+):
+    """When the cap exactly covers every pending song, the loop finishes
+    without ever hitting the `generated >= limit` break -- the remaining
+    line must still print (with 0 remaining), not silently disappear."""
+    songs = _fake_song_pool(2)
+    monkeypatch.setattr(radio_content_plan, "SONG_PLAN", {"oldies": songs})
+
+    rgc.run_plan_songs("fake-key", "oldies", limit=2)
+
+    assert (money_path.music_dir / f"{songs[0].key}.ogg").exists()
+    assert (money_path.music_dir / f"{songs[1].key}.ogg").exists()
+    assert len(money_path.post_calls) == 2
+
+    out = capsys.readouterr().out
+    assert "limit 2 reached, 0 of 2 pool songs remain ungenerated" in out
 
 
 def test_plan_songs_no_limit_is_byte_identical_to_before(money_path, monkeypatch):
