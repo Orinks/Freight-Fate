@@ -138,9 +138,12 @@ class TripTrafficMixin:
         reliability rides on. What differs is what the post actually is: a
         patrol or speed post still calls a bear, a work zone is drivers
         talking about enforcement working the zone rather than a trooper
-        sighting, and a scale is chatter about logs being checked. Bear
-        stays CB slang for a trooper on the open road, never for a fixed
-        inspection facility (docs/ontology.md).
+        sighting, a scale or a commercial-vehicle unit is chatter about
+        logs (and, for the commercial-vehicle unit, equipment) being
+        checked, and a chain control is chatter about chains being
+        checked at the grade. Bear stays CB slang for a trooper on the
+        open road, never for a fixed inspection facility or a chain
+        checkpoint (docs/ontology.md).
         """
         distance = self._distance_text(max(0.0, ahead_mi))
         confidence = self._cb_confidence(post)
@@ -157,6 +160,30 @@ class TripTrafficMixin:
             if confidence == "ordinary":
                 return f"CB chatter, {distance}: a driver says they're checking logs {side}."
             return f"CB chatter: somebody said they were checking logs {side} a while back."
+        if post.kind == KIND_CMV:
+            if confidence == "strong":
+                return (
+                    f"CB chatter, {distance}: two drivers say they're checking "
+                    f"logs and equipment {side}."
+                )
+            if confidence == "ordinary":
+                return (
+                    f"CB chatter, {distance}: a driver says they're checking "
+                    f"logs and equipment {side}."
+                )
+            return f"CB chatter: somebody said they were checking logs and equipment {side} a while back."
+        if post.kind == KIND_CHAIN:
+            if confidence == "strong":
+                return (
+                    f"CB chatter, {distance}: two drivers say the chain control "
+                    f"is checking rigs {side}."
+                )
+            if confidence == "ordinary":
+                return (
+                    f"CB chatter, {distance}: a driver says the chain control "
+                    f"is checking rigs {side}."
+                )
+            return f"CB chatter: somebody said the chain control was checking rigs {side} a while back."
         if confidence == "strong":
             return f"CB chatter, {distance}: two drivers call a bear {side}."
         if confidence == "ordinary":

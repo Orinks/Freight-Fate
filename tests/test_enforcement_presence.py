@@ -24,6 +24,8 @@ from freight_fate.sim.enforcement_observe import (
     observe,
 )
 from freight_fate.sim.enforcement_posts import (
+    KIND_CHAIN,
+    KIND_CMV,
     KIND_FIXED_SCALE,
     KIND_MEDIAN,
     KIND_SCALE_APRON,
@@ -334,19 +336,25 @@ def test_cb_chatter_varies_by_what_the_post_actually_is():
     """The rewrite that shipped the presence model collapsed every post kind
     to "a bear {side}" x3 confidence levels. A patrol/speed post still calls
     a bear; a work zone is drivers talking about enforcement working the
-    zone, not a trooper sighting; a scale is chatter about logs being
-    checked -- and every kind keeps the same confidence framing and the
-    distance/side slots."""
+    zone, not a trooper sighting; a scale or a commercial-vehicle unit is
+    chatter about logs (and, for the CMV unit, equipment) being checked; a
+    chain control is chatter about chains being checked at the grade --
+    and every kind keeps the same confidence framing and the distance/side
+    slots."""
     trip = _trip()
     patrol = always_observing_post(at_mi=20.0, kind=KIND_MEDIAN)
     work_zone = always_observing_post(at_mi=20.0, kind=KIND_WORK_ZONE)
     scale_apron = always_observing_post(at_mi=20.0, kind=KIND_SCALE_APRON)
     fixed_scale = always_observing_post(at_mi=20.0, kind=KIND_FIXED_SCALE)
+    cmv = always_observing_post(at_mi=20.0, kind=KIND_CMV)
+    chain = always_observing_post(at_mi=20.0, kind=KIND_CHAIN)
 
     patrol_line = trip.cb_patrol_message(patrol, 3.0)
     work_zone_line = trip.cb_patrol_message(work_zone, 3.0)
     apron_line = trip.cb_patrol_message(scale_apron, 3.0)
     scale_line = trip.cb_patrol_message(fixed_scale, 3.0)
+    cmv_line = trip.cb_patrol_message(cmv, 3.0)
+    chain_line = trip.cb_patrol_message(chain, 3.0)
 
     # Every line still carries the distance and its own side slot.
     for line, post in (
@@ -354,6 +362,8 @@ def test_cb_chatter_varies_by_what_the_post_actually_is():
         (work_zone_line, work_zone),
         (apron_line, scale_apron),
         (scale_line, fixed_scale),
+        (cmv_line, cmv),
+        (chain_line, chain),
     ):
         assert "3.0" in line or "miles" in line or line.startswith("CB chatter:")
         assert trip._cb_side(post) in line
@@ -363,6 +373,8 @@ def test_cb_chatter_varies_by_what_the_post_actually_is():
     assert "bear" not in work_zone_line.lower()
     assert "bear" not in apron_line.lower()
     assert "bear" not in scale_line.lower()
+    assert "bear" not in cmv_line.lower()
+    assert "bear" not in chain_line.lower()
 
     # The work zone talks about enforcement, not a trooper sighting.
     assert "troopers" in work_zone_line.lower()
@@ -374,9 +386,20 @@ def test_cb_chatter_varies_by_what_the_post_actually_is():
     assert "coop" not in apron_line.lower()
     assert "coop" not in scale_line.lower()
 
+    # The commercial-vehicle unit gets the inspection family too -- logs
+    # AND equipment, since a roadside CMV stop is a full equipment check,
+    # not just a paperwork check.
+    assert "logs" in cmv_line.lower()
+    assert "equipment" in cmv_line.lower()
+    assert "coop" not in cmv_line.lower()
+
+    # The chain control gets its own line, naming the checkpoint by its
+    # ontology-canonical noun rather than calling it a bear.
+    assert "chain control" in chain_line.lower()
+
     # The confidence framing (two drivers / a driver / somebody a while
     # back) is shared across every kind.
-    for line in (patrol_line, work_zone_line, apron_line, scale_line):
+    for line in (patrol_line, work_zone_line, apron_line, scale_line, cmv_line, chain_line):
         assert any(marker in line for marker in ("two drivers", "a driver", "somebody"))
 
 
