@@ -952,6 +952,88 @@ def test_hazard_announces_speed_control_cancellation_once(monkeypatch):
         app.shutdown()
 
 
+@pytest.mark.smoke
+def test_dodgeable_hazard_leaves_cruise_armed_through_the_lane_change_dodge():
+    """Shane's report, 2026-08-14: with adaptive cruise on, dodging a
+    dodgeable hazard by changing lanes killed the whole session outright --
+    not just easing off for the lane being left, which is the narrower bug
+    3cbdcffb fixed. Only braking, the driver's own or the automatic brake
+    taking over, may cancel cruise; a lane change that answers the hazard
+    must not."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import LANE_TAP_CHANGE_S
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.curves = []
+        open_limits(driving)
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 26.8  # ~60 mph
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph is not None
+        assert driving.lane.lane == 0
+
+        hazard = TripEvent(
+            TripEventKind.HAZARD, "A deer is in the road.", {"name": "deer", "dodgeable": True}
+        )
+        driving._handle_trip_event(hazard)
+        # A dodgeable hazard alone never hands the pedal back -- that is what
+        # the lane change below is for.
+        assert driving._cruise_mph is not None
+        assert driving._hazard_deadline is not None
+
+        driving._tap_lane_change(1)  # dodge into the open lane
+        for _ in range(int(LANE_TAP_CHANGE_S * 60) + 5):
+            driving.update(1 / 60)
+            assert driving._cruise_mph is not None  # never drops mid-maneuver
+
+        assert driving.lane.lane == 1
+        assert driving._lane_change_target is None
+        assert driving._cruise_mph is not None
+    finally:
+        app.shutdown()
+
+
+def test_driver_braking_still_cancels_cruise_during_a_dodge(monkeypatch):
+    """The other half of Shane's contract: a lane change never cancels
+    cruise, but the driver's own brake still does, mid-dodge or not."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    class DownKeys:
+        def __getitem__(self, key):
+            return key == pygame.K_DOWN
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.curves = []
+        open_limits(driving)
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 26.8
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph is not None
+
+        hazard = TripEvent(
+            TripEventKind.HAZARD, "A deer is in the road.", {"name": "deer", "dodgeable": True}
+        )
+        driving._handle_trip_event(hazard)
+        driving._tap_lane_change(1)
+        assert driving._cruise_mph is not None  # still armed, mid-dodge
+
+        monkeypatch.setattr(pygame.key, "get_pressed", lambda: DownKeys())
+        driving.update(1 / 60)
+        assert driving._cruise_mph is None
+    finally:
+        app.shutdown()
+
+
 def test_metric_cruise_minimum_refusal_uses_metric_units(monkeypatch):
     from freight_fate.app import App
 

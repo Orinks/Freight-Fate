@@ -145,13 +145,6 @@ class DrivingEventMixin:
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
                 return  # off the highway: the hazard passes you by
-            speed_control_was_active = (
-                self._speed_control_armed
-                or self._cruise_mph is not None
-                or self._keeper_mph is not None
-            )
-            if speed_control_was_active:
-                self._disarm_speed_control()  # hands back on the wheel to brake
             self._pending_ambient_event = None
             self.ctx.audio.play(sound or "ui/warning")
             self.ctx.controller.rumble.hazard()  # 750 ms right->left sweep
@@ -204,6 +197,23 @@ class DrivingEventMixin:
                 self._hazard_deadline = min(self._hazard_deadline, new_deadline)
             self._hazard_lane = self.lane.lane
             self._hazard_slow_hint_said = False
+            # A dodgeable hazard leaves the wheel alone: adaptive cruise or
+            # the keeper stays armed through the lane change that answers it,
+            # and only braking -- the driver's own, or the automatic brake
+            # taking over near the deadline (see ``_update_hazard``) --
+            # cancels the session. A hazard with no dodge in it (or one
+            # folded in with a brake-only hazard, which always wins the
+            # group's wording, see above) has no such answer, so hands go
+            # back to the pedals right away (Shane, 2026-08-14: a lane change
+            # was killing cruise outright, not just easing off the lane being
+            # passed -- that narrower bug is 3cbdcffb).
+            speed_control_was_active = not self._hazard_dodgeable and (
+                self._speed_control_armed
+                or self._cruise_mph is not None
+                or self._keeper_mph is not None
+            )
+            if speed_control_was_active:
+                self._disarm_speed_control()  # hands back on the wheel to brake
             # The normal/terse pair rides the event from the sim layer; the
             # delivery layer picks the rendering (R5), so no rewriting here.
             message = event.message

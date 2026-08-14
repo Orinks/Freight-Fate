@@ -393,6 +393,13 @@
   were pulling out of. Now, for as long as the lane change is underway, the
   truck drives toward the lane you are entering instead.
 
+- **Changing lanes no longer switches automatic speed control off -- only
+  braking does.** Dodging a hazard by changing lanes with adaptive cruise or
+  the speed keeper on used to cancel the session outright the instant the
+  hazard was called, even if you never touched the brake. Now cruise and the
+  keeper stay on through a dodge; only your own brake, or the automatic
+  brake taking over, ends the session.
+
 - **When a cloud backup is refused by the server, the game now says so
   instead of blaming your connection.** Retrying "Keep this computer's
   save and back it up" after the server rejected a save used to say
