@@ -22,6 +22,17 @@ Usage:
     uv run python tools/generate_radio.py --voices --dry-run  # show what would be added
     uv run python tools/generate_radio.py --voices             # add missing cast voices
     uv run python tools/generate_radio.py --sfx                # imaging SFX beds (spends credits)
+
+Plan-driven runners (tools/radio_generate_content.py, reading
+tools/radio_content_plan.py -- STATIONS, AD_PLAN, SONG_PLAN):
+    uv run python tools/generate_radio.py --plan-hosts            # every station's host lines
+    uv run python tools/generate_radio.py --plan-hosts roadhouse  # one station's host lines
+    uv run python tools/generate_radio.py --plan-ids               # spoken IDs + jingles, every station
+    uv run python tools/generate_radio.py --plan-ids roadhouse    # one station's ID + jingles
+    uv run python tools/generate_radio.py --plan-ads                # the shared ad rotation
+    uv run python tools/generate_radio.py --plan-songs oldies       # one song pool
+    uv run python tools/generate_radio.py --plan-hosts --force      # regenerate even if the file exists
+    uv run python tools/generate_radio.py --probe                   # measure real per-song credit cost
 """
 
 from __future__ import annotations
@@ -830,15 +841,62 @@ def report_durations() -> None:
     import soundfile as sf
 
     print("\nMeasured durations (paste into music.py):")
-    for path in sorted((ASSETS / "music").glob("radio_*.ogg")) + sorted(
-        (ASSETS / "music").glob("host_*.ogg")
-    ):
+    paths: list[Path] = []
+    for pattern in ("radio_*.ogg", "host_*.ogg", "id_*.ogg", "ad_*.ogg"):
+        paths.extend(sorted((ASSETS / "music").glob(pattern)))
+    for path in paths:
         info = sf.info(str(path))
         print(f"  {path.stem}: {info.frames / info.samplerate:.1f}s")
 
 
+def _take_flag_arg(argv: list[str], flag: str) -> tuple[bool, str | None]:
+    """Pop ``flag`` out of ``argv`` in place; if the flag is present and the
+    token right after it isn't itself a ``--flag``, pop and return that too
+    as the flag's optional value (a station key or song pool)."""
+    if flag not in argv:
+        return False, None
+    i = argv.index(flag)
+    argv.pop(i)
+    if i < len(argv) and not argv[i].startswith("--"):
+        return True, argv.pop(i)
+    return True, None
+
+
 def main(argv: list[str] | None = None) -> int:
-    argv = sys.argv[1:] if argv is None else argv
+    argv = list(sys.argv[1:] if argv is None else argv)
+
+    plan_hosts, plan_hosts_key = _take_flag_arg(argv, "--plan-hosts")
+    plan_ids, plan_ids_key = _take_flag_arg(argv, "--plan-ids")
+    plan_ads, _ = _take_flag_arg(argv, "--plan-ads")
+    plan_songs, plan_songs_pool = _take_flag_arg(argv, "--plan-songs")
+    probe, _ = _take_flag_arg(argv, "--probe")
+    force, _ = _take_flag_arg(argv, "--force")
+
+    if plan_hosts or plan_ids or plan_ads or plan_songs or probe:
+        if plan_songs and not plan_songs_pool:
+            raise SystemExit("--plan-songs requires a POOL argument, e.g. --plan-songs oldies")
+        from radio_generate_content import (
+            run_plan_ads,
+            run_plan_hosts,
+            run_plan_ids,
+            run_plan_songs,
+            run_probe,
+        )
+
+        key = _api_key()
+        if plan_hosts:
+            run_plan_hosts(key, plan_hosts_key, force=force)
+        if plan_ids:
+            run_plan_ids(key, plan_ids_key, force=force)
+        if plan_ads:
+            run_plan_ads(key, force=force)
+        if plan_songs:
+            run_plan_songs(key, plan_songs_pool, force=force)
+        if probe:
+            run_probe(key)
+        report_durations()
+        return 0
+
     flags = {arg for arg in argv if arg.startswith("--")}
     keys = [arg for arg in argv if not arg.startswith("--")]
     if "--voices" in flags:
