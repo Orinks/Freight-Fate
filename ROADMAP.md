@@ -498,6 +498,27 @@ onto exit signalling.
 - [ ] **Owner listening pass over the generated station content.** Only
       programmatic QC has run so far; ear-check the hosts, IDs, ads, and
       new songs and regenerate any misfires by key.
+- [ ] **Cruise destination-lane selection for drift lane changes.** The
+      2026-08-14 fix keeps cruise from braking for the lane you are leaving,
+      but only for tap changes under automated lane keeping; a held-wheel
+      drift still flips the lead at the line-cross instead of the moment the
+      change starts.
+- [ ] **Off-air stations should not yank the dial.** Tuning past a dead
+      stream should carry on around the dial from where you were instead of
+      handing over to a distant fallback station (Darren).
+- [ ] **Lane names past three lanes.** Left, middle, and right cannot tell
+      four or five lanes apart; Sarah already hit ambiguous callouts on a
+      three-plus road near Riverside.
+- [ ] **Game sounds duck under the in-cab radio.** Enforcement markers and
+      pass-bys currently talk over the radio instead of alongside it
+      (Shane).
+- [ ] **One-lane roads: a cop cannot pass you, so it should not try**
+      (Shane).
+- [ ] **Merging AI yields to a truck** instead of racing it for the gap
+      (Shane, long-standing).
+- [ ] **Should the engine start off at trip start?** Design question from
+      Darren -- starting it yourself is already how the first-run
+      walkthrough begins, so there is a real choice to make.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
