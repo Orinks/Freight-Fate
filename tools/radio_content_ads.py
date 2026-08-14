@@ -112,7 +112,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_wagon_wheel_inn",
         business="Wagon Wheel Motor Inn",
-        voice="Claudia",
+        voice="Alexandra",
         script=(
             "When the sleeper's too small and the night's too long, the "
             "Wagon Wheel Motor Inn keeps truck parking out back, a real "
@@ -141,7 +141,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_black_kettle_coffee",
         business="Black Kettle Coffee",
-        voice="Claudia",
+        voice="Jade",
         script=(
             "Black Kettle Coffee is roasted for the long haul. Dark, "
             "smooth, and strong enough to introduce itself. It's a slow "
@@ -242,7 +242,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_milepost_ministries",
         business="Milepost Ministries",
-        voice="Claudia",
+        voice="Janet",
         script=(
             "Some loads weigh more than freight. Milepost Ministries "
             "keeps chapel doors open at truck stops across the country, "
