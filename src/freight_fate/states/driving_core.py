@@ -53,7 +53,6 @@ from ..music import (
     RADIO_TRACKS_PER_HOST_BREAK,
     music_track_duration_s,
     select_drive_music_sequence,
-    select_host_segments,
     select_menu_music_sequence,
     select_station_playlist,
 )
@@ -68,6 +67,7 @@ from ..radio import (
     signal_volume_factor,
     truck_position,
 )
+from ..radio_content import content_duration_s, plan_break
 from ..sim import hos
 from ..sim.driving_modes import tuning_for_time_scale
 from ..sim.enforcement_observe import OBSERVE_LEEWAY_MPH

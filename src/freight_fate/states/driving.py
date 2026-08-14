@@ -162,16 +162,16 @@ class DrivingState(
         self._music_night = is_night(self.trip.local_start_hour)
         self.radio = RadioState.from_settings(ctx.settings, ctx.profile)
         self._radio_backend = _DrivingRadioBackend(self)
-        # Station rotation: per-station shuffled song order, with host breaks
-        # every few songs on the stations that have a live host.
+        # Station rotation: per-station shuffled song order, with break slots
+        # (host/id/ad) every few songs on the stations that have a live host.
         self._radio_station_id = ""
         self._radio_playlist: tuple[str, ...] = ()
-        self._radio_hosts: tuple[str, ...] = ()
         self._radio_track_index = 0
-        self._radio_host_index = 0
         self._radio_elapsed_s = 0.0
-        self._radio_tracks_since_host = 0
-        self._radio_playing_host = False
+        self._radio_break_queue: tuple[str, ...] = ()
+        self._radio_break_pos = 0
+        self._radio_break_count = 0
+        self._radio_tracks_since_break = 0
         # Personal M3U stations: where each playlist left off this drive,
         # and a short hold between files so a fade-in never reads as ended.
         self._playlist_positions: dict[str, int] = {}

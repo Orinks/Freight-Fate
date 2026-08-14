@@ -808,7 +808,7 @@ def test_drive_music_advances_to_next_track_while_paused(monkeypatch):
         assert isinstance(app.state, PauseMenuState)
         current = driving._radio_playlist[driving._radio_track_index % len(driving._radio_playlist)]
         index_before = driving._radio_track_index
-        host_before = driving._radio_playing_host
+        break_before = bool(driving._radio_break_queue)
         played.clear()
 
         # Sit on the pause menu until the current song's playback ends.
@@ -816,7 +816,8 @@ def test_drive_music_advances_to_next_track_while_paused(monkeypatch):
 
         assert played, "the radio went silent under the pause menu"
         assert (
-            driving._radio_track_index != index_before or driving._radio_playing_host != host_before
+            driving._radio_track_index != index_before
+            or bool(driving._radio_break_queue) != break_before
         )
     finally:
         app.shutdown()

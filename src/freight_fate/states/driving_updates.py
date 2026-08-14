@@ -1948,12 +1948,12 @@ class DrivingUpdateMixin:
         self._music_night = night
         self._radio_station_id = station.id
         self._radio_playlist = self._station_rotation_pool(station, night)
-        self._radio_hosts = select_host_segments(station.host, f"{self.trip_seed}|{station.id}")
         self._radio_track_index = 0
-        self._radio_host_index = 0
         self._radio_elapsed_s = 0.0
-        self._radio_tracks_since_host = 0
-        self._radio_playing_host = False
+        self._radio_break_queue: tuple[str, ...] = ()
+        self._radio_break_pos = 0
+        self._radio_break_count = 0
+        self._radio_tracks_since_break = 0
         if self._radio_playlist:
             self.ctx.audio.play_music(self._radio_playlist[0], fade_ms=fade_ms)
 
@@ -1974,26 +1974,39 @@ class DrivingUpdateMixin:
         if not self._radio_playlist:
             return
         self._radio_elapsed_s += max(0.0, dt)
-        if self._radio_playing_host and self._radio_hosts:
-            current = self._radio_hosts[self._radio_host_index % len(self._radio_hosts)]
+        if self._radio_break_queue:
+            current = self._radio_break_queue[self._radio_break_pos]
         else:
             current = self._radio_playlist[self._radio_track_index % len(self._radio_playlist)]
-        if self._radio_elapsed_s < music_track_duration_s(current):
+        if self._radio_elapsed_s < content_duration_s(current):
             return
         self._radio_elapsed_s = 0.0
-        if self._radio_playing_host:
-            self._radio_playing_host = False
-            self._radio_host_index += 1
+        if self._radio_break_queue:
+            self._radio_break_pos += 1
+            if self._radio_break_pos < len(self._radio_break_queue):
+                self.ctx.audio.play_music(
+                    self._radio_break_queue[self._radio_break_pos], fade_ms=300
+                )
+                return
+            self._radio_break_queue = ()
             self._play_station_track(fade_ms=1200)
             return
         self._radio_track_index += 1
-        self._radio_tracks_since_host += 1
-        if self._radio_hosts and self._radio_tracks_since_host >= RADIO_TRACKS_PER_HOST_BREAK:
-            self._radio_playing_host = True
-            self._radio_tracks_since_host = 0
-            key = self._radio_hosts[self._radio_host_index % len(self._radio_hosts)]
-            self.ctx.audio.play_music(key, fade_ms=600)
-            return
+        self._radio_tracks_since_break += 1
+        if self._radio_tracks_since_break >= RADIO_TRACKS_PER_HOST_BREAK:
+            queue = plan_break(
+                station.host,
+                station.playlist,
+                f"{self.trip_seed}|{station.id}",
+                self._radio_break_count,
+            )
+            self._radio_tracks_since_break = 0
+            if queue:
+                self._radio_break_queue = queue
+                self._radio_break_pos = 0
+                self._radio_break_count += 1
+                self.ctx.audio.play_music(queue[0], fade_ms=600)
+                return
         self._play_station_track(fade_ms=2500)
 
     def _play_station_track(self, fade_ms: int) -> None:
@@ -2023,7 +2036,7 @@ class DrivingUpdateMixin:
             self._playlist_positions[station.id] = index
             self._radio_station_id = station.id
             self._radio_playlist = []
-            self._radio_hosts = []
+            self._radio_break_queue = ()
             # The fade-in window would read as "finished" to music_playing
             # on some backends; hold the advance check off briefly.
             self._playlist_wait_s = 1.5
