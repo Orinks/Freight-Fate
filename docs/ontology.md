@@ -319,6 +319,7 @@ from the words, and synonyms cost them a re-read.
 | A toll gantry or plaza billing the truck | Toll charged | toll cue, gantry chime | `events/toll_charged` |
 | The driver's own yawn as fatigue builds | Yawn | fatigue sound, drowsy cue | `driver/yawn` |
 | Being looked at for something other than speed: damage, missing chains, following too close | Inspection warning | inspection cue, roadside-check tone | `events/inspection_warning` |
+| The earcon that fires with the open-scale approach notice, ahead of the ambient bed | Scale warning | weigh-station warning cue, scale earcon | `events/weigh_station_warning` |
 | The ambient bed that swells as the truck comes up on an open scale | Weigh station | scale bed, weigh-lane loop | `poi/weigh_station_lane` |
 | The end of a pursuit | Spike strip | tire-deflation device, pursuit ender | `events/spike_strip` |
 | The sounding entry for liquid running back and forth inside a tank trailer (the concept itself is "surge", above) | Surge | slosh, sloshing, wave action | `vehicle/liquid_wash`, `sim/surge.LiquidLoad` |

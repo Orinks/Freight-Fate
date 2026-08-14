@@ -490,6 +490,14 @@ _ENFORCEMENT = SoundCategory(
             "close.",
         ),
         SoundEntry(
+            "Scale warning",
+            (Cue("events/weigh_station_warning", volume=0.7),),
+            "An open weigh station is ahead, and the full spoken notice -- "
+            "distance, name, the exit key -- follows right behind it. Its "
+            "own low thump-then-beep, not the inspection cue, so the scale "
+            "is unmistakable before a word is spoken.",
+        ),
+        SoundEntry(
             "Weigh station",
             (Cue("poi/weigh_station_lane", volume=0.6, hold_s=3.0),),
             "The bed that swells as you come up on an open scale. An open "

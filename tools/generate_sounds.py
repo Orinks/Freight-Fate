@@ -5,9 +5,16 @@ ELEVENLABS_API_KEY env var or local ignored .env), requests each effect, and
 converts the returned MP3 to the project's Ogg Vorbis convention with ffmpeg.
 Never run at runtime and the key is never bundled.
 
+One cue is procedural instead: the weigh-station warning is pure numpy
+arithmetic (same deterministic-numpy tradition as generate_radio.py's
+generate_static/generate_fringe), so it needs no API key and spends no
+credits. It is generated as part of the default "everything" run, and can
+also be built alone with --weigh-station-warning.
+
 Usage:
     uv run python tools/generate_sounds.py            # generate the default set
     uv run python tools/generate_sounds.py events/police_siren
+    uv run python tools/generate_sounds.py --weigh-station-warning  # procedural, no credits
 """
 
 from __future__ import annotations
@@ -282,8 +289,125 @@ def _generate(key: str, spec_key: str, prompt: str, duration: float, influence: 
     print(f"    wrote {out} ({out.stat().st_size:,} bytes)", flush=True)
 
 
+# -- procedural: the weigh-station warning ------------------------------------
+#
+# Owner ruling 2026-08-14: the scale gets its own earcon rather than reusing
+# events/inspection_warning, and it is synthesized, not requested from
+# ElevenLabs -- pure arithmetic, no random source, deterministic like
+# generate_radio.py's generate_static/generate_fringe and the enforcement
+# signature synthesized at runtime in states/driving_siren.py. Unlike that
+# signature this ships as a real asset under events/, packed like every other
+# event cue, because it plays from a build-time trigger (the scale-approach
+# announcement), not something the audio engine can synthesize cheaply every
+# frame.
+
+WEIGH_STATION_WARNING_KEY = "events/weigh_station_warning"
+
+
+def _synth_edge_fade(samples, rate: int, *, attack_s: float = 0.004, release_s: float = 0.02):
+    """Short attack/release taper -- same convention as generate_radio.py's
+    fringe picket splashes and _edge_fade, kept local here so this file does
+    not have to import from generate_radio (which itself imports from this
+    one)."""
+    import numpy as np
+
+    n = samples.size
+    if n < 2:
+        return samples
+    attack = min(int(attack_s * rate), n // 2)
+    release = min(int(release_s * rate), n - attack)
+    env = np.ones(n, dtype=np.float64)
+    if attack > 0:
+        env[:attack] = np.linspace(0.0, 1.0, attack)
+    if release > 0:
+        env[-release:] = np.linspace(1.0, 0.0, release)
+    return samples * env
+
+
+def _write_synth_asset(sample, rate: int, relpath: str) -> None:
+    """Write a numpy sample array into the loose asset tree as Ogg Vorbis.
+
+    Same temp-WAV-then-ffmpeg convention as the ElevenLabs path above
+    (``_generate``), so every asset under assets/sounds/ is the same
+    container however it was made.
+    """
+    import soundfile as sf
+
+    out = ASSETS / relpath
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        tmp_path = tmp.name
+    try:
+        sf.write(tmp_path, sample.astype("float32"), rate, format="WAV")
+        subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error", "-i", tmp_path, "-c:a", "libvorbis", str(out)],
+            check=True,
+        )
+    finally:
+        os.unlink(tmp_path)
+    print(f"    wrote {out} ({out.stat().st_size:,} bytes)", flush=True)
+
+
+def generate_weigh_station_warning() -> None:
+    """Procedural two-part "the scale" cue; no API credits, deterministic.
+
+    Part one is a low weighted thump -- an 85 Hz fundamental with a second
+    layer an octave under it -- reading as a heavy platform underfoot. It is
+    the only event earcon carrying real low end: the enforcement marker
+    (states/driving_siren.SIGNATURE_LOW_HZ, 660-1056 Hz) and ui/notify are
+    both dry and high, so the weight alone keeps this unmistakable against
+    either. Part two is a short bright two-note beep on its heel, like a
+    scale readout locking a number in -- the half that actually reads as
+    "the scale" rather than just "a warning". About 0.9 seconds end to end.
+
+    Pure arithmetic, no random source: a rebuild always reproduces the same
+    PCM audio (identical to sample precision, like every other numpy-synthed
+    cue here). The committed .ogg itself can still change a few bytes run to
+    run -- libvorbis stamps a fresh random stream serial into the Ogg
+    container on every encode, the one part of this pipeline arithmetic does
+    not control -- so the file that ships is whichever encode was committed,
+    not something a rebuild should be expected to match byte for byte.
+    """
+    import numpy as np
+
+    rate = 44100
+
+    # Part 1: the low thump. Two sines (not one) so the sub layer supplies
+    # weight a single tone at this length would not read as "heavy".
+    thump_s = 0.46
+    t1 = np.arange(int(thump_s * rate)) / rate
+    thump = 0.7 * np.sin(2.0 * np.pi * 85.0 * t1) + 0.5 * np.sin(2.0 * np.pi * 42.5 * t1)
+    thump *= np.exp(-t1 / 0.11)  # fast decay: a struck weight, not a held tone
+    thump = _synth_edge_fade(thump, rate, attack_s=0.006, release_s=0.03)
+
+    gap1 = np.zeros(int(0.09 * rate))
+
+    # Part 2: the readout beep, two notes stepping up.
+    beep_s = 0.11
+    t2 = np.arange(int(beep_s * rate)) / rate
+    beep_a = np.sin(2.0 * np.pi * 1180.0 * t2) * np.exp(-t2 / 0.09)
+    beep_b = np.sin(2.0 * np.pi * 1560.0 * t2) * np.exp(-t2 / 0.09)
+    beep_a = _synth_edge_fade(beep_a, rate, attack_s=0.004, release_s=0.02)
+    beep_b = _synth_edge_fade(beep_b, rate, attack_s=0.004, release_s=0.02)
+    gap2 = np.zeros(int(0.04 * rate))
+
+    tail = np.zeros(int(0.08 * rate))
+
+    sample = np.concatenate([thump, gap1, beep_a, gap2, beep_b, tail])
+    sample = 0.85 * sample / np.max(np.abs(sample))
+    _write_synth_asset(sample, rate, f"{WEIGH_STATION_WARNING_KEY}.ogg")
+
+
 def main(argv: list[str] | None = None) -> int:
-    argv = sys.argv[1:] if argv is None else argv
+    argv = list(sys.argv[1:] if argv is None else argv)
+    do_all = not argv
+    want_procedural = do_all or "--weigh-station-warning" in argv
+    if "--weigh-station-warning" in argv:
+        argv.remove("--weigh-station-warning")
+    if want_procedural:
+        generate_weigh_station_warning()
+    if not argv and not do_all:
+        return 0  # only the procedural flag was given; no API key needed
     wanted = argv or list(SPECS)
     key = _api_key()
     for spec_key in wanted:

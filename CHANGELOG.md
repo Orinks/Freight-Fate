@@ -13,6 +13,11 @@
   not you -- so it never reads like your own pull-over beginning. Once in
   a while it names why: speeding, a log check, a light out.
 
+- **The scale ahead now has its own sound.** A short, low two-part cue --
+  a heavy thump, then a quick beep -- plays the moment an open weigh
+  station is announced, so you know it is the scale before a word is
+  spoken, not the same tone used for other roadside checks.
+
 - **You can now pay down what you owe from your own cash.** Whenever you
   carry a balance and have money in hand, the terminal and every truck stop
   offer to pay it all, half, or everything above a 200 dollar fuel cushion.

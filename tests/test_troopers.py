@@ -671,11 +671,12 @@ def test_weigh_station_warning_is_spoken_before_bypass(monkeypatch):
 
     app = App()
     spoken = []
+    played = []
     try:
         d = _driving(app, patrol_intensity=None)
         monkeypatch.setattr(app.ctx, "say", lambda *a, **k: None)
         monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: spoken.append(text))
-        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        monkeypatch.setattr(app.ctx.audio, "play", lambda key, **k: played.append(key))
         d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
         d.trip.posts = [*d.trip.posts, open_scale_post(d.trip.stops[0])]
         d.trip.position_mi = 8.2
@@ -690,6 +691,11 @@ def test_weigh_station_warning_is_spoken_before_bypass(monkeypatch):
         # is the instruction that used to march drivers into the bypass.
         assert "signal for the scale exit with X" in spoken[0]
         assert "Once you are stopped at the scale, press T to check in" in spoken[0]
+        # Its own earcon, not the shared inspection cue (owner ruling,
+        # 2026-08-14): testers could not tell the scale-ahead warning apart
+        # from being looked at for something else.
+        assert played.count("events/weigh_station_warning") == 1
+        assert "events/inspection_warning" not in played
     finally:
         app.shutdown()
 

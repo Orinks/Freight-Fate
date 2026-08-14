@@ -3167,7 +3167,12 @@ class DrivingUpdateMixin:
                 # drier approach bed and nothing said -- the swell says
                 # "scale", and the absence of speech is what says "closed".
                 self._weigh_station_notice_key = key
-                self.ctx.audio.play("events/inspection_warning", volume=0.7)
+                # Its own earcon, not the shared inspection cue: testers
+                # could not tell "the scale is ahead" apart from "you are
+                # being looked at for something else" (owner ruling,
+                # 2026-08-14). The low thump-then-beep reads as the scale on
+                # its own, before a word is spoken.
+                self.ctx.audio.play("events/weigh_station_warning", volume=0.7)
                 # Action first, and both keys through control_hint. The old
                 # line hard-coded "press T", and T at speed planned a sleep
                 # stop past the scale -- the instruction itself marched a

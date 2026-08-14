@@ -95,6 +95,7 @@ not distributed in this repository.
 | Toll charged | `events/toll_charged.ogg` | Short toll/transponder cue |
 | State crossing | `events/state_crossing.ogg` | Short route milestone cue |
 | Inspection warning | `events/inspection_warning.ogg` | Short inspection/weigh-station cue |
+| Scale warning | `events/weigh_station_warning.ogg` | Procedural (numpy) two-part low-thump-then-beep cue for the open-scale approach notice, generated with `tools/generate_sounds.py --weigh-station-warning`, no ElevenLabs credits |
 | Local turn left | `events/turn_left.ogg` | ElevenLabs-generated falling two-note turn chime, panned left at playback |
 | Local turn right | `events/turn_right.ogg` | Rising mirror of the left-turn chime (note order swapped via `tools/mirror_turn_chime.py`), panned right at playback |
 | Local turn ahead | `events/turn_ahead.ogg` | ElevenLabs-generated single-tone straight-ahead cue, loudness-normalized |

@@ -153,15 +153,15 @@ def test_asset_bytes_reads_loose_files_without_pack():
 def test_committed_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
-    # Repacked 2026-08-14: split the music/ subtree out into its own
-    # music.pak (see test_committed_music_pack_has_freight_fate_header) and
-    # added the radio station-identity content -- hosts, station IDs, ads,
-    # imaging SFX, 15 new songs. sounds.pak now holds everything else: 159
-    # entries, all 153 pre-split non-music entries preserved.
-    assert len(pack_bytes) == 7_775_520
+    # Repacked 2026-08-14 (weigh-station warning earcon): added the
+    # procedural events/weigh_station_warning.ogg cue (owner ruling --
+    # the scale gets its own earcon instead of reusing the shared
+    # inspection cue). sounds.pak now holds 160 entries, the prior 159
+    # preserved plus the one new asset.
+    assert len(pack_bytes) == 7_781_859
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "ac097bf70fb6c9c29861076eb754095a0a2636cf02d22a147275dae267a27ab1"
+        "3ce9fc6b6fab461eebf3b75050c90c142e7d2e260178cf5b09b350afd066e7a2"
     )
 
 
