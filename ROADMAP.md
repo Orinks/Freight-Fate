@@ -519,6 +519,11 @@ onto exit signalling.
 - [ ] **Should the engine start off at trip start?** Design question from
       Darren -- starting it yourself is already how the first-run
       walkthrough begins, so there is a real choice to make.
+- [ ] **K in a low-speed zone with the speed keeper turned off speaks a
+      dead end.** "Adaptive cruise is not available in a facility access
+      road zone" never says the keeper exists, is off, or where to turn it
+      on (Settings, Gameplay, Controls) -- it cost the owner a settings
+      hunt on 2026-08-14. The line should name the setting.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
