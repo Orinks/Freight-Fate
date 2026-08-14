@@ -2788,6 +2788,23 @@ class DrivingUpdateMixin:
                 f"Collision! The truck took damage. "
                 f"Total damage {self.truck.damage_pct:.0f} percent."
             )
+            # A dodgeable hazard's announcement leaves the session armed --
+            # see ``_handle_trip_event`` -- on the promise that only braking
+            # ends it: the driver's own, or AEB's (which already cancels the
+            # instant it takes the pedal, above). With AEB off and no dodge
+            # and no brake, neither of those ever fires, and the hazard rode
+            # cruise straight into the collision with the session still
+            # showing armed (reviewer-caught regression on the announce-time
+            # fix, 2026-08-14). The deadline lapsing un-dodged is the third
+            # way the promise ends, whatever the AEB setting -- the hazard
+            # stopped being answerable the moment it hit the truck.
+            if (
+                self._speed_control_armed
+                or self._cruise_mph is not None
+                or self._keeper_mph is not None
+            ):
+                self._disarm_speed_control()
+                message = f"{message} Automatic speed control canceled."
             self._last_event_message = message
             self.ctx.say_event(message, interrupt=True)
 

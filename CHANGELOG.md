@@ -397,8 +397,9 @@
   braking does.** Dodging a hazard by changing lanes with adaptive cruise or
   the speed keeper on used to cancel the session outright the instant the
   hazard was called, even if you never touched the brake. Now cruise and the
-  keeper stay on through a dodge; only your own brake, or the automatic
-  brake taking over, ends the session.
+  keeper stay on through a dodge; only your own brake, the automatic brake
+  taking over, or a hazard you never answer at all reaching the truck ends
+  the session.
 
 - **When a cloud backup is refused by the server, the game now says so
   instead of blaming your connection.** Retrying "Keep this computer's

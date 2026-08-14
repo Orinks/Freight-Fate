@@ -998,6 +998,51 @@ def test_dodgeable_hazard_leaves_cruise_armed_through_the_lane_change_dodge():
         app.shutdown()
 
 
+@pytest.mark.smoke
+def test_dodgeable_hazard_leaves_the_keeper_armed_through_the_lane_change_dodge():
+    """The speed keeper shares ``_disarm_speed_control`` with cruise, so the
+    same dodge that must not kill adaptive cruise must not kill the keeper
+    either."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import LANE_TAP_CHANGE_S
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.curves = []
+        # A real construction zone the whole way, so the keeper holds itself
+        # rather than handing straight back to cruise the moment the road
+        # under the wheels reads as open (that switch is _update_keeper's own
+        # job, not this test's).
+        driving.trip.speed_limit_at = lambda mile: (25.0, "construction")
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 6
+        driving.truck.velocity_mps = 11.2  # ~25 mph
+        driving._engage_keeper(30.0, "construction", target_mph=25.0, announce=False)
+        assert driving._keeper_mph is not None
+        assert driving.lane.lane == 0
+
+        hazard = TripEvent(
+            TripEventKind.HAZARD, "A deer is in the road.", {"name": "deer", "dodgeable": True}
+        )
+        driving._handle_trip_event(hazard)
+        assert driving._keeper_mph is not None  # announcement alone spares it
+        assert driving._hazard_deadline is not None
+
+        driving._tap_lane_change(1)  # dodge into the open lane
+        for _ in range(int(LANE_TAP_CHANGE_S * 60) + 5):
+            driving.update(1 / 60)
+            assert driving._keeper_mph is not None  # never drops mid-maneuver
+
+        assert driving.lane.lane == 1
+        assert driving._lane_change_target is None
+        assert driving._keeper_mph is not None
+    finally:
+        app.shutdown()
+
+
 def test_driver_braking_still_cancels_cruise_during_a_dodge(monkeypatch):
     """The other half of Shane's contract: a lane change never cancels
     cruise, but the driver's own brake still does, mid-dodge or not."""
@@ -1030,6 +1075,57 @@ def test_driver_braking_still_cancels_cruise_during_a_dodge(monkeypatch):
         monkeypatch.setattr(pygame.key, "get_pressed", lambda: DownKeys())
         driving.update(1 / 60)
         assert driving._cruise_mph is None
+    finally:
+        app.shutdown()
+
+
+def test_an_ignored_dodgeable_hazard_still_ends_cruise_at_the_deadline(monkeypatch):
+    """Reviewer-caught regression on the announce-time fix above: with the
+    automatic brake turned OFF, a dodgeable hazard the driver never answers
+    -- no dodge, no brake -- used to ride cruise straight into the collision
+    with the session still showing armed. Only braking may cancel cruise,
+    but the deadline lapsing un-dodged IS the collision, which is the third
+    way the promise ends -- whatever the AEB setting."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.curves = []
+        open_limits(driving)
+        driving.ctx.settings.automatic_emergency_braking = False
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 26.8
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph is not None
+
+        hazard = TripEvent(
+            TripEventKind.HAZARD, "A deer is in the road.", {"name": "deer", "dodgeable": True}
+        )
+        driving._handle_trip_event(hazard)
+        assert driving._cruise_mph is not None  # the hazard alone still spares it
+        assert driving._hazard_deadline is not None
+        damage_before = driving.truck.damage_pct
+
+        for _ in range(2000):
+            driving.update(1 / 60)
+            if driving._hazard_deadline is None:
+                break
+        else:
+            raise AssertionError("the hazard deadline never lapsed")
+
+        assert driving.truck.damage_pct > damage_before  # the collision applied
+        assert driving._cruise_mph is None
+        assert not driving._speed_control_armed
     finally:
         app.shutdown()
 
