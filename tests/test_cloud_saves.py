@@ -1823,9 +1823,14 @@ def test_terminal_save_says_when_the_latest_save_is_already_backed_up(monkeypatc
         menu._save()
         menu.update(0.0)
 
+        # The line has to answer the worry a driver actually has here. After
+        # fuelling and buying tires they KNOW the career changed, so a bare
+        # "already backed up" reads as the game refusing to send it (Shane,
+        # 2026-08-15). Naming what is true -- the cloud copy matches this
+        # computer -- is the part that settles it.
         assert spoken == [
             "Game saved. Backing up.",
-            "Your latest save is already backed up.",
+            "Already backed up. The cloud copy matches this computer's save.",
         ]
     finally:
         app.shutdown()

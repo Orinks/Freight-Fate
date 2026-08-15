@@ -884,7 +884,14 @@ class CityMenuState(MenuState):
         if outcome == "accepted":
             return "Backed up to the cloud."
         if outcome == "unchanged":
-            return "Your latest save is already backed up."
+            # "Already backed up" alone reads as a refusal to a driver who
+            # just fuelled and bought tires: they know the career changed, so
+            # being told there is nothing to send sounds like the game is
+            # wrong (Shane, 2026-08-15). It is not -- every one of those
+            # actions saves, and a save backs up on its own, so the server
+            # really is current. Say the part that answers his worry: the
+            # copy up there matches the one on this computer.
+            return "Already backed up. The cloud copy matches this computer's save."
         if outcome.startswith("rejected:"):
             return rejection_status(name, outcome.split(":", 1)[1])
         if outcome == "conflict":
