@@ -1028,18 +1028,27 @@ class SettingsState(MenuState):
         self.ctx.say("Settings saved.", interrupt=True)
 
 
-# Spoken once to a player whose settings predate this layout, the first time
-# they open the Gameplay submenu. It covers both moves in one breath: the new
-# submenu shape, and the world-data rows leaving Speech and weather. A blind
-# player cannot see a menu change shape, so the words carry the whole change,
-# and the reassurance that nothing about their actual settings moved.
-GAMEPLAY_REORG_NOTICE = (
-    "Gameplay is now a category with its own submenu: Driving assistance, "
-    "Difficulty and hours of service, World and traffic, and Controls. "
-    "Weather, traffic, and parking sources moved into World and traffic, from "
-    "what used to be Speech and weather. Nothing about your settings changed; "
-    "this is just where to find them now."
-)
+# Spoken once to a player whose settings predate a layout, the first time they
+# open the Gameplay submenu, one entry per settings layout version they missed.
+# A blind player cannot see a menu change shape, so the words carry the whole
+# change -- and the reassurance that nothing about their actual settings moved,
+# which is true by construction: every move keeps the saved key it always had.
+SETTINGS_LAYOUT_NOTICES = {
+    1: (
+        "Gameplay is now a category with its own submenu: Driving assistance, "
+        "Difficulty and hours of service, World and traffic, and Controls. "
+        "Weather, traffic, and parking sources moved into World and traffic, "
+        "from what used to be Speech and weather. Nothing about your settings "
+        "changed; this is just where to find them now."
+    ),
+    2: (
+        "Two rows moved. Speed keeper is now in Driving assistance, with the "
+        "rest of the driving help, instead of Controls. Lane and edge cue "
+        "prominence is now called Lane and edge cue volume and lives in Audio, "
+        "right under Gameplay cues volume, because that is the volume it "
+        "layers on. Your choices came with them."
+    ),
+}
 
 
 class GameplaySettingsState(MenuState):
@@ -1075,15 +1084,22 @@ class GameplaySettingsState(MenuState):
     def announce_entry(self) -> None:
         super().announce_entry()
         s = self.ctx.settings
-        if s.gameplay_reorg_notice_pending:
-            # Said once and only to a player whose settings moved under them.
-            # Queued behind the menu's own entry line rather than interrupting
-            # it, and cleared to disk immediately so a mid-notice quit does not
-            # replay it forever -- but a player who never reaches this screen
-            # keeps the flag, and hears it whenever they first arrive.
-            s.gameplay_reorg_notice_pending = False
+        if s.settings_layout_notice_from >= 0:
+            # Said once and only to a player whose settings moved under them,
+            # oldest layout first so two moves arrive in the order they
+            # happened. Queued behind the menu's own entry line rather than
+            # interrupting it, and cleared to disk immediately so a mid-notice
+            # quit does not replay it forever -- but a player who never reaches
+            # this screen keeps the flag, and hears it whenever they arrive.
+            owed = [
+                text
+                for version, text in sorted(SETTINGS_LAYOUT_NOTICES.items())
+                if version > s.settings_layout_notice_from
+            ]
+            s.settings_layout_notice_from = -1
             s.save()
-            self.ctx.say(GAMEPLAY_REORG_NOTICE, interrupt=False, review=False)
+            for text in owed:
+                self.ctx.say(text, interrupt=False, review=False)
 
     def _open(self, category: str) -> None:
         self.ctx.push_state(SettingsCategoryState(self.ctx, category))
@@ -1135,7 +1151,7 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Driving assistance preset: {self._assist_preset_label()}",
                     lambda: self._cycle_assist_preset(1),
-                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist and sets lane keeping to full, so the truck holds the lane, a tap changes lanes, and your destination exit is taken for you. Changing an individual assist makes this Custom. You still choose routes, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
+                    help="Realistic provides modern truck safety support. Balanced adds partial lane keeping, a firmer hand on descents, and stopping at your destination. All assists enables every available driving assist and sets lane keeping to full, so the truck holds the lane, a tap changes lanes, and your destination exit is taken for you. Changing an individual assist makes this Custom. You still choose routes, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
                 )
             ]
             items.extend(
@@ -1174,20 +1190,10 @@ class SettingsCategoryState(MenuState):
                     "partial, All assists to full.",
                 )
             )
-            items.append(
-                MenuItem(
-                    lambda: f"Lane and edge cue prominence: {s.lane_cue_loudness}",
-                    lambda: self._cycle_cue_loudness(1),
-                    help="How much the road cues stand out when you leave your "
-                    "line: the rumble-strip and shoulder textures, the lane "
-                    "locator you turn on with I while driving, and the warning "
-                    "bars before a hairpin all follow this. It is not a separate "
-                    "volume; it layers on top of the Gameplay cues volume in "
-                    "Audio settings. Subtle keeps these cues under the engine, "
-                    "standard matches it, prominent cuts through for players who "
-                    "want no doubt. Presets never change it.",
-                )
-            )
+            # Lane and edge cue volume moved to Audio, next to the Gameplay
+            # cues volume it scales. It is a volume, and a second volume
+            # control hiding in the assists list is how it came to be a row
+            # nobody could explain.
             items.append(MenuItem("Back", self.go_back))
             return items
         if self.category == "difficulty":

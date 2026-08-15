@@ -24,12 +24,16 @@ PROFILE_SHARING_CONSENT_VERSION = 3
 
 # Bumped when the settings *menu* is reorganized enough that a returning
 # player needs telling where things moved -- it tracks the shape of the menus,
-# not any one field. Version 1 introduces the Gameplay category (with its
-# Driving assistance, Difficulty and hours of service, World and traffic, and
-# Controls submenus) and splits the world-data rows out of Speech and weather.
-# A load that finds an older value on disk (or none) raises a one-shot notice;
-# a fresh install writes the current version and hears nothing.
-SETTINGS_VERSION = 1
+# not any one field. A load that finds an older value on disk (or none)
+# records which version it came from, and every notice newer than that is
+# spoken once; a fresh install writes the current version and hears nothing.
+#
+# 1: the Gameplay category (Driving assistance, Difficulty and hours of
+#    service, World and traffic, Controls), and the world-data rows leaving
+#    Speech and weather.
+# 2: the speed keeper moving to Driving assistance, and the lane and edge cue
+#    volume moving to Audio.
+SETTINGS_VERSION = 2
 
 # Which chatter switch governs each roadside-callout category. Zone entries
 # (parks, forests, wilderness) share one switch; the lone highway heritage
@@ -362,11 +366,15 @@ class Settings:
     # the Speech-and-weather split are new to this player, so the Gameplay
     # submenu explains once where their settings moved.
     settings_version: int = SETTINGS_VERSION
-    # One-shot: set on load when an older settings_version was found on disk,
-    # cleared the first time the Gameplay submenu speaks the "where things
-    # moved" notice. Persisted so a player who quits before opening Gameplay
-    # still hears it next time; a fresh install never sets it.
-    gameplay_reorg_notice_pending: bool = False
+    # Which layout version this player was last told about. Set on load when an
+    # older settings_version was found on disk, and cleared back to -1 (nothing
+    # owed) the first time the Gameplay submenu speaks the "where things moved"
+    # notices for every version above it. Persisted so a player who quits
+    # before opening Gameplay still hears it next time; a fresh install never
+    # sets it. An int rather than the single bool it replaced, so the next
+    # reorganization does not need a field of its own -- and so a player two
+    # layouts behind hears both moves instead of only the newest.
+    settings_layout_notice_from: int = -1
 
     @property
     def path(self):
@@ -604,19 +612,27 @@ class Settings:
             setattr(s, attr, max(0.0, min(1.0, float(value))))
         if not isinstance(s.radio_station_id, str) or not s.radio_station_id:
             s.radio_station_id = "route_playlist"
-        # Settings-menu layout migration. A file written before the Gameplay
-        # category existed (an older settings_version, or none at all) gets a
-        # one-shot notice pointing at where its settings moved; a fresh
-        # install (no file to read) writes the current version and stays
-        # silent. Not tied to any one field -- it tracks the menu shape.
-        if not isinstance(s.gameplay_reorg_notice_pending, bool):
-            s.gameplay_reorg_notice_pending = False
+        # Settings-menu layout migration. A file written under an older layout
+        # (an older settings_version, or none at all) records the version it
+        # came from, and the Gameplay submenu later speaks every notice above
+        # it; a fresh install (no file to read) writes the current version and
+        # stays silent. Not tied to any one field -- it tracks the menu shape.
+        if not isinstance(s.settings_layout_notice_from, int) or isinstance(
+            s.settings_layout_notice_from, bool
+        ):
+            s.settings_layout_notice_from = -1
         if isinstance(data, dict):
             saved_version = data.get("settings_version", 0)
             if not isinstance(saved_version, int) or isinstance(saved_version, bool):
                 saved_version = 0
             if saved_version < SETTINGS_VERSION:
-                s.gameplay_reorg_notice_pending = True
+                # The oldest layout still owed wins: a player who is two
+                # reorganizations behind hears both, in order.
+                s.settings_layout_notice_from = (
+                    saved_version
+                    if s.settings_layout_notice_from < 0
+                    else min(s.settings_layout_notice_from, saved_version)
+                )
         s.settings_version = SETTINGS_VERSION
         return s
 
