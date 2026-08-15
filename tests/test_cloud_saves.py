@@ -543,11 +543,44 @@ def test_resolve_keep_mine_reports_auth_for_a_retired_token():
 
 
 def test_resolve_keep_mine_reports_rejected_for_a_validator_refusal():
+    # The raw reason rides along (Shane's report, 2026-08-14: the menu that
+    # resolves a conflict needs it to speak the same career-named,
+    # family-split story as the background queue, not a bare tag).
     transport = FakeTransport(error=rejected_error("invalid_achievement"))
     service = make_service(transport, Clock())
     profile = Profile(name="Road Star")
 
-    assert service.resolve_keep_mine("Road Star", profile.to_dict()) == "rejected"
+    assert (
+        service.resolve_keep_mine("Road Star", profile.to_dict()) == "rejected:invalid_achievement"
+    )
+
+
+@pytest.mark.parametrize(
+    "reason", ["impossible_xp", "impossible_money", "invalid_schema", "unsupported_version"]
+)
+def test_resolve_keep_mine_carries_every_rejected_reason(reason):
+    """Every code classify_upload_failure sorts as "rejected" round-trips
+    through resolve_keep_mine's return value -- not just the one used above
+    -- so cloud_save_states.py can build the right family-specific story for
+    each of them."""
+    transport = FakeTransport(error=rejected_error(reason))
+    service = make_service(transport, Clock())
+    profile = Profile(name="Road Star")
+
+    assert service.resolve_keep_mine("Road Star", profile.to_dict()) == f"rejected:{reason}"
+
+
+def test_resolve_keep_mine_rejection_logs_the_raw_reason_but_the_tag_never_speaks_it(caplog):
+    transport = FakeTransport(error=rejected_error("impossible_money"))
+    service = make_service(transport, Clock())
+    profile = Profile(name="Road Star")
+
+    with caplog.at_level(logging.WARNING, logger="freight_fate.cloud_saves"):
+        result = service.resolve_keep_mine("Road Star", profile.to_dict())
+
+    lines = [r.getMessage() for r in caplog.records if "keep-mine upload" in r.getMessage()]
+    assert any("Road Star" in line and "impossible_money" in line for line in lines)
+    assert result == "rejected:impossible_money"
 
 
 # -- the save-listener hook -------------------------------------------------------
@@ -1130,28 +1163,46 @@ def test_delete_menu_flow_confirms_then_forgets_the_slot(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    ("upload_result", "expected_fragment"),
+    ("upload_result", "expected_fragments"),
     [
         (
             {"ok": False, "reason": "error"},
-            "check your connection",
+            ["check your connection"],
         ),
         (
             {"ok": False, "reason": "http_401"},
-            "no longer accepts this computer's sign-in",
+            ["no longer accepts this computer's sign-in"],
         ),
         (
+            # Arithmetic cross-check refusal: named career, flagged for
+            # review, and the owner-required appeal sentence (a real career
+            # was false-flagged by this exact wording on 2026-08-14).
+            {"ok": False, "reason": "impossible_money"},
+            ["road star", "flagged it for review", "tester document"],
+        ),
+        (
+            # Schema/version refusal: named career, blames a build
+            # mismatch, never "flagged".
+            {"ok": False, "reason": "invalid_schema"},
+            ["road star", "build mismatch", "not something you did"],
+        ),
+        (
+            # A rejected code with no specific family: named career, the
+            # generic wording, still not "check your connection".
             {"ok": False, "reason": "invalid_achievement"},
-            "not a problem with your connection",
+            ["road star", "backup not accepted"],
         ),
     ],
-    ids=["network", "auth", "rejected"],
+    ids=["network", "auth", "rejected_arithmetic", "rejected_schema", "rejected_unknown"],
 )
-def test_keep_mine_retry_speaks_the_real_cause(monkeypatch, upload_result, expected_fragment):
+def test_keep_mine_retry_speaks_the_real_cause(monkeypatch, upload_result, expected_fragments):
     """Jessie's report, 2026-08-14: the server refused an upload with
     invalid_achievement, but the game blamed the connection. The "Keep this
     computer's save and back it up" retry must now speak the real family --
-    network, auth, or a server rejection -- not one line for all three."""
+    network, auth, or a server rejection -- not one line for all three.
+    Shane's report, same day: for a server rejection specifically, it must
+    also name the career and split the story by reason code, the same as
+    the background auto-backup queue does."""
     import time as time_module
 
     from freight_fate import cloud_saves as cloud_saves_module
@@ -1175,15 +1226,20 @@ def test_keep_mine_retry_speaks_the_real_cause(monkeypatch, upload_result, expec
             time_module.sleep(0.01)
         slot.update(0.0)
 
-        assert any(expected_fragment.lower() in t.lower() for t in spoken), spoken
-        # The message never claims a network problem for a server rejection,
-        # and never claims a server rejection for an actual network problem.
-        if expected_fragment == "not a problem with your connection":
+        joined = " ".join(spoken).lower()
+        for fragment in expected_fragments:
+            assert fragment in joined, spoken
+        # The message never claims a network problem for a server
+        # rejection, and never claims a server rejection for an actual
+        # network problem.
+        if upload_result["reason"] not in ("error", "http_401"):
             assert not any(
-                "check your connection" in t.lower()
+                "check your connection" in t.lower() and "backup not accepted" not in t.lower()
                 for t in spoken
-                if "not a problem" not in t.lower()
             )
+        # The raw reason code is logged for review; it is never spoken.
+        if upload_result["reason"] not in ("error", "http_401"):
+            assert upload_result["reason"] not in joined
     finally:
         app.shutdown()
 

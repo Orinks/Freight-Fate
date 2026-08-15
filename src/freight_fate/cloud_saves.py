@@ -234,13 +234,17 @@ ARITHMETIC_REJECTION_REASONS = frozenset({"impossible_xp", "impossible_money"})
 SCHEMA_REJECTION_REASONS = frozenset({"invalid_schema", "unsupported_version"})
 
 
-def _rejection_status(name: str, reason: str | None) -> str:
+def rejection_status(name: str, reason: str | None) -> str:
     """The player-facing status line for a server-refused upload.
 
     Always names the career (Shane's report, 2026-08-14: with more than one
     career backed up he could not tell which one had been refused, or why),
     then splits the "rejected" family by what the reason code actually means
-    to a player instead of one line for every cause.
+    to a player instead of one line for every cause. Shared by the background
+    auto-backup queue (:meth:`CloudSaves._upload_slot`) and the foreground
+    "keep this computer's save" retry (:meth:`CloudSaves.resolve_keep_mine`,
+    via :mod:`freight_fate.states.cloud_save_states`) so both speak the same
+    story for the same reason code.
     """
     if reason in ARITHMETIC_REJECTION_REASONS:
         return (
@@ -961,7 +965,7 @@ class CloudSaves:
             # only the honest, career-named story below is.
             reason = result.get("reason")
             log.warning("Cloud backup of %s was rejected: %s", name, reason)
-            self._set_status(_rejection_status(name, reason))
+            self._set_status(rejection_status(name, reason))
             self._done_with(name, snapshot)
             return
         # Transient (network, 5xx): keep the snapshot, back off.
@@ -990,9 +994,14 @@ class CloudSaves:
         ``"ok"`` on success, or the classified failure family the caller
         needs to speak the real cause instead of always blaming the
         connection (Jessie's report, 2026-08-14; see
-        ``classify_upload_failure``): ``"auth"``, ``"rejected"``,
-        ``"conflict"`` (the cloud moved again since this conflict was
-        recorded), or ``"network"``.
+        ``classify_upload_failure``): ``"auth"``, ``"conflict"`` (the cloud
+        moved again since this conflict was recorded), ``"network"``, or --
+        for a server rejection -- ``"rejected:<reason>"``, carrying the raw
+        reason code so the caller can build the same career-named,
+        family-split story as the background queue via
+        :func:`rejection_status` (this menu is the exact button a
+        conflicted tester presses, so a bare "rejected" tag with no career
+        name or cause was not enough; see :mod:`freight_fate.states.cloud_save_states`).
         """
         if self._identity is None:
             return "network"
@@ -1018,4 +1027,11 @@ class CloudSaves:
             return "conflict"
         reason = result.get("reason")
         log.warning("Cloud keep-mine upload of %s failed: %s", name, reason)
-        return classify_upload_failure(reason)
+        family = classify_upload_failure(reason)
+        if family == "rejected":
+            # Carry the raw reason through the return value the caller
+            # already treats as an opaque tag, so it can speak the same
+            # career-named, family-split story cases 1-4 speak -- never the
+            # raw code itself, which stays log-only (logged just above).
+            return f"rejected:{reason}"
+        return family

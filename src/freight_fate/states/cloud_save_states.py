@@ -577,7 +577,11 @@ class CloudSlotState(MenuState):
             # "ok" -> kept_mine; otherwise the classified failure family
             # (network/auth/rejected/conflict) picks which honest line
             # update() speaks -- never the same "check your connection"
-            # line for every cause (Jessie's report, 2026-08-14).
+            # line for every cause (Jessie's report, 2026-08-14). A rejected
+            # upload comes back as "rejected:<reason>", carrying the raw
+            # reason code so update() can name the career and split the
+            # story by cause the same way the background queue does
+            # (Shane's report, 2026-08-14).
             self._outcome = "kept_mine" if result == "ok" else f"keep_mine_failed_{result}"
 
         threading.Thread(target=worker, name="cloud-saves-keep-mine", daemon=True).start()
@@ -669,14 +673,17 @@ class CloudSlotState(MenuState):
                 f"{cloud_saves.AUTH_HELP} Nothing was changed.",
                 interrupt=True,
             )
-        elif outcome == "keep_mine_failed_rejected":
-            self._status = "The server did not accept this save. Nothing was changed."
-            self.ctx.say(
-                "The server did not accept this save, so nothing was "
-                "changed. This is not a problem with your connection -- it "
-                "is something for the developers; please report it.",
-                interrupt=True,
-            )
+        elif outcome.startswith("keep_mine_failed_rejected:"):
+            # The reason code rides along in the outcome tag (see
+            # start_keep_mine) so this speaks the same career-named,
+            # family-split story the background auto-backup queue speaks
+            # for the same reason code, instead of one fixed unnamed line
+            # for every cause -- this menu is the exact button a conflicted
+            # tester presses (Shane's report, 2026-08-14).
+            reason = outcome.split(":", 1)[1]
+            message = cloud_saves.rejection_status(self.save_name, reason)
+            self._status = f"{self.save_name}: backup not accepted. Nothing was changed."
+            self.ctx.say(f"{message} Nothing was changed.", interrupt=True)
         elif outcome == "keep_mine_failed_conflict":
             self._status = "The cloud copy changed again. Nothing was changed."
             self.ctx.say(
