@@ -137,14 +137,23 @@ class CloudAuthError(Exception):
 # player always hears the same recovery path. orinks.net issues one token
 # per computer, so a refusal means this computer's token was signed out
 # from the account's computer list (or replaced by a sign-out-everywhere).
+#
+# Every control named here has to be one this player can actually find. The
+# recovery used to be "choose Add computer to get a fresh token, then paste
+# it": both halves of that died with the clipboard setup, and the setup page
+# has no Add computer button at all now -- a computer is added by activating
+# it from the game. The menu item is named as it reads while the identity
+# file is still on disk (which it is, in this failure): the Online hub says
+# "orinks.net account: connected", not "Set up orinks.net account".
 AUTH_HELP = (
     "orinks.net no longer accepts this computer's sign-in. Usually this "
     "computer was signed out from the computer list on your orinks.net "
-    "driver setup page: open that page, choose Add computer to get a fresh "
-    "token, then paste it under Set up orinks.net account on the Online "
-    "menu. If your driver is not on that page at all, the account itself is "
-    "gone rather than this computer's sign-in, which can happen after the "
-    "site is rebuilt; make a new account and connect it the same way."
+    "driver setup page. To connect it again, open the Online menu, choose "
+    "orinks.net account, then Set up this computer with orinks.net: the "
+    "game gives you an activation code to enter in your browser. If your "
+    "driver is not on that page at all, the account itself is gone rather "
+    "than this computer's sign-in, which can happen after the site is "
+    "rebuilt; make a new account and connect it the same way."
 )
 
 
@@ -157,8 +166,8 @@ def _auth_refused(e: urllib.error.HTTPError, body: dict) -> bool:
     answer ``404 {"error": "driver_not_found"}`` -- observed on the staging
     site on 2026-08-11, after the deployment behind it was rebuilt and every
     driver issued before the move stopped resolving. AUTH_HELP therefore
-    covers both, since the recovery differs: Add computer for the first,
-    a whole new account for the second.
+    covers both, since the recovery differs: activating this computer again
+    for the first, a whole new account for the second.
     """
     return e.code == 401 or body.get("error") in ("unauthorized", "driver_not_found")
 
