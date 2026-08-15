@@ -5,6 +5,7 @@ from dataclasses import replace
 
 import pytest
 
+from freight_fate.data.world_constants import FACILITY_APPROACH_TRUSTED_MAX_MI
 from freight_fate.data.world_models import Stop
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
 from freight_fate.sim.road_event_pacing import LIMIT_GAP_REAL_S, ZONE_GAP_REAL_S
@@ -16,7 +17,14 @@ from freight_fate.sim.trip import (
     NPCVehicle,
     TripEventKind,
 )
-from freight_fate.sim.trip_models import RoadStop
+from freight_fate.sim.trip_models import (
+    DESTINATION_LOCAL_APPROACH_MI,
+    FACILITY_GATE_LIMIT_MPH,
+    FACILITY_GATE_ZONE_MI,
+    RAMP_MAX_MPH,
+    RoadStop,
+    approach_shed_mi,
+)
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
 
 
@@ -793,13 +801,87 @@ def test_zone_speed_limits_apply(world):
 def test_delivery_final_miles_use_facility_approach_limits(world):
     trip, _ = make_trip(world, "Chicago", "Indianapolis")
 
-    limit, reason = trip.speed_limit_at(trip.total_miles - 2.0)
-    assert limit == 35.0
+    limit, reason = trip.speed_limit_at(trip.total_miles - 1.0)
+    assert limit == RAMP_MAX_MPH
     assert reason == "destination approach"
 
     limit, reason = trip.speed_limit_at(trip.total_miles - 0.2)
     assert limit == 15.0
     assert reason == "facility gate"
+
+
+def test_the_last_three_miles_are_not_a_thirty_five_wall(world):
+    """Shane, 2026-08-15: the truck slowed to a crawl miles from the exit.
+
+    The arrival approach used to be a flat 35 over the final three miles --
+    a step change that landed a mile or two before the destination exit and
+    dragged the truck down while it was still on the freeway. The corridor's
+    own limit now stands out there, and the approach never caps below the
+    speed the ramp can be taken at."""
+    trip, _ = make_trip(world, "Chicago", "Indianapolis")
+
+    limit, reason = trip.speed_limit_at(trip.total_miles - 3.0)
+    assert reason is None
+    assert limit > RAMP_MAX_MPH
+
+    approach = next(z for z in trip.zones if z.reason == "destination approach")
+    assert approach.limit_mph == RAMP_MAX_MPH
+    assert approach.limit_mph >= RAMP_MAX_MPH, "the exit must stay enterable"
+
+
+def test_the_destination_approach_starts_where_the_shed_needs_it(world):
+    """Its start comes out of the deceleration, not a round mileage: the
+    local approach road, plus the road this corridor's speed needs to come
+    down to ramp speed."""
+    trip, _ = make_trip(world, "Chicago", "Indianapolis")
+    approach = next(z for z in trip.zones if z.reason == "destination approach")
+
+    entry_mph = trip._corridor_limit_at(approach.start_mi)
+    expected = trip.total_miles - (
+        DESTINATION_LOCAL_APPROACH_MI + approach_shed_mi(entry_mph, RAMP_MAX_MPH)
+    )
+    assert approach.start_mi == pytest.approx(expected, abs=0.05)
+    assert approach.end_mi == pytest.approx(trip.total_miles)
+    # Whatever the corridor runs at, the shed is a fraction of a mile -- never
+    # the multi-mile cap the flat zone put out ahead of the exit.
+    assert approach_shed_mi(entry_mph, RAMP_MAX_MPH) < 1.0
+
+
+def test_a_facility_with_a_longer_approach_road_gets_a_longer_zone(world):
+    """The band is sized from the destination facility's own approach record,
+    so a dock sitting further off the highway keeps its local road at ramp
+    speed instead of everybody sharing one mileage."""
+    near, _ = make_trip(world, "Chicago", "Indianapolis", destination_approach_mi=0.6)
+    far, _ = make_trip(world, "Chicago", "Indianapolis", destination_approach_mi=2.5)
+
+    near_zone = next(z for z in near.zones if z.reason == "destination approach")
+    far_zone = next(z for z in far.zones if z.reason == "destination approach")
+    assert far.total_miles - far_zone.start_mi > near.total_miles - near_zone.start_mi
+    assert far_zone.limit_mph == near_zone.limit_mph == RAMP_MAX_MPH
+
+    # A record longer than any real approach road is geocoding noise, and is
+    # not allowed to cap the freeway for miles.
+    wild, _ = make_trip(world, "Chicago", "Indianapolis", destination_approach_mi=35.0)
+    wild_zone = next(z for z in wild.zones if z.reason == "destination approach")
+    assert wild.total_miles - wild_zone.start_mi <= FACILITY_APPROACH_TRUSTED_MAX_MI + 1.0
+
+
+def test_the_facility_gate_zone_is_unchanged(world):
+    trip, _ = make_trip(world, "Chicago", "Indianapolis")
+    gate = next(z for z in trip.zones if z.reason == "facility gate")
+    assert gate.limit_mph == FACILITY_GATE_LIMIT_MPH
+    assert gate.start_mi == pytest.approx(trip.total_miles - FACILITY_GATE_ZONE_MI)
+    assert gate.end_mi == pytest.approx(trip.total_miles)
+
+
+def test_the_approach_speaks_no_more_often_than_it_used_to(world):
+    """The owner's standing note that the drive is too chatty: a graduated
+    approach must not buy its gradient with an extra callout. Two arrival
+    zones before, two now."""
+    trip, _ = make_trip(world, "Chicago", "Indianapolis")
+    arrival = [z for z in trip.zones if z.reason in ("destination approach", "facility gate")]
+    assert len(arrival) == 2
+    assert [z.reason for z in arrival] == ["destination approach", "facility gate"]
 
 
 def test_pickup_deadhead_route_uses_local_facility_limits(world):

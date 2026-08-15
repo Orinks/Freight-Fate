@@ -682,6 +682,20 @@ onto exit signalling.
       edge-rumble ladder carrying position in between (R12); and the dodge
       outcome pair (hazard-clear and collision) is learnable on both sides in
       the sounds screen (R14).
+- [x] **Exit traffic speaks only for the exit you are taking -- landed
+      2026-08-15** (owner, the same day as the chattiness note above: "when
+      exits come up, the game announces traffic info for that exit. Suppress
+      all of those types of announcements unless the player signals for the
+      exit"). Every route stop grows an exit-traffic pressure a couple of
+      miles ahead of itself, so a corridor thick with truck stops narrated
+      exit after exit the driver had no intention of using. The advisory is
+      now gated in the driving layer on the exit being signalled -- or on
+      lane keeping taking it for the driver -- and the trip marks the
+      pressure announced either way, so arming late cannot dump a stale
+      call. Merge, construction-taper and traffic-pack pressures are
+      untouched: they warn about the road the truck is already on. A first
+      concrete cut under principle (4) above, announce on change not on
+      state.
 - [ ] R12 follow-up: redline and low-air are still discrete re-speaks rather
       than the transition-plus-continuous-cue model off-pavement now uses. The
       transition speech is straightforward; the continuous half wants an
@@ -2563,8 +2577,12 @@ for 1.8" framing predates the release split):
 - [x] **Highway exits take a real setup.** X signals the announced exit,
       the GPS asks for the right-side exit lane, checks ramp speed at the
       gore, and explains missed exits; destination ramps follow the same
-      speed/lane/intent contract, and merge/exit traffic puts spoken
-      pressure on the maneuver.
+      speed/lane/intent contract, and merge traffic puts spoken pressure on
+      the maneuver. Since 2026-08-15 the approach is graduated rather than
+      stepped: automatic control holds road speed and sheds along the
+      distance still left, the arrival zones are sized from the destination
+      facility's own approach record and never cap below ramp speed, and
+      exit-traffic advisories speak only for an exit the driver is taking.
 - [x] **Enforcement beyond the speeding stop.** Weigh-station blow-pasts
       and severe visible damage draw roadside stops; running from lights
       escalates through warnings to a felony stop with spike strips and

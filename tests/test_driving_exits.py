@@ -504,6 +504,142 @@ def test_exit_traffic_pressure_changes_missed_lane_recovery(monkeypatch):
         app.shutdown()
 
 
+def _pressure_speech(driving, spoken):
+    """Everything a pressure got to say -- spoken now or queued to speak.
+
+    Traffic pressures are ambient events, and an ambient event either speaks
+    at once or waits in the one-deep slot; both count as reaching the driver.
+    """
+    pending = driving._pending_ambient_event
+    return list(spoken) + ([pending[0]] if pending else [])
+
+
+def _pressure_event(driving, pressure, ahead=1.0):
+    """The GPS cue the trip emits for a pressure, built by the trip itself.
+
+    Handed straight to the driving state rather than waited for over frames:
+    a live tick also carries stop callouts and CB chatter that share the
+    ambient slot, and which of them lands first is not what these tests are
+    about.
+    """
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    return TripEvent(
+        TripEventKind.GPS_CUE,
+        driving.trip._traffic_pressure_message(pressure, ahead),
+        {"traffic_pressure": pressure},
+    )
+
+
+def _exit_pressure_run(app):
+    """A drive with an exit-traffic pressure over the next route exit."""
+    from freight_fate.sim.trip import TrafficPressure
+
+    driving = start_drive(app)
+    quiet_trip(driving)
+    stop = driving.trip.stops[0]
+    pressure = TrafficPressure(
+        stop.at_mi - 2.0,
+        stop.at_mi + 0.4,
+        "exit",
+        "right",
+        0.75,
+        42.0,
+        f"exit traffic for {stop.spoken_name}",
+    )
+    driving.trip.traffic_pressures = [pressure]
+    driving.trip._announced_traffic_pressures.clear()
+    driving.trip.position_mi = stop.at_mi - 3.0
+    driving.truck.velocity_mps = 25.0
+    driving._pending_ambient_event = None
+    driving._ambient_event_cooldown_s = 0.0
+    return driving, stop, pressure
+
+
+def test_exit_traffic_stays_quiet_for_an_exit_you_are_not_taking(monkeypatch):
+    """Owner, 2026-08-15: the game announced the traffic at every exit coming
+    up, none of them the driver's. Every route stop grows an exit-traffic
+    pressure, so a corridor thick with truck stops narrated one after another.
+    Un-signalled, the advisory says nothing at all."""
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        driving, stop, pressure = _exit_pressure_run(app)
+        assert not driving._exit_signal_on
+
+        driving._handle_trip_event(_pressure_event(driving, pressure))
+
+        assert not any("Exit traffic" in line for line in _pressure_speech(driving, spoken))
+
+        # Marked announced by the trip all the same, so arming the exit late
+        # cannot dump a stale advisory afterwards.
+        driving.trip._check_traffic_pressures()
+        assert driving.trip._announced_traffic_pressures
+    finally:
+        app.shutdown()
+
+
+def test_exit_traffic_still_speaks_once_you_signal_for_that_exit(monkeypatch):
+    """Signal first and the full advisory arrives in time to be useful."""
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.lane_keeping = "partial"
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        driving, stop, pressure = _exit_pressure_run(app)
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_stop is stop
+        assert driving._exit_signal_on
+        spoken.clear()
+        driving._pending_ambient_event = None
+        driving._ambient_event_cooldown_s = 0.0
+
+        driving._handle_trip_event(_pressure_event(driving, pressure))
+
+        heard = _pressure_speech(driving, spoken)
+        assert any("Exit traffic building" in line for line in heard), heard
+        assert any("hold the right exit lane" in line for line in heard), heard
+    finally:
+        app.shutdown()
+
+
+def test_merging_and_construction_pressures_still_speak_unsignalled(monkeypatch):
+    """Only the exit ones are gated. A merge warns about the road the truck is
+    already on, not a turn-off it is free to ignore."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TrafficPressure
+
+    spoken = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        at = driving.trip.position_mi + 1.6
+        for kind, direction, phrase in (
+            ("route_merge", "right", "Merging traffic in"),
+            ("construction_merge", "left", "Traffic squeezing at the construction taper"),
+            ("traffic_pack", "right", "Traffic pack in"),
+        ):
+            spoken.clear()
+            driving._pending_ambient_event = None
+            driving._ambient_event_cooldown_s = 0.0
+            pressure = TrafficPressure(at, at + 0.6, kind, direction, 0.75, 42.0, "test pressure")
+            driving._handle_trip_event(_pressure_event(driving, pressure))
+            heard = _pressure_speech(driving, spoken)
+            assert any(phrase in line for line in heard), (kind, heard)
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_exit_lane_can_be_set_with_keyboard_steering(monkeypatch):
     from freight_fate.app import App

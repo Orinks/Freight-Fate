@@ -109,6 +109,8 @@ class DrivingEventMixin:
             return
         if self._should_ignore_unreachable_zone_cue(event):
             return
+        if self._should_ignore_unsignalled_exit_pressure(event):
+            return
         kind = event.kind
         sound = _route_event_sound(event)
         if kind == TripEventKind.LANE and self._terse_speech():
@@ -402,6 +404,35 @@ class DrivingEventMixin:
             return False
         stop = self._destination_exit_stop()
         return stop is not None and zone.start_mi >= stop.at_mi
+
+    def _should_ignore_unsignalled_exit_pressure(self, event) -> bool:
+        """Exit traffic is news only to a driver taking that exit.
+
+        Every route stop grows an exit-traffic pressure a couple of miles
+        ahead of itself, and each one announced itself in turn -- so a
+        corridor thick with truck stops narrated the traffic at exit after
+        exit the driver had no intention of using (owner, 2026-08-15). The
+        advisory earns its words only for somebody about to move right, so it
+        speaks for a signalled exit and for one lane keeping is taking on the
+        driver's behalf, and stays silent for the rest of them.
+
+        The trip marks the pressure announced whether or not it is spoken, so
+        arming an exit late cannot dump a stale advisory afterwards; signal
+        before the window arrives and the whole call comes as usual. Nothing
+        else changes -- the traffic is still there, still crowds the exit
+        lane, and still explains a missed exit afterwards.
+
+        Merging traffic and construction-taper calls are not gated: they warn
+        about the road the truck is already on, not about a turn-off it is
+        free to ignore.
+        """
+        pressure = event.data.get("traffic_pressure")
+        if pressure is None or getattr(pressure, "kind", "") != "exit":
+            return False
+        stop = self._exit_stop
+        if stop is None or not self._exit_intent_ready(stop):
+            return True
+        return not (pressure.start_mi <= stop.at_mi <= pressure.end_mi)
 
     @staticmethod
     def _is_lane_closure_pressure(event) -> bool:
