@@ -1070,6 +1070,37 @@ onto exit signalling.
       build pointed at the preview validates end to end; at dev cutover,
       re-regen if fields drifted and replay stored prod blobs before the
       prod deploy.
+- [ ] **Public career should follow the career you open (Shane,
+      2026-08-14) -- design decision needed.** The public-career chooser
+      (orinks-net dev b2b8a5c, publicSaveName) makes fronting a career a
+      manual step, and Shane asks for the active career to become the
+      public one automatically. The sharp edge: testers keep throwaway
+      fiddle careers, and blind auto-follow would publish an experiment
+      the moment it is opened. Leading candidate (Shane's own follow-up):
+      ask once per career, spoken -- "do you want this career public on
+      the boards?" -- yes is public, no is private but still backed up;
+      backups never depend on the answer. Paired suggestion: the drivers
+      board names the career in play ("munchkinbear, playing on career
+      littlebear"), which would also surface the known presence-vs-stats
+      career mismatch honestly instead of hiding it. Owner call before
+      any build ships it.
+- [x] **Staging validator repaired end to end for honest saves
+      (2026-08-14 night).** Three refusal classes fixed in one evening:
+      unknown fields from another build line are tolerated (issue #97
+      doctrine), the money ceiling credits the richest career start (the
+      owner-operator's 18,000 rejected as impossible_money until then --
+      the exporter now ships startingMoneyMax), and money may run
+      negative because 1.9 debt IS an overdraft. Every rejected upload
+      is now retained as evidence, not just the arithmetic families --
+      four honest-save bugs in a row had to be diagnosed blind because
+      schema-family refusals vanished on arrival. Root operational
+      lesson: the branch's Vercel builds never deployed Convex (the
+      deploy key was dev-scoped), so fixes "deployed" all evening
+      without reaching testers; feat/profile-1-9-fields now carries its
+      own production deploy key and auto-deploys to
+      scrupulous-ferret-428 on every push, proven in build logs. All
+      stuck testers (trssharp, munchkinbear x3 careers, jessie, sarah)
+      confirmed backing up the same night.
 - [ ] **PRE-RELEASE MUST-DO: point the game back at production.** The
       1.9 test line defaults its online services to the staged
       deployment (dev.orinks.net, the orinks-net dev branch on its own
