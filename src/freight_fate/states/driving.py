@@ -577,6 +577,12 @@ class DrivingState(
         self._transverse_fired: set[float] = set()
         self._lane_locator_on = False  # I toggles the panned position tock
         self._lane_locator_timer = 0.0
+        # The same tock, summoned by the steering itself rather than by I:
+        # while a lane move is underway it runs on its own and ends with the
+        # signal cancelling. See _update_steering_lane_cue.
+        self._steer_cue_active = False
+        self._steer_cue_timer = 0.0
+        self._steer_cue_hold_s = 0.0  # how long the wheel has been held this way
         self._curve_run: dict | None = None  # the bend underway, and how it is going
         self._cross_repeat_s = 0.0  # rapid re-crossings keep only the quiet thump
         self._sideswipe_cooldown_s = 0.0  # one contact, however many crossings

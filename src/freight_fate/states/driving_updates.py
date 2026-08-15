@@ -1545,6 +1545,103 @@ class DrivingUpdateMixin:
             "vehicle/lane_locator", volume=min(1.0, 0.5 * self._cue_loudness()), pan=pan
         )
 
+    def _exit_alignment_progress(self) -> float:
+        """How far along the exit-lane position is, 0 to 1.
+
+        Either route to ready counts, the same two the exit itself accepts:
+        the commitment built by holding Right, and simply sitting far enough
+        over. Whichever is further along is what the driver is hearing.
+        """
+        if self._exit_stop is None or not self._exit_signal_on:
+            return 0.0
+        if self.lane.lane != 0 and self._lane_change_target != 0:
+            return 0.0  # ramps peel off the right lane; in-lane position cannot help
+        return max(
+            0.0,
+            min(
+                1.0,
+                max(
+                    self._exit_lane_alignment / EXIT_LANE_READY,
+                    self.lane.offset / EXIT_LANE_OFFSET_READY,
+                ),
+            ),
+        )
+
+    def _steering_lane_cue_armed(self, dt: float) -> bool:
+        """Is a lane move underway that the driver should hear their position for?
+
+        Two ways in. Holding a steering direction for ``STEER_CUE_ARM_S`` is a
+        move rather than a drift correction, and lasts as long as the wheel is
+        held. An armed exit takes the cue over for the whole line-up: it runs
+        from the moment the driver starts moving over until the exit lane is
+        set, so the wheel coming back afterwards cannot re-arm it.
+        """
+        if self.lane.steering != 0.0:
+            self._steer_cue_hold_s += dt
+        else:
+            self._steer_cue_hold_s = 0.0
+        if self._lane_locator_on:
+            return False  # the driver already has this tock running; one is enough
+        if self.ctx.settings.lane_is_automated():
+            return False  # the truck holds the lane and takes the exit itself
+        if self.truck.speed_mph < STEER_CUE_MIN_MPH:
+            return False
+        steered = self._steer_cue_hold_s >= STEER_CUE_ARM_S
+        if self._exit_stop is not None and self._exit_signal_on and self._ramp_mi is None:
+            if self._exit_lane_ready():
+                return False
+            return steered or self._exit_lane_alignment > 0.0
+        return steered
+
+    def _update_steering_lane_cue(self, dt: float) -> None:
+        """Hear where you are in the lane while you steer across it.
+
+        The lane locator answers "where am I" on demand. This answers it for
+        the length of a move being made right now, with no key to remember:
+        the same panned tock, keeping time from the moment the wheel goes
+        over until the move is done. Taking an exit with the lane work yours
+        means holding a position at the right of the lane, and that position
+        was the one thing on the road a blind driver could not hear (owner,
+        2026-08-15).
+
+        The beat closes up as the exit-lane position fills, then stops dead
+        and the signal cancels the instant the position is good -- a turn
+        signal clicking off as the wheel comes back. The quickening says
+        "nearly", the click says "set", and neither is a sentence.
+        """
+        audio = self.ctx.audio
+        if not self._steering_lane_cue_armed(dt):
+            if not self._steer_cue_active:
+                return
+            self._steer_cue_active = False
+            self._steer_cue_timer = 0.0
+            # Click off only if we still held the frame a moment ago. A menu
+            # over the drive lets the latch lapse on the audio clock, and the
+            # move ends in silence rather than a signal cancelling at the
+            # pause screen -- the dead man's switch, same as a held alert.
+            if audio.cue_held(STEER_CUE_HOLD):
+                audio.release_cue(STEER_CUE_HOLD)
+                audio.play(
+                    "vehicle/signal_tone",
+                    volume=min(1.0, STEER_CUE_CANCEL_VOL * self._cue_loudness()),
+                    pan=0.0,  # centred and quieter: the signal off, not the signal on
+                )
+            return
+        audio.hold_cue(STEER_CUE_HOLD)
+        if not self._steer_cue_active:
+            self._steer_cue_active = True
+            self._steer_cue_timer = 0.0  # first tock lands on the frame the move starts
+        self._steer_cue_timer -= dt
+        if self._steer_cue_timer > 0.0:
+            return
+        span = STEER_CUE_TOCK_S - STEER_CUE_TOCK_FAST_S
+        self._steer_cue_timer = STEER_CUE_TOCK_S - span * self._exit_alignment_progress()
+        audio.play(
+            "vehicle/lane_locator",
+            volume=min(1.0, 0.5 * self._cue_loudness()),
+            pan=max(-1.0, min(1.0, self.lane.offset)),
+        )
+
     def _update_edge_ladder_audio(self, audio) -> None:
         """Run the edge-boundary ladder: structural loops, not louder beeps.
 
@@ -1826,6 +1923,10 @@ class DrivingUpdateMixin:
         self._update_edge_ladder_audio(audio)
         self._update_transverse_strips()
         self._update_lane_locator_audio(dt)
+        # After the locator, which owns the tock whenever the driver asked for
+        # it, and after _update_exit_preparation has settled this frame's
+        # alignment -- so the click lands on the frame the exit lane is set.
+        self._update_steering_lane_cue(dt)
         if rumble > 0.0 and self.ctx.settings.lane_is_manual():
             # Harsh, continuous pad buzz while over the rumble strip; refreshed
             # each frame, it stops on its own once steered back off.

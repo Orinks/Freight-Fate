@@ -46,6 +46,16 @@
   in-cab radio volume in ten percent steps, spoken as it moves, without
   leaving the driving seat.
 
+- **You can hear where you are in the lane while you steer.** When the lane
+  work is yours, holding a steering direction now brings the soft position
+  tock up on its own, panned to where the truck sits inside the lane, and it
+  stops with a quiet click when you straighten up. Lining up for an exit, the
+  tock comes up as you move over and its beat quickens as you get far enough
+  right; the moment the exit lane is set it stops and the signal cancels
+  itself, the way it does in a truck when the wheel comes back. That click is
+  how you know you are far enough over, with nothing spoken. The I key still
+  turns the same tock on and off whenever you want it.
+
 ### Changed
 
 - **The overspeed warning no longer chimes at you for cruise's own speed.**

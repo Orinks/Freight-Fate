@@ -100,6 +100,14 @@ NUM_CHANNELS = 32
 # solid tone once ran until the game was killed (Shane, 2026-08-03).
 ALERT_HOLD_TIMEOUT_S = 0.4
 
+# The same dead man's switch, for a cue its owner sounds itself instead of
+# holding on a channel -- a rhythmic tick, a manoeuvre that ends with a click.
+# The owner re-asserts the latch every frame it has, and asks ``cue_held``
+# before playing the sound that ends the cue. A driving state that lost the
+# frame to a menu comes back with the latch already lapsed, so the manoeuvre
+# ends in silence instead of clicking off over the pause screen.
+CUE_HOLD_TIMEOUT_S = 0.4
+
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
 # attack -> sustain -> release sound: play the attack, loop this tuned interior
 # region while the key/button is held, then let the release tail ring out.
@@ -2092,6 +2100,7 @@ class AudioEngine:
         self._logged_volumes: tuple[float | None, ...] | None = None
         self._alert_hold_key = ""  # continuous alert tone being re-asserted
         self._alert_hold_s = 0.0  # time left before the hold lapses
+        self._cue_holds: dict[str, float] = {}  # caller-owned held cues, name -> time left
         self._jake_voice_classic = False  # Settings: real (recorded) or classic (synth)
         log.info("Audio backend: %s", self._impl.name)
 
@@ -2339,6 +2348,27 @@ class AudioEngine:
         self._alert_hold_s = 0.0
         self.stop_loop(CH_ALERT, fade_ms=fade_ms)
 
+    # -- held cues an owner sounds itself --------------------------------------
+
+    def hold_cue(self, name: str) -> None:
+        """Mark the cue ``name`` as still going, for the next moment only.
+
+        The caller plays the sound; this is only the latch that says the
+        caller is still there. Call it every frame the cue applies. See
+        ``CUE_HOLD_TIMEOUT_S``: the countdown runs on the app's audio clock,
+        which ticks on every screen, so an owner that stopped getting the
+        frame lapses instead of picking up where it left off.
+        """
+        self._cue_holds[name] = CUE_HOLD_TIMEOUT_S
+
+    def cue_held(self, name: str) -> bool:
+        """Whether ``name`` was re-asserted recently enough to still be live."""
+        return self._cue_holds.get(name, 0.0) > 0.0
+
+    def release_cue(self, name: str) -> None:
+        """Drop the latch on ``name`` now, having ended the cue deliberately."""
+        self._cue_holds.pop(name, None)
+
     # -- truck engine ----------------------------------------------------------------
 
     def engine_start(self, play_start_sound: bool = True) -> None:
@@ -2366,6 +2396,12 @@ class AudioEngine:
             self._alert_hold_s -= dt
             if self._alert_hold_s <= 0.0:
                 self.release_alert()
+        # Same watchdog for the latches whose sound the owner plays itself.
+        if self._cue_holds:
+            for name in list(self._cue_holds):
+                self._cue_holds[name] -= dt
+                if self._cue_holds[name] <= 0.0:
+                    del self._cue_holds[name]
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
         self._impl.set_engine_rpm(rpm, throttle)

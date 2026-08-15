@@ -106,7 +106,10 @@ onto exit signalling.
       turn in July. Needs a held tick that self-cancels at the corner and a
       rule about signalling before one, alongside whatever turn geometry
       the surface-intersection work (1.9, `docs/surface-roads-plan.md`
-      phase 4) leaves behind.
+      phase 4) leaves behind. The self-cancel half of that now exists:
+      `_update_steering_lane_cue` holds a cue on the audio clock's dead
+      man's switch and ends it with a centred, quieter `vehicle/signal_tone`.
+      Borrow it rather than building a second one.
 - [ ] **Decide the two orphan sound assets in the same change.**
       `vehicle/turn_signal` is the repeating tick this feature wants and
       has never been wired to anything. `vehicle/lane_drift` is dead for a
@@ -115,6 +118,18 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Lane position while steering -- SHIPPED.** Owner request 2026-08-15:
+      with the lane work yours, taking an exit means holding a position at
+      the right of the lane, and that position was the one thing on the road
+      a blind driver could not hear. Holding a steering direction now starts
+      the lane locator's own panned tock without the I key, for as long as
+      the move lasts; an armed exit takes it over from the moment the driver
+      moves across, quickens the beat as the position fills, and stops it
+      with `vehicle/signal_tone` played centred and quiet -- the signal
+      cancelling itself -- the instant the exit lane is set. No new speech,
+      silent under full lane keeping and below the locator's speed floor,
+      and held on the audio clock's dead man's switch so a menu over the
+      drive ends it in silence. See `_update_steering_lane_cue`.
 - [x] **Debt payoff from cash -- SHIPPED.** Whenever a driver carries a
       balance and has money in hand, the terminal and every truck stop now
       offer to pay it down: all of it, half, or everything above a 200
