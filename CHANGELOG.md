@@ -48,6 +48,32 @@
 
 ### Changed
 
+- **The overspeed warning no longer chimes at you for cruise's own speed.**
+  It used to start warning at 5 miles per hour over the limit, which is
+  exactly the pace adaptive cruise holds, so the truck nagged you for a speed
+  it had chosen itself -- and the only way out was to switch the whole alert
+  off. It now waits until you are more than 7 over: past anything cruise will
+  do, still short of where a trooper can act on it, so it warns you while
+  slowing down is still free. Because it no longer fires at speeds you did not
+  pick, the Overspeed warning setting is gone; there is nothing left to turn
+  off. The runaway alarm past 20 over is unchanged.
+
+- **Settings now sit where you would go looking for them.** Speed keeper
+  moved from Controls to Driving assistance, with the rest of the driving
+  help. Lane and edge cue prominence is now called Lane and edge cue volume
+  and lives in Audio, right under Gameplay cues volume, because that is the
+  volume it rides on -- and its values now say quieter, standard, and louder,
+  which is what you are actually choosing between. Your settings came with
+  them: nothing you had chosen was reset. If you have played before, the
+  Gameplay menu tells you once where things went.
+
+- **The driving assistance help no longer promises lane centering that does
+  not happen.** Lane centering assistance is a row for steering help the
+  truck does not do yet, and it used to describe itself as though it did.
+  It now says plainly that leaving it on or off makes no difference to how
+  the truck steers today, and the Balanced preset describes what it really
+  changes.
+
 - **A speed limit drop now says why, when the road knows.** "Speed limit
   reduced to 35" used to leave you guessing. Now, when the trip's own data
   can honestly explain the drop, it says so: the town you are approaching

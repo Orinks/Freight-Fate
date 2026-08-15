@@ -170,10 +170,6 @@ class Settings:
     # Simple keeps the familiar hold-through-stop behavior. Deliberate requires
     # a release and second press before an automatic changes direction.
     automatic_direction_changes: str = "simple"  # simple/deliberate
-    # Dash chime plus a spoken heads-up while over the posted limit, like a
-    # carrier-set overspeed alert; on by default, a company truck would have
-    # it. "urgent only" keeps just the runaway alarm for deliberate speeders.
-    overspeed_warning: str = "on"  # on / urgent only / off
     # Distance compression while driving. Relaxed (10x) by default: new players
     # get the most real time to hear and react to spoken events; veterans can
     # step up to standard or realistic in Settings, Gameplay.
@@ -362,8 +358,8 @@ class Settings:
     # after a mid-prompt quit.
     online_offer_seen: bool = False
     # The settings-menu layout version this file was last written by. See
-    # SETTINGS_VERSION: an older value on load means the Gameplay category and
-    # the Speech-and-weather split are new to this player, so the Gameplay
+    # SETTINGS_VERSION, which lists what each one changed: an older value on
+    # load means every layout above it is new to this player, so the Gameplay
     # submenu explains once where their settings moved.
     settings_version: int = SETTINGS_VERSION
     # Which layout version this player was last told about. Set on load when an
@@ -531,13 +527,6 @@ class Settings:
             s.automatic_direction_changes = "simple"
         if s.jake_voice not in ("real", "classic"):
             s.jake_voice = "real"
-        # The overspeed alert briefly shipped as a bool; map old saves over.
-        if s.overspeed_warning is True:
-            s.overspeed_warning = "on"
-        elif s.overspeed_warning is False:
-            s.overspeed_warning = "off"
-        if s.overspeed_warning not in ("on", "urgent only", "off"):
-            s.overspeed_warning = "on"
         # Latching pedals briefly shipped as a bool; map old saves over.
         if s.pedal_latch is True:
             s.pedal_latch = "assists first"

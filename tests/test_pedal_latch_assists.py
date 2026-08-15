@@ -56,6 +56,19 @@ def _fake_curve(monkeypatch, driving, advisory=35.0):
     return curve
 
 
+def _silence_overspeed_alarm(driving) -> None:
+    """Stop the dash overspeed alarm arming, to isolate the latch handoff.
+
+    These tests deliberately run the truck well over the posted limit, and the
+    alarm's hard release of a latched throttle is a separate, pre-existing
+    system. This used to be done by turning the overspeed_warning setting off;
+    that setting is gone (the alarm no longer fires at speeds cruise itself
+    picks, so there was nothing left to switch off), so the update is stubbed
+    out here instead. Same isolation, no setting.
+    """
+    driving._update_overspeed_warning = lambda *args, **kwargs: None
+
+
 def test_speed_authority_predicate_reads_all_three():
     from driving_feature_helpers import start_drive
 
@@ -95,8 +108,8 @@ def test_cruise_holds_its_speed_under_a_latched_throttle(monkeypatch):
         d.truck.engine_on = True  # _update_cruise cancels the session without it
         # The corridor's posted limit here is well under 60: the overspeed
         # alarm is its own pre-existing hard release (out of scope for this
-        # fix), so it is switched off to isolate the latch/cruise handoff.
-        app.ctx.settings.overspeed_warning = "off"
+        # fix), so it is stubbed out to isolate the latch/cruise handoff.
+        _silence_overspeed_alarm(d)
         d.truck.velocity_mps = 60 / 2.2369362920544
         _latch_throttle(d)
         d._engage_cruise(55.0)
@@ -155,7 +168,7 @@ def test_the_latch_ramps_back_in_when_the_authority_releases(monkeypatch):
         # See the sibling cruise test: the corridor limit here is under 60,
         # and the overspeed hard release is a separate, pre-existing system
         # this task does not touch.
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         d.truck.velocity_mps = 60 / 2.2369362920544
         _latch_throttle(d)
         d._engage_cruise(55.0)
@@ -190,7 +203,7 @@ def test_keeper_holds_a_zone_speed_under_a_latched_throttle(monkeypatch):
         # being this far over it would trip that separate, pre-existing hard
         # release before the keeper gets a chance to work; not what this
         # test is about.
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         # A school zone under the wheels, truck well over its number.
         start = d.trip.position_mi
         d.trip.zones.append(Zone(start - 0.1, start + 3.0, 25.0, "school"))
@@ -224,7 +237,7 @@ def test_releasing_the_latch_leaves_cruise_holding(monkeypatch):
         quiet_trip(d)
         release_air_brakes(d)
         d.truck.engine_on = True  # _update_cruise cancels the session without it
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         d.truck.velocity_mps = 60 / 2.2369362920544
         _latch_throttle(d)
         d._engage_cruise(55.0)
@@ -259,7 +272,7 @@ def test_curve_assist_drains_a_latched_throttle(monkeypatch):
         quiet_trip(d)
         release_air_brakes(d)
         d.truck.engine_on = True
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         d.ctx.settings.curve_speed_assist = True
         monkeypatch.setattr(d.trip, "engine_brake_ban_at", lambda _mile: None)
         _fake_curve(monkeypatch, d, advisory=35.0)
@@ -293,7 +306,7 @@ def test_latch_first_mode_keeps_the_old_override_meaning(monkeypatch):
         quiet_trip(d)
         release_air_brakes(d)
         app.ctx.settings.pedal_latch = "latch first"
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         d.truck.engine_on = True
         d.truck.velocity_mps = 60 / 2.2369362920544
         _latch_throttle(d)
@@ -325,7 +338,7 @@ def test_the_catch_line_names_the_authority_holding_the_speed(monkeypatch):
         quiet_trip(d)
         release_air_brakes(d)
         d.truck.engine_on = True
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         d.truck.velocity_mps = 60 / 2.2369362920544
         d._engage_cruise(55.0)
 
@@ -390,7 +403,7 @@ def test_latch_first_catch_keeps_the_plain_line(monkeypatch):
         quiet_trip(d)
         release_air_brakes(d)
         app.ctx.settings.pedal_latch = "latch first"
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         d.truck.engine_on = True
         d.truck.velocity_mps = 60 / 2.2369362920544
         d._engage_cruise(55.0)
@@ -426,7 +439,7 @@ def test_curve_assist_jake_arrives_once_the_latched_throttle_drains(monkeypatch)
         quiet_trip(d)
         release_air_brakes(d)
         d.truck.engine_on = True
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         d.ctx.settings.curve_speed_assist = True
         monkeypatch.setattr(d.trip, "engine_brake_ban_at", lambda _mile: None)
         # A real downgrade under the bend, faked the same way the existing
@@ -478,7 +491,7 @@ def test_the_brake_key_hard_releases_the_latch_and_cancels_cruise(monkeypatch):
         quiet_trip(d)
         release_air_brakes(d)
         d.truck.engine_on = True  # _update_cruise cancels the session without it
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         d.truck.velocity_mps = 60 / 2.2369362920544
         _latch_throttle(d)
         d._engage_cruise(55.0)
@@ -513,7 +526,7 @@ def test_the_catch_line_names_the_keeper(monkeypatch):
         quiet_trip(d)
         release_air_brakes(d)
         d.truck.engine_on = True  # _update_keeper cancels the session without it
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         start = d.trip.position_mi
         d.trip.zones.append(Zone(start - 0.1, start + 3.0, 25.0, "school"))
         d.truck.velocity_mps = 30 / 2.2369362920544
@@ -551,7 +564,7 @@ def test_a_hand_held_key_stands_the_keeper_down(monkeypatch):
         quiet_trip(d)
         release_air_brakes(d)
         d.truck.engine_on = True  # _update_keeper cancels the session without it
-        app.ctx.settings.overspeed_warning = "off"
+        _silence_overspeed_alarm(d)
         start = d.trip.position_mi
         d.trip.zones.append(Zone(start - 0.1, start + 3.0, 25.0, "school"))
         d.truck.velocity_mps = 30 / 2.2369362920544

@@ -977,12 +977,15 @@ deadline itself, the seasons, and the market all run on one continuous
 timeline; only the spoken wall clock changes. Daylight saving is deliberately
 not modeled, so a zone's offset never moves under you.
 
-The overspeed warning is your dash, not the police. A few miles per hour over
-the limit chimes softly and says the limit; the chime repeats, faster the
-further over you go. It quiets while you are braking down and resets once you
-settle under. It is a courtesy and it costs nothing: speeding is charged by
-the trooper who saw it, on the shoulder, or it is not charged at all. Set it
-to on, urgent only, or off under Settings, Gameplay.
+The overspeed warning is your dash, not the police. More than 7 miles per
+hour over the limit chimes softly and says the limit; the chime repeats,
+faster the further over you go. It quiets while you are braking down and
+resets once you settle under. It is a courtesy and it costs nothing: speeding
+is charged by the trooper who saw it, on the shoulder, or it is not charged
+at all. There is no setting for it: 7 over is past anything adaptive cruise
+will do on its own, so it never chimes at a speed the truck chose, and it is
+short of the point where a trooper can act on your speed, so it always warns
+you while slowing down is still free.
 
 Ramp ends are real intersections. Most ramps end at a traffic light or a stop
 sign, called out on the way down. Lights cycle green, yellow, red, and speak
@@ -1398,15 +1401,15 @@ quarters always reaching you. See When You Owe Money.
 
 ### Driving assistance and speed keeper
 
-Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds light lane centering and lets braking capture a lower descent target. All assists adds automatic safe descent targets and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
+Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds partial lane keeping, lets braking capture a lower descent target, and stops for you at your destination. All assists adds automatic safe descent targets and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
 
-The individual controls are Automatic emergency braking, Lane-departure warning, Stop-and-go assistance, Lane centering assistance, Descent speed control, Exit speed assistance, Destination approach assistance, Planned rest-stop stopping assistance, Curve speed assistance, and Route-transition assistance. Descent speed control has four levels: Off, Realistic, Balanced, and Interactive. Interactive is a descent-control level, not a preset. Exit speed assistance slows for an already-selected exit, destination approach assistance slows and stops at the selected facility arrival point, and the separate default-off planned-stop control stops at a sleep stop only after T plans it and X signals for it. Curve speed assistance reduces speed workload for mapped curves: it uses the service brakes for a bend you are barely over the advisory for, and reaches for the engine brake only when the corner genuinely needs about 10 miles per hour or more taken off, or the road under you is a real downgrade. That is why it is usually quiet through easy bends and audibly working through hard ones -- and it is what keeps it from barking a restricted engine brake through every mapped curve in a town. Route-transition assistance helps manage speed and lane workload at confirmed route transitions. Assists never silently choose a route or optional exit, enter a yard, dock, or complete a delivery: you still steer, confirm route choices and exits, initiate lane changes, leave long stops, and handle every precision task.
+The individual controls are Automatic emergency braking, Lane-departure warning, Stop-and-go assistance, Lane centering assistance, Descent speed control, Exit speed assistance, Destination approach assistance, Planned rest-stop stopping assistance, Curve speed assistance, and Route-transition assistance. Descent speed control has four levels: Off, Realistic, Balanced, and Interactive. Interactive is a descent-control level, not a preset. Exit speed assistance slows for an already-selected exit, destination approach assistance slows and stops at the selected facility arrival point, and the separate default-off planned-stop control stops at a sleep stop only after T plans it and X signals for it. Curve speed assistance reduces speed workload for mapped curves: it uses the service brakes for a bend you are barely over the advisory for, and reaches for the engine brake only when the corner genuinely needs about 10 miles per hour or more taken off, or the road under you is a real downgrade. That is why it is usually quiet through easy bends and audibly working through hard ones -- and it is what keeps it from barking a restricted engine brake through every mapped curve in a town. Route-transition assistance helps manage speed and lane workload at confirmed route transitions. Lane centering assistance is reserved for steering help the truck does not do yet: the row is there, and the presets set it, but leaving it on or off makes no difference to how the truck steers today. Assists never silently choose a route or optional exit, enter a yard, dock, or complete a delivery: you still steer, confirm route choices and exits, initiate lane changes, leave long stops, and handle every precision task.
 
-Two more controls sit in this category. **Predictive cruise** lets cruise read the road about a mile and a half ahead: it banks a little speed before a climb, gives up the last few miles per hour at a crest instead of fighting for them, and stops adding speed it would only brake away before a descent. **Lane and edge cue loudness** scales how loud the road speaks when you leave your line -- the rumble-strip and shoulder textures, the lane locator, and the warning bars before a hairpin all follow it. Subtle keeps them under the engine, standard matches it, and prominent cuts through. Neither is ever changed by choosing a preset.
+**Predictive cruise** also sits in this category, outside the presets. It lets cruise read the road about a mile and a half ahead: it banks a little speed before a climb, gives up the last few miles per hour at a crest instead of fighting for them, and stops adding speed it would only brake away before a descent. Lane and edge cue volume used to sit here too; it is a volume, so it now lives in Audio, directly under Gameplay cues volume.
 
 Lane keeping also lives in this category. It was called Lane drift before 1.9, and its values were the wrong way round: the old "off" meant the truck held the lane for you. Nothing about your driving changed in the rename -- your old setting carried over to the value that behaves identically -- but the row now says what the truck actually does. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial drifts gently with generous steering help. Off drifts like a real wheel, and every exit needs your turn signal set and the exit lane held. On partial or off, a short beep comes from the side you drift toward, so steer away from the beep; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. Lane keeping is a preset field: Realistic sets it to off, Balanced to partial, and All assists to full, so the preset row can never describe less automation than you actually have.
 
-One more control, Speed keeper, sits outside the presets and is never changed by choosing a preset. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and construction zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. A facility approach is a chain of streets with their own posted numbers, so when the street under you posts a higher one the keeper takes it and says the new number; when it posts a lower one the keeper simply obeys it. It also looks ahead rather than reading only the limit under the wheels: it eases early for the next judged street turn or the next lower posted limit, and the corner call tells you when the keeper has the turn, so you know whether to leave it alone. On the open road it automatically changes to adaptive cruise and accelerates toward the posted limit, or restores the cruise target you selected earlier. Entering another restricted zone changes back to the speed keeper. If you start it during the deadhead, the planned pickup pauses the session while you check in and load, keeps it through a save, and resumes it after departure once the truck is rolling. Plus and Minus adjust the remembered open-road cruise target in either mode, snapping outward to the next multiple of 5 the same way, or by exactly 1 mile per hour with Control held. Any brake input outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Speed keeper is on by default and can be turned off in Settings, Gameplay.
+One more control, Speed keeper, sits outside the presets and is never changed by choosing a preset. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and construction zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. A facility approach is a chain of streets with their own posted numbers, so when the street under you posts a higher one the keeper takes it and says the new number; when it posts a lower one the keeper simply obeys it. It also looks ahead rather than reading only the limit under the wheels: it eases early for the next judged street turn or the next lower posted limit, and the corner call tells you when the keeper has the turn, so you know whether to leave it alone. On the open road it automatically changes to adaptive cruise and accelerates toward the posted limit, or restores the cruise target you selected earlier. Entering another restricted zone changes back to the speed keeper. If you start it during the deadhead, the planned pickup pauses the session while you check in and load, keeps it through a save, and resumes it after departure once the truck is rolling. Plus and Minus adjust the remembered open-road cruise target in either mode, snapping outward to the next multiple of 5 the same way, or by exactly 1 mile per hour with Control held. Any brake input outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Speed keeper is on by default and can be turned off in Settings, Gameplay, Driving assistance. It moved there from Controls in 1.9: it holds a speed for you, which is what the rest of that screen does.
 
 Latching pedals is the same kind of control: an input accommodation that sits outside the presets, on by default at Assists first. Tap the accelerator or brake, then press again and hold for half a second, and a click plus a spoken confirmation latch that pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly, spoken. See the driving controls table for the full gesture. The setting has three values. Assists first, the default, makes the latch the quietest voice in the cab: any speed assist that is holding or shedding speed -- cruise, the speed keeper, or curve assistance -- drives the pedal, and the latch takes over again the moment the assist lets go, with no need to redo the latch gesture; latching while cruise or the speed keeper is active says which one is holding the speed. Latch first keeps the older meaning, where the latch overrides the assists until a safety system steps in. Off turns the accommodation off for fully manual driving, so a tap or a held key is just a tap or a held key. A key you physically hold down still overrides the assists in every mode, in any setting.
 
@@ -1420,19 +1423,40 @@ a setting, Right arrow or Enter changes it forward, Left arrow changes it
 backward, and Escape returns to the category list. Changes are saved as they
 are made.
 
-Gameplay settings include:
+Gameplay opens four screens, and each setting below is on the screen it is
+listed under. Driving assistance is covered in full above.
+
+**Difficulty and hours of service:**
+
+| Setting | Purpose |
+| --- | --- |
+| Driving mode | Choose Relaxed, Standard, or Realistic pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most real time to respond. Standard keeps balanced timing and consequences. Realistic moves distance and time fastest, so decisions arrive sooner without extra forgiveness. At low speed the clock still eases toward real time, and deliberate parked waiting runs at double the selected pace. |
+| Hours of service | Choose realistic or relaxed legal limits. Relaxed hours rules lengthen the limits and further reduce random hazard frequency; real violations keep their normal consequences. |
+
+The dash overspeed alert has no setting. It speaks once and then chimes,
+faster the further over you go, when you are more than 7 miles per hour over
+the posted limit -- above the pace adaptive cruise itself holds, so it never
+chimes at a speed the truck chose, and below the point where a trooper can
+act on your speed, so it still warns you while slowing down is free. Braking
+quiets it, and settling back under the limit disarms it.
+
+**World and traffic:**
+
+| Setting | Purpose |
+| --- | --- |
+| Weather source | Switches between simulated weather and live conditions for your current route position while driving. Route planning checks live city conditions along the route when available. |
+| Traffic source | Switches between simulated traffic incidents and live reports from state 511 services when available. |
+| Parking source | Switches between simulated truck parking and live availability when available. |
+| Live weather controls calendar | When on, live weather uses today's real date and season. When off, live conditions continue while the career date advances at midnight and its seasons pass. |
+| Enforcement presence | How much police activity you hear on the road. It changes the ambience only: it never changes how likely you are to be pulled over, and asking for the road ahead always reports enforcement in full. |
+
+**Controls:**
 
 | Setting | Purpose |
 | --- | --- |
 | Units | Switch speed and distance between miles and kilometers. |
 | Transmission | Switch between automatic and manual transmission. |
 | Automatic direction changes | In an automatic, both styles now change direction the same way: a fresh press held at a standstill. A brake held through a stop just holds the truck. The setting remains for familiarity. |
-| Overspeed warning | The dash alert for running over the posted limit: On speaks once and then chimes faster the further over you are, Urgent only keeps just the runaway alarm for deliberate fast cruising, and Off silences it. |
-| Driving mode | Choose Relaxed, Standard, or Realistic pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most real time to respond. Standard keeps balanced timing and consequences. Realistic moves distance and time fastest, so decisions arrive sooner without extra forgiveness. At low speed the clock still eases toward real time, and deliberate parked waiting runs at double the selected pace. |
-| Hours of service | Choose realistic or relaxed legal limits. Relaxed hours rules lengthen the limits and further reduce random hazard frequency; real violations keep their normal consequences. |
-| Enforcement presence | How much police activity you hear on the road. It changes the ambience only: it never changes how likely you are to be pulled over, and asking for the road ahead always reports enforcement in full. |
-| Lane keeping | Lane keeping has moved to Settings, Driving assistance. This row opens that menu. |
-| Speed keeper | Allow automatic speed control to use the speed keeper in low-speed zones and switch back to adaptive cruise on open roads. |
 | Controller | Accept controller input alongside the keyboard. The keyboard always stays active. |
 | Haptics | Use controller vibration for hazards, hard braking, rumble strips, and road seams. |
 
@@ -1442,6 +1466,7 @@ Audio settings include:
 | --- | --- |
 | Master volume | Overall game volume. |
 | Gameplay cues volume | Horn, alerts, road, facility, and gameplay cue sounds. |
+| Lane and edge cue volume | How loud the road cues are when you leave your line, next to everything else: the rumble-strip and shoulder textures, the lane locator, and the warning bars before a hairpin. It rides on the Gameplay cues volume above rather than replacing it, so this row moves those cues alone. Quieter keeps them under the engine, standard matches it, and louder cuts through. It was called Lane and edge cue prominence and sat in Driving assistance before 1.9. Presets never change it. |
 | Weather sounds volume | Rain, wind, thunder, snow, and fog sounds. |
 | Engine sounds volume | Engine start, shutdown, and running engine sounds. |
 | Engine voice | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
@@ -1450,7 +1475,7 @@ Audio settings include:
 | Radio streamer-safe mode | Off by default: the full dial plays, including real public streams and personal playlists. Turn it on while streaming or recording to keep the radio on built-in safe stations only. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
 
-Speech and weather settings include:
+Speech settings include:
 
 | Setting | Purpose |
 | --- | --- |
@@ -1463,8 +1488,9 @@ Speech and weather settings include:
 | Speech pitch | Appears only when the current voice source supports pitch changes. |
 | Speech volume | Appears only when the current voice source supports volume changes. |
 | Speech voice | Appears only when selectable voices are available. |
-| Weather source | Switches between simulated weather and live conditions for your current route position while driving. Route planning checks live city conditions along the route when available. |
-| Live weather controls calendar | When on, live weather uses today's real date and season. When off, live conditions continue while the career date advances at midnight and its seasons pass. |
+
+Weather, traffic, and parking sources moved out of this category into
+Gameplay, World and traffic.
 
 Online features live in their own Online menu on the main menu rather than
 inside Settings. Choosing Online inside Settings opens that same menu, so
@@ -1474,7 +1500,7 @@ your orinks.net account, cloud backup, and every sharing choice in one place:
 | Item | Purpose |
 | --- | --- |
 | Drivers board | Reads the public board: each driver's name, what they are doing, and how fresh the report is. Viewing the board shares nothing about you and does not require sharing to be on. |
-| Online services | The master switch for the orinks.net and sharing services. When off, the drivers board, Profile sharing, Cloud backup, Mastodon sharing, and Discord presence all behave as disabled, and each keeps its own setting for when you turn the master switch back on. Real-world weather, traffic, and parking are separate: they follow their own toggles under Settings, Speech and weather. |
+| Online services | The master switch for the orinks.net and sharing services. When off, the drivers board, Profile sharing, Cloud backup, Mastodon sharing, and Discord presence all behave as disabled, and each keeps its own setting for when you turn the master switch back on. Real-world weather, traffic, and parking are separate: they follow their own toggles under Settings, Gameplay, World and traffic. |
 | Set up orinks.net account | Connects the game to your orinks.net account. Connecting turns Profile sharing on and starts backing your careers up to that account, so your public driver profile has career statistics on it from the first delivery instead of reading as empty; each of those is a single item on this menu if you want it off. Everything below uses this one sign-in. It takes an activation code and your browser: the game asks orinks.net for a short code, speaks it, and opens your browser at the sign-in page with the code already filled in. Sign in there and the game notices and finishes on its own. The screen keeps two items for as long as the code is live -- one spells the code letter by letter in the NATO alphabet, one puts it on your clipboard -- so you can carry it across to a browser the game could not open for you. You need an orinks.net account before you start; the setup connects one, it does not create one. |
 | Profile sharing | One optional public setting covers the drivers board, eligible profile details, official achievements, automatic road-journal posts, and the updates feed. It does nothing until you connect your orinks.net driver, and connecting turns it on; one item here turns it back off whenever you like. While you drive with the radio on, your board line also names the station you are listening to. Money is handled in two deliberate halves: lifetime career earnings, the running total your career has ever earned, is a public career statistic, while the money you currently have is never published. Beyond that, the game never publishes the full save, coordinates, active cargo details, real name, or precise live location. Detailed career statistics appear only after orinks.net accepts a validated private cloud backup; without one, the public profile remains available but omits those statistics. Turning Profile sharing off stops local posting immediately and hides the public profile independently of Cloud backup. |
 | Back up saves to your orinks.net account | After each game save, upload that career to your own orinks.net account so you can restore it on another computer or after losing this one. Connecting your orinks.net account turns this on, because the career statistics on your public profile are read from these backups; turning it off leaves the profile without them. Backups are private to your account and never become public downloads. orinks.net validates each revision before accepting and signing it. It uses the same one-time sign-in as your driver profile, so set that up first. The last ten accepted backups of each career are kept. |

@@ -689,16 +689,28 @@ class _DrivingRadioBackend:
 # who reads the speed lives there; this name is kept because half the driving
 # layer already asks for it.
 SPEEDING_LEEWAY_MPH = OBSERVE_LEEWAY_MPH
-# The dash overspeed alert speaks up before enforcement does: it arms a few
-# mph over the limit (under the strike leeway), then chimes on an interval
-# until the truck settles back under. Real carrier trucks nag exactly like
-# this, which is why nobody in one is surprised by their own speed.
-OVERSPEED_WARN_MPH = 5.0  # over the limit where the warning arms
+# The dash overspeed alert speaks up before enforcement does: it arms over the
+# limit (under the strike leeway), then chimes on an interval until the truck
+# settles back under. Real carrier trucks nag exactly like this, which is why
+# nobody in one is surprised by their own speed.
+#
+# 7 is the only value that sits in the gap, and the gap is narrow:
+#   - ACC_LIMIT_OFFSET_MPH (5.0) is the pace predictive cruise itself holds.
+#     Arming AT 5 gave the warning zero headroom over the speed the game's own
+#     automation picks, so ordinary control-loop wobble -- a downgrade, a
+#     traffic adjustment, the grade band -- chimed at a driver for a speed
+#     they did not choose. That was patched once by bounding the grade band
+#     rather than by moving this number; this is the real fix.
+#   - OBSERVE_LEEWAY_MPH (9.0) is where a trooper can act. Arming below it is
+#     the whole point: the dash warns while compliance is still free, never
+#     after the driver is already ticketable.
+# Anything at or above 9 would let a driver become ticketable in silence,
+# which inverts what the alert is for.
+OVERSPEED_WARN_MPH = 7.0  # over the limit where the warning arms
 OVERSPEED_RESET_MPH = 1.0  # back within this of the limit disarms it
 # The cadence carries the magnitude: slightly over dings politely, a real
 # runaway dings twice a second. Interval slides between these ends as the
-# overage grows. "Urgent only" mode arms nothing below the urgent line --
-# the speed demon's compromise: haul as you like, but a runaway still rings.
+# overage grows.
 OVERSPEED_CHIME_REPEAT_S = 5.0  # cadence just past the warn threshold
 OVERSPEED_CHIME_FAST_S = 0.5  # cadence at OVERSPEED_URGENT_MPH over and beyond
 OVERSPEED_URGENT_MPH = 20.0

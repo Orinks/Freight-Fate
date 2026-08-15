@@ -133,10 +133,36 @@ onto exit signalling.
       calendar moved out of Speech and weather (now "Speech") into World and
       traffic; enforcement presence moved to World and traffic too. The dead
       "Lane keeping" pointer stub in old Gameplay is gone, and the duplicate
-      speed keeper row is collapsed to exactly one (in Controls). A one-shot
+      speed keeper row is collapsed to exactly one. A one-shot
       `settings_version` migration line tells a returning player where things
       moved the first time they open Gameplay; a fresh install hears nothing.
       A reachability test guards against orphaning any setting in the split.
+- [x] **Settings audit -- SHIPPED 2026-08-15.** A field-by-field sweep of all
+      73 `Settings` fields for consumers found nothing dead: every field
+      either reached the game or was genuine internal migration machinery,
+      so the audit itself was a reorganization and an honesty pass rather
+      than a deletion (the one field that did come out, below, was removed
+      for behaving wrongly, not for being unread). The speed
+      keeper moved from Controls into Driving assistance; "Lane and edge cue
+      prominence" became "Lane and edge cue volume" and moved to Audio under
+      the Gameplay cues volume it scales, with quieter/standard/louder values;
+      every saved key stayed identical, so no choice reset. The layout-notice
+      flag became a per-version `settings_layout_notice_from`, so future menu
+      moves need no new field and a player two layouts behind hears both.
+      `test_no_settings_field_is_a_phantom` now fails any field with no
+      consumer outside `settings.py` and the settings menu, with commented
+      allow-lists separating internal flags from pending features. The one
+      real removal came out of the audit rather than into it: the overspeed
+      warning armed at 5 over, exactly the pace `ACC_LIMIT_OFFSET_MPH` makes
+      predictive cruise hold, so it chimed at drivers for the truck's own
+      speed and the setting existed only to silence it. It now arms at 7 --
+      above cruise's pace, below `OBSERVE_LEEWAY_MPH`'s 9 -- and the
+      `overspeed_warning` setting is gone (owner ruling 2026-08-15).
+- [ ] **Lane centering assistance is still a promise, not a feature.**
+      `lane_centering_assist` is a real settings row the presets write, and
+      nothing in the driving code reads it; the help text now says so plainly
+      instead of describing steering help that never arrives. Either
+      implement the steering help or retire the row before 1.9 ships.
 - [x] **Headless-measured startup: four fixes for ~0.46s off the
       launch-to-main-menu path -- SHIPPED 2026-08-12.** A profiling pass
       pinned headless startup at a 2.166s median and isolated four

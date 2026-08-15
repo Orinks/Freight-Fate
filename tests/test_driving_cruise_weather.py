@@ -2821,7 +2821,7 @@ def test_limit_drop_grace_uses_released_key_not_smoothed_throttle(monkeypatch):
 def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
     """The dash overspeed alert: spoken once when armed, chiming on an
     interval while over, disarmed by settling back under the limit -- and
-    a fresh episode speaks again. Off means silent."""
+    a fresh episode speaks again."""
     from freight_fate.app import App
 
     app = App()
@@ -2836,14 +2836,16 @@ def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
         monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
         t = driving.truck
         t.throttle = 0.3
-        # 56 in a 50: over the warn threshold, inside the strike leeway.
-        t.velocity_mps = 56.0 / 2.23694
+        # 58 in a 50: over the 7-over warn threshold, inside the 9-over
+        # strike leeway -- the band where the dash still gets you back down
+        # for free.
+        t.velocity_mps = 58.0 / 2.23694
 
         driving._update_speeding(0.1)
         assert any("Watch your speed" in e for e in events)
         assert played.count("vehicle/overspeed_chime") == 1
 
-        for _ in range(52):  # past one 5 s repeat interval
+        for _ in range(52):  # past one repeat interval
             driving._update_speeding(0.1)
         assert played.count("vehicle/overspeed_chime") == 2
         assert sum("Watch your speed" in e for e in events) == 1  # spoken once
@@ -2851,7 +2853,7 @@ def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
         # Settling under the limit disarms; the next episode speaks again.
         t.velocity_mps = 50.0 / 2.23694
         driving._update_speeding(0.1)
-        t.velocity_mps = 56.0 / 2.23694
+        t.velocity_mps = 58.0 / 2.23694
         driving._update_speeding(0.1)
         assert sum("Watch your speed" in e for e in events) == 2
 
@@ -2863,34 +2865,51 @@ def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
             driving._update_speeding(0.1)
         assert played.count("vehicle/overspeed_chime") >= 2
 
-        # Urgent-only mode: deliberate fast cruising stays unjudged, but a
-        # runaway past the urgent line still rings, at the fast cadence.
-        app.ctx.settings.overspeed_warning = "urgent only"
-        t.velocity_mps = 50.0 / 2.23694
-        driving._update_speeding(0.1)  # disarm
-        played.clear()
-        events.clear()
-        t.velocity_mps = 60.0 / 2.23694  # 10 over: quiet in urgent-only
-        for _ in range(60):
+    finally:
+        app.shutdown()
+
+
+def test_adaptive_cruise_at_its_own_pace_never_arms_the_overspeed_warning(monkeypatch):
+    """The bug the setting existed to work around.
+
+    Predictive cruise holds ACC_LIMIT_OFFSET_MPH (5) over the posted limit by
+    design. The warning used to arm at exactly 5 over too, so the truck chimed
+    at the driver for the pace it had chosen itself, and the only fix on offer
+    was a setting to silence the whole alert. The threshold now sits above
+    cruise's pace: driving at, and a little past, the speed cruise picks is
+    silent, and no setting is needed to make it so.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.enforcement_observe import OBSERVE_LEEWAY_MPH
+    from freight_fate.states.driving_core import (
+        ACC_LIMIT_OFFSET_MPH,
+        OVERSPEED_WARN_MPH,
+    )
+
+    # The threshold has to live in the gap, or one of the two failures is back:
+    # chiming at cruise's own pace, or staying silent until the driver is
+    # already ticketable.
+    assert ACC_LIMIT_OFFSET_MPH < OVERSPEED_WARN_MPH < OBSERVE_LEEWAY_MPH
+
+    app = App()
+    events, played = [], []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, **k: played.append(key))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.patrols = []
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
+        t = driving.truck
+        t.throttle = 0.3
+        # Exactly the pace predictive cruise holds, plus a mile an hour of the
+        # control-loop wobble a real grade produces.
+        t.velocity_mps = (50.0 + ACC_LIMIT_OFFSET_MPH + 1.0) / 2.23694
+        for _ in range(100):  # ten seconds of it
             driving._update_speeding(0.1)
         assert played.count("vehicle/overspeed_chime") == 0
-        t.velocity_mps = 75.0 / 2.23694  # 25 over: the runaway alarm rings
-        for _ in range(30):  # 3 seconds at the 0.5 s cadence
-            driving._update_speeding(0.1)
-        assert any("Watch your speed" in e for e in events)
-        assert played.count("vehicle/overspeed_chime") >= 4
-
-        # The setting turns the whole alert off.
-        app.ctx.settings.overspeed_warning = "off"
-        t.velocity_mps = 50.0 / 2.23694
-        driving._update_speeding(0.1)
-        t.velocity_mps = 56.0 / 2.23694
-        chimes = played.count("vehicle/overspeed_chime")
-        spoken = sum("Watch your speed" in e for e in events)
-        for _ in range(60):
-            driving._update_speeding(0.1)
-        assert played.count("vehicle/overspeed_chime") == chimes
-        assert sum("Watch your speed" in e for e in events) == spoken
+        assert not [e for e in events if "Watch your speed" in e]
     finally:
         app.shutdown()
 
