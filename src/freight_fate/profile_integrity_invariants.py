@@ -21,6 +21,7 @@ from .models.carrier_fleet import FLEET_TIERS
 from .models.economy import PAY_ADVANCE_LIMIT
 from .models.market import MARKET_CARGO_KEYS
 from .models.profile import SAVE_VERSION, STARTING_MONEY, Profile, _fresh_condition
+from .models.start_options import all_start_options
 from .models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG
 
 # Signature keys ride inside the saved file but never inside a cloud upload --
@@ -117,6 +118,17 @@ def invariant_data() -> dict:
         # that their backup was rejected. See the money and XP checks in
         # convex/freightFateSharedProfileValidation.ts.
         "startingMoney": _json_number(STARTING_MONEY),
+        # The most cash any career-start option hands over. The money ceiling
+        # must credit this, not the company-driver default: the owner-operator
+        # start opens with 18,000 dollars, and a ceiling built on 5,000
+        # rejected every honest owner-operator backup until their earnings
+        # eventually outgrew the gap. Wrong in the generous direction is the
+        # survivable wrong here, so the validator uses the maximum rather
+        # than a per-carrier lookup that would break on a start option the
+        # server has not heard of yet.
+        "startingMoneyMax": _json_number(
+            max(option.starting_money for option in all_start_options())
+        ),
         "payAdvanceLimit": _json_number(PAY_ADVANCE_LIMIT),
         "xpPerMileMax": _json_number(_xp_per_mile_max()),
         "xpFlatPerDelivery": _json_number(_xp_flat_per_delivery()),

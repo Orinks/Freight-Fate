@@ -51,6 +51,21 @@ def test_exported_starting_money_matches_a_fresh_career():
     assert invariant_data()["startingMoney"] == Profile().money
 
 
+def test_exported_starting_money_max_covers_every_start_option():
+    """The server's money ceiling credits the richest career start.
+
+    The owner-operator option opens with more cash than the company-driver
+    default; a ceiling built on the default rejected every honest
+    owner-operator backup as impossible_money until earnings outgrew the gap.
+    """
+    from freight_fate.models.start_options import all_start_options
+
+    exported = invariant_data()["startingMoneyMax"]
+    for option in all_start_options():
+        assert option.starting_money <= exported, option.key
+    assert exported == max(option.starting_money for option in all_start_options())
+
+
 def test_exported_condition_fields_match_a_real_record():
     """The export must describe the record the game actually writes.
 
