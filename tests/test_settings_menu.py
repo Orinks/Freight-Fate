@@ -1139,6 +1139,7 @@ def test_online_menu_keeps_profile_sharing_and_private_cloud_backup_separate():
             "Drivers board",
             "Online services: on",
             "Set up orinks.net account",
+            "Open my driver setup page",
             "Profile sharing: not set up",
             "Back up saves to your orinks.net account: not set up",
             "Restore a cloud backup",

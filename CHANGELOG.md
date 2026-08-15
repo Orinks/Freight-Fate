@@ -4,6 +4,13 @@
 
 ### Added
 
+- **The Online menu can open your driver setup page for you.** A new item,
+  Open my driver setup page, opens it in your browser -- no address to
+  remember or type. That page is where you change your driver name, turn
+  profile sharing on or off, see the computers signed in to your account,
+  and sign any of them out. If the game cannot open a browser, it puts the
+  address on your clipboard and tells you; if the clipboard will not take it
+  either, it reads the address out.
 - **You will sometimes hear a trooper run somebody else down.** A siren past
   you, the stop on the shoulder as you pass, maybe the CB calling it -- and a
   bear who has somebody stopped is not watching you.

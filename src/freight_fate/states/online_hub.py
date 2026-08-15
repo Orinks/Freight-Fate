@@ -60,7 +60,25 @@ class OnlineHubState(MenuState):
                 self._online_account_setup,
                 help="Connect the game to your orinks.net account. Connecting turns "
                 "Profile sharing on and starts backing your careers up to that "
-                "account; both are single items on this menu if you want either off.",
+                "account; both are single items on this menu if you want either off. "
+                "To change your driver name or sign a computer out afterwards, use "
+                "Open my driver setup page below.",
+            ),
+            # Deliberately its own row rather than a job the account row does
+            # once connected: that row is also the way back in when
+            # orinks.net stops accepting this computer, which is exactly when
+            # a player needs to re-activate rather than browse. Keeping both
+            # available means the spoken recovery advice (cloud_saves
+            # AUTH_HELP) still names something that works, and the row never
+            # changes what it does under a player's fingers.
+            MenuItem(
+                "Open my driver setup page",
+                self._open_setup_page,
+                help="Opens your orinks.net driver setup page in a browser. "
+                "That page is where you change your driver name, turn profile "
+                "sharing on or off, see the computers signed in to your "
+                "account, and sign any of them out. Nothing about it has to "
+                "be typed or remembered: the game knows the address.",
             ),
             MenuItem(
                 # The identity check lives INSIDE the label so it is
@@ -168,12 +186,15 @@ class OnlineHubState(MenuState):
         self._adjust(direction)
 
     def _adjust(self, direction: int) -> None:
-        # The board, account setup, restore, and Mastodon link rows are
-        # actions, so left/right does nothing there instead of changing a
-        # nearby toggle.
+        # The board, account setup, setup page, restore, and Mastodon link
+        # rows are actions, so left/right does nothing there instead of
+        # changing a nearby toggle. This list is positional: a row added to
+        # build_items has to be added here at the same index, or every toggle
+        # below it starts answering for its neighbour.
         actions = [
             lambda _d: None,
             self._toggle_online_services,
+            lambda _d: None,
             lambda _d: None,
             self._toggle_online_presence,
             self._toggle_cloud_saves,
@@ -218,6 +239,51 @@ class OnlineHubState(MenuState):
         from .online_states import OnlineSetupState
 
         self.ctx.push_state(OnlineSetupState(self.ctx))
+
+    def _open_setup_page(self) -> None:
+        """Open the driver setup page, or hand over the address if it cannot.
+
+        Same shape as the Mastodon link page's opener: the clipboard write is
+        attempted first so the fallback can promise something true, and
+        webbrowser.open failing is never the end of the road -- a remote or
+        streamed session is the normal case where it does nothing at all.
+        """
+        import webbrowser
+
+        from ..online_presence import setup_page_url
+        from .online_states import write_clipboard_text
+
+        url = setup_page_url()
+        copied = write_clipboard_text(url)
+        try:
+            webbrowser.open(url)
+        except Exception:
+            if copied:
+                self.ctx.say(
+                    "The browser could not be opened. The address is on your "
+                    "clipboard. Paste it into your browser's address bar.",
+                    interrupt=True,
+                )
+            else:
+                # Spelled the way a player has to type it, since neither the
+                # browser nor the clipboard is going to carry it for them.
+                self.ctx.say(
+                    "The browser could not be opened and the clipboard did "
+                    f"not take the address. Go to {url} in any browser.",
+                    interrupt=True,
+                )
+            return
+        clipboard_note = (
+            " The address is also on your clipboard in case the browser did not open."
+            if copied
+            else ""
+        )
+        self.ctx.say(
+            "Opening your driver setup page in your browser. Sign in there "
+            "with your orinks.net account to change your driver name, your "
+            "profile sharing, or the computers signed in to your account." + clipboard_note,
+            interrupt=True,
+        )
 
     def _toggle_online_presence(self, _d: int) -> None:
         from .online_states import OnlineSetupState, ProfileSharingSyncState
