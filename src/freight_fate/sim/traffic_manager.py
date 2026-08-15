@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import random
 from dataclasses import dataclass
 
@@ -14,6 +15,8 @@ from .trip_models import (
     TRAFFIC_LOOKAHEAD_MI,
     TrafficContext,
 )
+
+log = logging.getLogger(__name__)
 
 # -- the rolling bubble --------------------------------------------------------------
 # Traffic used to be seeded once, for the whole route, at one candidate vehicle
@@ -634,6 +637,20 @@ class TrafficManager:
         else:
             return None
         self.announced_vehicle_keys.add(vehicle.key)
+        # The number in a traffic cue is the lead's own speed, and from the
+        # seat there is no way to check it: a cue that says "leave room for
+        # 30" is either a vehicle really doing 30 or a cue quoting the wrong
+        # thing, and they sound identical (playtest, 2026-08-15). Log what the
+        # line was built from so the next one can be read back.
+        log.info(
+            "traffic cue %s: %s doing %.1f mph, gap %.2f mi, truck %.1f mph, mile %.2f",
+            kind,
+            vehicle_class,
+            vehicle.speed_mph,
+            context.gap_mi,
+            truck_speed_mph,
+            position_mi,
+        )
         return TrafficSituation(kind, vehicle, message, interrupt=True)
 
 

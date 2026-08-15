@@ -2874,6 +2874,49 @@ def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
         app.shutdown()
 
 
+def test_overspeed_warning_stops_dinging_once_back_under_its_own_threshold(monkeypatch):
+    """Slowing down must end the episode, not carry it down to the limit.
+
+    The disarm was measured from the posted limit, six mph below the point
+    the alert arms at. So one honest trigger at nine over went on chiming at
+    six, five, four and three over while the driver was slowing -- speeds the
+    alert must never speak at, and exactly what a tester heard as "it dings
+    at five over" (Shane, 2026-08-15; reproduced in a logged playtest).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    events, played = [], []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, **k: played.append(key))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.patrols = []
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
+        t = driving.truck
+        t.throttle = 0.3
+        t.velocity_mps = 60.0 / 2.23694  # 10 over: armed, and fairly asked for
+        driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") == 1
+
+        # Backed off to five over -- under the threshold, still above the
+        # limit. Nothing more may sound, however long it is held.
+        t.velocity_mps = 55.0 / 2.23694
+        played.clear()
+        for _ in range(200):  # 20 seconds, four repeat intervals
+            driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") == 0, played
+
+        # And the episode really ended: going back over speaks again.
+        t.velocity_mps = 60.0 / 2.23694
+        driving._update_speeding(0.1)
+        assert sum("Watch your speed" in e for e in events) == 2
+    finally:
+        app.shutdown()
+
+
 def test_adaptive_cruise_at_its_own_pace_never_arms_the_overspeed_warning(monkeypatch):
     """The bug the setting existed to work around.
 

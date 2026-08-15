@@ -1119,9 +1119,7 @@ class DrivingUpdateMixin:
             self._finish_hazard_clear(f"You swerve around {names}. Well done.")
             return
         if not quiet:
-            self.ctx.say_event(
-                f"In {lane_phrase(lane.lane, lane.lane_count)}.", interrupt=False
-            )
+            self.ctx.say_event(f"In {lane_phrase(lane.lane, lane.lane_count)}.", interrupt=False)
 
     def _closed_lane_here(self) -> int | None:
         """The coned-off lane index in the truck's own lane numbering.
@@ -3232,8 +3230,9 @@ class DrivingUpdateMixin:
         """
         speed = self.truck.speed_mph
         if self._overspeed_active:
-            if speed <= limit + OVERSPEED_RESET_MPH:
+            if speed <= limit + OVERSPEED_WARN_MPH - OVERSPEED_RESET_MPH:
                 self._overspeed_active = False
+                self._log_overspeed("disarmed", speed, limit)
                 return
             braking_down = self.truck.brake > 0.0 and self.truck.throttle <= 0.05
             # The further over, the faster the ding: cadence slides from
@@ -3249,10 +3248,12 @@ class DrivingUpdateMixin:
             if self._overspeed_chime_timer >= interval and not braking_down:
                 self._overspeed_chime_timer = 0.0
                 self.ctx.audio.play("vehicle/overspeed_chime", volume=0.55)
+                self._log_overspeed("chime", speed, limit)
             return
         if speed > limit + OVERSPEED_WARN_MPH:
             self._overspeed_active = True
             self._overspeed_chime_timer = 0.0
+            self._log_overspeed("armed", speed, limit)
             self.ctx.audio.play("vehicle/overspeed_chime", volume=0.65)
             self.ctx.say_event(
                 overspeed_nag(
@@ -3261,6 +3262,29 @@ class DrivingUpdateMixin:
                 ),
                 interrupt=False,
             )
+
+    def _log_overspeed(self, event: str, speed: float, limit: float) -> None:
+        """Every arm, chime and disarm, with the numbers behind it.
+
+        A driver who hears the alert cannot see which limit it is measuring
+        against, and from a bug report neither can we: a tester reporting a
+        chime at five over could be five over a number he never saw drop
+        (Shane, 2026-08-15). The log carries the speed, the limit in force,
+        the mile it came from and the zone that set it, so a session can be
+        read back instead of argued about. Transitions and chimes only --
+        three or four lines an episode, not a per-frame trace.
+        """
+        _, reason = self.trip.speed_limit_at(self.trip.position_mi)
+        log.info(
+            "overspeed %s: %.1f mph, limit %.0f (%+.1f over, arms at %+.0f), mile %.2f, %s",
+            event,
+            speed,
+            limit,
+            speed - limit,
+            OVERSPEED_WARN_MPH,
+            self.trip.position_mi,
+            f"zone: {reason}" if reason else "no zone",
+        )
 
     def _begin_pull_over(self, limit: float) -> None:
         """A trooper has lit you up: announce it and wait for the stop."""

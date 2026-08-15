@@ -438,6 +438,13 @@
 
 ### Fixed
 
+- **The speed alert stops dinging once you have slowed down.** It arms at
+  seven over, which is where it should be -- but once it had armed it kept
+  chiming until you were within one mile per hour of the limit, so a single
+  trip over the line nagged you all the way down through six, five and four
+  over while you were already slowing. It now goes quiet as soon as you are
+  back under the speed it armed at, and holding five over never sounds at
+  all.
 - **A new build no longer connects to orinks.net as a brand new computer.**
   Each copy of the game kept its own note of which driver it was signed in
   as, so unzipping a new build started out disconnected -- and every time you
