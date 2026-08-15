@@ -1238,17 +1238,22 @@ onto exit signalling.
       buttons say Sign out and have never said Remove. The site's message
       now names signing out, says why the list fills with the same PC, and
       links to the page (orinks-net dev, 5f5df49).
-- [ ] **The computer cap counts activations, not computers.** Every
-      freshly unzipped build that connects mints another row, so a tester
-      who takes a build a week fills the list of ten with one PC and is
-      locked out. A client-side fix (remembering the sign-in in the
-      platform secret store) was written and REVERTED on owner ruling
-      2026-08-15: a copy extracted to a clean folder must be a clean game,
-      and may consult only that folder and the game's appdata. The fix
-      belongs on the server -- the game sends a machine label when the
-      player deliberately activates, and the server replaces that
-      computer's row instead of adding one. Until then, a full list needs
-      one pass of Sign out all computers.
+- [x] **The computer cap counted activations, not computers -- FIXED on
+      staging 2026-08-15.** Every freshly unzipped build that connected
+      minted another row, so a tester who takes a build a week filled the
+      list of ten with one PC and was locked out. A client-side fix
+      (remembering the sign-in in the platform secret store) was written
+      and REVERTED on owner ruling: a copy extracted to a clean folder must
+      be a clean game, and may consult only that folder and the game's
+      appdata. The counting is the server's, so the fix is the server's --
+      the game names the computer with an opaque hash when the player
+      deliberately activates (never a hostname; equality is all it is used
+      for), and redeeming replaces that computer's row instead of adding
+      one. The cap skips a computer already on the list, so a full account
+      can still reconnect the PC it is signed in on, and a build that sends
+      no key behaves exactly as before. orinks-net dev 542bb69, deployed to
+      staging and verified against dev.orinks.net. An account that already
+      collected ghost rows still needs one pass of Sign out all computers.
 - [ ] **PRE-RELEASE MUST-DO: point the game back at production.** The
       1.9 test line defaults its online services to the staged
       deployment (dev.orinks.net, the orinks-net dev branch on its own

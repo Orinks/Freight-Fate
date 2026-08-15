@@ -115,6 +115,37 @@ def test_start_returns_an_activation():
     assert activation.interval == 3
 
 
+def test_start_names_this_computer_so_the_list_does_not_fill_up():
+    """orinks.net capped an account at ten computers and counted activations,
+    so every unzipped build took another slot and a tester filled the list with
+    one PC (armstrong445, 2026-08-15). The server replaces a computer's entry
+    when the game names it; naming it is this call's job."""
+    sent = {}
+
+    def transport(url, payload, headers, method=None):
+        sent.update(payload)
+        return {
+            "device_code": "a" * 64,
+            "user_code": "WKQR-3468",
+            "verification_uri": "https://orinks.net/activate",
+            "verification_uri_complete": "https://orinks.net/activate?code=WKQR-3468",
+            "expires_in": 600,
+            "interval": 3,
+        }
+
+    assert online_activation.start_activation(transport=transport) is not None
+    key = sent["machine_key"]
+    # Opaque and bounded: the server compares it and nothing else, so it must
+    # never carry a hostname a person could be named in.
+    assert len(key) == 32 and all(c in "0123456789abcdef" for c in key), key
+    import platform
+
+    assert platform.node().lower() not in key.lower()
+    # The same computer must answer the same, or the row it replaces is never
+    # found and the list fills up exactly as before.
+    assert key == online_activation.machine_key()
+
+
 def test_start_returns_none_on_rate_limit_or_unavailable():
     for code in (429, 503):
 

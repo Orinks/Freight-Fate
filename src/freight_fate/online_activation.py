@@ -23,17 +23,45 @@ updating the server first.
 
 from __future__ import annotations
 
+import hashlib
 import logging
+import platform
 import time
 import urllib.error
+import uuid
 from dataclasses import dataclass, field
 
 from .online_presence import Transport, _http_json, base_url
 
 log = logging.getLogger(__name__)
 
+
+def machine_key() -> str:
+    """An opaque, stable name for this computer, for the computer list.
+
+    orinks.net caps an account at ten computers and used to count
+    ACTIVATIONS: every freshly unzipped build that connected took another
+    slot, so a tester who takes a build a week filled the list with one PC
+    and was locked out (armstrong445, 2026-08-15). Sending this lets the
+    server replace that computer's entry instead of adding one.
+
+    Hashed, and never the hostname itself: the server only ever compares it
+    for equality, so there is no reason to hand over a name that might be a
+    person's. Derived from the machine's network identity, which is stable
+    across a reinstall and across unzipping the game somewhere else -- the
+    two things that were minting duplicate rows.
+
+    This is NOT identity and never authenticates anything: it is a hint the
+    player triggers by deliberately connecting, and a wrong or missing one
+    costs only a duplicate row.
+    """
+    seed = f"{uuid.getnode():x}:{platform.node()}"
+    return hashlib.sha256(seed.encode("utf-8", "replace")).hexdigest()[:32]
+
+
 __all__ = [
     "Activation",
+    "machine_key",
     "PollResult",
     "spell_code",
     "start_activation",
@@ -179,7 +207,11 @@ def start_activation(*, transport: Transport = _http_json) -> Activation | None:
     for all of them -- there is nothing actionable to say differently.
     """
     try:
-        reply = transport(f"{base_url()}/api/freight-fate/activate/start", {}, {})
+        # An older server ignores an unknown field, so this is safe to send
+        # before the site half is everywhere.
+        reply = transport(
+            f"{base_url()}/api/freight-fate/activate/start", {"machine_key": machine_key()}, {}
+        )
     except Exception as e:
         log.warning("Activation start failed: %s", e)
         return None
