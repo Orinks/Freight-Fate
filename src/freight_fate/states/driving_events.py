@@ -1425,7 +1425,17 @@ class DrivingEventMixin:
 
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
         labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
-        distance = self.ctx.settings.distance_text(ahead)
+        # Quarter-mile steps once inside a mile: the whole-mile form rounds a
+        # third of a mile to nothing, so the last call before the gore was "In
+        # 0 miles, the destination exit" -- which reads as already-missed while
+        # there is still road to use it (owner playtest, 2026-08-15). Whole
+        # miles still answer from a mile out, because "In 5.0 miles" is worse
+        # than "In 5 miles" for the calls that come early.
+        distance = (
+            self.ctx.settings.short_distance_text(ahead)
+            if ahead < 1.0
+            else self.ctx.settings.distance_text(ahead)
+        )
         core = (
             f"In {distance}, {labeled}, destination exit."
             if labeled
