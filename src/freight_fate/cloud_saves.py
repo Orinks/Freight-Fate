@@ -275,6 +275,33 @@ AUTH_PAUSED_STATUS = (
 )
 
 
+def conflict_status(name: str) -> str:
+    """The player-facing line for a slot the server refused to overwrite
+    because another computer advanced it. Shared by the manual "Save game"
+    result (states/city.py) and the background queue's spoken announcement
+    so a conflict is always told the same way."""
+    return (
+        f"{name} needs attention: the cloud copy changed on another "
+        "computer. Open Restore a cloud backup on the Online menu "
+        "to choose which copy to keep."
+    )
+
+
+def recovery_status(name: str) -> str:
+    """The spoken all-clear for a career whose backup refusal was announced:
+    one line, career-named like every other backup story, when a later
+    upload of that slot is accepted again."""
+    return f"{name} is backed up again."
+
+
+# The dedupe key for the auth announcement: a paused sign-in is a property
+# of this computer, not of any one career, so it is announced once per
+# outage rather than once per slot -- loading a second career during the
+# same outage must not repeat the byte-identical line. save_slot_name()
+# replaces "*", so no real slot can ever collide with this key.
+_AUTH_ANNOUNCED_KEY = "*auth*"
+
+
 # -- sync state ----------------------------------------------------------------
 
 
@@ -707,6 +734,14 @@ class CloudSaves:
         # that slot reaches a terminal result. Both guarded by self._lock.
         self._attempts: dict[str, int] = {}
         self._outcomes: dict[str, tuple[int, str]] = {}
+        # Spoken lines the background queue owes the player (drained by the
+        # app's main loop through take_announcements), and per slot the
+        # refusal cause already announced this session -- retries refused
+        # for the same cause stay silent until the cause changes or the
+        # slot uploads successfully. Both guarded by self._lock: the worker
+        # thread writes, the main loop drains.
+        self._announcements: list[str] = []
+        self._announced_causes: dict[str, str] = {}
 
         self._wake = threading.Event()
         self._stop = threading.Event()
@@ -864,6 +899,75 @@ class CloudSaves:
             if current is None or token >= current[0]:
                 self._outcomes[name] = (token, outcome)
 
+    def take_announcements(self) -> list[str]:
+        """Drain the spoken lines the background queue owes the player.
+
+        Automatic saves (rest stops, motels, deliveries, sleep, business
+        actions) upload with no menu watching, so a refusal used to reach
+        only the passive status line -- a blind player never heard that the
+        career had stopped backing up. The worker thread never speaks;
+        it queues lines here, and the app's main loop drains them every
+        frame (the same polled pattern as ControllerManager.take_disconnect)
+        onto the normal announcement channel. Thread-safe; empty almost
+        always.
+        """
+        with self._lock:
+            if not self._announcements:
+                return []
+            lines = self._announcements
+            self._announcements = []
+            return lines
+
+    def _announce_refusal(self, name: str, token: int, cause: str, message: str) -> None:
+        """Record a terminal upload refusal, and queue its spoken line when
+        the background queue owes one.
+
+        The token gates the speaking, never the bookkeeping: every terminal
+        refusal records its cause, manual or background, so whichever
+        channel told the player first -- this one, or the Save game watch
+        (states/city.py) that owns token > 0 attempts -- the player hears
+        each standing cause exactly once. Only a background attempt
+        (token 0) appends the line; a manual refusal is the menu's to
+        speak. A recorded cause stays silent until it changes or the slot
+        uploads successfully (see _announce_recovery). The auth cause
+        dedupes machine-wide under _AUTH_ANNOUNCED_KEY: a paused sign-in
+        belongs to this computer, not to whichever career saved first.
+        Transient network failures never arrive here -- they retry
+        silently.
+        """
+        key = _AUTH_ANNOUNCED_KEY if cause == "auth" else name
+        with self._lock:
+            if self._announced_causes.get(key) == cause:
+                return
+            self._announced_causes[key] = cause
+            if token == 0:
+                self._announcements.append(message)
+
+    def _announce_recovery(self, name: str, token: int, *, uploaded: bool) -> None:
+        """A slot with a recorded refusal is backed up again: clear the
+        record so later trouble speaks afresh, and say so once.
+
+        Same principle as _announce_refusal: the token gates the speaking,
+        never the bookkeeping. Any success clears the slot's recorded
+        cause, but only a background one (token 0) appends the recovery
+        line -- a manual save's success is already spoken by the Save game
+        watch, and a second line for the same event would say it twice.
+        ``uploaded`` marks a real accepted upload, which also proves this
+        computer's sign-in works, so it re-arms the machine-wide auth
+        announcement -- silently, since the auth line named no career and
+        reconnecting speaks its own confirmation. The "unchanged" path
+        never contacts the server, so it proves nothing about auth and
+        leaves that record alone.
+        """
+        with self._lock:
+            if uploaded:
+                self._announced_causes.pop(_AUTH_ANNOUNCED_KEY, None)
+            if name not in self._announced_causes:
+                return
+            del self._announced_causes[name]
+            if token == 0:
+                self._announcements.append(recovery_status(name))
+
     def shutdown(self) -> None:
         """Flush the pending upload briefly and stop the worker. Never raises."""
         self._stop_worker()
@@ -984,6 +1088,7 @@ class CloudSaves:
                 # source of truth for "keep mine".
                 self._done_with(name, snapshot)
                 self._note_outcome(name, token, "conflict")
+                self._announce_refusal(name, token, "conflict", conflict_status(name))
                 return
             log.info(
                 "Cloud backup of %s was blocked by a conflict whose cloud "
@@ -996,6 +1101,10 @@ class CloudSaves:
         if slot.get("hash") == content_hash:
             self._done_with(name, snapshot)
             self._note_outcome(name, token, "unchanged")
+            # The cloud already holds this save -- a resolved conflict or a
+            # menu restore got the slot current, so an announced refusal is
+            # over even though no upload ran here.
+            self._announce_recovery(name, token, uploaded=False)
             return
         result = upload_save(
             self._identity,
@@ -1011,6 +1120,7 @@ class CloudSaves:
             self._retry_at = None
             self._set_status("Latest backup accepted and server-verified.")
             self._note_outcome(name, token, "accepted")
+            self._announce_recovery(name, token, uploaded=True)
             log.info("Cloud backup of %s uploaded as revision %s", name, result["revision"])
             return
         if result.get("reason") == "conflict":
@@ -1031,6 +1141,7 @@ class CloudSaves:
             self.sync_state.record_conflict(name, result)
             self._done_with(name, snapshot)
             self._note_outcome(name, token, "conflict")
+            self._announce_refusal(name, token, "conflict", conflict_status(name))
             log.warning(
                 "Cloud backup of %s skipped: the cloud copy is newer (revision %s)",
                 name,
@@ -1045,6 +1156,7 @@ class CloudSaves:
             self._set_status(AUTH_PAUSED_STATUS)
             self._done_with(name, snapshot)
             self._note_outcome(name, token, "auth")
+            self._announce_refusal(name, token, "auth", AUTH_PAUSED_STATUS)
             return
         if family == "rejected":
             # Not transient: retrying with the same inputs cannot succeed.
@@ -1055,6 +1167,9 @@ class CloudSaves:
             self._set_status(rejection_status(name, reason))
             self._done_with(name, snapshot)
             self._note_outcome(name, token, f"rejected:{reason}")
+            self._announce_refusal(
+                name, token, f"rejected:{reason}", rejection_status(name, reason)
+            )
             return
         # Transient (network, 5xx): keep the snapshot, back off.
         self._retry_at = self._clock() + self._retry
