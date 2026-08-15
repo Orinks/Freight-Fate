@@ -265,6 +265,16 @@ def rejection_status(name: str, reason: str | None) -> str:
     )
 
 
+# The status line for the auth family, shared by the background queue and the
+# manual "Save game" announcement so a paused sign-in is always told the same
+# way. AUTH_HELP (above) carries the full recovery path when a menu can offer
+# it; this is the short standing line.
+AUTH_PAUSED_STATUS = (
+    "Backups are paused: orinks.net no longer accepts this "
+    "computer's sign-in. Reconnect from the Online menu."
+)
+
+
 # -- sync state ----------------------------------------------------------------
 
 
@@ -686,9 +696,17 @@ class CloudSaves:
         self.sync_state = sync_state if sync_state is not None else SyncState()
 
         self._lock = threading.Lock()
-        # slot name -> (profile dict snapshot, queued-at time)
-        self._pending: dict[str, tuple[dict, float]] = {}
+        # slot name -> (profile dict snapshot, queued-at time, attempt token).
+        # The token rides with the snapshot so an upload's terminal result is
+        # always recorded against the attempt that queued it, never against a
+        # manual attempt that started while it was in flight.
+        self._pending: dict[str, tuple[dict, float, int]] = {}
         self._retry_at: float | None = None
+        # Manual "Save game" attempts (backup_now): the latest attempt token
+        # handed out per slot, and the outcome recorded when an upload for
+        # that slot reaches a terminal result. Both guarded by self._lock.
+        self._attempts: dict[str, int] = {}
+        self._outcomes: dict[str, tuple[int, str]] = {}
 
         self._wake = threading.Event()
         self._stop = threading.Event()
@@ -774,11 +792,77 @@ class CloudSaves:
             return
         name = save_slot_name(profile.name)
         with self._lock:
-            self._pending[name] = (snapshot, self._clock())
+            # Token 0: a background save, which no manual watch ever matches.
+            self._pending[name] = (snapshot, self._clock(), 0)
         if self._threaded:
             self._wake.set()
         else:
             self.pump()
+
+    def backup_now(self, profile: Profile) -> int | None:
+        """Snapshot a just-saved profile and attempt its upload promptly.
+
+        The manual "Save game" path (Shane's report, 2026-08-14: a silent
+        background upload is indistinguishable from no backup for a screen
+        reader user). Like :meth:`queue_backup`, but the snapshot is queued
+        as already past the debounce, the transient-retry backoff is lifted
+        for this attempt, and the worker is woken immediately. Every other
+        semantic -- the content-hash skip, conflict, rejection, and auth
+        handling -- is exactly the background queue's.
+
+        Returns an attempt token the caller can poll through
+        :meth:`outcome_for` without ever blocking, or None when the service
+        is off or the snapshot failed.
+        """
+        if not self._enabled:
+            return None
+        try:
+            snapshot = profile.to_dict()
+        except Exception:  # never let backup break the save that triggered it
+            log.debug("Cloud backup snapshot failed", exc_info=True)
+            return None
+        name = save_slot_name(profile.name)
+        with self._lock:
+            token = self._attempts.get(name, 0) + 1
+            self._attempts[name] = token
+            # Queued as already debounce-old, so the next pump owes it an
+            # attempt instead of a wait.
+            self._pending[name] = (snapshot, self._clock() - self._debounce, token)
+            # A manual save is the player asking now: this attempt does not
+            # sit out a backoff armed by an earlier transient failure.
+            self._retry_at = None
+        if self._threaded:
+            self._wake.set()
+        else:
+            self.pump()
+        return token
+
+    def outcome_for(self, name: str, token: int) -> str | None:
+        """The recorded outcome of a :meth:`backup_now` attempt, or None
+        while it is still in flight. Never blocks.
+
+        Outcomes: ``"accepted"``, ``"unchanged"`` (the cloud already holds
+        this exact content), ``"conflict"`` (recorded for the Cloud backup
+        menu), ``"auth"``, ``"network"`` (still retrying in the background),
+        or ``"rejected:<reason>"``.
+        """
+        with self._lock:
+            entry = self._outcomes.get(name)
+            if entry is None or entry[0] < token:
+                return None
+            return entry[1]
+
+    def _note_outcome(self, name: str, token: int, outcome: str) -> None:
+        """Record a terminal upload result under the attempt token its
+        snapshot was queued with (0 for background saves, which no poller
+        ever matches). Uploads run outside the lock, so an upload already in
+        flight when a newer manual attempt starts finishes carrying its own
+        older token: it must neither answer for the newer attempt nor
+        overwrite the newer attempt's recorded result."""
+        with self._lock:
+            current = self._outcomes.get(name)
+            if current is None or token >= current[0]:
+                self._outcomes[name] = (token, outcome)
 
     def shutdown(self) -> None:
         """Flush the pending upload briefly and stop the worker. Never raises."""
@@ -847,7 +931,7 @@ class CloudSaves:
         with self._lock:
             if not self._pending:
                 return _WORKER_TICK_S
-            oldest = min(t for _, t in self._pending.values())
+            oldest = min(t for _, t, _ in self._pending.values())
         if self._retry_at is not None:
             return max(0.05, self._retry_at - now)
         return max(0.05, self._debounce - (now - oldest))
@@ -862,14 +946,14 @@ class CloudSaves:
             return
         with self._lock:
             due = [
-                (name, snapshot)
-                for name, (snapshot, queued_at) in self._pending.items()
+                (name, snapshot, token)
+                for name, (snapshot, queued_at, token) in self._pending.items()
                 if force or now - queued_at >= self._debounce
             ]
-        for name, snapshot in due:
+        for name, snapshot, token in due:
             if self._stop.is_set() and not force:
                 return
-            self._upload_slot(name, snapshot)
+            self._upload_slot(name, snapshot, token)
 
     def _done_with(self, name: str, snapshot: dict) -> None:
         """Drop a handled snapshot -- unless a newer save replaced it while
@@ -879,7 +963,7 @@ class CloudSaves:
             if current is not None and current[0] is snapshot:
                 del self._pending[name]
 
-    def _upload_slot(self, name: str, snapshot: dict) -> None:
+    def _upload_slot(self, name: str, snapshot: dict, token: int = 0) -> None:
         slot = self.sync_state.slot(name)
         conflict = slot.get("conflict")
         if conflict is not None and conflict.get("latestRevision") is None:
@@ -899,6 +983,7 @@ class CloudSaves:
                 # menu. Drop the snapshot -- the local file is still the
                 # source of truth for "keep mine".
                 self._done_with(name, snapshot)
+                self._note_outcome(name, token, "conflict")
                 return
             log.info(
                 "Cloud backup of %s was blocked by a conflict whose cloud "
@@ -910,6 +995,7 @@ class CloudSaves:
         _, content_hash = cloud_content(snapshot)
         if slot.get("hash") == content_hash:
             self._done_with(name, snapshot)
+            self._note_outcome(name, token, "unchanged")
             return
         result = upload_save(
             self._identity,
@@ -924,6 +1010,7 @@ class CloudSaves:
             self._done_with(name, snapshot)
             self._retry_at = None
             self._set_status("Latest backup accepted and server-verified.")
+            self._note_outcome(name, token, "accepted")
             log.info("Cloud backup of %s uploaded as revision %s", name, result["revision"])
             return
         if result.get("reason") == "conflict":
@@ -934,6 +1021,7 @@ class CloudSaves:
                 # retry pass re-create the slot from this machine's save.
                 self.sync_state.forget(name)
                 self._retry_at = self._clock() + self._retry
+                self._note_outcome(name, token, "network")
                 log.info(
                     "Cloud backup of %s named a revision the cloud no longer "
                     "has; restarting the slot fresh",
@@ -942,6 +1030,7 @@ class CloudSaves:
                 return
             self.sync_state.record_conflict(name, result)
             self._done_with(name, snapshot)
+            self._note_outcome(name, token, "conflict")
             log.warning(
                 "Cloud backup of %s skipped: the cloud copy is newer (revision %s)",
                 name,
@@ -953,11 +1042,9 @@ class CloudSaves:
             # The credentials were retired (usually by connecting another
             # computer); every retry would fail identically, and the player
             # can only fix it by reconnecting.
-            self._set_status(
-                "Backups are paused: orinks.net no longer accepts this "
-                "computer's sign-in. Reconnect from the Online menu."
-            )
+            self._set_status(AUTH_PAUSED_STATUS)
             self._done_with(name, snapshot)
+            self._note_outcome(name, token, "auth")
             return
         if family == "rejected":
             # Not transient: retrying with the same inputs cannot succeed.
@@ -967,9 +1054,11 @@ class CloudSaves:
             log.warning("Cloud backup of %s was rejected: %s", name, reason)
             self._set_status(rejection_status(name, reason))
             self._done_with(name, snapshot)
+            self._note_outcome(name, token, f"rejected:{reason}")
             return
         # Transient (network, 5xx): keep the snapshot, back off.
         self._retry_at = self._clock() + self._retry
+        self._note_outcome(name, token, "network")
 
     def _cloud_slot_exists(self, name: str) -> bool:
         """Whether the cloud still holds any revision of this slot. Errs on

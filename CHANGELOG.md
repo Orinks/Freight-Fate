@@ -375,6 +375,15 @@
 
 ### Fixed
 
+- **Saving the game now backs up your career right away and tells you how
+  it went.** Choosing Save game at the terminal used to run the cloud
+  backup silently in the background some seconds later, so "Game saved."
+  sounded exactly the same whether the backup worked, failed, or never
+  ran. Now the backup starts immediately and one line follows with the
+  result: backed up, already backed up, or exactly what went wrong and
+  where to fix it. If your account is set up but cloud backup is off,
+  saving says that too instead of leaving you to assume you were covered.
+
 - **A highway narrowing to one lane now tells you when it moves you.** If
   the lane you were in stops existing where the road narrows, you used to
   be shifted over with no warning at all. Now, whenever that actually
