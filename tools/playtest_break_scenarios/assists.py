@@ -239,6 +239,12 @@ def _ramp_speed_control_handback():
         # Signal as early as the game lets a driver signal, the way the report
         # did: X every half second until an exit takes it.
         armed_mi = None
+        # This scenario never touches the pedals, so anything that stops the
+        # truck on the way -- automatic braking for a merging vehicle, say --
+        # leaves it parked for the rest of the frame budget and the run reports
+        # that no exit ever arrived. The subject is the ramp handback, not
+        # surviving traffic, so a stall gets the truck rolling again.
+        stalls = 0
         for frame in range(20000):
             if d._exit_stop is not None:
                 armed_mi = d._exit_stop.at_mi - d.trip.position_mi
@@ -246,6 +252,10 @@ def _ramp_speed_control_handback():
             if frame % 15 == 0:
                 rig.press(pygame.K_x)
             d.update(DT)
+            if d.truck.speed_mph < 3.0 and stalls < 20:
+                stalls += 1
+                rig.prepare(speed_mph=limit - 1.0)
+                rig.press(pygame.K_k)
             if frame % 10 == 0:
                 rig.check_invariants()
         if armed_mi is None:
