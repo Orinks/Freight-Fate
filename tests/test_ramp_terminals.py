@@ -1014,3 +1014,374 @@ def test_route_transition_assistance_does_not_chatter_at_the_ramp_cap(monkeypatc
         assert released <= 1, said
     finally:
         app.shutdown()
+
+
+def _ready_to_exit(app, monkeypatch, spoken, *, mph: float = 40.0):
+    """A drive with an armed speed-control session, right at its exit."""
+    d = _driving(app)
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    app.ctx.settings.route_transition_assist = True
+    app.ctx.settings.speed_keeper = True
+    d.truck.set_air_ready(parking_brake=False)
+    d.truck.start_engine()
+    d.truck.velocity_mps = mph / 2.2369362920544
+    return d
+
+
+def _take_the_exit(d, control: str = "stop", *, stop=None):
+    """Drive the real exit-take path onto a ramp ending in ``control``."""
+    from freight_fate.sim.trip_models import RoadStop
+
+    d.trip.ramp_control_at = lambda mile: control
+    if stop is None:
+        stop = RoadStop("Test Plaza", d.trip.position_mi, "travel_center", ("rest",))
+        stop.exit_label = ""
+    d._exit_stop = stop
+    d._exit_signal_on = True
+    d._exit_signal_canceled = False
+    d._exit_lane_alignment = 1.0
+    d.lane.lane = 0
+    d.trip.position_mi = stop.at_mi
+    d._update_exit(0.0)
+    return stop
+
+
+def _honor_the_bar_and_drive_on(d):
+    """Stop at the bar, pull away from it, and leave the ramp behind."""
+    d.truck.velocity_mps = 0.0
+    d._ramp_mi = RAMP_ACCESS_MI
+    d._resume_speed_control_if_ready(braking=False)
+    d.truck.brake = 0.0
+    d.truck.velocity_mps = 3.0  # rolling to the entrance, still on the ramp
+    d._resume_speed_control_if_ready(braking=False)
+    d._ramp_mi = None  # the ramp is behind the truck
+
+
+def test_ramp_terminal_hands_adaptive_cruise_back_after_the_stop_bar(monkeypatch):
+    """Shane, 2026-08-15: taking an exit killed adaptive cruise and the speed
+    keeper for the rest of the run, and only the resume key brought them back.
+
+    The bar is a transit stop, not an arrival: honor it, drive on, and
+    automatic speed control is simply there again."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken)
+        d.trip.speed_limit_at = lambda mile: (65.0, None)
+        d._engage_cruise(40.0)
+
+        _take_the_exit(d)
+        assert d._ramp_mi is not None  # the ramp really was taken
+        # The ramp takes the pedals back, but not the session.
+        assert d._cruise_mph is None
+        assert d._speed_control_armed
+        assert d._speed_control_paused_at_stop
+
+        # Route-transition assistance brakes for the sign.
+        d._ramp_light_announced = True
+        d._ramp_mi = 0.22
+        d._update_ramp_terminal_assist()
+        assert d._ramp_assist_said
+        assert d._speed_control_paused_at_stop
+
+        _honor_the_bar_and_drive_on(d)
+        d.truck.velocity_mps = 40.0 / 2.2369362920544
+        d._resume_speed_control_if_ready(braking=False)
+
+        # No key was pressed anywhere in that sequence.
+        assert d._cruise_mph == pytest.approx(40.0)
+        assert not d._speed_control_paused_at_stop
+        # The existing resume line, once, and no new line about the pause.
+        assert sum("Adaptive cruise resuming" in t for t in spoken) == 1
+        assert not any("paus" in t.lower() for t in spoken), spoken
+    finally:
+        app.shutdown()
+
+
+def test_ramp_terminal_hands_the_speed_keeper_back_after_the_stop_bar(monkeypatch):
+    """The same for the keeper: it dies with cruise and must come back with it."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken, mph=25.0)
+        d.trip.speed_limit_at = lambda mile: (25.0, "facility access road")
+        d._engage_keeper(25.0, "facility access road")
+        assert d._keeper_mph == pytest.approx(25.0)
+
+        _take_the_exit(d)
+        assert d._ramp_mi is not None
+        assert d._keeper_mph is None
+        assert d._speed_control_armed
+
+        _honor_the_bar_and_drive_on(d)
+        d.truck.velocity_mps = 15.0 / 2.2369362920544
+        d._resume_speed_control_if_ready(braking=False)
+
+        assert d._keeper_mph == pytest.approx(25.0)
+        assert not d._speed_control_paused_at_stop
+        assert sum("Automatic speed control resuming" in t for t in spoken) == 1
+    finally:
+        app.shutdown()
+
+
+def test_speed_control_stays_off_on_the_creep_to_the_stop_bar(monkeypatch):
+    """The trap the pause exists for: nothing re-engages while the truck is
+    still slowing toward the bar, or rolling the last of the ramp to the
+    entrance behind it."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken)
+        d.trip.speed_limit_at = lambda mile: (65.0, None)
+        d._engage_cruise(40.0)
+        _take_the_exit(d)
+
+        d._ramp_mi = 0.2
+        for mph in (35.0, 20.0, 10.0, 2.0, 0.0):
+            d.truck.velocity_mps = mph / 2.2369362920544
+            d._resume_speed_control_if_ready(braking=False)
+            assert d._cruise_mph is None, mph
+            assert d._keeper_mph is None, mph
+
+        # Stopped, then rolling again -- but the entrance is still ahead.
+        d.truck.brake = 0.0
+        d._ramp_mi = 0.08
+        d.truck.velocity_mps = 20.0 / 2.2369362920544
+        d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph is None
+        assert d._keeper_mph is None
+    finally:
+        app.shutdown()
+
+
+def test_an_arrival_pause_still_waits_for_departure(monkeypatch):
+    """A pickup or delivery gate is an arrival, not a transit stop: it holds
+    the session until the player departs, however long the truck rolls."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken)
+        d.trip.speed_limit_at = lambda mile: (65.0, None)
+        d._engage_cruise(40.0)
+
+        assert d._pause_speed_control()  # the gate flavour: no resume_when_rolling
+        d.truck.velocity_mps = 0.0
+        d._resume_speed_control_if_ready(braking=False)
+        d.truck.velocity_mps = 40.0 / 2.2369362920544
+        for _ in range(5):
+            d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph is None
+        assert d._speed_control_paused_at_stop
+
+        # Departing is what lets it back on.
+        d._restore_speed_control_session(armed=True, target_mph=40.0)
+        d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph == pytest.approx(40.0)
+    finally:
+        app.shutdown()
+
+
+def test_the_destination_ramp_still_holds_speed_control_to_the_gate(monkeypatch):
+    """The regression guard. A destination exit is an arrival: its ramp ends at
+    the facility gate, and cruise winding back up on it is what drove an owner
+    playtest past the terminal at 66 mph."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import RoadStop
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken)
+        d.trip.speed_limit_at = lambda mile: (65.0, None)
+        d._engage_cruise(40.0)
+        destination = RoadStop(
+            "Rochester Freight Market",
+            d.trip.position_mi,
+            "delivery_destination",
+            ("deliver",),
+        )
+        destination.exit_label = ""
+        destination.exit_phrase = ""
+
+        _take_the_exit(d, stop=destination)
+        assert d._speed_control_paused_at_stop
+        assert not d._speed_control_transit_pause
+
+        _honor_the_bar_and_drive_on(d)
+        d.truck.velocity_mps = 40.0 / 2.2369362920544
+        for _ in range(5):
+            d._resume_speed_control_if_ready(braking=False)
+
+        assert d._cruise_mph is None
+        assert d._keeper_mph is None
+        assert d._speed_control_paused_at_stop
+    finally:
+        app.shutdown()
+
+
+def test_a_green_ramp_light_rolled_through_still_hands_speed_control_back(monkeypatch):
+    """No stop was ever required, so nothing can be waiting for one: the ramp
+    falling behind the truck is how a green terminal is honored."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken)
+        d.trip.speed_limit_at = lambda mile: (65.0, None)
+        d._engage_cruise(40.0)
+        _take_the_exit(d, "signal")
+        assert d._speed_control_transit_pause
+
+        # Rolled the whole ramp and through a green: never below a walk.
+        d._ramp_mi = 0.2
+        d.truck.velocity_mps = 20.0 / 2.2369362920544
+        d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph is None  # still on the ramp
+        assert not d._speed_control_stop_honored
+
+        d._ramp_mi = None
+        d.truck.velocity_mps = 40.0 / 2.2369362920544
+        d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph == pytest.approx(40.0)
+    finally:
+        app.shutdown()
+
+
+def test_a_weigh_station_ramp_hands_speed_control_back_after_check_in(monkeypatch):
+    """A scale is a transit stop like any other: pull in, check in, drive on."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import RoadStop
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken)
+        d.trip.speed_limit_at = lambda mile: (65.0, None)
+        d._engage_cruise(40.0)
+        scale = RoadStop(
+            "Ontario Scale", d.trip.position_mi, "weigh_station", ("inspect",), parking="none"
+        )
+        scale.exit_label = ""
+
+        _take_the_exit(d, stop=scale)
+        assert d._speed_control_transit_pause
+        _honor_the_bar_and_drive_on(d)
+        d.truck.velocity_mps = 40.0 / 2.2369362920544
+        d._resume_speed_control_if_ready(braking=False)
+
+        assert d._cruise_mph == pytest.approx(40.0)
+    finally:
+        app.shutdown()
+
+
+def test_a_manual_takeover_on_the_ramp_is_never_undone(monkeypatch):
+    """The player's own pedal keeps the resume waiting, and switching speed
+    control off on the ramp keeps it off past the bar."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken)
+        d.trip.speed_limit_at = lambda mile: (65.0, None)
+        d._engage_cruise(40.0)
+        _take_the_exit(d)
+
+        # Braking down the ramp and away from the bar: never resumes under
+        # the player's own foot.
+        d._ramp_mi = None
+        d.truck.velocity_mps = 40.0 / 2.2369362920544
+        for _ in range(5):
+            d._resume_speed_control_if_ready(braking=True)
+        assert d._cruise_mph is None
+        assert d._speed_control_paused_at_stop
+
+        # Switching it off is final: the resume cannot bring back a session
+        # the player ended.
+        d._toggle_cruise()
+        assert not d._speed_control_armed
+        for _ in range(5):
+            d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph is None
+        assert d._keeper_mph is None
+    finally:
+        app.shutdown()
+
+
+def test_a_stalled_or_backing_truck_at_the_bar_never_resumes(monkeypatch):
+    """Speed control needs a running engine and forward motion. ``speed_mph``
+    is unsigned, so a truck backing off the bar reads as rolling."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken)
+        d.trip.speed_limit_at = lambda mile: (65.0, None)
+        d._engage_cruise(40.0)
+        _take_the_exit(d)
+        d.truck.velocity_mps = 0.0
+        d._resume_speed_control_if_ready(braking=False)
+        d._ramp_mi = None
+
+        d.truck.stalled = True
+        d.truck.velocity_mps = 20.0 / 2.2369362920544
+        d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph is None
+
+        d.truck.stalled = False
+        d.truck.engine_on = False
+        d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph is None
+
+        # Backing away from the bar is not driving on from it.
+        d.truck.engine_on = True
+        d.truck.velocity_mps = -3.0
+        for _ in range(5):
+            d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph is None
+        assert d._keeper_mph is None
+
+        # Rolling forward again is what finally hands it back.
+        d.truck.velocity_mps = 20.0 / 2.2369362920544
+        d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph == pytest.approx(40.0)
+    finally:
+        app.shutdown()
+
+
+def test_reloading_mid_ramp_never_leaves_speed_control_stuck(monkeypatch):
+    """A save carries the session, not the ramp, so a reload must not come
+    back holding a pause for a ramp that is no longer there."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _ready_to_exit(app, monkeypatch, spoken)
+        d.trip.speed_limit_at = lambda mile: (65.0, None)
+        d._engage_cruise(40.0)
+        _take_the_exit(d)
+        assert d.snapshot()["speed_control_armed"]
+
+        # What restoring that snapshot does to the session.
+        d._ramp_mi = None
+        d._restore_speed_control_session(armed=True, target_mph=40.0)
+        assert not d._speed_control_paused_at_stop
+        assert not d._speed_control_transit_pause
+
+        d.truck.velocity_mps = 40.0 / 2.2369362920544
+        d._resume_speed_control_if_ready(braking=False)
+        assert d._cruise_mph == pytest.approx(40.0)
+    finally:
+        app.shutdown()

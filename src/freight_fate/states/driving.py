@@ -470,10 +470,16 @@ class DrivingState(
         # restricted zones, while this target remembers what cruise should
         # resume at after the zone ends.
         self._speed_control_armed = False
-        # Set while an armed session is held at a pickup or delivery gate. The
-        # session is remembered but must not re-engage on its own: it resumes
-        # when the player departs, or when they arm it again by hand.
+        # Set while an armed session is held at a planned stop. An ARRIVAL --
+        # a pickup or delivery gate, a planned rest stop -- is remembered but
+        # must not re-engage on its own: it resumes when the player departs,
+        # or when they arm it again by hand. A TRANSIT stop -- the light or
+        # sign at the end of a ramp -- has no departure to wait for, so its
+        # pause lifts itself once the stop has been honored and the truck is
+        # rolling again.
         self._speed_control_paused_at_stop = False
+        self._speed_control_transit_pause = False
+        self._speed_control_stop_honored = False
         self._speed_control_target_mph: float | None = None
         self._acc_following = False
         self._acc_weather_gap_said = False

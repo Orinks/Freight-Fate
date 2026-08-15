@@ -316,27 +316,119 @@ def test_the_ramp_cap_glides_down_as_the_exit_closes(monkeypatch):
         app.shutdown()
 
 
-def test_the_ramp_cap_buys_more_road_under_time_compression(monkeypatch):
-    """Compressed miles pass faster than the truck can slow through them, so
-    the same shed needs more of them -- the law the keeper's ease already
-    follows. The truck must still arrive able to take the exit."""
+def _cap_at(driving, stop, ahead_mi: float) -> float:
+    """The exit cap with the truck ``ahead_mi`` short of the gore."""
+    driving.trip.position_mi = stop.at_mi - ahead_mi
+    driving._update_exit(0.0, 0.0)  # publishes the approach distance to the clock
+    return driving._ramp_approach_cap_mph()
+
+
+def test_shane_2026_08_15_signalling_nine_miles_out_sheds_nothing(monkeypatch):
+    """The second tester report on this branch.
+
+    "If you signal more than 5 miles out you're still slowing down as soon as
+    you signal... I noticed this when I purposely signalled for an exit 9 miles
+    before a truck stop."
+
+    The glide itself was right; the compression handling was not. The cap
+    divided the available road by the effective time scale, so at high pacing
+    it fell under a 65 mph cruise nine miles from the gore and signalling early
+    was itself what slowed the truck. The road is measured in real miles now,
+    and the trip decompresses over the approach so that stays true.
+    """
     from freight_fate.app import App
-    from freight_fate.states.driving import RAMP_MAX_MPH
+
+    for time_scale in (1.0, 4.0, 20.0):
+        app = App()
+        try:
+            driving, stop = _armed_exit_at(app, monkeypatch, ahead_mi=4.5, time_scale=time_scale)
+            cruise = driving._cruise_mph
+            for ahead in (9.0, 5.0, 2.0, 1.0):
+                assert _cap_at(driving, stop, ahead) > cruise, (time_scale, ahead)
+            # Half a mile out is where a driver would really lift; the shed
+            # runs from there, not from the moment the signal went on.
+            assert _cap_at(driving, stop, 0.5) <= cruise
+        finally:
+            app.shutdown()
+
+
+def test_the_ramp_cap_reads_the_same_road_at_every_pacing(monkeypatch):
+    """The cap is a fact about the map, not about the clock: it must answer
+    identically at 1x, 4x and 20x. Decompressing the approach is what makes
+    those real miles real."""
+    from freight_fate.app import App
+
+    rows = {}
+    for time_scale in (1.0, 4.0, 20.0):
+        app = App()
+        try:
+            driving, stop = _armed_exit_at(app, monkeypatch, ahead_mi=4.5, time_scale=time_scale)
+            rows[time_scale] = [
+                _cap_at(driving, stop, ahead) for ahead in (9.0, 5.0, 2.0, 1.0, 0.5)
+            ]
+        finally:
+            app.shutdown()
+    assert rows[4.0] == pytest.approx(rows[1.0])
+    assert rows[20.0] == pytest.approx(rows[1.0])
+
+
+def test_the_exit_approach_runs_on_the_real_clock(monkeypatch):
+    """The mechanism: inside the road the shed needs, the trip decompresses the
+    way a hard bend already does, and pacing eases back afterwards instead of
+    snapping."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import EXIT_APPROACH_RELEASE_S
 
     app = App()
     try:
         driving, stop = _armed_exit_at(app, monkeypatch, ahead_mi=4.5, time_scale=20.0)
-        driving.trip.position_mi = stop.at_mi - 2.0
-        compressed = driving._ramp_approach_cap_mph()
-        driving.trip.time_scale = 1.0
-        real_time = driving._ramp_approach_cap_mph()
-        assert compressed < real_time
-        # Still ramp-enterable at the gore either way.
-        driving.trip.time_scale = 20.0
-        driving.trip.position_mi = stop.at_mi - 0.05
-        assert driving._ramp_approach_cap_mph() <= RAMP_MAX_MPH
+        trip = driving.trip
+
+        trip.position_mi = stop.at_mi - 4.0
+        driving._update_exit(0.0, 0.0)
+        assert trip.effective_time_scale > 1.0  # nothing to shed for yet
+
+        trip.position_mi = stop.at_mi - 0.5
+        driving._update_exit(0.0, 0.0)
+        assert trip.effective_time_scale == pytest.approx(1.0)
+        trip.update(1 / 60)
+        assert trip._exit_approach_release_s == pytest.approx(EXIT_APPROACH_RELEASE_S)
+
+        # The exit is cancelled: pacing climbs back rather than snapping.
+        driving._exit_stop = None
+        driving._update_exit(0.0, 0.0)
+        trip.update(EXIT_APPROACH_RELEASE_S / 2.0)
+        eased = trip.effective_time_scale
+        assert 1.0 < eased < 20.0
+        trip.update(EXIT_APPROACH_RELEASE_S)
+        assert trip._exit_approach_release_s == pytest.approx(0.0)
+        assert trip.effective_time_scale > eased
     finally:
         app.shutdown()
+
+
+def test_the_truck_still_makes_the_ramp_at_every_pacing(monkeypatch):
+    """The constraint the glide must never trade away: whatever the pacing, the
+    truck arrives at the gore slow enough to take the exit."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_MAX_MPH
+
+    for time_scale in (1.0, 4.0, 20.0, 40.0):
+        app = App()
+        try:
+            driving, stop = _armed_exit_at(app, monkeypatch, ahead_mi=4.5, time_scale=time_scale)
+            entry = None
+            for _ in range(60 * 60 * 20):
+                driving.update(1 / 60)
+                if driving._ramp_mi is not None:
+                    entry = driving.truck.speed_mph
+                    break
+                if driving.trip.position_mi > stop.at_mi + 0.5:
+                    break
+            assert entry is not None, f"never took the exit at {time_scale}x"
+            assert entry <= RAMP_MAX_MPH, (time_scale, entry)
+        finally:
+            app.shutdown()
 
 
 def test_set_at_current_speed_cruise_is_unchanged(monkeypatch):

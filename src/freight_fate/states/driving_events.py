@@ -1076,9 +1076,18 @@ class DrivingEventMixin:
         deceleration itself, reaching the ramp number a little before the gore.
         The road is priced exactly as the keeper's ease prices it -- a reaction
         budget in real seconds at the speed the truck is doing, and a
-        comfortable shed rate under that -- both converted through the trip's
-        effective time scale, because compressed miles pass faster than the
-        truck can slow through them.
+        comfortable shed rate under that.
+
+        In REAL miles, not compressed ones. Pricing the road through the
+        effective time scale looked prudent and was the same report all over
+        again: at high pacing the cap fell under a 65 mph cruise nine miles
+        out, so signalling early was itself what slowed the truck (Shane,
+        2026-08-15, signalling nine miles before a truck stop). The clock is
+        where that problem belongs and is now where it is solved --
+        ``Trip._armed_exit_decompression`` puts the trip back on real time
+        for the whole approach window, which is wider than this glide -- so by
+        the time the cap has anything to say, the miles under it really are
+        real ones.
         """
         floor = self._cruise_exit_mph
         if floor is None:
@@ -1091,12 +1100,11 @@ class DrivingEventMixin:
         ahead = stop.at_mi - self.trip.position_mi
         if ahead <= 0.0:
             return floor
-        scale = max(1.0, self.trip.effective_time_scale)
         # Priced at the set speed, not the live one, so the cap cannot chase
         # its own slowing and hand the road back a mile an hour at a time.
         speed = max(self.truck.speed_mph, self._cruise_mph or 0.0, floor)
-        reaction_mi = APPROACH_REACTION_S * speed * scale / 3600.0
-        brake_m = max(0.0, ahead - reaction_mi) / scale * METERS_PER_MILE
+        reaction_mi = APPROACH_REACTION_S * speed / 3600.0
+        brake_m = max(0.0, ahead - reaction_mi) * METERS_PER_MILE
         floor_mps = floor / MPH_PER_MPS
         allowed = (floor_mps**2 + 2.0 * APPROACH_DECEL_MPS2 * brake_m) ** 0.5 * MPH_PER_MPS
         return max(floor, allowed)
@@ -1268,8 +1276,14 @@ class DrivingEventMixin:
         ahead = stop.at_mi - self.trip.position_mi
         if not 0 < ahead <= 1.5:
             return
-        if self._cruise_mph is not None:
-            self._cancel_cruise()
+        if self._cruise_mph is not None or self._keeper_mph is not None:
+            # The assist takes the pedals for the ramp; the session is not its
+            # to end. Disarming here was the first of the three places that
+            # left both controllers dead for the rest of the run (Shane,
+            # 2026-08-15) -- and the keeper has to come off too, or it fights
+            # the assist's own brake. A destination exit still holds like any
+            # arrival; every other exit is a transit stop.
+            self._pause_speed_control(resume_when_rolling=stop.type != "delivery_destination")
         if self.truck.speed_mph <= RAMP_MAX_MPH:
             return
         self.truck.brake = max(self.truck.brake, 0.35)
@@ -2089,7 +2103,10 @@ class DrivingEventMixin:
         self.truck.brake = max(self.truck.brake, self._ramp_assist_brake)
         if not self._ramp_assist_said:
             self._ramp_assist_said = True
-            self._pause_speed_control()
+            # A transit stop: the bar is honored and then driven away from, so
+            # the session comes back on its own past it rather than waiting
+            # for a departure that never happens on a ramp.
+            self._pause_speed_control(resume_when_rolling=True)
             what = "light" if self._ramp_control == "signal" else "stop sign"
             self.ctx.say_event(
                 f"Route-transition assistance braking for the {what}.", interrupt=False
@@ -2194,6 +2211,18 @@ class DrivingEventMixin:
             self._ramp_mi is not None
             and self._ramp_control in ("signal", "stop")
             and not self._ramp_terminal_done
+        )
+        # And the road left to an exit the driver has signalled for, which the
+        # clock reads to decide whether the approach itself is close enough to
+        # be driven in real time. None once the ramp is taken -- from there
+        # ``controlled_ramp`` owns the clock -- or once the exit is behind.
+        ahead_to_exit = (
+            None
+            if self._exit_stop is None or self._ramp_mi is not None
+            else self._exit_stop.at_mi - self.trip.position_mi
+        )
+        self.trip.exit_approach_mi = (
+            ahead_to_exit if ahead_to_exit is not None and ahead_to_exit > 0.0 else None
         )
         if self._ramp_mi is not None:
             self._ramp_mi -= moved_mi
@@ -2328,9 +2357,9 @@ class DrivingEventMixin:
             self._update_exit_countdown(stop)
             return
         self._exit_stop = None
-        # The exit is settled either way now, so the ramp cap comes off: taking
-        # it cancels cruise outright, and missing it must not leave automatic
-        # control crawling at ramp speed down the open highway.
+        # The exit is settled either way now, so the ramp cap comes off:
+        # taking it pauses the session for the ramp, and missing it must not
+        # leave automatic control crawling at ramp speed down the open highway.
         self._cruise_exit_mph = None
         if self._exit_signal_canceled:
             self._reset_exit_lane_state()
@@ -2395,8 +2424,19 @@ class DrivingEventMixin:
             self._lane_change_target = None
             self._merge_deadline = None
             self._begin_ramp_terminal(stop)
-            self._cancel_cruise()
-            self._cancel_keeper()
+            # The ramp takes the pedals back, but the SESSION rides along: a
+            # ramp terminal is a transit stop, so automatic speed control
+            # returns on its own once the bar is honored and the ramp is
+            # behind the truck. Disarming here is why both controllers stayed
+            # dead until the player pressed resume (Shane, 2026-08-15). The
+            # resume helper still refuses the whole ramp, so nothing
+            # re-engages between here and the bar.
+            #
+            # A destination exit is the exception: that ramp ends at the gate,
+            # and winding the truck back up on it is exactly what drove a
+            # playtest past the terminal at 66 mph. It holds like any other
+            # arrival, until the player departs with the next load.
+            self._pause_speed_control(resume_when_rolling=stop.type != "delivery_destination")
             self.ctx.audio.play("ui/notify", volume=0.7)
             if stop.type == "delivery_destination":
                 labeled = getattr(stop, "exit_phrase", "") or stop.exit_label

@@ -438,6 +438,24 @@
 
 ### Fixed
 
+- **Automatic speed control comes back on its own after a ramp's stop bar.**
+  Taking an exit used to switch off both adaptive cruise and the speed
+  keeper for the rest of the run, and you had to turn them on again by hand
+  to get back up to speed on the approach. Now the ramp only borrows them:
+  once you have honored the light or the sign and you are rolling again,
+  automatic speed control picks up where it left off, with nothing to press.
+  A destination exit still holds it until you leave with your next load, and
+  nothing switches itself back on while you are still slowing for the bar.
+
+- **Signalling for an exit early no longer slows you down early.** Signal
+  nine miles out and the truck used to start shedding speed straight away,
+  with the exit nowhere in sight. Now it holds road speed until it is close
+  enough to genuinely need to slow, and how close that is depends on how
+  fast you are going: quicker means starting a little sooner. The approach
+  itself now runs at real-time pace, the way a ramp and a hard bend already
+  do, so the last mile gives you real seconds to work with, and pacing eases
+  back up afterwards instead of jumping.
+
 - **Your own playlists work again, and they can now carry internet stations
   as well as music files.** A playlist exported from an internet radio app
   is nothing but station addresses, and every one of those was thrown away,
