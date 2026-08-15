@@ -3782,6 +3782,17 @@ section below and the Unreleased changelog; the release-line view:
       and a completeness test fails any new cue that ships uncatalogued --
       including the ones the game synthesizes at runtime rather than shipping
       as a file.
+- [ ] **Sweep the catalog for cues that demo too quietly to hear.** The weigh
+      station bed was fixed on its own report (Shane, 2026-08-15): it plays at
+      the level the road plays it, which is deliberately low because it works
+      by swelling under engine noise, so in a silent menu it read as nothing
+      at all. Measuring every catalogued cue over the span the demo actually
+      sounds put it at -33 dBFS against a catalog median of -21 -- and it is
+      not even the quietest. "The road lean" (-38.5) and "Yawn" (-38.3) are
+      lower still and nobody has reported them, so they were deliberately
+      left alone rather than tuned blind. Worth listening through the whole
+      catalog on headphones and deciding a floor, instead of waiting for each
+      one to be reported.
 
 ## Shipped in 1.6.0
 

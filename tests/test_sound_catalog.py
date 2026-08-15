@@ -337,3 +337,31 @@ def test_the_road_lean_is_taught_as_a_cue_you_steer_toward():
             f"{rung} must keep telling the player to steer away from it, "
             "or the two opposite conventions blur together"
         )
+
+
+def test_the_weigh_station_bed_demos_louder_than_the_road_plays_it():
+    """The one cue whose road level makes it undemonstrable.
+
+    Mixed to sit *under* engine and tyre noise, it works on the road by
+    swelling against them. Played in a silent menu at that same level it is a
+    featureless hiss and reads as nothing happening (Shane, 2026-08-15: "I
+    press enter on it and I get silence"). The Learn game sounds screen has to
+    play it above its road ceiling to demonstrate it at all, so that is
+    pinned here rather than left to drift back down.
+    """
+    from freight_fate.states.driving_enforcement import SCALE_BED_OPEN_MAX_VOLUME
+
+    entry = next(
+        e
+        for e in sound_catalog.catalog_entries()
+        if any(cue.key == "poi/weigh_station_lane" for cue in e.plays)
+    )
+    cue = next(c for c in entry.plays if c.key == "poi/weigh_station_lane")
+
+    assert cue.volume > SCALE_BED_OPEN_MAX_VOLUME, (
+        "the weigh station bed must demo above the loudest the road ever "
+        f"plays it ({SCALE_BED_OPEN_MAX_VOLUME}), or the screen teaches the "
+        "player that a real cue is silent"
+    )
+    # Long enough to register as a sound rather than a blip of hiss.
+    assert cue.hold_s >= 5.0

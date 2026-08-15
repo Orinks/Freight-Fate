@@ -445,6 +445,13 @@
 
 ### Fixed
 
+- **The weigh station sound can be heard in Learn game sounds.** Pressing
+  Enter on it played the bed at exactly the level the road plays it, and on
+  the road that level is deliberately low because the sound works by coming
+  up underneath your engine. On its own in a quiet menu there was nothing to
+  come up against, so it sounded like nothing played at all. It now plays
+  louder there than it ever does while driving, and for longer, and the
+  description says why it is quieter out on the road.
 - **Two backup refusals now tell you what is actually wrong.** If you have
   as many careers backed up as the server keeps, it now says so and tells
   you to remove one from the Cloud backup menu -- something you can fix in
