@@ -1385,3 +1385,49 @@ def test_reloading_mid_ramp_never_leaves_speed_control_stuck(monkeypatch):
         assert d._cruise_mph == pytest.approx(40.0)
     finally:
         app.shutdown()
+
+
+def _priority_recorder(calls):
+    """Record (text, priority) for every event line the ramp speaks."""
+
+    def _say(text, interrupt: bool = True, **kwargs):
+        calls.append((str(text), kwargs.get("priority")))
+
+    return _say
+
+
+def test_the_ramp_coaching_outranks_chatter():
+    """The lines that get you to the bar must not wait behind the road.
+
+    Every one of them defaulted to AMBIENT, which waits the full stale budget
+    behind whatever is speaking. On a real ramp the pacer dropped the assist's
+    own "braking for the light" sixteen milliseconds after the yellow call,
+    and "through on the yellow" behind that -- so the truck braked for the
+    light and the driver was told none of it (owner playtest, 2026-08-15).
+    """
+    from freight_fate.app import App
+    from freight_fate.speech_pacing import EventPriority
+
+    app = App()
+    calls: list[tuple[str, object]] = []
+    try:
+        d = _driving(app)
+        app.ctx.say_event = _priority_recorder(calls)
+        app.ctx.settings.route_transition_assist = True
+
+        # The light changing under the driver, and the assist acting on it.
+        _on_ramp(d, "signal", red=True, mph=35.0)
+        d._ramp_light_last_phase = "green"
+        d._update_ramp_light(0.1)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.08
+        d.truck.brake = 0.0
+        d.truck.throttle = 0.5
+        d._update_ramp_terminal_assist()
+
+        spoken = [text for text, _ in calls]
+        assert any("turns red" in text for text in spoken), spoken
+        assert any("assistance braking" in text for text in spoken), spoken
+        for text, priority in calls:
+            assert priority == EventPriority.ROUTE, (text, priority)
+    finally:
+        app.shutdown()

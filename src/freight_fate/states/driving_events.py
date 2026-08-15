@@ -1778,17 +1778,33 @@ class DrivingEventMixin:
             self._ramp_waiting_at_light = False
             self._ramp_terminal_done = True
             self.ctx.audio.play("events/ramp_light_green", volume=0.8)
-            self.ctx.say_event("Green light. Pull ahead to the entrance.", interrupt=False)
+            self.ctx.say_event(
+                "Green light. Pull ahead to the entrance.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+            )
             return
         # Every phase change speaks. The light is an instruction, not
         # ambiance: a silent flip back to red between the spoken green and
         # the stop bar cost real playtesters real trailer damage. The wording
         # is distance-aware: a screen shows where the stop bar is, so speech
         # has to say whether the driver has reached it.
+        #
+        # ROUTE, for the same reason the comment above gives. Left at the
+        # AMBIENT default, this whole family waited the full stale budget
+        # behind whatever was speaking, and on a real ramp the pacer dropped
+        # the assist's own "braking for the light" sixteen milliseconds after
+        # the yellow call, then "through on the yellow" behind it -- so the
+        # truck braked for the light and the driver was told none of it
+        # (owner playtest, 2026-08-15).
         short = self._ramp_mi > RAMP_ACCESS_MI
         if phase == "red":
             self.ctx.audio.play("events/ramp_light_red", volume=0.7)
-            self.ctx.say_event("The light ahead turns red. Be ready to stop.", interrupt=False)
+            self.ctx.say_event(
+                "The light ahead turns red. Be ready to stop.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+            )
         elif phase == "yellow":
             self.ctx.audio.play("ui/notify", volume=0.7)
             message = (
@@ -1797,7 +1813,7 @@ class DrivingEventMixin:
                 if short
                 else "The light turns yellow at the bar. Continuing through is legal."
             )
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
         else:
             self.ctx.audio.play("events/ramp_light_green", volume=0.7)
             message = (
@@ -1806,7 +1822,7 @@ class DrivingEventMixin:
                 if short
                 else "The light ahead turns green."
             )
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
 
     def _update_ramp_queue_guidance(self) -> None:
         """Tell a driver stopped short of the stop bar to close the gap.
@@ -1894,9 +1910,14 @@ class DrivingEventMixin:
                         f"{threshold} {unit_word} to stop bar, "
                         f"speed limit {self._approach_limit_text()}.",
                         interrupt=False,
+                        priority=EventPriority.ROUTE,
                     )
                     return
-                self.ctx.say_event(f"{threshold} {unit_word} to the bar.", interrupt=False)
+                self.ctx.say_event(
+                    f"{threshold} {unit_word} to the bar.",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                )
                 return
 
     def _set_bar_solid(self, on: bool) -> None:
@@ -2029,7 +2050,9 @@ class DrivingEventMixin:
             )
             if self._terse_speech():
                 self.ctx.say_event(
-                    f"Light at ramp end, {phase}. Limit {limit_text}.", interrupt=False
+                    f"Light at ramp end, {phase}. Limit {limit_text}.",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
                 )
                 return
             # "Brake to a stop" alone invites stopping right here, a quarter
@@ -2047,17 +2070,24 @@ class DrivingEventMixin:
             else:
                 message = "Traffic light at the end of the ramp, currently green."
             self.ctx.say_event(
-                f"{message} Speed limit {limit_text} on the approach.", interrupt=False
+                f"{message} Speed limit {limit_text} on the approach.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
             )
         elif self._ramp_control == "stop":
             self.ctx.audio.play("ui/notify", volume=0.7)
             if self._terse_speech():
-                self.ctx.say_event(f"Stop sign at ramp end. Limit {limit_text}.", interrupt=False)
+                self.ctx.say_event(
+                    f"Stop sign at ramp end. Limit {limit_text}.",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                )
                 return
             self.ctx.say_event(
                 "Stop sign at the end of the ramp. Brake to a full stop there. "
                 f"Speed limit {limit_text} on the approach.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
             )
 
     def _update_ramp_terminal_assist(self) -> None:
@@ -2106,6 +2136,7 @@ class DrivingEventMixin:
                 self.ctx.say_event(
                     "Stopped at the sign. Clear; pull ahead to the entrance.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                 )
             elif not self._ramp_waiting_at_light:
                 self._ramp_waiting_at_light = True
@@ -2147,7 +2178,9 @@ class DrivingEventMixin:
             self._pause_speed_control(resume_when_rolling=True)
             what = "light" if self._ramp_control == "signal" else "stop sign"
             self.ctx.say_event(
-                f"Route-transition assistance braking for the {what}.", interrupt=False
+                f"Route-transition assistance braking for the {what}.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
             )
 
     def _update_ramp_terminal(self) -> None:
@@ -2207,7 +2240,7 @@ class DrivingEventMixin:
                 message = "Through on the yellow; brake for the entrance."
             else:
                 message = "Green light. Through the intersection; brake for the entrance."
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
             return
         if self._ramp_control == "stop":
             if speed > RED_STOP_MPH and not past_bar:
