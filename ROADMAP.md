@@ -1274,14 +1274,17 @@ onto exit signalling.
       pattern); the pickup gate and city-service arrivals still pin the
       odometer at the end regardless of speed — same treadmill, same fix
       pattern, deliberately left out of the first pass.
-- [ ] **Speak refused backups where the player can hear it.** A
-      non-transient upload rejection only lands in the Cloud backup
-      menu's status line; nothing is spoken at save time, so a refused
-      backup sounds exactly like a working one until the player goes
-      looking (this is also what kept the possession bug invisible --
-      and the same silence family as the sticky-conflict case from
-      Jessie's stale prod save). Consider a one-time spoken notice when
-      a slot's backups stop being accepted.
+- [ ] **Speak refused backups where the player can hear it.** The manual
+      half shipped 2026-08-14 (Shane's report): Save game at the terminal
+      now runs the backup immediately (`CloudSaves.backup_now`, no
+      debounce or backoff) and speaks the outcome -- accepted, already
+      backed up, rejected with the career named, conflict, paused
+      sign-in, or still retrying. Still open: the automatic background
+      saves stay silent, so a refused backup between manual saves still
+      sounds like a working one (this is what kept the possession bug
+      invisible -- the same silence family as the sticky-conflict case
+      from Jessie's stale prod save). Consider a one-time spoken notice
+      when a slot's backups stop being accepted.
 - [ ] **Report client sync status server-side so stalls are diagnosable
       from the dashboard.** The client now logs its per-career sync state
       at startup (2026-08-13), but that only helps for testers who share

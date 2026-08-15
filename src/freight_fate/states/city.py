@@ -94,6 +94,11 @@ def _job_from_payload(data: dict) -> Job:
 # Empty-drive range for shopping another city's board.
 BOBTAIL_RANGE_MI = 400.0
 
+# How long a manual "Save game" waits for its cloud backup result before
+# handing the attempt back to the background retry. Long enough for a normal
+# round trip, short enough that a dead network never holds the answer hostage.
+BACKUP_RESULT_WAIT_S = 10.0
+
 
 def first_dispatch_done(profile) -> bool:
     return "first_dispatch" in getattr(profile, "achievements", ())
@@ -156,6 +161,9 @@ class CityMenuState(MenuState):
         # same instance (coming back from the dispatch board, say) interrupt as
         # usual, so stale speech never delays where-you-are.
         self._queue_entry_announcement = queue_entry_announcement
+        # A manual save watching for its cloud backup result:
+        # (slot name, attempt token, seconds left to wait), or None.
+        self._backup_watch: tuple[str, int, float] | None = None
 
     @property
     def title(self) -> str:  # type: ignore[override]
@@ -166,6 +174,11 @@ class CityMenuState(MenuState):
 
     def enter(self) -> None:
         self._confirm_sleep_rested = False
+        # Entering -- first arrival or coming back from a submenu -- drops any
+        # backup announcement still owed to an earlier save: spoken text is
+        # the interface, and a stale "Backed up to the cloud" landing minutes
+        # later would describe a save the player has moved past.
+        self._backup_watch = None
         sequence = select_menu_music_sequence(self.ctx.profile)
         self.ctx.play_music_sequence("menu", sequence)
         self.ctx.audio.set_ambient("poi/facility_gate")
@@ -187,6 +200,7 @@ class CityMenuState(MenuState):
         super().jump(index)
 
     def exit(self) -> None:
+        self._backup_watch = None
         self.ctx.audio.set_ambient(None)
 
     def presence(self):
@@ -816,7 +830,72 @@ class CityMenuState(MenuState):
     def _save(self) -> None:
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
+        # A manual save is the player asking for certainty (Shane's report,
+        # 2026-08-14): the cloud backup runs right away and the result is
+        # spoken, because a silent background upload is indistinguishable
+        # from no backup for a screen reader user. update() speaks exactly
+        # one result line when the attempt lands.
+        cloud = self.ctx.cloud_saves_service()
+        p = self.ctx.profile
+        # Sandbox runs (driving school, forced playtest scenarios) never reach
+        # disk in save_profile, so their throwaway profile must never reach
+        # the cloud either -- it would overwrite the real career's slot.
+        sandbox = getattr(self.ctx, "school_sandbox", False) or getattr(
+            self.ctx, "playtest_sandbox", False
+        )
+        if cloud.enabled and p is not None and not sandbox:
+            token = cloud.backup_now(p)
+            if token is not None:
+                from ..cloud_saves import save_slot_name
+
+                self._backup_watch = (save_slot_name(p.name), token, BACKUP_RESULT_WAIT_S)
+                self.ctx.say("Game saved. Backing up.")
+                return
         self.ctx.say("Game saved.")
+        if cloud.identity is not None and not cloud.enabled:
+            # The player set up an account but backup is off: say so here,
+            # where they asked to save, instead of only in the Online menu.
+            # With no account configured, saving stays local and quiet.
+            self.ctx.say(cloud.status, interrupt=False)
+
+    def update(self, dt: float) -> None:
+        super().update(dt)
+        if self._backup_watch is None:
+            return
+        name, token, remaining = self._backup_watch
+        outcome = self.ctx.cloud_saves_service().outcome_for(name, token)
+        if outcome is None:
+            remaining -= dt
+            if remaining > 0.0:
+                self._backup_watch = (name, token, remaining)
+                return
+            # Still in flight after the bounded wait: the worker keeps
+            # retrying on its own, and the player is told so once.
+            outcome = "network"
+        self._backup_watch = None
+        self.ctx.audio.play("ui/notify")
+        self.ctx.say(self._backup_outcome_text(name, outcome), interrupt=False)
+
+    def _backup_outcome_text(self, name: str, outcome: str) -> str:
+        """One spoken line per cloud backup outcome family, reusing the
+        standing status wording wherever one already exists."""
+        from ..cloud_saves import AUTH_PAUSED_STATUS, rejection_status
+
+        if outcome == "accepted":
+            return "Backed up to the cloud."
+        if outcome == "unchanged":
+            return "Your latest save is already backed up."
+        if outcome.startswith("rejected:"):
+            return rejection_status(name, outcome.split(":", 1)[1])
+        if outcome == "conflict":
+            return (
+                f"{name} needs attention: the cloud copy changed on another "
+                "computer. Open Restore a cloud backup on the Online menu "
+                "to choose which copy to keep."
+            )
+        if outcome == "auth":
+            return AUTH_PAUSED_STATUS
+        return "The backup will keep retrying in the background."
 
     def _settings(self) -> None:
         from .main_menu import SettingsState

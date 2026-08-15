@@ -1371,3 +1371,283 @@ def test_legacy_snapshot_is_labeled_and_refused_before_the_confirm_step():
         assert any("stays safe in your orinks.net account" in text for text in spoken)
     finally:
         app.shutdown()
+
+
+# -- the manual backup attempt (Shane's report, 2026-08-14: hitting Save gave ----
+# -- no sign a backup ran, so a silent one was indistinguishable from none) ------
+
+
+def test_backup_now_skips_the_debounce():
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+
+    token = service.backup_now(Profile(name="Road Star"))
+
+    # No debounce wait: the attempt went out inside the call.
+    assert len(transport.posts) == 1
+    assert service.outcome_for("Road Star", token) == "accepted"
+    assert service.sync_state.slot("Road Star")["revision"] == 1
+
+
+def test_backup_now_bypasses_the_transient_retry_backoff():
+    transport = FakeTransport(error=OSError("no network"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+    assert len(transport.posts) == 1  # failed: the backoff is armed
+
+    # A background pump sits the backoff out...
+    service.pump()
+    assert len(transport.posts) == 1
+
+    # ...the manual attempt does not.
+    transport.error = None
+    token = service.backup_now(Profile(name="Road Star"))
+    assert len(transport.posts) == 2
+    assert service.outcome_for("Road Star", token) == "accepted"
+
+
+def test_backup_now_reports_content_already_on_the_server():
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+    service.queue_backup(profile)
+    drain(service, clock)
+
+    token = service.backup_now(profile)  # nothing changed since
+
+    assert len(transport.posts) == 1  # the content-hash skip still holds
+    assert service.outcome_for("Road Star", token) == "unchanged"
+
+
+def test_backup_now_reports_a_rejection_with_its_reason():
+    transport = FakeTransport(error=rejected_error("invalid_achievement"))
+    service = make_service(transport, Clock())
+
+    token = service.backup_now(Profile(name="Road Star"))
+
+    assert service.outcome_for("Road Star", token) == "rejected:invalid_achievement"
+
+
+def test_backup_now_reports_the_auth_family():
+    service = make_service(FakeTransport(error=auth_error()), Clock())
+
+    token = service.backup_now(Profile(name="Road Star"))
+
+    assert service.outcome_for("Road Star", token) == "auth"
+
+
+def test_backup_now_reports_network_trouble_and_keeps_retrying():
+    transport = FakeTransport(error=OSError("no route"))
+    clock = Clock()
+    service = make_service(transport, clock)
+
+    token = service.backup_now(Profile(name="Road Star"))
+
+    assert service.outcome_for("Road Star", token) == "network"
+    # The snapshot stays queued for the background retry cadence.
+    transport.error = None
+    clock.advance(RETRY_INTERVAL_S + 0.1)
+    service.pump()
+    assert service.sync_state.slot("Road Star")["revision"] == 1
+
+
+def test_backup_now_records_a_fresh_conflict():
+    transport = FakeTransport(error=conflict_error(latest_revision=5))
+    service = make_service(transport, Clock())
+
+    token = service.backup_now(Profile(name="Road Star"))
+
+    assert service.outcome_for("Road Star", token) == "conflict"
+    assert "Road Star" in service.conflicts()
+
+
+def test_backup_now_respects_a_recorded_conflict():
+    # The conflict guard is unchanged: a live cloud copy still blocks the
+    # upload -- but the manual attempt reports it instead of staying silent.
+    transport = RoutedTransport(
+        list_reply={"ok": True, "saves": [{"saveName": "Road Star", "revision": 40}]}
+    )
+    service = make_service(transport, Clock())
+    service.sync_state.record_conflict("Road Star", {"latestRevision": 40})
+
+    token = service.backup_now(Profile(name="Road Star"))
+
+    assert transport.posts == []
+    assert service.outcome_for("Road Star", token) == "conflict"
+
+
+def test_backup_now_disabled_returns_no_token():
+    service = make_service(FakeTransport(), Clock(), enabled=False)
+    assert service.backup_now(Profile(name="Road Star")) is None
+
+
+def test_outcome_for_ignores_results_from_an_earlier_attempt():
+    service = make_service(FakeTransport(), Clock())
+    token = service.backup_now(Profile(name="Road Star"))
+    assert service.outcome_for("Road Star", token) == "accepted"
+    # A later attempt's poller never hears the old result.
+    assert service.outcome_for("Road Star", token + 1) is None
+
+
+# -- the Save game item at the terminal speaks the backup result ------------------
+
+
+def make_terminal_menu(app, service):
+    """The terminal menu over an injected cloud service. The state is not
+    entered: enter() starts music and warms live weather, and _save needs
+    neither."""
+    from freight_fate.states.city import CityMenuState
+
+    app.cloud = service
+    app.ctx.profile = Profile(name="Road Star", current_city="Chicago")
+    return CityMenuState(app.ctx)
+
+
+def test_terminal_save_speaks_the_accepted_backup(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        menu = make_terminal_menu(app, make_service(FakeTransport(), Clock()))
+
+        menu._save()
+        assert spoken[-1] == "Game saved. Backing up."
+
+        menu.update(0.0)
+        assert spoken[-1] == "Backed up to the cloud."
+    finally:
+        app.shutdown()
+
+
+def test_terminal_save_says_when_the_latest_save_is_already_backed_up(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        menu = make_terminal_menu(app, make_service(FakeTransport(), Clock()))
+        menu._save()
+        menu.update(0.0)
+
+        spoken.clear()
+        menu._save()
+        menu.update(0.0)
+
+        assert spoken == [
+            "Game saved. Backing up.",
+            "Your latest save is already backed up.",
+        ]
+    finally:
+        app.shutdown()
+
+
+def test_terminal_save_speaks_a_rejection_with_the_career_named(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        service = make_service(FakeTransport(error=rejected_error("impossible_money")), Clock())
+        menu = make_terminal_menu(app, service)
+
+        menu._save()
+        menu.update(0.0)
+
+        assert spoken[-2] == "Game saved. Backing up."
+        assert spoken[-1].startswith("Road Star: backup not accepted.")
+        assert "flagged it for review" in spoken[-1]
+        # The raw reason code stays log-only, exactly as in the background queue.
+        assert "impossible_money" not in " ".join(spoken)
+    finally:
+        app.shutdown()
+
+
+def test_terminal_save_with_cloud_off_mentions_it_only_when_an_account_exists(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        # An account is configured but backup is off: the save says so.
+        menu = make_terminal_menu(app, make_service(FakeTransport(), Clock(), enabled=False))
+        menu._save()
+        assert spoken == [
+            "Game saved.",
+            "Cloud backup is off. Saves on this computer are not backed up.",
+        ]
+
+        # No account at all: saving stays local and quiet, exactly as before.
+        app.cloud = make_service(FakeTransport(), Clock(), enabled=False, identity=None)
+        spoken.clear()
+        menu._save()
+        assert spoken == ["Game saved."]
+    finally:
+        app.shutdown()
+
+
+def test_terminal_save_hands_a_silent_attempt_back_to_the_background(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import BACKUP_RESULT_WAIT_S
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        # A threaded service whose worker is never started: the outcome can
+        # never land inside the wait, deterministically.
+        service = CloudSaves(
+            enabled=True,
+            identity=IDENTITY,
+            transport=FakeTransport(error=OSError("no route")),
+            threaded=True,
+        )
+        menu = make_terminal_menu(app, service)
+
+        menu._save()
+        assert spoken[-1] == "Game saved. Backing up."
+
+        menu.update(BACKUP_RESULT_WAIT_S / 2)
+        assert spoken[-1] == "Game saved. Backing up."
+
+        menu.update(BACKUP_RESULT_WAIT_S)
+        assert spoken[-1] == "The backup will keep retrying in the background."
+
+        # Exactly one result line: nothing else ever arrives for this save.
+        menu.update(60.0)
+        assert spoken.count("The backup will keep retrying in the background.") == 1
+    finally:
+        app.shutdown()
+
+
+def test_leaving_the_terminal_drops_the_pending_backup_announcement(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        service = CloudSaves(
+            enabled=True,
+            identity=IDENTITY,
+            transport=FakeTransport(),
+            threaded=True,  # worker never started: the outcome stays pending
+        )
+        menu = make_terminal_menu(app, service)
+        menu._save()
+
+        menu.exit()
+        spoken.clear()
+        menu.update(60.0)
+
+        assert spoken == []
+    finally:
+        app.shutdown()
