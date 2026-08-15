@@ -242,6 +242,14 @@ ARITHMETIC_REJECTION_REASONS = frozenset({"impossible_xp", "impossible_money"})
 # player did to the save.
 SCHEMA_REJECTION_REASONS = frozenset({"invalid_schema", "unsupported_version"})
 
+# The server checks the town a career is parked in against its own city list,
+# so a city the game knows and the server has not caught up with refuses every
+# backup from that career until the server is updated. That is a real failure
+# mode, not a hypothetical -- a tester's backups stopped for a day on a stale
+# deployed catalog (2026-08-14) -- and under the generic wording it looked like
+# an unexplained refusal. Nothing the player can do about it, so say so.
+CATALOG_REJECTION_REASONS = frozenset({"invalid_city"})
+
 
 def rejection_status(name: str, reason: str | None) -> str:
     """The player-facing status line for a server-refused upload.
@@ -268,6 +276,13 @@ def rejection_status(name: str, reason: str | None) -> str:
             f"{name}: backup not accepted. Your game and the server "
             "disagree about this save's shape -- usually a build mismatch, "
             "not something you did. Your local career is safe."
+        )
+    if reason in CATALOG_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. The server does not recognise the "
+            "town this career is parked in, which usually means it has not "
+            "caught up with this build yet. Your local career is safe, and "
+            "backups start working again on their own once it has."
         )
     return (
         f"{name}: backup not accepted. Your local career is safe. Public details were not updated."

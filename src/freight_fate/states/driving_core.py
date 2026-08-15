@@ -744,7 +744,13 @@ SPEEDING_LEEWAY_MPH = OBSERVE_LEEWAY_MPH
 # Anything at or above 9 would let a driver become ticketable in silence,
 # which inverts what the alert is for.
 OVERSPEED_WARN_MPH = 7.0  # over the limit where the warning arms
-OVERSPEED_RESET_MPH = 1.0  # back within this of the limit disarms it
+# Hysteresis measured from the arm point, NOT from the limit. Measured from the
+# limit it was six mph deep: one honest trigger at nine over went on chiming
+# through six, five, four and three over while the driver was slowing down, so
+# a driver who blipped over once heard the alert at speeds it must never speak
+# at (playtest, 2026-08-15, and the tester report behind it). Back under the
+# threshold by this much and the episode is over.
+OVERSPEED_RESET_MPH = 1.0
 # The cadence carries the magnitude: slightly over dings politely, a real
 # runaway dings twice a second. Interval slides between these ends as the
 # overage grows.

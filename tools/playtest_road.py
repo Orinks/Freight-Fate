@@ -409,7 +409,12 @@ def build_driving(ctx, hit: Hit, args):
     if args.verbosity is not None:
         s.speech_verbosity = args.verbosity
 
-    ctx.profile = Profile(name="Playtest", current_city=hit.origin)
+    # The canonical key, not the display name the route sets are written in:
+    # a career's current_city is a slug ("dallas_tx_us"), and cloud backup
+    # refuses anything else as an unknown city. Left as the display name, every
+    # playtest quietly threw a rejected upload at the server and told the
+    # driver its backup was not accepted (2026-08-15).
+    ctx.profile = Profile(name="Playtest", current_city=ctx.world.resolve_city_key(hit.origin))
     route = ctx.world.supported_route(hit.origin, hit.destination)
     job = Job(
         CARGO_CATALOG[args.cargo_type],

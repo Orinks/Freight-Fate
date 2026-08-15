@@ -963,6 +963,25 @@ def test_upload_rejected_for_unsupported_version_speaks_the_same_schema_story():
     assert "build mismatch" in service.status
 
 
+def test_upload_rejected_for_an_unknown_city_names_the_server_as_behind():
+    """A city the server has not caught up with is nobody's fault.
+
+    Under the generic wording this reads as an unexplained refusal, and it is
+    a live failure mode: a stale deployed catalog stopped a tester's backups
+    for a day (2026-08-14) with nothing to tell them why.
+    """
+    transport = FakeTransport(error=rejected_error("invalid_city"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+
+    status = service.status
+    assert status.startswith("Road Star: backup not accepted.")
+    assert "does not recognise the town" in status
+    assert "flagged" not in status
+
+
 def test_upload_rejected_for_an_unrecognized_code_falls_back_safely_with_the_name():
     transport = FakeTransport(error=rejected_error("invalid_market"))
     clock = Clock()
