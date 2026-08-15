@@ -476,9 +476,10 @@ A merging vehicle carries no target speed: it merges behind or passes on
 its own, and naming a speed to "be ready for" read as an instruction to
 slow down that the situation never asked for. The same rule holds for the
 route-merge and construction-taper traffic-pressure advisories
-(`Trip._traffic_pressure_message`, GPS_CUE): "Merging traffic ahead, keep
-right, leave a gap" and "Traffic squeezing at the construction taper,
-merge left early, leave a gap" carry no speed either. The taper's actual
+(`Trip._traffic_pressure_message`, GPS_CUE): "Merging traffic in
+«distance». Keep «direction» and leave a gap." and "Traffic squeezing at
+the construction taper in «distance». Merge «direction» early and leave a
+gap." carry no speed either. The taper's actual
 posted limit is a real sign, not a merge advisory, and is still spoken by
 the separate zone warning/entry lines. Exit traffic keeps its speed --
 the truck itself is slowing for the ramp, not reacting to someone else's
