@@ -107,6 +107,22 @@ def test_describe_names_the_lane():
     assert lane.describe() == "In the left lane, drifting left."
 
 
+def test_a_single_lane_road_has_no_side_to_name():
+    """"The right lane" on a one-lane road invites the driver to wonder what
+    is in the left one, when there is no left one (Cary, 2026-08-15)."""
+    from freight_fate.sim.lane import lane_phrase
+
+    lane = LaneKeeping(seed=1)
+    lane.set_lane_count(1)
+    lane.offset = 0.0
+    assert lane.describe() == "In the lane, centered."
+    lane.offset = -0.5
+    assert lane.describe() == "In the lane, drifting left."
+    assert lane_phrase(0, 1) == "the lane"
+    # Two lanes and up still name the side, which is the whole point there.
+    assert lane_phrase(0, 2) == "the right lane"
+
+
 def test_set_lane_count_clamps_the_lane():
     lane = LaneKeeping(seed=1)
     lane.lane = 1
@@ -643,7 +659,11 @@ def test_a_narrowing_road_with_no_closure_says_the_forced_move(monkeypatch):
         assert len(calls) == 1
         text, interrupt = calls[0]
         assert "road narrows to one lane" in text
-        assert "right lane" in text
+        # Narrowing to ONE lane already tells the driver which lane they are
+        # in, so the line no longer names a side that does not exist any more
+        # (Cary, 2026-08-15) -- it just says they were moved.
+        assert "You are moved over." in text
+        assert "right lane" not in text
         assert interrupt is True  # never-dropped, same family as the closure call
         assert text in [m.text for m in app.ctx.message_log.messages]
     finally:

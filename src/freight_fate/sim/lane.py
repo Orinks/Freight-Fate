@@ -39,12 +39,32 @@ DEFAULT_LANE_COUNT = 2
 
 
 def lane_label(index: int, count: int) -> str:
-    """Spoken name for a lane index: right, left, or middle."""
+    """Spoken name for a lane index: right, left, or middle.
+
+    A single-lane road has no sides to name. Calling it "the right lane"
+    invites the driver to wonder what is in the left one when there is no
+    left one (Cary, 2026-08-15), so it answers to the road itself. Callers
+    that build "the {label} lane" get "the single lane"; the readouts that
+    want a bare noun use ``lane_phrase`` below.
+    """
+    if count <= 1:
+        return "single"
     if index <= 0:
         return "right"
     if index >= count - 1:
         return "left"
     return "middle"
+
+
+def lane_phrase(index: int, count: int) -> str:
+    """How a readout names the lane the truck is in, article included.
+
+    "In the right lane" reads naturally; "In the single lane" does not, so
+    a one-lane road simply says "In the lane".
+    """
+    if count <= 1:
+        return "the lane"
+    return f"the {lane_label(index, count)} lane"
 
 
 class LaneKeeping:
@@ -171,7 +191,7 @@ class LaneKeeping:
         return self._edge_excursion()
 
     def describe(self) -> str:
-        lane_part = f"In the {self.lane_name} lane"
+        lane_part = f"In {lane_phrase(self.lane, self.lane_count)}"
         side = "left" if self.offset < 0 else "right"
         away = abs(self.offset)
         if away < 0.25:

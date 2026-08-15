@@ -71,7 +71,7 @@ from ..sim import hos
 from ..sim.driving_modes import tuning_for_time_scale
 from ..sim.enforcement_observe import OBSERVE_LEEWAY_MPH
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
-from ..sim.lane import CURVE_RATE, LaneKeeping, lane_label
+from ..sim.lane import CURVE_RATE, LaneKeeping, lane_label, lane_phrase
 from ..sim.lane_guidance import LaneGuidance
 from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE

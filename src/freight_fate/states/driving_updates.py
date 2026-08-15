@@ -1119,7 +1119,9 @@ class DrivingUpdateMixin:
             self._finish_hazard_clear(f"You swerve around {names}. Well done.")
             return
         if not quiet:
-            self.ctx.say_event(f"In the {lane.lane_name} lane.", interrupt=False)
+            self.ctx.say_event(
+                f"In {lane_phrase(lane.lane, lane.lane_count)}.", interrupt=False
+            )
 
     def _closed_lane_here(self) -> int | None:
         """The coned-off lane index in the truck's own lane numbering.
@@ -1195,13 +1197,19 @@ class DrivingUpdateMixin:
             and before_lane >= count
             and before_lane != self.lane.lane
         ):
-            open_name = lane_label(self.lane.lane, count)
             self.ctx.audio.play(
                 "vehicle/lane_line_cross", volume=min(1.0, 0.7 * self._cue_loudness())
             )
+            # Naming the lane is only worth saying while there is another one
+            # it could have been. Narrowing to one lane already said which
+            # lane you are in by saying there is only one.
+            moved = (
+                "You are moved over."
+                if count <= 1
+                else f"You are moved to the {lane_label(self.lane.lane, count)} lane."
+            )
             self.ctx.say_event(
-                f"The road narrows to {_lane_count_words(count)}. You are "
-                f"moved to the {open_name} lane.",
+                f"The road narrows to {_lane_count_words(count)}. {moved}",
                 interrupt=True,
             )
 

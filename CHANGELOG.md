@@ -438,6 +438,12 @@
 
 ### Fixed
 
+- **A one-lane road no longer calls itself the right lane.** Pressing L on a
+  road with only one lane answered "In the right lane", which invites you to
+  wonder what is in the left one when there is no left one. It now says "In
+  the lane" and reports your position in it as usual. The call that moves you
+  when the road narrows to a single lane has stopped naming a side too.
+
 - **Your own playlists work again, and they can now carry internet stations
   as well as music files.** A playlist exported from an internet radio app
   is nothing but station addresses, and every one of those was thrown away,
