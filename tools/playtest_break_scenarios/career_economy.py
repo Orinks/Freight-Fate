@@ -351,7 +351,11 @@ def _owner_op_boundary():
     findings: list[str] = []
     app = App()
     try:
-        app.ctx.profile = Profile(name="Owner Boundary", current_city="Chicago")
+        # Slug, not display name -- see the note in playtest_break.py.
+        app.ctx.profile = Profile(
+            name="Owner Boundary",
+            current_city=app.ctx.world.resolve_city_key("Chicago"),
+        )
         p = app.ctx.profile
         p.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL - 1]  # exactly level 18
         if p.career.level != OWNER_OPERATOR_LEVEL:
@@ -384,7 +388,10 @@ def _owner_op_boundary():
     # One level short, plenty of money: must be refused and name level 18.
     app2 = App()
     try:
-        app2.ctx.profile = Profile(name="One Short", current_city="Chicago")
+        app2.ctx.profile = Profile(
+            name="One Short",
+            current_city=app2.ctx.world.resolve_city_key("Chicago"),
+        )
         p2 = app2.ctx.profile
         p2.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL - 2]  # level 17
         if p2.career.level != OWNER_OPERATOR_LEVEL - 1:
