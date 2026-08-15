@@ -166,9 +166,12 @@ def test_an_unusable_playlist_warns_and_builds_no_station(tmp_path, caplog):
     with caplog.at_level(logging.INFO, logger="freight_fate.radio"):
         stations = load_personal_playlists(tmp_path)
     assert [s.name for s in stations] == ["good"]
-    warnings = [r.message % r.args for r in caplog.records if r.levelno >= logging.WARNING]
+    # getMessage(), not message % args: caplog's records have already been
+    # through a handler, so ``message`` is the interpolated text and applying
+    # the args a second time raises rather than reporting the real result.
+    warnings = [r.getMessage() for r in caplog.records if r.levelno >= logging.WARNING]
     assert any("empty.m3u" in text for text in warnings)
-    info = [r.message % r.args for r in caplog.records if r.levelno == logging.INFO]
+    info = [r.getMessage() for r in caplog.records if r.levelno == logging.INFO]
     assert any("good.m3u" in text and "1 files, 1 streams" in text for text in info)
 
 
