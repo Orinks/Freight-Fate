@@ -39,6 +39,7 @@ This file catalogues the game layer, and then the spoken vocabulary for both.
 | Duty log | `DutyLog` | `sim/hos.py` |
 | Loyalty account | `LoyaltyAccount` | `models/loyalty.py` |
 | Radio favorite (spoken "favorites", a saved station) | `RadioState.favorite_ids` | `radio.py` |
+| Personal playlist station (one of the player's own playlist files on the dial) | `PERSONAL_PLAYLIST_SOURCE_TYPE`, `load_personal_playlists` | `radio.py` |
 | Save migration | `migrate_save_data`, `SAVE_VERSION` | `models/save_migration.py` |
 | Career from an earlier version (the 1.9 cutover gate; never "legacy" in spoken text) | `created_line`, `LegacyCareerError` | `models/profile.py` |
 | Integrity signature | `SIGNATURE_FIELD`, `ProfileIntegrityError` | `models/profile.py` |
@@ -325,6 +326,7 @@ from the words, and synonyms cost them a re-read.
 | The sounding entry for liquid running back and forth inside a tank trailer (the concept itself is "surge", above) | Surge | slosh, sloshing, wave action | `vehicle/liquid_wash`, `sim/surge.LiquidLoad` |
 | The load hitting the front or back of the tank | Surge strike | liquid hit, fore-aft strike | `vehicle/liquid_hit`, `sim/surge.SloshAxis` |
 | The load hitting the side of the tank -- the one that rolls trucks | Surge strike, sideways | lateral hit, side slosh | `vehicle/liquid_hit_lateral`, `sim/surge.SloshAxis` |
+| A station built from one of the player's own playlist files | playlist; what is in it is tracks, whether a track is a file or an internet station | mix, folder, media library, your files | `PERSONAL_PLAYLIST_SOURCE_TYPE`, `RadioStation.playlist_entries` |
 | The one career whose accepted backups front the player's public profile | public career | shared career, featured career, main save | `publicSaveName` |
 | Game sound lowering itself while the road voice speaks | game sounds step back for speech (the Settings > Audio row) | ducking, audio duck, attenuation | `settings.duck_audio_for_speech`, `AudioEngine.set_speech_duck` |
 

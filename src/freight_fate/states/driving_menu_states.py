@@ -311,6 +311,11 @@ class DrivingStatusScreenState(MenuState):
 
     def _radio_lines(self) -> list[str]:
         d = self.driving
+        # Opening the dial re-reads the Playlists folder: a playlist added or
+        # repaired mid-run used to need a whole new drive before the radio
+        # would look at the folder again, and this screen is where a player
+        # goes to find out why their playlist is not on the dial.
+        d.radio.reload_personal_playlists()
         d._sync_radio_settings()
         settings = self.ctx.settings
         position = d.radio.position

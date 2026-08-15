@@ -172,10 +172,16 @@ class DrivingState(
         self._radio_break_pos = 0
         self._radio_break_count = 0
         self._radio_tracks_since_break = 0
-        # Personal M3U stations: where each playlist left off this drive,
-        # and a short hold between files so a fade-in never reads as ended.
+        # Personal playlist stations: where each playlist left off this drive,
+        # and a hold between entries so neither a fade-in nor a stream still
+        # connecting ever reads as a finished track.
         self._playlist_positions: dict[str, int] = {}
         self._playlist_wait_s = 0.0
+        self._playlist_stream_tries = 0
+        self._playlist_stream_skips = 0
+        # Which playlists have already said they have nothing that will play,
+        # so a broken folder explains itself once instead of every 30 seconds.
+        self._playlist_silence_spoken: set[str] = set()
         # Reception: signal re-checked on a slow cadence while driving so
         # ranged stations fade with distance and drop past their contour.
         self._radio_signal_timer = 0.0

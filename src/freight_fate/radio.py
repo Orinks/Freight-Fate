@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import logging
 import math
 import re
 from dataclasses import dataclass
@@ -12,17 +13,21 @@ from typing import Protocol
 
 from .data.data_resources import read_data_text
 
+log = logging.getLogger(__name__)
+
 SAFE_ROUTE_PLAYLIST = "route_playlist"
 SAFE_FALLBACK_STATION_ID = "ff-safety-satellite"
 RADIO_CATALOG_RESOURCE = "radio_catalog.json"
 RADIO_IMPORTED_RESOURCE = "radio_imported.json"
 EARTH_RADIUS_MI = 3958.8
-# Personal M3U playlists: files dropped into the Playlists folder become
+# Personal playlists: files dropped into the Playlists folder become
 # stations on the dial. A folder, not a file picker, on purpose -- screen
 # reader users manage folders in their file manager far more comfortably
-# than in any in-game browse dialog.
+# than in any in-game browse dialog. Both ubiquitous playlist formats are
+# read, because which one a player has is decided by whatever exported it.
 PERSONAL_PLAYLIST_SOURCE_TYPE = "playlist"
 PLAYLISTS_DIR_NAME = "Playlists"
+PLAYLIST_SUFFIXES = ("*.m3u", "*.m3u8", "*.pls")
 
 
 @dataclass(frozen=True)
@@ -58,9 +63,11 @@ class RadioStation:
     # the elevation term of the range model entirely.
     frequency_mhz: float = 0.0
     site_elev_ft: float | None = None
-    # Personal playlist stations only: the resolved media file paths from the
-    # player's M3U file, in playlist order.
-    playlist_files: tuple[str, ...] = ()
+    # Personal playlist stations only: what the player's playlist file lists,
+    # in playlist order. An entry is either a resolved media file path or an
+    # internet station's URL (is_stream_entry tells them apart), because a
+    # playlist may hold both and the order is the player's own.
+    playlist_entries: tuple[str, ...] = ()
 
     @property
     def display_name(self) -> str:
@@ -280,19 +287,38 @@ def _absolute_anywhere(line: str) -> bool:
     return PurePosixPath(line).is_absolute() or PureWindowsPath(line).is_absolute()
 
 
+def is_stream_entry(entry: str) -> bool:
+    """Whether a playlist entry names an internet station, not a file."""
+    return entry.lower().startswith(("http://", "https://"))
+
+
+def _resolve_entry(line: str, path: Path) -> str:
+    """One playlist line as a stream URL or a fully resolved file path."""
+    if is_stream_entry(line):
+        return line
+    entry = Path(line)
+    if not _absolute_anywhere(line):
+        entry = path.parent / entry
+    return str(entry)
+
+
 def _parse_m3u(path: Path) -> tuple[tuple[str, ...], str]:
-    """Media file paths and the optional #PLAYLIST title from one M3U file.
+    """Entries and the optional #PLAYLIST title from one M3U file.
 
     Relative entries resolve against the M3U's own folder, so a playlist
     exported next to its music keeps working when the folder moves. Stream
-    URLs are skipped: internet radio stays in the curated catalog, where it
-    carries source notes and streamer-safety review."""
+    URLs are entries like any other: a playlist exported from an internet
+    radio app is nothing but stream URLs, and skipping them made the whole
+    station vanish. They need no extra licensing gate -- personal playlist
+    stations are already not safe_for_streaming, so they ride exactly the
+    same streamer-safe switch the curated real streams do."""
     try:
         text = path.read_text(encoding="utf-8-sig", errors="replace")
     except OSError:
+        log.warning("Could not read playlist %s", path.name, exc_info=True)
         return (), ""
     title = ""
-    files: list[str] = []
+    entries: list[str] = []
     for raw in text.splitlines():
         line = raw.strip()
         if not line:
@@ -301,17 +327,48 @@ def _parse_m3u(path: Path) -> tuple[tuple[str, ...], str]:
             if line.upper().startswith("#PLAYLIST:"):
                 title = line.split(":", 1)[1].strip()
             continue
-        if line.lower().startswith(("http://", "https://")):
+        entries.append(_resolve_entry(line, path))
+    return tuple(entries), title
+
+
+def _parse_pls(path: Path) -> tuple[tuple[str, ...], str]:
+    """Entries and a title from one PLS file.
+
+    The format internet radio directories hand out: ``File1=``/``File2=``
+    lines, numbered rather than ordered by position, with a matching
+    ``Title1=``. A one-entry PLS is a single station and its Title1 is that
+    station's own name, which is the best name the dial can give it; a
+    multi-entry PLS titles each track instead, so there the file name wins."""
+    try:
+        text = path.read_text(encoding="utf-8-sig", errors="replace")
+    except OSError:
+        log.warning("Could not read playlist %s", path.name, exc_info=True)
+        return (), ""
+    files: dict[int, str] = {}
+    titles: dict[int, str] = {}
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith(";") or "=" not in line:
             continue
-        entry = Path(line)
-        if not _absolute_anywhere(line):
-            entry = path.parent / entry
-        files.append(str(entry))
-    return tuple(files), title
+        key, value = (part.strip() for part in line.split("=", 1))
+        match = re.fullmatch(r"(?i)(file|title)(\d+)", key)
+        if not match or not value:
+            continue
+        target = files if match.group(1).lower() == "file" else titles
+        target[int(match.group(2))] = value
+    entries = tuple(_resolve_entry(files[n], path) for n in sorted(files))
+    title = titles.get(min(files), "") if len(entries) == 1 and titles else ""
+    return entries, title
+
+
+def _parse_playlist_file(path: Path) -> tuple[tuple[str, ...], str]:
+    if path.suffix.lower() == ".pls":
+        return _parse_pls(path)
+    return _parse_m3u(path)
 
 
 def load_personal_playlists(directory: Path | None = None) -> tuple[RadioStation, ...]:
-    """One dial station per M3U file in the player's Playlists folder.
+    """One dial station per playlist file in the player's Playlists folder.
 
     Creating the folder here is the feature's discoverability: an empty
     Playlists directory next to the saves invites dropping files in.
@@ -320,16 +377,32 @@ def load_personal_playlists(directory: Path | None = None) -> tuple[RadioStation
     base = directory if directory is not None else personal_playlists_dir()
     try:
         base.mkdir(parents=True, exist_ok=True)
-        candidates = sorted(base.glob("*.m3u")) + sorted(base.glob("*.m3u8"))
+        candidates = sorted(
+            (path for pattern in PLAYLIST_SUFFIXES for path in base.glob(pattern)),
+            key=lambda path: path.name.lower(),
+        )
     except OSError:
+        log.warning("Could not read the Playlists folder %s", base, exc_info=True)
         return ()
     stations: list[RadioStation] = []
     used: set[str] = set()
     for path in candidates:
-        files, title = _parse_m3u(path)
-        if not files:
+        entries, title = _parse_playlist_file(path)
+        if not entries:
+            # Silence used to be the whole diagnosis here: no station on the
+            # dial, nothing in the log, nothing spoken.
+            log.warning("Playlist %s has no usable entries; it gets no station", path.name)
             continue
         name = title or path.stem
+        streams = sum(1 for entry in entries if is_stream_entry(entry))
+        log.info(
+            "Playlist %s loaded as %r: %d entries, %d files, %d streams",
+            path.name,
+            name,
+            len(entries),
+            len(entries) - streams,
+            streams,
+        )
         slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "playlist"
         sid = f"playlist-{slug}"
         n = 2
@@ -350,7 +423,7 @@ def load_personal_playlists(directory: Path | None = None) -> tuple[RadioStation
                 # media, so these ride the same gate as real streams.
                 safe_for_streaming=False,
                 always_available=True,
-                playlist_files=files,
+                playlist_entries=entries,
             )
         )
     return tuple(stations)
@@ -644,6 +717,28 @@ class RadioState:
             favorite_ids=set(getattr(profile, "radio_favorites", ()) or ()),
         )
 
+    def reload_personal_playlists(self, directory: Path | None = None) -> None:
+        """Re-read the Playlists folder so the dial matches it right now.
+
+        Playlists used to be read once, when the drive began: a player who
+        fixed a playlist file mid-run had to start another drive before the
+        radio would even look again. The dial screen is the cheap place to
+        re-read -- it opens rarely, and it is exactly where a player goes
+        when their playlist is missing from the dial.
+        """
+        kept = tuple(
+            station
+            for station in self.catalog
+            if station.source_type != PERSONAL_PLAYLIST_SOURCE_TYPE
+        )
+        stale = {station.id for station in self.catalog} - {station.id for station in kept}
+        loaded = load_personal_playlists(directory)
+        self.catalog = kept + loaded
+        self._identity_siblings = _identity_siblings(self.catalog)
+        # A playlist that would not play earlier deserves another chance once
+        # its file has been edited; the session-long ban is for dead streams.
+        self.unplayable_ids -= stale | {station.id for station in loaded}
+
     def apply_settings(self, settings) -> None:
         self.volume = self._clamp_volume(float(getattr(settings, "radio_volume", self.volume)))
         self.streamer_safe = bool(getattr(settings, "radio_streamer_safe", self.streamer_safe))
@@ -931,10 +1026,7 @@ class RadioState:
                 self._play_message(
                     "Radio fallback." if replacement.fallback else "Radio handover.",
                     replacement,
-                    extra=(
-                        f"{original.station.display_name} is off the air; it is "
-                        "off the dial for the rest of this session."
-                    ),
+                    extra=self._refusal_clause(original.station),
                 ),
                 replacement.station,
                 enabled=True,
@@ -943,6 +1035,24 @@ class RadioState:
             )
         return RadioAction(
             self._play_message(prefix, reception), station, enabled=True, reception=reception
+        )
+
+    @staticmethod
+    def _refusal_clause(station: RadioStation) -> str:
+        """Why a station just left the dial, in the player's own terms.
+
+        "Off the air" is true of a dead broadcast and false of a playlist:
+        a playlist whose tracks will not open is a folder problem the player
+        can go and fix, and saying so is the difference between a fixable
+        fault and a mystery."""
+        if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
+            return (
+                f"None of the tracks in {station.display_name} would open; it is "
+                "off the dial for the rest of this session."
+            )
+        return (
+            f"{station.display_name} is off the air; it is "
+            "off the dial for the rest of this session."
         )
 
     def mark_unplayable(self, station_id: str) -> None:
