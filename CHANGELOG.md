@@ -448,6 +448,19 @@
   signed in as, so there is nothing to reconnect and nothing new on the list.
   If your list is already full of old entries, sign out all computers on the
   orinks.net setup page once and connect this one again.
+- **The truck no longer builds speed for a hill the grade key says is not
+  there.** Automatic speed control plans for gentler grades than the ones the
+  game calls steep, so you could hear "building speed for the grade ahead" and
+  then press G and be told nothing steep was coming for fifteen miles. The
+  cue now names the grade it is working for -- "building speed for a 2 percent
+  upgrade ahead" -- and G names that same pull after it tells you nothing
+  steep is coming, so both answers describe the same road.
+- **G now tells you when a grade you are already on is about to get worse.**
+  A two percent descent that steepened to six without flattening out in
+  between was reported as nothing steep ahead. G now says it steepens, how
+  far off it is, and how long it runs. On a steep grade already, the answer
+  is "nothing else steep" rather than a flat contradiction of the sentence
+  before it.
 - **When orinks.net stops accepting this computer, the game now points you at
   a setup that still exists.** The spoken advice described the old
   copy-and-paste connection: an Add computer button on the website and a
