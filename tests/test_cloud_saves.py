@@ -38,6 +38,7 @@ from freight_fate.cloud_saves import (
     download_save,
     list_saves,
     profile_dict_from_content,
+    rejection_status,
     restore_to_disk,
     save_slot_name,
     set_public_save,
@@ -526,6 +527,34 @@ def test_classify_upload_failure_sorts_the_three_honest_families():
     assert classify_upload_failure("error") == "network"
     assert classify_upload_failure("http_500") == "network"
     assert classify_upload_failure(None) == "network"
+
+
+def test_a_permanent_refusal_is_never_left_to_retry_as_if_it_were_the_network():
+    """Two server refusals were missing from this table, so
+    ``classify_upload_failure`` sorted them as "network" and the queue backed
+    off and retried forever without telling the player anything. Neither can
+    ever succeed on a retry: one needs the player to free a slot, the other
+    needs the server fixed. Same class as Jessie's ``invalid_achievement``
+    told as "check your connection" (2026-08-14), different codes."""
+    assert classify_upload_failure("too_many_slots") == "rejected"
+    assert classify_upload_failure("signing_unavailable") == "rejected"
+
+
+@pytest.mark.parametrize(
+    "reason, expected",
+    [
+        ("too_many_slots", "as many careers backed up as the server keeps"),
+        ("signing_unavailable", "could not finish signing"),
+    ],
+)
+def test_each_new_refusal_gets_its_own_honest_sentence(reason, expected):
+    """A refusal the player can clear themselves and one that is ours to fix
+    must not share the generic line -- only one of them has anything to do."""
+    spoken = rejection_status("Little Bear", reason)
+    assert spoken.startswith("Little Bear: backup not accepted.")
+    assert expected in spoken
+    # No jargon reaches the player: the reason code itself never speaks.
+    assert reason not in spoken
 
 
 def test_resolve_keep_mine_reports_network_for_a_transport_error():
