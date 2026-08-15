@@ -438,6 +438,12 @@
 
 ### Fixed
 
+- **The last call before your exit no longer says "in 0 miles".** Once you
+  were inside a mile of a destination exit, the distance was rounded to whole
+  miles and came out as zero, so the announcement sounded like the exit had
+  already gone by while you still had a third of a mile to take it. Inside a
+  mile you now hear a quarter mile, half a mile, or one mile; further out it
+  still counts down in whole miles.
 - **The speed alert stops dinging once you have slowed down.** It arms at
   seven over, which is where it should be -- but once it had armed it kept
   chiming until you were within one mile per hour of the limit, so a single
