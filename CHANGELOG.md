@@ -414,6 +414,22 @@
   so a playlist you add or repair mid-drive shows up without starting a new
   run.
 
+- **The route report now gives you a real distance as you close on a
+  gate.** R used to round everything down to whole miles, so the last half
+  mile to a facility gate answered "0 miles to the gate" over and over
+  while you were still driving it. Now it counts down in quarter miles and
+  then in feet, right down to the entrance. On city streets it also names
+  the street under your wheels instead of a highway you already left, and
+  pulling out of a gate it counts you down to the on-ramp instead of
+  claiming you are partway through the run.
+
+- **The coming-up key is shorter, and no longer reads out police
+  activity.** U used to recite the next exit, traffic pressure, patrols
+  and three bends on top of everything else, most of which already has its
+  own key. It now answers only what nothing else does: the ramp control
+  ahead, the next imposed speed limit, the next stop, and the next bend
+  that will demand slowing. Enforcement still reaches you on the CB.
+
 - **Saving the game now backs up your career right away and tells you how
   it went.** Choosing Save game at the terminal used to run the cloud
   backup silently in the background some seconds later, so "Game saved."

@@ -280,7 +280,15 @@ def test_playtest_harness_can_exercise_npc_traffic(monkeypatch):
 
 
 @pytest.mark.career_1_9
-def test_playtest_harness_can_exercise_traffic_pressure_guidance(monkeypatch):
+def test_upcoming_key_leaves_traffic_pressure_to_its_own_advisory(monkeypatch):
+    """U stopped reciting traffic pressure (owner report, 2026-08-15).
+
+    Two of its three sources restated the clause printed right beside them
+    in the same readout -- the construction taper's own squeeze and the exit
+    traffic for the stop just named. The advisory itself is unchanged and is
+    covered where it is emitted (``test_weather_trip``); what this pins is
+    that pressing U does not repeat it.
+    """
     with PlaytestHarness(monkeypatch) as harness:
         result = harness.start_delivery(profile_name="Harness Traffic Pressure")
         harness.add_traffic_pressure_ahead(
@@ -293,8 +301,8 @@ def test_playtest_harness_can_exercise_traffic_pressure_guidance(monkeypatch):
         harness.press_key(pygame.K_u)
 
     assert "Coming up:" in result.transcript_text
-    assert "exit traffic for harness ramp in 2 miles" in result.transcript_text
-    assert "move right" in result.transcript_text
+    assert "exit traffic for harness ramp" not in result.transcript_text
+    assert "move right and target" not in result.transcript_text
 
 
 def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):

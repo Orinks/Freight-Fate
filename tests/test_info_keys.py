@@ -8,7 +8,12 @@ def key_event(key):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode="", mod=0)
 
 
-def _driving(app, origin="Buffalo", destination="Rochester"):
+def _driving(
+    app,
+    origin="Buffalo",
+    destination="Rochester",
+    origin_location="company yard",
+):
     from freight_fate.models.jobs import CARGO_CATALOG, Job
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import DrivingState
@@ -19,7 +24,7 @@ def _driving(app, origin="Buffalo", destination="Rochester"):
         CARGO_CATALOG["general"],
         12.0,
         origin,
-        "company yard",
+        origin_location,
         destination,
         route.miles,
         1000.0,
@@ -201,9 +206,39 @@ def test_upcoming_key_reports_an_imposed_limit_ahead(monkeypatch):
         app.shutdown()
 
 
-def test_upcoming_key_reports_an_enforcement_post_ahead(monkeypatch):
+def test_upcoming_key_never_reports_enforcement(monkeypatch):
+    """U is the road, not the police (owner ruling, 2026-08-15).
+
+    Enforcement heads-ups still reach the player on the CB; this key does
+    not recite them in any hours-of-service mode, enforced or not.
+    """
     from enforcement_helpers import always_observing_post
 
+    from freight_fate.app import App
+    from freight_fate.sim import hos
+
+    app = App()
+    try:
+        d = _driving(app)
+        for mode in ("realistic", "relaxed", "debug_off"):
+            app.ctx.settings.hos_mode = mode
+            d.trip.position_mi = 4.0
+            d.trip.posts = [always_observing_post(at_mi=6.0, reach_mi=4.0)]
+            spoken = _capture(app, monkeypatch)
+
+            d.handle_event(key_event(pygame.K_u))
+
+            report = spoken[-1].lower()
+            assert d.trip.next_patrol_within(15.0) is not None, mode
+            for word in ("enforcement", "patrol", "trooper", "police", "bear"):
+                assert word not in report, (mode, word, report)
+        assert hos.HOS_NON_ENFORCED_MODES  # the branch that used to gate this
+    finally:
+        app.shutdown()
+
+
+def test_upcoming_key_does_not_repeat_the_next_exit_key(monkeypatch):
+    """Shift+R is the listed-exit key, word for word; U stopped echoing it."""
     from freight_fate.app import App
 
     app = App()
@@ -212,17 +247,74 @@ def test_upcoming_key_reports_an_enforcement_post_ahead(monkeypatch):
         d.trip.position_mi = 4.0
         d.trip.zones = []
         d.trip.stops = []
-        d.trip.navigation_cues = []
-        d.trip.patrols = [always_observing_post(at_mi=14.0, reach_mi=4.0)]
+        d.trip.curves = ()
+        cue = d.trip.next_exit_cue()
+        assert cue is not None, "route has no listed exit to echo"
+        d.trip.position_mi = max(0.0, cue.at_mi - 5.0)
         spoken = _capture(app, monkeypatch)
 
         d.handle_event(key_event(pygame.K_u))
 
-        # A status readout the player asked for speaks the canonical noun.
-        # "Bear" is CB voice and belongs only inside a clause the line
-        # attributes to the CB.
-        assert "enforcement post" in spoken[-1]
-        assert "bear" not in spoken[-1]
+        assert cue.text not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_upcoming_key_leads_with_the_ramp_light(monkeypatch):
+    """The stop bar is the nearest thing on a signal-controlled ramp."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import Zone
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 4.0
+        d.trip.zones = [Zone(5.0, 8.0, 45.0, "construction")]
+        d._ramp_mi = 0.4
+        d._ramp_control = "signal"
+        d._ramp_terminal_done = False
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_u))
+
+        report = spoken[-1]
+        assert report.startswith("Coming up: light ")
+        assert "stop bar" in report
+        # The zone still follows it; the light only takes the lead.
+        assert report.index("stop bar") < report.index("construction")
+    finally:
+        app.shutdown()
+
+
+def test_upcoming_key_stays_a_couple_of_sentences(monkeypatch):
+    """Everything at once is still four clauses, not the old paragraph."""
+    from enforcement_helpers import always_observing_post
+
+    from freight_fate.app import App
+    from freight_fate.sim.trip import Zone
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 4.0
+        d.trip.zones = [
+            Zone(5.0, 6.0, 55.0, "construction merge", closed_side="right"),
+            Zone(6.0, 8.0, 45.0, "construction", closed_side="right"),
+        ]
+        d.trip.posts = [always_observing_post(at_mi=6.0, reach_mi=4.0)]
+        d._ramp_mi = 0.4
+        d._ramp_control = "signal"
+        d._ramp_terminal_done = False
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_u))
+
+        from freight_fate.states.driving_controls import UPCOMING_MAX_CLAUSES
+
+        report = spoken[-1]
+        assert report.count(". ") + 1 <= UPCOMING_MAX_CLAUSES, report
+        # The traffic-pressure clause restated the taper beside it.
+        assert "move left and target" not in report, report
     finally:
         app.shutdown()
 
@@ -326,6 +418,7 @@ def test_route_key_reports_progress_then_road_state_and_destination(monkeypatch)
 
 def test_route_key_counts_down_to_a_planned_stop_instead_of_the_destination(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.states.driving_location import spoken_closing_distance
 
     app = App()
     try:
@@ -338,7 +431,7 @@ def test_route_key_counts_down_to_a_planned_stop_instead_of_the_destination(monk
         d.handle_event(key_event(pygame.K_r))
 
         report = spoken[-1]
-        ahead = d.trip._distance_text(stop.at_mi - d.trip.position_mi)
+        ahead = spoken_closing_distance(stop.at_mi - d.trip.position_mi, d.trip.imperial)
         assert f"{ahead} to {stop.spoken_name}." in report
         assert "left." not in report
         assert "On I-90 East in New York, toward Rochester, New York." in report
@@ -702,6 +795,137 @@ def test_route_key_answers_with_the_gate_when_the_route_has_ended(monkeypatch):
 
         assert spoken[-1].startswith("Route status: you have arrived")
         assert "Stop to dock" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def _on_the_surface_chain(app):
+    """A drive handed over to the destination facility's street chain."""
+    d = _driving(app)
+    d._destination_exit_taken = True
+    d._ramp_mi = None
+    assert d._begin_surface_chain(announce=False), "no street chain for this facility"
+    return d
+
+
+def test_route_key_never_says_zero_miles_closing_on_the_gate(monkeypatch):
+    """Named regression for the owner report of 2026-08-15.
+
+    ``Trip._distance_text`` rounds to whole miles, so every answer inside
+    the last half mile was "0 miles to the gate" -- and at 25 mph on city
+    streets that half mile takes over a minute. Walk the chain down to a
+    couple of hundred feet and the countdown has to keep meaning something.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _on_the_surface_chain(app)
+        assert d.trip.total_miles >= 0.5, "chain too short to walk the whole ladder"
+        spoken = _capture(app, monkeypatch)
+        heard = []
+        for remaining in (0.5, 0.4, 0.3, 0.2, 0.1, 0.05, 200 / 5280.0, 60 / 5280.0):
+            if remaining > d.trip.total_miles:
+                continue
+            d.trip.position_mi = d.trip.total_miles - remaining
+            spoken.clear()
+            d.handle_event(key_event(pygame.K_r))
+            heard.append(spoken[-1])
+
+        assert heard, "the chain was too short to walk down"
+        for report in heard:
+            assert "0 miles" not in report, report
+            assert "0 kilometers" not in report, report
+        assert "200 feet to the gate" in heard[-2], heard[-2]
+        assert "50 feet to the gate" in heard[-1], heard[-1]
+        assert "half a mile to the gate" in heard[0], heard[0]
+    finally:
+        app.shutdown()
+
+
+def test_route_key_names_the_street_under_the_wheels(monkeypatch):
+    """The chain's report follows the truck, not the street it started on."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _on_the_surface_chain(app)
+        legs = d.trip.route.legs
+        assert len(legs) >= 2
+        spoken = _capture(app, monkeypatch)
+
+        d.trip.position_mi = legs[0].miles * 0.5
+        d.handle_event(key_event(pygame.K_r))
+        assert f"on city streets, {legs[0].highway}," in spoken[-1], spoken[-1]
+
+        d.trip.position_mi = legs[0].miles + legs[1].miles * 0.5
+        d.handle_event(key_event(pygame.K_r))
+        assert f"on city streets, {legs[1].highway}," in spoken[-1], spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_route_key_counts_down_to_the_on_ramp_leaving_the_origin_gate(monkeypatch):
+    """The departure chain is city streets, and the highway readout was
+    wrong on it twice over: it called a two-mile street chain's percent the
+    run's progress, and it pointed the driver "toward" the city they were
+    standing in (owner report, 2026-08-15)."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app, "Rochester", "Buffalo", origin_location="Rochester freight market")
+        assert d._begin_departure_chain(announce=False), "no departure chain for this facility"
+        highway = d._highway_trip.route.legs[0].highway
+        d.trip.position_mi = d.trip.total_miles * 0.5
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_r))
+
+        report = spoken[-1]
+        assert report.startswith("Route status: on city streets,")
+        assert f"to the {highway} on-ramp." in report, report
+        assert "percent there" not in report, report
+        assert "toward" not in report, report
+        assert "0 miles" not in report, report
+    finally:
+        app.shutdown()
+
+
+def test_route_key_answers_the_pickup_drive_as_city_streets(monkeypatch):
+    """The pickup drive is streets from end to end: no highway leg to frame."""
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        origin, location = "Rochester", "Rochester freight market"
+        app.ctx.profile = Profile(name="Info Keys", current_city=origin)
+        highway = app.ctx.world.supported_route(origin, "Buffalo")
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            origin,
+            location,
+            "Buffalo",
+            highway.miles,
+            1000.0,
+            12.0,
+            destination_location="Buffalo freight market",
+        )
+        route = app.ctx.world.facility_approach_route(origin, location)
+        d = DrivingState(app.ctx, job, route, phase="pickup")
+        d.trip.position_mi = max(0.0, d.trip.total_miles - 200 / 5280.0)
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_r))
+
+        report = spoken[-1]
+        assert report.startswith("Route status: on city streets,")
+        assert "200 feet to the gate at" in report, report
+        assert "percent there" not in report, report
     finally:
         app.shutdown()
 

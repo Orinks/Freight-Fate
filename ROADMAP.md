@@ -652,6 +652,21 @@ onto exit signalling.
       until the walkthrough completes (gated on tutorial_done itself).
       The long tail of messages that read the same in both modes stays
       normal-only by design.
+- [x] **Info keys: R answers with a real distance, U stops reciting the
+      other keys (owner report, 2026-08-15).** R rounded to whole miles, so
+      the last half mile onto a facility gate answered "0 miles to the
+      gate" for over a minute of surface-street driving; it now closes in
+      quarter miles and then in feet or metres. The same report's "does not
+      reflect the actual state of things" was three more frames: the street
+      chain now names the street under the wheels rather than the chain's
+      first leg, the departure chain out of the origin gate counts down to
+      its on-ramp instead of reading a two-mile chain's percent as the
+      run's progress and pointing "toward" the city the truck is standing
+      in, and the pickup drive answers as the streets it is instead of a
+      highway leg. U dropped the enforcement clause (owner ruling: that
+      belongs on the CB), the next listed exit (Shift+R is that key),
+      traffic pressure (it restated the taper or the stop beside it), and
+      two of its three bends; it is capped at four clauses.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each

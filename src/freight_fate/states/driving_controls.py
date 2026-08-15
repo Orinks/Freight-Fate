@@ -15,6 +15,10 @@ SAFE_SPEED_EXIT_MI = 2.0
 # the one number never contradicts the call you just heard.
 SAFE_SPEED_CURVE_MI = 0.5
 
+# The most clauses the U readout may ever speak: the ramp control ahead,
+# the next imposed limit, the next stop, and the next demanding bend.
+UPCOMING_MAX_CLAUSES = 4
+
 
 class DrivingControlsMixin:
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -333,7 +337,9 @@ class DrivingControlsMixin:
             "Control with Comma or Period jumps to the oldest or newest message. "
             "The bracket keys switch between all messages, general messages, and driving events. "
             "Control C copies the message you are on. "
-            "U reads what is coming up: imposed limits, stops, exits, and bends ahead. "
+            "U reads the road ahead that no other key answers: the ramp "
+            "control coming up, the next imposed limit, the next stop, and "
+            "the next bend that demands slowing. "
             "Curves that demand slowing are called before they arrive, "
             "like Sharp left, half a mile, advise 35; D folds the bend "
             "into its one safe-speed number. "
@@ -944,7 +950,20 @@ class DrivingControlsMixin:
         return f"Nothing steep in the next {self.trip._distance_text(scanned)}."
 
     def _speak_upcoming(self, within_mi: float = 15.0) -> None:
-        """U: what is coming up -- imposed limits, stops, and exits ahead.
+        """U: the road ahead that no other key already answers.
+
+        Deliberately four clauses at the very most. Every other key on the
+        wheel answers one question, and U was reciting all of them: the
+        listed exit is Shift+R, the posted limit and the bend under the
+        wheels are S, the safe number is D, the grade is G, and the route
+        with its planned stop is R. What is left is what nothing else says
+        -- the ramp control ahead, the next imposed limit, the next stop,
+        and the next bend that will demand slowing (owner report,
+        2026-08-15: the drive is far too chatty).
+
+        Enforcement is deliberately absent. Patrols and their CB reports
+        reach the player on the CB, where the owner ruled they belong; U is
+        the road, not the police.
 
         On a signal-controlled ramp the nearest upcoming thing is always
         the stop bar, so it leads the readout with the light's phase."""
@@ -999,40 +1018,41 @@ class DrivingControlsMixin:
                 f"{self.trip.planned_prefix(stop)}{stop.spoken_name} "
                 f"in {s.distance_text(stop.at_mi - pos)}{ending}"
             )
-        pressure = self.trip.next_traffic_pressure_within(within_mi)
-        if pressure is not None:
-            parts.append(
-                f"{pressure.reason} in {s.distance_text(pressure.start_mi - pos)}, "
-                f"move {pressure.direction} and target "
-                f"{s.speed_text(pressure.target_speed_mph)}"
-            )
-        if self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES:
-            patrol = self.trip.next_patrol_within(within_mi)
-            if patrol is not None:
-                ahead = patrol.start_mi - pos
-                parts.append(self.trip.cb_patrol_status(patrol, ahead))
-        cue = self.trip.next_exit_cue()
-        if cue is not None and 0 < cue.at_mi - pos <= within_mi:
-            parts.append(f"in {s.distance_text(cue.at_mi - pos)}, {cue.text}")
-        # The next few bends that would demand slowing from the posted
-        # limit; gentle sweeps stay out of the readout like they stay out
-        # of the pacenotes.
+        # Traffic pressure is gone from this key: two of its three sources
+        # restate the clause printed right beside them here -- the
+        # construction taper's own squeeze, and the exit traffic for the
+        # stop just named -- and the route merge speaks its own advisory on
+        # the approach.
+        #
+        # The next listed exit is gone too: Shift+R is that key, word for
+        # word.
+        #
+        # The next bend that demands slowing stays, but one of them, not
+        # three. S names the bend already under the wheels, D folds it into
+        # the safe-speed number, and the pacenotes call each one before it
+        # arrives; three bends with their advisories was the paragraph.
         limit, _ = self.trip.speed_limit_at(pos)
-        bends = [
-            c
-            for c in self.trip.curves_within(within_mi)
-            if c.advisory_mph < limit and c.severity != "gentle"
-        ][:3]
-        for c in bends:
+        bend = next(
+            (
+                c
+                for c in self.trip.curves_within(within_mi)
+                if c.advisory_mph < limit and c.severity != "gentle"
+            ),
+            None,
+        )
+        if bend is not None:
             parts.append(
-                f"{self._pacenote_phrase(c).lower()} in "
-                f"{s.distance_text(c.start_mi - pos, precise=True)}, "
-                f"advise {s.speed_text(c.advisory_mph)}"
+                f"{self._pacenote_phrase(bend).lower()} in "
+                f"{s.distance_text(bend.start_mi - pos, precise=True)}, "
+                f"advise {s.speed_text(bend.advisory_mph)}"
             )
         if not parts:
             self.ctx.say(f"Nothing notable in the next {s.distance_text(within_mi)}.")
             return
-        self.ctx.say("Coming up: " + ". ".join(parts) + ".")
+        # The clause list cannot outgrow this today; the cap is here so a
+        # later addition has to take something out rather than quietly
+        # growing the readout back into a paragraph.
+        self.ctx.say("Coming up: " + ". ".join(parts[:UPCOMING_MAX_CLAUSES]) + ".")
 
     def _gear_text(self) -> str:
         tr = self.truck.transmission

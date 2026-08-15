@@ -578,13 +578,13 @@ Driving controls are active while the road view is focused:
 | Alt+A | Report time at the wheel so far this shift, and time on duty. |
 | Alt+S | Report when your 30 minute break is due, or that a break will not help. |
 | Alt+D | Report what ends this shift -- driving time left and duty window both -- and where you can legally stop before it. |
-| R | Report trip progress (the same percent the online drivers board shows) and the distance left, then the road you are on with its direction, the state you are in, and the city you are heading toward. With a planned stop set, the distance counts down to that stop instead of the destination. |
+| R | Report trip progress (the same percent the online drivers board shows) and the distance left, then the road you are on with its direction, the state you are in, and the city you are heading toward. With a planned stop set, the distance counts down to that stop instead of the destination. On city streets -- pulling out of the origin gate, driving a pickup approach, or running the last streets to a facility gate -- it names the street under your wheels and counts down to the on-ramp or the gate instead. Distances close in quarter miles and then in feet, so the answer is never "0 miles" while the gate is still ahead. |
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report which lane you are in, whether you are centered, drifting, or at an edge, and whether the lane beside you is open or blocked. |
 | Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
 | A | Repeat the last route announcement -- the last thing with consequences -- even if other speech came after it. |
-| U | Report what is coming up: imposed speed limits, patrols, stops, exits, and the next few bends ahead with their advisory speeds. |
+| U | Report the road ahead that no other key answers: the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
 | F1 | Show the driving control list and current objective. |
 | Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
