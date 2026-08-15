@@ -34,6 +34,18 @@ every spoken line, no window, no speech::
 interchange, toll, chain-law. ``--routes`` picks a named set (mountain,
 rolling, flat, all) unless ``--from``/``--to`` name a pair.
 
+``--routes random`` draws instead from the whole map, so a session is not
+always testing the same ten corridors -- half the named ones are mountain,
+which is how a playtest keeps landing in engine-brake country whatever it
+meant to look at::
+
+    uv run python tools/playtest_road.py --routes random --find limit-drop --scan
+    uv run python tools/playtest_road.py --routes random --seed 42 --find curve
+
+The draw prints its seed; passing it back gives the same roads (the work
+zones on them are drawn per trip and will differ). ``--sample`` sets how many
+routes it offers the search and ``--max-miles`` how long they may be.
+
 The driving assists that change what the truck does on a grade are arguments
 too -- ``--descent off|realistic|interactive``, ``--assists``,
 ``--predictive-cruise on|off``, ``--lane-keeping``, ``--transmission``, and
@@ -46,6 +58,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import random
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -75,6 +88,18 @@ ROUTE_SETS: dict[str, list[tuple[str, str]]] = {
     ],
 }
 ROUTE_SETS["all"] = [pair for pairs in ROUTE_SETS.values() for pair in pairs]
+# ``--routes random`` is not a list: it is drawn from the whole map at run
+# time. The named sets are ten hand-picked corridors and half of them are
+# mountain, so playtest after playtest ran the same roads and kept landing on
+# engine-brake country whatever the session was actually testing (owner,
+# 2026-08-15). The draw prints its seed, so a road worth revisiting can be
+# drawn again -- the work zones on it are a per-trip roll and will not repeat.
+RANDOM_ROUTES = "random"
+# Long hauls make a feature search crawl and put the interesting mile hours
+# from the start. Past this the draw takes another pair instead; --max-miles
+# lifts it for anyone who wants a coast-to-coast run.
+RANDOM_MAX_MILES = 600.0
+RANDOM_SAMPLE = 6  # how many pairs a random draw offers the search
 
 FEATURES = (
     "downgrade",
@@ -91,6 +116,48 @@ SCAN_STEP_MI = 0.1
 # How far before the feature the truck is placed: far enough that an advance
 # warning has somewhere to land, close enough that you are not driving to it.
 DEFAULT_LEAD_MI = 1.8
+
+
+def random_pairs(world, *, count: int, max_miles: float, seed: int) -> list[tuple[str, str]]:
+    """Supported city pairs drawn from the whole map, shortest first.
+
+    Named the way the hand-picked sets are and the way a player would say
+    them, so the banner, the scan lines and a ``--from``/``--to`` rerun all
+    read as roads rather than as database keys. A name is only used when it
+    resolves back to the same city; anything ambiguous keeps its key.
+    Shortest first, so the search reaches a feature quickly and the drive
+    starts near it rather than hours up the road.
+    """
+    rng = random.Random(seed)
+    names = world.city_names()
+    found: list[tuple[float, str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    # Bounded: a draw must never hunt forever for its last pair on a map where
+    # most random pairs are longer than the limit.
+    for _ in range(count * 400):
+        if len(found) >= count:
+            break
+        a, b = rng.sample(names, 2)
+        key = (a, b) if a < b else (b, a)
+        if key in seen:
+            continue
+        seen.add(key)
+        route = world.supported_route(a, b)
+        if route is None or route.miles > max_miles:
+            continue
+        found.append((route.miles, _speakable(world, a), _speakable(world, b)))
+    found.sort()
+    return [(a, b) for _, a, b in found]
+
+
+def _speakable(world, key: str) -> str:
+    """The city's spoken name where that still names this city, else the key.
+
+    Two cities share a bare name often enough (Jackson, Portland) that a
+    blind swap would silently point a rerun at the wrong road.
+    """
+    spoken = world.spoken_city(key)
+    return spoken if world.resolve_city_key(spoken) == key else key
 
 
 @dataclass
@@ -547,7 +614,29 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument("--from", dest="origin", help="origin city (use with --to)")
     p.add_argument("--to", dest="destination", help="destination city")
-    p.add_argument("--routes", default="mountain", choices=sorted(ROUTE_SETS), help="route set")
+    p.add_argument(
+        "--routes",
+        default="mountain",
+        choices=sorted([*ROUTE_SETS, RANDOM_ROUTES]),
+        help="route set, or 'random' to draw from the whole map",
+    )
+    p.add_argument(
+        "--seed",
+        type=int,
+        help="seed for --routes random: pins which roads are drawn, not the trip on them",
+    )
+    p.add_argument(
+        "--sample",
+        type=int,
+        default=RANDOM_SAMPLE,
+        help=f"how many routes --routes random draws (default {RANDOM_SAMPLE})",
+    )
+    p.add_argument(
+        "--max-miles",
+        type=float,
+        default=RANDOM_MAX_MILES,
+        help=f"longest route --routes random will draw (default {RANDOM_MAX_MILES:.0f})",
+    )
     p.add_argument("--find", dest="feature", choices=FEATURES, help="road feature to start at")
     p.add_argument("--at", type=float, help="start at this mile instead of searching")
     p.add_argument("--pick", type=int, default=0, help="which search result to use (0 = best)")
@@ -609,11 +698,25 @@ def main(argv: list[str] | None = None) -> int:
     # run a read-only search is what opened and closed a window on every
     # --scan; nothing below this block needs a window until we actually drive.
     world = load_world()
-    pairs = (
-        [(args.origin, args.destination)]
-        if args.origin and args.destination
-        else ROUTE_SETS[args.routes]
-    )
+    if args.origin and args.destination:
+        pairs = [(args.origin, args.destination)]
+    elif args.routes == RANDOM_ROUTES:
+        seed = args.seed if args.seed is not None else random.randrange(1_000_000)
+        pairs = random_pairs(world, count=args.sample, max_miles=args.max_miles, seed=seed)
+        if not pairs:
+            print(
+                f"No supported route under {args.max_miles:.0f} miles came up; raise --max-miles."
+            )
+            return 1
+        # The seed pins the ROADS, not the run: work zones are drawn per trip,
+        # so the same seed finds the same corridors with a different set of
+        # zone-driven limit drops on them each time.
+        print(f"Random routes (same roads again with --seed {seed}):")
+        for origin, destination in pairs:
+            print(f"  {origin} -> {destination}")
+        print()
+    else:
+        pairs = ROUTE_SETS[args.routes]
     if args.at is not None:
         origin, destination = pairs[0]
         _, trip = _build_trip(world, origin, destination)
