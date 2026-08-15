@@ -277,13 +277,214 @@ def test_chatter_switches_gate_spoken_callouts(monkeypatch):
         d._pending_ambient_event = None
         d._handle_trip_event(billboard)
         assert len(calls) == 2
-
-        # Terse speech mutes all roadside chatter regardless of switches.
-        app.ctx.settings.set_all_chatter(True)
-        app.ctx.settings.speech_verbosity = 0
-        d._ambient_event_cooldown_s = 0.0
-        d._pending_ambient_event = None
-        d._handle_trip_event(river)
-        assert len(calls) == 2
     finally:
         app.shutdown()
+
+
+# -- terse chatter -------------------------------------------------------------
+
+
+CHATTER_CASES = (
+    # switch, category, the baked line, the name the short form must keep
+    ("chatter_parks", "national_park", "Entering Hot Springs National Park.", "Hot Springs"),
+    ("chatter_rivers", "river", "Crossing the Cahaba River.", "Cahaba River"),
+    ("chatter_passes", "mountain_pass", "Approaching Lone Pine Saddle.", "Lone Pine Saddle"),
+    ("chatter_museums", "museum", "Cullman County Museum ahead.", "Cullman County Museum"),
+    ("chatter_billboards", "billboard", "Billboard: Free ice water.", "Free ice water"),
+)
+
+
+def _chatter_event(category, spoken):
+    kind = TripEventKind.BILLBOARD if category == "billboard" else TripEventKind.LANDMARK
+    return TripEvent(kind, spoken, {"category": category})
+
+
+@pytest.mark.parametrize(("switch", "category", "spoken", "name"), CHATTER_CASES)
+def test_terse_speaks_every_chatter_category_its_switch_leaves_on(
+    monkeypatch, switch, category, spoken, name
+):
+    """Owner, 2026-08-15: "Roadside chatter is pinned to the normal or terse
+    setting. When terse, the individual settings don't mean anything."
+
+    Terse used to mute roadside chatter wholesale, so a terse player had five
+    switches that were on, looked live, and did nothing. The switch decides
+    what is heard; verbosity decides how much is said about it."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        heard = []
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard, terse=True))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.set_all_chatter(True)
+
+        d._handle_trip_event(_chatter_event(category, spoken))
+
+        assert len(heard) == 1, heard
+        assert name in heard[0]
+        # Short form, not the full line: the name and the fact, no framing.
+        assert len(heard[0]) < len(spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize(("switch", "category", "spoken", "name"), CHATTER_CASES)
+def test_terse_stays_silent_for_a_chatter_category_switched_off(
+    monkeypatch, switch, category, spoken, name
+):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        heard = []
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard, terse=True))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.set_all_chatter(True)
+        setattr(app.ctx.settings, switch, False)
+
+        d._handle_trip_event(_chatter_event(category, spoken))
+
+        assert heard == []
+        # A muted callout is dropped whole: it never becomes the A-key replay.
+        assert d._last_event_message != spoken
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize(("switch", "category", "spoken", "name"), CHATTER_CASES)
+def test_normal_speech_still_hears_the_whole_chatter_line(
+    monkeypatch, switch, category, spoken, name
+):
+    """The other axis is unchanged: normal mode still gets the full line."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        heard = []
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        app.ctx.settings.speech_verbosity = 1
+        app.ctx.settings.set_all_chatter(True)
+
+        d._handle_trip_event(_chatter_event(category, spoken))
+
+        assert heard == [spoken]
+    finally:
+        app.shutdown()
+
+
+def test_a_switched_off_category_is_silent_in_terse_even_mid_drive(monkeypatch):
+    """The switches are read at speak time, so flipping one mid-drive applies
+    to the next callout rather than to the next trip."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        heard = []
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard, terse=True))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.set_all_chatter(True)
+
+        d._handle_trip_event(_chatter_event("river", "Crossing the Cahaba River."))
+        assert heard == ["Cahaba River."]
+
+        app.ctx.settings.chatter_rivers = False
+        d._ambient_event_cooldown_s = 0.0
+        d._pending_ambient_event = None
+        d._handle_trip_event(_chatter_event("river", "Crossing the Elk River."))
+        assert heard == ["Cahaba River."]
+    finally:
+        app.shutdown()
+
+
+def test_village_callouts_keep_the_place_callouts_ladder(monkeypatch):
+    """Town names are places, not chatter: they answer to place_callouts, and
+    terse still leaves them out. Untouched by the chatter change."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        heard = []
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard, terse=True))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        app.ctx.settings.set_all_chatter(True)
+        app.ctx.settings.place_callouts = "all"
+        app.ctx.settings.speech_verbosity = 0
+
+        d._handle_trip_event(_chatter_event("village", "Passing Fairfield."))
+        assert heard == []
+
+        app.ctx.settings.speech_verbosity = 1
+        d._ambient_event_cooldown_s = 0.0
+        d._pending_ambient_event = None
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard))
+        d._handle_trip_event(_chatter_event("village", "Passing Fairfield."))
+        assert heard == ["Passing Fairfield."]
+
+        app.ctx.settings.place_callouts = "off"
+        d._ambient_event_cooldown_s = 0.0
+        d._pending_ambient_event = None
+        d._handle_trip_event(_chatter_event("village", "Passing Midfield."))
+        assert heard == ["Passing Fairfield."]
+    finally:
+        app.shutdown()
+
+
+def test_roadside_chatter_short_forms_keep_the_fact():
+    """The renderer itself, on the shapes the bake actually produces."""
+    from freight_fate.speech_text import roadside_chatter
+
+    cases = {
+        "Entering Hot Springs National Park.": "Hot Springs National Park.",
+        "Crossing the Cahaba River.": "Cahaba River.",
+        "Approaching Lone Pine Saddle.": "Lone Pine Saddle.",
+        "Cullman County Museum ahead.": "Cullman County Museum.",
+        # An initial inside a name is not a sentence end.
+        "Museum ahead: Jamie L. Whitten Historical Center.": (
+            "Jamie L. Whitten Historical Center."
+        ),
+        # Prose keeps its opening clause: the name and the fact.
+        (
+            "You are passing Ozark beside Fort Novosel, the home of Army Aviation, "
+            "where every Army helicopter pilot learns to fly."
+        ): "Ozark beside Fort Novosel.",
+        # A billboard is its gag, with the framing dropped -- and a two-beat
+        # gag keeps its punchline.
+        "Billboard: Free ice water.": "Free ice water.",
+        "Billboard: Eat here. Get gas.": "Eat here. Get gas.",
+    }
+    for spoken, expected in cases.items():
+        message = roadside_chatter(spoken, "test")
+        assert message.normal == spoken
+        assert message.render(True) == expected
+        assert len(message.render(True)) < len(spoken)
+
+
+def test_every_baked_chatter_line_renders_a_shorter_terse_form(world):
+    """No category ends up with an empty, longer, or fragmentary short form,
+    and the named categories never lose the name."""
+    from freight_fate.settings import CHATTER_CATEGORY_FIELDS
+    from freight_fate.speech_text import roadside_chatter
+
+    named = {"river", "mountain_pass", "museum", "national_park", "national_forest"}
+    checked = 0
+    for leg in world.legs:
+        for landmark in leg.landmarks:
+            if landmark.category not in CHATTER_CATEGORY_FIELDS:
+                continue
+            checked += 1
+            message = roadside_chatter(f"{landmark.spoken}.", landmark.category)
+            terse = message.render(True)
+            assert terse and terse != "."
+            assert len(terse) <= len(message.normal)
+            if landmark.category in named:
+                assert landmark.name in terse
+    assert checked > 2_000

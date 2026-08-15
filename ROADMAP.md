@@ -682,6 +682,18 @@ onto exit signalling.
       edge-rumble ladder carrying position in between (R12); and the dodge
       outcome pair (hazard-clear and collision) is learnable on both sides in
       the sounds screen (R14).
+- [x] **The chatter switches work in terse -- landed 2026-08-15** (owner:
+      "Roadside chatter is pinned to the normal or terse setting. When
+      terse, the individual settings don't mean anything"). Terse returned
+      before the five switches were consulted, so a terse player had five
+      switches on by default that did nothing. The switch decides what is
+      spoken and verbosity decides how much is said about it: an enabled
+      category now speaks in terse as its short form -- the name and the
+      fact, framing dropped -- built as a SpokenMessage pair
+      (`speech_text.roadside_chatter`) like the rest of the S2 work.
+      Villages are untouched; they answer to the place-callouts ladder.
+      Principle (2) above, in miniature: the switch is the ladder, and
+      verbosity stops overriding it.
 - [x] **Exit traffic speaks only for the exit you are taking -- landed
       2026-08-15** (owner, the same day as the chattiness note above: "when
       exits come up, the game announces traffic info for that exit. Suppress

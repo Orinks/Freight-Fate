@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from ..message_log import MessageCategory
-from ..speech_text import SpokenMessage, cruise_curve_easing
+from ..speech_text import SpokenMessage, cruise_curve_easing, roadside_chatter
 from .base import TimedMessageState
 from .driving_core import *
 from .driving_menu_states import ArrivalState, FacilityArrivalState
@@ -118,20 +118,33 @@ class DrivingEventMixin:
         if kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
             # Ambient roadside color, filtered by the player's chatter
             # switches at speak time so a mid-trip settings change applies
-            # immediately. Terse speech mutes all of it; a muted callout is
-            # dropped whole -- it never becomes the A-key replay either.
+            # immediately. A muted callout is dropped whole -- it never
+            # becomes the A-key replay either.
+            #
+            # The switch decides WHAT is heard and verbosity decides how much
+            # is said about it; the two are separate axes. Terse used to mute
+            # roadside chatter wholesale, which left a terse player five
+            # switches that were on, looked live, and did nothing at all
+            # (owner, 2026-08-15). An enabled category now speaks in either
+            # mode, in terse as its short form.
             category = str(event.data.get("category", ""))
-            if self._terse_speech() or not self.ctx.settings.chatter_enabled(category):
+            if not self.ctx.settings.chatter_enabled(category):
                 return
             # Town and village names answer to the place-callouts ladder, not
             # the chatter switches: sparse keeps only the names that explain
-            # a speed limit change, all adds the towns the route passes.
+            # a speed limit change, all adds the towns the route passes. That
+            # ladder is untouched here, terse muting included -- these are
+            # places, not chatter, and they are already at their short form.
             if category == "village":
+                if self._terse_speech():
+                    return
                 mode = self.ctx.settings.place_callouts
                 if mode == "off":
                     return
                 if mode == "sparse" and not event.data.get("explains_limit"):
                     return
+            else:
+                event.message = roadside_chatter(event.message, category)
         if kind == TripEventKind.CHECKPOINT and self.ctx.settings.place_callouts != "all":
             # Curated route-town markers ("Passing X on I-40") are places,
             # not safety -- only the loudest place tier speaks them.

@@ -59,6 +59,15 @@
   where the place you are delivering to actually sits, so a dock right off
   the ramp no longer shares its approach with one several miles inland.
 
+- **Your roadside chatter switches now work in terse speech.** Parks,
+  rivers, mountain passes, museums, and billboards each have their own
+  switch, and in terse speech none of them did anything -- every roadside
+  callout was silenced whichever way the switches were set. Now the switch
+  alone decides what you hear: leave a kind on and you get it in terse too,
+  kept short. A river crossing is the river's name, a park is the park, a
+  billboard is the sign itself with nothing wrapped around it. Normal speech
+  is unchanged, and town names still follow the place callouts setting.
+
 - **Traffic at exits you are not taking has gone quiet.** The game used to
   call the traffic building at every exit ahead of you, one after another,
   whether or not any of them was yours. Now that call comes only for an

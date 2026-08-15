@@ -285,3 +285,72 @@ def achievement_announced(name: str) -> SpokenMessage:
     <name>."; terse hears the bare name, the sound having already said "new".
     """
     return SpokenMessage(f"New achievement! {name}.", f"{name}.")
+
+
+# -- roadside chatter ----------------------------------------------------------
+# The five chatter switches decide WHAT is spoken; verbosity decides how much
+# is said about it. Terse used to blanket-mute roadside chatter, which left a
+# terse player five switches that were on, looked live, and did nothing (owner,
+# 2026-08-15). Every enabled category now speaks in terse, in its short form:
+# the name and the fact, with the framing dropped.
+
+# Openings the baked lines use, longest first so "Crossing the" wins over
+# "Crossing". What follows one of these is the name, which is the whole terse
+# line: "Entering Hot Springs National Park" is "Hot Springs National Park".
+_CHATTER_LEAD_INS = (
+    "Museum ahead: ",
+    "Billboard: ",
+    "You are passing ",
+    "You are crossing ",
+    "Approaching ",
+    "Crossing the ",
+    "Crossing ",
+    "Entering ",
+    "Passing ",
+)
+# And the one that trails instead of leads ("Cullman County Museum ahead").
+_CHATTER_TAIL = " ahead"
+# A sentence end, but not after an initial: the museum bake carries names like
+# "Jamie L. Whitten Historical Center", and splitting at "L." would speak a
+# fragment.
+_CHATTER_SENTENCE_END = re.compile(r"(?<![A-Z])[.!?]\s+")
+# Past this, a first sentence is prose rather than a label, and its opening
+# clause carries the name and the fact on its own: the heritage markers and
+# the placed billboard signs run to several lines of history.
+_CHATTER_CLAUSE_MAX = 60
+
+
+def roadside_chatter(spoken: str, category: str) -> SpokenMessage:
+    """A roadside callout with its terse short form.
+
+    Terse keeps the name and the fact and drops the framing around them. The
+    lines are baked prose rather than composed slots, so the short form is cut
+    from the text: the first sentence, its opening frame removed, and -- where
+    that first sentence is prose long enough to have run past the fact -- its
+    opening clause alone.
+
+    Villages do not come through here. Town names answer to the place-callouts
+    ladder, not to the chatter switches (see ``CHATTER_CATEGORY_FIELDS``), and
+    are already the bare "Passing X".
+    """
+    normal = str(spoken).strip()
+    terse = normal
+    for lead in _CHATTER_LEAD_INS:
+        if terse.startswith(lead):
+            terse = terse[len(lead) :]
+            break
+    # A short line already IS the fact -- a two-beat billboard gag is not
+    # improved by losing its punchline. Only prose gets cut down.
+    if len(terse) > _CHATTER_CLAUSE_MAX:
+        terse = _CHATTER_SENTENCE_END.split(terse, maxsplit=1)[0].strip()
+        if len(terse) > _CHATTER_CLAUSE_MAX and "," in terse:
+            terse = terse.split(",", 1)[0].strip()
+    terse = terse.rstrip(".!?").strip()
+    if terse.endswith(_CHATTER_TAIL):
+        terse = terse[: -len(_CHATTER_TAIL)].strip()
+    if not terse:
+        return SpokenMessage(normal, normal)
+    terse = f"{terse}."
+    # Never hand back a "short" form that is not shorter; a line already at
+    # its shortest reads the same in both modes.
+    return SpokenMessage(normal, terse if len(terse) < len(normal) else None)
