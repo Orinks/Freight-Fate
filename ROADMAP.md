@@ -1254,6 +1254,18 @@ onto exit signalling.
       no key behaves exactly as before. orinks-net dev 542bb69, deployed to
       staging and verified against dev.orinks.net. An account that already
       collected ghost rows still needs one pass of Sign out all computers.
+- [x] **The Online menu opens the driver setup page (owner, 2026-08-15).**
+      Follow-up from the above: the recovery for a full computer list, a
+      driver rename, or a sharing change all live on a page whose path
+      (/freight-fate/online/setup) nobody should have to remember, and the
+      game had no way to reach it. New hub row "Open my driver setup page"
+      opens `online_presence.setup_page_url()` -- staged host included --
+      with the Mastodon opener's clipboard-then-spoken-address fallback for
+      remote and streamed sessions. Deliberately its OWN row rather than a
+      job the account row takes over once connected: that row is also the
+      way back in when orinks.net stops accepting this computer, which is
+      the moment a player needs to re-activate rather than browse, and it
+      is what AUTH_HELP names.
 - [ ] **PRE-RELEASE MUST-DO: point the game back at production.** The
       1.9 test line defaults its online services to the staged
       deployment (dev.orinks.net, the orinks-net dev branch on its own

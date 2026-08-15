@@ -102,6 +102,17 @@ def base_url() -> str:
     return os.environ.get("FREIGHT_FATE_ONLINE_URL", DEFAULT_BASE_URL).rstrip("/")
 
 
+def setup_page_url() -> str:
+    """The player's driver setup page on whichever Orinks site this build
+    talks to.
+
+    Defined once, because the path is not something a player can be expected
+    to remember or type: everything that sends them there has to name the
+    same address, and on a staged build it has to be the staged host.
+    """
+    return f"{base_url()}/freight-fate/online/setup"
+
+
 def client_version() -> str:
     """The build identity this game reports with every Orinks request.
 
