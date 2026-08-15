@@ -523,9 +523,22 @@ _ENFORCEMENT = SoundCategory(
         ),
         SoundEntry(
             "Weigh station",
-            (Cue("poi/weigh_station_lane", volume=0.6, hold_s=3.0),),
+            # Deliberately louder and longer than the road plays it. This bed
+            # is the quietest thing in the catalog by a wide margin -- a flat
+            # ambience with no attack, sitting around -33 dBFS where the
+            # median cue is -21 -- and on the road that is right, because it
+            # works by swelling against engine and tyre noise. Demonstrated
+            # in a silent menu at the road's own level it reads as nothing
+            # happening at all (Shane, 2026-08-15: "I press enter on it and I
+            # get silence"). The screen's whole job is to let a player learn
+            # the cue before it matters, so here it plays above the road's
+            # ceiling and holds long enough to register as a sound rather
+            # than a hiss.
+            (Cue("poi/weigh_station_lane", volume=1.0, hold_s=5.0),),
             "The bed that swells as you come up on an open scale. An open "
-            "scale must be pulled into; blowing past one is its own stop.",
+            "scale must be pulled into; blowing past one is its own stop. On "
+            "the road it comes up under the engine rather than over it, so "
+            "it is quieter there than it is here.",
         ),
         SoundEntry(
             "Spike strip",
