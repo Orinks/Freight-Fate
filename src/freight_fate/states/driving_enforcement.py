@@ -534,8 +534,15 @@ class EnforcementWatchMixin:
         if self._exit_is_armed_for(stop):
             return
         self._weigh_station_reminder_key = key
+        # The distance was hard-coded to the threshold, so a reminder that
+        # fired at two hundred yards still announced "half a mile" -- and
+        # after the approach line above was fixed to speak a real short
+        # distance, the pair read as the scale moving further away while the
+        # truck closed on it (gate harness, 2026-08-15). Speak the road that
+        # is actually left.
         self.ctx.say_event(
-            "Weigh station in half a mile. Slow below fifteen for the scale.",
+            f"Weigh station in {self.ctx.settings.short_distance_text(ahead)}. "
+            "Slow below fifteen for the scale.",
             interrupt=False,
             priority=EventPriority.ROUTE,
         )

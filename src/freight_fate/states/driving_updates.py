@@ -3374,7 +3374,17 @@ class DrivingUpdateMixin:
                 # stop past the scale -- the instruction itself marched a
                 # tester into the bypass charge (report, 2026-08-12).
                 self.ctx.say_event(
-                    f"Open weigh station ahead in {self.ctx.settings.distance_text(ahead)}: "
+                    # short_distance_text, not distance_text: the plain form
+                    # rounds to whole miles, so a scale first seen inside half
+                    # a mile announced itself "in 0 miles" and the reminder
+                    # that followed said "in half a mile" -- the distance
+                    # appeared to run backwards while the scale was still
+                    # ahead (gate harness, 2026-08-15). This is the same
+                    # rounding that made the route key say "0 miles" to a
+                    # gate; the colloquial form is what the reminder below
+                    # already speaks, so the two now agree.
+                    f"Open weigh station ahead in "
+                    f"{self.ctx.settings.short_distance_text(ahead)}: "
                     f"{stop.name}. All trucks must pull in. Slow below fifteen "
                     "and signal for the scale exit with "
                     f"{self.ctx.control_hint('take_exit')}. Once you are "

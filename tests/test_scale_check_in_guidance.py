@@ -168,10 +168,47 @@ def test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed(monkeypatc
         d.trip.position_mi = 9.7
         d._check_weigh_station_enforcement(9.6)
 
-        reminders = [s for s in spoken if "Weigh station in half a mile" in s]
-        assert reminders == ["Weigh station in half a mile. Slow below fifteen for the scale."]
-        kwargs = next(k for text, k in events if "half a mile" in text)
+        # The reminder used to hard-code "half a mile" wherever inside that
+        # window it fired, so at this position -- three tenths out -- it
+        # overstated the road left, and against the fixed approach line it
+        # read as the scale receding while the truck closed (2026-08-15).
+        reminders = [s for s in spoken if s.startswith("Weigh station in ")]
+        assert reminders == [
+            "Weigh station in half a mile. Slow below fifteen for the scale."
+        ]
+        kwargs = next(k for text, k in events if k and "Weigh station in " in text)
         assert kwargs.get("priority") is EventPriority.ROUTE
+    finally:
+        app.shutdown()
+
+
+def test_reminder_speaks_the_road_actually_left(monkeypatch):
+    """Fired well inside the window, it must not still claim half a mile.
+
+    The distance was hard-coded to the threshold, so a reminder that landed
+    at a couple of hundred yards overstated the road left -- and beside the
+    approach line, which speaks a real short distance, the scale appeared to
+    move further away as the truck closed on it (gate harness, 2026-08-15).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken, _events = _capture(app, monkeypatch)
+        scale, _ = _with_scale(d)
+        d.trip.position_mi = 8.2
+        d.truck.velocity_mps = 45.0 / 2.23694
+        d._check_weigh_station_enforcement(8.0)  # latch the one-shot notice
+
+        # Deep inside the reminder window rather than at its edge.
+        d.trip.position_mi = scale.at_mi - 0.15
+        d._check_weigh_station_enforcement(scale.at_mi - 0.2)
+
+        reminders = [s for s in spoken if s.startswith("Weigh station in ")]
+        assert reminders == [
+            "Weigh station in a quarter mile. Slow below fifteen for the scale."
+        ]
     finally:
         app.shutdown()
 
