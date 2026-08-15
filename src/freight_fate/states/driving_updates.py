@@ -11,7 +11,7 @@ from ..models.enforcement import (
     WEIGH_STATION_BYPASS_FINE,
     WORK_ZONE_BARRELS_FINE,
 )
-from ..radio import effective_range_miles, truck_elevation_ft
+from ..radio import effective_range_miles, is_stream_entry, truck_elevation_ft
 from ..speech_pacing import EventSpeechPacer
 from ..speech_text import overspeed_nag, terse_silent
 from .driving_core import *
@@ -71,6 +71,17 @@ RADIO_VOLUME_STEP = 0.1
 PICKET_MIN_RATE_HZ = 0.4
 PICKET_MAX_RATE_HZ = 9.0
 FM_DEFAULT_MHZ = 98.0  # mid-band; wavelength varies ~10 percent over 88-108
+
+# Personal playlist pacing. A file starts playing the moment play_music_file
+# returns, so it only needs long enough for the fade-in not to read as a
+# finished track. A stream entry connects on a worker thread and is silent
+# until it lands, so it gets the same order of grace the curated real streams
+# get before a re-tune (_radio_reconnect_timer), and two attempts before the
+# entry is written off and the playlist moves on.
+PLAYLIST_FADE_HOLD_S = 1.5
+PLAYLIST_CONNECT_HOLD_S = 9.0
+PLAYLIST_CONNECT_TRIES = 2
+PLAYLIST_RETRY_S = 30.0  # how often a playlist with nothing playable looks again
 
 # Sustained redline quietly grinds the engine down (Truck._update_temps), so
 # the player must hear about it while it is happening, not at the end screen.
@@ -2058,54 +2069,124 @@ class DrivingUpdateMixin:
         self.ctx.audio.play_music(key, fade_ms=fade_ms)
 
     def _start_playlist_station(self, station, fade_ms: int = 900, advance: bool = False) -> None:
-        """Play a personal M3U station from its remembered position.
+        """Play a personal playlist station from its remembered position.
 
-        Unreadable entries are skipped at play time rather than pruned at
-        load: a NAS that was asleep when the drive started should not erase
-        the tracks behind it. Raises RadioPlaybackError only when nothing in
-        the whole playlist opens, so the radio's existing fallback machinery
-        speaks the failure the same way it does a dead stream."""
-        files = station.playlist_files
-        if not files:
+        A file entry plays off disk; a stream entry tunes the same live
+        connection the curated real streams use. Entries that will not open
+        are skipped at play time rather than pruned at load: a NAS that was
+        asleep when the drive started should not erase the tracks behind it.
+        Raises RadioPlaybackError only when nothing in the whole playlist
+        opens, so the radio's existing fallback machinery speaks the failure
+        the same way it does a dead stream."""
+        entries = station.playlist_entries
+        if not entries:
             raise RadioPlaybackError("playlist is empty")
         start = self._playlist_positions.get(station.id, 0)
         if advance:
-            start = (start + 1) % len(files)
-        for attempt in range(len(files)):
-            index = (start + attempt) % len(files)
+            start = (start + 1) % len(entries)
+        for attempt in range(len(entries)):
+            index = (start + attempt) % len(entries)
+            entry = entries[index]
+            stream = is_stream_entry(entry)
             try:
-                self.ctx.audio.play_music_file(files[index], fade_ms=fade_ms)
+                if stream:
+                    self.ctx.audio.play_radio_stream(entry, fade_ms=fade_ms)
+                else:
+                    self.ctx.audio.play_music_file(entry, fade_ms=fade_ms)
             except RuntimeError:
                 continue
             self._playlist_positions[station.id] = index
             self._radio_station_id = station.id
             self._radio_playlist = []
             self._radio_break_queue = ()
-            # The fade-in window would read as "finished" to music_playing
-            # on some backends; hold the advance check off briefly.
-            self._playlist_wait_s = 1.5
+            # A file's fade-in window would read as "finished" to
+            # music_playing on some backends, and a stream has not even
+            # connected yet; either way, hold the advance check off.
+            self._playlist_wait_s = PLAYLIST_CONNECT_HOLD_S if stream else PLAYLIST_FADE_HOLD_S
+            self._playlist_stream_tries = 0
             return
-        raise RadioPlaybackError("no playable file in this playlist")
+        raise RadioPlaybackError("no playable entry in this playlist")
+
+    def _playlist_entry(self, station) -> str:
+        """The entry this playlist is sitting on right now."""
+        entries = station.playlist_entries
+        if not entries:
+            return ""
+        return entries[self._playlist_positions.get(station.id, 0) % len(entries)]
 
     def _update_playlist_playback(self, station, dt: float) -> None:
-        """Advance a personal playlist when the current file ends."""
+        """Advance a personal playlist when the current entry ends.
+
+        A live stream never ends: it holds the dial until the driver tunes
+        away or the connection dies. Since play_radio_stream connects on a
+        worker thread, a silent music channel right after tuning means
+        "still connecting", never "finished" -- so a stream entry gets a
+        connect hold and a re-tune before it is written off."""
         if station.id != self._radio_station_id:
             self._playlist_wait_s = 0.0
+            self._playlist_stream_skips = 0
             try:
                 self._start_playlist_station(station, fade_ms=2500)
             except RadioPlaybackError:
-                self.ctx.audio.stop_music(600)
+                self._playlist_nothing_plays(station)
                 self._radio_station_id = station.id
-                self._playlist_wait_s = 30.0  # retry the folder occasionally
             return
         self._playlist_wait_s = max(0.0, self._playlist_wait_s - max(0.0, dt))
-        if self._playlist_wait_s > 0.0 or self.ctx.audio.music_playing():
+        if self._playlist_wait_s > 0.0:
             return
+        if self.ctx.audio.music_playing():
+            self._playlist_stream_tries = 0
+            self._playlist_stream_skips = 0
+            self._playlist_silence_spoken.discard(station.id)
+            return
+        entry = self._playlist_entry(station)
+        if is_stream_entry(entry) and self._playlist_stream_tries < PLAYLIST_CONNECT_TRIES:
+            # Re-tune the same URL: one still connecting is a no-op, and one
+            # whose connect already failed raises here -- which is exactly
+            # when the entry gets skipped, the same as an unreadable file.
+            self._playlist_stream_tries += 1
+            try:
+                self.ctx.audio.play_radio_stream(entry, fade_ms=600)
+            except RuntimeError:
+                pass
+            else:
+                self._playlist_wait_s = PLAYLIST_CONNECT_HOLD_S
+                return
         try:
             self._start_playlist_station(station, fade_ms=1200, advance=True)
         except RadioPlaybackError:
-            self.ctx.audio.stop_music(600)
-            self._playlist_wait_s = 30.0
+            self._playlist_nothing_plays(station)
+            return
+        if is_stream_entry(self._playlist_entry(station)):
+            # A stream cannot say up front whether it will play, so a
+            # playlist of dead streams would otherwise cycle silently
+            # forever. One lap of the entries with nothing ever heard is
+            # the same answer as nothing opening at all.
+            self._playlist_stream_skips += 1
+            if self._playlist_stream_skips > len(station.playlist_entries):
+                self._playlist_nothing_plays(station)
+        else:
+            self._playlist_stream_skips = 0
+
+    def _playlist_nothing_plays(self, station) -> None:
+        """Nothing in this playlist would play: say so once, then keep trying.
+
+        Silence with no explanation is the bug this feature kept hitting.
+        The line names the folder the player can go and fix, and it speaks
+        once per station until something in it plays again -- a station that
+        is simply between tracks says nothing at all."""
+        self.ctx.audio.stop_music(600)
+        self._playlist_wait_s = PLAYLIST_RETRY_S
+        self._playlist_stream_tries = 0
+        self._playlist_stream_skips = 0
+        if station.id in self._playlist_silence_spoken:
+            return
+        self._playlist_silence_spoken.add(station.id)
+        self.ctx.say_event(
+            f"Nothing in {station.display_name} would play. "
+            "Check the tracks in your Playlists folder.",
+            interrupt=False,
+        )
 
     def _track_radio_badges(self, reception) -> None:
         """Badges for actually living on the dial rather than just switching it on.

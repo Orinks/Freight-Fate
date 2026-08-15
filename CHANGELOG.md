@@ -375,6 +375,19 @@
 
 ### Fixed
 
+- **Your own playlists work again, and they can now carry internet stations
+  as well as music files.** A playlist exported from an internet radio app
+  is nothing but station addresses, and every one of those was thrown away,
+  so the playlist ended up empty and no station ever reached the dial -- with
+  nothing said about it either way. Now a playlist plays whatever it lists,
+  music files and internet stations together, in your order, and a stream is
+  given time to connect rather than being skipped for being slow. PLS
+  playlists are read alongside M3U and M3U8. If nothing in a playlist will
+  play, the radio tells you that and names the Playlists folder instead of
+  going quietly silent. Opening the Radio status screen re-reads the folder,
+  so a playlist you add or repair mid-drive shows up without starting a new
+  run.
+
 - **Saving the game now backs up your career right away and tells you how
   it went.** Choosing Save game at the terminal used to run the cloud
   backup silently in the background some seconds later, so "Game saved."

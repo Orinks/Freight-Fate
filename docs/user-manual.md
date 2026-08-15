@@ -1551,13 +1551,20 @@ drive. When the BASS audio backend is available, those stations play from
 their public stream URLs. If a selected station cannot play, the radio falls
 back safely instead of blocking the drive.
 
-You can put your own music on the dial. Drop M3U or M3U8 playlist files into
-the Playlists folder next to your saves (the game creates it on first run) and
-each file becomes a station under Your playlists, named from the playlist. The
-entries can point at files anywhere your computer can read, including network
-drives, and the usual formats all play: mp3, ogg, opus, flac, aac, and wma.
-The station remembers its place while you tune away during a drive, and a file
-that will not open is skipped rather than stopping the music. Personal
+You can put your own music on the dial. Drop M3U, M3U8, or PLS playlist files
+into the Playlists folder next to your saves (the game creates it on first run)
+and each file becomes a station under Your playlists, named from the playlist.
+The entries can point at files anywhere your computer can read, including
+network drives, and the usual formats all play: mp3, ogg, opus, flac, aac, and
+wma. Entries can also be internet stations: a playlist exported from an
+internet radio app is nothing but stream addresses, and those play too, in the
+order the playlist lists them alongside any music files. The station remembers
+its place while you tune away during a drive, and an entry that will not open
+is skipped rather than stopping the music -- a stream is given time to connect
+first, so it is never skipped for being slow. If nothing in a playlist will
+play, the radio says so and names the folder rather than going quietly silent.
+Opening the Radio status screen re-reads the folder, so a playlist you add or
+fix mid-drive appears on the dial without starting a new run. Personal
 playlists ride the same streamer-safe gate as real streams -- turning the mode
 on hides them, because the game cannot vouch for what your files are licensed
 for. Ctrl with any tune key jumps straight to the Your playlists category.

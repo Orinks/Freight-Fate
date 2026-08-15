@@ -3092,9 +3092,20 @@ section below and the Unreleased changelog; the release-line view:
       must not erase the station); each station remembers its place for
       the drive. A drop-in folder, never a file picker -- screen-reader
       users manage folders in Explorer. Personal media rides the
-      streamer-safe gate like real streams; stream URLs inside an M3U
-      are ignored (curated catalog only). Follow-up: consider shuffle
-      and a cross-session resume position if playtests want them.
+      streamer-safe gate like real streams. Owner report 2026-08-15:
+      stream URLs inside a playlist were dropped, so a playlist exported
+      from an internet radio app parsed to nothing and its station never
+      reached the dial, silently -- fixed on
+      `fix/personal-playlist-streams`. Entries are now file paths or
+      stream URLs in the player's own order (a stream plays through the
+      same async connect the curated real streams use, with a connect
+      hold so it is never skipped for being slow); `.pls` files are read
+      alongside `.m3u`/`.m3u8`; loading logs one INFO line per playlist
+      and a WARNING for any file that yields nothing; a playlist with
+      nothing playable says so instead of falling silent; and opening
+      the Radio status screen re-reads the folder mid-drive. Follow-up:
+      consider shuffle and a cross-session resume position if playtests
+      want them.
 - [x] **Radio dial categories with a jump key (landed 2026-07-20).**
       Ctrl+bracket (the owner's binding -- plain brackets already tune)
       leaps to the first station of the previous/next dial category and
