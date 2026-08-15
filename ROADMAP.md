@@ -4113,7 +4113,10 @@ From a batch of player reports:
   quarters of a mile (short dips filtered out -- unfiltered, Knoxville to
   Asheville spoke 76 advisories in 116 miles), a once-per-grade line when
   cruise concedes the hill, and the G key for the slope under the wheels, its
-  run, the truck's verdict, and the next steep grade ahead.
+  run, the truck's verdict, and the next grade ahead worth planning for --
+  including a grade that steepens without flattening first, and the gentler
+  pull the speed preview is banking momentum for, which the steep bar alone
+  never mentioned.
 - [x] **`tools/playtest_road.py`: drop into a chosen piece of road.** Built
   alongside the grade work, because walking the menus to a specific hill takes
   minutes and lands somewhere slightly different every time. Finds a road

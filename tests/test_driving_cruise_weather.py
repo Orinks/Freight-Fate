@@ -3189,6 +3189,32 @@ def test_predictive_cruise_banks_speed_before_a_climb():
         app.shutdown()
 
 
+def test_predictive_cruise_cue_names_the_grade_it_is_building_for():
+    """ "The grade ahead" sounded like a steep one, and the G key disagreed.
+
+    The cue fires from one and a half percent up, under the bar the steep
+    advisory uses, so a driver who pressed G heard that nothing steep was
+    coming for fifteen miles (tester report, Cary, 2026-08-15). Naming the
+    number makes the two answers describe one road.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say_event = speech_stub(spoken)
+    try:
+        driving = _cruising(app)
+        _hill_road(driving, flat_mi=0.5, grade=0.02, climb_mi=1.0)
+        driving.truck.grade = 0.0
+        app.ctx.settings.predictive_cruise = True
+        bias = driving._predictive_cruise_bias(62.0)
+        assert bias > 0.5, bias
+        driving._say_predictive_cruise(0.0, bias)
+        assert any("2.0 percent upgrade" in line for line in spoken), spoken
+    finally:
+        app.shutdown()
+
+
 def test_predictive_cruise_finds_a_short_hill():
     """A half-mile hill must not average away inside the preview.
 

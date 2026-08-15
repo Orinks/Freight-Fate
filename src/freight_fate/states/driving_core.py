@@ -492,6 +492,10 @@ PCC_CUE_COOLDOWN_S = 45.0  # rolling country must not chant preview cues
 # halfway down it.
 GRADE_WARN_PCT = 3.0  # steep enough to call out, either direction
 GRADE_WARN_CLEAR_PCT = 2.0  # hysteresis: under this the grade is behind you
+# A grade that keeps its sign but gets materially worse is a new thing to plan
+# for: two percent down that becomes six is the hill gear goes in for, and the
+# road never flattens in between to announce it.
+GRADE_WARN_STEEPEN_PCT = 1.0
 GRADE_WARN_LOOKAHEAD_MI = 0.75  # how far ahead the advisory reaches
 GRADE_WARN_SCAN_MI = 15.0  # how far a grade's run is measured before giving up
 GRADE_WARN_STEP_MI = 0.25  # sampling stride; matches the baked segment length

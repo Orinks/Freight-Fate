@@ -3081,6 +3081,34 @@ class DrivingEventMixin:
         means = [sum(samples[i : i + window]) / window for i in range(len(samples) - window + 1)]
         return max(means), min(means)
 
+    def _preview_grade_ahead(self) -> tuple[float, float] | None:
+        """The first sustained grade inside the preview, and how far off it is.
+
+        The same windowed read the preview plans against, so the G key and the
+        preview cue describe one road. Predictive cruise banks momentum from
+        one and a half percent up and the steep advisory only speaks at three,
+        so the truck could say it was building speed for the grade ahead while
+        G answered that nothing steep was coming for fifteen miles -- both
+        true, and together they read as broken (tester report, 2026-08-15).
+        """
+        samples = self._grade_samples(PCC_PREVIEW_MI)
+        window = max(1, int(round(PCC_GRADE_WINDOW_MI / PCC_PREVIEW_STEP_MI)))
+        if len(samples) < window:
+            return None
+        means = [sum(samples[i : i + window]) / window for i in range(len(samples) - window + 1)]
+        # The steepest window, not the first one over the bar: on the run into
+        # Asheville the first was a 1.5 percent lift a mile out and the cue was
+        # already building for the 3.7 percent pull behind it, so naming the
+        # first put two different numbers on one hill (sweep, 2026-08-15).
+        peak = max(range(len(means)), key=lambda i: abs(means[i]))
+        if abs(means[peak]) < PCC_GRADE_MIN:
+            return None
+        sign = 1.0 if means[peak] > 0 else -1.0
+        start = peak
+        while start > 0 and means[start - 1] * sign >= PCC_GRADE_MIN:
+            start -= 1
+        return means[peak], (start + 1) * PCC_PREVIEW_STEP_MI
+
     def _predictive_cruise_bias(self, target_mph: float) -> float:
         """Speed to add or give up for the grade the truck is about to reach.
 
@@ -3160,11 +3188,15 @@ class DrivingEventMixin:
         if not phase or self._terse_speech() or self._pcc_cue_s > 0.0:
             return
         self._pcc_cue_s = PCC_CUE_COOLDOWN_S
-        message = (
-            "Building speed for the grade ahead."
-            if phase == "building"
-            else "Easing off for the road ahead."
-        )
+        if phase == "building":
+            # Name the number. "The grade ahead" reads as a steep one, and the
+            # G key -- which only calls a grade steep at three percent -- then
+            # answered that nothing steep was coming for fifteen miles, which
+            # is how a two percent pull looked like a bug (tester, 2026-08-15).
+            climb_ahead, _ = self._grade_extremes_ahead()
+            message = f"Building speed for a {climb_ahead * 100:.1f} percent upgrade ahead."
+        else:
+            message = "Easing off for the road ahead."
         self.ctx.say_event(message, interrupt=False)
 
     def _descent_hold_mph(self) -> float:

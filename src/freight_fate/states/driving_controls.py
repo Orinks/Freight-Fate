@@ -857,8 +857,10 @@ class DrivingControlsMixin:
         The verdict comes from the sim's own net-force balance, so the spoken
         answer to "why am I slowing down" is the same physics the wheels feel
         -- including whether the jake has the descent or is about to lose it.
-        The next steep grade ahead comes with it, so one press answers both
-        "what am I on" and "what is coming".
+        The next grade ahead comes with it, so one press answers both "what am
+        I on" and "what is coming" -- down to the gentler pull the speed
+        preview plans for, which is quieter than the steep bar but is the
+        reason the truck just said it was building speed.
         """
         t = self.truck
         grade = t.grade
@@ -922,12 +924,17 @@ class DrivingControlsMixin:
         here_sign = (
             1 if here >= GRADE_WARN_CLEAR_PCT else -1 if here <= -GRADE_WARN_CLEAR_PCT else 0
         )
+        here_pct = abs(here) if here_sign else 0.0
         while probe < min(self.trip.total_miles, self.trip.position_mi + GRADE_WARN_SCAN_MI):
             pct = self.trip.grade_at(probe) * 100.0
             sign = 1 if pct > 0 else -1
             # The grade already under the wheels is the first sentence's job;
-            # this one starts at the next change of character.
-            if abs(pct) >= GRADE_WARN_PCT and sign != here_sign:
+            # this one starts at the next change of character -- or at the
+            # point the same grade turns into a materially worse one, which
+            # never changes sign and so was never spoken at all.
+            turned = sign != here_sign
+            steepened = not turned and abs(pct) >= here_pct + GRADE_WARN_STEEPEN_PCT
+            if abs(pct) >= GRADE_WARN_PCT and (turned or steepened):
                 run_mi = self._grade_run_mi(probe, sign)
                 # Same filter the advisory uses: a third-of-a-mile dip is not
                 # the next grade, it is a bump in this one.
@@ -939,15 +946,47 @@ class DrivingControlsMixin:
                         if ahead >= GRADE_WARN_MIN_RUN_MI
                         else "just ahead"
                     )
-                    return (
-                        f"Next, a {abs(pct):.1f} percent {direction} {distance}, "
-                        f"running {self.trip._distance_text(run_mi)}."
-                    )
+                    running = f"running {self.trip._distance_text(run_mi)}."
+                    if steepened:
+                        return f"It steepens to {abs(pct):.1f} percent {distance}, {running}"
+                    return f"Next, a {abs(pct):.1f} percent {direction} {distance}, {running}"
             if abs(pct) < GRADE_WARN_CLEAR_PCT:
                 here_sign = 0
+                here_pct = 0.0
             probe += GRADE_WARN_STEP_MI
         scanned = max(0.0, min(GRADE_WARN_SCAN_MI, self.trip.total_miles - self.trip.position_mi))
-        return f"Nothing steep in the next {self.trip._distance_text(scanned)}."
+        # "Nothing steep ahead" in the same breath as a six percent grade under
+        # the wheels reads as the game contradicting itself.
+        nothing = "Nothing else steep" if abs(here) >= GRADE_WARN_PCT else "Nothing steep"
+        clause, sustained = self._mild_grade_clause(here)
+        # A short punchy pull can be over the steep number and still fall under
+        # the run filter this scan uses. Saying "nothing steep" and then naming
+        # a 3.7 percent grade in the same sentence is the same contradiction in
+        # miniature, so the lead says what the scan actually means.
+        if clause and not sustained:
+            nothing += " for long"
+        return f"{nothing} in the next {self.trip._distance_text(scanned)}{clause}."
+
+    def _mild_grade_clause(self, here_pct: float) -> tuple[str, bool]:
+        """The grade the preview is planning for, when none is steep enough to
+        call out, and whether it is under the steep number.
+
+        Automatic speed control banks momentum for a two percent pull and says
+        so; with nothing steep in fifteen miles, G had nothing to say back and
+        the two answers looked like a bug (tester report, 2026-08-15). Read off
+        the preview's own scan so both describe the same hill.
+        """
+        preview = self._preview_grade_ahead()
+        if preview is None:
+            return "", True
+        grade, ahead_mi = preview
+        # A grade already under the wheels is the first sentence's job.
+        if abs(here_pct) >= PCC_GRADE_MIN * 100.0 and (grade > 0) == (here_pct > 0):
+            return "", True
+        pct = abs(grade) * 100.0
+        direction = "upgrade" if grade > 0 else "downgrade"
+        where = self.ctx.settings.short_distance_text(ahead_mi)
+        return f", but a {pct:.1f} percent {direction} starts in {where}", pct < GRADE_WARN_PCT
 
     def _speak_upcoming(self, within_mi: float = 15.0) -> None:
         """U: the road ahead that no other key already answers.

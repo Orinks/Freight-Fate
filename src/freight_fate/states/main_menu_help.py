@@ -177,7 +177,7 @@ HELP_PAGES = [
             "Space speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state.",
             "S speaks the posted speed limit here, the zone if any, and how far over you are.",
             "D speaks one safe-speed number for right now: weather grip and an armed exit ramp are already baked into it.",
-            "G speaks the grade under the wheels, how far it runs, whether the truck is holding, pulling, or losing it, and the next steep grade ahead.",
+            "G speaks the grade under the wheels, how far it runs, whether the truck is holding, pulling, or losing it, and the next grade ahead worth planning for.",
             "Steep grades of three percent or more announce themselves before you reach them, except on terse speech, where G answers on demand instead.",
             "Tab opens a driving status menu for route, driver, map, and a Driver apps tablet menu.",
             "Inside Driver apps, choose Navigation, Weather, Traffic, Truck stops,",

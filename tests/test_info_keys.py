@@ -995,3 +995,134 @@ def test_grade_key_says_when_nothing_steep_is_coming(monkeypatch):
         assert "Nothing steep in the next" in spoken[-1], spoken[-1]
     finally:
         app.shutdown()
+
+
+def test_grade_key_names_the_grade_the_preview_is_planning_for(monkeypatch):
+    """A grade under the steep bar is still the grade cruise is reacting to.
+
+    Predictive cruise banks momentum from one and a half percent up; the steep
+    advisory only speaks at three. So the truck would say it was building speed
+    for the grade ahead and G would answer that nothing steep was coming for
+    fifteen miles -- both true, and together they read as a broken game
+    (tester report, Cary, 2026-08-15).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 5.0
+        # Level under the wheels, a 2 percent pull half a mile out: worth
+        # banking speed for, well under the bar for a steep call.
+        d.trip.grade_at = lambda mile: 0.02 if mile >= 5.45 else 0.0
+        d.truck.grade = 0.0
+        d.truck.velocity_mps = 60.0 / 2.23694
+        app.ctx.settings.predictive_cruise = True
+        # The preview plans for it, which is what makes the silence a bug.
+        assert d._predictive_cruise_bias(62.0) > 0.5
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_g))
+        said = spoken[-1]
+        assert "Nothing steep" in said, said
+        assert "2.0 percent upgrade" in said, said
+        assert "half a mile" in said, said
+    finally:
+        app.shutdown()
+
+
+def test_grade_key_does_not_call_a_punchy_pull_nothing_steep(monkeypatch):
+    """Steep but short: the lead must not deny the grade it goes on to name.
+
+    The steep scan filters out anything that does not hold for three quarters
+    of a mile, so a half-mile 3.7 percent pull reaches the "nothing steep"
+    answer -- and then the preview clause names it in the same sentence.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 5.0
+        d.trip.grade_at = lambda mile: 0.037 if 5.4 <= mile < 5.9 else 0.0
+        d.truck.grade = 0.0
+        d.truck.velocity_mps = 60.0 / 2.23694
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_g))
+        said = spoken[-1]
+        assert "Nothing steep for long" in said, said
+        assert "3.7 percent upgrade" in said, said
+    finally:
+        app.shutdown()
+
+
+def test_grade_key_names_the_same_hill_the_speed_control_cue_names(monkeypatch):
+    """Two grades inside the preview must still produce one number.
+
+    The cue builds for the steepest window it can see. If G reported the
+    first window merely over the bar instead, a gentle lift in front of the
+    real pull put two different numbers on one hill -- the same
+    contradiction in a smaller form.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 5.0
+        # A one and a half percent lift, and the pull it leads into. Both
+        # under the bar for a steep call, so the mild clause is the only
+        # thing that can name either of them.
+        d.trip.grade_at = lambda mile: 0.026 if mile >= 5.9 else (0.015 if mile >= 5.2 else 0.0)
+        d.truck.grade = 0.0
+        d.truck.velocity_mps = 60.0 / 2.23694
+        climb_ahead, _ = d._grade_extremes_ahead()
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_g))
+        said = spoken[-1]
+        assert "Nothing steep" in said, said
+        assert f"{climb_ahead * 100:.1f} percent upgrade" in said, said
+        assert "1.5 percent" not in said, said
+    finally:
+        app.shutdown()
+
+
+def test_grade_key_names_a_grade_that_steepens_without_letting_up(monkeypatch):
+    """A hill that gets worse without flattening first is still news.
+
+    The scan only reported a grade whose sign differed from the one under the
+    wheels, so a mild pull that turned into a six percent descent -- never
+    dropping under the clear bar in between -- answered "nothing steep".
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 5.0
+        d.trip.grade_at = lambda mile: -0.065 if mile >= 7.0 else -0.022
+        d.truck.grade = -0.022
+        d.truck.velocity_mps = 60.0 / 2.23694
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_g))
+        said = spoken[-1]
+        assert "Nothing steep" not in said, said
+        assert "steepens to 6.5 percent" in said, said
+    finally:
+        app.shutdown()
+
+
+def test_grade_key_says_nothing_else_steep_while_on_a_steep_grade(monkeypatch):
+    """Six percent under the wheels and "nothing steep ahead" in one breath."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 5.0
+        _fixed_grade(d, -6.0, until_mi=12.0)
+        d.truck.velocity_mps = 60.0 / 2.23694
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_g))
+        assert "Nothing else steep in the next" in spoken[-1], spoken[-1]
+    finally:
+        app.shutdown()
