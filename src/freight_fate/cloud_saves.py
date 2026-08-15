@@ -208,6 +208,12 @@ REJECTED_UPLOAD_REASONS = frozenset(
         "invalid_hos",
         "invalid_achievement",
         "unsupported_version",
+        # Neither of these can succeed on a retry, and both were missing here
+        # until Shane's three careers refused at once (2026-08-15): they fell
+        # through to "network", so the queue backed off and tried again
+        # forever while the player was told nothing at all.
+        "too_many_slots",
+        "signing_unavailable",
     }
 )
 
@@ -250,6 +256,17 @@ SCHEMA_REJECTION_REASONS = frozenset({"invalid_schema", "unsupported_version"})
 # an unexplained refusal. Nothing the player can do about it, so say so.
 CATALOG_REJECTION_REASONS = frozenset({"invalid_city"})
 
+# The one refusal a player can clear without anyone's help: the server keeps a
+# fixed number of backed-up careers, and the answer is to remove one from the
+# Cloud backup menu. Under the generic line it read as an unexplained failure
+# with nothing to do about it, which is the opposite of the truth.
+SLOTS_FULL_REJECTION_REASONS = frozenset({"too_many_slots"})
+
+# The server accepted the save and then could not sign it -- its own
+# configuration, nothing about this career. Says so plainly rather than
+# implying the save was judged and found wanting.
+SERVER_FAULT_REJECTION_REASONS = frozenset({"signing_unavailable"})
+
 
 def rejection_status(name: str, reason: str | None) -> str:
     """The player-facing status line for a server-refused upload.
@@ -283,6 +300,20 @@ def rejection_status(name: str, reason: str | None) -> str:
             "town this career is parked in, which usually means it has not "
             "caught up with this build yet. Your local career is safe, and "
             "backups start working again on their own once it has."
+        )
+    if reason in SLOTS_FULL_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. You have as many careers backed up "
+            "as the server keeps, so there is no room for this one. Remove a "
+            "career from the Cloud backup menu and this will back up again. "
+            "Your local career is safe."
+        )
+    if reason in SERVER_FAULT_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. The server could not finish signing "
+            "this backup, which is a problem at our end and not anything about "
+            "your career. Your local career is safe, and backups start working "
+            "again on their own once it is fixed."
         )
     return (
         f"{name}: backup not accepted. Your local career is safe. Public details were not updated."

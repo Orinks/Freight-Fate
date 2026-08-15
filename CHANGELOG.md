@@ -445,6 +445,14 @@
 
 ### Fixed
 
+- **Two backup refusals now tell you what is actually wrong.** If you have
+  as many careers backed up as the server keeps, it now says so and tells
+  you to remove one from the Cloud backup menu -- something you can fix in
+  a few seconds, where before it gave the same vague "not accepted" line as
+  everything else. And if the server itself fails to finish a backup, it now
+  says that is a problem at our end and not anything about your career, and
+  that backups will start working again on their own. Neither of these used
+  to say anything at all: the game quietly kept retrying them forever.
 - **The exit calls stop being talked over.** Every announcement that gets
   you off the highway -- the exit ahead, the exit lane, the gore, and the one
   that tells you lane keeping is taking your destination exit for you -- was
