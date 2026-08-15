@@ -805,6 +805,18 @@ onto exit signalling.
       matched outright with no distance test. All three fixed with the
       spoken hand-back-up line; queue creep and hand-set speeds
       unchanged.
+- [x] **Traffic drove at fixed speeds while the map got faster.** The
+      intent bands were absolute mph (cruising 52-64, merging 38-52,
+      braking 35-48) chosen before real OSM speed limits were baked per
+      leg, and they never moved when the map did. On a 75 mph Texas
+      corridor the whole population ran 20-40 mph under the road, which
+      the driver met as a lead-vehicle cue telling them to leave room for
+      30 for a semi on an interstate (owner playtest, 2026-08-15). Speeds
+      are now drawn as offsets from the posting at the spawn mile, with
+      the floor a share of that limit rather than one absolute number, so
+      the same bands suit a 75 corridor and a 30 mph street. NPCs read the
+      car limit, not the truck cap, so in a split-limit state the traffic
+      going by a rig held to 55 is doing a legal 65.
 - [ ] **Adaptive cruise's own limit lookahead ignores time compression.**
       `_acc_limit_lookahead_mi` sizes cruise's slow-down trigger with the
       same uncompressed braking physics the limit pacenote just moved off
