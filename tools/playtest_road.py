@@ -498,7 +498,11 @@ def run_headless(app, driving, args) -> None:
 
     spoken: list[tuple[str, str]] = []
     app.ctx.say_event = lambda text, interrupt=False, **_: spoken.append(("event", text))
-    app.ctx.say = lambda text, interrupt=True: spoken.append(("say", text))
+    # ``**_`` for the same reason say_event above has it: the shim must absorb
+    # every keyword App.say grows, or the bench dies the first time the game
+    # uses one. It crashed on ``review=`` -- passed by award_achievement, so
+    # any run that earned a badge took the whole bench down mid-drive.
+    app.ctx.say = lambda text, interrupt=True, **_: spoken.append(("say", text))
 
     class NoKeys:
         def __getitem__(self, _key):
