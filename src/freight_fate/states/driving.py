@@ -140,6 +140,16 @@ class DrivingState(
                 if phase == DRIVE_PHASE_PICKUP
                 else job.destination_facility_text()
             ),
+            # The arrival zones size the approach from the facility's own
+            # record rather than a flat last-three-miles, so the run holds
+            # corridor speed until the local road really begins.
+            destination_approach_mi=ctx.world.facility_approach_miles(
+                *(
+                    (job.origin, job.origin_location)
+                    if phase == DRIVE_PHASE_PICKUP
+                    else (job.destination, job.destination_location)
+                )
+            ),
         )
         if phase == DRIVE_PHASE_DELIVERY:
             # The destination exit, ramp terminal, and street chain own the

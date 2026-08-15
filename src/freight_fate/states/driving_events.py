@@ -1004,11 +1004,57 @@ class DrivingEventMixin:
             # so; pressing X right after must not repeat the whole sentence.
             return ""
         self._cruise_exit_mph = capped
-        action = "easing to" if self.truck.speed_mph > self._cruise_exit_mph + 1.0 else "holding"
+        # The number is where the truck will BE at the gore, not where it goes
+        # now: _ramp_approach_cap_mph holds road speed until the exit is close
+        # enough to shed for. Arming five miles out and dropping straight to
+        # ramp speed is the "keeper goes to 40 miles away from the exit"
+        # report (Shane, 2026-08-15).
+        action = "will ease to" if self.truck.speed_mph > self._cruise_exit_mph + 1.0 else "holding"
         return (
             f" Adaptive cruise {action} "
             f"{self.ctx.settings.speed_text(self._cruise_exit_mph)} for the ramp."
         )
+
+    def _ramp_approach_cap_mph(self) -> float | None:
+        """The armed exit's cap right now, measured off the road still left.
+
+        The ramp target is where the truck has to BE at the gore. Applied the
+        moment the exit is armed it is also where the truck goes immediately,
+        and an exit arms as much as five miles out (further under time
+        compression, which is what the arming window is sized in) -- so a
+        driver heard the callout and then watched automatic control sit at 40
+        for miles of open interstate with the exit nowhere near (tester
+        report, Shane, 2026-08-15).
+
+        Instead the cap glides: corridor speed stands until the exit is inside
+        the road this truck needs to shed for it, then comes down along the
+        deceleration itself, reaching the ramp number a little before the gore.
+        The road is priced exactly as the keeper's ease prices it -- a reaction
+        budget in real seconds at the speed the truck is doing, and a
+        comfortable shed rate under that -- both converted through the trip's
+        effective time scale, because compressed miles pass faster than the
+        truck can slow through them.
+        """
+        floor = self._cruise_exit_mph
+        if floor is None:
+            return None
+        if self._ramp_mi is not None:
+            return floor  # already on the ramp: the number is the number
+        stop = self._exit_stop or self._ramp_stop
+        if stop is None:
+            return floor
+        ahead = stop.at_mi - self.trip.position_mi
+        if ahead <= 0.0:
+            return floor
+        scale = max(1.0, self.trip.effective_time_scale)
+        # Priced at the set speed, not the live one, so the cap cannot chase
+        # its own slowing and hand the road back a mile an hour at a time.
+        speed = max(self.truck.speed_mph, self._cruise_mph or 0.0, floor)
+        reaction_mi = APPROACH_REACTION_S * speed * scale / 3600.0
+        brake_m = max(0.0, ahead - reaction_mi) / scale * METERS_PER_MILE
+        floor_mps = floor / MPH_PER_MPS
+        allowed = (floor_mps**2 + 2.0 * APPROACH_DECEL_MPS2 * brake_m) ** 0.5 * MPH_PER_MPS
+        return max(floor, allowed)
 
     def _reset_exit_lane_state(self) -> None:
         self._exit_lane_alignment = 0.0
@@ -3138,9 +3184,10 @@ class DrivingEventMixin:
         elif self._cruise_working_mph > self._cruise_mph:
             self._cruise_working_mph = max(self._cruise_mph, self._cruise_working_mph - step)
         target_mph = self._cruise_working_mph
-        exit_capped = self._cruise_exit_mph is not None and self._cruise_exit_mph < target_mph
+        exit_cap = self._ramp_approach_cap_mph()
+        exit_capped = exit_cap is not None and exit_cap < target_mph
         if exit_capped:
-            target_mph = self._cruise_exit_mph
+            target_mph = exit_cap
         # A pacenote capped cruise for a bend: hold the advisory until the
         # curve's footprint is behind the truck, then climb back silently --
         # announcing every release would chant through a curve cluster.

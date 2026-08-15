@@ -3,6 +3,11 @@
 
 from __future__ import annotations
 
+from ..sim.trip_models import (
+    APPROACH_DECEL_MPS2,
+    APPROACH_REACTION_S,
+    APPROACH_SETTLE_S,
+)
 from .driving_core import (
     CRUISE_MIN_MPH,
     KEEPER_MIN_MPH,
@@ -11,15 +16,18 @@ from .driving_core import (
 )
 from .driving_turns import TURN_COMMIT_TAIL_MI
 
+# The keeper's ease and the arrival zones plan the same shed, so the three
+# numbers under it have one definition, in the portable layer.
+#
 # How early the keeper starts shedding speed for something ahead, sized in
 # REAL seconds rather than miles -- the same law the turn call and the zone
 # warning already follow, because under time compression a fixed stretch of
 # road passes before a truck can slow through it.
-KEEPER_EASE_REAL_S = 6.0
+KEEPER_EASE_REAL_S = APPROACH_REACTION_S
 # And down to the number this long BEFORE the point, never exactly on it: a
 # corner reached at the advise speed with no margin is a corner taken at it,
 # which is the tester report this exists to answer.
-KEEPER_SETTLE_REAL_S = 2.0
+KEEPER_SETTLE_REAL_S = APPROACH_SETTLE_S
 # What the keeper actually delivers at street speed, measured on the bench
 # rather than assumed: it is capped at light brake and comes off the pedal
 # inside its own deadband, so it sheds about 0.4 m/s2 down there (0.9 at
@@ -36,7 +44,7 @@ KEEPER_SETTLE_REAL_S = 2.0
 # KEEPER_SNUB_MAX_BRAKE. The two failures do not cost the same: arriving early
 # costs a stretch at the lower number, arriving late costs the corner, the
 # loop-back, and the session with it.
-KEEPER_EASE_DECEL_MPS2 = 0.4
+KEEPER_EASE_DECEL_MPS2 = APPROACH_DECEL_MPS2
 # Aim a hair under the number rather than exactly at it. The keeper closes
 # the last mile an hour on engine drag alone -- below its braking deadband --
 # so a target set right on the number is a number the truck only reaches AT

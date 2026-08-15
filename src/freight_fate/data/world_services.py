@@ -10,6 +10,7 @@ from .world_constants import (
     CITY_SERVICE_SOURCE_NOTES,
     FACILITY_APPROACH_MILES,
     FACILITY_APPROACH_ROADS,
+    FACILITY_APPROACH_TRUSTED_MAX_MI,
 )
 from .world_models import (
     CityService,
@@ -173,6 +174,38 @@ class WorldServiceMixin:
     def facility_source_approach(self, city: str, location_name: str) -> FacilityApproach | None:
         location = self.facility_location(city, location_name)
         return self._facility_approaches.get(location.id)
+
+    def facility_approach_miles(self, city: str, location_name: str) -> float | None:
+        """Local approach road a HIGHWAY run has to cover to reach this gate.
+
+        The arrival zones size the destination approach from this rather than
+        from a flat mileage: the facilities differ hugely, and a number that
+        fits a dock two ramps off the interstate is a crawl for one sitting on
+        the frontage road.
+
+        ``None`` means "no usable geometry, size it synthetically", and it is
+        the answer in two different cases. A facility with a genuine
+        turn-level street chain has that chain driven as a route of its own
+        once the highway run ends, so counting its mileage here as well would
+        slow the freeway for road the truck has not reached. A facility whose
+        record is a fallback, or whose endpoint estimate is longer than any
+        real approach road (the misplaced pins the synthetic cap already
+        guards), has nothing worth believing."""
+        try:
+            location = self.facility_location(city, location_name)
+        except (KeyError, ValueError):
+            return None
+        approach = self._facility_approaches.get(location.id)
+        if approach is not None and approach.turn_level and approach.segments:
+            return None  # its own street chain covers this road
+        if approach is not None and not approach.fallback and approach.total_miles > 0.0:
+            return approach.total_miles
+        endpoint = self._facility_endpoints.get(location.id)
+        if endpoint is not None and endpoint.source_backed and not endpoint.fallback:
+            miles = endpoint.approach_miles
+            if 0.0 < miles <= FACILITY_APPROACH_TRUSTED_MAX_MI:
+                return miles
+        return None
 
     def facility_geometry(self, city: str, location_name: str) -> LocalGeometry | None:
         location = self.facility_location(city, location_name)
