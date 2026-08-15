@@ -204,7 +204,9 @@ HELP_PAGES = [
             "Comma repeats what was just said and keeps stepping back, and Period moves forward again. "
             "Control with Comma or Period jumps to the oldest or newest message, the bracket keys switch "
             "between all messages, general messages, and driving events, and Control C copies the one you are on.",
-            "U speaks what is coming up: imposed speed limits, stops, and exits ahead.",
+            "U speaks the road ahead that no other key answers: the ramp control "
+            "coming up, the next imposed speed limit, the next stop, and the next "
+            "bend that demands slowing.",
             "Left or Right Control stops the driving event voice.",
             "Escape opens the pause menu.",
         ],

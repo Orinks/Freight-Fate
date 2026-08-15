@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from ..message_log import MessageCategory
 from ..speech_text import SpokenMessage, cruise_curve_easing
+from ..units import spoken_feet_or_meters
 from .base import TimedMessageState
 from .driving_core import *
 from .driving_menu_states import ArrivalState, FacilityArrivalState
@@ -1842,11 +1843,7 @@ class DrivingEventMixin:
 
     def _short_distance_text(self, miles: float) -> str:
         """A short gap in round spoken units: feet or meters, never decimals."""
-        if self.ctx.settings.imperial_units:
-            feet = max(50, int(round(miles * 5280.0 / 50.0)) * 50)
-            return f"{feet} feet"
-        meters = max(20, int(round(miles * 1609.344 / 20.0)) * 20)
-        return f"{meters} meters"
+        return spoken_feet_or_meters(miles, self.ctx.settings.imperial_units)
 
     def _approach_limit_text(self) -> str:
         """The enforced limit AT THE STOP BAR, spoken.
