@@ -438,6 +438,14 @@
 
 ### Fixed
 
+- **The ramp's traffic light stops going quiet on you.** The lines that get
+  you to the stop bar -- the light changing, how far the bar is, and route
+  transition assistance telling you it is braking for the light -- were
+  treated as chatter, so any other announcement landing at the same moment
+  pushed them out entirely. On a busy ramp that meant the truck braked for a
+  light and said nothing about it, and going through on a yellow was never
+  mentioned. They now take priority over ordinary road talk, the same as the
+  exit you are taking.
 - **The last call before your exit no longer says "in 0 miles".** Once you
   were inside a mile of a destination exit, the distance was rounded to whole
   miles and came out as zero, so the announcement sounded like the exit had
