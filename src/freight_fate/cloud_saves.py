@@ -342,10 +342,25 @@ def conflict_status(name: str) -> str:
     )
 
 
+def backup_status(name: str) -> str:
+    """The spoken all-clear for an ordinary accepted background backup.
+
+    Career-named like every other backup story, and deliberately the shortest
+    of them: it fires at every rest stop, motel, sleep and delivery, so it has
+    to be something a driver can hear many times a run without it becoming
+    noise. "backed up" is the wording the rest of the feature already uses --
+    the Save game line, the recovery line, the Cloud backup menu -- so this
+    adds a moment to say it, not a new noun to learn.
+    """
+    return f"{name} is backed up."
+
+
 def recovery_status(name: str) -> str:
     """The spoken all-clear for a career whose backup refusal was announced:
     one line, career-named like every other backup story, when a later
-    upload of that slot is accepted again."""
+    upload of that slot is accepted again. Says "again" because it answers
+    the refusal the driver already heard; an ordinary success uses
+    :func:`backup_status`."""
     return f"{name} is backed up again."
 
 
@@ -998,30 +1013,42 @@ class CloudSaves:
             if token == 0:
                 self._announcements.append(message)
 
-    def _announce_recovery(self, name: str, token: int, *, uploaded: bool) -> None:
-        """A slot with a recorded refusal is backed up again: clear the
-        record so later trouble speaks afresh, and say so once.
+    def _announce_success(self, name: str, token: int, *, uploaded: bool) -> None:
+        """An upload was accepted: say so, and clear any recorded refusal so
+        later trouble speaks afresh.
+
+        Success used to be silent unless it followed an announced refusal,
+        which left the ordinary case with nothing to hear at all. A save at a
+        rest stop backs up in the background, and a driver who cannot see the
+        status line got the same nothing whether the career reached the server
+        or never left the machine -- silence reading as failure is the whole
+        complaint behind the refusal lines above, and it applied just as much
+        to the path that worked (owner, 2026-08-15).
 
         Same principle as _announce_refusal: the token gates the speaking,
-        never the bookkeeping. Any success clears the slot's recorded
-        cause, but only a background one (token 0) appends the recovery
-        line -- a manual save's success is already spoken by the Save game
-        watch, and a second line for the same event would say it twice.
+        never the bookkeeping. Only a background save (token 0) speaks here --
+        a manual save's outcome is already spoken by the Save game watch
+        (states/city.py `_backup_outcome_text`), and a second line for the
+        same event would say it twice.
+
         ``uploaded`` marks a real accepted upload, which also proves this
         computer's sign-in works, so it re-arms the machine-wide auth
         announcement -- silently, since the auth line named no career and
-        reconnecting speaks its own confirmation. The "unchanged" path
-        never contacts the server, so it proves nothing about auth and
-        leaves that record alone.
+        reconnecting speaks its own confirmation. The "unchanged" path never
+        contacts the server: it leaves the auth record alone, and it stays
+        silent unless it is clearing a refusal, because nothing was sent and
+        claiming a fresh backup would be untrue.
         """
         with self._lock:
             if uploaded:
                 self._announced_causes.pop(_AUTH_ANNOUNCED_KEY, None)
-            if name not in self._announced_causes:
+            recovered = self._announced_causes.pop(name, None) is not None
+            if token != 0:
                 return
-            del self._announced_causes[name]
-            if token == 0:
+            if recovered:
                 self._announcements.append(recovery_status(name))
+            elif uploaded:
+                self._announcements.append(backup_status(name))
 
     def shutdown(self) -> None:
         """Flush the pending upload briefly and stop the worker. Never raises."""
@@ -1159,7 +1186,7 @@ class CloudSaves:
             # The cloud already holds this save -- a resolved conflict or a
             # menu restore got the slot current, so an announced refusal is
             # over even though no upload ran here.
-            self._announce_recovery(name, token, uploaded=False)
+            self._announce_success(name, token, uploaded=False)
             return
         result = upload_save(
             self._identity,
@@ -1175,7 +1202,7 @@ class CloudSaves:
             self._retry_at = None
             self._set_status("Latest backup accepted and server-verified.")
             self._note_outcome(name, token, "accepted")
-            self._announce_recovery(name, token, uploaded=True)
+            self._announce_success(name, token, uploaded=True)
             log.info("Cloud backup of %s uploaded as revision %s", name, result["revision"])
             return
         if result.get("reason") == "conflict":

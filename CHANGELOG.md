@@ -452,6 +452,14 @@
   come up against, so it sounded like nothing played at all. It now plays
   louder there than it ever does while driving, and for longer, and the
   description says why it is quieter out on the road.
+- **You now hear when a career is backed up, not only when it is not.** Save
+  at a rest stop, a motel, after a delivery or a night's sleep, and the game
+  tells you your career is backed up once the server has it. Before, only
+  trouble spoke: a backup that worked said nothing, so there was no way to
+  tell a career safely on the server from one that never left your computer
+  without opening the Cloud backup menu to look. Saving from that menu
+  yourself confirms the way it always did, and a career the server already
+  has stays quiet rather than repeating itself.
 - **Two backup refusals now tell you what is actually wrong.** If you have
   as many careers backed up as the server keeps, it now says so and tells
   you to remove one from the Cloud backup menu -- something you can fix in
