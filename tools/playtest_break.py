@@ -166,7 +166,11 @@ class Rig:
         self.ctx = ctx
         ctx.settings.automatic_transmission = automatic
         ctx.settings.radio_enabled = False  # no station machinery, no network
-        profile = Profile(name="Breaker", current_city="Buffalo")
+        # A career's current_city is a slug ("buffalo_ny_us"). The world
+        # resolves the old display name for routing, so a label here drives
+        # fine and only shows up later, when a save made from this harness is
+        # refused by cloud backup as an unknown city.
+        profile = Profile(name="Breaker", current_city=ctx.world.resolve_city_key("Buffalo"))
         if business:
             profile.business_status = business
         ctx.profile = profile

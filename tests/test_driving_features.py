@@ -4442,6 +4442,14 @@ def test_exit_announcements_speak_each_name_once(monkeypatch):
         assert announcement.count(facility) == 1
         assert "In 1 mile," in announcement  # singular, not "1 miles"
 
+        # Inside a mile the whole-mile form rounds to nothing, and the last
+        # call before the gore came out as "In 0 miles, the destination exit"
+        # while there was still a third of a mile to use it (owner playtest,
+        # 2026-08-15).
+        close = driving._destination_exit_announcement(stop, 0.3)
+        assert "0 miles" not in close, close
+        assert "a quarter mile" in close, close
+
         driving.trip.position_mi = stop.at_mi
         driving.truck.velocity_mps = 29.0  # too fast: blow past it
         driving._update_exit(0.0)
