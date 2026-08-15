@@ -118,7 +118,26 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
-- [x] **Lane position while steering -- SHIPPED.** Owner request 2026-08-15:
+- [ ] **A staged limit drop should be taken in stages (Shane, 2026-08-15).**
+      Approaching roadwork the truck hears "speed limit 55 miles per hour,
+      then construction zone 45" and then sheds straight to 45, never
+      pausing at 55. His words: it "should slow to 55 then when before the
+      work zone it should slow to 45 instead of diving right down to 45".
+      The world model is NOT at fault and needs no change -- `trip.py`
+      already lays a `construction merge` zone at
+      `CONSTRUCTION_TAPER_LIMIT_MPH` (55) over the taper mile, then the
+      `construction` zone at 45, and `speed_limit_at` returns the right
+      number for each. The keeper's cap is right too: it comes down with the
+      limit under the wheels. The culprit is the ease-ahead,
+      `_keeper_ease_target` (`driving_events.py`), which picks the LOWEST
+      limit in its lookahead window and sheds toward it, so an intermediate
+      posted number inside that window is skipped rather than held. Fix
+      shape: ease to the NEXT limit boundary, then re-target, so the truck
+      steps down the way the sign sequence and the announcement both
+      describe. Deliberately NOT done unattended -- it changes assist
+      behaviour on the approach to a work zone, and the spoken promise and
+      the enforcement numbers have to be re-checked together against the
+      harness, not reasoned about. Owner request 2026-08-15:
       with the lane work yours, taking an exit means holding a position at
       the right of the lane, and that position was the one thing on the road
       a blind driver could not hear. Holding a steering direction now starts
