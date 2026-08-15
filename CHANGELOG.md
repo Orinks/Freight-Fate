@@ -438,6 +438,13 @@
 
 ### Fixed
 
+- **The exit calls stop being talked over.** Every announcement that gets
+  you off the highway -- the exit ahead, the exit lane, the gore, and the one
+  that tells you lane keeping is taking your destination exit for you -- was
+  treated as chatter, so another line landing at the same moment could push
+  it out. With lane keeping on full that meant the truck left the highway
+  without the warning that it was about to, which reads as the exit taking
+  itself. They now come ahead of ordinary road talk.
 - **The ramp's traffic light stops going quiet on you.** The lines that get
   you to the stop bar -- the light changing, how far the bar is, and route
   transition assistance telling you it is braking for the light -- were

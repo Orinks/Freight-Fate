@@ -4986,3 +4986,40 @@ def test_terse_speech_hears_no_grade_advisories(monkeypatch):
 # for the climb (deliberately terse-suppressed) and descent control's "cannot
 # hold this grade" (deliberately not) -- and they have their own tests. What the
 # advisory adds here is the approach warning, covered above.
+
+
+def test_the_destination_exit_call_outranks_chatter(monkeypatch):
+    """The line that says lane keeping is taking the exit must not be dropped.
+
+    On full lane keeping the truck leaves the highway without the driver
+    touching anything, and this announcement is the only warning that it is
+    about to. At the AMBIENT default it was dropped whenever another line
+    landed in the same moment, so the exit read as taking itself -- reported
+    twice (Sarah A, 2026-08-15, "seems to be random").
+    """
+    from freight_fate.app import App
+    from freight_fate.speech_pacing import EventPriority
+
+    app = App()
+    calls: list[tuple[str, object]] = []
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=True, **kw: calls.append((str(text), kw.get("priority"))),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.lane_keeping = "full"
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving._destination_exit_announced_key = None
+        driving._check_destination_exit()
+
+        assert calls, "the destination exit was never announced"
+        text, priority = calls[-1]
+        assert "destination exit" in text, text
+        assert priority == EventPriority.ROUTE, (text, priority)
+    finally:
+        app.shutdown()
