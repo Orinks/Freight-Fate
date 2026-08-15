@@ -308,6 +308,11 @@ def test_cruise_refuses_to_engage_in_a_facility_zone(monkeypatch):
         assert driving._cruise_mph is None
         assert driving._keeper_mph is None
         assert any("not available" in s and "facility access road" in s for s in said)
+        # The refusal has to name the way out. A driver who has never turned
+        # the keeper on otherwise hears only that cruise is unavailable and
+        # reasonably concludes that every ramp kills speed control for good
+        # (Shane, 2026-08-15) -- the keeper is exactly what holds speed here.
+        assert any("speed keeper" in s.lower() and "Settings" in s for s in said)
     finally:
         app.shutdown()
 

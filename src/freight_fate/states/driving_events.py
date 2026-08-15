@@ -1764,7 +1764,13 @@ class DrivingEventMixin:
         this state losing the frame to a menu or an arrival screen. Turning
         it back off here is still instant."""
         if on:
-            self.ctx.audio.hold_alert("vehicle/bar_solid", volume=0.85)
+            # 0.85 read as jarring against everything else on the road
+            # (Darren, 2026-08-15): a continuous tone at nearly full scale
+            # sits far louder than the intermittent cues around it, and this
+            # one plays while the driver is concentrating on stopping. The
+            # tone still has to be unmistakable, so it stays the loudest
+            # continuous cue -- just no longer the loudest thing in the cab.
+            self.ctx.audio.hold_alert("vehicle/bar_solid", volume=BAR_SOLID_VOLUME)
         elif self._bar_solid_on:
             self.ctx.audio.release_alert()
         self._bar_solid_on = on
@@ -2615,7 +2621,15 @@ class DrivingEventMixin:
         """
         t = self.truck
         if not self.ctx.settings.speed_keeper:
-            self.ctx.say(f"Adaptive cruise is not available in a {zone_reason} zone.")
+            # Naming the way out matters more than the refusal: the keeper is
+            # exactly the thing that holds speed here, and a driver who has
+            # never turned it on hears only that cruise "is not available"
+            # and concludes the ramp kills speed control (Shane, 2026-08-15).
+            self.ctx.say(
+                f"Adaptive cruise is not available in a {zone_reason} zone. "
+                "The speed keeper holds your speed here instead; turn it on "
+                "in Settings, Controls."
+            )
             return
         if not t.engine_on or (target_mph is None and t.speed_mph < KEEPER_MIN_MPH):
             self.ctx.say("The speed keeper needs the engine running and the truck rolling.")

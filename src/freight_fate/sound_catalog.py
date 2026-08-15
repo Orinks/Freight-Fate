@@ -26,6 +26,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+# The stop bar's continuous tone. It has to be unmistakable -- it is the cue a
+# driver stops the truck by -- but at 0.85 it sat well above every
+# intermittent cue around it and read as jarring (Darren, 2026-08-15). A
+# continuous tone is inherently more present than a tick at the same level, so
+# it stays the loudest continuous cue at a level that no longer dominates the
+# cab. Lives here, with the catalog, so the road and the Learn game sounds
+# screen play it at one level and cannot drift apart.
+BAR_SOLID_VOLUME = 0.62
+
 
 @dataclass(frozen=True)
 class Cue:
@@ -318,7 +327,9 @@ _RAMPS = SoundCategory(
     (
         SoundEntry(
             "Stop bar tone",
-            (Cue("vehicle/bar_solid", volume=0.85, hold_s=3.0),),
+            # Same level the road plays it at, so learning the cue teaches
+            # what it will actually sound like out there.
+            (Cue("vehicle/bar_solid", volume=BAR_SOLID_VOLUME, hold_s=3.0),),
             "A continuous tone that means the stop bar is close enough that "
             "you must already be stopping. It runs until you have stopped or "
             "passed it. Treat it as the last warning, not the first.",
