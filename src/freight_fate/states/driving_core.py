@@ -76,6 +76,13 @@ from ..sim.lane_guidance import LaneGuidance
 from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
+from ..sim.trip_models import (
+    APPROACH_DECEL_MPS2,
+    APPROACH_REACTION_S,
+    DESTINATION_LOCAL_APPROACH_MI,
+    METERS_PER_MILE,
+)
+from ..sim.trip_models import RAMP_MAX_MPH as TRIP_RAMP_MAX_MPH
 from ..sim.vehicle import (
     CHAIN_SAFE_MPH,
     DAMAGE_BAND_LAST_CALL,
@@ -228,7 +235,10 @@ AEB_ESCALATE_CONFIRM_S = 0.5
 # "or change lanes" names a maneuver that takes that long to finish.
 HAZARD_MIN_REACTION_S = 3.0
 RAMP_CREEP_MI = 0.04  # within ~200 ft of the bar, "creep"; farther is a drive
-RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
+# Any faster and you blow past the exit. Defined in the portable layer,
+# because the arrival speed zones are built from the same number: the
+# destination approach must never cap below the speed the ramp needs.
+RAMP_MAX_MPH = TRIP_RAMP_MAX_MPH
 RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 # Ramp terminals: where the off-ramp meets the surface road there is usually
@@ -311,7 +321,10 @@ RAMP_SPEECH_WPM_MIN = 30.0
 RAMP_SPEECH_WPM_MAX = 60.0
 RAMP_ARRIVAL_REACTION_S = 3.0
 RAMP_ARRIVAL_GRACE_MIN_S = 8.0
-DESTINATION_EXIT_BEFORE_END_MI = 1.0
+# Where the synthetic destination exit sits, and equally the local approach
+# road the arrival zones assume behind it when the facility has no usable
+# record of its own -- one road, described once (``sim.trip_models``).
+DESTINATION_EXIT_BEFORE_END_MI = DESTINATION_LOCAL_APPROACH_MI
 # A real interchange counts as the destination exit only inside this final
 # approach window. Routes that finish on rural highways carry no baked
 # interchanges, and without the floor the scan crowned the last labeled exit

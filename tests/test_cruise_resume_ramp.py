@@ -223,6 +223,122 @@ def test_open_road_resume_waits_for_road_speed_before_engaging_cruise(monkeypatc
         app.shutdown()
 
 
+def _armed_exit_at(app, monkeypatch, *, ahead_mi: float, time_scale: float = 1.0):
+    """Cruise holding 65 with a route exit armed ``ahead_mi`` up the road.
+
+    ``time_scale`` is set on the settings, not the trip: the drive re-reads it
+    from there every frame, so a trip-only assignment lasts exactly one tick.
+    """
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+    app.ctx.settings.time_scale = time_scale
+    driving = start_drive(app)
+    quiet_trip(driving)
+    open_limits(driving)
+    driving.trip.zones = []
+    driving.trip.curves = []
+    driving.trip.traffic_context = lambda: None
+    driving.trip.grade_at = lambda mile: 0.0
+    driving.trip.traffic_pressures = []
+    driving._destination_exit_taken = True  # a plain route exit, not the delivery
+    driving.trip.time_scale = time_scale
+    assert app.ctx.settings.time_scale == time_scale
+    t = driving.truck
+    driving.handle_event(key_event(pygame.K_e))
+    t.cargo_kg = 0.0
+    t.grade = 0.0
+    t.transmission.gear = 10
+    t.velocity_mps = 65.0 / 2.23694
+    stop = driving.trip.stops[0]
+    driving.trip.position_mi = stop.at_mi - ahead_mi
+    driving.handle_event(key_event(pygame.K_k))  # cruise at road speed
+    driving.handle_event(key_event(pygame.K_x))  # signal for the exit
+    assert driving._exit_stop is stop
+    return driving, stop
+
+
+def test_shane_2026_08_15_the_ramp_cap_no_longer_lands_miles_from_the_exit(monkeypatch):
+    """The tester report this branch exists for.
+
+    "When taking an exit, the keeper goes to 40 MPH miles away from the exit.
+    It should gradually slow, or at least keep 45 so the exit can be taken. It
+    should measure how far the truck is away from the exit and gradually slow
+    like a driver would."
+
+    Arming an exit set the ramp target as the cap outright, and an exit arms
+    five miles out at the least -- so automatic control sat at 40 for miles of
+    open interstate. The ramp number is now where the truck has to BE at the
+    gore: the cap is measured off the road still left, holds road speed while
+    there is plenty, and never sits below the speed the ramp needs until the
+    ramp is genuinely close.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_CRUISE_TARGET_MPH, RAMP_MAX_MPH
+
+    app = App()
+    try:
+        driving, stop = _armed_exit_at(app, monkeypatch, ahead_mi=4.5)
+        assert driving._cruise_exit_mph == pytest.approx(RAMP_CRUISE_TARGET_MPH)
+
+        # Four and a half miles out, the cap is not the thing holding the
+        # truck: road speed stands, and it is never under ramp speed.
+        far_cap = driving._ramp_approach_cap_mph()
+        assert far_cap >= RAMP_MAX_MPH
+        assert far_cap >= driving._cruise_mph
+
+        # And the truck really does hold it rather than shedding to 40: five
+        # seconds of driving with the exit armed, and it is still at road
+        # speed with the brakes off.
+        for _ in range(60 * 5):
+            driving.update(1 / 60)
+        assert driving.truck.speed_mph > driving._cruise_mph - 3.0
+        assert driving.truck.brake == pytest.approx(0.0)
+    finally:
+        app.shutdown()
+
+
+def test_the_ramp_cap_glides_down_as_the_exit_closes(monkeypatch):
+    """Measured off the distance, the way the report asked: the cap comes down
+    smoothly with the road left, and lands on the ramp target at the gore."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_CRUISE_TARGET_MPH
+
+    app = App()
+    try:
+        driving, stop = _armed_exit_at(app, monkeypatch, ahead_mi=4.5)
+        caps = []
+        for ahead in (4.5, 2.0, 1.0, 0.6, 0.4, 0.2, 0.05):
+            driving.trip.position_mi = stop.at_mi - ahead
+            caps.append(driving._ramp_approach_cap_mph())
+        assert caps == sorted(caps, reverse=True), caps
+        assert caps[-1] == pytest.approx(RAMP_CRUISE_TARGET_MPH)
+        assert min(caps) >= RAMP_CRUISE_TARGET_MPH
+    finally:
+        app.shutdown()
+
+
+def test_the_ramp_cap_buys_more_road_under_time_compression(monkeypatch):
+    """Compressed miles pass faster than the truck can slow through them, so
+    the same shed needs more of them -- the law the keeper's ease already
+    follows. The truck must still arrive able to take the exit."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_MAX_MPH
+
+    app = App()
+    try:
+        driving, stop = _armed_exit_at(app, monkeypatch, ahead_mi=4.5, time_scale=20.0)
+        driving.trip.position_mi = stop.at_mi - 2.0
+        compressed = driving._ramp_approach_cap_mph()
+        driving.trip.time_scale = 1.0
+        real_time = driving._ramp_approach_cap_mph()
+        assert compressed < real_time
+        # Still ramp-enterable at the gore either way.
+        driving.trip.time_scale = 20.0
+        driving.trip.position_mi = stop.at_mi - 0.05
+        assert driving._ramp_approach_cap_mph() <= RAMP_MAX_MPH
+    finally:
+        app.shutdown()
+
+
 def test_set_at_current_speed_cruise_is_unchanged(monkeypatch):
     """The K-set-at-current-speed path: engaging at 60 with the target at 60
     seeds the working setpoint at road speed, so there is no ramp artifact and

@@ -20,13 +20,14 @@ from ..data.world import (
 from ..sim.hos import HosClock
 from ..sim.trip_models import (
     DESTINATION_APPROACH_LIMIT_MPH,
-    DESTINATION_APPROACH_ZONE_MI,
+    DESTINATION_LOCAL_APPROACH_MI,
     FACILITY_ACCESS_LIMIT_MPH,
     FACILITY_GATE_LIMIT_MPH,
     FACILITY_GATE_ZONE_MI,
     URBAN_LIMIT_MPH,
     URBAN_RADIUS_MI,
     _leg_speed_limit_at,
+    approach_shed_mi,
     corridor_speed_limit,
 )
 from .business_constants import DIRECT_FREIGHT_PAY_MULT
@@ -805,7 +806,14 @@ def _route_planning_limit(
         limit = baked if baked is not None else corridor_speed_limit(leg.highway, region)
         if baked is None and any(abs(route_mi - mp) <= URBAN_RADIUS_MI for mp in city_mileposts):
             limit = min(limit, URBAN_LIMIT_MPH)
-        if route_mi >= max(0.0, route.miles - DESTINATION_APPROACH_ZONE_MI):
+        # The arrival zones the drive will really build: the local approach
+        # road capped at ramp speed, and the shed into it sized from the
+        # corridor limit here. Planning cannot see which facility the job ends
+        # at, so it plans the synthetic approach every job at least gets.
+        approach_mi = DESTINATION_LOCAL_APPROACH_MI + approach_shed_mi(
+            limit, DESTINATION_APPROACH_LIMIT_MPH
+        )
+        if route_mi >= max(0.0, route.miles - approach_mi):
             limit = min(limit, DESTINATION_APPROACH_LIMIT_MPH)
     if route_mi >= max(0.0, route.miles - FACILITY_GATE_ZONE_MI):
         limit = min(limit, FACILITY_GATE_LIMIT_MPH)

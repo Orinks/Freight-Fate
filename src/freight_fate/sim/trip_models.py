@@ -15,6 +15,7 @@ from ..data.world import (
     TollEvent,
     vehicle_access_allows,
 )
+from ..data.world_constants import FACILITY_APPROACH_TRUSTED_MAX_MI
 from .hos import is_night, time_of_day
 from .timezones import TimeZone
 from .vehicle import TruckState
@@ -278,10 +279,55 @@ FACILITY_ACCESS_LIMIT_MPH = 25.0
 # approach is an arterial, not an access road (owner, 2026-07-24).
 FACILITY_ARTERIAL_LIMIT_MPH = 45.0
 FACILITY_ACCESS_TAIL_MI = 2.0
-DESTINATION_APPROACH_LIMIT_MPH = 35.0
+# The speed at or below which an off-ramp can actually be taken, and so the
+# floor for anything the arrival zones cap. Defined here, in the portable
+# layer, because both the zone builder and the driving state need the same
+# number: ``states/driving_core`` imports it as ``RAMP_MAX_MPH``.
+RAMP_MAX_MPH = 45.0
+# The destination approach never caps below the speed the ramp needs. It used
+# to be a flat 35 over the last three miles, which put a step change on the
+# road a mile or two before the exit and dragged the truck down to a crawl
+# while it was still on the freeway (tester report, Shane, 2026-08-15).
+DESTINATION_APPROACH_LIMIT_MPH = RAMP_MAX_MPH
 FACILITY_GATE_LIMIT_MPH = 15.0
-DESTINATION_APPROACH_ZONE_MI = 3.0
 FACILITY_GATE_ZONE_MI = 0.5
+# Local approach road assumed when the destination facility has no usable
+# approach record -- the stretch between the exit and the gate. Kept equal to
+# the exit's own placement (``DESTINATION_EXIT_BEFORE_END_MI``), which imports
+# it, so the synthetic approach and the synthetic exit describe one road.
+DESTINATION_LOCAL_APPROACH_MI = 1.0
+# The same ceiling the world's own approach lookup applies, kept here too
+# because a Trip can be handed a mileage by a tool or a test that never went
+# through that lookup.
+DESTINATION_APPROACH_TRUSTED_MAX_MI = FACILITY_APPROACH_TRUSTED_MAX_MI
+
+# -- How a loaded truck sheds speed for something ahead ------------------------
+# One budget, shared by the arrival zones here and by the keeper's ease in
+# ``states/driving_speed_control`` (which imports these): a comfortable rate the
+# truck genuinely delivers on light brake, seconds spent hearing the call and
+# getting to the pedal before any slowing starts, and a settling tail so the
+# number is reached ahead of the point rather than exactly on it.
+APPROACH_DECEL_MPS2 = 0.4
+APPROACH_REACTION_S = 6.0
+APPROACH_SETTLE_S = 2.0
+MPH_PER_MPS = 2.23694
+METERS_PER_MILE = 1609.344
+
+
+def approach_shed_mi(from_mph: float, to_mph: float) -> float:
+    """Road a loaded truck needs to come down from one speed to another.
+
+    In route miles on the clock the road is measured in, so a zone built from
+    it starts where a driver would really begin slowing. The seconds of the
+    shed are priced at the speed the truck is doing through them -- the mean of
+    the two ends -- while the reaction budget is priced at the speed it comes
+    in at and the settling tail at the number it leaves on, exactly as
+    ``_keeper_ease_mi`` prices the same three pieces."""
+    if to_mph >= from_mph:
+        return 0.0
+    shed_s = (from_mph - to_mph) / MPH_PER_MPS / APPROACH_DECEL_MPS2
+    shed_mi = shed_s * (from_mph + to_mph) / 2.0 / 3600.0
+    return shed_mi + (APPROACH_REACTION_S * from_mph + APPROACH_SETTLE_S * to_mph) / 3600.0
 NIGHT_HAZARD_BONUS = 0.10  # extra hazard risk after dark
 # A zone flip that flips back within this distance is boundary noise from a
 # road hugging the line (the state-crossing dwell filter's lesson), not a

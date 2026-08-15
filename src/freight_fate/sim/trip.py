@@ -167,6 +167,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         parking_provider=None,
         bobtail: bool = False,
         destination_label: str = "",
+        destination_approach_mi: float | None = None,
     ) -> None:
         self.route = route
         self.truck = truck
@@ -194,6 +195,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # warehouse read as a wrong turn (owner playtest, 2026-07-19). The
         # spoken facility name replaces the city in the status line there.
         self.destination_label = destination_label
+        # How much local approach road stands between the highway and this
+        # run's gate, from the destination facility's own approach record.
+        # None where the facility has no usable record, or where its street
+        # chain is driven as a route of its own after this one -- the arrival
+        # zones then size the approach from the synthetic exit instead.
+        self.destination_approach_mi = destination_approach_mi
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
@@ -1449,7 +1456,28 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 zones.append(Zone(0.0, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road"))
             zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
             return zones
-        approach_start = max(0.0, total - DESTINATION_APPROACH_ZONE_MI)
+        # Everything else ends on the highway, comes off at the destination
+        # exit, and finishes on the facility's own local road. Two bands, the
+        # same two callouts this has always spoken:
+        #
+        #   * the local approach, capped at the speed the ramp can be taken at
+        #     and no lower, running back from the gate for as much road as the
+        #     facility's own approach record says it really has;
+        #   * the gate itself, unchanged.
+        #
+        # Ahead of the local road the corridor's own limit stands, right up to
+        # the point a driver has to start shedding for the ramp -- that point
+        # comes out of the deceleration, not out of a round number. The flat
+        # three-mile 35 this replaces landed as a step change a mile or two
+        # before the exit and read to testers as the truck giving up on the
+        # freeway (Shane, 2026-08-15).
+        local_mi = self.destination_approach_mi or DESTINATION_LOCAL_APPROACH_MI
+        local_mi = min(max(local_mi, FACILITY_GATE_ZONE_MI), DESTINATION_APPROACH_TRUSTED_MAX_MI)
+        local_start = max(0.0, total - local_mi)
+        entry_mph = self._corridor_limit_at(max(0.0, local_start - 0.05))
+        approach_start = max(
+            0.0, local_start - approach_shed_mi(entry_mph, DESTINATION_APPROACH_LIMIT_MPH)
+        )
         return [
             Zone(approach_start, total, DESTINATION_APPROACH_LIMIT_MPH, "destination approach"),
             Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"),

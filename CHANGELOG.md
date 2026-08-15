@@ -83,6 +83,33 @@
   It now says plainly that leaving it on or off makes no difference to how
   the truck steers today, and the Balanced preset describes what it really
   changes.
+- **Coming up on your exit no longer slows you to a crawl miles out.**
+  Signal for an exit and automatic speed control used to drop straight to
+  40 the moment you armed it, with the ramp still miles up the road. Now it
+  holds road speed and starts shedding when the exit is genuinely close,
+  coming down gradually so you arrive slow enough to take the ramp instead
+  of crawling the last stretch of highway. The final approach to a delivery
+  works the same way: the road stays at its posted limit until the local
+  road to the gate really begins, and that stretch is now measured from
+  where the place you are delivering to actually sits, so a dock right off
+  the ramp no longer shares its approach with one several miles inland.
+
+- **Your roadside chatter switches now work in terse speech.** Parks,
+  rivers, mountain passes, museums, and billboards each have their own
+  switch, and in terse speech none of them did anything -- every roadside
+  callout was silenced whichever way the switches were set. Now the switch
+  alone decides what you hear: leave a kind on and you get it in terse too,
+  kept short. A river crossing is the river's name, a park is the park, a
+  billboard is the sign itself with nothing wrapped around it. Normal speech
+  is unchanged, and town names still follow the place callouts setting.
+
+- **Traffic at exits you are not taking has gone quiet.** The game used to
+  call the traffic building at every exit ahead of you, one after another,
+  whether or not any of them was yours. Now that call comes only for an
+  exit you have signalled for -- or one lane keeping is taking for you --
+  and it arrives with the same warning as before. Merging traffic and
+  construction taper warnings are unchanged: those are about the road you
+  are already on.
 
 - **A speed limit drop now says why, when the road knows.** "Speed limit
   reduced to 35" used to leave you guessing. Now, when the trip's own data

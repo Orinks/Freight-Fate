@@ -555,7 +555,7 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
     assert result.speeding_tickets == 0
     assert "Lights and siren" not in result.transcript_text
     assert "destination exit" in result.transcript_text
-    assert "Adaptive cruise easing to 40 miles per hour for the ramp" in result.transcript_text
+    assert "Adaptive cruise will ease to 40 miles per hour for the ramp" in result.transcript_text
     # The exit key is a turn signal now: "Signal on for ..." replaced the older
     # "Signaling for ..." callout when the cancel/confirm model landed.
     assert "Signal on for" in result.transcript_text
@@ -671,7 +671,7 @@ def test_signaled_downhill_exit_keeps_cruise_below_ramp_limit(monkeypatch):
 
     assert driving._ramp_mi is not None, harness.result.transcript_text
     assert entry_speed <= RAMP_MAX_MPH
-    assert "Adaptive cruise easing to 40 miles per hour for the ramp" in (
+    assert "Adaptive cruise will ease to 40 miles per hour for the ramp" in (
         harness.result.transcript_text
     )
     assert "going too fast for the ramp" not in harness.result.transcript_text

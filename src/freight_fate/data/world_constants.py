@@ -248,6 +248,15 @@ FACILITY_APPROACH_MILES = {
     "warehouse": 3.5,
 }
 
+# How much of a facility's own recorded approach the arrival speed zones will
+# believe. Measured off the records themselves: the road-snapped turn-level
+# chains, the only approaches that follow real streets end to end, reach 2.49
+# miles at the ninetieth percentile. The straight-line endpoint estimates run
+# far past that on a long tail of geocoding noise -- 98 of them sit exactly on
+# the bake tool's 35-mile cap -- and past this line a record is describing a
+# pin in the wrong place rather than a road anybody drives.
+FACILITY_APPROACH_TRUSTED_MAX_MI = 2.5
+
 FACILITY_APPROACH_ROADS = {
     "air_cargo": "airport cargo access road",
     "automotive_plant": "assembly plant access road",
