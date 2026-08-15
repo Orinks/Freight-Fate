@@ -1493,6 +1493,45 @@ def test_outcome_for_ignores_results_from_an_earlier_attempt():
     assert service.outcome_for("Road Star", token + 1) is None
 
 
+def test_an_upload_in_flight_when_save_is_pressed_keeps_its_own_verdict():
+    """Uploads run outside the lock, so a background upload (a delivery
+    autosave, a retry pass) can already be on the wire when the player
+    presses Save game. Its terminal result must stay stamped with its own
+    queued-under token: the wrong save's verdict must never be spoken as
+    this save's outcome, and the manual attempt's own result must never be
+    silenced or overwritten by the older upload finishing late."""
+    clock = Clock()
+    service = None  # assigned below; the transport closes over it
+    tokens: list[int] = []
+    newer = Profile(name="Road Star")
+    newer.money += 777.0  # the manual snapshot differs from the autosave's
+
+    class MidFlightSave(FakeTransport):
+        """The first request is the background upload already in flight;
+        while it is on the wire the player presses Save game (run to
+        completion re-entrantly, the synchronous stand-in for the worker
+        thread), and then the old upload comes back refused."""
+
+        def __call__(self, url, payload, headers):
+            self.requests.append((url, payload, headers))
+            if len(self.requests) == 1:
+                tokens.append(service.backup_now(newer))
+                raise rejected_error("invalid_achievement")
+            self.revision += 1
+            return {"ok": True, "revision": self.revision}
+
+    transport = MidFlightSave()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+
+    assert len(transport.posts) == 2  # the autosave, then the manual attempt
+    # The manual attempt's watch hears its own accepted result -- not the
+    # older upload's rejection, which finished after it and carries the
+    # background token no watch ever matches.
+    assert service.outcome_for("Road Star", tokens[0]) == "accepted"
+
+
 # -- the Save game item at the terminal speaks the backup result ------------------
 
 
@@ -1624,6 +1663,30 @@ def test_terminal_save_hands_a_silent_attempt_back_to_the_background(monkeypatch
         # Exactly one result line: nothing else ever arrives for this save.
         menu.update(60.0)
         assert spoken.count("The backup will keep retrying in the background.") == 1
+    finally:
+        app.shutdown()
+
+
+def test_sandbox_save_never_reaches_the_cloud(monkeypatch):
+    """A driving-school or forced-playtest sandbox save never reaches disk
+    (save_profile's own guard), so it must never reach the cloud either --
+    the throwaway profile shares the real career's slot name -- and must
+    not promise a backup out loud."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        transport = FakeTransport()
+        menu = make_terminal_menu(app, make_service(transport, Clock()))
+        monkeypatch.setattr(app.ctx, "playtest_sandbox", True, raising=False)
+
+        menu._save()
+        menu.update(0.0)
+
+        assert transport.requests == []
+        assert spoken == ["Game saved."]
     finally:
         app.shutdown()
 
