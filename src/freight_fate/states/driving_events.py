@@ -1175,7 +1175,11 @@ class DrivingEventMixin:
                 else " Steer right for the exit lane."
             )
         self.ctx.audio.play("ui/notify", volume=0.6)
-        self.ctx.say_event(f"{name} in {distance}.{lane_text}", interrupt=False)
+        self.ctx.say_event(
+            f"{name} in {distance}.{lane_text}",
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+        )
 
     def _update_exit_preparation(self, keys, dt: float) -> None:
         stop = self._exit_stop
@@ -1247,6 +1251,7 @@ class DrivingEventMixin:
                 f"Signal is on; steer right "
                 f"for the exit lane and slow to {RAMP_MAX_MPH:.0f}.{pressure_text}",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
             )
         if (
             0 < ahead <= EXIT_LANE_PREP_MI
@@ -1261,6 +1266,7 @@ class DrivingEventMixin:
             self.ctx.say_event(
                 f"At the exit gore. Hold the exit lane and stay under {RAMP_MAX_MPH:.0f}.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
             )
 
     def _update_exit_speed_assist(self, stop) -> None:
@@ -1307,7 +1313,11 @@ class DrivingEventMixin:
         )
         # Never "confirm": there is no confirm action, and an X pressed to
         # obey it cancels the signal instead.
-        self.ctx.say_event(f"Exit speed assistance slowing. {lane_text}", interrupt=False)
+        self.ctx.say_event(
+            f"Exit speed assistance slowing. {lane_text}",
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+        )
 
     def _hold_exit_approach_speed(self) -> None:
         """Keep the truck at ramp speed on an approach the assist is running.
@@ -1473,7 +1483,14 @@ class DrivingEventMixin:
             # target, rather than handing the pedal back cold.
             message = self._destination_exit_announcement(stop, ahead) + self._cap_cruise_for_ramp()
             self.ctx.audio.play("ui/notify", volume=0.7)
-            self.ctx.say_event(message, interrupt=False)
+            # ROUTE: this line carries "lane keeping will take this exit",
+            # which is the only warning the driver gets that the truck is
+            # about to leave the highway without them touching anything. Left
+            # at the AMBIENT default it was dropped whenever another line
+            # landed in the same moment, and the exit read as taking itself --
+            # reported twice now (Sarah A, 2026-08-15; and the report the
+            # attribution was written for in the first place).
+            self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
         if self._exit_stop is None:
             self._exit_stop = stop
             self._exit_signal_canceled = False
@@ -1613,6 +1630,7 @@ class DrivingEventMixin:
                 f"Off the ramp and onto city streets: {street[:1].lower()}{street[1:]}. "
                 f"{self.trip._distance_text(route.miles)} to the facility gate.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
             )
         return True
 
