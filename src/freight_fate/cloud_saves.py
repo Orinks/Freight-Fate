@@ -294,6 +294,14 @@ def recovery_status(name: str) -> str:
     return f"{name} is backed up again."
 
 
+# The dedupe key for the auth announcement: a paused sign-in is a property
+# of this computer, not of any one career, so it is announced once per
+# outage rather than once per slot -- loading a second career during the
+# same outage must not repeat the byte-identical line. save_slot_name()
+# replaces "*", so no real slot can ever collide with this key.
+_AUTH_ANNOUNCED_KEY = "*auth*"
+
+
 # -- sync state ----------------------------------------------------------------
 
 
@@ -911,32 +919,54 @@ class CloudSaves:
             return lines
 
     def _announce_refusal(self, name: str, token: int, cause: str, message: str) -> None:
-        """Queue one spoken line for a background upload's terminal refusal.
+        """Record a terminal upload refusal, and queue its spoken line when
+        the background queue owes one.
 
-        Manual attempts (token > 0) never announce here: the Save game item
-        that started them speaks its own outcome (states/city.py), and this
-        channel repeating it would tell the player the same refusal twice.
-        One announcement per (slot, cause): later uploads refused for the
-        same cause stay silent until the cause changes or the slot uploads
-        successfully (see _announce_recovery). Transient network failures
-        never arrive here -- they retry silently.
+        The token gates the speaking, never the bookkeeping: every terminal
+        refusal records its cause, manual or background, so whichever
+        channel told the player first -- this one, or the Save game watch
+        (states/city.py) that owns token > 0 attempts -- the player hears
+        each standing cause exactly once. Only a background attempt
+        (token 0) appends the line; a manual refusal is the menu's to
+        speak. A recorded cause stays silent until it changes or the slot
+        uploads successfully (see _announce_recovery). The auth cause
+        dedupes machine-wide under _AUTH_ANNOUNCED_KEY: a paused sign-in
+        belongs to this computer, not to whichever career saved first.
+        Transient network failures never arrive here -- they retry
+        silently.
         """
-        if token != 0:
-            return
+        key = _AUTH_ANNOUNCED_KEY if cause == "auth" else name
         with self._lock:
-            if self._announced_causes.get(name) == cause:
+            if self._announced_causes.get(key) == cause:
                 return
-            self._announced_causes[name] = cause
-            self._announcements.append(message)
+            self._announced_causes[key] = cause
+            if token == 0:
+                self._announcements.append(message)
 
-    def _announce_recovery(self, name: str) -> None:
-        """A slot whose refusal was announced is backed up again: say so
-        once, and re-arm the refusal announcement for any later trouble."""
+    def _announce_recovery(self, name: str, token: int, *, uploaded: bool) -> None:
+        """A slot with a recorded refusal is backed up again: clear the
+        record so later trouble speaks afresh, and say so once.
+
+        Same principle as _announce_refusal: the token gates the speaking,
+        never the bookkeeping. Any success clears the slot's recorded
+        cause, but only a background one (token 0) appends the recovery
+        line -- a manual save's success is already spoken by the Save game
+        watch, and a second line for the same event would say it twice.
+        ``uploaded`` marks a real accepted upload, which also proves this
+        computer's sign-in works, so it re-arms the machine-wide auth
+        announcement -- silently, since the auth line named no career and
+        reconnecting speaks its own confirmation. The "unchanged" path
+        never contacts the server, so it proves nothing about auth and
+        leaves that record alone.
+        """
         with self._lock:
+            if uploaded:
+                self._announced_causes.pop(_AUTH_ANNOUNCED_KEY, None)
             if name not in self._announced_causes:
                 return
             del self._announced_causes[name]
-            self._announcements.append(recovery_status(name))
+            if token == 0:
+                self._announcements.append(recovery_status(name))
 
     def shutdown(self) -> None:
         """Flush the pending upload briefly and stop the worker. Never raises."""
@@ -1074,7 +1104,7 @@ class CloudSaves:
             # The cloud already holds this save -- a resolved conflict or a
             # menu restore got the slot current, so an announced refusal is
             # over even though no upload ran here.
-            self._announce_recovery(name)
+            self._announce_recovery(name, token, uploaded=False)
             return
         result = upload_save(
             self._identity,
@@ -1090,7 +1120,7 @@ class CloudSaves:
             self._retry_at = None
             self._set_status("Latest backup accepted and server-verified.")
             self._note_outcome(name, token, "accepted")
-            self._announce_recovery(name)
+            self._announce_recovery(name, token, uploaded=True)
             log.info("Cloud backup of %s uploaded as revision %s", name, result["revision"])
             return
         if result.get("reason") == "conflict":

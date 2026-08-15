@@ -1670,6 +1670,81 @@ def test_manual_refusal_never_reaches_the_global_channel():
     assert service.take_announcements() == []
 
 
+def test_manual_success_after_a_spoken_refusal_recovers_silently_and_rearms():
+    transport = FakeTransport(error=rejected_error("impossible_money"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert len(service.take_announcements()) == 1
+
+    # The player hits Save game and the upload goes through: the city
+    # watch speaks "Backed up to the cloud." on its own, so the global
+    # channel must not add a second line for the same event.
+    transport.error = None
+    profile.money += 1.0
+    token = service.backup_now(profile)
+    assert service.outcome_for("Road Star", token) == "accepted"
+    assert service.take_announcements() == []
+
+    # The dedupe still re-armed: the same refusal speaks once more.
+    transport.error = rejected_error("impossible_money")
+    profile.money += 1.0
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert len(service.take_announcements()) == 1
+
+
+def test_manual_refusal_seeds_the_dedupe_for_the_background_channel():
+    # A conflict spoken by the manual Save game watch (states/city.py) is
+    # already in the player's ear; the next automatic save blocked by the
+    # same standing conflict must not repeat the identical sentence.
+    transport = FakeTransport(error=conflict_error(latest_revision=5))
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    token = service.backup_now(profile)
+    assert service.outcome_for("Road Star", token) == "conflict"
+    assert service.take_announcements() == []  # the menu watch owns this one
+
+    profile.money += 1.0
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert service.take_announcements() == []
+
+
+def test_auth_announcement_is_one_per_outage_not_per_career():
+    transport = FakeTransport(error=auth_error(401))
+    clock = Clock()
+    service = make_service(transport, clock)
+
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+    assert service.take_announcements() == [AUTH_PAUSED_STATUS]
+
+    # The sign-in belongs to this computer, not to the career: loading
+    # another career during the same outage must not repeat the line.
+    service.queue_backup(Profile(name="Night Owl"))
+    drain(service, clock)
+    assert service.take_announcements() == []
+
+    # A successful upload proves the sign-in works again -- silently:
+    # neither career's slot spoke a refusal, so nothing recovers aloud.
+    transport.error = None
+    service.queue_backup(Profile(name="Night Owl"))
+    drain(service, clock)
+    assert service.take_announcements() == []
+
+    # ...and a fresh outage after that speaks afresh.
+    transport.error = auth_error(401)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+    assert service.take_announcements() == [AUTH_PAUSED_STATUS]
+
+
 def test_take_announcements_drains_the_queue():
     transport = FakeTransport(error=rejected_error("impossible_money"))
     clock = Clock()
