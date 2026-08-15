@@ -330,6 +330,18 @@ MERGE_BARRELS_DAMAGE = 0.25  # collision severity for riding into the barrels
 SIDESWIPE_DAMAGE = 0.35  # changing lanes into occupied space costs more
 DODGE_CLEARANCE_AHEAD_MI = 0.35  # target lane must be clear this far ahead...
 DODGE_CLEARANCE_BEHIND_MI = 0.15  # ...and this far behind your drive tires
+# The steering lane cue: the panned position tock, played on its own while a
+# lane move is underway rather than waiting for the I key, and clicked off
+# like a turn signal when the move is done. Owner request 2026-08-15: taking
+# an exit with the lane work yours means HOLDING a position at the right of
+# the lane, and that position was the one thing on the road a blind driver
+# could not hear.
+STEER_CUE_MIN_MPH = 2.0  # same floor as the lane locator: stopped tires steer nothing
+STEER_CUE_ARM_S = 0.5  # a steering hold this long is a move, not a drift correction
+STEER_CUE_TOCK_S = 0.9  # the locator's own beat, so the two are one sound
+STEER_CUE_TOCK_FAST_S = 0.35  # the beat it closes to as the exit lane position fills
+STEER_CUE_HOLD = "lane_steer"  # dead-man's-switch latch name, held on the audio clock
+STEER_CUE_CANCEL_VOL = 0.45  # the self-cancel click, quieter than the signal going on
 KEEP_RIGHT_NAG_S = 45.0  # left-lane camping before the CB calls you out
 KEEP_RIGHT_REPEAT_S = 75.0  # spacing for repeat nags while still camping
 KEEP_RIGHT_MIN_MPH = 45.0  # lane discipline only matters at highway speed

@@ -157,9 +157,14 @@ _LANE = SoundCategory(
             ),
             "A soft tock, once a beat, panned to where the truck sits inside "
             "its lane. You turn it on and off yourself and it keeps ticking "
-            "until you stop it. The demo walks it from the left of the lane "
-            "to the right.",
-            when="Lane keeping partial or off, and above walking pace.",
+            "until you stop it. It also starts on its own while you are "
+            "steering across the lane, and while you are lining up for an "
+            "exit -- and there the beat quickens as you reach the position "
+            "the exit needs, then stops and the signal cancels. The demo "
+            "walks it from the left of the lane to the right.",
+            when="Lane keeping partial or off, and above walking pace. The "
+            "one that starts on its own lasts as long as the move: a steering "
+            "direction held, or the exit lane being set after you signalled.",
         ),
         SoundEntry(
             "Rumble strip, single hit",
@@ -195,10 +200,18 @@ _LANE = SoundCategory(
             (
                 Cue("vehicle/signal_tone", volume=0.8, pan=-0.6),
                 Cue("vehicle/signal_tone", volume=0.8, pan=0.6, delay_s=1.2),
+                # The self-cancel, third: quieter and from straight ahead,
+                # exactly as states/driving_updates.py::_update_steering_lane_cue
+                # plays it. Same tone, and the treatment is the difference.
+                Cue("vehicle/signal_tone", volume=0.45, pan=0.0, delay_s=2.4),
             ),
             "Your own turn signal, from the side you signalled. It marks a "
             "move you meant to make: a lane change, easing onto the shoulder, "
-            "coming up a ramp, or taking the exit the route asked for.",
+            "coming up a ramp, or taking the exit the route asked for. The "
+            "quieter one from straight ahead is the same signal cancelling "
+            "itself, the way it does in a truck when the wheel comes back: "
+            "the move is finished. After an exit line-up that click is the "
+            "word that you are far enough over.",
         ),
     ),
 )
