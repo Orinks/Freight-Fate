@@ -195,3 +195,134 @@ def _gate_overshoot_with_assists():
         )
     finally:
         rig.close()
+
+
+@scenario(
+    "ramp_speed_control_handback",
+    "Signal early at 20x, honor the ramp's stop bar, drive on: no early shed, "
+    "and speed control returns unaided.",
+)
+def _ramp_speed_control_handback():
+    """Both of Shane's 2026-08-15 reports, driven end to end in real frames.
+
+    Signalling nine miles out used to start the shed immediately under time
+    compression, and taking the ramp used to kill adaptive cruise and the speed
+    keeper for the rest of the run -- only the resume key brought them back.
+    Neither survived a full gate before, because no scenario drove a ramp
+    terminal and then asked whether automatic speed control had come back.
+    """
+    from freight_fate.states.driving import RAMP_MAX_MPH
+
+    name = "ramp_speed_control_handback"
+    rig = Rig()
+    findings: list[str] = []
+    try:
+        d = rig.d
+        pygame = rig.pygame
+        # High pacing is the case the early shed showed up in; full lane
+        # keeping pins the exit-lane mechanics that are not under test here.
+        rig.ctx.settings.time_scale = 20.0
+        d.trip.time_scale = 20.0
+        rig.ctx.settings.route_transition_assist = True
+        rig.ctx.settings.speed_keeper = True
+        rig.ctx.settings.lane_keeping = "full"
+        d.trip.curves = []
+        d.trip.grade_at = lambda mile: 0.0
+        limit, _ = d.trip.speed_limit_at(d.trip.position_mi)
+        rig.prepare(speed_mph=limit - 1.0)
+        rig.press(pygame.K_k)  # automatic speed control on, at corridor speed
+        cruise = d._cruise_mph
+        if cruise is None:
+            findings.append("cruise never armed at corridor speed")
+            return _outcome(name, rig, findings, "")
+
+        # Signal as early as the game lets a driver signal, the way the report
+        # did: X every half second until an exit takes it.
+        armed_mi = None
+        for frame in range(20000):
+            if d._exit_stop is not None:
+                armed_mi = d._exit_stop.at_mi - d.trip.position_mi
+                break
+            if frame % 15 == 0:
+                rig.press(pygame.K_x)
+            d.update(DT)
+            if frame % 10 == 0:
+                rig.check_invariants()
+        if armed_mi is None:
+            findings.append("no exit ever came within signalling range")
+            return _outcome(name, rig, findings, "")
+        exit_stop = d._exit_stop
+
+        # 1. Far from the gore the signal itself must not slow the truck: the
+        #    approach cap has to stay clear of the set speed.
+        early_shed_mi = None
+        entry_mph = None
+        for _ in range(60000):
+            ahead = exit_stop.at_mi - d.trip.position_mi
+            cap = d._ramp_approach_cap_mph()
+            if early_shed_mi is None and ahead > 1.0 and cap is not None and cap < cruise - 0.01:
+                early_shed_mi = ahead
+            if d._ramp_mi is not None:
+                entry_mph = d.truck.speed_mph
+                break
+            if ahead < -0.5:
+                break
+            d.update(DT)
+            rig.check_invariants()
+        if early_shed_mi is not None:
+            findings.append(
+                f"the exit cap fell under the {cruise:.0f} mph set speed "
+                f"{early_shed_mi:.1f} miles from the gore: signalling early is itself "
+                "what slows the truck"
+            )
+        if entry_mph is None:
+            findings.append("the signalled exit was never taken at all")
+            return _outcome(name, rig, findings, "")
+        if entry_mph > RAMP_MAX_MPH:
+            findings.append(f"entered the gore at {entry_mph:.1f} mph, over the ramp's limit")
+
+        # 2. The ramp takes the pedals, never the session.
+        if not d._speed_control_armed:
+            findings.append(
+                "taking the exit disarmed automatic speed control outright, so nothing "
+                "can bring it back but the resume key"
+            )
+        # 3. Route-transition assistance brings the truck to the bar. Nothing
+        #    may re-engage on the creep toward it.
+        rig.step(60000, until=lambda: d._ramp_terminal_done and d.truck.speed_mph < 1.0)
+        if not d._ramp_terminal_done:
+            findings.append("the ramp terminal never resolved")
+        if d._cruise_mph is not None or d._keeper_mph is not None:
+            findings.append("automatic speed control re-engaged while still on the ramp")
+
+        # 4. Drive on from the bar -- past the plaza rather than into it, which
+        #    is the "honor the bar and drive on" the report is about. No key
+        #    but the throttle: speed control has to be live again once the ramp
+        #    is behind the truck.
+        rig.held.add(pygame.K_UP)
+        rig.step(60000, until=lambda: d._ramp_mi is None and d.truck.speed_mph > 25.0)
+        rig.step(120)  # a couple of seconds of open road to hand it back on
+        rig.held.discard(pygame.K_UP)
+        live = d._cruise_mph is not None or d._keeper_mph is not None
+        if not live:
+            findings.append(
+                "past the stop bar and back up to road speed with automatic speed "
+                "control still dead: the driver has to switch it on by hand"
+            )
+
+        # 5. And the drive stayed sane by ear: no resume announced on the ramp,
+        #    and the pause never announced itself twice.
+        if rig.said("Automatic speed control paused") > 1:
+            findings.append("the ramp pause announced itself more than once")
+        if rig.said("resuming") > 1:
+            findings.append("automatic speed control announced its return more than once")
+
+        return _outcome(
+            name,
+            rig,
+            findings,
+            f"signalled {armed_mi:.1f} mi out with no early shed, entered the gore at "
+            f"{entry_mph:.0f} mph, and speed control came back past the bar unaided",
+        )
+    finally:
+        rig.close()

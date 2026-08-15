@@ -2651,6 +2651,17 @@ for 1.8" framing predates the release split):
       distance still left, the arrival zones are sized from the destination
       facility's own approach record and never cap below ramp speed, and
       exit-traffic advisories speak only for an exit the driver is taking.
+      Two more of Shane's reports closed on `fix/ramp-speed-control-resume`
+      (2026-08-15): the ramp now PAUSES an armed speed-control session
+      instead of disarming it -- in all three places that used to end it
+      outright -- and lifts that pause by itself once the bar is honored and
+      the truck is rolling again, so nobody has to press resume past a stop
+      bar; a destination exit still holds until departure. And the approach
+      glide is measured in real miles, with `Trip._armed_exit_decompression`
+      putting the trip on the real clock for the shed window the way a
+      controlled ramp and a severe curve already do, so signalling nine miles
+      out no longer starts the shed the moment the signal goes on, at any
+      pacing. Battery scenario: `ramp_speed_control_handback`.
 - [x] **Enforcement beyond the speeding stop.** Weigh-station blow-pasts
       and severe visible damage draw roadside stops; running from lights
       escalates through warnings to a felony stop with spike strips and

@@ -12,6 +12,7 @@ from .driving_core import (
     CRUISE_MIN_MPH,
     KEEPER_MIN_MPH,
     MPH_PER_MPS,
+    RED_STOP_MPH,
     RESTRICTED_ZONE_REASONS,
 )
 from .driving_turns import TURN_COMMIT_TAIL_MI
@@ -127,7 +128,7 @@ class SpeedControlStateMixin:
         self._clear_cruise()
         self._clear_keeper()
         self._speed_control_armed = False
-        self._speed_control_paused_at_stop = False
+        self._clear_stop_pause()
         self._speed_control_target_mph = None
 
     def _speed_authority_engaged(self) -> bool:
@@ -168,35 +169,83 @@ class SpeedControlStateMixin:
         # as the truck is rolling and off the brakes -- pressing resume
         # while still slowing arms it for the moment conditions clear.
 
-    def _pause_speed_control(self) -> bool:
-        """Pause an armed session at a planned stop without forgetting it."""
+    def _clear_stop_pause(self) -> None:
+        """Forget a stop pause, whichever kind of stop made it."""
+        self._speed_control_paused_at_stop = False
+        self._speed_control_transit_pause = False
+        self._speed_control_stop_honored = False
+
+    def _pause_speed_control(self, *, resume_when_rolling: bool = False) -> bool:
+        """Pause an armed session at a planned stop without forgetting it.
+
+        Two kinds of stop wear this pause. An ARRIVAL -- a pickup or delivery
+        gate, a planned rest stop -- is held until the player departs, and
+        departure is the only thing that clears it. A TRANSIT stop -- the
+        light or sign at the end of a ramp -- has no departure at all: the
+        driver stops at the bar and drives on. Held the arrival way, taking an
+        exit left adaptive cruise and the speed keeper dead for the rest of
+        the run, and only pressing resume brought them back (Shane,
+        2026-08-15). ``resume_when_rolling`` says this is a transit stop, and
+        the pause lifts itself once the stop has been honored and the truck is
+        rolling again.
+
+        Clearing the controllers alone is never enough either way: the truck
+        is still rolling toward the bar or the gate, so the resume check would
+        re-engage the keeper on the very next frame and announce it -- right
+        after telling the player it would wait.
+        """
         if not self._speed_control_armed:
             return False
         was_active = self._cruise_mph is not None or self._keeper_mph is not None
         self._clear_cruise()
         self._clear_keeper()
-        # Held until departure. Clearing the controllers alone is not enough:
-        # the truck is still rolling toward the gate, so the resume check would
-        # re-engage the keeper on the very next frame and announce it -- right
-        # after telling the player it would wait until they departed.
         self._speed_control_paused_at_stop = True
+        self._speed_control_transit_pause = resume_when_rolling
+        self._speed_control_stop_honored = False
         return was_active
+
+    def _lift_transit_pause(self, *, braking: bool) -> bool:
+        """Whether a transit pause has run its course this frame.
+
+        It ends where the stop it was made for ends: the truck honored the bar
+        and is rolling again with the player off the brake. Running out of
+        ramp AND out of armed exit counts as honoring it too -- a terminal
+        with no control at all is honored by driving through it, a blown ramp
+        hands the highway back at speed, and a cancelled exit leaves nothing
+        to wait for. Both have to be clear: the exit assist pauses a mile and
+        a half out, with the ramp still ahead and no bar taken yet. An arrival
+        pause is never lifted here; only departure clears one.
+        """
+        if not self._speed_control_transit_pause:
+            return False
+        t = self.truck
+        if t.speed_mph <= RED_STOP_MPH or (self._ramp_mi is None and self._exit_stop is None):
+            self._speed_control_stop_honored = True
+        if not self._speed_control_stop_honored or braking:
+            return False
+        # Rolling FORWARD: backing away from a bar is not driving on from it,
+        # and speed_mph reads the same either way.
+        if t.velocity_mps <= 0.0 or t.speed_mph < KEEPER_MIN_MPH:
+            return False
+        self._clear_stop_pause()
+        return True
 
     def _restore_speed_control_session(self, *, armed: bool, target_mph: float | None) -> None:
         self._clear_cruise()
         self._clear_keeper()
         self._speed_control_armed = armed
-        self._speed_control_paused_at_stop = False
+        self._clear_stop_pause()
         self._speed_control_target_mph = target_mph if armed else None
 
     def _resume_speed_control_if_ready(self, *, braking: bool) -> None:
         """Resume a paused job-scoped session once the player is rolling again."""
         if (
             not self._speed_control_armed
-            or self._speed_control_paused_at_stop
             or self._cruise_mph is not None
             or self._keeper_mph is not None
         ):
+            return
+        if self._speed_control_paused_at_stop and not self._lift_transit_pause(braking=braking):
             return
         t = self.truck
         if t.emergency_brake:
@@ -204,20 +253,27 @@ class SpeedControlStateMixin:
             self.ctx.say_event("Automatic speed control canceled.", interrupt=False)
             return
         if self._ramp_mi is not None:
-            # A ramp stop is in progress. Taking the exit cancels cruise
-            # outright, and the stop at the end of the ramp is the driver's to
+            # A ramp stop is in progress. Taking the exit hands the pedals
+            # back, and the stop at the end of the ramp is the driver's to
             # make -- resuming here wound the truck back up and drove a player
             # straight past the destination terminal, silently, at 66 mph
             # (owner playtest, Buffalo to Albany, 2026-08-12). The whole ramp
             # counts, not just the stretch ``trip.controlled_ramp`` covers:
             # that flag drops the moment the light or sign is behind the
-            # truck, which is exactly where the entrance still is.
+            # truck, which is exactly where the entrance still is. This, not
+            # the pause above, is what keeps a transit pause from re-engaging
+            # on the creep to the bar.
             return
         if (
             braking
             or t.air_brakes_holding
             or not t.engine_on
             or t.stalled
+            # Backing is the driver's own low-speed manoeuvre and never an
+            # open road to hand back to. ``speed_mph`` is unsigned, so without
+            # this a truck reversing at dock speed reads as rolling.
+            or t.transmission.in_reverse
+            or t.velocity_mps <= 0.0
             or t.speed_mph < KEEPER_MIN_MPH
         ):
             return

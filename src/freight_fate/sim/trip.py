@@ -64,6 +64,15 @@ PACENOTE_LEAD_FLOOR_S = 30.0
 # calls seconds apart (owner's Payson run, 2026-07-19).
 PACENOTE_LINK_GAP_MI = 0.3
 
+# A signalled exit gets the same real-time treatment as a hard bend, over the
+# road the truck genuinely needs to reach ramp speed (``approach_shed_mi``),
+# widened the way the pacenote window is so the clock is already real by the
+# time anything has to start shedding for it.
+EXIT_APPROACH_DECOMPRESS_SLACK = 1.5
+# And pacing climbs back over this many real seconds afterwards rather than
+# snapping from real time to full compression the instant the exit resolves.
+EXIT_APPROACH_RELEASE_S = 3.0
+
 # Speed-limit lookahead (the co-driver warns before a big posted drop, the
 # same way she calls a curve): only drops of at least this size get a
 # warning -- a 65-to-60 step needs no braking plan, a village 30 does.
@@ -266,6 +275,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # the driving state maintains it. Same clock rule as the ramp: the
         # advisory has to be brakeable in real seconds, and at 40x it is not.
         self.controlled_turn = False
+        # Road left to an exit the driver has signalled for, or None when no
+        # exit is armed or the truck is already on the ramp. The driving state
+        # reports it every frame; the clock is the only thing that reads it.
+        self.exit_approach_mi: float | None = None
+        self._exit_approach_release_s = 0.0
         self._announced_chain_law: set[str] = set()
         self._announced_curves: set[str] = set()
         self._announced_lane_changes: set[str] = set()
@@ -390,6 +404,22 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             # inside the warning window to the end of the curve, the clock
             # runs real.
             return min(full, 1.0)
+        if self._armed_exit_decompression():
+            # And for a signalled exit, which is the same bargain again: the
+            # shed to ramp speed is sized in real reaction-plus-braking
+            # seconds. Compressed, the road ran out before the truck could
+            # use it, so automatic control started easing nine miles from a
+            # truck stop just to be sure of the gore (Shane, 2026-08-15).
+            # Real seconds over the approach mean the glide only has to bite
+            # where a driver would really lift.
+            return min(full, 1.0)
+        if self._exit_approach_release_s > 0.0:
+            # Coming back up to pace after an approach, not snapping to it:
+            # the truck is accelerating away from an exit it took, cancelled,
+            # or missed, and the clock climbs with it.
+            real = min(full, 1.0)
+            eased = 1.0 - self._exit_approach_release_s / EXIT_APPROACH_RELEASE_S
+            return real + (full - real) * eased
         floor = min(LOW_SPEED_TIME_SCALE, full)
         ramp = min(1.0, self.truck.speed_mph / FULL_COMPRESSION_MPH)
         return floor + (full - floor) * ramp
@@ -1081,6 +1111,26 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             if ahead <= window:
                 return True
         return False
+
+    def _armed_exit_decompression(self) -> bool:
+        """True while a signalled exit is inside the road the truck must shed.
+
+        Shaped like ``_severe_curve_decompression``: from inside the window
+        the approach needs until the exit is behind the truck, the clock runs
+        real. The window is the shed budget the ramp cap and the arrival zones
+        already share -- reaction seconds plus a comfortable rate down to the
+        speed the gore accepts -- so it widens on its own with road speed. A
+        truck doing 80 starts its approach earlier than one doing 60, which is
+        the tester's own caveat, and nothing here is a fixed number of miles.
+        """
+        ahead = self.exit_approach_mi
+        if ahead is None or ahead <= 0.0:
+            return False
+        speed = self.truck.speed_mph
+        if speed <= RAMP_MAX_MPH:
+            return False  # already slow enough for the gore: nothing to shed
+        window = approach_shed_mi(speed, RAMP_MAX_MPH) * EXIT_APPROACH_DECOMPRESS_SLACK
+        return ahead <= window
 
     @staticmethod
     def _curve_pacenote_lead_mi(speed_mph: float, advisory_mph: float) -> float:
@@ -2204,6 +2254,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # already keeps a still-rolling truck at maneuvering pace.
         if self.waiting and not self.truck.parking_brake:
             self.waiting = False
+
+        # Arm or run down the approach's release tail before the scale is
+        # read, so pacing eases back over real seconds instead of snapping the
+        # frame an exit is taken, cancelled, or missed.
+        if self._armed_exit_decompression():
+            self._exit_approach_release_s = EXIT_APPROACH_RELEASE_S
+        else:
+            self._exit_approach_release_s = max(0.0, self._exit_approach_release_s - dt)
 
         # weather drives truck grip and evolves over game time
         scale = self.effective_time_scale
