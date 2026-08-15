@@ -438,6 +438,14 @@
 
 ### Fixed
 
+- **Other traffic now drives at the speed of the road it is on.** Cars and
+  trucks around you ran at fixed speeds that were set before the game knew
+  the real posted limit of every road, so on a 75 mile per hour interstate
+  everything around you was doing 30 to 55, and the truck would tell you to
+  leave room for 30 for a semi on an open highway. Traffic is now paced off
+  the limit where it is: it keeps up on a fast corridor, and it slows down
+  properly through a town. In states where cars may go faster than trucks,
+  the cars going past you really are doing the higher legal number.
 - **The speed alert stops dinging once you have slowed down.** It arms at
   seven over, which is where it should be -- but once it had armed it kept
   chiming until you were within one mile per hour of the limit, so a single

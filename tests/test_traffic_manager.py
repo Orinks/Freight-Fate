@@ -428,7 +428,12 @@ def test_traffic_appears_behind_the_truck_so_it_can_be_overtaken():
         behind_seen.extend(v.speed_mph for v in manager.vehicles if v.position_mi < position)
 
     assert behind_seen, "nothing was ever spawned behind the truck"
-    assert any(mph > 62.0 for mph in behind_seen), "nothing behind is fast enough to pass"
+    # Measured against the road, not against a fixed number. This stretch of
+    # I-65 out of Chicago is posted at 55, and traffic speeds are drawn
+    # relative to the posting -- a truck cannot legally outrun the limit, so
+    # anything faster than it is something that can come by.
+    limit = manager._posted_limit_at(40.0)
+    assert any(mph > limit for mph in behind_seen), "nothing behind is fast enough to pass"
 
 
 def test_nothing_is_created_alongside_the_truck():
@@ -495,3 +500,79 @@ def test_density_follows_the_clock_not_the_departure_hour():
     rush = manager._leg_density(leg, night=False)
 
     assert rush > quiet
+
+
+def test_traffic_runs_at_the_speed_of_the_road_it_is_on():
+    """Highway traffic must not crawl because the map got faster.
+
+    The intent bands were absolute mph, set before real posted limits were
+    baked per leg. On a 75 mph corridor the whole population ran 20-40 mph
+    slower than the road, so a lead-vehicle cue told the driver to leave room
+    for 30 for a semi on an interstate (owner playtest, 2026-08-15).
+    """
+    world = get_world()
+    route = world.route_from_cities(["Dallas", "Houston"])
+    assert route is not None
+    manager = _manager_for_route(route, seed=4)
+    # A dry-road claim: bad weather slowing everyone down is the model
+    # working, and would blur what this test is about.
+    manager.weather.current = WeatherKind.CLEAR
+
+    limit = manager._posted_limit_at(180.0)
+    assert limit >= 70.0, f"the fixture stretch is meant to be a fast one, got {limit}"
+
+    # Each vehicle once, at the speed it joined the road at, and paired with
+    # where it joined: the claim is about the speed traffic is created with,
+    # not about a braking vehicle's later deceleration, and a slow vehicle
+    # lingers in the bubble long enough to dominate a per-frame sample.
+    seen: list[tuple[float, float]] = []
+    counted: set[str] = set()
+    position = 175.0
+    while position < 190.0:
+        position += 0.25
+        manager.update(dt=1.0, position_mi=position, time_scale=1.0)
+        for v in manager.vehicles:
+            if v.key not in counted:
+                counted.add(v.key)
+                seen.append((v.speed_mph, v.position_mi))
+
+    assert seen, "nothing was ever spawned on the fixture stretch"
+    for mph, at_mi in seen:
+        floor = manager._floor_speed(manager._posted_limit_at(at_mi))
+        assert mph >= floor - 0.01, f"{mph:.1f} mph at mile {at_mi:.1f}, floor {floor:.1f}"
+    # And the fast road is carrying somebody at its own posted number, which
+    # is what the old absolute bands could not do once the map got faster.
+    fast = [mph for mph, at_mi in seen if manager._posted_limit_at(at_mi) >= 70.0]
+    assert fast, "no vehicle was ever on the fast stretch"
+    assert max(fast) >= limit, max(fast)
+    # And nothing on a 75 mph corridor is doing town speeds. This is the
+    # actual report: the old bands put merging traffic at 38-52 and braking
+    # traffic at 35-48 whatever the road was posted at, so the truck told the
+    # driver to leave room for 30 for a semi on an interstate.
+    assert min(fast) >= limit - 25.0, min(fast)
+    near_the_limit = [mph for mph in fast if mph >= limit - 8.0]
+    assert len(near_the_limit) >= len(fast) // 4, f"{len(near_the_limit)} of {len(fast)}"
+
+
+def test_traffic_scales_down_where_the_road_is_slow():
+    """The same draw on a 45 mph posting must not put interstate speeds in a
+    town: relative bands have to cut both ways."""
+    world = get_world()
+    route = world.route_from_cities(["Chicago", "Indianapolis"])
+    assert route is not None
+    manager = _manager_for_route(route, seed=4)
+
+    slow = manager._posted_limit_at(5.0)
+    assert slow <= 55.0, f"the fixture stretch is meant to be a slow one, got {slow}"
+
+    seen: list[float] = []
+    position = 3.0
+    while position < 15.0:
+        position += 0.25
+        manager.update(dt=1.0, position_mi=position, time_scale=1.0)
+        seen.extend(
+            v.speed_mph for v in manager.vehicles if manager._posted_limit_at(v.position_mi) <= slow
+        )
+
+    assert seen, "nothing was ever spawned on the fixture stretch"
+    assert max(seen) <= slow + 12.0, max(seen)

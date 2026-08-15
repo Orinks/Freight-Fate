@@ -14,6 +14,8 @@ from .trip_models import (
     RUSH_HOUR_WINDOWS,
     TRAFFIC_LOOKAHEAD_MI,
     TrafficContext,
+    _leg_speed_limit_at,
+    corridor_speed_limit,
 )
 
 log = logging.getLogger(__name__)
@@ -54,6 +56,28 @@ NO_SPAWN_BEHIND_MI = 0.6
 # bounds how long a slow one can hold the lane in front of the truck.
 EXIT_AFTER_MIN_MI = 2.5
 EXIT_AFTER_MAX_MI = 11.0
+# What each intent is doing relative to the road's posted limit. These were
+# absolute mph bands (cruising 52-64, braking 35-48) tuned before real posted
+# limits were baked per leg, and they never moved when the map did: on a 75 mph
+# Texas corridor the entire population ran 20-40 mph slower than the road, so
+# the truck kept announcing "leave room for 30" for a semi on an interstate
+# (owner playtest, 2026-08-15). Relative bands hold on a 75 corridor, a 55
+# two-lane and a 30 mph town street alike.
+TRAFFIC_SPEED_OFFSETS_MPH = {
+    "passing": (3.0, 10.0),
+    "cruising": (-3.0, 5.0),
+    "following": (-10.0, -3.0),
+    "merging": (-18.0, -8.0),
+    "braking": (-22.0, -10.0),
+}
+# The floor is a share of the limit, not one absolute number: 30 mph is a
+# reasonable slowest-thing-on-the-road for an interstate and absurd for a town
+# street, and the old flat floors did the same damage in miniature.
+TRAFFIC_MIN_SPEED_SHARE = 0.45
+TRAFFIC_MIN_SPEED_MPH = 15.0
+# Used only where the route cannot answer for a mile at all (off the end of the
+# last leg); every real spawn reads the leg it lands on.
+DEFAULT_LIMIT_MPH = 65.0
 
 
 @dataclass
@@ -267,15 +291,13 @@ class TrafficManager:
                     ("car", "box truck", "semi", "service vehicle"),
                     weights=(5.0, 1.4, 2.0, 0.3),
                 )[0]
-                base_speed = {
-                    "cruising": rng.uniform(52.0, 64.0),
-                    "following": rng.uniform(42.0, 55.0),
-                    "merging": rng.uniform(38.0, 52.0),
-                    "braking": rng.uniform(35.0, 48.0),
-                    "passing": rng.uniform(62.0, 75.0),
-                }[intent]
+                position_mi = start + rng.uniform(low, high)
+                limit_mph = self._posted_limit_at(position_mi)
+                base_speed = self._intent_speed(intent, limit_mph, rng)
                 rush_slowdown = rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
-                speed = max(25.0, base_speed - weather_slowdown - rush_slowdown)
+                speed = max(
+                    self._floor_speed(limit_mph), base_speed - weather_slowdown - rush_slowdown
+                )
                 # Passing traffic lives in the left lane; everyone else --
                 # including vehicles merging in from a ramp -- holds the
                 # right lane, where trucks are supposed to be.
@@ -283,7 +305,7 @@ class TrafficManager:
                 vehicles.append(
                     TrafficVehicle(
                         key=f"traffic:{leg_index}:{slot}:{intent}",
-                        position_mi=start + rng.uniform(low, high),
+                        position_mi=position_mi,
                         speed_mph=speed,
                         target_speed_mph=speed,
                         relative_lane=-lane,
@@ -315,7 +337,10 @@ class TrafficManager:
             key = f"trooper:{post.id}"
             if key in existing_keys:
                 continue
-            speed = 62.0
+            # A roving patrol runs with traffic, which is the posted number
+            # here rather than a fixed 62 that reads as slow on a 75 corridor
+            # and as reckless through a town.
+            speed = self._posted_limit_at(post.at_mi)
             self.vehicles.append(
                 TrafficVehicle(
                     key=key,
@@ -487,6 +512,47 @@ class TrafficManager:
                 break
         return found
 
+    def _leg_and_offset_at(self, mile: float) -> tuple[Leg, float] | None:
+        """The leg a route mile falls in, and how far into that leg it is.
+
+        The offset is leg-relative and direction-aware, because a leg driven
+        from b to a reads its baked samples from the far end.
+        """
+        found: tuple[Leg, float] | None = None
+        for index, (start, leg) in enumerate(zip(self.leg_starts, self.route.legs, strict=False)):
+            if mile + 1e-9 >= start:
+                offset = max(0.0, min(leg.miles, mile - start))
+                forward = self.route.cities[index] == leg.a
+                found = (leg, offset if forward else leg.miles - offset)
+            else:
+                break
+        return found
+
+    def _posted_limit_at(self, mile: float) -> float:
+        """The posted limit for a car here.
+
+        Deliberately the posted number rather than the truck cap: in a split
+        limit state the cars going by a rig held to 55 are doing the legal 65,
+        and that difference is the traffic the player hears.
+        """
+        found = self._leg_and_offset_at(mile)
+        if found is None:
+            return DEFAULT_LIMIT_MPH
+        leg, offset = found
+        baked = _leg_speed_limit_at(leg, offset)
+        if baked is not None:
+            return baked
+        return corridor_speed_limit(leg.highway, "")
+
+    def _floor_speed(self, limit_mph: float) -> float:
+        """The slowest a moving vehicle gets here from speed draws alone."""
+        return max(TRAFFIC_MIN_SPEED_MPH, limit_mph * TRAFFIC_MIN_SPEED_SHARE)
+
+    def _intent_speed(self, intent: str, limit_mph: float, rng: random.Random) -> float:
+        """A speed for this intent on a road posted at ``limit_mph``."""
+        low, high = TRAFFIC_SPEED_OFFSETS_MPH[intent]
+        return limit_mph + rng.uniform(low, high)
+
     def _cell_rng(self, cell: int) -> random.Random:
         """A generator belonging to one cell of road.
 
@@ -547,15 +613,10 @@ class TrafficManager:
                 ("car", "box truck", "semi", "service vehicle"),
                 weights=(5.0, 1.4, 2.0, 0.3),
             )[0]
-            base_speed = {
-                "cruising": rng.uniform(52.0, 64.0),
-                "following": rng.uniform(42.0, 55.0),
-                "merging": rng.uniform(38.0, 52.0),
-                "braking": rng.uniform(35.0, 48.0),
-                "passing": rng.uniform(66.0, 78.0),
-            }[intent]
+            limit_mph = self._posted_limit_at(mile)
+            base_speed = self._intent_speed(intent, limit_mph, rng)
             rush_slowdown = rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
-            speed = max(25.0, base_speed - weather_slowdown - rush_slowdown)
+            speed = max(self._floor_speed(limit_mph), base_speed - weather_slowdown - rush_slowdown)
             lane = 1 if intent == "passing" else 0
             self.vehicles.append(
                 TrafficVehicle(
@@ -583,7 +644,10 @@ class TrafficManager:
             intent = self._vehicle_intent(vehicle)
             vehicle.relative_lane = self.player_lane - vehicle.lane
             if intent == "braking" and 0.0 <= gap <= 1.8:
-                vehicle.target_speed_mph = max(30.0, vehicle.target_speed_mph - 8.0 * dt)
+                vehicle.target_speed_mph = max(
+                    self._floor_speed(self._posted_limit_at(vehicle.position_mi)),
+                    vehicle.target_speed_mph - 8.0 * dt,
+                )
             delta = vehicle.target_speed_mph - vehicle.speed_mph
             vehicle.speed_mph += max(-6.0 * dt, min(4.0 * dt, delta))
             vehicle.position_mi += max(0.0, vehicle.speed_mph) * game_hours
