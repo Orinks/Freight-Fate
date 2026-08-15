@@ -879,7 +879,7 @@ class CityMenuState(MenuState):
     def _backup_outcome_text(self, name: str, outcome: str) -> str:
         """One spoken line per cloud backup outcome family, reusing the
         standing status wording wherever one already exists."""
-        from ..cloud_saves import AUTH_PAUSED_STATUS, rejection_status
+        from ..cloud_saves import AUTH_PAUSED_STATUS, conflict_status, rejection_status
 
         if outcome == "accepted":
             return "Backed up to the cloud."
@@ -888,11 +888,7 @@ class CityMenuState(MenuState):
         if outcome.startswith("rejected:"):
             return rejection_status(name, outcome.split(":", 1)[1])
         if outcome == "conflict":
-            return (
-                f"{name} needs attention: the cloud copy changed on another "
-                "computer. Open Restore a cloud backup on the Online menu "
-                "to choose which copy to keep."
-            )
+            return conflict_status(name)
         if outcome == "auth":
             return AUTH_PAUSED_STATUS
         return "The backup will keep retrying in the background."

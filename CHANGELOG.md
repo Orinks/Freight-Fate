@@ -384,6 +384,18 @@
   where to fix it. If your account is set up but cloud backup is off,
   saving says that too instead of leaving you to assume you were covered.
 
+- **A refused cloud backup now says so wherever you are.** The automatic
+  saves -- rest stops, motels, deliveries, sleeping, business at the
+  terminal -- back up in the background, and until now a refusal only
+  changed a status line in the Cloud backup menu, so a career could stop
+  backing up without a word. Now the game says it out loud the first time
+  it happens, wherever you are: which career was refused and why -- the
+  save was not accepted, the cloud copy changed on another computer, or
+  your sign-in needs reconnecting. It says it once, not on every retry,
+  and when that career's backups start being accepted again it tells you
+  that too, by name: backed up again. Ordinary network trouble stays
+  quiet and simply retries.
+
 - **A highway narrowing to one lane now tells you when it moves you.** If
   the lane you were in stops existing where the road narrows, you used to
   be shifted over with no warning at all. Now, whenever that actually

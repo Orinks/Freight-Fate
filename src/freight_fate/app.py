@@ -851,6 +851,13 @@ class App:
                     )
                     if self.state is not None:
                         self.state.on_controller_disconnect()
+                # Cloud backup refusals speak wherever the player is --
+                # driving or in menus -- not only on the terminal's Save
+                # game item: the worker thread queues them and this loop
+                # delivers, queued on the normal announcement channel so a
+                # backup notice never cuts off urgent driving speech.
+                for line in self.cloud.take_announcements():
+                    self.ctx.say(line, interrupt=False)
                 self.ctx.audio.update(dt)  # advance time-based audio fades
                 self.ctx.update_speech_duck()  # restore the mix after speech
                 if self.state is not None:

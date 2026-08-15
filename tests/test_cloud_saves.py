@@ -24,6 +24,7 @@ from speech_capture import speech_stub
 from freight_fate import cloud_save_integrity
 from freight_fate.cloud_save_integrity import CloudSaveIntegrityError, canonical_profile
 from freight_fate.cloud_saves import (
+    AUTH_PAUSED_STATUS,
     DEBOUNCE_S,
     RETRY_INTERVAL_S,
     CloudAuthError,
@@ -32,6 +33,7 @@ from freight_fate.cloud_saves import (
     backup_summary,
     classify_upload_failure,
     cloud_content,
+    conflict_status,
     delete_save,
     download_save,
     list_saves,
@@ -1530,6 +1532,173 @@ def test_an_upload_in_flight_when_save_is_pressed_keeps_its_own_verdict():
     # older upload's rejection, which finished after it and carries the
     # background token no watch ever matches.
     assert service.outcome_for("Road Star", tokens[0]) == "accepted"
+
+
+# -- background refusals speak everywhere (owner decision, 2026-08-15: automatic --
+# -- saves upload silently, so a blind player never heard a career stop backing up)
+
+
+def test_background_rejection_announces_exactly_once_across_retries():
+    transport = FakeTransport(error=rejected_error("impossible_money"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+
+    lines = service.take_announcements()
+    assert len(lines) == 1
+    assert lines[0].startswith("Road Star: backup not accepted.")
+    assert "flagged it for review" in lines[0]
+    # The raw reason code stays log-only, exactly as in the status line.
+    assert "impossible_money" not in lines[0]
+
+    # Every later save refused for the same cause stays silent.
+    for _ in range(3):
+        profile.money += 1.0
+        service.queue_backup(profile)
+        drain(service, clock)
+    assert service.take_announcements() == []
+
+
+def test_background_refusal_speaks_again_when_the_cause_changes():
+    transport = FakeTransport(error=rejected_error("invalid_schema"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert "build mismatch" in service.take_announcements()[0]
+
+    transport.error = rejected_error("impossible_money")
+    profile.money += 1.0
+    service.queue_backup(profile)
+    drain(service, clock)
+
+    lines = service.take_announcements()
+    assert len(lines) == 1
+    assert "flagged it for review" in lines[0]
+
+
+def test_success_after_a_spoken_refusal_announces_recovery_and_rearms():
+    transport = FakeTransport(error=rejected_error("impossible_money"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert len(service.take_announcements()) == 1
+
+    transport.error = None
+    profile.money += 1.0
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert service.take_announcements() == ["Road Star is backed up again."]
+
+    # A clean backup with nothing to recover from stays silent...
+    profile.money += 1.0
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert service.take_announcements() == []
+
+    # ...and the dedupe is re-armed: the same refusal speaks once more.
+    transport.error = rejected_error("impossible_money")
+    profile.money += 1.0
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert len(service.take_announcements()) == 1
+
+
+def test_background_auth_refusal_speaks_the_reconnect_line_once():
+    transport = FakeTransport(error=auth_error(401))
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert service.take_announcements() == [AUTH_PAUSED_STATUS]
+
+    profile.money += 1.0
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert service.take_announcements() == []
+
+
+def test_background_conflict_announces_the_choice_line_once():
+    transport = FakeTransport(error=conflict_error(latest_revision=5))
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert service.take_announcements() == [conflict_status("Road Star")]
+
+    # Later saves blocked by the same recorded conflict stay silent.
+    profile.money += 1.0
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert service.take_announcements() == []
+
+
+def test_background_network_trouble_stays_a_silent_retry():
+    # Transient failures retry on their own; the manual save path already
+    # voices them on demand, so the global channel says nothing.
+    transport = FakeTransport(error=OSError("no route"))
+    clock = Clock()
+    service = make_service(transport, clock)
+
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+
+    assert service.take_announcements() == []
+
+
+def test_manual_refusal_never_reaches_the_global_channel():
+    # The terminal's Save game item polls and speaks its own outcome
+    # (states/city.py); announcing it here too would say the refusal twice.
+    transport = FakeTransport(error=rejected_error("invalid_achievement"))
+    service = make_service(transport, Clock())
+
+    token = service.backup_now(Profile(name="Road Star"))
+
+    assert service.outcome_for("Road Star", token) == "rejected:invalid_achievement"
+    assert service.take_announcements() == []
+
+
+def test_take_announcements_drains_the_queue():
+    transport = FakeTransport(error=rejected_error("impossible_money"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+
+    assert len(service.take_announcements()) == 1
+    assert service.take_announcements() == []
+
+
+def test_app_loop_speaks_queued_background_refusals(monkeypatch):
+    """The worker thread never speaks; the app's main loop drains
+    take_announcements and delivers on the normal announcement channel --
+    the same polled pattern as the controller-disconnect notice."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    clock = Clock()
+    app.cloud = make_service(FakeTransport(error=rejected_error("impossible_money")), clock)
+    app.cloud.queue_backup(Profile(name="Road Star"))
+    drain(app.cloud, clock)
+
+    app.run(max_frames=3)  # run() shuts the app down on its way out
+
+    refusals = [t for t in spoken if t.startswith("Road Star: backup not accepted.")]
+    assert len(refusals) == 1
 
 
 # -- the Save game item at the terminal speaks the backup result ------------------

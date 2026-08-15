@@ -626,7 +626,43 @@ onto exit signalling.
       until the walkthrough completes (gated on tutorial_done itself).
       The long tail of messages that read the same in both modes stays
       normal-only by design.
-- [x] **Speech-priority redesign, stage S3 -- landed 2026-08-12** (R6, R7,
+- [ ] **Drive-time chattiness: even terse is far too much (owner,
+      2026-08-15) -- next speech-redesign target, grounded in
+      accessibility practice.** The terse contract compressed each
+      message; the drive is still too chatty because compression does
+      not reduce the NUMBER of things spoken. The grounding from
+      accessibility practice points at four principles the current
+      design only half-applies:
+      (1) Sound before speech (Game Accessibility Guidelines: key
+      information carried by audio cues; audio-game convention:
+      continuous state belongs in continuous sound -- engine pitch,
+      surface texture, panning -- events in earcons, speech ONLY for
+      what sound cannot carry, like numbers and instructions). Candidate:
+      a systematic pass converting spoken state updates (speed drift,
+      gaps opening, weather shifts) to the earcon/sonification layer,
+      with speech kept for the first occurrence as a teaching pair --
+      the Learn game sounds screen already exists to make that safe.
+      (2) The screen-reader verbosity model (JAWS/NVDA convention):
+      verbosity is a LADDER of named levels the user picks, cutting
+      whole categories -- not one global compress. Candidate: driving
+      verbosity presets (coaching / standard / quiet / urgent-only)
+      where quiet drops entire categories (ambient, flavor, repeat
+      coaching) rather than shortening them, per-category overrides
+      kept like the separate-volume-controls guideline.
+      (3) The live-region politeness model (W3C ARIA): only urgent
+      content interrupts; polite content waits for silence and is
+      DROPPED when stale rather than queued forever. The S1 pacer
+      already does half of this; the missing half is a per-minute
+      spoken-event budget at cruise -- when the budget is spent,
+      polite messages coalesce or drop to the message log instead of
+      speaking late.
+      (4) Announce on change, not on state: nothing re-reads, nothing
+      confirms what the sound layer already made audible.
+      Fold into the gated speech-redesign program (R1-R15) as its next
+      stage; design first, owner sign-off before any nightly ships it,
+      testers verify per the standing gate. The owner's report is the
+      requirement: a long drive in terse mode should be mostly engine,
+      road, and radio -- speech should feel like an event.
       R9, R10, R11, R12, R14). The naming diet and the noise cuts: facility
       names speak in full on first mention per leg and short after, with the
       type prefix dropped when the proper name already carries it (R6);
@@ -1212,6 +1248,47 @@ onto exit signalling.
       both were updated. Pushing it needs `git lfs push origin <branch>`
       by absolute path first (git-lfs is not on PATH here), then the
       normal `git push`.
+- [ ] **A real endorsement path (owner, 2026-08-15) -- design from
+      actual CDL structure.** Four endorsements (refrigerated,
+      heavy_haul, high_value, tank -- three of them done by level 4) is
+      not meaningful progression. The real credential ladder has far
+      more rungs, and each maps naturally onto freight, lanes, and pay
+      the game already models. Proposed two-track path, grounded in
+      FMCSA structure:
+      RESTRICTION REMOVALS (early game): a fresh CDL can carry
+      restrictions that are lifted by training, not levels -- the E
+      restriction (automatic transmission only) is the natural first
+      rung and ties straight into the game's existing transmission
+      setting: train out the restriction, drive manual boxes, better
+      settlements on manual-spec tractors.
+      CARRIER CERTIFICATIONS (early-mid, sponsored): today's
+      refrigerated / high-value stay here, joined by flatbed load
+      securement (steel, lumber, machinery classes) -- these are
+      company training, not CDL law, and dispatch trust is the gate.
+      CDL ENDORSEMENTS (mid-late, real names, knowledge tests +
+      course fees + time): T doubles/triples (unlocks double-trailer
+      freight), N tank (the existing tank endorsement, renamed to its
+      real letter), H hazmat -- the standout game beat: ELDT theory
+      course PLUS a TSA background check with a real waiting period of
+      in-game days and a fee before chemicals-class freight opens --
+      and X (tank + hazmat combined) for fuel-tanker work.
+      SPECIALIST CREDENTIALS (late game): LCV certification (49 CFR
+      380: requires the T endorsement plus six months of Class A
+      experience -- a real prerequisite chain worth copying) unlocking
+      turnpike doubles/triples ONLY on the specific corridors that
+      allow them, which fits the real-map corridor data; TWIC port
+      card for container freight out of port cities; oversize/
+      overweight permits per state with pilot-car escorts, curfews,
+      and route surveys deepening heavy_haul from one unlock into a
+      permit economy.
+      Pacing intent: restriction removal in act one, first CDL letters
+      in act two, LCV/TWIC/superload in act three -- so the back half
+      of the 30-level arc earns credentials instead of only numbers.
+      Each rung is a course (money + dwell time, motel-style), some
+      with prerequisites and waiting periods, all spoken in plain
+      language with the real-world name given once. Validator note:
+      endorsement keys ride the invariants export, so every new key is
+      an exporter regen + staging deploy in the same change.
 - [ ] **Jail for a pursuit, not a three-hour "processing" fee.** Owner
       question 2026-08-10, roadmapped rather than built. Speeding is a
       citation even at the extreme end, so no change there -- but fleeing
@@ -1305,17 +1382,20 @@ onto exit signalling.
       pattern); the pickup gate and city-service arrivals still pin the
       odometer at the end regardless of speed — same treadmill, same fix
       pattern, deliberately left out of the first pass.
-- [ ] **Speak refused backups where the player can hear it.** The manual
+- [x] **Speak refused backups where the player can hear it.** The manual
       half shipped 2026-08-14 (Shane's report): Save game at the terminal
       now runs the backup immediately (`CloudSaves.backup_now`, no
       debounce or backoff) and speaks the outcome -- accepted, already
       backed up, rejected with the career named, conflict, paused
-      sign-in, or still retrying. Still open: the automatic background
-      saves stay silent, so a refused backup between manual saves still
-      sounds like a working one (this is what kept the possession bug
-      invisible -- the same silence family as the sticky-conflict case
-      from Jessie's stale prod save). Consider a one-time spoken notice
-      when a slot's backups stop being accepted.
+      sign-in, or still retrying. The background half shipped 2026-08-15
+      (owner decision): a background upload's terminal refusal --
+      rejected, conflict, or paused sign-in -- now queues one spoken
+      line (`CloudSaves.take_announcements`, drained by the app's main
+      loop like the controller-disconnect notice), once per cause per
+      career until the cause changes or the slot uploads again, with a
+      career-named all-clear when backups resume. Transient network
+      failures still retry silently; the manual Save game item still
+      owns its own attempt's result.
 - [ ] **Report client sync status server-side so stalls are diagnosable
       from the dashboard.** The client now logs its per-career sync state
       at startup (2026-08-13), but that only helps for testers who share
