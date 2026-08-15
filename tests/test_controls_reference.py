@@ -36,7 +36,16 @@ def test_controls_help_page_points_at_the_driving_keys():
     assert "S speaks the posted speed limit" in joined
     assert "R speaks how far along you are" in joined
     assert "A repeats the last driving announcement" in joined
-    assert "U speaks what is coming up" in joined
+    # U stopped being a recital of everything ahead (2026-08-15): the exit
+    # cue, the traffic-pressure advisory and two of the three bends were
+    # already other keys' answers, so the help now promises only the road
+    # nothing else covers. Pinned on the promise, not the old phrasing.
+    assert "U speaks the road ahead that no other key answers" in joined
+    # And U must never advertise police activity again (owner ruling): the
+    # check is scoped to U's own line, because a sibling line legitimately
+    # explains what the hours-of-service keys do with enforcement off.
+    u_line = next(line for line in lines if line.startswith("U speaks"))
+    assert not any(word in u_line.lower() for word in ("patrol", "police", "bear"))
     assert any("X" in line and "signal" in line.lower() for line in lines)
     assert all("X takes the next announced exit" not in line for line in lines)
     assert "Left or Right Control stops the driving event voice" in joined
