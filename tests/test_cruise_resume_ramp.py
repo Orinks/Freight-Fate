@@ -248,8 +248,18 @@ def _armed_exit_at(app, monkeypatch, *, ahead_mi: float, time_scale: float = 1.0
     t.grade = 0.0
     t.transmission.gear = 10
     t.velocity_mps = 65.0 / 2.23694
-    stop = driving.trip.stops[0]
+    # The first stop is not always far enough into the route to stand
+    # ``ahead_mi`` behind it. Where it is not, position_mi clamps at zero, the
+    # exit lands inside the exit assist's 1.5-mile reach, the assist takes the
+    # pedals exactly as it should -- and the test failed about one run in five
+    # for a road it never actually set up (captured 2026-08-15: a travel centre
+    # at mile 1.0 with the truck clamped to 0.08). Take a stop with room
+    # behind it, and pin the geometry so it can never quietly degrade again.
+    room = [s for s in driving.trip.stops if s.at_mi > ahead_mi + 1.0]
+    assert room, f"no route stop sits more than {ahead_mi + 1.0} miles in"
+    stop = room[0]
     driving.trip.position_mi = stop.at_mi - ahead_mi
+    assert stop.at_mi - driving.trip.position_mi == pytest.approx(ahead_mi)
     driving.handle_event(key_event(pygame.K_k))  # cruise at road speed
     driving.handle_event(key_event(pygame.K_x))  # signal for the exit
     assert driving._exit_stop is stop
@@ -290,6 +300,14 @@ def test_shane_2026_08_15_the_ramp_cap_no_longer_lands_miles_from_the_exit(monke
         # speed with the brakes off.
         for _ in range(60 * 5):
             driving.update(1 / 60)
+        # Named, not dereferenced: a paused session leaves _cruise_mph None,
+        # and reading through it turned any such failure into a TypeError
+        # instead of saying what went wrong.
+        assert driving._cruise_mph is not None, (
+            "speed control was paused four and a half miles from the exit; "
+            f"armed={driving._speed_control_armed} "
+            f"paused_at_stop={driving._speed_control_paused_at_stop}"
+        )
         assert driving.truck.speed_mph > driving._cruise_mph - 3.0
         assert driving.truck.brake == pytest.approx(0.0)
     finally:
