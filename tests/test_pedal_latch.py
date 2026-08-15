@@ -207,8 +207,9 @@ def test_settings_menu_offers_latching_pedals():
 
 def test_legacy_bool_settings_migrate_to_modes():
     """Owner revision 2026-08-13: pedal_latch grew from a bool to a
-    three-way mode. Same coercion path as the overspeed_warning migration
-    (settings.py ~520): True -> "assists first", False -> "off"."""
+    three-way mode: True -> "assists first", False -> "off". The overspeed
+    warning once used the same coercion path, before that setting was
+    removed."""
     from freight_fate.settings import Settings
 
     settings = Settings()

@@ -306,9 +306,9 @@ _ENGINE_BRAKE = SoundCategory(
             "nobody has necessarily seen you, but an officer who has will "
             "act on it. The faster the chime repeats, the further over you "
             "are.",
-            when="Overspeed warning on. Set to urgent only it stays quiet "
-            "until you are far enough over to be running away with the "
-            "truck, and set to off it never sounds.",
+            when="More than 7 miles per hour over the posted limit -- past "
+            "anything adaptive cruise will do on its own, and short of where "
+            "a trooper can act on your speed.",
         ),
         SoundEntry(
             "Gear grind",

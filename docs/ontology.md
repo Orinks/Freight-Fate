@@ -206,7 +206,7 @@ from the words, and synonyms cost them a re-read.
 | A license add-on | endorsement | certification, licence | `ENDORSEMENT_LEVELS` |
 | A purchasable consumable | its own name: "shower", "energy drink" | buff, item, power-up | `Buff` |
 | The tractor a carrier gave you | your assigned truck | your truck (when leased) | `FleetTier` |
-| How much of the lane-holding work the truck does | lane keeping, always with its value clause ("full, the truck holds the lane and takes your exits") | lane drift (retired 1.9), steering assist, lane keeping assist (that is `lane_centering_assist`), the bare value word alone -- "off" here is the hardest mode, the opposite of "off" on the rows around it | `settings.lane_keeping` |
+| How much of the lane-holding work the truck does | lane keeping, always with its value clause ("full, the truck holds the lane and takes your exits") | lane drift (retired 1.9), steering assist, lane keeping assist (that is `lane_centering_assist`, a reserved row for steering help that is not implemented -- never describe it as working), the bare value word alone -- "off" here is the hardest mode, the opposite of "off" on the rows around it | `settings.lane_keeping` |
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
 | Room to move into the next lane over | the lane is open ("right lane open"); held by somebody, it is blocked ("right lane blocked by a semi") | clear (that is what the truck is clear OF -- the vehicle passed), safe, free, gap | `LaneGapMixin`, `states/driving_lane_gap.py` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
@@ -329,6 +329,7 @@ from the words, and synonyms cost them a re-read.
 | A station built from one of the player's own playlist files | playlist; what is in it is tracks, whether a track is a file or an internet station | mix, folder, media library, your files | `PERSONAL_PLAYLIST_SOURCE_TYPE`, `RadioStation.playlist_entries` |
 | The one career whose accepted backups front the player's public profile | public career | shared career, featured career, main save | `publicSaveName` |
 | Game sound lowering itself while the road voice speaks | game sounds step back for speech (the Settings > Audio row) | ducking, audio duck, attenuation | `settings.duck_audio_for_speech`, `AudioEngine.set_speech_duck` |
+| How loud the lane and edge cues are next to everything else | lane and edge cue volume (the Settings > Audio row), with quieter / standard / louder as its values | prominence (what the row said until 1.9, and what the owner could not decode), lane cue loudness, cue intensity | `settings.lane_cue_loudness`, `sim/lane_guidance.CUE_LOUDNESS` |
 
 Notes on the entries that are not simple:
 

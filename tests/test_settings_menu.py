@@ -211,14 +211,13 @@ GAMEPLAY_SUBCATEGORY_ROWS = {
         "Latching pedals",
         "Predictive cruise",
         "Curve callouts",
+        "Speed keeper",
         "Lane keeping",
-        "Lane and edge cue prominence",
         "Back",
     ],
     "difficulty": [
         "Driving mode",
         "Hours of service",
-        "Overspeed warning",
         "Back",
     ],
     "world": [
@@ -235,7 +234,6 @@ GAMEPLAY_SUBCATEGORY_ROWS = {
         "Automatic direction changes",
         "Controller",
         "Haptics",
-        "Speed keeper",
         "Back",
     ],
 }
@@ -322,8 +320,9 @@ def _all_settings_rows(app):
 
 def test_exactly_one_speed_keeper_row_in_the_whole_tree():
     """The speed keeper was a single bool with two live rows (old Gameplay and
-    Driving assistance). Exactly one row may drive it now, and it is in
-    Controls."""
+    Driving assistance). Exactly one row may drive it now, and it is in Driving
+    assistance -- it holds a speed for you, which is what that whole screen is
+    about, where Controls is the keyboard, the controller and the units."""
     from freight_fate.app import App
 
     app = App()
@@ -333,7 +332,7 @@ def test_exactly_one_speed_keeper_row_in_the_whole_tree():
             (screen, label) for screen, label, _ in rows if label.startswith("Speed keeper")
         ]
         assert len(speed_keeper_rows) == 1, speed_keeper_rows
-        assert speed_keeper_rows[0][0] == "controls"
+        assert speed_keeper_rows[0][0] == "assistance"
     finally:
         app.shutdown()
 
@@ -387,10 +386,13 @@ def test_every_gameplay_setting_stays_reachable_after_the_split():
         assert reachable("controls", "Automatic direction changes")
         assert reachable("controls", "Controller")
         assert reachable("controls", "Haptics")
-        assert reachable("controls", "Speed keeper")
+        assert reachable("assistance", "Speed keeper")
+        assert not reachable("controls", "Speed keeper")
         assert reachable("difficulty", "Driving mode")
         assert reachable("difficulty", "Hours of service")
-        assert reachable("difficulty", "Overspeed warning")
+        # The overspeed warning lost its row: it no longer fires at speeds
+        # cruise itself picks, so there is nothing to turn off.
+        assert not any(label.startswith("Overspeed warning") for _, label, _ in rows)
         assert reachable("world", "Enforcement presence")
         # Moved out of Speech and weather.
         assert reachable("world", "Weather source")
@@ -413,7 +415,7 @@ def test_settings_menu_toggles_speed_keeper():
     app = App()
     try:
         assert app.ctx.settings.speed_keeper is True
-        cat = open_settings_category(app, "Controls")
+        cat = open_settings_category(app, "Driving assistance")
         while not cat.items[cat.index].text.startswith("Speed keeper"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
@@ -1251,14 +1253,20 @@ def test_gameplay_reorg_notice_fires_once_for_a_pre_reorg_settings_file():
     spoken = []
     app.ctx.say = speech_stub(spoken)
     try:
-        assert app.ctx.settings.gameplay_reorg_notice_pending is True
+        # No settings_version on disk reads as layout 0, so every notice is
+        # owed -- the Gameplay split and the later row moves, in that order.
+        assert app.ctx.settings.settings_layout_notice_from == 0
         gameplay = open_gameplay_parent(app)
         assert any("Gameplay is now a category" in line for line in spoken)
         assert any("Weather, traffic, and parking sources moved" in line for line in spoken)
         assert any("Nothing about your settings changed" in line for line in spoken)
+        assert any("Speed keeper is now in Driving assistance" in line for line in spoken)
+        first = next(i for i, s in enumerate(spoken) if "Gameplay is now a category" in s)
+        second = next(i for i, s in enumerate(spoken) if "Speed keeper is now in" in s)
+        assert first < second, spoken
         # Cleared, and persisted so a restart does not replay it.
-        assert app.ctx.settings.gameplay_reorg_notice_pending is False
-        assert Settings.load().gameplay_reorg_notice_pending is False
+        assert app.ctx.settings.settings_layout_notice_from == -1
+        assert Settings.load().settings_layout_notice_from == -1
 
         spoken.clear()
         gameplay.enter()  # re-reveal the same screen
@@ -1280,7 +1288,7 @@ def test_a_fresh_install_hears_no_gameplay_reorg_notice():
     spoken = []
     app.ctx.say = speech_stub(spoken)
     try:
-        assert app.ctx.settings.gameplay_reorg_notice_pending is False
+        assert app.ctx.settings.settings_layout_notice_from == -1
         open_gameplay_parent(app)
         assert not [line for line in spoken if "Gameplay is now a category" in line]
     finally:
@@ -1295,7 +1303,7 @@ def test_a_current_version_settings_file_hears_no_notice():
     settings = Settings()
     settings.path.parent.mkdir(parents=True, exist_ok=True)
     settings.path.write_text(json.dumps({"settings_version": SETTINGS_VERSION}), encoding="utf-8")
-    assert Settings.load().gameplay_reorg_notice_pending is False
+    assert Settings.load().settings_layout_notice_from == -1
 
 
 def test_settings_version_is_written_to_disk():
@@ -1307,3 +1315,161 @@ def test_settings_version_is_written_to_disk():
 
     written = json.loads(settings.path.read_text(encoding="utf-8"))
     assert written["settings_version"] == SETTINGS_VERSION
+
+
+def test_a_player_one_layout_behind_hears_only_the_newer_notice():
+    """Notices are per layout version, not one blanket announcement: a tester
+    who already has the Gameplay submenu is told about the row moves and
+    nothing else."""
+    import json
+
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(json.dumps({"settings_version": 1}), encoding="utf-8")
+
+    app = App()
+    spoken = []
+    app.ctx.say = speech_stub(spoken)
+    try:
+        assert app.ctx.settings.settings_layout_notice_from == 1
+        open_gameplay_parent(app)
+        assert any("Speed keeper is now in Driving assistance" in line for line in spoken)
+        assert not [line for line in spoken if "Gameplay is now a category" in line]
+    finally:
+        app.shutdown()
+
+
+# Fields with no consumer anywhere outside settings.py and the settings menu.
+# Each one needs a reason to be here, because "a menu row and nothing else" is
+# exactly what a phantom setting looks like: lane_centering_assist offered
+# blind players steering help for months while nothing in the driving code
+# ever read it.
+#
+# Internal flags -- machinery the player never chooses, read inside
+# settings.py or by the settings menu itself:
+SETTINGS_INTERNAL_FLAGS = {
+    # The layout-migration pair: which menu shape wrote the file, and which
+    # layout notices are still owed. Read by Settings.load and the Gameplay
+    # submenu, never by the game.
+    "settings_version",
+    "settings_layout_notice_from",
+    # How many times the Lane keeping row still explains its own rename.
+    # Counted down by the row that speaks it.
+    "lane_keeping_rename_notice_left",
+    # The preset row's own state. apply_/refresh_driving_assistance_preset in
+    # settings.py write it; it names a combination of the real fields rather
+    # than doing anything itself.
+    "driving_assistance_preset",
+    # The roadside-chatter switches. Nothing reads these by name: the drive
+    # asks settings.chatter_enabled(category), which maps a bake category to
+    # its switch through CHATTER_CATEGORY_FIELDS.
+    "chatter_parks",
+    "chatter_rivers",
+    "chatter_passes",
+    "chatter_museums",
+    "chatter_billboards",
+}
+
+# Pending features -- a real row a player can set, for behaviour that does not
+# exist yet. Different from an internal flag: a player CAN choose it and hear
+# nothing happen, so the help text must say so plainly. Owner direction
+# 2026-08-15 keeps this row as the slot the work will land in.
+SETTINGS_PENDING_FEATURES = {
+    # No steering help is implemented; the help text says exactly that.
+    "lane_centering_assist",
+}
+
+
+def test_no_settings_field_is_a_phantom():
+    """Every Settings field must reach the game, or be listed above with a
+    reason. A field whose only appearances are its own definition and a menu
+    row promises a blind player something the truck never does."""
+    import re
+    from dataclasses import fields
+    from pathlib import Path
+
+    from freight_fate.settings import Settings
+
+    root = Path(__file__).resolve().parents[1] / "src" / "freight_fate"
+    # settings.py defines the fields; main_menu.py is the settings menu, where
+    # a phantom's one and only reference lives. A real setting is read
+    # somewhere else -- and string access (getattr, DRIVING_ASSIST_FIELDS,
+    # the menu spec tuples) still counts, because the field name appears
+    # literally in those files too.
+    sources = [
+        path.read_text(encoding="utf-8")
+        for path in root.rglob("*.py")
+        if path.name not in ("settings.py", "main_menu.py")
+    ]
+    known = SETTINGS_INTERNAL_FLAGS | SETTINGS_PENDING_FEATURES
+    phantoms = [
+        f.name
+        for f in fields(Settings)
+        if f.name not in known and not any(re.search(rf"\b{f.name}\b", text) for text in sources)
+    ]
+    assert phantoms == [], (
+        "These settings have no consumer outside settings.py and the settings "
+        "menu. Wire them up, remove them, or list them in "
+        "SETTINGS_INTERNAL_FLAGS / SETTINGS_PENDING_FEATURES with a reason: "
+        f"{phantoms}"
+    )
+    # The allow-lists must not outlive their entries either: a name listed
+    # here that is no longer a field is a stale exemption hiding the next one.
+    live = {f.name for f in fields(Settings)}
+    assert known <= live, sorted(known - live)
+
+
+def test_lane_centering_help_does_not_promise_steering_help():
+    """The pending row must never read as a working assist again."""
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        cat = SettingsCategoryState(app.ctx, "assistance")
+        row = next(
+            item for item in cat.build_items() if item.text.startswith("Lane centering assistance")
+        )
+        assert "does not do yet" in row.help
+        assert "makes no difference" in row.help
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize("category", ["assistance", "difficulty", "world", "controls", "audio"])
+def test_every_row_answers_the_arrow_keys(category):
+    """The rows and the left/right action list are two hand-kept lists, and a
+    row moved out of one but not the other leaves the arrows landing on the
+    wrong setting -- silently, for a player who cannot see the mismatch."""
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        cat = SettingsCategoryState(app.ctx, category)
+        cat.items = cat.build_items()
+        rows = [item for item in cat.items if item.text != "Back"]
+        deaf = []
+        for index in range(len(rows)):
+            cat.index = index
+            # Both directions, because a volume already at its ceiling does
+            # not move on Right and a row that answers neither arrow is the
+            # actual bug. A misaligned action list moves some OTHER row, so
+            # this row's own label staying put in both directions is what
+            # catches it.
+            answered = False
+            for direction in (1, -1):
+                before = cat.items[index].text
+                cat.adjust(direction)
+                cat.items = cat.build_items()
+                if cat.items[index].text != before:
+                    answered = True
+                    break
+            if not answered:
+                deaf.append(rows[index].text)
+        assert deaf == [], (category, deaf)
+    finally:
+        app.shutdown()

@@ -87,8 +87,10 @@ Two observations:
 One binary setting: `speech_verbosity` (0 terse / 1 normal; the chatty tier
 was retired — `settings.py:270,496`). Orthogonal switches that already exist:
 five roadside-chatter category toggles, the `place_callouts` ladder
-(off/sparse/all), `announce_menu_position`, `overspeed_warning`, and the
-routine speed-callout interval.
+(off/sparse/all), `announce_menu_position`, and the routine speed-callout
+interval. (`overspeed_warning` was on this list until 2026-08-15, when the
+setting was removed: the alert had armed at the same 5-over pace adaptive
+cruise holds, and raising the threshold to 7 left nothing to switch off.)
 
 Coverage: verbosity is consulted at **~79 sites** total (65 of them the
 `_terse_speech()` helper in driving states), against **176 `say_event` + 535
@@ -498,7 +500,7 @@ Concrete category dispositions, with transcript lines:
 | Achievements | full flavor | earcon + name only: "Bumper-to-Bumper Blues." Flavor waits in the log/menu (R9) |
 | Tolls | both lines, full accounting | pre-announce drops (AMBIENT); charged line always speaks (ROUTE, R1): "Toll, 15 dollars, carrier." |
 | First-drive walkthrough | suppressed entirely | exempt from verbosity until `tutorial_done` (R15) |
-| Speed-limit nag | full sentence | "Limit 65." (overspeed_warning toggle already exists for silencing) |
+| Speed-limit nag | full sentence | "Limit 65." (the overspeed alert is separate and no longer has a toggle; it arms at 7 over) |
 | Speed callouts, tutorial, chatter, bend confirmations | already silent | keep silent |
 
 **R5. Make `say_event` verbosity-aware instead of hand-branching 65 call

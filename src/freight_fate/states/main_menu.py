@@ -1028,18 +1028,29 @@ class SettingsState(MenuState):
         self.ctx.say("Settings saved.", interrupt=True)
 
 
-# Spoken once to a player whose settings predate this layout, the first time
-# they open the Gameplay submenu. It covers both moves in one breath: the new
-# submenu shape, and the world-data rows leaving Speech and weather. A blind
-# player cannot see a menu change shape, so the words carry the whole change,
-# and the reassurance that nothing about their actual settings moved.
-GAMEPLAY_REORG_NOTICE = (
-    "Gameplay is now a category with its own submenu: Driving assistance, "
-    "Difficulty and hours of service, World and traffic, and Controls. "
-    "Weather, traffic, and parking sources moved into World and traffic, from "
-    "what used to be Speech and weather. Nothing about your settings changed; "
-    "this is just where to find them now."
-)
+# Spoken once to a player whose settings predate a layout, the first time they
+# open the Gameplay submenu, one entry per settings layout version they missed.
+# A blind player cannot see a menu change shape, so the words carry the whole
+# change -- and the reassurance that nothing about their actual settings moved,
+# which is true by construction: every move keeps the saved key it always had.
+SETTINGS_LAYOUT_NOTICES = {
+    1: (
+        "Gameplay is now a category with its own submenu: Driving assistance, "
+        "Difficulty and hours of service, World and traffic, and Controls. "
+        "Weather, traffic, and parking sources moved into World and traffic, "
+        "from what used to be Speech and weather. Nothing about your settings "
+        "changed; this is just where to find them now."
+    ),
+    2: (
+        "Two rows moved. Speed keeper is now in Driving assistance, with the "
+        "rest of the driving help, instead of Controls. Lane and edge cue "
+        "prominence is now called Lane and edge cue volume and lives in Audio, "
+        "right under Gameplay cues volume, because that is the volume it "
+        "layers on. Your choices came with them. Overspeed warning no longer "
+        "has a row at all: it used to chime at the speed cruise itself holds, "
+        "and now it stays quiet until you are genuinely heading for a ticket."
+    ),
+}
 
 
 class GameplaySettingsState(MenuState):
@@ -1075,15 +1086,22 @@ class GameplaySettingsState(MenuState):
     def announce_entry(self) -> None:
         super().announce_entry()
         s = self.ctx.settings
-        if s.gameplay_reorg_notice_pending:
-            # Said once and only to a player whose settings moved under them.
-            # Queued behind the menu's own entry line rather than interrupting
-            # it, and cleared to disk immediately so a mid-notice quit does not
-            # replay it forever -- but a player who never reaches this screen
-            # keeps the flag, and hears it whenever they first arrive.
-            s.gameplay_reorg_notice_pending = False
+        if s.settings_layout_notice_from >= 0:
+            # Said once and only to a player whose settings moved under them,
+            # oldest layout first so two moves arrive in the order they
+            # happened. Queued behind the menu's own entry line rather than
+            # interrupting it, and cleared to disk immediately so a mid-notice
+            # quit does not replay it forever -- but a player who never reaches
+            # this screen keeps the flag, and hears it whenever they arrive.
+            owed = [
+                text
+                for version, text in sorted(SETTINGS_LAYOUT_NOTICES.items())
+                if version > s.settings_layout_notice_from
+            ]
+            s.settings_layout_notice_from = -1
             s.save()
-            self.ctx.say(GAMEPLAY_REORG_NOTICE, interrupt=False, review=False)
+            for text in owed:
+                self.ctx.say(text, interrupt=False, review=False)
 
     def _open(self, category: str) -> None:
         self.ctx.push_state(SettingsCategoryState(self.ctx, category))
@@ -1135,7 +1153,7 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Driving assistance preset: {self._assist_preset_label()}",
                     lambda: self._cycle_assist_preset(1),
-                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist and sets lane keeping to full, so the truck holds the lane, a tap changes lanes, and your destination exit is taken for you. Changing an individual assist makes this Custom. You still choose routes, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
+                    help="Realistic provides modern truck safety support. Balanced adds partial lane keeping, a firmer hand on descents, and stopping at your destination. All assists enables every available driving assist and sets lane keeping to full, so the truck holds the lane, a tap changes lanes, and your destination exit is taken for you. Changing an individual assist makes this Custom. You still choose routes, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
                 )
             ]
             items.extend(
@@ -1174,20 +1192,10 @@ class SettingsCategoryState(MenuState):
                     "partial, All assists to full.",
                 )
             )
-            items.append(
-                MenuItem(
-                    lambda: f"Lane and edge cue prominence: {s.lane_cue_loudness}",
-                    lambda: self._cycle_cue_loudness(1),
-                    help="How much the road cues stand out when you leave your "
-                    "line: the rumble-strip and shoulder textures, the lane "
-                    "locator you turn on with I while driving, and the warning "
-                    "bars before a hairpin all follow this. It is not a separate "
-                    "volume; it layers on top of the Gameplay cues volume in "
-                    "Audio settings. Subtle keeps these cues under the engine, "
-                    "standard matches it, prominent cuts through for players who "
-                    "want no doubt. Presets never change it.",
-                )
-            )
+            # Lane and edge cue volume moved to Audio, next to the Gameplay
+            # cues volume it scales. It is a volume, and a second volume
+            # control hiding in the assists list is how it came to be a row
+            # nobody could explain.
             items.append(MenuItem("Back", self.go_back))
             return items
         if self.category == "difficulty":
@@ -1209,16 +1217,12 @@ class SettingsCategoryState(MenuState):
                     "makes road hazards rare, so you can focus on "
                     "driver responsibility: hours, fueling, and repairs.",
                 ),
-                MenuItem(
-                    lambda: f"Overspeed warning: {s.overspeed_warning}",
-                    lambda: self._toggle_overspeed_warning(1),
-                    help="A dash chime and a spoken heads-up when you run over "
-                    "the posted limit, dinging faster the further over you go, "
-                    "like a carrier-set overspeed alert in a real company "
-                    "truck. Urgent only stays quiet until you are far past "
-                    "the limit, for drivers who speed on purpose but still "
-                    "want the runaway alarm.",
-                ),
+                # The overspeed warning no longer has a row. It armed at the
+                # same 5-over pace predictive cruise itself holds, so it
+                # chimed at drivers for a speed the truck picked, and the
+                # setting existed to switch that off. It now arms above
+                # cruise's pace and below the enforcement leeway, which
+                # leaves nothing worth turning off.
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "world":
@@ -1299,16 +1303,10 @@ class SettingsCategoryState(MenuState):
                     "braking, the rumble strip, and road seams. Has no effect "
                     "without a controller connected.",
                 ),
-                MenuItem(
-                    lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
-                    lambda: self._toggle_speed_keeper(1),
-                    help="In low-speed zones where adaptive cruise is unavailable, "
-                    "such as facility roads, gates, and construction zones, pressing "
-                    "K holds your current speed so the accelerator does not need to "
-                    "stay held, then switches back to adaptive cruise on open roads. "
-                    "The keeper eases off early for the next turn or the next lower "
-                    "limit. Braking cancels the whole session.",
-                ),
+                # The speed keeper moved to Driving assistance: it holds a speed
+                # for you, which is what every other row on that screen does.
+                # Controls is the keyboard, the controller, and the units the
+                # numbers arrive in.
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "audio":
@@ -1322,6 +1320,19 @@ class SettingsCategoryState(MenuState):
                     lambda: f"Gameplay cues volume: {round(s.sfx_volume * 100)} percent",
                     lambda: self._volume("sfx_volume", 0.1),
                     help="Horn, alerts, road, facility, and gameplay cue sounds.",
+                ),
+                MenuItem(
+                    lambda: f"Lane and edge cue volume: {self._cue_loudness_label()}",
+                    lambda: self._cycle_cue_loudness(1),
+                    help="How loud the road cues are when you leave your line, "
+                    "next to everything else: the rumble-strip and shoulder "
+                    "textures, the lane locator you turn on with I while "
+                    "driving, and the warning bars before a hairpin. It rides "
+                    "on the Gameplay cues volume above rather than replacing "
+                    "it, so this row moves those cues alone. Quieter keeps "
+                    "them under the engine, standard matches it, and louder "
+                    "cuts through for drivers who want no doubt about which "
+                    "edge they are on.",
                 ),
                 MenuItem(
                     lambda: f"Weather sounds volume: {round(s.weather_volume * 100)} percent",
@@ -1444,7 +1455,6 @@ class SettingsCategoryState(MenuState):
                 "difficulty": [
                     self._cycle_pace,
                     self._cycle_hos,
-                    self._toggle_overspeed_warning,
                 ],
                 "world": [
                     self._toggle_real_weather,
@@ -1459,7 +1469,6 @@ class SettingsCategoryState(MenuState):
                     self._cycle_automatic_direction_changes,
                     self._toggle_controller,
                     self._toggle_haptics,
-                    self._toggle_speed_keeper,
                 ],
                 "assistance": [
                     self._cycle_assist_preset,
@@ -1467,15 +1476,15 @@ class SettingsCategoryState(MenuState):
                         (lambda d, field=field: self._toggle_driving_assist(field, d))
                         for field, _, _ in self._driving_assist_specs()
                     ],
-                    # The last two rows of this category were left out of the
-                    # arrow-key path, so Left and Right did nothing on them
+                    # The last row of this category was left out of the
+                    # arrow-key path, so Left and Right did nothing on it
                     # while every other row answered.
                     self._cycle_lane_keeping,
-                    self._cycle_cue_loudness,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
                     lambda d: self._volume("sfx_volume", 0.1 * d),
+                    self._cycle_cue_loudness,
                     lambda d: self._volume("weather_volume", 0.1 * d),
                     lambda d: self._volume("engine_volume", 0.1 * d),
                     self._toggle_engine_voice,
@@ -1629,10 +1638,15 @@ class SettingsCategoryState(MenuState):
                 "Stop-and-go assistance",
                 "Adaptive cruise can slow behind modeled traffic and resume while it remains safe.",
             ),
+            # Nothing in the driving code reads this yet, and the row used to
+            # promise steering help that never arrived. It stays as the slot
+            # the help will land in, and says plainly that it is not doing
+            # anything today -- a blind driver cannot see that the wheel is
+            # unchanged, so the row has to tell them.
             (
                 "lane_centering_assist",
                 "Lane centering assistance",
-                "Adds light steering help toward the lane center; lane warnings remain separate.",
+                "Reserved for steering help toward the lane center, which the truck does not do yet: leaving this on or off makes no difference to how it steers today. Lane keeping is the row that decides how much of the lane work is yours, and Lane-departure warning is the one that speaks when you drift.",
             ),
             (
                 "descent_speed_control",
@@ -1682,6 +1696,15 @@ class SettingsCategoryState(MenuState):
                 "curve_callouts",
                 "Curve callouts",
                 "A co-driver reads the road: bends that demand slowing are called before they arrive, like Sharp left, half a mile, advise 35. Bends you are already slow enough for stay silent. The U readout lists the next few either way. Presets never change this.",
+            ),
+            # The speed keeper holds a speed for you, so it belongs with the
+            # rest of the driving help rather than in Controls, where it sat
+            # among the keyboard, controller and units rows. Like the other
+            # input-accessibility aids above it, presets never touch it.
+            (
+                "speed_keeper",
+                "Speed keeper",
+                "In low-speed zones where adaptive cruise is unavailable, such as facility roads, gates, and construction zones, pressing K holds your current speed so the accelerator does not need to stay held, then switches back to adaptive cruise on open roads. The keeper eases off early for the next turn or the next lower limit. Braking cancels the whole session. Presets never change this.",
             ),
         )
 
@@ -1759,6 +1782,7 @@ class SettingsCategoryState(MenuState):
             "curve_callouts",
             "predictive_cruise",
             "selected_stop_assist",
+            "speed_keeper",
         ):
             # Input-accessibility aids and information layers, not realism
             # choices: they live outside the presets, so toggling one never
@@ -1823,15 +1847,6 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_transmission(self, _d: int) -> None:
         self.ctx.settings.automatic_transmission = not self.ctx.settings.automatic_transmission
-        self._announce()
-
-    def _toggle_overspeed_warning(self, d: int) -> None:
-        modes = ["on", "urgent only", "off"]
-        try:
-            i = modes.index(self.ctx.settings.overspeed_warning)
-        except ValueError:
-            i = 0
-        self.ctx.settings.overspeed_warning = modes[(i + d) % len(modes)]
         self._announce()
 
     def _cycle_automatic_direction_changes(self, d: int) -> None:
@@ -1905,6 +1920,19 @@ class SettingsCategoryState(MenuState):
             "Getting caught speeding is exactly as likely as before."
         )
 
+    def _cue_loudness_label(self) -> str:
+        """The spoken value, in the words a volume row uses.
+
+        The saved values are unchanged -- "subtle", "standard", "prominent" --
+        so nobody's choice resets. What changes is that the row now says
+        quieter or louder, which is what a player is actually choosing
+        between. "Prominence" described the row to whoever wrote it, not to
+        whoever hears it.
+        """
+        return {"subtle": "quieter", "standard": "standard", "prominent": "louder"}.get(
+            self.ctx.settings.lane_cue_loudness, "standard"
+        )
+
     def _cycle_cue_loudness(self, d: int) -> None:
         levels = ["subtle", "standard", "prominent"]
         try:
@@ -1924,11 +1952,6 @@ class SettingsCategoryState(MenuState):
         # Lane keeping is a preset field, so a hand-picked value is answered
         # by the preset row the same way any other assist is.
         self.ctx.settings.refresh_driving_assistance_preset()
-        self._announce()
-
-    def _toggle_speed_keeper(self, _d: int = 1) -> None:
-        """Toggle the speed keeper setting."""
-        self.ctx.settings.speed_keeper = not self.ctx.settings.speed_keeper
         self._announce()
 
     def _toggle_engine_voice(self, _d: int = 1) -> None:
