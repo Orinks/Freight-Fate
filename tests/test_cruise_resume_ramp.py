@@ -409,22 +409,41 @@ def test_the_exit_approach_runs_on_the_real_clock(monkeypatch):
 
 def test_the_truck_still_makes_the_ramp_at_every_pacing(monkeypatch):
     """The constraint the glide must never trade away: whatever the pacing, the
-    truck arrives at the gore slow enough to take the exit."""
+    truck arrives at the gore slow enough to take the exit -- and gets there.
+
+    Exit speed assistance used to brake to ramp speed and then hand back an
+    empty pedal, so with automatic speed control paused behind it nothing was
+    driving and the truck coasted to a dead STOP in the through lane a quarter
+    mile short of its own exit. Real-time pacing was the worst case, because
+    the coast had the most seconds to finish. A truck stopped in a live lane
+    short of its exit is worse than any speed it could arrive at, so that is
+    pinned here first.
+    """
     from freight_fate.app import App
     from freight_fate.states.driving import RAMP_MAX_MPH
 
     for time_scale in (1.0, 4.0, 20.0, 40.0):
         app = App()
+        # The exit lane is not what this test is about; full lane keeping pins
+        # those mechanics so the drive turns only on speed.
+        app.ctx.settings.lane_keeping = "full"
         try:
             driving, stop = _armed_exit_at(app, monkeypatch, ahead_mi=4.5, time_scale=time_scale)
             entry = None
+            stopped_at = None
             for _ in range(60 * 60 * 20):
                 driving.update(1 / 60)
+                if stopped_at is None and driving.truck.speed_mph <= 0.05:
+                    stopped_at = stop.at_mi - driving.trip.position_mi
                 if driving._ramp_mi is not None:
                     entry = driving.truck.speed_mph
                     break
                 if driving.trip.position_mi > stop.at_mi + 0.5:
                     break
+            assert stopped_at is None, (
+                f"came to a dead stop {stopped_at:.2f} miles short of the gore "
+                f"at {time_scale}x, in the through lane"
+            )
             assert entry is not None, f"never took the exit at {time_scale}x"
             assert entry <= RAMP_MAX_MPH, (time_scale, entry)
         finally:

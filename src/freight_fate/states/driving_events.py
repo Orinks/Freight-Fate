@@ -1285,6 +1285,14 @@ class DrivingEventMixin:
             # arrival; every other exit is a transit stop.
             self._pause_speed_control(resume_when_rolling=stop.type != "delivery_destination")
         if self.truck.speed_mph <= RAMP_MAX_MPH:
+            # Down to ramp speed. HOLD it to the gore rather than handing back
+            # an empty pedal: the assist took the throttle to slow the truck,
+            # and with automatic speed control paused behind it nothing else
+            # is driving. Left alone the truck coasted the rest of the
+            # approach down to a dead stop in the through lane, a quarter mile
+            # short of its own exit -- worst at real-time pacing, where the
+            # coast has the most seconds to finish.
+            self._hold_exit_approach_speed()
             return
         self.truck.brake = max(self.truck.brake, 0.35)
         if self._assist_exit_slowing_said:
@@ -1300,6 +1308,26 @@ class DrivingEventMixin:
         # Never "confirm": there is no confirm action, and an X pressed to
         # obey it cancels the signal instead.
         self.ctx.say_event(f"Exit speed assistance slowing. {lane_text}", interrupt=False)
+
+    def _hold_exit_approach_speed(self) -> None:
+        """Keep the truck at ramp speed on an approach the assist is running.
+
+        A light, bounded throttle and never a brake. It stands down the moment
+        the driver is on a pedal of their own, because slowing further for
+        their own gore is their call; the driver can always ask for more than
+        this, and the assist's own brake above ramp speed caps the other end.
+        Says nothing: the slowing line already named who has the pedal, and
+        holding the speed it announced is the same assist finishing its job.
+        """
+        t = self.truck
+        if not t.engine_on or t.stalled or t.air_brakes_holding:
+            return
+        if t.brake > 0.01 or t.emergency_brake or t.transmission.in_reverse:
+            return
+        short_by = RAMP_CRUISE_TARGET_MPH - t.speed_mph
+        if short_by <= 0.0:
+            return  # coasting between the target and the ramp limit is fine
+        t.throttle = max(t.throttle, min(EXIT_HOLD_MAX_THROTTLE, short_by / 10.0))
 
     def _active_exit_pressure(self, stop) -> object | None:
         sample_mi = min(self.trip.position_mi, stop.at_mi)

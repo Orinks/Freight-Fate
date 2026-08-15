@@ -256,12 +256,15 @@ def _ramp_speed_control_handback():
         # 1. Far from the gore the signal itself must not slow the truck: the
         #    approach cap has to stay clear of the set speed.
         early_shed_mi = None
+        stopped_short_mi = None
         entry_mph = None
         for _ in range(60000):
             ahead = exit_stop.at_mi - d.trip.position_mi
             cap = d._ramp_approach_cap_mph()
             if early_shed_mi is None and ahead > 1.0 and cap is not None and cap < cruise - 0.01:
                 early_shed_mi = ahead
+            if stopped_short_mi is None and ahead > 0.0 and d.truck.speed_mph <= 0.05:
+                stopped_short_mi = ahead
             if d._ramp_mi is not None:
                 entry_mph = d.truck.speed_mph
                 break
@@ -269,6 +272,11 @@ def _ramp_speed_control_handback():
                 break
             d.update(DT)
             rig.check_invariants()
+        if stopped_short_mi is not None:
+            findings.append(
+                f"came to a dead stop {stopped_short_mi:.2f} miles short of the gore, in the "
+                "through lane: the approach slowed the truck and then nothing drove it"
+            )
         if early_shed_mi is not None:
             findings.append(
                 f"the exit cap fell under the {cruise:.0f} mph set speed "

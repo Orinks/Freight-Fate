@@ -240,6 +240,10 @@ RAMP_CREEP_MI = 0.04  # within ~200 ft of the bar, "creep"; farther is a drive
 # destination approach must never cap below the speed the ramp needs.
 RAMP_MAX_MPH = TRIP_RAMP_MAX_MPH
 RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
+# Ceiling on the light throttle exit speed assistance uses to HOLD that target
+# once it has slowed the truck to it. Deliberately small: the assist is keeping
+# a truck rolling to its own gore, not driving it.
+EXIT_HOLD_MAX_THROTTLE = 0.45
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 # Ramp terminals: where the off-ramp meets the surface road there is usually
 # a light or a stop sign (diamond interchanges), occasionally free flow

@@ -456,6 +456,13 @@
   do, so the last mile gives you real seconds to work with, and pacing eases
   back up afterwards instead of jumping.
 
+- **Exit speed assistance now carries you to the exit, not just down to
+  ramp speed.** It used to slow the truck for the ramp and then let go of the
+  pedal entirely, so if you were not driving yourself the truck coasted the
+  rest of the way and could roll to a dead stop in the lane, short of your
+  own exit. It now holds ramp speed to the gore. Your own pedals still come
+  first: brake and it stands aside.
+
 - **Your own playlists work again, and they can now carry internet stations
   as well as music files.** A playlist exported from an internet radio app
   is nothing but station addresses, and every one of those was thrown away,

@@ -2528,8 +2528,15 @@ def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
 
 def test_signaling_for_an_exit_eases_cruise_to_ramp_speed(monkeypatch):
     """Pressing X is the commitment to leave the highway, so adaptive cruise
-    has to come down to ramp speed with it -- for a truck stop exit just as
-    much as for the destination, and it has to let go again on a cancel."""
+    takes a ramp target with it -- for a truck stop exit just as much as for
+    the destination, and it lets go again on a cancel.
+
+    The target is where the truck has to BE at the gore, not where it goes the
+    moment the signal is on. Signalling used to start the shed immediately, so
+    a driver who signalled early watched automatic control slow with the exit
+    nowhere in sight (Shane, 2026-08-15). Three miles out nothing may be
+    shedding; the glide bites where a driver would really lift.
+    """
     from freight_fate.app import App
     from freight_fate.states.driving_core import RoadStop
 
@@ -2540,23 +2547,43 @@ def test_signaling_for_an_exit_eases_cruise_to_ramp_speed(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         open_limits(driving)
+        driving.trip.grade_at = lambda mile: 0.0
+        driving.truck.grade = 0.0
         stop = RoadStop("Petro Knoxville", 40.0, "truck_stop", ("fuel", "sleep"), exit_label="")
         monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
         driving.trip.position_mi = 37.0
         driving.truck.engine_on = True
         driving.truck.velocity_mps = 65.0 / 2.23694
+        driving.truck.throttle = 0.4  # holding the road, the way a drive arrives here
         driving._engage_cruise(65.0)
         said.clear()
 
         driving._take_exit()
 
+        assert driving._exit_stop is stop
         assert driving._cruise_exit_mph == 40.0
         assert "Adaptive cruise will ease to 40 miles per hour for the ramp" in said[-1]
-        # And cruise actually acts on it: throttle off, brakes on.
+
+        # Three miles out the ramp target is a plan, not a brake: the cap is
+        # nowhere near the set speed, and cruise is still holding the road.
+        assert driving._ramp_approach_cap_mph() > driving._cruise_mph
+        driving.truck.brake = 0.0
+        for _ in range(4):
+            driving._update_cruise(0.5, braking=False, accelerating=False, clutch_disengaged=False)
+            assert driving.truck.brake == 0.0  # nothing sheds this far out
+        assert driving._cruise_mph == 65.0  # and the set speed is untouched
+
+        # Close to the gore it bites, and cruise acts on it: throttle off,
+        # brakes on.
+        driving.trip.position_mi = stop.at_mi - 0.25
+        assert driving._ramp_approach_cap_mph() < driving._cruise_mph
         driving._update_cruise(0.5, braking=False, accelerating=False, clutch_disengaged=False)
         assert driving.truck.throttle == 0.0
         assert driving.truck.brake > 0.0
 
+        # Back up the road to cancel: inside the commit window X no longer
+        # means "never mind", and the cancel is what is under test here.
+        driving.trip.position_mi = 37.0
         driving._take_exit()  # X again cancels
         assert driving._cruise_exit_mph is None
     finally:
