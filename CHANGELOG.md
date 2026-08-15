@@ -474,16 +474,6 @@
   say why or what to do. It now tells you the server has not caught up, that
   your career on this computer is safe, and that backups resume on their own
   once it has.
-- **A new build no longer connects to orinks.net as a brand new computer.**
-  Each copy of the game kept its own note of which driver it was signed in
-  as, so unzipping a new build started out disconnected -- and every time you
-  connected it again, your account gained another computer. Players who keep
-  up with test builds filled the computer list with the same machine over and
-  over, and once it was full, orinks.net refused to connect them at all. A
-  freshly unzipped copy now recognises the account this computer is already
-  signed in as, so there is nothing to reconnect and nothing new on the list.
-  If your list is already full of old entries, sign out all computers on the
-  orinks.net setup page once and connect this one again.
 - **The truck no longer builds speed for a hill the grade key says is not
   there.** Automatic speed control plans for gentler grades than the ones the
   game calls steep, so you could hear "building speed for the grade ahead" and

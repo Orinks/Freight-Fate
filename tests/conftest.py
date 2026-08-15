@@ -134,10 +134,6 @@ def isolated_keyring(monkeypatch):
     # Resolved tokens are cached for the life of the process, which outlives
     # any one test's data directory.
     monkeypatch.setattr(online_presence.OnlineIdentity, "_token_cache", {})
-    # So is "this computer has no sign-in in the store": it is asked once per
-    # process, so without this an earlier test's answer would carry into a
-    # later test's fresh store.
-    monkeypatch.setattr(online_presence.OnlineIdentity, "_machine_lookup_done", False)
     yield
 
 
