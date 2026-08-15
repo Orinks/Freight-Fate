@@ -1630,6 +1630,52 @@ def test_background_refusal_speaks_again_when_the_cause_changes():
     assert "flagged it for review" in lines[0]
 
 
+def test_a_background_backup_says_it_was_backed_up():
+    # The ordinary case, and the one that used to say nothing: a save at a
+    # rest stop uploads on the background queue, and a driver who cannot see
+    # the status line heard the same silence whether it reached the server or
+    # never left the machine (owner, 2026-08-15).
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert service.take_announcements() == ["Road Star is backed up."]
+
+
+def test_a_manual_backup_stays_silent_so_the_menu_watch_can_speak():
+    # states/city.py waits on the result and says "Backed up to the cloud."
+    # itself; a second line from the queue would say it twice for one save.
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    token = service.backup_now(profile)
+    assert service.outcome_for("Road Star", token) == "accepted"
+    assert service.take_announcements() == []
+
+
+def test_nothing_to_send_stays_silent():
+    # The cloud already holds this exact save, so no upload ran. Claiming a
+    # fresh backup would be untrue, and at a parked rest stop it would repeat
+    # on every autosave.
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert service.take_announcements() == ["Road Star is backed up."]
+
+    service.queue_backup(profile)  # unchanged since the accepted revision
+    drain(service, clock)
+    assert service.take_announcements() == []
+
+
 def test_success_after_a_spoken_refusal_announces_recovery_and_rearms():
     transport = FakeTransport(error=rejected_error("impossible_money"))
     clock = Clock()
@@ -1646,11 +1692,12 @@ def test_success_after_a_spoken_refusal_announces_recovery_and_rearms():
     drain(service, clock)
     assert service.take_announcements() == ["Road Star is backed up again."]
 
-    # A clean backup with nothing to recover from stays silent...
+    # A clean backup with nothing to recover from says the plain line rather
+    # than the "again" one: nothing was wrong, so there is nothing to be over.
     profile.money += 1.0
     service.queue_backup(profile)
     drain(service, clock)
-    assert service.take_announcements() == []
+    assert service.take_announcements() == ["Road Star is backed up."]
 
     # ...and the dedupe is re-armed: the same refusal speaks once more.
     transport.error = rejected_error("impossible_money")
@@ -1779,12 +1826,15 @@ def test_auth_announcement_is_one_per_outage_not_per_career():
     drain(service, clock)
     assert service.take_announcements() == []
 
-    # A successful upload proves the sign-in works again -- silently:
-    # neither career's slot spoke a refusal, so nothing recovers aloud.
+    # A successful upload proves the sign-in works again. It says the plain
+    # backup line, not a recovery one: the refusal was announced against this
+    # computer's sign-in rather than either career, so no slot has anything to
+    # be over -- but the upload did happen, and every accepted background
+    # backup says so.
     transport.error = None
     service.queue_backup(Profile(name="Night Owl"))
     drain(service, clock)
-    assert service.take_announcements() == []
+    assert service.take_announcements() == ["Night Owl is backed up."]
 
     # ...and a fresh outage after that speaks afresh.
     transport.error = auth_error(401)
