@@ -156,6 +156,20 @@ def _http_json(
 # every already-stored token, which then falls back to a re-paste.
 _TOKEN_SERVICE = "Freight Fate driver token"
 
+# The token above is filed under the Driver ID, and the Driver ID lives in
+# online.json inside the save folder -- which is per-copy-of-the-game, on
+# purpose (see _portable_migration_candidates in models/profile.py: one
+# extracted copy must never adopt another's saves). The account is not
+# per-copy, though: it belongs to the computer. So the ID is filed here too,
+# and a copy that has no online.json of its own asks the machine who it is
+# rather than making the player connect the same PC over again -- which is
+# what filled orinks.net accounts with a computer list that was one computer,
+# once per build the player unzipped (armstrong445, 2026-08-15).
+#
+# Read as a sentence in Credential Manager, same as the service above.
+_ID_SERVICE = "Freight Fate driver ID"
+_ID_USERNAME = "this computer"
+
 # The keyring backend each platform's build has to be able to reach. Naming
 # them is the whole point of the check below: keyring resolves backends
 # through entry points, which a compiled build drops unless both the modules
@@ -270,6 +284,13 @@ class OnlineIdentity:
     # already happened, so it is not retried on every frame either.
     _token_cache: ClassVar[dict[str, str]] = {}
 
+    # Whether this process has already asked the secret store who this
+    # computer is. Without it, a machine that never connected would pay a
+    # store lookup on every one of those menu-label load() calls, several
+    # times a frame, forever -- the miss is the common case, so it is the one
+    # that has to be cheap.
+    _machine_lookup_done: ClassVar[bool] = False
+
     @staticmethod
     def path():
         from .models.profile import data_dir
@@ -293,6 +314,34 @@ class OnlineIdentity:
             log.debug("no usable secret store for the driver token", exc_info=True)
             return False
         return True
+
+    @staticmethod
+    def _store_driver_id(driver_id: str) -> None:
+        """Record which driver this computer is signed in as.
+
+        Best effort by design: this is a convenience pointer, never the
+        identity itself, so a store that refuses it costs the player nothing
+        beyond connecting a new copy of the game by hand.
+        """
+        kr = _keyring()
+        if kr is None:
+            return
+        try:
+            kr.set_password(_ID_SERVICE, _ID_USERNAME, driver_id)
+        except Exception:
+            log.debug("could not record the Driver ID for this computer", exc_info=True)
+
+    @staticmethod
+    def _read_stored_driver_id() -> str | None:
+        kr = _keyring()
+        if kr is None:
+            return None
+        try:
+            driver_id = kr.get_password(_ID_SERVICE, _ID_USERNAME)
+        except Exception:
+            log.debug("could not read this computer's Driver ID", exc_info=True)
+            return None
+        return driver_id if isinstance(driver_id, str) and driver_id else None
 
     @staticmethod
     def _read_stored_token(driver_id: str) -> str | None:
@@ -353,6 +402,10 @@ class OnlineIdentity:
         if self._store_token(self.driver_id, self.driver_token):
             self._write_identity_file(include_token=False)
             self._remove_token_file()
+            # Only on this branch: the pointer is worth nothing unless the
+            # token it points at is in the same store. A machine with no
+            # store keeps both halves in the save folder, together.
+            self._store_driver_id(self.driver_id)
         else:
             if os.name == "nt":
                 raise OSError("plaintext credential fallback is disabled on Windows")
@@ -377,6 +430,60 @@ class OnlineIdentity:
             log.debug("could not move the driver token into the secret store", exc_info=True)
 
     @classmethod
+    def _load_from_this_computer(cls) -> OnlineIdentity | None:
+        """The account this computer is signed in as, when this copy of the
+        game has no identity file of its own.
+
+        A newly extracted copy starts with an empty save folder, and before
+        this it had no way to know the machine was already connected: it made
+        the player activate again, and every one of those activations minted
+        another computer on the account. The secret store is per Windows (or
+        macOS, or desktop) user, not per folder, so it is the right place to
+        answer "who is this computer".
+
+        Never consulted when an identity file exists -- that file is this
+        copy's own answer and always wins, so two copies deliberately
+        connected to two different accounts stay that way.
+        """
+        if cls._machine_lookup_done:
+            return None
+        driver_id = cls._read_stored_driver_id()
+        driver_token = (
+            cls._token_cache.get(driver_id) or cls._read_stored_token(driver_id)
+            if driver_id is not None
+            else None
+        )
+        if (
+            driver_id is None
+            or not isinstance(driver_token, str)
+            or len(driver_id) < 8
+            or len(driver_token) < 24
+        ):
+            # Nothing usable in the store: the flag is set here and not on
+            # the success path below, so a recovery whose file write failed
+            # is retried next call rather than flipping the game back to
+            # "not connected" for the rest of the session.
+            cls._machine_lookup_done = True
+            return None
+        identity = cls(driver_id=driver_id, driver_token=driver_token)
+        cls._token_cache[driver_id] = driver_token
+        try:
+            # Write this copy's own online.json, so the recovery happens once
+            # rather than on every launch, and so the copy reads the same as
+            # one that was activated directly.
+            identity._write_identity_file(include_token=False)
+        except OSError:
+            # Nothing is lost: the identity above is still returned and the
+            # store still knows it next launch.
+            log.debug("could not write the recovered identity file", exc_info=True)
+        log.info(
+            "This copy had no identity file; adopted the orinks.net sign-in "
+            "this computer already has (driver %s)",
+            driver_id,
+        )
+        return identity
+
+    @classmethod
     def load(cls) -> OnlineIdentity | None:
         try:
             with open(cls.path(), encoding="utf-8") as f:
@@ -384,7 +491,7 @@ class OnlineIdentity:
             driver_id = data["driver_id"]
             legacy_token = data.get("driver_token")
         except (FileNotFoundError, KeyError, json.JSONDecodeError, OSError, TypeError):
-            return None
+            return cls._load_from_this_computer()
         if not isinstance(driver_id, str):
             return None
 

@@ -438,6 +438,16 @@
 
 ### Fixed
 
+- **A new build no longer connects to orinks.net as a brand new computer.**
+  Each copy of the game kept its own note of which driver it was signed in
+  as, so unzipping a new build started out disconnected -- and every time you
+  connected it again, your account gained another computer. Players who keep
+  up with test builds filled the computer list with the same machine over and
+  over, and once it was full, orinks.net refused to connect them at all. A
+  freshly unzipped copy now recognises the account this computer is already
+  signed in as, so there is nothing to reconnect and nothing new on the list.
+  If your list is already full of old entries, sign out all computers on the
+  orinks.net setup page once and connect this one again.
 - **A one-lane road no longer calls itself the right lane.** Pressing L on a
   road with only one lane answered "In the right lane", which invites you to
   wonder what is in the left one when there is no left one. It now says "In
