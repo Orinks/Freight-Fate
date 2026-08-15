@@ -414,18 +414,28 @@ def build_driving(ctx, hit: Hit, args):
     # refuses anything else as an unknown city. Left as the display name, every
     # playtest quietly threw a rejected upload at the server and told the
     # driver its backup was not accepted (2026-08-15).
-    ctx.profile = Profile(name="Playtest", current_city=ctx.world.resolve_city_key(hit.origin))
+    origin_key = ctx.world.resolve_city_key(hit.origin)
+    destination_key = ctx.world.resolve_city_key(hit.destination)
+    ctx.profile = Profile(name="Playtest", current_city=origin_key)
     route = ctx.world.supported_route(hit.origin, hit.destination)
+    # The job's endpoints are keys for the same reason. Delivering runs
+    # ``profile.current_city = job.destination``, so a job built from the route
+    # sets' display names puts the label straight back after the first drop --
+    # which is why fixing only the line above was not enough: a playtest career
+    # that actually completed a run still carried "Grand Junction". The spoken
+    # fields keep the display names, so nothing reads a slug aloud.
     job = Job(
         CARGO_CATALOG[args.cargo_type],
         args.cargo,
-        hit.origin,
+        origin_key,
         "company yard",
-        hit.destination,
+        destination_key,
         route.miles,
         2500.0,
         14.0,
         destination_location=f"{hit.destination} freight market",
+        origin_spoken=ctx.world.spoken_city(origin_key),
+        destination_spoken=ctx.world.spoken_city(destination_key),
     )
     driving = DrivingState(
         ctx, job, route, phase="delivery", start_hour=args.hour if args.hour is not None else 9.0
