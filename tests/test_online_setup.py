@@ -880,3 +880,24 @@ def test_without_autostart_entry_still_speaks_the_menu_intro():
     said = [line for line in spoken if isinstance(line, str)]
     assert any("orinks.net account setup" in line for line in said)
     assert "Contacting orinks.net for an activation code." not in said
+
+
+def test_auth_help_names_the_item_this_menu_really_offers():
+    """The reconnect advice has to survive a rename of the thing it names.
+
+    ``cloud_saves.AUTH_HELP`` is spoken when orinks.net stops accepting this
+    computer's sign-in, and its whole job is to walk the player to the
+    control that fixes it. It used to send them to an Add computer button
+    and a paste field, both of which went away with the clipboard setup
+    (armstrong445, 2026-08-15: a capped account was told to use a flow that
+    no longer exists). Reading the label off the live menu means the next
+    rename fails here instead of in a player's ears.
+    """
+    from freight_fate.cloud_saves import AUTH_HELP
+
+    state = online_states.OnlineSetupState(_make_ctx())
+    idle_label = state._setup_label()
+
+    assert idle_label in AUTH_HELP
+    assert "Add computer" not in AUTH_HELP
+    assert "paste" not in AUTH_HELP.lower()

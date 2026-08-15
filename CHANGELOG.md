@@ -438,6 +438,12 @@
 
 ### Fixed
 
+- **When orinks.net stops accepting this computer, the game now points you at
+  a setup that still exists.** The spoken advice described the old
+  copy-and-paste connection: an Add computer button on the website and a
+  token to paste back into the game. Neither is there any more. It now walks
+  you to the Online menu item that asks orinks.net for a fresh activation
+  code, the same way connecting a computer works everywhere else.
 - **A one-lane road no longer calls itself the right lane.** Pressing L on a
   road with only one lane answered "In the right lane", which invites you to
   wonder what is in the left one when there is no left one. It now says "In
