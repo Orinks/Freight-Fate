@@ -1219,6 +1219,23 @@ onto exit signalling.
       scrupulous-ferret-428 on every push, proven in build logs. All
       stuck testers (trssharp, munchkinbear x3 careers, jessie, sarah)
       confirmed backing up the same night.
+- [x] **A new copy of the game keeps this computer's sign-in
+      (armstrong445, 2026-08-15).** He could not connect the latest build:
+      orinks.net refused the activation because the account was at the
+      ten-computer cap, and the refusal told him to "remove one on the
+      setup page" -- a page whose buttons say Sign out and have never said
+      Remove. Two fixes. The site's message now names signing out, says
+      why the list fills up with the same PC, and links to the page
+      (orinks-net dev, 5f5df49). The game no longer keeps the Driver ID
+      only in the per-copy save folder: it goes into the platform secret
+      store beside the token, so a freshly extracted build adopts the
+      sign-in this computer already has instead of activating as a
+      stranger and minting another computer. A copy's own identity file
+      still wins when it has one, so two copies deliberately connected to
+      two accounts stay that way. NOT retroactive: an account that
+      already collected ghost rows (any tester who unzips a build a week)
+      needs one pass of Sign out all computers on the setup page and a
+      single re-activation.
 - [ ] **PRE-RELEASE MUST-DO: point the game back at production.** The
       1.9 test line defaults its online services to the staged
       deployment (dev.orinks.net, the orinks-net dev branch on its own

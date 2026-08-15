@@ -438,6 +438,16 @@
 
 ### Fixed
 
+- **A new build no longer connects to orinks.net as a brand new computer.**
+  Each copy of the game kept its own note of which driver it was signed in
+  as, so unzipping a new build started out disconnected -- and every time you
+  connected it again, your account gained another computer. Players who keep
+  up with test builds filled the computer list with the same machine over and
+  over, and once it was full, orinks.net refused to connect them at all. A
+  freshly unzipped copy now recognises the account this computer is already
+  signed in as, so there is nothing to reconnect and nothing new on the list.
+  If your list is already full of old entries, sign out all computers on the
+  orinks.net setup page once and connect this one again.
 - **When orinks.net stops accepting this computer, the game now points you at
   a setup that still exists.** The spoken advice described the old
   copy-and-paste connection: an Add computer button on the website and a
