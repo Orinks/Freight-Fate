@@ -1500,6 +1500,90 @@ entry, which is the point.
 
 ---
 
+### Task 10: The earcon actually plays, and the red the harness exposed
+
+**Added after Task 9, on the owner's decision of 2026-08-16 ("wire the
+earcons, roadmap the rest").**
+
+**Files:**
+- Modify: `src/freight_fate/app.py` (the gate at ~216 and ~342)
+- Modify: `src/freight_fate/states/driving_enforcement.py:570-577`
+- Modify: `tests/adversarial/` (`KNOWN_OPEN`)
+- Modify: `CHANGELOG.md`, `ROADMAP.md`
+- Test: `tests/test_driving_speech_ladder.py`
+
+**Why this exists.** Task 9's measurement showed the ladder ships as two
+effective positions, and that the gate never plays a sound when it silences a
+category. `LADDER_EARCONS` is wired only into `states/learn_sounds.py:80`, for
+preview. The gate silences, logs, and returns. That leaves spec invariant 3
+unmet: "what drops out of speech lands on the earcon layer or the message
+log... this is what makes cutting legitimate rather than exclusionary." For a
+blind player, a category replaced by a learnable sound and a category deleted
+are not the same thing, and today it is the second one.
+
+- [ ] **Step 1: Play the earcon at the gate.**
+
+Where the disposition is `EARCON`, play `LADDER_EARCONS[category]` before
+returning. Where it is `SILENT`, stay silent — that distinction is the whole
+difference between the `quiet` and `urgent_only` rungs, which are currently
+identical at the voice. `SAFETY` and `MONEY` never reach this path.
+
+Write the test first, and make it assert the sound actually plays rather than
+that a map contains a key: drive a `STATUS` line at `quiet` and assert the
+audio layer was asked for the coaching/status cue; drive the same line at
+`urgent_only` and assert silence. State in your report how you know each would
+fail if the playback were removed.
+
+- [ ] **Step 2: Fix the scale-priority bug the harness exposed.**
+
+`_scale_outranks_rest_planning()` (`driving_enforcement.py:570-577`) calls
+`say_event` with no `priority=`, so it defaults to `AMBIENT` and is silently
+dropped behind a backlog. Its sibling `_weigh_station_reminder` (line 546)
+passes `priority=EventPriority.ROUTE`. Add the same. This is a real
+pre-existing bug — the "scale comes first, rest planning can wait"
+instruction never reaches the player — and it was invisible until the harness
+stopped bypassing the pacer. Add a regression test.
+
+- [ ] **Step 3: Resolve the adversarial red.**
+
+`uv run pytest tests/adversarial -m adversarial` is at 3 failed. `AGENTS.md`
+requires known-open findings to be strict xfails in `KNOWN_OPEN`, never left
+merely failing.
+
+- `scale_check_in_guidance` should pass once Step 2 lands. Confirm it does.
+- `fuel_rescue_farming` is a harness artifact: three byte-identical rescue
+  lines driven back-to-back inside the pacer's 2.5s repeat window, which a
+  real player would never hit because running dry twice takes minutes. Prefer
+  advancing the scenario's clock so it reflects real play; if that is not
+  clean, add a `KNOWN_OPEN` entry saying exactly this.
+- `settings_flips_mid_drive` is a real design gap: a `CONFIRMATION` line
+  inherits the protected hand-back meant for ROUTE/CRITICAL, so a stale,
+  already-contradicted confirmation can resurface. Add a `KNOWN_OPEN` entry
+  describing it; do not fix it here.
+
+- [ ] **Step 4: Tell the truth in the changelog, and roadmap the rest.**
+
+Update the `CHANGELOG.md` entry so it does not imply four distinct levels
+when two of the four behave identically today. Say what each rung actually
+does. Add unchecked `ROADMAP.md` bullets for: implementing
+`FIRST_OCCURRENCE` and `TRANSITIONS` so `standard` differs from `coaching`;
+the `CONFIRMATION` hand-back gap; and the sonification pass and per-minute
+cruise speech budget (principles 1 and 3) if Task 9 did not already record
+them.
+
+- [ ] **Step 5: Verify and commit.**
+
+Foreground, focused only — `test-runner` owns the full suite:
+`uv run pytest tests/test_driving_speech_ladder.py -v`, then
+`uv run pytest tests/adversarial -m adversarial`, then
+`uv run ruff check src tests tools`.
+
+Commit carries `[skip changelog]` only if the changelog edit is purely a
+correction to the entry Task 9 already added; if it materially changes what
+players are told, it is a changelog change and must not skip.
+
+---
+
 ## After the plan
 
 Hand the build to testers via the Dropbox share and the living document. Do
