@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from ..message_log import MessageCategory
+from ..speech_pacing import SpeechCategory
 from ..speech_text import SpokenMessage, cruise_curve_easing, roadside_chatter
 from ..units import spoken_feet_or_meters
 from .base import TimedMessageState
@@ -24,6 +25,36 @@ from .driving_stops import (
     bar_solid_zone_mi,
     bar_tick_range_mi,
 )
+
+# Flavor kinds the driving speech ladder deliberately does not govern. They
+# answer to the chatter switches and the place-callouts ladder instead. Kept
+# as an explicit set rather than an absence, so the "is every kind
+# classified" test can tell "decided to leave alone" from "forgot".
+_FLAVOR_EVENT_KINDS = frozenset(
+    {
+        TripEventKind.LANDMARK,
+        TripEventKind.BILLBOARD,
+        TripEventKind.CITY_REACHED,
+        TripEventKind.STATE_CROSSING,
+        TripEventKind.TIMEZONE_CROSSING,
+    }
+)
+
+_EVENT_CATEGORIES = {
+    TripEventKind.HAZARD: SpeechCategory.SAFETY,
+    TripEventKind.INSPECTION: SpeechCategory.SAFETY,
+    TripEventKind.ZONE_ENTER: SpeechCategory.NAVIGATION,
+    TripEventKind.ZONE_EXIT: SpeechCategory.NAVIGATION,
+    TripEventKind.STOP_AHEAD: SpeechCategory.NAVIGATION,
+    TripEventKind.STOP_REACHED: SpeechCategory.NAVIGATION,
+    TripEventKind.CHECKPOINT: SpeechCategory.NAVIGATION,
+    TripEventKind.GPS_CUE: SpeechCategory.NAVIGATION,
+    TripEventKind.ARRIVED: SpeechCategory.NAVIGATION,
+    TripEventKind.CURVE: SpeechCategory.NAVIGATION,
+    TripEventKind.TOLL_CHARGED: SpeechCategory.MONEY,
+    TripEventKind.WEATHER_CHANGE: SpeechCategory.STATUS,
+    TripEventKind.LANE: SpeechCategory.STATUS,
+}
 
 
 class DrivingEventMixin:
@@ -241,7 +272,7 @@ class DrivingEventMixin:
                     else f"{message} {suffix}"
                 )
             self._last_event_message = message
-            self.ctx.say_event(message, interrupt=True)
+            self.ctx.say_event(message, interrupt=True, category=self._event_category(event))
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
@@ -253,7 +284,12 @@ class DrivingEventMixin:
             # slot, where the next hazard or piece of chatter could silently
             # destroy it. (The toll-ahead heads-up stays ambient.)
             self.ctx.audio.play(sound or "ui/notify")
-            self.ctx.say_event(event.message, interrupt=False, priority=EventPriority.ROUTE)
+            self.ctx.say_event(
+                event.message,
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=self._event_category(event),
+            )
             self.ctx.award_achievement("toll_paid", event=True)
         elif kind == TripEventKind.STATE_CROSSING:
             cue = event.data.get("cue")
@@ -265,7 +301,9 @@ class DrivingEventMixin:
             if sound is not None:
                 self.ctx.audio.play(sound)
             self.ctx.say_event(
-                timezone_crossing_message(event, self._terse_speech()), interrupt=False
+                timezone_crossing_message(event, self._terse_speech()),
+                interrupt=False,
+                category=self._event_category(event),
             )
         elif kind == TripEventKind.CURVE:
             # Curve approach warnings are critical navigation cues: they
@@ -315,12 +353,14 @@ class DrivingEventMixin:
                     self.ctx.say_event(
                         cruise_curve_easing(message, self.ctx.settings.speed_text(advisory)),
                         interrupt=True,
+                        category=self._event_category(event),
                     )
                 else:
                     self._cancel_cruise()
                     self.ctx.say_event(
                         message + " Adaptive cruise off; you need manual speed control.",
                         interrupt=True,
+                        category=self._event_category(event),
                     )
             else:
                 # Interrupt, always: a pacenote queued behind landmark chatter
@@ -328,7 +368,7 @@ class DrivingEventMixin:
                 # quarter mile (owner's AZ-260 log, 2026-07-19 -- the words
                 # were honest when emitted and stale when finally spoken).
                 # Ambient lines can wait; the road cannot.
-                self.ctx.say_event(message, interrupt=True)
+                self.ctx.say_event(message, interrupt=True, category=self._event_category(event))
             # Open the re-arm window: if Ctrl silences this call before it
             # finishes, it gets one refreshed re-speak (owner worry,
             # 2026-07-20 -- his stop-speech reflex vs a safety cue).
@@ -363,7 +403,12 @@ class DrivingEventMixin:
             else:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
                     self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
-                self.ctx.say_event(event.message, interrupt=False, priority=priority)
+                self.ctx.say_event(
+                    event.message,
+                    interrupt=False,
+                    priority=priority,
+                    category=self._event_category(event),
+                )
                 # Any spoken route line pushes spaced ambient chatter back, so
                 # an informational notice never lands on top of a navigation
                 # instruction the player needs to act on.
@@ -483,6 +528,30 @@ class DrivingEventMixin:
         player still needed (speech priority research, R1)."""
         return event.kind == TripEventKind.HAZARD
 
+    @staticmethod
+    def _event_category(event) -> SpeechCategory | None:
+        """What this announcement is ABOUT, for the driving speech ladder.
+
+        Deliberately separate from :meth:`_event_priority`: urgency decides
+        how long a line waits, category decides whether the player's rung
+        speaks it at all.
+
+        ``None`` means "not the ladder's business" and the gate passes the
+        line straight through. Two different things read as None and both
+        are correct. Flavor -- billboards, landmarks, the place and border
+        callouts -- answers to the chatter switches and the place-callouts
+        ladder, and the owner set those separately (2026-08-15); a rung must
+        never be able to silence them. And a kind nobody has classified yet
+        also reads None, so the failure mode of a new event kind is a line
+        too many rather than a warning the ladder ate.
+
+        The navigation/status split is where "act-now cues only" lives: the
+        stop, exit, or turn the player must act on is NAVIGATION; the
+        weather turning and the road's general state are STATUS and fall
+        silent at the quietest rung.
+        """
+        return _EVENT_CATEGORIES.get(event.kind)
+
     def _event_priority(self, event):
         """How long this announcement is willing to wait behind other speech.
 
@@ -557,7 +626,12 @@ class DrivingEventMixin:
             message = (
                 f"{message} Speed keeper holding {self.ctx.settings.speed_text(self._keeper_mph)}."
             )
-            self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
+            self.ctx.say_event(
+                message,
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=self._event_category(event),
+            )
             return
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify")
@@ -566,7 +640,12 @@ class DrivingEventMixin:
         # without an interrupt that could cut a real warning mid-word.
         if not self._terse_speech():
             message = f"{message} Adaptive cruise disabled; take manual speed control."
-        self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
+        self.ctx.say_event(
+            message,
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=self._event_category(event),
+        )
 
     def _hooked_trailer_defect(self) -> str | None:
         """What an inspector would write up on the trailer, if anything."""
@@ -642,7 +721,12 @@ class DrivingEventMixin:
         )
         # A fine is money, not an act-now warning: ROUTE's never-dropped
         # queue instead of an interrupt that could erase one.
-        self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
+        self.ctx.say_event(
+            message,
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=self._event_category(event),
+        )
         _record_inspection(self.ctx, event=True)
 
     def _place_out_of_service(self) -> None:

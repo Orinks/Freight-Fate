@@ -10,6 +10,7 @@ import pytest
 from speech_capture import speech_stub
 
 from freight_fate.settings import Settings
+from freight_fate.sim.trip_models import TripEventKind
 from freight_fate.speech_pacing import (
     DRIVING_SPEECH_DISPOSITIONS,
     DRIVING_SPEECH_MODES,
@@ -17,6 +18,7 @@ from freight_fate.speech_pacing import (
     SpeechCategory,
     disposition_for,
 )
+from freight_fate.states.driving_events import _EVENT_CATEGORIES, _FLAVOR_EVENT_KINDS
 
 
 def test_the_ladder_has_four_named_rungs() -> None:
@@ -222,3 +224,48 @@ def test_an_untagged_line_still_speaks_at_the_quietest_rung() -> None:
         assert spoken == ["Something nobody classified."]
     finally:
         app.shutdown()
+
+
+def _event(kind):
+    return type("E", (), {"kind": kind, "data": {}})()
+
+
+def test_the_hazard_call_is_safety() -> None:
+    from freight_fate.states.driving_events import DrivingEventMixin
+
+    assert DrivingEventMixin._event_category(_event(TripEventKind.HAZARD)) is (
+        SpeechCategory.SAFETY
+    )
+
+
+def test_a_planned_stop_is_navigation() -> None:
+    from freight_fate.states.driving_events import DrivingEventMixin
+
+    assert DrivingEventMixin._event_category(_event(TripEventKind.STOP_AHEAD)) is (
+        SpeechCategory.NAVIGATION
+    )
+
+
+def test_weather_colour_is_status_not_navigation() -> None:
+    # This is what makes "act-now cues only" real at urgent_only: the stop
+    # you must act on is NAVIGATION and speaks; the weather turning is
+    # STATUS and does not.
+    from freight_fate.states.driving_events import DrivingEventMixin
+
+    assert DrivingEventMixin._event_category(_event(TripEventKind.WEATHER_CHANGE)) is (
+        SpeechCategory.STATUS
+    )
+
+
+def test_billboards_and_landmarks_bypass_the_ladder_entirely() -> None:
+    # The owner's directive, at the classification layer: flavor is not a
+    # ladder category. Mapping BILLBOARD to STATUS would silence billboards
+    # at urgent_only, which is precisely what must not happen. A flavor kind
+    # classifies as None, so the gate passes it through and its own chatter
+    # switch decides.
+    from freight_fate.states.driving_events import DrivingEventMixin
+
+    for kind in (TripEventKind.BILLBOARD, TripEventKind.LANDMARK):
+        assert DrivingEventMixin._event_category(_event(kind)) is None
+        assert kind in _FLAVOR_EVENT_KINDS
+        assert kind not in _EVENT_CATEGORIES
