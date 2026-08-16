@@ -204,6 +204,10 @@ class EventSpeechPacer:
     * ``is_repeat`` decides whether the player has already heard this; a True
       means say nothing at all.
     * ``note_spoken`` records a line that did reach the voice.
+    * ``is_silenced_repeat``/``note_silenced`` are the same pair for a line
+      the driving speech rung cut to an earcon or to nothing -- a private
+      namespace so a silenced occurrence can dedupe its own earcon without
+      ever registering as something ``is_repeat`` would recognise as heard.
     * ``note_interrupt`` for an interrupting line (it purges the channel), or
       ``should_flush`` for a queued one -- True there means the backlog has
       gone stale and this line must be submitted interrupting instead.
@@ -247,6 +251,19 @@ class EventSpeechPacer:
         self._recent: dict[str, float] = {}
         # condition key -> the last thing said about it.
         self._conditions: dict[str, str] = {}
+        # The same two maps, but for occurrences the driving speech rung
+        # silenced (an earcon or nothing, never the words). Kept separate
+        # from ``_recent``/``_conditions`` on purpose: those two belong to
+        # what the player actually heard, and ``is_repeat`` consults them to
+        # decide whether a genuinely spoken line would be news. If a
+        # silenced occurrence wrote into that same state, raising the rung
+        # mid-drive while a standing condition was still active (still
+        # locked out, still at redline) would find the SILENCED text sitting
+        # in ``_conditions``, read the now-audible occurrence as an unchanged
+        # repeat, and skip it -- exactly the rung promising full sentences
+        # going quiet for the condition the player raised it to hear about.
+        self._silenced_recent: dict[str, float] = {}
+        self._silenced_conditions: dict[str, str] = {}
         # Set by pause(): the next line purges the channel, so anything the
         # voice was still holding when the player stepped away cannot surface
         # behind it.
@@ -308,6 +325,52 @@ class EventSpeechPacer:
     def forget_condition(self, key: str) -> None:
         """A standing condition has cleared; let it announce itself afresh."""
         self._conditions.pop(key, None)
+        self._silenced_conditions.pop(key, None)
+
+    # -- what the rung silenced (earcon-only or fully quiet) ----------------------
+
+    def is_silenced_repeat(
+        self,
+        text: str,
+        *,
+        key: str | None = None,
+        window: float | None = None,
+    ) -> bool:
+        """True when this silenced occurrence was already marked (earcon or not).
+
+        The silenced branches' own dedup: mirrors :meth:`is_repeat`'s rules
+        exactly, but reads a namespace private to occurrences the rung cut,
+        never ``_conditions``/``_recent``. A silenced repeat must not go
+        unmarked (that is the earcon machine-gun this exists to stop), but it
+        must equally never be mistaken for a genuinely spoken occurrence by
+        :meth:`is_repeat` once the rung changes and the condition is still
+        active -- that would silence the very line the player raised the
+        rung to hear.
+        """
+        if not text:
+            return False
+        if key is not None and self._silenced_conditions.get(key) == text:
+            return True
+        budget = self.REPEAT_WINDOW_S if window is None else window
+        if budget <= 0.0:
+            return False
+        last = self._silenced_recent.get(text)
+        return last is not None and self._clock() - last < budget
+
+    def note_silenced(self, text: str, *, key: str | None = None) -> None:
+        """Record a silenced occurrence (earcon played, or fully quiet)."""
+        if not text:
+            return
+        now = self._clock()
+        self._silenced_recent[text] = now
+        if key is not None:
+            self._silenced_conditions[key] = text
+        if len(self._silenced_recent) > self.RECENT_LIMIT:
+            self._silenced_recent = {
+                line: said
+                for line, said in self._silenced_recent.items()
+                if now - said < self.RECENT_MEMORY_S
+            }
 
     # -- the backlog projection ---------------------------------------------------
 

@@ -260,7 +260,7 @@ class GameContext:
             # are otherwise identical at the voice.
             if isinstance(text, SpokenMessage):
                 text = text.render(self.settings.renders_terse()) or text.normal
-            if self._event_pacer.is_repeat(text):
+            if self._event_pacer.is_silenced_repeat(text):
                 # A keyless standing condition (no ``key=`` reaches this
                 # method) re-fires on a timer while the drive is otherwise
                 # unchanged. The gate above never used to consult the pacer,
@@ -268,10 +268,17 @@ class GameContext:
                 # the quiet rung machine-gunning a sound where coaching says
                 # one sentence and falls silent. The plain repeat window is
                 # enough here; there is no ``key=`` to track a condition by.
+                # ``is_silenced_repeat``/``note_silenced`` are a namespace of
+                # their own (not ``is_repeat``/``note_spoken``): a silenced
+                # occurrence must never write into the state the SPEAKING
+                # path reads, or raising the rung mid-drive while this same
+                # condition is still active would find its own silenced text
+                # already on file and go quiet for the sentence the rung now
+                # promises.
                 return
             if self.settings.speech_disposition(category) is Disposition.EARCON:
                 self._play_ladder_earcon(category)
-            self._event_pacer.note_spoken(text)
+            self._event_pacer.note_silenced(text)
             transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)
             if review:
                 self.message_log.add(text, MessageCategory.GENERAL)
@@ -400,7 +407,7 @@ class GameContext:
             # layer marks the moment instead of the words.
             if isinstance(text, SpokenMessage):
                 text = text.render(self.settings.renders_terse()) or text.normal
-            if self._event_pacer.is_repeat(text, key=key, force=force):
+            if self._event_pacer.is_silenced_repeat(text, key=key):
                 # A keyed standing condition (an engine held at redline, a
                 # locked-out air brake) re-fires on a timer by design while
                 # the condition holds -- that is what keeps it audible when
@@ -408,13 +415,20 @@ class GameContext:
                 # ever reaching the pacer, so a silenced repeat still played
                 # the earcon and logged the line on every re-fire: the quiet
                 # rung machine-gunning a sound where coaching says one
-                # sentence and falls silent for the rest of the drive. The
-                # same dedup the speaking path gets below now applies here
-                # too, before the earcon and before the log.
+                # sentence and falls silent for the rest of the drive.
+                # ``is_silenced_repeat``/``note_silenced`` deliberately do NOT
+                # share ``is_repeat``/``_conditions`` with the speaking path
+                # below: if a silenced occurrence wrote ``_conditions[key]``,
+                # raising the rung mid-drive while this same condition was
+                # still active (still locked out, still at redline) would
+                # have the speaking path's own ``is_repeat`` see its silenced
+                # text already on file, read the now-audible occurrence as an
+                # unchanged repeat, and skip it -- the rung the player raised
+                # specifically to hear this condition going quiet instead.
                 return
             if self.settings.speech_disposition(category) is Disposition.EARCON:
                 self._play_ladder_earcon(category)
-            self._event_pacer.note_spoken(text, key=key)
+            self._event_pacer.note_silenced(text, key=key)
             transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)
             if review:
                 self.message_log.add(text, MessageCategory.EVENT)

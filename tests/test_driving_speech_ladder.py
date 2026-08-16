@@ -1126,9 +1126,10 @@ def test_a_silenced_keyed_status_line_plays_the_earcon_once(monkeypatch) -> None
     # sentence and falls silent at coaching/standard. Fires the identical
     # keyed STATUS line five times, exactly as a held accelerator against a
     # locked-out brake does, and requires exactly one earcon. Reverting the
-    # ``is_repeat``/``note_spoken`` pair this fix added to say_event's
-    # silenced branch restores the old log-and-play-every-time behaviour,
-    # which collects five entries here and fails the length assertion.
+    # ``is_silenced_repeat``/``note_silenced`` pair this fix added to
+    # say_event's silenced branch restores the old log-and-play-every-time
+    # behaviour, which collects five entries here and fails the length
+    # assertion.
     from freight_fate.sound_catalog import entry_by_name
 
     app = _app()
@@ -1161,8 +1162,8 @@ def test_a_silenced_plain_repeat_via_say_plays_the_earcon_once(monkeypatch) -> N
     # silenced branch relies on the pacer's plain repeat window instead. The
     # same identical line fired twice in a row (well inside
     # EventSpeechPacer.REPEAT_WINDOW_S) must not double the earcon. Reverting
-    # the ``is_repeat``/``note_spoken`` pair added to ``say``'s silenced
-    # branch collects two entries here.
+    # the ``is_silenced_repeat``/``note_silenced`` pair added to ``say``'s
+    # silenced branch collects two entries here.
     from freight_fate.sound_catalog import entry_by_name
 
     app = _app()
@@ -1181,6 +1182,50 @@ def test_a_silenced_plain_repeat_via_say_plays_the_earcon_once(monkeypatch) -> N
 
         cue = entry_by_name(LADDER_EARCONS[SpeechCategory.COACHING]).plays[0]
         assert played == [(cue.key, cue.volume, cue.pan)]
+    finally:
+        app.shutdown()
+
+
+def test_raising_the_rung_still_speaks_an_active_silenced_condition() -> None:
+    # Re-review regression: the silenced branches' earcon dedup must not
+    # write into the state the SPEAKING path's ``is_repeat`` reads. Silence
+    # a keyed STATUS condition at quiet (it plays an earcon and gets marked
+    # under ``EventSpeechPacer._silenced_conditions``), then raise the rung
+    # to coaching with the condition still active and its text byte-for-byte
+    # unchanged -- STATUS is FULL at coaching, so this occurrence must
+    # actually speak, because the player raised the rung specifically to
+    # hear it. Before this fix, the silenced branch called
+    # ``note_spoken(text, key=key)``, which wrote ``_conditions[key] =
+    # text`` -- the exact map ``is_repeat`` reads on the speaking path below.
+    # The speaking call would then find its own silenced text already on
+    # file, read the now-audible occurrence as an unchanged repeat, and
+    # silently return: the line would never speak and never log, for the
+    # rest of that occurrence, at the very rung that promises full
+    # sentences. Reverting ``is_silenced_repeat``/``note_silenced`` back to
+    # ``is_repeat``/``note_spoken`` makes ``spoken`` empty here.
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "quiet"
+
+        app.ctx.say_event(
+            "Parking brake set. Press P to release it.",
+            interrupt=False,
+            key="air_brake_lockout",
+            category=SpeechCategory.STATUS,
+        )
+        assert spoken == []  # silenced (earcon only) at quiet
+
+        app.ctx.settings.driving_speech = "coaching"
+        app.ctx.say_event(
+            "Parking brake set. Press P to release it.",
+            interrupt=False,
+            key="air_brake_lockout",
+            category=SpeechCategory.STATUS,
+        )
+
+        assert spoken == ["Parking brake set. Press P to release it."]
     finally:
         app.shutdown()
 
