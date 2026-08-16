@@ -36,6 +36,13 @@ PLACE_KEYS = {
 
 class DrivingControlsMixin:
     def handle_event(self, event: pygame.event.Event) -> None:
+        # Everything spoken from here down is an answer to a key the player
+        # pressed, so it may cut the line in progress even though unasked-for
+        # lines queue at the wheel. See GameContext.player_asked.
+        with self.ctx.player_asked():
+            self._handle_key(event)
+
+    def _handle_key(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYUP and event.key == pygame.K_h:
             self.ctx.audio.horn_stop()
             return
@@ -530,6 +537,12 @@ class DrivingControlsMixin:
             self._manual_shift(target)
 
     def handle_controller(self, event: pygame.event.Event, manager) -> None:
+        # Same contract as the keyboard: a pad button is a request too, and
+        # the pad is the device where not being able to cut speech hurt most.
+        with self.ctx.player_asked():
+            self._handle_controller_button(event, manager)
+
+    def _handle_controller_button(self, event: pygame.event.Event, manager) -> None:
         button = event.button
         if event.type == pygame.CONTROLLERBUTTONUP:
             if button == pygame.CONTROLLER_BUTTON_LEFTSTICK:
