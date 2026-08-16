@@ -1126,3 +1126,74 @@ def test_grade_key_says_nothing_else_steep_while_on_a_steep_grade(monkeypatch):
         assert "Nothing else steep in the next" in spoken[-1], spoken[-1]
     finally:
         app.shutdown()
+
+
+def _pad(button):
+    return pygame.event.Event(pygame.CONTROLLERBUTTONDOWN, button=button)
+
+
+def test_controller_can_ask_for_the_speed_limit(monkeypatch):
+    """Right bumper plus X, the pad's answer to the keyboard's S.
+
+    The pad had no speed-limit binding at all, so a controller-only driver
+    had to reach for the keyboard to ask the one question enforcement acts
+    on (Sarah R., 2026-08-16).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = _capture(app, monkeypatch)
+        app.ctx.controller.modifier = True
+        d.handle_controller(_pad(pygame.CONTROLLER_BUTTON_X), app.ctx.controller)
+        assert "Speed limit" in spoken[-1] or "Truck limit" in spoken[-1]
+        assert "per hour" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_controller_back_button_stops_the_driving_voice(monkeypatch):
+    """Back silences the road while it is talking, and reads help when it is not.
+
+    Before this the pad could not stop the event voice at all -- every button
+    was bound and the stop was a keyboard key -- so announcements ran to the
+    end unless the driver reached for Control.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = _capture(app, monkeypatch)
+        stopped = []
+        monkeypatch.setattr(app.ctx, "stop_event_speech", lambda: stopped.append(True))
+
+        monkeypatch.setattr(app.ctx, "event_voice_busy", lambda: True)
+        d.handle_controller(_pad(pygame.CONTROLLER_BUTTON_BACK), app.ctx.controller)
+        assert stopped == [True]
+        # Silence is the whole point: it must not answer with a paragraph.
+        assert not spoken
+
+        monkeypatch.setattr(app.ctx, "event_voice_busy", lambda: False)
+        d.handle_controller(_pad(pygame.CONTROLLER_BUTTON_BACK), app.ctx.controller)
+        assert stopped == [True]
+        assert "right trigger" in spoken[-1].lower()
+    finally:
+        app.shutdown()
+
+
+def test_controller_help_names_the_stop_and_the_speed_limit(monkeypatch):
+    """Both new bindings are discoverable from the pad's own help."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = _capture(app, monkeypatch)
+        d._speak_controller_help()
+        said = spoken[-1]
+        assert "plus X reads the posted speed limit" in said
+        assert "Back button stops the driving voice" in said
+    finally:
+        app.shutdown()
