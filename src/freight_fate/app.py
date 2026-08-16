@@ -118,6 +118,23 @@ class GameContext:
         self.playtest_sandbox = False
         self.message_log = app.message_log
 
+    def _ladder_applies(self) -> bool:
+        """Whether the driving speech rung may silence anything yet.
+
+        First-run teaching outranks the rung, exactly as it outranks terse
+        (research doc R15). A player who picks the quietest setting before
+        their first drive is the one who most needs to be told the status,
+        help, and hazard keys exist -- silence them and they can never pull
+        information nobody told them about. The gate is ``tutorial_done``
+        itself, so finishing the walkthrough and then choosing a quiet rung
+        resurrects nothing.
+
+        ``GameContext.profile`` is ``Profile | None`` (``app.py:98``), and
+        the default here is deliberately ``True``: no profile means nobody
+        is on a first drive, so the rung applies normally.
+        """
+        return bool(getattr(self.profile, "tutorial_done", True))
+
     def _online_enabled(self, setting: bool) -> bool:
         """True when both the master ``online_services`` switch and the
         individual ``setting`` are enabled.
@@ -196,7 +213,7 @@ class GameContext:
         *,
         category: SpeechCategory | None = None,
     ) -> None:
-        if not self.settings.speaks(category):
+        if not self.settings.speaks(category) and self._ladder_applies():
             # The player's rung silences this category. The line still
             # reaches the review log, so the information is cut from the
             # drive, not from the game -- the review key that exists to
@@ -322,7 +339,7 @@ class GameContext:
         A pair whose terse rendering is empty is dropped whole in terse
         mode: not spoken, not logged, exactly like a muted chatter line.
         """
-        if not self.settings.speaks(category) and not force:
+        if not self.settings.speaks(category) and not force and self._ladder_applies():
             # The player's rung silences this category. The line still
             # reaches the review log and the status keys, so the
             # information is cut from the drive, not from the game.

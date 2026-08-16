@@ -441,6 +441,37 @@ _HAZARDS = SoundCategory(
             "at night, and a tired driver drifts and reacts late. Plan a "
             "stop rather than pushing through it.",
         ),
+        # The two earcons the S4 driving speech ladder stands in with, once a
+        # rung stops speaking a whole category (LADDER_EARCONS in
+        # speech_pacing.py, pinned learnable by
+        # tests/test_driving_speech_ladder.py). Neither has a real call site
+        # yet -- the ladder logs and answers status keys for what it cuts,
+        # it does not yet sound anything in its place -- so there is no road
+        # level to be faithful to; the levels below are this cue's own.
+        # Synthesized rather than shipped (``ladder_earcons.py``), the same
+        # way the enforcement signature is -- and, like that one, keyed under
+        # a folder name ("ladder/") outside the ones
+        # ``tests/test_speech_audio.py::test_all_referenced_assets_exist``
+        # scans for a file on disk, since neither cue has one.
+        SoundEntry(
+            "Coaching note",
+            (Cue("ladder/coaching_note", volume=0.4),),
+            "A soft two-note rising chime standing in for a driving tip. The "
+            "tip itself still reaches the message log, so pull it up there "
+            "if you want the words.",
+            when="Driving speech set to Quiet. At Urgent only, tips are "
+            "dropped instead of getting a sound.",
+        ),
+        SoundEntry(
+            "Status note",
+            (Cue("ladder/status_note", volume=0.35),),
+            "A single short, low tock standing in for a status update -- "
+            "load condition, the weather turning, and the like. The words "
+            "still reach the message log and the status keys still answer "
+            "for it.",
+            when="Driving speech set to Quiet. At Urgent only, status "
+            "updates are dropped instead of getting a sound.",
+        ),
     ),
 )
 

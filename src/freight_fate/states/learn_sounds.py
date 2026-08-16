@@ -12,6 +12,7 @@ so nothing here plays on movement.
 
 from __future__ import annotations
 
+from ..ladder_earcons import register_ladder_earcons
 from ..sound_catalog import CATALOG, SoundCategory, SoundEntry
 from ..sound_demo import SoundDemo
 from .base import MenuItem, MenuState
@@ -63,18 +64,20 @@ class LearnSoundCategoryState(MenuState):
     def enter(self) -> None:
         """Open the screen, ready to play everything the catalog names.
 
-        The enforcement signature is synthesized rather than shipped, and the
-        only other thing that publishes it is a drive starting. Opening this
-        screen from the main menu would otherwise land on an entry that
-        resolved to nothing -- a cue demonstrated as silence, which is the one
-        thing this screen must never do. Registering is idempotent and cheap,
-        so both entry points simply do it on the way in.
+        The enforcement signature and the two ladder earcons are synthesized
+        rather than shipped, and nothing else publishes the earcons at all --
+        the ladder does not yet sound anything in gameplay, only this screen
+        does. Opening this screen from the main menu would otherwise land on
+        an entry that resolved to nothing -- a cue demonstrated as silence,
+        which is the one thing this screen must never do. Registering is
+        idempotent and cheap, so both entry points simply do it on the way in.
 
         Stopping the demo here covers re-entry: a screen pushed over this one
         freezes the demo's clock, and coming back re-announces the title while
         a held cue would otherwise pick its hold straight back up.
         """
         register_enforcement_sounds()
+        register_ladder_earcons()
         self.demo.stop()
         super().enter()
 

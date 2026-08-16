@@ -153,6 +153,21 @@ DRIVING_SPEECH_DISPOSITIONS: dict[str, dict[SpeechCategory, Disposition]] = {
 
 DEFAULT_DRIVING_SPEECH = "standard"
 
+# The sound that carries a category once a rung stops speaking it. Every
+# value is a real ``SoundEntry.name`` in the Learn game sounds catalog
+# (``sound_catalog.CATALOG``) -- pinned by
+# ``test_every_earcon_category_is_learnable`` -- because a sound the player
+# cannot look up is information removed rather than information moved (R14).
+# CONFIRMATION reuses the hazard-clear chime that already shipped in S3
+# rather than inventing a second success cue; COACHING and STATUS have no
+# existing sound that means what an earcon here needs to mean, so each gets
+# its own synthesized entry (``ladder_earcons.py``).
+LADDER_EARCONS = {
+    SpeechCategory.COACHING: "Coaching note",
+    SpeechCategory.CONFIRMATION: "Hazard clear",
+    SpeechCategory.STATUS: "Status note",
+}
+
 
 def disposition_for(mode: str, category: SpeechCategory | None) -> Disposition:
     """How this rung delivers this category.

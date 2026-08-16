@@ -14,6 +14,7 @@ from freight_fate.sim.trip_models import TripEvent, TripEventKind
 from freight_fate.speech_pacing import (
     DRIVING_SPEECH_DISPOSITIONS,
     DRIVING_SPEECH_MODES,
+    LADDER_EARCONS,
     Disposition,
     SpeechCategory,
     disposition_for,
@@ -161,18 +162,50 @@ def test_a_silenced_category_never_reaches_the_voice() -> None:
 
 def test_a_silenced_category_still_reaches_the_message_log() -> None:
     # Nothing the ladder cuts becomes unreachable -- the log and the
-    # status-query keys still answer for it.
+    # status-query keys still answer for it. Asserts the logged TEXT, not
+    # just a count delta: a regression that logged an empty fallback or a
+    # stale string would still pass a bare length check.
     app = _app()
     try:
         app.ctx.speech.say_event = speech_stub()
         app.ctx.settings.driving_speech = "urgent_only"
-        before = len(app.ctx.message_log.messages)
 
         app.ctx.say_event(
             "Load damage 43 percent.", interrupt=False, category=SpeechCategory.STATUS
         )
 
-        assert len(app.ctx.message_log.messages) == before + 1
+        assert app.ctx.message_log.messages[-1].text == "Load damage 43 percent."
+    finally:
+        app.shutdown()
+
+
+def test_a_silenced_category_never_reaches_the_voice_via_say() -> None:
+    # ``say``'s gate is separate hand-written code from ``say_event``'s
+    # (app.py, both branches now call the shared ``_ladder_applies`` helper
+    # but the surrounding silencing logic is duplicated per method), and
+    # nothing exercised it before this test -- only inspection did.
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "urgent_only"
+
+        app.ctx.say("Load damage 43 percent.", category=SpeechCategory.STATUS)
+
+        assert spoken == []
+    finally:
+        app.shutdown()
+
+
+def test_a_silenced_category_still_reaches_the_log_through_say() -> None:
+    app = _app()
+    try:
+        app.ctx.speech.say = speech_stub()
+        app.ctx.settings.driving_speech = "urgent_only"
+
+        app.ctx.say("Load damage 43 percent.", category=SpeechCategory.STATUS)
+
+        assert app.ctx.message_log.messages[-1].text == "Load damage 43 percent."
     finally:
         app.shutdown()
 
@@ -357,6 +390,11 @@ def test_weather_change_is_silent_at_urgent_only_through_the_real_path() -> None
     app = App()
     try:
         driving = start_drive(app)
+        # A fresh New career profile has tutorial_done False, which now
+        # exempts it from the rung (task 6). This test is about
+        # WEATHER_CHANGE's category threading, not the tutorial, so mark
+        # the walkthrough done to get the rung's ordinary behaviour.
+        app.ctx.profile.tutorial_done = True
         quiet_trip(driving)
         spoken: list[str] = []
         app.ctx.speech.say_event = speech_stub(spoken)
@@ -386,7 +424,10 @@ def _real_driving(app):
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import DrivingState
 
-    app.ctx.profile = Profile(name="Ladder Fix Round", current_city="Denver")
+    # tutorial_done=True: these tests are about the rung, not first-run
+    # teaching (task 6's exemption reads this flag, and a bare Profile()
+    # defaults it False, which would otherwise exempt every one of them).
+    app.ctx.profile = Profile(name="Ladder Fix Round", current_city="Denver", tutorial_done=True)
     job = Job(
         CARGO_CATALOG["general"], 12.0, "Denver", "yard", "Salt Lake City", 200.0, 900.0, 12.0
     )
@@ -688,3 +729,98 @@ def test_missed_turn_speaks_at_urgent_only() -> None:
         assert "missed the turn" in spoken[-1].lower()
     finally:
         app.shutdown()
+
+
+# -- the tutorial exemption, and learnable earcons (task 6) -----------------
+
+
+def test_the_ladder_does_not_apply_before_the_walkthrough_is_done() -> None:
+    # R15, defended against a new mechanism. Terse used to silence the
+    # tutorial outright, which orphaned exactly the new player most likely
+    # to pick the quietest setting on day one. A rung must not do it either.
+    # Uses a real Profile (not a bare literal on a None ctx.profile): the
+    # gate reads ctx.profile.tutorial_done, and GameContext.profile is None
+    # until something assigns it, exactly like every other real-profile test
+    # in this file (see _real_driving above).
+    from freight_fate.models.profile import Profile
+
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "urgent_only"
+        app.ctx.profile = Profile(name="New Driver", current_city="Denver")
+        app.ctx.profile.tutorial_done = False
+
+        app.ctx.say_event(
+            "Press E to start the engine.",
+            interrupt=False,
+            category=SpeechCategory.COACHING,
+        )
+
+        assert spoken == ["Press E to start the engine."]
+    finally:
+        app.shutdown()
+
+
+def test_the_ladder_applies_once_the_walkthrough_is_done() -> None:
+    from freight_fate.models.profile import Profile
+
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "urgent_only"
+        app.ctx.profile = Profile(name="New Driver", current_city="Denver")
+        app.ctx.profile.tutorial_done = True
+
+        app.ctx.say_event(
+            "Press E to start the engine.",
+            interrupt=False,
+            category=SpeechCategory.COACHING,
+        )
+
+        assert spoken == []
+    finally:
+        app.shutdown()
+
+
+def test_the_ladder_applies_with_no_profile_at_all() -> None:
+    # ctx.profile is Profile | None; the exemption must default to "the rung
+    # applies" when there is no profile (a menu, a screen with no career
+    # loaded), never to "nobody can ever be silenced". Getting the default
+    # backwards would make the whole ladder inert outside a drive.
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "urgent_only"
+        assert app.ctx.profile is None
+
+        app.ctx.say_event(
+            "Press E to start the engine.",
+            interrupt=False,
+            category=SpeechCategory.COACHING,
+        )
+
+        assert spoken == []
+    finally:
+        app.shutdown()
+
+
+def test_every_earcon_category_is_learnable() -> None:
+    # R14's standing rule, binding S4's substitutions: no earcon may carry
+    # meaning that the Learn game sounds screen cannot teach. This is what
+    # makes "the rung replaces words with sounds" legitimate rather than
+    # exclusionary. ``SoundEntry`` has no ``key`` field -- its spoken
+    # identity is ``name`` -- so ``LADDER_EARCONS`` and this check both key
+    # off that.
+    from freight_fate.sound_catalog import CATALOG
+
+    learnable = {entry.name for category in CATALOG for entry in category.entries}
+    for rung in DRIVING_SPEECH_MODES:
+        for category in SpeechCategory:
+            if disposition_for(rung, category) is Disposition.EARCON:
+                assert LADDER_EARCONS[category] in learnable, (
+                    f"{category} becomes an earcon at {rung} with nothing to learn it by"
+                )
