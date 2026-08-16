@@ -1350,3 +1350,53 @@ class TestCarsParser:
             )
             == []
         )
+
+
+class TestZoneNeedsRoomForItsTaper:
+    """A work zone the driver cannot be warned about must not be placed.
+
+    Owner report, 2026-08-16: departing a facility could drop the truck
+    inside the cones before it had moved, because a real 511 event near the
+    start of a corridor clamped its start to mile zero and its warning taper
+    got clipped to nothing behind the driver.
+    """
+
+    @staticmethod
+    def _zones_for_event_at(lat, lon):
+        provider = MagicMock(spec=RealTrafficProvider)
+        provider.get_construction_near_route.return_value = [
+            TrafficEvent(
+                id="cz-start",
+                event_type="construction",
+                severity="medium",
+                description="Paving right at the start of the run",
+                county="Franklin",
+                latitude=lat,
+                longitude=lon,
+                road_name="I-71",
+                location_text="Near milepost 0",
+                work_type="paving",
+                closure="single lane",
+            )
+        ]
+        return _make_trip(traffic_provider=provider)._place_real_construction_zones()
+
+    def test_a_zone_at_the_very_start_is_dropped(self):
+        # The first route point is mile 0 itself; a zone centred there cannot
+        # fit a taper ahead of the driver, so nothing is placed at all.
+        zones = self._zones_for_event_at(39.9612, -82.9988)
+        assert zones == []
+
+    def test_a_zone_with_room_still_gets_its_full_taper(self):
+        """The guard is about the warning fitting, not about a quiet start."""
+        from freight_fate.sim.trip_models import CONSTRUCTION_TAPER_MI
+
+        zones = self._zones_for_event_at(39.83, -83.01)  # ~mile 15
+        assert len(zones) == 2
+        taper, work = zones
+        assert taper.reason == "construction merge"
+        assert work.reason == "construction"
+        # The taper is on the route, ahead of the start, and full length.
+        assert taper.start_mi >= 0.0
+        assert work.start_mi >= CONSTRUCTION_TAPER_MI
+        assert work.start_mi - taper.start_mi == CONSTRUCTION_TAPER_MI
