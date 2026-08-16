@@ -454,6 +454,14 @@
   the career that is waiting, and says that nothing backs up until you pick,
   that choosing this computer's save keeps what you have played, and that
   nothing is overwritten until you choose.
+- **The "no" on a confirmation no longer sounds like the thing you wanted.**
+  The question before restoring a backup offered "No, keep this computer's
+  save" -- which is word for word what the real upload choice is called, so
+  if you were trying to push your own career up to the server, the answer
+  that sounded exactly right was the one that quietly backed out and did
+  nothing. Every confirmation in Cloud backup now says "No, cancel and
+  change nothing", and says in its help what was left untouched and where
+  the choice you wanted actually lives.
 - **When you pick between two copies of a career, you can hear what each one
   is.** The choice used to describe the copy on the server -- its level and
   its money -- and say nothing at all about the one on your own computer, so
