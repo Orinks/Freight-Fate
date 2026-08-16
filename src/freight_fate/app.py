@@ -396,6 +396,15 @@ class GameContext:
         self._event_pacer.resume()
         _stop_event_speech(self.speech)
 
+    def event_voice_busy(self) -> bool:
+        """Whether the event voice is mid-delivery right now.
+
+        The same projection the audio duck restores on, so a control that has
+        to decide "is there anything to shut up" is trusting the estimate the
+        mix already trusts rather than inventing a second one.
+        """
+        return self._event_pacer.busy()
+
     def stop_event_speech(self) -> None:
         self._event_pacer.reset()
         _stop_event_speech(self.speech)

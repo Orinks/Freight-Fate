@@ -440,12 +440,15 @@ class DrivingControlsMixin:
             "Click the left stick to honk, "
             "the right stick to toggle the engine brake. "
             "Hold the right bumper for the second layer: plus A starts or stops "
-            "the engine, plus B reads fuel, plus Y sets or releases the parking "
+            "the engine, plus B reads fuel, plus X reads the posted speed limit "
+            "here and how far over you are, plus Y sets or releases the parking "
             "brake, plus D-pad up reads the next listed exit, plus D-pad down "
             "plans a nearby sleep stop while rolling or opens its actions when "
             "stopped at it; away from route points while fully stopped, it opens "
             "emergency shoulder sleep. Plus Start opens the status menu. "
-            "Start pauses and unpauses. The Back button repeats this help. "
+            "Start pauses and unpauses. The Back button stops the driving voice "
+            "while it is speaking, the way Left or Right Control does on the "
+            "keyboard; when nothing is being said, it repeats this help. "
             f"{self._objective_help()}"
         )
 
@@ -569,7 +572,18 @@ class DrivingControlsMixin:
             # keeps the whole hours-of-service report it always spoke.
             self._speak_clock(full_hours=True)
         elif button == pygame.CONTROLLER_BUTTON_BACK:
-            self._speak_controller_help()
+            # The pad had no way to stop the event voice at all -- every other
+            # button is bound, and Ctrl is a keyboard key -- so a controller-only
+            # driver had to reach for the keyboard to silence an announcement
+            # (Sarah R., 2026-08-16). Back stops it while it is speaking and
+            # keeps reading help when it is not: pressing Back mid-flood used
+            # to answer a driver who wanted quiet with a paragraph of help.
+            if self.ctx.event_voice_busy():
+                self.ctx.stop_event_speech()
+                self._note_critical_speech_stopped()
+                self._set_status("Event voice stopped.")
+            else:
+                self._speak_controller_help()
 
     def _handle_controller_modified(self, button: int) -> None:
         """Secondary bindings while the right bumper (modifier) is held."""
@@ -585,6 +599,11 @@ class DrivingControlsMixin:
             self._toggle_engine()
         elif button == pygame.CONTROLLER_BUTTON_B:
             self._speak_fuel()
+        elif button == pygame.CONTROLLER_BUTTON_X:
+            # The pad had no answer to "what is the limit here" at all, so a
+            # controller-only driver had to reach for the keyboard's S to ask
+            # the one question enforcement acts on (Sarah R., 2026-08-16).
+            self._speak_speed_limit()
         elif button == pygame.CONTROLLER_BUTTON_Y:
             self._toggle_parking_brake()
         elif button == pygame.CONTROLLER_BUTTON_RIGHTSTICK:

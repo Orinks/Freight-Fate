@@ -728,6 +728,17 @@ onto exit signalling.
       with a number used to fall through to the engine-brake stages, so
       asking for the state changed the jake; the stage branch now requires
       Alt to be absent.
+- [x] **The pad could not stop the event voice, or ask the limit (Sarah R.,
+      2026-08-16).** Two gaps in the controller scheme, one of them a hole
+      rather than a rough edge: `stop_event_speech` was bound only to Ctrl,
+      so a controller-only driver had no way to silence an announcement and
+      every one ran to the end. Every pad button was already bound, so Back
+      is now context-sensitive -- it stops the voice while `event_voice_busy`
+      (the same projection the audio duck restores on) and reads the
+      controller help when nothing is speaking, which also stops it
+      answering a driver who wants quiet with a paragraph of help. Right
+      bumper plus X reads the posted limit, the pad's answer to S, in the
+      slot Sarah proposed.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each

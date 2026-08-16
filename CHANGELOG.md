@@ -17,6 +17,16 @@
   Requested by William, who wrote in to say the granite capital of the world
   had been left out. He was right.
 
+- **The controller can stop the driving voice, and ask what the limit is.**
+  Two things a pad simply could not do. The Back button now stops an
+  announcement while it is being read, the way Left or Right Control does on
+  the keyboard -- before this there was no way to silence the road from a
+  controller at all, so playing on the pad alone meant every announcement ran
+  to the end or you reached for the keyboard. When nothing is being said,
+  Back still reads the controller help as before. Right bumper plus X reads
+  the posted speed limit here and how far over you are, which the pad had no
+  button for. Both reported by Sarah R.
+
 - **Four keys now answer one question each about where you are.** Alt 1
   speaks the state, Alt 2 the road you are on, Alt 3 the town you are in --
   or the nearest one and how far off the road it sits -- and Alt 4 the
