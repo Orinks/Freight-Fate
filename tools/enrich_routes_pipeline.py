@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from enrich_routes_base import *
+from terrain_rules import leg_terrain
 
 
 def enrich_all_routes(
@@ -82,10 +83,22 @@ def enrich_all_routes(
                 # legs reach here (fully-enriched legs are skipped above), so a
                 # placeholder "flat" on a freshly-added mountain leg is corrected
                 # without rewriting existing curated terrain.
-                rank = {"flat": 0, "hills": 1, "mountain": 2}
-                terrains = [s.get("terrain", "flat") for s in corridor["grade_segments"]]
-                if terrains:
-                    leg["terrain"] = max(terrains, key=lambda t: rank.get(t, 0))
+                #
+                # Roll the classified stretches up through the SHARED leg rule,
+                # not the steepest single bin: taking the max made one 0.3-mile
+                # roller label a whole leg "mountain" (Elberton-Athens, Georgia
+                # piedmont, 2026-08-16), the same no-relief-no-duration mistake
+                # terrain_rules.py exists to prevent.
+                mtn_mi = hill_mi = 0.0
+                for segment in corridor["grade_segments"]:
+                    span = float(segment["end_mi"]) - float(segment["start_mi"])
+                    kind = segment.get("terrain", "flat")
+                    if kind == "mountain":
+                        mtn_mi += span
+                    elif kind == "hills":
+                        hill_mi += span
+                if corridor["grade_segments"]:
+                    leg["terrain"] = leg_terrain(mtn_mi, hill_mi, float(leg["miles"]))
             if "checkpoints" in needs:
                 corridor["checkpoints"] = _checkpoints(data, leg, samples)
             if "state_miles" in needs or "state_crossings" in needs:

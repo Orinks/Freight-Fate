@@ -1,12 +1,12 @@
 FREIGHT FATE MAP INVENTORY
 ==========================
-Cities (freight nodes): 623
-Real named checkpoints: 3134
-Legs carrying at least one named checkpoint: 1041
+Cities (freight nodes): 624
+Real named checkpoints: 3144
+Legs carrying at least one named checkpoint: 1044
 
 
 ================================================
-CITIES -- 623 places you can pick up and deliver freight
+CITIES -- 624 places you can pick up and deliver freight
 ================================================
 Grouped by region, alphabetical within each region.
 
@@ -39,7 +39,7 @@ Appalachia (27):
   Winchester, Virginia
   Wytheville, Virginia
 
-Atlantic Southeast (44):
+Atlantic Southeast (45):
   Albany, Georgia
   Americus, Georgia
   Athens, Georgia
@@ -56,6 +56,7 @@ Atlantic Southeast (44):
   Dalton, Georgia
   Dublin, Georgia
   Durham, North Carolina
+  Elberton, Georgia
   Fayetteville, North Carolina
   Florence, South Carolina
   Greensboro, North Carolina
@@ -667,7 +668,7 @@ Upper Midwest (29):
 
 
 ================================================
-CHECKPOINTS -- 3134 named places you drive past
+CHECKPOINTS -- 3144 named places you drive past
 ================================================
 Grouped by the leg they sit on, in mile order along the drive.
 
@@ -2222,6 +2223,22 @@ El Paso -> Van Horn (I-10)
   at 30 mi: Fabens (Texas)
   at 53 mi: Fort Hancock (Texas)
   at 88 mi: Sierra Blanca (Texas)
+
+Elberton -> Athens (GA-72)
+  at 7 mi: Oglesby (Georgia)
+  at 17 mi: Comer (Georgia)
+  at 27 mi: Hull (Georgia)
+
+Elberton -> Augusta (GA-17)
+  at 20 mi: Tignall (Georgia)
+  at 30 mi: Washington (Georgia)
+  at 50 mi: Thomson (Georgia)
+
+Elberton -> Greenville (I-85)
+  at 20 mi: Royston (Georgia)
+  at 31 mi: Lavonia (Georgia)
+  at 42 mi: Fair Play (South Carolina)
+  at 60 mi: Anderson (South Carolina)
 
 Elizabethtown -> Bowling Green (I-65)
   at 42 mi: Cave City (Kentucky)

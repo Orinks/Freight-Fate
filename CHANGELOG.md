@@ -4,6 +4,19 @@
 
 ### Added
 
+- **Elberton, Georgia is on the map, and it hauls granite.** The town cuts
+  better than a third of all the headstones and memorials made in the United
+  States, so its docks are quarries and monument plants: Polycor Georgia
+  Granite Quarries, Keystone Memorials, Matthews Granite, the crushed-stone
+  yard at Ideal Aggregate, and the flatbed granite terminal Henry and Henry
+  have run there since 1989. There is a poultry plant and a burger plant
+  too. Three roads reach it -- Georgia 72 west to Athens past Oglesby, Comer
+  and Hull; Georgia 17 south through Tignall and Washington to Thomson and
+  on to Augusta; and Georgia 17 north through Royston to Lavonia, then
+  Interstate 85 past Fair Play and Anderson into Greenville, South Carolina.
+  Requested by William, who wrote in to say the granite capital of the world
+  had been left out. He was right.
+
 - **Four keys now answer one question each about where you are.** Alt 1
   speaks the state, Alt 2 the road you are on, Alt 3 the town you are in --
   or the nearest one and how far off the road it sits -- and Alt 4 the

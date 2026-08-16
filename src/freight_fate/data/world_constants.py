@@ -524,6 +524,11 @@ CITY_MARKET_TAGS = {
     "dallas_tx_us": ("intermodal", "parcel", "retail"),
     "denver_co_us": ("intermodal", "construction", "mining"),
     "detroit_mi_us": ("automotive", "border", "port"),
+    # Elberton quarries and cuts better than a third of the monumental granite
+    # made in the United States; block and finished stone out, quarry machinery
+    # and abrasives in. The region tag alone would read it as a generic
+    # southeastern retail town.
+    "elberton_ga_us": ("mining", "construction", "manufacturing"),
     "el_paso_tx_us": ("border", "cross_dock"),
     "fresno_ca_us": ("agriculture", "food", "cold_chain"),
     "green_bay_wi_us": ("port",),

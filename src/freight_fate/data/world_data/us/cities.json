@@ -7933,6 +7933,51 @@
       "locations": [],
       "lat": 28.4789,
       "lon": -82.5257
+    },
+    "elberton_ga_us": {
+      "spoken_city": "Elberton",
+      "state": "GA",
+      "country": "US",
+      "region": "atlantic_southeast",
+      "lat": 34.1115,
+      "lon": -82.8688,
+      "locations": [
+        {
+          "name": "Polycor Georgia Granite Quarries",
+          "type": "mine_quarry",
+          "source": "Real Elberton granite quarrier, Post Office Box 1047, Elberton. Elberton Granite Association member directory (egaonline.com), the trade association of the Elberton granite district; accessed 2026-08-16."
+        },
+        {
+          "name": "Keystone Memorials",
+          "type": "manufacturing_plant",
+          "source": "Real Elberton quarrier and monument, mausoleum and bronze base manufacturer, 1595 Washington Highway. Elberton Granite Association member directory (egaonline.com), the trade association of the Elberton granite district; accessed 2026-08-16."
+        },
+        {
+          "name": "Matthews Granite",
+          "type": "manufacturing_plant",
+          "source": "Real Elberton monument manufacturer, 390 West Railroad Street; the former Star Granite and Bronze, acquired by Matthews International in February 2018. Elberton Granite Association member directory (egaonline.com), the trade association of the Elberton granite district; accessed 2026-08-16."
+        },
+        {
+          "name": "Ideal Aggregate",
+          "type": "construction_materials_yard",
+          "source": "Real Elberton crushed granite producer, 1046 Whiteside Drive. Elberton Granite Association member directory (egaonline.com), the trade association of the Elberton granite district; accessed 2026-08-16."
+        },
+        {
+          "name": "Henry and Henry Elberton Terminal",
+          "type": "terminal",
+          "source": "Real flatbed granite carrier terminal, Henry and Henry, Incorporated, 221 McDonough Street, Elberton, operating there since 1989 with an elevated loading dock and bridge cranes; United States Department of Transportation number 244284, active. Elberton Granite Association member directory (egaonline.com), the trade association of the Elberton granite district; accessed 2026-08-16."
+        },
+        {
+          "name": "Pilgrim's Pride Elberton Plant",
+          "type": "food_processor",
+          "source": "Real poultry processing plant, 1129 Old Middleton Road, Elberton; Food Safety and Inspection Service establishment M7424 and P184. Development Authority of Elbert County employer list, accessed 2026-08-16."
+        },
+        {
+          "name": "Bubba Foods",
+          "type": "food_processor",
+          "source": "Real frozen beef patty plant, 1208 Progress Boulevard in the Elberton Industrial Park; Food Safety and Inspection Service inspected establishment. Development Authority of Elbert County employer list, accessed 2026-08-16."
+        }
+      ]
     }
   }
 }

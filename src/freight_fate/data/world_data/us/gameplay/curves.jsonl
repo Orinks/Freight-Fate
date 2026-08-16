@@ -1,4 +1,4 @@
-{"meta": {"data_version": "sha256:1105f42dafc9", "params": {"a_lat_g": 0.3, "connector_window_mi": 0.75, "curve_pad_m": 150.0, "curve_radius_ft": 3000.0, "deflection_floor_deg": 8.0, "eps_tangent_m": 30.0, "layer": "curves", "point_budget": 600, "quant_deg": 5, "radius_window_m": 80.0, "sign_hysteresis_deg": 5.0, "speed_gap_mi": 4.0}, "schema": 1, "source": "OpenRouteService driving-hgv (self-hosted) + OSM via Overpass (ODbL, (c) OpenStreetMap contributors)"}}
+{"meta": {"data_version": "sha256:523027d2277b", "params": {"a_lat_g": 0.3, "connector_window_mi": 0.75, "curve_pad_m": 150.0, "curve_radius_ft": 3000.0, "deflection_floor_deg": 8.0, "eps_tangent_m": 30.0, "layer": "curves", "point_budget": 600, "quant_deg": 5, "radius_window_m": 80.0, "sign_hysteresis_deg": 5.0, "speed_gap_mi": 4.0}, "schema": 1, "source": "OpenRouteService driving-hgv (self-hosted) + OSM via Overpass (ODbL, (c) OpenStreetMap contributors)"}}
 {"advisory_mph": 20, "apex_mi": 0.11, "connector": true, "deflection_deg": 180.0, "direction": "R", "end_mi": 0.14, "leg": "aberdeen_sd_us:pierre_sd_us", "min_radius_ft": 98, "seq": 1, "start_mi": 0.05}
 {"advisory_mph": 35, "apex_mi": 0.14, "connector": true, "deflection_deg": 89.6, "direction": "L", "end_mi": 0.2, "leg": "aberdeen_sd_us:pierre_sd_us", "min_radius_ft": 307, "seq": 2, "start_mi": 0.14}
 {"advisory_mph": 35, "apex_mi": 0.41, "connector": true, "deflection_deg": 90.0, "direction": "R", "end_mi": 0.52, "leg": "aberdeen_sd_us:pierre_sd_us", "min_radius_ft": 307, "seq": 3, "start_mi": 0.41}
@@ -18809,6 +18809,155 @@
 {"advisory_mph": 100, "apex_mi": 119.12, "deflection_deg": 14.9, "direction": "R", "end_mi": 119.21, "leg": "el_paso_tx_us:van_horn_tx_us", "min_radius_ft": 2180, "seq": 18, "start_mi": 119.12}
 {"advisory_mph": 35, "apex_mi": 120.72, "connector": true, "deflection_deg": 90.0, "direction": "L", "end_mi": 120.76, "leg": "el_paso_tx_us:van_horn_tx_us", "min_radius_ft": 245, "seq": 19, "start_mi": 120.68}
 {"advisory_mph": 40, "apex_mi": 120.94, "connector": true, "deflection_deg": 90.9, "direction": "R", "end_mi": 120.98, "leg": "el_paso_tx_us:van_horn_tx_us", "min_radius_ft": 364, "seq": 20, "start_mi": 120.87}
+{"advisory_mph": 20, "apex_mi": 0.0, "connector": true, "deflection_deg": 92.2, "direction": "R", "end_mi": 0.03, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 108, "seq": 1, "start_mi": 0.0}
+{"advisory_mph": 35, "apex_mi": 0.1, "connector": true, "deflection_deg": 47.2, "direction": "R", "end_mi": 0.16, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 311, "seq": 2, "start_mi": 0.09}
+{"advisory_mph": 45, "apex_mi": 0.24, "connector": true, "deflection_deg": 33.5, "direction": "L", "end_mi": 0.37, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 416, "seq": 3, "start_mi": 0.23}
+{"advisory_mph": 100, "apex_mi": 0.72, "deflection_deg": 9.1, "direction": "L", "end_mi": 0.76, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 2189, "seq": 4, "start_mi": 0.69}
+{"advisory_mph": 75, "apex_mi": 1.17, "deflection_deg": 21.5, "direction": "L", "end_mi": 1.22, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1205, "seq": 5, "start_mi": 1.12}
+{"advisory_mph": 70, "apex_mi": 1.45, "deflection_deg": 31.6, "direction": "L", "end_mi": 1.5, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1083, "seq": 6, "start_mi": 1.36}
+{"advisory_mph": 45, "apex_mi": 1.52, "deflection_deg": 8.4, "direction": "R", "end_mi": 1.52, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 409, "seq": 7, "start_mi": 1.52}
+{"advisory_mph": 65, "apex_mi": 2.72, "deflection_deg": 19.1, "direction": "L", "end_mi": 2.74, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 985, "seq": 8, "start_mi": 2.66}
+{"advisory_mph": 70, "apex_mi": 3.13, "deflection_deg": 11.4, "direction": "R", "end_mi": 3.16, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1091, "seq": 9, "start_mi": 3.11}
+{"advisory_mph": 75, "apex_mi": 5.27, "deflection_deg": 8.7, "direction": "L", "end_mi": 5.3, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1300, "seq": 10, "start_mi": 5.27}
+{"advisory_mph": 65, "apex_mi": 5.79, "deflection_deg": 22.6, "direction": "L", "end_mi": 5.89, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 904, "seq": 11, "start_mi": 5.78}
+{"advisory_mph": 55, "apex_mi": 6.1, "deflection_deg": 47.9, "direction": "R", "end_mi": 6.19, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 619, "seq": 12, "start_mi": 6.05}
+{"advisory_mph": 75, "apex_mi": 6.36, "deflection_deg": 14.8, "direction": "R", "end_mi": 6.38, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1188, "seq": 13, "start_mi": 6.33}
+{"advisory_mph": 55, "apex_mi": 6.86, "deflection_deg": 29.0, "direction": "R", "end_mi": 6.88, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 643, "seq": 14, "start_mi": 6.8}
+{"advisory_mph": 80, "apex_mi": 7.8, "deflection_deg": 22.4, "direction": "L", "end_mi": 7.94, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1472, "seq": 15, "start_mi": 7.8}
+{"advisory_mph": 65, "apex_mi": 8.52, "deflection_deg": 19.0, "direction": "R", "end_mi": 8.58, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 879, "seq": 16, "start_mi": 8.5}
+{"advisory_mph": 85, "apex_mi": 9.25, "deflection_deg": 9.4, "direction": "R", "end_mi": 9.27, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1524, "seq": 17, "start_mi": 9.23}
+{"advisory_mph": 65, "apex_mi": 9.45, "deflection_deg": 26.6, "direction": "L", "end_mi": 9.52, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 884, "seq": 18, "start_mi": 9.4}
+{"advisory_mph": 90, "apex_mi": 10.12, "deflection_deg": 15.4, "direction": "R", "end_mi": 10.21, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1719, "seq": 19, "start_mi": 10.06}
+{"advisory_mph": 100, "apex_mi": 12.03, "deflection_deg": 11.8, "direction": "L", "end_mi": 12.12, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 2326, "seq": 20, "start_mi": 12.01}
+{"advisory_mph": 110, "apex_mi": 14.83, "deflection_deg": 12.0, "direction": "R", "end_mi": 14.95, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 2692, "seq": 21, "start_mi": 14.83}
+{"advisory_mph": 90, "apex_mi": 17.27, "deflection_deg": 28.7, "direction": "L", "end_mi": 17.42, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1833, "seq": 22, "start_mi": 17.22}
+{"advisory_mph": 95, "apex_mi": 19.84, "deflection_deg": 11.0, "direction": "L", "end_mi": 19.93, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 2014, "seq": 23, "start_mi": 19.84}
+{"advisory_mph": 105, "apex_mi": 20.18, "deflection_deg": 10.0, "direction": "R", "end_mi": 20.24, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 2424, "seq": 24, "start_mi": 20.15}
+{"advisory_mph": 80, "apex_mi": 21.64, "deflection_deg": 13.0, "direction": "L", "end_mi": 21.73, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1447, "seq": 25, "start_mi": 21.63}
+{"advisory_mph": 95, "apex_mi": 22.27, "deflection_deg": 15.1, "direction": "R", "end_mi": 22.32, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 2045, "seq": 26, "start_mi": 22.19}
+{"advisory_mph": 30, "apex_mi": 31.14, "deflection_deg": 41.3, "direction": "L", "end_mi": 31.2, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 200, "seq": 27, "start_mi": 31.13}
+{"advisory_mph": 55, "apex_mi": 32.31, "deflection_deg": 15.0, "direction": "R", "end_mi": 32.35, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 651, "seq": 28, "start_mi": 32.31}
+{"advisory_mph": 65, "apex_mi": 32.58, "deflection_deg": 16.7, "direction": "R", "end_mi": 32.62, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 891, "seq": 29, "start_mi": 32.58}
+{"advisory_mph": 25, "apex_mi": 33.32, "deflection_deg": 287.7, "direction": "R", "end_mi": 33.38, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 128, "seq": 30, "start_mi": 33.13}
+{"advisory_mph": 50, "apex_mi": 33.58, "deflection_deg": 22.3, "direction": "R", "end_mi": 33.62, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 587, "seq": 31, "start_mi": 33.58}
+{"advisory_mph": 55, "apex_mi": 33.79, "deflection_deg": 21.9, "direction": "R", "end_mi": 33.85, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 627, "seq": 32, "start_mi": 33.76}
+{"advisory_mph": 110, "apex_mi": 34.17, "deflection_deg": 13.3, "direction": "R", "end_mi": 34.26, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 2746, "seq": 33, "start_mi": 34.17}
+{"advisory_mph": 95, "apex_mi": 34.34, "connector": true, "deflection_deg": 13.2, "direction": "L", "end_mi": 34.35, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 1971, "seq": 34, "start_mi": 34.3}
+{"advisory_mph": 60, "apex_mi": 34.44, "connector": true, "deflection_deg": 14.4, "direction": "R", "end_mi": 34.46, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 737, "seq": 35, "start_mi": 34.4}
+{"advisory_mph": 50, "apex_mi": 34.57, "connector": true, "deflection_deg": 9.0, "direction": "L", "end_mi": 34.57, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 537, "seq": 36, "start_mi": 34.49}
+{"advisory_mph": 40, "apex_mi": 34.6, "connector": true, "deflection_deg": 21.5, "direction": "R", "end_mi": 34.6, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 323, "seq": 37, "start_mi": 34.57}
+{"advisory_mph": 30, "apex_mi": 34.62, "connector": true, "deflection_deg": 65.1, "direction": "L", "end_mi": 34.68, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 213, "seq": 38, "start_mi": 34.6}
+{"advisory_mph": 35, "apex_mi": 34.68, "connector": true, "deflection_deg": 14.7, "direction": "R", "end_mi": 34.69, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 313, "seq": 39, "start_mi": 34.68}
+{"advisory_mph": 65, "apex_mi": 34.71, "connector": true, "deflection_deg": 25.7, "direction": "L", "end_mi": 34.72, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 914, "seq": 40, "start_mi": 34.71}
+{"advisory_mph": 100, "apex_mi": 34.72, "connector": true, "deflection_deg": 14.8, "direction": "R", "end_mi": 34.78, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 2223, "seq": 41, "start_mi": 34.72}
+{"advisory_mph": 50, "apex_mi": 34.86, "connector": true, "deflection_deg": 45.0, "direction": "R", "end_mi": 34.92, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 554, "seq": 42, "start_mi": 34.79}
+{"advisory_mph": 25, "apex_mi": 34.95, "connector": true, "deflection_deg": 91.2, "direction": "R", "end_mi": 35.0, "leg": "elberton_ga_us:athens_ga_us", "min_radius_ft": 140, "seq": 43, "start_mi": 34.95}
+{"advisory_mph": 15, "apex_mi": 0.0, "connector": true, "deflection_deg": 101.6, "direction": "L", "end_mi": 0.08, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 53, "seq": 1, "start_mi": 0.0}
+{"advisory_mph": 55, "apex_mi": 0.52, "connector": true, "deflection_deg": 15.3, "direction": "R", "end_mi": 0.52, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 701, "seq": 2, "start_mi": 0.51}
+{"advisory_mph": 95, "apex_mi": 0.52, "connector": true, "deflection_deg": 9.0, "direction": "L", "end_mi": 0.59, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 2068, "seq": 3, "start_mi": 0.52}
+{"advisory_mph": 65, "apex_mi": 1.46, "deflection_deg": 23.6, "direction": "R", "end_mi": 1.5, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 878, "seq": 4, "start_mi": 1.4}
+{"advisory_mph": 75, "apex_mi": 1.82, "deflection_deg": 22.5, "direction": "R", "end_mi": 1.9, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1234, "seq": 5, "start_mi": 1.78}
+{"advisory_mph": 70, "apex_mi": 2.11, "deflection_deg": 45.4, "direction": "L", "end_mi": 2.31, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1161, "seq": 6, "start_mi": 2.11}
+{"advisory_mph": 105, "apex_mi": 6.12, "deflection_deg": 8.1, "direction": "L", "end_mi": 6.16, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 2482, "seq": 7, "start_mi": 6.12}
+{"advisory_mph": 80, "apex_mi": 6.56, "deflection_deg": 24.6, "direction": "R", "end_mi": 6.59, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1392, "seq": 8, "start_mi": 6.44}
+{"advisory_mph": 105, "apex_mi": 7.84, "deflection_deg": 11.8, "direction": "L", "end_mi": 7.93, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 2531, "seq": 9, "start_mi": 7.84}
+{"advisory_mph": 110, "apex_mi": 8.02, "deflection_deg": 11.1, "direction": "L", "end_mi": 8.05, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 2666, "seq": 10, "start_mi": 7.96}
+{"advisory_mph": 100, "apex_mi": 8.42, "deflection_deg": 13.2, "direction": "R", "end_mi": 8.54, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 2165, "seq": 11, "start_mi": 8.42}
+{"advisory_mph": 90, "apex_mi": 8.67, "deflection_deg": 10.6, "direction": "R", "end_mi": 8.74, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1841, "seq": 12, "start_mi": 8.67}
+{"advisory_mph": 75, "apex_mi": 12.15, "deflection_deg": 24.9, "direction": "R", "end_mi": 12.23, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1174, "seq": 13, "start_mi": 12.12}
+{"advisory_mph": 80, "apex_mi": 21.03, "deflection_deg": 24.5, "direction": "R", "end_mi": 21.16, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1342, "seq": 14, "start_mi": 21.03}
+{"advisory_mph": 90, "apex_mi": 21.27, "deflection_deg": 8.4, "direction": "L", "end_mi": 21.35, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1775, "seq": 15, "start_mi": 21.27}
+{"advisory_mph": 80, "apex_mi": 22.92, "deflection_deg": 22.4, "direction": "L", "end_mi": 23.0, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1376, "seq": 16, "start_mi": 22.88}
+{"advisory_mph": 75, "apex_mi": 23.72, "deflection_deg": 23.9, "direction": "L", "end_mi": 23.8, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1296, "seq": 17, "start_mi": 23.67}
+{"advisory_mph": 70, "apex_mi": 23.95, "deflection_deg": 18.9, "direction": "R", "end_mi": 24.02, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1132, "seq": 18, "start_mi": 23.93}
+{"advisory_mph": 75, "apex_mi": 24.95, "deflection_deg": 24.1, "direction": "L", "end_mi": 24.98, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1196, "seq": 19, "start_mi": 24.88}
+{"advisory_mph": 95, "apex_mi": 26.38, "deflection_deg": 18.4, "direction": "L", "end_mi": 26.45, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 2041, "seq": 20, "start_mi": 26.29}
+{"advisory_mph": 90, "apex_mi": 27.33, "deflection_deg": 15.7, "direction": "R", "end_mi": 27.44, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1850, "seq": 21, "start_mi": 27.33}
+{"advisory_mph": 85, "apex_mi": 27.51, "deflection_deg": 16.3, "direction": "R", "end_mi": 27.62, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1634, "seq": 22, "start_mi": 27.48}
+{"advisory_mph": 110, "apex_mi": 27.67, "deflection_deg": 11.4, "direction": "R", "end_mi": 27.74, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 2585, "seq": 23, "start_mi": 27.67}
+{"advisory_mph": 95, "apex_mi": 28.46, "deflection_deg": 31.7, "direction": "L", "end_mi": 28.58, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1924, "seq": 24, "start_mi": 28.36}
+{"advisory_mph": 60, "apex_mi": 29.7, "deflection_deg": 62.3, "direction": "L", "end_mi": 29.72, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 855, "seq": 25, "start_mi": 29.52}
+{"advisory_mph": 35, "apex_mi": 29.88, "deflection_deg": 26.5, "direction": "L", "end_mi": 29.88, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 261, "seq": 26, "start_mi": 29.87}
+{"advisory_mph": 35, "apex_mi": 29.88, "deflection_deg": 45.6, "direction": "R", "end_mi": 29.95, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 261, "seq": 27, "start_mi": 29.88}
+{"advisory_mph": 95, "apex_mi": 32.18, "deflection_deg": 16.4, "direction": "L", "end_mi": 32.25, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1989, "seq": 28, "start_mi": 32.18}
+{"advisory_mph": 95, "apex_mi": 32.69, "deflection_deg": 9.7, "direction": "L", "end_mi": 32.74, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 2097, "seq": 29, "start_mi": 32.66}
+{"advisory_mph": 70, "apex_mi": 33.56, "deflection_deg": 49.8, "direction": "R", "end_mi": 33.69, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1100, "seq": 30, "start_mi": 33.41}
+{"advisory_mph": 85, "apex_mi": 39.96, "deflection_deg": 17.0, "direction": "L", "end_mi": 40.06, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1542, "seq": 31, "start_mi": 39.94}
+{"advisory_mph": 75, "apex_mi": 40.85, "deflection_deg": 18.2, "direction": "L", "end_mi": 40.91, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1336, "seq": 32, "start_mi": 40.85}
+{"advisory_mph": 80, "apex_mi": 41.09, "deflection_deg": 31.4, "direction": "L", "end_mi": 41.12, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1464, "seq": 33, "start_mi": 40.94}
+{"advisory_mph": 75, "apex_mi": 41.55, "deflection_deg": 42.2, "direction": "R", "end_mi": 41.63, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1285, "seq": 34, "start_mi": 41.36}
+{"advisory_mph": 95, "apex_mi": 42.77, "deflection_deg": 9.5, "direction": "R", "end_mi": 42.82, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1937, "seq": 35, "start_mi": 42.77}
+{"advisory_mph": 95, "apex_mi": 45.22, "deflection_deg": 19.9, "direction": "R", "end_mi": 45.34, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1948, "seq": 36, "start_mi": 45.22}
+{"advisory_mph": 30, "apex_mi": 48.81, "deflection_deg": 72.0, "direction": "L", "end_mi": 48.84, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 185, "seq": 37, "start_mi": 48.78}
+{"advisory_mph": 70, "apex_mi": 49.07, "deflection_deg": 66.3, "direction": "R", "end_mi": 49.13, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1108, "seq": 38, "start_mi": 48.84}
+{"advisory_mph": 30, "apex_mi": 49.96, "deflection_deg": 113.8, "direction": "R", "end_mi": 49.99, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 200, "seq": 39, "start_mi": 49.92}
+{"advisory_mph": 30, "apex_mi": 50.21, "deflection_deg": 82.9, "direction": "R", "end_mi": 50.26, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 183, "seq": 40, "start_mi": 50.21}
+{"advisory_mph": 25, "apex_mi": 50.36, "deflection_deg": 74.5, "direction": "R", "end_mi": 50.43, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 161, "seq": 41, "start_mi": 50.36}
+{"advisory_mph": 80, "apex_mi": 76.5, "deflection_deg": 22.3, "direction": "R", "end_mi": 76.52, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1354, "seq": 42, "start_mi": 76.39}
+{"advisory_mph": 30, "apex_mi": 76.67, "deflection_deg": 72.0, "direction": "L", "end_mi": 76.67, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 174, "seq": 43, "start_mi": 76.57}
+{"advisory_mph": 25, "apex_mi": 76.68, "deflection_deg": 92.2, "direction": "R", "end_mi": 76.74, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 117, "seq": 44, "start_mi": 76.67}
+{"advisory_mph": 95, "apex_mi": 76.76, "deflection_deg": 12.3, "direction": "L", "end_mi": 76.77, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 2039, "seq": 45, "start_mi": 76.76}
+{"advisory_mph": 70, "apex_mi": 76.78, "deflection_deg": 8.8, "direction": "R", "end_mi": 76.8, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1091, "seq": 46, "start_mi": 76.77}
+{"advisory_mph": 85, "apex_mi": 77.71, "deflection_deg": 18.2, "direction": "R", "end_mi": 77.81, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1598, "seq": 47, "start_mi": 77.71}
+{"advisory_mph": 65, "apex_mi": 78.17, "deflection_deg": 12.1, "direction": "R", "end_mi": 78.21, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1010, "seq": 48, "start_mi": 78.17}
+{"advisory_mph": 70, "apex_mi": 78.65, "deflection_deg": 19.1, "direction": "R", "end_mi": 78.69, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1132, "seq": 49, "start_mi": 78.63}
+{"advisory_mph": 65, "apex_mi": 79.44, "deflection_deg": 60.4, "direction": "L", "end_mi": 79.46, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 896, "seq": 50, "start_mi": 79.25}
+{"advisory_mph": 70, "apex_mi": 81.08, "deflection_deg": 36.8, "direction": "L", "end_mi": 81.16, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1048, "seq": 51, "start_mi": 81.03}
+{"advisory_mph": 85, "apex_mi": 81.44, "connector": true, "deflection_deg": 11.7, "direction": "R", "end_mi": 81.52, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 1605, "seq": 52, "start_mi": 81.44}
+{"advisory_mph": 45, "apex_mi": 81.68, "connector": true, "deflection_deg": 91.1, "direction": "R", "end_mi": 81.72, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 492, "seq": 53, "start_mi": 81.58}
+{"advisory_mph": 35, "apex_mi": 81.96, "connector": true, "deflection_deg": 91.0, "direction": "R", "end_mi": 81.97, "leg": "elberton_ga_us:augusta_ga_us", "min_radius_ft": 280, "seq": 54, "start_mi": 81.89}
+{"advisory_mph": 20, "apex_mi": 0.0, "connector": true, "deflection_deg": 92.4, "direction": "R", "end_mi": 0.03, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 107, "seq": 1, "start_mi": 0.0}
+{"advisory_mph": 35, "apex_mi": 0.08, "connector": true, "deflection_deg": 47.1, "direction": "R", "end_mi": 0.13, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 311, "seq": 2, "start_mi": 0.07}
+{"advisory_mph": 45, "apex_mi": 0.19, "connector": true, "deflection_deg": 33.4, "direction": "L", "end_mi": 0.31, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 418, "seq": 3, "start_mi": 0.19}
+{"advisory_mph": 100, "apex_mi": 0.59, "connector": true, "deflection_deg": 9.1, "direction": "L", "end_mi": 0.63, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2182, "seq": 4, "start_mi": 0.56}
+{"advisory_mph": 75, "apex_mi": 0.95, "deflection_deg": 21.6, "direction": "L", "end_mi": 1.0, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1199, "seq": 5, "start_mi": 0.92}
+{"advisory_mph": 15, "apex_mi": 1.07, "deflection_deg": 90.1, "direction": "L", "end_mi": 1.12, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 65, "seq": 6, "start_mi": 1.07}
+{"advisory_mph": 35, "apex_mi": 1.17, "deflection_deg": 160.4, "direction": "R", "end_mi": 1.29, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 245, "seq": 7, "start_mi": 1.12}
+{"advisory_mph": 95, "apex_mi": 1.98, "deflection_deg": 17.4, "direction": "L", "end_mi": 2.03, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1961, "seq": 8, "start_mi": 1.93}
+{"advisory_mph": 90, "apex_mi": 2.7, "deflection_deg": 11.6, "direction": "L", "end_mi": 2.75, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1781, "seq": 9, "start_mi": 2.7}
+{"advisory_mph": 105, "apex_mi": 3.7, "deflection_deg": 8.0, "direction": "L", "end_mi": 3.74, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2365, "seq": 10, "start_mi": 3.67}
+{"advisory_mph": 100, "apex_mi": 4.1, "deflection_deg": 12.4, "direction": "R", "end_mi": 4.22, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2187, "seq": 11, "start_mi": 4.1}
+{"advisory_mph": 75, "apex_mi": 10.07, "deflection_deg": 13.5, "direction": "R", "end_mi": 10.12, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1328, "seq": 12, "start_mi": 10.07}
+{"advisory_mph": 55, "apex_mi": 10.89, "deflection_deg": 19.0, "direction": "L", "end_mi": 10.94, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 729, "seq": 13, "start_mi": 10.86}
+{"advisory_mph": 25, "apex_mi": 15.28, "deflection_deg": 102.8, "direction": "R", "end_mi": 15.3, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 138, "seq": 14, "start_mi": 15.28}
+{"advisory_mph": 60, "apex_mi": 15.34, "deflection_deg": 41.8, "direction": "L", "end_mi": 15.45, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 798, "seq": 15, "start_mi": 15.33}
+{"advisory_mph": 105, "apex_mi": 15.78, "deflection_deg": 8.5, "direction": "L", "end_mi": 15.85, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2511, "seq": 16, "start_mi": 15.78}
+{"advisory_mph": 100, "apex_mi": 16.74, "deflection_deg": 24.3, "direction": "L", "end_mi": 16.79, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2324, "seq": 17, "start_mi": 16.61}
+{"advisory_mph": 100, "apex_mi": 17.01, "deflection_deg": 37.1, "direction": "L", "end_mi": 17.09, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2166, "seq": 18, "start_mi": 16.83}
+{"advisory_mph": 25, "apex_mi": 17.34, "deflection_deg": 66.1, "direction": "R", "end_mi": 17.37, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 118, "seq": 19, "start_mi": 17.33}
+{"advisory_mph": 65, "apex_mi": 19.9, "deflection_deg": 47.8, "direction": "L", "end_mi": 19.96, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 872, "seq": 20, "start_mi": 19.82}
+{"advisory_mph": 60, "apex_mi": 20.28, "deflection_deg": 91.7, "direction": "R", "end_mi": 20.39, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 861, "seq": 21, "start_mi": 20.1}
+{"advisory_mph": 95, "apex_mi": 21.82, "deflection_deg": 20.5, "direction": "L", "end_mi": 21.97, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1941, "seq": 22, "start_mi": 21.82}
+{"advisory_mph": 75, "apex_mi": 22.27, "deflection_deg": 25.5, "direction": "L", "end_mi": 22.28, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1297, "seq": 23, "start_mi": 22.22}
+{"advisory_mph": 70, "apex_mi": 22.37, "deflection_deg": 27.3, "direction": "L", "end_mi": 22.44, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1093, "seq": 24, "start_mi": 22.31}
+{"advisory_mph": 110, "apex_mi": 23.69, "deflection_deg": 14.1, "direction": "R", "end_mi": 23.71, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2588, "seq": 25, "start_mi": 23.62}
+{"advisory_mph": 95, "apex_mi": 23.82, "deflection_deg": 14.3, "direction": "R", "end_mi": 23.88, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1949, "seq": 26, "start_mi": 23.78}
+{"advisory_mph": 80, "apex_mi": 24.97, "deflection_deg": 26.9, "direction": "L", "end_mi": 25.04, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1385, "seq": 27, "start_mi": 24.9}
+{"advisory_mph": 30, "apex_mi": 26.28, "deflection_deg": 40.1, "direction": "L", "end_mi": 26.33, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 211, "seq": 28, "start_mi": 26.27}
+{"advisory_mph": 80, "apex_mi": 26.86, "deflection_deg": 10.6, "direction": "L", "end_mi": 26.9, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1483, "seq": 29, "start_mi": 26.86}
+{"advisory_mph": 35, "apex_mi": 27.13, "deflection_deg": 10.6, "direction": "R", "end_mi": 27.14, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 297, "seq": 30, "start_mi": 27.13}
+{"advisory_mph": 15, "apex_mi": 27.19, "deflection_deg": 88.3, "direction": "L", "end_mi": 27.22, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 50, "seq": 31, "start_mi": 27.19}
+{"advisory_mph": 35, "apex_mi": 27.24, "deflection_deg": 20.3, "direction": "L", "end_mi": 27.24, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 250, "seq": 32, "start_mi": 27.24}
+{"advisory_mph": 30, "apex_mi": 27.34, "deflection_deg": 213.2, "direction": "R", "end_mi": 27.44, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 223, "seq": 33, "start_mi": 27.24}
+{"advisory_mph": 75, "apex_mi": 51.67, "deflection_deg": 8.0, "direction": "R", "end_mi": 51.71, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1186, "seq": 34, "start_mi": 51.67}
+{"advisory_mph": 115, "apex_mi": 51.72, "deflection_deg": 10.3, "direction": "L", "end_mi": 51.77, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2927, "seq": 35, "start_mi": 51.72}
+{"advisory_mph": 105, "apex_mi": 60.9, "deflection_deg": 9.3, "direction": "L", "end_mi": 60.98, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2488, "seq": 36, "start_mi": 60.9}
+{"advisory_mph": 65, "apex_mi": 67.27, "deflection_deg": 15.0, "direction": "R", "end_mi": 67.31, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 906, "seq": 37, "start_mi": 67.27}
+{"advisory_mph": 50, "apex_mi": 67.46, "deflection_deg": 86.4, "direction": "L", "end_mi": 67.59, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 570, "seq": 38, "start_mi": 67.39}
+{"advisory_mph": 110, "apex_mi": 67.82, "deflection_deg": 11.5, "direction": "R", "end_mi": 67.87, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2777, "seq": 39, "start_mi": 67.79}
+{"advisory_mph": 85, "apex_mi": 68.07, "deflection_deg": 31.9, "direction": "R", "end_mi": 68.13, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1683, "seq": 40, "start_mi": 67.92}
+{"advisory_mph": 65, "apex_mi": 68.79, "deflection_deg": 38.9, "direction": "L", "end_mi": 68.85, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 979, "seq": 41, "start_mi": 68.69}
+{"advisory_mph": 90, "apex_mi": 69.68, "deflection_deg": 10.8, "direction": "R", "end_mi": 69.75, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1879, "seq": 42, "start_mi": 69.68}
+{"advisory_mph": 50, "apex_mi": 70.03, "deflection_deg": 17.8, "direction": "R", "end_mi": 70.05, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 537, "seq": 43, "start_mi": 70.03}
+{"advisory_mph": 35, "apex_mi": 70.31, "deflection_deg": 13.7, "direction": "R", "end_mi": 70.31, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 289, "seq": 44, "start_mi": 70.3}
+{"advisory_mph": 35, "apex_mi": 70.31, "deflection_deg": 24.0, "direction": "L", "end_mi": 70.34, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 289, "seq": 45, "start_mi": 70.31}
+{"advisory_mph": 50, "apex_mi": 70.43, "deflection_deg": 11.5, "direction": "R", "end_mi": 70.43, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 563, "seq": 46, "start_mi": 70.43}
+{"advisory_mph": 50, "apex_mi": 70.71, "deflection_deg": 12.5, "direction": "L", "end_mi": 70.72, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 547, "seq": 47, "start_mi": 70.71}
+{"advisory_mph": 55, "apex_mi": 70.72, "deflection_deg": 17.0, "direction": "R", "end_mi": 70.73, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 646, "seq": 48, "start_mi": 70.72}
+{"advisory_mph": 70, "apex_mi": 70.73, "deflection_deg": 31.4, "direction": "L", "end_mi": 70.8, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1154, "seq": 49, "start_mi": 70.73}
+{"advisory_mph": 115, "apex_mi": 71.55, "connector": true, "deflection_deg": 8.8, "direction": "R", "end_mi": 71.76, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 2862, "seq": 50, "start_mi": 71.55}
+{"advisory_mph": 45, "apex_mi": 71.77, "connector": true, "deflection_deg": 21.9, "direction": "L", "end_mi": 71.81, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 464, "seq": 51, "start_mi": 71.77}
+{"advisory_mph": 70, "apex_mi": 71.82, "connector": true, "deflection_deg": 20.6, "direction": "R", "end_mi": 71.87, "leg": "elberton_ga_us:greenville_sc_us", "min_radius_ft": 1016, "seq": 52, "start_mi": 71.82}
 {"advisory_mph": 55, "apex_mi": 0.2, "connector": true, "deflection_deg": 16.0, "direction": "R", "end_mi": 0.25, "leg": "elizabethtown_ky_us:bowling_green_ky_us", "min_radius_ft": 729, "seq": 1, "start_mi": 0.2}
 {"advisory_mph": 55, "apex_mi": 0.41, "connector": true, "deflection_deg": 19.5, "direction": "R", "end_mi": 0.44, "leg": "elizabethtown_ky_us:bowling_green_ky_us", "min_radius_ft": 621, "seq": 2, "start_mi": 0.41}
 {"advisory_mph": 45, "apex_mi": 0.45, "connector": true, "deflection_deg": 14.7, "direction": "L", "end_mi": 0.45, "leg": "elizabethtown_ky_us:bowling_green_ky_us", "min_radius_ft": 418, "seq": 3, "start_mi": 0.44}
