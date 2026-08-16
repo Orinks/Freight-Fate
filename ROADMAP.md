@@ -790,6 +790,17 @@ onto exit signalling.
       facilities. Real and wanted, a data project to scope on its own. It is
       the realism fix, not the safety fix, and does not gate anything now
       that (a) and (b) have landed.
+- [x] **"Selected" with the radio off read as a dead key (Darren,
+      2026-08-16).** Filed as a bug; it is not one. Probed end to end: tuning
+      while off picks the station, plays nothing, and `toggle` then lands on
+      exactly that station, so the pre-selection is real and works. What was
+      wrong was the sentence -- it stopped at "Selected ...", which is
+      indistinguishable from a station that failed to play. All three off-air
+      replies now carry `RADIO_OFF_SELECTION_HINT`. It names no control on
+      purpose: the toggle is a keyboard key, the pad has no radio at all, and
+      spoken advice must not name a control this driver may not have. A test
+      pins the promise as well as the wording -- switching on must land on
+      the picked station, or the sentence becomes a lie.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each

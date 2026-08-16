@@ -367,3 +367,49 @@ def test_catalog_entries_have_spoken_identity():
         + "\n".join(problems[:40])
         + (f"\n... and {len(problems) - 40} more" if len(problems) > 40 else "")
     )
+
+
+def test_tuning_with_the_radio_off_says_what_happens_next():
+    """Selecting a station while the radio is off is deliberate, not a dead key.
+
+    A tester filed it as a bug (Darren, 2026-08-16) because the reply stopped
+    at "Selected ...", which reads exactly like a station that failed to play.
+    The pre-selection is real -- switching on lands on it -- so the sentence
+    now says so. It names no control: the radio toggle is a keyboard key and
+    the pad has none, and spoken advice must not name a control the driver
+    may not have.
+    """
+    from freight_fate.radio import RADIO_OFF_SELECTION_HINT
+
+    radio = RadioState(streamer_safe=False)
+    radio.enabled = False
+    backend = RecordingBackend()
+
+    tuned = radio.tune(1, backend)
+    assert tuned.message.startswith("Radio off.")
+    assert RADIO_OFF_SELECTION_HINT in tuned.message
+    assert not tuned.enabled
+    assert backend.played == [], "a station picked while off must not play"
+
+    jumped = radio.tune_category(1, backend)
+    assert jumped.message.startswith("Radio off.")
+    assert RADIO_OFF_SELECTION_HINT in jumped.message
+    assert backend.played == []
+
+    # The promise the sentence makes has to be true: switching on plays the
+    # station that was picked, rather than retuning somewhere else.
+    picked = radio.station_id
+    switched = radio.toggle(backend)
+    assert switched.enabled
+    assert radio.station_id == picked
+    assert backend.played and backend.played[-1][0] == picked
+
+
+def test_the_hint_is_absent_once_the_radio_is_on():
+    """It explains an unplayed selection; with the radio on there is none."""
+    from freight_fate.radio import RADIO_OFF_SELECTION_HINT
+
+    radio = RadioState(streamer_safe=False)
+    assert radio.enabled
+    message = radio.tune(1, RecordingBackend()).message
+    assert RADIO_OFF_SELECTION_HINT not in message
