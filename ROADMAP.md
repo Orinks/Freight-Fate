@@ -739,6 +739,12 @@ onto exit signalling.
       answering a driver who wants quiet with a paragraph of help. Right
       bumper plus X reads the posted limit, the pad's answer to S, in the
       slot Sarah proposed.
+- [x] **Learn game sounds had no Back row (owner, 2026-08-16).** Escape
+      worked and the intro said so, but every other menu in the game also
+      offers a Back item -- 16 in the main menu alone -- so this screen was
+      the one place a player had to have heard the intro to know the way out.
+      Both screens now append it. On the category screen it runs `go_back`,
+      which already stops a held demo, so the row cannot leave a cue ringing.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each
