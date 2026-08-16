@@ -464,7 +464,7 @@ name of the shorter rendering and is no longer a thing the player selects.
 | The loudest rung, technique included | coaching | verbose, tutorial mode, chatty | `DRIVING_SPEECH_MODES` |
 | The working default | standard | normal, default | `DRIVING_SPEECH_MODES` |
 | Confirmations and status become sounds | quiet | terse (that is the rendering, not the rung), minimal | `DRIVING_SPEECH_MODES` |
-| Safety, cost, and the turn you must take | urgent only | emergency mode, critical only | `DRIVING_SPEECH_MODES` |
+| Safety, cost, and route instructions | urgent only | emergency mode, critical only | `DRIVING_SPEECH_MODES` |
 
 Roadside colour -- billboards, place names, landmarks -- is **not** governed
 by these rungs. It answers to the chatter switches and the place-callouts

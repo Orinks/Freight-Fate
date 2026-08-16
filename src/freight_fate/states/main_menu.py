@@ -1059,9 +1059,10 @@ SETTINGS_LAYOUT_NOTICES = {
         "still speak every safety call, route instruction, and money "
         "consequence; quiet only trades confirmations and status updates for "
         "short sounds instead of words. Two new choices sit on either end: "
-        "coaching, which explains driving technique along with everything "
-        "standard says, and urgent only, which speaks just the safety calls, "
-        "what things cost, and the turn you have to take."
+        "coaching, meant to add driving-technique tips on top of everything "
+        "standard says, though for now the two sound the same while that "
+        "part is still being built, and urgent only, which speaks just the "
+        "safety calls, what things cost, and route instructions."
     ),
 }
 
@@ -1528,12 +1529,13 @@ class SettingsCategoryState(MenuState):
             (
                 lambda: f"Driving speech: {s.driving_speech.replace('_', ' ')}",
                 self._cycle_driving_speech,
-                "How much the road tells you. Coaching explains technique, "
-                "standard is the working default, quiet cuts confirmations "
-                "and status to sounds, and urgent only leaves the safety "
-                "calls, what things cost, and the turn you have to take. "
-                "Billboards, place names and landmarks are not part of this "
-                "-- they have their own switches below.",
+                "How much the road tells you. Coaching and standard sound "
+                "the same for now, speaking every tip, confirmation, and "
+                "status update in full; quiet cuts confirmations and status "
+                "to sounds, and urgent only leaves the safety calls, what "
+                "things cost, and route instructions. Billboards, place "
+                "names and landmarks are not part of this -- they have "
+                "their own switches below.",
             ),
             (
                 lambda: f"Roadside chatter: {s.chatter_summary()}",
@@ -1595,7 +1597,10 @@ class SettingsCategoryState(MenuState):
                 lambda: f"Driving event voice: {self._event_voice_label()}",
                 self._cycle_event_voice,
                 "Speaks road events through the main voice or a separate SAPI or "
-                "OneCore voice, so a screen reader cannot cut them off.",
+                "OneCore voice, so a screen reader cannot cut them off. The rate, "
+                "pitch, volume, and voice rows below appear in this category only "
+                "when the voice speaking to you supports them; with a screen "
+                "reader running, those four are set in the screen reader itself.",
             ),
         ]
         if speech.supports_rate:

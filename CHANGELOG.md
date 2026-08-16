@@ -3140,9 +3140,9 @@
   readouts as full sentences (Standard easing off repeat tips on its own is
   still coming). Quiet turns tips, confirmations, and status readouts into
   a short sound instead of a sentence, and keeps the safety calls, what
-  things cost, and the turn you actually have to take as words. Urgent
-  only keeps that same short set of words plus the confirmation sound, but
-  tips and status updates go fully quiet -- no words and no sound, though
+  things cost, and route instructions as words. Urgent only keeps that
+  same short set of words plus the confirmation sound, but tips and
+  status updates go fully quiet -- no words and no sound, though
   you can still pull them up from the message log. Billboards, place
   names, and landmarks are not part of this ladder and keep their own
   switches, so you can drive a quiet cab through a talkative countryside.
@@ -3156,6 +3156,12 @@
   against other things being said and never reach your ears at all, so
   pressing the rest key looked like it did nothing. It now always gets
   through.
+
+- **The driving speech settings explain themselves again.** A rewrite of
+  the Driving speech row's help text dropped the line explaining that the
+  rate, pitch, volume, and voice rows only show up when your voice supports
+  them, and that a screen reader sets those four itself. It is back, now on
+  the Driving event voice row.
 
 - **A stalled engine, a carrier-grounded tractor, and a snapped tire chain
   now speak on Quiet and Urgent only.** These three were wrongly grouped

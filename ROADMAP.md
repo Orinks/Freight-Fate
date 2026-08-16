@@ -760,6 +760,24 @@ onto exit signalling.
       Standard are presently indistinguishable to a player. Needs the
       leg-scoped "spoken once" and enter/worsen/clear-only bookkeeping
       the table's own docstring describes.
+- [ ] **Urgent only's NAVIGATION row is TERSE, not act-now-only (final
+      review of this branch, finding 5).** The spec calls urgent only's
+      navigation cell "act-now cues only," but
+      `DRIVING_SPEECH_DISPOSITIONS["urgent_only"][SpeechCategory.NAVIGATION]`
+      ships `Disposition.TERSE`, so every navigation line speaks there --
+      progress, distance-to-go, and upcoming-stop previews included, not
+      only the turn the player has to take right now.
+      `states/driving_events.py`'s taxonomy split (NAVIGATION vs. STATUS)
+      narrows this in practice for most call sites, which is a defensible
+      reading but was never declared as the intended scope. Needs either a
+      genuine act-now filter inside NAVIGATION (drop progress/distance/
+      upcoming-stop previews specifically, keep the maneuver-now line) or a
+      deliberate decision that the taxonomy split already satisfies the
+      spec, written down here instead of left implicit. Player-facing copy
+      was softened in the meantime from "the turn you have to take" to
+      "route instructions" (CHANGELOG, user manual, the Driving speech
+      settings row, and the settings-version-3 notice) so nothing promises
+      filtering that is not built.
 - [ ] **A stale CONFIRMATION line can resurface and bury what the player
       just asked for (found by task 10, adversarial scenario
       `settings_flips_mid_drive`).** A `CONFIRMATION` line (e.g.
