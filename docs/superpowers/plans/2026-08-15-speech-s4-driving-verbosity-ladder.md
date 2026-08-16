@@ -936,6 +936,20 @@ git commit -m "feat(speech): coaching, confirmations and status say what they ar
 - Consumes: the gate from Task 3, `SpeechCategory`.
 - Produces: nothing new — this closes two invariants the spec states and the gate would otherwise violate.
 
+**Also carried from the Task 3 review — two test gaps in the gate this task
+extends, both traceable to Task 3's brief rather than its implementer:**
+
+1. No test exercises the gate on `GameContext.say` at all — only `say_event`
+   is covered. `say`'s gate is separately hand-written code (`app.py:199-209`),
+   not shared logic, so its `MessageCategory.GENERAL` logging path is verified
+   only by inspection. Add a test that silences a category and asserts the
+   line reaches the log through `say`.
+2. `test_a_silenced_category_still_reaches_the_message_log` asserts only a
+   count delta (`before + 1`), not the logged text. A regression that logged
+   an empty fallback or a stale string would pass it. Assert the actual text.
+
+Fix both while you are in this file; they are two short tests.
+
 These are spec invariants 3 and 4. Without them the ladder ships two real
 bugs: a brand-new player who picks `quiet` before their first drive loses the
 teaching they have not had yet (R15's exact failure mode, reintroduced by a
