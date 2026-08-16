@@ -826,6 +826,42 @@ onto exit signalling.
       never interrupted either and called the behaviour deliberate. That was
       true of 1.9's code and wrong as an answer, because she was reporting a
       CHANGE. Corrected in the living document.
+- [x] **Emergency braking, pass one: two controls the pad was promised and
+      never had (owner, 2026-08-16).** `emergency = keys[pygame.K_b]` was the
+      only source of the emergency application, while the controller help,
+      `input_hints` and the manual all said "press the left trigger fully for
+      the hardest stop". A pad driver got a full service application and none
+      of what the emergency one carries -- the air cue, the rumble, and every
+      check keyed off `emergency_brake`. `PAD_EMERGENCY_BRAKE = 0.97` now
+      arms it, gated on `not backing` because holding that same trigger from
+      a stop is the reverse gesture. Worse in the same area: the microsleep
+      reaction check was four keys, so a controller-only driver could not
+      react to "steer or brake now" and drifted off the road every time; the
+      stick and the trigger now count, at keyboard parity (a held Down arrow
+      already counted).
+- [ ] **Emergency braking, realism gaps still open (measured 2026-08-16).**
+      Two found while doing the above, neither a quick win, both wanted:
+      (a) THE BUDGET DISAGREES WITH THE STOP. `EMERGENCY_BRAKE_MULT = 1.6`
+      makes the emergency application 5.49 m/s^2 against a full service
+      application's 3.43 -- 211 ft versus 334 ft from 60 mph. But
+      `full_service_decel_mps2`, whose own docstring says it is "what an
+      emergency-braking budget must use", returns the UNBOOSTED figure, so
+      every stopping-distance cue is computed on a truck 1.6x weaker than the
+      one B actually delivers. Note before changing it: 211 ft is close to
+      real modern tractor-trailer performance and the FMVSS 121 reduced-
+      stopping-distance ceiling of 250 ft, while 334 ft is a pre-2011 truck.
+      That points at `max_brake_decel_g` being low and the boost quietly
+      compensating, so the fix is probably to raise the base and drop the
+      multiplier rather than to nerf the emergency stop. Needs an owner call
+      on feel, since it moves every stop in the game.
+      (b) NOTHING EVER LOCKS UP. The jake has a traction cap and
+      `jake_slipping` to start a trolley jackknife; the foundation brakes
+      have no equivalent. Grip does scale the force correctly (measured: 5.49
+      dry, 3.85 wet, 0.99 on glare ice, all under the tire limit), so the
+      truck is never superhuman -- it simply always makes a clean stop, with
+      no lockup, no lost steering and no jackknife however hard it is slammed
+      on ice. There is no ABS modelled either, so this is idealised rather
+      than either era of real truck. The bigger of the two jobs.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each

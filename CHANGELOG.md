@@ -17,6 +17,16 @@
   Requested by William, who wrote in to say the granite capital of the world
   had been left out. He was right.
 
+- **The controller can make the hardest stop, and can wake you up.** Two
+  things the pad was told it could do and could not. Pressing the left
+  trigger all the way down is now the emergency brake, exactly as the help
+  has always said -- before this it was only ever a hard normal stop, and the
+  emergency application was on the keyboard's B key alone. And when you are
+  nodding off and the truck says to steer or brake, steering with the stick
+  or pressing the left trigger now counts: on a controller neither of those
+  was a key, so a controller driver could not react at all and went off the
+  road every time. Both found while looking at emergency braking.
+
 - **Pressing a key cuts the speech in progress again.** If something is being
   read out and you press a key to ask for something else, you get the new
   answer straight away instead of waiting for the old line to finish. That is

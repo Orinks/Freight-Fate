@@ -65,6 +65,16 @@ PICKET_DUCK = 0.12
 # (main_menu.py's _volume helper), so the wheel and the menu can never
 # disagree about a reachable value.
 RADIO_VOLUME_STEP = 0.1
+
+# How far down the left trigger has to be before it counts as the emergency
+# application rather than a hard service stop. The controller help, the input
+# hints and the manual have all promised "press the left trigger fully for
+# the hardest stop" since the pad shipped, and nothing implemented it: the
+# emergency flag was read from the B key alone, so a pad driver got a full
+# service application and none of what the emergency one carries (owner,
+# 2026-08-16). Set high on purpose -- this is the pedal you stand on when
+# something is about to happen, and it must not fire on a firm normal stop.
+PAD_EMERGENCY_BRAKE = 0.97
 # Flutter rate bounds: parked multipath barely moves (slow wander floor);
 # the ceiling is perceptual -- past ~9 events a second it just reads as
 # noise, and the one-shot mixer would thrash.
@@ -243,8 +253,17 @@ class DrivingUpdateMixin:
         # gesture, cruise cancel, the hazard's brake answer -- sees one
         # truth. Microsleeps stay on the raw keys: only a live reaction
         # proves the driver awake.
+        # The latch releases on the emergency application, so it has to see the
+        # pad's version of it too. Read raw here rather than gated on backing:
+        # a trigger buried to the floor should drop a latched pedal whichever
+        # direction the truck is going.
         hand_up, key_down, throttle_latched = self._update_pedal_latches(
-            key_up, key_down, pad_throttle, pad_brake, keys[pygame.K_b], dt
+            key_up,
+            key_down,
+            pad_throttle,
+            pad_brake,
+            keys[pygame.K_b] or pad_brake >= PAD_EMERGENCY_BRAKE,
+            dt,
         )
         # The latch is the LOWEST-priority speed input in "assists first"
         # mode: while cruise, the keeper, or curve assist is engaged it
@@ -299,7 +318,11 @@ class DrivingUpdateMixin:
         if pad_brake > 0.05 and not backing:
             t.brake = max(t.brake, pad_brake)
         braking = braking_ramp or (pad_brake > 0.05 and not backing)
-        emergency = keys[pygame.K_b]
+        # "not backing" matters more here than it looks: in automatic, holding
+        # the left trigger from a stop is the gesture that shifts to reverse,
+        # so without it every backing manoeuvre would slam the emergency
+        # application on and flat-spot the tires for it.
+        emergency = keys[pygame.K_b] or (pad_brake >= PAD_EMERGENCY_BRAKE and not backing)
         # A real truck drops cruise at the first tap of the service brake.
         # Only the player's own pedal cancels here; the sim's automatic brake
         # ramps (reverse arrest, hazard events) go through their own cancels.
@@ -3056,8 +3079,20 @@ class DrivingUpdateMixin:
         if self.truck.speed_mph <= HAZARD_SAFE_MPH:
             self._resolve_microsleep(silent=True)
             return
+        # The line the truck just spoke is "Steer or brake now to stay awake",
+        # and on a pad both of those are the stick and the left trigger --
+        # neither of which is a key. A controller-only driver could not wake
+        # up at all and drifted off the road every time (owner, 2026-08-16).
+        # Parity with the keyboard is the bar: a held Down arrow already
+        # counts as a reaction, so a held trigger does too.
+        pad = self.ctx.controller
+        pad_reacted = pad.active and (abs(pad.steering) > 0.0 or pad.brake > 0.05)
         reacted = (
-            keys[pygame.K_LEFT] or keys[pygame.K_RIGHT] or keys[pygame.K_DOWN] or keys[pygame.K_b]
+            keys[pygame.K_LEFT]
+            or keys[pygame.K_RIGHT]
+            or keys[pygame.K_DOWN]
+            or keys[pygame.K_b]
+            or pad_reacted
         )
         if reacted:
             self._resolve_microsleep()
