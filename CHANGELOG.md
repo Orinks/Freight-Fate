@@ -445,6 +445,15 @@
 
 ### Fixed
 
+- **A career waiting on your decision now says so on the menu.** When the
+  same career has been played on two computers, the game stops backing it up
+  until you say which copy to keep -- and the only place to say so is Restore
+  a cloud backup on the Online menu. That row gave no sign anything was
+  waiting, and its name suggests it will replace the career you just played,
+  so it was easy to arrow past for days while nothing backed up. It now names
+  the career that is waiting, and says that nothing backs up until you pick,
+  that choosing this computer's save keeps what you have played, and that
+  nothing is overwritten until you choose.
 - **The weigh station sound can be heard in Learn game sounds.** Pressing
   Enter on it played the bed at exactly the level the road plays it, and on
   the road that level is deliberately low because the sound works by coming
