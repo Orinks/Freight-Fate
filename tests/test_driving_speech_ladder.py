@@ -7,6 +7,7 @@ visible diff in this file rather than a behaviour surprise on the road.
 from __future__ import annotations
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.settings import Settings
 from freight_fate.speech_pacing import (
@@ -130,3 +131,94 @@ def test_verbosity_is_gone() -> None:
     # 11 references across 7 src files, all replaced -- a leftover reader
     # would silently see normal for every player.
     assert not hasattr(Settings(), "speech_verbosity")
+
+
+def _app():
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.settings.sapi_events = True
+    return app
+
+
+def test_a_silenced_category_never_reaches_the_voice() -> None:
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "urgent_only"
+
+        app.ctx.say_event(
+            "Load damage 43 percent.", interrupt=False, category=SpeechCategory.STATUS
+        )
+
+        assert spoken == []
+    finally:
+        app.shutdown()
+
+
+def test_a_silenced_category_still_reaches_the_message_log() -> None:
+    # Nothing the ladder cuts becomes unreachable -- the log and the
+    # status-query keys still answer for it.
+    app = _app()
+    try:
+        app.ctx.speech.say_event = speech_stub()
+        app.ctx.settings.driving_speech = "urgent_only"
+        before = len(app.ctx.message_log.messages)
+
+        app.ctx.say_event(
+            "Load damage 43 percent.", interrupt=False, category=SpeechCategory.STATUS
+        )
+
+        assert len(app.ctx.message_log.messages) == before + 1
+    finally:
+        app.shutdown()
+
+
+def test_safety_speaks_at_the_quietest_rung() -> None:
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "urgent_only"
+
+        app.ctx.say_event(
+            "Brake or change lanes! Slow car ahead.",
+            interrupt=True,
+            category=SpeechCategory.SAFETY,
+        )
+
+        assert spoken == ["Brake or change lanes! Slow car ahead."]
+    finally:
+        app.shutdown()
+
+
+def test_the_rung_picks_the_rendering() -> None:
+    from freight_fate.speech_text import SpokenMessage
+
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        pair = SpokenMessage("Watch your speed. The limit is 65 miles per hour.", "Limit 65.")
+
+        app.ctx.settings.driving_speech = "quiet"
+        app.ctx.say_event(pair, interrupt=True, category=SpeechCategory.NAVIGATION)
+
+        assert spoken == ["Limit 65."]
+    finally:
+        app.shutdown()
+
+
+def test_an_untagged_line_still_speaks_at_the_quietest_rung() -> None:
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "urgent_only"
+
+        app.ctx.say_event("Something nobody classified.", interrupt=False)
+
+        assert spoken == ["Something nobody classified."]
+    finally:
+        app.shutdown()

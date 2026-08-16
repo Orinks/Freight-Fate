@@ -26,6 +26,7 @@ from .models.profile import Profile
 from .music import music_track_duration_s
 from .settings import Settings
 from .speech import EventPriority, EventSpeechPacer, Speech
+from .speech_pacing import SpeechCategory
 from .speech_text import SpokenMessage
 from .states.base import State
 
@@ -187,7 +188,25 @@ class GameContext:
             self._truck_parking = TruckParkingProvider()
         return self._truck_parking
 
-    def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
+    def say(
+        self,
+        text: str,
+        interrupt: bool = True,
+        review: bool = True,
+        *,
+        category: SpeechCategory | None = None,
+    ) -> None:
+        if not self.settings.speaks(category):
+            # The player's rung silences this category. The line still
+            # reaches the review log, so the information is cut from the
+            # drive, not from the game -- the review key that exists to
+            # answer for it still can.
+            if isinstance(text, SpokenMessage):
+                text = text.render(self.settings.renders_terse()) or text.normal
+            transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)
+            if review:
+                self.message_log.add(text, MessageCategory.GENERAL)
+            return
         if isinstance(text, SpokenMessage):
             # A normal/terse pair resolves here, in the delivery layer, so
             # coverage never again depends on a call-site branch (research
@@ -258,6 +277,7 @@ class GameContext:
         priority: EventPriority | None = None,
         key: str | None = None,
         force: bool = False,
+        category: SpeechCategory | None = None,
     ) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
@@ -302,6 +322,17 @@ class GameContext:
         A pair whose terse rendering is empty is dropped whole in terse
         mode: not spoken, not logged, exactly like a muted chatter line.
         """
+        if not self.settings.speaks(category) and not force:
+            # The player's rung silences this category. The line still
+            # reaches the review log and the status keys, so the
+            # information is cut from the drive, not from the game.
+            # ``force`` is a line the player asked for and must hear.
+            if isinstance(text, SpokenMessage):
+                text = text.render(self.settings.renders_terse()) or text.normal
+            transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)
+            if review:
+                self.message_log.add(text, MessageCategory.EVENT)
+            return
         if isinstance(text, SpokenMessage):
             text = text.render(self.settings.renders_terse())
             if not text:
