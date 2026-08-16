@@ -430,7 +430,6 @@ class Settings:
     @classmethod
     def load(cls) -> Settings:
         s = cls()
-        defaults = cls()
         data = None
         try:
             with open(s.path, encoding="utf-8") as f:
@@ -438,6 +437,25 @@ class Settings:
             if not isinstance(data, dict):
                 log.warning("Settings file is not a settings object; using defaults")
                 data = {}
+        except FileNotFoundError:
+            pass
+        except (json.JSONDecodeError, OSError):
+            log.warning("Could not read settings; using defaults", exc_info=True)
+        return cls.from_dict(data)
+
+    @classmethod
+    def from_dict(cls, data: dict | None) -> Settings:
+        """Build settings from a parsed settings file, running every migration.
+
+        Split out of :meth:`load` so the migrations are testable without a
+        filesystem. ``data`` is ``None`` when there was no readable file and
+        every default stands -- several migrations below distinguish that
+        from an empty dict (a file that exists but says nothing), and that
+        distinction must survive the split.
+        """
+        s = cls()
+        defaults = cls()
+        if isinstance(data, dict):
             for k, v in data.items():
                 if hasattr(s, k):
                     setattr(s, k, v)
@@ -445,10 +463,6 @@ class Settings:
             # silently expand it into public Profile sharing.
             if data.get("profile_sharing_consent_version") != PROFILE_SHARING_CONSENT_VERSION:
                 s.online_presence = False
-        except FileNotFoundError:
-            pass
-        except (json.JSONDecodeError, OSError):
-            log.warning("Could not read settings; using defaults", exc_info=True)
         # ``steering_assist`` became ``lane_keeping`` in 1.9. A save that
         # already carries the new key is read as-is; anything older has its
         # legacy value carried across to the mode that behaves identically,
