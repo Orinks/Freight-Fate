@@ -2476,10 +2476,26 @@ class DrivingUpdateMixin:
         action = self.radio.toggle(self._radio_backend)
         self._finish_radio_action(action)
 
+    def _radio_switched_off(self) -> bool:
+        """Tick and say so when a dial key lands on a radio that is off.
+
+        Sibling of ``_radio_no_power``, and deliberately the same shape: the
+        two "not right now" answers should feel identical, so a driver learns
+        one response rather than two. Call it after the power check -- no
+        power is the more basic reason and owns the reply.
+        """
+        if self.radio.enabled:
+            return False
+        self.ctx.audio.play("ui/error")
+        self.ctx.say("Radio off.")
+        return True
+
     def _tune_radio(self, direction: int) -> None:
         if self._radio_no_power():
             return
         self._sync_radio_settings()
+        if self._radio_switched_off():
+            return
         action = self.radio.tune(direction, self._radio_backend)
         self._finish_radio_action(action)
 
@@ -2487,6 +2503,8 @@ class DrivingUpdateMixin:
         if self._radio_no_power():
             return
         self._sync_radio_settings()
+        if self._radio_switched_off():
+            return
         action = self.radio.tune_category(direction, self._radio_backend)
         self._finish_radio_action(action)
 
