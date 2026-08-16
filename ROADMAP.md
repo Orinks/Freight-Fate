@@ -3537,6 +3537,33 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
+- [x] **Elberton, Georgia added as a granite node (player request, 2026-08-16).**
+      A contact-form request from William asked for the "granite capital of
+      the world", left off the map. Researched and confirmed: Elberton cuts
+      over a third of US monumental granite, ~90 percent of its output being
+      cemetery memorials, with named granite carriers based in town. Added as
+      a small specialty-origin node (population 4,640, no interstate) with
+      seven real curated facilities from the Elberton Granite Association
+      directory and the county development authority, plus three legs --
+      Athens on GA 72, Augusta on GA 17 through Washington and Thomson, and
+      Greenville, South Carolina on GA 17 to I-85 at Lavonia. Ten real
+      checkpoints placed, ORS driving-hgv geometry and curve/maxspeed bake
+      run. The one claim in the request that does NOT hold: Elberton is not
+      why the country has granite at all -- countertop and dimension stone is
+      overwhelmingly imported, and Barre Vermont, Texas, Missouri and
+      Minnesota all cut monuments independently.
+- [ ] **The new Elberton facilities have no baked surface-street approaches.**
+      The city-services / facility-endpoint / local-approach / facility-approach
+      sweeps predate the node, so its docks fall back to synthetic approaches
+      until the next data expansion pass. Same standing gap as every other
+      city added since the 2026-07-14 resweep; folded into that job.
+- [ ] **Ninety auto-discovered stops are named by bare brand initialisms.**
+      36 "TA", 32 "BP", 15 "76", plus CGX, CFN, TXB and a lowercase "bp".
+      `AGENTS.md` calls this out by name ("TA" must be "TA Travel Center").
+      The spoken form carries the type label in front ("travel center: TA"),
+      so it is intelligible today rather than broken -- but the stop schema
+      has no spoken override, so fixing it means renaming the stops
+      themselves in one sweep across the network.
 - [x] **Village and small-town callouts (landed 2026-07-19).** The route now
       names the small places it runs through -- "Entering Strawberry",
       "Passing Kennebunk" -- so a speed limit dropping to 35 in the middle of
