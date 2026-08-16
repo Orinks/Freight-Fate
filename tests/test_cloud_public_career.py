@@ -198,3 +198,57 @@ def test_an_unreadable_local_save_costs_a_sentence_not_the_resolution(monkeypatc
         assert any("The cloud copy is" in t for t in labels)
     finally:
         app.shutdown()
+
+
+def test_no_cancel_row_is_named_after_a_real_action(monkeypatch):
+    """The owner pressed "No, keep this computer's save" on his own career
+    expecting it to upload, and it backed out doing nothing (2026-08-15) --
+    because it was the restore confirmation's CANCEL, word for word the same
+    promise as the conflict screen's real action, "Keep this computer's save
+    and back it up". On the one screen where a career is already stuck, a
+    retreat dressed as the remedy costs the player the fix. Cancels say they
+    cancel."""
+    from freight_fate.app import App
+    from freight_fate.states import cloud_save_states as css
+
+    app = App()
+    try:
+        slot = css.CloudSlotState(
+            app.ctx, "armstrong45", [{"revision": 4, "createdAt": time.time() * 1000}]
+        )
+        confirms = [
+            css.ConfirmRestoreState(app.ctx, slot, {"revision": 4}),
+            css.ConfirmKeepMineState(app.ctx, slot),
+            css.ConfirmDeleteCloudState(app.ctx, slot),
+        ]
+        for state in confirms:
+            labels = [i.text for i in state.build_items()]
+            no_row = next(t for t in labels if t.startswith("No"))
+            assert no_row == "No, cancel and change nothing", (
+                f"{type(state).__name__} offers {no_row!r}, which describes an "
+                "outcome rather than a cancellation"
+            )
+            # And the yes still says what it does, so the pair is not two
+            # indistinguishable rows.
+            assert any(t.startswith("Yes,") for t in labels)
+    finally:
+        app.shutdown()
+
+
+def test_the_restore_cancel_points_back_at_the_upload_choice(monkeypatch):
+    """A player who lands on the restore confirmation while meaning to push
+    their own save up needs the way out named, not just the retreat."""
+    from freight_fate.app import App
+    from freight_fate.states import cloud_save_states as css
+
+    app = App()
+    try:
+        slot = css.CloudSlotState(
+            app.ctx, "armstrong45", [{"revision": 4, "createdAt": time.time() * 1000}]
+        )
+        state = css.ConfirmRestoreState(app.ctx, slot, {"revision": 4})
+        cancel = next(i for i in state.build_items() if i.text.startswith("No"))
+
+        assert "Keep this computer's save and back it up" in cancel.help_text
+    finally:
+        app.shutdown()

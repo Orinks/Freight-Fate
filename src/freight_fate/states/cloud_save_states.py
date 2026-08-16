@@ -836,7 +836,21 @@ class ConfirmRestoreState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("No, keep this computer's save", self.go_back),
+            MenuItem(
+                # NOT "No, keep this computer's save". That is word for word
+                # what the conflict screen's real action is called ("Keep
+                # this computer's save and back it up"), so a player who
+                # wants exactly that hears it here, presses it, and gets
+                # nothing -- the owner did it on his own career while
+                # testing, and it is the likeliest reason Brandon got no
+                # further either (2026-08-15). A cancel says it cancels.
+                "No, cancel and change nothing",
+                self.go_back,
+                help="Goes back without downloading anything. This "
+                "computer's save is left exactly as it is. To send this "
+                "computer's save UP to the server instead, go back and "
+                "choose Keep this computer's save and back it up.",
+            ),
             MenuItem("Yes, restore this backup", self._yes),
         ]
 
@@ -894,7 +908,15 @@ class ConfirmDeleteCloudState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("No, keep the cloud backups", self.go_back),
+            MenuItem(
+                # Same rule as the restore confirmation above: a cancel row
+                # must not be phrased as an outcome another control already
+                # delivers, or it reads as the action rather than the retreat.
+                "No, cancel and change nothing",
+                self.go_back,
+                help="Goes back without deleting anything. Your cloud "
+                "backups for this career are left exactly as they are.",
+            ),
             MenuItem("Yes, delete every cloud backup of this career", self._yes),
         ]
 
@@ -949,7 +971,18 @@ class ConfirmKeepMineState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("No, keep the current cloud backup", self.go_back),
+            MenuItem(
+                # Same trap in the other direction: phrased as an outcome,
+                # "keep the current cloud backup" reads like the choice to
+                # take the cloud copy, on the one screen where picking the
+                # wrong one of two similar-sounding rows leaves a career
+                # stuck exactly as it was.
+                "No, cancel and change nothing",
+                self.go_back,
+                help="Goes back without uploading. The career stays as it "
+                "is on this computer, and stays unbacked up until you "
+                "choose which copy to keep.",
+            ),
             MenuItem("Yes, validate and replace the cloud backup", self._yes),
         ]
 
