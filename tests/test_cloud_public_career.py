@@ -129,3 +129,72 @@ def test_the_public_career_shows_status_not_an_action(monkeypatch):
         assert "Make this your public career" not in texts
     finally:
         app.shutdown()
+
+
+def test_a_conflict_names_both_copies_so_the_choice_can_be_answered(monkeypatch):
+    """Brandon (armstrong445), 2026-08-15. The screen named the cloud copy's
+    level and money and said nothing whatever about the save already on his
+    machine, so he was asked to choose between something described and
+    something anonymous. The safe-feeling answer to that question is to
+    choose neither, and that is what he did for a day while his career sat
+    unbacked. Both copies are now described the same way, from the same
+    ``backup_summary`` the server line is built with, so they can be compared
+    word for word."""
+    from freight_fate.app import App
+    from freight_fate.states import cloud_save_states
+
+    app = App()
+    try:
+        monkeypatch.setattr(
+            cloud_save_states,
+            "_local_summary_for",
+            lambda name: "armstrong45, level 4, 3,294 dollars",
+        )
+        state = cloud_save_states.CloudSlotState(
+            app.ctx, "armstrong45", [{"revision": 4, "createdAt": time.time() * 1000}]
+        )
+        monkeypatch.setattr(
+            state,
+            "_conflict",
+            lambda: {"latestSummary": "armstrong45, level 7, 9,100 dollars", "latestRevision": 4},
+        )
+        labels = [i.text for i in state.build_items()]
+        headline = next(t for t in labels if "needs attention" in t)
+
+        # What he keeps and what he moves to, both audible before either
+        # choice is read out.
+        assert "This computer's copy is armstrong45, level 4, 3,294 dollars" in headline
+        assert "The cloud copy is armstrong45, level 7, 9,100 dollars" in headline
+
+        keep_mine = next(t for t in labels if t.startswith("Keep this computer's save"))
+        use_cloud = next(t for t in labels if t.startswith("Use the cloud copy"))
+        # Each row names what it KEEPS: two rows differing only in "this
+        # computer" and "the cloud" is not a choice a player can answer.
+        assert "level 4, 3,294 dollars" in keep_mine
+        assert "level 7, 9,100 dollars" in use_cloud
+    finally:
+        app.shutdown()
+
+
+def test_an_unreadable_local_save_costs_a_sentence_not_the_resolution(monkeypatch):
+    """The whole point of this screen is to unstick a career. A local save
+    that will not load must not be the thing that stops it being unstuck."""
+    from freight_fate.app import App
+    from freight_fate.states import cloud_save_states
+
+    app = App()
+    try:
+        state = cloud_save_states.CloudSlotState(
+            app.ctx, "armstrong45", [{"revision": 4, "createdAt": time.time() * 1000}]
+        )
+        monkeypatch.setattr(
+            state, "_conflict", lambda: {"latestSummary": "armstrong45, level 7, 9,100 dollars"}
+        )
+        monkeypatch.setattr(state, "_local_summary", lambda: "")
+
+        labels = [i.text for i in state.build_items()]
+
+        assert any(t.startswith("Keep this computer's save") for t in labels)
+        assert any("The cloud copy is" in t for t in labels)
+    finally:
+        app.shutdown()

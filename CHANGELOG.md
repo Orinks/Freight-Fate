@@ -454,6 +454,14 @@
   the career that is waiting, and says that nothing backs up until you pick,
   that choosing this computer's save keeps what you have played, and that
   nothing is overwritten until you choose.
+- **When you pick between two copies of a career, you can hear what each one
+  is.** The choice used to describe the copy on the server -- its level and
+  its money -- and say nothing at all about the one on your own computer, so
+  you were choosing between something described and something you had to
+  take on faith. Both are now read out the same way, and each choice names
+  what it keeps: "Keep this computer's save and back it up: Bear Cub, level
+  4, 3,294 dollars". The career list says it too, so you can tell the two
+  apart before opening anything.
 - **The weigh station sound can be heard in Learn game sounds.** Pressing
   Enter on it played the bed at exactly the level the road plays it, and on
   the road that level is deliberately low because the sound works by coming
