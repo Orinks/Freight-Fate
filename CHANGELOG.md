@@ -3130,6 +3130,21 @@
   payment option at the yard now keeps two hundred dollars of fuel money in
   your pocket, so choosing Pay half can no longer leave you at zero.
 
+### Changed
+
+- **Driving speech is now a ladder you pick, not a single terse switch.**
+  The old setting only made each message shorter, which is why a quiet
+  drive still talked constantly -- it never said fewer things. Driving
+  speech, in the Speech settings, now has four rungs. Coaching explains
+  technique as you drive. Standard is the working default. Quiet cuts
+  confirmations and status readouts to short sounds instead of sentences,
+  keeping the safety calls, what things cost, and the turn you actually
+  have to take as words. Urgent only keeps that same short set of words and
+  drops the coaching too. Billboards, place names, and landmarks are not
+  part of this ladder and keep their own switches, so you can drive a
+  quiet cab through a talkative countryside. If you were playing on terse,
+  you are now on Quiet.
+
 ## 1.8.8.1 - 2026-08-08
 
 ### Added

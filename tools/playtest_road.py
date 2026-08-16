@@ -562,12 +562,20 @@ def run_headless(app, driving, args) -> None:
     from freight_fate.states.driving_damage import cargo_status_clause
 
     spoken: list[tuple[str, str]] = []
-    app.ctx.say_event = lambda text, interrupt=False, **_: spoken.append(("event", text))
-    # ``**_`` for the same reason say_event above has it: the shim must absorb
-    # every keyword App.say grows, or the bench dies the first time the game
-    # uses one. It crashed on ``review=`` -- passed by award_achievement, so
-    # any run that earned a badge took the whole bench down mid-drive.
-    app.ctx.say = lambda text, interrupt=True, **_: spoken.append(("say", text))
+    # Stub the VOICE layer (ctx.speech.say/say_event), not ctx.say/say_event
+    # themselves. The driving verbosity ladder's gate and the event pacer's
+    # repeat/backlog handling both live *inside* GameContext.say/say_event --
+    # replacing those methods (the old approach here) skipped both, so this
+    # bench printed every line the game would say with no rung applied and
+    # no repeat suppression running, not what a player at their real
+    # ``--verbosity`` setting actually hears. By the time a line reaches the
+    # voice layer it has already been gated and rendered to a plain string,
+    # so the shim only needs (text, interrupt).
+    # ``**_`` absorbs anything the voice backend's own say/say_event might
+    # grow beyond that -- the shim must not crash the bench the first time
+    # the backend gains a keyword.
+    app.ctx.speech.say_event = lambda text, interrupt=False, **_: spoken.append(("event", text))
+    app.ctx.speech.say = lambda text, interrupt=True, **_: spoken.append(("say", text))
 
     class NoKeys:
         def __getitem__(self, _key):

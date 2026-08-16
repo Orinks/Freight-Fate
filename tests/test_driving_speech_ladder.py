@@ -1003,3 +1003,190 @@ def test_a_changed_status_line_speaks_again() -> None:
         ]
     finally:
         app.shutdown()
+
+
+# -- Task 9: the whole-drive proof -------------------------------------------
+#
+# Every test above drives the gate directly, with a literal string handed to
+# say_event. That proves the gate honours whatever category and rung it is
+# given -- it does not prove a real drive actually says fewer things as the
+# rung tightens, which is the owner's actual complaint (a COUNT complaint,
+# not a length complaint). These drive a real scenario from the adversarial
+# battery (``tools/playtest_break.py``) through real DrivingState frames and
+# count what reaches the voice.
+#
+# The transcript capture seam these tests rely on -- stubbing
+# ``ctx.speech.say``/``ctx.speech.say_event`` rather than ``ctx.say``/
+# ``ctx.say_event`` themselves -- is the harness fix this task also makes to
+# ``tools/playtest_break.py`` and ``tools/playtest_road.py``: the ladder's
+# gate and the event pacer both live *inside* ``GameContext.say``/
+# ``say_event``, so replacing those methods (the previous state of both
+# tools) would have skipped both and shown every scenario what the game
+# would say with no rung applied at all.
+
+
+def _load_break_harness():
+    """Import tools/playtest_break.py under its own name, in-process.
+
+    Mirrors ``tests/adversarial/test_break_scenarios.py``'s loader exactly:
+    ``tools/`` is not a package, so the battery is loaded by path, and it
+    must land in ``sys.modules`` under the literal name ``"playtest_break"``
+    because its scenario modules register themselves back into it with
+    ``from playtest_break import ...``.
+    """
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    if "playtest_break" in sys.modules:
+        return sys.modules["playtest_break"]
+    tools = Path(__file__).resolve().parents[1] / "tools"
+    if str(tools) not in sys.path:
+        sys.path.insert(0, str(tools))
+    spec = importlib.util.spec_from_file_location("playtest_break", tools / "playtest_break.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["playtest_break"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _spoken_transcript_for_scenario(name: str, rung: str) -> list[str]:
+    """Run one playtest_break scenario with the driving-speech rung forced,
+    returning the transcript exactly as a player at that rung would hear it.
+
+    Forcing the rung takes two overrides on top of ``Rig``'s own setup, both
+    found by actually walking the battery rather than assuming:
+
+    * ``settings.driving_speech`` -- the rig itself never sets this, so
+      every scenario runs at the stock default ("standard") unless told
+      otherwise.
+    * ``profile.tutorial_done`` -- ``Rig`` builds a fresh ``Profile``, whose
+      default is ``tutorial_done=False``. R15's exemption (task 6) makes the
+      *entire* ladder gate a no-op whenever that flag is False, so every one
+      of the battery's 34 scenarios speaks identically at all four rungs
+      out of the box -- confirmed by monkeypatching ``Settings.speaks`` to
+      always return ``True`` (simulating the ladder never having shipped)
+      and finding every scenario's transcript came back byte-for-byte
+      unchanged. Setting it True here is what ``test_driving_speech_ladder``
+      does everywhere else it drives a real ``DrivingState`` (see
+      ``_real_driving`` above): the rung, not first-run teaching, is what
+      is under test.
+    """
+    break_harness = _load_break_harness()
+    Rig = break_harness.Rig
+    original_init = Rig.__init__
+
+    def patched_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        self.ctx.settings.driving_speech = rung
+        self.ctx.profile.tutorial_done = True
+
+    Rig.__init__ = patched_init
+    try:
+        outcome = break_harness.run_scenario(name)
+    finally:
+        Rig.__init__ = original_init
+    assert outcome.verdict != "ERROR", f"{name} crashed at rung {rung!r}: {outcome.note}"
+    return outcome.transcript
+
+
+def _spoken_line_count_for_scenario(name: str, rung: str) -> int:
+    return len(_spoken_transcript_for_scenario(name, rung))
+
+
+# ``reverse_down_the_route`` (backing down the interstate) was picked by
+# actually measuring every registered scenario, not by assumption -- most of
+# the battery's 34 scenarios never reach a CONFIRMATION or STATUS call site
+# that survives the pre-existing per-condition repeat suppression, so their
+# rung-to-rung counts are flat and would make this a vacuous test. This one
+# reliably says "Reverse selected. Backing slowly." (CONFIRMATION) once and
+# then a fresh "engine is screaming at redline" STATUS readout on each
+# further mile of engine wear -- both EARCON-silenced at quiet and
+# urgent_only, both full words at coaching and standard.
+_SCENARIO = "reverse_down_the_route"
+
+
+@pytest.mark.timeout(300)
+def test_a_drive_gets_quieter_as_the_rung_tightens() -> None:
+    # The owner's report is a COUNT complaint, not a length complaint, so
+    # the pin is a count. Under xdist a sweep like this needs its own
+    # timeout or the worker reads as "node down".
+    transcripts = {
+        rung: _spoken_transcript_for_scenario(_SCENARIO, rung) for rung in DRIVING_SPEECH_MODES
+    }
+    counts = {rung: len(lines) for rung, lines in transcripts.items()}
+
+    # Non-vacuous: the coaching rung must actually carry a CONFIRMATION line
+    # and a STATUS line -- the two categories quiet and urgent_only cut to
+    # EARCON -- or a tie further down the ladder would pass for the wrong
+    # reason (nothing to cut) rather than because the gate did its job.
+    coaching_text = "\n".join(transcripts["coaching"])
+    assert "Reverse selected. Backing slowly." in coaching_text  # CONFIRMATION
+    assert "screaming at redline" in coaching_text  # STATUS
+
+    # coaching and standard tie on this drive (and on every other candidate
+    # scenario measured while building this test). That is not a scenario
+    # problem: Disposition.FIRST_OCCURRENCE and Disposition.TRANSITIONS --
+    # the two rows "standard" uses to blunt the same COACHING/STATUS
+    # categories "coaching" leaves FULL -- are pinned in
+    # DRIVING_SPEECH_DISPOSITIONS but not actually wired anywhere:
+    # Settings.speaks() only branches on EARCON/SILENT (settings.py), so
+    # every disposition that is not one of those two currently speaks
+    # exactly like FULL. That gap is real, confirmed by grepping every
+    # consumer of Disposition in src/, and is tracked as roadmap follow-up
+    # rather than silently implemented as a side effect of this proof.
+    assert counts["coaching"] >= counts["standard"]
+
+    # The real cut: CONFIRMATION and STATUS both go silent at quiet, and
+    # nothing else in this drive is rung-sensitive. Verified to be the
+    # ladder's doing and not some other terse-mode mechanism (several call
+    # sites carry their own pre-existing ``_terse_speech()`` early return)
+    # by monkeypatching Settings.speaks() to always return True and
+    # confirming this scenario's counts go flat at 19 across every rung.
+    assert counts["standard"] > counts["quiet"]
+
+    # quiet and urgent_only are identical on every input Settings.speaks()
+    # and Settings.renders_terse() consult -- see DRIVING_SPEECH_DISPOSITIONS:
+    # both rungs render every category TERSE or EARCON, and EARCON/SILENT
+    # both silence the voice (Disposition's own docstring: "EARCON and
+    # SILENT both stop the words; they differ in whether the sound layer
+    # still marks the moment"). That sound layer is not wired to anything
+    # yet -- ROADMAP.md's sonification-pass follow-up is where it belongs --
+    # so on any channel this harness can observe, the two rungs are
+    # provably the same rung today. Pinned as full transcript equality, not
+    # just a count tie, so a future asymmetry between them is caught
+    # immediately rather than only once it changes a length.
+    assert counts["quiet"] >= counts["urgent_only"]
+    assert transcripts["quiet"] == transcripts["urgent_only"]
+
+
+def test_every_trip_event_kind_is_classified() -> None:
+    # Every kind is either governed by the ladder or explicitly left to the
+    # flavor switches. Neither list may quietly gain a member by omission:
+    # a new event kind must make someone decide which it is.
+    from freight_fate.sim.trip_models import TripEventKind
+    from freight_fate.states.driving_events import _EVENT_CATEGORIES, _FLAVOR_EVENT_KINDS
+
+    undecided = [
+        k.name for k in TripEventKind if k not in _EVENT_CATEGORIES and k not in _FLAVOR_EVENT_KINDS
+    ]
+    assert undecided == [], f"trip event kinds nobody classified: {undecided}"
+
+    both = [k.name for k in TripEventKind if k in _EVENT_CATEGORIES and k in _FLAVOR_EVENT_KINDS]
+    assert both == [], f"trip event kinds claimed by both lists: {both}"
+
+
+def test_flavor_is_independent_of_the_rung() -> None:
+    # The owner's directive of 2026-08-15, as an executable assertion: the
+    # ladder governs information, the chatter switches govern colour, and
+    # neither may grow a dependency on the other.
+    from freight_fate.settings import Settings
+
+    s = Settings()
+    s.driving_speech = "urgent_only"
+    s.set_all_chatter(True)
+    assert s.chatter_enabled("billboard") is True
+
+    s.driving_speech = "coaching"
+    s.set_all_chatter(False)
+    assert s.chatter_enabled("billboard") is False
