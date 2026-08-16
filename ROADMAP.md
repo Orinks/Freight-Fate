@@ -762,13 +762,29 @@ onto exit signalling.
       `NO_SPAWN_AHEAD_MI = 1.1`, and a cell drawn there can roll the
       "merging" intent, so the first thing a driver hears on pulling out is
       a merge cue about a vehicle barely a mile off.
-      Three candidate fixes, not yet chosen because they trade off against
-      each other: a no-hazard floor on the first miles of a run (cheapest,
-      but suppresses a real work zone that is genuinely there); a
-      trip-start-only widening of the bubble's ahead floor (narrow, does
-      nothing for the zones); or the owner's own reading -- give every
-      origin a departure chain, which is the honest shape and a world-data
-      sweep rather than a code change. Wants a decision before the work.
+      CORRECTION to the first write-up of this bullet: the departure chain
+      is NOT a fix for (2) or (3), and treating it as the honest complete
+      answer was wrong. `_finish_departure_chain` hands the parked highway
+      trip back unchanged and never advances its position, so the truck
+      rejoins at highway mile 0 either way. A real zone clamped to zero
+      still covers the merge, and the bubble still seeds around the truck at
+      its 1.1-mile floor -- the chain buys a minute of streets and then
+      delivers the driver into the same hazard at ramp speed.
+      Measured coverage, since it sizes the data option: 3,639 of 5,054
+      facilities (72 percent) depart straight onto the highway, and all 624
+      cities have at least one. That is a rebuild of most approach data, not
+      a gap-fill.
+      RECOMMENDED SPLIT, owner decision still wanted on the third:
+      (a) A work zone must have its full warning taper on the route ahead of
+      where the run starts; a zone whose taper is clipped by the start is
+      dropped for that run. Not "no hazards in the first miles" -- a zone at
+      mile 5 signed from mile 4 is fine. The game declines to place a hazard
+      it cannot sign, rather than hiding work that is really there.
+      (b) At trip start only, keep the "merging" intent out of the bubble's
+      nearest cells, so the first cue of a run is never a merge a mile off.
+      (c) Departure chains for the remaining 72 percent: real, wanted, and a
+      data project to scope on its own. It is the realism fix, not the
+      safety fix, and (a) and (b) do not depend on it.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each
