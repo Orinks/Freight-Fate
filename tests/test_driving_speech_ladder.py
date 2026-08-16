@@ -949,6 +949,91 @@ def test_every_earcon_category_is_learnable() -> None:
                 )
 
 
+def test_an_earcon_category_actually_asks_the_audio_layer_to_play(monkeypatch) -> None:
+    # Task 10: spec invariant 3 was unmet -- LADDER_EARCONS existed and was
+    # pinned learnable, but nothing during a drive ever asked the audio
+    # layer to sound it, so a "quiet" driver got silence where the spec
+    # promises a cue. This asserts the actual call into ``ctx.audio.play``,
+    # not that a dictionary contains a key: reverting app.py's gate to its
+    # old log-and-return (no ``_play_ladder_earcon`` call) leaves ``played``
+    # empty and fails this, where a test that only inspected LADDER_EARCONS
+    # or DRIVING_SPEECH_DISPOSITIONS would stay green either way.
+    from freight_fate.sound_catalog import entry_by_name
+
+    app = _app()
+    try:
+        app.ctx.speech.say_event = speech_stub()
+        played: list[tuple[str, float, float]] = []
+        monkeypatch.setattr(
+            app.ctx.audio,
+            "play",
+            lambda key, volume=1.0, pan=0.0: played.append((key, volume, pan)),
+        )
+        app.ctx.settings.driving_speech = "quiet"
+
+        app.ctx.say_event(
+            "Load damage 43 percent.", interrupt=False, category=SpeechCategory.STATUS
+        )
+
+        cue = entry_by_name(LADDER_EARCONS[SpeechCategory.STATUS]).plays[0]
+        assert played == [(cue.key, cue.volume, cue.pan)]
+    finally:
+        app.shutdown()
+
+
+def test_a_silent_category_asks_the_audio_layer_for_nothing(monkeypatch) -> None:
+    # The other half of the pair above: SILENT and EARCON both cut the
+    # words, and only EARCON is supposed to sound anything. This is the
+    # entire remaining difference at the voice between "quiet" and
+    # "urgent_only" -- without the disposition check in app.py's gate
+    # (playing on every silenced line rather than only EARCON ones), this
+    # would see the same call the quiet-rung test above asserts and fail.
+    app = _app()
+    try:
+        app.ctx.speech.say_event = speech_stub()
+        played: list[tuple[str, float, float]] = []
+        monkeypatch.setattr(
+            app.ctx.audio,
+            "play",
+            lambda key, volume=1.0, pan=0.0: played.append((key, volume, pan)),
+        )
+        app.ctx.settings.driving_speech = "urgent_only"
+
+        app.ctx.say_event(
+            "Load damage 43 percent.", interrupt=False, category=SpeechCategory.STATUS
+        )
+
+        assert played == []
+    finally:
+        app.shutdown()
+
+
+def test_an_earcon_category_plays_through_say_too(monkeypatch) -> None:
+    # ``say``'s gate is separate hand-written code from ``say_event``'s
+    # (see test_a_silenced_category_never_reaches_the_voice_via_say above),
+    # so the earcon wiring has to be checked there too rather than assumed
+    # to follow from the ``say_event`` coverage.
+    from freight_fate.sound_catalog import entry_by_name
+
+    app = _app()
+    try:
+        app.ctx.speech.say = speech_stub()
+        played: list[tuple[str, float, float]] = []
+        monkeypatch.setattr(
+            app.ctx.audio,
+            "play",
+            lambda key, volume=1.0, pan=0.0: played.append((key, volume, pan)),
+        )
+        app.ctx.settings.driving_speech = "quiet"
+
+        app.ctx.say("Nice smooth shift.", category=SpeechCategory.COACHING)
+
+        cue = entry_by_name(LADDER_EARCONS[SpeechCategory.COACHING]).plays[0]
+        assert played == [(cue.key, cue.volume, cue.pan)]
+    finally:
+        app.shutdown()
+
+
 def test_an_unchanged_status_line_speaks_once() -> None:
     app = _app()
     try:

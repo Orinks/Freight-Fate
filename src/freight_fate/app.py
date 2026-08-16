@@ -20,13 +20,15 @@ from .audio import SPEECH_DUCK_LEVEL, AudioEngine
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
+from .ladder_earcons import register_ladder_earcons
 from .message_log import MessageCategory, MessageLog
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
 from .settings import Settings
+from .sound_catalog import entry_by_name
 from .speech import EventPriority, EventSpeechPacer, Speech
-from .speech_pacing import SpeechCategory
+from .speech_pacing import LADDER_EARCONS, Disposition, SpeechCategory
 from .speech_text import SpokenMessage
 from .states.base import State
 
@@ -117,6 +119,12 @@ class GameContext:
         # playtest_levers.apply_continue_levers); save_profile honors it.
         self.playtest_sandbox = False
         self.message_log = app.message_log
+        # The S4 ladder's earcons (LADDER_EARCONS below) can now play from
+        # any screen the silencing gate fires on, not only the Learn game
+        # sounds screen that used to be the sole registrant. Idempotent and
+        # cheap, so doing it once here means the drive never has to wait on
+        # that screen having been visited first.
+        register_ladder_earcons()
 
     def _ladder_applies(self) -> bool:
         """Whether the driving speech rung may silence anything yet.
@@ -134,6 +142,35 @@ class GameContext:
         is on a first drive, so the rung applies normally.
         """
         return bool(getattr(self.profile, "tutorial_done", True))
+
+    def _play_ladder_earcon(self, category: SpeechCategory | None) -> None:
+        """Sound the cue standing in for a category the rung just cut.
+
+        Spec invariant 3: what drops out of speech lands on the earcon layer
+        or the message log, so cutting is legitimate rather than
+        exclusionary. Only called where ``speech_disposition`` is already
+        ``EARCON`` -- ``SILENT`` never reaches here, which is the entire
+        difference at the voice between the ``quiet`` and ``urgent_only``
+        rungs. ``LADDER_EARCONS`` names the cue by the catalog entry's
+        canonical noun; the entry itself (``sound_catalog.py``) is the one
+        place its key, volume, and pan are written down, so this resolves
+        through it rather than keeping a second copy that could drift.
+
+        A category missing from ``LADDER_EARCONS``, or a name the catalog
+        does not carry, is a data bug in that table (a test pins every
+        EARCON row against the catalog) -- not something to raise mid-drive
+        over, so it is skipped rather than crashing the game.
+        """
+        if category is None:
+            return
+        name = LADDER_EARCONS.get(category)
+        if name is None:
+            return
+        entry = entry_by_name(name)
+        if entry is None or not entry.plays:
+            return
+        cue = entry.plays[0]
+        self.audio.play(cue.key, volume=cue.volume, pan=cue.pan)
 
     def _online_enabled(self, setting: bool) -> bool:
         """True when both the master ``online_services`` switch and the
@@ -217,7 +254,12 @@ class GameContext:
             # The player's rung silences this category. The line still
             # reaches the review log, so the information is cut from the
             # drive, not from the game -- the review key that exists to
-            # answer for it still can.
+            # answer for it still can. Where the rung's disposition is
+            # EARCON rather than SILENT, the sound layer marks the moment
+            # instead of the words -- the two rungs that share this branch
+            # are otherwise identical at the voice.
+            if self.settings.speech_disposition(category) is Disposition.EARCON:
+                self._play_ladder_earcon(category)
             if isinstance(text, SpokenMessage):
                 text = text.render(self.settings.renders_terse()) or text.normal
             transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)
@@ -343,7 +385,11 @@ class GameContext:
             # The player's rung silences this category. The line still
             # reaches the review log and the status keys, so the
             # information is cut from the drive, not from the game.
-            # ``force`` is a line the player asked for and must hear.
+            # ``force`` is a line the player asked for and must hear. Where
+            # the rung's disposition is EARCON rather than SILENT, the sound
+            # layer marks the moment instead of the words.
+            if self.settings.speech_disposition(category) is Disposition.EARCON:
+                self._play_ladder_earcon(category)
             if isinstance(text, SpokenMessage):
                 text = text.render(self.settings.renders_terse()) or text.normal
             transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)

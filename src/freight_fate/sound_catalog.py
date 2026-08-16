@@ -444,10 +444,11 @@ _HAZARDS = SoundCategory(
         # The two earcons the S4 driving speech ladder stands in with, once a
         # rung stops speaking a whole category (LADDER_EARCONS in
         # speech_pacing.py, pinned learnable by
-        # tests/test_driving_speech_ladder.py). Neither has a real call site
-        # yet -- the ladder logs and answers status keys for what it cuts,
-        # it does not yet sound anything in its place -- so there is no road
-        # level to be faithful to; the levels below are this cue's own.
+        # tests/test_driving_speech_ladder.py, and played by
+        # GameContext._play_ladder_earcon in app.py via
+        # sound_catalog.entry_by_name). This entry's own recipe -- key and
+        # volume -- IS the road level: app.py resolves the cue from here
+        # rather than keeping a second copy, so there is nothing to drift.
         # Synthesized rather than shipped (``ladder_earcons.py``), the same
         # way the enforcement signature is -- and, like that one, keyed under
         # a folder name ("ladder/") outside the ones
@@ -634,6 +635,21 @@ CATALOG: tuple[SoundCategory, ...] = (
 def catalog_entries() -> tuple[SoundEntry, ...]:
     """Every entry, in catalog order."""
     return tuple(entry for category in CATALOG for entry in category.entries)
+
+
+def entry_by_name(name: str) -> SoundEntry | None:
+    """The catalog entry with this canonical spoken noun, or ``None``.
+
+    A lookup one caller (the S4 ladder's earcon playback, ``app.py``) needs
+    at runtime: it knows a cue only by the name it teaches under
+    (``speech_pacing.LADDER_EARCONS``), and the recipe -- key, volume, pan
+    -- lives here so the drive and the Learn game sounds screen can never
+    play the same cue two different ways.
+    """
+    for entry in catalog_entries():
+        if entry.name == name:
+            return entry
+    return None
 
 
 def catalog_keys() -> set[str]:
