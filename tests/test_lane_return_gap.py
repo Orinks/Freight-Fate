@@ -277,7 +277,7 @@ def test_terse_speech_keeps_the_lane_and_drops_the_vehicle(monkeypatch):
     try:
         d = _driving(app)
         monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         _rolling(d)
         _pass_a_box_truck(d, spoken)
         _clear_the_box_truck(d)

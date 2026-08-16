@@ -8,6 +8,13 @@ from dataclasses import asdict, dataclass
 from typing import ClassVar
 
 from .models.profile import data_dir
+from .speech_pacing import (
+    DEFAULT_DRIVING_SPEECH,
+    DRIVING_SPEECH_MODES,
+    Disposition,
+    SpeechCategory,
+    disposition_for,
+)
 from .units import (
     MILES_TO_KM,
     distance_unit,
@@ -33,7 +40,8 @@ PROFILE_SHARING_CONSENT_VERSION = 3
 #    Speech and weather.
 # 2: the speed keeper moving to Driving assistance, and the lane and edge cue
 #    volume moving to Audio.
-SETTINGS_VERSION = 2
+# 3: speech_verbosity (0 terse / 1 normal) became the driving_speech ladder.
+SETTINGS_VERSION = 3
 
 # Which chatter switch governs each roadside-callout category. Zone entries
 # (parks, forests, wilderness) share one switch; the lone highway heritage
@@ -291,7 +299,11 @@ class Settings:
     # reads speed off it -- so ducking is opt-in for players who need it,
     # not a default that changes what everyone hears (owner, 2026-08-12).
     duck_audio_for_speech: bool = False
-    speech_verbosity: int = 1  # 0 terse, 1 normal
+    # How much of the road's INFORMATION speaks: a ladder of named rungs
+    # that cut whole categories, not one global compression. Flavor is not
+    # governed here -- billboards, places and landmarks answer to the
+    # chatter switches and the place-callouts ladder (owner, 2026-08-15).
+    driving_speech: str = DEFAULT_DRIVING_SPEECH
     # Roadside chatter: the ambient color spoken between navigation cues.
     # Each category has its own switch so a player can keep the geography
     # (rivers, passes) while silencing the jokes (billboards), or vice versa.
@@ -548,10 +560,15 @@ class Settings:
             s.pedal_latch = "off"
         if s.pedal_latch not in ("assists first", "latch first", "off"):
             s.pedal_latch = "assists first"
-        # The chatty level (2) was retired; it never diverged from normal
-        # beyond a quicker speed-callout timer. Saved chatty falls to normal.
-        if s.speech_verbosity not in (0, 1):
-            s.speech_verbosity = 1
+        # The two-value verbosity became a four-rung ladder (S4). A terse
+        # player asked for less and lands on quiet; everyone else on
+        # standard, which is what normal already was. Keyed on the absence
+        # of the new field, so a player who has since picked a rung is
+        # never dragged back by a stale verbosity left in the file.
+        if isinstance(data, dict) and "driving_speech" not in data:
+            s.driving_speech = "quiet" if data.get("speech_verbosity") == 0 else "standard"
+        if s.driving_speech not in DRIVING_SPEECH_MODES:
+            s.driving_speech = DEFAULT_DRIVING_SPEECH
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:
@@ -638,6 +655,25 @@ class Settings:
                 )
         s.settings_version = SETTINGS_VERSION
         return s
+
+    def speech_disposition(self, category: SpeechCategory | None) -> Disposition:
+        """How the player's rung delivers this category of information."""
+        return disposition_for(self.driving_speech, category)
+
+    def speaks(self, category: SpeechCategory | None) -> bool:
+        """Whether this category reaches the voice at all on this rung."""
+        return self.speech_disposition(category) not in (
+            Disposition.EARCON,
+            Disposition.SILENT,
+        )
+
+    def renders_terse(self) -> bool:
+        """Whether spoken lines take their terse rendering on this rung.
+
+        The rung picks the rendering, so ``SpokenMessage`` keeps the
+        single-boolean ``render`` signature S2 gave it.
+        """
+        return self.driving_speech in ("quiet", "urgent_only")
 
     def chatter_enabled(self, category: str) -> bool:
         """Whether a roadside-callout category is currently spoken.

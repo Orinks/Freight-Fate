@@ -3352,12 +3352,12 @@ def test_cruise_says_when_a_climb_has_beaten_it():
     """
     from freight_fate.app import App
 
-    for verbosity, expected in ((1, True), (0, False)):
+    for driving_speech, expected in (("standard", True), ("quiet", False)):
         app = App()
         events: list[str] = []
         app.ctx.say_event = lambda text, interrupt=False, sink=events, **_: sink.append(text)
         try:
-            app.ctx.settings.speech_verbosity = verbosity
+            app.ctx.settings.driving_speech = driving_speech
             driving = _cruising(app)
             driving.trip.grade_at = lambda mile: 0.07
             for _ in range(90 * 60):
@@ -3367,7 +3367,7 @@ def test_cruise_says_when_a_climb_has_beaten_it():
                     driving.truck.auto_shift()
                 driving.truck.update(1 / 60)
             said = sum("still losing the grade" in e for e in events)
-            assert bool(said) is expected, (verbosity, events[-3:])
+            assert bool(said) is expected, (driving_speech, events[-3:])
             if expected:
                 assert said == 1  # once a hill, not once a second
         finally:
@@ -3386,7 +3386,7 @@ def test_climb_cue_stays_quiet_when_cruise_is_winning():
     events: list[str] = []
     app.ctx.say_event = lambda text, interrupt=False, sink=events, **_: sink.append(text)
     try:
-        app.ctx.settings.speech_verbosity = 1
+        app.ctx.settings.driving_speech = "standard"
         driving = _cruising(app)
         # The target sits well above the truck -- the limit-rise shape --
         # so cruise floors the pedal while genuinely accelerating.

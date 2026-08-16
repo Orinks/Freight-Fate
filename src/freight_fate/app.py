@@ -192,7 +192,7 @@ class GameContext:
             # A normal/terse pair resolves here, in the delivery layer, so
             # coverage never again depends on a call-site branch (research
             # doc, R5). An empty rendering is a line terse mode drops whole.
-            text = text.render(self.settings.speech_verbosity == 0)
+            text = text.render(self.settings.renders_terse())
             if not text:
                 return
         transcript.info("%s", text)
@@ -303,7 +303,7 @@ class GameContext:
         mode: not spoken, not logged, exactly like a muted chatter line.
         """
         if isinstance(text, SpokenMessage):
-            text = text.render(self.settings.speech_verbosity == 0)
+            text = text.render(self.settings.renders_terse())
             if not text:
                 return
         if self._event_pacer.is_repeat(text, key=key, force=force):

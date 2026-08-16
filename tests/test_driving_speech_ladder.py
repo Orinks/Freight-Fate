@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import pytest
 
+from freight_fate.settings import Settings
 from freight_fate.speech_pacing import (
     DRIVING_SPEECH_DISPOSITIONS,
     DRIVING_SPEECH_MODES,
@@ -78,3 +79,54 @@ def test_the_table_reads_exactly_as_the_spec_says() -> None:
 
 def test_an_unknown_rung_falls_back_to_standard() -> None:
     assert disposition_for("nonsense", SpeechCategory.STATUS) == Disposition.TRANSITIONS
+
+
+def test_the_default_rung_is_standard() -> None:
+    assert Settings().driving_speech == "standard"
+
+
+def test_a_saved_terse_player_lands_on_quiet() -> None:
+    s = Settings.from_dict({"speech_verbosity": 0})
+    assert s.driving_speech == "quiet"
+
+
+def test_a_saved_normal_player_lands_on_standard() -> None:
+    s = Settings.from_dict({"speech_verbosity": 1})
+    assert s.driving_speech == "standard"
+
+
+def test_a_nonsense_saved_verbosity_lands_on_standard() -> None:
+    s = Settings.from_dict({"speech_verbosity": 7})
+    assert s.driving_speech == "standard"
+
+
+def test_a_settings_file_that_already_has_a_rung_is_left_alone() -> None:
+    # The migration must not re-run against a file that has moved on, or a
+    # player who chose urgent_only would be dragged back to quiet on the
+    # next launch of a build that still saw a stale speech_verbosity.
+    s = Settings.from_dict({"speech_verbosity": 0, "driving_speech": "urgent_only"})
+    assert s.driving_speech == "urgent_only"
+
+
+def test_an_unreadable_rung_falls_back_to_standard() -> None:
+    s = Settings.from_dict({"driving_speech": "loud please"})
+    assert s.driving_speech == "standard"
+
+
+def test_the_settings_object_answers_for_a_category() -> None:
+    s = Settings()
+    s.driving_speech = "urgent_only"
+    assert s.speaks(SpeechCategory.SAFETY) is True
+    assert s.speaks(SpeechCategory.STATUS) is False
+    assert s.speaks(None) is True
+    assert s.renders_terse() is True
+
+    s.driving_speech = "coaching"
+    assert s.speaks(SpeechCategory.STATUS) is True
+    assert s.renders_terse() is False
+
+
+def test_verbosity_is_gone() -> None:
+    # 11 references across 7 src files, all replaced -- a leftover reader
+    # would silently see normal for every player.
+    assert not hasattr(Settings(), "speech_verbosity")

@@ -1372,6 +1372,11 @@ SETTINGS_INTERNAL_FLAGS = {
     "chatter_passes",
     "chatter_museums",
     "chatter_billboards",
+    # The driving-speech rung. Nothing reads this by name either: call sites
+    # ask settings.speaks(category), settings.speech_disposition(category),
+    # or settings.renders_terse(), all of which read the field inside
+    # settings.py.
+    "driving_speech",
 }
 
 # Pending features -- a real row a player can set, for behaviour that does not

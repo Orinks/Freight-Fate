@@ -1178,7 +1178,7 @@ class DrivingControlsMixin:
             lines.append(f"{entry.get('label', 'Buff')}: {left}")
         for info in self.rig_buffs.values():
             lines.append(f"{info.get('label', 'Rig service')}: good for the rest of the trip")
-        if self.ctx.settings.speech_verbosity >= 1:
+        if not self.ctx.settings.renders_terse():
             fatigue = self.ctx.profile.fatigue
             if fatigue >= hos.FATIGUE_DROWSY:
                 lines.append(f"Fatigue: {fatigue:.0f} percent")

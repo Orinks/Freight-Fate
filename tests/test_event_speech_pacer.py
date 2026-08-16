@@ -1004,7 +1004,7 @@ def test_the_hazard_wipe_reproduces_identically_under_terse_speech() -> None:
     app = App()
     try:
         driving = _driving(app)
-        app.ctx.settings.speech_verbosity = 0  # terse
+        app.ctx.settings.driving_speech = "quiet"  # terse
         events: list[tuple[str, bool]] = []
         driving.ctx.audio.play = lambda *a, **k: None
         driving.ctx.say_event = speech_stub(events, with_interrupt=True)
@@ -1040,7 +1040,7 @@ def test_a_lane_closure_merge_call_reaches_review_in_full_under_terse() -> None:
     app = App()
     try:
         driving = _driving(app)
-        app.ctx.settings.speech_verbosity = 0  # terse
+        app.ctx.settings.driving_speech = "quiet"  # terse
         events: list[tuple[str, dict]] = []
         driving.ctx.audio.play = lambda *a, **k: None
         driving.ctx.say_event = lambda text, *a, **k: events.append((text, k))
@@ -1074,7 +1074,7 @@ def test_speak_ambient_event_still_honors_a_true_terse_mute_for_logging() -> Non
     app = App()
     try:
         driving = _driving(app)
-        app.ctx.settings.speech_verbosity = 0  # terse
+        app.ctx.settings.driving_speech = "quiet"  # terse
         driving.ctx.audio.play = lambda *a, **k: None
         driving.ctx.say_event = lambda *a, **k: None
         before = len(app.ctx.message_log.messages)
@@ -1098,7 +1098,7 @@ def test_speak_ambient_event_logs_the_full_text_not_the_terse_text() -> None:
     app = App()
     try:
         driving = _driving(app)
-        app.ctx.settings.speech_verbosity = 0  # terse
+        app.ctx.settings.driving_speech = "quiet"  # terse
         driving.ctx.audio.play = lambda *a, **k: None
         driving.ctx.say_event = lambda *a, **k: None
         pair = SpokenMessage(

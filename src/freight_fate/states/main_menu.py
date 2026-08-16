@@ -23,6 +23,7 @@ from ..playtest_levers import apply_continue_levers
 from ..settings import (
     DRIVING_ASSIST_FIELDS,
     DRIVING_ASSIST_PRESETS,
+    DRIVING_SPEECH_MODES,
     ENFORCEMENT_PRESENCE_LEVELS,
     LANE_KEEPING_MODES,
     LANE_KEEPING_TO_LEGACY,
@@ -1513,7 +1514,7 @@ class SettingsCategoryState(MenuState):
         speech = self.ctx.speech
         specs = [
             (
-                lambda: f"Speech verbosity: {['terse', 'normal'][s.speech_verbosity]}",
+                lambda: f"Speech verbosity: {s.driving_speech}",
                 self._cycle_verbosity,
                 "Controls how often driving status reminders speak. Rate, pitch, "
                 "volume, and voice rows appear in this category only when the "
@@ -1993,7 +1994,9 @@ class SettingsCategoryState(MenuState):
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:
-        self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 2
+        s = self.ctx.settings
+        i = DRIVING_SPEECH_MODES.index(s.driving_speech)
+        s.driving_speech = DRIVING_SPEECH_MODES[(i + d) % len(DRIVING_SPEECH_MODES)]
         self._announce()
 
     def _cycle_place_callouts(self, d: int) -> None:

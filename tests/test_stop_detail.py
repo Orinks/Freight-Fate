@@ -487,7 +487,7 @@ def test_terse_rest_stop_arrival_names_the_stop_action(monkeypatch):
     said = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(said))
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         d = _driving(app)
         stop = _stops(d.trip.position_mi)[0]
         d._ramp_mi = 0.0

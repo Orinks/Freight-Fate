@@ -141,7 +141,7 @@ def test_terse_keeps_direction_street_and_distance_but_drops_the_advisory(monkey
 
     app = App()
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         d = _driving(app)
         _street_chain(d)
         spoken = _capture(app, monkeypatch)
@@ -455,7 +455,7 @@ def test_terse_miss_keeps_the_essentials(monkeypatch):
 
     app = App()
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         d = _driving(app)
         _street_chain(d)
         spoken = _capture(app, monkeypatch)

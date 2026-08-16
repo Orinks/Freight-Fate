@@ -2565,7 +2565,7 @@ class DrivingUpdateMixin:
         self.trip.parking_provider = self.ctx.truck_parking_provider() if real else None
 
     def _update_announcements(self, dt: float) -> None:
-        if self.ctx.settings.speech_verbosity == 0:
+        if self.ctx.settings.renders_terse():
             return
         self._speed_announce_timer += dt
         interval = tuning_for_time_scale(self.trip.time_scale).routine_speech_interval_s

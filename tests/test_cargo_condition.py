@@ -314,7 +314,7 @@ def test_the_coaching_tail_speaks_once_per_episode(app, monkeypatch):
 def test_terse_cargo_cues_keep_the_consequence(app, monkeypatch):
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
-    app.ctx.settings.speech_verbosity = 0
+    app.ctx.settings.driving_speech = "quiet"
     driving = _driving(app)
     driving.trip.curve_at = lambda mile: None
 
@@ -451,7 +451,7 @@ def test_terse_settlement_line_keeps_every_number(app, monkeypatch):
     from freight_fate.states.driving_menu_states import ArrivalState
 
     monkeypatch.setattr(app.ctx, "say", speech_stub())
-    app.ctx.settings.speech_verbosity = 0
+    app.ctx.settings.driving_speech = "quiet"
     driving = _driving(app)
     arrival = ArrivalState.__new__(ArrivalState)
     arrival.ctx = app.ctx

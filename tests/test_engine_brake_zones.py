@@ -425,7 +425,7 @@ def test_terse_speech_still_hears_the_violation_warning(monkeypatch):
 
     app = App()
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         d = _driving(app)
         spoken = _capture_events(app, monkeypatch)
         _roll_with_jake(d, monkeypatch, mile=2.0)

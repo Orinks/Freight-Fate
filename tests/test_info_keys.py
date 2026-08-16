@@ -560,7 +560,7 @@ def test_terse_clock_key_drops_calendar_and_stop_planning(monkeypatch):
 
     app = App()
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         d = _driving(app)
         d.trip.position_mi = 40.0
         spoken = _capture(app, monkeypatch)
@@ -568,7 +568,7 @@ def test_terse_clock_key_drops_calendar_and_stop_planning(monkeypatch):
         terse_report = spoken[-1]
         assert "deadline in" in terse_report
 
-        app.ctx.settings.speech_verbosity = 1
+        app.ctx.settings.driving_speech = "standard"
         spoken.clear()
         d.handle_event(key_event(pygame.K_c))
         assert len(terse_report) < len(spoken[-1])
@@ -675,7 +675,7 @@ def test_alt_d_carries_the_next_legal_stop_context(monkeypatch):
         # answers "when does this shift end".
         assert "legal stop" in verbose or "No route stop" in verbose
 
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         d.handle_event(_alt(pygame.K_d))
         assert "Next legal stop" not in spoken[-1]
         assert len(spoken[-1]) < len(verbose)

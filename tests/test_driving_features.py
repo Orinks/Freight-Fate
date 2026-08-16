@@ -1195,7 +1195,7 @@ def test_terse_air_brake_startup_omits_control_instructions(monkeypatch):
         speech_stub(spoken, with_interrupt=True),
     )
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         driving = start_drive(app)
         # First-run guidance ignores verbosity (R15), so silence the terse
         # startup line's neighbors the honest way: this driver has finished
@@ -1324,7 +1324,7 @@ def test_terse_hazard_drops_brake_now_instruction(monkeypatch):
         speech_stub(events, with_interrupt=True, terse=True),
     )
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         driving = start_drive(app)
         quiet_trip(driving)
 
@@ -1518,7 +1518,7 @@ def test_terse_lane_departure_omits_recovery_instruction(monkeypatch):
     )
     monkeypatch.setattr(app.ctx.audio, "play", lambda *args, **kwargs: None)
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         driving = start_drive(app)
         quiet_trip(driving)
         driving.truck.velocity_mps = 20.0
@@ -2128,7 +2128,7 @@ def test_armed_exit_countdown_silent_on_terse(monkeypatch):
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         driving = start_drive(app)
         quiet_trip(driving)
         stop = SimpleNamespace(
@@ -2362,7 +2362,7 @@ def test_terse_destination_exit_omits_press_x_instruction(monkeypatch):
         speech_stub(events, with_interrupt=True),
     )
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         driving = start_drive(app)
         quiet_trip(driving)
         destination = driving._destination_exit_stop()
@@ -4963,7 +4963,7 @@ def test_terse_speech_hears_no_grade_advisories(monkeypatch):
     played = []
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: played.append(a))
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         driving = _advisory_setup(app, lambda mile: -0.06)
         spoken.clear()
         played.clear()  # the career setup's own menu sounds are not ours
@@ -4975,7 +4975,7 @@ def test_terse_speech_hears_no_grade_advisories(monkeypatch):
         assert driving._grade_scan_mi == -1e9  # never even scanned
 
         # Normal speech still gets it.
-        app.ctx.settings.speech_verbosity = 2
+        app.ctx.settings.driving_speech = "standard"
         driving._update_grade_advisory()
         assert any("downgrade" in line for line in spoken), spoken
     finally:

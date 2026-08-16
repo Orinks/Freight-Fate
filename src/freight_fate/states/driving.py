@@ -683,7 +683,7 @@ class DrivingState(
                 setattr(self, name, data[name])
 
     def _terse_speech(self) -> bool:
-        return self.ctx.settings.speech_verbosity == 0
+        return self.ctx.settings.renders_terse()
 
     def _absolute_game_hour(self, trip_minutes: float | None = None) -> float:
         if trip_minutes is None:
