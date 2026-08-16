@@ -722,18 +722,26 @@ onto exit signalling.
       test_a_drive_gets_quieter_as_the_rung_tightens` drives a real
       scenario through all four rungs and pins the spoken line count
       falling as the rung tightens.
+- [x] **The ladder's earcons actually play now -- landed 2026-08-16
+      (task 10).** `LADDER_EARCONS` was wired only into the Learn game
+      sounds screen's preview; the gate at `app.py` silenced a cut
+      category, logged it, and returned, so Quiet and Urgent only were
+      audibly identical -- a category the ladder cut was silence, never a
+      sound, at every rung that cut it. `GameContext._play_ladder_earcon`
+      now plays `LADDER_EARCONS[category]` (resolved through
+      `sound_catalog.entry_by_name`, so the recipe lives in one place)
+      wherever the rung's disposition is EARCON, in both `say` and
+      `say_event`; SILENT still stays silent, which is now the entire
+      difference between Quiet and Urgent only at the voice.
 - [ ] **Sonification pass (principle 1 of the drive-time chattiness
       redesign above).** Convert spoken state updates (speed drift,
       gaps opening, weather shifts) to the earcon/sonification layer,
       speech kept only for the first occurrence as a teaching pair. The
-      ladder's Quiet rung already names two earcons for this (Coaching
-      note, Status note -- `speech_pacing.LADDER_EARCONS`, pinned
-      learnable in the Learn game sounds screen) but neither has a real
-      call site yet: a category the ladder cuts is silence today, not a
-      sound, at every rung that cuts it, so Quiet and Urgent only are
-      currently audibly identical to a player -- confirmed by running
-      every scenario in `tools/playtest_break.py` at both rungs and
-      finding the transcripts always tie.
+      ladder's three earcons (Coaching note, Status note, the reused
+      Hazard clear chime) now play for real (see above) -- what remains
+      is everything past those three categories: speed drift, gaps
+      opening, and weather shifts have no sonified substitute at all yet
+      and still speak in full every time regardless of rung.
 - [ ] **Per-minute cruise speech budget (principle 3 of the drive-time
       chattiness redesign above).** The live-region politeness model's
       missing half: the S1 pacer already drops stale AMBIENT lines, but
@@ -752,6 +760,23 @@ onto exit signalling.
       Standard are presently indistinguishable to a player. Needs the
       leg-scoped "spoken once" and enter/worsen/clear-only bookkeeping
       the table's own docstring describes.
+- [ ] **A stale CONFIRMATION line can resurface and bury what the player
+      just asked for (found by task 10, adversarial scenario
+      `settings_flips_mid_drive`).** A `CONFIRMATION` line (e.g.
+      "Transmission changed to manual.") is usually spoken with
+      `interrupt=True` and no explicit `priority=`, so `say_event`
+      defaults it to `EventPriority.CRITICAL` -- and the pacer's
+      protected-hand-back slot, built to rescue a ROUTE or CRITICAL line
+      an interrupt plausibly cut off mid-sentence, holds onto it on the
+      same terms. The next interrupting line on the main channel (an S
+      query, another settings flip) purges the channel and hands the
+      confirmation back to be requeued, even though it already finished
+      speaking and what it reported may already be contradicted -- and it
+      resurfaces after, sometimes burying, the line the player actually
+      just asked for. Recorded as a strict xfail in
+      `tests/adversarial/test_break_scenarios.py::KNOWN_OPEN`. Needs a
+      pacer design change so CONFIRMATION does not occupy the
+      ROUTE/CRITICAL hand-back slot; out of scope for task 10.
 - [x] **Speech-priority redesign, stage S3 -- landed 2026-08-12** (R6, R7,
       R9, R10, R11, R12, R14). The naming diet and the noise cuts: facility
       names speak in full on first mention per leg and short after, with the

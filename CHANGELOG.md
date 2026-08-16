@@ -3135,15 +3135,27 @@
 - **Driving speech is now a ladder you pick, not a single terse switch.**
   The old setting only made each message shorter, which is why a quiet
   drive still talked constantly -- it never said fewer things. Driving
-  speech, in the Speech settings, now has four rungs. Coaching explains
-  technique as you drive. Standard is the working default. Quiet cuts
-  confirmations and status readouts to short sounds instead of sentences,
-  keeping the safety calls, what things cost, and the turn you actually
-  have to take as words. Urgent only keeps that same short set of words and
-  drops the coaching too. Billboards, place names, and landmarks are not
-  part of this ladder and keep their own switches, so you can drive a
-  quiet cab through a talkative countryside. If you were playing on terse,
-  you are now on Quiet.
+  speech, in the Speech settings, now has four rungs. Coaching and Standard
+  sound the same for now: both speak tips, confirmations, and status
+  readouts as full sentences (Standard easing off repeat tips on its own is
+  still coming). Quiet turns tips, confirmations, and status readouts into
+  a short sound instead of a sentence, and keeps the safety calls, what
+  things cost, and the turn you actually have to take as words. Urgent
+  only keeps that same short set of words plus the confirmation sound, but
+  tips and status updates go fully quiet -- no words and no sound, though
+  you can still pull them up from the message log. Billboards, place
+  names, and landmarks are not part of this ladder and keep their own
+  switches, so you can drive a quiet cab through a talkative countryside.
+  If you were playing on terse, you are now on Quiet.
+
+### Fixed
+
+- **"The scale comes first" now actually reaches you.** Pressing the rest
+  key with an open weigh station ahead was supposed to tell you the scale
+  comes first and rest planning can wait -- but that line could lose a race
+  against other things being said and never reach your ears at all, so
+  pressing the rest key looked like it did nothing. It now always gets
+  through.
 
 ## 1.8.8.1 - 2026-08-08
 
