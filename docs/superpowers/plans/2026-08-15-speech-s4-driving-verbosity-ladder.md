@@ -245,7 +245,7 @@ Expected: PASS, all cases.
 - [ ] **Step 5: Lint and commit**
 
 ```bash
-uv run ruff check src tests
+uv run ruff check src tests tools
 git add src/freight_fate/speech_pacing.py tests/test_driving_speech_ladder.py
 git commit -m "feat(speech): informational speech gets a category tag and a rung table [skip changelog]"
 ```
@@ -466,7 +466,7 @@ Expected: these will FAIL where they set `settings.speech_verbosity` directly. U
 - [ ] **Step 5: Lint and commit**
 
 ```bash
-uv run ruff check src tests
+uv run ruff check src tests tools
 git add src/freight_fate/settings.py tests/
 git commit -m "feat(settings): the driving speech ladder replaces the verbosity pair [skip changelog]"
 ```
@@ -651,7 +651,7 @@ pacing arguments via `**_pacing`, so adding `category` breaks no existing stub.
 - [ ] **Step 5: Lint and commit**
 
 ```bash
-uv run ruff check src tests
+uv run ruff check src tests tools
 git add src/freight_fate/app.py tests/test_driving_speech_ladder.py
 git commit -m "feat(speech): the delivery layer gates on the player's rung [skip changelog]"
 ```
@@ -812,7 +812,7 @@ Expected: PASS.
 - [ ] **Step 5: Lint and commit**
 
 ```bash
-uv run ruff check src tests
+uv run ruff check src tests tools
 git add src/freight_fate/states/driving_events.py src/freight_fate/sim/trip.py tests/
 git commit -m "feat(speech): trip events carry what they are about [skip changelog]"
 ```
@@ -918,7 +918,7 @@ Expected: PASS.
 - [ ] **Step 5: Lint and commit**
 
 ```bash
-uv run ruff check src tests
+uv run ruff check src tests tools
 git add src/freight_fate/states/ tests/
 git commit -m "feat(speech): coaching, confirmations and status say what they are [skip changelog]"
 ```
@@ -1079,7 +1079,7 @@ Expected: PASS.
 - [ ] **Step 5: Lint and commit**
 
 ```bash
-uv run ruff check src tests
+uv run ruff check src tests tools
 git add src/freight_fate/app.py src/freight_fate/speech_pacing.py src/freight_fate/sound_catalog.py tests/test_driving_speech_ladder.py
 git commit -m "feat(speech): teaching outranks the rung, and every substituted sound is learnable [skip changelog]"
 ```
@@ -1089,9 +1089,21 @@ git commit -m "feat(speech): teaching outranks the rung, and every substituted s
 ### Task 7: The settings row, and the ontology
 
 **Files:**
-- Modify: `src/freight_fate/states/main_menu.py` (`_speech_control_specs` at line 1506; `_cycle_verbosity` at line 1995)
+- Modify: `src/freight_fate/states/main_menu.py` (`_speech_control_specs` at line 1506; `_cycle_verbosity` at line 1995; `SETTINGS_LAYOUT_NOTICES` at lines 1037-1054)
 - Modify: `docs/ontology.md` (the "Terse speech grammar" section at line 453)
 - Test: `tests/test_settings_menu.py` (append)
+
+**Required, carried from the Task 2 review:** Task 2 bumped
+`SETTINGS_VERSION` to 3, but `SETTINGS_LAYOUT_NOTICES` has no entry for
+version 3. Without one, every returning player has
+`settings_layout_notice_from` armed (`settings.py:648`) and then silently
+cleared by `s.save()` on their first Gameplay open
+(`main_menu.py:1097-1105`) — so a blind player is never told that the
+setting they knew as "terse" is now a rung called "quiet". The bump buys
+nothing without this. Add the version-3 notice in this task, in plain
+player language, naming what changed and what their old choice became.
+Pin it with a test asserting a version-2 settings file surfaces a
+non-empty notice on first open.
 
 **Interfaces:**
 - Consumes: `DRIVING_SPEECH_MODES`, `Settings.driving_speech`.
@@ -1198,7 +1210,7 @@ Expected: PASS.
 - [ ] **Step 5: Lint and commit**
 
 ```bash
-uv run ruff check src tests
+uv run ruff check src tests tools
 git add src/freight_fate/states/main_menu.py docs/ontology.md tests/test_settings_menu.py
 git commit -m "feat(settings): the driving speech row names its rung [skip changelog]"
 ```
@@ -1306,7 +1318,7 @@ Re-run the transcript and confirm the repeats are gone.
 - [ ] **Step 5: Lint and commit**
 
 ```bash
-uv run ruff check src tests
+uv run ruff check src tests tools
 git add src/freight_fate/states/ tests/test_driving_speech_ladder.py
 git commit -m "feat(speech): standing conditions announce on change, not on state [skip changelog]"
 ```
