@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Four keys now answer one question each about where you are.** Alt 1
+  speaks the state, Alt 2 the road you are on, Alt 3 the town you are in --
+  or the nearest one and how far off the road it sits -- and Alt 4 the
+  direction you are travelling. R still says all of it in one sentence;
+  these are for when you want the one fact and not the paragraph. The
+  keypad numbers do the same thing. Suggested by Tim K.
+
 - **The Online menu can open your driver setup page for you.** A new item,
   Open my driver setup page, opens it in your browser -- no address to
   remember or type. That page is where you change your driver name, turn
