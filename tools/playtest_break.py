@@ -226,7 +226,7 @@ class Rig:
 
         def _speak(text: str, interrupt: bool = True, **kwargs: object):
             if isinstance(text, SpokenMessage):
-                text = text.render(self.ctx.settings.speech_verbosity == 0)
+                text = text.render(self.ctx.settings.renders_terse())
                 if not text:
                     return
             self.transcript.append(f"{prefix}{text}")

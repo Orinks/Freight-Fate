@@ -49,9 +49,10 @@ routes it offers the search and ``--max-miles`` how long they may be.
 The driving assists that change what the truck does on a grade are arguments
 too -- ``--descent off|realistic|interactive``, ``--assists``,
 ``--predictive-cruise on|off``, ``--lane-keeping``, ``--transmission``, and
-``--verbosity`` -- so a behaviour can be compared across settings without
-editing your own. Anything not given falls back to your real settings, so the
-playtest otherwise reproduces what a player would actually get.
+``--verbosity coaching|standard|quiet|urgent_only`` -- so a behaviour can be
+compared across settings without editing your own. Anything not given falls
+back to your real settings, so the playtest otherwise reproduces what a
+player would actually get.
 """
 
 from __future__ import annotations
@@ -474,7 +475,7 @@ def build_driving(ctx, hit: Hit, args):
     if args.transmission:
         s.automatic_transmission = args.transmission == "automatic"
     if args.verbosity is not None:
-        s.speech_verbosity = args.verbosity
+        s.driving_speech = args.verbosity
 
     # The canonical key, not the display name the route sets are written in:
     # a career's current_city is a slug ("dallas_tx_us"), and cloud backup
@@ -540,10 +541,7 @@ def _print_setup(ctx, driving, hit: Hit, start_mi: float, args) -> None:
     print(f"  cruise            : {f'set {args.cruise:.0f} mph' if args.cruise else 'off'}")
     print("  your real settings:")
     print(f"    transmission    : {'automatic' if s.automatic_transmission else 'manual'}")
-    print(
-        f"    speech verbosity: {s.speech_verbosity} "
-        f"({'terse' if s.speech_verbosity == 0 else 'normal'})"
-    )
+    print(f"    driving speech  : {s.driving_speech}")
     print(f"    units           : {'miles' if s.imperial_units else 'kilometers'}")
     print(f"    speed keeper    : {'on' if s.speed_keeper else 'off'}")
     print(f"    descent control : {getattr(s, 'descent_speed_control', 'n/a')}")
@@ -621,7 +619,7 @@ def run_headless(app, driving, args) -> None:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    from freight_fate.settings import LANE_KEEPING_MODES
+    from freight_fate.settings import DRIVING_SPEECH_MODES, LANE_KEEPING_MODES
 
     p = argparse.ArgumentParser(
         description="Drop into a chosen piece of road with the truck already set up."
@@ -683,7 +681,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="curve speed assistance: off means you brake for the bends yourself",
     )
     p.add_argument("--transmission", choices=("automatic", "manual"), help="override the gearbox")
-    p.add_argument("--verbosity", type=int, choices=(0, 1, 2), help="speech verbosity override")
+    p.add_argument("--verbosity", choices=DRIVING_SPEECH_MODES, help="driving speech rung override")
     p.add_argument("--weather", help="force a weather kind, e.g. rain, snow, clear")
     p.add_argument("--hour", type=float, help="clock hour to start at")
     p.add_argument("--headless", type=float, default=0.0, help="bench for N minutes, no window")
