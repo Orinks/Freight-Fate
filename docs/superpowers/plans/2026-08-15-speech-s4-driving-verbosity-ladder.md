@@ -1415,6 +1415,37 @@ Write `_spoken_line_count_for_scenario` as a helper in the test file, driving
 `tests/test_playtest_harness.py` already does — read that file first and reuse
 its seam rather than shelling out.
 
+**Required first — fix the harness, or this test cannot work.** Found during
+Task 8 and verified directly: both sanctioned transcript harnesses replace
+`ctx.say_event` itself with a recorder —
+`tools/playtest_break.py:208` (`ctx.say_event = self._recorder("[event] ")`)
+and `tools/playtest_road.py:565`. The ladder's gate and the pacer both live
+*inside* `GameContext.say_event`, so replacing the method skips both. Two
+consequences:
+
+1. The monotonicity test below would read identical counts at every rung,
+   because no rung is ever applied. It would fail for a reason that has
+   nothing to do with the ladder.
+2. More importantly, this is a pre-existing defect in the project's only
+   sanctioned way to read spoken output. Every transcript ever taken from it
+   shows what the game *would* say with no verbosity setting applied at all —
+   not what a player hears. It overstates the drive's chattiness, which is
+   the very thing the owner's report was about.
+
+Fix both harnesses to stub the **voice layer** rather than the context
+method: replace `ctx.speech.say_event` / `ctx.speech.say` and leave
+`ctx.say_event` intact, so the gate, the category, the pacer's repeat window
+and the `key=` suppression all run before the recorder sees a line. This is
+exactly what the Task 5 tests did successfully, so the pattern is proven in
+this repo. Keep the recorder's `**kwargs` absorption.
+
+Expect existing harness output to change once this lands: lines that were
+being double-reported, and lines a rung silences, will stop appearing. That
+is the fix working. Check `tests/test_playtest_harness.py` for expectations
+pinned to the old behavior and update them, but do not weaken an assertion
+to accommodate the change — if a test breaks in a way you cannot explain as
+the fix working, stop and report it.
+
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_driving_speech_ladder.py -k drive_gets_quieter -v`
