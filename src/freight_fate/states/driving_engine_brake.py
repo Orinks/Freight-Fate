@@ -18,6 +18,7 @@ the reason.
 
 from __future__ import annotations
 
+from ..speech_pacing import SpeechCategory
 from .driving_core import *
 
 # How far out the spoken NO ENGINE BRAKE sign reads when the retarder is on.
@@ -153,7 +154,7 @@ class EngineBrakeZoneMixin:
                 "using the brakes instead of the engine brake."
             )
         self.ctx.audio.play("ui/notify", volume=0.6)
-        self.ctx.say_event(message, interrupt=False)
+        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.CONFIRMATION)
 
     def _jake_zone_exempt(self) -> bool:
         """The ordinance's own carve-outs: emergencies and real downgrades."""
@@ -189,6 +190,7 @@ class EngineBrakeZoneMixin:
             f"No engine brake zone in {distance}, coming into {spoken}. "
             "Switch the engine brake off before the zone.",
             interrupt=False,
+            category=SpeechCategory.NAVIGATION,
         )
 
     def _speak_jake_zone_warning(self, city: str) -> None:
@@ -204,7 +206,7 @@ class EngineBrakeZoneMixin:
                 f"No engine brakes in {spoken}; local noise rules. Switch the "
                 f"engine brake off with {hint} or you will be fined."
             )
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)
 
     def _fine_engine_braking(self, city: str) -> None:
         """The citation: paid on the spot, escalating like repeat offenses do."""
@@ -227,4 +229,4 @@ class EngineBrakeZoneMixin:
                 f"a {fine:,.0f} dollar fine under the town noise rules, paid "
                 "on the spot."
             )
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.MONEY)

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from ..speech_pacing import SpeechCategory
 from .base import TimedMessageState
 from .driving_core import *
 
@@ -35,7 +36,7 @@ class DrivingPickupMixin:
                 "Slow down and come to a complete stop at the gate."
             )
         )
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)
         if speed_control_paused:
             self._announce_pickup_speed_control_pause()
 
@@ -46,7 +47,11 @@ class DrivingPickupMixin:
         speed_control_paused = self._pause_speed_control()
         self.ctx.audio.play("ui/notify", volume=0.7)
         self._set_status("Pickup gate: stop to check in.")
-        self.ctx.say_event(f"At {self._pickup_facility_text()}. Stop to check in.", interrupt=False)
+        self.ctx.say_event(
+            f"At {self._pickup_facility_text()}. Stop to check in.",
+            interrupt=False,
+            category=SpeechCategory.NAVIGATION,
+        )
         if speed_control_paused:
             self._announce_pickup_speed_control_pause()
 
@@ -55,6 +60,7 @@ class DrivingPickupMixin:
             "Automatic speed control paused for pickup. It will resume after "
             "you depart with the load.",
             interrupt=False,
+            category=SpeechCategory.CONFIRMATION,
         )
 
     def _open_pickup_arrival(self) -> None:

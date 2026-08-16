@@ -32,6 +32,7 @@ lining up on a dock must never be scolded for doing their job.
 from __future__ import annotations
 
 from ..sim.trip_models import FACILITY_GATE_ZONE_MI
+from ..speech_pacing import SpeechCategory
 from .driving_core import *
 
 # The rungs, in miles backed along the route since reverse was engaged.
@@ -88,6 +89,7 @@ class WrongWayMixin:
                 "You are backing into traffic. Stop, select a forward gear, and "
                 "get the truck pointed the right way.",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
             severity = WRONG_WAY_COLLISION_SEVERITY
             self.ctx.audio.play("vehicle/collision")
@@ -96,6 +98,7 @@ class WrongWayMixin:
             self.ctx.say_event(
                 f"Something hit the trailer. Total damage {t.damage_pct:.0f} percent.",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
             return
         if backed >= WRONG_WAY_WARN_MI and said_at < WRONG_WAY_WARN_MI:
@@ -110,6 +113,7 @@ class WrongWayMixin:
                 f"illegal, and you have given up {distance} of the route. Stop and "
                 "select a forward gear.",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
             return
         if backed >= WRONG_WAY_REMIND_MI and said_at < WRONG_WAY_REMIND_MI:
@@ -117,4 +121,5 @@ class WrongWayMixin:
             self.ctx.say_event(
                 "You are still in reverse, backing away from your destination.",
                 interrupt=False,
+                category=SpeechCategory.SAFETY,
             )

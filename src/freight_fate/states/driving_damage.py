@@ -54,6 +54,7 @@ from ..models.cargo_condition import (
 from ..models.carrier_fleet import slip_seat_pool, slip_seats
 from ..models.trucks import TRUCK_CATALOG
 from ..sim.trip_models import FACILITY_GATE_ZONE_MI
+from ..speech_pacing import SpeechCategory
 from .driving_core import *
 
 # The condition rungs, in the order a load passes them, for the in-drive cue.
@@ -212,7 +213,9 @@ class DamageBandMixin:
         # road: it earns the voice when it starts and again when the number it
         # carries has moved. Otherwise the driver hears the same sentence for
         # the rest of the run and has to sit through it every time.
-        self.ctx.say_event(message, interrupt=True, key="cargo_condition")
+        self.ctx.say_event(
+            message, interrupt=True, key="cargo_condition", category=SpeechCategory.COACHING
+        )
 
     # -- the bands ---------------------------------------------------------------
 
@@ -311,7 +314,7 @@ class DamageBandMixin:
                     else f"Damage {damage:.0f} percent. Still in limp mode, capped at {cap}."
                 )
             self.ctx.audio.play("ui/notify")
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.STATUS)
 
     def _out_of_service_message(self) -> str:
         """The wall landing: the fact, the cost, and the path forward.
@@ -416,7 +419,7 @@ class DamageBandMixin:
                 f"Holding {speed_text(cap)}."
             )
         )
-        self.ctx.say_event(message, interrupt=False)
+        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
 
     # -- recovery ---------------------------------------------------------------
 
@@ -473,7 +476,7 @@ class DamageBandMixin:
                 f"Press {self.ctx.control_hint('engine')} to restart the engine, and "
                 "repair it properly at the next stop."
             )
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.MONEY)
 
     def _carrier_grounds_the_tractor(self) -> None:
         """Company driver: the carrier takes the truck, and the driver waits.
@@ -525,7 +528,7 @@ class DamageBandMixin:
                 "equipment damage against your record; a pattern of it costs the seat. "
                 f"Press {self.ctx.control_hint('engine')} to restart the engine."
             )
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.CONFIRMATION)
 
     def _record_equipment_event(self) -> None:
         """Leave the event on the career for the trust and termination layer.

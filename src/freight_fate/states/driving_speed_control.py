@@ -8,6 +8,7 @@ from ..sim.trip_models import (
     APPROACH_REACTION_S,
     APPROACH_SETTLE_S,
 )
+from ..speech_pacing import SpeechCategory
 from .driving_core import (
     CRUISE_MIN_MPH,
     KEEPER_MIN_MPH,
@@ -250,7 +251,11 @@ class SpeedControlStateMixin:
         t = self.truck
         if t.emergency_brake:
             self._disarm_speed_control()
-            self.ctx.say_event("Automatic speed control canceled.", interrupt=False)
+            self.ctx.say_event(
+                "Automatic speed control canceled.",
+                interrupt=False,
+                category=SpeechCategory.CONFIRMATION,
+            )
             return
         if self._ramp_mi is not None:
             # A ramp stop is in progress. Taking the exit hands the pedals
@@ -287,6 +292,7 @@ class SpeedControlStateMixin:
                 f"{self.ctx.settings.speed_text(self._keeper_mph)} through the "
                 f"{zone_reason} zone.",
                 interrupt=False,
+                category=SpeechCategory.CONFIRMATION,
             )
             return
         if t.speed_mph < CRUISE_MIN_MPH:

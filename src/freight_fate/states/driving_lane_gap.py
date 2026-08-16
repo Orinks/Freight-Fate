@@ -38,6 +38,7 @@ missed the line -- or who wants to know before committing -- can ask.
 
 from __future__ import annotations
 
+from ..speech_pacing import SpeechCategory
 from .driving_core import *
 
 # How much wider than the sideswipe test this cue looks. Positional slack for
@@ -165,7 +166,7 @@ class LaneGapMixin:
         else:
             message = f"Clear of the {vehicle}. {name.capitalize()} lane open."
         self.ctx.audio.play("ui/notify", volume=0.45)
-        self.ctx.say_event(message, interrupt=False)
+        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
 
     # -- the on-demand readout ------------------------------------------------
 

@@ -12,7 +12,7 @@ from ..models.enforcement import (
     WORK_ZONE_BARRELS_FINE,
 )
 from ..radio import effective_range_miles, is_stream_entry, truck_elevation_ft
-from ..speech_pacing import EventSpeechPacer
+from ..speech_pacing import EventSpeechPacer, SpeechCategory
 from ..speech_text import overspeed_nag, terse_silent
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
@@ -187,7 +187,11 @@ class DrivingUpdateMixin:
             return
         pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
         self.ctx.audio.play("vehicle/curve_bink", volume=0.9, pan=pan)
-        self.ctx.say_event(self._pacenote_text(curve, ahead, speed), interrupt=True)
+        self.ctx.say_event(
+            self._pacenote_text(curve, ahead, speed),
+            interrupt=True,
+            category=SpeechCategory.NAVIGATION,
+        )
 
     def _note_critical_speech_stopped(self) -> None:
         """Called from the Ctrl handler: arm the one-shot refreshed re-speak
@@ -278,7 +282,9 @@ class DrivingUpdateMixin:
         if key_up and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
-                self.ctx.say_event("Jake off.", interrupt=False)
+                self.ctx.say_event(
+                    "Jake off.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                )
             t.throttle = min(1.0, t.throttle + ramp)
         elif backing:
             t.throttle = min(0.45, t.throttle + ramp)
@@ -287,7 +293,9 @@ class DrivingUpdateMixin:
         if pad_throttle > 0.05 and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
-                self.ctx.say_event("Jake off.", interrupt=False)
+                self.ctx.say_event(
+                    "Jake off.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                )
             t.throttle = max(t.throttle, pad_throttle)
         # Keyboard ramps the brake up and down; the analog trigger sets a direct
         # held floor on top of that.
@@ -305,7 +313,7 @@ class DrivingUpdateMixin:
         # ramps (reverse arrest, hazard events) go through their own cancels.
         if self._cruise_mph is not None and (braking_key or emergency) and not backing:
             self._cancel_cruise()
-            self.ctx.say_event("Cruise off.", interrupt=False)
+            self.ctx.say_event("Cruise off.", interrupt=False, category=SpeechCategory.CONFIRMATION)
         if emergency:
             # no ramp: slams to full application instantly, plus spring brakes
             if not t.emergency_brake and abs(t.velocity_mps) > 1:
@@ -372,7 +380,11 @@ class DrivingUpdateMixin:
         if t.transmission.automatic != desired_automatic:
             t.transmission.automatic = desired_automatic
             mode = "automatic" if desired_automatic else "manual"
-            self.ctx.say_event(f"Transmission changed to {mode}.", interrupt=True)
+            self.ctx.say_event(
+                f"Transmission changed to {mode}.",
+                interrupt=True,
+                category=SpeechCategory.CONFIRMATION,
+            )
 
         clutch_pressed = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
         clutch_val = 1.0 if clutch_pressed else 0.0
@@ -410,6 +422,7 @@ class DrivingUpdateMixin:
                     f"The engine stalled. Press {self.ctx.control_hint('engine')} to restart, "
                     "and use a lower gear at low speed.",
                     interrupt=True,
+                    category=SpeechCategory.CONFIRMATION,
                 )
             elif t.fuel_gal <= 0:
                 self._handle_out_of_fuel()
@@ -520,7 +533,7 @@ class DrivingUpdateMixin:
                 if self._terse_speech()
                 else "Start the engine first; air pressure cannot build with the engine off."
             )
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
         elif not t.air_ready:
             self._set_status("Waiting for air pressure before the truck can move.")
             message = (
@@ -532,7 +545,7 @@ class DrivingUpdateMixin:
                     "to release the parking brake."
                 )
             )
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
         elif t.parking_brake:
             brake_hint = self.ctx.control_hint("parking_brake")
             self._set_status(f"Parking brake set. Press {brake_hint} to release it.")
@@ -541,7 +554,7 @@ class DrivingUpdateMixin:
                 if self._terse_speech()
                 else f"Parking brake set. Press {brake_hint} to release it."
             )
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
 
     def _update_air_brake_announcements(
         self,
@@ -594,7 +607,7 @@ class DrivingUpdateMixin:
                 if self._terse_speech()
                 else f"Low air warning: {t.air_pressure_psi:.0f} psi. {advice}"
             )
-            self.ctx.say_event(message, interrupt=True)
+            self.ctx.say_event(message, interrupt=True, category=SpeechCategory.STATUS)
         elif t.air_pressure_psi >= t.specs.air_low_warning_clear_psi:
             # Re-arm only once pressure has recovered clear of the warning
             # threshold (hysteresis), not merely ticked a fraction above it.
@@ -615,7 +628,7 @@ class DrivingUpdateMixin:
                     "compressor rebuild air before moving."
                 )
             )
-            self.ctx.say_event(message, interrupt=True)
+            self.ctx.say_event(message, interrupt=True, category=SpeechCategory.STATUS)
         elif not t.spring_brakes_active:
             self._spring_brake_said = False
 
@@ -636,7 +649,7 @@ class DrivingUpdateMixin:
                     f"Press {brake_hint} to release the parking brake."
                 )
             )
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
             # air_ready is retired as an award (folded into "first_day" at
             # pickup completion, see city_pickup.py); the catalog entry and
             # id stay so the cloud validator's allow-list never sees a
@@ -707,12 +720,20 @@ class DrivingUpdateMixin:
                 if want == "forward":
                     tr.gear = 1
                     self._set_status("Forward gear selected.")
-                    self.ctx.say_event("Forward gear selected.", interrupt=False)
+                    self.ctx.say_event(
+                        "Forward gear selected.",
+                        interrupt=False,
+                        category=SpeechCategory.CONFIRMATION,
+                    )
                     return False
                 tr.gear = REVERSE
                 self._cancel_cruise()
                 self._set_status("Reverse selected. Backing slowly.")
-                self.ctx.say_event("Reverse selected. Backing slowly.", interrupt=False)
+                self.ctx.say_event(
+                    "Reverse selected. Backing slowly.",
+                    interrupt=False,
+                    category=SpeechCategory.CONFIRMATION,
+                )
                 return True
         else:
             self._direction_armed = ""
@@ -746,6 +767,7 @@ class DrivingUpdateMixin:
                     message,
                     interrupt=urgent,
                     priority=EventPriority.CRITICAL if urgent else EventPriority.ROUTE,
+                    category=SpeechCategory.SAFETY if urgent else SpeechCategory.STATUS,
                 )
         self.trip.hos_violation = mode not in hos.HOS_NON_ENFORCED_MODES and self.hos.in_violation(
             mode
@@ -765,7 +787,7 @@ class DrivingUpdateMixin:
             )
         for worn in p.expire_buffs(now_h):
             text = worn.get("worn_off") or f"The {worn.get('label', 'buff').lower()} has worn off."
-            self.ctx.say_event(text, interrupt=False)
+            self.ctx.say_event(text, interrupt=False, category=SpeechCategory.STATUS)
         self.truck.engine_wear_buff_mult = float(self.rig_buffs.get("engine", {}).get("rate", 1.0))
         self.truck.tire_wear_buff_mult = float(self.rig_buffs.get("tire", {}).get("rate", 1.0))
         fatigue = p.fatigue
@@ -778,6 +800,7 @@ class DrivingUpdateMixin:
                 "You are dangerously drowsy and drifting out of "
                 "your lane. Sleep at the next rest stop.",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
         elif fatigue >= hos.FATIGUE_DROWSY and not self._drowsy_said and alerts_clear:
             self._drowsy_said = True
@@ -789,6 +812,7 @@ class DrivingUpdateMixin:
                 "You are getting drowsy. Take a break or sleep at a rest stop.",
                 interrupt=False,
                 priority=EventPriority.ROUTE,
+                category=SpeechCategory.SAFETY,
             )
         if fatigue < hos.FATIGUE_DROWSY:
             self._drowsy_said = False
@@ -856,6 +880,7 @@ class DrivingUpdateMixin:
                 self.ctx.say_event(
                     f"{self._pacenote_phrase(active)}: too fast, drifting to the outside.",
                     interrupt=True,
+                    category=SpeechCategory.SAFETY,
                 )
         else:
             curve = 0.0
@@ -972,10 +997,18 @@ class DrivingUpdateMixin:
         if curve_assisting:
             if not self._curve_assist_active and self._curve_assist_cue_s <= 0.0:
                 self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
-                self.ctx.say_event("Curve speed assistance slowing.", interrupt=False)
+                self.ctx.say_event(
+                    "Curve speed assistance slowing.",
+                    interrupt=False,
+                    category=SpeechCategory.CONFIRMATION,
+                )
         elif self._curve_assist_active and self._curve_assist_cue_s <= 0.0:
             self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
-            self.ctx.say_event("Curve speed assistance released.", interrupt=False)
+            self.ctx.say_event(
+                "Curve speed assistance released.",
+                interrupt=False,
+                category=SpeechCategory.CONFIRMATION,
+            )
         self._curve_assist_active = curve_assisting
         # Hysteresis on the ramp cap, for the same reason the curve assist has
         # it: decided both ways on the one threshold, a truck riding the ramp
@@ -991,9 +1024,17 @@ class DrivingUpdateMixin:
         if transition_assisting:
             self.truck.brake = max(self.truck.brake, 0.4)
             if not self._transition_assist_active:
-                self.ctx.say_event("Route-transition assistance slowing.", interrupt=False)
+                self.ctx.say_event(
+                    "Route-transition assistance slowing.",
+                    interrupt=False,
+                    category=SpeechCategory.CONFIRMATION,
+                )
         elif self._transition_assist_active:
-            self.ctx.say_event("Route-transition assistance released.", interrupt=False)
+            self.ctx.say_event(
+                "Route-transition assistance released.",
+                interrupt=False,
+                category=SpeechCategory.CONFIRMATION,
+            )
         self._transition_assist_active = transition_assisting
         wind = self.weather.effects.wind
         off_road_event = self.lane.update(
@@ -1009,7 +1050,12 @@ class DrivingUpdateMixin:
             # Back on the pavement: the standing condition ended, so its one
             # transition line speaks and the band resets (research doc R12).
             self._road_position_band = None
-            self.ctx.say_event("Back on the pavement.", interrupt=False, review=False)
+            self.ctx.say_event(
+                "Back on the pavement.",
+                interrupt=False,
+                review=False,
+                category=SpeechCategory.STATUS,
+            )
         self._cross_repeat_s = max(0.0, self._cross_repeat_s - dt)
         self._sideswipe_cooldown_s = max(0.0, self._sideswipe_cooldown_s - dt)
         if self.lane.crossed:
@@ -1043,6 +1089,7 @@ class DrivingUpdateMixin:
                     f"The {lane_label(target, self.lane.lane_count)} lane is "
                     f"closed. Staying in the {self.lane.lane_name} lane.",
                     interrupt=True,
+                    category=SpeechCategory.SAFETY,
                 )
                 return
             self.lane.lane = target
@@ -1102,6 +1149,7 @@ class DrivingUpdateMixin:
                 f"lane! The truck took damage, now {self.truck.damage_pct:.0f} "
                 "percent. Check your mirrors before moving over.",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
             return
         if (
@@ -1119,7 +1167,11 @@ class DrivingUpdateMixin:
             self._finish_hazard_clear(f"You swerve around {names}. Well done.")
             return
         if not quiet:
-            self.ctx.say_event(f"In {lane_phrase(lane.lane, lane.lane_count)}.", interrupt=False)
+            self.ctx.say_event(
+                f"In {lane_phrase(lane.lane, lane.lane_count)}.",
+                interrupt=False,
+                category=SpeechCategory.CONFIRMATION,
+            )
 
     def _closed_lane_here(self) -> int | None:
         """The coned-off lane index in the truck's own lane numbering.
@@ -1186,6 +1238,7 @@ class DrivingUpdateMixin:
                 f"The {lane_label(closed, count)} lane is closed where the road "
                 f"narrows. You are in the {open_name} lane.",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
             return
         before_lane = self._lane_before_narrow
@@ -1209,6 +1262,7 @@ class DrivingUpdateMixin:
             self.ctx.say_event(
                 f"The road narrows to {_lane_count_words(count)}. {moved}",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
 
     def _update_merge(self, dt: float) -> None:
@@ -1242,6 +1296,7 @@ class DrivingUpdateMixin:
                     f"The {lane_label(closed, self.lane.lane_count)} lane closes "
                     f"at the work zone ahead. Move to the {open_name} lane.",
                     interrupt=True,
+                    category=SpeechCategory.SAFETY,
                 )
             return
         if self._merge_deadline is None:
@@ -1252,6 +1307,7 @@ class DrivingUpdateMixin:
                 f"You are in the closed {lane_label(closed, self.lane.lane_count)} "
                 f"lane! Move to the {open_name} lane!",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
             return
         if self._lane_change_target is not None and self._lane_change_target != closed:
@@ -1270,6 +1326,7 @@ class DrivingUpdateMixin:
                 f"{open_name} lane. The truck took damage, now "
                 f"{self.truck.damage_pct:.0f} percent.",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
             self._cite_barrel_strike(zone)
 
@@ -1329,6 +1386,7 @@ class DrivingUpdateMixin:
             # Money rides ROUTE's never-dropped contract: a busy stretch must
             # not age a citation out of the queue.
             priority=EventPriority.ROUTE,
+            category=SpeechCategory.MONEY,
         )
 
     def _keep_right_justified(self) -> bool:
@@ -1419,7 +1477,7 @@ class DrivingUpdateMixin:
             message = self.lane.describe()
         if not self._terse_speech():
             message += " Steer back toward the lane center."
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.STATUS)
 
     def _edge_boundary(self) -> str:
         """What lies past the road edge the truck is drifting toward.
@@ -1498,7 +1556,7 @@ class DrivingUpdateMixin:
             text = "Through the bend, held your line."
         else:
             text = "Through the bend."
-        self.ctx.say_event(text, interrupt=False)
+        self.ctx.say_event(text, interrupt=False, category=SpeechCategory.CONFIRMATION)
 
     def _lane_count_here(self) -> int:
         """Lanes on our side at this mile.
@@ -1994,6 +2052,7 @@ class DrivingUpdateMixin:
                 f"{before.display_name} faded out of range. "
                 f"Falling back to {action.station.display_name}.",
                 interrupt=False,
+                category=SpeechCategory.STATUS,
             )
             return
         self._radio_signal_factor = signal_volume_factor(reception)
@@ -2012,7 +2071,9 @@ class DrivingUpdateMixin:
                 if action.fallback_used:
                     self.radio.write_settings(self.ctx.settings)
                     self.ctx.settings.save()
-                    self.ctx.say_event(action.message, interrupt=False)
+                    self.ctx.say_event(
+                        action.message, interrupt=False, category=SpeechCategory.STATUS
+                    )
             self._radio_fringe_signal = None
             return
         self._radio_reconnect_timer = 0.0
@@ -2293,6 +2354,7 @@ class DrivingUpdateMixin:
             f"Nothing in {station.display_name} would play. "
             "Check the tracks in your Playlists folder.",
             interrupt=False,
+            category=SpeechCategory.STATUS,
         )
 
     def _track_radio_badges(self, reception) -> None:
@@ -2414,6 +2476,7 @@ class DrivingUpdateMixin:
                 f"{before.display_name} left the dial: streamer-safe mode is on. "
                 f"Tuned to {action.station.display_name}.",
                 interrupt=False,
+                category=SpeechCategory.STATUS,
             )
 
     def _apply_radio_volume(self) -> None:
@@ -2574,7 +2637,11 @@ class DrivingUpdateMixin:
             mph = self.truck.speed_mph
             if abs(mph - self._last_announced_mph) >= 5 and mph > 1:
                 self._last_announced_mph = mph
-                self.ctx.say_event(self.ctx.settings.speed_text(mph), interrupt=False)
+                self.ctx.say_event(
+                    self.ctx.settings.speed_text(mph),
+                    interrupt=False,
+                    category=SpeechCategory.STATUS,
+                )
 
     def _brake_budget_s(self, target_mph: float = HAZARD_SAFE_MPH) -> float:
         """Seconds of full service braking to reach the given safe speed.
@@ -2838,6 +2905,7 @@ class DrivingUpdateMixin:
         self.ctx.say_event(
             f"{abs(pct):.1f} percent {direction} ahead{length}. {advice}",
             interrupt=False,
+            category=SpeechCategory.NAVIGATION,
         )
 
     def _hazard_names_text(self) -> str:
@@ -2875,7 +2943,7 @@ class DrivingUpdateMixin:
         self.ctx.controller.rumble.alert(intensity=0.4)
         message = terse_silent(message_text)
         self._last_event_message = message
-        self.ctx.say_event(message, interrupt=False)
+        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.CONFIRMATION)
         self.ctx.award_achievement("hazard_avoided", event=True)
         self._hazard_names = []
 
@@ -2918,7 +2986,7 @@ class DrivingUpdateMixin:
                 if self.trip.has_open_adjacent_lane_at()
                 else "It is still in your lane. Nearly stop."
             )
-            self.ctx.say_event(hint, interrupt=False)
+            self.ctx.say_event(hint, interrupt=False, category=SpeechCategory.SAFETY)
         self._hazard_deadline -= dt
         self._track_assisted_deceleration(dt)
         assist_may_act = (
@@ -2958,10 +3026,20 @@ class DrivingUpdateMixin:
                 # Kept out of the reviewable log: this line interrupts the
                 # hazard warning, and the review keys exist to give that
                 # warning back, not the assist that talked over it.
-                self.ctx.say_event("Automatic braking.", interrupt=True, review=False)
+                self.ctx.say_event(
+                    "Automatic braking.",
+                    interrupt=True,
+                    review=False,
+                    category=SpeechCategory.SAFETY,
+                )
             elif self._aeb_emergency and not self._automatic_braking_escalated:
                 self._automatic_braking_escalated = True
-                self.ctx.say_event("Emergency braking engaged.", interrupt=True, review=False)
+                self.ctx.say_event(
+                    "Emergency braking engaged.",
+                    interrupt=True,
+                    review=False,
+                    category=SpeechCategory.SAFETY,
+                )
             if self._cruise_mph is not None:
                 self._cancel_cruise()
         if self._hazard_deadline <= 0:
@@ -2994,7 +3072,7 @@ class DrivingUpdateMixin:
                 self._disarm_speed_control()
                 message = f"{message} Automatic speed control canceled."
             self._last_event_message = message
-            self.ctx.say_event(message, interrupt=True)
+            self.ctx.say_event(message, interrupt=True, category=SpeechCategory.SAFETY)
 
     # -- microsleeps (severe fatigue) ----------------------------------------------
 
@@ -3029,7 +3107,11 @@ class DrivingUpdateMixin:
         self._microsleep_deadline = MICROSLEEP_REACTION_S
         self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
         self.ctx.controller.rumble.alert()
-        self.ctx.say_event("You are nodding off. Steer or brake now to stay awake!", interrupt=True)
+        self.ctx.say_event(
+            "You are nodding off. Steer or brake now to stay awake!",
+            interrupt=True,
+            category=SpeechCategory.SAFETY,
+        )
 
     def _update_microsleep(self, keys, dt: float) -> None:
         if self._microsleep_deadline is None:
@@ -3055,7 +3137,9 @@ class DrivingUpdateMixin:
         self._microsleep_misses = 0
         if not silent:
             self.ctx.say_event(
-                "You caught it. Pull over and sleep before the next one.", interrupt=False
+                "You caught it. Pull over and sleep before the next one.",
+                interrupt=False,
+                category=SpeechCategory.CONFIRMATION,
             )
 
     def _microsleep_drift_off_road(self) -> None:
@@ -3075,6 +3159,7 @@ class DrivingUpdateMixin:
                 "You cannot stay awake. You drift onto the shoulder and jolt "
                 f"awake on the brakes. {standing} {self._fatigue_out_of_service()}",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
         else:
             self.ctx.say_event(
@@ -3082,6 +3167,7 @@ class DrivingUpdateMixin:
                 f"took damage, now {t.damage_pct:.0f} percent. {standing} "
                 "Pull over and sleep.",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
 
     def _record_fatigue_event(self) -> str:
@@ -3158,7 +3244,9 @@ class DrivingUpdateMixin:
         # A standing condition: the engine is still at redline and the driver
         # already knows. Repeating it earns the voice only when the wear
         # number it carries has actually moved.
-        self.ctx.say_event(message, interrupt=True, key="engine_redline")
+        self.ctx.say_event(
+            message, interrupt=True, key="engine_redline", category=SpeechCategory.STATUS
+        )
 
     def _update_speeding(self, dt: float, *, accelerator_held: bool = False) -> None:
         """The dash alert, and the braking grace a dropped limit earns.
@@ -3261,6 +3349,7 @@ class DrivingUpdateMixin:
                     self.ctx.settings.speed_value(limit),
                 ),
                 interrupt=False,
+                category=SpeechCategory.NAVIGATION,
             )
 
     def _log_overspeed(self, event: str, speed: float, limit: float) -> None:
@@ -3349,7 +3438,7 @@ class DrivingUpdateMixin:
         # you about enforcement"; the siren says what it is.
         self._play_enforcement_marker(volume=0.9)
         self._hold_stop_siren()
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)
         # One demand at a time: an exit armed for a ramp must not keep
         # announcing and steering for it under the trooper's lights -- that
         # is how a scale bypass became a failure-to-stop cascade.
@@ -3357,6 +3446,7 @@ class DrivingUpdateMixin:
             self.ctx.say_event(
                 "Exit approach canceled; plan it again after the stop.",
                 interrupt=False,
+                category=SpeechCategory.CONFIRMATION,
             )
 
     def _pull_over_grace_seconds(self, message: str) -> float:
@@ -3424,6 +3514,7 @@ class DrivingUpdateMixin:
                     f"{self.ctx.control_hint('rest')} to check in.",
                     interrupt=False,
                     priority=EventPriority.ROUTE,
+                    category=SpeechCategory.NAVIGATION,
                 )
             self._check_scale_reminder(stop, ahead, key)
             if key in self.enforcement_events:
@@ -3604,25 +3695,31 @@ class DrivingUpdateMixin:
         t = self.truck
         planing = t.hydroplaning
         if planing and not self._hydro_active:
-            self.ctx.say_event("Hydroplaning. The steering has gone light; ease off the speed.")
+            self.ctx.say_event(
+                "Hydroplaning. The steering has gone light; ease off the speed.",
+                category=SpeechCategory.SAFETY,
+            )
         self._hydro_active = planing
         slipping = t.jake_slipping and t.speed_mph > 5.0
         if slipping and not self._jake_slip_active:
             self.ctx.say_event(
-                "The drive wheels are sliding under the engine brake. Ease off the jake."
+                "The drive wheels are sliding under the engine brake. Ease off the jake.",
+                category=SpeechCategory.SAFETY,
             )
         self._jake_slip_active = slipping
         if t.chains_just_snapped:
             t.chains_just_snapped = False
             self.ctx.say_event(
                 "A tire chain let go and hammered the fender on its way off. "
-                "The set is scrap; you are running on rubber again."
+                "The set is scrap; you are running on rubber again.",
+                category=SpeechCategory.CONFIRMATION,
             )
         chains_fast = t.chains_on and t.speed_mph > CHAIN_SAFE_MPH + 2.0
         if chains_fast and not self._chains_fast_active:
             self.ctx.say_event(
                 "The chains are hammering the pavement at this speed. "
-                f"Keep it under {CHAIN_SAFE_MPH:.0f} or they will not last."
+                f"Keep it under {CHAIN_SAFE_MPH:.0f} or they will not last.",
+                category=SpeechCategory.COACHING,
             )
         self._chains_fast_active = chains_fast
 
@@ -3651,7 +3748,8 @@ class DrivingUpdateMixin:
             need = "chains" if level >= 2 else "winter-rated tires or chains"
             self.ctx.say_event(
                 f"You are rolling into an active chain law without {need}. "
-                "Stop and chain up, or hope the checkpoint is unstaffed."
+                "Stop and chain up, or hope the checkpoint is unstaffed.",
+                category=SpeechCategory.NAVIGATION,
             )
         start, end = self.trip.chain_law_areas[area]
         if self.trip.position_mi < (start + end) / 2.0 or key in self._chain_law_cited:
@@ -3675,6 +3773,7 @@ class DrivingUpdateMixin:
             f"You have {p.money:,.0f} dollars.",
             interrupt=False,
             priority=EventPriority.ROUTE,
+            category=SpeechCategory.MONEY,
         )
 
     def _reset_pull_over_tracker(self) -> None:
@@ -3792,7 +3891,7 @@ class DrivingUpdateMixin:
                 "stop on the shoulder."
             )
         self.ctx.audio.play("ui/warning")
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)
 
     def _settle_engine_to_idle(self) -> None:
         """Snap engine RPM and audio to idle for a menu-driven stop.
@@ -3907,7 +4006,10 @@ class DrivingUpdateMixin:
         if not holding:
             if self._pursuit_hold_s > 0.0:
                 self._pursuit_hold_s = 0.0
-                self.ctx.say_event("Not running. Brake to a stop on the shoulder.")
+                self.ctx.say_event(
+                    "Not running. Brake to a stop on the shoulder.",
+                    category=SpeechCategory.CONFIRMATION,
+                )
             return
         required = self._pursuit_hold_required_s()
         if self._pursuit_hold_s <= 0.0:
@@ -3924,6 +4026,7 @@ class DrivingUpdateMixin:
                 f"Hold shift {hint} for {required:.0f} seconds to run. {cost} "
                 "Let go now to stop instead.",
                 interrupt=True,
+                category=SpeechCategory.SAFETY,
             )
         self._pursuit_hold_s += dt
         if self._pursuit_hold_s >= required:

@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..speech_pacing import SpeechCategory
 from .driving_core import *
 from .driving_menu_states import DrivingStatusState
 from .driving_pause_states import PauseMenuState
@@ -1483,9 +1484,13 @@ class DrivingControlsMixin:
         """
         if self.ctx.settings.pedal_latch == "off":
             if self._throttle_latch.release():
-                self.ctx.say_event("Throttle released.", interrupt=False)
+                self.ctx.say_event(
+                    "Throttle released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                )
             if self._brake_latch.release():
-                self.ctx.say_event("Brake released.", interrupt=False)
+                self.ctx.say_event(
+                    "Brake released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                )
             return key_up, key_down, False
         for latch, held, name in (
             (self._throttle_latch, key_up, "Throttle"),
@@ -1515,9 +1520,11 @@ class DrivingControlsMixin:
                         line = "Throttle latched. Adaptive cruise holds the speed."
                     elif self._keeper_mph is not None:
                         line = "Throttle latched. Speed keeper holds the speed."
-                self.ctx.say_event(line, interrupt=False)
+                self.ctx.say_event(line, interrupt=False, category=SpeechCategory.CONFIRMATION)
             elif event == "released":
-                self.ctx.say_event(f"{name} released.", interrupt=False)
+                self.ctx.say_event(
+                    f"{name} released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                )
         throttle_overridden = (
             key_down
             or pad_brake > 0.05
@@ -1526,9 +1533,13 @@ class DrivingControlsMixin:
             or self._overspeed_active
         )
         if throttle_overridden and self._throttle_latch.release():
-            self.ctx.say_event("Throttle released.", interrupt=False)
+            self.ctx.say_event(
+                "Throttle released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+            )
         if (key_up or pad_throttle > 0.05) and self._brake_latch.release():
-            self.ctx.say_event("Brake released.", interrupt=False)
+            self.ctx.say_event(
+                "Brake released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+            )
         return (
             key_up,
             key_down or self._brake_latch.latched,

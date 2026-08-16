@@ -46,6 +46,7 @@ speaking a lane ordinal that was never harvested.
 from __future__ import annotations
 
 from ..sim.trip_models import FACILITY_ACCESS_LIMIT_MPH, FACILITY_GATE_LIMIT_MPH
+from ..speech_pacing import SpeechCategory
 from .driving_core import *
 
 # The approach call is sized in REAL seconds of hearing-and-braking time, the
@@ -244,7 +245,7 @@ class TurnCommitmentMixin:
             if sound:
                 pan = -TURN_CUE_PAN if cue.direction == "left" else TURN_CUE_PAN
                 self.ctx.audio.play(sound, pan=pan)
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.NAVIGATION)
             return
         if ahead > 0:
             return
@@ -319,7 +320,7 @@ class TurnCommitmentMixin:
             message += f" Brake to {target} with {self.ctx.control_hint('brake')} on the approach."
         self.ctx.audio.play("ui/warning")
         self._set_status(status)
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.CONFIRMATION)
 
     # -- the pursuit guide ----------------------------------------------------
 
