@@ -38,9 +38,17 @@ MIN_STOPPING_DECEL_MPS2 = 0.35
 SURGE_EXCUSE_BRAKE = 0.6
 SURGE_EXCUSE_FORCE_N = 1500.0
 
-# Full service application plus the spring brakes: the hardest stop the rig
-# can make, still scaled by weather grip and brake fade.
-EMERGENCY_BRAKE_MULT = 1.6
+# The emergency application is INSTANT, not stronger. A full service
+# application already puts a working rig at the friction limit, so the springs
+# slamming on cannot beat it -- on a real truck dynamiting is the last resort
+# because it locks wheels and costs you steering, never because it stops
+# shorter. This multiplier used to be 1.6, which made the hardest stop 1.6x a
+# full pedal AND left ``full_service_decel_mps2`` -- the figure every stopping
+# cue in the game is computed from -- describing a truck the brakes were not
+# (measured 2026-08-16: 334 ft of cue budget against a 211 ft stop). What the
+# emergency application still buys is the ramp: ``brake`` goes to 1.0 in one
+# frame instead of climbing, which is most of a second at highway speed.
+EMERGENCY_BRAKE_MULT = 1.0
 MAX_REVERSE_MPS = 4.5  # about 10 mph: backing speed, not road speed
 
 KG_PER_TON = 1000.0  # game cargo "tons" are treated as metric tonnes
@@ -137,11 +145,22 @@ DAMAGE_BAND_OUT_OF_SERVICE = 4
 # there and a loaded van starts lifting a wheel around 0.35 g anyway.
 #
 # So: braking bites only past what a full service application can produce,
-# which leaves the emergency application, a grade adding its own g to the
-# stop, and collisions. Cornering bites from a shade under the rollover
-# threshold, where the load is working against its straps well before the
-# truck is in trouble.
-CARGO_HARD_BRAKE_G = 0.45  # decel past which freight starts moving
+# which leaves a grade adding its own g to the stop, and collisions.
+# Cornering bites from a shade under the rollover threshold, where the load is
+# working against its straps well before the truck is in trouble.
+#
+# This was 0.45, a figure with no source behind it: it was chosen to sit in
+# the gap between a full service application (0.35 g) and the emergency one
+# (0.56 g, via a multiplier since removed), so that dynamiting the brakes cost
+# freight and an ordinary hard stop did not. With the emergency application no
+# longer stronger than a full pedal, that gap is gone and the fudge has no job
+# -- so the threshold is now the securement standard the paragraph above
+# already cites, 0.8 g forward under 49 CFR 393.102. Braking alone can no
+# longer move properly restrained freight, which is exactly what the
+# regulation means; a downgrade stacking its own g on the stop, and hitting
+# something, still can. Never punish the driver for the correct emergency
+# action -- the same rule that gave tank loads pushed_through_by_surge.
+CARGO_HARD_BRAKE_G = 0.8  # decel past which freight starts moving
 CARGO_BRAKE_PCT_PER_G_S = 6.0  # per g of excess, per real second
 # Lateral, and geometric: what the bend actually pulls, from its radius and
 # the speed it is being taken at. The old model read raw mph over the posted
@@ -277,7 +296,14 @@ class TruckSpecs:
     max_rpm: float = 2_200.0
     peak_torque_rpm: float = 1_300.0
     driveline_efficiency: float = 0.85
-    max_brake_decel_g: float = 0.35
+    # A loaded modern tractor-trailer stops from 60 mph in about 210-235 ft on
+    # dry pavement, against the FMVSS 121 reduced-stopping-distance ceiling of
+    # 250 ft that has applied to most new tractors since 2011. That is roughly
+    # 0.55 g at the tire. The old 0.35 here was a pre-2011 truck (334 ft) and
+    # the emergency multiplier was quietly making up the difference, which is
+    # why the two disagreed. Grip, fade, wear and load all still scale it, so
+    # this is the ceiling on dry pavement with good brakes, not a promise.
+    max_brake_decel_g: float = 0.55
     brake_fade_temp_c: float = 400.0  # brakes fade above this temperature
     brake_thermal_mass_j_per_c: float = 180_000.0  # drums and shoes, all ten positions
     fuel_tank_gal: float = 150.0

@@ -114,13 +114,36 @@ def test_a_full_service_stop_does_not_hurt_a_secured_load():
     assert t.cargo_damage_pct == 0.0
 
 
-def test_an_emergency_application_does_reach_the_freight():
-    """Full service plus the spring brakes is past what securement holds."""
+def test_braking_alone_never_reaches_the_freight_any_more():
+    """The emergency application stopped being the exception (2026-08-16).
+
+    It used to be stronger than a full pedal by a multiplier, and the damage
+    threshold was set in the gap between the two so that dynamiting the brakes
+    cost freight. Both halves of that are gone: the emergency application is
+    instant rather than harder, and the threshold is the securement standard
+    itself. Under 49 CFR 393.102 a load is restrained to 0.8 g forward and no
+    Class 8 rig brakes that hard, so no stop the driver can make moves
+    properly tied-down freight -- which is the whole point of the regulation.
+    """
     t = _loaded(mph=65.0)
-    emergency_g = t.specs.max_brake_decel_g * EMERGENCY_BRAKE_MULT
-    assert emergency_g > CARGO_HARD_BRAKE_G
+    hardest_g = t.specs.max_brake_decel_g * EMERGENCY_BRAKE_MULT
+    assert hardest_g < CARGO_HARD_BRAKE_G
     for _ in range(300):
-        t._update_cargo(1 / 60, decel_g=emergency_g)
+        t._update_cargo(1 / 60, decel_g=hardest_g)
+    assert t.cargo_damage_pct == 0.0
+
+
+def test_a_downgrade_stacking_onto_the_stop_still_reaches_the_freight():
+    """What braking cannot do alone, a hill helps it do.
+
+    The grade adds its own g to the stop, which is one of the two cases the
+    threshold was always meant to catch -- the other being hitting something.
+    """
+    t = _loaded(mph=65.0)
+    steep = t.specs.max_brake_decel_g * EMERGENCY_BRAKE_MULT + 0.3
+    assert steep > CARGO_HARD_BRAKE_G
+    for _ in range(300):
+        t._update_cargo(1 / 60, decel_g=steep)
     assert t.cargo_damage_pct > 0.0
 
 

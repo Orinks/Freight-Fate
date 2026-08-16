@@ -241,7 +241,13 @@ def test_a_half_full_smooth_bore_needs_the_most_road():
     assert smooth > baffled > dry
     assert smooth > quarter > dry
     assert nearly_full < quarter
-    assert 1.2 < smooth / dry < 1.6  # a third more road again, near enough
+    # Meaningfully more road, and the exact fraction is not the teaching
+    # point -- the ordering above is. The band moved down from 1.2 when the
+    # brakes were corrected to a modern truck (2026-08-16): the surge force
+    # comes from the liquid model rather than being reverse-engineered from
+    # this ratio, so a fixed shove is a smaller share of a stronger stop.
+    # Same wave, same push, better brakes.
+    assert 1.15 < smooth / dry < 1.6
 
 
 def test_braking_to_a_stop_actually_takes_longer_with_liquid_aboard():

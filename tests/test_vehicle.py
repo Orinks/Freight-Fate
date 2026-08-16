@@ -515,7 +515,16 @@ def test_hard_collision_stop_does_not_stall_an_automatic():
     assert t.transmission.gear == 1
 
 
-def test_emergency_brake_outbrakes_service_brakes():
+def test_the_emergency_application_is_instant_rather_than_stronger():
+    """It beats a service stop on response, not on force (2026-08-16).
+
+    A full service application already has a working rig at the friction
+    limit, so the springs slamming on cannot stop it shorter; on a real truck
+    dynamiting is the last resort because it locks wheels, never because it
+    out-brakes the pedal. What it buys is the ramp -- ``brake`` goes to 1.0 in
+    one frame instead of climbing to it, which is most of a second at highway
+    speed, and that second is the whole reason the control exists.
+    """
     a = make_auto_truck()
     b = make_auto_truck()
     a.velocity_mps = b.velocity_mps = 30.0
@@ -524,7 +533,21 @@ def test_emergency_brake_outbrakes_service_brakes():
     for _ in range(120):
         a.update(1 / 60)
         b.update(1 / 60)
-    assert b.velocity_mps < a.velocity_mps
+    assert b.velocity_mps == pytest.approx(a.velocity_mps)
+
+    # The response difference, which is what the state layer applies: from a
+    # released pedal the emergency application is already at full bite while
+    # a ramping service pedal is still on its way there.
+    slow = make_auto_truck()
+    fast = make_auto_truck()
+    slow.velocity_mps = fast.velocity_mps = 30.0
+    slow.brake = 0.2  # a pedal still coming up to pressure
+    fast.brake = 1.0
+    fast.emergency_brake = True
+    for _ in range(30):
+        slow.update(1 / 60)
+        fast.update(1 / 60)
+    assert fast.velocity_mps < slow.velocity_mps
 
 
 def test_fuel_burns_under_load_and_engine_dies_empty():
