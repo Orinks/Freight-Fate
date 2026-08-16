@@ -774,17 +774,22 @@ onto exit signalling.
       facilities (72 percent) depart straight onto the highway, and all 624
       cities have at least one. That is a rebuild of most approach data, not
       a gap-fill.
-      RECOMMENDED SPLIT, owner decision still wanted on the third:
-      (a) A work zone must have its full warning taper on the route ahead of
-      where the run starts; a zone whose taper is clipped by the start is
-      dropped for that run. Not "no hazards in the first miles" -- a zone at
-      mile 5 signed from mile 4 is fine. The game declines to place a hazard
-      it cannot sign, rather than hiding work that is really there.
-      (b) At trip start only, keep the "merging" intent out of the bubble's
-      nearest cells, so the first cue of a run is never a merge a mile off.
-      (c) Departure chains for the remaining 72 percent: real, wanted, and a
-      data project to scope on its own. It is the realism fix, not the
-      safety fix, and (a) and (b) do not depend on it.
+      SPLIT, (a) and (b) LANDED 2026-08-16 on owner go-ahead:
+      (a) DONE. A real zone whose `start_mi` is inside `CONSTRUCTION_TAPER_MI`
+      of the route start is dropped rather than having its taper clipped to
+      nothing. Not "no hazards in the first miles" -- a zone at mile 5 signed
+      from mile 4 is untouched. The game declines to place a hazard it cannot
+      sign, rather than hiding work that is really there.
+      (b) DONE. `MERGE_FREE_START_MI = 3.0` withholds the "merging" intent
+      from the bubble inside the opening miles, keyed off the route mile so
+      it also covers the on-ramp handback. Harness evidence:
+      `floor_it_through_town` used to open "Merging box truck 1.5 miles
+      ahead" and now opens "Slow box truck 1.5 miles ahead", with merging
+      traffic still appearing later in the same run.
+      (c) OPEN -- departure chains for the remaining 72 percent of
+      facilities. Real and wanted, a data project to scope on its own. It is
+      the realism fix, not the safety fix, and does not gate anything now
+      that (a) and (b) have landed.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each

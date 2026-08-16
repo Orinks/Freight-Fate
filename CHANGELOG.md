@@ -17,6 +17,17 @@
   Requested by William, who wrote in to say the granite capital of the world
   had been left out. He was right.
 
+- **Pulling out no longer drops you straight into a hazard.** Two things
+  could greet you the moment a run began. A real road-authority work zone
+  near the start of a corridor could already be around you before you had
+  moved, with its warning taper behind you where you could never hear it --
+  those zones are now only placed where there is room to warn you about them
+  properly. And the first thing you heard could be a warning about somebody
+  merging into you barely a mile ahead, before you were up to speed; the
+  opening miles of a run no longer put merging traffic there. Work zones
+  further along the road, and merging traffic once you are rolling, are both
+  unchanged. Reported by Josh.
+
 - **Learn game sounds has a Back option on both screens.** Arrow to the
   bottom of the list of sound groups, or of the sounds inside one, and there
   is now a Back row like every other menu in the game. Escape still works as
