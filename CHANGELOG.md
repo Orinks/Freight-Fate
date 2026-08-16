@@ -3157,6 +3157,20 @@
   pressing the rest key looked like it did nothing. It now always gets
   through.
 
+- **A stalled engine, a carrier-grounded tractor, and a snapped tire chain
+  now speak on Quiet and Urgent only.** These three were wrongly grouped
+  with routine confirmations, so on the two quietest driving speech
+  settings they played a short sound instead of telling you the engine
+  died and how to restart it, that dispatch took your tractor and put you
+  in another one, or that a chain let go and the set is now scrap. All
+  three speak as words on every driving speech setting now.
+
+- **"Back on the pavement" now shows up in message review on Urgent
+  only.** On the quietest driving speech setting this line spoke no words,
+  played no sound, and used to skip the message log too, so there was no
+  way to confirm the truck was back on the road. It now always reaches the
+  log.
+
 ## 1.8.8.1 - 2026-08-08
 
 ### Added

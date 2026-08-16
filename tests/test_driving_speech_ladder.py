@@ -740,6 +740,88 @@ def test_cargo_condition_speaks_at_urgent_only_as_money() -> None:
         app.shutdown()
 
 
+def test_the_carrier_grounding_speaks_at_urgent_only_as_money() -> None:
+    # Critical 2 (final review): this line is the company driver's twin of
+    # the owner-operator's roadside-repair report (already MONEY) -- same
+    # moment, but this one was tagged CONFIRMATION, an EARCON category at
+    # quiet and urgent_only. A company driver at either rung would have
+    # heard one chime and learned neither that dispatch took the tractor,
+    # the reputation hit, nor the damage on the truck they are now in.
+    # ``_real_driving``'s ``Profile`` defaults to ``COMPANY_DRIVER``
+    # (business_status's own default), so no extra setup is needed to land
+    # in ``_carrier_grounds_the_tractor`` rather than its owner-operator
+    # sibling. Reverting the category back to CONFIRMATION makes
+    # ``spoken`` empty here.
+    app = _urgent_only_app()
+    try:
+        driving = _real_driving(app)
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+
+        driving._carrier_grounds_the_tractor()
+
+        assert spoken
+        assert "grounded" in spoken[-1].lower()
+        assert "carrier" in spoken[-1].lower()
+    finally:
+        app.shutdown()
+
+
+def test_an_engine_stall_speaks_at_urgent_only_as_safety() -> None:
+    # Critical 3 (final review): a stall is an unrequested failure that
+    # stops the truck and names the key to get it moving again -- the same
+    # "will not move, here is what to press" shape as the out-of-service
+    # wall and the spring-brake emergency, both already SAFETY. It was
+    # tagged CONFIRMATION, so a quiet or urgent_only driver got a chime and
+    # no recovery instruction with a dead engine. ``TruckState.update`` is
+    # monkeypatched to force the stall directly (real stall physics need a
+    # manual gearbox held in the wrong gear at low speed, which is
+    # incidental to what this test is pinning: the category on the line
+    # that fires once ``was_on and not t.engine_on and t.stalled``).
+    # Reverting the category back to CONFIRMATION makes ``spoken`` empty.
+    from driving_feature_helpers import quiet_trip
+
+    app = _urgent_only_app()
+    try:
+        driving = _real_driving(app)
+        quiet_trip(driving)
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        driving.truck.engine_on = True
+
+        def _force_stall(dt: float) -> None:
+            driving.truck.engine_on = False
+            driving.truck.stalled = True
+
+        driving.truck.update = _force_stall
+
+        driving.update(1 / 60)
+
+        assert spoken
+        assert "engine stalled" in spoken[-1].lower()
+    finally:
+        app.shutdown()
+
+
+def test_a_tire_chain_release_speaks_at_urgent_only_as_money() -> None:
+    # Critical 3 (final review), the chain-release half: "the set is scrap"
+    # is a purchase, and running unchained under an active chain law is
+    # citation exposure -- MONEY, matching its own text, not CONFIRMATION.
+    app = _urgent_only_app()
+    try:
+        driving = _real_driving(app)
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        driving.truck.chains_just_snapped = True
+
+        driving._update_traction_cues()
+
+        assert spoken
+        assert "scrap" in spoken[-1].lower()
+    finally:
+        app.shutdown()
+
+
 def test_missed_destination_exit_speaks_at_urgent_only() -> None:
     # Important 6: the route just changed and this names the maneuver that
     # still gets the load delivered -- NAVIGATION, not CONFIRMATION, so it
@@ -1034,6 +1116,75 @@ def test_an_earcon_category_plays_through_say_too(monkeypatch) -> None:
         app.shutdown()
 
 
+def test_a_silenced_keyed_status_line_plays_the_earcon_once(monkeypatch) -> None:
+    # Critical 1 (final review): both silenced branches in app.py used to
+    # ``return`` before ever consulting the pacer, so a keyed standing
+    # condition -- air_brake_lockout re-firing every 4s while the
+    # accelerator is held (driving_updates.py's _maybe_say_air_brake_lockout),
+    # engine_redline re-firing every OVERREV_REPEAT_S -- played its earcon on
+    # every re-announce at quiet, where the same condition speaks one
+    # sentence and falls silent at coaching/standard. Fires the identical
+    # keyed STATUS line five times, exactly as a held accelerator against a
+    # locked-out brake does, and requires exactly one earcon. Reverting the
+    # ``is_repeat``/``note_spoken`` pair this fix added to say_event's
+    # silenced branch restores the old log-and-play-every-time behaviour,
+    # which collects five entries here and fails the length assertion.
+    from freight_fate.sound_catalog import entry_by_name
+
+    app = _app()
+    try:
+        app.ctx.speech.say_event = speech_stub()
+        played: list[tuple[str, float, float]] = []
+        monkeypatch.setattr(
+            app.ctx.audio,
+            "play",
+            lambda key, volume=1.0, pan=0.0: played.append((key, volume, pan)),
+        )
+        app.ctx.settings.driving_speech = "quiet"
+
+        for _ in range(5):
+            app.ctx.say_event(
+                "Parking brake set. Press P to release it.",
+                interrupt=False,
+                key="air_brake_lockout",
+                category=SpeechCategory.STATUS,
+            )
+
+        cue = entry_by_name(LADDER_EARCONS[SpeechCategory.STATUS]).plays[0]
+        assert played == [(cue.key, cue.volume, cue.pan)]
+    finally:
+        app.shutdown()
+
+
+def test_a_silenced_plain_repeat_via_say_plays_the_earcon_once(monkeypatch) -> None:
+    # Critical 1's other half: ``say`` has no ``key=``/``force=``, so its
+    # silenced branch relies on the pacer's plain repeat window instead. The
+    # same identical line fired twice in a row (well inside
+    # EventSpeechPacer.REPEAT_WINDOW_S) must not double the earcon. Reverting
+    # the ``is_repeat``/``note_spoken`` pair added to ``say``'s silenced
+    # branch collects two entries here.
+    from freight_fate.sound_catalog import entry_by_name
+
+    app = _app()
+    try:
+        app.ctx.speech.say = speech_stub()
+        played: list[tuple[str, float, float]] = []
+        monkeypatch.setattr(
+            app.ctx.audio,
+            "play",
+            lambda key, volume=1.0, pan=0.0: played.append((key, volume, pan)),
+        )
+        app.ctx.settings.driving_speech = "quiet"
+
+        app.ctx.say("Nice smooth shift.", category=SpeechCategory.COACHING)
+        app.ctx.say("Nice smooth shift.", category=SpeechCategory.COACHING)
+
+        cue = entry_by_name(LADDER_EARCONS[SpeechCategory.COACHING]).plays[0]
+        assert played == [(cue.key, cue.volume, cue.pan)]
+    finally:
+        app.shutdown()
+
+
 def test_an_unchanged_status_line_speaks_once() -> None:
     app = _app()
     try:
@@ -1235,12 +1386,19 @@ def test_a_drive_gets_quieter_as_the_rung_tightens() -> None:
     # both rungs render every category TERSE or EARCON, and EARCON/SILENT
     # both silence the voice (Disposition's own docstring: "EARCON and
     # SILENT both stop the words; they differ in whether the sound layer
-    # still marks the moment"). That sound layer is not wired to anything
-    # yet -- ROADMAP.md's sonification-pass follow-up is where it belongs --
-    # so on any channel this harness can observe, the two rungs are
-    # provably the same rung today. Pinned as full transcript equality, not
-    # just a count tie, so a future asymmetry between them is caught
-    # immediately rather than only once it changes a length.
+    # still marks the moment"). This harness only observes the speech
+    # transcript -- ``_spoken_transcript_for_scenario`` stubs
+    # ``ctx.speech.say_event`` -- so it cannot see the two rungs' real
+    # difference at the voice: quiet plays an earcon where COACHING,
+    # CONFIRMATION, and STATUS go EARCON, and urgent_only plays nothing
+    # where COACHING and STATUS go SILENT instead. That split is wired (Task
+    # 10) and covered directly by
+    # ``test_an_earcon_category_actually_asks_the_audio_layer_to_play`` and
+    # ``test_a_silent_category_asks_the_audio_layer_for_nothing``, which
+    # stub ``ctx.audio.play`` rather than the speech channel. Pinned here as
+    # full transcript equality, not just a count tie, so a future asymmetry
+    # between them AT THE VOICE is caught immediately rather than only once
+    # it changes a length.
     assert counts["quiet"] >= counts["urgent_only"]
     assert transcripts["quiet"] == transcripts["urgent_only"]
 

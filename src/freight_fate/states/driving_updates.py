@@ -431,7 +431,7 @@ class DrivingUpdateMixin:
                     f"The engine stalled. Press {self.ctx.control_hint('engine')} to restart, "
                     "and use a lower gear at low speed.",
                     interrupt=True,
-                    category=SpeechCategory.CONFIRMATION,
+                    category=SpeechCategory.SAFETY,
                 )
             elif t.fuel_gal <= 0:
                 self._handle_out_of_fuel()
@@ -1081,10 +1081,15 @@ class DrivingUpdateMixin:
             # Back on the pavement: the standing condition ended, so its one
             # transition line speaks and the band resets (research doc R12).
             self._road_position_band = None
+            # review=True: STATUS goes SILENT at urgent_only, so this line
+            # would otherwise reach no voice, no earcon, and (with the old
+            # review=False here) no log either -- genuinely unreachable,
+            # which breaks the ladder's own invariant that nothing it cuts
+            # becomes invisible to the review keys.
             self.ctx.say_event(
                 "Back on the pavement.",
                 interrupt=False,
-                review=False,
+                review=True,
                 category=SpeechCategory.STATUS,
             )
         self._cross_repeat_s = max(0.0, self._cross_repeat_s - dt)
@@ -3746,7 +3751,7 @@ class DrivingUpdateMixin:
             self.ctx.say_event(
                 "A tire chain let go and hammered the fender on its way off. "
                 "The set is scrap; you are running on rubber again.",
-                category=SpeechCategory.CONFIRMATION,
+                category=SpeechCategory.MONEY,
             )
         chains_fast = t.chains_on and t.speed_mph > CHAIN_SAFE_MPH + 2.0
         if chains_fast and not self._chains_fast_active:

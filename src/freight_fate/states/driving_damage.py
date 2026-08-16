@@ -539,7 +539,7 @@ class DamageBandMixin:
                 "equipment damage against your record; a pattern of it costs the seat. "
                 f"Press {self.ctx.control_hint('engine')} to restart the engine."
             )
-        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.CONFIRMATION)
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.MONEY)
 
     def _record_equipment_event(self) -> None:
         """Leave the event on the career for the trust and termination layer.

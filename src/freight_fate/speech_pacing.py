@@ -84,6 +84,17 @@ class SpeechCategory(StrEnum):
     Flavor -- billboards, place names, landmarks, roadside colour -- is
     deliberately absent. It answers to the chatter switches and the
     place-callouts ladder, and the owner set those separately (2026-08-15).
+
+    A recurring miscategorisation the review caught three times (2026-08-16):
+    a line that names a key the player must press to keep moving is never
+    CONFIRMATION. CONFIRMATION is an outcome report -- the assist cleared it,
+    the latch caught, here is what happened. A stalled engine, a grounded
+    tractor, a scrapped chain set are unrequested failures that stop the
+    truck and demand a next action; at quiet and urgent_only CONFIRMATION
+    is an EARCON, so miscategorising one of these turns the instruction that
+    gets the truck moving again into a chime. Route it by what actually
+    changed instead: SAFETY when the truck will not move and the line says
+    what to press, MONEY when it cost money or equipment.
     """
 
     SAFETY = "safety"
