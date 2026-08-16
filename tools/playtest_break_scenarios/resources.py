@@ -12,12 +12,36 @@ import re
 from playtest_break import DT, Outcome, Rig, _outcome, scenario
 
 
+class _AdvancingClock:
+    """A wall clock the scenario can fast-forward between rescues.
+
+    ``EventSpeechPacer``'s repeat window (``REPEAT_WINDOW_S``, 2.5 real
+    seconds) is keyed off ``time.monotonic()``, and the fuel-farm loop below
+    runs three byte-identical rescue lines back to back in a fraction of a
+    second of real wall time -- a harness artifact, not something a real
+    player can hit, since running a tank dry twice takes minutes of actual
+    driving. Swapping the pacer onto this clock and advancing it past the
+    window between rescues makes the scenario measure what a real driver
+    would hear instead of how fast the test loop happens to run.
+    """
+
+    def __init__(self) -> None:
+        self.now = 1000.0
+
+    def __call__(self) -> float:
+        return self.now
+
+    def advance(self, seconds: float) -> None:
+        self.now += seconds
+
+
 @scenario(
     "fuel_rescue_farming",
     "Run dry three times as a company driver, once as an owner-op; is the rescue farmable?",
 )
 def _fuel_farm():
     from freight_fate.models.business import LEASED_OWNER_OPERATOR
+    from freight_fate.speech_pacing import EventSpeechPacer
 
     findings: list[str] = []
     rig = Rig()
@@ -26,12 +50,19 @@ def _fuel_farm():
         p = rig.ctx.profile
         d.trip.position_mi = 12.0
         rig.prepare(speed_mph=0.0)
+        # See _AdvancingClock: real minutes separate two run-dry events, so
+        # the pacer's repeat window must see real seconds pass too, or three
+        # byte-identical rescue lines collapse into one purely because the
+        # test loop runs faster than a real drive ever could.
+        clock = _AdvancingClock()
+        rig.ctx._event_pacer = EventSpeechPacer(clock=clock)
         money_before = p.money
         rep_before = p.career.reputation
         for _ in range(3):
             d.truck.fuel_gal = 0.001
             d.truck.start_engine()
             rig.step(240, until=lambda: not d.truck.engine_on and d.truck.fuel_gal >= 25.0)
+            clock.advance(EventSpeechPacer.REPEAT_WINDOW_S + 1.0)
         rescues = rig.said("Roadside rescue")
         if rescues != 3:
             findings.append(f"expected 3 rescues, transcript has {rescues}")
@@ -64,10 +95,13 @@ def _fuel_farm():
         p.money = 100.0
         d.trip.position_mi = 12.0
         rig2.prepare(speed_mph=0.0)
+        clock2 = _AdvancingClock()
+        rig2.ctx._event_pacer = EventSpeechPacer(clock=clock2)
         for _ in range(2):
             d.truck.fuel_gal = 0.001
             d.truck.start_engine()
             rig2.step(240, until=lambda: not d.truck.engine_on and d.truck.fuel_gal >= 25.0)
+            clock2.advance(EventSpeechPacer.REPEAT_WINDOW_S + 1.0)
         if abs(p.money - (100.0 - 1500.0)) > 0.01:
             findings.append(
                 f"owner-op rescue billing off: expected -1,500 total, money is {p.money:,.0f}"
