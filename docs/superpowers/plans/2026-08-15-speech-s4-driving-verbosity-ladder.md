@@ -1345,6 +1345,14 @@ git commit -m "feat(speech): standing conditions announce on change, not on stat
 - Test: `tests/test_driving_speech_ladder.py` (append)
 - Modify: `CHANGELOG.md` (under `## Unreleased`)
 - Modify: `ROADMAP.md` (the chattiness bullet at line 704)
+- Modify: `docs/user-manual.md` (the settings table row at line 1482)
+
+**Carried from the Task 7 review:** `docs/user-manual.md:1482` still documents
+the row as "Speech verbosity | Controls how often driving status reminders
+run." No task in this plan touched it, so it is a plan gap rather than a task
+miss — but it is player-facing documentation that now contradicts both the
+in-game row and `docs/ontology.md`. Update it to the "Driving speech" row and
+describe the four rungs in the same plain language the settings help uses.
 
 **Interfaces:**
 - Consumes: everything above.
