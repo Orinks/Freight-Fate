@@ -118,6 +118,23 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **There is no way to back a career up on demand (Brandon, 2026-08-15).**
+      A career can only travel upward two ways: the background queue after a
+      save, and "Keep this computer's save and back it up" -- which
+      `CloudSlotState.build_items` only offers while a conflict is RECORDED.
+      No conflict, no upload control anywhere in the game. Brandon fell
+      through that hole twice in one evening: first the conflict blocked the
+      queue, and then, once he had resolved it by restoring, the button that
+      could have sent his own newer career up vanished with the conflict that
+      summoned it. He lost level 4 and 3,294 dollars back to the cloud's
+      level 3 -- recoverable only because a restore leaves the replaced file
+      as `.ffsave.bak`, which nothing tells the player. Wanted: a plain "Back
+      up this career now" on the Cloud backup menu, always present, using the
+      same upload path, so a stuck queue is never the player's only hope.
+      Deliberately not added unattended at 1am -- it is a new control on a
+      shipping menu and wants a canonical name in `docs/ontology.md`, a
+      decision about whether it appears on the Online menu too, and its own
+      spoken result.
 - [ ] **A staged limit drop should be taken in stages (Shane, 2026-08-15).**
       Approaching roadwork the truck hears "speed limit 55 miles per hour,
       then construction zone 45" and then sheds straight to 45, never
