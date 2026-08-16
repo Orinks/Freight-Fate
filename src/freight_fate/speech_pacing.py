@@ -50,7 +50,7 @@ player never again waits through a paragraph of expired narration.
 from __future__ import annotations
 
 import time
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 
 
 class EventPriority(IntEnum):
@@ -70,6 +70,104 @@ class EventPriority(IntEnum):
     AMBIENT = 0
     ROUTE = 1
     CRITICAL = 2
+
+
+class SpeechCategory(StrEnum):
+    """What a line of informational speech is ABOUT.
+
+    Orthogonal to :class:`EventPriority`, which says how long a line waits
+    and whether staleness may drop it. Urgency alone gave the verbosity
+    system only one lever -- length -- which is why compressing every
+    message (stage S2) did not make the drive quieter: it never reduced how
+    many things speak. The rung table below cuts by category instead.
+
+    Flavor -- billboards, place names, landmarks, roadside colour -- is
+    deliberately absent. It answers to the chatter switches and the
+    place-callouts ladder, and the owner set those separately (2026-08-15).
+    """
+
+    SAFETY = "safety"
+    NAVIGATION = "navigation"
+    MONEY = "money"
+    COACHING = "coaching"
+    CONFIRMATION = "confirmation"
+    STATUS = "status"
+
+
+class Disposition(StrEnum):
+    """What a rung does with a category.
+
+    ``EARCON`` and ``SILENT`` both stop the words; they differ in whether
+    the sound layer still marks the moment. Neither loses the line -- both
+    still reach the message log, and the status-query keys still answer, so
+    nothing the ladder cuts becomes unreachable.
+    """
+
+    FULL = "full"  # speaks, normal rendering
+    TERSE = "terse"  # speaks, terse rendering -- never silence
+    FIRST_OCCURRENCE = "first"  # speaks the first time per leg, then silent
+    TRANSITIONS = "transitions"  # speaks on enter, worsen, and clear only
+    EARCON = "earcon"  # the sound layer carries it; no words
+    SILENT = "silent"  # no words, no sound; log and status keys only
+
+
+DRIVING_SPEECH_MODES = ("coaching", "standard", "quiet", "urgent_only")
+
+# The rung table. Read a row as "at this rung, a line of this category is
+# delivered this way". Safety and money are FULL or TERSE in every row and a
+# test pins that: R1's never-dropped contract outranks any rung.
+DRIVING_SPEECH_DISPOSITIONS: dict[str, dict[SpeechCategory, Disposition]] = {
+    "coaching": {
+        SpeechCategory.SAFETY: Disposition.FULL,
+        SpeechCategory.MONEY: Disposition.FULL,
+        SpeechCategory.NAVIGATION: Disposition.FULL,
+        SpeechCategory.COACHING: Disposition.FULL,
+        SpeechCategory.CONFIRMATION: Disposition.FULL,
+        SpeechCategory.STATUS: Disposition.FULL,
+    },
+    "standard": {
+        SpeechCategory.SAFETY: Disposition.FULL,
+        SpeechCategory.MONEY: Disposition.FULL,
+        SpeechCategory.NAVIGATION: Disposition.FULL,
+        SpeechCategory.COACHING: Disposition.FIRST_OCCURRENCE,
+        SpeechCategory.CONFIRMATION: Disposition.FULL,
+        SpeechCategory.STATUS: Disposition.TRANSITIONS,
+    },
+    "quiet": {
+        SpeechCategory.SAFETY: Disposition.TERSE,
+        SpeechCategory.MONEY: Disposition.TERSE,
+        SpeechCategory.NAVIGATION: Disposition.TERSE,
+        SpeechCategory.COACHING: Disposition.EARCON,
+        SpeechCategory.CONFIRMATION: Disposition.EARCON,
+        SpeechCategory.STATUS: Disposition.EARCON,
+    },
+    "urgent_only": {
+        SpeechCategory.SAFETY: Disposition.TERSE,
+        SpeechCategory.MONEY: Disposition.TERSE,
+        SpeechCategory.NAVIGATION: Disposition.TERSE,
+        SpeechCategory.COACHING: Disposition.SILENT,
+        SpeechCategory.CONFIRMATION: Disposition.EARCON,
+        SpeechCategory.STATUS: Disposition.SILENT,
+    },
+}
+
+DEFAULT_DRIVING_SPEECH = "standard"
+
+
+def disposition_for(mode: str, category: SpeechCategory | None) -> Disposition:
+    """How this rung delivers this category.
+
+    An unknown rung reads as the default rather than raising: a settings
+    file edited by hand must not be able to crash the drive. A ``None``
+    category is an unclassified call site and always speaks -- the rendering
+    still follows the rung, so it gets shorter but never disappears.
+    """
+    row = (
+        DRIVING_SPEECH_DISPOSITIONS.get(mode) or DRIVING_SPEECH_DISPOSITIONS[DEFAULT_DRIVING_SPEECH]
+    )
+    if category is None:
+        return row[SpeechCategory.SAFETY]
+    return row.get(SpeechCategory(category), Disposition.FULL)
 
 
 class EventSpeechPacer:
