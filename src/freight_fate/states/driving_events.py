@@ -82,18 +82,23 @@ class DrivingEventMixin:
         self.ctx.message_log.add(message, MessageCategory.EVENT)
 
     def _speak_ambient_event(
-        self, message: str, sound: str | None = None, *, log: bool = True
+        self,
+        message: str,
+        sound: str | None = None,
+        *,
+        log: bool = True,
+        category: SpeechCategory | None = None,
     ) -> None:
         if log:
             # The drain call below passes log=False so a line that does
             # make it to speech is not entered into review twice.
             self._log_ambient_event(message)
         if self._hazard_deadline is not None or self._ambient_event_cooldown_s > 0.0:
-            self._pending_ambient_event = (message, sound)
+            self._pending_ambient_event = (message, sound, category)
             return
         if sound is not None:
             self.ctx.audio.play(sound)
-        self.ctx.say_event(message, interrupt=False, review=False)
+        self.ctx.say_event(message, interrupt=False, review=False, category=category)
         self._ambient_event_cooldown_s = tuning_for_time_scale(
             self.trip.time_scale
         ).ambient_spacing_s
@@ -105,11 +110,11 @@ class DrivingEventMixin:
             return
         if self._ambient_event_cooldown_s > 0.0 or self._pending_ambient_event is None:
             return
-        message, sound = self._pending_ambient_event
+        message, sound, category = self._pending_ambient_event
         self._pending_ambient_event = None
         # Already logged the moment it queued; speaking it now must not log
         # it a second time.
-        self._speak_ambient_event(message, sound, log=False)
+        self._speak_ambient_event(message, sound, log=False, category=category)
 
     def _should_space_ambient_event(self, event) -> bool:
         if event.kind == TripEventKind.WEATHER_CHANGE:
@@ -276,7 +281,7 @@ class DrivingEventMixin:
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
-            self._speak_ambient_event(event.message)
+            self._speak_ambient_event(event.message, category=self._event_category(event))
             self._record_weather_achievement()
         elif kind == TripEventKind.TOLL_CHARGED:
             # Money is a consequence, not chatter: the charged line rides
@@ -295,7 +300,7 @@ class DrivingEventMixin:
             cue = event.data.get("cue")
             state = getattr(cue, "near_text", event.message)
             add_unique_stat(self.ctx.profile, "states_crossed", str(state))
-            self._speak_ambient_event(event.message, sound)
+            self._speak_ambient_event(event.message, sound, category=self._event_category(event))
             self.ctx.award_achievement("state_crossing", event=True)
         elif kind == TripEventKind.TIMEZONE_CROSSING:
             if sound is not None:
@@ -377,11 +382,11 @@ class DrivingEventMixin:
                 self._critical_call_age_s = 0.0
                 self._critical_respeak_at = None
         elif kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
-            self._speak_ambient_event(event.message)
+            self._speak_ambient_event(event.message, category=self._event_category(event))
         elif kind == TripEventKind.LANE:
             # Road-status color: how many lanes the road just became. Ambient,
             # so it yields to safety cues and is muted whole in terse speech.
-            self._speak_ambient_event(event.message)
+            self._speak_ambient_event(event.message, category=self._event_category(event))
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):
@@ -399,6 +404,7 @@ class DrivingEventMixin:
                 self._speak_ambient_event(
                     event.message,
                     sound if kind != TripEventKind.ZONE_ENTER else None,
+                    category=self._event_category(event),
                 )
             else:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:

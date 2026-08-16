@@ -10,7 +10,7 @@ import pytest
 from speech_capture import speech_stub
 
 from freight_fate.settings import Settings
-from freight_fate.sim.trip_models import TripEventKind
+from freight_fate.sim.trip_models import TripEvent, TripEventKind
 from freight_fate.speech_pacing import (
     DRIVING_SPEECH_DISPOSITIONS,
     DRIVING_SPEECH_MODES,
@@ -269,3 +269,31 @@ def test_billboards_and_landmarks_bypass_the_ladder_entirely() -> None:
         assert DrivingEventMixin._event_category(_event(kind)) is None
         assert kind in _FLAVOR_EVENT_KINDS
         assert kind not in _EVENT_CATEGORIES
+
+
+def test_weather_change_is_silent_at_urgent_only_through_the_real_path() -> None:
+    # Classification alone cannot catch a call site that never threads the
+    # category through: WEATHER_CHANGE and LANE only ever reach the voice by
+    # way of _speak_ambient_event, which used to drop the category on the
+    # floor no matter what _event_category said. This drives a real
+    # WEATHER_CHANGE TripEvent through _handle_trip_event -- the actual
+    # speaking path -- instead of calling _event_category directly.
+    from driving_feature_helpers import quiet_trip, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "urgent_only"
+
+        driving._handle_trip_event(
+            TripEvent(TripEventKind.WEATHER_CHANGE, "Weather turning: heavy rain.", {})
+        )
+
+        assert spoken == []
+    finally:
+        app.shutdown()

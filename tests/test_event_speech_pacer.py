@@ -828,7 +828,7 @@ def test_a_hazard_wiping_the_ambient_slot_still_leaves_the_line_in_review() -> N
         # spacing had not cleared yet.
         driving._ambient_event_cooldown_s = 5.0
         driving._speak_ambient_event(LANE_CLOSURE_LINE, "events/traffic_slowing")
-        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing")
+        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing", None)
         played.clear()
 
         driving._handle_trip_event(
@@ -872,7 +872,7 @@ def test_an_overwritten_ambient_line_still_reaches_review() -> None:
         driving._speak_ambient_event("Passing the fuel island.", "ui/notify")
 
         # Only the newer line is actually waiting to speak...
-        assert driving._pending_ambient_event == ("Passing the fuel island.", "ui/notify")
+        assert driving._pending_ambient_event == ("Passing the fuel island.", "ui/notify", None)
         # ...but both reached the review buffer when they queued.
         logged = [m.text for m in app.ctx.message_log.messages]
         assert "Rain easing off, roads still wet." in logged
@@ -1011,7 +1011,7 @@ def test_the_hazard_wipe_reproduces_identically_under_terse_speech() -> None:
         driving.ctx.controller.rumble.hazard = lambda: None
         driving._ambient_event_cooldown_s = 5.0
         driving._speak_ambient_event(LANE_CLOSURE_LINE, "events/traffic_slowing")
-        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing")
+        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing", None)
 
         driving._handle_trip_event(
             TripEvent(
