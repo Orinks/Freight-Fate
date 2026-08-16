@@ -806,6 +806,26 @@ onto exit signalling.
       `select_station` is untouched: that is the game retuning off a station
       the player lost (streamer-safe, signal gone), not a dial key, and it
       has to work regardless of the switch.
+- [x] **R2 caught the info keys as well as the notices (Sarah R. via the
+      owner, 2026-08-16).** A 1.9 regression against 1.8, found only because
+      the owner knew 1.8 muted speech on any button. On dev/main `ctx.say` is
+      `speech.say(text, interrupt)` with no pacer, so every readout cut the
+      line in progress. `e0230c85` (R2) added `paces_main_speech` to stop
+      unasked-for lines stamping on one mid-air -- right for achievements and
+      assist notices, but applied to every main-channel line at the wheel, so
+      pressing a key stopped cutting too. That is the whole contract of an
+      info key, and the thing a tester coming from 1.8 reaches for first.
+      Fixed centrally, matching how R2 itself was done rather than tagging
+      twenty call sites that gain siblings every week: `GameContext.
+      player_asked()` wraps the driving state's key and pad handlers, and
+      `say` exempts anything spoken inside it. Anything arriving from
+      `update` still queues. The existing `_requeue_cut_event` rescue means a
+      road line cut by an answer is re-delivered behind it rather than lost --
+      confirmed in the probe, not assumed.
+      NOTE for the record: my first reply to Sarah told her the keyboard
+      never interrupted either and called the behaviour deliberate. That was
+      true of 1.9's code and wrong as an answer, because she was reporting a
+      CHANGE. Corrected in the living document.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each

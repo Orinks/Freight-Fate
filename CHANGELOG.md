@@ -17,6 +17,15 @@
   Requested by William, who wrote in to say the granite capital of the world
   had been left out. He was right.
 
+- **Pressing a key cuts the speech in progress again.** If something is being
+  read out and you press a key to ask for something else, you get the new
+  answer straight away instead of waiting for the old line to finish. That is
+  how it worked before, and it came back. It applies to the controller
+  buttons too. What has not come back is announcements talking over each
+  other: an achievement, an assist notice, or anything else you did not ask
+  for still waits its turn rather than stamping on a warning you are half way
+  through hearing. Reported by Sarah R.
+
 - **The dial does nothing while the radio is switched off.** It used to pick
   a station quietly and hold it for when you switched on. That was
   deliberate, but it is not how a radio works, and it sounded like a station
