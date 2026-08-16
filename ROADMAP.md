@@ -790,17 +790,22 @@ onto exit signalling.
       facilities. Real and wanted, a data project to scope on its own. It is
       the realism fix, not the safety fix, and does not gate anything now
       that (a) and (b) have landed.
-- [x] **"Selected" with the radio off read as a dead key (Darren,
-      2026-08-16).** Filed as a bug; it is not one. Probed end to end: tuning
-      while off picks the station, plays nothing, and `toggle` then lands on
-      exactly that station, so the pre-selection is real and works. What was
-      wrong was the sentence -- it stopped at "Selected ...", which is
-      indistinguishable from a station that failed to play. All three off-air
-      replies now carry `RADIO_OFF_SELECTION_HINT`. It names no control on
-      purpose: the toggle is a keyboard key, the pad has no radio at all, and
-      spoken advice must not name a control this driver may not have. A test
-      pins the promise as well as the wording -- switching on must land on
-      the picked station, or the sentence becomes a lie.
+- [x] **The dial is inert with the radio switched off (Darren, 2026-08-16;
+      owner ruling the same day).** Tuning while off used to pick a station
+      silently and hold it for power-on -- deliberate, and it worked, but it
+      is not how a radio behaves and it read as a station that had failed to
+      play. First pass only lengthened the sentence to explain itself; the
+      owner ruled for the expectation instead, which is the better call
+      because matching what a driver already knows beats teaching them a
+      quirk. `tune` and `tune_category` now return `_dial_is_off()` before
+      touching `station_id`, and `_radio_switched_off()` in the driving layer
+      ticks and speaks, deliberately the same shape as `_radio_no_power` so
+      the two "not right now" answers feel like one response. It says "Radio
+      off" rather than going silent -- nothing happening with no explanation
+      is the one outcome a screen reader user cannot tell from a broken key.
+      `select_station` is untouched: that is the game retuning off a station
+      the player lost (streamer-safe, signal gone), not a dial key, and it
+      has to work regardless of the switch.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each

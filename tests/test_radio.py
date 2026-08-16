@@ -369,47 +369,58 @@ def test_catalog_entries_have_spoken_identity():
     )
 
 
-def test_tuning_with_the_radio_off_says_what_happens_next():
-    """Selecting a station while the radio is off is deliberate, not a dead key.
+def test_the_dial_does_nothing_while_the_radio_is_switched_off():
+    """A switched-off radio does not tune, the way a real one does not.
 
-    A tester filed it as a bug (Darren, 2026-08-16) because the reply stopped
-    at "Selected ...", which reads exactly like a station that failed to play.
-    The pre-selection is real -- switching on lands on it -- so the sentence
-    now says so. It names no control: the radio toggle is a keyboard key and
-    the pad has none, and spoken advice must not name a control the driver
-    may not have.
+    It used to pick a station silently and hold it for power-on. That was
+    deliberate, but a tester filed it as a bug because it is not how a radio
+    behaves (Darren, 2026-08-16), and the owner ruled for the expectation.
     """
-    from freight_fate.radio import RADIO_OFF_SELECTION_HINT
+    radio = RadioState(streamer_safe=False)
+    radio.enabled = False
+    backend = RecordingBackend()
+    before = radio.station_id
 
+    tuned = radio.tune(1, backend)
+    assert tuned.message == "Radio off."
+    assert not tuned.enabled
+    assert radio.station_id == before, "the dial must not move while off"
+
+    jumped = radio.tune_category(1, backend)
+    assert jumped.message == "Radio off."
+    assert radio.station_id == before
+
+    assert backend.played == [], "nothing may play while the radio is off"
+
+    # Switching on lands on the station that was already tuned, untouched by
+    # the presses that did nothing.
+    switched = radio.toggle(backend)
+    assert switched.enabled
+    assert radio.station_id == before
+
+
+def test_the_dial_still_works_normally_once_the_radio_is_on():
+    """The rule is about being switched off, not a new restriction on tuning."""
+    radio = RadioState(streamer_safe=False)
+    assert radio.enabled
+    before = radio.station_id
+    radio.tune(1, RecordingBackend())
+    assert radio.station_id != before
+
+
+def test_the_game_may_still_move_the_dial_off_a_lost_station_while_off():
+    """select_station is not a dial key: it is the game retuning for cause.
+
+    Streamer-safe mode and a signal lost mid-drive both move the dial off a
+    station the player may no longer have, and that has to work regardless of
+    the switch, or the radio comes back on playing something disallowed.
+    """
     radio = RadioState(streamer_safe=False)
     radio.enabled = False
     backend = RecordingBackend()
 
-    tuned = radio.tune(1, backend)
-    assert tuned.message.startswith("Radio off.")
-    assert RADIO_OFF_SELECTION_HINT in tuned.message
-    assert not tuned.enabled
-    assert backend.played == [], "a station picked while off must not play"
+    action = radio.select_station(SAFE_ROUTE_PLAYLIST, backend)
 
-    jumped = radio.tune_category(1, backend)
-    assert jumped.message.startswith("Radio off.")
-    assert RADIO_OFF_SELECTION_HINT in jumped.message
+    assert radio.station_id == SAFE_ROUTE_PLAYLIST
+    assert not action.enabled
     assert backend.played == []
-
-    # The promise the sentence makes has to be true: switching on plays the
-    # station that was picked, rather than retuning somewhere else.
-    picked = radio.station_id
-    switched = radio.toggle(backend)
-    assert switched.enabled
-    assert radio.station_id == picked
-    assert backend.played and backend.played[-1][0] == picked
-
-
-def test_the_hint_is_absent_once_the_radio_is_on():
-    """It explains an unplayed selection; with the radio on there is none."""
-    from freight_fate.radio import RADIO_OFF_SELECTION_HINT
-
-    radio = RadioState(streamer_safe=False)
-    assert radio.enabled
-    message = radio.tune(1, RecordingBackend()).message
-    assert RADIO_OFF_SELECTION_HINT not in message
