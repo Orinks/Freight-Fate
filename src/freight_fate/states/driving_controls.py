@@ -19,6 +19,20 @@ SAFE_SPEED_CURVE_MI = 0.5
 # the next imposed limit, the next stop, and the next demanding bend.
 UPCOMING_MAX_CLAUSES = 4
 
+# Alt with a number speaks one fact about where the truck is and stops
+# (Tim K., 2026-08-16). Four keys in the order he asked for them, keypad
+# included so the number row is not the only way in.
+PLACE_KEYS = {
+    pygame.K_1: "_speak_current_state",
+    pygame.K_2: "_speak_current_road",
+    pygame.K_3: "_speak_current_town",
+    pygame.K_4: "_speak_current_direction",
+    pygame.K_KP1: "_speak_current_state",
+    pygame.K_KP2: "_speak_current_road",
+    pygame.K_KP3: "_speak_current_town",
+    pygame.K_KP4: "_speak_current_direction",
+}
+
 
 class DrivingControlsMixin:
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -60,6 +74,11 @@ class DrivingControlsMixin:
                 self._toggle_auto_jake_enabled()
             else:
                 self._toggle_engine_brake()
+        elif key in PLACE_KEYS and getattr(event, "mod", 0) & pygame.KMOD_ALT:
+            # Checked ahead of the jake stages on purpose: Alt with a number
+            # used to fall through to them, so a driver reaching for "what
+            # state am I in" changed the engine brake instead.
+            getattr(self, PLACE_KEYS[key])()
         elif key in (pygame.K_1, pygame.K_2, pygame.K_3):
             self._select_jake_stage(key - pygame.K_0)
         elif key == pygame.K_p:
@@ -327,6 +346,11 @@ class DrivingControlsMixin:
             "where you can legally stop before it. "
             "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
+            "Four keys answer one part of that each, when you want the fact "
+            "without the sentence: Alt 1 the state you are in, Alt 2 the road "
+            "you are on, Alt 3 the town you are in or the nearest one, and "
+            "Alt 4 the direction you are travelling. The keypad numbers work "
+            "the same way. "
             "V weather. L lane position, and whether the lane beside you is "
             "open. After a pass, the truck also says when the lane you came "
             "out of is clear again. I turns the lane locator on and off: a "

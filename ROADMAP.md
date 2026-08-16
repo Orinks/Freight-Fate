@@ -718,6 +718,16 @@ onto exit signalling.
       belongs on the CB), the next listed exit (Shift+R is that key),
       traffic pressure (it restated the taper or the stop beside it), and
       two of its three bends; it is capped at four clauses.
+- [x] **One fact per key: Alt 1 to Alt 4 (Tim K., 2026-08-16).** R answers
+      state, road, town and direction in one sentence, so hearing the one
+      you wanted meant sitting through the other three at speed. Alt 1
+      speaks the state, Alt 2 the road signed the way it reads, Alt 3 the
+      town the truck is in -- or the nearest one, ranked by true distance
+      rather than distance along the road, with how far off it sits -- and
+      Alt 4 the direction of travel. Keypad numbers are equivalent. Alt
+      with a number used to fall through to the engine-brake stages, so
+      asking for the state changed the jake; the stage branch now requires
+      Alt to be absent.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each

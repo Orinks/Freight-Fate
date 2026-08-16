@@ -580,6 +580,10 @@ Driving controls are active while the road view is focused:
 | Alt+D | Report what ends this shift -- driving time left and duty window both -- and where you can legally stop before it. |
 | R | Report trip progress (the same percent the online drivers board shows) and the distance left, then the road you are on with its direction, the state you are in, and the city you are heading toward. With a planned stop set, the distance counts down to that stop instead of the destination. On city streets -- pulling out of the origin gate, driving a pickup approach, or running the last streets to a facility gate -- it names the street under your wheels and counts down to the on-ramp or the gate instead. Distances close in quarter miles and then in feet, so the answer is never "0 miles" while the gate is still ahead. |
 | Shift+R | Report the next listed highway exit. |
+| Alt+1 | Report the state you are in, and nothing else. |
+| Alt+2 | Report the road you are on, signed the way you would read it -- "I-90 East". On city streets it names the street instead. |
+| Alt+3 | Report the town you are in. When you are not in one, it names the nearest town, how far off the road it sits, and whether it is ahead or behind. On an empty stretch it says there is no town near you rather than going quiet. |
+| Alt+4 | Report the direction you are travelling, as the shields sign it -- "Eastbound". A city street has no signed direction and it says so. |
 | V | Report weather and forecast. |
 | L | Report which lane you are in, whether you are centered, drifting, or at an edge, and whether the lane beside you is open or blocked. |
 | Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
@@ -589,6 +593,10 @@ Driving controls are active while the road view is focused:
 | Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
 | Escape | Open the pause menu. |
+
+Alt+1 through Alt+4 answer one part of R each, for when you want the single
+fact and not the whole sentence. The keypad numbers do the same thing, so a
+keyboard without a number row above the letters is not shut out.
 
 Manual transmission adds:
 

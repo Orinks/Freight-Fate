@@ -199,6 +199,8 @@ from the words, and synonyms cost them a re-read.
 | The vehicle | truck | rig (except as noted) | `TruckModel` |
 | One city-to-city stretch | leg | segment, hop | `Leg` |
 | The real highway a leg follows | corridor | -- | -- |
+| A populated place beside the corridor, spoken when the driver asks where they are | town ("In Pine", "Nearest town, Cicero") | village (that is the bake's category name, not a spoken word), settlement, locality, place | `Landmark.category == "village"`, `DrivingLocationMixin._speak_current_town` |
+| Which way the truck is travelling, worded the way the shields sign it | direction, spoken as "Eastbound" | heading, bearing, compass direction (the signed direction is not the geometry) | `_leg_heading`, `DrivingLocationMixin._speak_current_direction` |
 | One drive, start to finish | run | trip, haul | `Trip` |
 | A truck stop or service POI | stop | POI, waypoint | `Stop`, `RoadStop` |
 | The level band | rank | tier, grade | `CareerRank` |
