@@ -839,6 +839,28 @@ onto exit signalling.
       react to "steer or brake now" and drifted off the road every time; the
       stick and the trigger now count, at keyboard parity (a held Down arrow
       already counted).
+- [ ] **PARKED BRANCH `fix/honest-brake-decel` (b2a5a43a, pushed, owner
+      parked it 2026-08-16 rather than land it the night before a build).**
+      Gap (a) below is DONE on that branch and measured: `max_brake_decel_g`
+      0.35 -> 0.55 and `EMERGENCY_BRAKE_MULT` 1.6 -> 1.0 put a loaded rig at
+      215 ft from 60 mph, and make `full_service_decel_mps2` describe the
+      truck the brakes actually are. `CARGO_HARD_BRAKE_G` 0.45 -> 0.8 came
+      with it (0.45 was unsourced, chosen to sit in the gap between the old
+      full-service and emergency figures; 0.8 g forward is 49 CFR 393.102,
+      already cited in the comment beside it). Three tests rewritten to the
+      new model, not loosened.
+      WHAT BLOCKS THE MERGE, and it is a decision rather than a bug: two
+      assist tests fail, one of which encodes the owner ruling of 2026-08-11
+      that the automatic braking assist must actually stop in time. The 1.6x
+      boost was what delivered that. With the emergency application no longer
+      stronger than a full pedal, a hot, worn, wet, 6-percent-downgrade stop
+      at 65 loaded genuinely cannot be made in 2.5 s, and escalating buys the
+      assist nothing. RECOMMENDED RESOLUTION: keep the ruling by engaging the
+      assist EARLIER -- a fade margin on its budget, since in-stop fade is
+      what the boost was quietly covering -- rather than letting the truck
+      brake harder than physics allows. Do not rebase this onto a moved
+      `feat/career-1.9` without re-running the full suite: the change moves
+      every stopping distance in the game.
 - [ ] **Emergency braking, realism gaps still open (measured 2026-08-16).**
       Two found while doing the above, neither a quick win, both wanted:
       (a) THE BUDGET DISAGREES WITH THE STOP. `EMERGENCY_BRAKE_MULT = 1.6`
