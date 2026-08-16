@@ -25,6 +25,15 @@ EARTH_RADIUS_MI = 3958.8
 # reader users manage folders in their file manager far more comfortably
 # than in any in-game browse dialog. Both ubiquitous playlist formats are
 # read, because which one a player has is decided by whatever exported it.
+# Tuning with the radio switched off picks a station without playing it, so
+# a driver can set the dial before switching on. That is deliberate, but the
+# reply used to stop at "Selected ...", which reads as a station that simply
+# failed to play -- a tester filed it as a bug (Darren, 2026-08-16). Saying
+# what happens next turns it from a dead key into a working one. Deliberately
+# names no key: the radio toggle is a keyboard control and the pad has none,
+# and spoken advice must never name a control this driver may not have.
+RADIO_OFF_SELECTION_HINT = "It will play when you switch the radio on."
+
 PERSONAL_PLAYLIST_SOURCE_TYPE = "playlist"
 PLAYLISTS_DIR_NAME = "Playlists"
 PLAYLIST_SUFFIXES = ("*.m3u", "*.m3u8", "*.pls")
@@ -932,7 +941,8 @@ class RadioState:
         self.station_id = reception.station.id
         if not self.enabled:
             return RadioAction(
-                f"Radio off. Selected {self._station_phrase(reception)}.",
+                f"Radio off. Selected {self._station_phrase(reception)}. "
+                f"{RADIO_OFF_SELECTION_HINT}",
                 reception.station,
                 enabled=False,
                 reception=reception,
@@ -965,7 +975,8 @@ class RadioState:
         label = DIAL_CATEGORY_NAMES.get(target, "Radio")
         if not self.enabled:
             return RadioAction(
-                f"Radio off. {label}. Selected {self._station_phrase(reception)}.",
+                f"Radio off. {label}. Selected {self._station_phrase(reception)}. "
+                f"{RADIO_OFF_SELECTION_HINT}",
                 reception.station,
                 enabled=False,
                 reception=reception,
@@ -983,7 +994,9 @@ class RadioState:
         self.station_id = station.id
         if not self.enabled:
             return RadioAction(
-                f"Radio off. Selected {self._station_phrase(estimate_signal(station, self.position, self.elevation_ft))}.",
+                f"Radio off. Selected "
+                f"{self._station_phrase(estimate_signal(station, self.position, self.elevation_ft))}. "
+                f"{RADIO_OFF_SELECTION_HINT}",
                 station,
                 enabled=False,
                 reception=self.current_reception(),

@@ -17,6 +17,12 @@
   Requested by William, who wrote in to say the granite capital of the world
   had been left out. He was right.
 
+- **Tuning with the radio switched off now says what it is doing.** You have
+  always been able to set the dial with the radio off and have it play the
+  station you picked when you switch on. It just did not say so -- it stopped
+  at "Selected", which sounds like a station that failed to play. It now
+  finishes the thought. Reported by Darren.
+
 - **Pulling out no longer drops you straight into a hazard.** Two things
   could greet you the moment a run began. A real road-authority work zone
   near the start of a corridor could already be around you before you had
