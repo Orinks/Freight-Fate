@@ -674,6 +674,51 @@ def test_the_air_brake_lockout_speaks_again_when_the_reason_changes() -> None:
         app.shutdown()
 
 
+def test_the_air_brake_lockout_recurs_once_it_clears_and_comes_back() -> None:
+    # Review fix: the key was set but never released, so EventSpeechPacer's
+    # single app-session _conditions dict (never cleared by pause/resume/
+    # reset, app.py:112) kept the first "Parking brake set..." on file
+    # forever. A later, unrelated recurrence of the identical text -- the
+    # lockout clears, then hours later the player parks at a different stop
+    # and hits the accelerator before releasing the brake -- would go
+    # silent under the stale key: exactly the "swallows a genuine
+    # re-warning" failure the task's constraints forbid. Mirrors
+    # test_a_cleared_condition_announces_itself_afresh
+    # (test_event_speech_pacer.py) and _update_overrev's
+    # reset_event_condition("engine_redline") pattern, but through the real
+    # per-frame update() -- where the new reset actually lives -- not the
+    # pacer directly.
+    from driving_feature_helpers import quiet_trip
+
+    app = _app()
+    try:
+        driving = _real_driving(app)
+        quiet_trip(driving)
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        clock = _FakeClock()
+        app.ctx._event_pacer = EventSpeechPacer(clock=clock)
+        driving.truck.engine_on = True
+        driving.truck.set_air_ready(parking_brake=True)  # locked out, air ready
+
+        driving._maybe_say_air_brake_lockout()  # first instance: speaks
+
+        driving.truck.parking_brake = False  # the lockout genuinely clears
+        clock.now += 10.0
+        driving.update(1 / 60)  # a real per-frame pass sees the clear
+
+        driving.truck.set_air_ready(parking_brake=True)  # locked out again, later
+        driving._brake_lockout_cue_timer = 0.0
+        clock.now += 10.0
+        driving._maybe_say_air_brake_lockout()  # a fresh instance: must speak too
+
+        parking_lines = [s for s in spoken if "Parking brake set" in s]
+        assert len(parking_lines) == 2
+        assert parking_lines[0] == parking_lines[1]  # identical text, both spoken
+    finally:
+        app.shutdown()
+
+
 def test_cargo_condition_speaks_at_urgent_only_as_money() -> None:
     # Important 5: the coaching tail only rides the first report; every
     # message this sends -- including that first one -- carries the pay

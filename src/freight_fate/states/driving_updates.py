@@ -279,6 +279,15 @@ class DrivingUpdateMixin:
         )
         if accelerating and not backing and t.air_brakes_holding:
             self._maybe_say_air_brake_lockout()
+        elif not t.air_brakes_holding:
+            # The lockout actually cleared (parking brake released, spring
+            # brakes recovered) -- not merely the player's foot off the
+            # pedal, which must NOT drop the key or the next press would
+            # re-announce an unchanged reason. The next time it arms is a
+            # fresh instance of the condition and gets its warning again,
+            # even with identical wording (mirrors _update_overrev's reset
+            # of "engine_redline").
+            self.ctx.reset_event_condition("air_brake_lockout")
         if key_up and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
