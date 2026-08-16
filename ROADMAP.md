@@ -2891,6 +2891,39 @@ Mechanics finished after the 1.8.0 cut, so they release with 1.9 (the
 detailed design notes live in the sections further down, whose "Shipped
 for 1.8" framing predates the release split):
 
+- [ ] **The deadline planner is blind to curves (measured 2026-08-16, owner
+      question).** `route_drive_hours` walks the route on posted limits
+      alone -- there are zero references to curves anywhere in
+      `models/jobs.py` -- so every bend the driver actually has to slow for
+      is time the plan never budgeted. Measured across eight routes, the
+      advisories cost 2.8 percent of drive time on average: 0.5 percent on
+      flat corridors (Chicago-Indianapolis, Buffalo-Rochester,
+      Phoenix-Flagstaff), 3.3 to 3.4 on Atlanta-Nashville and
+      Seattle-Portland, and 5.6 on Denver-Salt Lake City, whose worst bend is
+      signed 20.
+      NOT URGENT, and deliberately not done before the 2026-08-17 build:
+      `DEADLINE_PLANNING_SPEED_FACTOR = 0.88` already discounts the plan by
+      12 percent, which covers even the mountain case. The reason to fix it
+      anyway is that the cover is luck rather than design -- the bends
+      already eat half that margin in the mountains, and every further round
+      of curve enrichment erodes it with no signal, until one day a corridor
+      goes undeliverable and nothing in the code will say why. Making the
+      planner cap each sampled segment at the curve advisory is small and
+      contained, but it moves every deadline in the game, so it wants its
+      own change and a full gate.
+      CHECKED AT THE SAME TIME AND SOUND, so nobody re-investigates it: the
+      hours-of-service model does NOT conflate the duty window with the
+      driving limit. `driving_min` and `duty_min` are separate, `drive()`
+      advances both, `on_duty`/`off_duty` advance only the window, short
+      breaks do not extend it, the 30-minute break lands after 8 hours of
+      driving, and split sleeper berth is implemented. It only FEELS
+      conflated because of where the arithmetic lands: simulated shifts end
+      at 12.6 h duty for drop-and-hook and 13.2 h for a live load against an
+      11-hour driving limit, so an ordinary day is bound by driving and never
+      meets the window -- while a slow shipper (14.7 h) or a breakdown
+      (14.1 h) does hit it. That is the same shape the window has in real
+      life, so it is tuning to leave alone.
+
 - [x] **Highway exits take a real setup.** X signals the announced exit,
       the GPS asks for the right-side exit lane, checks ramp speed at the
       gore, and explains missed exits; destination ramps follow the same
