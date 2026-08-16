@@ -573,6 +573,7 @@ class EnforcementWatchMixin:
             f"with {self.ctx.control_hint('take_exit')}. Rest planning can "
             "wait until you are past the scale.",
             interrupt=False,
+            priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
         )
         return True
