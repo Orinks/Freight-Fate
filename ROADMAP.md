@@ -745,6 +745,30 @@ onto exit signalling.
       the one place a player had to have heard the intro to know the way out.
       Both screens now append it. On the category screen it runs `go_back`,
       which already stops a held demo, so the row cannot leave a cue ringing.
+- [ ] **Departing straight into a hazard: work zone or merging traffic at
+      mile zero (owner, 2026-08-16).** CONFIRMED, all three claims, and the
+      three causes are separate. (1) No departure chain: only a facility with
+      a genuine multi-segment turn-level chain gets one
+      (`_departure_chain_route`); every other origin keeps the scripted
+      departure straight onto the highway, so route mile 0 IS the spawn and
+      there are no city miles to absorb anything. (2) Work zone at zero:
+      simulated zones draw from `uniform(15, ...)` so their taper cannot
+      start before mile 14, but REAL 511 zones have no such floor --
+      `start_mi = max(0.0, best_leg_mile - zone_length / 2)` clamps to zero,
+      so a real event near the corridor start can already cover the truck
+      before it moves, with the taper behind it and nothing to announce.
+      (3) Merging traffic ahead: `spawn_initial_traffic` keeps slot 0 at
+      least 8 miles into a leg, but the rolling bubble's floor is
+      `NO_SPAWN_AHEAD_MI = 1.1`, and a cell drawn there can roll the
+      "merging" intent, so the first thing a driver hears on pulling out is
+      a merge cue about a vehicle barely a mile off.
+      Three candidate fixes, not yet chosen because they trade off against
+      each other: a no-hazard floor on the first miles of a run (cheapest,
+      but suppresses a real work zone that is genuinely there); a
+      trip-start-only widening of the bubble's ahead floor (narrow, does
+      nothing for the zones); or the owner's own reading -- give every
+      origin a departure chain, which is the honest shape and a world-data
+      sweep rather than a code change. Wants a decision before the work.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each
