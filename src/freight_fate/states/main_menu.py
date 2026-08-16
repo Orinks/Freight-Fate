@@ -1051,6 +1051,18 @@ SETTINGS_LAYOUT_NOTICES = {
         "has a row at all: it used to chime at the speed cruise itself holds, "
         "and now it stays quiet until you are genuinely heading for a ticket."
     ),
+    3: (
+        "Speech verbosity is now called Driving speech, in the Speech "
+        "category, and it has two more steps than before. What used to be "
+        "normal is now called standard, and what used to be terse is now "
+        "called quiet -- your choice came with you. Standard and quiet both "
+        "still speak every safety call, route instruction, and money "
+        "consequence; quiet only trades confirmations and status updates for "
+        "short sounds instead of words. Two new choices sit on either end: "
+        "coaching, which explains driving technique along with everything "
+        "standard says, and urgent only, which speaks just the safety calls, "
+        "what things cost, and the turn you have to take."
+    ),
 }
 
 
@@ -1514,12 +1526,14 @@ class SettingsCategoryState(MenuState):
         speech = self.ctx.speech
         specs = [
             (
-                lambda: f"Speech verbosity: {s.driving_speech}",
-                self._cycle_verbosity,
-                "Controls how often driving status reminders speak. Rate, pitch, "
-                "volume, and voice rows appear in this category only when the "
-                "voice speaking to you supports them; with a screen reader "
-                "running, those four are set in the screen reader itself.",
+                lambda: f"Driving speech: {s.driving_speech.replace('_', ' ')}",
+                self._cycle_driving_speech,
+                "How much the road tells you. Coaching explains technique, "
+                "standard is the working default, quiet cuts confirmations "
+                "and status to sounds, and urgent only leaves the safety "
+                "calls, what things cost, and the turn you have to take. "
+                "Billboards, place names and landmarks are not part of this "
+                "-- they have their own switches below.",
             ),
             (
                 lambda: f"Roadside chatter: {s.chatter_summary()}",
@@ -1993,7 +2007,7 @@ class SettingsCategoryState(MenuState):
         self.ctx.apply_haptics()
         self._announce()
 
-    def _cycle_verbosity(self, d: int) -> None:
+    def _cycle_driving_speech(self, d: int) -> None:
         s = self.ctx.settings
         i = DRIVING_SPEECH_MODES.index(s.driving_speech)
         s.driving_speech = DRIVING_SPEECH_MODES[(i + d) % len(DRIVING_SPEECH_MODES)]

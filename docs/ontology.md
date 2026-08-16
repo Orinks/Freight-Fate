@@ -452,6 +452,24 @@ outside a CB clause. The check exists because slang leaks: the word is
 evocative, it reads well in a sentence, and one careless line teaches a screen
 reader user a second noun for a thing that already had one.
 
+### Driving speech rungs
+
+How much of the road's *information* speaks. Four rungs, cutting whole
+categories rather than shortening sentences; the player picks one and the
+delivery layer decides per category. "Terse" survives only as the internal
+name of the shorter rendering and is no longer a thing the player selects.
+
+| Concept | Canonical spoken noun | Never say | Where |
+| --- | --- | --- | --- |
+| The loudest rung, technique included | coaching | verbose, tutorial mode, chatty | `DRIVING_SPEECH_MODES` |
+| The working default | standard | normal, default | `DRIVING_SPEECH_MODES` |
+| Confirmations and status become sounds | quiet | terse (that is the rendering, not the rung), minimal | `DRIVING_SPEECH_MODES` |
+| Safety, cost, and the turn you must take | urgent only | emergency mode, critical only | `DRIVING_SPEECH_MODES` |
+
+Roadside colour -- billboards, place names, landmarks -- is **not** governed
+by these rungs. It answers to the chatter switches and the place-callouts
+ladder, and a player may run the loudest colour with the quietest rung.
+
 ### Terse speech grammar
 
 Terse mode promises: the truck tells you what to *do* and what it *cost*, and
