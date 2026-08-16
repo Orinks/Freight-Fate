@@ -738,6 +738,7 @@ onto exit signalling.
       testers verify per the standing gate. The owner's report is the
       requirement: a long drive in terse mode should be mostly engine,
       road, and radio -- speech should feel like an event.
+- [x] **Speech-priority redesign, stage S3 -- landed 2026-08-12** (R6, R7,
       R9, R10, R11, R12, R14). The naming diet and the noise cuts: facility
       names speak in full on first mention per leg and short after, with the
       type prefix dropped when the proper name already carries it (R6);
