@@ -526,6 +526,13 @@ class DrivingUpdateMixin:
             return
         self._brake_lockout_cue_timer = 4.0
         t = self.truck
+        # One standing condition -- "why the truck will not roll yet" --
+        # with three mutually exclusive descriptions. A player who holds the
+        # accelerator against the lockout re-triggers this every 4 seconds;
+        # sharing the key means an unchanged reason (still parked, still
+        # building air at the same psi) speaks once, while a genuine change
+        # (engine started, psi climbed, brake released then reset) speaks
+        # again because the text itself differs.
         if not t.engine_on:
             self._set_status("Start the engine before releasing the brakes.")
             message = (
@@ -533,7 +540,9 @@ class DrivingUpdateMixin:
                 if self._terse_speech()
                 else "Start the engine first; air pressure cannot build with the engine off."
             )
-            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
+            self.ctx.say_event(
+                message, interrupt=False, key="air_brake_lockout", category=SpeechCategory.STATUS
+            )
         elif not t.air_ready:
             self._set_status("Waiting for air pressure before the truck can move.")
             message = (
@@ -545,7 +554,9 @@ class DrivingUpdateMixin:
                     "to release the parking brake."
                 )
             )
-            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
+            self.ctx.say_event(
+                message, interrupt=False, key="air_brake_lockout", category=SpeechCategory.STATUS
+            )
         elif t.parking_brake:
             brake_hint = self.ctx.control_hint("parking_brake")
             self._set_status(f"Parking brake set. Press {brake_hint} to release it.")
@@ -554,7 +565,9 @@ class DrivingUpdateMixin:
                 if self._terse_speech()
                 else f"Parking brake set. Press {brake_hint} to release it."
             )
-            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
+            self.ctx.say_event(
+                message, interrupt=False, key="air_brake_lockout", category=SpeechCategory.STATUS
+            )
 
     def _update_air_brake_announcements(
         self,

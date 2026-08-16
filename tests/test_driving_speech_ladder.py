@@ -16,10 +16,25 @@ from freight_fate.speech_pacing import (
     DRIVING_SPEECH_MODES,
     LADDER_EARCONS,
     Disposition,
+    EventSpeechPacer,
     SpeechCategory,
     disposition_for,
 )
 from freight_fate.states.driving_events import _EVENT_CATEGORIES, _FLAVOR_EVENT_KINDS
+
+
+class _FakeClock:
+    """A controllable clock for the pacer, so a key= test can advance real
+    seconds between two calls without a real sleep -- matching how a
+    standing condition actually changes seconds apart, not in the same
+    instant, and avoiding the anti-backlog projection (an unrelated pacer
+    concern) mistaking a same-instant follow-up for a stale AMBIENT line."""
+
+    def __init__(self) -> None:
+        self.now = 1000.0
+
+    def __call__(self) -> float:
+        return self.now
 
 
 def test_the_ladder_has_four_named_rungs() -> None:
@@ -596,6 +611,69 @@ def test_the_parked_low_air_warning_stays_quiet_at_urgent_only() -> None:
         app.shutdown()
 
 
+# -- Task 8 audit: the air-brake lockout re-read the same standing reason ---
+#
+# tools/playtest_break.py --scenario microsleep_throttle_through --transcript
+# showed "Parking brake set. Press P to release it." spoken twice back to
+# back with nothing about the truck changed in between: the player kept
+# holding the accelerator against a parked, air-ready truck, and
+# _maybe_say_air_brake_lockout's 4-second retrigger timer re-announced the
+# same fact every time it fired. These drive the real method (not a literal
+# string handed to say_event) so a key removed from the actual call site
+# fails the test, not just a generic pacer check.
+#
+# Both tests advance a fake clock past EventSpeechPacer.REPEAT_WINDOW_S
+# (2.5s) between calls. Without that, an identical-text repeat would already
+# be caught by the pacer's plain "said this recently" window regardless of
+# key=, and the test would pass whether or not the key survived a revert --
+# exactly the vacuous-test trap the plan's history warns about. Past that
+# window, only key= keeps an unchanged reason from re-announcing.
+
+
+def test_the_air_brake_lockout_speaks_once_while_the_reason_is_unchanged() -> None:
+    app = _app()
+    try:
+        driving = _real_driving(app)
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        clock = _FakeClock()
+        app.ctx._event_pacer = EventSpeechPacer(clock=clock)
+        driving.truck.engine_on = True
+        driving.truck.set_air_ready(parking_brake=True)  # air ready, brake still set
+
+        for _ in range(4):  # the player holding the accelerator against the lockout
+            driving._brake_lockout_cue_timer = 0.0
+            clock.now += 10.0  # well past the plain repeat window
+            driving._maybe_say_air_brake_lockout()
+
+        assert len(spoken) == 1
+    finally:
+        app.shutdown()
+
+
+def test_the_air_brake_lockout_speaks_again_when_the_reason_changes() -> None:
+    app = _app()
+    try:
+        driving = _real_driving(app)
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        clock = _FakeClock()
+        app.ctx._event_pacer = EventSpeechPacer(clock=clock)
+        driving.truck.engine_on = False  # fresh trip: cold air start, engine off
+
+        driving._maybe_say_air_brake_lockout()
+        driving._brake_lockout_cue_timer = 0.0
+        clock.now += 10.0  # well past the plain repeat window
+        driving.truck.engine_on = True  # engine started, air still not built
+
+        driving._maybe_say_air_brake_lockout()
+
+        assert len(spoken) == 2
+        assert spoken[0] != spoken[1]
+    finally:
+        app.shutdown()
+
+
 def test_cargo_condition_speaks_at_urgent_only_as_money() -> None:
     # Important 5: the coaching tail only rides the first report; every
     # message this sends -- including that first one -- carries the pay
@@ -824,3 +902,59 @@ def test_every_earcon_category_is_learnable() -> None:
                 assert LADDER_EARCONS[category] in learnable, (
                     f"{category} becomes an earcon at {rung} with nothing to learn it by"
                 )
+
+
+def test_an_unchanged_status_line_speaks_once() -> None:
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "coaching"
+
+        for _ in range(4):
+            app.ctx.say_event(
+                "Gap to the truck ahead: 3 seconds.",
+                interrupt=False,
+                key="lead_gap",
+                category=SpeechCategory.STATUS,
+            )
+
+        assert spoken == ["Gap to the truck ahead: 3 seconds."]
+    finally:
+        app.shutdown()
+
+
+def test_a_changed_status_line_speaks_again() -> None:
+    app = _app()
+    try:
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+        app.ctx.settings.driving_speech = "coaching"
+        # A real gap-closing update arrives seconds apart, not in the same
+        # instant -- advance the pacer's clock between the two calls so the
+        # anti-backlog projection (unrelated to the key= mechanism under
+        # test) doesn't read the second line as starting stale behind the
+        # first one's still-projected utterance.
+        clock = _FakeClock()
+        app.ctx._event_pacer = EventSpeechPacer(clock=clock)
+
+        app.ctx.say_event(
+            "Gap to the truck ahead: 3 seconds.",
+            interrupt=False,
+            key="lead_gap",
+            category=SpeechCategory.STATUS,
+        )
+        clock.now += 5.0
+        app.ctx.say_event(
+            "Gap to the truck ahead: 1 second.",
+            interrupt=False,
+            key="lead_gap",
+            category=SpeechCategory.STATUS,
+        )
+
+        assert spoken == [
+            "Gap to the truck ahead: 3 seconds.",
+            "Gap to the truck ahead: 1 second.",
+        ]
+    finally:
+        app.shutdown()
