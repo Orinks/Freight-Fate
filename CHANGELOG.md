@@ -17,6 +17,12 @@
   Requested by William, who wrote in to say the granite capital of the world
   had been left out. He was right.
 
+- **Learn game sounds has a Back option on both screens.** Arrow to the
+  bottom of the list of sound groups, or of the sounds inside one, and there
+  is now a Back row like every other menu in the game. Escape still works as
+  it always did. Leaving a group by either route stops a sound that was still
+  running.
+
 - **The controller can stop the driving voice, and ask what the limit is.**
   Two things a pad simply could not do. The Back button now stops an
   announcement while it is being read, the way Left or Right Control does on
