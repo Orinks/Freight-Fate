@@ -2786,7 +2786,10 @@ class DrivingEventMixin:
             message += f" Brake with {self.ctx.control_hint('brake')} well before it."
         self.ctx.audio.play("ui/warning")
         self._set_status(f"Drove past {place}. Use the next safe turnaround.")
-        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.CONFIRMATION)
+        # The mandatory destination terminal, not an optional stop: names the
+        # loop-back maneuver that still delivers the load, so it must survive
+        # quiet/urgent_only as words.
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)
 
     def _update_selected_stop_assist(self) -> bool:
         """Brake an explicitly selected optional stop at its entrance."""
@@ -3984,11 +3987,14 @@ class DrivingEventMixin:
             )
         self.ctx.audio.play("ui/warning")
         self._set_status("Destination exit missed. Use the next safe turnaround.")
+        # A mandatory-stop miss, not an optional one: the route just changed
+        # and this names the maneuver that still gets the load delivered, so
+        # it must survive quiet/urgent_only as words, not an earcon blip.
         self.ctx.say_event(
             f"You missed the destination exit for {self._destination_facility_text()}. "
             f"{reroute_text}",
             interrupt=True,
-            category=SpeechCategory.CONFIRMATION,
+            category=SpeechCategory.NAVIGATION,
         )
 
     def _handle_arrival_gate(self) -> None:

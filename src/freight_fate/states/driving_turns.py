@@ -320,7 +320,10 @@ class TurnCommitmentMixin:
             message += f" Brake to {target} with {self.ctx.control_hint('brake')} on the approach."
         self.ctx.audio.play("ui/warning")
         self._set_status(status)
-        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.CONFIRMATION)
+        # A mandatory turn on the route, not an optional stop: names the
+        # loop-back (or the auto-turn) that still delivers the load, so it
+        # must survive quiet/urgent_only as words, not an earcon blip.
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)
 
     # -- the pursuit guide ----------------------------------------------------
 

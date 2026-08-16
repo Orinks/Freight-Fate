@@ -607,7 +607,14 @@ class DrivingUpdateMixin:
                 if self._terse_speech()
                 else f"Low air warning: {t.air_pressure_psi:.0f} psi. {advice}"
             )
-            self.ctx.say_event(message, interrupt=True, category=SpeechCategory.STATUS)
+            # Parked, this is a band readout; rolling, it is the last warning
+            # before the spring brakes set on their own -- the same
+            # urgency-decides-the-category shape as the HOS check above.
+            self.ctx.say_event(
+                message,
+                interrupt=True,
+                category=SpeechCategory.SAFETY if rolling else SpeechCategory.STATUS,
+            )
         elif t.air_pressure_psi >= t.specs.air_low_warning_clear_psi:
             # Re-arm only once pressure has recovered clear of the warning
             # threshold (hysteresis), not merely ticked a fraction above it.
@@ -628,7 +635,9 @@ class DrivingUpdateMixin:
                     "compressor rebuild air before moving."
                 )
             )
-            self.ctx.say_event(message, interrupt=True, category=SpeechCategory.STATUS)
+            # The low-air band is a STATUS readout; the spring brakes actually
+            # setting is the emergency the band was warning about -- SAFETY.
+            self.ctx.say_event(message, interrupt=True, category=SpeechCategory.SAFETY)
         elif not t.spring_brakes_active:
             self._spring_brake_said = False
 
@@ -1477,7 +1486,10 @@ class DrivingUpdateMixin:
             message = self.lane.describe()
         if not self._terse_speech():
             message += " Steer back toward the lane center."
-        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.STATUS)
+        # Position (the standing off-pavement condition) is STATUS; this
+        # function only ever speaks on entry or worsening -- the transition
+        # itself is the warning, so every line it emits is SAFETY.
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.SAFETY)
 
     def _edge_boundary(self) -> str:
         """What lies past the road edge the truck is drifting toward.

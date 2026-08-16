@@ -186,4 +186,7 @@ class FacilityGateMixin:
                 )
         self.ctx.audio.play("ui/warning")
         self._set_status("Missed the facility gate. Use the next safe turnaround.")
-        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.CONFIRMATION)
+        # The mandatory destination gate, not an optional stop: names the
+        # loop-back maneuver that still delivers the load, so it must survive
+        # quiet/urgent_only as words, not an earcon blip.
+        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)

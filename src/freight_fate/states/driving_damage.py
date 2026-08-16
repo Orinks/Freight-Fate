@@ -213,8 +213,13 @@ class DamageBandMixin:
         # road: it earns the voice when it starts and again when the number it
         # carries has moved. Otherwise the driver hears the same sentence for
         # the rest of the run and has to sit through it every time.
+        #
+        # The coaching tail only ever rides the first report -- every message
+        # this sends, including that first one, carries the pay consequence
+        # (an exception, a claim, a refused load), and the category governs
+        # the whole line, not just the tail. MONEY, not COACHING.
         self.ctx.say_event(
-            message, interrupt=True, key="cargo_condition", category=SpeechCategory.COACHING
+            message, interrupt=True, key="cargo_condition", category=SpeechCategory.MONEY
         )
 
     # -- the bands ---------------------------------------------------------------
@@ -253,6 +258,11 @@ class DamageBandMixin:
         terse = self._terse_speech()
         damage = self.truck.damage_pct
         cap = self.ctx.settings.speed_text(DAMAGE_LIMP_CAP_MPH)
+        # Every band here is a vehicle-condition readout (the redline/low-air
+        # pattern) except the wall itself: out of service governs the truck
+        # down to a creep and orders a stop right now, which is an act-now
+        # cue, not a status readout. That one branch alone earns SAFETY.
+        category = SpeechCategory.STATUS
         if band > previous:
             if band == DAMAGE_BAND_REDUCED:
                 message = (
@@ -287,6 +297,7 @@ class DamageBandMixin:
                 )
             else:
                 message = self._out_of_service_message()
+                category = SpeechCategory.SAFETY
             self.ctx.audio.play("ui/warning")
         else:
             # Coming back down after a repair. Terse keeps the fact and drops
@@ -314,7 +325,7 @@ class DamageBandMixin:
                     else f"Damage {damage:.0f} percent. Still in limp mode, capped at {cap}."
                 )
             self.ctx.audio.play("ui/notify")
-        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.STATUS)
+        self.ctx.say_event(message, interrupt=True, category=category)
 
     def _out_of_service_message(self) -> str:
         """The wall landing: the fact, the cost, and the path forward.
