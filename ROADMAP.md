@@ -2905,23 +2905,21 @@ for 1.8" framing predates the release split):
       measured 0.47 to 1.49 across region, road class and clock, bracketing
       the slider's old 0.45/1.0/1.35. Old settings files carrying the key load
       unchanged: `Settings.load` only applies keys that still exist.
-- [ ] **Roving patrols can never clock anyone on a highway (measured
-      2026-08-16).** The other half of the same owner report, still OPEN.
-      `KIND_ROVING` uses `METHOD_PACING`, whose `geometry_factor` needs
-      `PACING_MIN_REAL_S = 20` REAL seconds accumulated inside the 1-mile
-      window past the post. The game's slowest time compression is 10x
-      (`TIME_SCALES = (10, 20, 40)`), and at 65 mph that window lasts 5.5 real
-      seconds -- 2.8 at 20x, 1.4 at 40x. So the gate can only be met below
-      about 2x, which the game does not offer, and roving patrols are about a
-      third of all staffed posts. They are also the ones with bodies in the
-      traffic bubble, so this is exactly the "a cop passed me while I was
-      speeding and nothing happened" report from the owner and Shane P.
-      `enforcement_observe`'s own docstring says the real-time hold "is gone
-      entirely" -- true for the speed accrual, which is distance-quantised,
-      but `PACING_MIN_REAL_S` survived it. FIX: quantise the pacing hold by
-      DISTANCE like everything else, smaller than the 1-mile tracking window.
-      Deliberately not done before the 2026-08-17 build: it increases how
-      often players are pulled over and wants a playtest.
+- [x] **Roving patrols could never clock anyone on a highway -- FIXED
+      2026-08-16 after an owner-ordered harness playtest.** There were TWO
+      blockers, and the first hid the second. (1) `PACING_MIN_REAL_S = 20`
+      real seconds, unsatisfiable at any compression the game offers. (2)
+      Even with that made distance-based, a pacing unit only banks road AFTER
+      the truck passes it, while `end_mi` stopped asking it to look 0.3 of a
+      mile past itself and the tracker ran to a literal 1.0 -- so the most
+      pace it could hold at a moment it was allowed to observe was 0.3, short
+      of any gate. Both windows now read one constant, `PACING_WINDOW_MI`.
+      MEASURED, same roads and seeds either side: at a sustained 12 over,
+      roving patrols went from 315 looks and ZERO catches to 350 looks and 7
+      catches; total stops over 2,007 miles went 17 -> 24, one per 118 miles
+      -> one per 84. Harness clean on five enforcement scenarios. Three tests
+      added, including one that pins the gate inside the window, since
+      nothing in 3,940 tests caught either bug.
 - [ ] **Things an officer never notices that the game already models
       (2026-08-16).** `_candidates` covers speeding, unsafe equipment, no
       chains, no lights, following too close and left-lane misuse. Missing,

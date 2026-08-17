@@ -138,6 +138,16 @@
 
 ### Changed
 
+- **Roving patrols can pull you over now. They never could before.** The
+  troopers that run with traffic rather than sitting on a crossover were
+  incapable of writing a ticket on a highway -- not unlucky, incapable. If
+  you heard one go by while you were speeding and nothing happened, that is
+  why, and it was not you imagining it. They now clock you the way a real one
+  does: by falling in behind and holding it for a stretch of road. Expect to
+  be pulled over somewhat more often if you sustain a big overage; over two
+  thousand test miles held at twelve over, stops went from one every 118
+  miles to one every 84.
+
 - **The enforcement presence setting is gone, and the road decides instead.**
   How much police activity you hear is now a fact about where you are: a busy
   interstate through a heavily policed state at the afternoon peak sounds

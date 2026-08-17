@@ -68,6 +68,7 @@ from ..sim.enforcement_observe import (
 from ..sim.enforcement_posts import (
     KIND_FIXED_SCALE,
     KIND_SCALE_APRON,
+    PACING_WINDOW_MI,
     TABLEAU_SIREN_LEAD_MI,
     post_seed,
 )
@@ -195,7 +196,8 @@ class EnforcementWatchMixin:
         # The look itself, and the mile it was taken at: what makes the
         # deferral a postponement rather than a discard.
         self._held_observation: tuple[Observation, float] | None = None
-        self._pacing_since_s: dict[str, float] = {}
+        # Miles each pacing unit has held station behind the truck.
+        self._pacing_mi: dict[str, float] = {}
 
     # -- presence ------------------------------------------------------------
 
@@ -692,7 +694,7 @@ class EnforcementWatchMixin:
                 tolerance_mph=COVER_SPEED_TOLERANCE_MPH,
             ),
             crest_between=self._crest_between(position, post.at_mi),
-            paced_real_s=self._pacing_since_s.get(post.id, 0.0),
+            paced_mi=self._pacing_mi.get(post.id, 0.0),
             over_limit_mi=self._over_limit_mi,
         )
 
@@ -764,7 +766,7 @@ class EnforcementWatchMixin:
             self._over_limit_mi = 0.0
         else:
             self._over_limit_mi += moved
-        self._track_pacing(dt)
+        self._track_pacing(moved)
         self._update_scale_bed()
         if self._ramp_mi is None:
             self._update_marked_unit_passes(previous_mi)
@@ -792,17 +794,24 @@ class EnforcementWatchMixin:
         """Whether cruise or the speed keeper currently owns the throttle."""
         return self._cruise_mph is not None or bool(getattr(self, "_speed_control_armed", False))
 
-    def _track_pacing(self, dt: float) -> None:
-        """How long each roving unit has been sitting behind the truck."""
+    def _track_pacing(self, moved: float) -> None:
+        """How much road each roving unit has held station behind the truck over.
+
+        Road, not real seconds. The old real-time version could not be
+        satisfied at any compression the game offers -- the 1-mile window past
+        a post is 5.5 real seconds at 65 mph and 10x, against a 20-second gate
+        -- so a roving patrol never once clocked anybody on a highway
+        (measured 2026-08-16: 315 looks, zero catches over 2,000 miles).
+        """
         position = self.trip.position_mi
         for post in self.trip.posts:
             if post.method != "pacing" or not post.staffed:
                 continue
             behind = position - post.at_mi
-            if 0.0 < behind <= 1.0:
-                self._pacing_since_s[post.id] = self._pacing_since_s.get(post.id, 0.0) + dt
-            elif behind > 1.0:
-                self._pacing_since_s.pop(post.id, None)
+            if 0.0 < behind <= PACING_WINDOW_MI:
+                self._pacing_mi[post.id] = self._pacing_mi.get(post.id, 0.0) + moved
+            elif behind > PACING_WINDOW_MI:
+                self._pacing_mi.pop(post.id, None)
 
     def _run_observations(self) -> None:
         """Take this mile's look and act on it."""

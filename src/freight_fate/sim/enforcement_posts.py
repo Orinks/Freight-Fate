@@ -73,7 +73,24 @@ METHOD_REACH_MI = {
 # A unit that paces you has to be behind you long enough to hold a speed. Real
 # seconds, not compressed ones: the officer's stopwatch runs on the same clock
 # the player's does.
-PACING_MIN_REAL_S = 20.0
+# How far a pacing unit has to hold station behind the truck before it has a
+# speed. DISTANCE, not real seconds: this was 20 real seconds until
+# 2026-08-16, and the module that reads it already explains why that cannot
+# work -- the 1-mile tracking window past a post lasts 5.5 real seconds at 65
+# mph and the game's slowest compression (10x), so the gate could never be met
+# and a roving patrol could never clock anybody on a highway. Measured over
+# 2,000 miles at 12 over: 315 looks, zero catches. Well inside the 1-mile
+# window so the confidence ramp has room to finish.
+PACING_MIN_MI = 0.4
+# How far back a pacing unit stays with the truck. One constant, shared by the
+# tracker that accumulates the pace and by the window the post is asked to
+# look in -- they used to be a literal 1.0 in the driving layer and a 0.3 in
+# ``end_mi``, which is a second reason a roving patrol could never write a
+# ticket: it only banks pace AFTER you pass it, and it stopped being asked to
+# look 0.3 of a mile past itself, so it could never reach even a shortened
+# gate. A trooper who falls in behind you stays there until they have a
+# number.
+PACING_WINDOW_MI = 1.0
 
 # -- kinds ------------------------------------------------------------------
 
@@ -357,6 +374,11 @@ class EnforcementPost:
 
     @property
     def end_mi(self) -> float:
+        # A pacing unit is behind you and moving with you, so its window runs
+        # as far back as it will hold station. Every other post is a point on
+        # the road that you drive past and leave.
+        if self.method == METHOD_PACING:
+            return self.at_mi + PACING_WINDOW_MI
         return self.at_mi + 0.3
 
     def covers(self, mile: float) -> bool:
@@ -707,7 +729,8 @@ __all__ = [
     "METHOD_REACH_MI",
     "METHOD_SCALE_SCREEN",
     "METHOD_VISUAL",
-    "PACING_MIN_REAL_S",
+    "PACING_MIN_MI",
+    "PACING_WINDOW_MI",
     "POST_KINDS",
     "REASON_BY_KIND",
     "SPACING_MI",
