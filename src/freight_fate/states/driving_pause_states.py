@@ -62,7 +62,8 @@ class PauseMenuState(MenuState):
         # A paused player is not actively hauling, so they leave the public
         # drivers board as though they went off duty; the service's off-duty
         # grace absorbs a quick pause-and-resume without bouncing the row.
-        # Discord presence (above) still shows "Paused" while the menu is up.
+        # Discord presence (above) still shows "Paused" while the menu is up,
+        # until its own idle window takes it down for a player who walked away.
         return None
 
     def build_items(self) -> list[MenuItem]:

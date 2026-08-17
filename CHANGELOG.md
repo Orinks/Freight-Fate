@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Changed
+
+- **Discord presence now comes down when you step away.** Pausing mid-drive and
+  leaving the game open used to keep your Discord status showing the run you
+  were on -- the route, the cargo, and how far along you were -- for as long as
+  the game stayed open, so friends could see you sixty percent into a haul you
+  had walked away from hours earlier. After half an hour with nothing changing,
+  whether you are paused or just parked at a menu, the presence is hidden. It
+  comes straight back the moment you play again. This matches what the public
+  drivers board already does with an idle driver.
+
 ### Fixed
 
 - **The cloud backup list now tells you how to fix a conflict.** A career

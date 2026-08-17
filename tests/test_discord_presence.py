@@ -12,6 +12,7 @@ import time
 
 from freight_fate.discord_presence import (
     DEFAULT_CLIENT_ID,
+    IDLE_CLEAR_S,
     MAX_FIELD_LEN,
     DiscordPresence,
     PresenceState,
@@ -63,12 +64,13 @@ class Clock:
         self.t += seconds
 
 
-def make_presence(rpc, clock, *, enabled=True, min_interval_s=15.0):
+def make_presence(rpc, clock, *, enabled=True, min_interval_s=15.0, idle_clear_s=IDLE_CLEAR_S):
     """A synchronous (non-threaded) service wired to a fake RPC and clock."""
     return DiscordPresence(
         enabled=enabled,
         client_id="test-app-id",
         min_interval_s=min_interval_s,
+        idle_clear_s=idle_clear_s,
         clock=clock,
         rpc_factory=lambda _cid: rpc,
         session_start=1234.0,
@@ -288,6 +290,99 @@ def test_first_update_sends_immediately():
     presence.update(PresenceState("In the main menu"))
     assert len(rpc.updates) == 1
     assert rpc.updates[0]["details"] == "In the main menu"
+    presence.shutdown()
+
+
+# -- idle (player away) -------------------------------------------------------
+
+
+def test_idle_state_is_hidden_from_discord():
+    # A player who pauses mid-drive and walks away reports the identical
+    # "Paused" snapshot forever. After the idle window the presence must come
+    # down rather than telling everyone they are still 60% into a run.
+    rpc = FakeRpc()
+    clock = Clock()
+    presence = make_presence(rpc, clock)
+    presence.start()
+    presence.update(PresenceState("Paused", "steel coils, 60% there"))
+    assert len(rpc.updates) == 1
+
+    # Half the window in: still a live session, presence stays up.
+    clock.advance(IDLE_CLEAR_S / 2)
+    presence._pump()
+    assert rpc.cleared == 0
+
+    # Window crossed: one clear, then silence -- no clear-per-tick churn.
+    clock.advance(IDLE_CLEAR_S / 2)
+    presence._pump()
+    assert rpc.cleared == 1
+    clock.advance(IDLE_CLEAR_S)
+    presence._pump()
+    assert rpc.cleared == 1
+    assert len(rpc.updates) == 1
+    presence.shutdown()
+
+
+def test_change_reshows_an_idle_presence():
+    rpc = FakeRpc()
+    clock = Clock()
+    presence = make_presence(rpc, clock)
+    presence.start()
+    presence.update(PresenceState("Paused", "steel coils, 60% there"))
+    clock.advance(IDLE_CLEAR_S)
+    presence._pump()
+    assert rpc.cleared == 1
+
+    # Unpausing changes the snapshot, which restarts the idle clock and puts
+    # the presence back up (once Discord's rate-limit window allows it).
+    presence.update(PresenceState("Driving: Chicago to Dallas", "steel coils, 60% there"))
+    clock.advance(16.0)
+    presence._pump()
+    assert len(rpc.updates) == 2
+    assert rpc.updates[-1]["details"] == "Driving: Chicago to Dallas"
+
+    # And it stays up from there rather than immediately re-hiding.
+    clock.advance(IDLE_CLEAR_S / 2)
+    presence._pump()
+    assert rpc.cleared == 1
+    presence.shutdown()
+
+
+def test_repeated_identical_reports_do_not_hold_off_the_idle_clear():
+    # The game re-reports the active state every frame; only a *changed*
+    # snapshot counts as the player still being there.
+    rpc = FakeRpc()
+    clock = Clock()
+    presence = make_presence(rpc, clock)
+    presence.start()
+    paused = PresenceState("Paused", "steel coils, 60% there")
+    presence.update(paused)
+    for _ in range(4):
+        clock.advance(IDLE_CLEAR_S / 4)
+        presence.update(paused)
+        presence._pump()
+    assert rpc.cleared == 1
+    presence.shutdown()
+
+
+def test_re_enabling_restarts_the_idle_clock():
+    rpc = FakeRpc()
+    clock = Clock()
+    presence = make_presence(rpc, clock)
+    presence.start()
+    presence.update(PresenceState("Paused", "steel coils, 60% there"))
+    clock.advance(IDLE_CLEAR_S)
+    presence._pump()
+    assert rpc.cleared == 1
+
+    # Turning the setting off and on again is a live player at the menu, so
+    # the last reported state goes back up with a fresh idle window.
+    presence.set_enabled(False)
+    presence.set_enabled(True)
+    assert rpc.updates[-1]["details"] == "Paused"
+    clock.advance(IDLE_CLEAR_S / 2)
+    presence._pump()
+    assert rpc.updates[-1]["details"] == "Paused"
     presence.shutdown()
 
 

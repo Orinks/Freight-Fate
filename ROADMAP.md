@@ -875,6 +875,7 @@ fit for an audio-first game.
       connecting turns on cloud backup or the drivers board -- both stay off
       until chosen separately, from Online.
 - [x] Idle drivers age off the live board: a truck parked with the game left running (not paused) signs off after 30 minutes without a snapshot change and stops heartbeating (`online_presence.py` IDLE_SIGNOFF_S); the server hides still-beating idle rows on the same clock for older builds (orinks-net `PRESENCE_IDLE_MS` + per-row `changedAt`), and deadhead presence now carries progress so a long empty run never reads as idle
+- [x] Idle Discord presence comes down on the same clock: a snapshot unchanged for 30 minutes (a pause menu left open, or the game parked at any screen) clears the rich presence and leaves it hidden until something changes (`discord_presence.py` IDLE_CLEAR_S), so a paused player no longer shows mid-run all evening
 - [x] Online hub: the drivers board, orinks.net account, cloud backup and restore, and all sharing toggles moved from Settings into one Online menu on the main menu (`states/online_hub.py`); Settings keeps an Online pointer that opens the same menu for a release or two
 - [ ] Remove the Settings Online pointer once players have had a release or two to relearn the location
 - [x] The drivers-board progress percent is readable in-game: the R route report leads with "N percent there" (`Trip.progress_percent`, same position/total figure presence posts) and the Tab status menu carries a Progress line; deadhead drives included
