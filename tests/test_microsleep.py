@@ -140,3 +140,74 @@ def test_three_missed_microsleeps_force_a_stop():
         assert d.truck.throttle == pytest.approx(0.0)
     finally:
         app.shutdown()
+
+
+class _FakeRumble:
+    def alert(self):
+        pass
+
+
+class _FakePad:
+    """Enough of ControllerManager for the microsleep reaction check.
+
+    A stub rather than a patched real manager: steering and brake are
+    properties on ControllerManager, so an instance attribute cannot shadow
+    them.
+    """
+
+    device = "controller"
+
+    def __init__(self, *, steering=0.0, brake=0.0, active=True):
+        self.steering = steering
+        self.brake = brake
+        self.active = active
+        self.rumble = _FakeRumble()
+
+    def hint(self, action: str) -> str:
+        from freight_fate.input_hints import _HINTS
+
+        return _HINTS[action][1]
+
+
+def test_a_controller_driver_can_wake_from_a_microsleep(monkeypatch):
+    """The truck says "steer or brake", and on a pad neither of those is a key.
+
+    A controller-only driver could not react at all and drifted off the road
+    every single time (owner, 2026-08-16). Parity with the keyboard is the
+    bar: a held Down arrow already counts, so a held trigger counts too.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        for pad in (_FakePad(brake=0.8), _FakePad(steering=-0.6)):
+            d = _driving(app)
+            d.truck.velocity_mps = 30.0
+            monkeypatch.setattr(app.ctx, "controller", pad)
+            before = d.truck.damage_pct
+            d._begin_microsleep()
+            assert d._microsleep_deadline is not None
+            d._update_microsleep(_no_keys(), 0.1)
+            assert d._microsleep_deadline is None, "the pad reaction must count"
+            assert d.truck.damage_pct == pytest.approx(before)
+    finally:
+        app.shutdown()
+
+
+def test_an_idle_pad_is_not_a_microsleep_reaction(monkeypatch):
+    """Only a reaction wakes you -- a resting pad is not one."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.truck.velocity_mps = 30.0
+        monkeypatch.setattr(app.ctx, "controller", _FakePad())
+        d._begin_microsleep()
+        for _ in range(60):
+            d._update_microsleep(_no_keys(), 0.1)
+            if d._microsleep_deadline is None:
+                break
+        assert d._microsleep_misses == 1
+    finally:
+        app.shutdown()

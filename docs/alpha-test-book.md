@@ -709,9 +709,9 @@ something else already had your attention — a hazard, an exit, a stop in
 progress — and then it was never given back. The look is now kept and
 acted on the moment the cab goes quiet.
 
-Setup: a long run, Standard pressure. Enforcement presence does not
-change the odds — it only changes how loud the road is — so leave it
-wherever you like.
+Setup: a long run, Standard pressure. There is nothing to set for
+enforcement any more — how loud the policed country sounds now comes from
+where you are and what time it is.
 
 Do: hold nine or ten over for a long stretch, on purpose, and keep
 driving through hazards rather than around them. The point is to be busy

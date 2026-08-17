@@ -115,6 +115,10 @@ class GameContext:
         # Whether the game mix is currently stepped down under the event
         # voice (Settings > Audio; see _engage_speech_duck).
         self._speech_ducked = False
+        # True only while a control the player actually pressed is being
+        # handled. See ``player_asked``: a readout somebody asked for cuts the
+        # line in progress even at the wheel, where unasked-for lines queue.
+        self._speech_requested = False
         # True while a playtest-lever scenario runs unsaved (see
         # playtest_levers.apply_continue_levers); save_profile honors it.
         self.playtest_sandbox = False
@@ -291,7 +295,11 @@ class GameContext:
             if not text:
                 return
         transcript.info("%s", text)
-        if interrupt and getattr(self._app.state, "paces_main_speech", False):
+        if (
+            interrupt
+            and not self._speech_requested
+            and getattr(self._app.state, "paces_main_speech", False)
+        ):
             # At the wheel, the main channel queues instead of cutting: an
             # achievement or assist notice must not stamp on the line the
             # player was mid-way through hearing. Menus and readers keep
@@ -299,6 +307,14 @@ class GameContext:
             # state, so navigation there still cancels speech the way every
             # screen reader does. A queued line also cannot purge a shared
             # voice, so the rescue below has nothing to hand back.
+            #
+            # A line the player ASKED for is exempt (``_speech_requested``).
+            # The rule above was aimed at lines nobody asked for, but it was
+            # applied to every main-channel line at the wheel, so pressing a
+            # key stopped cutting the speech in progress -- which is what 1.8
+            # does and what every screen reader does (Sarah R. via the owner,
+            # 2026-08-16). Answering the key you just pressed is the whole
+            # contract of an info key.
             interrupt = False
         cut = None
         if interrupt and self._event_voice_shares_main():
@@ -526,6 +542,36 @@ class GameContext:
         """Back at the wheel; nothing from before the pause is news."""
         self._event_pacer.resume()
         _stop_event_speech(self.speech)
+
+    @contextlib.contextmanager
+    def player_asked(self):
+        """Mark everything spoken inside as an answer to a control press.
+
+        Wrapped around the driving state's input handlers rather than added
+        to each readout, for the same reason the pacing rule itself is
+        central: there are twenty-odd info keys and they gain new siblings
+        every week, and a rule that has to be remembered per call site is one
+        that will be missed. Anything spoken from a key press is by
+        definition something the player asked for.
+
+        Re-entrant and restoring, so a handler that opens a menu which speaks
+        does not leave the flag stuck on for the ambient lines that follow.
+        """
+        previous = self._speech_requested
+        self._speech_requested = True
+        try:
+            yield
+        finally:
+            self._speech_requested = previous
+
+    def event_voice_busy(self) -> bool:
+        """Whether the event voice is mid-delivery right now.
+
+        The same projection the audio duck restores on, so a control that has
+        to decide "is there anything to shut up" is trusting the estimate the
+        mix already trusts rather than inventing a second one.
+        """
+        return self._event_pacer.busy()
 
     def stop_event_speech(self) -> None:
         self._event_pacer.reset()

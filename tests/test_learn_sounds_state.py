@@ -207,7 +207,8 @@ def test_the_category_screen_lists_every_catalog_category():
     try:
         state = LearnSoundsState(app.ctx)
         labels = [item.text for item in state.build_items()]
-        assert labels == [c.name for c in CATALOG]
+        # Every category, in catalog order, then the way out.
+        assert labels == [c.name for c in CATALOG] + ["Back"]
     finally:
         app.shutdown()
 
@@ -648,5 +649,45 @@ def test_both_entry_points_push_the_same_screen(monkeypatch):
         item = next(i for i in menu.build_items() if i.text == "Learn game sounds")
         item.action()
         assert isinstance(pushed[0], LearnSoundsState)
+    finally:
+        app.shutdown()
+
+
+def test_both_learn_sounds_screens_offer_a_back_row():
+    """Escape always worked; a row you can arrow onto is how the rest of the
+    game offers the way out, and the only way a player finds it without
+    having heard the intro (owner, 2026-08-16)."""
+    from freight_fate.sound_catalog import CATALOG
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState, LearnSoundsState
+
+    app = _app()
+    try:
+        for state in (LearnSoundsState(app.ctx), LearnSoundCategoryState(app.ctx, CATALOG[0])):
+            items = state.build_items()
+            assert items[-1].text == "Back", state.__class__.__name__
+            assert items[-1].action == state.go_back
+    finally:
+        app.shutdown()
+
+
+def test_leaving_a_category_by_the_back_row_stops_a_held_demo(monkeypatch):
+    """The row must not leave a cue ringing behind it."""
+    from speech_capture import speech_stub
+
+    from freight_fate.sound_catalog import CATALOG
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        state = LearnSoundCategoryState(app.ctx, CATALOG[0])
+        state.enter()
+        stopped: list[bool] = []
+        monkeypatch.setattr(state.demo, "stop", lambda: stopped.append(True))
+
+        back = state.build_items()[-1]
+        assert back.text == "Back"
+        back.action()
+        assert stopped, "go_back must stop the demo on the way out"
     finally:
         app.shutdown()

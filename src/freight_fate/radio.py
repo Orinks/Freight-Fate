@@ -921,6 +921,16 @@ class RadioState:
             self.station_id = best.station.id
 
     def tune(self, direction: int, backend: RadioPlaybackBackend | None = None) -> RadioAction:
+        # A switched-off radio does not tune, the way a real one does not
+        # (Darren, 2026-08-16; owner ruling the same day). The dial used to
+        # pick a station silently and hold it for power-on, which was
+        # deliberate but read as a dead key -- and the fix for that reading
+        # is the behaviour matching the expectation, not a longer sentence.
+        # The dial says why rather than going silent: nothing happening with
+        # no explanation is the one outcome a screen reader user cannot tell
+        # from a broken key.
+        if not self.enabled:
+            return self._dial_is_off()
         receptions = self.receivable_stations()
         current = self.current_station()
         ids = [reception.station.id for reception in receptions]
@@ -930,14 +940,16 @@ class RadioState:
             index = 0
         reception = receptions[(index + direction) % len(receptions)]
         self.station_id = reception.station.id
-        if not self.enabled:
-            return RadioAction(
-                f"Radio off. Selected {self._station_phrase(reception)}.",
-                reception.station,
-                enabled=False,
-                reception=reception,
-            )
         return self.play(backend, prefix=f"Tuned to {reception.station.display_name}.")
+
+    def _dial_is_off(self) -> RadioAction:
+        """The reply to any dial key while the radio is switched off."""
+        return RadioAction(
+            "Radio off.",
+            self.current_station(),
+            enabled=False,
+            reception=self.current_reception(),
+        )
 
     def tune_category(
         self, direction: int, backend: RadioPlaybackBackend | None = None
@@ -947,7 +959,12 @@ class RadioState:
         Twenty-five AFN entries in a row buried the terrestrial section for
         anyone tuning linearly (owner, 2026-07-20); this is the escape. Only
         categories with a receivable station exist to jump to, and the spoken
-        line leads with the category so the landing is oriented."""
+        line leads with the category so the landing is oriented.
+
+        Inert with the radio switched off, exactly like the plain dial keys:
+        it is the same control one layer up."""
+        if not self.enabled:
+            return self._dial_is_off()
         receptions = self.receivable_stations()
         groups: list[int] = []
         for reception in receptions:
@@ -963,13 +980,6 @@ class RadioState:
         reception = next(r for r in receptions if self._group(r.station) == target)
         self.station_id = reception.station.id
         label = DIAL_CATEGORY_NAMES.get(target, "Radio")
-        if not self.enabled:
-            return RadioAction(
-                f"Radio off. {label}. Selected {self._station_phrase(reception)}.",
-                reception.station,
-                enabled=False,
-                reception=reception,
-            )
         return self.play(backend, prefix=f"{label}. Tuned to {reception.station.display_name}.")
 
     def select_station(
@@ -983,7 +993,12 @@ class RadioState:
         self.station_id = station.id
         if not self.enabled:
             return RadioAction(
-                f"Radio off. Selected {self._station_phrase(estimate_signal(station, self.position, self.elevation_ft))}.",
+                # Not a dial key: this path is the game moving the dial off a
+                # station the player may no longer have (streamer-safe, or a
+                # signal lost mid-drive), so it still moves while switched
+                # off. It only reports; it never promises playback.
+                f"Radio off. Selected "
+                f"{self._station_phrase(estimate_signal(station, self.position, self.elevation_ft))}.",
                 station,
                 enabled=False,
                 reception=self.current_reception(),

@@ -14,9 +14,10 @@ Three rules shape everything here.
 never told it was there. That is not balance, it is the whole accessibility
 contract: a blind player cannot see a cruiser on a crossover, so if the game
 never made a sound about it, the ticket it writes is arbitrary. Every staffed
-post emits its marker earcon before it enters observing range, at every
-enforcement-presence level, and ``observe`` refuses to look at a driver who
-has not heard it.
+post emits its marker earcon before it enters observing range, and
+``observe`` refuses to look at a driver who has not heard it. An UNSTAFFED
+post makes no sound at all: a cue you cannot tell from a staffed one, for a
+car nobody is sitting in, is what taught players the police do not enforce.
 
 **Speech is rationed; earcons are not.** Two spoken enforcement lines for a
 whole run, spent on the things that cost money -- an open scale, and anything
@@ -49,7 +50,6 @@ from ..models.safety_record import (
     refresh_selection_score,
     safety_record_text,
 )
-from ..settings import ENFORCEMENT_AMBIENCE_SCALE
 from ..sim.enforcement_observe import (
     CERTAIN_OVER_MPH,
     COVER_RADIUS_MI,
@@ -68,6 +68,7 @@ from ..sim.enforcement_observe import (
 from ..sim.enforcement_posts import (
     KIND_FIXED_SCALE,
     KIND_SCALE_APRON,
+    PACING_WINDOW_MI,
     TABLEAU_SIREN_LEAD_MI,
     post_seed,
 )
@@ -123,11 +124,11 @@ RADIO_CUE_DUCK_S = 1.1
 PASS_TRIGGER_MI = 0.05
 
 # The tableau: a staffed patrol post that already has somebody stopped. Both
-# cues scale with the enforcement-presence ambience exactly the way the
-# ordinary marked-unit pass does (``_play_marked_unit_pass``) -- presence is
-# ambience only, never whether a cue plays at all. The mechanical truth is
-# the catch suppression in ``EnforcementPost.tableau_busy_at``, which
-# neither cue's volume touches.
+# cues scale with the road's own presence exactly the way the ordinary
+# marked-unit pass does (``_play_marked_unit_pass``) -- that scaling is
+# loudness, never whether a cue plays at all. The mechanical truth is the
+# catch suppression in ``EnforcementPost.tableau_busy_at``, which neither
+# cue's volume touches.
 TABLEAU_SHOULDER_PAN = 0.85  # hard right: US traffic keeps the shoulder there
 TABLEAU_SIREN_VOLUME = 0.7
 TABLEAU_PASS_VOLUME = 0.7
@@ -196,14 +197,36 @@ class EnforcementWatchMixin:
         # The look itself, and the mile it was taken at: what makes the
         # deferral a postponement rather than a discard.
         self._held_observation: tuple[Observation, float] | None = None
-        self._pacing_since_s: dict[str, float] = {}
+        # Miles each pacing unit has held station behind the truck.
+        self._pacing_mi: dict[str, float] = {}
 
     # -- presence ------------------------------------------------------------
 
     def _ambience_scale(self) -> float:
-        """The enforcement-presence multiplier. Ambience only, never odds."""
-        level = getattr(self.ctx.settings, "enforcement_presence", "standard")
-        return ENFORCEMENT_AMBIENCE_SCALE.get(level, 1.0)
+        """How loud the policed country is right here, from the road itself.
+
+        This was a player setting (full / standard / quiet) until 2026-08-16.
+        It never touched placement, staffing or odds -- ``announced`` is set
+        for every staffed post whatever the level -- but it did decide whether
+        the marked-unit pass for an EMPTY crossover played at all, and that is
+        the thing that made the road sound saturated with police who then
+        ignored a speeder going by. By ear an empty car and a staffed one were
+        the same cue, so the setting was buying atmosphere that read as broken
+        enforcement (owner ruling, 2026-08-16: remove it, make it dynamic).
+
+        What replaces it is the road: the same region, road class and clock
+        that decide where posts go now decide how loudly the country polices.
+        A hot region on an interstate at the afternoon peak sounds policed; a
+        cold-region state route at four in the morning barely does -- and both
+        are facts about where the truck is rather than a slider the player
+        can set and then wonder why the game feels different.
+
+        Deliberately the SAME number the placement walk uses to decide how far
+        apart to put the posts, rather than a second formula that could drift
+        from it: if the road is carrying posts close together, it should sound
+        like it.
+        """
+        return self.trip._post_density_at(self.trip.position_mi)
 
     def _enforcement_busy(self) -> bool:
         """Whether the cab already has a demand on the driver.
@@ -334,12 +357,13 @@ class EnforcementWatchMixin:
                 # anonymous marked-unit pass would only double it up.
                 continue
             if not post.staffed:
-                # An empty crossover is silent unless the presence setting is
-                # buying atmosphere: this is the one cue the slider governs,
-                # and it can never cost the player anything, because there is
-                # nobody there to observe them.
-                if self._ambience_scale() >= 1.2:
-                    self._play_marked_unit_pass(post)
+                # An empty crossover is silent, always. It used to speak at the
+                # top presence setting, and that is the cue that taught players
+                # the police do not enforce: by ear it is identical to a
+                # staffed unit, so a driver heard a trooper go by while
+                # speeding and nothing happened -- because there was nobody in
+                # the car (owner and Shane P., 2026-08-16). A marked unit you
+                # can hear is now always one that can act.
                 continue
             if post.is_scale:
                 continue  # the scale bed already covers the approach
@@ -676,7 +700,7 @@ class EnforcementWatchMixin:
                 tolerance_mph=COVER_SPEED_TOLERANCE_MPH,
             ),
             crest_between=self._crest_between(position, post.at_mi),
-            paced_real_s=self._pacing_since_s.get(post.id, 0.0),
+            paced_mi=self._pacing_mi.get(post.id, 0.0),
             over_limit_mi=self._over_limit_mi,
         )
 
@@ -748,7 +772,7 @@ class EnforcementWatchMixin:
             self._over_limit_mi = 0.0
         else:
             self._over_limit_mi += moved
-        self._track_pacing(dt)
+        self._track_pacing(moved)
         self._update_scale_bed()
         if self._ramp_mi is None:
             self._update_marked_unit_passes(previous_mi)
@@ -776,17 +800,24 @@ class EnforcementWatchMixin:
         """Whether cruise or the speed keeper currently owns the throttle."""
         return self._cruise_mph is not None or bool(getattr(self, "_speed_control_armed", False))
 
-    def _track_pacing(self, dt: float) -> None:
-        """How long each roving unit has been sitting behind the truck."""
+    def _track_pacing(self, moved: float) -> None:
+        """How much road each roving unit has held station behind the truck over.
+
+        Road, not real seconds. The old real-time version could not be
+        satisfied at any compression the game offers -- the 1-mile window past
+        a post is 5.5 real seconds at 65 mph and 10x, against a 20-second gate
+        -- so a roving patrol never once clocked anybody on a highway
+        (measured 2026-08-16: 315 looks, zero catches over 2,000 miles).
+        """
         position = self.trip.position_mi
         for post in self.trip.posts:
             if post.method != "pacing" or not post.staffed:
                 continue
             behind = position - post.at_mi
-            if 0.0 < behind <= 1.0:
-                self._pacing_since_s[post.id] = self._pacing_since_s.get(post.id, 0.0) + dt
-            elif behind > 1.0:
-                self._pacing_since_s.pop(post.id, None)
+            if 0.0 < behind <= PACING_WINDOW_MI:
+                self._pacing_mi[post.id] = self._pacing_mi.get(post.id, 0.0) + moved
+            elif behind > PACING_WINDOW_MI:
+                self._pacing_mi.pop(post.id, None)
 
     def _run_observations(self) -> None:
         """Take this mile's look and act on it."""

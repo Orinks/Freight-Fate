@@ -4,6 +4,79 @@
 
 ### Added
 
+- **Elberton, Georgia is on the map, and it hauls granite.** The town cuts
+  better than a third of all the headstones and memorials made in the United
+  States, so its docks are quarries and monument plants: Polycor Georgia
+  Granite Quarries, Keystone Memorials, Matthews Granite, the crushed-stone
+  yard at Ideal Aggregate, and the flatbed granite terminal Henry and Henry
+  have run there since 1989. There is a poultry plant and a burger plant
+  too. Three roads reach it -- Georgia 72 west to Athens past Oglesby, Comer
+  and Hull; Georgia 17 south through Tignall and Washington to Thomson and
+  on to Augusta; and Georgia 17 north through Royston to Lavonia, then
+  Interstate 85 past Fair Play and Anderson into Greenville, South Carolina.
+  Requested by William, who wrote in to say the granite capital of the world
+  had been left out. He was right.
+
+- **The controller can make the hardest stop, and can wake you up.** Two
+  things the pad was told it could do and could not. Pressing the left
+  trigger all the way down is now the emergency brake, exactly as the help
+  has always said -- before this it was only ever a hard normal stop, and the
+  emergency application was on the keyboard's B key alone. And when you are
+  nodding off and the truck says to steer or brake, steering with the stick
+  or pressing the left trigger now counts: on a controller neither of those
+  was a key, so a controller driver could not react at all and went off the
+  road every time. Both found while looking at emergency braking.
+
+- **Pressing a key cuts the speech in progress again.** If something is being
+  read out and you press a key to ask for something else, you get the new
+  answer straight away instead of waiting for the old line to finish. That is
+  how it worked before, and it came back. It applies to the controller
+  buttons too. What has not come back is announcements talking over each
+  other: an achievement, an assist notice, or anything else you did not ask
+  for still waits its turn rather than stamping on a warning you are half way
+  through hearing. Reported by Sarah R.
+
+- **The dial does nothing while the radio is switched off.** It used to pick
+  a station quietly and hold it for when you switched on. That was
+  deliberate, but it is not how a radio works, and it sounded like a station
+  that had failed to play. The dial keys now leave the tuning alone and
+  simply say "Radio off", with the same short tone you get for any control
+  that will not do anything right now. Reported by Darren.
+
+- **Pulling out no longer drops you straight into a hazard.** Two things
+  could greet you the moment a run began. A real road-authority work zone
+  near the start of a corridor could already be around you before you had
+  moved, with its warning taper behind you where you could never hear it --
+  those zones are now only placed where there is room to warn you about them
+  properly. And the first thing you heard could be a warning about somebody
+  merging into you barely a mile ahead, before you were up to speed; the
+  opening miles of a run no longer put merging traffic there. Work zones
+  further along the road, and merging traffic once you are rolling, are both
+  unchanged. Reported by Josh.
+
+- **Learn game sounds has a Back option on both screens.** Arrow to the
+  bottom of the list of sound groups, or of the sounds inside one, and there
+  is now a Back row like every other menu in the game. Escape still works as
+  it always did. Leaving a group by either route stops a sound that was still
+  running.
+
+- **The controller can stop the driving voice, and ask what the limit is.**
+  Two things a pad simply could not do. The Back button now stops an
+  announcement while it is being read, the way Left or Right Control does on
+  the keyboard -- before this there was no way to silence the road from a
+  controller at all, so playing on the pad alone meant every announcement ran
+  to the end or you reached for the keyboard. When nothing is being said,
+  Back still reads the controller help as before. Right bumper plus X reads
+  the posted speed limit here and how far over you are, which the pad had no
+  button for. Both reported by Sarah R.
+
+- **Four keys now answer one question each about where you are.** Alt 1
+  speaks the state, Alt 2 the road you are on, Alt 3 the town you are in --
+  or the nearest one and how far off the road it sits -- and Alt 4 the
+  direction you are travelling. R still says all of it in one sentence;
+  these are for when you want the one fact and not the paragraph. The
+  keypad numbers do the same thing. Suggested by Tim K.
+
 - **The Online menu can open your driver setup page for you.** A new item,
   Open my driver setup page, opens it in your browser -- no address to
   remember or type. That page is where you change your driver name, turn
@@ -64,6 +137,27 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+
+- **Roving patrols can pull you over now. They never could before.** The
+  troopers that run with traffic rather than sitting on a crossover were
+  incapable of writing a ticket on a highway -- not unlucky, incapable. If
+  you heard one go by while you were speeding and nothing happened, that is
+  why, and it was not you imagining it. They now clock you the way a real one
+  does: by falling in behind and holding it for a stretch of road. Expect to
+  be pulled over somewhat more often if you sustain a big overage; over two
+  thousand test miles held at twelve over, stops went from one every 118
+  miles to one every 84.
+
+- **The enforcement presence setting is gone, and the road decides instead.**
+  How much police activity you hear is now a fact about where you are: a busy
+  interstate through a heavily policed state at the afternoon peak sounds
+  policed, and a quiet two-lane at four in the morning barely does. Nothing
+  you set. The setting only ever changed volume and never your odds of being
+  pulled over, but at its loudest it also played a passing-cruiser sound for
+  empty patrol spots -- which sounds exactly like a real one, so you could
+  hear a trooper go by while speeding and have nothing happen. An empty spot
+  is now always silent. If you can hear a marked unit, there is somebody in
+  it who can act.
 
 - **The overspeed warning no longer chimes at you for cruise's own speed.**
   It used to start warning at 5 miles per hour over the limit, which is
@@ -445,6 +539,31 @@
 
 ### Fixed
 
+- **A career waiting on your decision now says so on the menu.** When the
+  same career has been played on two computers, the game stops backing it up
+  until you say which copy to keep -- and the only place to say so is Restore
+  a cloud backup on the Online menu. That row gave no sign anything was
+  waiting, and its name suggests it will replace the career you just played,
+  so it was easy to arrow past for days while nothing backed up. It now names
+  the career that is waiting, and says that nothing backs up until you pick,
+  that choosing this computer's save keeps what you have played, and that
+  nothing is overwritten until you choose.
+- **The "no" on a confirmation no longer sounds like the thing you wanted.**
+  The question before restoring a backup offered "No, keep this computer's
+  save" -- which is word for word what the real upload choice is called, so
+  if you were trying to push your own career up to the server, the answer
+  that sounded exactly right was the one that quietly backed out and did
+  nothing. Every confirmation in Cloud backup now says "No, cancel and
+  change nothing", and says in its help what was left untouched and where
+  the choice you wanted actually lives.
+- **When you pick between two copies of a career, you can hear what each one
+  is.** The choice used to describe the copy on the server -- its level and
+  its money -- and say nothing at all about the one on your own computer, so
+  you were choosing between something described and something you had to
+  take on faith. Both are now read out the same way, and each choice names
+  what it keeps: "Keep this computer's save and back it up: Bear Cub, level
+  4, 3,294 dollars". The career list says it too, so you can tell the two
+  apart before opening anything.
 - **The weigh station sound can be heard in Learn game sounds.** Pressing
   Enter on it played the bed at exactly the level the road plays it, and on
   the road that level is deliberately low because the sound works by coming

@@ -38,7 +38,7 @@ from .enforcement_posts import (
     METHOD_RADAR,
     METHOD_SCALE_SCREEN,
     METHOD_VISUAL,
-    PACING_MIN_REAL_S,
+    PACING_MIN_MI,
     EnforcementPost,
 )
 
@@ -129,8 +129,11 @@ class RoadSample:
     pack_neighbours: int = 0
     # A crest or hard bend sits between the truck and the post.
     crest_between: bool = False
-    # Real seconds this post has been sitting behind the truck (pacing only).
-    paced_real_s: float = 0.0
+    # Road this post has been sitting behind the truck over (pacing only).
+    # Miles rather than real seconds, for the same reason the over-limit hold
+    # is: a stretch of road is the same stretch at every time compression, at
+    # every frame rate, and after a reload.
+    paced_mi: float = 0.0
     # How far the truck has run continuously over the limit.
     over_limit_mi: float = 0.0
 
@@ -205,9 +208,9 @@ def geometry_factor(post: EnforcementPost, sample: RoadSample) -> float:
     if post.method == METHOD_PACING:
         # A pacing unit is behind you, so it works the other way round: it
         # needs to have been there long enough to hold a speed.
-        if sample.paced_real_s < PACING_MIN_REAL_S:
+        if sample.paced_mi < PACING_MIN_MI:
             return 0.0
-        return _clamp(0.5 + 0.5 * min(1.0, sample.paced_real_s / (2.0 * PACING_MIN_REAL_S)))
+        return _clamp(0.5 + 0.5 * min(1.0, sample.paced_mi / (2.0 * PACING_MIN_MI)))
     if ahead < -0.3 or ahead > post.reach_mi:
         return 0.0
     closeness = 1.0 - _clamp(max(0.0, ahead) / max(1e-6, post.reach_mi))

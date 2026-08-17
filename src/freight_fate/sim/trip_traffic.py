@@ -401,6 +401,18 @@ class TripTrafficMixin:
                 end_mi = min(self.total_miles, start_mi + zone_length)
                 start_mi = max(0.0, end_mi - zone_length)
 
+                # A work zone the driver cannot be warned about is one the
+                # game must not place. Invented zones draw from mile 15 and
+                # so always have room for their taper; a real 511 event near
+                # the start of the corridor used to clamp to zero, which put
+                # the truck INSIDE the cones before it moved, with the taper
+                # behind it where no announcement could ever reach (owner
+                # report, 2026-08-16). This is not a no-hazard zone at the
+                # start of a run: a zone at mile 5 signed from mile 4 is
+                # untouched. The rule is only that the warning has to fit.
+                if start_mi < CONSTRUCTION_TAPER_MI:
+                    continue
+
                 # Check overlap with previously placed real zones
                 if any(
                     start_mi < s_end + ZONE_MIN_GAP_MI and end_mi > s_start - ZONE_MIN_GAP_MI

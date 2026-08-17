@@ -186,3 +186,93 @@ def test_hub_setup_page_reads_the_address_out_when_nothing_else_works(monkeypatc
         assert "https://dev.orinks.net/freight-fate/online/setup" in said
     finally:
         app.shutdown()
+
+
+def _hub_row(hub, needle: str):
+    # build_items() rather than hub.items: the rows are only populated on
+    # enter(), and these cases are about the label, not the screen.
+    return next(i for i in hub.build_items() if needle in i.text)
+
+
+def test_the_restore_row_says_when_a_career_is_waiting_on_a_choice(monkeypatch):
+    """Brandon (armstrong445), 2026-08-15: a conflict parked his backups at
+    revision 2 against the cloud's 4, and the recovery line told him to open
+    "Restore a cloud backup". He landed on that row five times across twenty
+    minutes and never opened it -- then signed out of every computer and
+    re-activated instead, which cannot clear a conflict. Under the bare name
+    the row promises to REPLACE the career he has just played, which is the
+    opposite of what he wanted, so the waiting decision has to say itself
+    here rather than wait to be discovered."""
+    from freight_fate.app import App
+    from freight_fate.states import online_hub
+
+    app = App()
+    try:
+        hub = online_hub.OnlineHubState(app.ctx)
+        monkeypatch.setattr(hub, "_waiting_conflicts", lambda: ["armstrong45"])
+        row = _hub_row(hub, "Restore a cloud backup")
+
+        assert "armstrong45" in row.text
+        assert "which copy to keep" in row.text
+        # The reason to open a row named "Restore" when you mean to keep your
+        # own save has to reach the player, or the name wins the argument.
+        assert "not backing up at all until you pick" in row.help_text
+        assert "keeps what you have played" in row.help_text
+        assert "nothing is overwritten until you choose" in row.help_text
+    finally:
+        app.shutdown()
+
+
+def test_the_restore_row_is_its_plain_self_when_nothing_is_waiting(monkeypatch):
+    """The warning is only worth anything if it is absent the rest of the
+    time; a row that always claims something needs attention is noise."""
+    from freight_fate.app import App
+    from freight_fate.states import online_hub
+
+    app = App()
+    try:
+        hub = online_hub.OnlineHubState(app.ctx)
+        monkeypatch.setattr(hub, "_waiting_conflicts", lambda: [])
+        row = _hub_row(hub, "Restore a cloud backup")
+
+        assert row.text == "Restore a cloud backup"
+        assert "waiting" not in row.help_text
+    finally:
+        app.shutdown()
+
+
+def test_several_waiting_careers_are_counted_not_listed(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states import online_hub
+
+    app = App()
+    try:
+        hub = online_hub.OnlineHubState(app.ctx)
+        monkeypatch.setattr(hub, "_waiting_conflicts", lambda: ["a", "b", "c"])
+        row = _hub_row(hub, "Restore a cloud backup")
+
+        assert "3 careers are waiting" in row.text
+    finally:
+        app.shutdown()
+
+
+def test_a_broken_cloud_service_costs_the_row_its_warning_not_the_menu(monkeypatch):
+    """This label is built on every pass through the Online menu. A cloud
+    service that is off, missing or still starting must not take the whole
+    screen down with it."""
+    from freight_fate.app import App
+    from freight_fate.states import online_hub
+
+    app = App()
+    try:
+        hub = online_hub.OnlineHubState(app.ctx)
+
+        def explode():
+            raise RuntimeError("no cloud service here")
+
+        monkeypatch.setattr(app.ctx, "cloud_saves_service", explode)
+        row = _hub_row(hub, "Restore a cloud backup")
+
+        assert row.text == "Restore a cloud backup"
+    finally:
+        app.shutdown()

@@ -225,7 +225,6 @@ GAMEPLAY_SUBCATEGORY_ROWS = {
         "Traffic source",
         "Parking source",
         "Live weather controls calendar",
-        "Enforcement presence",
         "Back",
     ],
     "controls": [
@@ -393,7 +392,6 @@ def test_every_gameplay_setting_stays_reachable_after_the_split():
         # The overspeed warning lost its row: it no longer fires at speeds
         # cruise itself picks, so there is nothing to turn off.
         assert not any(label.startswith("Overspeed warning") for _, label, _ in rows)
-        assert reachable("world", "Enforcement presence")
         # Moved out of Speech and weather.
         assert reachable("world", "Weather source")
         assert reachable("world", "Traffic source")

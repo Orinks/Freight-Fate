@@ -73,6 +73,9 @@ GAMEPLAY_DIR = WORLD_DATA / "us" / "gameplay"
 ESCAPE_CACHE = ROOT / "src" / "freight_fate" / "data" / "escape_ramps.json"
 
 OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
+# The public Overpass endpoints answer 406 to an unidentified client, so a
+# small batch can run against them when the self-hosted server is not up.
+USER_AGENT = "Freight-Fate curve-geometry bake (https://github.com/Orinks/Freight-Fate)"
 SCHEMA_VERSION = 1
 SOURCE_NOTE = (
     "OpenRouteService driving-hgv (self-hosted) + OSM via Overpass "
@@ -87,7 +90,7 @@ FLUSH_EVERY = 25  # write the world source + shards every N legs so progress is 
 # --- combined per-leg Overpass query (maxspeed + escape ramps, rider 2) -----
 def _overpass(query: str) -> dict[str, Any]:
     data = urllib.parse.urlencode({"data": query}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data)
+    req = urllib.request.Request(OVERPASS_URL, data=data, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=180) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
@@ -245,7 +248,11 @@ def harvest_ramps(
     # so collapse same-side ramps within RAMP_DEDUP_MI into one, keeping a name.
     merged: list[dict[str, Any]] = []
     for r in ramps:
-        if merged and r["side"] == merged[-1]["side"] and r["at_mi"] - merged[-1]["at_mi"] <= RAMP_DEDUP_MI:
+        if (
+            merged
+            and r["side"] == merged[-1]["side"]
+            and r["at_mi"] - merged[-1]["at_mi"] <= RAMP_DEDUP_MI
+        ):
             if not merged[-1]["name"] and r["name"]:
                 merged[-1]["name"] = r["name"]
             continue
@@ -272,9 +279,7 @@ def _write_shard(path: Path, by_leg: dict[str, list[dict[str, Any]]], extra_para
 
     Records already carry their ``leg`` id; legs are emitted in sorted order so
     shard bytes never depend on processing order (determinism, acceptance #2)."""
-    lines = [
-        json.dumps(rec, sort_keys=True) for leg in sorted(by_leg) for rec in by_leg[leg]
-    ]
+    lines = [json.dumps(rec, sort_keys=True) for leg in sorted(by_leg) for rec in by_leg[leg]]
     payload = "\n".join(lines)
     data_version = "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
     meta = {
@@ -299,7 +304,10 @@ def _write_shard(path: Path, by_leg: dict[str, list[dict[str, Any]]], extra_para
         }
     }
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(meta, sort_keys=True) + "\n" + payload + ("\n" if payload else ""), encoding="utf-8")
+    path.write_text(
+        json.dumps(meta, sort_keys=True) + "\n" + payload + ("\n" if payload else ""),
+        encoding="utf-8",
+    )
 
 
 # --- leg selection ----------------------------------------------------------
@@ -314,8 +322,11 @@ def select_legs(world: dict, args: argparse.Namespace) -> list[dict]:
         return [
             L
             for L in legs
-            if reg in (str(cities.get(L["from"], {}).get("region", "")).lower(),
-                       str(cities.get(L["to"], {}).get("region", "")).lower())
+            if reg
+            in (
+                str(cities.get(L["from"], {}).get("region", "")).lower(),
+                str(cities.get(L["to"], {}).get("region", "")).lower(),
+            )
         ]
     sel = list(legs)
     if args.limit:
@@ -368,7 +379,12 @@ def process_leg(
     # city-street anchors exactly as the post-bake linter would, guaranteeing
     # it then reports ZERO (repair is idempotent and keeps gap markers).
     world_profile = [
-        {"at_mi": s["at_mi"], "mph": s["mph"], "source": s.get("source", ""), "hgv": s.get("hgv", False)}
+        {
+            "at_mi": s["at_mi"],
+            "mph": s["mph"],
+            "source": s.get("source", ""),
+            "hgv": s.get("hgv", False),
+        }
         if s["mph"] is not None
         else {"at_mi": s["at_mi"], "mph": None}
         for s in speed_full
@@ -443,7 +459,13 @@ def main() -> int:
         key = (leg["from"], leg["to"])
         try:
             r = process_leg(leg, cities, api_key, escape_cache)
-        except (urllib.error.URLError, urllib.error.HTTPError, RuntimeError, KeyError, OSError) as exc:
+        except (
+            urllib.error.URLError,
+            urllib.error.HTTPError,
+            RuntimeError,
+            KeyError,
+            OSError,
+        ) as exc:
             failed += 1
             print(f"  [{n}/{len(legs)}] {key[0]}:{key[1]} FAILED: {exc}", flush=True)
             continue

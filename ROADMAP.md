@@ -118,6 +118,23 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **There is no way to back a career up on demand (Brandon, 2026-08-15).**
+      A career can only travel upward two ways: the background queue after a
+      save, and "Keep this computer's save and back it up" -- which
+      `CloudSlotState.build_items` only offers while a conflict is RECORDED.
+      No conflict, no upload control anywhere in the game. Brandon fell
+      through that hole twice in one evening: first the conflict blocked the
+      queue, and then, once he had resolved it by restoring, the button that
+      could have sent his own newer career up vanished with the conflict that
+      summoned it. He lost level 4 and 3,294 dollars back to the cloud's
+      level 3 -- recoverable only because a restore leaves the replaced file
+      as `.ffsave.bak`, which nothing tells the player. Wanted: a plain "Back
+      up this career now" on the Cloud backup menu, always present, using the
+      same upload path, so a stuck queue is never the player's only hope.
+      Deliberately not added unattended at 1am -- it is a new control on a
+      shipping menu and wants a canonical name in `docs/ontology.md`, a
+      decision about whether it appears on the Online menu too, and its own
+      spoken result.
 - [ ] **A staged limit drop should be taken in stages (Shane, 2026-08-15).**
       Approaching roadwork the truck hears "speed limit 55 miles per hour,
       then construction zone 45" and then sheds straight to 45, never
@@ -735,6 +752,185 @@ onto exit signalling.
       difference between Quiet and Urgent only at the voice.
 - [ ] **Sonification pass (principle 1 of the drive-time chattiness
       redesign above).** Convert spoken state updates (speed drift,
+- [x] **One fact per key: Alt 1 to Alt 4 (Tim K., 2026-08-16).** R answers
+      state, road, town and direction in one sentence, so hearing the one
+      you wanted meant sitting through the other three at speed. Alt 1
+      speaks the state, Alt 2 the road signed the way it reads, Alt 3 the
+      town the truck is in -- or the nearest one, ranked by true distance
+      rather than distance along the road, with how far off it sits -- and
+      Alt 4 the direction of travel. Keypad numbers are equivalent. Alt
+      with a number used to fall through to the engine-brake stages, so
+      asking for the state changed the jake; the stage branch now requires
+      Alt to be absent.
+- [x] **The pad could not stop the event voice, or ask the limit (Sarah R.,
+      2026-08-16).** Two gaps in the controller scheme, one of them a hole
+      rather than a rough edge: `stop_event_speech` was bound only to Ctrl,
+      so a controller-only driver had no way to silence an announcement and
+      every one ran to the end. Every pad button was already bound, so Back
+      is now context-sensitive -- it stops the voice while `event_voice_busy`
+      (the same projection the audio duck restores on) and reads the
+      controller help when nothing is speaking, which also stops it
+      answering a driver who wants quiet with a paragraph of help. Right
+      bumper plus X reads the posted limit, the pad's answer to S, in the
+      slot Sarah proposed.
+- [x] **Learn game sounds had no Back row (owner, 2026-08-16).** Escape
+      worked and the intro said so, but every other menu in the game also
+      offers a Back item -- 16 in the main menu alone -- so this screen was
+      the one place a player had to have heard the intro to know the way out.
+      Both screens now append it. On the category screen it runs `go_back`,
+      which already stops a held demo, so the row cannot leave a cue ringing.
+- [ ] **Departing straight into a hazard: work zone or merging traffic at
+      mile zero (owner, 2026-08-16).** CONFIRMED, all three claims, and the
+      three causes are separate. (1) No departure chain: only a facility with
+      a genuine multi-segment turn-level chain gets one
+      (`_departure_chain_route`); every other origin keeps the scripted
+      departure straight onto the highway, so route mile 0 IS the spawn and
+      there are no city miles to absorb anything. (2) Work zone at zero:
+      simulated zones draw from `uniform(15, ...)` so their taper cannot
+      start before mile 14, but REAL 511 zones have no such floor --
+      `start_mi = max(0.0, best_leg_mile - zone_length / 2)` clamps to zero,
+      so a real event near the corridor start can already cover the truck
+      before it moves, with the taper behind it and nothing to announce.
+      (3) Merging traffic ahead: `spawn_initial_traffic` keeps slot 0 at
+      least 8 miles into a leg, but the rolling bubble's floor is
+      `NO_SPAWN_AHEAD_MI = 1.1`, and a cell drawn there can roll the
+      "merging" intent, so the first thing a driver hears on pulling out is
+      a merge cue about a vehicle barely a mile off.
+      CORRECTION to the first write-up of this bullet: the departure chain
+      is NOT a fix for (2) or (3), and treating it as the honest complete
+      answer was wrong. `_finish_departure_chain` hands the parked highway
+      trip back unchanged and never advances its position, so the truck
+      rejoins at highway mile 0 either way. A real zone clamped to zero
+      still covers the merge, and the bubble still seeds around the truck at
+      its 1.1-mile floor -- the chain buys a minute of streets and then
+      delivers the driver into the same hazard at ramp speed.
+      Measured coverage, since it sizes the data option: 3,639 of 5,054
+      facilities (72 percent) depart straight onto the highway, and all 624
+      cities have at least one. That is a rebuild of most approach data, not
+      a gap-fill.
+      SPLIT, (a) and (b) LANDED 2026-08-16 on owner go-ahead:
+      (a) DONE. A real zone whose `start_mi` is inside `CONSTRUCTION_TAPER_MI`
+      of the route start is dropped rather than having its taper clipped to
+      nothing. Not "no hazards in the first miles" -- a zone at mile 5 signed
+      from mile 4 is untouched. The game declines to place a hazard it cannot
+      sign, rather than hiding work that is really there.
+      (b) DONE. `MERGE_FREE_START_MI = 3.0` withholds the "merging" intent
+      from the bubble inside the opening miles, keyed off the route mile so
+      it also covers the on-ramp handback. Harness evidence:
+      `floor_it_through_town` used to open "Merging box truck 1.5 miles
+      ahead" and now opens "Slow box truck 1.5 miles ahead", with merging
+      traffic still appearing later in the same run.
+      (c) OPEN -- departure chains for the remaining 72 percent of
+      facilities. Real and wanted, a data project to scope on its own. It is
+      the realism fix, not the safety fix, and does not gate anything now
+      that (a) and (b) have landed.
+- [x] **The dial is inert with the radio switched off (Darren, 2026-08-16;
+      owner ruling the same day).** Tuning while off used to pick a station
+      silently and hold it for power-on -- deliberate, and it worked, but it
+      is not how a radio behaves and it read as a station that had failed to
+      play. First pass only lengthened the sentence to explain itself; the
+      owner ruled for the expectation instead, which is the better call
+      because matching what a driver already knows beats teaching them a
+      quirk. `tune` and `tune_category` now return `_dial_is_off()` before
+      touching `station_id`, and `_radio_switched_off()` in the driving layer
+      ticks and speaks, deliberately the same shape as `_radio_no_power` so
+      the two "not right now" answers feel like one response. It says "Radio
+      off" rather than going silent -- nothing happening with no explanation
+      is the one outcome a screen reader user cannot tell from a broken key.
+      `select_station` is untouched: that is the game retuning off a station
+      the player lost (streamer-safe, signal gone), not a dial key, and it
+      has to work regardless of the switch.
+- [x] **R2 caught the info keys as well as the notices (Sarah R. via the
+      owner, 2026-08-16).** A 1.9 regression against 1.8, found only because
+      the owner knew 1.8 muted speech on any button. On dev/main `ctx.say` is
+      `speech.say(text, interrupt)` with no pacer, so every readout cut the
+      line in progress. `e0230c85` (R2) added `paces_main_speech` to stop
+      unasked-for lines stamping on one mid-air -- right for achievements and
+      assist notices, but applied to every main-channel line at the wheel, so
+      pressing a key stopped cutting too. That is the whole contract of an
+      info key, and the thing a tester coming from 1.8 reaches for first.
+      Fixed centrally, matching how R2 itself was done rather than tagging
+      twenty call sites that gain siblings every week: `GameContext.
+      player_asked()` wraps the driving state's key and pad handlers, and
+      `say` exempts anything spoken inside it. Anything arriving from
+      `update` still queues. The existing `_requeue_cut_event` rescue means a
+      road line cut by an answer is re-delivered behind it rather than lost --
+      confirmed in the probe, not assumed.
+      NOTE for the record: my first reply to Sarah told her the keyboard
+      never interrupted either and called the behaviour deliberate. That was
+      true of 1.9's code and wrong as an answer, because she was reporting a
+      CHANGE. Corrected in the living document.
+- [x] **Emergency braking, pass one: two controls the pad was promised and
+      never had (owner, 2026-08-16).** `emergency = keys[pygame.K_b]` was the
+      only source of the emergency application, while the controller help,
+      `input_hints` and the manual all said "press the left trigger fully for
+      the hardest stop". A pad driver got a full service application and none
+      of what the emergency one carries -- the air cue, the rumble, and every
+      check keyed off `emergency_brake`. `PAD_EMERGENCY_BRAKE = 0.97` now
+      arms it, gated on `not backing` because holding that same trigger from
+      a stop is the reverse gesture. Worse in the same area: the microsleep
+      reaction check was four keys, so a controller-only driver could not
+      react to "steer or brake now" and drifted off the road every time; the
+      stick and the trigger now count, at keyboard parity (a held Down arrow
+      already counted).
+- [ ] **PARKED BRANCH `fix/honest-brake-decel` (b2a5a43a, pushed, owner
+      parked it 2026-08-16 rather than land it the night before a build).**
+      Gap (a) below is DONE on that branch and measured: `max_brake_decel_g`
+      0.35 -> 0.55 and `EMERGENCY_BRAKE_MULT` 1.6 -> 1.0 put a loaded rig at
+      215 ft from 60 mph, and make `full_service_decel_mps2` describe the
+      truck the brakes actually are. `CARGO_HARD_BRAKE_G` 0.45 -> 0.8 came
+      with it (0.45 was unsourced, chosen to sit in the gap between the old
+      full-service and emergency figures; 0.8 g forward is 49 CFR 393.102,
+      already cited in the comment beside it). Three tests rewritten to the
+      new model, not loosened.
+      WHAT BLOCKS THE MERGE, and it is a decision rather than a bug: two
+      assist tests fail, one of which encodes the owner ruling of 2026-08-11
+      that the automatic braking assist must actually stop in time. The 1.6x
+      boost was what delivered that. With the emergency application no longer
+      stronger than a full pedal, a hot, worn, wet, 6-percent-downgrade stop
+      at 65 loaded genuinely cannot be made in 2.5 s, and escalating buys the
+      assist nothing. RECOMMENDED RESOLUTION: keep the ruling by engaging the
+      assist EARLIER -- a fade margin on its budget, since in-stop fade is
+      what the boost was quietly covering -- rather than letting the truck
+      brake harder than physics allows. Do not rebase this onto a moved
+      `feat/career-1.9` without re-running the full suite: the change moves
+      every stopping distance in the game.
+- [ ] **Emergency braking, realism gaps still open (measured 2026-08-16).**
+      Two found while doing the above, neither a quick win, both wanted:
+      (a) THE BUDGET DISAGREES WITH THE STOP. `EMERGENCY_BRAKE_MULT = 1.6`
+      makes the emergency application 5.49 m/s^2 against a full service
+      application's 3.43 -- 211 ft versus 334 ft from 60 mph. But
+      `full_service_decel_mps2`, whose own docstring says it is "what an
+      emergency-braking budget must use", returns the UNBOOSTED figure, so
+      every stopping-distance cue is computed on a truck 1.6x weaker than the
+      one B actually delivers. Note before changing it: 211 ft is close to
+      real modern tractor-trailer performance and the FMVSS 121 reduced-
+      stopping-distance ceiling of 250 ft, while 334 ft is a pre-2011 truck.
+      That points at `max_brake_decel_g` being low and the boost quietly
+      compensating, so the fix is probably to raise the base and drop the
+      multiplier rather than to nerf the emergency stop. Needs an owner call
+      on feel, since it moves every stop in the game.
+      (b) NOTHING EVER LOCKS UP. The jake has a traction cap and
+      `jake_slipping` to start a trolley jackknife; the foundation brakes
+      have no equivalent. Grip does scale the force correctly (measured: 5.49
+      dry, 3.85 wet, 0.99 on glare ice, all under the tire limit), so the
+      truck is never superhuman -- it simply always makes a clean stop, with
+      no lockup, no lost steering and no jackknife however hard it is slammed
+      on ice. There is no ABS modelled either, so this is idealised rather
+      than either era of real truck. The bigger of the two jobs.
+- [ ] **Drive-time chattiness: even terse is far too much (owner,
+      2026-08-15) -- next speech-redesign target, grounded in
+      accessibility practice.** The terse contract compressed each
+      message; the drive is still too chatty because compression does
+      not reduce the NUMBER of things spoken. The grounding from
+      accessibility practice points at four principles the current
+      design only half-applies:
+      (1) Sound before speech (Game Accessibility Guidelines: key
+      information carried by audio cues; audio-game convention:
+      continuous state belongs in continuous sound -- engine pitch,
+      surface texture, panning -- events in earcons, speech ONLY for
+      what sound cannot carry, like numbers and instructions). Candidate:
+      a systematic pass converting spoken state updates (speed drift,
       gaps opening, weather shifts) to the earcon/sonification layer,
       speech kept only for the first occurrence as a teaching pair. The
       ladder's three earcons (Coaching note, Status note, the reused
@@ -2792,6 +2988,78 @@ Mechanics finished after the 1.8.0 cut, so they release with 1.9 (the
 detailed design notes live in the sections further down, whose "Shipped
 for 1.8" framing predates the release split):
 
+- [x] **Enforcement presence is the road's, not a setting (owner ruling,
+      2026-08-16).** The `enforcement_presence` field, its levels, its
+      settings row and its ambience table are gone. It never touched odds --
+      `announced` is set for every staffed post at any level, so the "quiet"
+      player was never safer -- but at `full` it played the marked-unit pass
+      for EMPTY crossovers, and by ear that is identical to a staffed one. So
+      the road sounded saturated with police, a third of whom demonstrably
+      ignored a speeder going by, because nobody was in the car. An unstaffed
+      post is now silent at all times: a marked unit you can hear is one that
+      can act. Loudness comes from `Trip._post_density_at` -- deliberately the
+      same number the placement walk uses, not a parallel formula -- which
+      measured 0.47 to 1.49 across region, road class and clock, bracketing
+      the slider's old 0.45/1.0/1.35. Old settings files carrying the key load
+      unchanged: `Settings.load` only applies keys that still exist.
+- [x] **Roving patrols could never clock anyone on a highway -- FIXED
+      2026-08-16 after an owner-ordered harness playtest.** There were TWO
+      blockers, and the first hid the second. (1) `PACING_MIN_REAL_S = 20`
+      real seconds, unsatisfiable at any compression the game offers. (2)
+      Even with that made distance-based, a pacing unit only banks road AFTER
+      the truck passes it, while `end_mi` stopped asking it to look 0.3 of a
+      mile past itself and the tracker ran to a literal 1.0 -- so the most
+      pace it could hold at a moment it was allowed to observe was 0.3, short
+      of any gate. Both windows now read one constant, `PACING_WINDOW_MI`.
+      MEASURED, same roads and seeds either side: at a sustained 12 over,
+      roving patrols went from 315 looks and ZERO catches to 350 looks and 7
+      catches; total stops over 2,007 miles went 17 -> 24, one per 118 miles
+      -> one per 84. Harness clean on five enforcement scenarios. Three tests
+      added, including one that pins the gate inside the window, since
+      nothing in 3,940 tests caught either bug.
+- [ ] **Things an officer never notices that the game already models
+      (2026-08-16).** `_candidates` covers speeding, unsafe equipment, no
+      chains, no lights, following too close and left-lane misuse. Missing,
+      each already simulated elsewhere: an hours-of-service violation
+      (`hos.in_violation`, and a roadside inspection is exactly where it is
+      caught -- the most realistic omission for a truck); the engine brake in
+      a no-engine-brake town (`Trip.engine_brake_ban_at`, which has its own
+      ontology row); and wrong-way driving (`WrongWayMixin`). All three want
+      a `WHAT_` reason, a fine in `models/enforcement`, and a visual-method
+      post to see them.
+- [ ] **The deadline planner is blind to curves (measured 2026-08-16, owner
+      question).** `route_drive_hours` walks the route on posted limits
+      alone -- there are zero references to curves anywhere in
+      `models/jobs.py` -- so every bend the driver actually has to slow for
+      is time the plan never budgeted. Measured across eight routes, the
+      advisories cost 2.8 percent of drive time on average: 0.5 percent on
+      flat corridors (Chicago-Indianapolis, Buffalo-Rochester,
+      Phoenix-Flagstaff), 3.3 to 3.4 on Atlanta-Nashville and
+      Seattle-Portland, and 5.6 on Denver-Salt Lake City, whose worst bend is
+      signed 20.
+      NOT URGENT, and deliberately not done before the 2026-08-17 build:
+      `DEADLINE_PLANNING_SPEED_FACTOR = 0.88` already discounts the plan by
+      12 percent, which covers even the mountain case. The reason to fix it
+      anyway is that the cover is luck rather than design -- the bends
+      already eat half that margin in the mountains, and every further round
+      of curve enrichment erodes it with no signal, until one day a corridor
+      goes undeliverable and nothing in the code will say why. Making the
+      planner cap each sampled segment at the curve advisory is small and
+      contained, but it moves every deadline in the game, so it wants its
+      own change and a full gate.
+      CHECKED AT THE SAME TIME AND SOUND, so nobody re-investigates it: the
+      hours-of-service model does NOT conflate the duty window with the
+      driving limit. `driving_min` and `duty_min` are separate, `drive()`
+      advances both, `on_duty`/`off_duty` advance only the window, short
+      breaks do not extend it, the 30-minute break lands after 8 hours of
+      driving, and split sleeper berth is implemented. It only FEELS
+      conflated because of where the arithmetic lands: simulated shifts end
+      at 12.6 h duty for drop-and-hook and 13.2 h for a live load against an
+      11-hour driving limit, so an ordinary day is bound by driving and never
+      meets the window -- while a slow shipper (14.7 h) or a breakdown
+      (14.1 h) does hit it. That is the same shape the window has in real
+      life, so it is tuning to leave alone.
+
 - [x] **Highway exits take a real setup.** X signals the announced exit,
       the GPS asks for the right-side exit lane, checks ramp speed at the
       gore, and explains missed exits; destination ramps follow the same
@@ -3594,6 +3862,33 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
+- [x] **Elberton, Georgia added as a granite node (player request, 2026-08-16).**
+      A contact-form request from William asked for the "granite capital of
+      the world", left off the map. Researched and confirmed: Elberton cuts
+      over a third of US monumental granite, ~90 percent of its output being
+      cemetery memorials, with named granite carriers based in town. Added as
+      a small specialty-origin node (population 4,640, no interstate) with
+      seven real curated facilities from the Elberton Granite Association
+      directory and the county development authority, plus three legs --
+      Athens on GA 72, Augusta on GA 17 through Washington and Thomson, and
+      Greenville, South Carolina on GA 17 to I-85 at Lavonia. Ten real
+      checkpoints placed, ORS driving-hgv geometry and curve/maxspeed bake
+      run. The one claim in the request that does NOT hold: Elberton is not
+      why the country has granite at all -- countertop and dimension stone is
+      overwhelmingly imported, and Barre Vermont, Texas, Missouri and
+      Minnesota all cut monuments independently.
+- [ ] **The new Elberton facilities have no baked surface-street approaches.**
+      The city-services / facility-endpoint / local-approach / facility-approach
+      sweeps predate the node, so its docks fall back to synthetic approaches
+      until the next data expansion pass. Same standing gap as every other
+      city added since the 2026-07-14 resweep; folded into that job.
+- [ ] **Ninety auto-discovered stops are named by bare brand initialisms.**
+      36 "TA", 32 "BP", 15 "76", plus CGX, CFN, TXB and a lowercase "bp".
+      `AGENTS.md` calls this out by name ("TA" must be "TA Travel Center").
+      The spoken form carries the type label in front ("travel center: TA"),
+      so it is intelligible today rather than broken -- but the stop schema
+      has no spoken override, so fixing it means renaming the stops
+      themselves in one sweep across the network.
 - [x] **Village and small-town callouts (landed 2026-07-19).** The route now
       names the small places it runs through -- "Entering Strawberry",
       "Passing Kennebunk" -- so a speed limit dropping to 35 in the middle of

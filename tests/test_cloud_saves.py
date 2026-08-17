@@ -1184,7 +1184,10 @@ def test_delete_menu_flow_confirms_then_forgets_the_slot(monkeypatch):
         confirm = app.state
         assert confirm.title == "Delete the cloud backups?"
         # Safe default first: "No" is the focused item.
-        assert confirm.items[0].text == "No, keep the cloud backups"
+        # Safe default still first; the wording changed on 2026-08-15 so a
+        # cancel can never be mistaken for the action it declines (see
+        # test_no_cancel_row_is_named_after_a_real_action).
+        assert confirm.items[0].text == "No, cancel and change nothing"
         assert any("cannot be brought back" in t for t in spoken)
 
         calls = {}

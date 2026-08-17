@@ -29,7 +29,10 @@ class LearnSoundsState(MenuState):
     )
 
     def build_items(self) -> list[MenuItem]:
-        return [
+        # Escape has always worked, but a row you can arrow onto is how every
+        # other menu in the game offers the way out, and it is the only one a
+        # player finds without having heard the intro (owner, 2026-08-16).
+        items = [
             MenuItem(
                 category.name,
                 lambda c=category: self.ctx.push_state(LearnSoundCategoryState(self.ctx, c)),
@@ -37,6 +40,8 @@ class LearnSoundsState(MenuState):
             )
             for category in CATALOG
         ]
+        items.append(MenuItem("Back", self.go_back, help="Leave Learn game sounds."))
+        return items
 
     @staticmethod
     def _summary(category: SoundCategory) -> str:
@@ -82,7 +87,7 @@ class LearnSoundCategoryState(MenuState):
         super().enter()
 
     def build_items(self) -> list[MenuItem]:
-        return [
+        items = [
             MenuItem(
                 entry.name,
                 lambda e=entry: self.play_entry(e),
@@ -93,6 +98,10 @@ class LearnSoundCategoryState(MenuState):
             )
             for entry in self.category.entries
         ]
+        # Selecting this runs go_back, which stops a held demo on the way out,
+        # so the row cannot leave a cue ringing behind it.
+        items.append(MenuItem("Back", self.go_back, help="Back to the list of sound groups."))
+        return items
 
     def play_entry(self, entry: SoundEntry) -> None:
         """Demo one entry, or say why it cannot be demonstrated.

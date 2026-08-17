@@ -576,3 +576,41 @@ def test_traffic_scales_down_where_the_road_is_slow():
 
     assert seen, "nothing was ever spawned on the fixture stretch"
     assert max(seen) <= slow + 12.0, max(seen)
+
+
+def test_the_opening_miles_of_a_run_spawn_nobody_merging():
+    """Pulling out of a gate must not open with a merge warning.
+
+    The bubble's nearest cell is barely a mile ahead, and a merging vehicle
+    drawn there made "merging traffic ahead" the first thing a driver heard
+    on a run they had not started moving on (owner report, 2026-08-16).
+    Behaviour, not the constant: nothing merging is placed inside the
+    window, and merging traffic still exists once the run is under way.
+    """
+    from freight_fate.sim.traffic_manager import MERGE_FREE_START_MI
+
+    # Sweep seeds so this cannot pass by one lucky draw.
+    opening: list[str] = []
+    later: list[str] = []
+    for seed in range(40):
+        manager = _manager(seed=seed)
+        manager._replenish(0.0)
+        opening += [v.intent for v in manager.vehicles if v.position_mi < MERGE_FREE_START_MI]
+        later += [v.intent for v in manager.vehicles if v.position_mi >= MERGE_FREE_START_MI]
+
+    assert opening, "the sweep must actually place vehicles in the window"
+    assert "merging" not in opening
+    # The intent is withheld at the start, not removed from the game.
+    assert "merging" in later
+
+
+def test_the_merge_free_window_only_covers_the_start_of_the_route():
+    """Mid-route the draw is untouched -- this is a start-of-run rule."""
+    from freight_fate.sim.traffic_manager import MERGE_FREE_START_MI
+
+    intents: list[str] = []
+    for seed in range(40):
+        manager = _manager(seed=seed)
+        manager._replenish(60.0)
+        intents += [v.intent for v in manager.vehicles if v.position_mi >= MERGE_FREE_START_MI]
+    assert "merging" in intents

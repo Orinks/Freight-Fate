@@ -1035,6 +1035,17 @@ def test_radio_controls_are_keyboard_reachable(monkeypatch):
         harness.press_key(pygame.K_m)
         assert harness.driving.radio.enabled is not before_enabled
         assert result.transcript[-1].lower().startswith("radio ")
+        # The dial is inert with the radio switched off (Darren, 2026-08-16),
+        # so reaching the tuning keys means having the radio on first. Press
+        # again when the toggle above left it off, and check the dead case on
+        # the way past rather than trusting it.
+        if not harness.driving.radio.enabled:
+            parked = harness.driving.radio.station_id
+            harness.press_key(pygame.K_PAGEDOWN)
+            assert harness.driving.radio.station_id == parked
+            assert result.transcript[-1] == "Radio off."
+            harness.press_key(pygame.K_m)
+        assert harness.driving.radio.enabled
         before_station = harness.driving.radio.station_id
         harness.press_key(pygame.K_PAGEDOWN)
         assert harness.driving.radio.station_id != before_station

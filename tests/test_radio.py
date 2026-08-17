@@ -367,3 +367,60 @@ def test_catalog_entries_have_spoken_identity():
         + "\n".join(problems[:40])
         + (f"\n... and {len(problems) - 40} more" if len(problems) > 40 else "")
     )
+
+
+def test_the_dial_does_nothing_while_the_radio_is_switched_off():
+    """A switched-off radio does not tune, the way a real one does not.
+
+    It used to pick a station silently and hold it for power-on. That was
+    deliberate, but a tester filed it as a bug because it is not how a radio
+    behaves (Darren, 2026-08-16), and the owner ruled for the expectation.
+    """
+    radio = RadioState(streamer_safe=False)
+    radio.enabled = False
+    backend = RecordingBackend()
+    before = radio.station_id
+
+    tuned = radio.tune(1, backend)
+    assert tuned.message == "Radio off."
+    assert not tuned.enabled
+    assert radio.station_id == before, "the dial must not move while off"
+
+    jumped = radio.tune_category(1, backend)
+    assert jumped.message == "Radio off."
+    assert radio.station_id == before
+
+    assert backend.played == [], "nothing may play while the radio is off"
+
+    # Switching on lands on the station that was already tuned, untouched by
+    # the presses that did nothing.
+    switched = radio.toggle(backend)
+    assert switched.enabled
+    assert radio.station_id == before
+
+
+def test_the_dial_still_works_normally_once_the_radio_is_on():
+    """The rule is about being switched off, not a new restriction on tuning."""
+    radio = RadioState(streamer_safe=False)
+    assert radio.enabled
+    before = radio.station_id
+    radio.tune(1, RecordingBackend())
+    assert radio.station_id != before
+
+
+def test_the_game_may_still_move_the_dial_off_a_lost_station_while_off():
+    """select_station is not a dial key: it is the game retuning for cause.
+
+    Streamer-safe mode and a signal lost mid-drive both move the dial off a
+    station the player may no longer have, and that has to work regardless of
+    the switch, or the radio comes back on playing something disallowed.
+    """
+    radio = RadioState(streamer_safe=False)
+    radio.enabled = False
+    backend = RecordingBackend()
+
+    action = radio.select_station(SAFE_ROUTE_PLAYLIST, backend)
+
+    assert radio.station_id == SAFE_ROUTE_PLAYLIST
+    assert not action.enabled
+    assert backend.played == []

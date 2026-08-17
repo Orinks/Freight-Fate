@@ -558,15 +558,30 @@ def test_road_joint_audio_does_not_consume_the_enforcement_stream():
 # --- presence is not difficulty --------------------------------------------
 
 
-def test_presence_levels_never_reach_placement_or_staffing():
-    from freight_fate.settings import ENFORCEMENT_AMBIENCE_SCALE, Settings
+def test_there_is_no_enforcement_presence_setting_any_more():
+    """Removed 2026-08-16 on the owner's ruling, and it must not come back.
 
-    assert set(ENFORCEMENT_AMBIENCE_SCALE) == {"full", "standard", "quiet"}
-    assert Settings().enforcement_presence == "standard"
+    It governed ambient volume only and never touched odds, but at its
+    loudest it gave an EMPTY crossover the same pass-by cue a staffed one
+    gets -- and by ear that is a trooper who watched you speed and did
+    nothing, which is what taught players the police do not enforce.
+    """
+    from dataclasses import fields
+
+    from freight_fate.settings import Settings
+
+    assert not hasattr(Settings(), "enforcement_presence")
+    assert "enforcement_presence" not in {f.name for f in fields(Settings)}
+    menu = (SRC / "states" / "main_menu.py").read_text(encoding="utf-8")
+    assert "enforcement_presence" not in menu
+    assert "Enforcement presence" not in menu
+
+
+def test_placement_and_staffing_read_no_difficulty_dial():
     posts = (SRC / "sim" / "enforcement_posts.py").read_text(encoding="utf-8")
     observing = (SRC / "sim" / "enforcement_observe.py").read_text(encoding="utf-8")
     for source in (posts, observing):
-        assert "enforcement_presence" not in source.replace("``settings.enforcement_presence``", "")
+        assert "enforcement_presence" not in source
         assert "hazard_scale" not in source.replace("``hazard_scale``", "")
 
 
@@ -1355,41 +1370,36 @@ def test_the_same_driving_through_the_same_road_produces_the_same_outcome():
 # --- the setting, and what it promises --------------------------------------
 
 
-def test_changing_enforcement_presence_says_what_it_does_not_change(monkeypatch):
-    """A slider that lowers what you hear is indistinguishable, from inside the
-    cab, from one that lowers what can happen to you. Saying so at the moment
-    of the change is the only place the player can learn the difference."""
-    from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsCategoryState
+def test_how_loud_the_road_sounds_comes_from_the_road():
+    """The slider's replacement: the same number that places the posts.
 
-    app = App()
-    try:
-        spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, *a, **k: spoken.append(text))
-        menu = SettingsCategoryState(app.ctx, "world")
-        app.ctx.settings.enforcement_presence = "standard"
-        menu._cycle_enforcement_presence(1)
-        assert app.ctx.settings.enforcement_presence == "quiet"
-        assert "Enforcement presence, quiet." in spoken[-1]
-        assert "You will hear less police activity." in spoken[-1]
-        assert "Getting caught speeding is exactly as likely as before." in spoken[-1]
-    finally:
-        app.shutdown()
+    A hot-region interstate at the afternoon peak should sound more policed
+    than a cold-region two-lane at four in the morning, and it should do it
+    without the player choosing anything.
+    """
+    trip = _trip()
+    at = trip._post_density_at(trip.total_miles / 2.0)
+    assert at > 0.0
+    # It is the placement number itself, not a parallel formula that could
+    # drift away from it.
+    from freight_fate.states.driving_enforcement import EnforcementWatchMixin
+
+    source = EnforcementWatchMixin._ambience_scale.__doc__ or ""
+    assert "placement" in source.lower()
 
 
-def test_the_setting_help_promises_the_same_thing():
-    from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsCategoryState
+def test_an_empty_crossover_is_never_audible():
+    """The cue that read as a trooper ignoring a speeder, because it was.
 
-    app = App()
-    try:
-        menu = SettingsCategoryState(app.ctx, "world")
-        item = next(i for i in menu.build_items() if i.text.startswith("Enforcement presence"))
-        assert "How much police activity you hear on the road" in item.help
-        assert "does not change how likely you are to be pulled over" in item.help
-        assert "always reports enforcement in full" in item.help
-    finally:
-        app.shutdown()
+    An unstaffed post cannot observe anyone, so a pass-by earcon for one is a
+    police presence the player can hear and can never be caught by. Whatever
+    the road's own presence works out to, an empty post stays silent.
+    """
+    watch = (SRC / "states" / "driving_enforcement.py").read_text(encoding="utf-8")
+    marker = watch.index("if not post.staffed:")
+    block = watch[marker : marker + 700]
+    assert "continue" in block
+    assert "_play_marked_unit_pass" not in block.split("continue")[0]
 
 
 def test_an_open_scale_reads_the_safety_record_aloud(monkeypatch):
@@ -1431,3 +1441,86 @@ def test_an_open_scale_reads_the_safety_record_aloud(monkeypatch):
         assert all("Safety record: targeted" in line for line in dirty)
     finally:
         app.shutdown()
+
+
+# --- a roving patrol can actually write a ticket -----------------------------
+
+
+def test_a_pacing_unit_can_bank_its_pace_inside_its_own_window():
+    """The structural bug: two windows that could never both be satisfied.
+
+    A pacing unit only banks road AFTER the truck passes it, and it used to
+    stop being asked to look 0.3 of a mile past itself (``end_mi``), while the
+    tracker ran to a literal 1.0 mile. So the most pace it could ever hold at
+    a moment it was allowed to observe was 0.3 -- short of any gate. Both now
+    read one constant.
+    """
+    from freight_fate.sim.enforcement_posts import (
+        METHOD_PACING,
+        PACING_MIN_MI,
+        PACING_WINDOW_MI,
+    )
+
+    assert PACING_MIN_MI < PACING_WINDOW_MI, "the gate must fit inside the window"
+    # Full confidence is reached at twice the gate; that has to fit too, or
+    # the ramp is decoration.
+    assert 2.0 * PACING_MIN_MI <= PACING_WINDOW_MI
+
+    trip = _trip()
+    roving = [p for p in trip.posts if p.method == METHOD_PACING]
+    assert roving, "the sample route must carry a roving patrol"
+    post = roving[0]
+    assert post.end_mi - post.at_mi == pytest.approx(PACING_WINDOW_MI)
+    # And it is still asked to look at the far end of that window.
+    assert post.covers(post.at_mi + PACING_WINDOW_MI - 1e-6)
+
+
+def test_the_pacing_gate_is_road_not_real_seconds():
+    """It was 20 real seconds, which no time compression the game offers could
+    satisfy: the window is 5.5 real seconds at 65 mph and 10x, the slowest
+    setting. Measured before the fix: 315 looks, zero catches over 2,000
+    miles."""
+    from freight_fate.sim import enforcement_observe as eo
+    from freight_fate.sim.enforcement_posts import KIND_ROVING, METHOD_PACING, PACING_MIN_MI
+
+    source = (SRC / "sim" / "enforcement_observe.py").read_text(encoding="utf-8")
+    assert "paced_real_s" not in source
+    assert "PACING_MIN_REAL_S" not in source
+
+    post = always_observing_post(at_mi=10.0, kind=KIND_ROVING)
+    assert post.method == METHOD_PACING
+
+    def _sample(paced_mi):
+        return eo.RoadSample(
+            position_mi=post.at_mi + 0.1,
+            speed_mph=77.0,
+            limit_mph=65.0,
+            paced_mi=paced_mi,
+        )
+
+    short = _sample(PACING_MIN_MI * 0.5)
+    enough = _sample(PACING_MIN_MI)
+    assert eo.geometry_factor(post, short) == 0.0
+    assert eo.geometry_factor(post, enough) > 0.0
+
+
+def test_a_roving_patrol_catches_a_sustained_speeder():
+    """End to end through observe(), which never once happened before.
+
+    Not a certainty -- the seeded roll still applies in the driving layer --
+    but the observation has to be POSSIBLE, which is what was broken.
+    """
+    from freight_fate.sim.enforcement_observe import WHAT_SPEEDING, RoadSample, observe
+    from freight_fate.sim.enforcement_posts import KIND_ROVING, PACING_MIN_MI
+
+    post = always_observing_post(at_mi=10.0, kind=KIND_ROVING)
+    sample = RoadSample(
+        position_mi=post.at_mi + PACING_MIN_MI,
+        speed_mph=77.0,
+        limit_mph=65.0,
+        over_limit_mi=1.0,
+        paced_mi=PACING_MIN_MI,
+    )
+    found = observe(post, sample)
+    assert found is not None
+    assert found.what == WHAT_SPEEDING

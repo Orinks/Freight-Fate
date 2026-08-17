@@ -51,6 +51,11 @@ MAX_BUBBLE_VEHICLES = 28
 # warning would announce a truck that did not exist a second earlier.
 NO_SPAWN_AHEAD_MI = 1.1
 NO_SPAWN_BEHIND_MI = 0.6
+# How far into a run the bubble withholds the "merging" intent. Wide enough
+# to clear the nearest spawn cell plus the distance a merge cue carries, so
+# the opening line of a run is never somebody merging into a truck that has
+# not got up to speed yet. Everything else about the draw is unchanged.
+MERGE_FREE_START_MI = 3.0
 # How far a bubble vehicle runs before it leaves the highway, drawn per
 # vehicle. Nobody shares a whole corridor with you, and the upper end is what
 # bounds how long a slow one can hold the lane in front of the truck.
@@ -604,6 +609,19 @@ class TrafficManager:
             # spread, where slower vehicles are what you come up on.
             if behind:
                 intent = rng.choices(("passing", "cruising"), weights=(3.0, 1.0))[0]
+            elif mile < MERGE_FREE_START_MI:
+                # Pulling out of a gate, the bubble's nearest cell is 1.1
+                # miles ahead, and a merging vehicle drawn there made a merge
+                # warning the first thing a driver heard on a run they had
+                # not started moving on (owner report, 2026-08-16). The
+                # vehicle still spawns; it is just not merging into you
+                # before you are up to speed. Keyed off the mile rather than
+                # the truck's position so it covers the on-ramp handback
+                # too, which rejoins the highway trip at mile zero.
+                intent = rng.choices(
+                    ("cruising", "following", "braking", "passing"),
+                    weights=(3.0, 1.5, 1.0, 0.6),
+                )[0]
             else:
                 intent = rng.choices(
                     ("cruising", "following", "merging", "braking", "passing"),

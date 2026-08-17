@@ -265,7 +265,11 @@ class TimedMessageState(State):
 class MenuItem:
     label: str | Callable[[], str]
     action: Callable[[], None]
-    help: str = ""
+    # Callable for the same reason ``label`` is: a row whose help depends on
+    # state that changes while the menu is open (a waiting cloud conflict,
+    # say) must not read out an answer that was true when the screen was
+    # built. Read it through ``help_text``, never off the field.
+    help: str | Callable[[], str] = ""
     # The click played when this item is activated. Set to None for items whose
     # action plays its own confirmation sound, so the two do not stack.
     select_sound: str | None = "ui/menu_select"
@@ -273,6 +277,10 @@ class MenuItem:
     @property
     def text(self) -> str:
         return self.label() if callable(self.label) else self.label
+
+    @property
+    def help_text(self) -> str:
+        return self.help() if callable(self.help) else self.help
 
 
 class MenuState(State):
@@ -323,7 +331,7 @@ class MenuState(State):
         if not self.items:
             return self.intro_help
         item = self.items[self.index]
-        return item.help or f"{item.text}."
+        return item.help_text or f"{item.text}."
 
     def move(self, delta: int) -> None:
         if not self.items:

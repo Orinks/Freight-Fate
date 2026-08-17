@@ -24,7 +24,6 @@ from ..settings import (
     DRIVING_ASSIST_FIELDS,
     DRIVING_ASSIST_PRESETS,
     DRIVING_SPEECH_MODES,
-    ENFORCEMENT_PRESENCE_LEVELS,
     LANE_KEEPING_MODES,
     LANE_KEEPING_TO_LEGACY,
     PLACE_CALLOUT_MODES,
@@ -1269,13 +1268,6 @@ class SettingsCategoryState(MenuState):
                     "seasons pass while weather conditions still come from the "
                     "real world.",
                 ),
-                MenuItem(
-                    lambda: f"Enforcement presence: {s.enforcement_presence}",
-                    lambda: self._cycle_enforcement_presence(1),
-                    help="How much police activity you hear on the road. It does "
-                    "not change how likely you are to be pulled over. Asking for "
-                    "the road ahead always reports enforcement in full.",
-                ),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "controls":
@@ -1475,7 +1467,6 @@ class SettingsCategoryState(MenuState):
                     self._toggle_real_traffic,
                     self._toggle_real_parking,
                     self._toggle_live_weather_calendar,
-                    self._cycle_enforcement_presence,
                 ],
                 "controls": [
                     self._toggle_units,
@@ -1914,31 +1905,6 @@ class SettingsCategoryState(MenuState):
             i = 0
         self.ctx.settings.hos_mode = modes[(i + d) % len(modes)]
         self._announce()
-
-    def _cycle_enforcement_presence(self, d: int) -> None:
-        """Cycle how loud the policed country is -- and say what it does not do.
-
-        The reassurance is not padding. A slider that lowers what you hear is
-        indistinguishable, from inside the cab, from a slider that lowers what
-        can happen to you; saying so plainly at the moment of the change is
-        the only place the player can learn the difference.
-        """
-        levels = list(ENFORCEMENT_PRESENCE_LEVELS)
-        try:
-            i = levels.index(self.ctx.settings.enforcement_presence)
-        except ValueError:
-            i = levels.index("standard")
-        chosen = levels[(i + d) % len(levels)]
-        self.ctx.settings.enforcement_presence = chosen
-        heard = {
-            "full": "You will hear more police activity.",
-            "standard": "You will hear the usual amount of police activity.",
-            "quiet": "You will hear less police activity.",
-        }[chosen]
-        self.ctx.say(
-            f"Enforcement presence, {chosen}. {heard} "
-            "Getting caught speeding is exactly as likely as before."
-        )
 
     def _cue_loudness_label(self) -> str:
         """The spoken value, in the words a volume row uses.

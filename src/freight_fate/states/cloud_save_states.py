@@ -50,6 +50,27 @@ CLOUD_DISCLOSURE = (
 )
 
 
+def _local_summary_for(save_name: str) -> str:
+    """This computer's copy of ``save_name``, in the same words the cloud
+    copy is described with, or "" if it cannot be read.
+
+    Module level because both the career list and the single-career screen
+    need it, and neither should be the one that owns it. Never raises: a
+    save that will not load costs a sentence, never the screen that resolves
+    the conflict.
+    """
+    try:
+        from ..cloud_saves import backup_summary
+        from ..models.profile import Profile, find_save_path
+
+        path = find_save_path(save_name)
+        if path is None:
+            return ""
+        return backup_summary(Profile.load(path).to_dict())
+    except Exception:
+        return ""
+
+
 def _backed_up_text(created_at_ms: float | None) -> str:
     """A speakable freshness phrase from a server epoch-milliseconds stamp."""
     if not created_at_ms:
@@ -198,7 +219,16 @@ class CloudBackupState(MenuState):
                 if _is_legacy_snapshot(entry):
                     bits.append("from an earlier version of Freight Fate")
                 if name in conflicts:
+                    # The summary already read out above is the CLOUD copy
+                    # (it comes from the server row), so the thing still
+                    # missing here is what this computer holds. Naming it
+                    # makes the difference audible from the list, before the
+                    # player has to open anything to find out what is at
+                    # stake.
                     bits.append("needs attention: this computer has a different copy")
+                    mine = _local_summary_for(name)
+                    if mine:
+                        bits.append(f"this computer's copy is {mine}")
                     bits.append("Open this career to choose which copy to keep")
                 items.append(
                     MenuItem(
@@ -319,9 +349,15 @@ class CloudSlotState(MenuState):
                     "keep below; nothing changes until you choose.",
                 )
             )
+            mine = self._local_summary()
+            theirs = conflict.get("latestSummary")
             items.append(
                 MenuItem(
-                    "Keep this computer's save and back it up",
+                    # Each row names what it KEEPS. Arrowing between two rows
+                    # that differ only in the words "this computer" and "the
+                    # cloud" is not a choice a player can answer; arrowing
+                    # between two careers with a level and a balance is.
+                    "Keep this computer's save and back it up" + (f": {mine}" if mine else ""),
                     self._confirm_keep_mine,
                     help="Uploads this computer's save over the cloud copy "
                     "and turns backups for this career back on.",
@@ -329,7 +365,7 @@ class CloudSlotState(MenuState):
             )
             items.append(
                 MenuItem(
-                    "Use the cloud copy on this computer",
+                    "Use the cloud copy on this computer" + (f": {theirs}" if theirs else ""),
                     lambda: self._confirm_restore(self.revisions[0] if self.revisions else None),
                     help="Downloads the cloud copy over this computer's "
                     "save. The current local save is kept as a fallback "
@@ -405,12 +441,21 @@ class CloudSlotState(MenuState):
         return f"Restore the latest backup, {_backed_up_text(latest.get('createdAt'))}{legacy}"
 
     def _conflict_label(self, conflict: dict) -> str:
+        """Both copies, described the same way, before either choice is read.
+
+        Naming only the cloud side made the decision unanswerable: the player
+        could hear what he would be moving TO but nothing about what he would
+        be giving up.
+        """
         summary = conflict.get("latestSummary")
-        detail = f" The cloud copy is {summary}." if summary else ""
-        return (
-            f"This career needs attention: the cloud copy changed on another computer."
-            f"{detail} The choices below pick which copy to keep."
-        )
+        mine = self._local_summary()
+        bits = ["This career needs attention: the cloud copy changed on another computer."]
+        if mine:
+            bits.append(f"This computer's copy is {mine}.")
+        if summary:
+            bits.append(f"The cloud copy is {summary}.")
+        bits.append("The choices below pick which copy to keep.")
+        return " ".join(bits)
 
     # -- actions ----------------------------------------------------------------
 
@@ -515,6 +560,17 @@ class CloudSlotState(MenuState):
         from ..models.profile import find_save_path
 
         return find_save_path(self.save_name) is not None
+
+    def _local_summary(self) -> str:
+        """This computer's copy in the same shape the cloud copy is described.
+
+        The conflict screen used to name the cloud copy's level and money and
+        say nothing at all about the save already on the machine, so the
+        player was asked to choose between something described and something
+        anonymous -- and the safe-feeling answer to that is to choose
+        neither, which is what Brandon did for a day (owner, 2026-08-15).
+        """
+        return _local_summary_for(self.save_name)
 
     def start_delete(self) -> None:
         """Called by the confirmation state after the player says yes."""
@@ -780,7 +836,21 @@ class ConfirmRestoreState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("No, keep this computer's save", self.go_back),
+            MenuItem(
+                # NOT "No, keep this computer's save". That is word for word
+                # what the conflict screen's real action is called ("Keep
+                # this computer's save and back it up"), so a player who
+                # wants exactly that hears it here, presses it, and gets
+                # nothing -- the owner did it on his own career while
+                # testing, and it is the likeliest reason Brandon got no
+                # further either (2026-08-15). A cancel says it cancels.
+                "No, cancel and change nothing",
+                self.go_back,
+                help="Goes back without downloading anything. This "
+                "computer's save is left exactly as it is. To send this "
+                "computer's save UP to the server instead, go back and "
+                "choose Keep this computer's save and back it up.",
+            ),
             MenuItem("Yes, restore this backup", self._yes),
         ]
 
@@ -838,7 +908,15 @@ class ConfirmDeleteCloudState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("No, keep the cloud backups", self.go_back),
+            MenuItem(
+                # Same rule as the restore confirmation above: a cancel row
+                # must not be phrased as an outcome another control already
+                # delivers, or it reads as the action rather than the retreat.
+                "No, cancel and change nothing",
+                self.go_back,
+                help="Goes back without deleting anything. Your cloud "
+                "backups for this career are left exactly as they are.",
+            ),
             MenuItem("Yes, delete every cloud backup of this career", self._yes),
         ]
 
@@ -893,7 +971,18 @@ class ConfirmKeepMineState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem("No, keep the current cloud backup", self.go_back),
+            MenuItem(
+                # Same trap in the other direction: phrased as an outcome,
+                # "keep the current cloud backup" reads like the choice to
+                # take the cloud copy, on the one screen where picking the
+                # wrong one of two similar-sounding rows leaves a career
+                # stuck exactly as it was.
+                "No, cancel and change nothing",
+                self.go_back,
+                help="Goes back without uploading. The career stays as it "
+                "is on this computer, and stays unbacked up until you "
+                "choose which copy to keep.",
+            ),
             MenuItem("Yes, validate and replace the cloud backup", self._yes),
         ]
 
