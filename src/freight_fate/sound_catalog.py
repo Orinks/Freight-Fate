@@ -455,6 +455,18 @@ _HAZARDS = SoundCategory(
         # ``tests/test_speech_audio.py::test_all_referenced_assets_exist``
         # scans for a file on disk, since neither cue has one.
         SoundEntry(
+            "Road ahead note",
+            (Cue("ladder/road_ahead_note", volume=0.38),),
+            "Two short notes falling, standing in for a heads-up about what "
+            "the road is about to do -- a bend coming, a merge, how far the "
+            "next stretch runs. The words still reach the message log, and "
+            "the route and road keys still answer for it.",
+            when="Driving speech set to Urgent only. At Quiet and below "
+            "these are spoken. Directions you cannot recover from -- take "
+            "this exit, turn here, you missed it -- are always spoken, at "
+            "every setting.",
+        ),
+        SoundEntry(
             "Coaching note",
             (Cue("ladder/coaching_note", volume=0.4),),
             "A soft two-note rising chime standing in for a driving tip. The "

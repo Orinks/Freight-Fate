@@ -66,6 +66,7 @@ def test_the_table_reads_exactly_as_the_spec_says() -> None:
         SpeechCategory.SAFETY: Disposition.FULL,
         SpeechCategory.MONEY: Disposition.FULL,
         SpeechCategory.NAVIGATION: Disposition.FULL,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.FULL,
         SpeechCategory.COACHING: Disposition.FULL,
         SpeechCategory.CONFIRMATION: Disposition.FULL,
         SpeechCategory.STATUS: Disposition.FULL,
@@ -74,6 +75,7 @@ def test_the_table_reads_exactly_as_the_spec_says() -> None:
         SpeechCategory.SAFETY: Disposition.FULL,
         SpeechCategory.MONEY: Disposition.FULL,
         SpeechCategory.NAVIGATION: Disposition.FULL,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.FULL,
         SpeechCategory.COACHING: Disposition.FIRST_OCCURRENCE,
         SpeechCategory.CONFIRMATION: Disposition.FULL,
         SpeechCategory.STATUS: Disposition.TRANSITIONS,
@@ -82,6 +84,7 @@ def test_the_table_reads_exactly_as_the_spec_says() -> None:
         SpeechCategory.SAFETY: Disposition.TERSE,
         SpeechCategory.MONEY: Disposition.TERSE,
         SpeechCategory.NAVIGATION: Disposition.TERSE,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.TERSE,
         SpeechCategory.COACHING: Disposition.EARCON,
         SpeechCategory.CONFIRMATION: Disposition.EARCON,
         SpeechCategory.STATUS: Disposition.EARCON,
@@ -90,6 +93,7 @@ def test_the_table_reads_exactly_as_the_spec_says() -> None:
         SpeechCategory.SAFETY: Disposition.TERSE,
         SpeechCategory.MONEY: Disposition.TERSE,
         SpeechCategory.NAVIGATION: Disposition.TERSE,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.EARCON,
         SpeechCategory.COACHING: Disposition.SILENT,
         SpeechCategory.CONFIRMATION: Disposition.EARCON,
         SpeechCategory.STATUS: Disposition.SILENT,
@@ -274,8 +278,8 @@ def test_an_untagged_line_still_speaks_at_the_quietest_rung() -> None:
         app.shutdown()
 
 
-def _event(kind):
-    return type("E", (), {"kind": kind, "data": {}})()
+def _event(kind, **data):
+    return type("E", (), {"kind": kind, "data": data})()
 
 
 def test_the_hazard_call_is_safety() -> None:
@@ -287,10 +291,64 @@ def test_the_hazard_call_is_safety() -> None:
 
 
 def test_a_planned_stop_is_navigation() -> None:
+    """The heads-up and the arrival are both navigation at every rung.
+
+    The heads-up looks like an advisory and is not: it names the key that
+    takes the stop and gives you a mile to press it, so a tone in its place
+    would not be a quieter drive, it would be no way to pull in. Measured on
+    a headless I-65 run before this was corrected -- "Road Ranger at exit
+    292 in one mile. Press X to signal" was one of the lines urgent_only
+    would have swallowed. Neither is ever STATUS.
+    """
     from freight_fate.states.driving_events import DrivingEventMixin
 
-    assert DrivingEventMixin._event_category(_event(TripEventKind.STOP_AHEAD)) is (
-        SpeechCategory.NAVIGATION
+    for kind in (TripEventKind.STOP_AHEAD, TripEventKind.STOP_REACHED):
+        assert DrivingEventMixin._event_category(_event(kind)) is SpeechCategory.NAVIGATION
+
+
+def test_the_lead_announcement_yields_before_the_turn_itself() -> None:
+    """ "In a mile, take exit 42" is a heads-up; "take exit 42" is not.
+
+    This is the split that makes quiet and urgent_only different settings.
+    Before it they differed only in COACHING and STATUS, both of which were
+    already inaudible at quiet -- so the two quietest rungs were near
+    copies of each other (owner, 2026-08-17: "not sure which quiet should
+    have then. Still very little").
+    """
+    from freight_fate.states.driving_events import DrivingEventMixin
+
+    lead = _event(TripEventKind.GPS_CUE, advance=True)
+    turn = _event(TripEventKind.GPS_CUE)
+    assert DrivingEventMixin._event_category(lead) is SpeechCategory.NAVIGATION_ADVISORY
+    assert DrivingEventMixin._event_category(turn) is SpeechCategory.NAVIGATION
+
+    # And the rungs actually deliver them differently.
+    assert disposition_for("quiet", SpeechCategory.NAVIGATION_ADVISORY) == Disposition.TERSE
+    assert disposition_for("urgent_only", SpeechCategory.NAVIGATION_ADVISORY) == Disposition.EARCON
+    for rung in ("quiet", "urgent_only"):
+        assert disposition_for(rung, SpeechCategory.NAVIGATION) == Disposition.TERSE
+
+
+def test_the_two_quietest_rungs_are_not_the_same_setting() -> None:
+    """A guard against the shape of the bug, not just this instance of it.
+
+    If a later change makes every category quiet and urgent_only disagree on
+    inaudible at quiet, the two settings become indistinguishable again
+    however different the table looks.
+    """
+    quiet = DRIVING_SPEECH_DISPOSITIONS["quiet"]
+    urgent = DRIVING_SPEECH_DISPOSITIONS["urgent_only"]
+    audible = {
+        Disposition.FULL,
+        Disposition.TERSE,
+        Disposition.FIRST_OCCURRENCE,
+        Disposition.TRANSITIONS,
+    }
+    differ = [c for c in quiet if quiet[c] != urgent[c]]
+    assert differ, "the rungs are identical"
+    assert any(quiet[c] in audible for c in differ), (
+        "quiet and urgent_only differ only in categories quiet already "
+        "silences, so a player switching between them hears no change"
     )
 
 

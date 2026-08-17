@@ -55,12 +55,17 @@ _EVENT_CATEGORIES = {
     # is a HAZARD and stays SAFETY.
     TripEventKind.ZONE_ENTER: SpeechCategory.STATUS,
     TripEventKind.ZONE_EXIT: SpeechCategory.STATUS,
+    # Stays act-now despite being a lookahead: it names the key that
+    # takes the stop and gives a mile to press it, so retiring it to a
+    # tone would not make the drive quieter, it would remove the only
+    # way to pull in. Same rule the module docstring gives for
+    # CONFIRMATION -- a line that names a key you must press is not one.
     TripEventKind.STOP_AHEAD: SpeechCategory.NAVIGATION,
     TripEventKind.STOP_REACHED: SpeechCategory.NAVIGATION,
     TripEventKind.CHECKPOINT: SpeechCategory.NAVIGATION,
     TripEventKind.GPS_CUE: SpeechCategory.NAVIGATION,
     TripEventKind.ARRIVED: SpeechCategory.NAVIGATION,
-    TripEventKind.CURVE: SpeechCategory.NAVIGATION,
+    TripEventKind.CURVE: SpeechCategory.NAVIGATION_ADVISORY,
     TripEventKind.TOLL_CHARGED: SpeechCategory.MONEY,
     TripEventKind.WEATHER_CHANGE: SpeechCategory.STATUS,
     TripEventKind.LANE: SpeechCategory.STATUS,
@@ -564,13 +569,21 @@ class DrivingEventMixin:
         The navigation/status split is where "act-now cues only" lives: the
         stop, exit, or turn the player must act on is NAVIGATION; the
         weather turning and the road's general state are STATUS and fall
-        silent at the quietest rung.
+        silent at the quietest rung. Between them sits
+        NAVIGATION_ADVISORY -- the lead announcement, the bend coming, the
+        stop still miles off. Spoken at quiet, a tone at urgent_only, which
+        is what makes those two rungs different settings.
         """
         if event.kind == TripEventKind.GPS_CUE and event.data.get("limit_change"):
             # "Speed limit raised to 55" is the road's state; S answers it on
             # demand. The other GPS cues -- merge onto this highway, take that
             # exit -- are the turn itself and stay NAVIGATION.
             return SpeechCategory.STATUS
+        if event.kind == TripEventKind.GPS_CUE and event.data.get("advance"):
+            # "In a mile, take exit 42" -- the heads-up. The near call that
+            # follows at the exit itself is the one you cannot recover from
+            # and stays NAVIGATION, spoken at every rung.
+            return SpeechCategory.NAVIGATION_ADVISORY
         if event.kind == TripEventKind.GPS_CUE and event.data.get("npc_vehicle") is not None:
             # A traffic advisory: "Merging car, 2.2 miles". Awareness of the
             # road around you, which the pass-by and engine sounds already

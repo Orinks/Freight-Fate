@@ -138,6 +138,18 @@
 
 ### Changed
 
+- **Urgent only is a real step down from Quiet now.** The two quietest
+  driving speech settings used to be nearly the same thing: everything they
+  differed on was already a sound rather than words at Quiet, so switching
+  between them changed almost nothing you could hear. Urgent only now also
+  turns the heads-up lines into a short sound -- a bend coming up, a town
+  a couple of miles off, how far the next stretch runs. What stays in words
+  is the safety calls, what things cost, and the directions you cannot take
+  back: the turn itself, the exit, and the stop you are pulling into. The
+  new sound is two short notes falling, and it is in Learn game sounds as
+  "Road ahead note" like every other one. Quiet is unchanged -- it still
+  speaks all of it.
+
 - **Nothing ahead of you is ever "in 0 miles" any more.** A warning about
   something less than half a mile off used to round the distance down to
   zero, so the truck would say "in 0 miles, facility access road ahead" when

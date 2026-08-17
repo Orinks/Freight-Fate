@@ -2997,7 +2997,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 # ladder never says zero, so the cue is spoken with a real
                 # distance instead of dropped.
                 message = f"In {self._ahead_text(ahead)}, {cue.text}."
-                self._emit(TripEventKind.GPS_CUE, message, cue=cue)
+                # Marked as the lead rather than the turn: the near call
+                # below is the one you cannot recover from, and it always
+                # speaks. This one is a heads-up and retires to a tone at
+                # urgent_only (see SpeechCategory.NAVIGATION_ADVISORY).
+                self._emit(TripEventKind.GPS_CUE, message, cue=cue, advance=True)
             if -0.1 <= ahead <= 0.1 and near_key not in self._announced_navigation:
                 self._announced_navigation.add(near_key)
                 if cue.kind == "checkpoint":

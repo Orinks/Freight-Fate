@@ -1060,8 +1060,11 @@ SETTINGS_LAYOUT_NOTICES = {
         "short sounds instead of words. Two new choices sit on either end: "
         "coaching, meant to add driving-technique tips on top of everything "
         "standard says, though for now the two sound the same while that "
-        "part is still being built, and urgent only, which speaks just the "
-        "safety calls, what things cost, and route instructions."
+        "part is still being built, and urgent only, which speaks the "
+        "safety calls, what things cost, and the directions you cannot take "
+        "back -- the turn itself, the exit, the stop you are pulling into "
+        "-- while a heads-up about a bend or a town coming up becomes a "
+        "short sound."
     ),
 }
 
@@ -1523,8 +1526,10 @@ class SettingsCategoryState(MenuState):
                 "How much the road tells you. Coaching and standard sound "
                 "the same for now, speaking every tip, confirmation, and "
                 "status update in full; quiet cuts confirmations and status "
-                "to sounds, and urgent only leaves the safety calls, what "
-                "things cost, and route instructions. Billboards, place "
+                "to sounds, and urgent only also turns the heads-up about a "
+                "bend or a town coming up into a short sound, keeping the "
+                "safety calls, what things cost, and the turn itself. "
+                "Billboards, place "
                 "names and landmarks are not part of this -- they have "
                 "their own switches below.",
             ),

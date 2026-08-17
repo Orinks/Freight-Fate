@@ -99,6 +99,15 @@ class SpeechCategory(StrEnum):
 
     SAFETY = "safety"
     NAVIGATION = "navigation"
+    # Navigation you cannot recover from -- take this exit, turn here, you
+    # missed it -- against navigation that is a heads-up on what the road is
+    # about to do. Both are navigation and both speak at quiet; they part
+    # company at urgent_only, where the heads-up becomes a tone and the
+    # unrecoverable one keeps its words. Splitting them is what makes the
+    # two quietest rungs different settings rather than near-copies (owner,
+    # 2026-08-17: the strict "only if you must act" rule describes
+    # urgent_only, and quiet should be "still very little" above it).
+    NAVIGATION_ADVISORY = "navigation_advisory"
     MONEY = "money"
     COACHING = "coaching"
     CONFIRMATION = "confirmation"
@@ -132,6 +141,7 @@ DRIVING_SPEECH_DISPOSITIONS: dict[str, dict[SpeechCategory, Disposition]] = {
         SpeechCategory.SAFETY: Disposition.FULL,
         SpeechCategory.MONEY: Disposition.FULL,
         SpeechCategory.NAVIGATION: Disposition.FULL,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.FULL,
         SpeechCategory.COACHING: Disposition.FULL,
         SpeechCategory.CONFIRMATION: Disposition.FULL,
         SpeechCategory.STATUS: Disposition.FULL,
@@ -140,6 +150,7 @@ DRIVING_SPEECH_DISPOSITIONS: dict[str, dict[SpeechCategory, Disposition]] = {
         SpeechCategory.SAFETY: Disposition.FULL,
         SpeechCategory.MONEY: Disposition.FULL,
         SpeechCategory.NAVIGATION: Disposition.FULL,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.FULL,
         SpeechCategory.COACHING: Disposition.FIRST_OCCURRENCE,
         SpeechCategory.CONFIRMATION: Disposition.FULL,
         SpeechCategory.STATUS: Disposition.TRANSITIONS,
@@ -148,6 +159,7 @@ DRIVING_SPEECH_DISPOSITIONS: dict[str, dict[SpeechCategory, Disposition]] = {
         SpeechCategory.SAFETY: Disposition.TERSE,
         SpeechCategory.MONEY: Disposition.TERSE,
         SpeechCategory.NAVIGATION: Disposition.TERSE,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.TERSE,
         SpeechCategory.COACHING: Disposition.EARCON,
         SpeechCategory.CONFIRMATION: Disposition.EARCON,
         SpeechCategory.STATUS: Disposition.EARCON,
@@ -156,6 +168,7 @@ DRIVING_SPEECH_DISPOSITIONS: dict[str, dict[SpeechCategory, Disposition]] = {
         SpeechCategory.SAFETY: Disposition.TERSE,
         SpeechCategory.MONEY: Disposition.TERSE,
         SpeechCategory.NAVIGATION: Disposition.TERSE,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.EARCON,
         SpeechCategory.COACHING: Disposition.SILENT,
         SpeechCategory.CONFIRMATION: Disposition.EARCON,
         SpeechCategory.STATUS: Disposition.SILENT,
@@ -174,6 +187,7 @@ DEFAULT_DRIVING_SPEECH = "standard"
 # existing sound that means what an earcon here needs to mean, so each gets
 # its own synthesized entry (``ladder_earcons.py``).
 LADDER_EARCONS = {
+    SpeechCategory.NAVIGATION_ADVISORY: "Road ahead note",
     SpeechCategory.COACHING: "Coaching note",
     SpeechCategory.CONFIRMATION: "Hazard clear",
     SpeechCategory.STATUS: "Status note",

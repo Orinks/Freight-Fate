@@ -322,6 +322,7 @@ from the words, and synonyms cost them a re-read.
 | Crossing into another state | State line | border cue, state-crossing chime | `events/state_crossing` |
 | A toll gantry or plaza billing the truck | Toll charged | toll cue, gantry chime | `events/toll_charged` |
 | The driver's own yawn as fatigue builds | Yawn | fatigue sound, drowsy cue | `driver/yawn` |
+| The synthesized two falling notes standing in for a heads-up about what the road is about to do -- a bend, a merge, a stop still miles off -- once the speech ladder stops speaking them, at the Urgent only rung | Road ahead note | navigation advisory earcon, lead-cue tone | `ladder/road_ahead_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS`, `SpeechCategory.NAVIGATION_ADVISORY` |
 | The synthesized chime standing in for a driving tip once the speech ladder stops speaking coaching, at the Quiet rung | Coaching note | coaching earcon, tip chime | `ladder/coaching_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
 | The synthesized tock standing in for a status update once the speech ladder stops speaking it, at the Quiet rung | Status note | status earcon, state tock | `ladder/status_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
 | Being looked at for something other than speed: damage, missing chains, following too close | Inspection warning | inspection cue, roadside-check tone | `events/inspection_warning` |
@@ -466,7 +467,7 @@ name of the shorter rendering and is no longer a thing the player selects.
 | The loudest rung, technique included | coaching | verbose, tutorial mode, chatty | `DRIVING_SPEECH_MODES` |
 | The working default | standard | normal, default | `DRIVING_SPEECH_MODES` |
 | Confirmations and status become sounds | quiet | terse (that is the rendering, not the rung), minimal | `DRIVING_SPEECH_MODES` |
-| Safety, cost, and route instructions | urgent only | emergency mode, critical only | `DRIVING_SPEECH_MODES` |
+| Safety, cost, and the directions you cannot take back | urgent only | emergency mode, critical only | `DRIVING_SPEECH_MODES` |
 
 Roadside colour -- billboards, place names, landmarks -- is **not** governed
 by these rungs. It answers to the chatter switches and the place-callouts

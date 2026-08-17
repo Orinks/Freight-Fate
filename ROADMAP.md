@@ -980,24 +980,30 @@ onto exit signalling.
       Standard are presently indistinguishable to a player. Needs the
       leg-scoped "spoken once" and enter/worsen/clear-only bookkeeping
       the table's own docstring describes.
-- [ ] **Urgent only's NAVIGATION row is TERSE, not act-now-only (final
-      review of this branch, finding 5).** The spec calls urgent only's
-      navigation cell "act-now cues only," but
-      `DRIVING_SPEECH_DISPOSITIONS["urgent_only"][SpeechCategory.NAVIGATION]`
-      ships `Disposition.TERSE`, so every navigation line speaks there --
-      progress, distance-to-go, and upcoming-stop previews included, not
-      only the turn the player has to take right now.
-      `states/driving_events.py`'s taxonomy split (NAVIGATION vs. STATUS)
-      narrows this in practice for most call sites, which is a defensible
-      reading but was never declared as the intended scope. Needs either a
-      genuine act-now filter inside NAVIGATION (drop progress/distance/
-      upcoming-stop previews specifically, keep the maneuver-now line) or a
-      deliberate decision that the taxonomy split already satisfies the
-      spec, written down here instead of left implicit. Player-facing copy
-      was softened in the meantime from "the turn you have to take" to
-      "route instructions" (CHANGELOG, user manual, the Driving speech
-      settings row, and the settings-version-3 notice) so nothing promises
-      filtering that is not built.
+- [x] **Urgent only's NAVIGATION row is a genuine act-now filter (final
+      review of this branch, finding 5).** Shipped 2026-08-17 as the
+      option the bullet asked for: a real filter inside NAVIGATION rather
+      than a declaration that the taxonomy split was already enough.
+      NAVIGATION_ADVISORY carries the lookahead half -- the lead
+      announcement ("in a mile, take exit 42"), the bend coming, the place
+      still miles off -- and retires to the Road ahead note earcon at
+      urgent only while NAVIGATION keeps the turn itself, the exit, and the
+      stop. Measured on a headless I-65 run: quiet 29 lines, urgent only
+      26, against 0 apart before. Player-facing copy went back to a real
+      promise in the same change (settings row, its help text, the user
+      manual, docs/ontology.md).
+
+      Found while doing it: STOP_AHEAD looks like a lookahead and is not --
+      "Road Ranger at exit 292 in one mile. Press X to signal" names the key
+      that takes the stop, so a tone in its place removes the only way to
+      pull in rather than making the drive quieter. It stays act-now, the
+      same rule the pacing module already gives for CONFIRMATION.
+
+      The bullet's real cause was structural and is worth keeping written
+      down: before this, quiet and urgent only differed in COACHING and
+      STATUS alone, and both were already inaudible at quiet -- so the two
+      quietest rungs were the same setting with different names. A test now
+      fails if any future table lands back in that shape.
 - [ ] **A stale CONFIRMATION line can resurface and bury what the player
       just asked for (found by task 10, adversarial scenario
       `settings_flips_mid_drive`).** A `CONFIRMATION` line (e.g.
