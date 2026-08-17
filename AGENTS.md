@@ -47,8 +47,14 @@ code, in the same change:
 
 - Setup: `uv sync --group dev`
 - Tests: `uv run pytest` (config already applies `-q -n auto` and a per-test
-  timeout). Run focused tests for your area first, the full suite for shared
-  behavior. A slow sweep test needs its own `@pytest.mark.timeout` -- under
+  timeout). **Focused tests while you iterate, the full suite once before you
+  push or merge.** The full run is about four minutes, so spending it on every
+  one-line change is waste -- run the files covering your area instead, as
+  many times as it takes. Run it in full exactly once, at the end, because
+  that is where the surprises live: a canonical-phrase change on 2026-08-17
+  passed every focused suite and still had a stale assertion waiting in
+  `test_lane_discrete.py`, three files away from anything obviously related.
+  A slow sweep test needs its own `@pytest.mark.timeout` -- under
   xdist the thread timeout kills the worker and reads as "node down". What
   `-n auto` resolves to is capped in `tests/conftest.py`: workers load pygame
   and the audio stack, so past about eight the run stops getting faster, and
