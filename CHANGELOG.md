@@ -138,6 +138,21 @@
 
 ### Changed
 
+- **The route key stops repeating the turn you were just given.** On city
+  streets the truck calls each turn as it comes, and pressing R then read the
+  same turn back to you a second time, in your screen reader's voice, right
+  behind the one you had just heard. R now answers where you are and how far
+  to the gate, and leaves the turns to the guidance -- which is what it
+  already did out on the highway.
+
+- **Shift+R is gone.** It read out the next listed highway exit, which is
+  reference material the drive never asks you to do anything about. The next
+  exit is still listed on the status screen, where you can read it when you
+  want it. Plain R now answers the same thing whether or not you are holding
+  Shift, so catching the Shift key by accident no longer gives you silence.
+  On a controller, the right bumper with D-pad up answers route status too,
+  for the same reason.
+
 - **The police marker stops turning the radio down when you asked it not
   to.** With "game sounds step back for speech" switched off, passing a
   patrol still dropped the radio for a moment to make room for the marker
