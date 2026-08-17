@@ -138,6 +138,17 @@
 
 ### Changed
 
+- **The enforcement presence setting is gone, and the road decides instead.**
+  How much police activity you hear is now a fact about where you are: a busy
+  interstate through a heavily policed state at the afternoon peak sounds
+  policed, and a quiet two-lane at four in the morning barely does. Nothing
+  you set. The setting only ever changed volume and never your odds of being
+  pulled over, but at its loudest it also played a passing-cruiser sound for
+  empty patrol spots -- which sounds exactly like a real one, so you could
+  hear a trooper go by while speeding and have nothing happen. An empty spot
+  is now always silent. If you can hear a marked unit, there is somebody in
+  it who can act.
+
 - **The overspeed warning no longer chimes at you for cruise's own speed.**
   It used to start warning at 5 miles per hour over the limit, which is
   exactly the pace adaptive cruise holds, so the truck nagged you for a speed

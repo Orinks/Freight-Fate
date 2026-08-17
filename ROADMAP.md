@@ -2891,6 +2891,47 @@ Mechanics finished after the 1.8.0 cut, so they release with 1.9 (the
 detailed design notes live in the sections further down, whose "Shipped
 for 1.8" framing predates the release split):
 
+- [x] **Enforcement presence is the road's, not a setting (owner ruling,
+      2026-08-16).** The `enforcement_presence` field, its levels, its
+      settings row and its ambience table are gone. It never touched odds --
+      `announced` is set for every staffed post at any level, so the "quiet"
+      player was never safer -- but at `full` it played the marked-unit pass
+      for EMPTY crossovers, and by ear that is identical to a staffed one. So
+      the road sounded saturated with police, a third of whom demonstrably
+      ignored a speeder going by, because nobody was in the car. An unstaffed
+      post is now silent at all times: a marked unit you can hear is one that
+      can act. Loudness comes from `Trip._post_density_at` -- deliberately the
+      same number the placement walk uses, not a parallel formula -- which
+      measured 0.47 to 1.49 across region, road class and clock, bracketing
+      the slider's old 0.45/1.0/1.35. Old settings files carrying the key load
+      unchanged: `Settings.load` only applies keys that still exist.
+- [ ] **Roving patrols can never clock anyone on a highway (measured
+      2026-08-16).** The other half of the same owner report, still OPEN.
+      `KIND_ROVING` uses `METHOD_PACING`, whose `geometry_factor` needs
+      `PACING_MIN_REAL_S = 20` REAL seconds accumulated inside the 1-mile
+      window past the post. The game's slowest time compression is 10x
+      (`TIME_SCALES = (10, 20, 40)`), and at 65 mph that window lasts 5.5 real
+      seconds -- 2.8 at 20x, 1.4 at 40x. So the gate can only be met below
+      about 2x, which the game does not offer, and roving patrols are about a
+      third of all staffed posts. They are also the ones with bodies in the
+      traffic bubble, so this is exactly the "a cop passed me while I was
+      speeding and nothing happened" report from the owner and Shane P.
+      `enforcement_observe`'s own docstring says the real-time hold "is gone
+      entirely" -- true for the speed accrual, which is distance-quantised,
+      but `PACING_MIN_REAL_S` survived it. FIX: quantise the pacing hold by
+      DISTANCE like everything else, smaller than the 1-mile tracking window.
+      Deliberately not done before the 2026-08-17 build: it increases how
+      often players are pulled over and wants a playtest.
+- [ ] **Things an officer never notices that the game already models
+      (2026-08-16).** `_candidates` covers speeding, unsafe equipment, no
+      chains, no lights, following too close and left-lane misuse. Missing,
+      each already simulated elsewhere: an hours-of-service violation
+      (`hos.in_violation`, and a roadside inspection is exactly where it is
+      caught -- the most realistic omission for a truck); the engine brake in
+      a no-engine-brake town (`Trip.engine_brake_ban_at`, which has its own
+      ontology row); and wrong-way driving (`WrongWayMixin`). All three want
+      a `WHAT_` reason, a fine in `models/enforcement`, and a visual-method
+      post to see them.
 - [ ] **The deadline planner is blind to curves (measured 2026-08-16, owner
       question).** `route_drive_hours` walks the route on posted limits
       alone -- there are zero references to curves anywhere in

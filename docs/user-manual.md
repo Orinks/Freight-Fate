@@ -1456,7 +1456,6 @@ quiets it, and settling back under the limit disarms it.
 | Traffic source | Switches between simulated traffic incidents and live reports from state 511 services when available. |
 | Parking source | Switches between simulated truck parking and live availability when available. |
 | Live weather controls calendar | When on, live weather uses today's real date and season. When off, live conditions continue while the career date advances at midnight and its seasons pass. |
-| Enforcement presence | How much police activity you hear on the road. It changes the ambience only: it never changes how likely you are to be pulled over, and asking for the road ahead always reports enforcement in full. |
 
 **Controls:**
 

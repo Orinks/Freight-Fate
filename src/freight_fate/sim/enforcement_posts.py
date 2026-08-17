@@ -26,11 +26,14 @@ a new world-data field:
 ``cmv_unit``         commercial-vehicle enforcement; scales and truck corridors
 ``chain_control``    an entry in ``chain_law_areas``
 
-Presence is not difficulty. Placement and staffing read nothing from the
-enforcement-presence setting and nothing from ``hazard_scale``: the road has
-the police it has. The presence setting governs how much ambient enforcement
-audio the player hears, and never how likely they are to be pulled over
-(see ``settings.enforcement_presence``).
+Presence is not difficulty. Placement and staffing read nothing from
+``hazard_scale``: the road has the police it has. There is no player setting
+here either -- there was one until 2026-08-16, governing ambient volume
+only, and it was removed because at its loudest it gave empty crossovers the
+same pass-by cue a staffed one gets, which by ear is a trooper who watched
+you speed and did nothing. How loud the policed country sounds now comes
+from ``_post_density_at``: the same region, road class and clock that decide
+where the posts go.
 """
 
 from __future__ import annotations
