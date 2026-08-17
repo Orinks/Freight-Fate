@@ -1057,14 +1057,11 @@ SETTINGS_LAYOUT_NOTICES = {
         "called quiet -- your choice came with you. Standard and quiet both "
         "still speak every safety call, route instruction, and money "
         "consequence; quiet only trades confirmations and status updates for "
-        "short sounds instead of words. Two new choices sit on either end: "
-        "coaching, meant to add driving-technique tips on top of everything "
-        "standard says, though for now the two sound the same while that "
-        "part is still being built, and urgent only, which speaks the "
-        "safety calls, what things cost, and the directions you cannot take "
-        "back -- the turn itself, the exit, the stop you are pulling into "
-        "-- while a heads-up about a bend or a town coming up becomes a "
-        "short sound."
+        "short sounds instead of words. A third choice sits below them: "
+        "urgent only, which speaks the safety calls, what things cost, and "
+        "the directions you cannot take back -- the turn itself, the exit, "
+        "the stop you are pulling into -- while a heads-up about a bend or a "
+        "town coming up becomes a short sound."
     ),
 }
 
@@ -1523,13 +1520,13 @@ class SettingsCategoryState(MenuState):
             (
                 lambda: f"Driving speech: {s.driving_speech.replace('_', ' ')}",
                 self._cycle_driving_speech,
-                "How much the road tells you. Coaching and standard sound "
-                "the same for now, speaking every tip, confirmation, and "
-                "status update in full; quiet cuts confirmations and status "
-                "to sounds, and urgent only also turns the heads-up about a "
-                "bend or a town coming up into a short sound, keeping the "
-                "safety calls, what things cost, and the turn itself. "
-                "Billboards, place "
+                "How much the road tells you. Standard speaks every "
+                "confirmation and status update in words, a driving tip "
+                "once per leg, and a status readout when it changes; quiet "
+                "cuts confirmations and status to short sounds; and urgent "
+                "only also turns the heads-up about a bend or a town coming "
+                "up into a short sound, keeping the safety calls, what "
+                "things cost, and the turn itself. Billboards, place "
                 "names and landmarks are not part of this -- they have "
                 "their own switches below.",
             ),

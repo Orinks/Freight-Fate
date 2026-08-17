@@ -37,8 +37,18 @@ class _FakeClock:
         return self.now
 
 
-def test_the_ladder_has_four_named_rungs() -> None:
-    assert DRIVING_SPEECH_MODES == ("coaching", "standard", "quiet", "urgent_only")
+def test_the_ladder_has_three_named_rungs() -> None:
+    """ "coaching" was a fourth rung and is gone (2026-08-17).
+
+    It never differed from standard at the voice -- measured on two
+    scenarios, byte-identical transcripts -- because its two table cells
+    only bite where a coaching tip repeats and the game has exactly one
+    line in that category. A setting that offers a choice and changes
+    nothing audible is worse than one fewer choice in a game played by
+    ear. The CATEGORY survives; the rung does not.
+    """
+    assert DRIVING_SPEECH_MODES == ("standard", "quiet", "urgent_only")
+    assert "coaching" not in DRIVING_SPEECH_DISPOSITIONS
 
 
 def test_every_rung_rules_on_every_category() -> None:
@@ -62,15 +72,6 @@ def test_an_untagged_line_speaks_at_every_rung(mode: str) -> None:
 
 
 def test_the_table_reads_exactly_as_the_spec_says() -> None:
-    assert DRIVING_SPEECH_DISPOSITIONS["coaching"] == {
-        SpeechCategory.SAFETY: Disposition.FULL,
-        SpeechCategory.MONEY: Disposition.FULL,
-        SpeechCategory.NAVIGATION: Disposition.FULL,
-        SpeechCategory.NAVIGATION_ADVISORY: Disposition.FULL,
-        SpeechCategory.COACHING: Disposition.FULL,
-        SpeechCategory.CONFIRMATION: Disposition.FULL,
-        SpeechCategory.STATUS: Disposition.FULL,
-    }
     assert DRIVING_SPEECH_DISPOSITIONS["standard"] == {
         SpeechCategory.SAFETY: Disposition.FULL,
         SpeechCategory.MONEY: Disposition.FULL,
@@ -1480,36 +1481,29 @@ def test_a_drive_gets_quieter_as_the_rung_tightens() -> None:
     }
     counts = {rung: len(lines) for rung, lines in transcripts.items()}
 
-    # Non-vacuous: the coaching rung must actually carry a CONFIRMATION line
-    # and a STATUS line -- the two categories quiet and urgent_only cut to
+    # Non-vacuous: the top rung must actually carry a CONFIRMATION line and
+    # a STATUS line -- the two categories quiet and urgent_only cut to
     # EARCON -- or a tie further down the ladder would pass for the wrong
     # reason (nothing to cut) rather than because the gate did its job.
-    coaching_text = "\n".join(transcripts["coaching"])
-    assert "Reverse selected. Backing slowly." in coaching_text  # CONFIRMATION
-    assert "screaming at redline" in coaching_text  # STATUS
+    standard_text = "\n".join(transcripts["standard"])
+    assert "Reverse selected. Backing slowly." in standard_text  # CONFIRMATION
+    assert "screaming at redline" in standard_text  # STATUS
 
-    # coaching and standard tie on this drive (and on every other candidate
-    # scenario measured while building this test). That is not a scenario
-    # problem: Disposition.FIRST_OCCURRENCE and Disposition.TRANSITIONS --
-    # the two rows "standard" uses to blunt the same COACHING/STATUS
-    # categories "coaching" leaves FULL -- are pinned in
-    # DRIVING_SPEECH_DISPOSITIONS but not actually wired anywhere:
-    # Settings.speaks() only branches on EARCON/SILENT (settings.py), so
-    # every disposition that is not one of those two currently speaks
-    # exactly like FULL. That gap is real, confirmed by grepping every
-    # consumer of Disposition in src/, and is tracked as roadmap follow-up
-    # rather than silently implemented as a side effect of this proof.
-    assert counts["coaching"] >= counts["standard"]
-
-    # The real cut: CONFIRMATION and STATUS both go silent at quiet, and
-    # nothing else in this drive is rung-sensitive. Verified to be the
-    # ladder's doing and not some other terse-mode mechanism (several call
-    # sites carry their own pre-existing ``_terse_speech()`` early return)
-    # by monkeypatching Settings.speaks() to always return True and
-    # confirming this scenario's counts go flat at 19 across every rung.
+    # This scenario's STATUS readout carries a climbing damage number, so
+    # every re-fire is a genuine WORSENING and standard's TRANSITIONS row
+    # correctly keeps speaking it. The once-per-leg and re-assertion halves
+    # of that row are covered directly by
+    # test_standard_says_a_coaching_tip_once_per_leg and
+    # test_standard_speaks_a_status_change_but_not_its_re_assertion.
     assert counts["standard"] > counts["quiet"]
 
-    # quiet and urgent_only are identical on every input Settings.speaks()
+    # On THIS scenario quiet and urgent_only tie: it has no navigation
+    # advisory (no bend, no lead-in, no stop ahead), which is the only
+    # category that separates them at the voice. The separation itself is
+    # covered by test_the_lead_announcement_yields_before_the_turn_itself
+    # and measured on a real drive in the commit that added it.
+    #
+    # Beyond that they are identical on every input Settings.speaks()
     # and Settings.renders_terse() consult -- see DRIVING_SPEECH_DISPOSITIONS:
     # both rungs render every category TERSE or EARCON, and EARCON/SILENT
     # both silence the voice (Disposition's own docstring: "EARCON and
@@ -1732,15 +1726,6 @@ def test_standard_says_a_coaching_tip_once_per_leg() -> None:
         app.ctx.reset_ladder_leg_memory()
         assert not app.ctx._ladder_said
 
-        # Coaching keeps saying it -- that is the whole difference between
-        # the two fullest rungs. Asserted at the ladder's own seam: routing
-        # a second identical line all the way to the voice would be decided
-        # by the pacer, which suppresses same-text repeats on its own timer
-        # and would answer a question this test is not asking.
-        app.ctx.settings.driving_speech = "coaching"
-        tip = "Keep it under 30 or the chains will not last."
-        for _ in range(3):
-            assert not app.ctx._ladder_repeats(tip, SpeechCategory.COACHING, "chains_fast")
         assert driving is not None
     finally:
         app.shutdown()

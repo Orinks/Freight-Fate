@@ -138,6 +138,16 @@
 
 ### Changed
 
+- **The Coaching speech setting is gone; there are three settings now.**
+  Coaching sat above Standard and was meant to add driving-technique tips on
+  top of it. Those tips were never written, so cycling to it changed nothing
+  you could hear -- and in a game you play by ear, a setting that offers a
+  choice and makes no difference just sounds like something is broken.
+  Driving speech is now Standard, Quiet, and Urgent only, and all three
+  sound clearly different from each other. If you had Coaching selected you
+  are now on Standard, which is what you were hearing anyway. It can come
+  back the day there are tips to put in it.
+
 - **Standard stops repeating itself.** Standard was supposed to say a
   driving tip once and give a status readout only when it changes, but it
   was speaking both every single time, exactly like Coaching. It now does

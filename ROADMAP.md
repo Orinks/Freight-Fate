@@ -986,18 +986,30 @@ onto exit signalling.
       which is the "swallows a genuine re-warning" failure the original
       review of this area forbade.
 
-- [ ] **Coaching and standard still sound nearly the same, now for a
-      content reason rather than a code one.** With the dispositions
-      real, the two rungs differ wherever a COACHING line repeats or a
-      STATUS line re-asserts itself unchanged. But exactly ONE line in
-      the game carries `SpeechCategory.COACHING` (chains hammering above
-      the safe speed, `driving_updates.py`), and the status readouts
-      that repeat mostly carry a changed number, which is a genuine
-      transition and correctly still speaks. So the audible gap stays
-      small until coaching's own technique tips are written -- which is
-      the part the manual has always said was still being built. Owner
-      asked for the difference on 2026-08-17; the machinery is now there
-      to hang it on.
+- [x] **The coaching rung is removed (2026-08-17).** Measured on two
+      scenarios after the dispositions went in: byte-identical transcripts
+      against standard, 6 and 8 lines each. The rung's two cells only bite
+      where a coaching tip repeats, and exactly one line in the game carries
+      `SpeechCategory.COACHING`. An inaudible setting is worse than one
+      fewer setting here -- a player cycling it hears nothing change and
+      reasonably concludes it is broken. `DRIVING_SPEECH_MODES` is now
+      three; a saved "coaching" migrates to standard through the existing
+      unknown-rung fallback. The CATEGORY and its earcon stay.
+
+- [ ] **Coaching's technique tips, and the rung to hold them.** The reason
+      the rung was removed rather than kept: there is nothing to say in it.
+      Writing the tips means adding COACHING-category lines (there is one
+      today, chains hammering above the safe speed) and re-adding the rung
+      as one row of `DRIVING_SPEECH_DISPOSITIONS` plus its menu copy. The
+      FIRST_OCCURRENCE machinery standard uses to blunt them is already
+      built and tested, so the rung would be audibly different from standard
+      the day the first tip lands.
+
+      Worth knowing before writing them: the status readouts that repeat
+      mostly carry a changed number, which is a genuine worsening and
+      correctly still speaks at standard. So a tip only earns the rung its
+      difference if it is the kind of thing that would otherwise be said
+      more than once per leg.
 - [x] **Urgent only's NAVIGATION row is a genuine act-now filter (final
       review of this branch, finding 5).** Shipped 2026-08-17 as the
       option the bullet asked for: a real filter inside NAVIGATION rather

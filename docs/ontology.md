@@ -464,7 +464,6 @@ name of the shorter rendering and is no longer a thing the player selects.
 
 | Concept | Canonical spoken noun | Never say | Where |
 | --- | --- | --- | --- |
-| The loudest rung, technique included | coaching | verbose, tutorial mode, chatty | `DRIVING_SPEECH_MODES` |
 | The working default | standard | normal, default | `DRIVING_SPEECH_MODES` |
 | Confirmations and status become sounds | quiet | terse (that is the rendering, not the rung), minimal | `DRIVING_SPEECH_MODES` |
 | Safety, cost, and the directions you cannot take back | urgent only | emergency mode, critical only | `DRIVING_SPEECH_MODES` |

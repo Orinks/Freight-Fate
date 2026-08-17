@@ -557,6 +557,10 @@ class Settings:
         if isinstance(data, dict) and "driving_speech" not in data:
             s.driving_speech = "quiet" if data.get("speech_verbosity") == 0 else "standard"
         if s.driving_speech not in DRIVING_SPEECH_MODES:
+            # Also the migration for a saved "coaching" (the rung removed on
+            # 2026-08-17): it was indistinguishable from standard at the
+            # voice, and standard is the default, so a player who had it
+            # lands on the setting they were already hearing.
             s.driving_speech = DEFAULT_DRIVING_SPEECH
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""

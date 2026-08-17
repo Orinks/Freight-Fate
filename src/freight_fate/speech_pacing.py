@@ -131,21 +131,23 @@ class Disposition(StrEnum):
     SILENT = "silent"  # no words, no sound; log and status keys only
 
 
-DRIVING_SPEECH_MODES = ("coaching", "standard", "quiet", "urgent_only")
+# "coaching" was a fourth rung above standard, and it was removed on
+# 2026-08-17 because it never differed from standard at the voice. Its two
+# table cells (COACHING full rather than once-per-leg, STATUS full rather
+# than on transitions) only bite where a coaching tip repeats, and exactly
+# one line in the game carries SpeechCategory.COACHING -- so cycling to it
+# changed nothing a player could hear. In a game read entirely by ear, a
+# setting that offers a choice and produces no audible difference is worse
+# than one fewer choice: it reads as broken. The CATEGORY stays (that one
+# line, and the Coaching note earcon quiet retires it to); it is the RUNG
+# that is gone, and re-adding it is one row of a data table once there are
+# tips to put in it.
+DRIVING_SPEECH_MODES = ("standard", "quiet", "urgent_only")
 
 # The rung table. Read a row as "at this rung, a line of this category is
 # delivered this way". Safety and money are FULL or TERSE in every row and a
 # test pins that: R1's never-dropped contract outranks any rung.
 DRIVING_SPEECH_DISPOSITIONS: dict[str, dict[SpeechCategory, Disposition]] = {
-    "coaching": {
-        SpeechCategory.SAFETY: Disposition.FULL,
-        SpeechCategory.MONEY: Disposition.FULL,
-        SpeechCategory.NAVIGATION: Disposition.FULL,
-        SpeechCategory.NAVIGATION_ADVISORY: Disposition.FULL,
-        SpeechCategory.COACHING: Disposition.FULL,
-        SpeechCategory.CONFIRMATION: Disposition.FULL,
-        SpeechCategory.STATUS: Disposition.FULL,
-    },
     "standard": {
         SpeechCategory.SAFETY: Disposition.FULL,
         SpeechCategory.MONEY: Disposition.FULL,

@@ -1499,7 +1499,7 @@ def test_the_driving_speech_row_names_the_rung_without_underscores():
         app.shutdown()
 
 
-def test_driving_speech_row_cycles_all_four_rungs_and_wraps():
+def test_driving_speech_row_cycles_all_three_rungs_and_wraps():
     """Drives the real row through the menu's own Enter/Left handling, the
     same path a player uses -- not the settings field directly, so a broken
     wire between the row and DRIVING_SPEECH_MODES would show up here."""
@@ -1516,7 +1516,7 @@ def test_driving_speech_row_cycles_all_four_rungs_and_wraps():
         cat.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.driving_speech == "urgent_only"
         cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.driving_speech == "coaching"  # wrapped
+        assert app.ctx.settings.driving_speech == "standard"  # wrapped
         cat.handle_event(key_event(pygame.K_LEFT))
         assert app.ctx.settings.driving_speech == "urgent_only"
     finally:
