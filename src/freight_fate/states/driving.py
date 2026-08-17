@@ -586,6 +586,11 @@ class DrivingState(
         self.lane_guidance = LaneGuidance()
         self._edge_loop_key: str | None = None  # active edge-ladder rung loop
         self._road_pan_applied = 0.0  # last pursuit-guide pan set on the road bed
+        # The opt-in guide tone: whether its loop is running, and where it
+        # is panned. Separate from the bed's tracker so switching the
+        # setting mid-drive cannot leave either one stuck off center.
+        self._lane_guide_tone_on = False
+        self._lane_guide_pan_applied = 0.0
         # Dead-man's-curve strips: fixed road furniture ahead of each hairpin.
         from ..sim.lane_guidance import HAIRPIN_ADVISORY_MPH, STRIP_LEAD_MI
 

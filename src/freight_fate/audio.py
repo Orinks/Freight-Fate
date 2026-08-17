@@ -83,6 +83,7 @@ CH_ALERT = 16  # continuous alert tones: the stop bar's solid zone
 CH_SIREN = 17  # the held enforcement siren, panned and levelled to the cruiser
 CH_SCALE = 18  # weigh-station approach bed, swelling on real seconds
 CH_SURGE = 19  # liquid running in a tank trailer: gated, silent on other freight
+CH_LANE_GUIDE = 20  # optional lane-guide tone, panned by the guide (off by default)
 # Everything above must be inside the reservation. set_reserved(n) protects
 # channels 0..n-1 from find_channel, and this sat at 14 while CH_RADIO_FX,
 # CH_EDGE and CH_ALERT were added above it -- so on the pygame fallback a

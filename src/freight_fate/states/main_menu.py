@@ -1341,6 +1341,21 @@ class SettingsCategoryState(MenuState):
                     "edge they are on.",
                 ),
                 MenuItem(
+                    lambda: f"Lane guide sound: {'tone' if s.lane_guide_tone else 'road noise'}",
+                    self._toggle_lane_guide_tone,
+                    help="What leans toward the side you are drifting to. "
+                    "Road noise is the road you are already hearing, which "
+                    "moves toward the side you need to steer and goes quiet "
+                    "when you are straight -- nothing is added to the cab. "
+                    "Tone plays a soft note instead, for the same length of "
+                    "time and panned the same way. It is there because on "
+                    "some setups the road is too quiet under the engine to "
+                    "tell which side it went to. Road noise is the default "
+                    "and the one most drivers should stay on: a note held in "
+                    "your ear is tiring over a long haul and can crowd out "
+                    "the rest of what the cab is telling you.",
+                ),
+                MenuItem(
                     lambda: f"Weather sounds volume: {round(s.weather_volume * 100)} percent",
                     lambda: self._volume("weather_volume", 0.1),
                     help="Rain, wind, thunder, snow, and fog sounds.",
@@ -1490,6 +1505,7 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("master_volume", 0.1 * d),
                     lambda d: self._volume("sfx_volume", 0.1 * d),
                     self._cycle_cue_loudness,
+                    self._toggle_lane_guide_tone,
                     lambda d: self._volume("weather_volume", 0.1 * d),
                     lambda d: self._volume("engine_volume", 0.1 * d),
                     self._toggle_engine_voice,
@@ -1920,6 +1936,12 @@ class SettingsCategoryState(MenuState):
         return {"subtle": "quieter", "standard": "standard", "prominent": "louder"}.get(
             self.ctx.settings.lane_cue_loudness, "standard"
         )
+
+    def _toggle_lane_guide_tone(self, _d: int = 1) -> None:
+        s = self.ctx.settings
+        s.lane_guide_tone = not s.lane_guide_tone
+        s.save()
+        self._announce()
 
     def _cycle_cue_loudness(self, d: int) -> None:
         levels = ["subtle", "standard", "prominent"]

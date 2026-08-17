@@ -224,6 +224,23 @@ class Settings:
     # How loud the lane and edge cues speak: the edge-boundary textures,
     # the lane locator, and the dead-man's-curve strips all scale by it.
     lane_cue_loudness: str = "standard"  # subtle/standard/prominent
+    # What the lane guide leans when you drift: the road bed you are already
+    # hearing, or a tone of its own.
+    #
+    # OFF by default, and that is the whole point. The community ruled
+    # against steering tones on the audiogames.net thread (JaceK, 2026-07-17:
+    # a continuous tone overwhelms the soundscape and hurts players with
+    # sensory or hearing conditions), Forza's blind driving assists reached
+    # the same answer, and the guide has panned the existing bed ever since.
+    # What the ruling objects to is a tone nobody asked for, so this is a
+    # choice and never a default.
+    #
+    # It exists because the bed genuinely fails some drivers: vehicle/road is
+    # -33.3 dBFS RMS against the engine's -18.7 and already runs at full gain
+    # by highway speed, and a bed 15 dB under the engine carries no pan at
+    # all (Darren, 2026-08-17). Regenerating the bed louder is still the fix
+    # that helps everyone and is still on the roadmap.
+    lane_guide_tone: bool = False
     # The shipped defaults now match the realistic preset field for field --
     # lane keeping was the only one that did not, and it is the default the
     # row has been claiming since before it could see that field.
@@ -496,6 +513,11 @@ class Settings:
             s.hos_mode = "realistic"
         if s.lane_cue_loudness not in ("subtle", "standard", "prominent"):
             s.lane_cue_loudness = "standard"
+        if not isinstance(s.lane_guide_tone, bool):
+            # An unreadable value falls to the bed, never to the tone: the
+            # ruling's line is that a tone is chosen, so a broken settings
+            # file must not be able to choose one.
+            s.lane_guide_tone = False
         if s.lane_keeping not in LANE_KEEPING_MODES:
             s.lane_keeping = LANE_KEEPING_FALLBACK
             s.lane_keeping_unreadable = True

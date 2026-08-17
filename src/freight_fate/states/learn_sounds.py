@@ -13,6 +13,7 @@ so nothing here plays on movement.
 from __future__ import annotations
 
 from ..ladder_earcons import register_ladder_earcons
+from ..lane_guide_tone import register_lane_guide_tone
 from ..sound_catalog import CATALOG, SoundCategory, SoundEntry
 from ..sound_demo import SoundDemo
 from .base import MenuItem, MenuState
@@ -83,6 +84,7 @@ class LearnSoundCategoryState(MenuState):
         """
         register_enforcement_sounds()
         register_ladder_earcons()
+        register_lane_guide_tone()
         self.demo.stop()
         super().enter()
 

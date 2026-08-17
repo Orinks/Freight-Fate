@@ -176,6 +176,19 @@ _LANE = SoundCategory(
             "direction held, or the exit lane being set after you signalled.",
         ),
         SoundEntry(
+            "Lane guide tone",
+            (
+                Cue("guide/lane_guide_tone", volume=0.35, pan=-0.8, hold_s=1.6),
+                Cue("guide/lane_guide_tone", volume=0.35, pan=0.8, delay_s=2.0, hold_s=1.6),
+            ),
+            "A soft note that leans toward the side you are drifting to and "
+            "stops when you are straight again. You only hear this if you "
+            "have switched the lane guide sound from road noise to tone; the "
+            "default is the road itself leaning, with nothing added.",
+            when="Lane guide sound set to tone, and lane departure warning "
+            "on with lane keeping off or partial.",
+        ),
+        SoundEntry(
             "Rumble strip, single hit",
             (Cue("vehicle/rumble_strip", volume=0.8),),
             "A single hit of rumble strip with nothing held after it. A tired "

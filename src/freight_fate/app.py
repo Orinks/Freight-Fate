@@ -21,6 +21,7 @@ from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
 from .ladder_earcons import register_ladder_earcons
+from .lane_guide_tone import register_lane_guide_tone
 from .message_log import MessageCategory, MessageLog
 from .models.economy import Economy
 from .models.profile import Profile
@@ -136,6 +137,9 @@ class GameContext:
         # cheap, so doing it once here means the drive never has to wait on
         # that screen having been visited first.
         register_ladder_earcons()
+        # Same reason, same shape: the guide tone must exist before a
+        # drive starts, not only after the Learn screen has been opened.
+        register_lane_guide_tone()
 
     def _ladder_applies(self) -> bool:
         """Whether the driving speech rung may silence anything yet.
