@@ -10,7 +10,7 @@ from dataclasses import replace
 from ..data.curves import RouteCurve, route_curves
 from ..data.regions import classify_region
 from ..data.world import Leg, Route, get_world, lane_word
-from ..speech_text import stop_callout, terse_silent
+from ..speech_text import SpokenMessage, stop_callout, terse_silent
 from ..units import distance_unit, spoken_distance, spoken_gap, to_distance
 from .enforcement_posts import (
     KIND_FIXED_SCALE,
@@ -3009,26 +3009,44 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 else:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
 
-    def _traffic_pressure_message(self, pressure: TrafficPressure, ahead: float) -> str:
+    def _traffic_pressure_message(self, pressure: TrafficPressure, ahead: float) -> SpokenMessage:
+        """A traffic advisory, with the terse half these were shipped without.
+
+        These returned a plain ``str``, which the ladder treats as its own
+        terse rendering -- so at quiet "Exit traffic building in 2 miles.
+        Signal early, hold the right exit lane, and be ready to slow near
+        45" was spoken in full, the longest line on the drive. Terse keeps
+        what the player acts on (which side, how far, and the number when
+        there is one) and drops the coaching around it.
+        """
         distance = self._ahead_text(ahead)
         speed = self._speed_value(pressure.target_speed_mph)
+        side = pressure.direction
         if pressure.kind == "exit":
-            return (
+            return SpokenMessage(
                 f"Exit traffic building in {distance}. Signal early, hold the "
-                f"{pressure.direction} exit lane, and be ready to slow near {speed}."
+                f"{side} exit lane, and be ready to slow near {speed}.",
+                f"Exit traffic, {distance}. Hold {side}, {speed}.",
             )
         if pressure.kind == "construction_merge":
             # No target speed: the taper's actual posted limit is spoken
             # separately by the zone warning/entry lines (a real sign, not a
             # traffic-behavior guess). This advisory is merge-only, same
             # rule as merging_traffic_cue below -- see docs/ontology.md.
-            return (
+            return SpokenMessage(
                 f"Traffic squeezing at the construction taper in {distance}. "
-                f"Merge {pressure.direction} early and leave a gap."
+                f"Merge {side} early and leave a gap.",
+                f"Taper squeezing, {distance}. Merge {side}.",
             )
         if pressure.kind == "route_merge":
-            return f"Merging traffic in {distance}. Keep {pressure.direction} and leave a gap."
-        return f"Traffic pack in {distance}. Leave extra following room and be ready for {speed}."
+            return SpokenMessage(
+                f"Merging traffic in {distance}. Keep {side} and leave a gap.",
+                f"Merging traffic, {distance}. Keep {side}.",
+            )
+        return SpokenMessage(
+            f"Traffic pack in {distance}. Leave extra following room and be ready for {speed}.",
+            f"Traffic pack, {distance}. {speed}.",
+        )
 
     def _check_traffic_pressures(self) -> None:
         for pressure in self.traffic_pressures:

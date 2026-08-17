@@ -138,6 +138,26 @@
 
 ### Changed
 
+- **The cruise dial answers with the number at Quiet.** Tapping the speed up
+  or down now says just "62" instead of a full sentence about adaptive
+  cruise, at Quiet and Urgent only. The unit does not change between taps, so
+  saying it every time was the one part of the line carrying nothing. Fuller
+  settings are unchanged.
+
+- **A key you press always answers, whatever your speech setting is.** The
+  quietest settings were silencing replies to controls you had just used --
+  the cruise dial gave a short sound and no number at all. Your setting
+  decides how much the road tells you on its own; it was never meant to
+  decide whether the game answers a question you asked. The reply still gets
+  shorter at the quieter settings, it just no longer goes missing.
+
+- **Traffic warnings got a short form.** "Exit traffic building in 2 miles.
+  Signal early, hold the right exit lane, and be ready to slow near 45" was
+  spoken in full even at Quiet, where it was the longest line on the drive.
+  At Quiet it is now "Exit traffic, 2 miles. Hold right, 45", and the merge
+  and traffic-pack warnings shortened the same way. Fuller settings still
+  hear all of it.
+
 - **Urgent only is a real step down from Quiet now.** The two quietest
   driving speech settings used to be nearly the same thing: everything they
   differed on was already a sound rather than words at Quiet, so switching

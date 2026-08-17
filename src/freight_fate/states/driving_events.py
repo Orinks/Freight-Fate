@@ -55,12 +55,11 @@ _EVENT_CATEGORIES = {
     # is a HAZARD and stays SAFETY.
     TripEventKind.ZONE_ENTER: SpeechCategory.STATUS,
     TripEventKind.ZONE_EXIT: SpeechCategory.STATUS,
-    # Stays act-now despite being a lookahead: it names the key that
-    # takes the stop and gives a mile to press it, so retiring it to a
-    # tone would not make the drive quieter, it would remove the only
-    # way to pull in. Same rule the module docstring gives for
-    # CONFIRMATION -- a line that names a key you must press is not one.
-    TripEventKind.STOP_AHEAD: SpeechCategory.NAVIGATION,
+    # A stop you have not reached yet: "Road Ranger, exit 292, one mile."
+    # Worth a tone at urgent only rather than words -- a player who has
+    # turned the road down that far knows how to pull in, and the arrival
+    # itself (STOP_REACHED) still speaks.
+    TripEventKind.STOP_AHEAD: SpeechCategory.NAVIGATION_ADVISORY,
     TripEventKind.STOP_REACHED: SpeechCategory.NAVIGATION,
     TripEventKind.CHECKPOINT: SpeechCategory.NAVIGATION,
     TripEventKind.GPS_CUE: SpeechCategory.NAVIGATION,
@@ -3027,21 +3026,43 @@ class DrivingEventMixin:
             if self._cruise_exit_mph is not None:
                 ramp_target = min(target, self._cruise_exit_mph)
                 self.ctx.say(
-                    f"Open-road cruise target {self.ctx.settings.speed_text(target)}. "
-                    "Ramp approach target "
-                    f"{self.ctx.settings.speed_text(ramp_target)}.",
+                    SpokenMessage(
+                        f"Open-road cruise target {self.ctx.settings.speed_text(target)}. "
+                        "Ramp approach target "
+                        f"{self.ctx.settings.speed_text(ramp_target)}.",
+                        f"{self._speed_number(target)}, ramp {self._speed_number(ramp_target)}.",
+                    ),
                     category=SpeechCategory.CONFIRMATION,
                 )
             else:
+                # Terse is the number alone. Walking the dial is a rapid
+                # sequence of presses and the player already knows which
+                # control they are holding, so a sentence per press is the
+                # unit repeated, not information (owner, 2026-08-17).
                 self.ctx.say(
-                    f"Adaptive cruise {self.ctx.settings.speed_text(target)}.",
+                    SpokenMessage(
+                        f"Adaptive cruise {self.ctx.settings.speed_text(target)}.",
+                        f"{self._speed_number(target)}.",
+                    ),
                     category=SpeechCategory.CONFIRMATION,
                 )
         else:
             self.ctx.say(
-                f"Open-road cruise target {self.ctx.settings.speed_text(target)}.",
+                SpokenMessage(
+                    f"Open-road cruise target {self.ctx.settings.speed_text(target)}.",
+                    f"{self._speed_number(target)}.",
+                ),
                 category=SpeechCategory.CONFIRMATION,
             )
+
+    def _speed_number(self, mph: float) -> str:
+        """Just the figure, in the player's units -- no unit word.
+
+        What the dial answers with at quiet. The unit never changes between
+        presses, so repeating it on every tap of the Accel/Coast buttons is
+        the one part of the line carrying no information.
+        """
+        return self.ctx.settings.speed_text(mph).split()[0]
 
     def _engage_keeper(
         self,

@@ -254,7 +254,11 @@ class GameContext:
         *,
         category: SpeechCategory | None = None,
     ) -> None:
-        if not self.settings.speaks(category) and self._ladder_applies():
+        if (
+            not self.settings.speaks(category)
+            and self._ladder_applies()
+            and (not self._speech_requested)
+        ):
             # The player's rung silences this category. The line still
             # reaches the review log, so the information is cut from the
             # drive, not from the game -- the review key that exists to
@@ -262,6 +266,16 @@ class GameContext:
             # EARCON rather than SILENT, the sound layer marks the moment
             # instead of the words -- the two rungs that share this branch
             # are otherwise identical at the voice.
+            #
+            # A line the player ASKED for is exempt (``_speech_requested``,
+            # set by ``player_asked()`` around key and button handling) --
+            # the same escape ``say_event`` has carried as ``force`` since
+            # the ladder shipped, missing here. Without it, pressing the
+            # cruise dial at quiet answered with a chime and no number: the
+            # rung was silencing an answer to a question the player had just
+            # asked, which is not what a rung is for (owner, 2026-08-17).
+            # The RENDERING still follows the rung, so quiet answers the
+            # dial with "62" rather than a sentence.
             if isinstance(text, SpokenMessage):
                 text = text.render(self.settings.renders_terse()) or text.normal
             if self._event_pacer.is_silenced_repeat(text):

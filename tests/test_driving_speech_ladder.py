@@ -291,19 +291,44 @@ def test_the_hazard_call_is_safety() -> None:
 
 
 def test_a_planned_stop_is_navigation() -> None:
-    """The heads-up and the arrival are both navigation at every rung.
+    """The heads-up is an advisory; the arrival is not.
 
-    The heads-up looks like an advisory and is not: it names the key that
-    takes the stop and gives you a mile to press it, so a tone in its place
-    would not be a quieter drive, it would be no way to pull in. Measured on
-    a headless I-65 run before this was corrected -- "Road Ranger at exit
-    292 in one mile. Press X to signal" was one of the lines urgent_only
-    would have swallowed. Neither is ever STATUS.
+    "Road Ranger, exit 292, one mile" is worth a tone at urgent only -- a
+    player who has turned the road down that far knows how to pull in
+    (owner, 2026-08-17). Pulling in itself still speaks.
+
+    This was briefly filed the other way on the grounds that the line names
+    the key that takes the stop. It does not, at any rung that would have
+    retired it: ``stop_callout``'s terse form drops the key instruction, so
+    "Press X to signal for the exit" is never what quiet or urgent only
+    would have been cutting. Pinned here because the mistake came from
+    reading a SpokenMessage's normal half while reasoning about its terse
+    one, which is easy to do again.
     """
     from freight_fate.states.driving_events import DrivingEventMixin
 
-    for kind in (TripEventKind.STOP_AHEAD, TripEventKind.STOP_REACHED):
-        assert DrivingEventMixin._event_category(_event(kind)) is SpeechCategory.NAVIGATION
+    assert DrivingEventMixin._event_category(_event(TripEventKind.STOP_AHEAD)) is (
+        SpeechCategory.NAVIGATION_ADVISORY
+    )
+    assert DrivingEventMixin._event_category(_event(TripEventKind.STOP_REACHED)) is (
+        SpeechCategory.NAVIGATION
+    )
+
+    # The terse half is what a cut rung would actually be silencing, and it
+    # carries no key instruction -- so nothing about pulling in is lost.
+    from freight_fate.speech_text import stop_callout
+
+    line = stop_callout(
+        planned_prefix="",
+        typed_name="travel center: Road Ranger",
+        plain_name="Road Ranger",
+        exit_label="exit 292",
+        distance="one mile",
+        parking_normal="",
+        parking_certainty="confirmed",
+    )
+    assert "Press X" in line.normal
+    assert "Press" not in line.terse, line.terse
 
 
 def test_the_lead_announcement_yields_before_the_turn_itself() -> None:
@@ -1598,3 +1623,75 @@ def test_wrapping_a_curve_call_never_flattens_its_short_form():
         assert wrapped.terse is not None
         assert "half a mile" not in wrapped.terse, "the short form must stay short"
         assert wrapped.terse != str(wrapped)
+
+
+def test_a_key_the_player_pressed_is_never_silenced_by_the_rung() -> None:
+    """The rung governs what the road volunteers, not what you asked for.
+
+    ``say_event`` has carried this escape as ``force`` since the ladder
+    shipped; ``say`` never had it, so at quiet the cruise dial answered a
+    press with a chime and no number -- the rung silencing the answer to a
+    question the player had just asked (owner, 2026-08-17). The RENDERING
+    still follows the rung, so the answer gets shorter, never absent.
+    """
+    app = _app()
+    try:
+        app.ctx.settings.driving_speech = "quiet"
+        # The first-run gate outranks the rung; this is not a first drive.
+        _real_driving(app)
+        app.ctx.profile.tutorial_done = True
+
+        spoken: list[str] = []
+        app.ctx.speech.say = speech_stub(spoken)
+
+        # Volunteered: quiet turns a confirmation into a sound.
+        app.ctx.say("Transmission changed to manual.", category=SpeechCategory.CONFIRMATION)
+        assert spoken == []
+
+        with app.ctx.player_asked():
+            app.ctx.say("Transmission changed to manual.", category=SpeechCategory.CONFIRMATION)
+        assert spoken, "a line the player asked for was swallowed by the rung"
+    finally:
+        app.shutdown()
+
+
+def test_the_cruise_dial_answers_with_the_number_alone_at_quiet() -> None:
+    """Walking the dial is a rapid run of presses, and the unit never
+    changes between them -- so at quiet the figure is the whole message
+    (owner, 2026-08-17)."""
+    from freight_fate.speech_text import SpokenMessage
+
+    line = SpokenMessage("Adaptive cruise 62 miles per hour.", "62.")
+    for rung in ("coaching", "standard"):
+        s = Settings()
+        s.driving_speech = rung
+        assert line.render(s.renders_terse()) == "Adaptive cruise 62 miles per hour."
+    for rung in ("quiet", "urgent_only"):
+        s = Settings()
+        s.driving_speech = rung
+        assert line.render(s.renders_terse()) == "62."
+
+
+def test_traffic_advisories_have_a_terse_half(world) -> None:
+    """They shipped as plain strings, which the ladder treats as their own
+    terse rendering -- so "Exit traffic building in 2 miles. Signal early,
+    hold the right exit lane, and be ready to slow near 45" was spoken whole
+    at quiet, the longest line on the drive."""
+    from test_weather_trip import make_trip
+
+    from freight_fate.sim.trip_models import TrafficPressure
+
+    trip, _truck = make_trip(world)
+    for kind in ("exit", "construction_merge", "route_merge", "pack"):
+        pressure = TrafficPressure(
+            start_mi=0.2,
+            end_mi=0.6,
+            kind=kind,
+            direction="right",
+            intensity=0.5,
+            target_speed_mph=45.0,
+            reason="on-ramp",
+        )
+        message = trip._traffic_pressure_message(pressure, 2.0)
+        assert message.terse, kind
+        assert len(message.terse) < len(message.normal), kind
