@@ -2944,6 +2944,25 @@ for 1.8" framing predates the release split):
       -> one per 84. Harness clean on five enforcement scenarios. Three tests
       added, including one that pins the gate inside the window, since
       nothing in 3,940 tests caught either bug.
+- [x] **The road lean was inaudible under the engine (Darren and the owner,
+      2026-08-17).** Measured rather than tuned by ear: the road bed source is
+      -33.6 dBFS RMS against the engine loops' -18.7, and `set_road_noise`
+      already runs the road channel at full gain by highway speed, so there
+      was no headroom to raise. The lean carries its meaning in the PAN of
+      that bed, so a bed 15 dB under the engine carries nothing. The engine
+      now ducks to `GUIDE_DUCK_LEVEL = 0.45` while `GuidanceFrame.awake`,
+      the same shape as the speech duck, on its own multiplier so a shift-gap
+      duck mid-bend cannot cancel it. Measured result: the road goes from
+      -15.2 dB relative to the engine to -8.2. PARTIAL BY DESIGN, and worth
+      an ear check -- 8 dB down is better, not obviously enough. The deeper
+      fix is the asset itself, which is simply a quiet recording; normalising
+      it would fix every use at once but changes ambient road level and needs
+      a repack, so it was not the build-morning change.
+      FOUND ON THE WAY: `AudioEngine` never delegated the new setter, so the
+      first wiring was a silent no-op on the real engine -- the same shape as
+      the shipped-but-never-played trooper sound. Both backends carry the
+      factor now, and it is a class attribute so an instance built with
+      `__new__` (which the audio backend tests do) still multiplies by 1.0.
 - [ ] **Learn game sounds demos cues the player's settings make impossible
       (Darren, 2026-08-17).** He reported the road lean as "very very quiet
       and you can hardly even hear it". Measured: it is not quiet. On the
