@@ -1742,13 +1742,6 @@ class DrivingUpdateMixin:
         if frame.pan != self._road_pan_applied:
             self.ctx.audio.set_loop_pan(CH_ROAD, frame.pan)
             self._road_pan_applied = frame.pan
-        # The lean says which way to steer by panning the road bed, and that
-        # bed sits about 15 dB under the engine with the road channel already
-        # at full gain -- there is no room to raise it, so the engine steps
-        # back instead, the same way it does for speech. Only while the guide
-        # is awake: a drift or a bend in the lookahead, and back the moment
-        # the truck is straight (owner and Darren, 2026-08-17).
-        self.ctx.audio.set_guidance_duck(frame.awake)
         if frame.centered:
             # The drift settled: the old centered earcon still says so.
             self.ctx.audio.play("vehicle/lane_centered", volume=0.45, pan=0.0)

@@ -138,14 +138,6 @@
 
 ### Changed
 
-- **The road lean can actually be heard now.** The cue that slides the road
-  noise toward the way the wheel should go was recorded far quieter than the
-  engine, so on the move it was buried and you could not tell which side it
-  had gone to -- which is the entire point of it. The engine now steps back
-  while the road is leaning, the same way it does when the game speaks, and
-  comes straight back once you are running straight. Reported by Darren and
-  by Josh, who both described it the same way: you can hardly hear it.
-
 - **Roving patrols can pull you over now. They never could before.** The
   troopers that run with traffic rather than sitting on a crossover were
   incapable of writing a ticket on a highway -- not unlucky, incapable. If
