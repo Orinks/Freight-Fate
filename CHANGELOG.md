@@ -138,6 +138,17 @@
 
 ### Changed
 
+- **Hairpins that were not really there are gone.** The map's curve data was
+  built by measuring the shape of real roads, and in about one place in fifty
+  the measurement produced a bend that cannot exist: a turn sharper than the
+  piece of road it sits on, or a left and a right meeting at a single point
+  with no straight between them. On the road you heard a hairpin called, felt
+  the truck fight a corner, and saw nothing in the terrain to explain it --
+  Josh hit one on US-285 north of Santa Fe, a 25 mile an hour hairpin called
+  on a road posted 35. Those records are now thrown out when the map loads.
+  Real switchbacks are untouched: a genuine reversal has road between the two
+  halves, and that is exactly what the check looks for.
+
 - **The Coaching speech setting is gone; there are three settings now.**
   Coaching sat above Standard and was meant to add driving-technique tips on
   top of it. Those tips were never written, so cycling to it changed nothing

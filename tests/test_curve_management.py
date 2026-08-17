@@ -431,3 +431,91 @@ class TestTripCurveIntegration:
         # The first curve should be in announced
         expected_key = f"curve:{first.start_mi:.3f}:{first.direction}"
         assert expected_key in trip._announced_curves
+
+
+def _rec(start_mi, end_mi, direction, radius_ft, deflection_deg, advisory=25, connector=False):
+    from freight_fate.data.curves import CurveRecord
+
+    return CurveRecord(
+        start_mi=start_mi,
+        apex_mi=(start_mi + end_mi) / 2,
+        end_mi=end_mi,
+        direction=direction,
+        advisory_mph=advisory,
+        min_radius_ft=radius_ft,
+        deflection_deg=deflection_deg,
+        connector=connector,
+    )
+
+
+def test_a_curve_too_short_to_hold_its_own_arc_is_dropped():
+    """Owner playtest, 2026-08-17: "is a hairpin supposed to be on this
+    route?" on US-285 north of Santa Fe.
+
+    A 160 ft radius turning 79.9 degrees needs 223 ft of road; that record
+    claimed 53. Both existing screens correctly passed it -- it sits in real
+    mountain terrain, where real switchbacks live -- so the pacenote layer
+    called a 25 mph hairpin on a road posted 35. This screen asks a question
+    terrain cannot excuse: does the record agree with itself?
+    """
+    from freight_fate.data.curves import _screen_geometry, arc_consistency
+
+    # 500 ft radius, 30 degrees: needs 262 ft of arc.
+    honest = _rec(1.00, 1.10, "L", 500, 30.0)  # 528 ft of span, comfortable
+    assert arc_consistency(honest) > 1.0
+    # The same bend claiming to happen in 11 ft.
+    impossible = _rec(2.00, 2.002, "L", 500, 30.0)
+    assert arc_consistency(impossible) < 0.1
+
+    kept = _screen_geometry([honest, impossible])
+    assert honest in kept
+    assert impossible not in kept
+
+
+def test_a_zero_tangent_reversal_takes_both_sides_with_it():
+    """A digitized kink reads as opposite-direction curves meeting at a
+    point. A through highway cannot swap lock with no straight between, so
+    the whole wiggle goes -- including the side whose own arithmetic happens
+    to be fine, because the road does not really go left-right there."""
+    from freight_fate.data.curves import _screen_geometry
+
+    # Left is arithmetically fine on its own; right contradicts itself.
+    left = _rec(10.00, 10.05, "L", 160, 35.4)
+    right = _rec(10.05, 10.06, "R", 160, 79.9)
+    far = _rec(12.00, 12.20, "R", 900, 20.0, advisory=45)
+
+    kept = _screen_geometry([left, right, far])
+    assert left not in kept, "the fine-looking half of a zig-zag stays a zig-zag"
+    assert right not in kept
+    assert far in kept, "an unrelated curve down the road is untouched"
+
+
+def test_a_real_switchback_pair_with_road_between_them_survives():
+    """US-550 over Red Mountain Pass really does reverse. The screen must
+    only take reversals with NO tangent -- otherwise it eats the mountain
+    roads the previous two screens were careful to leave alone."""
+    from freight_fate.data.curves import _screen_geometry
+
+    # Two tight, honest bends with a tenth of a mile of straight between.
+    first = _rec(5.00, 5.10, "L", 200, 90.0, advisory=25)
+    second = _rec(5.20, 5.30, "R", 200, 90.0, advisory=25)
+    kept = _screen_geometry([first, second])
+    assert first in kept and second in kept
+
+
+def test_ramps_are_exempt_like_the_other_screens():
+    """Connectors really are that sharp and are recorded against a different
+    baseline; the screens above exempt them and so does this one."""
+    from freight_fate.data.curves import _screen_geometry
+
+    ramp = _rec(1.00, 1.001, "L", 500, 30.0, connector=True)
+    kept = _screen_geometry([ramp])
+    assert ramp in kept
+
+
+def test_a_record_missing_its_geometry_is_never_screened_on_arithmetic():
+    from freight_fate.data.curves import _screen_geometry, arc_consistency
+
+    blank = _rec(1.00, 1.001, "L", 0, 0.0)
+    assert arc_consistency(blank) > 1.0
+    assert blank in _screen_geometry([blank])

@@ -986,6 +986,26 @@ onto exit signalling.
       which is the "swallows a genuine re-warning" failure the original
       review of this area forbade.
 
+- [x] **Curve records that contradict their own geometry are screened at
+      load (2026-08-17).** Found in an owner playtest: a 160 ft "hairpin"
+      on US-285 turning 79.9 degrees over 53 feet of road, where that
+      geometry needs 223. Both existing screens passed it correctly -- it is
+      in real mountain terrain, which they deliberately leave alone. The new
+      screen asks only whether a record agrees with itself, which terrain
+      cannot excuse: span against the arc its own radius and deflection
+      require, plus zero-tangent opposite-direction pairs (the digitized-kink
+      signature, and what caught this one). Drops 1,190 of 51,231 surviving
+      mainline rows, 2.3%. Connectors exempt, matching the screens above.
+
+- [ ] **Advisory speeds above 80 mph in the baked curve data.** 298 of 804
+      curves on four sampled mountain routes carry an advisory over 80,
+      including 85 -- no US advisory plaque reads that. Harmless today only
+      because an advisory above the posted limit never fires a pacenote, so
+      nothing is spoken and nothing is wrong on the road; it is the bake's
+      0.3 g formula running unclamped on gentle curves. Worth clamping at
+      the bake so the data means what it says, and so a future consumer
+      cannot read one as a real number.
+
 - [x] **The coaching rung is removed (2026-08-17).** Measured on two
       scenarios after the dispositions went in: byte-identical transcripts
       against standard, 6 and 8 lines each. The rung's two cells only bite
