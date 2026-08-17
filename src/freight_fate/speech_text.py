@@ -253,6 +253,17 @@ def overspeed_nag(limit_speed_text: str, limit_value: str) -> SpokenMessage:
     )
 
 
+def _pacenote_terse(pacenote: str) -> str:
+    """The pacenote's own short form, or the pacenote itself.
+
+    ``SpokenMessage`` subclasses ``str``, so anything that concatenates or
+    formats one gets a plain ``str`` back and the short form is gone without
+    a word. Every helper that wraps a curve call has to reach for the short
+    form deliberately, which is what this is for.
+    """
+    return getattr(pacenote, "terse", None) or str(pacenote)
+
+
 def cruise_curve_easing(pacenote: str, advisory_speed_text: str) -> SpokenMessage:
     """The curve call plus the assist's easing clause.
 
@@ -263,7 +274,23 @@ def cruise_curve_easing(pacenote: str, advisory_speed_text: str) -> SpokenMessag
     """
     return SpokenMessage(
         f"{pacenote} Adaptive cruise easing to {advisory_speed_text} for the bend.",
-        pacenote,
+        _pacenote_terse(pacenote),
+    )
+
+
+def cruise_curve_dropped(pacenote: str) -> SpokenMessage:
+    """The curve call plus the handback when the bend is under cruise's floor.
+
+    Was a bare ``message + " Adaptive cruise off; ..."``, and that plus sign
+    is why the quiet rung still spoke full curve calls: concatenating a
+    ``SpokenMessage`` yields a plain ``str``, so the short form was thrown
+    away before the delivery layer ever looked for it (owner playtest,
+    2026-08-17). Terse keeps the handback -- losing cruise is not a detail a
+    driver can be left to infer -- and takes the pacenote's short form.
+    """
+    return SpokenMessage(
+        f"{pacenote} Adaptive cruise off; you need manual speed control.",
+        f"{_pacenote_terse(pacenote)} Cruise off.",
     )
 
 

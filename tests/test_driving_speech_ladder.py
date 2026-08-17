@@ -1511,3 +1511,32 @@ def test_the_cab_is_categorised_so_quiet_is_actually_quiet():
         i = joined.index(marker)
         window = joined[i : i + 260]
         assert "SpeechCategory.CONFIRMATION" in window, marker
+
+
+def test_wrapping_a_curve_call_never_flattens_its_short_form():
+    """A plus sign is all it took to lose the quiet rung's whole benefit.
+
+    ``SpokenMessage`` subclasses ``str``, so ``message + " ..."`` hands back
+    a plain ``str`` and the terse rendering is gone without a word. The curve
+    call was built as a pair, and one branch concatenated a cruise handback
+    onto it, so at quiet the driver still heard the full sentence (owner
+    playtest, 2026-08-17).
+    """
+    from freight_fate.speech_text import (
+        SpokenMessage,
+        cruise_curve_dropped,
+        cruise_curve_easing,
+    )
+
+    pacenote = SpokenMessage(
+        "Sharp right, half a mile. Advise 35 miles per hour.",
+        terse="Sharp right, 35 miles per hour.",
+    )
+    for wrapped in (
+        cruise_curve_dropped(pacenote),
+        cruise_curve_easing(pacenote, "35 miles per hour"),
+    ):
+        assert isinstance(wrapped, SpokenMessage), "the pair must survive the wrapper"
+        assert wrapped.terse is not None
+        assert "half a mile" not in wrapped.terse, "the short form must stay short"
+        assert wrapped.terse != str(wrapped)

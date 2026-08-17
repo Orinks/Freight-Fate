@@ -3,7 +3,12 @@ from __future__ import annotations
 
 from ..message_log import MessageCategory
 from ..speech_pacing import SpeechCategory
-from ..speech_text import SpokenMessage, cruise_curve_easing, roadside_chatter
+from ..speech_text import (
+    SpokenMessage,
+    cruise_curve_dropped,
+    cruise_curve_easing,
+    roadside_chatter,
+)
 from ..units import spoken_feet_or_meters
 from .base import TimedMessageState
 from .driving_core import *
@@ -363,7 +368,7 @@ class DrivingEventMixin:
                 else:
                     self._cancel_cruise()
                     self.ctx.say_event(
-                        message + " Adaptive cruise off; you need manual speed control.",
+                        cruise_curve_dropped(message),
                         interrupt=True,
                         category=self._event_category(event),
                     )
