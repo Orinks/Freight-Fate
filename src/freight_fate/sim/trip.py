@@ -90,12 +90,17 @@ LIMIT_WARNING_MAX_LEAD_MI = 5.0
 # spoken ("for the next half a mile"), so a short village zone reads as a
 # passing event, not a new cruising speed.
 LIMIT_SHORT_ZONE_MI = 2.5
-# Below this there is no warning to give: the zone is already underfoot, the
-# distance renders as "in 0 miles", and the number it names is not yet the one
-# in force -- so it contradicts the limit S answers with. The "Entering ...
-# zone" line is the announcement for anything this close (owner playtest,
-# 2026-08-17).
-ZONE_WARNING_MIN_MI = 0.15
+# Below this there is no warning to give: the zone is already underfoot and
+# the number it names is not yet the one in force, so it contradicts the limit
+# S answers with. The "Entering ... zone" line is the announcement for
+# anything this close (owner playtest, 2026-08-17). The wording of everything
+# above it is the ladder's job -- see Trip._ahead_text -- so this is only
+# about whether a warning is worth giving, not about how it reads.
+ZONE_WARNING_MIN_MI = 0.1
+# A navigation lead closer than this is the near announcement's own
+# moment: both would speak in one breath. Matches the +/-0.1 window the
+# near cue fires in.
+NAV_LEAD_MIN_MI = 0.1
 LIMIT_SCAN_STRIDE_MI = 0.1
 LIMIT_SCAN_MAX_MI = 3.0
 
@@ -459,6 +464,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             to_distance(miles, self.imperial),
             distance_unit(self.imperial, plural=False),
         )
+
+    def _ahead_text(self, miles: float) -> str:
+        """How far to something still in front of the truck, never "0 miles".
+
+        ``_distance_text`` rounds to whole units, so everything inside half a
+        mile announced itself as zero -- "In 0 miles, facility access road
+        ahead" while the road was already under the wheels (owner playtest,
+        2026-08-17, and the same rounding the R key was fixed for in July).
+        Quarter-mile steps, or hundred-metre steps in metric, which is what
+        the limit calls already speak.
+        """
+        return _spoken_short_miles(miles, self.imperial)
 
     def _gap_text(self, miles: float) -> str:
         return spoken_gap(miles, self.imperial)
@@ -1181,7 +1198,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # Build pacenote: "sharp curve left, half mile, advisory 35"
         direction = "left" if cr.direction == "L" else "right"
         prefix = "sharp " if cr.severity in ("hairpin", "sharp") else ""
-        distance = self._distance_text(ahead)
+        distance = self._ahead_text(ahead)
         self._emit(
             TripEventKind.CURVE,
             f"{prefix}curve {direction}, {distance}, advisory {cr.advisory_mph:.0f}.",
@@ -2180,7 +2197,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         if cue is None:
             return "No listed highway exit ahead before the destination."
         ahead = max(0.0, cue.at_mi - self.position_mi)
-        return f"Next listed exit in {self._distance_text(ahead)}: {cue.text}."
+        return f"Next listed exit in {self._ahead_text(ahead)}: {cue.text}."
 
     def next_exit_cue(self) -> NavigationCue | None:
         for cue in self.navigation_cues:
@@ -2450,18 +2467,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             else:
                 merge_part = "All lanes stay open through the work; hold your lane. "
             return (
-                f"Brake now! In {self._distance_text(ahead)}, construction ahead. "
+                f"Brake now! In {self._ahead_text(ahead)}, construction ahead. "
                 f"{merge_part}Speed limit "
                 f"{self._speed_value(CONSTRUCTION_TAPER_LIMIT_MPH)} at the taper, then "
                 f"{self._speed_value(zone.limit_mph)} through the work zone."
             )
         if zone.reason == "heavy traffic" and zone.aadt is not None:
             return (
-                f"In {self._distance_text(ahead)}, {self._congestion_phrase()} ahead. "
+                f"In {self._ahead_text(ahead)}, {self._congestion_phrase()} ahead. "
                 f"Traffic slowing to {self._speed_value(zone.limit_mph)}."
             )
         return (
-            f"In {self._distance_text(ahead)}, {zone.reason} ahead. "
+            f"In {self._ahead_text(ahead)}, {zone.reason} ahead. "
             f"Speed limit {self._speed_value(zone.limit_mph)}."
         )
 
@@ -2829,6 +2846,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             TripEventKind.GPS_CUE,
             f"Speed limit drops to {self._speed_value(limit)} in "
             f"{_spoken_short_miles(ahead, self.imperial)}.",
+            # A posting, like the arrival line it precedes: S answers it on
+            # demand and the speed control acts on it unasked.
+            limit_change=True,
         )
 
     def name_facility(self, plain_name: str, full_name: str) -> str:
@@ -2887,7 +2907,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                         typed_name=self.name_facility(stop.name, stop.spoken_name),
                         plain_name=stop.name,
                         exit_label=stop.exit_label,
-                        distance=self._distance_text(ahead),
+                        distance=self._ahead_text(ahead),
                         parking_normal=stop.parking_text,
                         parking_certainty=stop.parking,
                         exit_hint=self.exit_hint,
@@ -2937,8 +2957,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                     )
                     self._emit(
                         TripEventKind.GPS_CUE,
-                        f"Traffic slowing ahead in {self._distance_text(ahead)}; "
-                        f"{cue.text}{speed}.",
+                        f"Traffic slowing ahead in {self._ahead_text(ahead)}; {cue.text}{speed}.",
                         cue=cue,
                     )
                 continue
@@ -2961,14 +2980,24 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             # Street maneuvers use a block-scale lookahead; the highway-scale
             # default would put a whole surface chain "ahead" at departure.
             lookahead = LOCAL_TURN_LOOKAHEAD_MI if cue.kind == "local_turn" else 2.0
-            if 0 < ahead <= lookahead and advance_key not in self._announced_navigation:
+            # The near announcement fires from 0.1 mile out, so a lead any
+            # closer than that says the same thing twice in a breath -- which
+            # is what the old "skip it if it renders as 0 miles" guard was
+            # really protecting against. Expressed as the distance it always
+            # was, so the wording is free to improve without silently
+            # resurrecting the double.
+            if (
+                NAV_LEAD_MIN_MI < ahead <= lookahead
+                and advance_key not in self._announced_navigation
+            ):
                 self._announced_navigation.add(advance_key)
-                distance = self._distance_text(ahead)
-                # Within rounding range of the cue the near announcement is
-                # imminent; "In 0 miles, ..." reads as a bug, so skip the lead.
-                if not distance.startswith("0 "):
-                    message = f"In {distance}, {cue.text}."
-                    self._emit(TripEventKind.GPS_CUE, message, cue=cue)
+                # Was rendered with _distance_text and then suppressed when it
+                # came out as "0 ...", which lost the lead announcement
+                # entirely inside half a mile rather than wording it. The
+                # ladder never says zero, so the cue is spoken with a real
+                # distance instead of dropped.
+                message = f"In {self._ahead_text(ahead)}, {cue.text}."
+                self._emit(TripEventKind.GPS_CUE, message, cue=cue)
             if -0.1 <= ahead <= 0.1 and near_key not in self._announced_navigation:
                 self._announced_navigation.add(near_key)
                 if cue.kind == "checkpoint":
@@ -2977,7 +3006,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                     self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
 
     def _traffic_pressure_message(self, pressure: TrafficPressure, ahead: float) -> str:
-        distance = self._distance_text(ahead)
+        distance = self._ahead_text(ahead)
         speed = self._speed_value(pressure.target_speed_mph)
         if pressure.kind == "exit":
             return (

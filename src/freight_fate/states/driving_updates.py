@@ -3110,7 +3110,13 @@ class DrivingUpdateMixin:
                     "Automatic braking.",
                     interrupt=True,
                     review=False,
-                    category=SpeechCategory.SAFETY,
+                    # The assist reporting that IT acted, not a demand on the
+                    # driver -- the braking is audible and the hazard warning
+                    # that preceded it carried the action. At quiet, where the
+                    # rule is "speak what the player must do something about"
+                    # (owner, 2026-08-17), that makes it an earcon. The hazard
+                    # call itself stays SAFETY and speaks at every rung.
+                    category=SpeechCategory.CONFIRMATION,
                 )
             elif self._aeb_emergency and not self._automatic_braking_escalated:
                 self._automatic_braking_escalated = True

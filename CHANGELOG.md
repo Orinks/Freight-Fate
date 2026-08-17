@@ -138,6 +138,15 @@
 
 ### Changed
 
+- **Nothing ahead of you is ever "in 0 miles" any more.** A warning about
+  something less than half a mile off used to round the distance down to
+  zero, so the truck would say "in 0 miles, facility access road ahead" when
+  what it meant was "a quarter mile, get ready". Anything still in front of
+  you now counts down in quarter miles and then says "just ahead", the same
+  wording the speed limit calls already use. Distances that are lengths
+  rather than gaps -- "continue on Interstate 10 for 60 miles" -- are
+  unchanged. Found in Josh's own playtest.
+
 - **Being stopped short of a stop bar is always said out loud.** If you come
   to a halt well back from a red light or a stop sign, the truck tells you to
   drive up and close the gap. It was already trying to -- but on a busy
