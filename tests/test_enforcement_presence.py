@@ -986,6 +986,32 @@ def test_a_stop_cuts_the_radio_rather_than_ducking_it(monkeypatch):
         app.shutdown()
 
 
+def test_a_cue_leaves_the_radio_alone_when_ducking_is_off(monkeypatch):
+    """Owner, 2026-08-17: "the cop marker is ducking the radio when I have
+    auto-ducking off."
+
+    It was. The setting reads "game sounds step back for speech" and this is
+    an earcon rather than speech, which is how it came to be exempt -- but
+    from the seat there is one behavior with one name. The marker still
+    plays; it just no longer digs itself a hole first.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        played = []
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: played.append(a))
+        app.ctx.settings.duck_audio_for_speech = False
+
+        d._play_enforcement_marker()
+
+        assert d._radio_cue_duck == 1.0, "ducked with the setting off"
+        assert played, "the marker itself must still sound"
+    finally:
+        app.shutdown()
+
+
 def test_a_cue_ducks_the_radio_on_its_own_field(monkeypatch):
     """Never the picket duck: that one self-heals and would drag this away."""
     from freight_fate.app import App
@@ -994,6 +1020,7 @@ def test_a_cue_ducks_the_radio_on_its_own_field(monkeypatch):
     try:
         d = _driving(app)
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        app.ctx.settings.duck_audio_for_speech = True
         d._duck_radio_for_cue()
         assert d._radio_cue_duck < 1.0
         assert d._radio_picket_duck == 1.0

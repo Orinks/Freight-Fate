@@ -269,7 +269,17 @@ class EnforcementWatchMixin:
         streams, so an enforcement earcon played on top of the radio is
         competing with material that sounds exactly like it. Ducking is what
         makes the synthesized signature legible.
+
+        Honors the player's ducking setting (owner, 2026-08-17: the cop
+        marker ducked the radio with auto-ducking off). The setting reads
+        "game sounds step back for speech" and this is an earcon rather than
+        speech, which is how it came to be exempt -- but from the seat there
+        is one behavior with one name, and a player who has said do not step
+        my audio back did not mean "except for this". The earcon still plays
+        at full level; it just no longer digs itself a hole first.
         """
+        if not self.ctx.settings.duck_audio_for_speech:
+            return
         self._radio_cue_duck = RADIO_CUE_DUCK
         self._radio_cue_duck_s = RADIO_CUE_DUCK_S
         self._apply_radio_volume()
