@@ -139,7 +139,11 @@ def test_full_game_flow_headless(monkeypatch):
         assert app.state.phase == "delivery"
         departure = next(text for text in reversed(spoken) if "Dispatch routed you to" in text)
         assert "Loaded trip is" in departure
-        assert "Departing now" in departure
+        # This flow never started the engine, and the departure line says so
+        # rather than claiming a departure the truck cannot make -- it names
+        # the very key the drive below presses next.
+        assert "Departing now" not in departure
+        assert "The engine is off." in departure
         assert "Legal HOS plan" not in departure
         assert "Fuel-capable stops" not in departure
         assert "Parking notes" not in departure

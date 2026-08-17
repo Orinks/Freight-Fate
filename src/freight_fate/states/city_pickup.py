@@ -12,6 +12,7 @@ from ..settings import Settings
 from ..sim.surge import liquid_load_for
 from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState, TimedMessageState
+from .driving_core import FacilityEngineMixin
 
 PICKUP_CHECK_IN_MIN = 15.0
 PICKUP_LOADING_MIN = 60.0
@@ -124,14 +125,26 @@ def start_loaded_drive(
     ctx.profile.active_trip = driving.snapshot()
     ctx.save_profile()
     next_context = driving.trip.next_navigation_context()
+    # Never "Departing now" over a dead engine: a driver who shut down at the
+    # shipper leaves on a real start-up, and the line has to say so or the
+    # truck simply sits there in silence.
+    tail = (
+        "Departing now."
+        if engine_on
+        else (
+            f"The engine is off. Press {ctx.control_hint('engine')} to start it, "
+            f"wait for air pressure, then press {ctx.control_hint('parking_brake')} "
+            "to release the parking brake."
+        )
+    )
     ctx.say(
-        f"{lead}{route_departure_summary(route, ctx.settings)} {next_context} Departing now.",
+        f"{lead}{route_departure_summary(route, ctx.settings)} {next_context} {tail}",
         interrupt=True,
     )
     ctx.push_state(driving)
 
 
-class PickupFacilityState(MenuState):
+class PickupFacilityState(FacilityEngineMixin, MenuState):
     title = "Pickup facility"
     open_sound_key = "facility/dock_gate"
     intro_help = (
@@ -165,6 +178,10 @@ class PickupFacilityState(MenuState):
         # theatre and the inspector still writes up the box they refused.
         self._trailer_refused = trailer_refused
         self._offer_refusal = False
+        # Gallons idled away at this facility, reported once when the load is
+        # on. Deliberately not saved: it is a line about the wait just served,
+        # not a running total the driver has to carry.
+        self._idle_gallons = 0.0
         self.announce_speed_control_status = announce_speed_control_status
         if driving is not None:
             self.truck = driving.truck
@@ -202,6 +219,26 @@ class PickupFacilityState(MenuState):
     def facility(self) -> str:
         return self.job.origin_facility_text()
 
+    @property
+    def facility_truck(self) -> TruckState:
+        return self.truck
+
+    def on_facility_engine_changed(self) -> None:
+        # The snapshot already carries engine_on, so a shutdown here resumes
+        # shut down rather than the truck quietly restarting itself on load.
+        self._save_state()
+
+    def _charge_facility_idle(self, minutes: float) -> None:
+        """Facility time is engine time, if the driver leaves it running.
+
+        Check-in, a trailer swap and an hour on the dock never pass through
+        the per-frame loop that burns fuel, so an idling truck used to sit
+        there for free -- which left the kill switch with nothing to be worth
+        (Jake, 2026-08-17). Same idle rate the road charges, ~0.8 gallons an
+        hour, so shutting down is the driver's call and not a scolding.
+        """
+        self._idle_gallons += self.truck.burn_idle_fuel_over_game_time(minutes * 60.0)
+
     def presence(self):
         from ..discord_presence import PresenceState
 
@@ -238,6 +275,11 @@ class PickupFacilityState(MenuState):
                     )
                 if plan.trailer is not None:
                     lead += f" {plan.trailer.describe()}"
+                # Rounded to a tenth, so the smallest number that can be
+                # spoken is one worth hearing rather than "0.0 gallons".
+                if round(self._idle_gallons, 1) > 0.0:
+                    lead += f" You burned {self._idle_gallons:.1f} gallons idling through the wait."
+                self._idle_gallons = 0.0
                 self._just_loaded = False
         elif self.checked_in:
             if plan.is_drop_hook:
@@ -323,6 +365,7 @@ class PickupFacilityState(MenuState):
                     "write-up stays with them instead of you.",
                 )
             )
+        items.append(self.facility_engine_item())
         items.append(
             MenuItem(
                 "Pickup status",
@@ -419,6 +462,7 @@ class PickupFacilityState(MenuState):
         p.game_hours += TRAILER_SWAP_MIN / 60.0
         p.duty_log.record("on_duty_not_driving", start, p.game_hours, self.facility, "trailer swap")
         p.hos.on_duty(TRAILER_SWAP_MIN)
+        self._charge_facility_idle(TRAILER_SWAP_MIN)
         self._trailer_refused = True
         self._offer_refusal = False
         self._save_state()
@@ -468,6 +512,7 @@ class PickupFacilityState(MenuState):
             "on_duty_not_driving", start, p.game_hours, self.facility, "shipper check-in"
         )
         p.hos.on_duty(PICKUP_CHECK_IN_MIN)
+        self._charge_facility_idle(PICKUP_CHECK_IN_MIN)
         self.checked_in = True
         self._save_state()
         self.refresh(keep_index=False)
@@ -544,6 +589,7 @@ class PickupFacilityState(MenuState):
         activity = "dropping and hooking" if plan.is_drop_hook else "loading"
         p.duty_log.record("on_duty_not_driving", start, p.game_hours, self.facility, activity)
         p.hos.on_duty(plan.minutes)
+        self._charge_facility_idle(plan.minutes)
         self.loaded = True
         self._just_loaded = True
         self._save_state()
@@ -617,12 +663,13 @@ class PickupFacilityState(MenuState):
             else "not checked in"
         )
         brake = "parking brake set" if self.truck.parking_brake else "parking brake released"
+        engine = "Engine running" if self.truck.engine_on else "Engine off"
         self.ctx.say(
             f"Pickup at {self.facility}: {state}. "
             f"Cargo is {self.job.weight_tons:.0f} tons of {self.job.cargo.label}. "
             f"Destination is {self.job.destination_facility_text()}. "
             f"Current speed {self.ctx.settings.speed_text(self.truck.speed_mph)}. "
-            f"Air pressure {self.truck.air_pressure_psi:.0f} psi, {brake}."
+            f"{engine}. Air pressure {self.truck.air_pressure_psi:.0f} psi, {brake}."
             + self._speed_control_pause_text()
         )
 
@@ -662,6 +709,7 @@ class PickupFacilityState(MenuState):
             f"Destination: {self.job.spoken_destination}",
             f"Status: {state}",
             f"Speed: {self.ctx.settings.hud_speed_text(self.truck.speed_mph)}",
+            f"Engine: {'running' if self.truck.engine_on else 'off'}",
             f"Air: {self.truck.air_pressure_psi:.0f} psi   "
             f"{'parking set' if self.truck.parking_brake else 'parking released'}",
         ]

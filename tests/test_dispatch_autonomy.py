@@ -249,7 +249,11 @@ def test_company_departure_runs_dispatch_assigned_route(monkeypatch):
         assert app.state.phase == "delivery"
         assert app.state.route.cities == expected.cities
         departure = next(text for text in spoken if "Dispatch routed you to" in text)
-        assert "Departing now" in departure
+        # This fixture never starts the engine, so the line ends with the
+        # start-up keys rather than announcing a departure the truck cannot
+        # make. What matters here is that dispatch routed it and no route
+        # menu appeared.
+        assert "Loaded trip is" in departure
         assert not any("Route planning to" in text for text in spoken)
     finally:
         app.shutdown()

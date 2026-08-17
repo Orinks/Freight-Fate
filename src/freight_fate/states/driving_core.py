@@ -967,16 +967,91 @@ def _secure_truck_for_stopped_menu(
     return True
 
 
+def set_engine_running(ctx, truck, *, running: bool) -> bool:
+    """Start or stop the engine from a menu, keeping the audio loop in step.
+
+    The driving frame loop only notices engine transitions that happen inside
+    ``truck.update()``, so a change made while a menu holds the screen has to
+    move the audio itself; otherwise the loop idles on forever with the engine
+    off, or the truck runs in silence. Returns False only when the starter
+    refuses (no fuel), which leaves both the truck and the audio untouched.
+    """
+    if running:
+        if not truck.start_engine():
+            return False
+        ctx.audio.engine_start()
+        return True
+    if truck.engine_on:
+        truck.stop_engine()
+        ctx.audio.engine_stop()
+    return True
+
+
+FACILITY_ENGINE_SHUT_DOWN_ITEM = "Shut down the engine"
+FACILITY_ENGINE_START_ITEM = "Start the engine"
+
+
+class FacilityEngineMixin:
+    """The engine kill switch, offered where a facility menu has taken over.
+
+    Arriving at a shipper or a receiver parks the truck under half a mile an
+    hour and hands straight to a menu, so the road's engine control is out of
+    reach at exactly the moment a driver reaches for it: sitting at the gate,
+    or waiting on a dock crew (new player feedback, 2026-08-17). A state mixes
+    this in and supplies ``facility_truck``; both facilities then offer the
+    same one row, worded the same way.
+    """
+
+    @property
+    def facility_truck(self):
+        raise NotImplementedError
+
+    def facility_engine_item(self) -> MenuItem:
+        """One row that changes face, never two rows to arrow past."""
+        if self.facility_truck.engine_on:
+            return MenuItem(
+                FACILITY_ENGINE_SHUT_DOWN_ITEM,
+                self._toggle_facility_engine,
+                help="Shut it down while you sit here. No fuel burned and no "
+                "idle noise; you start it again before you pull out.",
+            )
+        return MenuItem(
+            FACILITY_ENGINE_START_ITEM,
+            self._toggle_facility_engine,
+            help="Bring the engine back up. Air pressure has to reach 100 psi "
+            "before the parking brake will release.",
+        )
+
+    def on_facility_engine_changed(self) -> None:
+        """Hook for a facility state that keeps a resume snapshot of its own."""
+
+    def _toggle_facility_engine(self) -> None:
+        truck = self.facility_truck
+        if truck.speed_mph > DOCKING_MAX_MPH:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Stop before touching the engine.")
+            return
+        if truck.engine_on:
+            set_engine_running(self.ctx, truck, running=False)
+            self.on_facility_engine_changed()
+            self.refresh(keep_index=True)
+            self.ctx.say("Engine off.")
+            return
+        if not set_engine_running(self.ctx, truck, running=True):
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("The engine will not start.")
+            return
+        self.on_facility_engine_changed()
+        self.refresh(keep_index=True)
+        self.ctx.say(f"Engine running. Air pressure {truck.air_pressure_psi:.0f} psi.")
+
+
 def _shut_down_engine(driving: DrivingState) -> str:
     """Stop the engine before a night's sleep; no truck idles through ten
     hours. Returns the spoken prefix, empty when it was already off."""
     if not driving.truck.engine_on:
         return ""
-    driving.truck.stop_engine()
-    # The audio engine must follow: the driving frame loop only notices
-    # engine-off transitions that happen inside truck.update(), so a stop
-    # made here (from a rest menu) would leave the loop playing forever.
-    driving.ctx.audio.engine_stop()
+    set_engine_running(driving.ctx, driving.truck, running=False)
     return "You shut down the engine. "
 
 

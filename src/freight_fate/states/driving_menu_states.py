@@ -640,7 +640,7 @@ class DriverAppScreenState(MenuState):
         return "Road chatter: no enforcement reports nearby."
 
 
-class FacilityArrivalState(MenuState):
+class FacilityArrivalState(FacilityEngineMixin, MenuState):
     title = "Destination facility"
     open_sound_key = "facility/dock_gate"
     intro_help = "Use arrows to navigate, Enter to select. Dock and deliver completes the job."
@@ -652,6 +652,10 @@ class FacilityArrivalState(MenuState):
     @property
     def facility(self) -> str:
         return self.driving._destination_facility_text()
+
+    @property
+    def facility_truck(self):
+        return self.driving.truck
 
     def presence(self):
         from ..discord_presence import PresenceState
@@ -704,6 +708,7 @@ class FacilityArrivalState(MenuState):
             )
         return [
             primary,
+            self.facility_engine_item(),
             MenuItem(
                 "Check paperwork",
                 self._paperwork,
@@ -735,6 +740,9 @@ class FacilityArrivalState(MenuState):
         def complete() -> None:
             _advance_rest_clock(d, plan.minutes)
             d.hos.on_duty(plan.minutes)
+            # A dock wait is engine time too. The settlement already reports
+            # the tank, so this one is felt rather than announced.
+            d.truck.burn_idle_fuel_over_game_time(plan.minutes * 60.0)
             d._set_status(
                 "Trailer dropped. Hooked to an empty, paperwork signed."
                 if plan.is_drop_hook
@@ -840,6 +848,7 @@ class FacilityArrivalState(MenuState):
             f"At {self.facility}. Hauling {d.job.weight_tons:.0f} tons of "
             f"{d.job.cargo.label}. Current speed "
             f"{self.ctx.settings.speed_text(d.truck.speed_mph)}. "
+            f"{'Engine running' if d.truck.engine_on else 'Engine off'}. "
             f"Stop, then {self._finish_instruction()}."
         )
 
@@ -852,6 +861,7 @@ class FacilityArrivalState(MenuState):
             "",
             f"Facility: {self.facility}",
             f"Speed: {self.ctx.settings.hud_speed_text(self.driving.truck.speed_mph)}",
+            f"Engine: {'running' if self.driving.truck.engine_on else 'off'}",
             "Stopping required before delivery settlement.",
             "",
         ] + [("> " if i == self.index else "  ") + item.text for i, item in enumerate(self.items)]

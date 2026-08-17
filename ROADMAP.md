@@ -5027,6 +5027,19 @@ Follow-ups for a later facility/keyboard polish pass:
   complete-stop threshold and an atomic brake-set handoff before menus freeze
   driving physics.
 
+- [x] Offer the engine kill switch inside the pickup and delivery facility
+  menus, and charge facility waits idle fuel at the road's rate so shutting
+  down is a decision rather than decoration. Departing with the engine off
+  names the start-up keys instead of announcing a departure.
+
+- Let the driver set and release the parking brake themselves at a facility.
+  Arrival currently parks the truck for them, which is what prompted the
+  request (Jake, 2026-08-17); a menu row alone would be inert, so this wants
+  the arrival gate to stop handing over an already-parked truck.
+- Drive to the terminal after a delivery instead of being narrated there.
+  `ArrivalState` settles the load and reports the driver parked at the home
+  terminal; the empty-reposition trip type (`_settle_bobtail`) is most of the
+  machinery a real post-delivery leg would need.
 - Keep the future cargo loading/securing minigame optional and audio-first,
   with a simple timed loading path preserved for players who do not want an
   extra ritual at every dock.

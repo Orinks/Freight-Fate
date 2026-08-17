@@ -4,6 +4,21 @@
 
 ### Added
 
+- **You can shut the engine off while you wait at a shipper or a receiver.**
+  Pulling through the gate parks the truck and opens the facility menu, so
+  the engine key was out of reach at exactly the moment you would reach for
+  it. There is now a row in both facility menus that shuts the engine down,
+  and turns into Start the engine once it is off. Shutting down at a pickup
+  is remembered if you save and quit, and if you pull out with the engine
+  still off, the departure tells you so and names the keys to start up and
+  release the parking brake instead of claiming you are already rolling.
+  Idling through check-in and an hour on the dock now burns fuel at the same
+  rate the road charges, about eight tenths of a gallon an hour, and the
+  loaded report tells you how much went while you sat there. Shut down and
+  it costs you nothing. Asked for by a new player and by Jake, who pointed
+  out that a wait which burns no fuel gives you no reason to reach for the
+  switch.
+
 - **Elberton, Georgia is on the map, and it hauls granite.** The town cuts
   better than a third of all the headstones and memorials made in the United
   States, so its docks are quarries and monument plants: Polycor Georgia

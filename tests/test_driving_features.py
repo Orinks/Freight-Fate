@@ -2881,10 +2881,13 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         assert all(key != "ui/menu_open" for key, _volume in played)
         labels = [item.text for item in app.state.items]
         assert labels[0] in DELIVERY_ACTIONS
-        assert labels[1:] == ["Check paperwork", "Check arrival status"]
+        # The engine row sits with the actions, ahead of the two questions.
+        assert labels[1] in ("Shut down the engine", "Start the engine")
+        assert labels[2:] == ["Check paperwork", "Check arrival status"]
         assert app.state.index == 0
 
-        app.state.handle_event(key_event(pygame.K_DOWN))
+        while app.state.items[app.state.index].text != "Check paperwork":
+            app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
 
         assert isinstance(app.state, FacilityArrivalState)
@@ -2898,7 +2901,8 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         assert "Cargo condition" in spoken[-1]
         assert "Dock and deliver to settle" in spoken[-1]
 
-        app.state.handle_event(key_event(pygame.K_UP))
+        while app.state.index:
+            app.state.handle_event(key_event(pygame.K_UP))
         minutes_before_unloading = driving.trip.game_minutes
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert "Unloading cargo" in app.state.lines()[0]
