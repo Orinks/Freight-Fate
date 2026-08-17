@@ -49,9 +49,10 @@ routes it offers the search and ``--max-miles`` how long they may be.
 The driving assists that change what the truck does on a grade are arguments
 too -- ``--descent off|realistic|interactive``, ``--assists``,
 ``--predictive-cruise on|off``, ``--lane-keeping``, ``--transmission``, and
-``--verbosity`` -- so a behaviour can be compared across settings without
-editing your own. Anything not given falls back to your real settings, so the
-playtest otherwise reproduces what a player would actually get.
+``--verbosity coaching|standard|quiet|urgent_only`` -- so a behaviour can be
+compared across settings without editing your own. Anything not given falls
+back to your real settings, so the playtest otherwise reproduces what a
+player would actually get.
 """
 
 from __future__ import annotations
@@ -474,7 +475,7 @@ def build_driving(ctx, hit: Hit, args):
     if args.transmission:
         s.automatic_transmission = args.transmission == "automatic"
     if args.verbosity is not None:
-        s.speech_verbosity = args.verbosity
+        s.driving_speech = args.verbosity
 
     # The canonical key, not the display name the route sets are written in:
     # a career's current_city is a slug ("dallas_tx_us"), and cloud backup
@@ -484,6 +485,14 @@ def build_driving(ctx, hit: Hit, args):
     origin_key = ctx.world.resolve_city_key(hit.origin)
     destination_key = ctx.world.resolve_city_key(hit.destination)
     ctx.profile = Profile(name="Playtest", current_city=origin_key)
+    # A bench career is not somebody's first drive. Without this the profile
+    # defaults to tutorial_done=False, first-run teaching outranks the rung
+    # by design (GameContext._ladder_applies), and the driving speech ladder
+    # is switched OFF for the whole run -- so --verbosity quiet reported
+    # "quiet" and changed nothing, and every rung sounded identical. Found
+    # when the owner playtested the quiet rung and heard standard
+    # (2026-08-17).
+    ctx.profile.tutorial_done = True
     route = ctx.world.supported_route(hit.origin, hit.destination)
     # The job's endpoints are keys for the same reason. Delivering runs
     # ``profile.current_city = job.destination``, so a job built from the route
@@ -540,10 +549,7 @@ def _print_setup(ctx, driving, hit: Hit, start_mi: float, args) -> None:
     print(f"  cruise            : {f'set {args.cruise:.0f} mph' if args.cruise else 'off'}")
     print("  your real settings:")
     print(f"    transmission    : {'automatic' if s.automatic_transmission else 'manual'}")
-    print(
-        f"    speech verbosity: {s.speech_verbosity} "
-        f"({'terse' if s.speech_verbosity == 0 else 'normal'})"
-    )
+    print(f"    driving speech  : {s.driving_speech}")
     print(f"    units           : {'miles' if s.imperial_units else 'kilometers'}")
     print(f"    speed keeper    : {'on' if s.speed_keeper else 'off'}")
     print(f"    descent control : {getattr(s, 'descent_speed_control', 'n/a')}")
@@ -564,12 +570,20 @@ def run_headless(app, driving, args) -> None:
     from freight_fate.states.driving_damage import cargo_status_clause
 
     spoken: list[tuple[str, str]] = []
-    app.ctx.say_event = lambda text, interrupt=False, **_: spoken.append(("event", text))
-    # ``**_`` for the same reason say_event above has it: the shim must absorb
-    # every keyword App.say grows, or the bench dies the first time the game
-    # uses one. It crashed on ``review=`` -- passed by award_achievement, so
-    # any run that earned a badge took the whole bench down mid-drive.
-    app.ctx.say = lambda text, interrupt=True, **_: spoken.append(("say", text))
+    # Stub the VOICE layer (ctx.speech.say/say_event), not ctx.say/say_event
+    # themselves. The driving verbosity ladder's gate and the event pacer's
+    # repeat/backlog handling both live *inside* GameContext.say/say_event --
+    # replacing those methods (the old approach here) skipped both, so this
+    # bench printed every line the game would say with no rung applied and
+    # no repeat suppression running, not what a player at their real
+    # ``--verbosity`` setting actually hears. By the time a line reaches the
+    # voice layer it has already been gated and rendered to a plain string,
+    # so the shim only needs (text, interrupt).
+    # ``**_`` absorbs anything the voice backend's own say/say_event might
+    # grow beyond that -- the shim must not crash the bench the first time
+    # the backend gains a keyword.
+    app.ctx.speech.say_event = lambda text, interrupt=False, **_: spoken.append(("event", text))
+    app.ctx.speech.say = lambda text, interrupt=True, **_: spoken.append(("say", text))
 
     class NoKeys:
         def __getitem__(self, _key):
@@ -621,7 +635,7 @@ def run_headless(app, driving, args) -> None:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    from freight_fate.settings import LANE_KEEPING_MODES
+    from freight_fate.settings import DRIVING_SPEECH_MODES, LANE_KEEPING_MODES
 
     p = argparse.ArgumentParser(
         description="Drop into a chosen piece of road with the truck already set up."
@@ -683,7 +697,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="curve speed assistance: off means you brake for the bends yourself",
     )
     p.add_argument("--transmission", choices=("automatic", "manual"), help="override the gearbox")
-    p.add_argument("--verbosity", type=int, choices=(0, 1, 2), help="speech verbosity override")
+    p.add_argument("--verbosity", choices=DRIVING_SPEECH_MODES, help="driving speech rung override")
     p.add_argument("--weather", help="force a weather kind, e.g. rain, snow, clear")
     p.add_argument("--hour", type=float, help="clock hour to start at")
     p.add_argument("--headless", type=float, default=0.0, help="bench for N minutes, no window")

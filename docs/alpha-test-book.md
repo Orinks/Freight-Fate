@@ -413,11 +413,11 @@ change."
 Pass when: every change is announced, lands in the adjacent lane, and
 the lane readout always agrees with what you last did.
 
-### 4.2 Brake or change lanes
+### 4.2 Change lanes or brake
 
 Setup: a busy leg, Standard or Realistic pressure.
 
-Do: when a dodgeable hazard calls "Brake or change lanes!", dodge with a
+Do: when a dodgeable hazard calls "Change lanes or brake!", dodge with a
 lane change instead of braking — but press L first to know where the
 traffic is.
 

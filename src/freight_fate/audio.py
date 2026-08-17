@@ -132,6 +132,11 @@ ENGINE_BAND_KEYS = frozenset(key for key, _native in ENGINE_BANDS)
 # a full second ring -- so this is a single key swap, not a per-band table.
 JAKE_RECORDED_KEY = "engine/jake_1600"
 JAKE_CLASSIC_KEY = "engine/jake_1600_synth"
+# Every recorded jake cut is engine/jake_<rpm band>; the classic voice is the
+# one synthesized cut that stands in for all of them. Derived rather than
+# written out: a bare prefix literal reads as a sound key to the
+# asset-existence sweep, and there is no file by that name.
+JAKE_BAND_PREFIX = JAKE_RECORDED_KEY.rsplit("_", 1)[0] + "_"
 # Crossfades live in a narrow window around each adjacent pair's GEOMETRIC
 # midpoint (log-space), this fraction of the gap wide. Two things follow:
 # a cut never plays far from its recorded speed (rate excursions stay under
@@ -2161,7 +2166,14 @@ class AudioEngine:
         swaps it for the classic synth cut when the setting calls for it, so
         neither call site needs to know the A/B exists.
         """
-        if self._jake_voice_classic and key == JAKE_RECORDED_KEY:
+        if self._jake_voice_classic and key.startswith(JAKE_BAND_PREFIX):
+            # EVERY rpm band, not just the 1600 one. The drive picks a cut per
+            # band -- engine/jake_1200 through _2200 -- and the classic voice
+            # has a single synthesized cut, so matching only the 1600 key left
+            # a driver on "classic" hearing the synth at 1600 and Jerry's
+            # recording at every other band. Rpm moves constantly on a
+            # descent, so the two voices alternated: the owner heard both at
+            # once (2026-08-17). One voice per setting, whatever the rpm.
             return JAKE_CLASSIC_KEY
         return key
 

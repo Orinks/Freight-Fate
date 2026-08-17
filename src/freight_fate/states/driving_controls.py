@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..speech_pacing import SpeechCategory
 from .driving_core import *
 from .driving_menu_states import DrivingStatusState
 from .driving_pause_states import PauseMenuState
@@ -649,7 +650,7 @@ class DrivingControlsMixin:
             t.stop_engine()
             self.ctx.audio.engine_stop()
             self._set_status("Engine off.")
-            self.ctx.say("Engine off.")
+            self.ctx.say("Engine off.", category=SpeechCategory.CONFIRMATION)
         else:
             if t.start_engine():
                 self._note_instruction_demonstrated("engine")
@@ -666,7 +667,10 @@ class DrivingControlsMixin:
                     self.ctx.controller.rumble.alert()
                     self._low_air_said = True
                 self._set_status("Engine running.")
-                self.ctx.say("Engine running. " + self._air_start_instruction())
+                self.ctx.say(
+                    "Engine running. " + self._air_start_instruction(),
+                    category=SpeechCategory.CONFIRMATION,
+                )
                 if self.tutorial:
                     self.tutorial.on_engine_started()
             else:
@@ -700,14 +704,20 @@ class DrivingControlsMixin:
             if t.release_parking_brake():
                 self.ctx.audio.play("vehicle/brake_release", volume=0.65)
                 self._set_status("Parking brake released.")
-                self.ctx.say(f"Parking brake released. Air pressure {t.air_pressure_psi:.0f} psi.")
+                self.ctx.say(
+                    f"Parking brake released. Air pressure {t.air_pressure_psi:.0f} psi.",
+                    category=SpeechCategory.CONFIRMATION,
+                )
                 if self.tutorial:
                     self.tutorial.on_parking_brake_released()
             else:
                 self.ctx.audio.play("ui/error")
                 self._set_status("Parking brake locked: build air pressure first.")
                 if self._terse_speech():
-                    self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
+                    self.ctx.say(
+                        f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.",
+                        category=SpeechCategory.CONFIRMATION,
+                    )
                 else:
                     self.ctx.say(
                         f"Parking brake stays set. Air pressure {t.air_pressure_psi:.0f} psi; "
@@ -746,7 +756,10 @@ class DrivingControlsMixin:
         self.ctx.audio.play("vehicle/brake_set", volume=0.65)
         self._set_status("Parking brake set.")
         slowing = " Truck still slowing." if t.speed_mph > DOCKING_MAX_MPH else ""
-        self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.{slowing}")
+        self.ctx.say(
+            f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.{slowing}",
+            category=SpeechCategory.CONFIRMATION,
+        )
 
     def _manual_shift(self, gear: int) -> None:
         # Through the truck, not the gearbox: the speed-dependent guards (a
@@ -1234,7 +1247,7 @@ class DrivingControlsMixin:
             lines.append(f"{entry.get('label', 'Buff')}: {left}")
         for info in self.rig_buffs.values():
             lines.append(f"{info.get('label', 'Rig service')}: good for the rest of the trip")
-        if self.ctx.settings.speech_verbosity >= 1:
+        if not self.ctx.settings.renders_terse():
             fatigue = self.ctx.profile.fatigue
             if fatigue >= hos.FATIGUE_DROWSY:
                 lines.append(f"Fatigue: {fatigue:.0f} percent")
@@ -1539,9 +1552,13 @@ class DrivingControlsMixin:
         """
         if self.ctx.settings.pedal_latch == "off":
             if self._throttle_latch.release():
-                self.ctx.say_event("Throttle released.", interrupt=False)
+                self.ctx.say_event(
+                    "Throttle released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                )
             if self._brake_latch.release():
-                self.ctx.say_event("Brake released.", interrupt=False)
+                self.ctx.say_event(
+                    "Brake released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                )
             return key_up, key_down, False
         for latch, held, name in (
             (self._throttle_latch, key_up, "Throttle"),
@@ -1571,9 +1588,11 @@ class DrivingControlsMixin:
                         line = "Throttle latched. Adaptive cruise holds the speed."
                     elif self._keeper_mph is not None:
                         line = "Throttle latched. Speed keeper holds the speed."
-                self.ctx.say_event(line, interrupt=False)
+                self.ctx.say_event(line, interrupt=False, category=SpeechCategory.CONFIRMATION)
             elif event == "released":
-                self.ctx.say_event(f"{name} released.", interrupt=False)
+                self.ctx.say_event(
+                    f"{name} released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                )
         throttle_overridden = (
             key_down
             or pad_brake > 0.05
@@ -1582,9 +1601,13 @@ class DrivingControlsMixin:
             or self._overspeed_active
         )
         if throttle_overridden and self._throttle_latch.release():
-            self.ctx.say_event("Throttle released.", interrupt=False)
+            self.ctx.say_event(
+                "Throttle released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+            )
         if (key_up or pad_throttle > 0.05) and self._brake_latch.release():
-            self.ctx.say_event("Brake released.", interrupt=False)
+            self.ctx.say_event(
+                "Brake released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+            )
         return (
             key_up,
             key_down or self._brake_latch.latched,

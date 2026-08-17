@@ -317,7 +317,7 @@ def test_terse_speaks_every_chatter_category_its_switch_leaves_on(
         heard = []
         monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard, terse=True))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         app.ctx.settings.set_all_chatter(True)
 
         d._handle_trip_event(_chatter_event(category, spoken))
@@ -342,7 +342,7 @@ def test_terse_stays_silent_for_a_chatter_category_switched_off(
         heard = []
         monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard, terse=True))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         app.ctx.settings.set_all_chatter(True)
         setattr(app.ctx.settings, switch, False)
 
@@ -368,7 +368,7 @@ def test_normal_speech_still_hears_the_whole_chatter_line(
         heard = []
         monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
-        app.ctx.settings.speech_verbosity = 1
+        app.ctx.settings.driving_speech = "standard"
         app.ctx.settings.set_all_chatter(True)
 
         d._handle_trip_event(_chatter_event(category, spoken))
@@ -389,7 +389,7 @@ def test_a_switched_off_category_is_silent_in_terse_even_mid_drive(monkeypatch):
         heard = []
         monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard, terse=True))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         app.ctx.settings.set_all_chatter(True)
 
         d._handle_trip_event(_chatter_event("river", "Crossing the Cahaba River."))
@@ -417,12 +417,12 @@ def test_village_callouts_keep_the_place_callouts_ladder(monkeypatch):
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         app.ctx.settings.set_all_chatter(True)
         app.ctx.settings.place_callouts = "all"
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
 
         d._handle_trip_event(_chatter_event("village", "Passing Fairfield."))
         assert heard == []
 
-        app.ctx.settings.speech_verbosity = 1
+        app.ctx.settings.driving_speech = "standard"
         d._ambient_event_cooldown_s = 0.0
         d._pending_ambient_event = None
         monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard))

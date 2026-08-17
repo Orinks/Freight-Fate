@@ -42,12 +42,12 @@ def test_empty_terse_rendering_drops_the_line_whole() -> None:
 
 def test_plus_extends_both_renderings() -> None:
     pair = SpokenMessage(
-        "Brake or change lanes! Slow car ahead.", "Brake or change lanes! Slow car ahead."
+        "Change lanes or brake! Slow car ahead.", "Change lanes or brake! Slow car ahead."
     )
     grown = pair.plus("Automatic speed control canceled.")
     assert grown.render(terse=False).endswith("Automatic speed control canceled.")
     assert grown.render(terse=True).endswith("Automatic speed control canceled.")
-    assert grown.render(terse=True).startswith("Brake or change lanes!")
+    assert grown.render(terse=True).startswith("Change lanes or brake!")
 
 
 def test_plus_on_a_dropped_line_keeps_the_suffix_in_terse() -> None:
@@ -84,10 +84,10 @@ def test_say_event_speaks_the_rendering_the_mode_asks_for() -> None:
         # The first line finishes (the clock steps past it) before the next
         # speaks, so neither the repeat window, the backlog projection, nor
         # the cut-line requeue gets a say in a test about rendering choice.
-        app.ctx.settings.speech_verbosity = 1
+        app.ctx.settings.driving_speech = "standard"
         app.ctx.say_event(pair, interrupt=True)
         clock.now += 30.0
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         app.ctx.say_event(pair, interrupt=True)
 
         assert spoken == [
@@ -103,7 +103,7 @@ def test_a_terse_dropped_line_never_reaches_the_voice_or_the_log() -> None:
     try:
         spoken: list[str] = []
         app.ctx.speech.say_event = speech_stub(spoken)
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         before = len(app.ctx.message_log.messages)
 
         app.ctx.say_event(terse_silent("You swerve around it. Well done."), interrupt=False)
@@ -119,7 +119,7 @@ def test_the_main_channel_resolves_pairs_too() -> None:
     try:
         spoken: list[str] = []
         app.ctx.speech.say = speech_stub(spoken)
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
 
         app.ctx.say(SpokenMessage("New achievement! Night Owl. Flavor text.", "Night Owl."))
         app.ctx.say(terse_silent("Nice shift."))

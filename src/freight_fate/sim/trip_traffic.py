@@ -145,7 +145,7 @@ class TripTrafficMixin:
         open road, never for a fixed inspection facility or a chain
         checkpoint (docs/ontology.md).
         """
-        distance = self._distance_text(max(0.0, ahead_mi))
+        distance = self._ahead_text(max(0.0, ahead_mi))
         confidence = self._cb_confidence(post)
         side = self._cb_side(post)
         if post.kind == KIND_WORK_ZONE:
@@ -200,7 +200,7 @@ class TripTrafficMixin:
         catches for as long as the trooper is busy with the stop this line
         reports.
         """
-        distance = self._distance_text(max(0.0, ahead_mi))
+        distance = self._ahead_text(max(0.0, ahead_mi))
         confidence = self._cb_confidence(post)
         side = self._cb_side(post)
         if confidence == "strong":
@@ -221,7 +221,7 @@ class TripTrafficMixin:
         Presence governs ambience; it never withholds information the player
         asked a key for.
         """
-        distance = self._distance_text(max(0.0, ahead_mi))
+        distance = self._ahead_text(max(0.0, ahead_mi))
         where = self._cb_side(post)
         if ahead_mi <= 0:
             return f"an enforcement post {where} on this stretch"

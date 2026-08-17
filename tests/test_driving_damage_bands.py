@@ -299,7 +299,7 @@ def test_the_last_call_names_the_number_that_stops_the_truck(app, monkeypatch):
 def test_terse_last_call_still_names_the_wall(app, monkeypatch):
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
-    app.ctx.settings.speech_verbosity = 0
+    app.ctx.settings.driving_speech = "quiet"
     driving = _driving(app)
     t = _rolling(driving, 60.0)
 
@@ -328,7 +328,7 @@ def test_a_second_excursion_into_a_band_warns_again(app, monkeypatch):
 def test_terse_speech_keeps_a_short_form_of_every_band(app, monkeypatch):
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
-    app.ctx.settings.speech_verbosity = 0
+    app.ctx.settings.driving_speech = "quiet"
     driving = _driving(app)
     t = _rolling(driving, 60.0)
 
@@ -363,7 +363,7 @@ def test_repair_announces_the_band_on_the_way_back_down(app, monkeypatch):
 def test_terse_repair_keeps_the_fact_without_the_flourish(app, monkeypatch):
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
-    app.ctx.settings.speech_verbosity = 0
+    app.ctx.settings.driving_speech = "quiet"
     driving = _driving(app)
     t = _rolling(driving, 60.0)
     t.damage_pct = DAMAGE_LIMP_PCT + 5.0
@@ -521,7 +521,7 @@ def test_the_wall_states_the_fact_the_cost_and_the_way_out(app, monkeypatch):
 def test_terse_wall_message_keeps_all_three(app, monkeypatch):
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
-    app.ctx.settings.speech_verbosity = 0
+    app.ctx.settings.driving_speech = "quiet"
     driving = _driving(app)
     t = _rolling(driving, 60.0)
     t.damage_pct = DAMAGE_OUT_OF_SERVICE_PCT
@@ -722,7 +722,7 @@ def test_redline_speaks_the_meter_that_is_actually_moving(app, monkeypatch):
     it told the player nothing was being harmed. Speak the moving meter."""
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
-    app.ctx.settings.speech_verbosity = 0
+    app.ctx.settings.driving_speech = "quiet"
     driving = _driving(app)
     t = _rolling(driving, 60.0)
     t.damage_pct = 0.0
@@ -742,7 +742,7 @@ def test_redline_speaks_the_meter_that_is_actually_moving(app, monkeypatch):
 def test_redline_still_names_an_active_damage_band(app, monkeypatch):
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
-    app.ctx.settings.speech_verbosity = 0
+    app.ctx.settings.driving_speech = "quiet"
     driving = _driving(app)
     t = _rolling(driving, 60.0)
     t.damage_pct = DAMAGE_LIMP_PCT + 3.0

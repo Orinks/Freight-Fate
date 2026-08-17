@@ -1893,7 +1893,7 @@ def test_fixed_object_hazard_needs_nearly_a_stop_or_a_swerve(monkeypatch):
         t.grip, t.grade = 1.0, 0.0
         hazard = TripEvent(
             TripEventKind.HAZARD,
-            "Brake or change lanes! Debris on the road.",
+            "Change lanes or brake! Debris on the road.",
             {"deadline_s": 3.0, "dodgeable": True},
         )
         driving._handle_trip_event(hazard)
@@ -1932,7 +1932,7 @@ def test_fixed_object_hazard_deadline_budgets_the_longer_stop():
         t.grip, t.grade = 1.0, 0.0
         hazard = TripEvent(
             TripEventKind.HAZARD,
-            "Brake or change lanes! Debris on the road.",
+            "Change lanes or brake! Debris on the road.",
             {"deadline_s": 3.0, "dodgeable": True},
         )
         driving._handle_trip_event(hazard)
@@ -2010,7 +2010,7 @@ def test_the_driver_always_gets_a_real_window_before_the_assist_takes_over(
         driving._handle_trip_event(
             TripEvent(
                 TripEventKind.HAZARD,
-                "Brake or change lanes! Slow truck right ahead.",
+                "Change lanes or brake! Slow truck right ahead.",
                 {"deadline_s": 2.5, "dodgeable": True},
             )
         )
@@ -2021,7 +2021,7 @@ def test_the_driver_always_gets_a_real_window_before_the_assist_takes_over(
 
 
 def test_a_dodgeable_hazard_leaves_time_to_finish_the_lane_change_it_asks_for():
-    """ "Brake or change lanes" names a maneuver that takes 2.5 s of drift.
+    """ "Change lanes or brake" names a maneuver that takes 2.5 s of drift.
     Demanding it inside a window shorter than the maneuver is not a demand,
     it is a trap -- so a dodgeable hazard budgets the move on top of the
     time to hear the warning and decide."""
@@ -2044,7 +2044,7 @@ def test_a_dodgeable_hazard_leaves_time_to_finish_the_lane_change_it_asks_for():
         driving._handle_trip_event(
             TripEvent(
                 TripEventKind.HAZARD,
-                "Brake or change lanes! Debris on the road.",
+                "Change lanes or brake! Debris on the road.",
                 {"deadline_s": 2.5, "dodgeable": True},
             )
         )
@@ -2116,7 +2116,7 @@ def test_the_assist_stands_on_everything_when_service_braking_is_losing():
         driving._handle_trip_event(
             TripEvent(
                 TripEventKind.HAZARD,
-                "Brake or change lanes! Slow truck right ahead.",
+                "Change lanes or brake! Slow truck right ahead.",
                 {"deadline_s": 2.5, "dodgeable": True},
             )
         )
@@ -2157,7 +2157,7 @@ def test_a_stop_service_braking_can_make_stays_on_the_service_brakes():
         driving._handle_trip_event(
             TripEvent(
                 TripEventKind.HAZARD,
-                "Brake or change lanes! Slow truck right ahead.",
+                "Change lanes or brake! Slow truck right ahead.",
                 {"deadline_s": 2.5, "dodgeable": True},
             )
         )
@@ -3352,12 +3352,12 @@ def test_cruise_says_when_a_climb_has_beaten_it():
     """
     from freight_fate.app import App
 
-    for verbosity, expected in ((1, True), (0, False)):
+    for driving_speech, expected in (("standard", True), ("quiet", False)):
         app = App()
         events: list[str] = []
         app.ctx.say_event = lambda text, interrupt=False, sink=events, **_: sink.append(text)
         try:
-            app.ctx.settings.speech_verbosity = verbosity
+            app.ctx.settings.driving_speech = driving_speech
             driving = _cruising(app)
             driving.trip.grade_at = lambda mile: 0.07
             for _ in range(90 * 60):
@@ -3367,7 +3367,7 @@ def test_cruise_says_when_a_climb_has_beaten_it():
                     driving.truck.auto_shift()
                 driving.truck.update(1 / 60)
             said = sum("still losing the grade" in e for e in events)
-            assert bool(said) is expected, (verbosity, events[-3:])
+            assert bool(said) is expected, (driving_speech, events[-3:])
             if expected:
                 assert said == 1  # once a hill, not once a second
         finally:
@@ -3386,7 +3386,7 @@ def test_climb_cue_stays_quiet_when_cruise_is_winning():
     events: list[str] = []
     app.ctx.say_event = lambda text, interrupt=False, sink=events, **_: sink.append(text)
     try:
-        app.ctx.settings.speech_verbosity = 1
+        app.ctx.settings.driving_speech = "standard"
         driving = _cruising(app)
         # The target sits well above the truck -- the limit-rise shape --
         # so cruise floors the pedal while genuinely accelerating.

@@ -73,6 +73,7 @@ from ..sim.enforcement_posts import (
     post_seed,
 )
 from ..sim.trip_models import ENFORCEMENT_WARNING_MAX_MI, SCALE_WARNING_REAL_S
+from ..speech_pacing import SpeechCategory
 from ..speech_text import SpokenMessage
 from .driving_core import *
 from .driving_siren import (
@@ -405,7 +406,9 @@ class EnforcementWatchMixin:
         self._schedule_sound(
             PASS_MARKER_LEAD_S, "events/police_siren", volume, TABLEAU_SHOULDER_PAN
         )
-        self.ctx.say_event(self._tableau_intro_message(post), interrupt=False)
+        self.ctx.say_event(
+            self._tableau_intro_message(post), interrupt=False, category=SpeechCategory.STATUS
+        )
 
     def _play_tableau_pass(self, post) -> None:
         """The stopped pair, panned hard to the shoulder as you go by.
@@ -569,6 +572,7 @@ class EnforcementWatchMixin:
             "Slow below fifteen for the scale.",
             interrupt=False,
             priority=EventPriority.ROUTE,
+            category=SpeechCategory.NAVIGATION,
         )
 
     def _scale_outranks_rest_planning(self) -> bool:
@@ -593,6 +597,8 @@ class EnforcementWatchMixin:
             f"with {self.ctx.control_hint('take_exit')}. Rest planning can "
             "wait until you are past the scale.",
             interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=SpeechCategory.NAVIGATION,
         )
         return True
 

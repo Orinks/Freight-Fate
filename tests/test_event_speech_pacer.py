@@ -828,7 +828,7 @@ def test_a_hazard_wiping_the_ambient_slot_still_leaves_the_line_in_review() -> N
         # spacing had not cleared yet.
         driving._ambient_event_cooldown_s = 5.0
         driving._speak_ambient_event(LANE_CLOSURE_LINE, "events/traffic_slowing")
-        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing")
+        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing", None)
         played.clear()
 
         driving._handle_trip_event(
@@ -872,7 +872,7 @@ def test_an_overwritten_ambient_line_still_reaches_review() -> None:
         driving._speak_ambient_event("Passing the fuel island.", "ui/notify")
 
         # Only the newer line is actually waiting to speak...
-        assert driving._pending_ambient_event == ("Passing the fuel island.", "ui/notify")
+        assert driving._pending_ambient_event == ("Passing the fuel island.", "ui/notify", None)
         # ...but both reached the review buffer when they queued.
         logged = [m.text for m in app.ctx.message_log.messages]
         assert "Rain easing off, roads still wet." in logged
@@ -1004,14 +1004,14 @@ def test_the_hazard_wipe_reproduces_identically_under_terse_speech() -> None:
     app = App()
     try:
         driving = _driving(app)
-        app.ctx.settings.speech_verbosity = 0  # terse
+        app.ctx.settings.driving_speech = "quiet"  # terse
         events: list[tuple[str, bool]] = []
         driving.ctx.audio.play = lambda *a, **k: None
         driving.ctx.say_event = speech_stub(events, with_interrupt=True)
         driving.ctx.controller.rumble.hazard = lambda: None
         driving._ambient_event_cooldown_s = 5.0
         driving._speak_ambient_event(LANE_CLOSURE_LINE, "events/traffic_slowing")
-        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing")
+        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing", None)
 
         driving._handle_trip_event(
             TripEvent(
@@ -1040,7 +1040,7 @@ def test_a_lane_closure_merge_call_reaches_review_in_full_under_terse() -> None:
     app = App()
     try:
         driving = _driving(app)
-        app.ctx.settings.speech_verbosity = 0  # terse
+        app.ctx.settings.driving_speech = "quiet"  # terse
         events: list[tuple[str, dict]] = []
         driving.ctx.audio.play = lambda *a, **k: None
         driving.ctx.say_event = lambda text, *a, **k: events.append((text, k))
@@ -1074,7 +1074,7 @@ def test_speak_ambient_event_still_honors_a_true_terse_mute_for_logging() -> Non
     app = App()
     try:
         driving = _driving(app)
-        app.ctx.settings.speech_verbosity = 0  # terse
+        app.ctx.settings.driving_speech = "quiet"  # terse
         driving.ctx.audio.play = lambda *a, **k: None
         driving.ctx.say_event = lambda *a, **k: None
         before = len(app.ctx.message_log.messages)
@@ -1098,7 +1098,7 @@ def test_speak_ambient_event_logs_the_full_text_not_the_terse_text() -> None:
     app = App()
     try:
         driving = _driving(app)
-        app.ctx.settings.speech_verbosity = 0  # terse
+        app.ctx.settings.driving_speech = "quiet"  # terse
         driving.ctx.audio.play = lambda *a, **k: None
         driving.ctx.say_event = lambda *a, **k: None
         pair = SpokenMessage(
@@ -1114,3 +1114,32 @@ def test_speak_ambient_event_logs_the_full_text_not_the_terse_text() -> None:
         assert pair.terse not in logged
     finally:
         app.shutdown()
+
+
+def test_a_confirmation_never_takes_the_hand_back_slot() -> None:
+    """It answers something the player did; it is not a warning to rescue.
+
+    Confirmations default to CRITICAL, so they used to qualify -- and then
+    the next interrupting line on the main channel handed the FINISHED
+    confirmation back to be requeued, where it resurfaced after, and could
+    bury, the line the player had actually just asked for. The adversarial
+    harness found it on settings_flips_mid_drive; pressed keys interrupting
+    again (2026-08-16) turned it from rare into every info key.
+    """
+    from freight_fate.speech_pacing import SpeechCategory
+
+    pacer, _ = make_pacer()
+    confirmation = "Transmission changed to manual."
+    assert (
+        pacer.note_interrupt(confirmation, EventPriority.CRITICAL, SpeechCategory.CONFIRMATION)
+        is None
+    )
+    # The S query that follows gets the channel to itself.
+    assert pacer.note_interrupt(HAZARD) is None
+
+
+def test_a_warning_is_still_handed_back_after_the_confirmation_rule() -> None:
+    """The slot still does its job for the lines it was built for."""
+    pacer, _ = make_pacer()
+    pacer.should_flush(STOP_LINE, EventPriority.ROUTE)
+    assert pacer.note_interrupt(HAZARD) == (STOP_LINE, EventPriority.ROUTE)

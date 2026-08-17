@@ -265,7 +265,7 @@ def test_terse_mode_hears_the_essential_cues(monkeypatch):
 
     app = App()
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         d = _driving(app)
         spoken = _capture_events(app, monkeypatch)
         d._destination_exit_taken = True

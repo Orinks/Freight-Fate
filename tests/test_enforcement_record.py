@@ -678,7 +678,7 @@ def test_terse_speech_still_hears_every_consequence(monkeypatch):
 
     app = App()
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         d = _driving(app)
         p = app.ctx.profile
         spoken = _quiet(app, monkeypatch)

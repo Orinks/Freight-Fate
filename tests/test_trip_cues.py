@@ -288,3 +288,87 @@ def test_city_events_include_state_without_repeating_crossing(world):
 
     city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
     assert city_events == ["Passing Buffalo, New York. Continuing on I-90 toward Cleveland."]
+
+
+def test_zone_warnings_come_one_at_a_time_and_never_for_one_underfoot(world):
+    """Owner playtest, 2026-08-17: five contradictory lines in sixty
+    milliseconds on a facility approach.
+
+    A tier-1 surface chain zones each street at its own baked speed, so a
+    one-mile approach holds four or five zones. Warning every zone inside the
+    lookahead fired them all at once -- "access road ahead, speed limit 15"
+    hard against "access road ahead, speed limit 25", neither of them the
+    number then in force, so the spoken limit contradicted what S answered.
+    """
+    from freight_fate.sim.trip import ZONE_WARNING_MIN_MI
+    from freight_fate.sim.trip_models import Zone
+
+    trip, _truck = make_trip(world)
+    trip.zones = [
+        Zone(0.05, 0.30, 15.0, "facility access road"),  # underfoot: no warning
+        Zone(0.60, 1.00, 25.0, "facility access road"),
+        Zone(1.00, 1.40, 15.0, "facility access road"),
+        Zone(1.40, 1.60, 15.0, "facility gate"),
+    ]
+    trip._announced_zone_warnings.clear()
+    trip._pending_zone_warning = None
+    trip.position_mi = 0.0
+
+    # Several ticks at a standstill: the loop runs every frame and must not
+    # spend the whole approach's worth of warnings on the first one.
+    for _ in range(5):
+        trip._events.clear()
+        trip._check_zones()
+    warned = [e for e in trip._events if e.kind is TripEventKind.GPS_CUE]
+    assert len(warned) <= 1, "one outstanding warning, not one per frame"
+
+    # And nothing was said about the zone already under the wheels.
+    said = " ".join(e.message for e in warned)
+    assert "15" not in said or ZONE_WARNING_MIN_MI < 0.05
+
+
+def test_distances_to_things_ahead_never_round_down_to_zero(world):
+    """Owner playtest, 2026-08-17: "What is this in 0 miles BS?"
+
+    ``_distance_text`` rounds to whole units, so every warning inside half a
+    mile announced itself as "in 0 miles" -- which reads as "no distance at
+    all" when the honest answer is "a quarter mile, get ready". Anything
+    still in FRONT of the truck goes through ``_ahead_text`` instead, which
+    steps in quarter miles down to "just ahead".
+
+    Segment lengths are deliberately not covered: "continue for 60 miles"
+    is a length, not a distance to something, and reads better whole.
+    """
+    trip, _truck = make_trip(world)
+
+    for miles in (0.4, 0.3, 0.25, 0.1, 0.05, 0.0):
+        spoken = trip._ahead_text(miles)
+        assert "0 mile" not in spoken, f"{miles} mi spoke as {spoken!r}"
+
+    assert trip._ahead_text(0.25) == "a quarter mile"
+    assert trip._ahead_text(1.0) == "one mile"
+    # Far enough out that whole miles are the natural wording again.
+    assert trip._ahead_text(5.0) == "5 miles"
+
+    # The lines the owner actually heard it in, end to end.
+    from freight_fate.sim.trip_models import TrafficPressure, Zone
+
+    trip.zones = [Zone(0.20, 0.60, 15.0, "facility access road")]
+    trip._announced_zone_warnings.clear()
+    trip._pending_zone_warning = None
+    trip.position_mi = 0.0
+    trip._events.clear()
+    trip._check_zones()
+    zone_said = " ".join(e.message for e in trip._events)
+    assert "0 mile" not in zone_said, zone_said
+
+    pressure = TrafficPressure(
+        start_mi=0.2,
+        end_mi=0.6,
+        kind="route_merge",
+        direction="right",
+        intensity=0.5,
+        target_speed_mph=45.0,
+        reason="on-ramp",
+    )
+    assert "0 mile" not in trip._traffic_pressure_message(pressure, 0.2)

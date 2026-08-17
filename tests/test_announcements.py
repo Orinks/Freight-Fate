@@ -106,7 +106,7 @@ def test_terse_drive_entry_skips_startup_handholding(monkeypatch):
     app = App()
     spoken = []
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         d = _driving(app)
         monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
 

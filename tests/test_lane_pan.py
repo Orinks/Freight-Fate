@@ -306,7 +306,7 @@ def test_curve_run_speaks_a_verdict_on_exit(monkeypatch):
         d = _driving(app)
         d.ctx.settings.lane_keeping = "off"
         d.ctx.settings.curve_callouts = True
-        d.ctx.settings.speech_verbosity = 1
+        d.ctx.settings.driving_speech = "standard"
         d.ctx.say_event = lambda text, interrupt=False, **_: events.append(text)
         d.truck.velocity_mps = 30.0 / 2.23694
         ticks = []

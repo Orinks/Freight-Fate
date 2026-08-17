@@ -21,7 +21,7 @@ from freight_fate.states.driving_core import Tutorial
 class _Ctx:
     def __init__(self, *, terse: bool) -> None:
         self.settings = Settings()
-        self.settings.speech_verbosity = 0 if terse else 1
+        self.settings.driving_speech = "quiet" if terse else "standard"
         self.settings.automatic_transmission = True
         self.profile = SimpleNamespace(tutorial_done=False)
         self.spoken: list[str] = []
@@ -96,7 +96,7 @@ def test_the_gate_is_tutorial_done_itself_not_verbosity_history() -> None:
 
     app = App()
     try:
-        app.ctx.settings.speech_verbosity = 0
+        app.ctx.settings.driving_speech = "quiet"
         app.ctx.profile = Profile(name="Vet", current_city="Buffalo")
         route = app.ctx.world.supported_route("Buffalo", "Rochester")
         job = Job(

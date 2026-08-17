@@ -1744,7 +1744,7 @@ class JobBoardState(MenuState):
         key = p.take_slip_seat(job)
         if key == before:
             return ""
-        terse = self.ctx.settings.speech_verbosity == 0
+        terse = self.ctx.settings.renders_terse()
         return f" {assignment_reason_text(key, job, profile=p, terse=terse)}"
 
     def _trailer_note(self, job: Job) -> str:

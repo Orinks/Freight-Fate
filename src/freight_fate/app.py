@@ -20,12 +20,15 @@ from .audio import SPEECH_DUCK_LEVEL, AudioEngine
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
+from .ladder_earcons import register_ladder_earcons
 from .message_log import MessageCategory, MessageLog
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
 from .settings import Settings
+from .sound_catalog import entry_by_name
 from .speech import EventPriority, EventSpeechPacer, Speech
+from .speech_pacing import LADDER_EARCONS, Disposition, SpeechCategory
 from .speech_text import SpokenMessage
 from .states.base import State
 
@@ -116,10 +119,69 @@ class GameContext:
         # handled. See ``player_asked``: a readout somebody asked for cuts the
         # line in progress even at the wheel, where unasked-for lines queue.
         self._speech_requested = False
+        # FIRST_OCCURRENCE and TRANSITIONS need memory of what has already
+        # been said; Settings cannot hold it, so it lives here beside the
+        # pacer. ``_ladder_said`` is leg-scoped ("once per leg"),
+        # ``_ladder_last`` is the last text seen per key so a re-assertion
+        # can be told from a change of state.
+        self._ladder_said: set[str] = set()
+        self._ladder_last: dict[str, str] = {}
         # True while a playtest-lever scenario runs unsaved (see
         # playtest_levers.apply_continue_levers); save_profile honors it.
         self.playtest_sandbox = False
         self.message_log = app.message_log
+        # The S4 ladder's earcons (LADDER_EARCONS below) can now play from
+        # any screen the silencing gate fires on, not only the Learn game
+        # sounds screen that used to be the sole registrant. Idempotent and
+        # cheap, so doing it once here means the drive never has to wait on
+        # that screen having been visited first.
+        register_ladder_earcons()
+
+    def _ladder_applies(self) -> bool:
+        """Whether the driving speech rung may silence anything yet.
+
+        First-run teaching outranks the rung, exactly as it outranks terse
+        (research doc R15). A player who picks the quietest setting before
+        their first drive is the one who most needs to be told the status,
+        help, and hazard keys exist -- silence them and they can never pull
+        information nobody told them about. The gate is ``tutorial_done``
+        itself, so finishing the walkthrough and then choosing a quiet rung
+        resurrects nothing.
+
+        ``GameContext.profile`` is ``Profile | None`` (``app.py:98``), and
+        the default here is deliberately ``True``: no profile means nobody
+        is on a first drive, so the rung applies normally.
+        """
+        return bool(getattr(self.profile, "tutorial_done", True))
+
+    def _play_ladder_earcon(self, category: SpeechCategory | None) -> None:
+        """Sound the cue standing in for a category the rung just cut.
+
+        Spec invariant 3: what drops out of speech lands on the earcon layer
+        or the message log, so cutting is legitimate rather than
+        exclusionary. Only called where ``speech_disposition`` is already
+        ``EARCON`` -- ``SILENT`` never reaches here, which is the entire
+        difference at the voice between the ``quiet`` and ``urgent_only``
+        rungs. ``LADDER_EARCONS`` names the cue by the catalog entry's
+        canonical noun; the entry itself (``sound_catalog.py``) is the one
+        place its key, volume, and pan are written down, so this resolves
+        through it rather than keeping a second copy that could drift.
+
+        A category missing from ``LADDER_EARCONS``, or a name the catalog
+        does not carry, is a data bug in that table (a test pins every
+        EARCON row against the catalog) -- not something to raise mid-drive
+        over, so it is skipped rather than crashing the game.
+        """
+        if category is None:
+            return
+        name = LADDER_EARCONS.get(category)
+        if name is None:
+            return
+        entry = entry_by_name(name)
+        if entry is None or not entry.plays:
+            return
+        cue = entry.plays[0]
+        self.audio.play(cue.key, volume=cue.volume, pan=cue.pan)
 
     def _online_enabled(self, setting: bool) -> bool:
         """True when both the master ``online_services`` switch and the
@@ -191,12 +253,66 @@ class GameContext:
             self._truck_parking = TruckParkingProvider()
         return self._truck_parking
 
-    def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
+    def say(
+        self,
+        text: str,
+        interrupt: bool = True,
+        review: bool = True,
+        *,
+        category: SpeechCategory | None = None,
+    ) -> None:
+        if (
+            not self.settings.speaks(category)
+            and self._ladder_applies()
+            and (not self._speech_requested)
+        ):
+            # The player's rung silences this category. The line still
+            # reaches the review log, so the information is cut from the
+            # drive, not from the game -- the review key that exists to
+            # answer for it still can. Where the rung's disposition is
+            # EARCON rather than SILENT, the sound layer marks the moment
+            # instead of the words -- the two rungs that share this branch
+            # are otherwise identical at the voice.
+            #
+            # A line the player ASKED for is exempt (``_speech_requested``,
+            # set by ``player_asked()`` around key and button handling) --
+            # the same escape ``say_event`` has carried as ``force`` since
+            # the ladder shipped, missing here. Without it, pressing the
+            # cruise dial at quiet answered with a chime and no number: the
+            # rung was silencing an answer to a question the player had just
+            # asked, which is not what a rung is for (owner, 2026-08-17).
+            # The RENDERING still follows the rung, so quiet answers the
+            # dial with "62" rather than a sentence.
+            if isinstance(text, SpokenMessage):
+                text = text.render(self.settings.renders_terse()) or text.normal
+            if self._event_pacer.is_silenced_repeat(text):
+                # A keyless standing condition (no ``key=`` reaches this
+                # method) re-fires on a timer while the drive is otherwise
+                # unchanged. The gate above never used to consult the pacer,
+                # so a silenced repeat still hit the earcon on every frame --
+                # the quiet rung machine-gunning a sound where coaching says
+                # one sentence and falls silent. The plain repeat window is
+                # enough here; there is no ``key=`` to track a condition by.
+                # ``is_silenced_repeat``/``note_silenced`` are a namespace of
+                # their own (not ``is_repeat``/``note_spoken``): a silenced
+                # occurrence must never write into the state the SPEAKING
+                # path reads, or raising the rung mid-drive while this same
+                # condition is still active would find its own silenced text
+                # already on file and go quiet for the sentence the rung now
+                # promises.
+                return
+            if self.settings.speech_disposition(category) is Disposition.EARCON:
+                self._play_ladder_earcon(category)
+            self._event_pacer.note_silenced(text)
+            transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)
+            if review:
+                self.message_log.add(text, MessageCategory.GENERAL)
+            return
         if isinstance(text, SpokenMessage):
             # A normal/terse pair resolves here, in the delivery layer, so
             # coverage never again depends on a call-site branch (research
             # doc, R5). An empty rendering is a line terse mode drops whole.
-            text = text.render(self.settings.speech_verbosity == 0)
+            text = text.render(self.settings.renders_terse())
             if not text:
                 return
         transcript.info("%s", text)
@@ -265,6 +381,48 @@ class GameContext:
         else:
             self.speech.say(text, interrupt=False)
 
+    def reset_ladder_leg_memory(self) -> None:
+        """Forget what has been said once, at a leg boundary.
+
+        FIRST_OCCURRENCE is "speaks the first time per leg", so a new leg is
+        a fresh road and the tip is worth one more telling.
+        """
+        self._ladder_said.clear()
+
+    def _ladder_repeats(self, text: str, category, key: str | None) -> bool:
+        """Whether this rung's disposition drops this line as already-said.
+
+        The two dispositions the table has always promised and
+        ``Settings.speaks`` never delivered: it branches on EARCON/SILENT
+        alone, so FIRST_OCCURRENCE and TRANSITIONS both behaved exactly like
+        FULL, and standard was therefore indistinguishable from coaching
+        (roadmap, and owner 2026-08-17: "should standard and coaching make a
+        difference? There should be").
+
+        FIRST_OCCURRENCE: said once per leg, then nothing.
+
+        TRANSITIONS: "enter, worsen, and clear only". Status lines carry the
+        state they are reporting in their own text, so a line identical to
+        the last one under this key is the condition re-asserting itself and
+        a changed one is the transition. Keyless lines fall back to the text
+        itself, which makes them first-occurrence -- the safe direction: a
+        line too few only for something that repeats itself word for word.
+        """
+        disposition = self.settings.speech_disposition(category)
+        if disposition is Disposition.FIRST_OCCURRENCE:
+            slot = key or text
+            if slot in self._ladder_said:
+                return True
+            self._ladder_said.add(slot)
+            return False
+        if disposition is Disposition.TRANSITIONS:
+            slot = key or text
+            if self._ladder_last.get(slot) == text:
+                return True
+            self._ladder_last[slot] = text
+            return False
+        return False
+
     def say_event(
         self,
         text: str,
@@ -274,6 +432,7 @@ class GameContext:
         priority: EventPriority | None = None,
         key: str | None = None,
         force: bool = False,
+        category: SpeechCategory | None = None,
     ) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
@@ -318,10 +477,52 @@ class GameContext:
         A pair whose terse rendering is empty is dropped whole in terse
         mode: not spoken, not logged, exactly like a muted chatter line.
         """
+        if not self.settings.speaks(category) and not force and self._ladder_applies():
+            # The player's rung silences this category. The line still
+            # reaches the review log and the status keys, so the
+            # information is cut from the drive, not from the game.
+            # ``force`` is a line the player asked for and must hear. Where
+            # the rung's disposition is EARCON rather than SILENT, the sound
+            # layer marks the moment instead of the words.
+            if isinstance(text, SpokenMessage):
+                text = text.render(self.settings.renders_terse()) or text.normal
+            if self._event_pacer.is_silenced_repeat(text, key=key):
+                # A keyed standing condition (an engine held at redline, a
+                # locked-out air brake) re-fires on a timer by design while
+                # the condition holds -- that is what keeps it audible when
+                # the rung speaks it. But this gate used to return before
+                # ever reaching the pacer, so a silenced repeat still played
+                # the earcon and logged the line on every re-fire: the quiet
+                # rung machine-gunning a sound where coaching says one
+                # sentence and falls silent for the rest of the drive.
+                # ``is_silenced_repeat``/``note_silenced`` deliberately do NOT
+                # share ``is_repeat``/``_conditions`` with the speaking path
+                # below: if a silenced occurrence wrote ``_conditions[key]``,
+                # raising the rung mid-drive while this same condition was
+                # still active (still locked out, still at redline) would
+                # have the speaking path's own ``is_repeat`` see its silenced
+                # text already on file, read the now-audible occurrence as an
+                # unchanged repeat, and skip it -- the rung the player raised
+                # specifically to hear this condition going quiet instead.
+                return
+            if self.settings.speech_disposition(category) is Disposition.EARCON:
+                self._play_ladder_earcon(category)
+            self._event_pacer.note_silenced(text, key=key)
+            transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)
+            if review:
+                self.message_log.add(text, MessageCategory.EVENT)
+            return
         if isinstance(text, SpokenMessage):
-            text = text.render(self.settings.speech_verbosity == 0)
+            text = text.render(self.settings.renders_terse())
             if not text:
                 return
+        if not force and self._ladder_applies() and self._ladder_repeats(text, category, key):
+            # Said once already, and this rung only promised once. Logged,
+            # so the review keys still answer for it.
+            transcript.info("[ladder] %s already said: %s", self.settings.driving_speech, text)
+            if review:
+                self.message_log.add(text, MessageCategory.EVENT)
+            return
         if self._event_pacer.is_repeat(text, key=key, force=force):
             # Already in the player's ear. Not spoken, not logged, not
             # reviewable: as far as the drive is concerned it never happened
@@ -351,7 +552,7 @@ class GameContext:
         cut = None
         if self.settings.sapi_events:
             if interrupt:
-                cut = self._event_pacer.note_interrupt(text, priority)
+                cut = self._event_pacer.note_interrupt(text, priority, category)
             elif self._event_pacer.should_flush(text, priority):
                 # The channel is backed up past the point of truth: purging
                 # and speaking fresh IS the queued line's honest delivery.
@@ -360,10 +561,10 @@ class GameContext:
             self.speech.say_event(text, interrupt)
         else:
             if interrupt:
-                cut = self._event_pacer.note_interrupt(text, priority)
+                cut = self._event_pacer.note_interrupt(text, priority, category)
                 _stop_main_speech(self.speech)
             else:
-                self._event_pacer.note_queued(text, priority)
+                self._event_pacer.note_queued(text, priority, category)
             self.speech.say(text, interrupt=False)
         self._engage_speech_duck()
         if cut is not None:
@@ -395,6 +596,13 @@ class GameContext:
     def reset_event_condition(self, key: str) -> None:
         """A standing condition has cleared; let it announce itself afresh."""
         self._event_pacer.forget_condition(key)
+        # TRANSITIONS means enter, worsen and clear. A condition that
+        # genuinely cleared and comes back is an ENTER, even though its text
+        # is word-for-word what was said last time -- so the last-text memory
+        # has to be dropped here too, or standard swallows the second real
+        # warning (test_the_air_brake_lockout_recurs_once_it_clears_and_
+        # comes_back, which is the failure this caught).
+        self._ladder_last.pop(key, None)
 
     def pause_event_speech(self) -> None:
         """The player stepped off the road: silence the road and drop its backlog.

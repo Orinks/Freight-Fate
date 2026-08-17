@@ -35,9 +35,11 @@ def _generated_keys() -> frozenset[str]:
     idempotent, so asking here costs one synthesis for the whole session.
     """
     from freight_fate.audio import generated_sound_keys
+    from freight_fate.ladder_earcons import register_ladder_earcons
     from freight_fate.states.driving_siren import register_enforcement_sounds
 
     register_enforcement_sounds()
+    register_ladder_earcons()
     return frozenset(generated_sound_keys())
 
 

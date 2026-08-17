@@ -322,6 +322,10 @@ from the words, and synonyms cost them a re-read.
 | Crossing into another state | State line | border cue, state-crossing chime | `events/state_crossing` |
 | A toll gantry or plaza billing the truck | Toll charged | toll cue, gantry chime | `events/toll_charged` |
 | The driver's own yawn as fatigue builds | Yawn | fatigue sound, drowsy cue | `driver/yawn` |
+| The synthesized short high note standing in for a confirmation -- the assist acted, the setting took -- once the speech ladder stops speaking it | Confirmation note | confirmation earcon, acted tone | `ladder/confirmation_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
+| The synthesized two falling notes standing in for a heads-up about what the road is about to do -- a bend, a merge, a stop still miles off -- once the speech ladder stops speaking them, at the Urgent only rung | Road ahead note | navigation advisory earcon, lead-cue tone | `ladder/road_ahead_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS`, `SpeechCategory.NAVIGATION_ADVISORY` |
+| The synthesized chime standing in for a driving tip once the speech ladder stops speaking coaching, at the Quiet rung | Coaching note | coaching earcon, tip chime | `ladder/coaching_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
+| The synthesized tock standing in for a status update once the speech ladder stops speaking it, at the Quiet rung | Status note | status earcon, state tock | `ladder/status_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
 | Being looked at for something other than speed: damage, missing chains, following too close | Inspection warning | inspection cue, roadside-check tone | `events/inspection_warning` |
 | The earcon that fires with the open-scale approach notice, ahead of the ambient bed | Scale warning | weigh-station warning cue, scale earcon | `events/weigh_station_warning` |
 | The ambient bed that swells as the truck comes up on an open scale | Weigh station | scale bed, weigh-lane loop | `poi/weigh_station_lane` |
@@ -452,6 +456,23 @@ outside a CB clause. The check exists because slang leaks: the word is
 evocative, it reads well in a sentence, and one careless line teaches a screen
 reader user a second noun for a thing that already had one.
 
+### Driving speech rungs
+
+How much of the road's *information* speaks. Four rungs, cutting whole
+categories rather than shortening sentences; the player picks one and the
+delivery layer decides per category. "Terse" survives only as the internal
+name of the shorter rendering and is no longer a thing the player selects.
+
+| Concept | Canonical spoken noun | Never say | Where |
+| --- | --- | --- | --- |
+| The working default | standard | normal, default | `DRIVING_SPEECH_MODES` |
+| Confirmations and status become sounds | quiet | terse (that is the rendering, not the rung), minimal | `DRIVING_SPEECH_MODES` |
+| Safety, cost, and the directions you cannot take back | urgent only | emergency mode, critical only | `DRIVING_SPEECH_MODES` |
+
+Roadside colour -- billboards, place names, landmarks -- is **not** governed
+by these rungs. It answers to the chatter switches and the place-callouts
+ladder, and a player may run the loudest colour with the quietest rung.
+
 ### Terse speech grammar
 
 Terse mode promises: the truck tells you what to *do* and what it *cost*, and
@@ -493,12 +514,16 @@ the separate zone warning/entry lines. Exit traffic keeps its speed --
 the truck itself is slowing for the ramp, not reacting to someone else's
 merge.
 
-**The dodgeable hazard call is "Brake or change lanes!" in every mode.** The
+**The dodgeable hazard call is "Change lanes or brake!" in every mode.** The
 same phrase the help teaches, kept in full in terse because it carries what
 the hazard tone cannot: the hazard is dodgeable AND there is an open lane to
 send the dodge. "Brake or swerve!" was a terse-only synonym for the game's
 most safety-critical cue and is exactly what this table exists to prevent;
-the phrase is pinned against the help text by a copy test.
+the phrase is pinned against the help text by a copy test. The lane change
+leads the braking (owner, 2026-08-17): both actions stay on offer, because a
+driver who cannot see the gap may reasonably prefer to slow, but at a hazard
+the first word is the one that gets acted on and the call only fires where a
+lane is genuinely open.
 
 ## Open naming decisions
 

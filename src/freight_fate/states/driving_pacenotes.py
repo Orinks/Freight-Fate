@@ -15,6 +15,8 @@ Curves that follow within a breath get a linked tail: "then right."
 
 from __future__ import annotations
 
+from ..speech_text import SpokenMessage
+
 # A following curve starting within this gap after the called one gets a
 # "then left/right" tail instead of its own later call.
 PACENOTE_LINK_GAP_MI = 0.3
@@ -42,13 +44,20 @@ class DrivingPacenoteMixin:
     def _pacenote_text(self, curve, ahead_mi: float, speed_mph: float) -> str:
         s = self.ctx.settings
         distance = (
-            "just ahead"
-            if ahead_mi < PACENOTE_JUST_AHEAD_MI
-            else s.short_distance_text(ahead_mi)
+            "just ahead" if ahead_mi < PACENOTE_JUST_AHEAD_MI else s.short_distance_text(ahead_mi)
         )
         call = f"{self._pacenote_phrase(curve)}, {distance}."
+        # The terse half of the pair. Curve calls read the same at every rung
+        # until this existed: the ladder asked TERSE for them and got the
+        # identical full sentence back, which is why the quiet rung still
+        # "felt like standard" through bends (owner playtest, 2026-08-17).
+        # Direction and the advisory speed are the two things a driver acts
+        # on, so they are what terse keeps; the distance goes, because the
+        # call only fires inside the lookahead anyway.
+        terse = self._pacenote_phrase(curve)
         if speed_mph > curve.advisory_mph + PACENOTE_MARGIN_MPH:
             call += f" Advise {s.speed_text(curve.advisory_mph)}."
+            terse += f", {s.speed_text(curve.advisory_mph)}"
         linked = self._pacenote_linked(curve)
         if linked is not None:
             # The tail is the follower's ONLY call (the trip suppresses its
@@ -60,7 +69,8 @@ class DrivingPacenoteMixin:
             if linked.advisory_mph < curve.advisory_mph:
                 tail += f", advise {s.speed_text(linked.advisory_mph)}"
             call += f" Then {tail}."
-        return call
+            terse += f", then {_DIRECTION_WORD[linked.direction]}"
+        return SpokenMessage(call, terse=f"{terse}.")
 
     def _pacenote_linked(self, curve):
         """The next curve when it follows within a breath of this one."""

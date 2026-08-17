@@ -853,7 +853,7 @@ often than open-country stretches.
 
 Hazards can happen while moving. When a "Brake now" warning appears, slow below
 25 miles per hour quickly to avoid a collision. Some hazards are called out as
-"Brake or change lanes" -- those are fixed objects in your lane, like road
+"Change lanes or brake" -- those are fixed objects in your lane, like road
 debris or a stopped vehicle. A lane change dodges them at full speed if the
 lane beside you is clear; braking works too, but you cannot roll over a ladder
 at 25 -- an object in the lane takes braking nearly to a stop, and then you
@@ -1486,7 +1486,7 @@ Speech settings include:
 
 | Setting | Purpose |
 | --- | --- |
-| Speech verbosity | Controls how often driving status reminders run. |
+| Driving speech | How much the road tells you, on a ladder of three settings from talkative to quiet. Standard speaks every confirmation and status readout in words, tells you a driving tip once per leg of the route, and repeats a status readout only when it changes rather than on every re-check. Quiet cuts confirmations and status readouts to short sounds instead of sentences, keeping the safety calls, what things cost, and route instructions as words. Urgent only drops the tips entirely, and turns the heads-up lines -- a bend coming, a town coming up, how far the next stretch runs -- into a short sound as well, so what is left in words is the safety calls, what things cost, and the directions you cannot take back: the turn itself, the exit, the stop you are pulling into. Billboards, place names, and landmarks are not part of this ladder and keep their own switches below, so a quiet cab can still drive through a talkative countryside. Was called Speech verbosity before 1.9; a saved terse choice now lands on Quiet, and normal lands on Standard. There was briefly a fourth, louder setting called Coaching; it never sounded any different from Standard, so it was removed and anyone who had it selected is now on Standard. |
 | Roadside chatter | The ambient color spoken between navigation cues: entering parks and forests, named river crossings, mountain passes, museums and attractions, and parody billboards. One master switch turns it all on or off, and each kind has its own switch below it. Safety and navigation speech is never affected, and town names have their own Place callouts setting. |
 | Place callouts | How much the co-driver says about places along the road. Sparse, the default, speaks only the town names that explain a speed limit change, like Entering Strawberry right before its 35. All adds the towns the route passes through or skirts. Off silences place names entirely. Speed limit announcements themselves are never affected, and no tier ever reads out every place on the map. |
 | Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |

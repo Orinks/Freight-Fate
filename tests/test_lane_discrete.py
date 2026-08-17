@@ -108,7 +108,7 @@ def test_describe_names_the_lane():
 
 
 def test_a_single_lane_road_has_no_side_to_name():
-    """"The right lane" on a one-lane road invites the driver to wonder what
+    """ "The right lane" on a one-lane road invites the driver to wonder what
     is in the left one, when there is no left one (Cary, 2026-08-15)."""
     from freight_fate.sim.lane import lane_phrase
 
@@ -990,7 +990,7 @@ def test_hazard_event_records_dodge_context():
         d._handle_trip_event(
             TripEvent(
                 TripEventKind.HAZARD,
-                "Brake or change lanes! Debris on the road.",
+                "Change lanes or brake! Debris on the road.",
                 {"deadline_s": 4.0, "dodgeable": True},
             )
         )
@@ -1006,7 +1006,7 @@ def test_hazard_event_records_dodge_context():
 
 def test_traffic_pressure_hazard_says_brake_only_with_no_lane_to_swerve_into():
     """Manual playtest, US-285 toward Denver, 2026-08-12: one lane your
-    side, and the lead-vehicle warning still said "Brake or change lanes!"
+    side, and the lead-vehicle warning still said "Change lanes or brake!"
     -- an escape the road never offered. The lead-vehicle branch must ask
     the same lane authority a real lane change answers to."""
     from freight_fate.data.world_models import LaneSegment
@@ -1047,7 +1047,7 @@ def test_traffic_pressure_hazard_keeps_the_lane_offer_when_one_exists():
 
     events = [e for e in trip._events if e.kind == TripEventKind.HAZARD]
     assert events
-    assert events[0].message == "Brake or change lanes! Brake lights right ahead."
+    assert events[0].message == "Change lanes or brake! Brake lights right ahead."
 
 
 def test_random_dodgeable_hazard_says_brake_only_with_no_lane_to_swerve_into(monkeypatch):

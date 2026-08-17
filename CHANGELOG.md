@@ -138,6 +138,93 @@
 
 ### Changed
 
+- **Confirmations no longer play the "you got past it" sound.** At the
+  quieter settings a confirmation is replaced by a short sound instead of
+  words, and the sound being used was the one that means you cleared a
+  hazard. So the truck could announce it was braking for a hazard by playing
+  the sound for having got past one, while the hazard was still in front of
+  you. Confirmations now have their own short note, and it is in Learn game
+  sounds as "Confirmation note".
+
+- **On a one-lane road the warning says to brake again.** At the quieter
+  settings a hazard you cannot go around had been reduced to just naming the
+  thing -- "brake lights right ahead" -- on the reasoning that the warning
+  tone already means brake. In practice that reads as an invitation to
+  change lanes, and on a one-lane road there is nowhere to go. The word
+  "Brake" is back for exactly that case. Where a lane really is open you
+  still get "change lanes or brake", and where nothing can be done about the
+  hazard at all the wording is unchanged.
+
+- **Hairpins that were not really there are gone.** The map's curve data was
+  built by measuring the shape of real roads, and in about one place in fifty
+  the measurement produced a bend that cannot exist: a turn sharper than the
+  piece of road it sits on, or a left and a right meeting at a single point
+  with no straight between them. On the road you heard a hairpin called, felt
+  the truck fight a corner, and saw nothing in the terrain to explain it --
+  Josh hit one on US-285 north of Santa Fe, a 25 mile an hour hairpin called
+  on a road posted 35. Those records are now thrown out when the map loads.
+  Real switchbacks are untouched: a genuine reversal has road between the two
+  halves, and that is exactly what the check looks for.
+
+- **The Coaching speech setting is gone; there are three settings now.**
+  Coaching sat above Standard and was meant to add driving-technique tips on
+  top of it. Those tips were never written, so cycling to it changed nothing
+  you could hear -- and in a game you play by ear, a setting that offers a
+  choice and makes no difference just sounds like something is broken.
+  Driving speech is now Standard, Quiet, and Urgent only, and all three
+  sound clearly different from each other. If you had Coaching selected you
+  are now on Standard, which is what you were hearing anyway. It can come
+  back the day there are tips to put in it.
+
+- **Standard stops repeating itself.** Standard was supposed to say a
+  driving tip once and give a status readout only when it changes, but it
+  was speaking both every single time, exactly like Coaching. It now does
+  what it always said it did: a tip is spoken once per leg of the route, and
+  a status readout speaks when the condition starts, gets worse, or clears
+  rather than on every re-check. A condition that clears and comes back
+  still speaks, even word for word -- coming back is news.
+
+- **The cruise dial answers with the number at Quiet.** Tapping the speed up
+  or down now says just "62" instead of a full sentence about adaptive
+  cruise, at Quiet and Urgent only. The unit does not change between taps, so
+  saying it every time was the one part of the line carrying nothing. Fuller
+  settings are unchanged.
+
+- **A key you press always answers, whatever your speech setting is.** The
+  quietest settings were silencing replies to controls you had just used --
+  the cruise dial gave a short sound and no number at all. Your setting
+  decides how much the road tells you on its own; it was never meant to
+  decide whether the game answers a question you asked. The reply still gets
+  shorter at the quieter settings, it just no longer goes missing.
+
+- **Traffic warnings got a short form.** "Exit traffic building in 2 miles.
+  Signal early, hold the right exit lane, and be ready to slow near 45" was
+  spoken in full even at Quiet, where it was the longest line on the drive.
+  At Quiet it is now "Exit traffic, 2 miles. Hold right, 45", and the merge
+  and traffic-pack warnings shortened the same way. Fuller settings still
+  hear all of it.
+
+- **Urgent only is a real step down from Quiet now.** The two quietest
+  driving speech settings used to be nearly the same thing: everything they
+  differed on was already a sound rather than words at Quiet, so switching
+  between them changed almost nothing you could hear. Urgent only now also
+  turns the heads-up lines into a short sound -- a bend coming up, a town
+  a couple of miles off, how far the next stretch runs. What stays in words
+  is the safety calls, what things cost, and the directions you cannot take
+  back: the turn itself, the exit, and the stop you are pulling into. The
+  new sound is two short notes falling, and it is in Learn game sounds as
+  "Road ahead note" like every other one. Quiet is unchanged -- it still
+  speaks all of it.
+
+- **Nothing ahead of you is ever "in 0 miles" any more.** A warning about
+  something less than half a mile off used to round the distance down to
+  zero, so the truck would say "in 0 miles, facility access road ahead" when
+  what it meant was "a quarter mile, get ready". Anything still in front of
+  you now counts down in quarter miles and then says "just ahead", the same
+  wording the speed limit calls already use. Distances that are lengths
+  rather than gaps -- "continue on Interstate 10 for 60 miles" -- are
+  unchanged. Found in Josh's own playtest.
+
 - **Being stopped short of a stop bar is always said out loud.** If you come
   to a halt well back from a red light or a stop sign, the truck tells you to
   drive up and close the gap. It was already trying to -- but on a busy
@@ -3256,6 +3343,53 @@
 - **Paying down what you owe never empties your wallet anymore.** Every
   payment option at the yard now keeps two hundred dollars of fuel money in
   your pocket, so choosing Pay half can no longer leave you at zero.
+
+### Changed
+
+- **Driving speech is now a ladder you pick, not a single terse switch.**
+  The old setting only made each message shorter, which is why a quiet
+  drive still talked constantly -- it never said fewer things. Driving
+  speech, in the Speech settings, now has four rungs. Coaching and Standard
+  sound the same for now: both speak tips, confirmations, and status
+  readouts as full sentences (Standard easing off repeat tips on its own is
+  still coming). Quiet turns tips, confirmations, and status readouts into
+  a short sound instead of a sentence, and keeps the safety calls, what
+  things cost, and route instructions as words. Urgent only keeps that
+  same short set of words plus the confirmation sound, but tips and
+  status updates go fully quiet -- no words and no sound, though
+  you can still pull them up from the message log. Billboards, place
+  names, and landmarks are not part of this ladder and keep their own
+  switches, so you can drive a quiet cab through a talkative countryside.
+  If you were playing on terse, you are now on Quiet.
+
+### Fixed
+
+- **"The scale comes first" now actually reaches you.** Pressing the rest
+  key with an open weigh station ahead was supposed to tell you the scale
+  comes first and rest planning can wait -- but that line could lose a race
+  against other things being said and never reach your ears at all, so
+  pressing the rest key looked like it did nothing. It now always gets
+  through.
+
+- **The driving speech settings explain themselves again.** A rewrite of
+  the Driving speech row's help text dropped the line explaining that the
+  rate, pitch, volume, and voice rows only show up when your voice supports
+  them, and that a screen reader sets those four itself. It is back, now on
+  the Driving event voice row.
+
+- **A stalled engine, a carrier-grounded tractor, and a snapped tire chain
+  now speak on Quiet and Urgent only.** These three were wrongly grouped
+  with routine confirmations, so on the two quietest driving speech
+  settings they played a short sound instead of telling you the engine
+  died and how to restart it, that dispatch took your tractor and put you
+  in another one, or that a chain let go and the set is now scrap. All
+  three speak as words on every driving speech setting now.
+
+- **"Back on the pavement" now shows up in message review on Urgent
+  only.** On the quietest driving speech setting this line spoke no words,
+  played no sound, and used to skip the message log too, so there was no
+  way to confirm the truck was back on the road. It now always reaches the
+  log.
 
 ## 1.8.8.1 - 2026-08-08
 

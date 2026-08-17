@@ -8,6 +8,13 @@ from dataclasses import asdict, dataclass
 from typing import ClassVar
 
 from .models.profile import data_dir
+from .speech_pacing import (
+    DEFAULT_DRIVING_SPEECH,
+    DRIVING_SPEECH_MODES,
+    Disposition,
+    SpeechCategory,
+    disposition_for,
+)
 from .units import (
     MILES_TO_KM,
     distance_unit,
@@ -33,7 +40,8 @@ PROFILE_SHARING_CONSENT_VERSION = 3
 #    Speech and weather.
 # 2: the speed keeper moving to Driving assistance, and the lane and edge cue
 #    volume moving to Audio.
-SETTINGS_VERSION = 2
+# 3: speech_verbosity (0 terse / 1 normal) became the driving_speech ladder.
+SETTINGS_VERSION = 3
 
 # Which chatter switch governs each roadside-callout category. Zone entries
 # (parks, forests, wilderness) share one switch; the lone highway heritage
@@ -282,7 +290,11 @@ class Settings:
     # reads speed off it -- so ducking is opt-in for players who need it,
     # not a default that changes what everyone hears (owner, 2026-08-12).
     duck_audio_for_speech: bool = False
-    speech_verbosity: int = 1  # 0 terse, 1 normal
+    # How much of the road's INFORMATION speaks: a ladder of named rungs
+    # that cut whole categories, not one global compression. Flavor is not
+    # governed here -- billboards, places and landmarks answer to the
+    # chatter switches and the place-callouts ladder (owner, 2026-08-15).
+    driving_speech: str = DEFAULT_DRIVING_SPEECH
     # Roadside chatter: the ambient color spoken between navigation cues.
     # Each category has its own switch so a player can keep the geography
     # (rivers, passes) while silencing the jokes (billboards), or vice versa.
@@ -421,7 +433,6 @@ class Settings:
     @classmethod
     def load(cls) -> Settings:
         s = cls()
-        defaults = cls()
         data = None
         try:
             with open(s.path, encoding="utf-8") as f:
@@ -429,6 +440,25 @@ class Settings:
             if not isinstance(data, dict):
                 log.warning("Settings file is not a settings object; using defaults")
                 data = {}
+        except FileNotFoundError:
+            pass
+        except (json.JSONDecodeError, OSError):
+            log.warning("Could not read settings; using defaults", exc_info=True)
+        return cls.from_dict(data)
+
+    @classmethod
+    def from_dict(cls, data: dict | None) -> Settings:
+        """Build settings from a parsed settings file, running every migration.
+
+        Split out of :meth:`load` so the migrations are testable without a
+        filesystem. ``data`` is ``None`` when there was no readable file and
+        every default stands -- several migrations below distinguish that
+        from an empty dict (a file that exists but says nothing), and that
+        distinction must survive the split.
+        """
+        s = cls()
+        defaults = cls()
+        if isinstance(data, dict):
             for k, v in data.items():
                 if hasattr(s, k):
                     setattr(s, k, v)
@@ -436,10 +466,6 @@ class Settings:
             # silently expand it into public Profile sharing.
             if data.get("profile_sharing_consent_version") != PROFILE_SHARING_CONSENT_VERSION:
                 s.online_presence = False
-        except FileNotFoundError:
-            pass
-        except (json.JSONDecodeError, OSError):
-            log.warning("Could not read settings; using defaults", exc_info=True)
         # ``steering_assist`` became ``lane_keeping`` in 1.9. A save that
         # already carries the new key is read as-is; anything older has its
         # legacy value carried across to the mode that behaves identically,
@@ -523,10 +549,19 @@ class Settings:
             s.pedal_latch = "off"
         if s.pedal_latch not in ("assists first", "latch first", "off"):
             s.pedal_latch = "assists first"
-        # The chatty level (2) was retired; it never diverged from normal
-        # beyond a quicker speed-callout timer. Saved chatty falls to normal.
-        if s.speech_verbosity not in (0, 1):
-            s.speech_verbosity = 1
+        # The two-value verbosity became a four-rung ladder (S4). A terse
+        # player asked for less and lands on quiet; everyone else on
+        # standard, which is what normal already was. Keyed on the absence
+        # of the new field, so a player who has since picked a rung is
+        # never dragged back by a stale verbosity left in the file.
+        if isinstance(data, dict) and "driving_speech" not in data:
+            s.driving_speech = "quiet" if data.get("speech_verbosity") == 0 else "standard"
+        if s.driving_speech not in DRIVING_SPEECH_MODES:
+            # Also the migration for a saved "coaching" (the rung removed on
+            # 2026-08-17): it was indistinguishable from standard at the
+            # voice, and standard is the default, so a player who had it
+            # lands on the setting they were already hearing.
+            s.driving_speech = DEFAULT_DRIVING_SPEECH
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:
@@ -613,6 +648,25 @@ class Settings:
                 )
         s.settings_version = SETTINGS_VERSION
         return s
+
+    def speech_disposition(self, category: SpeechCategory | None) -> Disposition:
+        """How the player's rung delivers this category of information."""
+        return disposition_for(self.driving_speech, category)
+
+    def speaks(self, category: SpeechCategory | None) -> bool:
+        """Whether this category reaches the voice at all on this rung."""
+        return self.speech_disposition(category) not in (
+            Disposition.EARCON,
+            Disposition.SILENT,
+        )
+
+    def renders_terse(self) -> bool:
+        """Whether spoken lines take their terse rendering on this rung.
+
+        The rung picks the rendering, so ``SpokenMessage`` keeps the
+        single-boolean ``render`` signature S2 gave it.
+        """
+        return self.driving_speech in ("quiet", "urgent_only")
 
     def chatter_enabled(self, category: str) -> bool:
         """Whether a roadside-callout category is currently spoken.

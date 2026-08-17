@@ -23,6 +23,7 @@ from ..playtest_levers import apply_continue_levers
 from ..settings import (
     DRIVING_ASSIST_FIELDS,
     DRIVING_ASSIST_PRESETS,
+    DRIVING_SPEECH_MODES,
     LANE_KEEPING_MODES,
     LANE_KEEPING_TO_LEGACY,
     PLACE_CALLOUT_MODES,
@@ -1049,6 +1050,19 @@ SETTINGS_LAYOUT_NOTICES = {
         "has a row at all: it used to chime at the speed cruise itself holds, "
         "and now it stays quiet until you are genuinely heading for a ticket."
     ),
+    3: (
+        "Speech verbosity is now called Driving speech, in the Speech "
+        "category, and it has two more steps than before. What used to be "
+        "normal is now called standard, and what used to be terse is now "
+        "called quiet -- your choice came with you. Standard and quiet both "
+        "still speak every safety call, route instruction, and money "
+        "consequence; quiet only trades confirmations and status updates for "
+        "short sounds instead of words. A third choice sits below them: "
+        "urgent only, which speaks the safety calls, what things cost, and "
+        "the directions you cannot take back -- the turn itself, the exit, "
+        "the stop you are pulling into -- while a heads-up about a bend or a "
+        "town coming up becomes a short sound."
+    ),
 }
 
 
@@ -1504,12 +1518,17 @@ class SettingsCategoryState(MenuState):
         speech = self.ctx.speech
         specs = [
             (
-                lambda: f"Speech verbosity: {['terse', 'normal'][s.speech_verbosity]}",
-                self._cycle_verbosity,
-                "Controls how often driving status reminders speak. Rate, pitch, "
-                "volume, and voice rows appear in this category only when the "
-                "voice speaking to you supports them; with a screen reader "
-                "running, those four are set in the screen reader itself.",
+                lambda: f"Driving speech: {s.driving_speech.replace('_', ' ')}",
+                self._cycle_driving_speech,
+                "How much the road tells you. Standard speaks every "
+                "confirmation and status update in words, a driving tip "
+                "once per leg, and a status readout when it changes; quiet "
+                "cuts confirmations and status to short sounds; and urgent "
+                "only also turns the heads-up about a bend or a town coming "
+                "up into a short sound, keeping the safety calls, what "
+                "things cost, and the turn itself. Billboards, place "
+                "names and landmarks are not part of this -- they have "
+                "their own switches below.",
             ),
             (
                 lambda: f"Roadside chatter: {s.chatter_summary()}",
@@ -1571,7 +1590,10 @@ class SettingsCategoryState(MenuState):
                 lambda: f"Driving event voice: {self._event_voice_label()}",
                 self._cycle_event_voice,
                 "Speaks road events through the main voice or a separate SAPI or "
-                "OneCore voice, so a screen reader cannot cut them off.",
+                "OneCore voice, so a screen reader cannot cut them off. The rate, "
+                "pitch, volume, and voice rows below appear in this category only "
+                "when the voice speaking to you supports them; with a screen "
+                "reader running, those four are set in the screen reader itself.",
             ),
         ]
         if speech.supports_rate:
@@ -1958,8 +1980,10 @@ class SettingsCategoryState(MenuState):
         self.ctx.apply_haptics()
         self._announce()
 
-    def _cycle_verbosity(self, d: int) -> None:
-        self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 2
+    def _cycle_driving_speech(self, d: int) -> None:
+        s = self.ctx.settings
+        i = DRIVING_SPEECH_MODES.index(s.driving_speech)
+        s.driving_speech = DRIVING_SPEECH_MODES[(i + d) % len(DRIVING_SPEECH_MODES)]
         self._announce()
 
     def _cycle_place_callouts(self, d: int) -> None:

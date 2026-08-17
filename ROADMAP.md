@@ -718,6 +718,40 @@ onto exit signalling.
       belongs on the CB), the next listed exit (Shift+R is that key),
       traffic pressure (it restated the taper or the stop beside it), and
       two of its three bends; it is capped at four clauses.
+- [x] **Drive-time chattiness: even terse was far too much (owner,
+      2026-08-15) -- landed 2026-08-16.** The terse contract only
+      compressed each message; a quiet drive still talked constantly
+      because compression never reduced the NUMBER of things spoken.
+      Shipped from the four accessibility-practice principles the
+      original design only half-applied: principle (2), the
+      screen-reader verbosity model -- driving speech is now a
+      four-rung ladder (coaching / standard / quiet / urgent only,
+      `Settings.driving_speech`) that cuts whole categories of
+      information rather than shortening all of them alike, tagged
+      across all 164 driving speech call sites, with a tutorial
+      exemption so a new driver's first-run teaching is never silenced
+      by their chosen rung; and principle (4), announce on change --
+      standing conditions (load damage, an engine held at redline, the
+      parking brake locked out) speak once and then again only when
+      what they say actually changes, via `say_event`'s `key=`, instead
+      of repeating on a timer. Whole-drive proof:
+      `tests/test_driving_speech_ladder.py::
+      test_a_drive_gets_quieter_as_the_rung_tightens` drives a real
+      scenario through all four rungs and pins the spoken line count
+      falling as the rung tightens.
+- [x] **The ladder's earcons actually play now -- landed 2026-08-16
+      (task 10).** `LADDER_EARCONS` was wired only into the Learn game
+      sounds screen's preview; the gate at `app.py` silenced a cut
+      category, logged it, and returned, so Quiet and Urgent only were
+      audibly identical -- a category the ladder cut was silence, never a
+      sound, at every rung that cut it. `GameContext._play_ladder_earcon`
+      now plays `LADDER_EARCONS[category]` (resolved through
+      `sound_catalog.entry_by_name`, so the recipe lives in one place)
+      wherever the rung's disposition is EARCON, in both `say` and
+      `say_event`; SILENT still stays silent, which is now the entire
+      difference between Quiet and Urgent only at the voice.
+- [ ] **Sonification pass (principle 1 of the drive-time chattiness
+      redesign above).** Convert spoken state updates (speed drift,
 - [x] **One fact per key: Alt 1 to Alt 4 (Tim K., 2026-08-16).** R answers
       state, road, town and direction in one sentence, so hearing the one
       you wanted meant sitting through the other three at speed. Alt 1
@@ -922,29 +956,122 @@ onto exit signalling.
       what sound cannot carry, like numbers and instructions). Candidate:
       a systematic pass converting spoken state updates (speed drift,
       gaps opening, weather shifts) to the earcon/sonification layer,
-      with speech kept for the first occurrence as a teaching pair --
-      the Learn game sounds screen already exists to make that safe.
-      (2) The screen-reader verbosity model (JAWS/NVDA convention):
-      verbosity is a LADDER of named levels the user picks, cutting
-      whole categories -- not one global compress. Candidate: driving
-      verbosity presets (coaching / standard / quiet / urgent-only)
-      where quiet drops entire categories (ambient, flavor, repeat
-      coaching) rather than shortening them, per-category overrides
-      kept like the separate-volume-controls guideline.
-      (3) The live-region politeness model (W3C ARIA): only urgent
-      content interrupts; polite content waits for silence and is
-      DROPPED when stale rather than queued forever. The S1 pacer
-      already does half of this; the missing half is a per-minute
-      spoken-event budget at cruise -- when the budget is spent,
-      polite messages coalesce or drop to the message log instead of
-      speaking late.
-      (4) Announce on change, not on state: nothing re-reads, nothing
-      confirms what the sound layer already made audible.
-      Fold into the gated speech-redesign program (R1-R15) as its next
-      stage; design first, owner sign-off before any nightly ships it,
-      testers verify per the standing gate. The owner's report is the
-      requirement: a long drive in terse mode should be mostly engine,
-      road, and radio -- speech should feel like an event.
+      speech kept only for the first occurrence as a teaching pair. The
+      ladder's three earcons (Coaching note, Status note, the reused
+      Hazard clear chime) now play for real (see above) -- what remains
+      is everything past those three categories: speed drift, gaps
+      opening, and weather shifts have no sonified substitute at all yet
+      and still speak in full every time regardless of rung.
+- [ ] **Per-minute cruise speech budget (principle 3 of the drive-time
+      chattiness redesign above).** The live-region politeness model's
+      missing half: the S1 pacer already drops stale AMBIENT lines, but
+      nothing yet caps how many polite messages a busy stretch of road
+      can queue in a minute at cruise. Add the budget so a jammed
+      stretch coalesces or defers to the message log instead of
+      speaking a backlog late.
+- [x] **`Disposition.FIRST_OCCURRENCE` and `Disposition.TRANSITIONS`
+      are implemented.** Shipped 2026-08-17. Both behaved exactly like
+      FULL because `Settings.speaks()` branches on EARCON/SILENT alone,
+      so standard's own table was a promise nothing kept. The
+      bookkeeping cannot live in `Settings` (it needs per-line memory),
+      so it sits in `GameContext` beside the pacer: `_ladder_said` is
+      leg-scoped for FIRST_OCCURRENCE, reset from
+      `DrivingUpdateMixin.update` on a leg change, and `_ladder_last`
+      holds the last text per key for TRANSITIONS -- identical text is
+      the condition re-asserting itself, changed text is the transition.
+
+      `reset_event_condition` clears the last-text memory too. Without
+      that, a condition that genuinely cleared and came back word for
+      word never spoke again; the air-brake lockout test caught it,
+      which is the "swallows a genuine re-warning" failure the original
+      review of this area forbade.
+
+- [x] **Curve records that contradict their own geometry are screened at
+      load (2026-08-17).** Found in an owner playtest: a 160 ft "hairpin"
+      on US-285 turning 79.9 degrees over 53 feet of road, where that
+      geometry needs 223. Both existing screens passed it correctly -- it is
+      in real mountain terrain, which they deliberately leave alone. The new
+      screen asks only whether a record agrees with itself, which terrain
+      cannot excuse: span against the arc its own radius and deflection
+      require, plus zero-tangent opposite-direction pairs (the digitized-kink
+      signature, and what caught this one). Drops 1,190 of 51,231 surviving
+      mainline rows, 2.3%. Connectors exempt, matching the screens above.
+
+- [ ] **Advisory speeds above 80 mph in the baked curve data.** 298 of 804
+      curves on four sampled mountain routes carry an advisory over 80,
+      including 85 -- no US advisory plaque reads that. Harmless today only
+      because an advisory above the posted limit never fires a pacenote, so
+      nothing is spoken and nothing is wrong on the road; it is the bake's
+      0.3 g formula running unclamped on gentle curves. Worth clamping at
+      the bake so the data means what it says, and so a future consumer
+      cannot read one as a real number.
+
+- [x] **The coaching rung is removed (2026-08-17).** Measured on two
+      scenarios after the dispositions went in: byte-identical transcripts
+      against standard, 6 and 8 lines each. The rung's two cells only bite
+      where a coaching tip repeats, and exactly one line in the game carries
+      `SpeechCategory.COACHING`. An inaudible setting is worse than one
+      fewer setting here -- a player cycling it hears nothing change and
+      reasonably concludes it is broken. `DRIVING_SPEECH_MODES` is now
+      three; a saved "coaching" migrates to standard through the existing
+      unknown-rung fallback. The CATEGORY and its earcon stay.
+
+- [ ] **Coaching's technique tips, and the rung to hold them.** The reason
+      the rung was removed rather than kept: there is nothing to say in it.
+      Writing the tips means adding COACHING-category lines (there is one
+      today, chains hammering above the safe speed) and re-adding the rung
+      as one row of `DRIVING_SPEECH_DISPOSITIONS` plus its menu copy. The
+      FIRST_OCCURRENCE machinery standard uses to blunt them is already
+      built and tested, so the rung would be audibly different from standard
+      the day the first tip lands.
+
+      Worth knowing before writing them: the status readouts that repeat
+      mostly carry a changed number, which is a genuine worsening and
+      correctly still speaks at standard. So a tip only earns the rung its
+      difference if it is the kind of thing that would otherwise be said
+      more than once per leg.
+- [x] **Urgent only's NAVIGATION row is a genuine act-now filter (final
+      review of this branch, finding 5).** Shipped 2026-08-17 as the
+      option the bullet asked for: a real filter inside NAVIGATION rather
+      than a declaration that the taxonomy split was already enough.
+      NAVIGATION_ADVISORY carries the lookahead half -- the lead
+      announcement ("in a mile, take exit 42"), the bend coming, the place
+      still miles off -- and retires to the Road ahead note earcon at
+      urgent only while NAVIGATION keeps the turn itself, the exit, and the
+      stop. Measured on a headless I-65 run: quiet 29 lines, urgent only
+      26, against 0 apart before. Player-facing copy went back to a real
+      promise in the same change (settings row, its help text, the user
+      manual, docs/ontology.md).
+
+      Found while doing it: STOP_AHEAD looks like a lookahead and is not --
+      "Road Ranger at exit 292 in one mile. Press X to signal" names the key
+      that takes the stop, so a tone in its place removes the only way to
+      pull in rather than making the drive quieter. It stays act-now, the
+      same rule the pacing module already gives for CONFIRMATION.
+
+      The bullet's real cause was structural and is worth keeping written
+      down: before this, quiet and urgent only differed in COACHING and
+      STATUS alone, and both were already inaudible at quiet -- so the two
+      quietest rungs were the same setting with different names. A test now
+      fails if any future table lands back in that shape.
+- [ ] **A stale CONFIRMATION line can resurface and bury what the player
+      just asked for (found by task 10, adversarial scenario
+      `settings_flips_mid_drive`).** A `CONFIRMATION` line (e.g.
+      "Transmission changed to manual.") is usually spoken with
+      `interrupt=True` and no explicit `priority=`, so `say_event`
+      defaults it to `EventPriority.CRITICAL` -- and the pacer's
+      protected-hand-back slot, built to rescue a ROUTE or CRITICAL line
+      an interrupt plausibly cut off mid-sentence, holds onto it on the
+      same terms. The next interrupting line on the main channel (an S
+      query, another settings flip) purges the channel and hands the
+      confirmation back to be requeued, even though it already finished
+      speaking and what it reported may already be contradicted -- and it
+      resurfaces after, sometimes burying, the line the player actually
+      just asked for. Recorded as a strict xfail in
+      `tests/adversarial/test_break_scenarios.py::KNOWN_OPEN`. Needs a
+      pacer design change so CONFIRMATION does not occupy the
+      ROUTE/CRITICAL hand-back slot; out of scope for task 10.
+- [x] **Speech-priority redesign, stage S3 -- landed 2026-08-12** (R6, R7,
       R9, R10, R11, R12, R14). The naming diet and the noise cuts: facility
       names speak in full on first mention per leg and short after, with the
       type prefix dropped when the proper name already carries it (R6);
@@ -1258,6 +1385,32 @@ onto exit signalling.
       `tests/` claims the bare module name `conftest`, which broke
       `test_online_presence.py`'s `from conftest import FakeKeyring`.
       The loader lives in the test module for that reason.
+- [ ] **Three adversarial scenarios need triage after the playtest_break
+      transcript-capture fix (task 9 of the driving-verbosity-ladder
+      plan, 2026-08-16).** `tools/playtest_break.py` and
+      `tools/playtest_road.py` used to stub `ctx.say`/`ctx.say_event`
+      themselves, which sits outside `GameContext.say`/`say_event` and
+      so skipped the event pacer entirely -- every transcript either
+      tool ever produced showed every line a scenario's code path
+      attempted, not what a player actually hears once repeat
+      suppression runs. Fixed to stub the voice layer
+      (`ctx.speech.say`/`say_event`) instead. With the real pacer now
+      running, three scenarios turned ODD that were CLEAN before:
+      `fuel_rescue_farming` (expects 3 identical roadside-rescue
+      announcements, gets 1 -- may be a genuine silent-second-rescue
+      accessibility gap, or just the scenario's own timing landing
+      inside the repeat window), `scale_check_in_guidance` ("T mid
+      scale warning" response goes missing), and
+      `settings_flips_mid_drive` (a direct call to `_speak_speed_limit`
+      lands inside the repeat window of an earlier routine
+      announcement and is correctly dropped, so the assertion reads a
+      stale `transcript[-1]`). None investigated further -- out of
+      scope for a proof-and-paperwork task. Each needs a human to judge
+      real bug vs. stale scenario-script assumption, then either a
+      small scenario-script fix (advance past `EventSpeechPacer.
+      REPEAT_WINDOW_S` before asserting, or read `rig.said(...)`/
+      `lines_with(...)` deltas instead of `transcript[-1]`) or a
+      `KNOWN_OPEN` entry in `tests/adversarial/test_break_scenarios.py`.
 - [x] **Passing traffic you can actually hear -- SHIPPED 2026-08-10**
       (player-requested). Five bugs in the existing bubble, no redesign:
       traffic was stepped on the raw `time_scale` while everything else

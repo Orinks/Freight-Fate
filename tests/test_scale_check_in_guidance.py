@@ -173,9 +173,7 @@ def test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed(monkeypatc
         # overstated the road left, and against the fixed approach line it
         # read as the scale receding while the truck closed (2026-08-15).
         reminders = [s for s in spoken if s.startswith("Weigh station in ")]
-        assert reminders == [
-            "Weigh station in half a mile. Slow below fifteen for the scale."
-        ]
+        assert reminders == ["Weigh station in half a mile. Slow below fifteen for the scale."]
         kwargs = next(k for text, k in events if k and "Weigh station in " in text)
         assert kwargs.get("priority") is EventPriority.ROUTE
     finally:
@@ -206,9 +204,7 @@ def test_reminder_speaks_the_road_actually_left(monkeypatch):
         d._check_weigh_station_enforcement(scale.at_mi - 0.2)
 
         reminders = [s for s in spoken if s.startswith("Weigh station in ")]
-        assert reminders == [
-            "Weigh station in a quarter mile. Slow below fifteen for the scale."
-        ]
+        assert reminders == ["Weigh station in a quarter mile. Slow below fifteen for the scale."]
     finally:
         app.shutdown()
 
@@ -287,6 +283,36 @@ def test_rest_key_at_speed_defers_to_the_open_scale(monkeypatch):
         assert d.trip.planned_stop_key is None
         assert d._selected_stop_key is None
         assert app.state is state_before
+    finally:
+        app.shutdown()
+
+
+def test_rest_key_defer_notice_carries_route_priority(monkeypatch):
+    # Regression: _scale_outranks_rest_planning called say_event with no
+    # priority=, so it defaulted to AMBIENT and would_start_stale could
+    # drop it silently behind the exit-lane and cruise backlog -- the "scale
+    # comes first" instruction the player asked for by pressing T never
+    # reaching them. Its sibling _weigh_station_reminder already passes
+    # priority=EventPriority.ROUTE (see
+    # test_open_scale_notice_carries_route_priority above); this line must
+    # match. Invisible under the old transcript harness, which bypassed the
+    # pacer entirely -- it only became visible once the harness stopped
+    # doing that (task 9), which is also why the adversarial battery's
+    # scale_check_in_guidance scenario went red until this fix landed.
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken, events = _capture(app, monkeypatch)
+        _with_scale(d)
+        d.trip.position_mi = 8.2
+        d.truck.velocity_mps = 54.0 / 2.23694
+
+        d._try_rest_stop()
+
+        kwargs = next(k for text, k in events if "Weigh station first" in text)
+        assert kwargs.get("priority") is EventPriority.ROUTE
     finally:
         app.shutdown()
 

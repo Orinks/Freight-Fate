@@ -38,6 +38,7 @@ from __future__ import annotations
 
 from ..audio import CH_SURGE
 from ..models.cargo_condition import cargo_condition_text
+from ..speech_pacing import SpeechCategory
 
 # The wash is the liquid on the move. Below this it is not doing anything a
 # driver needs to hear, and holding a bed under that floor would just be one
@@ -141,6 +142,7 @@ class LiquidLoadMixin:
                         "Ease off now -- baffles do nothing about this one."
                     ),
                     interrupt=True,
+                    category=SpeechCategory.SAFETY,
                 )
         else:
             self._liquid_lateral_cooldown_s = max(
@@ -158,6 +160,7 @@ class LiquidLoadMixin:
                     "It will push you on when it gets there."
                 ),
                 interrupt=False,
+                category=SpeechCategory.STATUS,
             )
             return
 
@@ -175,6 +178,7 @@ class LiquidLoadMixin:
                     self.ctx.say_event(
                         "Load settled." if terse else "The load has settled.",
                         interrupt=False,
+                        category=SpeechCategory.CONFIRMATION,
                     )
         else:
             self._liquid_settle_timer_s = 0.0

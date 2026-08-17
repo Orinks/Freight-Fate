@@ -1370,6 +1370,11 @@ SETTINGS_INTERNAL_FLAGS = {
     "chatter_passes",
     "chatter_museums",
     "chatter_billboards",
+    # The driving-speech rung. Nothing reads this by name either: call sites
+    # ask settings.speaks(category), settings.speech_disposition(category),
+    # or settings.renders_terse(), all of which read the field inside
+    # settings.py.
+    "driving_speech",
 }
 
 # Pending features -- a real row a player can set, for behaviour that does not
@@ -1470,5 +1475,79 @@ def test_every_row_answers_the_arrow_keys(category):
             if not answered:
                 deaf.append(rows[index].text)
         assert deaf == [], (category, deaf)
+    finally:
+        app.shutdown()
+
+
+# -- the driving speech ladder settings row --------------------------------
+
+
+def test_the_driving_speech_row_names_the_rung_without_underscores():
+    """The stored value is a storage key; "urgent_only" must reach a screen
+    reader as two spoken words, not a symbol nobody taught the player."""
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        app.ctx.settings.driving_speech = "urgent_only"
+        cat = SettingsCategoryState(app.ctx, "speech")
+        row = next(item for item in cat.build_items() if item.text.startswith("Driving speech"))
+        assert row.text == "Driving speech: urgent only"
+        assert "_" not in row.text
+    finally:
+        app.shutdown()
+
+
+def test_driving_speech_row_cycles_all_three_rungs_and_wraps():
+    """Drives the real row through the menu's own Enter/Left handling, the
+    same path a player uses -- not the settings field directly, so a broken
+    wire between the row and DRIVING_SPEECH_MODES would show up here."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        assert app.ctx.settings.driving_speech == "standard"  # the shipped default
+        cat = open_settings_category(app, "Speech")
+        while not cat.items[cat.index].text.startswith("Driving speech"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.driving_speech == "quiet"
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.driving_speech == "urgent_only"
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.driving_speech == "standard"  # wrapped
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.driving_speech == "urgent_only"
+    finally:
+        app.shutdown()
+
+
+def test_a_player_two_layouts_behind_hears_the_driving_speech_notice():
+    """A settings file written before the ladder existed (settings_version 2)
+    is one Gameplay-submenu visit away from the field being renamed under the
+    player with nothing said. The notice must actually reach the player, not
+    just get consumed by the version bump."""
+    import json
+
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(json.dumps({"settings_version": 2}), encoding="utf-8")
+
+    app = App()
+    spoken = []
+    app.ctx.say = speech_stub(spoken)
+    try:
+        assert app.ctx.settings.settings_layout_notice_from == 2
+        open_gameplay_parent(app)
+        notice = [line for line in spoken if "Driving speech" in line]
+        assert notice
+        assert notice[0].strip() != ""
+        # Only the version-3 notice was owed; the earlier ones must not replay.
+        assert not [line for line in spoken if "Gameplay is now a category" in line]
+        assert not [line for line in spoken if "Speed keeper is now in" in line]
     finally:
         app.shutdown()

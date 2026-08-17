@@ -1100,7 +1100,7 @@ def test_construction_zone_warns_before_entry(world):
 
     warnings = _gps_messages(events)
     assert warnings == [
-        f"Brake now! In {trip._distance_text(lookahead)}, construction ahead. "
+        f"Brake now! In {trip._ahead_text(lookahead)}, construction ahead. "
         f"{_closure_part(zone)}Speed limit "
         f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f} at the taper, then {zone.limit_mph:.0f} "
         "through the work zone."
@@ -1360,7 +1360,9 @@ def test_merge_traffic_pressures_drop_the_speed_advisory(world):
     route_merge_msg = trip._traffic_pressure_message(route_merge, 1.0)
     construction_merge_msg = trip._traffic_pressure_message(construction_merge, 1.0)
     exit_msg = trip._traffic_pressure_message(exit_pressure, 1.0)
-    distance = trip._distance_text(1.0)
+    # Ahead-distances speak the never-zero ladder now ('one mile', and
+    # 'a quarter mile' rather than a rounded-down '0 miles').
+    distance = trip._ahead_text(1.0)
 
     assert route_merge_msg == f"Merging traffic in {distance}. Keep right and leave a gap."
     assert construction_merge_msg == (

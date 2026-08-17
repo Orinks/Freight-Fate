@@ -50,7 +50,7 @@ player never again waits through a paragraph of expired narration.
 from __future__ import annotations
 
 import time
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 
 
 class EventPriority(IntEnum):
@@ -72,6 +72,150 @@ class EventPriority(IntEnum):
     CRITICAL = 2
 
 
+class SpeechCategory(StrEnum):
+    """What a line of informational speech is ABOUT.
+
+    Orthogonal to :class:`EventPriority`, which says how long a line waits
+    and whether staleness may drop it. Urgency alone gave the verbosity
+    system only one lever -- length -- which is why compressing every
+    message (stage S2) did not make the drive quieter: it never reduced how
+    many things speak. The rung table below cuts by category instead.
+
+    Flavor -- billboards, place names, landmarks, roadside colour -- is
+    deliberately absent. It answers to the chatter switches and the
+    place-callouts ladder, and the owner set those separately (2026-08-15).
+
+    A recurring miscategorisation the review caught three times (2026-08-16):
+    a line that names a key the player must press to keep moving is never
+    CONFIRMATION. CONFIRMATION is an outcome report -- the assist cleared it,
+    the latch caught, here is what happened. A stalled engine, a grounded
+    tractor, a scrapped chain set are unrequested failures that stop the
+    truck and demand a next action; at quiet and urgent_only CONFIRMATION
+    is an EARCON, so miscategorising one of these turns the instruction that
+    gets the truck moving again into a chime. Route it by what actually
+    changed instead: SAFETY when the truck will not move and the line says
+    what to press, MONEY when it cost money or equipment.
+    """
+
+    SAFETY = "safety"
+    NAVIGATION = "navigation"
+    # Navigation you cannot recover from -- take this exit, turn here, you
+    # missed it -- against navigation that is a heads-up on what the road is
+    # about to do. Both are navigation and both speak at quiet; they part
+    # company at urgent_only, where the heads-up becomes a tone and the
+    # unrecoverable one keeps its words. Splitting them is what makes the
+    # two quietest rungs different settings rather than near-copies (owner,
+    # 2026-08-17: the strict "only if you must act" rule describes
+    # urgent_only, and quiet should be "still very little" above it).
+    NAVIGATION_ADVISORY = "navigation_advisory"
+    MONEY = "money"
+    COACHING = "coaching"
+    CONFIRMATION = "confirmation"
+    STATUS = "status"
+
+
+class Disposition(StrEnum):
+    """What a rung does with a category.
+
+    ``EARCON`` and ``SILENT`` both stop the words; they differ in whether
+    the sound layer still marks the moment. Neither loses the line -- both
+    still reach the message log, and the status-query keys still answer, so
+    nothing the ladder cuts becomes unreachable.
+    """
+
+    FULL = "full"  # speaks, normal rendering
+    TERSE = "terse"  # speaks, terse rendering -- never silence
+    FIRST_OCCURRENCE = "first"  # speaks the first time per leg, then silent
+    TRANSITIONS = "transitions"  # speaks on enter, worsen, and clear only
+    EARCON = "earcon"  # the sound layer carries it; no words
+    SILENT = "silent"  # no words, no sound; log and status keys only
+
+
+# "coaching" was a fourth rung above standard, and it was removed on
+# 2026-08-17 because it never differed from standard at the voice. Its two
+# table cells (COACHING full rather than once-per-leg, STATUS full rather
+# than on transitions) only bite where a coaching tip repeats, and exactly
+# one line in the game carries SpeechCategory.COACHING -- so cycling to it
+# changed nothing a player could hear. In a game read entirely by ear, a
+# setting that offers a choice and produces no audible difference is worse
+# than one fewer choice: it reads as broken. The CATEGORY stays (that one
+# line, and the Coaching note earcon quiet retires it to); it is the RUNG
+# that is gone, and re-adding it is one row of a data table once there are
+# tips to put in it.
+DRIVING_SPEECH_MODES = ("standard", "quiet", "urgent_only")
+
+# The rung table. Read a row as "at this rung, a line of this category is
+# delivered this way". Safety and money are FULL or TERSE in every row and a
+# test pins that: R1's never-dropped contract outranks any rung.
+DRIVING_SPEECH_DISPOSITIONS: dict[str, dict[SpeechCategory, Disposition]] = {
+    "standard": {
+        SpeechCategory.SAFETY: Disposition.FULL,
+        SpeechCategory.MONEY: Disposition.FULL,
+        SpeechCategory.NAVIGATION: Disposition.FULL,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.FULL,
+        SpeechCategory.COACHING: Disposition.FIRST_OCCURRENCE,
+        SpeechCategory.CONFIRMATION: Disposition.FULL,
+        SpeechCategory.STATUS: Disposition.TRANSITIONS,
+    },
+    "quiet": {
+        SpeechCategory.SAFETY: Disposition.TERSE,
+        SpeechCategory.MONEY: Disposition.TERSE,
+        SpeechCategory.NAVIGATION: Disposition.TERSE,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.TERSE,
+        SpeechCategory.COACHING: Disposition.EARCON,
+        SpeechCategory.CONFIRMATION: Disposition.EARCON,
+        SpeechCategory.STATUS: Disposition.EARCON,
+    },
+    "urgent_only": {
+        SpeechCategory.SAFETY: Disposition.TERSE,
+        SpeechCategory.MONEY: Disposition.TERSE,
+        SpeechCategory.NAVIGATION: Disposition.TERSE,
+        SpeechCategory.NAVIGATION_ADVISORY: Disposition.EARCON,
+        SpeechCategory.COACHING: Disposition.SILENT,
+        SpeechCategory.CONFIRMATION: Disposition.EARCON,
+        SpeechCategory.STATUS: Disposition.SILENT,
+    },
+}
+
+DEFAULT_DRIVING_SPEECH = "standard"
+
+# The sound that carries a category once a rung stops speaking it. Every
+# value is a real ``SoundEntry.name`` in the Learn game sounds catalog
+# (``sound_catalog.CATALOG``) -- pinned by
+# ``test_every_earcon_category_is_learnable`` -- because a sound the player
+# cannot look up is information removed rather than information moved (R14).
+# CONFIRMATION had reused the hazard-clear chime that shipped in S3 rather
+# than getting a cue of its own. That was a mistake and is fixed: the chime
+# already means "you got past the hazard", so at quiet it fired for every
+# silenced confirmation -- including "Automatic braking.", which happens
+# while the hazard is still there (owner playtest, 2026-08-17). COACHING,
+# CONFIRMATION, NAVIGATION_ADVISORY and STATUS have no
+# existing sound that means what an earcon here needs to mean, so each gets
+# its own synthesized entry (``ladder_earcons.py``).
+LADDER_EARCONS = {
+    SpeechCategory.NAVIGATION_ADVISORY: "Road ahead note",
+    SpeechCategory.COACHING: "Coaching note",
+    SpeechCategory.CONFIRMATION: "Confirmation note",
+    SpeechCategory.STATUS: "Status note",
+}
+
+
+def disposition_for(mode: str, category: SpeechCategory | None) -> Disposition:
+    """How this rung delivers this category.
+
+    An unknown rung reads as the default rather than raising: a settings
+    file edited by hand must not be able to crash the drive. A ``None``
+    category is an unclassified call site and always speaks -- the rendering
+    still follows the rung, so it gets shorter but never disappears.
+    """
+    row = (
+        DRIVING_SPEECH_DISPOSITIONS.get(mode) or DRIVING_SPEECH_DISPOSITIONS[DEFAULT_DRIVING_SPEECH]
+    )
+    if category is None:
+        return row[SpeechCategory.SAFETY]
+    return row.get(SpeechCategory(category), Disposition.FULL)
+
+
 class EventSpeechPacer:
     """Keeps the dedicated event voice from performing the past.
 
@@ -80,6 +224,10 @@ class EventSpeechPacer:
     * ``is_repeat`` decides whether the player has already heard this; a True
       means say nothing at all.
     * ``note_spoken`` records a line that did reach the voice.
+    * ``is_silenced_repeat``/``note_silenced`` are the same pair for a line
+      the driving speech rung cut to an earcon or to nothing -- a private
+      namespace so a silenced occurrence can dedupe its own earcon without
+      ever registering as something ``is_repeat`` would recognise as heard.
     * ``note_interrupt`` for an interrupting line (it purges the channel), or
       ``should_flush`` for a queued one -- True there means the backlog has
       gone stale and this line must be submitted interrupting instead.
@@ -123,6 +271,19 @@ class EventSpeechPacer:
         self._recent: dict[str, float] = {}
         # condition key -> the last thing said about it.
         self._conditions: dict[str, str] = {}
+        # The same two maps, but for occurrences the driving speech rung
+        # silenced (an earcon or nothing, never the words). Kept separate
+        # from ``_recent``/``_conditions`` on purpose: those two belong to
+        # what the player actually heard, and ``is_repeat`` consults them to
+        # decide whether a genuinely spoken line would be news. If a
+        # silenced occurrence wrote into that same state, raising the rung
+        # mid-drive while a standing condition was still active (still
+        # locked out, still at redline) would find the SILENCED text sitting
+        # in ``_conditions``, read the now-audible occurrence as an unchanged
+        # repeat, and skip it -- exactly the rung promising full sentences
+        # going quiet for the condition the player raised it to hear about.
+        self._silenced_recent: dict[str, float] = {}
+        self._silenced_conditions: dict[str, str] = {}
         # Set by pause(): the next line purges the channel, so anything the
         # voice was still holding when the player stepped away cannot surface
         # behind it.
@@ -184,11 +345,76 @@ class EventSpeechPacer:
     def forget_condition(self, key: str) -> None:
         """A standing condition has cleared; let it announce itself afresh."""
         self._conditions.pop(key, None)
+        self._silenced_conditions.pop(key, None)
+
+    # -- what the rung silenced (earcon-only or fully quiet) ----------------------
+
+    def is_silenced_repeat(
+        self,
+        text: str,
+        *,
+        key: str | None = None,
+        window: float | None = None,
+    ) -> bool:
+        """True when this silenced occurrence was already marked (earcon or not).
+
+        The silenced branches' own dedup: mirrors :meth:`is_repeat`'s rules
+        exactly, but reads a namespace private to occurrences the rung cut,
+        never ``_conditions``/``_recent``. A silenced repeat must not go
+        unmarked (that is the earcon machine-gun this exists to stop), but it
+        must equally never be mistaken for a genuinely spoken occurrence by
+        :meth:`is_repeat` once the rung changes and the condition is still
+        active -- that would silence the very line the player raised the
+        rung to hear.
+        """
+        if not text:
+            return False
+        if key is not None and self._silenced_conditions.get(key) == text:
+            return True
+        budget = self.REPEAT_WINDOW_S if window is None else window
+        if budget <= 0.0:
+            return False
+        last = self._silenced_recent.get(text)
+        return last is not None and self._clock() - last < budget
+
+    def note_silenced(self, text: str, *, key: str | None = None) -> None:
+        """Record a silenced occurrence (earcon played, or fully quiet)."""
+        if not text:
+            return
+        now = self._clock()
+        self._silenced_recent[text] = now
+        if key is not None:
+            self._silenced_conditions[key] = text
+        if len(self._silenced_recent) > self.RECENT_LIMIT:
+            self._silenced_recent = {
+                line: said
+                for line, said in self._silenced_recent.items()
+                if now - said < self.RECENT_MEMORY_S
+            }
 
     # -- the backlog projection ---------------------------------------------------
 
-    def _track(self, text: str, priority: EventPriority) -> None:
-        """Remember the newest line worth rescuing if an interrupt lands on it."""
+    def _track(
+        self, text: str, priority: EventPriority, category: SpeechCategory | None = None
+    ) -> None:
+        """Remember the newest line worth rescuing if an interrupt lands on it.
+
+        A CONFIRMATION never takes the slot, whatever priority it was spoken
+        at. Confirmations default to CRITICAL because they answer something
+        the player just did, so they used to qualify -- and then the next
+        interrupting line on the main channel handed the finished
+        confirmation back to be requeued, where it resurfaced AFTER, and
+        could bury, the line the player had actually just asked for. The slot
+        exists to rescue a warning cut off mid-sentence; an outcome report
+        that already finished, and whose outcome may since have been
+        contradicted (the transmission flipped back, the units changed
+        again), is not that. Found by the adversarial harness on
+        settings_flips_mid_drive, and made routine rather than rare once
+        pressed keys began interrupting again (2026-08-16).
+        """
+        if category is SpeechCategory.CONFIRMATION:
+            self._protected = None
+            return
         if priority >= EventPriority.ROUTE:
             self._protected = (text, EventPriority(priority), self._clear_at)
 
@@ -210,7 +436,10 @@ class EventSpeechPacer:
         return text, priority
 
     def note_interrupt(
-        self, text: str, priority: EventPriority = EventPriority.CRITICAL
+        self,
+        text: str,
+        priority: EventPriority = EventPriority.CRITICAL,
+        category: SpeechCategory | None = None,
     ) -> tuple[str, EventPriority] | None:
         """An interrupting line purges the channel: the projection restarts.
 
@@ -222,10 +451,15 @@ class EventSpeechPacer:
         cut = self._take_protected(text)
         self._purge_next = False
         self._clear_at = self._clock() + self._duration_s(text)
-        self._track(text, priority)
+        self._track(text, priority, category)
         return cut
 
-    def note_queued(self, text: str, priority: EventPriority = EventPriority.AMBIENT) -> None:
+    def note_queued(
+        self,
+        text: str,
+        priority: EventPriority = EventPriority.AMBIENT,
+        category: SpeechCategory | None = None,
+    ) -> None:
         """Extend the projection for a line delivered queued, no verdict asked.
 
         For the deliveries that must never flush: a rescued cut-off line
@@ -234,7 +468,7 @@ class EventSpeechPacer:
         the main voice rather than the pacer."""
         start = max(self._clock(), self._clear_at)
         self._clear_at = start + self._duration_s(text)
-        self._track(text, EventPriority(priority))
+        self._track(text, EventPriority(priority), category)
 
     def note_channel_purged(self) -> tuple[str, EventPriority] | None:
         """Speech outside the pacer's view purged the channel events ride on.

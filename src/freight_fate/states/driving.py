@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from ..sim.pedal_latch import PedalLatch
 from ..sim.surge import liquid_load_for
+from ..speech_pacing import SpeechCategory
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from ..models.cargo_condition import cargo_fragility
@@ -431,6 +432,9 @@ class DrivingState(
         # saves are never pulled back onto the streets.
         self._departure_chain = False
         self._departure_checked = False
+        # -1 so the first tick always resets, whatever leg a resumed
+        # run starts on.
+        self._ladder_leg_index = -1
         # (position when computed, scan result) -- see _destination_exit_details
         self._destination_exit_cache: tuple[float, tuple[float, str, str] | None] | None = None
         self._cruise_mph: float | None = None
@@ -576,7 +580,7 @@ class DrivingState(
         self._left_lane_s = 0.0
         self._keep_right_nags = 0
         self._ambient_event_cooldown_s = 0.0
-        self._pending_ambient_event: tuple[str, str | None] | None = None
+        self._pending_ambient_event: tuple[str, str | None, SpeechCategory | None] | None = None
         self._road_joint_accumulator_m = 0.0
         self._next_joint_distance_m = self._road_texture_rng.uniform(14.0, 18.0)
         self.lane_guidance = LaneGuidance()
@@ -683,7 +687,7 @@ class DrivingState(
                 setattr(self, name, data[name])
 
     def _terse_speech(self) -> bool:
-        return self.ctx.settings.speech_verbosity == 0
+        return self.ctx.settings.renders_terse()
 
     def _absolute_game_hour(self, trip_minutes: float | None = None) -> float:
         if trip_minutes is None:

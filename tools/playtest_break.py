@@ -204,8 +204,19 @@ class Rig:
         self.d.weather.update = lambda *a, **k: None
 
         self.transcript: list[str] = []
-        ctx.say = self._recorder("")
-        ctx.say_event = self._recorder("[event] ")
+        # Stub the VOICE layer, not ctx.say/say_event themselves. The driving
+        # verbosity ladder's gate and the event pacer's repeat/backlog
+        # handling both live *inside* GameContext.say/say_event -- replacing
+        # those methods (the old approach here) skipped both, so every
+        # transcript this rig ever produced showed what the game would say
+        # with no rung applied and no repeat suppression running, not what a
+        # player actually hears. Stubbing ctx.speech.say/say_event instead
+        # (the same seam tests/test_driving_speech_ladder.py already proves)
+        # leaves the real gate and pacer in the call path; by the time a
+        # line reaches here it has already been gated against the rig's own
+        # settings.driving_speech and rendered to a plain string.
+        ctx.speech.say = self._recorder("")
+        ctx.speech.say_event = self._recorder("[event] ")
 
         self.held: set[int] = set()
         self._orig_get_pressed = pygame.key.get_pressed
@@ -217,18 +228,12 @@ class Rig:
     # -- speech ----------------------------------------------------------------
 
     def _recorder(self, prefix: str):
-        # **kwargs swallows whatever routing hints say_event grows (priority,
-        # key, force, ...) -- the rig records what was said, not how. A
-        # normal/terse pair resolves against the rig's own verbosity setting,
-        # the same choice the real delivery layer makes, so a scenario run
-        # terse records what a terse player would actually hear.
-        from freight_fate.speech_text import SpokenMessage
-
-        def _speak(text: str, interrupt: bool = True, **kwargs: object):
-            if isinstance(text, SpokenMessage):
-                text = text.render(self.ctx.settings.speech_verbosity == 0)
-                if not text:
-                    return
+        # ``**kwargs`` absorbs anything the voice backend's own say/say_event
+        # might grow beyond (text, interrupt). A SpokenMessage pair never
+        # reaches this point: GameContext.say/say_event already render it to
+        # a plain string against the player's real rung before calling down
+        # to the voice layer, so there is nothing left to resolve here.
+        def _speak(text: str, interrupt: bool = True, **kwargs: object) -> None:
             self.transcript.append(f"{prefix}{text}")
 
         return _speak

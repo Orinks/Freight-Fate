@@ -23,11 +23,19 @@ records an offline check flagged: flat local ground where no real hairpin
 can exist, city-departure geometry at a leg's ends off the mountains, and a
 radius no through highway of any class can bend to. Everything else, sharp
 or not, is left alone -- nothing in mountain terrain is ever flagged.
+
+A third screen applies to mainline of every class and asks only whether a
+record agrees with itself: a bend's recorded span has to be able to hold the
+arc its own radius and deflection describe, and opposite-direction curves
+cannot meet with no straight between them. Terrain cannot excuse either, so
+unlike the two above, this one does look at mountain roads -- which is where
+it was found (``ARC_CONSISTENCY_MIN``).
 """
 
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 
 from .data_resources import read_data_text
@@ -49,6 +57,44 @@ HAIRPIN_DEFLECTION_DEG = 150.0
 # Rockies) and their sharp records are kept exactly as baked.
 INTERSTATE_MIN_RADIUS_FT = 300
 INTERSTATE_MAX_DEFLECTION_DEG = 150.0
+
+# Geometry self-consistency screen, applied to mainline of every class.
+#
+# The two screens above ask "could a road of this class bend this hard?" and
+# "does the ground under it allow a hairpin?". Both deliberately leave
+# mountain terrain alone, because that is where real switchbacks live. This
+# third screen asks something neither does and that terrain cannot excuse:
+# does the record agree with ITSELF?
+#
+# A curve of radius R turning theta has an arc length of R*theta. The
+# recorded start-to-end span is measured along the same road, so a healthy
+# record spans at least its own arc -- the median mainline row comes in at
+# 1.22x. A row spanning a small fraction of that is not a bend the sweep
+# measured; it is two adjacent route points with a kink between them, and no
+# amount of real mountain justifies it.
+#
+# Found on US-285 north of Santa Fe (owner playtest, 2026-08-17): a 160 ft
+# "hairpin" turning 79.9 degrees over 53 feet of road, where that geometry
+# needs 223. It sat in mountain terrain, so both existing screens correctly
+# passed it, and the pacenote layer called a 25 mph hairpin on a road posted
+# 35.
+ARC_CONSISTENCY_MIN = 0.1
+# What a row with no usable radius/deflection reports: comfortably passing,
+# so an incomplete record is never dropped on arithmetic it never supplied.
+_CONSISTENT_ENOUGH = 9.9
+
+# The same artifact's other signature, and the one that caught the US-285
+# case: a digitized kink shows up as opposite-direction curves with NO
+# tangent between them. A real reversal at this radius has straight road in
+# between -- a through highway cannot swap lock at a point. Both sides of the
+# zig-zag go, not just the arithmetically worst one, because the wiggle is
+# spurious as a whole: the road does not really go left-right-left there.
+ZIGZAG_MAX_TANGENT_FT = 1.0
+ZIGZAG_MAX_RADIUS_FT = 400
+# One side must also fail arithmetic, at a looser bar than ARC_CONSISTENCY_MIN
+# -- an abrupt reversal alone is suggestive, not proof, and compound S-curves
+# are real.
+ZIGZAG_ARC_MAX = 0.5
 
 
 @dataclass(frozen=True)
@@ -112,6 +158,56 @@ def _is_interstate_artifact(row: dict) -> bool:
         row["min_radius_ft"] < INTERSTATE_MIN_RADIUS_FT
         or row["deflection_deg"] >= INTERSTATE_MAX_DEFLECTION_DEG
     )
+
+
+def arc_consistency(record: CurveRecord) -> float:
+    """Recorded span as a multiple of the arc this bend's own geometry needs.
+
+    1.0 means the span exactly holds the curve; the median mainline record is
+    1.22. Below 1 the record is describing a turn sharper than the road it
+    claims to occupy. Returns a large number when radius or deflection is
+    missing, so an incomplete row is never screened out on arithmetic it
+    never supplied.
+    """
+    need = record.min_radius_ft * math.radians(record.deflection_deg)
+    if need <= 0.0:
+        return _CONSISTENT_ENOUGH
+    span_ft = (record.end_mi - record.start_mi) * 5280.0
+    return span_ft / need
+
+
+def _screen_geometry(records: list[CurveRecord]) -> list[CurveRecord]:
+    """Drop mainline rows that contradict their own geometry.
+
+    Two rules, both blind to road class and terrain -- see
+    ``ARC_CONSISTENCY_MIN`` and ``ZIGZAG_MAX_TANGENT_FT``. Connectors are
+    exempt, matching the screens above: a ramp really does bend that hard,
+    and its arcs are recorded against a different baseline.
+
+    Together these drop about 2.3% of surviving mainline rows.
+    """
+    mainline = sorted(
+        (r for r in records if not r.connector), key=lambda r: (r.start_mi, r.apex_mi)
+    )
+    doomed: set[int] = set()
+    for i, record in enumerate(mainline):
+        if arc_consistency(record) < ARC_CONSISTENCY_MIN:
+            doomed.add(i)
+    for i, (left, right) in enumerate(zip(mainline, mainline[1:], strict=False)):
+        if left.direction == right.direction:
+            continue
+        if (right.start_mi - left.end_mi) * 5280.0 > ZIGZAG_MAX_TANGENT_FT:
+            continue
+        if min(left.min_radius_ft, right.min_radius_ft) > ZIGZAG_MAX_RADIUS_FT:
+            continue
+        if min(arc_consistency(left), arc_consistency(right)) >= ZIGZAG_ARC_MAX:
+            continue
+        doomed.add(i)
+        doomed.add(i + 1)
+    kept = [r for i, r in enumerate(mainline) if i not in doomed]
+    kept.extend(r for r in records if r.connector)
+    kept.sort(key=lambda r: (r.start_mi, r.apex_mi))
+    return kept
 
 
 def _flagged_artifact_keys() -> frozenset[tuple[str, int]]:
@@ -180,7 +276,9 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
                         connector=connector,
                     )
                 )
-    _CACHE = {key: tuple(rows) for key, rows in by_leg.items()}
+    # Third screen, needing neighbours and so running per leg once the rows
+    # are gathered rather than line by line above.
+    _CACHE = {key: tuple(_screen_geometry(rows)) for key, rows in by_leg.items()}
     return _CACHE
 
 
