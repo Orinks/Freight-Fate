@@ -81,20 +81,6 @@ KNOWN_OPEN = {
         "hauls are the faster ones to drive; the streak bonus is now capped at "
         "the mileage XP, so what remains is the flat completion XP by design"
     ),
-    "settings_flips_mid_drive": (
-        "a CONFIRMATION line (e.g. 'Transmission changed to manual.') speaks "
-        "with the default CRITICAL priority and interrupt=True, so the pacer's "
-        "protected-hand-back slot -- meant to rescue a ROUTE or CRITICAL line "
-        "an interrupt plausibly cut off mid-sentence -- holds onto it too. The "
-        "very next interrupting line on the main channel (an S query, a unit "
-        "flip) purges the channel and hands the confirmation back to be "
-        "requeued, even though it already finished speaking and whatever it "
-        "reported may already be contradicted (a transmission flipped back, "
-        "units changed again). It then resurfaces after -- and can bury -- the "
-        "line the player actually just asked for. A pacer design change "
-        "(CONFIRMATION should not occupy the ROUTE/CRITICAL hand-back slot), "
-        "out of scope for the S4 ladder task that found it"
-    ),
 }
 
 

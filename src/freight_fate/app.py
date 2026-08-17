@@ -482,7 +482,7 @@ class GameContext:
         cut = None
         if self.settings.sapi_events:
             if interrupt:
-                cut = self._event_pacer.note_interrupt(text, priority)
+                cut = self._event_pacer.note_interrupt(text, priority, category)
             elif self._event_pacer.should_flush(text, priority):
                 # The channel is backed up past the point of truth: purging
                 # and speaking fresh IS the queued line's honest delivery.
@@ -491,10 +491,10 @@ class GameContext:
             self.speech.say_event(text, interrupt)
         else:
             if interrupt:
-                cut = self._event_pacer.note_interrupt(text, priority)
+                cut = self._event_pacer.note_interrupt(text, priority, category)
                 _stop_main_speech(self.speech)
             else:
-                self._event_pacer.note_queued(text, priority)
+                self._event_pacer.note_queued(text, priority, category)
             self.speech.say(text, interrupt=False)
         self._engage_speech_duck()
         if cut is not None:

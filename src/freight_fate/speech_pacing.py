@@ -374,8 +374,27 @@ class EventSpeechPacer:
 
     # -- the backlog projection ---------------------------------------------------
 
-    def _track(self, text: str, priority: EventPriority) -> None:
-        """Remember the newest line worth rescuing if an interrupt lands on it."""
+    def _track(
+        self, text: str, priority: EventPriority, category: SpeechCategory | None = None
+    ) -> None:
+        """Remember the newest line worth rescuing if an interrupt lands on it.
+
+        A CONFIRMATION never takes the slot, whatever priority it was spoken
+        at. Confirmations default to CRITICAL because they answer something
+        the player just did, so they used to qualify -- and then the next
+        interrupting line on the main channel handed the finished
+        confirmation back to be requeued, where it resurfaced AFTER, and
+        could bury, the line the player had actually just asked for. The slot
+        exists to rescue a warning cut off mid-sentence; an outcome report
+        that already finished, and whose outcome may since have been
+        contradicted (the transmission flipped back, the units changed
+        again), is not that. Found by the adversarial harness on
+        settings_flips_mid_drive, and made routine rather than rare once
+        pressed keys began interrupting again (2026-08-16).
+        """
+        if category is SpeechCategory.CONFIRMATION:
+            self._protected = None
+            return
         if priority >= EventPriority.ROUTE:
             self._protected = (text, EventPriority(priority), self._clear_at)
 
@@ -397,7 +416,10 @@ class EventSpeechPacer:
         return text, priority
 
     def note_interrupt(
-        self, text: str, priority: EventPriority = EventPriority.CRITICAL
+        self,
+        text: str,
+        priority: EventPriority = EventPriority.CRITICAL,
+        category: SpeechCategory | None = None,
     ) -> tuple[str, EventPriority] | None:
         """An interrupting line purges the channel: the projection restarts.
 
@@ -409,10 +431,15 @@ class EventSpeechPacer:
         cut = self._take_protected(text)
         self._purge_next = False
         self._clear_at = self._clock() + self._duration_s(text)
-        self._track(text, priority)
+        self._track(text, priority, category)
         return cut
 
-    def note_queued(self, text: str, priority: EventPriority = EventPriority.AMBIENT) -> None:
+    def note_queued(
+        self,
+        text: str,
+        priority: EventPriority = EventPriority.AMBIENT,
+        category: SpeechCategory | None = None,
+    ) -> None:
         """Extend the projection for a line delivered queued, no verdict asked.
 
         For the deliveries that must never flush: a rescued cut-off line
@@ -421,7 +448,7 @@ class EventSpeechPacer:
         the main voice rather than the pacer."""
         start = max(self._clock(), self._clear_at)
         self._clear_at = start + self._duration_s(text)
-        self._track(text, EventPriority(priority))
+        self._track(text, EventPriority(priority), category)
 
     def note_channel_purged(self) -> tuple[str, EventPriority] | None:
         """Speech outside the pacer's view purged the channel events ride on.
