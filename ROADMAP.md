@@ -3123,10 +3123,21 @@ for 1.8" framing predates the release split):
       `set_road_noise` runs at highway speed, panned by GUIDE_PAN_MAX and
       PAN_SLEW_PER_S. Measured engine -18.7 and road -33.3, matching the
       numbers below.
-      STILL WANTED, and the reason the next bullet stays open: an ear on
-      whether 291 Hz sits on a diesel firing harmonic at some engine speeds.
-      A six-cylinder four-stroke at 1500 rpm puts its fourth harmonic near
-      300 Hz. Shifting the pitch is one constant.
+      MEASURED 2026-08-17, and the worry was right: 291.6 Hz is the WORST
+      of eight pitches tested against the real engine loops. Narrow-band
+      energy around it peaks at 130.4 dB on `engine/midhigh` -- ordinary
+      cruising -- against 121.8 at 1320 Hz and 122.8 at 880. That is 8.5 dB
+      more engine sitting directly on Darren's pitch than on the quietest
+      candidate, which is the difference between a cue that cuts through and
+      one that smears into the engine exactly when the driver is holding
+      speed. Higher pitches also localise better, which is the other half of
+      what this cue has to do.
+      NOT CHANGED WITHOUT AN EAR: the pitch is Darren's contribution and the
+      owner approved it by listening, so a table is not enough to overrule
+      it. An A/B of 291.6 against 880 over `engine/midhigh` is built and
+      ready to play. If the ear agrees with the measurement it is one
+      constant, `TONE_HZ` in `lane_guide_tone.py`, and the loop length
+      follows automatically.
 
 - [ ] **The road lean is inaudible under the engine, and the fix is the ASSET
       (Darren and the owner, 2026-08-17).** Measured: `vehicle/road` is
