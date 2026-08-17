@@ -579,7 +579,6 @@ Driving controls are active while the road view is focused:
 | Alt+S | Report when your 30 minute break is due, or that a break will not help. |
 | Alt+D | Report what ends this shift -- driving time left and duty window both -- and where you can legally stop before it. |
 | R | Report trip progress (the same percent the online drivers board shows) and the distance left, then the road you are on with its direction, the state you are in, and the city you are heading toward. With a planned stop set, the distance counts down to that stop instead of the destination. On city streets -- pulling out of the origin gate, driving a pickup approach, or running the last streets to a facility gate -- it names the street under your wheels and counts down to the on-ramp or the gate instead. Distances close in quarter miles and then in feet, so the answer is never "0 miles" while the gate is still ahead. |
-| Shift+R | Report the next listed highway exit. |
 | Alt+1 | Report the state you are in, and nothing else. |
 | Alt+2 | Report the road you are on, signed the way you would read it -- "I-90 East". On city streets it names the street instead. |
 | Alt+3 | Report the town you are in. When you are not in one, it names the nearest town, how far off the road it sits, and whether it is ahead or behind. On an empty stretch it says there is no town near you rather than going quiet. |
@@ -1035,7 +1034,7 @@ exit, continue to the next safe turnaround. Dispatch loops you back onto the
 approach so you can hear the exit call again and press X to take it.
 
 Ordinary highway exits that do not lead to a current action are not announced
-during the drive. Press Shift+R if you want the next listed exit for route
+during the drive. The status screen lists the next exit for route
 context.
 
 Stop actions depend on that stop's data. A stop may offer:
@@ -1301,7 +1300,6 @@ Use these keys when you need status without leaving the road:
 | Alt+S | When your 30 minute break is due. |
 | Alt+D | What ends this shift, both clocks, plus the next legal stop. |
 | R | Route progress and GPS context. |
-| Shift+R | Next listed highway exit. |
 | V | Weather and forecast. |
 | M | Toggle the in-cab radio. |
 | Page Down / Page Up | Tune the radio to the next or previous station. |

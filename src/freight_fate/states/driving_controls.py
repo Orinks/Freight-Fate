@@ -134,10 +134,12 @@ class DrivingControlsMixin:
         elif key == pygame.K_c:
             self._speak_clock()
         elif key == pygame.K_r:
-            if event.mod & pygame.KMOD_SHIFT:
-                self.ctx.say(self.trip.next_exit_context())
-            else:
-                self._speak_route_status()
+            # Shift+R used to read the next listed exit. Removed 2026-08-17:
+            # the exit list is reference material the drive never asks the
+            # player to act on, and it stays reachable on the status screen,
+            # which is where reference material belongs. R answers the same
+            # thing shifted or not, so a stray Shift is not silence.
+            self._speak_route_status()
         elif key == pygame.K_v:
             self._speak_weather()
         elif key == pygame.K_l:
@@ -353,7 +355,6 @@ class DrivingControlsMixin:
             "30 minute break is due, and Alt D what ends this shift, with "
             "where you can legally stop before it. "
             "R progress, distance left, and where you are. "
-            "Shift R next listed highway exit. "
             "Four keys answer one part of that each, when you want the fact "
             "without the sentence: Alt 1 the state you are in, Alt 2 the road "
             "you are on, Alt 3 the town you are in or the nearest one, and "
@@ -602,7 +603,11 @@ class DrivingControlsMixin:
     def _handle_controller_modified(self, button: int) -> None:
         """Secondary bindings while the right bumper (modifier) is held."""
         if button == pygame.CONTROLLER_BUTTON_DPAD_UP:
-            self.ctx.say(self.trip.next_exit_context())
+            # Was the next listed exit, the pad's twin of Shift+R, and goes
+            # with it (2026-08-17). Route status instead, so the pad keeps an
+            # answer here rather than a dead button -- and so a pad driver is
+            # not left with a binding the keyboard no longer has.
+            self._speak_route_status()
         elif button == pygame.CONTROLLER_BUTTON_DPAD_DOWN:
             self._try_rest_stop()
         elif button == pygame.CONTROLLER_BUTTON_DPAD_LEFT:
@@ -1062,9 +1067,9 @@ class DrivingControlsMixin:
 
         Deliberately four clauses at the very most. Every other key on the
         wheel answers one question, and U was reciting all of them: the
-        listed exit is Shift+R, the posted limit and the bend under the
-        wheels are S, the safe number is D, the grade is G, and the route
-        with its planned stop is R. What is left is what nothing else says
+        listed exit is on the status screen, the posted limit and the bend
+        under the wheels are S, the safe number is D, the grade is G, and
+        the route with its planned stop is R. What is left is what nothing else says
         -- the ramp control ahead, the next imposed limit, the next stop,
         and the next bend that will demand slowing (owner report,
         2026-08-15: the drive is far too chatty).
@@ -1132,8 +1137,9 @@ class DrivingControlsMixin:
         # stop just named -- and the route merge speaks its own advisory on
         # the approach.
         #
-        # The next listed exit is gone too: Shift+R is that key, word for
-        # word.
+        # The next listed exit is gone too. It had its own key until
+        # 2026-08-17; now it is reference material on the status screen,
+        # which is the same argument for keeping it out of here.
         #
         # The next bend that demands slowing stays, but one of them, not
         # three. S names the bend already under the wheels, D folds it into

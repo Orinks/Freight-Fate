@@ -7,10 +7,7 @@ from ..sim.trip_models import _leg_state_at
 from ..sim.trip_route_helpers import _leg_heading
 from ..units import (
     MILES_TO_KM,
-    distance_unit,
-    spoken_distance,
     spoken_feet_or_meters,
-    to_distance,
 )
 
 # Where the quarter-mile ladder runs out of anything honest to say: its own
@@ -267,10 +264,15 @@ class DrivingLocationMixin:
         what it is actually driving at, and the next maneuver if one is
         left. Sentences that come up empty are dropped rather than spoken
         as a gap."""
+        # No next-maneuver clause. On streets the event voice announces every
+        # turn as it arrives, so including it here meant R re-read, on the
+        # screen reader, the line the event voice had just delivered (owner,
+        # 2026-08-17). The highway readout above dropped the maneuver for
+        # exactly this reason and said so in its own comment; the street
+        # readout kept it, and that inconsistency is the bug.
         parts = (
             f"Route status: {self._local_where_text() if where is None else where}.",
             f"{self._closing_text(self.trip.remaining_miles)} to {target}.",
-            self._navigation_context(),
         )
         self.ctx.say(" ".join(part for part in parts if part))
 
@@ -316,34 +318,6 @@ class DrivingLocationMixin:
         if legs:
             return f"the {legs[0].highway} on-ramp"
         return "the highway on-ramp"
-
-    def _navigation_context(self) -> str:
-        """``Trip.next_navigation_context`` with its distance re-spoken.
-
-        The trip's own wording rounds to whole units, so a turn 300 feet out
-        announced itself as "in 0 miles" -- the same complaint that started
-        this, one clause later. This swaps the exact substring the trip built
-        for the closing-ladder form, which keeps one formatter for the whole
-        sentence and quietly becomes a no-op the day the trip layer speaks
-        short distances itself.
-        """
-        imperial = self.ctx.settings.imperial_units
-        cue = self.trip.next_navigation_cue()
-        if cue is None:
-            # Out of maneuvers on the way OUT of a gate, the trip's fallback
-            # names the city as the destination -- "Destination Rochester
-            # ahead" while pulling out of Rochester. The sentence before this
-            # one has already named the on-ramp, which is the true answer.
-            if self._departure_chain:
-                return ""
-            return self.trip.next_navigation_context(imperial)
-        text = self.trip.next_navigation_context(imperial)
-        ahead = max(0.0, cue.at_mi - self.trip.position_mi)
-        rounded = spoken_distance(
-            to_distance(ahead, imperial), distance_unit(imperial, plural=False)
-        )
-        closing = spoken_closing_distance(ahead, imperial)
-        return text.replace(rounded, closing, 1) if closing != rounded else text
 
     def _approach_facility_text(self) -> str:
         from .driving_core import DRIVE_PHASE_PICKUP
