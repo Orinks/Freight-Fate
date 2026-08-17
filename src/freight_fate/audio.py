@@ -203,6 +203,20 @@ ENGINE_START_SETTLE_CURVE = "ease_out"  # key into audio_fades.CURVES
 # present, the words win (XAG 105; speech priority research, R13).
 SPEECH_DUCK_LEVEL = 0.5
 
+# How far the engine drops while the road lean is actually leaning. The lean
+# carries its meaning in the PAN of the road bed, and that bed is recorded
+# about 15 dB below the engine loops (measured 2026-08-17: -33.6 dBFS against
+# -18.7), with no headroom left to raise it -- the road channel is already at
+# full gain by highway speed. So the only way the side it leans to can be
+# heard is for the engine to step back, exactly as it does for speech. Two
+# testers reported the same thing independently: "very very quiet and you can
+# hardly even hear it", and cannot be picked out over the engine.
+#
+# Only while the guide is awake, which is a drift or a bend inside the
+# lookahead -- precisely the moments the road has something to say. It
+# settles back the moment the truck is straight again.
+GUIDE_DUCK_LEVEL = 0.45
+
 BASS_NO_SOUND_DEVICE = 0
 
 # Radio streaming (BASS only). Opening a URL blocks until the server answers;
@@ -491,6 +505,10 @@ def _loop_category(channel: int) -> str:
 class _PygameBackend:
     """The original pygame.mixer implementation (engine band crossfade)."""
 
+    # Class-level so an instance built with __new__ (the audio backend tests
+    # do exactly that) still has a neutral mix factor to multiply by.
+    _guide_duck: float = 1.0
+
     name = "pygame"
     # While the event voice speaks, engine/weather/music step down to this
     # and back (see AudioEngine.set_speech_duck). Not a setting value:
@@ -524,6 +542,7 @@ class _PygameBackend:
         self._engine_last_rpm = ENGINE_RPM_IDLE
         self._engine_last_throttle = 0.0
         self._engine_duck = 1.0  # shift-gap disengage: below the load floor
+        self._guide_duck = 1.0  # the road lean needs room over the engine
         self._fades = FadeScheduler()
         try:
             if not pygame.mixer.get_init():
@@ -884,7 +903,12 @@ class _PygameBackend:
         for i, w in enumerate(weights):
             self.set_loop_volume(
                 CH_ENGINE[i],
-                ENGINE_LOOP_GAIN * w * load_gain * self._engine_duck * self._engine_intro_gain,
+                ENGINE_LOOP_GAIN
+                * w
+                * load_gain
+                * self._engine_duck
+                * self._guide_duck
+                * self._engine_intro_gain,
             )
 
     def set_engine_duck(self, duck: float) -> None:
@@ -893,6 +917,19 @@ class _PygameBackend:
         if duck == self._engine_duck:
             return
         self._engine_duck = duck
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
+
+    def set_guidance_duck(self, leaning: bool) -> None:
+        """Give the road lean room over the engine while it is leaning.
+
+        Its own multiplier rather than a second caller of the shift-gap duck:
+        the two are independent, and a gear change in the middle of a bend
+        must not cancel the room the lean was given. They simply multiply.
+        """
+        duck = GUIDE_DUCK_LEVEL if leaning else 1.0
+        if duck == self._guide_duck:
+            return
+        self._guide_duck = duck
         self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     def set_road_noise(self, speed_mps: float) -> None:
@@ -1034,6 +1071,10 @@ class _BassBackend:
     "no sound" device keeps the whole pipeline running silently.
     """
 
+    # Class-level so an instance built with __new__ (the audio backend tests
+    # do exactly that) still has a neutral mix factor to multiply by.
+    _guide_duck: float = 1.0
+
     name = "bass"
     # While the event voice speaks, engine/weather/music step down to this
     # and back (see AudioEngine.set_speech_duck). Not a setting value:
@@ -1107,6 +1148,7 @@ class _BassBackend:
         self._engine_last_rpm = ENGINE_RPM_IDLE
         self._engine_last_throttle = 0.0
         self._engine_duck = 1.0  # shift-gap disengage: below the load floor
+        self._guide_duck = 1.0  # the road lean needs room over the engine
         self._fades = FadeScheduler()
         self._engine_wobble: list[list[float]] = []
         self._wobble_rng = random.Random()
@@ -1659,6 +1701,7 @@ class _BassBackend:
                 ENGINE_LOOP_GAIN
                 * load_gain
                 * self._engine_duck
+                * self._guide_duck
                 * self.engine_volume
                 * self.speech_duck
                 * self.master_volume
@@ -1701,6 +1744,19 @@ class _BassBackend:
         if duck == self._engine_duck:
             return
         self._engine_duck = duck
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
+
+    def set_guidance_duck(self, leaning: bool) -> None:
+        """Give the road lean room over the engine while it is leaning.
+
+        Its own multiplier rather than a second caller of the shift-gap duck:
+        the two are independent, and a gear change in the middle of a bend
+        must not cancel the room the lean was given. They simply multiply.
+        """
+        duck = GUIDE_DUCK_LEVEL if leaning else 1.0
+        if duck == self._guide_duck:
+            return
+        self._guide_duck = duck
         self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     def set_road_noise(self, speed_mps: float) -> None:
@@ -2179,6 +2235,20 @@ class AudioEngine:
         impl_fn = getattr(self._impl, "set_engine_duck", None)
         if impl_fn is not None:
             impl_fn(duck)
+
+    def set_guidance_duck(self, leaning: bool) -> None:
+        """Give the road lean room over the engine while it is leaning.
+
+        The lean says which way to steer by panning the road bed, and that bed
+        is recorded roughly 15 dB under the engine loops with the road channel
+        already at full gain by highway speed -- so there is nothing to raise
+        and the engine steps back instead, exactly as it does for speech.
+        Guarded like the shift-gap duck so a backend without it is a no-op
+        rather than a crash.
+        """
+        impl_fn = getattr(self._impl, "set_guidance_duck", None)
+        if impl_fn is not None:
+            impl_fn(leaning)
 
     def set_speech_duck(self, duck: float) -> None:
         """Step engine, weather, and music (the radio's slot) down under the
