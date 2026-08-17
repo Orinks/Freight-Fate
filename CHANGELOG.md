@@ -138,6 +138,23 @@
 
 ### Changed
 
+- **Confirmations no longer play the "you got past it" sound.** At the
+  quieter settings a confirmation is replaced by a short sound instead of
+  words, and the sound being used was the one that means you cleared a
+  hazard. So the truck could announce it was braking for a hazard by playing
+  the sound for having got past one, while the hazard was still in front of
+  you. Confirmations now have their own short note, and it is in Learn game
+  sounds as "Confirmation note".
+
+- **On a one-lane road the warning says to brake again.** At the quieter
+  settings a hazard you cannot go around had been reduced to just naming the
+  thing -- "brake lights right ahead" -- on the reasoning that the warning
+  tone already means brake. In practice that reads as an invitation to
+  change lanes, and on a one-lane road there is nowhere to go. The word
+  "Brake" is back for exactly that case. Where a lane really is open you
+  still get "change lanes or brake", and where nothing can be done about the
+  hazard at all the wording is unchanged.
+
 - **Hairpins that were not really there are gone.** The map's curve data was
   built by measuring the shape of real roads, and in about one place in fifty
   the measurement produced a bend that cannot exist: a turn sharper than the

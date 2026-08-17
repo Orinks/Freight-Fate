@@ -455,6 +455,16 @@ _HAZARDS = SoundCategory(
         # ``tests/test_speech_audio.py::test_all_referenced_assets_exist``
         # scans for a file on disk, since neither cue has one.
         SoundEntry(
+            "Confirmation note",
+            (Cue("ladder/confirmation_note", volume=0.32),),
+            "One short, clear high note standing in for a confirmation -- "
+            "the assist acted, the setting took, the latch caught. The words "
+            "still reach the message log. Not to be confused with Hazard "
+            "clear above, which means something quite different and used to "
+            "be played here.",
+            when="Driving speech set to Quiet or Urgent only.",
+        ),
+        SoundEntry(
             "Road ahead note",
             (Cue("ladder/road_ahead_note", volume=0.38),),
             "Two short notes falling, standing in for a heads-up about what "

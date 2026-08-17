@@ -132,7 +132,18 @@ HAZARD_DODGE_CALL = "Change lanes or brake!"
 
 # Calls the hazard warning tone already carries by itself. Terse drops them
 # and keeps the body -- the thing and where it is.
-_TONE_IMPLIED_CALLS = ("Brake now!", "Brake!")
+#
+# "Brake!" was here and is not any more (owner playtest, 2026-08-17). It
+# reads like the same redundancy as "Brake now!" and is not: the emitter
+# uses it ONLY where the hazard is dodgeable but no lane is open, so it is
+# the one call that answers a question the driver is actively asking --
+# can I go around this? Dropped, quiet left a noun phrase with no verb
+# ("Brake lights right ahead.") and the owner reached for a lane change
+# three times in one drive on a one-lane stretch of US-285, getting "there
+# is no lane to your left here" each time. "Brake now!" stays implied: it
+# marks a hazard that cannot be dodged at all, so there is no choice for
+# the word to inform.
+_TONE_IMPLIED_CALLS = ("Brake now!",)
 
 
 def hazard_call(call: str, body: str) -> SpokenMessage:

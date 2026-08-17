@@ -184,14 +184,18 @@ DEFAULT_DRIVING_SPEECH = "standard"
 # (``sound_catalog.CATALOG``) -- pinned by
 # ``test_every_earcon_category_is_learnable`` -- because a sound the player
 # cannot look up is information removed rather than information moved (R14).
-# CONFIRMATION reuses the hazard-clear chime that already shipped in S3
-# rather than inventing a second success cue; COACHING and STATUS have no
+# CONFIRMATION had reused the hazard-clear chime that shipped in S3 rather
+# than getting a cue of its own. That was a mistake and is fixed: the chime
+# already means "you got past the hazard", so at quiet it fired for every
+# silenced confirmation -- including "Automatic braking.", which happens
+# while the hazard is still there (owner playtest, 2026-08-17). COACHING,
+# CONFIRMATION, NAVIGATION_ADVISORY and STATUS have no
 # existing sound that means what an earcon here needs to mean, so each gets
 # its own synthesized entry (``ladder_earcons.py``).
 LADDER_EARCONS = {
     SpeechCategory.NAVIGATION_ADVISORY: "Road ahead note",
     SpeechCategory.COACHING: "Coaching note",
-    SpeechCategory.CONFIRMATION: "Hazard clear",
+    SpeechCategory.CONFIRMATION: "Confirmation note",
     SpeechCategory.STATUS: "Status note",
 }
 

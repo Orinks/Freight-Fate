@@ -1780,3 +1780,62 @@ def test_standard_speaks_a_status_change_but_not_its_re_assertion() -> None:
         assert "load_damage" not in app.ctx._ladder_last
     finally:
         app.shutdown()
+
+
+def test_no_ladder_earcon_borrows_a_sound_that_already_means_something() -> None:
+    """Owner playtest, 2026-08-17: "the hazard earcon is being used double
+    in some places."
+
+    CONFIRMATION borrowed the shipped "Hazard clear" chime instead of having
+    a cue of its own, so at quiet every silenced confirmation played "you
+    got past the hazard" -- including "Automatic braking.", which fires
+    while the hazard is still there and the truck is braking for it. That is
+    the exact failure ``ladder_earcons``' own docstring forbids: one sound
+    teaching a player two things.
+
+    Pinned as a rule rather than as one mapping, so the next category added
+    to the ladder cannot quietly borrow a different loaded sound.
+    """
+    from freight_fate.speech_pacing import LADDER_EARCONS
+
+    # Sounds that already carry a meaning of their own on the road.
+    spoken_for = {
+        "Hazard clear",
+        "Hazard warning",
+        "Collision",
+        "Overspeed",
+        "Low air",
+    }
+    borrowed = {c: name for c, name in LADDER_EARCONS.items() if name in spoken_for}
+    assert not borrowed, f"ladder earcon borrows a loaded sound: {borrowed}"
+
+    # And every ladder earcon is its own sound, not shared between two
+    # categories -- which would be the same bug wearing a different hat.
+    names = list(LADDER_EARCONS.values())
+    assert len(names) == len(set(names)), names
+
+
+def test_a_dodgeable_hazard_with_nowhere_to_go_keeps_the_word_brake() -> None:
+    """Owner playtest, 2026-08-17: three lane-change attempts in one drive
+    on a one-lane stretch of US-285, each answered with "there is no lane to
+    your left here".
+
+    The emitter uses a bare "Brake!" ONLY where the hazard is dodgeable but
+    no lane is open, so it is the one call that answers the question the
+    driver is actually asking -- can I go around this? Terse used to drop it
+    as tone-implied, leaving a noun phrase with no verb. "Brake now!" stays
+    implied: it marks a hazard that cannot be dodged, so there is no choice
+    for the word to inform.
+    """
+    from freight_fate.speech_text import HAZARD_DODGE_CALL, hazard_call
+
+    no_lane = hazard_call("Brake!", "Brake lights right ahead.")
+    assert no_lane.terse.startswith("Brake!"), no_lane.terse
+
+    undodgeable = hazard_call("Brake now!", "Rockfall right ahead.")
+    assert not undodgeable.terse.startswith("Brake now!"), undodgeable.terse
+    assert undodgeable.terse == "Rockfall right ahead."
+
+    # The open-lane call survives whole: it names the better option.
+    dodgeable = hazard_call(HAZARD_DODGE_CALL, "Deer right ahead.")
+    assert dodgeable.terse.startswith(HAZARD_DODGE_CALL)

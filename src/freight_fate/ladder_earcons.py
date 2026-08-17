@@ -1,7 +1,7 @@
 """Synthesized earcons for the categories the S4 driving speech ladder
 retires to sound (R14, ``docs/ontology.md``'s "Terse speech grammar").
 
-``NAVIGATION_ADVISORY``, ``COACHING`` and ``STATUS`` have no existing cue that means what an earcon
+``NAVIGATION_ADVISORY``, ``COACHING``, ``CONFIRMATION`` and ``STATUS`` have no existing cue that means what an earcon
 standing in for either needs to mean -- every candidate already carries a
 meaning of its own (the overspeed chime says "you are speeding", not "here
 was a tip"), and reusing one would teach a player two different things under
@@ -16,7 +16,15 @@ need to be tellable apart from each other and from everything else already
 playing: coaching is two rising notes (a tip offered), status is one short
 low note (something changed, look at it later if you want to), and the road
 ahead note is two falling notes (the road is about to do something) -- the
-opposite contour to coaching's, so the pair cannot be confused at speed.
+opposite contour to coaching's, so the pair cannot be confused at speed --
+and confirmation is one short high note, an octave over status, so "that
+worked" and "something changed" part on pitch alone.
+
+CONFIRMATION used to borrow the shipped "Hazard clear" chime rather than
+have a tone of its own, which broke this module's own rule: that chime
+already means "you got past the hazard". At quiet it fired for every
+silenced confirmation, so the owner heard hazard-cleared while a hazard was
+still live and the truck was braking for it (playtest, 2026-08-17).
 """
 
 from __future__ import annotations
@@ -28,6 +36,7 @@ import wave
 
 from .audio import register_generated_sound
 
+CONFIRMATION_NOTE_KEY = "ladder/confirmation_note"
 ROAD_AHEAD_NOTE_KEY = "ladder/road_ahead_note"
 COACHING_NOTE_KEY = "ladder/coaching_note"
 STATUS_NOTE_KEY = "ladder/status_note"
@@ -70,6 +79,16 @@ def _wav_bytes(samples: array.array) -> bytes:
     return buffer.getvalue()
 
 
+def confirmation_note_wav() -> bytes:
+    """One short, clear high note: the thing you asked for happened.
+
+    A single note like the status tock, an octave above it, so "something
+    changed, look later" and "that worked" are told apart by pitch alone
+    without either becoming a two-note phrase like the other two.
+    """
+    return _wav_bytes(_tone_samples(784.0, 0.06, 0.32))
+
+
 def road_ahead_note_wav() -> bytes:
     """Two short notes falling: the road is about to do something.
 
@@ -106,6 +125,7 @@ def register_ladder_earcons() -> None:
     global _registered
     if _registered:
         return
+    register_generated_sound(CONFIRMATION_NOTE_KEY, confirmation_note_wav(), "wav")
     register_generated_sound(ROAD_AHEAD_NOTE_KEY, road_ahead_note_wav(), "wav")
     register_generated_sound(COACHING_NOTE_KEY, coaching_note_wav(), "wav")
     register_generated_sound(STATUS_NOTE_KEY, status_note_wav(), "wav")

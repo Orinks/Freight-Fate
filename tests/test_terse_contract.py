@@ -56,9 +56,17 @@ def test_the_swerve_synonym_is_gone_from_every_spoken_string() -> None:
 
 
 def test_tone_implied_calls_drop_to_the_body_in_terse() -> None:
+    """Only "Brake now!" is implied by the tone now.
+
+    "Brake!" was here until 2026-08-17. It looks like the same redundancy
+    and is not: the emitter uses it ONLY where the hazard is dodgeable but
+    no lane is open, so it answers the question the driver is asking. With
+    it dropped, quiet left a noun phrase with no verb and the owner reached
+    for a lane change three times on a one-lane stretch.
+    """
     assert hazard_call("Brake now!", "Deer in the road.").terse == "Deer in the road."
-    assert hazard_call("Brake!", "Mattress in your lane.").terse == "Mattress in your lane."
     assert hazard_call("Brake now!", "Deer in the road.").normal == "Brake now! Deer in the road."
+    assert hazard_call("Brake!", "Mattress in your lane.").terse == "Brake! Mattress in your lane."
 
 
 # -- certainty survives compression --------------------------------------------
