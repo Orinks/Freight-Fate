@@ -76,3 +76,29 @@ STATUS.md
 # definition can still be committed; only the local-only bits are ignored.
 .claude/settings.local.json
 .claude/worktrees/
+
+# Backported from the 1.9 line 2026-08-17. These rules have protected
+# feat/career-1.9 all along; dev had none of them, and one working tree serves
+# both release lines. Untracked files survive a branch switch, so 1.9 work
+# left 19 loose jake_*.wav samples and the radio cache sitting exposed the
+# moment the checkout moved to the 1.8 line -- ignored on the branch that
+# generated them, unignored on the branch they ended up under. The rule has to
+# exist on both lines or the protection is only ever half the time.
+#
+# The shipped audio is src/freight_fate/sounds.pak (tools/pack_sounds.py).
+# The loose assets/sounds tree is builder-local source material and never
+# ships through the repo (owner, 2026-08-08); only the credits ride along
+# so licensing stays reviewable in a clean clone.
+*.wav
+src/freight_fate/assets/sounds/**
+!src/freight_fate/assets/sounds/CREDITS.md
+# The classic engine voice (donated 1.8.x recording) is player-selectable in
+# Settings, not builder-local material, so it ships through the repo where
+# the licensed overlay can never shadow it. Only the one shipped file is
+# un-ignored -- anything else dropped in that directory stays uncommittable.
+!src/freight_fate/assets/sounds/engine_classic/
+src/freight_fate/assets/sounds/engine_classic/**
+!src/freight_fate/assets/sounds/engine_classic/idle.ogg
+
+# Cached source dumps for tools/import_radio_catalog.py
+data/radio-cache/
