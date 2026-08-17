@@ -138,6 +138,15 @@
 
 ### Changed
 
+- **The police marker stops turning the radio down when you asked it not
+  to.** With "game sounds step back for speech" switched off, passing a
+  patrol still dropped the radio for a moment to make room for the marker
+  tone. That setting is how you say you do not want the game moving your
+  audio around, and it now covers this too. The marker still sounds at full
+  volume -- it just no longer makes a hole first. If you listen to the police
+  scanner stations and want the marker to stand out from them, turning the
+  setting on gives you the old behaviour back.
+
 - **Confirmations no longer play the "you got past it" sound.** At the
   quieter settings a confirmation is replaced by a short sound instead of
   words, and the sound being used was the one that means you cleared a
