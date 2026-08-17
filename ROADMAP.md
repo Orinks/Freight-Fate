@@ -2944,6 +2944,25 @@ for 1.8" framing predates the release split):
       -> one per 84. Harness clean on five enforcement scenarios. Three tests
       added, including one that pins the gate inside the window, since
       nothing in 3,940 tests caught either bug.
+- [ ] **Learn game sounds demos cues the player's settings make impossible
+      (Darren, 2026-08-17).** He reported the road lean as "very very quiet
+      and you can hardly even hear it". Measured: it is not quiet. On the
+      road the bed runs at 0.97 gain at 65 mph against the demo's 0.60, and
+      the pan is `GUIDE_PAN_MAX = 0.8` in both -- the drive is LOUDER than
+      the lesson. What is actually true is that the lean cannot happen for
+      him: it needs lane departure warning ON and lane keeping off or
+      partial, so on full lane keeping there is no lean at any volume, only a
+      centred bed. The catalog's `when=` field says exactly this, but it
+      lives behind F1 while pressing Enter just plays the cue -- so the
+      screen teaches a sound the player will never hear and says nothing
+      about it. Same principle as the empty-crossover earcon removed
+      2026-08-16: a cue that cannot fire must not present as one that can.
+      FIX SHAPE: give `SoundEntry` an optional availability check against
+      live settings, and have `play_entry` say "your settings mean you will
+      not hear this on the road, because ..." before or instead of the demo.
+      Not done on build morning because it is a new mechanism across a
+      catalog rather than a one-line fix, and the entries that need
+      annotating have to be identified rather than guessed.
 - [ ] **Things an officer never notices that the game already models
       (2026-08-16).** `_candidates` covers speeding, unsafe equipment, no
       chains, no lights, following too close and left-lane misuse. Missing,
