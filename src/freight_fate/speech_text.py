@@ -121,7 +121,14 @@ def terse_silent(normal: str) -> SpokenMessage:
 # in terse mode, delivered only to the players who turned explanations off --
 # exactly the drift docs/ontology.md exists to prevent. A copy test scans
 # src/ so the synonym cannot come back.
-HAZARD_DODGE_CALL = "Brake or change lanes!"
+#
+# The lane change leads (owner, 2026-08-17). Both actions are still offered,
+# because a driver who cannot see the gap may reasonably prefer to slow --
+# but the order is the recommendation, and at a hazard the first word is the
+# one that gets acted on. This call is only ever used where a lane is
+# genuinely open: has_open_adjacent_lane_at gates it, and a one-lane stretch
+# gets a bare "Brake!" instead.
+HAZARD_DODGE_CALL = "Change lanes or brake!"
 
 # Calls the hazard warning tone already carries by itself. Terse drops them
 # and keeps the body -- the thing and where it is.

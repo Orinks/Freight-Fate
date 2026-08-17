@@ -42,12 +42,12 @@ def test_empty_terse_rendering_drops_the_line_whole() -> None:
 
 def test_plus_extends_both_renderings() -> None:
     pair = SpokenMessage(
-        "Brake or change lanes! Slow car ahead.", "Brake or change lanes! Slow car ahead."
+        "Change lanes or brake! Slow car ahead.", "Change lanes or brake! Slow car ahead."
     )
     grown = pair.plus("Automatic speed control canceled.")
     assert grown.render(terse=False).endswith("Automatic speed control canceled.")
     assert grown.render(terse=True).endswith("Automatic speed control canceled.")
-    assert grown.render(terse=True).startswith("Brake or change lanes!")
+    assert grown.render(terse=True).startswith("Change lanes or brake!")
 
 
 def test_plus_on_a_dropped_line_keeps_the_suffix_in_terse() -> None:

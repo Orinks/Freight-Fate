@@ -303,7 +303,7 @@ def test_stacked_hazard_wording_follows_the_strictest_dodgeability(monkeypatch):
         driving._handle_trip_event(
             TripEvent(
                 TripEventKind.HAZARD,
-                "Brake or change lanes! Debris on the road.",
+                "Change lanes or brake! Debris on the road.",
                 {"deadline_s": 4.0, "dodgeable": True, "name": "the debris"},
             )
         )
@@ -311,7 +311,7 @@ def test_stacked_hazard_wording_follows_the_strictest_dodgeability(monkeypatch):
         driving._handle_trip_event(
             TripEvent(
                 TripEventKind.HAZARD,
-                "Brake or change lanes! Retread debris from a blown tire.",
+                "Change lanes or brake! Retread debris from a blown tire.",
                 {"deadline_s": 4.0, "dodgeable": True, "name": "the tire debris"},
             )
         )

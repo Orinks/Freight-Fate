@@ -322,7 +322,7 @@ HELP_PAGES = [
             "breaks, or saves are available.",
             "When you hear Brake now, slow below twenty five miles per hour quickly",
             "to avoid a collision. These warnings are tied to road or traffic context.",
-            "Brake or change lanes means a fixed object in your lane: a quick",
+            "Change lanes or brake means a fixed object in your lane: a quick",
             "move to a clear lane dodges it at speed -- with lane keeping on",
             "partial or off, steer across the lane line; on full, tap Left or",
             "Right. Braking works too, but an object in the lane takes nearly",

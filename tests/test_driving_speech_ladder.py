@@ -233,12 +233,12 @@ def test_safety_speaks_at_the_quietest_rung() -> None:
         app.ctx.settings.driving_speech = "urgent_only"
 
         app.ctx.say_event(
-            "Brake or change lanes! Slow car ahead.",
+            "Change lanes or brake! Slow car ahead.",
             interrupt=True,
             category=SpeechCategory.SAFETY,
         )
 
-        assert spoken == ["Brake or change lanes! Slow car ahead."]
+        assert spoken == ["Change lanes or brake! Slow car ahead."]
     finally:
         app.shutdown()
 

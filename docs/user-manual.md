@@ -853,7 +853,7 @@ often than open-country stretches.
 
 Hazards can happen while moving. When a "Brake now" warning appears, slow below
 25 miles per hour quickly to avoid a collision. Some hazards are called out as
-"Brake or change lanes" -- those are fixed objects in your lane, like road
+"Change lanes or brake" -- those are fixed objects in your lane, like road
 debris or a stopped vehicle. A lane change dodges them at full speed if the
 lane beside you is clear; braking works too, but you cannot roll over a ladder
 at 25 -- an object in the lane takes braking nearly to a stop, and then you

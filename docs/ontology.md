@@ -513,12 +513,16 @@ the separate zone warning/entry lines. Exit traffic keeps its speed --
 the truck itself is slowing for the ramp, not reacting to someone else's
 merge.
 
-**The dodgeable hazard call is "Brake or change lanes!" in every mode.** The
+**The dodgeable hazard call is "Change lanes or brake!" in every mode.** The
 same phrase the help teaches, kept in full in terse because it carries what
 the hazard tone cannot: the hazard is dodgeable AND there is an open lane to
 send the dodge. "Brake or swerve!" was a terse-only synonym for the game's
 most safety-critical cue and is exactly what this table exists to prevent;
-the phrase is pinned against the help text by a copy test.
+the phrase is pinned against the help text by a copy test. The lane change
+leads the braking (owner, 2026-08-17): both actions stay on offer, because a
+driver who cannot see the gap may reasonably prefer to slow, but at a hazard
+the first word is the one that gets acted on and the call only fires where a
+lane is genuinely open.
 
 ## Open naming decisions
 

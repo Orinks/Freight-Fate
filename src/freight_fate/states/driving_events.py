@@ -571,6 +571,14 @@ class DrivingEventMixin:
             # demand. The other GPS cues -- merge onto this highway, take that
             # exit -- are the turn itself and stay NAVIGATION.
             return SpeechCategory.STATUS
+        if event.kind == TripEventKind.GPS_CUE and event.data.get("npc_vehicle") is not None:
+            # A traffic advisory: "Merging car, 2.2 miles". Awareness of the
+            # road around you, which the pass-by and engine sounds already
+            # carry, and no action attached at that distance (owner,
+            # 2026-08-17: "sound is enough"). The act-now half of traffic is a
+            # HAZARD event -- "Change lanes or brake! Merging traffic right
+            # ahead" -- which is SAFETY and speaks at every rung.
+            return SpeechCategory.STATUS
         return _EVENT_CATEGORIES.get(event.kind)
 
     def _event_priority(self, event):

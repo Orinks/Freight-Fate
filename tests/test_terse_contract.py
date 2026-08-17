@@ -34,19 +34,19 @@ SRC = Path(__file__).resolve().parents[1] / "src"
 
 def test_the_dodge_call_survives_terse_in_full_and_is_never_a_synonym() -> None:
     pair = hazard_call(HAZARD_DODGE_CALL, "Slow car right ahead.")
-    assert pair.normal == "Brake or change lanes! Slow car right ahead."
+    assert pair.normal == "Change lanes or brake! Slow car right ahead."
     assert pair.terse == pair.normal
 
 
 def test_the_dodge_call_is_the_phrase_the_help_teaches() -> None:
     help_text = (SRC / "freight_fate" / "states" / "main_menu_help.py").read_text(encoding="utf-8")
-    assert "Brake or change lanes" in help_text
-    assert HAZARD_DODGE_CALL.rstrip("!") == "Brake or change lanes"
+    assert "Change lanes or brake" in help_text
+    assert HAZARD_DODGE_CALL.rstrip("!") == "Change lanes or brake"
 
 
 def test_the_swerve_synonym_is_gone_from_every_spoken_string() -> None:
     """Terse mode said "Brake or swerve!" where every other surface taught
-    "Brake or change lanes" -- a synonym for the game's most safety-critical
+    "Change lanes or brake" -- a synonym for the game's most safety-critical
     cue, delivered only to the players who turned explanations off. Pin its
     absence the way the ontology pins "bear"."""
     offenders = [
