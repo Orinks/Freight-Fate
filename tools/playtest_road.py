@@ -485,6 +485,14 @@ def build_driving(ctx, hit: Hit, args):
     origin_key = ctx.world.resolve_city_key(hit.origin)
     destination_key = ctx.world.resolve_city_key(hit.destination)
     ctx.profile = Profile(name="Playtest", current_city=origin_key)
+    # A bench career is not somebody's first drive. Without this the profile
+    # defaults to tutorial_done=False, first-run teaching outranks the rung
+    # by design (GameContext._ladder_applies), and the driving speech ladder
+    # is switched OFF for the whole run -- so --verbosity quiet reported
+    # "quiet" and changed nothing, and every rung sounded identical. Found
+    # when the owner playtested the quiet rung and heard standard
+    # (2026-08-17).
+    ctx.profile.tutorial_done = True
     route = ctx.world.supported_route(hit.origin, hit.destination)
     # The job's endpoints are keys for the same reason. Delivering runs
     # ``profile.current_city = job.destination``, so a job built from the route

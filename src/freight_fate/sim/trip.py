@@ -2673,6 +2673,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             self._emit(
                 TripEventKind.GPS_CUE,
                 f"Speed limit {verb} {self._speed_value(limit)}{where}{span}.",
+                # The road's state, not a turn to act on. Marked so the
+                # driving speech ladder can tell it from the GPS_CUE that
+                # says "merge onto I-90 East", which must never go quiet.
+                limit_change=True,
             )
 
     def _lowered_limit_reason(self) -> str:

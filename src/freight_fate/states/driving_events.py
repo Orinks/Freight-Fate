@@ -48,8 +48,13 @@ _FLAVOR_EVENT_KINDS = frozenset(
 _EVENT_CATEGORIES = {
     TripEventKind.HAZARD: SpeechCategory.SAFETY,
     TripEventKind.INSPECTION: SpeechCategory.SAFETY,
-    TripEventKind.ZONE_ENTER: SpeechCategory.NAVIGATION,
-    TripEventKind.ZONE_EXIT: SpeechCategory.NAVIGATION,
+    # Entering and leaving a zone is the road's state, and its content is
+    # a limit the driver can ask S for at any moment -- the resolver's own
+    # rule puts that in STATUS (owner, 2026-08-17: these have to go at
+    # quiet). The act-now half of a work zone is its lane closure, which
+    # is a HAZARD and stays SAFETY.
+    TripEventKind.ZONE_ENTER: SpeechCategory.STATUS,
+    TripEventKind.ZONE_EXIT: SpeechCategory.STATUS,
     TripEventKind.STOP_AHEAD: SpeechCategory.NAVIGATION,
     TripEventKind.STOP_REACHED: SpeechCategory.NAVIGATION,
     TripEventKind.CHECKPOINT: SpeechCategory.NAVIGATION,
@@ -561,6 +566,11 @@ class DrivingEventMixin:
         weather turning and the road's general state are STATUS and fall
         silent at the quietest rung.
         """
+        if event.kind == TripEventKind.GPS_CUE and event.data.get("limit_change"):
+            # "Speed limit raised to 55" is the road's state; S answers it on
+            # demand. The other GPS cues -- merge onto this highway, take that
+            # exit -- are the turn itself and stay NAVIGATION.
+            return SpeechCategory.STATUS
         return _EVENT_CATEGORIES.get(event.kind)
 
     def _event_priority(self, event):
