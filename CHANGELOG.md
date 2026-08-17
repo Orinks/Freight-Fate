@@ -202,20 +202,9 @@
   Real switchbacks are untouched: a genuine reversal has road between the two
   halves, and that is exactly what the check looks for.
 
-- **The Coaching speech setting is gone; there are three settings now.**
-  Coaching sat above Standard and was meant to add driving-technique tips on
-  top of it. Those tips were never written, so cycling to it changed nothing
-  you could hear -- and in a game you play by ear, a setting that offers a
-  choice and makes no difference just sounds like something is broken.
-  Driving speech is now Standard, Quiet, and Urgent only, and all three
-  sound clearly different from each other. If you had Coaching selected you
-  are now on Standard, which is what you were hearing anyway. It can come
-  back the day there are tips to put in it.
-
-- **Standard stops repeating itself.** Standard was supposed to say a
-  driving tip once and give a status readout only when it changes, but it
-  was speaking both every single time, exactly like Coaching. It now does
-  what it always said it did: a tip is spoken once per leg of the route, and
+- **Standard stops repeating itself.** Standard says a
+  driving tip once and gives a status readout only when it changes. It now
+  does what the setting always said it did: a tip is spoken once per leg of the route, and
   a status readout speaks when the condition starts, gets worse, or clears
   rather than on every re-check. A condition that clears and comes back
   still speaks, even word for word -- coming back is news.
@@ -3385,18 +3374,21 @@
 - **Driving speech is now a ladder you pick, not a single terse switch.**
   The old setting only made each message shorter, which is why a quiet
   drive still talked constantly -- it never said fewer things. Driving
-  speech, in the Speech settings, now has four rungs. Coaching and Standard
-  sound the same for now: both speak tips, confirmations, and status
-  readouts as full sentences (Standard easing off repeat tips on its own is
-  still coming). Quiet turns tips, confirmations, and status readouts into
-  a short sound instead of a sentence, and keeps the safety calls, what
-  things cost, and route instructions as words. Urgent only keeps that
-  same short set of words plus the confirmation sound, but tips and
-  status updates go fully quiet -- no words and no sound, though
-  you can still pull them up from the message log. Billboards, place
-  names, and landmarks are not part of this ladder and keep their own
-  switches, so you can drive a quiet cab through a talkative countryside.
-  If you were playing on terse, you are now on Quiet.
+  speech, in the Speech settings, now has three settings. Standard speaks
+  every confirmation and status readout in words, says a driving tip once
+  per leg of your route rather than every time, and repeats a status
+  readout only when it changes. Quiet turns tips, confirmations and status
+  readouts into a short sound instead of a sentence, and keeps the safety
+  calls, what things cost, and route instructions as words. Urgent only
+  goes further: the heads-up lines become a short sound too -- a bend
+  coming, a town coming up -- leaving the safety calls, what things cost,
+  and the directions you cannot take back, which are the turn itself, the
+  exit, and the stop you are pulling into. Everything either of them stops
+  saying is still in the message log, and the status keys still answer for
+  it. Billboards, place names, and landmarks are not part of this ladder
+  and keep their own switches, so you can drive a quiet cab through a
+  talkative countryside. If you were playing on terse you are now on Quiet,
+  and normal lands on Standard.
 
 ### Fixed
 
