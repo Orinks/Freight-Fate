@@ -2944,6 +2944,24 @@ for 1.8" framing predates the release split):
       -> one per 84. Harness clean on five enforcement scenarios. Three tests
       added, including one that pins the gate inside the window, since
       nothing in 3,940 tests caught either bug.
+- [ ] **The road lean is inaudible under the engine, and the fix is the ASSET
+      (Darren and the owner, 2026-08-17).** Measured: `vehicle/road` is
+      -33.6 dBFS RMS against the engine loops' -18.7, and `set_road_noise`
+      already runs the road channel at full gain by highway speed, so there
+      is no headroom. The lean carries its meaning in the PAN of that bed, so
+      15 dB down it carries nothing.
+      TRIED AND REVERTED THE SAME MORNING: ducking the engine while the guide
+      is awake (`GUIDE_DUCK_LEVEL`, measured 6.9 dB of room, road from -15.2
+      to -8.2 relative). Darren rejected it before it shipped -- "the engine
+      sound is nice and smooth and does not need to be tampered with at all"
+      -- and he is right for a reason the measurement could not see: the
+      engine is how a blind driver reads speed, load and gear, and a bend is
+      when that matters most, not least. Reverted from the build.
+      THE FIX: re-record or regenerate `vehicle/road` louder so the bed sits
+      near the engine on its own. Fixes every use at once, touches nothing
+      else, needs a repack (`tools/pack_sounds.py`) since the loose tree is
+      builder-local and only the pak ships. Darren should judge the new
+      recording before it lands.
 - [ ] **Learn game sounds demos cues the player's settings make impossible
       (Darren, 2026-08-17).** He reported the road lean as "very very quiet
       and you can hardly even hear it". Measured: it is not quiet. On the
