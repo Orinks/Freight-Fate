@@ -1995,7 +1995,21 @@ class DrivingEventMixin:
                 message = (
                     "You are stopped short of the stop sign. Creep ahead and stop again at the bar."
                 )
-            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.NAVIGATION)
+            # ROUTE, not the ambient default. This is an instruction about a
+            # STANDING condition -- the truck is stopped short of the bar and
+            # stays stopped until the driver acts -- so the staleness rule that
+            # drops a line "starting after the moment it described" is reading
+            # a moment that has not passed. It dropped exactly this line in the
+            # owner playtest of 2026-08-17, leaving the truck 1,350 feet short
+            # through a whole green-yellow-red cycle with nothing said; the same
+            # failure the comment below already records from 2026-07-19. ROUTE
+            # waits its turn behind anything urgent, and is never dropped.
+            self.ctx.say_event(
+                message,
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.NAVIGATION,
+            )
             return
         on_green = self._ramp_light_phase() == "green"
         if gap_mi > RAMP_CREEP_MI:
@@ -2017,7 +2031,21 @@ class DrivingEventMixin:
                 "You are stopped short of the light. Creep ahead and hold "
                 "at the stop bar for green."
             )
-        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.NAVIGATION)
+        # ROUTE, not the ambient default. This is an instruction about a
+        # STANDING condition -- the truck is stopped short of the bar and
+        # stays stopped until the driver acts -- so the staleness rule that
+        # drops a line "starting after the moment it described" is reading
+        # a moment that has not passed. It dropped exactly this line in the
+        # owner playtest of 2026-08-17, leaving the truck 1,350 feet short
+        # through a whole green-yellow-red cycle with nothing said; the same
+        # failure the comment below already records from 2026-07-19. ROUTE
+        # waits its turn behind anything urgent, and is never dropped.
+        self.ctx.say_event(
+            message,
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=SpeechCategory.NAVIGATION,
+        )
 
     def _update_ramp_gap_countdown(self) -> None:
         """Count the stop bar down while the truck is rolling toward it.

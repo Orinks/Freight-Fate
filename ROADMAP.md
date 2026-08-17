@@ -918,6 +918,30 @@ onto exit signalling.
       no lockup, no lost steering and no jackknife however hard it is slammed
       on ice. There is no ABS modelled either, so this is idealised rather
       than either era of real truck. The bigger of the two jobs.
+- [ ] **PARKED BRANCH `worktree-speech-endorsements-1.9` (e780ab21, pushed).
+      The drive-time speech ladder, held until the endorsement slice starts
+      (owner, 2026-08-16).** 28 commits of speech work despite the branch
+      name -- there is NO endorsement code on it yet, which is what it is
+      waiting for. Ready otherwise, and verified rather than assumed:
+      `feat/career-1.9` is merged INTO it as of 623a0bc6 (two conflicts, both
+      from the same day -- the settings import still carried the removed
+      `ENFORCEMENT_PRESENCE_LEVELS`, and both sides had appended a roadmap
+      bullet in one spot), full suite 4011 passed, adversarial 34 passed with
+      one xfail matching this branch, ruff and compileall clean, four harness
+      scenarios CLEAN.
+      WHAT THE MERGE EXPOSED, now fixed on that branch at e780ab21: the
+      branch had documented a KNOWN_OPEN on `settings_flips_mid_drive` where
+      a CONFIRMATION takes the pacer's protected hand-back slot, so the next
+      interrupting main-channel line resurfaces a finished confirmation over
+      the line the player just asked for. Rare until this branch met
+      `fix/asked-for-speech-cuts`, which made every info key an interrupting
+      main-channel line -- probed on the merged tree, S spoke the limit and
+      the stale "Transmission changed to manual." came straight back behind
+      it. `_track` now refuses the slot to a CONFIRMATION whatever priority
+      it carries, the KNOWN_OPEN entry is deleted in the same change as the
+      strict XPASS asks, and two pacer tests pin both halves.
+      KEEP MERGING career-1.9 INTO IT while it waits; the overlap with the
+      speech work is where the surprises are.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each
@@ -3017,6 +3041,43 @@ for 1.8" framing predates the release split):
       -> one per 84. Harness clean on five enforcement scenarios. Three tests
       added, including one that pins the gate inside the window, since
       nothing in 3,940 tests caught either bug.
+- [ ] **The road lean is inaudible under the engine, and the fix is the ASSET
+      (Darren and the owner, 2026-08-17).** Measured: `vehicle/road` is
+      -33.6 dBFS RMS against the engine loops' -18.7, and `set_road_noise`
+      already runs the road channel at full gain by highway speed, so there
+      is no headroom. The lean carries its meaning in the PAN of that bed, so
+      15 dB down it carries nothing.
+      TRIED AND REVERTED THE SAME MORNING: ducking the engine while the guide
+      is awake (`GUIDE_DUCK_LEVEL`, measured 6.9 dB of room, road from -15.2
+      to -8.2 relative). Darren rejected it before it shipped -- "the engine
+      sound is nice and smooth and does not need to be tampered with at all"
+      -- and he is right for a reason the measurement could not see: the
+      engine is how a blind driver reads speed, load and gear, and a bend is
+      when that matters most, not least. Reverted from the build.
+      THE FIX: re-record or regenerate `vehicle/road` louder so the bed sits
+      near the engine on its own. Fixes every use at once, touches nothing
+      else, needs a repack (`tools/pack_sounds.py`) since the loose tree is
+      builder-local and only the pak ships. Darren should judge the new
+      recording before it lands.
+- [ ] **Learn game sounds demos cues the player's settings make impossible
+      (Darren, 2026-08-17).** He reported the road lean as "very very quiet
+      and you can hardly even hear it". Measured: it is not quiet. On the
+      road the bed runs at 0.97 gain at 65 mph against the demo's 0.60, and
+      the pan is `GUIDE_PAN_MAX = 0.8` in both -- the drive is LOUDER than
+      the lesson. What is actually true is that the lean cannot happen for
+      him: it needs lane departure warning ON and lane keeping off or
+      partial, so on full lane keeping there is no lean at any volume, only a
+      centred bed. The catalog's `when=` field says exactly this, but it
+      lives behind F1 while pressing Enter just plays the cue -- so the
+      screen teaches a sound the player will never hear and says nothing
+      about it. Same principle as the empty-crossover earcon removed
+      2026-08-16: a cue that cannot fire must not present as one that can.
+      FIX SHAPE: give `SoundEntry` an optional availability check against
+      live settings, and have `play_entry` say "your settings mean you will
+      not hear this on the road, because ..." before or instead of the demo.
+      Not done on build morning because it is a new mechanism across a
+      catalog rather than a one-line fix, and the entries that need
+      annotating have to be identified rather than guessed.
 - [ ] **Things an officer never notices that the game already models
       (2026-08-16).** `_candidates` covers speeding, unsafe equipment, no
       chains, no lights, following too close and left-lane misuse. Missing,

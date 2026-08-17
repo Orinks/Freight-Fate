@@ -138,6 +138,14 @@
 
 ### Changed
 
+- **Being stopped short of a stop bar is always said out loud.** If you come
+  to a halt well back from a red light or a stop sign, the truck tells you to
+  drive up and close the gap. It was already trying to -- but on a busy
+  approach that line could be dropped as chatter, so you could sit a quarter
+  mile short through a whole light cycle with nothing said and no idea you
+  were meant to move up. It now waits its turn behind anything urgent instead
+  of being thrown away. Found in Josh's own playtest.
+
 - **Roving patrols can pull you over now. They never could before.** The
   troopers that run with traffic rather than sitting on a crossover were
   incapable of writing a ticket on a highway -- not unlucky, incapable. If

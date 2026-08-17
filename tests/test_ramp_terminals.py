@@ -1431,3 +1431,48 @@ def test_the_ramp_coaching_outranks_chatter():
             assert priority == EventPriority.ROUTE, (text, priority)
     finally:
         app.shutdown()
+
+
+def test_being_stranded_short_of_the_bar_is_never_dropped_as_chatter():
+    """Owner playtest, 2026-08-17: stopped 1,350 feet short through a whole
+    green-yellow-red cycle with nothing said.
+
+    The game produced exactly the right line -- "Drive up and stop at the
+    bar; the red is the time to close the gap" -- and the pacer dropped it as
+    stale ambient. It is not chatter: it is an instruction about a STANDING
+    condition, and the truck stays stopped until the driver acts, so the
+    staleness rule was reading a moment that had not passed. The same failure
+    is recorded in the code from 2026-07-19, which is why this is pinned.
+    """
+    from freight_fate.app import App
+    from freight_fate.speech_pacing import EventPriority
+
+    line = (
+        "You are stopped about 1,350 feet short of the light. Drive up and "
+        "stop at the bar; the red is the time to close the gap."
+    )
+    app = App()
+    try:
+        app.ctx.settings.sapi_events = True
+        said = []
+        app.ctx.speech.say_event = lambda t, interrupt=True: said.append(t)
+        # Back the channel up the way a busy ramp approach does.
+        for _ in range(5):
+            app.ctx._event_pacer.note_queued("Brake lights right ahead.", EventPriority.CRITICAL)
+        app.ctx.say_event(line, interrupt=False, priority=EventPriority.ROUTE)
+        assert said, "a standing instruction must survive a backed-up channel"
+    finally:
+        app.shutdown()
+
+
+def test_the_stranded_prompts_ask_for_route_priority():
+    """Pinned at the call site too: the default is AMBIENT, and AMBIENT is
+    the one priority the stale-drop branch throws away."""
+    from pathlib import Path
+
+    src = Path(__file__).resolve().parents[1] / "src" / "freight_fate"
+    text = (src / "states" / "driving_events.py").read_text(encoding="utf-8")
+    for marker in ("short of the stop sign", "short of the light. Drive"):
+        i = text.index(marker)
+        window = text[i : i + 1400]
+        assert "EventPriority.ROUTE" in window, marker

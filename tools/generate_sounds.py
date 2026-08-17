@@ -151,6 +151,14 @@ SPECS: dict[str, tuple[str, float, float]] = {
         2.0,
         0.45,
     ),
+    "vehicle/road": (
+        "Continuous steady tyre roar and road surface noise from inside a "
+        "moving semi truck cab at highway speed, smooth broadband rumble, "
+        "even and unchanging with no events, no engine, no wind gusts, no "
+        "music, no speech, seamless loop",
+        22.0,
+        0.4,
+    ),
     "vehicle/lane_centered": (
         "Very short calm centered-lane confirmation sound for an audio driving "
         "game, soft two-note dashboard chime, clear and positive but subtle, "
@@ -205,7 +213,7 @@ SPECS: dict[str, tuple[str, float, float]] = {
 }
 
 # Ambience beds loop at runtime; ask the API for a seamless loop when it can.
-LOOP_KEYS = {"ambient/truck_stop", "ambient/warehouse"}
+LOOP_KEYS = {"ambient/truck_stop", "ambient/warehouse", "vehicle/road"}
 
 
 def _load_dotenv() -> None:
