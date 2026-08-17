@@ -1441,3 +1441,86 @@ def test_an_open_scale_reads_the_safety_record_aloud(monkeypatch):
         assert all("Safety record: targeted" in line for line in dirty)
     finally:
         app.shutdown()
+
+
+# --- a roving patrol can actually write a ticket -----------------------------
+
+
+def test_a_pacing_unit_can_bank_its_pace_inside_its_own_window():
+    """The structural bug: two windows that could never both be satisfied.
+
+    A pacing unit only banks road AFTER the truck passes it, and it used to
+    stop being asked to look 0.3 of a mile past itself (``end_mi``), while the
+    tracker ran to a literal 1.0 mile. So the most pace it could ever hold at
+    a moment it was allowed to observe was 0.3 -- short of any gate. Both now
+    read one constant.
+    """
+    from freight_fate.sim.enforcement_posts import (
+        METHOD_PACING,
+        PACING_MIN_MI,
+        PACING_WINDOW_MI,
+    )
+
+    assert PACING_MIN_MI < PACING_WINDOW_MI, "the gate must fit inside the window"
+    # Full confidence is reached at twice the gate; that has to fit too, or
+    # the ramp is decoration.
+    assert 2.0 * PACING_MIN_MI <= PACING_WINDOW_MI
+
+    trip = _trip()
+    roving = [p for p in trip.posts if p.method == METHOD_PACING]
+    assert roving, "the sample route must carry a roving patrol"
+    post = roving[0]
+    assert post.end_mi - post.at_mi == pytest.approx(PACING_WINDOW_MI)
+    # And it is still asked to look at the far end of that window.
+    assert post.covers(post.at_mi + PACING_WINDOW_MI - 1e-6)
+
+
+def test_the_pacing_gate_is_road_not_real_seconds():
+    """It was 20 real seconds, which no time compression the game offers could
+    satisfy: the window is 5.5 real seconds at 65 mph and 10x, the slowest
+    setting. Measured before the fix: 315 looks, zero catches over 2,000
+    miles."""
+    from freight_fate.sim import enforcement_observe as eo
+    from freight_fate.sim.enforcement_posts import KIND_ROVING, METHOD_PACING, PACING_MIN_MI
+
+    source = (SRC / "sim" / "enforcement_observe.py").read_text(encoding="utf-8")
+    assert "paced_real_s" not in source
+    assert "PACING_MIN_REAL_S" not in source
+
+    post = always_observing_post(at_mi=10.0, kind=KIND_ROVING)
+    assert post.method == METHOD_PACING
+
+    def _sample(paced_mi):
+        return eo.RoadSample(
+            position_mi=post.at_mi + 0.1,
+            speed_mph=77.0,
+            limit_mph=65.0,
+            paced_mi=paced_mi,
+        )
+
+    short = _sample(PACING_MIN_MI * 0.5)
+    enough = _sample(PACING_MIN_MI)
+    assert eo.geometry_factor(post, short) == 0.0
+    assert eo.geometry_factor(post, enough) > 0.0
+
+
+def test_a_roving_patrol_catches_a_sustained_speeder():
+    """End to end through observe(), which never once happened before.
+
+    Not a certainty -- the seeded roll still applies in the driving layer --
+    but the observation has to be POSSIBLE, which is what was broken.
+    """
+    from freight_fate.sim.enforcement_observe import WHAT_SPEEDING, RoadSample, observe
+    from freight_fate.sim.enforcement_posts import KIND_ROVING, PACING_MIN_MI
+
+    post = always_observing_post(at_mi=10.0, kind=KIND_ROVING)
+    sample = RoadSample(
+        position_mi=post.at_mi + PACING_MIN_MI,
+        speed_mph=77.0,
+        limit_mph=65.0,
+        over_limit_mi=1.0,
+        paced_mi=PACING_MIN_MI,
+    )
+    found = observe(post, sample)
+    assert found is not None
+    assert found.what == WHAT_SPEEDING
