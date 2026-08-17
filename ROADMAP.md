@@ -3097,6 +3097,37 @@ for 1.8" framing predates the release split):
       -> one per 84. Harness clean on five enforcement scenarios. Three tests
       added, including one that pins the gate inside the window, since
       nothing in 3,940 tests caught either bug.
+- [x] **An opt-in guide tone ships alongside the bed (2026-08-17).** Does
+      not close the bullet below -- the bed is still too quiet and still
+      needs regenerating, which is the fix that helps everyone. This is the
+      escape hatch for drivers the bed already fails.
+      THE RULING WAS CHECKED FIRST, not worked around: the community ruled
+      against steering tones (JaceK on the audiogames.net thread the owner
+      posted 2026-07-17 -- continuous tones overwhelm the soundscape and
+      hurt players with sensory or hearing conditions), and the owner
+      concurred at the time. What the ruling objects to is a tone nobody
+      asked for, so `Settings.lane_guide_tone` is False by default, an
+      unreadable value falls to the bed, and silence-is-centered still holds
+      -- the loop starts on the guide's wake and stops on its settle, so a
+      straight road is as quiet as it ever was. Owner decision 2026-08-17:
+      "we make it optional, the alternative is an unusable sound."
+      Darren's candidate is the SPEC, not the bytes: 291.6 Hz at -16 dBFS
+      RMS, both his. His file is a 1.45 s one-shot whose seam could not be
+      trimmed into a loop (three attempts, best -35 dBFS), and the harmonics
+      sit 40 dB down, so it is a pure sine and nothing else. Synthesized in
+      `lane_guide_tone.py` like the ladder earcons: the sample count is
+      chosen so a whole number of cycles fits exactly, which makes the wrap
+      error zero rather than small. Credit him in the release notes.
+      Auditioned against the real cab before wiring -- `engine/mid` and
+      `vehicle/road` pulled from the pak, road at the 0.97 gain
+      `set_road_noise` runs at highway speed, panned by GUIDE_PAN_MAX and
+      PAN_SLEW_PER_S. Measured engine -18.7 and road -33.3, matching the
+      numbers below.
+      STILL WANTED, and the reason the next bullet stays open: an ear on
+      whether 291 Hz sits on a diesel firing harmonic at some engine speeds.
+      A six-cylinder four-stroke at 1500 rpm puts its fourth harmonic near
+      300 Hz. Shifting the pitch is one constant.
+
 - [ ] **The road lean is inaudible under the engine, and the fix is the ASSET
       (Darren and the owner, 2026-08-17).** Measured: `vehicle/road` is
       -33.6 dBFS RMS against the engine loops' -18.7, and `set_road_noise`

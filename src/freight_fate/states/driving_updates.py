@@ -2,8 +2,17 @@
 from __future__ import annotations
 
 from .. import engine_audio
-from ..audio import CH_AIR, CH_BRAKE, CH_EDGE, CH_JAKE, CH_RADIO_FX, CH_ROAD
+from ..audio import (
+    CH_AIR,
+    CH_BRAKE,
+    CH_EDGE,
+    CH_JAKE,
+    CH_LANE_GUIDE,
+    CH_RADIO_FX,
+    CH_ROAD,
+)
 from ..audio_fades import curve as _resolve_curve
+from ..lane_guide_tone import LANE_GUIDE_TONE_KEY
 from ..models.enforcement import (
     CHAIN_LAW_FINE,
     FAILURE_TO_STOP_CITATION_FINE,
@@ -1842,12 +1851,55 @@ class DrivingUpdateMixin:
                 curve_steer=self._curve_steer_demand(),
                 curve_ahead_mi=self.trip.curve_ahead_mi(CURVE_LEAD_MI),
             )
-        if frame.pan != self._road_pan_applied:
+        if self.ctx.settings.lane_guide_tone:
+            self._lean_the_tone(frame)
+        elif frame.pan != self._road_pan_applied:
             self.ctx.audio.set_loop_pan(CH_ROAD, frame.pan)
             self._road_pan_applied = frame.pan
         if frame.centered:
             # The drift settled: the old centered earcon still says so.
             self.ctx.audio.play("vehicle/lane_centered", volume=0.45, pan=0.0)
+
+    # The asset is baked at Darren's -16 dBFS RMS, which is 2.6 dB over the
+    # engine. That is the level that fixed being inaudible, and it is louder
+    # than a cue needs to be once it is the only thing carrying the pan, so
+    # the channel takes it back down and the loudness setting scales from
+    # there like every other lane cue.
+    LANE_GUIDE_TONE_VOLUME = 0.35
+
+    def _lean_the_tone(self, frame) -> None:
+        """The opt-in alternative: lean a tone of the guide's own.
+
+        Same frame, same pan, same wake and sleep -- only the thing being
+        panned differs. The bed is left flat while the tone is in use, or a
+        driver who switched would get both leaning at once and the bed would
+        stay wherever the last drift left it.
+
+        Silence is still centered: the loop starts on the wake and stops on
+        the settle, so a straight road is as quiet as it has always been.
+        That is what keeps this inside the community ruling rather than
+        merely beside it -- the objection was to a CONTINUOUS tone, and this
+        one only exists while the truck is actually off center.
+        """
+        if self._road_pan_applied != 0.0:
+            self.ctx.audio.set_loop_pan(CH_ROAD, 0.0)
+            self._road_pan_applied = 0.0
+        if frame.awake:
+            if not self._lane_guide_tone_on:
+                self.ctx.audio.start_loop(
+                    CH_LANE_GUIDE,
+                    LANE_GUIDE_TONE_KEY,
+                    volume=LANE_GUIDE_TONE_VOLUME * self._cue_loudness(),
+                    fade_ms=120,
+                )
+                self._lane_guide_tone_on = True
+            if frame.pan != self._lane_guide_pan_applied:
+                self.ctx.audio.set_loop_pan(CH_LANE_GUIDE, frame.pan)
+                self._lane_guide_pan_applied = frame.pan
+        elif self._lane_guide_tone_on:
+            self.ctx.audio.stop_loop(CH_LANE_GUIDE, fade_ms=180)
+            self._lane_guide_tone_on = False
+            self._lane_guide_pan_applied = 0.0
 
     def _auto_jake_max_stage(self) -> int:
         """The highest stage the drive axle can hold right now (0..3).

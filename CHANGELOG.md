@@ -138,6 +138,18 @@
 
 ### Changed
 
+- **You can now choose a tone for the lane guide, if the road is too quiet
+  to follow.** When you drift, the road you are already hearing leans toward
+  the side you need to steer, and goes quiet when you are straight. That is
+  still what happens by default, and most drivers should leave it alone. But
+  on some setups the road sits too far under the engine to tell which side
+  it went to, which makes the whole cue useless. A new row in Audio
+  settings, "Lane guide sound", switches it to a soft note instead -- same
+  timing, same panning, same silence when you are straight, just something
+  you can actually hear. It is off unless you turn it on, and it is in Learn
+  game sounds as "Lane guide tone". Thanks to Darren, who reported the
+  problem and sent in the sound this is built from.
+
 - **The route key stops repeating the turn you were just given.** On city
   streets the truck calls each turn as it comes, and pressing R then read the
   same turn back to you a second time, in your screen reader's voice, right
