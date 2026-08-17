@@ -650,7 +650,7 @@ class DrivingControlsMixin:
             t.stop_engine()
             self.ctx.audio.engine_stop()
             self._set_status("Engine off.")
-            self.ctx.say("Engine off.")
+            self.ctx.say("Engine off.", category=SpeechCategory.CONFIRMATION)
         else:
             if t.start_engine():
                 self._note_instruction_demonstrated("engine")
@@ -667,7 +667,10 @@ class DrivingControlsMixin:
                     self.ctx.controller.rumble.alert()
                     self._low_air_said = True
                 self._set_status("Engine running.")
-                self.ctx.say("Engine running. " + self._air_start_instruction())
+                self.ctx.say(
+                    "Engine running. " + self._air_start_instruction(),
+                    category=SpeechCategory.CONFIRMATION,
+                )
                 if self.tutorial:
                     self.tutorial.on_engine_started()
             else:
@@ -701,14 +704,20 @@ class DrivingControlsMixin:
             if t.release_parking_brake():
                 self.ctx.audio.play("vehicle/brake_release", volume=0.65)
                 self._set_status("Parking brake released.")
-                self.ctx.say(f"Parking brake released. Air pressure {t.air_pressure_psi:.0f} psi.")
+                self.ctx.say(
+                    f"Parking brake released. Air pressure {t.air_pressure_psi:.0f} psi.",
+                    category=SpeechCategory.CONFIRMATION,
+                )
                 if self.tutorial:
                     self.tutorial.on_parking_brake_released()
             else:
                 self.ctx.audio.play("ui/error")
                 self._set_status("Parking brake locked: build air pressure first.")
                 if self._terse_speech():
-                    self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
+                    self.ctx.say(
+                        f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.",
+                        category=SpeechCategory.CONFIRMATION,
+                    )
                 else:
                     self.ctx.say(
                         f"Parking brake stays set. Air pressure {t.air_pressure_psi:.0f} psi; "
@@ -747,7 +756,10 @@ class DrivingControlsMixin:
         self.ctx.audio.play("vehicle/brake_set", volume=0.65)
         self._set_status("Parking brake set.")
         slowing = " Truck still slowing." if t.speed_mph > DOCKING_MAX_MPH else ""
-        self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.{slowing}")
+        self.ctx.say(
+            f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.{slowing}",
+            category=SpeechCategory.CONFIRMATION,
+        )
 
     def _manual_shift(self, gear: int) -> None:
         # Through the truck, not the gearbox: the speed-dependent guards (a

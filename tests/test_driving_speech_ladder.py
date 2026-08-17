@@ -1478,3 +1478,36 @@ def test_flavor_is_independent_of_the_rung() -> None:
     s.driving_speech = "coaching"
     s.set_all_chatter(False)
     assert s.chatter_enabled("billboard") is False
+
+
+def test_the_cab_is_categorised_so_quiet_is_actually_quiet():
+    """Owner playtest, 2026-08-17: "quiet still feels busy".
+
+    The ladder had categorised the ROAD thoroughly and left the CAB alone, so
+    control feedback -- the thing that fires on every key you press -- went
+    out uncategorised and always spoke in full. In that session, 130 of the
+    178 lines spoken after the rung was set to quiet had never been near it,
+    including ten consecutive "Adaptive cruise N miles per hour" from ten
+    taps of the plus key.
+    """
+    from freight_fate.settings import Settings
+    from freight_fate.speech_pacing import Disposition, SpeechCategory
+
+    quiet = Settings()
+    quiet.driving_speech = "quiet"
+    assert quiet.speech_disposition(SpeechCategory.CONFIRMATION) is Disposition.EARCON
+
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1] / "src" / "freight_fate"
+    src = (root / "states").glob("driving_*.py")
+    joined = "\n".join(p.read_text(encoding="utf-8") for p in src)
+    # The exact lines from that transcript must now carry a category.
+    for marker in (
+        'f"Adaptive cruise {self.ctx.settings.speed_text(target)}."',
+        '"Engine off."',
+        'f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.{slowing}"',
+    ):
+        i = joined.index(marker)
+        window = joined[i : i + 260]
+        assert "SpeechCategory.CONFIRMATION" in window, marker

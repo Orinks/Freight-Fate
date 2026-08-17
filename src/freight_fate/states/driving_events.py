@@ -787,7 +787,9 @@ class DrivingEventMixin:
             )
             message = f"On the selected ramp for {active.spoken_name}; {assist}."
             self._set_status(message)
-            self.ctx.say(message)
+            # The cab confirming a control the player just worked. At the
+            # quiet rung this becomes its earcon: you know you pressed K.
+            self.ctx.say(message, category=SpeechCategory.CONFIRMATION)
             return
 
         selected = self._selected_sleep_stop()
@@ -2963,12 +2965,19 @@ class DrivingEventMixin:
                 self.ctx.say(
                     f"Open-road cruise target {self.ctx.settings.speed_text(target)}. "
                     "Ramp approach target "
-                    f"{self.ctx.settings.speed_text(ramp_target)}."
+                    f"{self.ctx.settings.speed_text(ramp_target)}.",
+                    category=SpeechCategory.CONFIRMATION,
                 )
             else:
-                self.ctx.say(f"Adaptive cruise {self.ctx.settings.speed_text(target)}.")
+                self.ctx.say(
+                    f"Adaptive cruise {self.ctx.settings.speed_text(target)}.",
+                    category=SpeechCategory.CONFIRMATION,
+                )
         else:
-            self.ctx.say(f"Open-road cruise target {self.ctx.settings.speed_text(target)}.")
+            self.ctx.say(
+                f"Open-road cruise target {self.ctx.settings.speed_text(target)}.",
+                category=SpeechCategory.CONFIRMATION,
+            )
 
     def _engage_keeper(
         self,
