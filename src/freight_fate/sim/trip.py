@@ -90,6 +90,12 @@ LIMIT_WARNING_MAX_LEAD_MI = 5.0
 # spoken ("for the next half a mile"), so a short village zone reads as a
 # passing event, not a new cruising speed.
 LIMIT_SHORT_ZONE_MI = 2.5
+# Below this there is no warning to give: the zone is already underfoot, the
+# distance renders as "in 0 miles", and the number it names is not yet the one
+# in force -- so it contradicts the limit S answers with. The "Entering ...
+# zone" line is the announcement for anything this close (owner playtest,
+# 2026-08-17).
+ZONE_WARNING_MIN_MI = 0.15
 LIMIT_SCAN_STRIDE_MI = 0.1
 LIMIT_SCAN_MAX_MI = 3.0
 
@@ -323,6 +329,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # spaces out.
         self._event_breather = RoadEventBreather()
         self._announced_zone_warnings: set[str] = set()
+        # Milepost of the zone the driver was last warned about. A new
+        # warning waits until they have reached it, so a surface chain
+        # carrying a zone per street cannot fire them all at once.
+        self._pending_zone_warning: float | None = None
         self._announced_traffic_pressures: set[str] = set()
         self._announced_npc_traffic: set[str] = set()
         self._announced_real_traffic: set[str] = set()
@@ -2506,20 +2516,38 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
 
     def _check_zones(self) -> None:
         lookahead = self._zone_warning_lookahead_mi()
-        for zone in self.zones:
-            key = _zone_key(zone)
-            ahead = zone.start_mi - self.position_mi
-            if zone.reason == "construction merge":
-                continue
-            if not self._zone_is_active(zone):
-                continue  # a quiet congestion stretch may still wake up later
-            if 0 < ahead <= lookahead and key not in self._announced_zone_warnings:
-                self._announced_zone_warnings.add(key)
-                self._emit(
-                    TripEventKind.GPS_CUE,
-                    self._zone_warning_message(zone, ahead),
-                    zone=zone,
-                )
+        # The NEXT zone only, not every zone inside the lookahead. A facility
+        # approach zones each street at its own baked speed, so a one-mile
+        # surface chain can hold four or five of them -- and warning about all
+        # of them at once fired five contradictory lines inside sixty
+        # milliseconds, "access road ahead, speed limit 15" hard against
+        # "access road ahead, speed limit 25", neither of them the number then
+        # in force (owner playtest, 2026-08-17). One warning, for the one the
+        # driver reaches next; the rest become eligible as it is passed.
+        due = [
+            (zone.start_mi - self.position_mi, zone)
+            for zone in self.zones
+            if zone.reason != "construction merge"
+            and _zone_key(zone) not in self._announced_zone_warnings
+            and ZONE_WARNING_MIN_MI < zone.start_mi - self.position_mi <= lookahead
+            and self._zone_is_active(zone)
+        ]
+        # One warning OUTSTANDING at a time, not one per frame: the loop runs
+        # every tick, so capping it per call still fired four lines inside
+        # three milliseconds. The next zone is not announced until the truck
+        # has actually reached the one it was last warned about.
+        pending = self._pending_zone_warning
+        if pending is not None and self.position_mi < pending:
+            return
+        if due:
+            ahead, zone = min(due, key=lambda pair: pair[0])
+            self._announced_zone_warnings.add(_zone_key(zone))
+            self._pending_zone_warning = zone.start_mi
+            self._emit(
+                TripEventKind.GPS_CUE,
+                self._zone_warning_message(zone, ahead),
+                zone=zone,
+            )
         zone = self._active_zone_at(self.position_mi)
         if zone is not self._active_zone:
             if zone is not None:

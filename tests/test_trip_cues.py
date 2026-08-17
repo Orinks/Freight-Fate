@@ -288,3 +288,40 @@ def test_city_events_include_state_without_repeating_crossing(world):
 
     city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
     assert city_events == ["Passing Buffalo, New York. Continuing on I-90 toward Cleveland."]
+
+
+def test_zone_warnings_come_one_at_a_time_and_never_for_one_underfoot(world):
+    """Owner playtest, 2026-08-17: five contradictory lines in sixty
+    milliseconds on a facility approach.
+
+    A tier-1 surface chain zones each street at its own baked speed, so a
+    one-mile approach holds four or five zones. Warning every zone inside the
+    lookahead fired them all at once -- "access road ahead, speed limit 15"
+    hard against "access road ahead, speed limit 25", neither of them the
+    number then in force, so the spoken limit contradicted what S answered.
+    """
+    from freight_fate.sim.trip import ZONE_WARNING_MIN_MI
+    from freight_fate.sim.trip_models import Zone
+
+    trip, _truck = make_trip(world)
+    trip.zones = [
+        Zone(0.05, 0.30, 15.0, "facility access road"),  # underfoot: no warning
+        Zone(0.60, 1.00, 25.0, "facility access road"),
+        Zone(1.00, 1.40, 15.0, "facility access road"),
+        Zone(1.40, 1.60, 15.0, "facility gate"),
+    ]
+    trip._announced_zone_warnings.clear()
+    trip._pending_zone_warning = None
+    trip.position_mi = 0.0
+
+    # Several ticks at a standstill: the loop runs every frame and must not
+    # spend the whole approach's worth of warnings on the first one.
+    for _ in range(5):
+        trip._events.clear()
+        trip._check_zones()
+    warned = [e for e in trip._events if e.kind is TripEventKind.GPS_CUE]
+    assert len(warned) <= 1, "one outstanding warning, not one per frame"
+
+    # And nothing was said about the zone already under the wheels.
+    said = " ".join(e.message for e in warned)
+    assert "15" not in said or ZONE_WARNING_MIN_MI < 0.05
