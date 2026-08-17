@@ -985,3 +985,31 @@ def test_bass_road_noise_frequency_changes_with_speed(monkeypatch):
     assert slides[-1] == pytest.approx(base_freq * 0.85)
 
     a.shutdown()
+
+
+def test_the_classic_jake_voice_covers_every_rpm_band():
+    """One voice per setting, whatever the rpm (owner, 2026-08-17: "it is
+    playing both").
+
+    The drive picks a cut per rpm band -- engine/jake_1200 through _2200 --
+    and the classic voice is a single synthesized cut. The swap used to match
+    only the exact 1600 key, so a driver on "classic" got the synth at 1600
+    and the recorded cut at every other band; rpm moves constantly on a
+    descent, so the two voices alternated.
+    """
+    from freight_fate.audio import JAKE_CLASSIC_KEY, AudioEngine
+    from freight_fate.states.driving_updates import JAKE_LOOP_RPMS
+
+    engine = AudioEngine()
+    try:
+        bands = [f"engine/jake_{band}" for band in JAKE_LOOP_RPMS]
+
+        engine._jake_voice_classic = True
+        assert {engine._voice_key(k) for k in bands} == {JAKE_CLASSIC_KEY}
+
+        engine._jake_voice_classic = False
+        recorded = {engine._voice_key(k) for k in bands}
+        assert recorded == set(bands), "the recorded voice keeps its per-band cuts"
+        assert JAKE_CLASSIC_KEY not in recorded
+    finally:
+        engine.shutdown()
