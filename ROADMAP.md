@@ -884,6 +884,30 @@ onto exit signalling.
       no lockup, no lost steering and no jackknife however hard it is slammed
       on ice. There is no ABS modelled either, so this is idealised rather
       than either era of real truck. The bigger of the two jobs.
+- [ ] **PARKED BRANCH `worktree-speech-endorsements-1.9` (e780ab21, pushed).
+      The drive-time speech ladder, held until the endorsement slice starts
+      (owner, 2026-08-16).** 28 commits of speech work despite the branch
+      name -- there is NO endorsement code on it yet, which is what it is
+      waiting for. Ready otherwise, and verified rather than assumed:
+      `feat/career-1.9` is merged INTO it as of 623a0bc6 (two conflicts, both
+      from the same day -- the settings import still carried the removed
+      `ENFORCEMENT_PRESENCE_LEVELS`, and both sides had appended a roadmap
+      bullet in one spot), full suite 4011 passed, adversarial 34 passed with
+      one xfail matching this branch, ruff and compileall clean, four harness
+      scenarios CLEAN.
+      WHAT THE MERGE EXPOSED, now fixed on that branch at e780ab21: the
+      branch had documented a KNOWN_OPEN on `settings_flips_mid_drive` where
+      a CONFIRMATION takes the pacer's protected hand-back slot, so the next
+      interrupting main-channel line resurfaces a finished confirmation over
+      the line the player just asked for. Rare until this branch met
+      `fix/asked-for-speech-cuts`, which made every info key an interrupting
+      main-channel line -- probed on the merged tree, S spoke the limit and
+      the stale "Transmission changed to manual." came straight back behind
+      it. `_track` now refuses the slot to a CONFIRMATION whatever priority
+      it carries, the KNOWN_OPEN entry is deleted in the same change as the
+      strict XPASS asks, and two pacer tests pin both halves.
+      KEEP MERGING career-1.9 INTO IT while it waits; the overlap with the
+      speech work is where the surprises are.
 - [ ] **Drive-time chattiness: even terse is far too much (owner,
       2026-08-15) -- next speech-redesign target, grounded in
       accessibility practice.** The terse contract compressed each
