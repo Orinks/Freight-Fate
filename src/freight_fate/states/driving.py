@@ -432,6 +432,9 @@ class DrivingState(
         # saves are never pulled back onto the streets.
         self._departure_chain = False
         self._departure_checked = False
+        # -1 so the first tick always resets, whatever leg a resumed
+        # run starts on.
+        self._ladder_leg_index = -1
         # (position when computed, scan result) -- see _destination_exit_details
         self._destination_exit_cache: tuple[float, tuple[float, str, str] | None] | None = None
         self._cruise_mph: float | None = None

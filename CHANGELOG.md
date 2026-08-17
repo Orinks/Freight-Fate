@@ -138,6 +138,14 @@
 
 ### Changed
 
+- **Standard stops repeating itself.** Standard was supposed to say a
+  driving tip once and give a status readout only when it changes, but it
+  was speaking both every single time, exactly like Coaching. It now does
+  what it always said it did: a tip is spoken once per leg of the route, and
+  a status readout speaks when the condition starts, gets worse, or clears
+  rather than on every re-check. A condition that clears and comes back
+  still speaks, even word for word -- coming back is news.
+
 - **The cruise dial answers with the number at Quiet.** Tapping the speed up
   or down now says just "62" instead of a full sentence about adaptive
   cruise, at Quiet and Urgent only. The unit does not change between taps, so

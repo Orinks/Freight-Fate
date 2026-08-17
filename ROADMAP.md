@@ -969,17 +969,35 @@ onto exit signalling.
       can queue in a minute at cruise. Add the budget so a jammed
       stretch coalesces or defers to the message log instead of
       speaking a backlog late.
-- [ ] **`Disposition.FIRST_OCCURRENCE` and `Disposition.TRANSITIONS`
-      are not actually implemented.** Standard's row cuts COACHING to
-      FIRST_OCCURRENCE and STATUS to TRANSITIONS in
-      `DRIVING_SPEECH_DISPOSITIONS`, but `Settings.speaks()` only
-      branches on EARCON/SILENT -- every other disposition, including
-      these two, currently speaks exactly like FULL. Standard does not
-      yet limit a coaching tip to one telling or a status readout to
-      its transitions the way its own table promises; Coaching and
-      Standard are presently indistinguishable to a player. Needs the
-      leg-scoped "spoken once" and enter/worsen/clear-only bookkeeping
-      the table's own docstring describes.
+- [x] **`Disposition.FIRST_OCCURRENCE` and `Disposition.TRANSITIONS`
+      are implemented.** Shipped 2026-08-17. Both behaved exactly like
+      FULL because `Settings.speaks()` branches on EARCON/SILENT alone,
+      so standard's own table was a promise nothing kept. The
+      bookkeeping cannot live in `Settings` (it needs per-line memory),
+      so it sits in `GameContext` beside the pacer: `_ladder_said` is
+      leg-scoped for FIRST_OCCURRENCE, reset from
+      `DrivingUpdateMixin.update` on a leg change, and `_ladder_last`
+      holds the last text per key for TRANSITIONS -- identical text is
+      the condition re-asserting itself, changed text is the transition.
+
+      `reset_event_condition` clears the last-text memory too. Without
+      that, a condition that genuinely cleared and came back word for
+      word never spoke again; the air-brake lockout test caught it,
+      which is the "swallows a genuine re-warning" failure the original
+      review of this area forbade.
+
+- [ ] **Coaching and standard still sound nearly the same, now for a
+      content reason rather than a code one.** With the dispositions
+      real, the two rungs differ wherever a COACHING line repeats or a
+      STATUS line re-asserts itself unchanged. But exactly ONE line in
+      the game carries `SpeechCategory.COACHING` (chains hammering above
+      the safe speed, `driving_updates.py`), and the status readouts
+      that repeat mostly carry a changed number, which is a genuine
+      transition and correctly still speaks. So the audible gap stays
+      small until coaching's own technique tips are written -- which is
+      the part the manual has always said was still being built. Owner
+      asked for the difference on 2026-08-17; the machinery is now there
+      to hang it on.
 - [x] **Urgent only's NAVIGATION row is a genuine act-now filter (final
       review of this branch, finding 5).** Shipped 2026-08-17 as the
       option the bullet asked for: a real filter inside NAVIGATION rather

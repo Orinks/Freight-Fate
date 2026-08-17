@@ -119,6 +119,13 @@ class GameContext:
         # handled. See ``player_asked``: a readout somebody asked for cuts the
         # line in progress even at the wheel, where unasked-for lines queue.
         self._speech_requested = False
+        # FIRST_OCCURRENCE and TRANSITIONS need memory of what has already
+        # been said; Settings cannot hold it, so it lives here beside the
+        # pacer. ``_ladder_said`` is leg-scoped ("once per leg"),
+        # ``_ladder_last`` is the last text seen per key so a re-assertion
+        # can be told from a change of state.
+        self._ladder_said: set[str] = set()
+        self._ladder_last: dict[str, str] = {}
         # True while a playtest-lever scenario runs unsaved (see
         # playtest_levers.apply_continue_levers); save_profile honors it.
         self.playtest_sandbox = False
@@ -374,6 +381,48 @@ class GameContext:
         else:
             self.speech.say(text, interrupt=False)
 
+    def reset_ladder_leg_memory(self) -> None:
+        """Forget what has been said once, at a leg boundary.
+
+        FIRST_OCCURRENCE is "speaks the first time per leg", so a new leg is
+        a fresh road and the tip is worth one more telling.
+        """
+        self._ladder_said.clear()
+
+    def _ladder_repeats(self, text: str, category, key: str | None) -> bool:
+        """Whether this rung's disposition drops this line as already-said.
+
+        The two dispositions the table has always promised and
+        ``Settings.speaks`` never delivered: it branches on EARCON/SILENT
+        alone, so FIRST_OCCURRENCE and TRANSITIONS both behaved exactly like
+        FULL, and standard was therefore indistinguishable from coaching
+        (roadmap, and owner 2026-08-17: "should standard and coaching make a
+        difference? There should be").
+
+        FIRST_OCCURRENCE: said once per leg, then nothing.
+
+        TRANSITIONS: "enter, worsen, and clear only". Status lines carry the
+        state they are reporting in their own text, so a line identical to
+        the last one under this key is the condition re-asserting itself and
+        a changed one is the transition. Keyless lines fall back to the text
+        itself, which makes them first-occurrence -- the safe direction: a
+        line too few only for something that repeats itself word for word.
+        """
+        disposition = self.settings.speech_disposition(category)
+        if disposition is Disposition.FIRST_OCCURRENCE:
+            slot = key or text
+            if slot in self._ladder_said:
+                return True
+            self._ladder_said.add(slot)
+            return False
+        if disposition is Disposition.TRANSITIONS:
+            slot = key or text
+            if self._ladder_last.get(slot) == text:
+                return True
+            self._ladder_last[slot] = text
+            return False
+        return False
+
     def say_event(
         self,
         text: str,
@@ -467,6 +516,13 @@ class GameContext:
             text = text.render(self.settings.renders_terse())
             if not text:
                 return
+        if not force and self._ladder_applies() and self._ladder_repeats(text, category, key):
+            # Said once already, and this rung only promised once. Logged,
+            # so the review keys still answer for it.
+            transcript.info("[ladder] %s already said: %s", self.settings.driving_speech, text)
+            if review:
+                self.message_log.add(text, MessageCategory.EVENT)
+            return
         if self._event_pacer.is_repeat(text, key=key, force=force):
             # Already in the player's ear. Not spoken, not logged, not
             # reviewable: as far as the drive is concerned it never happened
@@ -540,6 +596,13 @@ class GameContext:
     def reset_event_condition(self, key: str) -> None:
         """A standing condition has cleared; let it announce itself afresh."""
         self._event_pacer.forget_condition(key)
+        # TRANSITIONS means enter, worsen and clear. A condition that
+        # genuinely cleared and comes back is an ENTER, even though its text
+        # is word-for-word what was said last time -- so the last-text memory
+        # has to be dropped here too, or standard swallows the second real
+        # warning (test_the_air_brake_lockout_recurs_once_it_clears_and_
+        # comes_back, which is the failure this caught).
+        self._ladder_last.pop(key, None)
 
     def pause_event_speech(self) -> None:
         """The player stepped off the road: silence the road and drop its backlog.

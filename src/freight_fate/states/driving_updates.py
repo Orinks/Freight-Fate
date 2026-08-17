@@ -231,6 +231,12 @@ class DrivingUpdateMixin:
         )
         self.trip.traffic_manager.hazard_scale = self.trip.hazard_scale
         self._sync_radio_settings()
+        # A new leg is a fresh road, so a once-per-leg tip earns one more
+        # telling (Disposition.FIRST_OCCURRENCE).
+        leg = self.trip.current_leg_index
+        if leg != self._ladder_leg_index:
+            self._ladder_leg_index = leg
+            self.ctx.reset_ladder_leg_memory()
         if self._destination_exit_response_s > 0.0:
             self._destination_exit_response_s = max(
                 0.0,

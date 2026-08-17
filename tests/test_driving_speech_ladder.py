@@ -1695,3 +1695,103 @@ def test_traffic_advisories_have_a_terse_half(world) -> None:
         message = trip._traffic_pressure_message(pressure, 2.0)
         assert message.terse, kind
         assert len(message.terse) < len(message.normal), kind
+
+
+def test_standard_says_a_coaching_tip_once_per_leg() -> None:
+    """FIRST_OCCURRENCE, which the table promised and nothing implemented.
+
+    ``Settings.speaks`` branches on EARCON/SILENT alone, so this disposition
+    and TRANSITIONS both behaved exactly like FULL -- which is why coaching
+    and standard were indistinguishable at the voice (roadmap; owner,
+    2026-08-17).
+    """
+    app = _app()
+    try:
+        driving = _real_driving(app)
+        app.ctx.profile.tutorial_done = True
+        app.ctx.settings.driving_speech = "standard"
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+
+        for _ in range(3):
+            app.ctx.say_event(
+                "Keep it under 30 or the chains will not last.",
+                interrupt=False,
+                key="chains_fast",
+                category=SpeechCategory.COACHING,
+            )
+        assert len(spoken) == 1, spoken
+
+        # A new leg is a fresh road: the tip is worth one more telling.
+        # Asserted at the seam -- a same-text call here would be decided by
+        # the pacer's own repeat window rather than by the rung, which would
+        # make this test pass or fail for the wrong reason. The per-frame
+        # wiring that calls this on a leg change is in
+        # DrivingUpdateMixin.update.
+        assert app.ctx._ladder_said
+        app.ctx.reset_ladder_leg_memory()
+        assert not app.ctx._ladder_said
+
+        # Coaching keeps saying it -- that is the whole difference between
+        # the two fullest rungs. Asserted at the ladder's own seam: routing
+        # a second identical line all the way to the voice would be decided
+        # by the pacer, which suppresses same-text repeats on its own timer
+        # and would answer a question this test is not asking.
+        app.ctx.settings.driving_speech = "coaching"
+        tip = "Keep it under 30 or the chains will not last."
+        for _ in range(3):
+            assert not app.ctx._ladder_repeats(tip, SpeechCategory.COACHING, "chains_fast")
+        assert driving is not None
+    finally:
+        app.shutdown()
+
+
+def test_standard_speaks_a_status_change_but_not_its_re_assertion() -> None:
+    """TRANSITIONS: enter, worsen, and clear -- not every re-fire.
+
+    A standing condition re-fires on a timer while it holds. Identical text
+    under the same key is the condition re-asserting itself; changed text is
+    the transition. A condition that genuinely CLEARS and returns speaks
+    again even word-for-word, which is what
+    ``reset_event_condition`` now also tells this memory.
+    """
+    app = _app()
+    try:
+        _real_driving(app)
+        app.ctx.profile.tutorial_done = True
+        app.ctx.settings.driving_speech = "standard"
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+
+        for _ in range(3):
+            app.ctx._event_pacer.forget_condition("load_damage")
+            app.ctx.say_event(
+                "Load damage 43 percent.",
+                interrupt=False,
+                key="load_damage",
+                category=SpeechCategory.STATUS,
+            )
+        assert len(spoken) == 1, spoken
+
+        # Worsened: a different number is a transition and speaks.
+        app.ctx._event_pacer.forget_condition("load_damage")
+        app.ctx.say_event(
+            "Load damage 61 percent.",
+            interrupt=False,
+            key="load_damage",
+            category=SpeechCategory.STATUS,
+        )
+        assert len(spoken) == 2, spoken
+
+        # Cleared: the memory of what was last said must go with it, or a
+        # condition that returns word-for-word never speaks again. The
+        # end-to-end path is covered by
+        # test_the_air_brake_lockout_recurs_once_it_clears_and_comes_back,
+        # which fails without this and is what caught it; asserted here at
+        # the seam because the pacer's own repeat window would otherwise
+        # decide the outcome of a same-text call and hide a regression.
+        assert app.ctx._ladder_last.get("load_damage") == "Load damage 61 percent."
+        app.ctx.reset_event_condition("load_damage")
+        assert "load_damage" not in app.ctx._ladder_last
+    finally:
+        app.shutdown()
