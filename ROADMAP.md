@@ -3115,6 +3115,24 @@ for 1.8" framing predates the release split):
       else, needs a repack (`tools/pack_sounds.py`) since the loose tree is
       builder-local and only the pak ships. Darren should judge the new
       recording before it lands.
+      THE NUMBER TO HIT, and this is the useful thing that came out of
+      Darren's candidate file (`sounds/lane beep.mp3` in the tester Dropbox,
+      2026-08-17): **-16 dBFS RMS**, which is where his file sits and which
+      puts it 2.6 dB ABOVE the engine loops. That is the level the bed needs.
+      "Louder" was the instruction before; this is a target.
+      OWNER DECISION 2026-08-17: wait for the ElevenLabs quota (resets
+      2026-09-06, see the radio-station note) and generate the bed there
+      rather than adapting Darren's file. His file cannot do this job -- it
+      is a single 1.45 s sustained 290 Hz tone with 0.01 s of trailing
+      silence, so it cannot loop without clicking, and the lean is a
+      continuously panned BED rather than a one-shot.
+      AND IT IS NOT AN EDGE CUE EITHER, which is where I nearly sent it: the
+      edge boundary already has a three-rung ladder chosen to stay separable
+      under engine noise (`edge_clip` intermittent, `edge_strip` periodic,
+      `edge_shoulder` aperiodic), plus a single-hit rumble strip and the
+      transverse strips. A discrete "you crossed the edge" beep would be a
+      fourth cue saying what those three already say. The gap is the
+      PRE-edge lean, and only the lean.
 - [ ] **Learn game sounds demos cues the player's settings make impossible
       (Darren, 2026-08-17).** He reported the road lean as "very very quiet
       and you can hardly even hear it". Measured: it is not quiet. On the
