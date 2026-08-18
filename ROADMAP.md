@@ -723,6 +723,30 @@ onto exit signalling.
       slope no road of that class can hold, on a segment too short to hold
       it, contradicted by its own terrain label. Not started.
 
+      THE DEEPER FIX, if the screen is not enough: the noise is bridges and
+      overpasses in a 30 m SRTM profile. FHWA's National Bridge Inventory
+      gives every US bridge's location and length, which is exactly the mask
+      to drop those samples against, and USGS 3DEP at 1/3 arc-second is a
+      finer elevation surface than the one ORS sampled.
+
+- [ ] **Baked records do not say whether a value was read, derived, or
+      assumed (2026-08-18).** The provenance rule now in `AGENTS.md` binds new
+      bakes; the existing world predates it. Every layer carries a `source`
+      string and none of them distinguish a reading from a fallback, which is
+      why three separate artifacts (curve radii, grade slopes, ramp control)
+      all shipped looking like survey data. Two pieces of work: tag the
+      layers already baked, and make the builders refuse to finish quietly
+      when a layer comes back mostly assumed.
+
+      MEASURED: `ramp_control` empty on 18,011 of 18,011; `speed_limits`
+      unsourced on 671 of 15,234; `landmarks` unsourced on 4,489 of 31,384;
+      `route_points` (7,646), `state_miles` (1,750), `legs` (1,290) and
+      `route_via` (27) carry no `source` at all. `grade_segments`,
+      `lane_segments`, `interchanges`, `stops`, `checkpoints`,
+      `state_crossings`, `restrictions` and `toll_events` are fully sourced --
+      but "sourced" is what the 146,496 impossible-slope-carrying grade
+      segments are too, which is the whole point.
+
 - [ ] **Ramp ends are too often stop signs, and none of it comes from real
       data (owner, 2026-08-17: "fix ramps to be more realistic, e.g. no stop
       signs at the end of ramps").** MEASURED FIRST: **all 18,011 exits in
