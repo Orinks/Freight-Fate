@@ -8,8 +8,10 @@
 > with curve nav), (4) the engine-ring spectra rebuild, and (5) the
 > NPR translator radio batch. Nothing else: every other unchecked
 > FEATURE bullet below targets the `feat/career-2.0` line (worktree
-> `C:/dev/ff-2.0`). The driving school stays gated off 1.9
-> (`DRIVING_SCHOOL_ENABLED`) and reopens on 2.0 to be finished.
+> `.claude/worktrees/career-2.0`, created 2026-08-18; the `C:/dev/ff-2.0`
+> path this note used to name never existed). The driving school stays
+> gated off 1.9 (`DRIVING_SCHOOL_ENABLED`) and reopens on 2.0 to be
+> finished.
 > Track plan: `docs/plan-1.9-final-slate.md`.
 
 > Current stable: **1.8.8.1** (hotfix shipped 2026-08-08). Next release: **1.9.0**, in
