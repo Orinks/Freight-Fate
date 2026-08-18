@@ -700,95 +700,121 @@ onto exit signalling.
       boundary and builds its backslash with `chr(92)` so the check cannot
       fall into the hole it exists to catch.
 
-- [ ] **Bake-time provenance and sanity rules -- the substrate for three
-      separate data bugs found on 2026-08-17/18.** Owner wants a rule about
-      verifying OSM before baking. The provenance audit says the rule needs
-      to be wider than that, because only one of the three bugs is an OSM
-      problem at all.
+- [x] **Bake-time provenance and sanity rules -- the substrate for three
+      separate data bugs found on 2026-08-17/18. RULE SHIPPED 2026-08-18.**
+      Owner wanted a rule about verifying OSM before baking. The provenance
+      audit says the rule has to be wider than that, because only one of the
+      three bugs is an OSM problem at all.
 
       WHERE EVERY LAYER ACTUALLY COMES FROM, counted off the baked `source`
       fields: ORS supplies exactly ONE thing, grade_segments, all 146,496 of
       them, from its route elevation profile. OSM/Overpass supplies the tag
       layers -- interchanges 18,011, lane_segments 20,666, speed_limits
-      8,098, restrictions 259, most stops. Neither supplies state_crossings
-      (OSRM geometry plus public boundary GeoJSON), tolls (hand-estimated per
-      authority), or the 31,384 landmarks, which carry NO source string at
-      all.
+      14,563 of 15,234, restrictions 259, most stops. Neither supplies
+      state_crossings (OSRM geometry plus public boundary GeoJSON) nor tolls
+      (hand-researched per authority, `tools/toll_rates.py`).
 
       THREE FAILURE MODES, THREE DIFFERENT RULES.
       1. ORS elevation is noisy and was trusted per segment: 455 grades over
          8 percent, +14.4 on I-5, on 0.2-0.3 mile spans that are bridges.
          This is the only one where "check it against an official source"
          literally applies -- FHWA publishes the interstate grade ceiling.
-      2. OSM is THIN, not wrong. maxspeed covers 8,098 corridor segments and
-         is simply absent elsewhere; ramp_control was absent on all 18,011
-         exits; facility approach speeds fall back to "25 named / 15 unnamed"
-         and the baked data holds exactly two values across 9,588 legs, which
-         is the fallback doing all the work. OSM never asserted anything
-         false. We filled its silence with defaults and baked them looking
-         identical to readings. Verification cannot help here; only refusing
-         to let a fallback look like a reading can.
+      2. OSM is THIN, not wrong. `maxspeed` is simply absent outside the
+         14,563 segments that carry it; `ramp_control` was absent on all
+         18,011 exits; facility approach speeds fall back to "25 named / 15
+         unnamed" and the baked data holds exactly two values across 9,588
+         legs, which is the fallback doing all the work. OSM never asserted
+         anything false. We filled its silence with defaults and baked them
+         looking identical to readings. Verification cannot help here; only
+         refusing to let a fallback look like a reading can.
       3. OUR OWN ARITHMETIC, with fine inputs: curve radius/deflection
          computed from sparse geometry (the script derives these, OSM does
          not supply them), and the gate zone that was longer than a quarter
          of the roads it sat on. No amount of source verification touches
          these.
 
-      SO THE RULE SHOULD BE: every baked value records whether it was READ,
-      DERIVED, or INVENTED; a bake fails loudly when a whole layer comes back
-      invented (18,011 of 18,011 empty should have been an error, not a
-      silent success); and derived values are checked against physical limits
-      for their road class before they are written. All three bugs would have
-      been caught at bake time by that. Also owed: the same rule written into
-      the global CLAUDE.md.
+      SHIPPED: the rule is in `CLAUDE.md` under "Provenance: read, derived,
+      or assumed -- never blurred". Every baked value declares its kind, a
+      builder must announce when a layer comes back mostly assumed, a derived
+      value is screened against the physical limit for its class before it is
+      written, and the official sources that do exist are named there (state
+      DOT design manuals, FHWA HPMS, USGS 3DEP, FHWA NBI, 23 CFR 658
+      Appendix A). The contributor guide moved from `AGENTS.md` into
+      `CLAUDE.md` in the same change, at the owner's request.
 
-- [ ] **Grade data carries impossible slopes, same shape as the curve
-      artifacts (audit, 2026-08-18).** 455 of 146,496 grade segments (0.31
-      percent) are steeper than 8 percent, topping out at **+14.4 percent on
-      I-5**. 1,077 interstate segments exceed 6 percent, which is the US
-      interstate design ceiling -- the famously steep ones sit at 6 to 7.
+- [ ] **The world baked before that rule still does not declare its kinds.**
+      Tagging the existing layers is its own sweep, and so is making the
+      builders refuse to finish quietly. MEASURED: `ramp_control` empty on
+      18,011 of 18,011; `speed_limits` unsourced on 671 of 15,234;
+      `landmarks` unsourced on 4,489 of 31,384; `route_points` (7,646),
+      `state_miles` (1,750), `legs` (1,290) and `route_via` (27) carry no
+      `source` at all. `grade_segments`, `lane_segments`, `interchanges`,
+      `stops`, `checkpoints`, `state_crossings`, `restrictions` and
+      `toll_events` are fully sourced -- but "sourced" is what the 146,496
+      grade segments carrying impossible slopes were too, which is the point.
 
-      THE TELL IS SELF-CONTRADICTION, not steepness: 336 of the 455 are
-      labelled `flat` or `hills` terrain rather than `mountain`, including
-      `I-22 -8.3% over 0.20 mi (flat)`. And they are short -- 335 of 455 run
-      0.2 or 0.3 miles -- which is the signature of elevation-profile
-      sampling noise over bridges and overpasses, not of road. Source on
-      every one: "OpenRouteService route elevation profile segmented by
-      terrain (development-time)."
+- [x] **Grade data carried impossible slopes, same shape as the curve
+      artifacts (audit 2026-08-18, screened 2026-08-18).** 455 of 146,496
+      grade segments were steeper than 8 percent, topping out at **+14.4
+      percent on I-5**, and 1,077 interstate segments exceeded the 6 percent
+      design ceiling for the class. The tell was self-contradiction, not
+      steepness: 336 of the 455 were labelled `flat` or `hills` rather than
+      `mountain`, and 335 ran only 0.2 or 0.3 miles -- the signature of
+      elevation-profile sampling over a bridge deck, not of road.
 
-      WHY IT MATTERS: grade drives the physics. The truck bleeds speed
-      climbing, the jake and descent control work the other way, and the
-      speed keeper sizes its snub against it. A phantom 14 percent on an
-      interstate is a dramatic, wrong-feeling stretch of road.
+      SHIPPED as a load-time screen in `src/freight_fate/data/grades.py`,
+      wired into `world_corridor.build_leg_corridor`. It could NOT copy the
+      curve screen's mountain exemption: the worst record, the I-5 14.4, is
+      itself labelled `mountain`. Road class carries the harder fact instead
+      -- no interstate is built past 7 -- so the ceiling is the stricter of
+      class (interstate 7, US 10, state 12) and the bake's own terrain label
+      (flat 6, hills 8). 926 segments, 0.63 percent, are capped; US-550,
+      CA-299 and the Eisenhower approach are untouched.
 
-      A load-time screen in the shape of the curve one would work: a
-      slope no road of that class can hold, on a segment too short to hold
-      it, contradicted by its own terrain label. Not started.
+      It CLAMPS where the curve screen DROPS, because grades tile the leg
+      continuously and `Trip.grade_at` falls through to a synthesized terrain
+      average for any uncovered mile -- dropping a spike out of a real climb
+      would swap a noisy reading for an invented one. The bake is untouched;
+      a capped segment records the derivation in its own `source`.
+
+      STILL OPEN, the deeper fix: the noise is bridges and overpasses in a
+      30 m SRTM profile. FHWA's National Bridge Inventory gives every US
+      bridge's location and length, which is exactly the mask to drop those
+      samples against, and USGS 3DEP at 1/3 arc-second is a finer elevation
+      surface than the one ORS sampled. A re-bake against those would remove
+      the artifacts rather than cap them.
 
 - [ ] **Ramp ends are too often stop signs, and none of it comes from real
       data (owner, 2026-08-17: "fix ramps to be more realistic, e.g. no stop
-      signs at the end of ramps").** MEASURED FIRST: **all 18,011 exits in
-      the baked world carry an empty `ramp_control`** -- OpenStreetMap tagged
-      a control on none of them -- so `_ramp_control_for`'s seeded fallback
-      decides every single ramp terminal in the game. Nothing a player hears
-      here is sourced.
+      signs at the end of ramps"). PARTLY SHIPPED.** MEASURED FIRST: **all
+      18,011 exits in the baked world carry an empty `ramp_control`** --
+      OpenStreetMap tagged a control on none of them -- so
+      `_ramp_control_for`'s seeded fallback decides every ramp terminal in
+      the game. Nothing a player hears here is sourced.
 
-      The fallback weights are `RAMP_CONTROL_URBAN_WEIGHTS = (0.70, 0.95)`
-      and `RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)`, which read as: urban
-      70 percent signal / 25 percent stop / 5 percent free-flow, and rural 30
-      percent signal / **50 percent stop** / 20 percent free-flow. Half of
-      every rural off-ramp in the game ends at a stop sign.
+      DONE (2026-08-18, `feat/no-stop-signs-between-freeways`): the 4,999
+      exits whose baked `via` names an interstate are decided as free-flow
+      before the dice are rolled. A stop sign where two freeways meet does
+      not exist, and that was a fact about the road, not a preference.
 
-      TWO SEPARATE JOBS, and they want different judgement. Retuning the
-      weights is a feel decision and the owner's call. The deeper one is that
-      the control should follow the interchange TYPE rather than a coin
-      flip -- a diamond terminal onto a minor road really does stop, a
-      cloverleaf loop or a directional ramp onto another highway does not,
-      and the game already knows about interchanges
-      (`build_interchanges*.py`, `data/world_models.py`). Sourcing it that
-      way would also let `ramp_control` stop being empty on 18,011 records.
+      WHAT IS LEFT IS A TUNING DECISION, NOT A MISSING FACT, which is why it
+      is still open. `via` classifies the other 13,012 exits like this:
+      4,311 onto a state route, 1,875 onto a US route, 638 onto a county
+      road, 568 onto a bare or named road, and **5,620 with no `via` at
+      all**. That tells you what the ramp lands ON, but the control at a
+      ramp terminal follows the INTERCHANGE TYPE and the crossroad's traffic,
+      neither of which is baked -- and a rural diamond terminal onto a state
+      route genuinely is a stop sign, so "onto a numbered route" does not
+      imply a signal. Deriving a control from `via` alone would be inventing
+      a fact, which the provenance rule in `CLAUDE.md` now forbids.
 
-      Not started beyond this measurement.
+      SO THE TWO REAL OPTIONS: (a) the owner retunes
+      `RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)` -- today 30 percent signal
+      / **50 percent stop** / 20 percent free-flow -- against how the ramps
+      now feel with the freeway fix in; or (b) bake the interchange type
+      from OSM junction geometry (`build_interchanges*.py` already walks it)
+      so the control follows the road instead of the dice. (b) is the honest
+      fix and the larger one; (a) is a constant and needs a driver's ear.
 
 - [ ] **The speed keeper announces a number it then fails to hold -- NOT
       REPRODUCED, mechanism unknown (owner report, 2026-08-17).** "Speed
