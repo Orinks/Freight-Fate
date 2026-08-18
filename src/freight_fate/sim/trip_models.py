@@ -291,6 +291,10 @@ RAMP_MAX_MPH = 45.0
 DESTINATION_APPROACH_LIMIT_MPH = RAMP_MAX_MPH
 FACILITY_GATE_LIMIT_MPH = 15.0
 FACILITY_GATE_ZONE_MI = 0.5
+# ...but never more than this share of the approach. A gate zone longer
+# than the road it sits on is how a blanket 15 came to override every
+# 25 street on a quarter of all facility chains.
+FACILITY_GATE_MAX_SHARE = 0.35
 # Local approach road assumed when the destination facility has no usable
 # approach record -- the stretch between the exit and the gate. Kept equal to
 # the exit's own placement (``DESTINATION_EXIT_BEFORE_END_MI``), which imports
@@ -328,6 +332,8 @@ def approach_shed_mi(from_mph: float, to_mph: float) -> float:
     shed_s = (from_mph - to_mph) / MPH_PER_MPS / APPROACH_DECEL_MPS2
     shed_mi = shed_s * (from_mph + to_mph) / 2.0 / 3600.0
     return shed_mi + (APPROACH_REACTION_S * from_mph + APPROACH_SETTLE_S * to_mph) / 3600.0
+
+
 NIGHT_HAZARD_BONUS = 0.10  # extra hazard risk after dark
 # A zone flip that flips back within this distance is boundary noise from a
 # road hugging the line (the state-crossing dwell filter's lesson), not a

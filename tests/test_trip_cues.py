@@ -372,3 +372,52 @@ def test_distances_to_things_ahead_never_round_down_to_zero(world):
         reason="on-ramp",
     )
     assert "0 mile" not in trip._traffic_pressure_message(pressure, 0.2)
+
+
+def test_the_gate_zone_never_swallows_the_streets_before_it(world):
+    """Owner report, 2026-08-17: "it says it's holding 25 when it's really
+    doing more like 14." Root cause found 2026-08-18, and it is arithmetic.
+
+    ``FACILITY_GATE_ZONE_MI`` is 0.5, but the median approach chain is 1.0
+    mile and 234 of 1,415 facilities run 0.5 or shorter -- so "the last half
+    mile" reached back over the whole approach. ``_active_zone_at`` takes the
+    LOWEST limit among overlapping zones, so that blanket 15 overrode every
+    25-mph street underneath it while the per-leg zones went on announcing
+    25. The truck was pinned at 15 and told it was holding 25.
+    """
+    from freight_fate.sim.trip_models import FACILITY_GATE_LIMIT_MPH
+
+    trip, _truck = make_trip(world)
+    for total, leg_lengths in ((0.54, [0.05, 0.21, 0.05, 0.09, 0.14]), (0.4, [0.2, 0.2])):
+        starts, acc = [], 0.0
+        for length in leg_lengths:
+            starts.append(acc)
+            acc += length
+
+        class _Leg:
+            def __init__(self, miles):
+                self.miles = miles
+                self.local_speed_mph = 25.0
+
+        class _Route:
+            legs = [_Leg(m) for m in leg_lengths]
+            miles = total
+
+        trip.route = _Route()
+        trip._leg_starts = starts
+        trip._is_facility_approach_route = lambda: True
+        zones = trip._facility_speed_zones()
+
+        gate = [z for z in zones if z.limit_mph == FACILITY_GATE_LIMIT_MPH]
+        assert gate, "the gate zone vanished"
+        # It starts no earlier than the final leg, so it can never reach back
+        # over a street the driver is still meant to be doing 25 on.
+        assert gate[0].start_mi >= starts[-1] - 1e-9, (
+            f"gate zone starts at {gate[0].start_mi} but the last leg starts at {starts[-1]}"
+        )
+        assert gate[0].start_mi > 0.0, "the gate zone covered the whole approach"
+
+        # And nothing 25 is left fully shadowed by it.
+        for zone in zones:
+            if zone.limit_mph == 25.0:
+                assert zone.start_mi < gate[0].start_mi, "a 25 street sits wholly inside the gate"
