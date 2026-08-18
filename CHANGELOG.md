@@ -207,6 +207,16 @@
 
 ### Changed
 
+- **No more stop signs where one interstate meets another.** Coming off a
+  ramp onto another interstate, you could be told to stop at a stop sign or
+  wait at a light. That does not happen on a real road: where two freeways
+  meet, the ramp simply merges. Nearly three thousand exits in the game were
+  affected, because the game was guessing at what waits at the end of every
+  ramp rather than looking at where the ramp goes. It now checks: if the ramp
+  takes you onto another interstate, you merge. Ramps onto ordinary roads are
+  unchanged, and a rural one can still end at a stop sign, because that is
+  what those really do.
+
 - **Your career readout says how much experience the next level needs.** It
   told you your level, your experience total, and which rank came next, but
   never the gap between them -- so the one thing you actually want to know,

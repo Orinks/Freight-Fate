@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import math
 import random
+import re
 
 import pygame
 
@@ -306,6 +307,15 @@ RED_RUN_DAMAGE = 0.3  # collision severity for running the red
 STOP_ROLL_DAMAGE = 0.2  # lighter clip for blowing the stop sign
 # Heuristic control mix when OSM has none baked: (signal, stop) cumulative
 # weights; the remainder is free flow. Urban terminals are mostly signalized.
+# A ramp onto ANOTHER FREEWAY is a system interchange: it ends in a merge,
+# never a stop sign and never a light. Nothing stops traffic where an
+# interstate meets an interstate. 4,999 of the world's 18,011 exits -- 27.8
+# percent -- lead to one, and every single one of them was rolling the dice
+# below, so half the rural ones were being given stop signs that cannot
+# exist (owner, 2026-08-17: "no stop signs at the end of ramps"). Matched on
+# the interchange's own `via`, which is baked from OSM.
+FREEWAY_VIA_RE = re.compile(r"\bI[-\s]?\d")
+
 RAMP_CONTROL_URBAN_WEIGHTS = (0.70, 0.95)
 RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)
 # Grace past the end of the ramp before a taken-but-never-stopped exit counts
