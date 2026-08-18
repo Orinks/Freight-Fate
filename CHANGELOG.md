@@ -153,6 +153,13 @@
 
 ### Changed
 
+- **Your career readout says how much experience the next level needs.** It
+  told you your level, your experience total, and which rank came next, but
+  never the gap between them -- so the one thing you actually want to know,
+  how much further, was the one thing missing. It now says "two hundred more
+  to level four" right after the level. At the top of the ladder it does not
+  promise a level that is not there. Asked for by Brandon.
+
 - **You can now choose a tone for the lane guide, if the road is too quiet
   to follow.** When you drift, the road you are already hearing leans toward
   the side you need to steer, and goes quiet when you are straight. That is

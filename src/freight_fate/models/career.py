@@ -186,6 +186,20 @@ ENDORSEMENT_ANNOUNCEMENTS = {
 }
 
 
+def xp_to_next_level(xp: float) -> float | None:
+    """Experience still owed before the next level, or None at the ceiling.
+
+    The summary said what level you are and what the next RANK is, but never
+    the number between them, so the one question a player actually asks --
+    how much more -- had no answer anywhere in the game (Brandon, tester
+    report 2026-08-17).
+    """
+    level = level_for_xp(xp)
+    if level >= MAX_CAREER_LEVEL:
+        return None
+    return max(0.0, LEVEL_XP[level] - xp)
+
+
 def level_for_xp(xp: float) -> int:
     level = 1
     for i, threshold in enumerate(LEVEL_XP[1:], start=2):
@@ -292,8 +306,13 @@ class Career:
             if next_rank is not None
             else " You are at the top career rank."
         )
+        owed = xp_to_next_level(self.xp)
+        # The number the player is actually asking for, next to the level it
+        # belongs to rather than buried at the end of a long readout.
+        owed_text = f" {owed:,.0f} more to level {self.level + 1}." if owed is not None else ""
         return (
-            f"Level {self.level}, {rank.title}. {self.xp:.0f} experience. "
+            f"Level {self.level}, {rank.title}. {self.xp:.0f} experience."
+            f"{owed_text} "
             f"Reputation {self.reputation:.0f} out of 100. "
             f"{self.deliveries} deliveries, {pct:.0f} percent on time. "
             f"{self.total_miles:,.0f} lifetime miles, "
