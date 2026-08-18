@@ -755,6 +755,18 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Nearly half the exits in the game now end at the control that is really
+  there.** What waits at the bottom of an off-ramp -- a traffic light, a stop
+  sign, or nothing at all -- was decided by a roll of the dice at every exit
+  in the country, because the real answer had only ever been looked up for
+  two states. It has now been looked up for all of them. Eight thousand two
+  hundred and five exits carry what OpenStreetMap actually records: five
+  thousand six hundred and twenty-nine end at a light, two and a half
+  thousand at a stop sign. Where the map has nothing to say, the old guess
+  still stands in, but it no longer overrules a known answer. You will
+  notice it most where the guess was wrong in the same place every trip --
+  a familiar exit that always announced a stop sign and never had one.
+
 
 - **A few stretches of road were far steeper than any road really is.** The
   climbs and descents in the game were measured from an elevation map, and
