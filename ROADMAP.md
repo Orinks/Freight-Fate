@@ -702,6 +702,49 @@ onto exit signalling.
       boundary and builds its backslash with `chr(92)` so the check cannot
       fall into the hole it exists to catch.
 
+- [ ] **START HERE: facility approach zones still overlap, and the keeper
+      eases for a zone three quarters of a mile away (tester log,
+      2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED
+      this. Zones still overlap each other and `_active_zone_at` takes the
+      LOWEST limit among overlapping zones, so a 15 zone that starts later
+      still wins at a position posted 25.
+
+      THE REPRODUCTION IS A REAL LOG, not a bench:
+      `C:/ff-tester/FreightFate/logs/game.log`, New Haven, Sargent Drive
+      approach, keeper set at 25. Read it with `grep -a` (padded). The
+      damning nine milliseconds:
+
+        14:24:57  "Speed limit 25 miles per hour, in a facility access road zone."
+        14:25:08   15 mph                                  <- already slowed
+        14:25:12  "In three quarters of a mile, facility access road ahead. Speed limit 15."
+        14:25:12  quiet silenced: "Entering facility access road zone. Speed limit 15 now."
+        14:25:15  quiet silenced: "Posted limit lower; speed keeper easing to 15"
+        14:25:27  "Speed limit 25 miles per hour, in a facility access road zone."
+
+      The same instant says the 15 zone is 0.75 mi AHEAD and that it is in
+      force NOW. The limit under the wheels was 25 throughout.
+
+      THE FIX: approach zones must not overlap at all. Each leg owns its
+      stretch exclusively, and the gate zone takes only what is left after
+      the last street's zone ENDS rather than being laid on top of it. Assert
+      non-overlap in a test -- do not eyeball the zone list, which is exactly
+      how this was missed: the corrected Rochester list `(0.31,0.54,25)` and
+      `(0.40,0.54,15)` was printed, read as fixed, and the overlap went
+      unnoticed.
+
+      TWO SEPARATE FAULTS RIDE ALONG AND BOTH ARE REAL:
+      1. The status readout speaks `_keeper_mph` (the SET speed) rather than
+         the target in force, so S says "holding 25" while the truck holds
+         15. It should say the live number, e.g. "holding 15, set 25".
+      2. "Posted limit lower; speed keeper easing to 15" is CONFIRMATION and
+         so is an earcon at quiet. An unrequested 10 mph speed change is
+         exactly what the owner's own quiet rule says must be spoken.
+
+      DO NOT bench this with hand-written zones. Four synthetic benches over
+      two sessions all came back CLEAN because tidy non-overlapping zones
+      were written by hand every time; the bug lives only in the overlap that
+      `_facility_speed_zones` actually produces.
+
 - [x] **Bake-time provenance and sanity rules -- the substrate for three
       separate data bugs found on 2026-08-17/18. RULE SHIPPED 2026-08-18.**
       Owner wanted a rule about verifying OSM before baking. The provenance
