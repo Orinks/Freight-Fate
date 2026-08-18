@@ -203,12 +203,14 @@ def test_elevation_extends_fm_range_like_the_rim(  # the owner's ham anchor
 ):
     # From high ground you receive far past the flat contour: line-of-sight
     # FM, 4/3-earth radio horizon. Desert Rock Phoenix (site 1086 ft, range
-    # 125 mi -> 250 game-mi flat reach) at ~300 miles: silent on the flats,
-    # clear from ~7000 ft.
+    # 125 mi, held to the 150 mi flat ceiling) at ~220 miles: silent on the
+    # flats, clear from ~7000 ft, where the lift buys about 95 miles more.
+    # The distance moved with RADIO_MAX_REACH_MI (2026-08-18); the anchor
+    # itself is unchanged -- the rim hears what the flats cannot.
     station = _ranged_fixture(
         "kfix-phoenix", lat=33.4484, lon=-112.074, range_miles=125.0, site_elev_ft=1086.0
     )
-    far_north = _north_of((station.lat, station.lon), 300.0)
+    far_north = _north_of((station.lat, station.lon), 220.0)
 
     flat = estimate_signal(station, far_north, elevation_ft=station.site_elev_ft)
     assert flat.signal == 0.0
@@ -220,6 +222,26 @@ def test_elevation_extends_fm_range_like_the_rim(  # the owner's ham anchor
     # no elevation data behaves exactly like the flat model
     unknown = estimate_signal(station, far_north)
     assert unknown.signal == 0.0
+
+
+def test_no_station_spans_three_states(  # the cap on the doubled reach
+):
+    # RADIO_REACH_MULT doubles every contour so a station survives time
+    # compression, but the big curated ranges (90-175 mi) doubled into
+    # 200-350 mile monsters: Houston, Tulsa, Austin and Oklahoma City all
+    # reached the Dallas dial, and half the terrestrial band at a metro was
+    # fringe the driver had to seek past (owner, 2026-08-18).
+    from freight_fate.radio import RADIO_MAX_REACH_MI, _reach_mi
+
+    modest = _ranged_fixture("kfix-modest", lat=39.0, lon=-98.0, range_miles=25.0)
+    giant = _ranged_fixture("kfix-giant", lat=39.0, lon=-98.0, range_miles=175.0)
+    # A normal station still gets the full doubling it was given.
+    assert _reach_mi(modest) == 50.0
+    assert _reach_mi(giant) == RADIO_MAX_REACH_MI
+
+    # And the far side of the cap really is off the dial, not merely quiet.
+    beyond = _north_of((giant.lat, giant.lon), RADIO_MAX_REACH_MI + 20.0)
+    assert estimate_signal(giant, beyond).signal == 0.0
 
 
 def test_below_the_tower_site_is_neutral_never_a_penalty():
@@ -479,9 +501,10 @@ def test_fringe_signal_thins_radio_volume(denver_driving):
     driving.radio.catalog = driving.radio.catalog + (ranged,)
     driving.radio.select_station("kfix-denver", driving._radio_backend)
 
-    # ~228 miles east of the Denver tower: past the doubled 240 mi reach's
-    # clean threshold, still technically in range.
-    fringe = (39.7392, -104.9903 + 4.3)
+    # ~135 miles east of the Denver tower: past the clean threshold of the
+    # 150 mi capped reach, still technically in range. Was 228 miles against
+    # the uncapped 240 mi reach before RADIO_MAX_REACH_MI (2026-08-18).
+    fringe = (39.7392, -104.9903 + 2.54)
 
     import freight_fate.states.driving_updates as driving_updates
 

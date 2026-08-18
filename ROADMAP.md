@@ -564,6 +564,92 @@ onto exit signalling.
       are partial by owner decision (ElevenLabs quota exhausted until
       2026-09-06): oldies is a full 8, gospel and tejano have 3 of 8, and
       synthwave has 1 of 8 -- see the follow-up bullets below.
+- [x] **Radiostorm curated onto the web band, and one address per station
+      -- landed 2026-08-17.** radiostorm.com's four channels (At Work 104,
+      Rock 104 Classic Rock, Oldies 104, Comedy 104) are curated entries
+      taken from the station's own `.pls` mounts, with the station's own
+      names and formats instead of the directory's contributor-typed ones.
+      Three of them were on the band twice: Live365 hands the same station
+      out under several CDN edge hosts and several bitrate mounts off one
+      station id, and `normalize_stream_url` folded none of that.
+      It now canonicalizes a Live365 mount onto its station id, so build-time
+      collision dropping and the dial's own identity grouping both see them
+      as one stream -- 22 duplicate imported rows went with it (Music City
+      Roadhouse, KPISS, Deep Space Radio, Retro Album Rock and more, plus a
+      row labelled KTHO 590 South Lake Tahoe that was pointed at Boss Boss
+      Radio's mount). `canonical_stream_url` then rewrote the 53 rows stored
+      at an ephemeral CDN edge host onto `streaming.live365.com`, which is
+      what the station publishes and what redirects to a live edge at play
+      time; folding the duplicates had otherwise left six stations with only
+      their edge-pinned row. Every surviving merged station was checked live
+      (14/14 streaming, 200 audio/mpeg); the two mounts that 404 do so on
+      every host and are simply off the air.
+- [x] **Every stream on the dial checked, and the dead ones taken off --
+      landed 2026-08-18.** `tools/check_radio_streams.py` probes all 6,463
+      real streams and writes `radio_stream_health.json`;
+      `import_radio_catalog.py` drops the imported casualties at build time
+      and curated ones are flagged `supported: false` with a dated note, so
+      the hand-written research survives a station coming back. 634 imported
+      rows dropped, 131 repointed at their Shoutcast `/;` mount, 8 curated
+      flagged, 7 curated repaired by hand (KDFC, WMFO, WRBH, WHYR, KFMG,
+      WBWC, KEOS). Two false-negative traps are baked into the tool now:
+      Python 3.12's default TLS security level refuses the older ciphers
+      most Icecast hosts offer and called KBOO, WBAI, KPFK, KZYX and two
+      dozen more dead while curl played every one, and a Shoutcast root
+      serves an HTML status page rather than audio. Without both fixes the
+      sweep reported 820 dead instead of 649.
+- [x] **Terrestrial tier widened from the FCC licence record -- landed
+      2026-08-18.** `tools/fetch_fcc_transmitters.py` caches all 26,212
+      licensed US call signs with real transmitter coordinates, ERP and
+      HAAT from the FCC's own FM and AM queries (public domain);
+      `import_radio_catalog.py` reads a Radio Browser US snapshot, resolves
+      the call sign out of each station's name against that list, and
+      places 648 new stations across all 50 states (2,219 resolved; the
+      rest collided with a call sign already on the dial or failed the
+      reachability sweep). Coverage now comes from
+      licensed power in six bands (8 to 55 miles) instead of the flat 40
+      every imported row used to get, which had translators reaching three
+      counties. The formats added are the ones the Wikidata join missed:
+      classic rock, country, classic hits, top 40, oldies. Roughly 500
+      commercial stations moved out of the always-available web band to the
+      dial position they actually broadcast on. Two gotchas worth keeping:
+      the FCC's front end answers 403 to a user agent containing a URL, and
+      its query output carries deleted licences under a "D"-prefixed call
+      sign that must be filtered or they shadow live stations. Names are
+      cleaned of stream jargon *before* the call sign is read out of them:
+      "Ambient Sleeping Pill | 128 kbps mp3" was placed at KBPS Portland's
+      transmitter on the strength of the bitrate.
+- [ ] **The FCC coverage bands are power buckets, not contours.** ERP and
+      HAAT are both cached; the real F(50,50) contour uses terrain and
+      antenna pattern, and the buckets ignore HAAT entirely. Good enough
+      that a translator no longer outreaches a Class C, not good enough to
+      call it modelled.
+- [ ] **Only stations naming their call sign got placed.** 2,228 of the
+      7,750 US directory rows resolved; the rest brand themselves purely
+      ("The Fox", "Magic 106.7") and would need a name-and-market match
+      against the licence list to place.
+- [x] **Reach capped so the dial is not half fringe -- landed 2026-08-18**
+      (owner ruling the same day: "sort by the strongest signal so the
+      player isn't searching through a bunch of fringe"). The sort was
+      already strongest-first in the terrestrial group; the clutter came
+      from `RADIO_REACH_MULT` doubling curated ranges of 90-175 miles into
+      200-350 mile monsters, against its own note about no station spanning
+      three states. `RADIO_MAX_REACH_MI = 150` caps the doubled figure:
+      Dallas went 33 terrestrial (15 fringe, furthest 238 mi) to 22 (4
+      fringe, furthest 127 mi), and rural dials keep their stations, which
+      a 120-mile cap did not. The elevation lift still stacks on top, so
+      the ham anchor holds -- a 7000 ft rim reaches 245 miles where the
+      flats reach 150; that test's distance moved from 300 to 220 miles and
+      its premise did not.
+- [ ] **A station skipped by the dial cannot be reached any other way.**
+      `station_list_lines` is a read-out, not a picker, so the dial keys are
+      the only route to a station. That ruled out the other fix for the
+      fringe complaint (seek stepping over weak stations, as a real car
+      radio does) and it is worth a picker in its own right.
+- [ ] **Re-run the stream sweep before each release.** The health file is a
+      snapshot, not a fact: stations come back, and a 5xx on sweep day is a
+      bad afternoon rather than a closure. `--recheck-dead` re-probes only
+      the casualties, which is cheap enough to be routine.
 - [ ] **Finish the station song batch after the ElevenLabs quota resets
       (2026-09-06).** Gospel +5, tejano +5, synthwave +7, plus top-ups
       (8-10 each) for country, classic rock, blues, and jazz, and 2-3 new

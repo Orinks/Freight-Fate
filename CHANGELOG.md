@@ -4,6 +4,60 @@
 
 ### Added
 
+- **Distant stations no longer clutter the dial.** Tuning has always put
+  the strongest station first, but a handful of big stations were reaching
+  so far that Houston, Tulsa, Austin and Oklahoma City all turned up on the
+  Dallas dial from two hundred miles away and more, so half of what you
+  scanned past was noise you would never choose. Nothing reaches past a
+  hundred and fifty miles now, and the Dallas dial went from thirty-three
+  stations with fifteen in the weeds to twenty-two with four. Out in
+  country where there is little else on the band, the far-off station is
+  still there -- that is where it earns its place. High ground still hears
+  what the flats cannot.
+
+- **Hundreds more real stations on the dial, in the places they broadcast
+  from.** Six hundred and forty-eight stations were added across all
+  fifty states, and they are the half of the dial that was thin before:
+  country, classic rock, hits, oldies and top forty, alongside the news and
+  public radio that was already there. Each one sits where its transmitter
+  really stands, taken from the FCC's own licence records, and reaches as
+  far as its licensed power actually carries -- so a hundred-kilowatt
+  station follows you most of an hour down the interstate, while a
+  low-power translator fades a few miles out of town instead of the flat
+  forty miles every imported station used to get. Some stations that used
+  to sit in web radio, playable anywhere in the country, have moved to the
+  dial position they broadcast on, which is where you would find them from
+  the cab.
+
+- **Stations that had gone off the air are off the dial.** Every stream on
+  the dial was called up and listened to, and the ones that no longer
+  answer -- a shut-down station, a lapsed account, a host that moved --
+  have been taken out, so tuning no longer lands you on silence and a
+  hand-off to a distant fallback. Six hundred and thirty-four of them went.
+  A hundred and thirty-one others turned out to be playing perfectly and
+  simply listed at the wrong door, and those were pointed at the right one
+  rather than dropped. Seven hand-picked stations that are genuinely down,
+  among them Wildcat Radio and Classical 90.5, are set aside rather than
+  deleted, ready to come back if their stream does. Five more were repaired
+  outright: Classical KDFC, WMFO, WRBH Reading Radio, WHYR Baton Rouge and
+  KFMG Des Moines all play again.
+
+- **Radiostorm's four channels are on the web radio band under their own
+  names.** At Work 104, Rock 104 Classic Rock, Oldies 104 and Comedy 104 --
+  the internet station out of Topeka that carries Marshall Barber's
+  Rockhouse -- come straight from the station's own stream list now, so each
+  one is named and described the way the station names it. Three of them
+  were already down there twice, once under a made-up genre, because the
+  directory listing had recorded the same channel under two different
+  addresses. Any station that reaches the dial by more than one address now
+  lands on it once, which also tidied up a dozen or so others, among them
+  Music City Roadhouse, KPISS and Deep Space Radio, and took away a listing
+  called KTHO 590 South Lake Tahoe that was really playing Boss Boss Radio.
+  Fifty-odd of these stations were also being reached at whichever server
+  happened to answer on the day the list was made, which is the sort of
+  address that stops working without warning; they are all reached at the
+  station's own address now, so they should keep playing for longer.
+
 - **You can shut the engine off while you wait at a shipper or a receiver.**
   Pulling through the gate parks the truck and opens the facility menu, so
   the engine key was out of reach at exactly the moment you would reach for

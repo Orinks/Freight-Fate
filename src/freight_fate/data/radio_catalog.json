@@ -5273,8 +5273,8 @@
       "state": "TN",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Southern Adventist University classical (Collegedale); icy-name 'WSMC' confirmed"
+      "supported": false,
+      "notes": "Southern Adventist University classical (Collegedale); icy-name 'WSMC' confirmed Off the dial 2026-08-18: stream sweep got \"HTTP 404\". Kept for the research in this row; flip supported back when the stream returns."
     },
     {
       "id": "wcrb-boston",
@@ -8367,8 +8367,8 @@
       "state": "UT",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Weber State University student station. Verified audio/mpeg 200."
+      "supported": false,
+      "notes": "Weber State University student station. Verified audio/mpeg 200. Off the dial 2026-08-18: stream sweep got \"HTTP 404\". Kept for the research in this row; flip supported back when the stream returns."
     },
     {
       "id": "kdna-yakima",
@@ -9009,8 +9009,8 @@
       "source": "https://www.wrbh.org/",
       "source_type": "local",
       "station_type": "reading_service",
-      "stream_url": "https://phoebe.streamerr.co:3200/",
-      "stream_format": "icecast",
+      "stream_url": "https://phoebe.streamerr.co:3200/;",
+      "stream_format": "mp3",
       "codec": "mp3",
       "lat": 29.93,
       "lon": -90.09,
@@ -9022,7 +9022,7 @@
       "real_stream": true,
       "supported": true,
       "reading_service": true,
-      "notes": "Full-power FM reading service for blind/print-disabled listeners; mount from station site (shared streamerr host, generic icy-name)."
+      "notes": "Full-power FM reading service for blind/print-disabled listeners; mount from station site (shared streamerr host, generic icy-name). Stream repaired 2026-08-18: the bare host root served an HTML status page; the Shoutcast \";\" mount on the same host is the audio (200 audio/mpeg)."
     },
     {
       "id": "wfyi-indianapolis",
@@ -9718,8 +9718,8 @@
       "state": "NC",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Blue Ridge Public Radio news service (separate from existing WNCW)."
+      "supported": false,
+      "notes": "Blue Ridge Public Radio news service (separate from existing WNCW). Off the dial 2026-08-18: stream sweep got \"HTTP 503\". Kept for the research in this row; flip supported back when the stream returns. A 5xx may be a bad day rather than a dead station -- recheck with tools/check_radio_streams.py --recheck-dead before removing the row."
     },
     {
       "id": "keos-college-station",
@@ -9729,7 +9729,7 @@
       "source": "https://www.keos.org",
       "source_type": "local",
       "station_type": "community",
-      "stream_url": "http://66.135.55.19:8170/",
+      "stream_url": "http://66.135.55.19:8170/;",
       "stream_format": "icecast",
       "codec": "mp3",
       "lat": 30.628,
@@ -9741,7 +9741,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Bryan/College Station volunteer community radio; Icecast mount from radio-browser (host blocked sandbox probe - verify with gate)."
+      "notes": "Bryan/College Station volunteer community radio; Icecast mount from radio-browser (host blocked sandbox probe - verify with gate). Stream repaired 2026-08-18: the bare host root served a Shoutcast status page; the \";\" mount on the same host is the audio."
     },
     {
       "id": "kdfc-san-francisco",
@@ -9751,9 +9751,9 @@
       "source": "https://www.classicalcalifornia.org/pages/listen",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://14093.live.streamtheworld.com:443/KDFCFM.mp3",
-      "stream_format": "mp3",
-      "codec": "mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KDFCFMAAC96.aac",
+      "stream_format": "aac",
+      "codec": "aac",
       "lat": 37.6892,
       "lon": -122.4353,
       "range_miles": 90,
@@ -9763,7 +9763,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "USC-owned classical; San Bruno Mtn transmitter. StreamTheWorld direct mount from playerservices KDFCFM.mp3."
+      "notes": "USC-owned classical; San Bruno Mtn transmitter. StreamTheWorld direct mount from playerservices KDFCFM.mp3. Stream repaired 2026-08-18: the numbered live.streamtheworld host now 403s from US IPs. The playerservices redirect form is what the station publishes and answers 206 audio/aacp."
     },
     {
       "id": "kkup-san-jose",
@@ -10070,8 +10070,8 @@
       "state": "NE",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Wayne State College, licensed Wayne NE (~30mi from Norfolk, nearest listed city); icy-name '91.9 TheCat'"
+      "supported": false,
+      "notes": "Wayne State College, licensed Wayne NE (~30mi from Norfolk, nearest listed city); icy-name '91.9 TheCat' Off the dial 2026-08-18: stream sweep got \"HTTP 404\". Kept for the research in this row; flip supported back when the stream returns."
     },
     {
       "id": "kwnk-reno",
@@ -10233,9 +10233,9 @@
       "source": "https://wmfo.org/ (Tufts University, Medford)",
       "source_type": "local",
       "station_type": "college",
-      "stream_url": "http://webstream.wmfo.org/",
-      "stream_format": "icecast",
-      "codec": "mp3",
+      "stream_url": "http://webstream.wmfo.org:8000/wmfo",
+      "stream_format": "aac",
+      "codec": "aac",
       "lat": 42.408,
       "lon": -71.118,
       "range_miles": 25,
@@ -10245,7 +10245,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "SHOUTcast base mount over http; gate to verify."
+      "notes": "SHOUTcast base mount over http; gate to verify. Stream repaired 2026-08-18: webstream.wmfo.org root served HTML. The named mount on port 8000 answers 200 audio/aacp."
     },
     {
       "id": "wicn-worcester",
@@ -13099,8 +13099,8 @@
       "frequency_mhz": 88.1,
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Rosebud Sioux Tribe / Rosebud Media Network (koyaradio.org). Station account on StreamOn.fm (ais-sa1.streamon.fm/7057_24k.aac) resolved via onlineradiobox redirect; verified 200 audio/aac. Coords = Rosebud city. Low-power full station, conservative range. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "supported": false,
+      "notes": "Rosebud Sioux Tribe / Rosebud Media Network (koyaradio.org). Station account on StreamOn.fm (ais-sa1.streamon.fm/7057_24k.aac) resolved via onlineradiobox redirect; verified 200 audio/aac. Coords = Rosebud city. Low-power full station, conservative range. Non-NPR community radio. BASS live 3/3 2026-07-27. Off the dial 2026-08-18: stream sweep got \"HTTP 503\". Kept for the research in this row; flip supported back when the stream returns. A 5xx may be a bad day rather than a dead station -- recheck with tools/check_radio_streams.py --recheck-dead before removing the row."
     },
     {
       "id": "kcnp-ada",
@@ -14042,8 +14042,8 @@
       "frequency_mhz": 88.1,
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Icecast on station domain radio.wesleyan.edu; GET 200. Coords = campus. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "supported": false,
+      "notes": "Icecast on station domain radio.wesleyan.edu; GET 200. Coords = campus. Non-NPR community radio. BASS live 3/3 2026-07-27. Off the dial 2026-08-18: stream sweep got \"timed out\". Kept for the research in this row; flip supported back when the stream returns. A 5xx may be a bad day rather than a dead station -- recheck with tools/check_radio_streams.py --recheck-dead before removing the row."
     },
     {
       "id": "wlfr-pomona",
@@ -14674,7 +14674,7 @@
       "source": "community radio sweep 2026-07-27 (agent research); station-owned mount",
       "source_type": "local",
       "station_type": "community",
-      "stream_url": "http://live.rcast.net:9092/",
+      "stream_url": "https://stream1.rcast.net/69234",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 30.4515,
@@ -14687,7 +14687,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Baton Rouge Community Radio, listener-supported LPFM owned by Baton Rouge Progressive Network, Pacifica affiliate (whyr.org). Mount live.rcast.net:9092 (station's rcast hosting account) via onlineradiobox 302. HTTP 200 audio/mpeg. Coords at 1623 Main St studio/tx; LPFM range. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "notes": "Baton Rouge Community Radio, listener-supported LPFM owned by Baton Rouge Progressive Network, Pacifica affiliate (whyr.org). Mount live.rcast.net:9092 (station's rcast hosting account) via onlineradiobox 302. HTTP 200 audio/mpeg. Coords at 1623 Main St studio/tx; LPFM range. Non-NPR community radio. BASS live 3/3 2026-07-27. Stream repaired 2026-08-18: the rcast.net port-9092 root served an HTML status page, not audio. Station-listed mount on stream1.rcast.net verified live (200 audio/mpeg)."
     },
     {
       "id": "wbrh-baton-rouge",
@@ -14858,7 +14858,7 @@
       "source": "community radio sweep 2026-07-27 (agent research); station-owned mount",
       "source_type": "local",
       "station_type": "college",
-      "stream_url": "http://wbwcradio.bw.edu:8000/",
+      "stream_url": "http://wbwcradio.bw.edu:8000/;",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 41.4181,
@@ -14871,7 +14871,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Baldwin Wallace University student radio. Class A, 4 kW; tx 41.4181,-81.9008 (Wikipedia). Own domain wbwcradio.bw.edu:8000 (Shoutcast DNAS); HTTP 200. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "notes": "Baldwin Wallace University student radio. Class A, 4 kW; tx 41.4181,-81.9008 (Wikipedia). Own domain wbwcradio.bw.edu:8000 (Shoutcast DNAS); HTTP 200. Non-NPR community radio. BASS live 3/3 2026-07-27. Stream repaired 2026-08-18: the bare host root served a Shoutcast status page; the \";\" mount on the same host is the audio."
     },
     {
       "id": "wrbc-lewiston",
@@ -15307,8 +15307,8 @@
       "frequency_mhz": 91.1,
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Western Colorado University student station. StreamGuys mount via onlineradiobox redirect; curl 200 audio/mpeg icy-name 'kwsb'. City coords. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "supported": false,
+      "notes": "Western Colorado University student station. StreamGuys mount via onlineradiobox redirect; curl 200 audio/mpeg icy-name 'kwsb'. City coords. Non-NPR community radio. BASS live 3/3 2026-07-27. Off the dial 2026-08-18: stream sweep got \"HTTP 404\". Kept for the research in this row; flip supported back when the stream returns."
     },
     {
       "id": "ksqd-santa-cruz",
@@ -15422,8 +15422,8 @@
       "frequency_mhz": 96.3,
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Community LPFM run by Radio Free Fargo with NDSU student broadcasting club. Icecast on operator's own infra (ice.romanport.com/knds); HEAD returns 400 but GET verified 200 audio/aac. Coords = Fargo city. LPFM range. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "supported": false,
+      "notes": "Community LPFM run by Radio Free Fargo with NDSU student broadcasting club. Icecast on operator's own infra (ice.romanport.com/knds); HEAD returns 400 but GET verified 200 audio/aac. Coords = Fargo city. LPFM range. Non-NPR community radio. BASS live 3/3 2026-07-27. Off the dial 2026-08-18: stream sweep got \"HTTP 404\". Kept for the research in this row; flip supported back when the stream returns."
     },
     {
       "id": "wtip-grand-marais",
@@ -15502,7 +15502,7 @@
       "source": "community radio sweep 2026-07-27 (agent research); station-owned mount",
       "source_type": "local",
       "station_type": "community",
-      "stream_url": "http://18.220.54.199:8004/",
+      "stream_url": "http://18.220.54.199:8002/;",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 41.5844,
@@ -15515,7 +15515,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Des Moines Community Radio Foundation; bare-IP Icecast mount, icy-name 'kfmg.org' confirms ownership; transmitter coords from WP. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "notes": "Des Moines Community Radio Foundation; bare-IP Icecast mount, icy-name 'kfmg.org' confirms ownership; transmitter coords from WP. Non-NPR community radio. BASS live 3/3 2026-07-27. Stream repaired 2026-08-18: port 8004 served an HTML status page. Port 8002 with the Shoutcast \";\" mount is the MP3 feed (200 audio/mpeg); :8000/kfmg.ogg is the Ogg twin."
     },
     {
       "id": "wsnd-notre-dame",
@@ -16282,6 +16282,74 @@
       "playlist": "synthwave",
       "always_available": true,
       "host": "neondrive"
+    },
+    {
+      "id": "radiostorm-at-work-104",
+      "call_sign": "",
+      "name": "Radiostorm At Work 104",
+      "format": "adult contemporary",
+      "source": "radiostorm.com listen-live page 2026-08-17; station-published Live365 mounts from its own .pls playlists",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_url": "https://streaming.live365.com/b30572_128mp3",
+      "stream_format": "mp3",
+      "codec": "mp3",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Radiostorm.com channel 1 (Topeka, KS). 128k MP3 mount from the station's atwork-mp3.pls. 302 -> cdnstream live365 edge. Curated over the directory rows, which carried it twice under two CDN hosts and called it '1970s'."
+    },
+    {
+      "id": "radiostorm-rock-104",
+      "call_sign": "",
+      "name": "Radiostorm Rock 104",
+      "format": "classic rock",
+      "source": "radiostorm.com listen-live page 2026-08-17; station-published Live365 mounts from its own .pls playlists",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_url": "https://streaming.live365.com/b47785_128mp3",
+      "stream_format": "mp3",
+      "codec": "mp3",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Radiostorm.com channel 2, 'Rock 104 Classic Rock'. 128k MP3 mount from classicrock-mp3.pls. 302 -> cdnstream live365 edge."
+    },
+    {
+      "id": "radiostorm-oldies-104",
+      "call_sign": "",
+      "name": "Radiostorm Oldies 104",
+      "format": "oldies",
+      "source": "radiostorm.com listen-live page 2026-08-17; station-published Live365 mounts from its own .pls playlists",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_url": "https://streaming.live365.com/b09584_128mp3",
+      "stream_format": "mp3",
+      "codec": "mp3",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Radiostorm.com channel 3. 128k MP3 mount from oldies-mp3.pls. The directory carried this one twice, at two bitrates off the same mount."
+    },
+    {
+      "id": "radiostorm-comedy-104",
+      "call_sign": "",
+      "name": "Radiostorm Comedy 104",
+      "format": "comedy",
+      "source": "radiostorm.com listen-live page 2026-08-17; station-published Live365 mounts from its own .pls playlists",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_url": "https://streaming.live365.com/b42761_64mp3",
+      "stream_format": "mp3",
+      "codec": "mp3",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Radiostorm.com channel 4. 64k MP3 is the only MP3 mount the station publishes for this channel (comedy-mp3.pls). Home of Marshall Barber's Rockhouse."
     }
   ]
 }

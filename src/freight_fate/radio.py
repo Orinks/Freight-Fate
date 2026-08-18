@@ -183,6 +183,21 @@ def _call_sign_base(call_sign: str) -> str:
 
 _URL_SCHEME_RE = re.compile(r"^[a-z][a-z0-9+.\-]*://", re.IGNORECASE)
 
+# Live365 hands the same station out under its own name and under whichever
+# CDN edge answered that day (ais-sa5.cdnstream1.com, das-edge14-live365-
+# dal02.cdnstream.com, the legacy edge4.peta.live365.net), and at several
+# bitrates off one station id. The mount name carries the id, so the id is
+# the station: b09584_128mp3 and b09584_64aac are one station at two
+# bitrates, not two stations.
+_LIVE365_HOST_RE = re.compile(
+    r"^(?:streaming\.live365\.com"
+    r"|(?:ais|das)-[\w.-]*\.cdnstream1?\.com"
+    r"|[\w-]+\.peta\.live365\.net)$",
+    re.IGNORECASE,
+)
+_LIVE365_MOUNT_RE = re.compile(r"^([ab]\d{4,7})(?:_[0-9a-z]+)?$", re.IGNORECASE)
+_LIVE365_CANONICAL_HOST = "streaming.live365.com"
+
 
 def normalize_stream_url(url: str) -> str:
     """A stream URL with scheme and a trailing slash stripped, for dedup only.
@@ -193,9 +208,13 @@ def normalize_stream_url(url: str) -> str:
     the dial twice under two names (WHYY 90.9, 2026-08-12 field report).
     Scheme and host are case-insensitive by spec, so only that part is
     folded -- a genuinely case-sensitive path is never merged with a
-    different one. Never stored or spoken -- comparison only. Shared with
-    tools/import_radio_catalog.py's build-time collision check, so both
-    layers agree on what counts as "the same stream".
+    different one. Live365 mounts fold further, onto the station id in the
+    mount name: the directory carries the same station under several CDN
+    edge hosts and bitrates, which put Radiostorm's At Work, Oldies and
+    Comedy channels on the web band twice each. Never stored or spoken --
+    comparison only. Shared with tools/import_radio_catalog.py's build-time
+    collision check, so both layers agree on what counts as "the same
+    stream".
     """
     url = url.strip()
     match = _URL_SCHEME_RE.match(url)
@@ -203,7 +222,33 @@ def normalize_stream_url(url: str) -> str:
         url = url[match.end() :]
     url = url.rstrip("/")
     host, _, rest = url.partition("/")
-    return f"{host.lower()}/{rest}" if rest else host.lower()
+    host = host.lower()
+    if _LIVE365_HOST_RE.match(host):
+        mount = _LIVE365_MOUNT_RE.match(rest.partition("?")[0])
+        if mount:
+            return f"{_LIVE365_CANONICAL_HOST}/{mount.group(1).lower()}"
+    return f"{host}/{rest}" if rest else host
+
+
+def canonical_stream_url(url: str) -> str:
+    """A Live365 stream pointed at Live365's own address, not one CDN edge.
+
+    The directory records whichever edge host answered the day it checked
+    (``ais-edge104-live365-dal02.cdnstream.com``), sometimes carrying the
+    checker's own player and ad-block tokens in the query. Those hostnames
+    come and go; ``streaming.live365.com`` is the address the station
+    publishes, and it redirects to a live edge at play time. Anything that
+    is not a Live365 mount is returned exactly as it came in.
+    """
+    match = _URL_SCHEME_RE.match(url.strip())
+    rest = url.strip()[match.end() :] if match else url.strip()
+    host, _, path = rest.partition("/")
+    if not _LIVE365_HOST_RE.match(host.lower()):
+        return url
+    mount = path.partition("?")[0].rstrip("/")
+    if not _LIVE365_MOUNT_RE.match(mount):
+        return url
+    return f"https://{_LIVE365_CANONICAL_HOST}/{mount}"
 
 
 def station_identity(station: RadioStation) -> str:
@@ -245,11 +290,16 @@ def load_imported_stations(
     built; the filter here repeats that against the curated catalog actually
     loaded, so hand-adding a curated station never puts its call sign on the
     dial twice while the imported file waits for a rebuild.
+
+    "No call sign" is not a call sign to collide with: web stations are
+    named rather than lettered, so the moment the curated catalog grew web
+    entries of its own, an empty string in the reserved set matched every
+    imported web station and emptied the whole band.
     """
     text = read_data_text(RADIO_IMPORTED_RESOURCE)
     if text is None:
         return ()
-    reserved = {_call_sign_base(station.call_sign) for station in curated}
+    reserved = {_call_sign_base(station.call_sign) for station in curated} - {""}
     return tuple(
         station
         for station in (_station_from_dict(row) for row in json.loads(text)["stations"])
@@ -519,12 +569,29 @@ RADIO_HORIZON_MI_PER_SQRT_FT = 1.23
 # lift -- agrees on one number.
 RADIO_REACH_MULT = 2.0
 
+# The ceiling that keeps the doubling honest (owner, 2026-08-18). A handful
+# of big curated stations carry 90-175 mile base ranges, and doubling those
+# put Houston, Tulsa, Austin and Oklahoma City on the Dallas dial from
+# 200-240 miles out -- the three-state span RADIO_REACH_MULT's own note says
+# it exists to prevent. Half the terrestrial band at a metro was fringe the
+# driver had to seek past to reach the stations actually worth hearing.
+# 150 rather than something tighter because 120 starts emptying rural dials,
+# and a thin dial is exactly where a distant station earns its place.
+RADIO_MAX_REACH_MI = 150.0
+
 
 def _reach_mi(station: RadioStation) -> float:
-    return station.range_miles * RADIO_REACH_MULT
+    return min(station.range_miles * RADIO_REACH_MULT, RADIO_MAX_REACH_MI)
 
 
 def effective_range_miles(station: RadioStation, elevation_ft: float | None) -> float:
+    """How far this station reaches from the truck's current ground height.
+
+    High ground still receives far past the flat contour -- that is the
+    owner's ham anchor and it survives the cap: the elevation lift is added
+    on top, so a rim at 7000 feet hears a station the flats cannot. What it
+    no longer does is compound with a doubled 175-mile range.
+    """
     if elevation_ft is None or station.site_elev_ft is None or station.range_miles <= 0:
         return _reach_mi(station)
     lift = max(0.0, elevation_ft - station.site_elev_ft)
