@@ -4303,28 +4303,6 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
-- [x] **Two map tools from nromey, report-only (landed 2026-08-18).**
-      `tools/analyze_route_gaps.py` asks the local ORS for real alternatives
-      per city pair we already serve, samples each every 2 miles, and scores
-      how far it strays from the corridor we ship -- a ramp wiggle scores
-      near zero, a genuinely different road scores high. The 2026-07-30
-      completeness audit measured ZERO same-pair parallel alternates in the
-      network, so route selection at dispatch has nothing to choose between;
-      this is the measurement that would tell us what to build first. It
-      needs a self-hosted ORS at `ORS_BASE_URL` and writes nothing to world
-      data. `tools/build_map_pack.py` builds full and diff map packs with a
-      manifest and a verify pass.
-
-      Cherry-picked from `nromey/map/gap-analyzer` rather than merged: that
-      branch is based on `feat/career-2.0` and merging it would have dragged
-      the whole 2.0 line across. It cannot live on `dev` either -- the
-      analyzer imports `tools/world_source.py` and `tools/straw_curve_sample.py`
-      and reads `world_data/us/geometry/`, none of which exist there.
-
-      Route selection at dispatch itself is NOT 1.9 scope; the tools are here
-      so the measurement is ready when 2.0 takes it up.
-
-
 - [x] **Elberton, Georgia added as a granite node (player request, 2026-08-16).**
       A contact-form request from William asked for the "granite capital of
       the world", left off the map. Researched and confirmed: Elberton cuts
