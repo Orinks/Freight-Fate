@@ -596,6 +596,45 @@ onto exit signalling.
 - [ ] **Should the engine start off at trip start?** Design question from
       Darren -- starting it yourself is already how the first-run
       walkthrough begins, so there is a real choice to make.
+- [ ] **The speed keeper announces a number it then fails to hold, and it
+      is the control loop, not the physics (owner report + bench,
+      2026-08-17).** "Speed keeper holding 25 through the facility access
+      road zone" while the truck sits near 14.
+
+      MEASURED, target 25 from a 14 mph start, shipped `KEEPER_MAX_THROTTLE`
+      of 0.5: light and flat peaks 26.5 then settles 13.0; full load flat
+      peaks 26.5 then settles 10.9; full load on a 2 percent climb settles
+      25.4, correctly. **It works uphill and fails on the flat**, which is
+      what rules out mass and grade -- a real traction limit fails worst on
+      the hill.
+
+      THE MECHANISM: the throttle law in `_update_keeper` is a pure
+      integrator with no proportional term and no anti-windup --
+      `_keeper_throttle += error * 0.1 * dt`, clamped. A large opening error
+      winds it to the cap and the truck sails to 26.5. The same weak 0.1
+      gain then unwinds it slowly while `_keeper_snub_brakes` sheds speed,
+      and during that overshoot the automatic box upshifts. The truck is
+      left lugging -- measured at 1017 rpm in 6th -- where half throttle
+      cannot hold 25, the box does not come back down, and the integrator is
+      too weak to recover. On the 2 percent grade the overshoot never gets
+      big enough to grab a too-tall gear, so it holds.
+
+      TWO CANDIDATE FIXES, owner's call, different risk. Add a proportional
+      term and anti-windup so it never overshoots; or block upshifts while
+      the keeper is closing a large error. The second is narrower but touches
+      shift logic with a lot of tuning history behind it
+      (`vehicle.auto_shift`, the progressive-upshift and pull-downshift
+      work).
+
+      REPRODUCING IT: the bench needs all four of a real `Zone` under the
+      wheels (without one the keeper cancels on tick one and hands to
+      cruise), a gear engaged, `transmission.automatic`, and
+      `truck.auto_shift()` called every frame -- **the driving loop runs the
+      box, `TruckState.update` does not**. Three of those were bench
+      artifacts that produced three different wrong answers before the real
+      one. Confirm against a real drive before committing to a fix.
+      Candidate for a `KNOWN_OPEN` strict xfail in the adversarial battery.
+
 - [ ] **K in a low-speed zone with the speed keeper turned off speaks a
       dead end.** "Adaptive cruise is not available in a facility access
       road zone" never says the keeper exists, is off, or where to turn it
