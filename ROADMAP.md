@@ -596,6 +596,31 @@ onto exit signalling.
 - [ ] **Should the engine start off at trip start?** Design question from
       Darren -- starting it yourself is already how the first-run
       walkthrough begins, so there is a real choice to make.
+- [ ] **Ramp ends are too often stop signs, and none of it comes from real
+      data (owner, 2026-08-17: "fix ramps to be more realistic, e.g. no stop
+      signs at the end of ramps").** MEASURED FIRST: **all 18,011 exits in
+      the baked world carry an empty `ramp_control`** -- OpenStreetMap tagged
+      a control on none of them -- so `_ramp_control_for`'s seeded fallback
+      decides every single ramp terminal in the game. Nothing a player hears
+      here is sourced.
+
+      The fallback weights are `RAMP_CONTROL_URBAN_WEIGHTS = (0.70, 0.95)`
+      and `RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)`, which read as: urban
+      70 percent signal / 25 percent stop / 5 percent free-flow, and rural 30
+      percent signal / **50 percent stop** / 20 percent free-flow. Half of
+      every rural off-ramp in the game ends at a stop sign.
+
+      TWO SEPARATE JOBS, and they want different judgement. Retuning the
+      weights is a feel decision and the owner's call. The deeper one is that
+      the control should follow the interchange TYPE rather than a coin
+      flip -- a diamond terminal onto a minor road really does stop, a
+      cloverleaf loop or a directional ramp onto another highway does not,
+      and the game already knows about interchanges
+      (`build_interchanges*.py`, `data/world_models.py`). Sourcing it that
+      way would also let `ramp_control` stop being empty on 18,011 records.
+
+      Not started beyond this measurement.
+
 - [ ] **The speed keeper announces a number it then fails to hold -- NOT
       REPRODUCED, mechanism unknown (owner report, 2026-08-17).** "Speed
       keeper holding 25 through the facility access road zone" while the
