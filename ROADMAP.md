@@ -700,6 +700,29 @@ onto exit signalling.
       boundary and builds its backslash with `chr(92)` so the check cannot
       fall into the hole it exists to catch.
 
+- [ ] **Grade data carries impossible slopes, same shape as the curve
+      artifacts (audit, 2026-08-18).** 455 of 146,496 grade segments (0.31
+      percent) are steeper than 8 percent, topping out at **+14.4 percent on
+      I-5**. 1,077 interstate segments exceed 6 percent, which is the US
+      interstate design ceiling -- the famously steep ones sit at 6 to 7.
+
+      THE TELL IS SELF-CONTRADICTION, not steepness: 336 of the 455 are
+      labelled `flat` or `hills` terrain rather than `mountain`, including
+      `I-22 -8.3% over 0.20 mi (flat)`. And they are short -- 335 of 455 run
+      0.2 or 0.3 miles -- which is the signature of elevation-profile
+      sampling noise over bridges and overpasses, not of road. Source on
+      every one: "OpenRouteService route elevation profile segmented by
+      terrain (development-time)."
+
+      WHY IT MATTERS: grade drives the physics. The truck bleeds speed
+      climbing, the jake and descent control work the other way, and the
+      speed keeper sizes its snub against it. A phantom 14 percent on an
+      interstate is a dramatic, wrong-feeling stretch of road.
+
+      A load-time screen in the shape of the curve one would work: a
+      slope no road of that class can hold, on a segment too short to hold
+      it, contradicted by its own terrain label. Not started.
+
 - [ ] **Ramp ends are too often stop signs, and none of it comes from real
       data (owner, 2026-08-17: "fix ramps to be more realistic, e.g. no stop
       signs at the end of ramps").** MEASURED FIRST: **all 18,011 exits in
