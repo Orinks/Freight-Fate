@@ -4105,7 +4105,9 @@
             ],
             "via": "",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 4.2,
@@ -4118,7 +4120,9 @@
             ],
             "via": "I 95 North",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 6.3,
@@ -4131,7 +4135,9 @@
             ],
             "via": "US 1",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 8.7,
@@ -4144,7 +4150,9 @@
             ],
             "via": "I 695 South",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 10.9,
@@ -4157,7 +4165,9 @@
             ],
             "via": "I 70 East",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 15.3,
@@ -4170,7 +4180,9 @@
             ],
             "via": "I 70 West",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 19.3,
@@ -4181,7 +4193,9 @@
             ],
             "via": "",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 23.9,
@@ -4205,7 +4219,9 @@
             ],
             "via": "I 270 South",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 29.3,
@@ -4229,7 +4245,9 @@
             ],
             "via": "MD 27",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 40.1,
@@ -4241,7 +4259,9 @@
             ],
             "via": "MD 75",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 43.9,
@@ -4254,7 +4274,9 @@
             ],
             "via": "MD 144",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 47.5,
@@ -4267,7 +4289,9 @@
             ],
             "via": "",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 49.5,
@@ -4280,7 +4304,9 @@
             ],
             "via": "I 270 South",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 52.9,
@@ -4292,7 +4318,9 @@
             ],
             "via": "US 40 Alternate",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 60.4,
@@ -4355,7 +4383,9 @@
             ],
             "via": "MD 65",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 76.4,
@@ -4379,7 +4409,9 @@
             ],
             "via": "MD 68",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 90.3,
@@ -4391,7 +4423,9 @@
             ],
             "via": "MD 56",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 94.2,
@@ -4413,7 +4447,9 @@
             "destinations": [],
             "via": "",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 99.0,
@@ -4426,7 +4462,9 @@
             ],
             "via": "MD 144",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 101.1,
@@ -4533,7 +4571,9 @@
             ],
             "via": "I 76 East;I 70 East",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 175.8,
@@ -4570,7 +4610,9 @@
             ],
             "via": "I 76 West;I 70 West",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 211.0,
@@ -4646,7 +4688,9 @@
             ],
             "via": "PA 8 North",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 242.8,
@@ -4659,7 +4703,9 @@
             ],
             "via": "I 376 West",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 245.1,
@@ -4672,7 +4718,9 @@
             ],
             "via": "I 376 East",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
         "tollway_detected": true,
@@ -7447,7 +7495,9 @@
             ],
             "via": "I 95 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 6.5,
@@ -7460,7 +7510,9 @@
             ],
             "via": "I 695 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 8.9,
@@ -7486,7 +7538,9 @@
             ],
             "via": "MD 100 East",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 14.5,
@@ -7512,7 +7566,9 @@
             ],
             "via": "MD 32 West",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 18.6,
@@ -7538,7 +7594,9 @@
             ],
             "via": "MD 197",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 26.5,
@@ -7564,7 +7622,9 @@
             ],
             "via": "I 395 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 32.1,
@@ -7577,7 +7637,9 @@
             ],
             "via": "MD 295",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 34.6,
@@ -7629,7 +7691,9 @@
             ],
             "via": "US 1 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 44.8,
@@ -7655,7 +7719,9 @@
             ],
             "via": "VA 120 South",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 50.2,
@@ -7668,7 +7734,9 @@
             ],
             "via": "VA 236",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 52.9,
@@ -7681,7 +7749,9 @@
             ],
             "via": "SR 644",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 55.0,
@@ -7694,7 +7764,9 @@
             ],
             "via": "VA 644 East",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 57.1,
@@ -7707,7 +7779,9 @@
             ],
             "via": "VA 286 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 60.3,
@@ -7720,7 +7794,9 @@
             ],
             "via": "I 95 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 62.7,
@@ -7746,7 +7822,9 @@
             ],
             "via": "VA 294 West",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 67.7,
@@ -7759,7 +7837,9 @@
             ],
             "via": "I 95 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 69.8,
@@ -7770,7 +7850,9 @@
             ],
             "via": "",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 71.8,
@@ -7783,7 +7865,9 @@
             ],
             "via": "VA 234 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 74.5,
@@ -7796,7 +7880,9 @@
             ],
             "via": "SR 619 West",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 77.0,
@@ -7807,7 +7893,9 @@
             ],
             "via": "",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 81.5,
@@ -7820,7 +7908,9 @@
             ],
             "via": "SR 610 West",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 85.2,
@@ -7833,7 +7923,9 @@
             ],
             "via": "SR 630",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 89.3,
@@ -7845,7 +7937,9 @@
             ],
             "via": "SR 8900",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 92.3,
@@ -7858,7 +7952,9 @@
             ],
             "via": "US 17 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 96.0,
@@ -7870,7 +7966,9 @@
             ],
             "via": "I 95 South",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 99.9,
@@ -7883,7 +7981,9 @@
             ],
             "via": "US 1;US 17",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 108.0,
@@ -7895,7 +7995,9 @@
             ],
             "via": "SR 606",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 116.5,
@@ -7906,7 +8008,9 @@
             ],
             "via": "US 639",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 119.0,
@@ -7929,7 +8033,9 @@
             ],
             "via": "VA 207",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 129.6,
@@ -7942,7 +8048,9 @@
             ],
             "via": "VA 30",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 135.8,
@@ -7955,7 +8063,9 @@
             ],
             "via": "I 95 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 138.9,
@@ -7967,7 +8077,9 @@
             ],
             "via": "SR 802",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 141.2,
@@ -8019,7 +8131,9 @@
             ],
             "via": "VA 161",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 152.3,
@@ -8032,7 +8146,9 @@
             ],
             "via": "I 95 North;I 64 West",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
         "tollway_detected": true,
@@ -9466,7 +9582,9 @@
             ],
             "via": "I 95 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 4.7,
@@ -9479,7 +9597,9 @@
             ],
             "via": "I 95 South",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 7.4,
@@ -9505,7 +9625,9 @@
             ],
             "via": "MD 100 West",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 13.5,
@@ -9518,7 +9640,9 @@
             ],
             "via": "MD 175 West;MD 175 East",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 16.0,
@@ -9609,7 +9733,9 @@
             ],
             "via": "MD 201",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 34.2,
@@ -9622,7 +9748,9 @@
             ],
             "via": "I 95 North;I 495 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 36.7,
@@ -9635,7 +9763,9 @@
             ],
             "via": "US 50 West",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 40.1,
@@ -9648,7 +9778,9 @@
             ],
             "via": "MD 201 North",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 42.2,
@@ -9659,7 +9791,9 @@
             ],
             "via": "US 1 Alternate South",
             "highway": "I-95",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
         "speed_limits": [
@@ -11336,7 +11470,9 @@
             ],
             "via": "US 40 Scenic",
             "highway": "I-68",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 31.2,
@@ -11360,7 +11496,9 @@
             ],
             "via": "US 40 Scenic;MD 144",
             "highway": "I-68",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 37.2,
@@ -14257,7 +14395,9 @@
             ],
             "via": "US 40 Alternate",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 24.3,
@@ -14270,7 +14410,9 @@
             ],
             "via": "I 70 East",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 26.3,
@@ -14283,7 +14425,9 @@
             ],
             "via": "MD 85",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 30.5,
@@ -14296,7 +14440,9 @@
             ],
             "via": "MD 144",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 34.4,
@@ -14308,7 +14454,9 @@
             ],
             "via": "MD 75",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 39.7,
@@ -14320,7 +14468,9 @@
             ],
             "via": "MD 27",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 45.0,
@@ -14345,7 +14495,9 @@
             ],
             "via": "MD 97",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 51.8,
@@ -14357,7 +14509,9 @@
             ],
             "via": "MD 32",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 55.1,
@@ -14368,7 +14522,9 @@
             ],
             "via": "",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 58.9,
@@ -14381,7 +14537,9 @@
             ],
             "via": "US 29 South",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 62.9,
@@ -14394,7 +14552,9 @@
             ],
             "via": "I 695 North;I 695 South",
             "highway": "I-70",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
         "restrictions": [
@@ -15799,7 +15959,9 @@
             ],
             "via": "",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 7.9,
@@ -15823,7 +15985,9 @@
             ],
             "via": "PA 16",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 16.9,
@@ -15834,7 +15998,9 @@
             ],
             "via": "PA 914",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 22.6,
@@ -15847,7 +16013,9 @@
             ],
             "via": "US 30",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 27.1,
@@ -15858,7 +16026,9 @@
             ],
             "via": "PA 997",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 31.2,
@@ -15867,7 +16037,9 @@
             "destinations": [],
             "via": "",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 35.6,
@@ -15876,7 +16048,9 @@
             "destinations": [],
             "via": "",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 44.0,
@@ -15888,7 +16062,9 @@
             ],
             "via": "PA 233",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 46.4,
@@ -15912,7 +16088,9 @@
             ],
             "via": "I 81 North",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 55.0,
@@ -15925,7 +16103,9 @@
             ],
             "via": "I 81 South",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 58.6,
@@ -15938,7 +16118,9 @@
             ],
             "via": "I 81 South",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 64.0,
@@ -15950,7 +16132,9 @@
             ],
             "via": "PA 114",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 68.1,
@@ -15963,7 +16147,9 @@
             ],
             "via": "I 81 South",
             "highway": "I-81",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 71.9,
@@ -17024,7 +17210,9 @@
             ],
             "via": "MD 18",
             "highway": "I-97",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 71.0,
@@ -17035,7 +17223,9 @@
             ],
             "via": "MD 18",
             "highway": "I-97",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 74.6,
@@ -17047,7 +17237,9 @@
             ],
             "via": "MD 8",
             "highway": "I-97",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 80.3,
@@ -17060,7 +17252,9 @@
             ],
             "via": "US 50 West;US 301 South",
             "highway": "I-97",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 83.9,
@@ -17086,7 +17280,9 @@
             ],
             "via": "MD 100 East",
             "highway": "I-97",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 97.8,
@@ -17099,7 +17295,9 @@
             ],
             "via": "MD 162;MD 176",
             "highway": "I-97",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 100.3,
@@ -17112,7 +17310,9 @@
             ],
             "via": "MD 648 North",
             "highway": "I-97",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 102.5,
@@ -17125,7 +17325,9 @@
             ],
             "via": "I 97 South",
             "highway": "I-97",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 104.8,
@@ -17149,7 +17351,9 @@
             ],
             "via": "I 95 North",
             "highway": "I-97",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
         "speed_limits": [

@@ -784,37 +784,36 @@ onto exit signalling.
       surface than the one ORS sampled. A re-bake against those would remove
       the artifacts rather than cap them.
 
-- [ ] **Ramp ends are too often stop signs, and none of it comes from real
-      data (owner, 2026-08-17: "fix ramps to be more realistic, e.g. no stop
-      signs at the end of ramps"). PARTLY SHIPPED.** MEASURED FIRST: **all
-      18,011 exits in the baked world carry an empty `ramp_control`** --
-      OpenStreetMap tagged a control on none of them -- so
-      `_ramp_control_for`'s seeded fallback decides every ramp terminal in
-      the game. Nothing a player hears here is sourced.
+- [ ] **Ramp ends are too often stop signs (owner, 2026-08-17: "fix ramps to
+      be more realistic, e.g. no stop signs at the end of ramps"). MOSTLY
+      SHIPPED.** The measurement this bullet used to open with -- "all 18,011
+      exits carry an empty `ramp_control`, OpenStreetMap tagged a control on
+      none of them" -- WAS WRONG, and wrong in the way that mattered. The
+      ramp-control bake had only ever been run over Indiana and Ohio; the
+      cached index at `~/.cache/freight-fate-osm/regions/freight-fate-rampcontrols.json`
+      covers exactly two state extracts and holds 161 nodes. Nobody had asked
+      OSM nationally.
 
-      DONE (2026-08-18, `feat/no-stop-signs-between-freeways`): the 4,999
-      exits whose baked `via` names an interstate are decided as free-flow
-      before the dice are rolled. A stop sign where two freeways meet does
-      not exist, and that was a fact about the road, not a preference.
+      DONE (2026-08-18): the 4,999 exits whose `via` names an interstate are
+      decided free-flow before the dice are rolled -- a stop sign where two
+      freeways meet does not exist. Then the ramp-control bake was run over
+      all 49 state extracts: **8,205 of 18,011 exits (45.6 percent) now carry
+      a control read from OSM** -- 5,629 signal, 2,576 stop -- across 712 of
+      754 legs.
 
-      WHAT IS LEFT IS A TUNING DECISION, NOT A MISSING FACT, which is why it
-      is still open. `via` classifies the other 13,012 exits like this:
-      4,311 onto a state route, 1,875 onto a US route, 638 onto a county
-      road, 568 onto a bare or named road, and **5,620 with no `via` at
-      all**. That tells you what the ramp lands ON, but the control at a
-      ramp terminal follows the INTERCHANGE TYPE and the crossroad's traffic,
-      neither of which is baked -- and a rural diamond terminal onto a state
-      route genuinely is a stop sign, so "onto a numbered route" does not
-      imply a signal. Deriving a control from `via` alone would be inventing
-      a fact, which the provenance rule in `CLAUDE.md` now forbids.
+      WHAT THE REAL DATA SAYS ABOUT THE OLD GUESS: among tagged terminals the
+      split is 69 percent signal / 31 percent stop. `RAMP_CONTROL_RURAL_WEIGHTS
+      = (0.30, 0.80)` reads as 30 signal / 50 stop / 20 free-flow. The
+      heuristic was far more stop-heavy than the road is, which is exactly
+      what the owner heard. Treat the 69/31 as suggestive rather than a
+      target: OSM tags signals more diligently than stop signs, and tagged
+      terminals skew urban.
 
-      SO THE TWO REAL OPTIONS: (a) the owner retunes
-      `RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)` -- today 30 percent signal
-      / **50 percent stop** / 20 percent free-flow -- against how the ramps
-      now feel with the freeway fix in; or (b) bake the interchange type
-      from OSM junction geometry (`build_interchanges*.py` already walks it)
-      so the control follows the road instead of the dice. (b) is the honest
-      fix and the larger one; (a) is a constant and needs a driver's ear.
+      STILL OPEN, 9,806 exits: OSM says nothing about them and the dice still
+      decide. Two ways to close it -- retune the weights against the measured
+      split, or bake the interchange TYPE from OSM junction geometry so the
+      control follows the road. The second is the honest one and is the
+      chosen direction.
 
 - [ ] **The speed keeper announces a number it then fails to hold -- NOT
       REPRODUCED, mechanism unknown (owner report, 2026-08-17).** "Speed
