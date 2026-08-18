@@ -596,44 +596,50 @@ onto exit signalling.
 - [ ] **Should the engine start off at trip start?** Design question from
       Darren -- starting it yourself is already how the first-run
       walkthrough begins, so there is a real choice to make.
-- [ ] **The speed keeper announces a number it then fails to hold, and it
-      is the control loop, not the physics (owner report + bench,
-      2026-08-17).** "Speed keeper holding 25 through the facility access
-      road zone" while the truck sits near 14.
+- [ ] **The speed keeper announces a number it then fails to hold -- NOT
+      REPRODUCED, mechanism unknown (owner report, 2026-08-17).** "Speed
+      keeper holding 25 through the facility access road zone" while the
+      truck sits near 14. **This bullet previously asserted a mechanism and
+      that assertion was wrong; it is corrected here rather than left to
+      mislead.**
 
-      MEASURED, target 25 from a 14 mph start, shipped `KEEPER_MAX_THROTTLE`
-      of 0.5: light and flat peaks 26.5 then settles 13.0; full load flat
-      peaks 26.5 then settles 10.9; full load on a 2 percent climb settles
-      25.4, correctly. **It works uphill and fails on the flat**, which is
-      what rules out mass and grade -- a real traction limit fails worst on
-      the hill.
+      THREE HYPOTHESES WERE TESTED AND ALL THREE DISPROVEN. (1) The throttle
+      law: replacing the bare integrator with PI plus anti-windup changed the
+      outcome not at all, and was reverted. (2) The box leaving the truck
+      lugging in too tall a gear: at the settle point throttle was already at
+      the cap, so the loop was demanding everything available. (3)
+      `_take_new_posted_limit` announcing the raised number in the present
+      tense: on the real loop the truck reaches the new number in about ten
+      seconds and holds it.
 
-      THE MECHANISM: the throttle law in `_update_keeper` is a pure
-      integrator with no proportional term and no anti-windup --
-      `_keeper_throttle += error * 0.1 * dt`, clamped. A large opening error
-      winds it to the cap and the truck sails to 26.5. The same weak 0.1
-      gain then unwinds it slowly while `_keeper_snub_brakes` sheds speed,
-      and during that overshoot the automatic box upshifts. The truck is
-      left lugging -- measured at 1017 rpm in 6th -- where half throttle
-      cannot hold 25, the box does not come back down, and the integrator is
-      too weak to recover. On the 2 percent grade the overshoot never gets
-      big enough to grab a too-tall gear, so it holds.
+      EVERY BENCH REPRODUCTION WAS AN ARTIFACT, four of them, each producing
+      a confident wrong answer. `_update_keeper` CANNOT be driven in
+      isolation: it needs a real `Zone` under the wheels (without one it
+      cancels on tick one and hands to cruise), a gear engaged,
+      `transmission.automatic`, `truck.auto_shift()` every frame (**the
+      driving loop runs the box, `TruckState.update` does not**), and the
+      loop's per-frame brake ramp-down (`driving_updates.py` line 349 --
+      without it the snub brake latches at 0.20 forever and the truck decays
+      to 11 mph, which is what the wrong mechanism above was built on).
+      `tests/playtest_harness.py` also hand-rolls its frame and overrides
+      throttle; the only faithful driver is `driving.update(dt)` itself.
 
-      TWO CANDIDATE FIXES, owner's call, different risk. Add a proportional
-      term and anti-windup so it never overshoots; or block upshifts while
-      the keeper is closing a large error. The second is narrower but touches
-      shift logic with a lot of tuning history behind it
-      (`vehicle.auto_shift`, the progressive-upshift and pull-downshift
-      work).
+      WHAT THE REAL LOOP ACTUALLY DOES, measured: press K at 14 mph on a
+      15-limit service way and it says "holding 14", honestly. Crossing into
+      a 25 zone it raises to 25 and the truck is doing 24.7 within ten
+      seconds. Correct behaviour throughout.
 
-      REPRODUCING IT: the bench needs all four of a real `Zone` under the
-      wheels (without one the keeper cancels on tick one and hands to
-      cruise), a gear engaged, `transmission.automatic`, and
-      `truck.auto_shift()` called every frame -- **the driving loop runs the
-      box, `TruckState.update` does not**. Three of those were bench
-      artifacts that produced three different wrong answers before the real
-      one. Confirm against a real drive before committing to a fix.
-      Candidate for a `KNOWN_OPEN` strict xfail in the adversarial battery.
+      THE ONE LIVE THREAD: when the keeper raised itself from 14 to 25,
+      NOTHING was spoken -- though `_take_new_posted_limit` ends in a
+      `say_event` and its own comment says an assist that speeds the truck up
+      on its own has to say so. If that line fires on the owner's machine and
+      not on the bench, the difference is the lead.
+
+      NEXT STEP IS EVIDENCE, NOT ANOTHER HYPOTHESIS: a
+      `FREIGHT_FATE_LOG_FILE` capture from a drive where the owner actually
+      sees it, giving the spoken line, the real speed, the gear, and the zone
+      under the wheels at that moment. Four synthetic guesses at those is
+      what produced four wrong answers.
 
 - [ ] **K in a low-speed zone with the speed keeper turned off speaks a
       dead end.** "Adaptive cruise is not available in a facility access
