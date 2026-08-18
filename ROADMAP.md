@@ -682,6 +682,24 @@ onto exit signalling.
 - [ ] **Should the engine start off at trip start?** Design question from
       Darren -- starting it yourself is already how the first-run
       walkthrough begins, so there is a real choice to make.
+- [x] **Ramps onto another freeway no longer roll for a control
+      (2026-08-18).** The half of the owner's request that was a fact rather
+      than a preference. Measured: all 18,011 baked exits carry an empty
+      `ramp_control`, so the seeded heuristic decides every terminal in the
+      game, and 4,999 of those exits (27.8 percent) lead to an interstate.
+      Every one was taking its chances with weights that hand stop signs to
+      half the rural ones -- roughly 2,500 stop signs and 1,500 traffic
+      lights placed where two freeways meet, which cannot happen. Now read
+      off the interchange's own baked `via` (`FREEWAY_VIA_RE`,
+      `Trip.interchange_at`) and decided before the dice.
+
+      A literal 0x08 byte got written into `FREEWAY_VIA_RE` on the way in,
+      from shell escaping, three times across source and test. It compiled,
+      matched every interstate correctly, and silently matched "HAWAII 1" as
+      well -- invisible in an editor and in a diff. A test pins the word
+      boundary and builds its backslash with `chr(92)` so the check cannot
+      fall into the hole it exists to catch.
+
 - [ ] **Ramp ends are too often stop signs, and none of it comes from real
       data (owner, 2026-08-17: "fix ramps to be more realistic, e.g. no stop
       signs at the end of ramps").** MEASURED FIRST: **all 18,011 exits in

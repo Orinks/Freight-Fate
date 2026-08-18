@@ -2016,6 +2016,26 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                     best = ix.ramp_control
         return best
 
+    def interchange_at(self, route_mile: float, tol_mi: float = 2.0):
+        """The baked interchange nearest a route mile, or None.
+
+        Sibling of ``ramp_control_at``, walking the same legs the same way.
+        The control heuristic needs more than the control field: where the
+        ramp GOES decides what can be at the end of it, and that lives in the
+        interchange's ``via`` and ``destinations``.
+        """
+        best = None
+        best_dist = tol_mi
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
+            forward = self.route.cities[i] == leg.a
+            for ix in leg.interchanges:
+                offset = _stop_offset_for_direction(ix.at_mi, leg.miles, forward)
+                dist = abs(start + offset - route_mile)
+                if dist <= best_dist:
+                    best_dist = dist
+                    best = ix
+        return best
+
     def _active_zone_at(self, mile: float) -> Zone | None:
         active = [
             z for z in self.zones if z.start_mi <= mile <= z.end_mi and self._zone_is_active(z)

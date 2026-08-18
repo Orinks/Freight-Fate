@@ -1858,6 +1858,11 @@ class DrivingEventMixin:
         of the trip seed, the stop, and baked data, so the signal-on
         announcement a mile out and the ramp itself always agree."""
         control = self.trip.ramp_control_at(stop.at_mi)
+        if not control and self._ramp_meets_a_freeway(stop):
+            # A system interchange: this ramp ends in a merge onto another
+            # freeway, and nothing stops traffic there. Decided before the
+            # dice rather than by them -- see FREEWAY_VIA_RE.
+            control = "none"
         if not control:
             if rng is None:
                 rng = random.Random((self.trip_seed << 16) ^ int(stop.at_mi * 100.0))
@@ -1869,6 +1874,21 @@ class DrivingEventMixin:
             roll = rng.random()
             control = "signal" if roll < signal_w else "stop" if roll < stop_w else "none"
         return control
+
+    def _ramp_meets_a_freeway(self, stop) -> bool:
+        """Whether this exit's ramp lands on another freeway.
+
+        Read off the baked interchange's own ``via``, so it is a fact about
+        the road rather than a roll. 4,999 of the world's 18,011 exits lead
+        to an interstate and every one of them used to take its chances with
+        the urban/rural weights below, which handed stop signs to roughly
+        half the rural ones -- a stop sign where an interstate meets an
+        interstate does not exist (owner, 2026-08-17).
+        """
+        interchange = self.trip.interchange_at(stop.at_mi)
+        if interchange is None:
+            return False
+        return bool(FREEWAY_VIA_RE.search((interchange.via or "").upper()))
 
     def _begin_ramp_terminal(self, stop) -> None:
         """Set up the terminal control state for the ramp just taken."""
