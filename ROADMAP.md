@@ -702,6 +702,37 @@ onto exit signalling.
       boundary and builds its backslash with `chr(92)` so the check cannot
       fall into the hole it exists to catch.
 
+- [ ] **Testers report sounds are quieter at the quiet speech rung, and
+      three measured suspects all went the OTHER way (Shane P, 2026-08-18).**
+      He flagged it honestly as "think, not know", then narrowed it to
+      troopers. Still unexplained, and worth other ears before more guessing.
+
+      ELIMINATED, so do not re-check these:
+      1. The confirmation earcon swap (hazard-clear chime -> its own note).
+         Catalog volume fell 0.75 -> 0.32, which looks damning, but MEASURED
+         it is -27.5 dBFS RMS before against -23.6 after: **3.9 dB LOUDER**.
+         The synthesized note is dense where the ogg chime is sparse.
+      2. The trooper pass level, after `enforcement_presence` was removed and
+         the scale became road post density. Measured across a real route the
+         density runs 1.0 to 1.3, so the pass plays between exactly the old
+         flat level and **2.3 dB louder**. It never goes below.
+      3. Extra mix ducking at quiet, on the theory that far more earcons fire
+         there. It does not: the duck is gated on `duck_audio_for_speech`,
+         which is OFF by default, and `_play_ladder_earcon` calls
+         `audio.play` directly without touching it.
+
+      THE LESSON THAT KEEPS REPEATING: a catalog volume is a MULTIPLIER, not
+      a loudness. Twice this week a suspect looked obvious from the number
+      and measured the opposite way (the other was Darren's road lean).
+      Measure the rendered RMS, never compare multipliers.
+
+      WHAT WOULD ACTUALLY SPLIT IT, asked of Shane and pending: does a
+      trooper sound low in EVERY speech mode, or only quiet? Every mode means
+      the sound itself and the speech setting is a red herring. Only quiet
+      means something in the speech layer collides with it -- and since level
+      and ducking are ruled out, that would point at masking or timing: a cue
+      now landing under an earcon it never used to collide with.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED
