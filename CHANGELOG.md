@@ -42,6 +42,10 @@
   outright: Classical KDFC, WMFO, WRBH Reading Radio, WHYR Baton Rouge and
   KFMG Des Moines all play again.
 
+- **Synthwave City FM is on the web radio band.** A synthwave station for
+  the night runs, requested by Sarah R. and added with the station's own
+  stream.
+
 - **Radiostorm's four channels are on the web radio band under their own
   names.** At Work 104, Rock 104 Classic Rock, Oldies 104 and Comedy 104 --
   the internet station out of Topeka that carries Marshall Barber's
