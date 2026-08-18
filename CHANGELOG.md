@@ -207,6 +207,17 @@
 
 ### Changed
 
+- **The speed keeper stops promising a speed the road will not let you
+  reach.** Turning it on approaching a facility, it would say it was holding
+  25 while the truck crawled along nearer 14, and no amount of waiting fixed
+  it. The gate area at the end of an approach is meant to be a slow zone for
+  the last stretch before the yard, but it was measured as a fixed half mile
+  back from the gate -- and a quarter of all approaches are shorter than
+  that, so the slow zone covered the entire drive in and quietly held you to
+  15 the whole way, while the streets you were actually on still said 25. The
+  gate zone is now the last street of the approach, which is what a gate is.
+  Approaches longer than that are unaffected.
+
 - **No more stop signs where one interstate meets another.** Coming off a
   ramp onto another interstate, you could be told to stop at a stop sign or
   wait at a light. That does not happen on a real road: where two freeways

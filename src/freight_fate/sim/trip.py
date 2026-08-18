@@ -1492,7 +1492,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         total = self.route.miles
         if total <= 0:
             return []
-        gate_start = max(0.0, total - FACILITY_GATE_ZONE_MI)
+        # The gate zone is the yard entrance, and on a real chain that is its
+        # LAST STREET -- not a fixed distance back from the end. A flat half
+        # mile is longer than a quarter of all approach chains: the median is
+        # 1.0 mile and 234 of 1,415 facilities run 0.5 or less, so on those
+        # the "last half mile" swallowed the entire approach. Because
+        # _active_zone_at takes the LOWEST limit among overlapping zones, that
+        # blanket 15 then overrode every 25 street underneath it while the
+        # per-leg zones went on announcing 25 -- the truck pinned at 15 and
+        # told it was holding 25 (owner report, 2026-08-17; root cause found
+        # 2026-08-18). Per-leg chains take the last leg below; the synthetic
+        # fallback keeps a distance but can no longer exceed its own road.
+        gate_start = max(0.0, total - min(FACILITY_GATE_ZONE_MI, total * FACILITY_GATE_MAX_SHARE))
         if self._is_facility_approach_route():
             # Tier-1 surface routes zone each street at its own baked speed
             # (25 named, 15 unnamed service ways); the blanket access-road
@@ -1513,7 +1524,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                         zones.append(
                             Zone(leg_start, leg_start + leg.miles, speed, "facility access road")
                         )
-                zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
+                # The last street IS the gate approach. Never earlier than the
+                # leg it belongs to, so it can never reach back over streets
+                # the driver is still meant to be doing 25 on.
+                last_leg_start = self._leg_starts[-1] if self._leg_starts else gate_start
+                zones.append(
+                    Zone(
+                        max(gate_start, last_leg_start),
+                        total,
+                        FACILITY_GATE_LIMIT_MPH,
+                        "facility gate",
+                    )
+                )
                 return zones
             # Graduated fallback (owner design, 2026-07-24): a long
             # synthetic approach is an arterial before it is an access
