@@ -700,6 +700,48 @@ onto exit signalling.
       boundary and builds its backslash with `chr(92)` so the check cannot
       fall into the hole it exists to catch.
 
+- [ ] **Bake-time provenance and sanity rules -- the substrate for three
+      separate data bugs found on 2026-08-17/18.** Owner wants a rule about
+      verifying OSM before baking. The provenance audit says the rule needs
+      to be wider than that, because only one of the three bugs is an OSM
+      problem at all.
+
+      WHERE EVERY LAYER ACTUALLY COMES FROM, counted off the baked `source`
+      fields: ORS supplies exactly ONE thing, grade_segments, all 146,496 of
+      them, from its route elevation profile. OSM/Overpass supplies the tag
+      layers -- interchanges 18,011, lane_segments 20,666, speed_limits
+      8,098, restrictions 259, most stops. Neither supplies state_crossings
+      (OSRM geometry plus public boundary GeoJSON), tolls (hand-estimated per
+      authority), or the 31,384 landmarks, which carry NO source string at
+      all.
+
+      THREE FAILURE MODES, THREE DIFFERENT RULES.
+      1. ORS elevation is noisy and was trusted per segment: 455 grades over
+         8 percent, +14.4 on I-5, on 0.2-0.3 mile spans that are bridges.
+         This is the only one where "check it against an official source"
+         literally applies -- FHWA publishes the interstate grade ceiling.
+      2. OSM is THIN, not wrong. maxspeed covers 8,098 corridor segments and
+         is simply absent elsewhere; ramp_control was absent on all 18,011
+         exits; facility approach speeds fall back to "25 named / 15 unnamed"
+         and the baked data holds exactly two values across 9,588 legs, which
+         is the fallback doing all the work. OSM never asserted anything
+         false. We filled its silence with defaults and baked them looking
+         identical to readings. Verification cannot help here; only refusing
+         to let a fallback look like a reading can.
+      3. OUR OWN ARITHMETIC, with fine inputs: curve radius/deflection
+         computed from sparse geometry (the script derives these, OSM does
+         not supply them), and the gate zone that was longer than a quarter
+         of the roads it sat on. No amount of source verification touches
+         these.
+
+      SO THE RULE SHOULD BE: every baked value records whether it was READ,
+      DERIVED, or INVENTED; a bake fails loudly when a whole layer comes back
+      invented (18,011 of 18,011 empty should have been an error, not a
+      silent success); and derived values are checked against physical limits
+      for their road class before they are written. All three bugs would have
+      been caught at bake time by that. Also owed: the same rule written into
+      the global CLAUDE.md.
+
 - [ ] **Grade data carries impossible slopes, same shape as the curve
       artifacts (audit, 2026-08-18).** 455 of 146,496 grade segments (0.31
       percent) are steeper than 8 percent, topping out at **+14.4 percent on
