@@ -4321,8 +4321,10 @@ section below and the Unreleased changelog; the release-line view:
       analyzer imports `tools/world_source.py` and `tools/straw_curve_sample.py`
       and reads `world_data/us/geometry/`, none of which exist there.
 
-      Route selection at dispatch itself is NOT 1.9 scope; the tools are here
-      so the measurement is ready when 2.0 takes it up.
+      They live on this line, not on 1.9: route selection at dispatch is 2.0
+      work, and the tools are report-only, so there is no reason for 1.9 to
+      carry them. They were briefly merged to 1.9 on 2026-08-18 and reverted
+      the same day (`3fd292a2`) when this branch was made for them.
 
 
 - [x] **Elberton, Georgia added as a granite node (player request, 2026-08-16).**
