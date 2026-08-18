@@ -700,37 +700,39 @@ onto exit signalling.
       boundary and builds its backslash with `chr(92)` so the check cannot
       fall into the hole it exists to catch.
 
-- [ ] **Grade data carries impossible slopes, same shape as the curve
-      artifacts (audit, 2026-08-18).** 455 of 146,496 grade segments (0.31
-      percent) are steeper than 8 percent, topping out at **+14.4 percent on
-      I-5**. 1,077 interstate segments exceed 6 percent, which is the US
-      interstate design ceiling -- the famously steep ones sit at 6 to 7.
+- [x] **Grade data carried impossible slopes, same shape as the curve
+      artifacts (audit 2026-08-18, screened 2026-08-18).** 455 of 146,496
+      grade segments were steeper than 8 percent, topping out at **+14.4
+      percent on I-5**, and 1,077 interstate segments exceeded the 6 percent
+      design ceiling for the class. The tell was self-contradiction, not
+      steepness: 336 of the 455 were labelled `flat` or `hills` rather than
+      `mountain`, and 335 ran only 0.2 or 0.3 miles -- the signature of
+      elevation-profile sampling over a bridge deck, not of road.
 
-      THE TELL IS SELF-CONTRADICTION, not steepness: 336 of the 455 are
-      labelled `flat` or `hills` terrain rather than `mountain`, including
-      `I-22 -8.3% over 0.20 mi (flat)`. And they are short -- 335 of 455 run
-      0.2 or 0.3 miles -- which is the signature of elevation-profile
-      sampling noise over bridges and overpasses, not of road. Source on
-      every one: "OpenRouteService route elevation profile segmented by
-      terrain (development-time)."
+      SHIPPED as a load-time screen in `src/freight_fate/data/grades.py`,
+      wired into `world_corridor.build_leg_corridor`. It could NOT copy the
+      curve screen's mountain exemption: the worst record, the I-5 14.4, is
+      itself labelled `mountain`. Road class carries the harder fact instead
+      -- no interstate is built past 7 -- so the ceiling is the stricter of
+      class (interstate 7, US 10, state 12) and the bake's own terrain label
+      (flat 6, hills 8). 926 segments, 0.63 percent, are capped; US-550,
+      CA-299 and the Eisenhower approach are untouched.
 
-      WHY IT MATTERS: grade drives the physics. The truck bleeds speed
-      climbing, the jake and descent control work the other way, and the
-      speed keeper sizes its snub against it. A phantom 14 percent on an
-      interstate is a dramatic, wrong-feeling stretch of road.
+      It CLAMPS where the curve screen DROPS, because grades tile the leg
+      continuously and `Trip.grade_at` falls through to a synthesized terrain
+      average for any uncovered mile -- dropping a spike out of a real climb
+      would swap a noisy reading for an invented one. The bake is untouched;
+      a capped segment records the derivation in its own `source`.
 
-      A load-time screen in the shape of the curve one would work: a
-      slope no road of that class can hold, on a segment too short to hold
-      it, contradicted by its own terrain label. Not started.
-
-      THE DEEPER FIX, if the screen is not enough: the noise is bridges and
-      overpasses in a 30 m SRTM profile. FHWA's National Bridge Inventory
-      gives every US bridge's location and length, which is exactly the mask
-      to drop those samples against, and USGS 3DEP at 1/3 arc-second is a
-      finer elevation surface than the one ORS sampled.
+      STILL OPEN, the deeper fix: the noise is bridges and overpasses in a
+      30 m SRTM profile. FHWA's National Bridge Inventory gives every US
+      bridge's location and length, which is exactly the mask to drop those
+      samples against, and USGS 3DEP at 1/3 arc-second is a finer elevation
+      surface than the one ORS sampled. A re-bake against those would remove
+      the artifacts rather than cap them.
 
 - [ ] **Baked records do not say whether a value was read, derived, or
-      assumed (2026-08-18).** The provenance rule now in `AGENTS.md` binds new
+      assumed (2026-08-18).** The provenance rule now in `CLAUDE.md` binds new
       bakes; the existing world predates it. Every layer carries a `source`
       string and none of them distinguish a reading from a fallback, which is
       why three separate artifacts (curve radii, grade slopes, ramp control)

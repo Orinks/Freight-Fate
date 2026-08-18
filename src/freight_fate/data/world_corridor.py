@@ -19,6 +19,7 @@ there and that tests import from there.
 
 from __future__ import annotations
 
+from .grades import screen_grade_segments
 from .world_constants import LIMIT_EXPLAINING_CATEGORIES
 from .world_parsing import (
     _parse_checkpoint,
@@ -77,8 +78,16 @@ def build_leg_corridor(
         _parse_elevation_sample(s, miles, leg_from, leg_to)
         for s in corridor.get("elevation_samples", ())
     )
-    grade_segments = tuple(
-        _parse_grade_segment(s, miles, leg_from, leg_to) for s in corridor.get("grade_segments", ())
+    # Screened on the way in: the elevation profile the grades were baked from
+    # reads bridge decks as road, which put slopes on the map that no highway
+    # of their class can hold. See ``grades.py`` -- the bake itself is left
+    # untouched and a capped segment says so in its own source string.
+    grade_segments = screen_grade_segments(
+        tuple(
+            _parse_grade_segment(s, miles, leg_from, leg_to)
+            for s in corridor.get("grade_segments", ())
+        ),
+        highway,
     )
     lane_segments = _parse_lane_segments(corridor.get("lane_segments", ()), miles, leg_from, leg_to)
     state_crossings = tuple(

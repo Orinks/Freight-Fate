@@ -756,6 +756,21 @@
 
 ### Fixed
 
+- **A few stretches of road were far steeper than any road really is.** The
+  climbs and descents in the game were measured from an elevation map, and
+  every so often that map crossed a bridge or an overpass and read the top of
+  the structure instead of the road underneath. Where that happened it
+  recorded a wall: better than fourteen percent on a stretch of I-5, and
+  hundreds of shorter ones scattered around the country, some of them on
+  ground the game itself calls flat. You would have felt it as a corner of
+  the map where the truck suddenly could not pull, or ran away from you on
+  the way down, for a couple of tenths of a mile and no reason. Nine hundred
+  and twenty-six of these are now held to what a road of that kind is
+  actually built to -- interstates to seven percent, other highways higher,
+  because some of them really do climb like that. Genuinely severe grades are
+  untouched: the Eisenhower approach on I-70 and the passes on US-550 and
+  CA-299 climb exactly as they did.
+
 - **A career waiting on your decision now says so on the menu.** When the
   same career has been played on two computers, the game stops backing it up
   until you say which copy to keep -- and the only place to say so is Restore
