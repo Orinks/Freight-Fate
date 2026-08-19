@@ -999,6 +999,35 @@ onto exit signalling.
       BEHAVIOUR is now real while its vehicle COUNT is not. Wiring the two
       together is 1.10 work: it would change traffic everywhere on the map.
 
+- [x] **FHWA HPMS Terrain_Type baked per leg -- SHIPPED 2026-08-19.** 1,273 of
+      1,290 legs. Exists because the world's own `terrain` field is derived
+      from NET elevation change end to end and is wrong often enough to
+      matter: checked against HPMS it agreed on only **851 of 1,273 legs
+      (67 percent)**. I-70 through Glenwood Canyon is tagged "flat"; the
+      single worst grade record in the game, +14.4 percent on I-5, sits on a
+      leg tagged "mountain" while HPMS calls that ground level.
+
+      TWO PROXIES WERE TRIED AND BOTH FAILED BEFORE THIS, which is the part
+      worth remembering:
+
+      1. The `terrain` label itself. Screening on it took 21 real curves off
+         Glenwood Canyon.
+      2. Feet of elevation range per mile, a number I invented and tuned by
+         eye against five probe legs. Calibrated properly against HPMS over a
+         92-leg sample it measured WEAK -- Youden's J of 0.29 -- and at the
+         threshold it suggested it mislabelled 54 percent of rolling and
+         mountainous legs. Shipping it would have been a guess wearing a
+         number, which is exactly what CLAUDE.md's provenance rule forbids,
+         and it took an owner challenge ("verify all this stuff with data") to
+         catch. THE LESSON: calibrate a threshold against real data and report
+         how well it separates, or do not have a threshold.
+
+      PROVENANCE: `type` is READ -- HPMS asserts the class. What is DERIVED is
+      that one value stands for a whole leg (the modal class over the sections
+      the leg touches), and the source string says so. Absence stays absence:
+      a leg HPMS never classified is never read as level, because the screens
+      treat level ground as licence to remove geometry.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED

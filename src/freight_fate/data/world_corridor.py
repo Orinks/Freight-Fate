@@ -25,6 +25,7 @@ from .world_parsing import (
     _parse_checkpoint,
     _parse_elevation_sample,
     _parse_grade_segment,
+    _parse_hpms_terrain,
     _parse_interchange,
     _parse_landmarks,
     _parse_lane_segments,
@@ -82,12 +83,14 @@ def build_leg_corridor(
     # reads bridge decks as road, which put slopes on the map that no highway
     # of their class can hold. See ``grades.py`` -- the bake itself is left
     # untouched and a capped segment says so in its own source string.
+    hpms_terrain = _parse_hpms_terrain(corridor.get("hpms_terrain"), leg_from, leg_to)
     grade_segments = screen_grade_segments(
         tuple(
             _parse_grade_segment(s, miles, leg_from, leg_to)
             for s in corridor.get("grade_segments", ())
         ),
         highway,
+        hpms_terrain.type if hpms_terrain else None,
     )
     lane_segments = _parse_lane_segments(corridor.get("lane_segments", ()), miles, leg_from, leg_to)
     state_crossings = tuple(
@@ -133,6 +136,7 @@ def build_leg_corridor(
         "interchanges": interchanges,
         "speed_limits": speed_limits,
         "traffic_volumes": traffic_volumes,
+        "hpms_terrain": hpms_terrain,
         "landmarks": landmarks,
         "restrictions": restrictions,
         "lane_segments": lane_segments,

@@ -279,6 +279,27 @@ class SpeedLimitSample:
 
 
 @dataclass(frozen=True)
+class HpmsTerrain:
+    """What terrain FHWA HPMS says this leg's road runs through.
+
+    ``type`` is HPMS's own Green Book class -- 1 level, 2 rolling, 3
+    mountainous -- and is READ, not computed. What is derived is that a
+    single value stands for a whole leg: HPMS classifies road sections and a
+    leg crosses many, so this is the modal class over the sections the leg
+    touches, with ``sections`` recording how many were behind it.
+
+    Baked by ``tools/build_terrain_type.py``. It exists because the world's
+    own ``terrain`` field is derived from net elevation change and calls
+    Glenwood Canyon flat; see ``data/curves.py``.
+    """
+
+    type: int
+    name: str = ""
+    sections: int = 0
+    source: str = ""
+
+
+@dataclass(frozen=True)
 class TrafficVolumeSample:
     """Traffic volume in effect from ``at_mi`` until the next sample.
 
@@ -617,6 +638,7 @@ class Leg:
     interchanges: tuple[Interchange, ...] = ()
     speed_limits: tuple[SpeedLimitSample, ...] = ()
     traffic_volumes: tuple[TrafficVolumeSample, ...] = ()
+    hpms_terrain: HpmsTerrain | None = None
     # Driving lanes per direction, baked from HPMS through-lane counts
     # (leg-level median); 0 means unbaked and the runtime default applies.
     lanes: int = 0
@@ -693,6 +715,7 @@ _DEFERRED_LEG_FIELDS = (
     "interchanges",
     "speed_limits",
     "traffic_volumes",
+    "hpms_terrain",
     "landmarks",
     "restrictions",
     "lane_segments",
@@ -764,6 +787,7 @@ class LazyLeg(Leg):
     interchanges = _LazyCorridorField()
     speed_limits = _LazyCorridorField()
     traffic_volumes = _LazyCorridorField()
+    hpms_terrain = _LazyCorridorField()
     landmarks = _LazyCorridorField()
     restrictions = _LazyCorridorField()
     lane_segments = _LazyCorridorField()
@@ -786,6 +810,7 @@ class LazyLeg(Leg):
         interchanges=_DEFER,
         speed_limits=_DEFER,
         traffic_volumes=_DEFER,
+        hpms_terrain=_DEFER,
         lanes: int = 0,
         local_cue: str = "",
         local_speed_mph: float = 0.0,
@@ -824,6 +849,7 @@ class LazyLeg(Leg):
             ("interchanges", interchanges),
             ("speed_limits", speed_limits),
             ("traffic_volumes", traffic_volumes),
+            ("hpms_terrain", hpms_terrain),
             ("landmarks", landmarks),
             ("restrictions", restrictions),
             ("lane_segments", lane_segments),
