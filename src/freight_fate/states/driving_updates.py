@@ -588,7 +588,20 @@ class DrivingUpdateMixin:
                 else "Start the engine first; air pressure cannot build with the engine off."
             )
             self.ctx.say_event(
-                message, interrupt=False, key="air_brake_lockout", category=SpeechCategory.STATUS
+                message,
+                interrupt=False,
+                # ROUTE, not the ambient default: this line is the reason the
+                # truck will not move under the driver's own throttle. As
+                # AMBIENT it was droppable as stale chatter, and the
+                # adversarial battery caught it being dropped the moment real
+                # traffic started appearing on the leg -- the AADT spawn
+                # change put a brake-lights advisory and an achievement
+                # ahead of it in the same channel, and the lockout lost a
+                # race it had never been in. Same call as the toll charge and
+                # the adaptive-cruise lines: a consequence is not colour.
+                priority=EventPriority.ROUTE,
+                key="air_brake_lockout",
+                category=SpeechCategory.STATUS,
             )
         elif not t.air_ready:
             self._set_status("Waiting for air pressure before the truck can move.")
@@ -602,7 +615,20 @@ class DrivingUpdateMixin:
                 )
             )
             self.ctx.say_event(
-                message, interrupt=False, key="air_brake_lockout", category=SpeechCategory.STATUS
+                message,
+                interrupt=False,
+                # ROUTE, not the ambient default: this line is the reason the
+                # truck will not move under the driver's own throttle. As
+                # AMBIENT it was droppable as stale chatter, and the
+                # adversarial battery caught it being dropped the moment real
+                # traffic started appearing on the leg -- the AADT spawn
+                # change put a brake-lights advisory and an achievement
+                # ahead of it in the same channel, and the lockout lost a
+                # race it had never been in. Same call as the toll charge and
+                # the adaptive-cruise lines: a consequence is not colour.
+                priority=EventPriority.ROUTE,
+                key="air_brake_lockout",
+                category=SpeechCategory.STATUS,
             )
         elif t.parking_brake:
             brake_hint = self.ctx.control_hint("parking_brake")
@@ -613,7 +639,20 @@ class DrivingUpdateMixin:
                 else f"Parking brake set. Press {brake_hint} to release it."
             )
             self.ctx.say_event(
-                message, interrupt=False, key="air_brake_lockout", category=SpeechCategory.STATUS
+                message,
+                interrupt=False,
+                # ROUTE, not the ambient default: this line is the reason the
+                # truck will not move under the driver's own throttle. As
+                # AMBIENT it was droppable as stale chatter, and the
+                # adversarial battery caught it being dropped the moment real
+                # traffic started appearing on the leg -- the AADT spawn
+                # change put a brake-lights advisory and an achievement
+                # ahead of it in the same channel, and the lockout lost a
+                # race it had never been in. Same call as the toll charge and
+                # the adaptive-cruise lines: a consequence is not colour.
+                priority=EventPriority.ROUTE,
+                key="air_brake_lockout",
+                category=SpeechCategory.STATUS,
             )
 
     def _update_air_brake_announcements(

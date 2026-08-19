@@ -813,6 +813,12 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The truck always tells you why it will not move.** Pressing the accelerator
+  against a set parking brake, or before the air is up, explains itself -- but
+  that line could be dropped as passing chatter if the road happened to be busy
+  at that moment, leaving you pushing the pedal with no idea why nothing was
+  happening. It is now treated as a consequence and always reaches you.
+
 - **Cues in quiet mode are no longer buried under the road.** When speech is set
   to quiet, several spoken lines are replaced by short sounds. Those sounds were
   playing at full road volume while the spoken lines they stand in for had

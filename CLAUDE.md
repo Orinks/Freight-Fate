@@ -68,6 +68,14 @@ code, in the same change:
   entry in the same change, which is what the XPASS failure will tell you to
   do. Same scenarios still run as a tool for reading spoken output:
   `uv run python tools/playtest_break.py --scenario NAME --transcript`.
+- After the full suite passes, run the adversarial battery too:
+  `uv run pytest tests/adversarial -m adversarial`. The playtest HARNESS is
+  already in the full run (`tests/test_playtest_harness.py`, 54 tests); the
+  battery is not, because `-m "not adversarial"` lives in the addopts. So a
+  green suite says nothing about whether deliberately unreasonable play still
+  behaves, which is exactly what a change to driving, traffic, speech or the
+  world data can break. Fix any XPASS by deleting its `KNOWN_OPEN` entry in
+  the same change.
 - Lint: `uv run ruff check src tests tools`
 - Byte-compile check: `uv run python -m compileall src tests tools`
 - Headless runs: set `FREIGHT_FATE_NO_SPEECH=1` (CI also uses
