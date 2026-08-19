@@ -751,11 +751,11 @@ onto exit signalling.
       on scope: it touches dispatch, route choice, and the spoken comparison
       of two routes, which is a bigger piece than it sounds.
 
-- [ ] **URGENT, MINE, SHIPPED: FIRST_OCCURRENCE silences changed content at
-      STANDARD (Darren, 2026-08-19).** Reported as "certain messages I can
-      read with comma and period are not being spoken... the dings play but
-      no messages... very sporadic". From his own log, and he is on
-      **standard**, the default rung:
+- [x] **URGENT, MINE, SHIPPED: the ladder silenced changed content at
+      STANDARD (Darren, 2026-08-19). FIXED 2026-08-19.** Reported as
+      "certain messages I can read with comma and period are not being
+      spoken... the dings play but no messages... very sporadic". From their
+      own log, and they are on **standard**, the default rung:
 
         [ladder] standard already said: 75 miles per hour
         [ladder] standard already said: 69 miles per hour
@@ -763,23 +763,35 @@ onto exit signalling.
         [ladder] standard already said: 57 miles per hour
         [ladder] standard already said: Clear of the car. Right lane open.
 
-      Different numbers each time, all dropped. `GameContext._ladder_repeats`
-      does `slot = key or text` for FIRST_OCCURRENCE, so once a KEYED line has
-      spoken, every later occurrence is dropped whatever its content. A
-      readout whose whole point is a changing number gets said once per leg
-      and then swallowed for the rest of it.
+      310 dropped lines in one leg of `game.prev.log`, "62 miles per hour"
+      twelve times among them. This is my change from 2026-08-18
+      (`feat(speech): standard stops repeating itself`), and it silenced
+      real information at the DEFAULT rung.
 
-      This is my change from 2026-08-18 (`feat(speech): standard stops
-      repeating itself`) and it is in the build testers have. It silences
-      real information at the DEFAULT rung, so it outranks the zone-overlap
-      item below.
+      I HAD NAMED THE WRONG BRANCH. It was not FIRST_OCCURRENCE. At
+      standard, FIRST_OCCURRENCE covers only COACHING, and the one line in
+      the game carrying that category is keyless and edge-gated, so it
+      behaved correctly. Every dropped line above is **STATUS**, which
+      standard delivers on TRANSITIONS -- and TRANSITIONS' fallback for a
+      line with no key was `slot = key or text`, using the text as its own
+      condition. That turns "enter, worsen, and clear" into "this exact
+      sentence once per leg, ever", which is why the damage grew with leg
+      length and read as sporadic. Checking the CATEGORY of each line in the
+      log is what found it; the roadmap's own guess would have left the bug
+      in place.
 
-      THE FIX, probably: FIRST_OCCURRENCE should key on the key AND the text,
-      like TRANSITIONS does -- "this exact line once per leg", not "this
-      condition once per leg". Check what actually wants once-per-leg
-      suppression before changing it, because the intent was a coaching TIP
-      that repeats verbatim, and a keyed changing readout was never meant to
-      be in scope. Verify against Darren's log, not a bench.
+      THE FIX (`_ladder_repeats`): a keyless line is a discrete moment, not
+      a standing condition -- its call site has already decided this
+      occurrence is worth saying -- so TRANSITIONS no longer suppresses it
+      at all. The pacer's 2.5-second repeat window still stops the same line
+      landing twice in a breath, which was the only repetition worth
+      blunting. FIRST_OCCURRENCE now keys on `(key, text)` rather than the
+      key alone, so a keyed readout whose number moves cannot be swallowed
+      the same way; that was latent rather than reported, and is fixed in
+      the same change.
+
+      Three tests in `test_driving_speech_ladder.py`, driven from the log's
+      own lines.
 
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,

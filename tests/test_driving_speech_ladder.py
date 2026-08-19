@@ -1839,3 +1839,157 @@ def test_a_dodgeable_hazard_with_nowhere_to_go_keeps_the_word_brake() -> None:
     # The open-lane call survives whole: it names the better option.
     dodgeable = hazard_call(HAZARD_DODGE_CALL, "Deer right ahead.")
     assert dodgeable.terse.startswith(HAZARD_DODGE_CALL)
+
+
+def test_standard_speaks_a_keyless_status_line_again_when_it_says_something_new() -> None:
+    """Darren, 2026-08-19: "the dings play but no messages... very sporadic".
+
+    His log has 310 dropped lines in one leg, all on **standard**, the
+    default rung -- and the ones dropped are the ones whose whole point is
+    that they changed:
+
+      [ladder] standard already said: 62 miles per hour
+      [ladder] standard already said: Speed limit drops to 55 in 3 miles.
+      [ladder] standard already said: Clear of the car. Right lane open.
+
+    Twelve of that first one in a single leg: the truck slows for traffic
+    and comes back up to 62, and every return to it is swallowed.
+
+    TRANSITIONS compares text under a key, which is right for a standing
+    condition. Its fallback for a line with no key was to use the text
+    itself as the key, which turns "enter, worsen, and clear" into "this
+    exact sentence once per leg, ever". A keyless line is not a standing
+    condition at all -- it is a discrete moment, already edge-gated at its
+    own call site -- so the rung has nothing to compare it against and must
+    not suppress it. The pacer's own repeat window still stops the same line
+    landing twice in one breath.
+    """
+    app = _app()
+    try:
+        _real_driving(app)
+        app.ctx.profile.tutorial_done = True
+        app.ctx.settings.driving_speech = "standard"
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+
+        app.ctx._event_pacer._clock = _stepping_clock()
+
+        # The truck slows and speeds up again over a long leg, so it reads
+        # 62 more than once -- minutes apart, a different moment each time.
+        # In his log "62 miles per hour" is silenced on every return to it.
+        for mph in (62, 51, 62, 71, 62):
+            app.ctx.say_event(
+                f"{mph} miles per hour",
+                interrupt=False,
+                category=SpeechCategory.STATUS,
+            )
+        assert len(spoken) == 5, spoken
+    finally:
+        app.shutdown()
+
+
+def test_standard_says_the_same_lane_gap_line_about_a_later_car() -> None:
+    """The most-dropped line in Darren's log, seventeen times in one leg.
+
+    Word-for-word identical and news every time: it is a different car each
+    time, and the call site (``_lane_gap_said_keys``) has already decided
+    this one is worth saying. Suppressing it on the text alone is the ladder
+    overruling that decision with less information than the caller had.
+    """
+    app = _app()
+    try:
+        _real_driving(app)
+        app.ctx.profile.tutorial_done = True
+        app.ctx.settings.driving_speech = "standard"
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+
+        # A fresh car minutes later, not the same one twice in a breath:
+        # step the pacer's clock past its repeat window between calls so the
+        # rung, not the window, decides the outcome.
+        app.ctx._event_pacer._clock = _stepping_clock()
+
+        line = "Clear of the car. Right lane open."
+        for _ in range(3):
+            app.ctx.say_event(line, interrupt=False, category=SpeechCategory.STATUS)
+        assert len(spoken) == 3, spoken
+    finally:
+        app.shutdown()
+
+
+def test_first_occurrence_still_holds_a_verbatim_tip_but_not_a_changed_one() -> None:
+    """FIRST_OCCURRENCE is "once per leg", and that is the point of it -- but
+    once per leg for the LINE, not for the condition behind it.
+
+    Keyed on the key alone, a keyed readout whose number moves is said once
+    and swallowed for the rest of the leg. Keyed on key AND text, the tip
+    that repeats word for word is still said once, which is all the
+    disposition was ever for.
+    """
+    app = _app()
+    try:
+        _real_driving(app)
+        app.ctx.profile.tutorial_done = True
+        app.ctx.settings.driving_speech = "standard"
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
+
+        app.ctx._event_pacer._clock = _stepping_clock()
+
+        tip = "The chains are hammering the pavement. Keep it under 30."
+        for _ in range(3):
+            app.ctx.say_event(
+                tip, interrupt=False, key="chains_fast", category=SpeechCategory.COACHING
+            )
+        assert len(spoken) == 1, spoken
+
+        app.ctx.say_event(
+            "The chains are hammering the pavement. Keep it under 25.",
+            interrupt=False,
+            key="chains_fast",
+            category=SpeechCategory.COACHING,
+        )
+        assert len(spoken) == 2, spoken
+    finally:
+        app.shutdown()
+
+
+def _stepping_clock():
+    """A monotonic clock that jumps a minute every time it is read.
+
+    Lets a test assert what the RUNG did with an identical line: without it
+    the pacer's 2.5-second repeat window decides every same-text call in a
+    fast test, and the assertion passes or fails for the wrong reason.
+    """
+    now = [0.0]
+
+    def clock() -> float:
+        now[0] += 60.0
+        return now[0]
+
+    return clock
+
+
+def test_only_standard_can_reach_the_already_said_gate() -> None:
+    """Quiet and urgent_only must not be able to drop a line as already-said.
+
+    Both quieter rungs deliver every category TERSE, EARCON, or SILENT --
+    the earcon/silent gate returns before ``_ladder_repeats`` is reached,
+    and a TERSE line is never dropped -- so the suppression that swallowed
+    310 lines on standard could not touch them. That is a property of the
+    TABLE, not of the code, and it is exactly the kind of thing a later
+    table edit changes without anyone noticing: moving one quiet cell to
+    TRANSITIONS would silently hand quiet a leg-scoped memory it has never
+    had. Pinned so that edit has to be deliberate.
+    """
+    reaches_the_gate = {Disposition.FIRST_OCCURRENCE, Disposition.TRANSITIONS}
+    for rung in ("quiet", "urgent_only"):
+        offenders = {
+            category: disposition
+            for category, disposition in DRIVING_SPEECH_DISPOSITIONS[rung].items()
+            if disposition in reaches_the_gate
+        }
+        assert not offenders, (
+            f"{rung} now reaches the already-said gate for {offenders}; "
+            "that gate is standard's alone (Darren, 2026-08-19)"
+        )

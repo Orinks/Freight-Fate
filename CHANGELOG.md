@@ -776,6 +776,17 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The truck went quiet on the default speech setting.** Cues that carry a
+  number that keeps moving -- your speed, a speed limit change, the lane
+  beside you coming clear -- were being dropped as things you had already
+  been told, so the ding played and the words never came. It only affected
+  the standard speech setting, which is the one you have unless you changed
+  it, and it got worse the longer the leg ran: once a line had been said,
+  every later version of it went silent for the rest of the drive, even
+  when the number in it had changed. One tester's drive lost three hundred
+  and ten spoken lines that way. Standard still says a repeated driving tip
+  only once, which is what that was for. Reported by Darren.
+
 - **Nearly half the exits in the game now end at the control that is really
   there.** What waits at the bottom of an off-ramp -- a traffic light, a stop
   sign, or nothing at all -- was decided by a roll of the dice at every exit

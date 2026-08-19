@@ -125,7 +125,7 @@ class GameContext:
         # pacer. ``_ladder_said`` is leg-scoped ("once per leg"),
         # ``_ladder_last`` is the last text seen per key so a re-assertion
         # can be told from a change of state.
-        self._ladder_said: set[str] = set()
+        self._ladder_said: set[tuple[str, str]] = set()
         self._ladder_last: dict[str, str] = {}
         # True while a playtest-lever scenario runs unsaved (see
         # playtest_levers.apply_continue_levers); save_profile honors it.
@@ -403,27 +403,43 @@ class GameContext:
         (roadmap, and owner 2026-08-17: "should standard and coaching make a
         difference? There should be").
 
-        FIRST_OCCURRENCE: said once per leg, then nothing.
+        FIRST_OCCURRENCE: this LINE said once per leg, then nothing. Keyed
+        on the key and the text together, not the key alone: the
+        disposition exists for a coaching tip that repeats word for word,
+        and keying on the condition instead meant a keyed readout whose
+        number moves was said once and swallowed for the rest of the leg.
 
-        TRANSITIONS: "enter, worsen, and clear only". Status lines carry the
-        state they are reporting in their own text, so a line identical to
-        the last one under this key is the condition re-asserting itself and
-        a changed one is the transition. Keyless lines fall back to the text
-        itself, which makes them first-occurrence -- the safe direction: a
-        line too few only for something that repeats itself word for word.
+        TRANSITIONS: "enter, worsen, and clear only". A ``key`` names a
+        standing condition, and status lines carry the state they are
+        reporting in their own text -- so a line identical to the last one
+        under this key is the condition re-asserting itself and a changed
+        one is the transition.
+
+        A line with NO key is not a standing condition; it is a discrete
+        moment, and its call site has already decided this occurrence is
+        worth saying (``_lane_gap_said_keys``, ``_air_ready_said``, an edge
+        flag). The rung has nothing to compare it against, so it does not
+        suppress it. This fallback used to key on the text itself, which
+        turned "enter, worsen, and clear" into "this exact sentence once per
+        leg, ever" -- 310 lines dropped in one leg of a tester's log on
+        STANDARD, the default rung, including every return to a speed the
+        truck had already passed through once (Darren, 2026-08-19). The pacer's own
+        repeat window still stops the same line landing twice in a breath,
+        which is the only repetition there was ever anything to blunt.
         """
         disposition = self.settings.speech_disposition(category)
         if disposition is Disposition.FIRST_OCCURRENCE:
-            slot = key or text
+            slot = (key, text) if key else ("", text)
             if slot in self._ladder_said:
                 return True
             self._ladder_said.add(slot)
             return False
         if disposition is Disposition.TRANSITIONS:
-            slot = key or text
-            if self._ladder_last.get(slot) == text:
+            if key is None:
+                return False
+            if self._ladder_last.get(key) == text:
                 return True
-            self._ladder_last[slot] = text
+            self._ladder_last[key] = text
             return False
         return False
 
