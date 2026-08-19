@@ -786,6 +786,12 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The truck says why it is slowing down.** When adaptive cruise eased off for
+  a work zone, opened its following gap for weather, or handed control back at
+  stopped traffic, that line could be dropped as stale chatter -- so the truck
+  changed speed and never said why. Those lines are now treated as
+  consequences rather than colour and always reach you.
+
 - **No more tickets for a following distance the truck chose.** A trooper could
   pull you over for following too close when adaptive cruise was the one
   managing the gap -- it aims to sit three seconds back, well clear of a

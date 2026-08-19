@@ -3840,9 +3840,20 @@ class DrivingEventMixin:
                     "construction": "Construction zone ahead",
                     "heavy traffic": "Heavy traffic ahead",
                 }.get(limit_reason, "Posted limit lower")
+                # ROUTE, not the ambient default. An assist saying it is
+                # about to change how fast the truck is going is a
+                # consequence, not colour -- the same reasoning that moved
+                # the toll charge off the ambient channel. As AMBIENT this
+                # was droppable as stale chatter, and it WAS dropped:
+                # tester Darren's I-75 log, 2026-08-18, "[pacer] stale
+                # ambient dropped: Construction zone ahead; adaptive cruise
+                # easing to 45 miles per hour" -- seventeen seconds before
+                # a trooper stopped him over the gap the easing was
+                # closing. The truck slowed itself and never said why.
                 self.ctx.say_event(
                     f"{reason}; adaptive cruise easing to {self.ctx.settings.speed_text(cap_mph)}.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                     category=SpeechCategory.CONFIRMATION,
                 )
                 # This line already named the number for a plain posted-limit
@@ -3874,7 +3885,12 @@ class DrivingEventMixin:
                 and context.gap_seconds <= desired_gap + 1.5
             ):
                 self._acc_weather_gap_said = True
-                self.ctx.say_event(reason, interrupt=False, category=SpeechCategory.CONFIRMATION)
+                self.ctx.say_event(
+                    reason,
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                    category=SpeechCategory.CONFIRMATION,
+                )
             lead_mph = context.lead.speed_mph
             if (
                 lead_mph <= 5.0
@@ -3883,9 +3899,13 @@ class DrivingEventMixin:
                 and context.gap_mi / context.closing_mph * 3600.0 <= ACC_STOPPED_CANCEL_S
             ):
                 self._cancel_cruise()
+                # Handing the truck back is the least droppable line the
+                # assist has: a driver who does not hear it believes the
+                # cruise is still holding the gap.
                 self.ctx.say_event(
                     "Stopped traffic ahead; adaptive cruise canceled.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                     category=SpeechCategory.SAFETY,
                 )
                 return
@@ -3910,6 +3930,7 @@ class DrivingEventMixin:
             self.ctx.say_event(
                 "Traffic ahead, adaptive cruise reducing speed.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
         self._acc_following = following

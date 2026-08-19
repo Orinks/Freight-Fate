@@ -1302,3 +1302,40 @@ def test_two_different_moments_still_both_get_said() -> None:
         ]
     finally:
         app.shutdown()
+
+
+def test_an_assist_changing_the_trucks_speed_is_never_dropped_as_chatter() -> None:
+    """Tester Darren, I-75, 2026-08-18.
+
+        [pacer] stale ambient dropped: Construction zone ahead;
+                adaptive cruise easing to 45 miles per hour.
+
+    Seventeen seconds later a trooper stopped him for the following gap that
+    easing was closing. The truck slowed itself and never said why.
+
+    An assist reporting that it is changing -- or handing back -- control of
+    the truck is a consequence, not colour. It rides ROUTE's never-dropped
+    contract, the same move the toll charge got for the same reason.
+    """
+    import inspect
+
+    from freight_fate.speech_pacing import EventPriority
+    from freight_fate.states import driving_events as de
+
+    src = inspect.getsource(de.DrivingEventMixin)
+    for line in (
+        "adaptive cruise easing to",
+        "Stopped traffic ahead; adaptive cruise canceled.",
+        "Traffic ahead, adaptive cruise reducing speed.",
+    ):
+        assert line in src, line
+        after = src.split(line, 1)[1][:400]
+        assert "EventPriority.ROUTE" in after, f"{line!r} is not on the never-dropped channel"
+
+    # And ROUTE really is the never-dropped channel: only AMBIENT is eligible
+    # for the stale drop that binned Darren's line.
+    assert EventPriority.ROUTE is not EventPriority.AMBIENT
+    say_src = inspect.getsource(
+        __import__("freight_fate.app", fromlist=["GameContext"]).GameContext.say_event
+    )
+    assert "priority == EventPriority.AMBIENT" in say_src

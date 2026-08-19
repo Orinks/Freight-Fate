@@ -924,6 +924,19 @@ onto exit signalling.
       No test covered following-too-close at all before this, which is how it
       shipped. Three now do, driven from his log's sequence.
 
+- [x] **An assist changed the truck's speed and the reason was dropped
+      (Darren, 2026-08-18) -- FIXED 2026-08-19.** From his log, seventeen
+      seconds before the trooper stopped him:
+
+        [pacer] stale ambient dropped: Construction zone ahead;
+                adaptive cruise easing to 45 miles per hour.
+
+      The line rode AMBIENT (the default for `interrupt=False`), so
+      `would_start_stale` was free to bin it. A line reporting that an assist
+      is taking or handing back control of the truck is a consequence, not
+      colour -- the same call already made for the toll charge -- so all four
+      now ride `EventPriority.ROUTE`'s never-dropped contract.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED
