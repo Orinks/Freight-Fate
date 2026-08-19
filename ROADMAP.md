@@ -691,6 +691,37 @@ onto exit signalling.
       Naming four or more lanes remains open as a FEATURE (ordinal names --
       "the second lane from the right"). Until then the cap is what keeps
       every callout unambiguous.
+- [x] **theradiostorm.com was on the dial twice; four "Radiostorm" channels
+      were really Star104 (owner, 2026-08-19).** The duplicate pair was one
+      station under two addresses -- its own `listen.theradiostorm.com:8242`
+      and a raw CDN node carrying a cache-busting hash. Both answered live
+      with identical `icy-name`, genre and bitrate. Kept the station's own
+      host; the CDN node's address will rot.
+
+      NEITHER GENERAL FIX WAS SAFE, which is the part worth keeping:
+
+      - De-dup by NAME slug would have merged 605 of 5,242 imported rows.
+        "Rock", "The Rock" and "rock" are different stations sharing a
+        generic name; collapsing them deletes real stations.
+      - De-dup by STREAM URL would have been worse. 40 urls carry more than
+        one dial entry and every one is correct: public radio networks
+        (Wyoming Public Radio, Iowa Public Radio, GPB, SDPB, Prairie Public)
+        broadcast one network feed from many transmitters, and each entry is
+        a real station receivable in its own city -- which is exactly what
+        the regional dial exists to model. Collapsing them would have
+        deleted Wyoming Public Radio from every city but one.
+
+      So duplicate-hunting on this catalog stays surgical: prove two rows are
+      one station in one place before merging them.
+
+      Corrected while there, because these are spoken: the four channels the
+      directory filed under "Star 104 / Radiostorm" report
+      `icy-url http://star104.net` and name themselves Star104, Country104
+      and Christmas104 -- a different operation from radiostorm.com (the four
+      curated 104 channels) and from theradiostorm.com. They carry their own
+      names now, their raw tag strings ("#80s, 1980s, 1980s hits") became
+      single genre words, and five names truncated mid-bracket were repaired.
+
 - [ ] **Game sounds duck under the in-cab radio.** Enforcement markers and
       pass-bys currently talk over the radio instead of alongside it
       (Shane).

@@ -786,6 +786,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The Radio Storm was on the dial twice.** The same station was listed under
+  two different addresses, so it turned up twice while you were scanning. It is
+  one entry now, at the station's own address, which should also keep it
+  playing for longer. Four other stations were listed as "Radiostorm" when they
+  are really Star104, Country104 and Christmas104 -- they go by their own names
+  now, and a handful of stations whose names had been cut off mid-word read
+  properly.
+
 - **Every lane has a name you can tell apart.** On the widest roads the truck
   could put you in four or five lanes, but it only has three names for them --
   right, middle and left -- so two or three different lanes were all called
