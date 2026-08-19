@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import math
 import random
 from dataclasses import dataclass
 
@@ -11,11 +12,14 @@ from ..data.world import Leg, Route
 from ..speech_text import brake_lights_cue, merging_traffic_cue, slow_lead_cue
 from .hos import is_night
 from .trip_models import (
+    DIRECTIONAL_SPLIT,
     RUSH_HOUR_WINDOWS,
     TRAFFIC_LOOKAHEAD_MI,
     TrafficContext,
     _leg_speed_limit_at,
     corridor_speed_limit,
+    hourly_volume_fraction,
+    leg_aadt_at,
 )
 
 log = logging.getLogger(__name__)
@@ -198,6 +202,10 @@ class TrafficManager:
         # all night, which is the case a player driving with live weather and
         # a real clock notices first.
         self.hour = start_hour
+        # Weekday or weekend, for the hourly volume curve. Set from the trip
+        # beside ``hour``; the weekday curve is the safe default because it is
+        # the busier of the two.
+        self._weekend = False
         # The driving state mirrors the player's discrete lane here each
         # frame so same-lane checks and spoken relative lanes stay honest.
         self.player_lane = 0
@@ -229,34 +237,69 @@ class TrafficManager:
             return 0.0
         return 0.14 if leg.checkpoints else 0.06
 
-    def _leg_density(self, leg: Leg, night: bool) -> float:
+    def _leg_density(self, leg: Leg, night: bool, mile: float | None = None) -> float:
         """How much of this road is carrying somebody, 0 to 1.
 
-        Deliberately reads nothing from ``hazard_scale``, on the rule the
-        enforcement layer already settled for police: presence is not
-        difficulty, and the road has the traffic it has. That knob is
-        ``hos.hazard_scale(mode)`` times the time-scale tuning's
-        ``hazard_frequency`` -- a difficulty setting multiplied by a
-        compression setting, neither of which is a statement about how many
-        vehicles exist. Together they were landing at 0.11 on an ordinary
-        run, cutting a busy interstate to a 5 percent chance of company per
-        cell, and the compression half had it exactly backwards: at ten times
-        pacing the truck covers ten times the ground in a real minute and
-        should meet MORE traffic, not less.
+        Read from the road's real traffic where the HPMS bake covers it. The
+        chain is the same one congestion already runs on: annual average
+        daily traffic, times this hour's share of the day, times the peak
+        direction's share, over the speed traffic is moving -- which gives
+        vehicles per mile in your direction, and times the cell width gives
+        the expected number in a cell.
 
-        Difficulty still reaches the player where it belongs -- on random
-        hazards, and on which vehicles are worth interrupting them about.
+        The cell either has somebody in it or it does not, so the expectation
+        becomes a probability the honest way: arrivals along a road are
+        Poisson, and P(at least one) is ``1 - exp(-lambda)``. That saturates
+        by itself on a road that really does carry a vehicle every four
+        tenths of a mile, which is most interstates at five in the afternoon.
+
+        WHAT THIS CANNOT DO, and it is worth being plain about it: the bubble
+        holds ``MAX_BUBBLE_VEHICLES`` over its width, about five vehicles a
+        mile, while a median road at peak wants thirteen in your direction
+        alone. So the ORDER is now real -- a quiet rural highway is
+        measurably sparser than a busy freeway, at the hour it is actually
+        quieter -- but the absolute count still cannot be. Fixing that means
+        several vehicles per cell and a much larger bubble, which is a
+        different change with a performance question attached.
+
+        Deliberately reads nothing from ``hazard_scale``: presence is not
+        difficulty, and the road has the traffic it has. Difficulty reaches
+        the player on random hazards and on which vehicles are worth
+        interrupting them about.
         """
-        metro_bias = 0.18 if leg.checkpoints else 0.0
-        night_bias = -0.08 if night else 0.0
-        rush_bias = self._rush_hour_traffic_bias(leg)
-        return min(
-            0.86,
-            max(
-                0.05,
-                0.22 + leg.miles / 900.0 + metro_bias + night_bias + rush_bias,
-            ),
-        )
+        volume = self._aadt_at(leg, mile)
+        if volume is None:
+            # No bake here. The old class/metro shape, kept intact so an
+            # uncovered leg drives exactly as it did rather than falling to
+            # some new default.
+            metro_bias = 0.18 if leg.checkpoints else 0.0
+            night_bias = -0.08 if night else 0.0
+            rush_bias = self._rush_hour_traffic_bias(leg)
+            return min(
+                0.86,
+                max(0.05, 0.22 + leg.miles / 900.0 + metro_bias + night_bias + rush_bias),
+            )
+        aadt, _lanes = volume
+        share = hourly_volume_fraction(self.hour, self._weekend)
+        moving_mph = max(25.0, min(70.0, abs(self.truck.speed_mph) or 60.0))
+        per_mile = aadt * share * DIRECTIONAL_SPLIT / moving_mph
+        expected_in_cell = per_mile * SPAWN_CELL_MI
+        occupied = 1.0 - math.exp(-expected_in_cell)
+        # Same floor and ceiling as before: the floor keeps an empty road from
+        # being literally empty, and the ceiling is what the bubble can hold.
+        return min(0.86, max(0.05, occupied))
+
+    def _aadt_at(self, leg: Leg, mile: float | None) -> tuple[float, int] | None:
+        """Baked (AADT, lanes) under a route mile, or None where none exists."""
+        if mile is None:
+            return leg_aadt_at(leg, 0.0) if getattr(leg, "traffic_volumes", ()) else None
+        found = self._leg_and_offset_at(mile)
+        if found is None:
+            return None
+        at_leg, offset = found
+        if not getattr(at_leg, "traffic_volumes", ()):
+            return None
+        return leg_aadt_at(at_leg, offset)
 
     def _weather_slowdown(self) -> float:
         effects = self.weather.effects
@@ -601,7 +644,7 @@ class TrafficManager:
                 continue
             # Density is a share of road, so it reads directly as the chance
             # this cell of it is carrying somebody.
-            if rng.random() > self._leg_density(leg, night):
+            if rng.random() > self._leg_density(leg, night, mile):
                 continue
             behind = mile < position_mi
             # Somebody behind you is somebody who is going to pass you, so the
@@ -651,10 +694,18 @@ class TrafficManager:
             )
 
     def update(
-        self, *, dt: float, position_mi: float, time_scale: float, hour: float | None = None
+        self,
+        *,
+        dt: float,
+        position_mi: float,
+        time_scale: float,
+        hour: float | None = None,
+        weekend: bool | None = None,
     ) -> None:
         if hour is not None:
             self.hour = hour
+        if weekend is not None:
+            self._weekend = weekend
         game_hours = dt * time_scale / 3600.0
         kept: list[TrafficVehicle] = []
         for vehicle in self.vehicles:

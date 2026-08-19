@@ -244,6 +244,16 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+- **How much company you have on the road comes from the real road now.** How
+  many vehicles you meet used to be a rough guess -- mostly whether the leg
+  passed near a town. It now comes from how many vehicles the road actually
+  carries each day, spread across the hours the way real traffic is. A quiet
+  rural highway at three in the morning is genuinely empty; the same road at
+  five in the afternoon is not, and a busy corridor is busier than a quiet one
+  at the same hour. The busiest roads still hit a ceiling on how much traffic
+  can be around you at once, so a packed city freeway will not feel as packed
+  as it really is.
+
 - **The driving mode row offers Relaxed and Standard; Realistic has been
   retired.** It was the fastest setting on the row, not the truest to life:
   real driving runs at one times, and Realistic ran the game clock at forty,

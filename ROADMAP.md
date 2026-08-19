@@ -1072,6 +1072,29 @@ onto exit signalling.
       and the stale ramp_control one are why the provenance status moved out
       of that file and into this one.
 
+- [ ] **Traffic density reads real AADT; the BUBBLE is now the limiter
+      (2026-08-19).** Spawn density used to be a class/metro heuristic --
+      "does this leg have checkpoints" standing in for how busy the road is.
+      It reads the baked HPMS volume under the truck now, through the chain
+      congestion already uses, and turns the expected count in a spawn cell
+      into an occupancy chance the honest way (arrivals are Poisson, so
+      P(at least one) is 1 - exp(-lambda)).
+
+      WHAT IT CANNOT DO, measured rather than guessed: a spawn cell is 0.4 mi
+      and density is a PROBABILITY, so it saturates at 1. The median road at
+      5 pm wants 5.3 vehicles per cell and a 10th-percentile rural road wants
+      1.3; the whole bubble holds about 5 vehicles per mile against a median
+      demand of 13 in your direction alone. So anything above roughly 45,000
+      AADT pins at the ceiling through the day, and the differentiation that
+      survives is at the quiet end and overnight -- which is real, and is
+      what a player notices most.
+
+      THE REMAINING WORK is the bubble, not the model: several vehicles per
+      cell and a much larger MAX_BUBBLE_VEHICLES than 28, which carries a
+      performance question and wants a playtest pass. Deliberately not tuned
+      to "feel right" in the meantime -- the Poisson number is the physically
+      correct occupancy and the representation is what is short.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED

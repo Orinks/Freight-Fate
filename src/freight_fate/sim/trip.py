@@ -2470,6 +2470,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             # road the truck is on right now, and a long run crosses rush
             # hours and empties out overnight while it drives.
             hour=self.local_hour,
+            # The hourly volume curve has a quieter weekend shape, and the
+            # density model reads the same curve congestion does.
+            weekend=self._is_weekend_now(),
         )
         self._check_zones()
         self._check_chain_law()

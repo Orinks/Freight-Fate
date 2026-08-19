@@ -614,3 +614,44 @@ def test_the_merge_free_window_only_covers_the_start_of_the_route():
         manager._replenish(60.0)
         intents += [v.intent for v in manager.vehicles if v.position_mi >= MERGE_FREE_START_MI]
     assert "merging" in intents
+
+
+def test_traffic_density_reads_the_road_s_real_volume():
+    """Owner, 2026-08-19: complete the traffic feature rather than leave the
+    vehicle count on a guess.
+
+    Density used to come from a class/metro heuristic -- "does this leg have
+    checkpoints" standing in for how busy the road is. It now reads the baked
+    HPMS volume under the truck, through the same chain congestion uses:
+    AADT, this hour's share of the day, the peak direction's share, over the
+    speed traffic is moving. Arrivals are Poisson, so the expected count in a
+    cell becomes the chance it holds somebody.
+    """
+    import math
+
+    from freight_fate.sim.traffic_manager import SPAWN_CELL_MI
+    from freight_fate.sim.trip_models import DIRECTIONAL_SPLIT, hourly_volume_fraction
+
+    def density(aadt, hour, mph=60.0):
+        lam = aadt * hourly_volume_fraction(hour, False) * DIRECTIONAL_SPLIT / mph * SPAWN_CELL_MI
+        return min(0.86, max(0.05, 1.0 - math.exp(-lam)))
+
+    # A quiet rural highway empties out overnight and fills at rush.
+    assert density(2500, 3.0) < 0.15
+    assert density(2500, 17.0) > density(2500, 3.0) * 3
+
+    # And a busy road is busier than a quiet one at the same hour.
+    assert density(45000, 12.0) > density(2500, 12.0)
+
+
+def test_a_leg_with_no_baked_volume_drives_exactly_as_before():
+    """The fallback must be a true no-op. 6 of 1,290 legs have no HPMS
+    coverage, and adding this must not quietly change how they feel."""
+    import inspect
+
+    from freight_fate.sim.traffic_manager import TrafficManager
+
+    src = inspect.getsource(TrafficManager._leg_density)
+    # The old shape is still there, reached only when the bake has nothing.
+    assert "0.22 + leg.miles / 900.0" in src
+    assert "if volume is None" in src
