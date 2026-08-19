@@ -56,6 +56,9 @@
   way past. It was destroyed in a hurricane and never rebuilt, so it is gone
   from the map. Reported by Brandon.
 
+- **Darren Duff radio is on the web radio band.** A rock station for the
+  long hauls, asked for by Brandon with the stream address found by Shane.
+
 - **Synthwave City FM is on the web radio band.** A synthwave station for
   the night runs, requested by Sarah R. and added with the station's own
   stream.

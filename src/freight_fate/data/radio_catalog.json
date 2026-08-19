@@ -16367,6 +16367,23 @@
       "stream_format": "mp3",
       "stream_url": "https://synthwave-rex.radioca.st/stream",
       "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "rock",
+      "id": "darren-duff-radio",
+      "name": "Darren Duff radio",
+      "notes": "Requested by Brandon (tester, 2026-08-18); stream address supplied by Shane P. Verified live 2026-08-19: HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, 320 kbps stereo at 44.1 kHz, icy-genre Rock. The name here is the station's own icy-name, which matches what Brandon called it. Its icy-description is still the Icecast default placeholder, so there is no station blurb to quote.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "tester request; stream address from another tester, checked 2026-08-19",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "http://darrenduff.com:1979/stream.mp3",
+      "supported": true
     }
   ]
 }
