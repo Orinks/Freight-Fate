@@ -733,6 +733,24 @@ onto exit signalling.
       and ducking are ruled out, that would point at masking or timing: a cue
       now landing under an earcon it never used to collide with.
 
+- [ ] **No way to route around an active work zone (Brandon, 2026-08-18).**
+      "Truckers don't always go through construction work zones when they are
+      active; when possible they will detour onto different roads to avoid
+      the risks and delays." A fair observation about how the job really
+      works, and the game currently gives no choice: the route runs through
+      whatever construction the corridor carries.
+
+      The natural home is ROUTE PLANNING, not the wheel. A driver decides
+      this before rolling, off the work-zone data we already bake (the WZDx
+      feeds behind the construction zones), not by improvising at 60 mph. So
+      the shape is an alternate route offered when the planned one crosses an
+      active zone, with the trade spoken plainly -- extra miles and time
+      against the delay and the risk -- rather than a mid-drive detour.
+
+      Not started, and it is a feature rather than a fix. Wants an owner call
+      on scope: it touches dispatch, route choice, and the spoken comparison
+      of two routes, which is a bigger piece than it sounds.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED
