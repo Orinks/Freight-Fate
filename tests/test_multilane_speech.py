@@ -39,7 +39,9 @@ def test_your_side_prefers_directional_tags():
 
 # -- Route.lane_summary (briefing) -------------------------------------------
 def test_route_lane_summary_reports_dominant_and_divided():
-    route = Route(["a", "b"], [_leg("a", "b", 10.0, [LaneSegment(0.0, 10.0, lanes=2, oneway=True)])])
+    route = Route(
+        ["a", "b"], [_leg("a", "b", 10.0, [LaneSegment(0.0, 10.0, lanes=2, oneway=True)])]
+    )
     assert route.lane_summary == "mostly divided, two lanes your side"
     assert "two lanes your side" in route.describe()
 
@@ -123,3 +125,54 @@ def test_callouts_seeded_on_resume_do_not_replay(world):
 def test_synthetic_change_message_direction():
     assert Trip._lane_change_message(2, 3) == "Road widens to three lanes your side."
     assert Trip._lane_change_message(3, 1) == "Down to one lane your side."
+
+
+def test_the_driver_is_never_offered_more_lanes_than_speech_can_name(world):
+    """Owner, 2026-08-19: "We don't support five lane highways yet, just three."
+
+    It is a speech limit before it is a driving one. ``lane_label`` has three
+    names -- right, left, middle -- so on a road of four or more, every
+    interior lane is announced as "the middle lane" and a player working by
+    ear cannot tell which one they are in, nor which one just came open.
+
+    The HPMS bake records real per-direction counts and they run to six on
+    urban freeways. That record stays true; the cap is on what the DRIVER is
+    offered.
+    """
+    from freight_fate.sim.trip_models import MAX_DRIVABLE_LANES, leg_lane_count
+
+    assert MAX_DRIVABLE_LANES == 3
+
+    route = world.route_from_cities(["Chicago", "Indianapolis"])
+    truck = TruckState()
+    weather = WeatherSystem("midwest", seed=1)
+    trip = Trip(route, truck, weather, seed=2)
+
+    for mile in range(0, int(trip.total_miles), 25):
+        assert trip.lane_count_at(float(mile)) <= MAX_DRIVABLE_LANES
+
+    # And the cap is real even when the road really does carry more.
+    import dataclasses
+
+    route.legs[0] = dataclasses.replace(route.legs[0], lanes=6, lane_segments=())
+    trip = Trip(route, truck, weather, seed=2)
+    assert leg_lane_count(route.legs[0]) == 6  # the record is untouched
+    assert trip.lane_count_at(0.0) == MAX_DRIVABLE_LANES
+
+
+def test_traffic_capacity_still_uses_the_real_lane_count(world):
+    """The other half: clamping capacity too would invent jams.
+
+    A six-lane urban freeway carrying its real volume flows. Divide that
+    volume by three lanes because three is all the driver can be put in, and
+    the congestion model reports stop-and-go on a road that is moving --
+    which is why the cap lives in ``lane_count_at`` and not in the bake or
+    in ``leg_aadt_at``.
+    """
+    from freight_fate.sim.trip_models import congestion_ratio
+
+    six = congestion_ratio(250_000, 8.0, 6, False)
+    three = congestion_ratio(250_000, 8.0, 3, False)
+    assert three > six
+    # The real count is what keeps this freeway out of the jam band.
+    assert six < 1.0 < three

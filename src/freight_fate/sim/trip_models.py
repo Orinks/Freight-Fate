@@ -441,6 +441,18 @@ def heuristic_aadt(highway: str, near_city: bool) -> float:
 # real per-leg count onto ``Leg`` later and ``leg_lane_count`` will use it.
 CONSTRUCTION_CLOSURE_CHANCE = 0.65
 DEFAULT_LEG_LANES = 2
+# The most lanes per direction the game can put a driver in, and it is a
+# SPEECH limit before it is a driving one: ``lane.lane_label`` has exactly
+# three names -- right, left, middle -- so on a road of four or more every
+# interior lane is announced as "the middle lane" and a player working by
+# ear cannot tell which one they are in, or which one just came open. Real
+# HPMS counts run to six on urban freeways and the bake records them
+# honestly; this clamps what the DRIVER is offered, not what the road is
+# recorded as carrying. Traffic capacity still divides by the real count
+# (``leg_aadt_at``), because how much road there is for traffic and how many
+# lanes the player can occupy are different questions -- clamping the
+# capacity too would invent jams on freeways that flow.
+MAX_DRIVABLE_LANES = 3
 TRAFFIC_LOOKAHEAD_MI = 2.5
 TRAFFIC_WARNING_GAP_S = 2.2
 TRAFFIC_PRESSURE_LOOKAHEAD_MI = 2.5

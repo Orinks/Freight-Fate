@@ -671,9 +671,26 @@ onto exit signalling.
 - [ ] **Off-air stations should not yank the dial.** Tuning past a dead
       stream should carry on around the dial from where you were instead of
       handing over to a distant fallback station (Darren).
-- [ ] **Lane names past three lanes.** Left, middle, and right cannot tell
-      four or five lanes apart; Sarah already hit ambiguous callouts on a
-      three-plus road near Riverside.
+- [x] **Lane names past three lanes -- CAPPED at three (owner ruling,
+      2026-08-19: "we don't support five lane highways yet, just three").**
+      Left, middle and right cannot tell four or five lanes apart; Sarah hit
+      ambiguous callouts on a three-plus road near Riverside. It is a SPEECH
+      limit before a driving one, so the answer is not more lane names but
+      fewer lanes: `MAX_DRIVABLE_LANES = 3`, applied in `Trip.lane_count_at`,
+      the documented single source for "how many lanes the driver has".
+
+      The cap is deliberately NOT in the bakes and NOT in `leg_aadt_at`. HPMS
+      records real per-direction counts up to six and those stay true; traffic
+      capacity keeps dividing by the real number, because how much road there
+      is for traffic and how many lanes a player can occupy are different
+      questions. Clamping capacity too would have invented stop-and-go on
+      urban freeways that flow -- a six-lane freeway at 250,000 AADT sits
+      under a v/c of 1.0 and goes over it if you divide by three. Both halves
+      are pinned in `test_multilane_speech.py`.
+
+      Naming four or more lanes remains open as a FEATURE (ordinal names --
+      "the second lane from the right"). Until then the cap is what keeps
+      every callout unambiguous.
 - [ ] **Game sounds duck under the in-cab radio.** Enforcement markers and
       pass-bys currently talk over the radio instead of alongside it
       (Shane).

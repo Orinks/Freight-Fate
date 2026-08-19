@@ -786,6 +786,15 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Every lane has a name you can tell apart.** On the widest roads the truck
+  could put you in four or five lanes, but it only has three names for them --
+  right, middle and left -- so two or three different lanes were all called
+  "the middle lane" and there was no way to tell from the callout which one you
+  were in, or which one had just come open. Roads now offer at most three lanes
+  to drive in. How busy a road is has not changed: the traffic still knows how
+  wide the real road is, so a wide city freeway does not suddenly jam just
+  because you are being offered fewer lanes to sit in.
+
 - **State lines, billboards and lane counts stop going missing.** The road's
   quieter announcements waited in a single place, so a second one arriving
   before the first had spoken simply erased it, and any hazard threw away

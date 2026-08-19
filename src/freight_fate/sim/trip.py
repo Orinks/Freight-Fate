@@ -1788,15 +1788,22 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         the HPMS leg count is the last word. This is the same answer the
         driving state steers by, so anything that reasons about how many lanes
         the driver has -- lane closures above all -- asks here.
+
+        Capped at ``MAX_DRIVABLE_LANES``: the spoken vocabulary has three
+        lane names, so a fourth lane is one the driver cannot be told apart
+        from the third. The cap lives here rather than in the bakes so the
+        recorded road stays true -- and deliberately NOT in ``leg_aadt_at``,
+        whose lane count is traffic capacity rather than a lane anyone
+        drives in.
         """
         baked = self.lanes_at(mile)
         if baked is not None:
-            return max(1, baked[0])
+            return max(1, min(MAX_DRIVABLE_LANES, baked[0]))
         leg_i, _ = self._leg_at_mile(self.position_mi if mile is None else mile)
         leg = self.route.legs[leg_i]
         if getattr(leg, "divided", None) is False:
             return 1
-        return leg_lane_count(leg)
+        return min(MAX_DRIVABLE_LANES, leg_lane_count(leg))
 
     def active_closure(self, mile: float | None = None) -> Zone | None:
         """The roadwork zone whose cones cover this mile, taper included.
