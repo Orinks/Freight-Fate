@@ -597,6 +597,11 @@ def test_live_fringe_stream_gets_hiss_bed_and_pickets(denver_driving, monkeypatc
 
     driving.truck.velocity_mps = 25.0
     driving._picket_wait_s = 0.0
+    # The picket's duck is part of "step my audio back", which is OFF by
+    # default -- so this asks for it explicitly rather than assuming. The
+    # burst itself plays either way; see
+    # test_a_picket_does_not_duck_when_the_player_turned_ducking_off.
+    driving.ctx.settings.duck_audio_for_speech = True
     driving._update_radio_fringe(0.016)
 
     assert loops and loops[-1][1] == "radio/fm_hiss_loop" and loops[-1][2] > 0.0
@@ -608,6 +613,18 @@ def test_live_fringe_stream_gets_hiss_bed_and_pickets(denver_driving, monkeypatc
     driving._picket_wait_s = 10.0
     driving._update_radio_fringe(0.5)
     assert driving._radio_picket_duck == 1.0
+
+    # And with "step my audio back" off, the same picket plays without
+    # ducking at all (owner, 2026-08-19: "if the duck setting is off,
+    # absolutely nothing, earcons, radio or anything should be ducked").
+    # The burst is signal, the duck is the accessibility behavior, and only
+    # the second one is the player's to switch off.
+    driving.ctx.settings.duck_audio_for_speech = False
+    played_effects.clear()
+    driving._picket_wait_s = 0.0
+    driving._update_radio_fringe(0.016)
+    assert any(key.startswith("radio/picket") for key, _v in played_effects)
+    assert driving._radio_picket_duck == 1.0, "ducked with the setting off"
 
 
 def test_clean_program_at_the_new_full_volume_join_has_no_fringe(denver_driving, monkeypatch):

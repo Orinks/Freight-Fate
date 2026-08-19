@@ -2263,9 +2263,16 @@ class DrivingUpdateMixin:
             "radio/static_burst",
             volume=(0.15 + 0.35 * picket_depth) * self.ctx.settings.radio_volume,
         )
-        self._radio_picket_duck = PICKET_DUCK
-        self._picket_duck_s = 0.05 + 0.08 * self._fringe_rng.random()
-        self._apply_radio_volume()
+        # Honors Settings > Audio the same as every other duck in the game.
+        # This one is arguably signal simulation rather than an accessibility
+        # step-back -- a picket IS the program dipping under multipath fade --
+        # but "do not step my audio back" is one behavior with one name, and a
+        # player who turned it off did not mean "except for this". The burst
+        # still plays at full level; it just no longer digs itself a hole.
+        if self.ctx.settings.duck_audio_for_speech:
+            self._radio_picket_duck = PICKET_DUCK
+            self._picket_duck_s = 0.05 + 0.08 * self._fringe_rng.random()
+            self._apply_radio_volume()
 
     def _stop_radio_fringe(self) -> None:
         if self._fringe_bed_active:

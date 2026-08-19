@@ -16,7 +16,7 @@ import pygame
 from . import __version__
 from .achievements import AchievementAward, award
 from .assets_pack import prefetch_default as prefetch_sound_pack
-from .audio import SPEECH_DUCK_LEVEL, AudioEngine
+from .audio import EARCON_DUCK_S, SPEECH_DUCK_LEVEL, AudioEngine
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
@@ -116,6 +116,9 @@ class GameContext:
         # Whether the game mix is currently stepped down under the event
         # voice (Settings > Audio; see _engage_speech_duck).
         self._speech_ducked = False
+        # Deadline for a duck an earcon opened, in real seconds. Zero when the
+        # duck belongs to a spoken line, which the pacer's projection ends.
+        self._earcon_duck_until = 0.0
         # True only while a control the player actually pressed is being
         # handled. See ``player_asked``: a readout somebody asked for cuts the
         # line in progress even at the wheel, where unasked-for lines queue.
@@ -527,6 +530,9 @@ class GameContext:
                 return
             if self.settings.speech_disposition(category) is Disposition.EARCON:
                 self._play_ladder_earcon(category)
+                # The cue is standing in for the words, so it gets the room
+                # the words would have had (see _engage_earcon_duck).
+                self._engage_earcon_duck()
             self._event_pacer.note_silenced(text, key=key)
             transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)
             if review:
@@ -592,6 +598,35 @@ class GameContext:
         if review:
             self.message_log.add(text, MessageCategory.EVENT)
 
+    def _engage_earcon_duck(self) -> None:
+        """Step the mix back for an earcon, the way it steps back for words.
+
+        Tester Shane, 2026-08-17: "some of the sounds when you put speech in
+        quiet mode have been significantly lowered." Measured absolutely they
+        were not -- the confirmation note came out about 4 dB LOUDER than the
+        chime it replaced, and a trooper pass never drops below its old level.
+        Both measurements missed the point, because a listener hears a level
+        RELATIVE to what is under it.
+
+        A spoken line ducks engine, weather and radio to SPEECH_DUCK_LEVEL
+        while it talks. A silenced line returns from ``say_event`` before
+        reaching that duck, so its earcon played against the full road bed --
+        roughly 6 dB worse off than the words it stands in for, and quiet is
+        precisely the rung where confirmation, status and coaching ALL become
+        earcons. So the sound that carries the information was the one
+        competing hardest to be heard.
+
+        The window is real seconds and short, because the cues are short: the
+        longest (the two-note coaching chime) runs 0.18 s. It is not the
+        pacer's projection, which describes a voice that in this case is
+        never going to speak.
+        """
+        if not self.settings.duck_audio_for_speech:
+            return
+        self._speech_ducked = True
+        self._earcon_duck_until = time.monotonic() + EARCON_DUCK_S
+        self.audio.set_speech_duck(SPEECH_DUCK_LEVEL)
+
     def _engage_speech_duck(self) -> None:
         """Step the game mix back while the event voice speaks (R13).
 
@@ -608,10 +643,20 @@ class GameContext:
         self.audio.set_speech_duck(SPEECH_DUCK_LEVEL)
 
     def update_speech_duck(self) -> None:
-        """Per-frame: bring the mix back once the event voice falls silent."""
-        if self._speech_ducked and not self._event_pacer.busy():
-            self._speech_ducked = False
-            self.audio.set_speech_duck(1.0)
+        """Per-frame: bring the mix back once the event voice falls silent.
+
+        An earcon duck holds for its own short window instead, since the
+        pacer has nothing to project for a line that was never spoken.
+        """
+        if not self._speech_ducked:
+            return
+        if self._earcon_duck_until and time.monotonic() < self._earcon_duck_until:
+            return
+        if self._event_pacer.busy():
+            return
+        self._speech_ducked = False
+        self._earcon_duck_until = 0.0
+        self.audio.set_speech_duck(1.0)
 
     def reset_event_condition(self, key: str) -> None:
         """A standing condition has cleared; let it announce itself afresh."""

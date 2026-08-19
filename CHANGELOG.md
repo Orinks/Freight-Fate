@@ -803,6 +803,16 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Cues in quiet mode are no longer buried under the road.** When speech is set
+  to quiet, several spoken lines are replaced by short sounds. Those sounds were
+  playing at full road volume while the spoken lines they stand in for had
+  always stepped the engine, weather and radio back -- so the sound carrying the
+  information was the one competing hardest to be heard. It now gets the same
+  room the words would have had. If you have turned "step my audio back" off in
+  Settings, Audio, nothing steps back at all: not speech, not these sounds, and
+  not the radio, which was still dipping under interference regardless.
+  Reported by Shane.
+
 - **The highway stops bending where it does not.** Cruising an interstate, the
   truck called out far more curves than the road actually has -- about six per
   hundred miles, on roads that in reality hardly ever ask you to slow. Half the

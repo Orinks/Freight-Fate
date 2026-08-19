@@ -209,6 +209,12 @@ ENGINE_START_SETTLE_CURVE = "ease_out"  # key into audio_fades.CURVES
 # present, the words win (XAG 105; speech priority research, R13).
 SPEECH_DUCK_LEVEL = 0.5
 
+# How long the same duck holds for an EARCON, which has no voice for the
+# pacer to project. Real seconds, and sized to the cues themselves: the
+# longest ladder earcon is the two-note coaching chime at 0.18 s, so this
+# covers it and its tail without the mix audibly breathing.
+EARCON_DUCK_S = 0.25
+
 BASS_NO_SOUND_DEVICE = 0
 
 # Radio streaming (BASS only). Opening a URL blocks until the server answers;
