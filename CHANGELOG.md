@@ -42,6 +42,11 @@
   outright: Classical KDFC, WMFO, WRBH Reading Radio, WHYR Baton Rouge and
   KFMG Des Moines all play again.
 
+- **A Florida landmark that no longer exists is off the road.** The truck
+  used to call out the Astronaut Memorial Planetarium and Observatory on the
+  way past. It was destroyed in a hurricane and never rebuilt, so it is gone
+  from the map. Reported by Brandon.
+
 - **Synthwave City FM is on the web radio band.** A synthwave station for
   the night runs, requested by Sarah R. and added with the station's own
   stream.
