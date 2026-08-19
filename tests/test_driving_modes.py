@@ -1,4 +1,4 @@
-"""Driving-pressure distinctions for Relaxed, Standard, and Realistic."""
+"""Driving-pressure distinctions for Relaxed and Standard."""
 
 import pygame
 import pytest
@@ -11,18 +11,19 @@ def test_driving_mode_tuning_keeps_standard_baseline_and_softens_only_relaxed():
 
     relaxed = tuning_for_time_scale(10.0)
     standard = tuning_for_time_scale(20.0)
-    realistic = tuning_for_time_scale(40.0)
 
-    assert [relaxed.name, standard.name, realistic.name] == [
-        "relaxed",
-        "standard",
-        "realistic",
-    ]
-    assert relaxed.reaction_window > standard.reaction_window == realistic.reaction_window
-    assert relaxed.collision_damage < standard.collision_damage == realistic.collision_damage
-    assert relaxed.fatigue_rate < standard.fatigue_rate == realistic.fatigue_rate
+    assert [relaxed.name, standard.name] == ["relaxed", "standard"]
+    assert relaxed.reaction_window > standard.reaction_window
+    assert relaxed.collision_damage < standard.collision_damage
+    assert relaxed.fatigue_rate < standard.fatigue_rate
     assert relaxed.ambient_spacing_s > standard.ambient_spacing_s
     assert relaxed.routine_speech_interval_s > standard.routine_speech_interval_s
+
+    # The retired Realistic scale, and any other custom one, still resolves
+    # to standard's pressure rather than raising -- a save or a bench that
+    # sets the raw trip value has to keep driving. 40x is reachable in play
+    # regardless: PARKED_TIME_SCALE_MULT doubles standard while parked.
+    assert tuning_for_time_scale(40.0).name == "standard"
 
 
 def test_pause_settings_mode_change_updates_active_trip_pressure(monkeypatch):
@@ -75,7 +76,7 @@ def test_pause_settings_mode_change_updates_active_trip_pressure(monkeypatch):
         driving.update(0.0)
         assert driving.trip.hazard_scale == pytest.approx(0.55)
 
-        app.ctx.settings.time_scale = 40.0
+        app.ctx.settings.time_scale = 20.0
         driving.update(0.0)
         assert driving.trip.hazard_scale == pytest.approx(1.0)
     finally:

@@ -793,6 +793,31 @@ onto exit signalling.
       Three tests in `test_driving_speech_ladder.py`, driven from the log's
       own lines.
 
+- [x] **Realistic pacing retired; the row is Relaxed and Standard (owner,
+      2026-08-19).** Realistic was 40x game-clock compression -- the FASTEST
+      of the three, and therefore the least like real driving, which is 1x.
+      It also carried standard's pressure tuning field for field
+      (`driving_modes._MODES`), so it was never a difficulty at all: only a
+      clock multiplier wearing a difficulty's name. Retiring it costs no
+      tuning.
+
+      A save carrying 40.0 migrates to 20.0 in `Settings.load` and arms
+      `pace_retired_notice_left`, because the migration halves the rate their
+      game clock bills and nothing else would say so -- they would meet it as
+      an hours-of-service day that suddenly lasts twice as long. Only the
+      exact retired value migrates; a hand-edited custom scale still runs at
+      whatever it says, as it always has. 40x is still reachable in play and
+      still exercised by tests: `PARKED_TIME_SCALE_MULT` doubles standard
+      while parked.
+
+      Found on the way: `SettingsCategoryState.announce_entry` speaks the
+      landing row through `ctx.say` rather than `speak_current`, so a
+      row-specific notice hung on `speak_current` alone could never reach a
+      player whose row is the one they land on -- which is every player for
+      Driving mode, the first row of its category. The lane-keeping rename
+      notice had the same hole, hidden only because Lane keeping is not first
+      in its category. Both now fire from `announce_entry` too.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED

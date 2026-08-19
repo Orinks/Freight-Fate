@@ -3137,9 +3137,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
     def _enforcement_warning_lookahead_mi(self) -> float:
         """Lead distance for an enforcement cue, in miles, sized in real time.
 
-        A flat five miles was five miles of *game* road: at realistic pacing
-        the player passed the post before an eighteen-word CB call had
-        finished speaking. Scale it with speed and pacing the way zone
+        A flat five miles was five miles of *game* road: at the faster
+        pacing the player passed the post before an eighteen-word CB call
+        had finished speaking. Scale it with speed and pacing the way zone
         warnings already are, and clamp it so it is never shorter than the
         old distance and never absurd.
         """

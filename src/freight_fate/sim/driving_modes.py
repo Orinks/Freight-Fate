@@ -16,10 +16,16 @@ class DrivingModeTuning:
     routine_speech_interval_s: float
 
 
+# The two pacing settings the row offers. "Realistic" (40x) was retired on
+# 2026-08-19: it carried standard's pressure tuning field for field and
+# differed only in compressing the clock twice as hard, so the row's one
+# realistic-sounding choice was also its least realistic -- real driving is
+# 1x. Retiring it costs no tuning, because there was none of its own to
+# lose; a save still carrying 40x migrates to standard in Settings.load,
+# and any other scale still falls through to standard's pressure here.
 _MODES = {
     10.0: DrivingModeTuning("relaxed", 0.55, 1.5, 0.6, 0.8, 5.0, 18.0),
     20.0: DrivingModeTuning("standard", 1.0, 1.0, 1.0, 1.0, 2.5, 12.0),
-    40.0: DrivingModeTuning("realistic", 1.0, 1.0, 1.0, 1.0, 2.5, 12.0),
 }
 
 

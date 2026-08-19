@@ -89,7 +89,9 @@ def test_advance_warning_lead_scales_with_time_compression(world):
     several times that.
     """
     trip = _trip(world, VILLAGE)
-    trip.time_scale = 40.0  # the game's top compression setting
+    # Beyond any pacing the row offers (Realistic was retired 2026-08-19),
+    # but reachable in play: parking doubles standard to exactly this.
+    trip.time_scale = 40.0
     speed = 55.0
     # The compression ramp reads the truck's real speed; a parked trip idles
     # at the 4x floor, so put the truck at highway pace first.

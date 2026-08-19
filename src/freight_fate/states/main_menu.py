@@ -1219,8 +1219,9 @@ class SettingsCategoryState(MenuState):
                     help="Driving mode controls pacing and pressure. Relaxed "
                     "gives wider hazard response windows, gentler "
                     "collision damage and fatigue, calmer speech, and the most "
-                    "real time. Standard keeps balanced pressure. Realistic "
-                    "moves fastest, so decisions arrive sooner.",
+                    "real time. Standard keeps balanced pressure and moves the "
+                    "clock twice as fast, so a driving day takes half as long "
+                    "and decisions arrive sooner.",
                 ),
                 MenuItem(
                     lambda: f"Hours of service: {self._hos_label()}",
@@ -1737,9 +1738,48 @@ class SettingsCategoryState(MenuState):
             ),
         )
 
+    def announce_entry(self) -> None:
+        # Entry speaks the landing row through ``ctx.say`` rather than
+        # ``speak_current``, so a row-specific notice attached only to the
+        # latter is never heard by a player whose row is the one they land
+        # on -- which is every player for Driving mode, the first row of
+        # Difficulty and hours of service. Both notices are guarded by their
+        # own counter, so running them here costs nothing on a visit that
+        # arrows in from elsewhere.
+        super().announce_entry()
+        self._maybe_say_lane_keeping_rename()
+        self._maybe_say_pace_retired()
+
     def speak_current(self) -> None:
         super().speak_current()
         self._maybe_say_lane_keeping_rename()
+        self._maybe_say_pace_retired()
+
+    def _maybe_say_pace_retired(self) -> None:
+        """Tell a player who was on Realistic why their row now says Standard.
+
+        Their game clock runs at half the rate they set it to, so a driving
+        day now takes twice the real time it used to. Nothing else on the
+        row would say so: the label reads Standard as though they had
+        chosen it. Same budget and same queueing as the lane-keeping rename
+        -- it follows the row announcement rather than interrupting it, so a
+        player arrowing straight past loses it and hears it next visit.
+        """
+        s = self.ctx.settings
+        if self.category != "difficulty" or s.pace_retired_notice_left <= 0:
+            return
+        if not self.items or not self.items[self.index].text.startswith("Driving mode"):
+            return
+        s.pace_retired_notice_left -= 1
+        s.save()
+        self.ctx.say(
+            "This row used to offer Realistic, and yours was set to it. "
+            "It has been retired: it was the fastest setting here, not the "
+            "most true to life, and the name said the opposite of what it "
+            "did. You are on Standard now, so the game clock runs at half "
+            "the speed it did and a driving day takes twice the real time.",
+            interrupt=False,
+        )
 
     def _maybe_say_lane_keeping_rename(self) -> None:
         """Tell a returning player their Lane drift row is now Lane keeping.
@@ -1839,7 +1879,7 @@ class SettingsCategoryState(MenuState):
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
-        return {10.0: "relaxed", 20.0: "standard", 40.0: "realistic"}.get(scale, f"{scale:g} times")
+        return {10.0: "relaxed", 20.0: "standard"}.get(scale, f"{scale:g} times")
 
     def _hos_label(self) -> str:
         return {

@@ -26,7 +26,21 @@ from .units import (
 
 log = logging.getLogger(__name__)
 
-TIME_SCALES = (10.0, 20.0, 40.0)
+# Driving-mode pacing, as a game-clock multiplier: at 20x, one real minute
+# is twenty game minutes. "Realistic" (40x) was retired on 2026-08-19 by
+# owner ruling, and the name is why: it was the MOST compressed setting on
+# the row, so the one word on the dial that promises real driving delivered
+# the furthest thing from it -- real driving is 1x, and 40x made the driving
+# day flash past. A save that still carries it lands on standard and is told
+# once (RETIRED_TIME_SCALE below).
+TIME_SCALES = (10.0, 20.0)
+RETIRED_TIME_SCALE = 40.0
+TIME_SCALE_FALLBACK = 20.0
+# Budget for the "your pacing row lost a setting" line, spent one visit at a
+# time on the real control. Same shape and reasoning as
+# LANE_KEEPING_RENAME_NOTICES: it queues behind the row announcement, so a
+# player who keeps arrowing loses it and the next visit says it again.
+PACE_RETIRED_NOTICES = 3
 PROFILE_SHARING_CONSENT_VERSION = 3
 
 # Bumped when the settings *menu* is reorganized enough that a returning
@@ -172,8 +186,13 @@ class Settings:
     automatic_direction_changes: str = "simple"  # simple/deliberate
     # Distance compression while driving. Relaxed (10x) by default: new players
     # get the most real time to hear and react to spoken events; veterans can
-    # step up to standard or realistic in Settings, Gameplay.
+    # step up to standard in Settings, Gameplay. Those are the only two
+    # offered -- see TIME_SCALES for why the third went.
     time_scale: float = 10.0
+    # Spoken once (up to PACE_RETIRED_NOTICES times) to a player whose saved
+    # pacing was the retired Realistic, because their truck now bills the
+    # clock at half the rate it did and nothing else would tell them.
+    pace_retired_notice_left: int = 0
     real_weather: bool = False  # live conditions from the NWS API
     real_traffic: bool = False  # live traffic incidents from state 511 APIs
     real_parking: bool = False  # live truck parking availability from TPIMS APIs
@@ -511,6 +530,21 @@ class Settings:
         # below. debug_off stays valid as an internal dev/test bypass only.
         if s.hos_mode not in HOS_MODES:
             s.hos_mode = "realistic"
+        # Realistic pacing is no longer offered. A save that chose it lands
+        # on standard rather than keeping a value the row cannot show, and
+        # arms the notice: the game clock now runs at half the rate this
+        # player set it to, which they would otherwise discover as their
+        # hours-of-service day lasting twice as long for no stated reason.
+        # Only the exact retired value migrates -- a hand-edited custom
+        # scale still runs at whatever it says, as it always has.
+        if s.time_scale == RETIRED_TIME_SCALE:
+            s.time_scale = TIME_SCALE_FALLBACK
+            s.pace_retired_notice_left = PACE_RETIRED_NOTICES
+        if not isinstance(s.pace_retired_notice_left, int) or isinstance(
+            s.pace_retired_notice_left, bool
+        ):
+            s.pace_retired_notice_left = 0
+        s.pace_retired_notice_left = max(0, min(PACE_RETIRED_NOTICES, s.pace_retired_notice_left))
         if s.lane_cue_loudness not in ("subtle", "standard", "prominent"):
             s.lane_cue_loudness = "standard"
         if not isinstance(s.lane_guide_tone, bool):

@@ -13,7 +13,7 @@ from playtest_harness import PlaytestHarness, key_event
 @pytest.mark.career_1_9
 @pytest.mark.parametrize(
     ("mode", "time_scale"),
-    [("relaxed", 10.0), ("standard", 20.0), ("realistic", 40.0)],
+    [("relaxed", 10.0), ("standard", 20.0)],
 )
 def test_each_driving_mode_completes_a_full_spoken_delivery(monkeypatch, mode, time_scale):
     with PlaytestHarness(monkeypatch) as harness:
@@ -687,7 +687,10 @@ def test_rest_stop_arrival_cue_allows_immediate_parking_brake_stop(monkeypatch):
 
     with PlaytestHarness(monkeypatch) as harness:
         harness.app.ctx.settings.automatic_transmission = True
-        harness.app.ctx.settings.time_scale = 40.0
+        # Standard, the fastest pacing the row offers since Realistic was
+        # retired -- so this is the shortest real-time arrival window a
+        # player can actually be given.
+        harness.app.ctx.settings.time_scale = 20.0
         # The question here is whether the spoken arrival point leaves real
         # seconds to stop in, not whether the driver made the exit lane.
         harness.app.ctx.settings.lane_keeping = "full"

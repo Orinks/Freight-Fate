@@ -462,9 +462,10 @@ CORRIDOR_HAZARD_MAX_FACTOR = 1.45
 CB_PATROL_LOOKAHEAD_MI = 5.0  # floor for the enforcement lead, never the whole answer
 # Enforcement cues get the same real-time treatment zone warnings already get
 # (ZONE_WARNING_REAL_S below). A fixed five miles is 13.8 real seconds at
-# relaxed pacing and 3.5 at realistic, and the CB call itself takes about
-# seven seconds to speak -- so at realistic pacing the player used to pass the
-# post mid-sentence.
+# relaxed pacing and 6.9 at standard, and the CB call itself takes about
+# seven seconds to speak -- so at the faster pacing the player used to pass
+# the post mid-sentence. (It was 3.5 seconds at the retired Realistic 40x,
+# which is where the problem was first seen.)
 ENFORCEMENT_WARNING_REAL_S = 18.0
 ENFORCEMENT_WARNING_MAX_MI = 12.0
 # An open scale costs money and time, so its call gets a longer lead than a
@@ -491,8 +492,8 @@ FULL_COMPRESSION_MPH = 50.0  # road speed where full pacing resumes
 # Setting the parking brake says "I'm staying put": nothing needs real-time
 # reactions, so waiting runs at double the configured pacing -- weather,
 # daylight, and dock time pass without dropping into real time, and each
-# pacing setting keeps its relative feel (relaxed 20x, standard 40x, realistic
-# 80x). Releasing the brake returns to the speed ramp instantly.
+# pacing setting keeps its relative feel (relaxed 20x, standard 40x).
+# Releasing the brake returns to the speed ramp instantly.
 PARKED_TIME_SCALE_MULT = 2.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.5
 # Chain-law areas sit over sustained steep grade -- the real trigger for

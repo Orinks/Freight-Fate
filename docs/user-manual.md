@@ -1436,7 +1436,7 @@ listed under. Driving assistance is covered in full above.
 
 | Setting | Purpose |
 | --- | --- |
-| Driving mode | Choose Relaxed, Standard, or Realistic pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most real time to respond. Standard keeps balanced timing and consequences. Realistic moves distance and time fastest, so decisions arrive sooner without extra forgiveness. At low speed the clock still eases toward real time, and deliberate parked waiting runs at double the selected pace. |
+| Driving mode | Choose Relaxed or Standard pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most real time to respond. Standard keeps balanced timing and consequences and moves distance and time twice as fast, so a driving day takes half the real time and decisions arrive sooner without extra forgiveness. At low speed the clock still eases toward real time, and deliberate parked waiting runs at double the selected pace. A third setting, Realistic, was retired: it was simply the fastest pacing rather than the most true to life, and the row says so once to anyone whose save had it. |
 | Hours of service | Choose realistic or relaxed legal limits. Relaxed hours rules lengthen the limits and further reduce random hazard frequency; real violations keep their normal consequences. |
 
 The dash overspeed alert has no setting. It speaks once and then chimes,

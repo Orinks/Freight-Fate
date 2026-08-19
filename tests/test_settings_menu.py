@@ -1358,6 +1358,10 @@ SETTINGS_INTERNAL_FLAGS = {
     # How many times the Lane keeping row still explains its own rename.
     # Counted down by the row that speaks it.
     "lane_keeping_rename_notice_left",
+    # Same shape, for the Driving mode row explaining that Realistic pacing
+    # was retired and their save landed on Standard. Armed by Settings.load,
+    # counted down by the row that speaks it.
+    "pace_retired_notice_left",
     # The preset row's own state. apply_/refresh_driving_assistance_preset in
     # settings.py write it; it names a combination of the real fields rather
     # than doing anything itself.
@@ -1549,5 +1553,127 @@ def test_a_player_two_layouts_behind_hears_the_driving_speech_notice():
         # Only the version-3 notice was owed; the earlier ones must not replay.
         assert not [line for line in spoken if "Gameplay is now a category" in line]
         assert not [line for line in spoken if "Speed keeper is now in" in line]
+    finally:
+        app.shutdown()
+
+
+def test_realistic_pacing_migrates_to_standard_and_is_explained():
+    """Owner ruling, 2026-08-19: Realistic was the fastest pacing on the row,
+    not the truest to life, so the row now offers Relaxed and Standard only.
+
+    A player who had chosen it gets standard -- but their game clock now
+    runs at half the rate they set, so a driving day takes twice the real
+    time. Nothing else would tell them: the row reads Standard as though
+    they had picked it. Same notice shape as the lane-keeping rename.
+    """
+    import json
+
+    from freight_fate.settings import PACE_RETIRED_NOTICES, TIME_SCALES, Settings
+
+    assert 40.0 not in TIME_SCALES
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(json.dumps({"time_scale": 40.0}), encoding="utf-8")
+    loaded = Settings.load()
+    assert loaded.time_scale == 20.0
+    assert loaded.pace_retired_notice_left == PACE_RETIRED_NOTICES
+
+
+def test_a_pacing_the_row_still_offers_is_left_alone():
+    """The migration is for the one retired value, not a clamp on the field.
+
+    A hand-edited custom scale has always run at whatever it says, and the
+    row has always been able to read it back as "N times". Turning this into
+    a general clamp would silently reset those saves too.
+    """
+    import json
+
+    from freight_fate.settings import Settings
+
+    for saved in (10.0, 20.0, 30.0):
+        settings = Settings()
+        settings.path.parent.mkdir(parents=True, exist_ok=True)
+        settings.path.write_text(json.dumps({"time_scale": saved}), encoding="utf-8")
+        loaded = Settings.load()
+        assert loaded.time_scale == saved, saved
+        assert loaded.pace_retired_notice_left == 0, saved
+
+
+def test_the_driving_mode_row_explains_the_retired_pacing():
+    from freight_fate.app import App
+    from freight_fate.settings import PACE_RETIRED_NOTICES
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    try:
+        app.ctx.settings.time_scale = 20.0
+        app.ctx.settings.pace_retired_notice_left = PACE_RETIRED_NOTICES
+        # Driving mode is the row this category lands on, so entry speaks it
+        # and spends one of the three.
+        cat = open_settings_category(app, "Difficulty and hours of service")
+        assert cat.items[cat.index].text.startswith("Driving mode")
+        notice = [line for line in spoken if "used to offer Realistic" in line]
+        assert notice
+        assert "half the speed" in notice[-1]
+        assert app.ctx.settings.pace_retired_notice_left == PACE_RETIRED_NOTICES - 1
+
+        # And it stops once the budget is spent.
+        app.ctx.settings.pace_retired_notice_left = 0
+        spoken.clear()
+        cat = open_settings_category(app, "Difficulty and hours of service")
+        cat.announce_entry()
+        cat.speak_current()
+        assert not [line for line in spoken if "used to offer Realistic" in line]
+    finally:
+        app.shutdown()
+
+
+def test_the_driving_mode_row_cycles_only_the_two_offered_paces():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.time_scale = 10.0
+        cat = open_settings_category(app, "Difficulty and hours of service")
+        while not cat.items[cat.index].text.startswith("Driving mode"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        seen = []
+        for _ in range(4):
+            seen.append(cat.items[cat.index].text)
+            cat.handle_event(key_event(pygame.K_RIGHT))
+        assert seen == [
+            "Driving mode: relaxed",
+            "Driving mode: standard",
+            "Driving mode: relaxed",
+            "Driving mode: standard",
+        ], seen
+    finally:
+        app.shutdown()
+
+
+def test_a_row_notice_is_heard_when_that_row_is_the_one_you_land_on():
+    """Entry speaks the landing row through ctx.say, not speak_current.
+
+    Driving mode is the first row of Difficulty and hours of service, so a
+    notice hung only on speak_current would never reach the player it was
+    written for -- they would have to arrow away and back to hear why their
+    pacing changed. The lane-keeping notice had the same hole; it was hidden
+    only because Lane keeping is not the first row of its category.
+    """
+    from freight_fate.app import App
+    from freight_fate.settings import PACE_RETIRED_NOTICES
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    try:
+        app.ctx.settings.time_scale = 20.0
+        app.ctx.settings.pace_retired_notice_left = PACE_RETIRED_NOTICES
+        cat = open_settings_category(app, "Difficulty and hours of service")
+        assert cat.items[cat.index].text.startswith("Driving mode"), cat.items[cat.index].text
+        cat.announce_entry()
+        assert [line for line in spoken if "used to offer Realistic" in line]
     finally:
         app.shutdown()

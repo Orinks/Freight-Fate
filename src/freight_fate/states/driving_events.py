@@ -1483,9 +1483,9 @@ class DrivingEventMixin:
         """Arming and announcement window for exits, scaled like zone warnings.
 
         At speed under time compression a fixed window shrinks to nothing in
-        real terms -- at 74 mph on realistic pacing, 5 miles is about 7 real
-        seconds, not enough to hear the callout, arm the exit, and brake to
-        ramp speed. Scale the window so it covers roughly
+        real terms -- at 74 mph on standard pacing, 5 miles is about 14 real
+        seconds, and it was half that on the retired Realistic setting: not
+        enough to hear the callout, arm the exit, and brake to ramp speed. Scale the window so it covers roughly
         ``EXIT_WARNING_REAL_S`` of real time at the current pace.
         """
         speed = max(self.truck.speed_mph, 30.0)

@@ -227,6 +227,16 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+- **The driving mode row offers Relaxed and Standard; Realistic has been
+  retired.** It was the fastest setting on the row, not the truest to life:
+  real driving runs at one times, and Realistic ran the game clock at forty,
+  so the one choice that promised a real day at the wheel gave you the
+  furthest thing from it. Standard is now the quickest pacing offered, at
+  twenty times. If your save was set to Realistic you are on Standard, your
+  game clock runs at half the speed it did, and a driving day takes twice the
+  real time -- the row tells you so the next few times you open it, because
+  nothing else would.
+
 
 - **The speed keeper stops promising a speed the road will not let you
   reach.** Turning it on approaching a facility, it would say it was holding

@@ -242,8 +242,10 @@ def test_the_dwell_pacing_constants_match_the_sim():
 
     assert LIMIT_DWELL_LOW_SPEED_SCALE == LOW_SPEED_TIME_SCALE
     assert LIMIT_DWELL_FULL_COMPRESSION_MPH == FULL_COMPRESSION_MPH
-    # Sized on the standard pace, the middle of the three the player can pick.
-    assert sorted(TIME_SCALES)[1] == LIMIT_DWELL_REFERENCE_SCALE
+    # Sized on the standard pace -- the faster of the two the player can
+    # pick, since Realistic was retired on 2026-08-19, and so still the
+    # worst case a posting has to survive.
+    assert sorted(TIME_SCALES)[-1] == LIMIT_DWELL_REFERENCE_SCALE
 
 
 def _posting_real_seconds(miles: float, mph: float | None) -> float:
