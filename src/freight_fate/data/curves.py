@@ -138,6 +138,128 @@ class RouteCurve:
 _CACHE: dict[str, tuple[CurveRecord, ...]] | None = None
 
 
+# The AASHTO point-mass control, which is what every state design manual
+# republishes: Rmin = V^2 / [15(0.01*emax + fmax)]  (FHWA-HRT-17-098, ch. 3;
+# Green Book table 3-7 supplies fmax). This is COMPUTED from the published
+# formula rather than a table typed in from memory, and the values it
+# produces are checked against the TxDOT Roadway Design Manual's own tables
+# 4-6 and 4-7 by test_the_radius_floor_matches_published_design_tables --
+# an earlier pass of this screen used 1,330 ft as the interstate floor, which
+# is in fact the SIXTY mph minimum, and let a design-speed step of bad
+# geometry through.
+AASHTO_SIDE_FRICTION = {
+    20: 0.27,
+    25: 0.23,
+    30: 0.20,
+    35: 0.18,
+    40: 0.16,
+    45: 0.15,
+    50: 0.14,
+    55: 0.13,
+    60: 0.12,
+    65: 0.11,
+    70: 0.10,
+    75: 0.09,
+    80: 0.08,
+}
+# 8 percent is the most permissive superelevation any state builds to, so a
+# curve under this floor is under EVERY standard, not merely under a strict
+# one. Snow states cap at 6 percent and could justify a stricter screen; the
+# looser number is the one that keeps this a screen for the impossible
+# rather than a screen for the unusual.
+SUPERELEVATION_MAX = 0.08
+
+
+def min_radius_ft(design_speed_mph: float) -> float:
+    """Tightest radius a road of this design speed may legally bend to."""
+    speeds = sorted(AASHTO_SIDE_FRICTION)
+    v = min(speeds, key=lambda s: abs(s - design_speed_mph))
+    return (v * v) / (15.0 * (SUPERELEVATION_MAX + AASHTO_SIDE_FRICTION[v]))
+
+
+# Which legs the screen may judge at all. It needs to know whether a tight
+# bend is the road or an artifact, and that is a question about terrain.
+#
+# TWO PROXIES WERE TRIED AND BOTH FAILED, which is why this reads a bake:
+#
+#   1. The world's own ``terrain`` field. Derived from NET elevation change
+#      end to end, so a road that climbs and drops all the way along without
+#      getting anywhere reads as flat -- I-70 through Glenwood Canyon is
+#      tagged "flat", and screening on it took 21 real curves off the canyon.
+#   2. Feet of elevation range per mile. Calibrated against HPMS Terrain_Type
+#      over a 92-leg sample and measured WEAK: Youden's J of 0.29, and at the
+#      threshold it suggested it mislabelled 54 percent of rolling and
+#      mountainous legs. A number tuned until it looked right, which is
+#      exactly what AGENTS.md says not to ship.
+#
+# So the terrain class is read rather than guessed: FHWA HPMS Terrain_Type,
+# baked per leg by tools/build_terrain_type.py. Only HPMS level ground is
+# screened. A leg HPMS calls rolling or mountainous keeps every curve it has,
+# and so does a leg HPMS has nothing to say about -- absence is not evidence
+# of flatness, and the safe direction here is a curve too many.
+HPMS_TERRAIN_LEVEL = 1
+
+
+def _leg_is_level(leg) -> bool:
+    """True only where HPMS itself says the ground is level."""
+    terrain = getattr(leg, "hpms_terrain", None)
+    return bool(terrain) and terrain.type == HPMS_TERRAIN_LEVEL
+
+
+def _leg_design_speed(leg) -> float:
+    """The speed this leg is built for, from its own baked limits.
+
+    The posted limit is the honest stand-in for design speed and it is real
+    data here -- OSM maxspeed swept per corridor -- so the floor follows the
+    road instead of a guess about its class. The fastest posting on the leg
+    is the one that matters: a curve has to be safe at the speed the road
+    lets a truck reach. Legs with no baked limit fall back to the class
+    default the runtime already uses elsewhere.
+    """
+    # A sample can carry a null mph (a posting the sweep found but could not
+    # read); those say nothing about design speed and must not be compared.
+    limits = [
+        s.mph for s in getattr(leg, "speed_limits", ()) if s is not None and s.mph is not None
+    ]
+    if limits:
+        return max(limits)
+    highway = (leg.highway or "").upper()
+    if highway.startswith("I-"):
+        return 70.0
+    return 55.0 if highway.startswith("US") else 45.0
+
+
+def _screenable_legs() -> dict[str, float]:
+    """``"a:b"`` -> radius floor, for legs flat enough to judge. Absent key
+    means "do not screen this leg's curves"."""
+    from .world import get_world
+
+    out: dict[str, float] = {}
+    for leg in get_world().legs:
+        if not _leg_is_level(leg):
+            continue
+        floor = min_radius_ft(_leg_design_speed(leg))
+        out[f"{leg.a}:{leg.b}"] = floor
+        out[f"{leg.b}:{leg.a}"] = floor
+    return out
+
+
+def _is_flat_ground_artifact(row: dict, floor: float) -> bool:
+    """A bend tighter than its own road may legally hold, on level ground.
+
+    The owner's report, 2026-08-19: "when I'm cruising down the highway or
+    turnpike in a car, it hardly ever curves." Measured, the map disagreed
+    with the road: interstate curve callouts ran 5.7 per hundred miles and
+    the median interstate curve radius sat at 1,342 ft against an 1,815 ft
+    floor for a 70 mph road.
+
+    The tell is the record disagreeing with ITSELF, which is why this needs
+    both halves -- a radius under the floor AND ground HPMS calls level.
+    Rough country earns a tight bend and keeps it.
+    """
+    return row["min_radius_ft"] < floor
+
+
 def _interstate_leg_keys() -> frozenset[str]:
     """``"a:b"`` keys, both directions, for interstate-class legs."""
     # Imported inside the function: the world module is heavy and has no need
@@ -242,6 +364,7 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
     if text is not None:
         interstate_legs = _interstate_leg_keys()
         flagged_artifacts = _flagged_artifact_keys()
+        screenable = _screenable_legs()
         for line in text.splitlines():
             if line.strip():
                 row = json.loads(line)
@@ -260,6 +383,12 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
                 # runtime rule, because the discriminator needs the dense
                 # elevation archive this loader has no reason to carry.
                 if not connector and (row["leg"], row.get("seq")) in flagged_artifacts:
+                    continue
+                # Fourth screen: any class, any route -- a bend tighter than
+                # the road's own design speed allows, on ground with no
+                # relief to justify it. See _is_flat_ground_artifact.
+                floor = screenable.get(row["leg"])
+                if not connector and floor is not None and _is_flat_ground_artifact(row, floor):
                     continue
                 # Connector arcs (interchange ramps) stay in the data with
                 # their flag: curve physics wants them, spoken layers skip

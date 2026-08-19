@@ -1028,6 +1028,50 @@ onto exit signalling.
       a leg HPMS never classified is never read as level, because the screens
       treat level ground as licence to remove geometry.
 
+- [x] **Curve audit: the map bent far more than the road does -- SHIPPED
+      2026-08-19.** Owner: "cruising down the highway or turnpike in a car, it
+      hardly ever curves. I want an honest audit."
+
+      MEASURED: 63,873 curve records, 55,434 mainline. The median interstate
+      curve radius was 1,342 ft; the tenth percentile across all mainline was
+      281 ft, which is an intersection rather than a highway. Interstate curve
+      callouts ran 5.7 per 100 miles. Separately, 46 percent of mainline
+      curves are INERT -- advisory 80 to 115 mph, and every consumer gates on
+      `speed > advisory + margin`, so a truck can never trigger them. Dead
+      weight in a 12.5 MB file, not noise; left alone deliberately.
+
+      THE FLOOR IS COMPUTED, NOT REMEMBERED. `min_radius_ft` evaluates the
+      AASHTO point-mass control from FHWA-HRT-17-098 with Green Book table 3-7
+      friction factors, and a test checks the output against TxDOT Roadway
+      Design Manual tables 4-6 and 4-7. My first pass hand-typed 1,330 ft as
+      the interstate floor -- that is the SIXTY mph minimum; 70 mph needs
+      1,815 at 8 percent superelevation -- so the screen was letting a whole
+      design-speed step of bad geometry through. Design speed now comes from
+      each leg's own baked OSM maxspeed rather than a guess at its class.
+
+      TERRAIN COMES FROM HPMS, not the world's label and not a relief
+      heuristic; see the terrain bake entry above for why both failed.
+
+      RESULT: interstate curve callouts 5.7 -> 2.4 per 100 miles, US highway
+      14.7 -> 7.4, state/local 18.6 -> 9.9. Glenwood Canyon keeps all 60 of
+      its curves. On I-77 Akron->Cleveland the screen removed two 82 ft
+      records turning 119 and 162 degrees -- on an interstate.
+
+- [x] **Grade screen now reads the real terrain class (2026-08-19).** The
+      screen itself already existed and is sound -- it CLAMPS rather than
+      drops, because grades tile the leg continuously and dropping a spike
+      would swap a noisy measurement for an invented terrain average. Its
+      class ceilings match what an independent check found (FHWA allows 6
+      percent in mountainous terrain, 7 by exception, and I-70 west of Denver
+      really holds 7). What changed is which terrain it asks: HPMS leads, the
+      segment's own label is the fallback, and a leg HPMS never classified
+      screens exactly as before. 926 -> 1,157 segments clamped; still zero
+      interstate segments above 7 percent.
+
+      NOTE: CLAUDE.md claimed "grade still has none". It had one. That claim
+      and the stale ramp_control one are why the provenance status moved out
+      of that file and into this one.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED

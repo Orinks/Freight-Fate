@@ -106,3 +106,40 @@ def test_the_baked_i5_leg_loads_with_no_impossible_slope():
     )
     worst = max(abs(s.avg_grade_pct) for s in built["grade_segments"])
     assert worst <= CLASS_CEILING_PCT["interstate"]
+
+
+def test_the_grade_ceiling_prefers_hpms_terrain_over_the_bake_label():
+    """The bake's own terrain label is derived from NET elevation change and
+    agreed with FHWA HPMS on only 67 percent of 1,273 legs.
+
+    The single worst grade record in the world -- +14.4 percent on I-5 --
+    sits on a leg the label calls "mountain", which would allow 12, while
+    HPMS calls that ground LEVEL, which allows 6. Class already capped it at
+    7; reading the real terrain caps it where it belongs.
+    """
+    from freight_fate.data.grades import (
+        HPMS_TERRAIN_TO_LABEL,
+        GradeSegment,
+        screen_grade_segments,
+    )
+
+    assert HPMS_TERRAIN_TO_LABEL == {1: "flat", 2: "hills", 3: "mountain"}
+    wall = GradeSegment(0.0, 0.3, 14.4, "mountain", "profile")
+
+    # Label alone: class ceiling for an interstate, 7.
+    by_label = screen_grade_segments((wall,), "I-5")[0]
+    assert by_label.avg_grade_pct == 7.0
+
+    # HPMS says level, so the terrain ceiling of 6 is the stricter one.
+    by_hpms = screen_grade_segments((wall,), "I-5", 1)[0]
+    assert by_hpms.avg_grade_pct == 6.0
+    assert "clamped" in by_hpms.source.lower()
+
+
+def test_a_leg_hpms_never_classified_screens_exactly_as_before():
+    """The fallback has to be a true no-op, or adding this bake would quietly
+    change the screening of every leg HPMS has nothing to say about."""
+    from freight_fate.data.grades import GradeSegment, screen_grade_segments
+
+    seg = GradeSegment(0.0, 0.3, 9.5, "hills", "profile")
+    assert screen_grade_segments((seg,), "I-70", None) == screen_grade_segments((seg,), "I-70")

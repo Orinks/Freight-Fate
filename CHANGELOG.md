@@ -803,6 +803,16 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The highway stops bending where it does not.** Cruising an interstate, the
+  truck called out far more curves than the road actually has -- about six per
+  hundred miles, on roads that in reality hardly ever ask you to slow. Half the
+  interstate bends in the map were sharper than an interstate is allowed to be
+  built, down to one turning a hundred and sixty degrees on a radius no highway
+  could hold; they came from noise in the road traces, not from the road. Those
+  are gone, and curve callouts on interstates are down to under half what they
+  were. Real mountain road keeps every bend it has, so the climbs that should
+  be interesting still are.
+
 - **A ticket you have already paid no longer sounds like a second one.**
   Hearing an enforcement stop read out again repeated the fine word for word,
   which was indistinguishable from being charged twice. The money was never

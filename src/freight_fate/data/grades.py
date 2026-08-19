@@ -45,13 +45,23 @@ from .world_models import GradeSegment
 # to argue with a genuinely severe US or state route pass.
 CLASS_CEILING_PCT = {"interstate": 7.0, "us": 10.0, "state": 12.0}
 
-# Ceiling implied by the bake's own terrain label, which is the other half of
-# the self-contradiction: a segment calling itself flat cannot also be a
-# 14 percent wall. Measured against the data, flat sits at 4.98 percent for
-# its 99th percentile and hills at 7.61, so these cut the tail and nothing
-# else. ``mountain`` gets a number only so the lookup is total; class governs
-# there in every case that matters.
+# Ceiling implied by terrain, which is the other half of the
+# self-contradiction: a segment on level ground cannot also be a 14 percent
+# wall. Measured against the data, flat sits at 4.98 percent for its 99th
+# percentile and hills at 7.61, so these cut the tail and nothing else.
+# ``mountain`` gets a number only so the lookup is total; class governs there
+# in every case that matters.
 TERRAIN_CEILING_PCT = {"flat": 6.0, "hills": 8.0, "mountain": 12.0}
+
+# WHICH terrain, though. The bake's own label is derived from net elevation
+# change end to end and is wrong often enough to matter: checked against FHWA
+# HPMS Terrain_Type over 1,273 legs it agreed on only 67 percent. The single
+# worst grade record in the world -- the I-5 14.4 -- sits on a leg the label
+# calls ``mountain`` (ceiling 12) while HPMS calls that ground LEVEL.
+#
+# So the HPMS class leads where it exists, and the segment's own label is the
+# fallback. HPMS speaks in Green Book terms; these are its names in ours.
+HPMS_TERRAIN_TO_LABEL = {1: "flat", 2: "hills", 3: "mountain"}
 
 _CLAMP_NOTE = (
     " Slope clamped at load from {raw:+.2f} to {capped:+.2f} percent -- derived, not read: "
@@ -76,23 +86,29 @@ def road_class(highway: str) -> str:
 
 
 def grade_ceiling_pct(highway: str, terrain: str) -> float:
-    """The stricter of what the road class and the terrain label allow."""
+    """The stricter of what the road class and the terrain allow."""
     by_class = CLASS_CEILING_PCT[road_class(highway)]
     by_terrain = TERRAIN_CEILING_PCT.get(terrain, max(TERRAIN_CEILING_PCT.values()))
     return min(by_class, by_terrain)
 
 
 def screen_grade_segments(
-    segments: tuple[GradeSegment, ...], highway: str
+    segments: tuple[GradeSegment, ...],
+    highway: str,
+    hpms_terrain: int | None = None,
 ) -> tuple[GradeSegment, ...]:
     """Cap slopes the road cannot hold, leaving every plausible one untouched.
 
     Returns the same objects where nothing was capped, so an unscreened world
     round-trips identically.
     """
+    # HPMS leads where the leg has a class; the segment's own label is the
+    # fallback, and stays the fallback rather than being overwritten, so a
+    # leg HPMS never classified screens exactly as it did before.
+    leg_terrain = HPMS_TERRAIN_TO_LABEL.get(hpms_terrain) if hpms_terrain else None
     screened = []
     for segment in segments:
-        ceiling = grade_ceiling_pct(highway, segment.terrain)
+        ceiling = grade_ceiling_pct(highway, leg_terrain or segment.terrain)
         if abs(segment.avg_grade_pct) <= ceiling:
             screened.append(segment)
             continue
@@ -102,7 +118,7 @@ def screen_grade_segments(
             capped=capped,
             ceiling=ceiling,
             road_class=road_class(highway),
-            terrain=segment.terrain,
+            terrain=leg_terrain or segment.terrain,
         )
         screened.append(
             GradeSegment(

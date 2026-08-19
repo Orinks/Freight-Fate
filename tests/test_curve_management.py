@@ -102,8 +102,25 @@ class TestInterstateArtifactScreen:
         recs = leg_curves("akron_oh_us:cleveland_oh_us")
         assert recs
         assert not [r for r in recs if r.min_radius_ft < INTERSTATE_MIN_RADIUS_FT]
-        # The real bends on this leg stay.
-        assert len(recs) >= 15
+
+        # The real bends on this leg stay. Pinned as a PROPERTY rather than a
+        # count: the flat-ground screen took this leg from 21 mainline curves
+        # to 11, and every one it removed is below the 1,482 ft floor a 65 mph
+        # road may bend to -- including the two 82 ft, 160-degree records this
+        # test is named for. A bare "at least fifteen" would have had to be
+        # relaxed to keep passing, which says nothing; this says what must be
+        # true of whatever survives.
+        from freight_fate.data.curves import _leg_design_speed, min_radius_ft
+        from freight_fate.data.world import get_world
+
+        leg = next(
+            leg for leg in get_world().legs if leg.a == "akron_oh_us" and leg.b == "cleveland_oh_us"
+        )
+        floor = min_radius_ft(_leg_design_speed(leg))
+        assert len(recs) >= 8
+        assert all(r.min_radius_ft >= floor for r in recs), (
+            f"a curve under the {floor:.0f} ft floor survived on {leg.highway}"
+        )
 
     def test_interstate_connector_arcs_are_untouched(self) -> None:
         """Ramps really are that sharp; physics still wants them."""
@@ -519,3 +536,168 @@ def test_a_record_missing_its_geometry_is_never_screened_on_arithmetic():
     blank = _rec(1.00, 1.001, "L", 0, 0.0)
     assert arc_consistency(blank) > 1.0
     assert blank in _screen_geometry([blank])
+
+
+# --- flat-ground class screen (owner audit, 2026-08-19) ---------------------
+
+
+def test_no_mainline_curve_bends_tighter_than_its_class_on_flat_ground():
+    """Owner, 2026-08-19: "cruising down the highway or turnpike in a car, it
+    hardly ever curves. I want an honest audit."
+
+    The audit found the map disagreeing with the road. The MEDIAN interstate
+    curve radius in the bake was 1,342 ft against a 1,330 ft design floor --
+    half of them at or below what a 70 mph road may legally bend to -- and
+    the tenth percentile across all mainline was 281 ft, an intersection
+    rather than a highway. Interstate curve callouts ran 5.7 per hundred
+    miles.
+
+    Rough country still earns a tight bend: this screens flat ground only,
+    so the Rockies and US-550 drive the way they should.
+    """
+    from freight_fate.data.curves import _screenable_legs, leg_curves
+    from freight_fate.data.world import get_world
+
+    world = get_world()
+    screenable = _screenable_legs()
+    offenders = []
+    for leg in world.legs:
+        floor = screenable.get(f"{leg.a}:{leg.b}")
+        if floor is None:
+            continue  # not flat enough to judge; see the canyon test below
+        for curve in leg_curves(f"{leg.a}:{leg.b}"):
+            if curve.min_radius_ft < floor:
+                offenders.append((leg.a, leg.b, leg.highway, curve.min_radius_ft, floor))
+    assert not offenders[:20], f"{len(offenders)} flat-ground curves under floor: {offenders[:5]}"
+
+
+def test_rough_country_keeps_its_tight_bends():
+    """The other half, and the reason this screens terrain rather than radius.
+
+    A blanket radius floor would flatten the best driving in the game. A
+    mountain leg is allowed to bend tighter than any design table, because
+    real ones do.
+    """
+    from freight_fate.data.curves import _leg_is_level, leg_curves, min_radius_ft
+    from freight_fate.data.world import get_world
+
+    world = get_world()
+    floor_70 = min_radius_ft(70.0)
+    kept_tight = 0
+    for leg in world.legs:
+        if _leg_is_level(leg):
+            continue
+        for curve in leg_curves(f"{leg.a}:{leg.b}"):
+            if curve.min_radius_ft < floor_70:
+                kept_tight += 1
+    assert kept_tight > 500, f"only {kept_tight} tight curves survive off flat ground"
+
+
+def test_a_canyon_tagged_flat_is_not_screened_as_level_ground():
+    """The world's terrain label is derived from NET elevation change, so a
+    road that climbs and drops all the way along without getting anywhere
+    reads as flat. I-70 through Glenwood Canyon is tagged flat, and its
+    curves are cut into rock walls.
+
+    Caught by test_glenwood_canyon_interstate_curves_survive when the screen
+    first went in and took 21 real curves off it. Two proxies were tried and
+    both failed -- the label itself, then feet of relief per mile, which
+    calibrated against HPMS at a Youden's J of 0.29. The screen reads the
+    real HPMS terrain class now, and HPMS calls this leg mountainous.
+    """
+    from freight_fate.data.curves import _leg_is_level
+    from freight_fate.data.world import get_world
+
+    canyon = next(
+        leg
+        for leg in get_world().legs
+        if leg.a == "glenwood_springs_co_us" and leg.b == "grand_junction_co_us"
+    )
+    assert str(getattr(canyon, "terrain", "")) == "flat"  # the label really is wrong
+    assert not _leg_is_level(canyon)  # HPMS is not
+
+
+def test_the_radius_floor_matches_published_design_tables():
+    """The floor is computed, so it has to be checked against print.
+
+    ``min_radius_ft`` evaluates the AASHTO point-mass control
+    (Rmin = V^2 / [15(0.01*emax + fmax)], FHWA-HRT-17-098 chapter 3) using
+    the Green Book table 3-7 side-friction factors. These expected values
+    are the TxDOT Roadway Design Manual's own tables 4-6 and 4-7, which
+    republish the Green Book controls -- so if either the formula or a
+    friction factor is mistyped, this fails against a published source
+    rather than against my arithmetic.
+
+    An earlier pass of this screen used 1,330 ft as the interstate floor.
+    That is the SIXTY mph minimum at 6 percent superelevation; a 70 mph road
+    needs 1,815 ft at 8 percent and 2,040 at 6. The screen was letting a
+    whole design-speed step of bad geometry through.
+    """
+    from freight_fate.data.curves import SUPERELEVATION_MAX, min_radius_ft
+
+    assert SUPERELEVATION_MAX == 0.08  # the most permissive standard built
+    published_e8 = {40: 444, 50: 758, 60: 1200, 70: 1810, 75: 2210}
+    for speed, expected in published_e8.items():
+        assert abs(min_radius_ft(speed) - expected) <= 5, (
+            f"{speed} mph: computed {min_radius_ft(speed):.0f} ft, "
+            f"TxDOT table 4-7 says {expected} ft"
+        )
+    # And it really is a floor that rises with speed.
+    assert min_radius_ft(50) < min_radius_ft(60) < min_radius_ft(70)
+
+
+def test_the_radius_floor_follows_the_leg_s_own_posted_limit():
+    """Design speed comes from the baked OSM maxspeed sweep, not a guess at
+    the road's class. A 55 mph US route and a 70 mph interstate are held to
+    different floors because they are different roads, and the data says
+    which is which."""
+    from freight_fate.data.curves import _leg_design_speed, min_radius_ft
+    from freight_fate.data.world import get_world
+
+    speeds = {_leg_design_speed(leg) for leg in get_world().legs}
+    assert len(speeds) > 1, "every leg fell back to the same default speed"
+    assert max(speeds) >= 65.0
+    # The floor tracks it rather than being pinned per class.
+    assert min_radius_ft(max(speeds)) > min_radius_ft(min(speeds))
+
+
+def test_absence_of_a_terrain_class_is_never_read_as_level():
+    """The safe direction, and the reason this reads a bake rather than a rule.
+
+    Screening treats level ground as licence to delete geometry, so a leg
+    HPMS never classified must keep every curve it has. Absence of evidence
+    is not evidence of flatness -- getting this backwards would quietly
+    strip curves from exactly the legs we know least about.
+    """
+    from freight_fate.data.curves import _leg_is_level
+
+    class NoTerrain:
+        hpms_terrain = None
+
+    class Rolling:
+        hpms_terrain = type("T", (), {"type": 2})()
+
+    class Mountain:
+        hpms_terrain = type("T", (), {"type": 3})()
+
+    class Level:
+        hpms_terrain = type("T", (), {"type": 1})()
+
+    assert not _leg_is_level(NoTerrain())
+    assert not _leg_is_level(Rolling())
+    assert not _leg_is_level(Mountain())
+    assert _leg_is_level(Level())
+
+
+def test_the_terrain_bake_says_what_kind_of_value_it_carries():
+    """AGENTS.md: a baked record must make plain whether it was read, derived
+    or assumed. The HPMS class is READ; that one value stands for a whole leg
+    is DERIVED, and the source string has to say both."""
+    from freight_fate.data.world import get_world
+
+    baked = [leg for leg in get_world().legs if getattr(leg, "hpms_terrain", None)]
+    assert baked, "no leg carries an HPMS terrain class"
+    source = baked[0].hpms_terrain.source
+    assert "HPMS" in source
+    assert "modal" in source.lower() or "derived" in source.lower()
+    assert all(leg.hpms_terrain.type in (1, 2, 3) for leg in baked)

@@ -111,57 +111,35 @@ code, in the same change:
 
 ### Provenance: read, derived, or assumed -- never blurred
 
-Three bugs in one week were the same bug: a baked number nobody could tell
-apart from a measurement. 455 grade segments steeper than 8 percent (worst
-+14.4 on I-5) came from elevation-profile noise over bridges. 1,079 curve
-records bend tighter than any highway of their class can. And `ramp_control`
-is empty on **all 18,011** interchanges, so a seeded runtime fallback decides
-every ramp terminal in the game. Not one of those upstream sources asserted
-anything false -- we filled their gaps, or mis-derived from them, and then
-stored the result in a `source`-carrying record that reads as a survey.
+A baked number nobody can tell apart from a measurement is the recurring bug
+in this data. Upstream rarely asserts anything false; we fill its gaps, or
+mis-derive from it, then store the result in a `source`-carrying record that
+reads as a survey.
 
-- **Say which KIND of value it is, not just where it came from.** Every baked
-  record carries `source`; that string must also make plain whether the value
-  was **read** (the upstream data asserts it), **derived** (computed from a
-  reading -- name the input and the formula), or **assumed** (a fallback used
-  because upstream is silent). `tools/toll_rates.py` is the model to copy: a
-  `verified` flag beside `src` on every figure, and a refusal to mark one
-  verified just to look tidy.
-- **A silent upstream is not a reading.** OSM covers `maxspeed` on 14,563 of
-  15,234 speed-limit segments and tagged ramp control on none of 18,011
-  interchanges. Filling that silence is fine and often necessary. Filling it
-  with an invented default, and shipping it in the same shape as the 14,563,
-  is what makes the gap invisible. Prefer a published statutory or design
-  value to a guess, and label it `assumed` either way.
-- **A bake that mostly assumed must say so, loudly.** When a builder writes
-  `assumed` for more than half a layer's records it prints that on stdout and
-  records the ratio in the layer's `meta`. A quiet builder that produced a
-  complete-looking file out of nothing is how the ramp fallback survived to
-  18,011.
-- **Screen a derived value against the physical limit for its class before
-  writing it.** A slope no interstate can hold, a radius no through highway
-  can bend to, an arc that will not fit its own recorded span. See the three
-  screens in `src/freight_fate/data/curves.py`; grade still has none.
-- **Self-contradiction is the tell, not extremity.** Real roads are sometimes
-  brutal, so steepness alone proves nothing. What proved the artifacts fake
-  was each record disagreeing with itself: an 8.3 percent slope on a segment
-  labelled `flat` terrain, a hairpin on flat local ground, a curve whose arc
-  is longer than the span containing it. Screen the contradiction and leave
-  the merely steep or merely sharp alone.
-- **Screen at load; never edit the bake to hide the evidence.** Both existing
-  screens run over an untouched bake and name the flagged rows in a separate
-  file (`curve_artifacts.jsonl`). Keep that shape: a screen that deletes what
-  it rejects cannot be re-judged when the rule turns out too broad.
-- **Official sources exist for most of this -- prefer them to a default.**
-  Grade and curve ceilings by class and terrain: state DOT road design
-  manuals (Caltrans HDM, TxDOT Roadway Design Manual), which republish the
-  AASHTO Green Book controls for free. Per-section terrain, through lanes,
-  and grade/curve class: FHWA HPMS public release. Elevation: USGS 3DEP at
-  1/3 arc-second, finer than the SRTM under ORS. Bridge locations and
-  vertical clearances, which is what to mask elevation noise against: FHWA
-  NBI. Truck speed limits by state: the state vehicle codes. Truck-legal
-  routes: the National Network, 23 CFR 658 Appendix A. All free, all
-  downloadable once and read offline, which the data rule above requires.
+- **Say which KIND of value it is.** `source` must state **read** (upstream
+  asserts it), **derived** (name the input and the formula), or **assumed**
+  (a fallback, because upstream is silent). Model: `tools/toll_rates.py`.
+- **A silent upstream is not a reading.** Filling a gap is fine; shipping the
+  fill in the same shape as the real readings is what hides it. Prefer a
+  published statutory or design value to a guess, and label it either way.
+- **A bake that mostly assumed says so loudly** -- on stdout, and as a ratio
+  in the layer's `meta`.
+- **Screen derived values against the physical limit for their class**, and
+  screen for **self-contradiction, not extremity**: real roads are sometimes
+  brutal, so a record is suspect when it disagrees with ITSELF (a steep slope
+  on ground classed level, an arc longer than its own span). Worked example:
+  `src/freight_fate/data/curves.py`.
+- **Never tune a threshold until it looks right.** Derive it from a published
+  standard, or calibrate against real data and report how well it separates.
+- **Screen at load; never edit the bake.** A screen that deletes what it
+  rejects cannot be re-judged when the rule turns out too broad.
+- **Prefer official sources**: state DOT design manuals (AASHTO controls,
+  free) for grade and curve ceilings; FHWA HPMS for terrain, lanes, AADT and
+  curve class; USGS 3DEP for elevation; FHWA NBI for bridges; state vehicle
+  codes for truck limits; 23 CFR 658 App. A for truck-legal routes.
+
+Which layers are screened, and what each measured, belongs in `ROADMAP.md`.
+This file is how to behave; that one is where things stand.
 
 ## Code conventions
 
