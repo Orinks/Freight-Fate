@@ -42,11 +42,23 @@ HPMS_QUERY_URL = (
     "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/"
     "hpms_v2_view/FeatureServer/0/query"
 )
+# DERIVED, not read, and the string has to say so (AGENTS.md, provenance).
+# HPMS asserts an AADT and a through-lane count for each road SECTION; what
+# is baked here is the median of the sections that snapped within
+# SNAP_CORRIDOR_M of a five-mile window of the leg, rounded to AADT_ROUND,
+# with a lone deep dip between two agreeing neighbours carried across as a
+# snapping artifact. Every one of those steps is ours. Nothing is invented:
+# a window with fewer than MIN_WINDOW_POINTS real sections produces no
+# sample, and a leg with no on-corridor sections keeps the runtime
+# heuristic rather than getting a made-up profile.
 HPMS_SOURCE = (
-    "FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane "
-    "counts, queried from the national ArcGIS Living Atlas layer "
-    "(Federal User Community hpms_v2_view) and snapped to checked-in route "
-    "geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+    "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and "
+    "through-lane counts: median of HPMS sections snapping within 250 m of a "
+    "5-mile window of the leg, rounded to the nearest 500, lone dips between "
+    "agreeing neighbours carried across. Sections queried from the national "
+    "ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and "
+    "snapped to checked-in route geometry, accessed 2026-07-05: "
+    "https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
 )
 
 ENVELOPE_SPAN_MI = 60.0  # one HPMS query per this much corridor

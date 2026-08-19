@@ -3,12 +3,16 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import zlib
+from dataclasses import replace
 
 from .legacy_aliases import LEGACY_CITY_SLUGS
 from .world_constants import *
 from .world_models import *
+
+log = logging.getLogger(__name__)
 
 
 def _overlay_city_key(name: str, cities: dict) -> str:
@@ -638,9 +642,84 @@ def _parse_traffic_volume(raw, leg_miles: float, from_city: str, to_city: str):
     return TrafficVolumeSample(at_mi=at_mi, aadt=aadt, lanes=lanes, source=source)
 
 
+# A single lane passes roughly 2,000 vehicles an hour, and the busiest hour
+# of a weekday carries about 8 percent of the day in the peak direction. So
+# one lane can plausibly stand behind an AADT of very roughly 45,000 -- call
+# it 40,000 to leave room for genuinely brutal roads. Above that, a record
+# claiming ONE lane per direction is not reporting a busy road: it is
+# disagreeing with itself, describing a divided freeway and a country lane in
+# the same breath.
+#
+# This is the volume/lane version of the screens in ``data/curves.py``, and
+# it exists for the same reason. Two records in the 2026-08-19 HPMS bake hit
+# it, both on CA-99 -- a divided freeway whose windowed lane median was
+# dragged to 1 by a frontage-road section snapping inside the corridor. Left
+# alone, congestion would have divided 69,000 vehicles a day by that single
+# lane and parked a permanent phantom jam on a road that flows.
+#
+# Screened at LOAD, never edited out of the bake: the bake keeps saying what
+# HPMS said, so the rule can be re-judged if it turns out too broad. The
+# flagged sample keeps its volume -- the volume is the reading -- and only
+# its contradicted lane count is replaced, by the median of the lane counts
+# the rest of the leg agreed on.
+LANE_CONTRADICTION_AADT = 40000.0
+
+
+def _screen_lane_contradictions(samples, from_city: str, to_city: str):
+    """Repair lane counts that disagree with the volume beside them."""
+    suspect = [
+        i for i, s in enumerate(samples) if s.lanes <= 1 and s.aadt >= LANE_CONTRADICTION_AADT
+    ]
+    if not suspect:
+        return samples
+    trusted = sorted(s.lanes for i, s in enumerate(samples) if i not in suspect)
+    # Nothing on the leg to learn from: two lanes is the shipped default for
+    # a divided highway (DEFAULT_LEG_LANES), and any answer beats one.
+    replacement = trusted[len(trusted) // 2] if trusted else 2
+    replacement = max(2, replacement)
+    repaired = list(samples)
+    for i in suspect:
+        bad = samples[i]
+        log.warning(
+            "%s to %s: traffic sample at mile %.1f claims %d lane(s) for %.0f AADT; "
+            "reading %d lanes from the rest of the leg instead",
+            from_city,
+            to_city,
+            bad.at_mi,
+            bad.lanes,
+            bad.aadt,
+            replacement,
+        )
+        repaired[i] = replace(bad, lanes=replacement)
+    return tuple(repaired)
+
+
+def _parse_hpms_terrain(raw, from_city: str, to_city: str):
+    """The baked HPMS terrain class, or None where the bake has nothing.
+
+    Absence stays absence: a leg HPMS never classified must not be read as
+    level, because the curve screen treats level ground as licence to remove
+    geometry.
+    """
+    if not raw:
+        return None
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} hpms_terrain must be an object")
+    kind = raw.get("type")
+    if kind not in (1, 2, 3):
+        raise ValueError(f"{from_city} to {to_city} hpms_terrain type {kind!r} is not 1, 2 or 3")
+    return HpmsTerrain(
+        type=int(kind),
+        name=str(raw.get("name", "")),
+        sections=int(raw.get("sections", 0) or 0),
+        source=str(raw.get("source", "")),
+    )
+
+
 def _parse_traffic_volumes(raw_samples, leg_miles: float, from_city: str, to_city: str):
     """Parse the baked HPMS AADT profile, ordered along the leg."""
     samples = tuple(_parse_traffic_volume(s, leg_miles, from_city, to_city) for s in raw_samples)
+    samples = _screen_lane_contradictions(samples, from_city, to_city)
     return tuple(sorted(samples, key=lambda s: s.at_mi))
 
 

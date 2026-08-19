@@ -937,6 +937,68 @@ onto exit signalling.
       colour -- the same call already made for the toll charge -- so all four
       now ride `EventPriority.ROUTE`'s never-dropped contract.
 
+- [ ] **Data provenance: where each baked layer actually stands
+      (audited 2026-08-19).** Moved out of `CLAUDE.md`, which should say how
+      to behave rather than carry a status board that goes stale -- the
+      ramp_control line in it had been false for a while by the time anyone
+      looked. Measured over `world_source`:
+
+        layer              records   declares its kind?
+        traffic_aadt        10,686   yes -- "derived", with the formula
+        restrictions           259   yes -- "read"
+        state_crossings        469   yes -- "computed"
+        toll_events             46   yes -- "estimated"
+        speed_limits        15,234   partly: 14,556 read from OSM, 671 honest
+                                     nulls, 7 labelled "estimated" with a reason
+        grade_segments     146,496   NO -- all carry a source, none say kind
+        lane_segments       20,666   NO
+        interchanges        18,011   NO
+        landmarks           31,383   NO, and 4,488 carry no source at all
+        elevation_samples    7,646   NO
+        checkpoints          3,144   NO
+
+      CORRECTION to a claim that was in CLAUDE.md: `ramp_control` is NOT
+      empty on all 18,011 interchanges. 8,205 carry a real OSM value since
+      the exit-control bake; 9,806 still fall to the seeded runtime fallback.
+
+      SPEED POSTINGS, since they drive both what is spoken and what the
+      player is fined against: the bake is honest (a gap is a null, never an
+      invented number), but the RUNTIME fill is silent. A null resolves
+      through `corridor_speed_limit(class, region)`, and 12,701 of the
+      world's 139,458 miles -- 9.1 percent -- get their limit that way,
+      indistinguishable to the player and to enforcement. Worth surfacing or
+      narrowing; not yet done.
+
+      LANDMARKS remain the layer with no provenance at all, which is why a
+      tester who knows an area is the only source we have for them (see
+      Brandon's demolished planetarium).
+
+- [x] **FHWA HPMS AADT baked onto the world -- SHIPPED 2026-08-19.** 1,284 of
+      1,290 legs, 10,686 volume samples. Congestion had been falling back to a
+      class/metro heuristic that "rarely jams on its own": a sweep of 12 seeds
+      across 8 metro pairs found not one congestion zone, so in practice the
+      game had no traffic jams at any hour. Real volumes put them where they
+      belong -- I-5 through LA at 292,500 AADT goes over capacity at peak, and
+      US-385 in Nebraska never does.
+
+      PROVENANCE: every sample says "derived" and names the derivation -- a
+      median of the HPMS sections snapping within 250 m of a five-mile window,
+      rounded to the nearest 500. Nothing is invented: a window with too few
+      real sections produces no sample, and a leg with no coverage keeps the
+      heuristic rather than getting a made-up profile.
+
+      A LOAD SCREEN repairs lane counts that contradict their own volume: two
+      records on CA-99 claimed ONE lane per direction while carrying 69,000
+      and 43,500 vehicles a day, which is a divided freeway and a country lane
+      described in the same breath. Left alone, congestion would have divided
+      that volume by a single lane and parked a permanent phantom jam on a
+      road that flows.
+
+      STILL OPEN: NPC spawn density (`_leg_density`) does not read AADT at
+      all -- it varies by rush hour, night and metro bias only. So the road's
+      BEHAVIOUR is now real while its vehicle COUNT is not. Wiring the two
+      together is 1.10 work: it would change traffic everywhere on the map.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED

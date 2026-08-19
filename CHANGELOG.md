@@ -3,6 +3,14 @@
 ## Unreleased
 
 ### Added
+- **Traffic jams where traffic really jams.** The game now knows how many
+  vehicles a day each stretch of road actually carries, taken from the federal
+  highway survey, so congestion is placed from real volumes instead of a rough
+  guess that almost never produced a jam. Run I-5 through Los Angeles or I-15
+  out of Santa Ana at five in the afternoon and you will meet stop-and-go,
+  because those roads genuinely are over capacity then; the same roads at three
+  in the morning are clear, and a quiet rural highway never jams at all.
+
 - **You can choose how much room the truck leaves to the vehicle ahead.** A new
   Following gap setting in Settings, Gameplay, Driving assistance offers close,
   normal or far -- two and a half, three, or three and a half seconds. Adaptive
