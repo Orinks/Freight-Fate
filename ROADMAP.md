@@ -751,6 +751,36 @@ onto exit signalling.
       on scope: it touches dispatch, route choice, and the spoken comparison
       of two routes, which is a bigger piece than it sounds.
 
+- [ ] **URGENT, MINE, SHIPPED: FIRST_OCCURRENCE silences changed content at
+      STANDARD (Darren, 2026-08-19).** Reported as "certain messages I can
+      read with comma and period are not being spoken... the dings play but
+      no messages... very sporadic". From his own log, and he is on
+      **standard**, the default rung:
+
+        [ladder] standard already said: 75 miles per hour
+        [ladder] standard already said: 69 miles per hour
+        [ladder] standard already said: 66 miles per hour
+        [ladder] standard already said: 57 miles per hour
+        [ladder] standard already said: Clear of the car. Right lane open.
+
+      Different numbers each time, all dropped. `GameContext._ladder_repeats`
+      does `slot = key or text` for FIRST_OCCURRENCE, so once a KEYED line has
+      spoken, every later occurrence is dropped whatever its content. A
+      readout whose whole point is a changing number gets said once per leg
+      and then swallowed for the rest of it.
+
+      This is my change from 2026-08-18 (`feat(speech): standard stops
+      repeating itself`) and it is in the build testers have. It silences
+      real information at the DEFAULT rung, so it outranks the zone-overlap
+      item below.
+
+      THE FIX, probably: FIRST_OCCURRENCE should key on the key AND the text,
+      like TRANSITIONS does -- "this exact line once per leg", not "this
+      condition once per leg". Check what actually wants once-per-leg
+      suppression before changing it, because the intent was a coaching TIP
+      that repeats verbatim, and a keyed changing readout was never meant to
+      be in scope. Verify against Darren's log, not a bench.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED
