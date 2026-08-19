@@ -786,6 +786,12 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **A ticket you have already paid no longer sounds like a second one.**
+  Hearing an enforcement stop read out again repeated the fine word for word,
+  which was indistinguishable from being charged twice. The money was never
+  taken twice; now the words say so too, leading with the fact that the stop is
+  already settled.
+
 - **The truck says why it is slowing down.** When adaptive cruise eased off for
   a work zone, opened its following gap for weather, or handed control back at
   stopped traffic, that line could be dropped as stale chatter -- so the truck

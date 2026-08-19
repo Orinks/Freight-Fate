@@ -427,6 +427,10 @@ class EnforcementStopState(_RoadsideExitMixin, MenuState):
         # INSPECTION_MIN the check-in lane would have cost you.
         self.inspection_on_stop = inspection_on_stop
         self._outcome_text = ""
+        # Whether the stop has been told once already. See announce_entry:
+        # the fine is charged here, in _resolve, exactly once, and a later
+        # telling has to sound like history rather than a fresh charge.
+        self._stop_announced = False
         self._resolve()
 
     @property
@@ -492,7 +496,28 @@ class EnforcementStopState(_RoadsideExitMixin, MenuState):
             self._outcome_text += self._suspended_exit_text()
 
     def announce_entry(self) -> None:
+        """The stop, said once as it happens and afterwards as history.
+
+        ``_resolve`` runs in ``__init__`` and charges the fine exactly once,
+        but this line was word-for-word identical every time it was spoken,
+        so a second telling was indistinguishable from a second charge --
+        and a driver with no screen has no other way to tell them apart.
+        Tester Darren's log has it twice, three seconds apart, on a 1,200
+        dollar work-zone citation (I-75, 2026-08-18).
+
+        Not silenced, because re-reading the stop is the only route back to
+        the detail. Led in the past tense instead, so the money is plainly
+        already spent.
+        """
         polite = " You signaled and pulled over promptly." if self.signaled else ""
+        if self._stop_announced:
+            self.ctx.say(
+                "Reading back the stop you have already settled. "
+                f"{self.summary} {self._outcome_text} {self.current_text()}",
+                interrupt=True,
+            )
+            return
+        self._stop_announced = True
         self.ctx.say(
             f"You stop on the shoulder for an enforcement inspection.{polite} "
             f"{self.summary} {self._outcome_text} {self.current_text()}",

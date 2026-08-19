@@ -1822,6 +1822,19 @@ onto exit signalling.
       lines 2229 and 2234 speak "Work zone active" where
       `docs/ontology.md` makes "construction zone" canonical. Pre-existing
       drift, found while fixing the lane trap.
+- [x] **A resolved enforcement stop re-speaks its fine amount -- FIXED
+      2026-08-19.** Seen live in Darren's log: the same 1,200 dollar citation
+      spoken twice, three seconds apart, word for word. `_resolve` charges
+      once and that was never in question, but a driver with no screen had no
+      way to tell a repeat from a second ticket. Now led in the past tense
+      ("Reading back the stop you have already settled") and not silenced,
+      because re-reading the stop is the only route back to the detail.
+
+      STILL OPEN: what called `announce_entry` twice. The fine is charged
+      once and the repeat is now distinguishable, so the player-facing harm
+      is gone, but the double call itself is unexplained.
+
+      Superseded description follows.
 - [ ] **A resolved enforcement stop re-speaks its fine amount.**
       Re-entering a settled stop replays the whole line including the
       dollar figure without charging anything, because `_resolve()` runs

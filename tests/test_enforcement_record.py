@@ -1034,3 +1034,54 @@ def test_a_floor_reputation_company_driver_loses_the_carrier(monkeypatch):
         assert p.money > 0 or p.career.level >= 1
     finally:
         app.shutdown()
+
+
+def test_a_settled_stop_is_read_back_as_history_not_as_a_fresh_charge():
+    """Tester Darren, I-75, 2026-08-18: the same 1,200 dollar work-zone
+    citation spoken twice, three seconds apart, word for word.
+
+    ``_resolve`` charges the fine once, in ``__init__``, and that is not in
+    question -- but the spoken line was identical every time, so a driver
+    working by ear could not tell a repeat from a second ticket. Not
+    silenced: re-reading the stop is the only way back to the detail.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving_rest_states import EnforcementStopState
+
+    app = App()
+    spoken = []
+    try:
+        app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+        driving = _driving(app)
+        money_before = app.ctx.profile.money
+
+        stop = EnforcementStopState(
+            app.ctx,
+            driving,
+            title="Work zone stop",
+            summary="A trooper watched you close right up on the vehicle ahead.",
+            fine=1200.0,
+            reputation_hit=2.0,
+            signaled=True,
+            return_message="Pull back onto the highway.",
+        )
+        charged = money_before - app.ctx.profile.money
+        assert charged > 0
+
+        stop.announce_entry()
+        first = spoken[-1]
+        assert first.startswith("You stop on the shoulder")
+
+        # Told again: same detail, plainly already settled.
+        stop.announce_entry()
+        second = spoken[-1]
+        assert second != first
+        assert "already settled" in second
+        assert "You stop on the shoulder" not in second
+        # And the detail is still all there.
+        assert stop.summary in second
+
+        # Saying it twice never charges twice.
+        assert money_before - app.ctx.profile.money == charged
+    finally:
+        app.shutdown()
