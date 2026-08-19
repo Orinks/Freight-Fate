@@ -542,15 +542,35 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         )
 
     def _weather_location(self) -> tuple[str, float, float]:
-        """Stable 20-mile route cell plus its current-road coordinate."""
+        """Stable 20-mile route cell, cut short at a state line.
+
+        The cell alone was too coarse across a border. A state line almost
+        never falls on a 20-mile mark, so the previous state's conditions
+        carried up to 20 miles past it -- at highway speed, a quarter hour of
+        rain that had already stopped in the real world (Brandon, tester
+        report 2026-08-18).
+
+        The state is part of the key, so crossing a line changes it at the
+        line and asks the provider afresh. And when the crossing happened
+        INSIDE the current cell, the cell's own start coordinate is still in
+        the state behind us, so the request would fetch the weather we are
+        leaving; the truck's own position is used instead.
+
+        The same fix the clock already had: state crossings are baked with
+        exact mileposts, which is how the timezone change lands at the line
+        rather than ten miles past it (owner, 2026-07-22).
+        """
         leg_i, leg_start = self._leg_at_mile(self.position_mi)
         leg = self.route.legs[leg_i]
         route_offset = max(0.0, min(leg.miles, self.position_mi - leg_start))
         cell = int(route_offset // 20.0)
         sample_mile = min(leg_start + cell * 20.0, leg_start + leg.miles)
+        state = self.state_at(self.position_mi)
+        if state and self.state_at(sample_mile) != state:
+            sample_mile = self.position_mi
         lat, lon = self.latlon_at(sample_mile)
         direction = f"{self.route.cities[leg_i]}:{self.route.cities[leg_i + 1]}"
-        return f"route:{direction}:{cell}", lat, lon
+        return f"route:{direction}:{cell}:{state}", lat, lon
 
     def _timezone_samples(self) -> list[tuple[float, TimeZone]]:
         """(trip mile, zone) along the route, from city and route-point geometry.

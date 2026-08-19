@@ -42,6 +42,15 @@
   outright: Classical KDFC, WMFO, WRBH Reading Radio, WHYR Baton Rouge and
   KFMG Des Moines all play again.
 
+- **Live weather changes at the state line, not twenty miles later.** With
+  live weather switched on, the game asks for real conditions every twenty
+  miles of road. A state line hardly ever falls neatly on one of those
+  marks, so the weather you were driving in could follow you across the
+  border for up to twenty miles -- a quarter of an hour of rain that had
+  already stopped where you actually were. Crossing a line now asks again
+  straight away, and asks about where you are rather than where you were.
+  Reported by Brandon.
+
 - **A Florida landmark that no longer exists is off the road.** The truck
   used to call out the Astronaut Memorial Planetarium and Observatory on the
   way past. It was destroyed in a hurricane and never rebuilt, so it is gone

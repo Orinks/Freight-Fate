@@ -2042,3 +2042,51 @@ def test_live_data_providers_ignore_the_online_services_master_switch():
         assert app.ctx._online_enabled(True) is True
     finally:
         app.shutdown()
+
+
+def test_weather_is_asked_again_at_a_state_line(world):
+    """Brandon, tester report 2026-08-18: rain carried from Florida into
+    Alabama with live weather on.
+
+    Live weather is sampled per 20-mile route cell. A state line almost never
+    falls on a 20-mile mark, so the previous state's conditions rode up to 20
+    miles past it -- at highway speed, a quarter hour of weather that had
+    already changed in the real world. The state is now part of the cell key,
+    and when the crossing happened inside the cell the truck's own position
+    is used for the lookup, because the cell's start coordinate is still in
+    the state behind it.
+    """
+    trip, _truck = make_trip(world)
+
+    crossing = None
+    previous = None
+    mile = 0.0
+    while mile < trip.total_miles:
+        state = trip.state_at(mile)
+        if previous and state and state != previous:
+            crossing = (mile, previous, state)
+            break
+        previous = state or previous
+        mile += 0.25
+    assert crossing, "this route has no baked state crossing to test with"
+    at_mi, before, after = crossing
+
+    trip.position_mi = at_mi - 0.5
+    key_before, lat_before, _lon = trip._weather_location()
+    trip.position_mi = at_mi + 0.25
+    key_after, lat_after, _lon2 = trip._weather_location()
+
+    assert key_before != key_after, "the weather key survived a state crossing"
+    assert before in key_before and after in key_after
+
+    # And the coordinate moved with us rather than staying at the cell start,
+    # which would have fetched the weather of the state just left.
+    assert lat_before != lat_after
+
+    # Inside one state the key must still be STABLE, or every frame would be
+    # a fresh provider request.
+    trip.position_mi = at_mi + 1.0
+    steady_a, _la, _loa = trip._weather_location()
+    trip.position_mi = at_mi + 1.5
+    steady_b, _lb, _lob = trip._weather_location()
+    assert steady_a == steady_b, "the key now churns within a single state"
