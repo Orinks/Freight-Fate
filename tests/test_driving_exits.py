@@ -508,10 +508,10 @@ def _pressure_speech(driving, spoken):
     """Everything a pressure got to say -- spoken now or queued to speak.
 
     Traffic pressures are ambient events, and an ambient event either speaks
-    at once or waits in the one-deep slot; both count as reaching the driver.
+    at once or waits its turn in the ambient queue; both count as reaching
+    the driver.
     """
-    pending = driving._pending_ambient_event
-    return list(spoken) + ([pending[0]] if pending else [])
+    return list(spoken) + [p.message for p in driving._pending_ambient_events]
 
 
 def _pressure_event(driving, pressure, ahead=1.0):
@@ -551,7 +551,7 @@ def _exit_pressure_run(app):
     driving.trip._announced_traffic_pressures.clear()
     driving.trip.position_mi = stop.at_mi - 3.0
     driving.truck.velocity_mps = 25.0
-    driving._pending_ambient_event = None
+    driving._pending_ambient_events.clear()
     driving._ambient_event_cooldown_s = 0.0
     return driving, stop, pressure
 
@@ -598,7 +598,7 @@ def test_exit_traffic_still_speaks_once_you_signal_for_that_exit(monkeypatch):
         assert driving._exit_stop is stop
         assert driving._exit_signal_on
         spoken.clear()
-        driving._pending_ambient_event = None
+        driving._pending_ambient_events.clear()
         driving._ambient_event_cooldown_s = 0.0
 
         driving._handle_trip_event(_pressure_event(driving, pressure))
@@ -630,7 +630,7 @@ def test_merging_and_construction_pressures_still_speak_unsignalled(monkeypatch)
             ("traffic_pack", "right", "Traffic pack in"),
         ):
             spoken.clear()
-            driving._pending_ambient_event = None
+            driving._pending_ambient_events.clear()
             driving._ambient_event_cooldown_s = 0.0
             pressure = TrafficPressure(at, at + 0.6, kind, direction, 0.75, 42.0, "test pressure")
             driving._handle_trip_event(_pressure_event(driving, pressure))

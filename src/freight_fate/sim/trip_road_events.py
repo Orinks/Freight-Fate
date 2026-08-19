@@ -144,24 +144,50 @@ class TripRoadEventMixin:
                 world = get_world()
                 city_state = world.cities[city].state
                 prev_state = world.cities[prev].state
-                # Said even when the leg carries a mapped boundary that emitted
-                # its own STATE_CROSSING event, because in practice that event
-                # does not reach the driver: it is ambient, and an ambient
-                # message waits in a single slot that the next critical event
-                # discards and any later ambient message overwrites. On an
-                # interstate the checkpoint cues fire constantly, so the mapped
-                # crossing is lost every time. Suppressing this line would leave
-                # silence at a state line rather than a repeat, which is the
-                # worse outcome. Restore the suppression once an ambient message
-                # can survive both -- see the xfail on
-                # test_mapped_state_lines_are_authoritative_in_delivery_transcripts.
-                crossing = f"Crossing into {city_state}. " if city_state != prev_state else ""
+                # The mapped boundary is authoritative when the route has
+                # one: it is announced at the surveyed mile rather than at
+                # whichever city happens to follow it, so repeating it here
+                # would say the same state line twice.
+                #
+                # This suppression was removed for a while, and the comment
+                # in its place said why: the mapped STATE_CROSSING event is
+                # ambient, and an ambient line used to wait in a single slot
+                # that any later ambient line overwrote and any hazard threw
+                # away. On an interstate it never reached the driver, so this
+                # prefix was the only thing keeping a state line from passing
+                # in silence -- a repeat being the better of two bad
+                # outcomes. Ambient lines ride a queue now
+                # (DrivingEventMixin._speak_ambient_event), the mapped
+                # crossing arrives, and the prefix goes back to being the
+                # duplicate it always was.
+                crossing = ""
+                if city_state != prev_state and not self._leg_maps_crossing_into(i - 1, city_state):
+                    crossing = f"Crossing into {city_state}. "
                 self._emit(
                     TripEventKind.CITY_REACHED,
                     f"{crossing}Passing {world.spoken_city(city, qualified=False)}, "
                     f"{city_state}. "
                     f"Continuing on {leg.highway} toward {world.spoken_city(nxt)}.",
                 )
+
+    def _leg_maps_crossing_into(self, leg_index: int, state: str) -> bool:
+        """Whether this leg carries a surveyed crossing into ``state``.
+
+        Read the same way ``_build_navigation_cues`` reads it, direction and
+        all: a leg driven backward is entered from its far end, so the
+        crossing's "to" state is the one being LEFT. Getting that backward
+        would suppress the prefix on exactly the legs where no mapped cue is
+        coming, which is the silence this whole thing exists to prevent.
+        """
+        if not 0 <= leg_index < len(self.route.legs):
+            return False
+        leg = self.route.legs[leg_index]
+        forward = self.route.cities[leg_index] == leg.a
+        for crossing in getattr(leg, "state_crossings", ()):
+            into_state = crossing.state if forward else crossing.from_state
+            if into_state == state:
+                return True
+        return False
 
     def _hazard_risk(self) -> float:
         """Chance of a hazard at each check; worse in fog and after dark."""

@@ -814,42 +814,17 @@ def test_playtest_harness_drives_a_specific_route(monkeypatch):
 @pytest.mark.parametrize(
     ("route_cities", "state", "passing_city", "expected_crossings"),
     [
-        pytest.param(
-            ["Indianapolis", "Nashville", "Atlanta"],
-            "Tennessee",
-            "Nashville",
-            1,
-            marks=pytest.mark.xfail(
-                reason="The driver hears the state line exactly once, but from the city passing "
-                "line rather than the mapped boundary. A mapped crossing is spoken as an "
-                "ambient message, and ambient messages wait in a single slot that the "
-                "next critical event discards and any later ambient message overwrites -- "
-                "on an interstate the checkpoint cues fire constantly, so it never gets "
-                "out. The passing-line fallback is deliberately kept: suppressing it "
-                "would leave silence at a state line instead of a repeat. Give ambient "
-                "messages a queue that survives both, then drop this and restore the "
-                "suppression in trip_road_events._check_cities.",
-                strict=True,
-            ),
-        ),
-        pytest.param(
-            ["Atlanta", "Nashville", "Indianapolis"],
-            "Tennessee",
-            "Nashville",
-            1,
-            marks=pytest.mark.xfail(
-                reason="see above: mapped crossing never reaches speech", strict=True
-            ),
-        ),
-        pytest.param(
-            ["Shreveport", "Dallas", "Albuquerque"],
-            "Texas",
-            "Dallas",
-            1,
-            marks=pytest.mark.xfail(
-                reason="see above: mapped crossing never reaches speech", strict=True
-            ),
-        ),
+        # These three were strict xfails while a mapped crossing could not
+        # reach the driver: it is ambient, and ambient lines waited in a
+        # single slot that any later ambient line overwrote and any hazard
+        # discarded. On an interstate that happened every time, so the city
+        # passing line carried a "Crossing into ..." prefix to keep a state
+        # line from passing in silence. Ambient lines ride a queue now, the
+        # mapped crossing arrives at the surveyed mile, and the prefix is
+        # suppressed again -- which is what these assert.
+        (["Indianapolis", "Nashville", "Atlanta"], "Tennessee", "Nashville", 1),
+        (["Atlanta", "Nashville", "Indianapolis"], "Tennessee", "Nashville", 1),
+        (["Shreveport", "Dallas", "Albuquerque"], "Texas", "Dallas", 1),
         # No mapped boundary on this route, so nothing is lost and the
         # fallback is the only announcement either way.
         (["Dallas", "San Antonio", "Houston"], "Texas", "San Antonio", 0),
@@ -1158,7 +1133,17 @@ def test_deterministic_landmark_and_billboard_hooks_honor_granular_toggles(monke
             "Billboard: Harness coffee ahead.",
             {"category": "billboard"},
         )
-        harness.driving._update_ambient_events(999.0)
+        # Realistic frames, not one synthetic 999-second leap: ambient lines
+        # now expire if they wait too long (AMBIENT_QUEUE_MAX_AGE_S), so a
+        # single enormous dt ages the whole queue out instead of draining it.
+        # A tenth of a second at a time is what the road actually does, and
+        # one line leaves the queue per frame by design -- the spacing is the
+        # point of the channel.
+        for _ in range(200):
+            if not harness.driving._pending_ambient_events:
+                break
+            harness.driving._ambient_event_cooldown_s = 0.0
+            harness.driving._update_ambient_events(0.1)
         before = len(result.spoken)
         harness.app.ctx.settings.chatter_rivers = False
         harness.app.ctx.settings.chatter_billboards = False

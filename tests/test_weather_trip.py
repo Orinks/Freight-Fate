@@ -1848,20 +1848,15 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
     assert "traffic" in hazards[0].data
 
 
-@pytest.mark.xfail(
-    reason=(
-        "The city passing line still carries the crossing even when the leg has a "
-        "mapped boundary, deliberately. The mapped crossing is spoken as an ambient "
-        "message, and ambient messages wait in a single slot that the next critical "
-        "event discards and any later ambient message overwrites -- on an interstate "
-        "it never reaches the driver. Dropping this prefix would leave silence at a "
-        "state line rather than a repeat. Give ambient messages a queue that survives "
-        "both, then drop this marker and restore the suppression in "
-        "trip_road_events._check_cities."
-    ),
-    strict=True,
-)
 def test_city_events_do_not_repeat_mapped_state_crossings(world):
+    """The mapped boundary owns the state line; the city line does not repeat it.
+
+    Was a strict xfail: the mapped crossing is ambient, and ambient lines used
+    to wait in a single slot that any later ambient line overwrote and any
+    hazard discarded, so on an interstate it never reached the driver at all.
+    The prefix here was covering for that. The ambient queue means the mapped
+    line arrives, so the cover comes off.
+    """
     route = world.route_from_cities(["Chicago", "Cleveland", "Pittsburgh"])
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)

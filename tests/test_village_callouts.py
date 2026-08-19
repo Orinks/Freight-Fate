@@ -269,7 +269,7 @@ def test_driving_serves_villages_by_ladder_tier(monkeypatch):
 
         def serve(spoken, explains):
             driving._ambient_event_cooldown_s = 0.0
-            driving._pending_ambient_event = None
+            driving._pending_ambient_events.clear()
             driving._handle_trip_event(
                 TripEvent(
                     TripEventKind.LANDMARK,

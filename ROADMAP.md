@@ -818,6 +818,43 @@ onto exit signalling.
       notice had the same hole, hidden only because Lane keeping is not first
       in its category. Both now fire from `announce_entry` too.
 
+- [x] **Ambient speech rides a queue; four strict xfails closed
+      (2026-08-19).** An ambient line -- a billboard, a lane count, a mapped
+      state line -- waited in a SINGLE slot. Any later ambient line
+      overwrote it and any hazard discarded it outright, so a surveyed state
+      crossing never reached the driver and `_check_cities` compensated with
+      a duplicate "Crossing into Ohio." prefix on the next city line.
+
+      Now a bounded FIFO (`AMBIENT_QUEUE_MAX`) with an age cap
+      (`AMBIENT_QUEUE_MAX_AGE_S`): lines keep their place, a hazard costs
+      nothing, and a line that waits out a long hazard expires rather than
+      being performed late. It also finishes Sarah's 2026-08-14 report
+      properly -- her lane closure that "dinged and vanished" was only kept
+      in review before, and is now actually heard once the road clears.
+
+      TWO THINGS THE QUEUE ALONE GOT WRONG, both caught by tests:
+
+      A countdown must SUPERSEDE, not stack. "CB chatter in 5 miles" then
+      "in 4" queued both, so the driver heard five while sitting at four --
+      wrong, where the old overwrite was merely lossy. `_ambient_key` gives
+      the lines that count down toward a standing thing (patrol post,
+      traffic pressure, toll, weather) a key, and a keyed line replaces the
+      one already waiting in place. Moments stay unkeyed and still queue.
+
+      THE HARNESS WAS LYING, and this is the one worth remembering:
+      `tests/playtest_harness.py::_drive_one_frame` hand-rolls a frame and
+      never called `_update_ambient_events`, which only the real
+      `DrivingUpdateMixin.update` does. Instrumented over a full
+      Indianapolis->Atlanta delivery: **42 ambient lines queued, zero
+      spoken.** The channel jams on the first line and stays jammed for the
+      whole drive, because the spacing cooldown it sets is decremented
+      nowhere else. So the xfail's stated cause ("on an interstate the
+      checkpoint cues fire constantly, so it never gets out") was describing
+      the harness, not the game, and every harness test has been
+      under-reporting spoken ambient output. The frame drains it now. When a
+      harness finding blames the game, check the harness runs the same frame
+      the game does before believing it.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED

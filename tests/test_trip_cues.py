@@ -262,8 +262,26 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
     assert "traffic" in hazards[0].data
 
 
-def test_city_events_announce_state_crossings(world):
+def test_city_events_announce_a_state_line_the_map_does_not_carry(world):
+    """The fallback that keeps a state line from passing in silence.
+
+    Where the route has a surveyed boundary, the mapped crossing owns the
+    announcement and this line does not repeat it -- that is
+    test_city_events_do_not_repeat_mapped_state_crossings. Where it has
+    none, this prefix is the only thing that says the state changed, so it
+    has to still be here. This test used to assert the prefix on a leg that
+    DOES carry a mapped crossing, from the years when the mapped one could
+    never reach the driver and the duplicate was the lesser evil.
+    """
+    import dataclasses
+
     route = world.route_from_cities(["Chicago", "Cleveland", "Pittsburgh"])
+    # The same leg with its surveyed boundary taken away: nothing else will
+    # speak the state change, so the city line must carry it. A Leg is
+    # frozen, so this is a replacement rather than an edit.
+    assert route.legs[0].state_crossings
+    route.legs[0] = dataclasses.replace(route.legs[0], state_crossings=())
+
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)

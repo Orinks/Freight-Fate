@@ -274,7 +274,7 @@ def test_chatter_switches_gate_spoken_callouts(monkeypatch):
 
         app.ctx.settings.chatter_billboards = False
         d._ambient_event_cooldown_s = 0.0
-        d._pending_ambient_event = None
+        d._pending_ambient_events.clear()
         d._handle_trip_event(billboard)
         assert len(calls) == 2
     finally:
@@ -397,7 +397,7 @@ def test_a_switched_off_category_is_silent_in_terse_even_mid_drive(monkeypatch):
 
         app.ctx.settings.chatter_rivers = False
         d._ambient_event_cooldown_s = 0.0
-        d._pending_ambient_event = None
+        d._pending_ambient_events.clear()
         d._handle_trip_event(_chatter_event("river", "Crossing the Elk River."))
         assert heard == ["Cahaba River."]
     finally:
@@ -424,14 +424,14 @@ def test_village_callouts_keep_the_place_callouts_ladder(monkeypatch):
 
         app.ctx.settings.driving_speech = "standard"
         d._ambient_event_cooldown_s = 0.0
-        d._pending_ambient_event = None
+        d._pending_ambient_events.clear()
         monkeypatch.setattr(app.ctx, "say_event", speech_stub(heard))
         d._handle_trip_event(_chatter_event("village", "Passing Fairfield."))
         assert heard == ["Passing Fairfield."]
 
         app.ctx.settings.place_callouts = "off"
         d._ambient_event_cooldown_s = 0.0
-        d._pending_ambient_event = None
+        d._pending_ambient_events.clear()
         d._handle_trip_event(_chatter_event("village", "Passing Midfield."))
         assert heard == ["Passing Fairfield."]
     finally:

@@ -1,6 +1,8 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from ..message_log import MessageCategory
 from ..speech_pacing import SpeechCategory
 from ..speech_text import (
@@ -71,6 +73,36 @@ _EVENT_CATEGORIES = {
 }
 
 
+# How many ambient lines may wait for the road to go quiet, and how long a
+# waiting one stays worth saying. Both exist because the queue below replaced
+# a single slot: without a bound a long hazard would bank a recital and
+# perform it once the road cleared, which is the failure the one slot was
+# crudely preventing. Sized in REAL seconds, not game miles -- a line waits
+# in the player's ear, not on the road -- and generously, because the lines
+# that were being lost (a state line, a lane count) describe where the truck
+# IS rather than something coming up, and stay true while they wait.
+AMBIENT_QUEUE_MAX = 4
+AMBIENT_QUEUE_MAX_AGE_S = 12.0
+
+
+@dataclass
+class PendingAmbient:
+    """One ambient line waiting its turn, and how long it has waited.
+
+    ``key`` names a standing thing the line is ABOUT -- a patrol post the
+    truck is closing on, a traffic pressure, a toll -- rather than a moment
+    that happened. A standing thing restates itself as the distance falls,
+    and the queue supersedes rather than stacks for those. A moment (a state
+    line, a lane count, a billboard) has no key and keeps its place.
+    """
+
+    message: str
+    sound: str | None
+    category: SpeechCategory | None
+    waited_s: float = 0.0
+    key: str | None = None
+
+
 class DrivingEventMixin:
     def _log_ambient_event(self, message: str) -> None:
         """Log an ambient line the moment it queues, not when it is spoken.
@@ -102,13 +134,45 @@ class DrivingEventMixin:
         *,
         log: bool = True,
         category: SpeechCategory | None = None,
+        key: str | None = None,
     ) -> None:
         if log:
             # The drain call below passes log=False so a line that does
             # make it to speech is not entered into review twice.
             self._log_ambient_event(message)
         if self._hazard_deadline is not None or self._ambient_event_cooldown_s > 0.0:
-            self._pending_ambient_event = (message, sound, category)
+            # Queued, not stored in place. This used to be a single slot, and
+            # two things fell through it: a later ambient line overwrote
+            # whatever was waiting, and a hazard threw the slot away outright.
+            # On an interstate that meant a mapped state line was lost every
+            # single time -- the crossing the driver most wants and the one
+            # the map is most sure of. The trip compensated by prefixing
+            # "Crossing into Ohio." to the next city line, a duplicate kept
+            # deliberately because silence at a state line is worse
+            # (trip_road_events._check_cities).
+            #
+            # A queue makes the line survive both. What keeps it from becoming
+            # a recital is age, not capacity: a line that waited out a long
+            # hazard is dropped in _update_ambient_events rather than
+            # performed late. Full queue drops the OLDEST for the same reason.
+            #
+            # A line ABOUT something still ahead restates itself as the truck
+            # closes on it -- "CB chatter in 5 miles", then "in 4". Queueing
+            # both would say five when the driver is at four, which is worse
+            # than the overwrite ever was: wrong, not merely late. So a keyed
+            # line replaces the one already waiting under that key, in place,
+            # keeping the wait it had already served. Only what it SAYS
+            # changed; it has been waiting the whole time.
+            if key is not None:
+                for waiting in self._pending_ambient_events:
+                    if waiting.key == key:
+                        waiting.message = message
+                        waiting.sound = sound
+                        waiting.category = category
+                        return
+            self._pending_ambient_events.append(PendingAmbient(message, sound, category, key=key))
+            while len(self._pending_ambient_events) > AMBIENT_QUEUE_MAX:
+                self._pending_ambient_events.popleft()
             return
         if sound is not None:
             self.ctx.audio.play(sound)
@@ -120,15 +184,56 @@ class DrivingEventMixin:
     def _update_ambient_events(self, dt: float) -> None:
         if self._ambient_event_cooldown_s > 0.0:
             self._ambient_event_cooldown_s = max(0.0, self._ambient_event_cooldown_s - dt)
+        # Age everything waiting, including through a hazard: a hazard no
+        # longer discards the queue, so this is what stops a line describing
+        # a mile the truck left long ago from being spoken as if it were now.
+        # Already logged when it queued, so an aged-out line is still in
+        # review -- dropped from the ear, not from the record.
+        for pending in self._pending_ambient_events:
+            pending.waited_s += dt
+        while (
+            self._pending_ambient_events
+            and self._pending_ambient_events[0].waited_s >= AMBIENT_QUEUE_MAX_AGE_S
+        ):
+            self._pending_ambient_events.popleft()
         if self._hazard_deadline is not None:
             return
-        if self._ambient_event_cooldown_s > 0.0 or self._pending_ambient_event is None:
+        if self._ambient_event_cooldown_s > 0.0 or not self._pending_ambient_events:
             return
-        message, sound, category = self._pending_ambient_event
-        self._pending_ambient_event = None
+        pending = self._pending_ambient_events.popleft()
         # Already logged the moment it queued; speaking it now must not log
         # it a second time.
-        self._speak_ambient_event(message, sound, log=False, category=category)
+        self._speak_ambient_event(
+            pending.message,
+            pending.sound,
+            log=False,
+            category=pending.category,
+            key=pending.key,
+        )
+
+    def _ambient_key(self, event) -> str | None:
+        """What standing thing this ambient line is about, if any.
+
+        Only the lines that count DOWN toward something get one. A landmark,
+        a lane count, a billboard, a state line: each is its own moment, and
+        two of them are two things to say, so they queue. A patrol post, a
+        traffic pressure or a toll is one thing said again at a nearer
+        distance, and the nearer wording replaces the further one.
+        """
+        post = event.data.get("cb_patrol")
+        if post is not None:
+            return f"cb:{getattr(post, 'leg_index', 0)}:{getattr(post, 'at_mi', 0.0)}"
+        pressure = event.data.get("traffic_pressure")
+        if pressure is not None:
+            return f"pressure:{getattr(pressure, 'kind', '')}:{getattr(pressure, 'start_mi', 0.0)}"
+        cue = event.data.get("cue")
+        if getattr(cue, "kind", "") == "toll":
+            return f"toll:{getattr(cue, 'key', '')}"
+        if event.kind == TripEventKind.WEATHER_CHANGE:
+            # The weather is one standing condition; a newer reading of it
+            # replaces an older one rather than being read out in sequence.
+            return "weather"
+        return None
 
     def _should_space_ambient_event(self, event) -> bool:
         if event.kind == TripEventKind.WEATHER_CHANGE:
@@ -211,7 +316,10 @@ class DrivingEventMixin:
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
                 return  # off the highway: the hazard passes you by
-            self._pending_ambient_event = None
+            # The queue is NOT discarded here any more. A hazard blocks the
+            # drain while it is live and the waiting lines age out on their
+            # own if it runs long; a short one no longer costs the driver the
+            # state line they were crossing when it fired.
             self.ctx.audio.play(sound or "ui/warning")
             self.ctx.controller.rumble.hazard()  # 750 ms right->left sweep
             # The deadline is the moment the assist has to act plus the time
@@ -295,7 +403,11 @@ class DrivingEventMixin:
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
-            self._speak_ambient_event(event.message, category=self._event_category(event))
+            self._speak_ambient_event(
+                event.message,
+                category=self._event_category(event),
+                key=self._ambient_key(event),
+            )
             self._record_weather_achievement()
         elif kind == TripEventKind.TOLL_CHARGED:
             # Money is a consequence, not chatter: the charged line rides
@@ -419,6 +531,7 @@ class DrivingEventMixin:
                     event.message,
                     sound if kind != TripEventKind.ZONE_ENTER else None,
                     category=self._event_category(event),
+                    key=self._ambient_key(event),
                 )
             else:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:

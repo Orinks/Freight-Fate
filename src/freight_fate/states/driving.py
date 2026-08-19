@@ -5,14 +5,15 @@ from __future__ import annotations
 
 from ..sim.pedal_latch import PedalLatch
 from ..sim.surge import liquid_load_for
-from ..speech_pacing import SpeechCategory
+from collections import deque
+
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from ..models.cargo_condition import cargo_fragility
 from .driving_damage import DamageBandMixin
 from .driving_enforcement import EnforcementWatchMixin
 from .driving_engine_brake import EngineBrakeZoneMixin
-from .driving_events import DrivingEventMixin
+from .driving_events import DrivingEventMixin, PendingAmbient
 from .driving_facility_gate import FacilityGateMixin
 from .driving_lane_gap import LaneGapMixin
 from .driving_liquid import LiquidLoadMixin
@@ -580,7 +581,9 @@ class DrivingState(
         self._left_lane_s = 0.0
         self._keep_right_nags = 0
         self._ambient_event_cooldown_s = 0.0
-        self._pending_ambient_event: tuple[str, str | None, SpeechCategory | None] | None = None
+        # Ambient lines waiting for the road to go quiet. A FIFO, not the
+        # one slot it used to be: see _speak_ambient_event.
+        self._pending_ambient_events: deque[PendingAmbient] = deque()
         self._road_joint_accumulator_m = 0.0
         self._next_joint_distance_m = self._road_texture_rng.uniform(14.0, 18.0)
         self.lane_guidance = LaneGuidance()

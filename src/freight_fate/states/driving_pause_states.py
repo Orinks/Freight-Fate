@@ -46,7 +46,7 @@ class PauseMenuState(MenuState):
         # own queue and is performed over the pause menu, or replayed in full
         # on resume (tester transcript, 2026-08-11).
         self.ctx.pause_event_speech()
-        self.driving._pending_ambient_event = None
+        self.driving._pending_ambient_events.clear()
         self.driving._reverse_cue_active = False
         self.driving._air_cue_active = False
         self.driving._jake_cue_key = None
@@ -319,7 +319,7 @@ class PauseMenuState(MenuState):
         # The player may have lost the thread across the pause: bring each
         # facility's full name back once (research doc R6).
         self.driving.trip.reset_facility_mentions()
-        self.driving._pending_ambient_event = None
+        self.driving._pending_ambient_events.clear()
         self.ctx.pop_state()
         self.ctx.say("Resumed.", interrupt=False, review=False)
 

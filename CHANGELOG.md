@@ -786,6 +786,18 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **State lines, billboards and lane counts stop going missing.** The road's
+  quieter announcements waited in a single place, so a second one arriving
+  before the first had spoken simply erased it, and any hazard threw away
+  whatever was waiting. Crossing a state line was the worst of it: on a busy
+  interstate the crossing almost never got said, and the truck covered for it
+  by tacking the state onto the next town it passed instead. They queue up
+  now and wait their turn, so you hear each one, and a hazard no longer costs
+  you the line that was about to be spoken. Anything that waited too long to
+  still be true is dropped rather than said late, and it is still in your
+  message review either way. Reported by Sarah for a lane closure that
+  chimed and never spoke.
+
 - **The truck went quiet on the default speech setting.** Cues that carry a
   number that keeps moving -- your speed, a speed limit change, the lane
   beside you coming clear -- were being dropped as things you had already

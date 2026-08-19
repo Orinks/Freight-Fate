@@ -895,6 +895,17 @@ class PlaytestHarness:
         driving.truck.update(1 / 60)
         for event in driving.trip.update(1 / 60):
             driving._handle_trip_event(event)
+        # The real frame drains the ambient channel here, between handling
+        # the trip's events and stepping the hazard (DrivingUpdateMixin.
+        # update). Leaving it out made this harness lie about spoken output:
+        # an ambient line that could not speak at once sets a spacing
+        # cooldown that only this call ever decrements, so the FIRST such
+        # line jammed the channel for the rest of the drive and every later
+        # one waited forever. A whole delivery produced 42 waiting ambient
+        # lines and spoke none of them, which is how a mapped state line came
+        # to look permanently unreachable and got written up as a strict
+        # xfail against the game rather than against this loop.
+        driving._update_ambient_events(1 / 60)
         driving._update_hazard(1 / 60)
         if driving._hazard_deadline is not None:
             driving.truck.velocity_mps = 5.0

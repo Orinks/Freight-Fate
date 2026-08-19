@@ -779,17 +779,17 @@ def test_the_pause_menu_drops_what_the_road_was_about_to_say() -> None:
         app.ctx.settings.sapi_events = True
         app.ctx.speech.say_event = speech_stub()
         app.ctx.speech.stop_event = lambda: stopped.append("stopped")
-        driving._pending_ambient_event = ("Rain easing off, roads still wet.", None)
+        driving._speak_ambient_event("Rain easing off, roads still wet.")
 
         pause = PauseMenuState(app.ctx, driving)
         app.push_state(pause)  # enter(): the player opened the pause menu
         assert stopped, "the event voice kept the road's backlog through the pause"
-        assert driving._pending_ambient_event is None
+        assert not driving._pending_ambient_events
 
         # Nothing that arrived while the menu was up survives the way back.
-        driving._pending_ambient_event = ("Passing the fuel island.", None)
+        driving._speak_ambient_event("Passing the fuel island.")
         pause._resume()
-        assert driving._pending_ambient_event is None
+        assert not driving._pending_ambient_events
     finally:
         app.shutdown()
 
@@ -803,13 +803,17 @@ LANE_CLOSURE_LINE = (
 )
 
 
-def test_a_hazard_wiping_the_ambient_slot_still_leaves_the_line_in_review() -> None:
-    """Reproduces Sarah's report against the pre-fix mechanics directly: the
-    HAZARD branch always rings its own earcon and, separately, always
-    empties ``_pending_ambient_event`` outright -- no attempt to speak or
-    log whatever was waiting there first. That is the ding without words:
-    the hazard's own chime rings, the queued line never reaches the voice,
-    and -- before the fix -- it never reached the review buffer either.
+def test_a_hazard_no_longer_costs_the_driver_the_line_that_was_waiting() -> None:
+    """Sarah, US-12 East, 2026-08-14: a lane closure dinged and vanished.
+
+    The first fix kept the line in review, which stopped it being lost
+    outright but still left her hearing a chime with no words. The hazard
+    branch used to empty the one-deep ambient slot the moment it fired.
+
+    It no longer does. The hazard holds the channel while it is live, the
+    waiting line stays queued behind it, and when the road clears the
+    driver hears what the ding was for. Review has it either way -- it is
+    logged when it queues, not when it speaks.
     """
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind
@@ -823,12 +827,11 @@ def test_a_hazard_wiping_the_ambient_slot_still_leaves_the_line_in_review() -> N
         driving.ctx.say_event = speech_stub(events, with_interrupt=True)
         driving.ctx.controller.rumble.hazard = lambda: None
 
-        # A lane-closure line already deferred into the one-deep ambient
-        # slot -- queued (and, per the fix, logged) behind chatter whose
-        # spacing had not cleared yet.
+        # A lane-closure line already deferred into the ambient queue --
+        # queued (and logged) behind chatter whose spacing had not cleared.
         driving._ambient_event_cooldown_s = 5.0
         driving._speak_ambient_event(LANE_CLOSURE_LINE, "events/traffic_slowing")
-        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing", None)
+        assert [p.message for p in driving._pending_ambient_events] == [LANE_CLOSURE_LINE]
         played.clear()
 
         driving._handle_trip_event(
@@ -839,25 +842,32 @@ def test_a_hazard_wiping_the_ambient_slot_still_leaves_the_line_in_review() -> N
             )
         )
 
-        # The hazard's own ding rang.
+        # The hazard's own ding rang, and it still owns the channel:
+        # nothing ambient speaks over a live hazard.
         assert any(call and call[0] == "events/hazard_warning" for call in played)
-        # The wipe is still real: the slot emptied and the line never spoke.
-        assert driving._pending_ambient_event is None
         assert all(text != LANE_CLOSURE_LINE for text, _ in events)
-        # But it did not vanish: the review buffer has it, because it was
-        # logged the moment it queued, not the moment (that never came) it
-        # would have spoken.
+        # But the line is still there rather than discarded.
+        assert [p.message for p in driving._pending_ambient_events] == [LANE_CLOSURE_LINE]
+
+        # Hazard over, spacing clear: she hears what the ding was for.
+        driving._hazard_deadline = None
+        driving._ambient_event_cooldown_s = 0.0
+        driving._update_ambient_events(0.1)
+        assert any(text == LANE_CLOSURE_LINE for text, _ in events)
+        # And review has it either way, logged when it queued.
         assert LANE_CLOSURE_LINE in [m.text for m in app.ctx.message_log.messages]
     finally:
         app.shutdown()
 
 
-def test_an_overwritten_ambient_line_still_reaches_review() -> None:
+def test_a_second_ambient_line_no_longer_lands_on_top_of_the_first() -> None:
     """The other half of the single-slot bug: no hazard involved, just a
-    second piece of ambient colour landing on top of the first before the
-    cooldown that is holding both of them open clears. The first line is
-    still overwritten and never spoken -- that part is by design (AMBIENT:
-    missing it costs nothing) -- but it must not come up empty on review.
+    second piece of ambient colour arriving before the cooldown holding
+    both of them open clears.
+
+    The first line used to be overwritten and never spoken. It keeps its
+    place in the queue now and both are said, oldest first, which is what
+    lets a mapped state line survive an interstate's chatter.
     """
     from freight_fate.app import App
 
@@ -871,9 +881,12 @@ def test_an_overwritten_ambient_line_still_reaches_review() -> None:
         driving._speak_ambient_event("Rain easing off, roads still wet.", None)
         driving._speak_ambient_event("Passing the fuel island.", "ui/notify")
 
-        # Only the newer line is actually waiting to speak...
-        assert driving._pending_ambient_event == ("Passing the fuel island.", "ui/notify", None)
-        # ...but both reached the review buffer when they queued.
+        # Both are waiting, in the order they happened.
+        assert [p.message for p in driving._pending_ambient_events] == [
+            "Rain easing off, roads still wet.",
+            "Passing the fuel island.",
+        ]
+        # And both reached the review buffer when they queued.
         logged = [m.text for m in app.ctx.message_log.messages]
         assert "Rain easing off, roads still wet." in logged
         assert "Passing the fuel island." in logged
@@ -945,9 +958,9 @@ def test_ordinary_traffic_pack_pressure_stays_ambient() -> None:
     assert router._event_priority(event) is EventPriority.AMBIENT
 
 
-def test_a_lane_closure_merge_call_never_enters_the_pending_slot() -> None:
+def test_a_lane_closure_merge_call_never_enters_the_ambient_queue() -> None:
     """End to end: even while a hazard has the ambient channel busy, the
-    lane-closure merge call bypasses ``_pending_ambient_event`` altogether
+    lane-closure merge call bypasses the ambient queue altogether
     and rides ROUTE's never-dropped queue instead."""
     from types import SimpleNamespace
 
@@ -971,7 +984,7 @@ def test_a_lane_closure_merge_call_never_enters_the_pending_slot() -> None:
             )
         )
 
-        assert driving._pending_ambient_event is None
+        assert not driving._pending_ambient_events
         text, kwargs = events[0]
         assert text == LANE_CLOSURE_LINE
         assert kwargs.get("priority") is EventPriority.ROUTE
@@ -994,7 +1007,7 @@ def test_a_lane_closure_merge_call_never_enters_the_pending_slot() -> None:
 # said at all.
 
 
-def test_the_hazard_wipe_reproduces_identically_under_terse_speech() -> None:
+def test_hazard_survival_works_identically_under_terse_speech() -> None:
     """Same bug, same fix, independent of verbosity: the closure line was
     never a SpokenMessage, so terse never touched whether it spoke or
     logged -- confirming the loss (and the fix) is not verbosity-specific."""
@@ -1011,7 +1024,7 @@ def test_the_hazard_wipe_reproduces_identically_under_terse_speech() -> None:
         driving.ctx.controller.rumble.hazard = lambda: None
         driving._ambient_event_cooldown_s = 5.0
         driving._speak_ambient_event(LANE_CLOSURE_LINE, "events/traffic_slowing")
-        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing", None)
+        assert [p.message for p in driving._pending_ambient_events] == [LANE_CLOSURE_LINE]
 
         driving._handle_trip_event(
             TripEvent(
@@ -1021,8 +1034,12 @@ def test_the_hazard_wipe_reproduces_identically_under_terse_speech() -> None:
             )
         )
 
-        assert driving._pending_ambient_event is None
+        # Not spoken over the hazard, and not thrown away either.
         assert all(text != LANE_CLOSURE_LINE for text, _ in events)
+        driving._hazard_deadline = None
+        driving._ambient_event_cooldown_s = 0.0
+        driving._update_ambient_events(0.1)
+        assert any(text == LANE_CLOSURE_LINE for text, _ in events)
         # The full text -- there is only one rendering -- is in review.
         assert LANE_CLOSURE_LINE in [m.text for m in app.ctx.message_log.messages]
     finally:
@@ -1055,7 +1072,7 @@ def test_a_lane_closure_merge_call_reaches_review_in_full_under_terse() -> None:
             )
         )
 
-        assert driving._pending_ambient_event is None
+        assert not driving._pending_ambient_events
         text, kwargs = events[0]
         assert text == LANE_CLOSURE_LINE  # full text; nothing to shorten it into
         assert kwargs.get("priority") is EventPriority.ROUTE
@@ -1143,3 +1160,145 @@ def test_a_warning_is_still_handed_back_after_the_confirmation_rule() -> None:
     pacer, _ = make_pacer()
     pacer.should_flush(STOP_LINE, EventPriority.ROUTE)
     assert pacer.note_interrupt(HAZARD) == (STOP_LINE, EventPriority.ROUTE)
+
+
+def test_a_line_that_waited_out_a_long_hazard_is_dropped_not_performed_late() -> None:
+    """What keeps the queue from becoming a recital.
+
+    The one-deep slot's crude virtue was that a long hazard could not bank
+    anything: it threw the waiting line away. A queue that kept everything
+    would answer a cleared hazard with a monologue about miles the truck has
+    already left. Age is the replacement for that, and it is measured in
+    real seconds because the wait happens in the player's ear.
+
+    Dropped from the ear only: the line was logged when it queued, so review
+    still answers for it. That is the guarantee Sarah's report bought and it
+    survives here unchanged.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving_events import AMBIENT_QUEUE_MAX_AGE_S
+
+    app = App()
+    try:
+        driving = _driving(app)
+        events: list[tuple[str, bool]] = []
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = speech_stub(events, with_interrupt=True)
+
+        driving._hazard_deadline = 30.0
+        driving._speak_ambient_event("Passing the fuel island.", "ui/notify")
+        assert driving._pending_ambient_events
+
+        # A hazard that runs longer than the line stays true for.
+        driving._update_ambient_events(AMBIENT_QUEUE_MAX_AGE_S + 0.1)
+        assert not driving._pending_ambient_events
+
+        driving._hazard_deadline = None
+        driving._ambient_event_cooldown_s = 0.0
+        driving._update_ambient_events(0.1)
+        assert all(text != "Passing the fuel island." for text, _ in events)
+        # Still reviewable, as it always was.
+        assert "Passing the fuel island." in [m.text for m in app.ctx.message_log.messages]
+    finally:
+        app.shutdown()
+
+
+def test_the_ambient_queue_is_bounded_and_drops_the_stalest_first() -> None:
+    """A bound as well as an age, because a busy interstate can out-produce
+    the drain even without a hazard. When it overflows the OLDEST goes: the
+    same reasoning as the age cap, applied to depth instead of time."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_events import AMBIENT_QUEUE_MAX
+
+    app = App()
+    try:
+        driving = _driving(app)
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = lambda *a, **k: None
+        driving._ambient_event_cooldown_s = 5.0
+
+        for i in range(AMBIENT_QUEUE_MAX + 2):
+            driving._speak_ambient_event(f"Ambient line {i}.")
+
+        waiting = [p.message for p in driving._pending_ambient_events]
+        assert len(waiting) == AMBIENT_QUEUE_MAX
+        assert waiting[0] == "Ambient line 2."
+        assert waiting[-1] == f"Ambient line {AMBIENT_QUEUE_MAX + 1}."
+        # Everything queued reached review, including the two that fell off.
+        logged = [m.text for m in app.ctx.message_log.messages]
+        assert "Ambient line 0." in logged
+        assert "Ambient line 1." in logged
+    finally:
+        app.shutdown()
+
+
+def test_a_countdown_that_restates_itself_speaks_the_nearer_distance() -> None:
+    """The FIFO must not make a waiting line WRONG.
+
+    A CB call about a patrol post counts down as the truck closes: "in 5
+    miles", then "in 4". Two moments would queue and both be said; this is
+    one standing thing said again at a nearer distance, so the nearer
+    wording replaces the further one where it already sits. Queueing both
+    would say five when the driver is at four -- worse than the old
+    single-slot overwrite, which got this case right by accident.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    sys_path_helper = __import__("enforcement_helpers")
+    always_observing_post = sys_path_helper.always_observing_post
+
+    app = App()
+    try:
+        driving = _driving(app)
+        spoken: list[tuple[str, bool]] = []
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = speech_stub(spoken, with_interrupt=True)
+        driving._ambient_event_cooldown_s = 5.0  # the channel is busy
+
+        for miles, reach in ((5, 4.0), (4, 3.0)):
+            driving._handle_trip_event(
+                TripEvent(
+                    TripEventKind.GPS_CUE,
+                    f"CB chatter in {miles} miles: drivers report a bear ahead.",
+                    {"cb_patrol": always_observing_post(at_mi=14.0, reach_mi=reach)},
+                )
+            )
+
+        # One line waiting, carrying the nearer distance.
+        waiting = [p.message for p in driving._pending_ambient_events]
+        assert waiting == ["CB chatter in 4 miles: drivers report a bear ahead."]
+
+        driving._ambient_event_cooldown_s = 0.0
+        driving._update_ambient_events(0.1)
+        assert spoken[-1][0] == "CB chatter in 4 miles: drivers report a bear ahead."
+    finally:
+        app.shutdown()
+
+
+def test_two_different_moments_still_both_get_said() -> None:
+    """The other side of the same rule, so supersession cannot creep.
+
+    A billboard and a state line are two things that happened, not one
+    thing restated, so neither replaces the other however close together
+    they land. This is the case the single slot got wrong and the whole
+    queue exists for.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _driving(app)
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = lambda *a, **k: None
+        driving._ambient_event_cooldown_s = 5.0
+
+        driving._speak_ambient_event("Crossing into Ohio near the line on I-76.")
+        driving._speak_ambient_event("Billboard: coffee at exit 4.")
+
+        assert [p.message for p in driving._pending_ambient_events] == [
+            "Crossing into Ohio near the line on I-76.",
+            "Billboard: coffee at exit 4.",
+        ]
+    finally:
+        app.shutdown()
