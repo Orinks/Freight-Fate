@@ -56,6 +56,7 @@ from ..sim.enforcement_observe import (
     COVER_SPEED_TOLERANCE_MPH,
     OBSERVE_HOLD_MI,
     OBSERVE_LEEWAY_MPH,
+    TAILGATE_GAP_S,
     WHAT_CHAINS,
     WHAT_DAMAGE,
     WHAT_FOLLOWING,
@@ -178,6 +179,9 @@ class EnforcementWatchMixin:
         # Continuous distance over the limit. This -- not a real-time hold --
         # is what a post reads as a speed. See _update_enforcement_watch.
         self._over_limit_mi = 0.0
+        # Continuous distance closed up on the vehicle ahead; same idea, and
+        # read by the same kind of hold. See _accrue_following_gap.
+        self._closed_up_mi = 0.0
         self._enforcement_prev_mi = 0.0
         self._passed_post_ids: set[str] = set()
         self._marked_post_ids: set[str] = set()
@@ -701,6 +705,7 @@ class EnforcementWatchMixin:
             chains_required=chain_level > 0,
             chains_on=bool(getattr(truck, "chains_on", False)) or chain_level == 0,
             following_gap_s=gap_s,
+            closed_up_mi=self._closed_up_mi,
             left_lane_restricted=bool(getattr(self, "_left_lane_restricted", False)),
             in_left_lane=int(getattr(self.lane, "lane", 0) or 0) > 0,
             pack_neighbours=trip.traffic_manager.pack_neighbours(
@@ -782,6 +787,7 @@ class EnforcementWatchMixin:
             self._over_limit_mi = 0.0
         else:
             self._over_limit_mi += moved
+        self._accrue_following_gap(moved)
         self._track_pacing(moved)
         self._update_scale_bed()
         if self._ramp_mi is None:
@@ -809,6 +815,36 @@ class EnforcementWatchMixin:
     def _speed_control_engaged(self) -> bool:
         """Whether cruise or the speed keeper currently owns the throttle."""
         return self._cruise_mph is not None or bool(getattr(self, "_speed_control_armed", False))
+
+    def _accrue_following_gap(self, moved: float) -> None:
+        """Road covered while genuinely closed up on the vehicle ahead.
+
+        The mirror of the over-limit accumulator above, and it exists for
+        the same reason: a post should read a following distance, not a
+        frame. A gap dips under ``TAILGATE_GAP_S`` whenever the lead brakes
+        harder than the truck comfortably can, which at a work-zone taper is
+        every time -- and before this, that single dip was a citation.
+
+        The assist carve-out is the same one over-limit already has, and it
+        matters more here: adaptive cruise targets ``ACC_BASE_GAP_SECONDS``
+        (three seconds, well clear of the 1.2 that draws a ticket) but can
+        only close the gap back up at its own comfort deceleration, so while
+        it is braking, the gap it is recovering is its doing and not the
+        driver's. The driver cannot even choose the gap -- a selectable
+        following distance is still an open roadmap item -- so ticketing
+        them for it fined them for using the feature (tester Darren, I-75,
+        2026-08-18: 1,200 dollars for a work-zone taper).
+        """
+        context = self.trip.traffic_context()
+        gap_s = getattr(context, "gap_seconds", None) if context is not None else None
+        if gap_s is None or not 0.0 < gap_s < TAILGATE_GAP_S:
+            self._closed_up_mi = 0.0
+            return
+        if self._speed_control_engaged() and self.truck.brake > 0.0 and self.truck.throttle <= 0.05:
+            # An assist is already recovering the gap. Not disregard.
+            self._closed_up_mi = 0.0
+            return
+        self._closed_up_mi += moved
 
     def _track_pacing(self, moved: float) -> None:
         """How much road each roving unit has held station behind the truck over.
@@ -894,6 +930,7 @@ class EnforcementWatchMixin:
         post = observation.post
         self._cut_radio_for_stop()
         self._over_limit_mi = 0.0
+        self._closed_up_mi = 0.0
         post.declined = True
         if observation.what == WHAT_SPEEDING:
             limit, _ = self.trip.speed_limit_at(self.trip.position_mi)

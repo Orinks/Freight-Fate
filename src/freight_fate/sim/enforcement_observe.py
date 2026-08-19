@@ -123,6 +123,11 @@ class RoadSample:
     chains_required: bool = False
     chains_on: bool = True
     following_gap_s: float | None = None
+    # Road covered while the gap has been inside TAILGATE_GAP_S, the same
+    # shape and the same units as ``over_limit_mi`` above and for the same
+    # reason: a stretch of road is the same stretch at every time
+    # compression, every frame rate, and after a reload.
+    closed_up_mi: float = 0.0
     left_lane_restricted: bool = False
     in_left_lane: bool = False
     # Neighbours inside COVER_RADIUS_MI holding within COVER_SPEED_TOLERANCE_MPH.
@@ -189,7 +194,18 @@ def _candidates(post: EnforcementPost, sample: RoadSample) -> list[tuple[str, fl
     if sample.night and not sample.lights_on:
         found.append((WHAT_LIGHTS, 0.9, "running dark"))
     gap = sample.following_gap_s
-    if gap is not None and 0.0 < gap < TAILGATE_GAP_S:
+    if gap is not None and 0.0 < gap < TAILGATE_GAP_S and sample.closed_up_mi >= OBSERVE_HOLD_MI:
+        # Held, not glimpsed -- exactly the rule speeding has had all along.
+        # Without the hold, one sampled frame inside the gap was a citation,
+        # and a gap dips below 1.2 seconds every time the vehicle ahead
+        # brakes harder than the truck comfortably can: at a work-zone taper
+        # where the whole line bunches up, most of all. Tester Darren was
+        # fined 1,200 dollars for such a moment on I-75 (2026-08-18) while
+        # adaptive cruise -- which targets a THREE second gap and which he
+        # has no way to configure -- was easing him down for the zone. The
+        # driving layer also refuses to accrue this while an assist is doing
+        # the braking, on the same "that is not disregard" principle the
+        # over-limit accumulator already applies.
         found.append((WHAT_FOLLOWING, _clamp((TAILGATE_GAP_S - gap) / TAILGATE_GAP_S), "closed up"))
     if sample.left_lane_restricted and sample.in_left_lane:
         found.append((WHAT_LANE, 0.4, "left lane"))

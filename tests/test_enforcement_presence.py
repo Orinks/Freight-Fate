@@ -1551,3 +1551,70 @@ def test_a_roving_patrol_catches_a_sustained_speeder():
     found = observe(post, sample)
     assert found is not None
     assert found.what == WHAT_SPEEDING
+
+
+# --- following too close: held, not glimpsed --------------------------------
+#
+# Tester Darren, I-75 near Forsyth GA, 2026-08-18. His log, in order:
+#
+#   17:09:14  Traffic ahead, adaptive cruise reducing speed.
+#   17:09:17  Changing to the middle lane.
+#   17:09:20  You swerve around the merging traffic. Well done.
+#   17:09:26  Brake now! In 3 miles, construction ahead...
+#   17:09:26  [dropped] Construction zone ahead; adaptive cruise easing to 45.
+#   17:09:31  Clear of the semi. Right lane open.
+#   17:09:43  ...a trooper saw following too close.   1,200 dollars.
+#
+# Adaptive cruise targets ACC_BASE_GAP_SECONDS -- three seconds, well clear
+# of the 1.2 that draws a ticket -- and the driver cannot configure it at
+# all. What put him inside 1.2 was the work-zone taper bunching the line up
+# faster than the assist could give ground. Before the hold below, that one
+# sampled frame was the whole offence.
+
+
+def test_a_momentary_gap_dip_is_not_a_following_citation():
+    # A work-zone post, the kind that wrote Darren's ticket, and one of the
+    # few that looks at anything but speed: following distance needs eyes.
+    post = always_observing_post(at_mi=10.0, kind=KIND_WORK_ZONE)
+    glimpsed = _sample(
+        speed_mph=60.0,
+        limit_mph=65.0,
+        over_limit_mi=0.0,
+        following_gap_s=0.6,
+        closed_up_mi=0.0,
+    )
+    assert observe(post, glimpsed) is None
+
+
+def test_a_gap_held_closed_over_real_road_still_is_one():
+    post = always_observing_post(at_mi=10.0, kind=KIND_WORK_ZONE)
+    held = _sample(
+        speed_mph=60.0,
+        limit_mph=65.0,
+        over_limit_mi=0.0,
+        following_gap_s=0.6,
+        closed_up_mi=OBSERVE_HOLD_MI * 2,
+    )
+    from freight_fate.sim.enforcement_observe import WHAT_FOLLOWING
+
+    observation = observe(post, held)
+    assert observation is not None
+    assert observation.what == WHAT_FOLLOWING
+
+
+def test_the_hold_matches_the_one_speeding_has_always_had():
+    """Not a new idea -- the same idea, finally applied to both.
+
+    A post reads a speed over a stretch of road rather than in a frame
+    (OBSERVE_HOLD_MI). Following distance had no equivalent, so the two
+    offences were judged on different evidence: one on a measurement, the
+    other on an instant.
+    """
+    import inspect
+
+    from freight_fate.sim import enforcement_observe as eo
+
+    src = inspect.getsource(eo._candidates)
+    speeding = "sample.over_limit_mi >= OBSERVE_HOLD_MI" in src
+    following = "sample.closed_up_mi >= OBSERVE_HOLD_MI" in src
+    assert speeding and following, src

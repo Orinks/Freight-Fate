@@ -903,6 +903,27 @@ onto exit signalling.
       harness finding blames the game, check the harness runs the same frame
       the game does before believing it.
 
+- [x] **Ticketed for a gap the assist was managing (Darren, 2026-08-18) --
+      FIXED 2026-08-19.** 1,200 dollars for "following too close" at a work
+      zone on I-75, with adaptive cruise driving. ACC targets
+      `ACC_BASE_GAP_SECONDS` (3.0), and `TAILGATE_GAP_S` is 1.2, so the
+      steady state was never the problem -- the taper bunched the line up
+      faster than ACC's comfort deceleration could give ground, and the gap
+      dipped through the band while the assist recovered it.
+
+      THE ASYMMETRY, sitting in plain sight in `enforcement_observe`:
+      speeding required `over_limit_mi >= OBSERVE_HOLD_MI` ("a speed rather
+      than a blip", its own comment); following-too-close required nothing at
+      all, so one sampled frame was the offence. It now needs the same held
+      stretch of road, and `_accrue_following_gap` refuses to accrue while an
+      automatic speed control is braking -- the identical carve-out the
+      over-limit accumulator already had, and whose own comment says it
+      exists so the game does not ticket "the most cautious drivers in the
+      game for using the feature".
+
+      No test covered following-too-close at all before this, which is how it
+      shipped. Three now do, driven from his log's sequence.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED

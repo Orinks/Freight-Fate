@@ -786,6 +786,17 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **No more tickets for a following distance the truck chose.** A trooper could
+  pull you over for following too close when adaptive cruise was the one
+  managing the gap -- it aims to sit three seconds back, well clear of a
+  ticket, but when traffic ahead brakes harder than the truck comfortably can,
+  the gap dips for a moment while the cruise recovers it. That moment was the
+  whole offence. Following distance now has to be genuinely held before an
+  officer reads it as tailgating, the same way speeding has always had to be
+  held over a stretch of road, and it does not count against you at all while
+  an assist is doing the braking. Reported by Darren, who was fined 1,200
+  dollars at a work zone on I-75.
+
 - **The Radio Storm was on the dial twice.** The same station was listed under
   two different addresses, so it turned up twice while you were scanning. It is
   one entry now, at the station's own address, which should also keep it
