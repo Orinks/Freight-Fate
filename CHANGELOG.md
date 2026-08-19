@@ -3,6 +3,15 @@
 ## Unreleased
 
 ### Added
+- **You can choose how much room the truck leaves to the vehicle ahead.** A new
+  Following gap setting in Settings, Gameplay, Driving assistance offers close,
+  normal or far -- two and a half, three, or three and a half seconds. Adaptive
+  cruise used to decide this entirely on its own, which meant a trooper could
+  pull you over for a following distance you had no say in. Bad weather still
+  opens the gap further whichever you pick, so close never means close on ice,
+  and all three leave you well clear of a ticket. Asked for after Darren was
+  stopped for exactly that.
+
 
 - **Distant stations no longer clutter the dial.** Tuning has always put
   the strongest station first, but a handful of big stations were reaching

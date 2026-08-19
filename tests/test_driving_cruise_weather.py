@@ -3727,3 +3727,70 @@ def test_speed_keeper_says_when_it_cannot_hold_the_speed(monkeypatch):
         assert len(said) == 1, events
     finally:
         app.shutdown()
+
+
+# --- driver-selectable following gap ----------------------------------------
+
+
+def test_the_closest_gap_offered_is_still_well_clear_of_a_citation():
+    """The floor under the whole setting.
+
+    Tester Darren was fined 1,200 dollars for a following gap adaptive
+    cruise was managing and he had no say in (I-75, 2026-08-18). Giving him
+    a say is worth nothing if the closest choice is itself ticketable, so
+    every offered gap has to sit clear of TAILGATE_GAP_S -- and clear by
+    enough that closing on a slower vehicle does not walk straight into it.
+    """
+    from freight_fate.sim.enforcement_observe import TAILGATE_GAP_S
+    from freight_fate.states.driving_core import ACC_GAP_CHOICES
+
+    assert ACC_GAP_CHOICES
+    for name, seconds in ACC_GAP_CHOICES.items():
+        assert seconds >= TAILGATE_GAP_S + 1.0, f"{name} leaves only {seconds}s"
+
+
+def test_weather_opens_the_chosen_gap_and_never_shortens_it():
+    """Close means close on a clear day, not on ice.
+
+    The driver's choice is the floor and weather only ever adds to it, so
+    picking the shortest cushion cannot cancel the wet-road opening, and
+    picking the longest one cannot be quietly pulled back to the middle.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+    from freight_fate.states.driving_core import ACC_GAP_CHOICES
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        # Effects are derived from the condition, so drive the condition --
+        # forcing a grip number would test a state the weather cannot be in.
+        for name, seconds in ACC_GAP_CHOICES.items():
+            app.ctx.settings.acc_following_gap = name
+            driving.weather.current = WeatherKind.CLEAR
+            assert driving._acc_gap_seconds() == seconds, name
+
+            driving.weather.current = WeatherKind.SNOW
+            wet = driving._acc_gap_seconds()
+            assert wet > seconds, f"{name} did not open up for snow"
+    finally:
+        app.shutdown()
+
+
+def test_the_gap_row_speaks_the_seconds_not_just_the_word():
+    """A word alone tells a player working by ear nothing about how much
+    road "close" actually buys. The number is in the label, not buried in
+    the help text."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        from freight_fate.states.main_menu import SettingsCategoryState
+
+        state = SettingsCategoryState(app.ctx, "assistance")
+        app.ctx.settings.acc_following_gap = "close"
+        assert state._acc_gap_label() == "close, 2 and a half seconds"
+        app.ctx.settings.acc_following_gap = "normal"
+        assert state._acc_gap_label() == "normal, 3 seconds"
+    finally:
+        app.shutdown()

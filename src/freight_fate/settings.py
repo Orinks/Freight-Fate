@@ -180,6 +180,18 @@ class Settings:
     # brake growl players hear today); "classic" swaps in the synthesized
     # growl the game shipped before it, kept as the future jake A/B.
     jake_voice: str = "real"  # real / classic
+    # How much room adaptive cruise leaves to the vehicle ahead: close,
+    # normal, or far (2.5 / 3.0 / 3.5 seconds -- ACC_GAP_CHOICES). A
+    # preference rather than a difficulty, so it is deliberately NOT a
+    # driving-assistance preset field: choosing a longer cushion must not
+    # flip the preset row to Custom.
+    #
+    # It exists because the truck could put the driver inside a citation and
+    # they had no say in it (tester Darren, I-75 2026-08-18: fined 1,200
+    # dollars for a gap adaptive cruise was managing). Enforcement no longer
+    # reads a momentary dip as tailgating, and now the cushion is the
+    # driver's call as well.
+    acc_following_gap: str = "normal"
     automatic_transmission: bool = True  # friendlier default for new players
     # Simple keeps the familiar hold-through-stop behavior. Deliberate requires
     # a release and second press before an automatic changes direction.
@@ -598,6 +610,10 @@ class Settings:
             s.automatic_direction_changes = "simple"
         if s.jake_voice not in ("real", "classic"):
             s.jake_voice = "real"
+        from .states.driving_core import ACC_GAP_CHOICES, ACC_GAP_DEFAULT
+
+        if s.acc_following_gap not in ACC_GAP_CHOICES:
+            s.acc_following_gap = ACC_GAP_DEFAULT
         # Latching pedals briefly shipped as a bool; map old saves over.
         if s.pedal_latch is True:
             s.pedal_latch = "assists first"

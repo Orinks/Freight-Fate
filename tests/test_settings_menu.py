@@ -213,6 +213,7 @@ GAMEPLAY_SUBCATEGORY_ROWS = {
         "Curve callouts",
         "Speed keeper",
         "Lane keeping",
+        "Following gap",
         "Back",
     ],
     "difficulty": [

@@ -517,7 +517,22 @@ GRADE_WARN_MIN_MPH = 25.0  # no advisories while crawling; nothing to plan for
 # spoke 76 advisories in 116 miles; at three quarters of a mile it speaks 4.
 GRADE_WARN_MIN_RUN_MI = 0.75
 GRADE_WARN_RESCAN_MI = 0.1  # how far the truck rolls between advisory scans
-ACC_BASE_GAP_SECONDS = 3.0  # clear-weather adaptive cruise gap
+ACC_BASE_GAP_SECONDS = 3.0  # clear-weather adaptive cruise gap, normal setting
+# The driver's choice of cushion, in seconds of clear-weather gap. Real
+# adaptive cruise offers three, and so does this. Weather still ADDS to
+# whichever one is chosen (see _acc_gap_seconds), so picking "close" never
+# stops the truck opening up on ice.
+#
+# Every one of them sits far clear of enforcement_observe.TAILGATE_GAP_S
+# (1.2 seconds), and that is a floor rather than a coincidence: the closest
+# setting the game offers must never be a setting that gets the driver
+# ticketed for choosing it. A test pins the margin.
+ACC_GAP_CHOICES = {
+    "close": 2.5,
+    "normal": ACC_BASE_GAP_SECONDS,
+    "far": 3.5,
+}
+ACC_GAP_DEFAULT = "normal"
 ACC_LIMIT_OFFSET_MPH = 5.0  # predictive ACC holds this far over the posted
 # limit -- a with-traffic pace, sized to sit right at OVERSPEED_WARN_MPH
 # without arming it, and comfortably under the 9 mph speeding-strike

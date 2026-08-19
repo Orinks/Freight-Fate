@@ -3431,13 +3431,21 @@ class DrivingEventMixin:
             )
 
     def _acc_gap_seconds(self) -> float:
+        """Seconds of room adaptive cruise leaves to the vehicle ahead.
+
+        The driver's chosen cushion is the floor; weather only ever adds to
+        it. Someone who picked "close" on a clear day still gets the full
+        wet-road opening when it rains, and someone who picked "far" never
+        has it quietly shortened back to the middle.
+        """
+        chosen = ACC_GAP_CHOICES.get(self.ctx.settings.acc_following_gap, ACC_BASE_GAP_SECONDS)
         effects = self.weather.effects
-        gap = ACC_BASE_GAP_SECONDS
+        gap = chosen
         if effects.grip < 0.9:
             gap += (0.9 - effects.grip) * 4.2
         if effects.visibility_mi < 3.0:
             gap += (3.0 - effects.visibility_mi) * 0.5
-        return min(6.0, max(ACC_BASE_GAP_SECONDS, gap))
+        return min(6.0, max(chosen, gap))
 
     def _acc_weather_gap_text(self) -> str | None:
         effects = self.weather.effects

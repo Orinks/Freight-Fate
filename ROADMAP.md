@@ -2645,10 +2645,25 @@ onto exit signalling.
       wheel power, so the saving would be real but small, and it lands in
       the engine-audio path that nromey's arc owns. Worth doing when that
       area is next open.
-- [ ] **Driver-selectable following gap.** Real ACC offers three gaps
-      (roughly 2.5, 3.0, 3.5 seconds). Freight Fate derives the gap from
-      weather only. A setting would suit the players who want a longer
-      cushion without pretending it is raining.
+- [x] **Driver-selectable following gap -- SHIPPED 2026-08-19 (owner: "add
+      it here for this next test build in 1.9").** Close, normal, far --
+      2.5, 3.0, 3.5 seconds (`ACC_GAP_CHOICES`), on a Following gap row in
+      Driving assistance.
+
+      Promoted into 1.9 by Darren's citation: he was fined for a following
+      distance adaptive cruise was managing and had no way to ask it for more
+      room, so the game charged him for a decision it never let him make.
+
+      The driver's choice is a FLOOR -- weather still only ever adds to it,
+      so "close" cannot cancel the wet-road opening and "far" cannot be
+      quietly pulled back. Every offered gap sits at least a second clear of
+      `TAILGATE_GAP_S`, pinned by a test: the closest setting the game offers
+      must never be one that gets a driver ticketed for choosing it.
+
+      Not a preset field -- a cushion is a preference, not a difficulty. The
+      row speaks its seconds ("close, 2 and a half seconds") because the bare
+      word tells a player working by ear nothing about how much road it buys.
+      Ontology row added.
 - [ ] **I-5 speed limit changes for a few miles (owner observation,
       night of 2026-07-22, verify only).** A short stretch of I-5 spoke
       a different limit. Probably CORRECT -- the dense maxspeed sweep

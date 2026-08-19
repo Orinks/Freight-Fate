@@ -1205,6 +1205,20 @@ class SettingsCategoryState(MenuState):
                     "partial, All assists to full.",
                 )
             )
+            items.append(
+                MenuItem(
+                    lambda: f"Following gap: {self._acc_gap_label()}",
+                    lambda: self._cycle_acc_gap(1),
+                    help="How much room adaptive cruise leaves to the vehicle "
+                    "ahead when it is following traffic. Close is two and a "
+                    "half seconds, normal three, far three and a half. Bad "
+                    "weather still opens the gap further whichever you pick, "
+                    "so close never means close on ice. All three leave you "
+                    "well clear of a following-too-close citation. This is "
+                    "your preference rather than a difficulty, so the "
+                    "assistance preset above does not change it.",
+                )
+            )
             # Lane and edge cue volume moved to Audio, next to the Gameplay
             # cues volume it scales. It is a volume, and a second volume
             # control hiding in the assists list is how it came to be a row
@@ -1499,8 +1513,11 @@ class SettingsCategoryState(MenuState):
                     ],
                     # The last row of this category was left out of the
                     # arrow-key path, so Left and Right did nothing on it
-                    # while every other row answered.
+                    # while every other row answered. Every row added here
+                    # after Lane keeping must be appended below it, in the
+                    # same order build_items appends them.
                     self._cycle_lane_keeping,
+                    self._cycle_acc_gap,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -1887,6 +1904,32 @@ class SettingsCategoryState(MenuState):
             "relaxed": "relaxed",
             "debug_off": "off (developer)",
         }.get(self.ctx.settings.hos_mode, "realistic")
+
+    def _acc_gap_label(self) -> str:
+        """The choice, and the number that makes it mean something.
+
+        A sighted player could infer "close" from a picture of a road. This
+        one is read aloud and nothing else on the row says how much room any
+        of the words buys, so the seconds go in the label rather than being
+        left to the help text.
+        """
+        from .driving_core import ACC_GAP_CHOICES, ACC_GAP_DEFAULT
+
+        choice = self.ctx.settings.acc_following_gap
+        seconds = ACC_GAP_CHOICES.get(choice, ACC_GAP_CHOICES[ACC_GAP_DEFAULT])
+        spoken = f"{seconds:g}".replace(".5", " and a half")
+        return f"{choice}, {spoken} seconds"
+
+    def _cycle_acc_gap(self, d: int) -> None:
+        from .driving_core import ACC_GAP_CHOICES, ACC_GAP_DEFAULT
+
+        order = list(ACC_GAP_CHOICES)
+        try:
+            i = order.index(self.ctx.settings.acc_following_gap)
+        except ValueError:
+            i = order.index(ACC_GAP_DEFAULT)
+        self.ctx.settings.acc_following_gap = order[(i + d) % len(order)]
+        self._announce()
 
     def _lane_keeping_label(self) -> str:
         # The value carries its own meaning: a player cycling the row hears

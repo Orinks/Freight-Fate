@@ -210,6 +210,7 @@ from the words, and synonyms cost them a re-read.
 | The tractor a carrier gave you | your assigned truck | your truck (when leased) | `FleetTier` |
 | How much of the lane-holding work the truck does | lane keeping, always with its value clause ("full, the truck holds the lane and takes your exits") | lane drift (retired 1.9), steering assist, lane keeping assist (that is `lane_centering_assist`, a reserved row for steering help that is not implemented -- never describe it as working), the bare value word alone -- "off" here is the hardest mode, the opposite of "off" on the rows around it | `settings.lane_keeping` |
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
+| Room adaptive cruise leaves to the vehicle ahead | following gap, always with its seconds ("close, two and a half seconds") | following distance, headway, gap on its own (bare "gap" is the lane row below, and the two are different things) | `settings.acc_following_gap`, `ACC_GAP_CHOICES` |
 | Room to move into the next lane over | the lane is open ("right lane open"); held by somebody, it is blocked ("right lane blocked by a semi") | clear (that is what the truck is clear OF -- the vehicle passed), safe, free, gap | `LaneGapMixin`, `states/driving_lane_gap.py` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
