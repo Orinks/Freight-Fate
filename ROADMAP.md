@@ -1174,15 +1174,22 @@ onto exit signalling.
       to "feel right" in the meantime -- the Poisson number is the physically
       correct occupancy and the representation is what is short.
 
-- [ ] **FLAKY: `test_speed_keeper_eases_for_a_lower_posted_limit_and_says_so`
-      fails about a quarter of the time (measured 2026-08-19).** The final
-      assertion misses by under half a mph -- 15.47 against a <= 15.0 -- so
-      it is a margin in the keeper's ease window, not a wrong behaviour.
-
-      Rate measured on BOTH sides before blaming anything, per the rule:
-      3/10 with that session's changes, 2/10 without. Pre-existing and
-      unrelated to them. Worth fixing because a one-in-four flake pollutes
-      every gate run and trains people to re-run rather than read.
+- [x] **The one-in-four keeper-ease flake, fixed at its three roots**
+      (2026-08-20, was: 15.47 against a <= 15.0). Traced with a frame
+      trace, not a guess. (1) `_keeper_ease_mi`'s 0.75-mi cap clipped the
+      PHYSICAL shed its own docstring promises is a floor, so long-route
+      time scales made the number unreachable -- the cap now trims only
+      the discretionary reaction budget. (2) While easing toward a lower
+      sign, the throttle rebuild between snubs could push speed back
+      through the sign's own number; the keeper now coasts at that
+      boundary instead of burning fuel to defeat its own easing.
+      (3) The assertion demanded an instantaneous <= 15.0 at one milepost,
+      but the keeper HOLDS a number by riding a designed snub ripple, so
+      the sign was a phase detector on the snub cycle; the test now
+      asserts the band the snub polices plus a ripple floor at the number.
+      0 failures in 20 randomized runs after; the variance source was the
+      fresh-career route draw (each drawn route's time compression), found
+      only after two wrong theories died to measurements.
 
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,

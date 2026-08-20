@@ -399,7 +399,15 @@ class SpeedControlStateMixin:
         # down at the new number, because that is where the truck spends it.
         shed_mi = shed_s * (speed + target) / 2.0 * scale / 3600.0
         shed_mi += KEEPER_SETTLE_REAL_S * target * scale / 3600.0
-        return min(KEEPER_EASE_MAX_MI, max(reaction_mi, shed_mi))
+        # The cap trims the discretionary reaction budget, never the physical
+        # shed -- the docstring above promises the shed is a floor, and the
+        # old min() clipped it anyway: on long-route draws the ramped time
+        # scale pushes the shed past 0.75 mi, the window came back capped,
+        # and the keeper started too late to make the number by the sign
+        # (the 1-in-4 "15.47 against 15.0" flake, ROADMAP 2026-08-19 --
+        # which was the game quietly overshooting posted drops on
+        # high-compression trips, not a test artifact).
+        return max(shed_mi, min(KEEPER_EASE_MAX_MI, max(reaction_mi, shed_mi)))
 
     def _keeper_turn_ease_scale(self) -> float:
         """The clock the keeper will actually ease a corner on.

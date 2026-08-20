@@ -581,9 +581,12 @@ def test_speed_keeper_eases_for_a_lower_posted_limit_and_says_so(monkeypatch):
         t.grade = 0.0
         t.transmission.gear = 5
         t.velocity_mps = 25.0 / 2.23694
-        # Just inside the window the keeper says it needs for this drop, which
-        # is what the window is a promise about.
-        drop_mi = driving.trip.position_mi + 0.9 * driving._keeper_ease_mi(
+        # Exactly the window the keeper says it needs for this drop -- that
+        # is what the window is a promise about. Placing the sign at 0.9x
+        # demanded arrival with 10 percent less road than the physics the
+        # window prices, which put the assertion on a knife edge that the
+        # drawn route's time scale decided (the 1-in-4 flake).
+        drop_mi = driving.trip.position_mi + driving._keeper_ease_mi(
             15.0, driving.trip.effective_time_scale
         )
         driving.trip.speed_limit_at = lambda mile: (
@@ -592,16 +595,31 @@ def test_speed_keeper_eases_for_a_lower_posted_limit_and_says_so(monkeypatch):
         driving.handle_event(key_event(pygame.K_k))
         assert driving._keeper_mph == pytest.approx(25.0, abs=0.5)
 
+        recent = []
         for _ in range(60 * 30):
             driving.update(1 / 60)
+            recent.append(t.speed_mph)
             if driving.trip.position_mi >= drop_mi:
                 break
-        # Down to the new number by the time the sign is under the wheels, said
-        # once for that number rather than once a frame.
+        # Down into the eased band by the time the sign is under the wheels,
+        # said once for that number rather than once a frame. The keeper
+        # holds a number by SNUBBING -- one brake application, held, released
+        # a mile under, throttle back, repeat -- so its speed at any single
+        # instant rides a designed ripple around the eased target. The
+        # promise is the band, not a knife-edge instant: never above the
+        # number by more than the snub threshold that polices it, and the
+        # ripple's floor at or under the number, which is what proves the
+        # shed actually happened. Asserting a bare <= 15.0 at one milepost
+        # made the sign a phase detector on that ripple: pass or fail by
+        # which half of the snub cycle the sign happened to land on, one run
+        # in four (ROADMAP 2026-08-19).
+        from freight_fate.states.driving_speed_control import KEEPER_SNUB_OVER_MPH
+
         assert any(
             e == "Posted limit lower; speed keeper easing to 15 miles per hour." for e in events
         )
-        assert t.speed_mph <= 15.0
+        assert t.speed_mph <= 15.0 + KEEPER_SNUB_OVER_MPH
+        assert min(recent[-90:]) <= 15.0, "the ripple never dipped to the eased number"
         assert sum("speed keeper easing to 15" in e for e in events) == 1
         # The keeper's own line already named the number; it must feed the
         # trip's pre-announce set so the plain arrival "Speed limit reduced

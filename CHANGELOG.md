@@ -813,6 +813,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The speed keeper settles at a lowered limit instead of surging past it.**
+  Approaching a lower posted limit, the keeper used to release its brake and
+  then power back up through the new number before braking again, so on
+  fast-paced trips you could cross the sign a little over the limit with the
+  engine working against its own slowing. It now coasts once it reaches the
+  new number, and on long trips it starts slowing early enough to actually
+  arrive at it.
+
 - **What waits at the end of an exit ramp now comes from the map's real road
   connections.** The game walks each exit's actual ramps: where every ramp
   merges straight onto another freeway, you get a clean merge with no light or
