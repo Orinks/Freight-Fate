@@ -813,6 +813,10 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **A speed limit warning no longer stutters.** Approaching a lower limit could
+  announce the same drop twice in a row, a fraction of a second apart, which
+  sounded like two different signs coming up.
+
 - **Arrival and turn calls cannot go missing.** "You are at the dock, stop to
   check in", the warning coming into a facility gate, the merge instruction off
   a ramp and the hold at a red light could all be dropped as passing chatter

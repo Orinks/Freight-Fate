@@ -2878,7 +2878,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         is refined to a fine stride so its dedup key stays stable no matter
         where inside a tick the scan starts."""
         current = self._corridor_limit_at(self.position_mi)
-        prev = self.position_mi
+        # The scan walks an ABSOLUTE grid, not one anchored to where the truck
+        # happens to be. Striding from position_mi put every probe at
+        # position + k * stride, so the fine anchor below moved with the truck
+        # even though it floors to a hundredth -- and the boundary rounded to
+        # 284.91 on one frame and 284.90 on the next, which is two different
+        # dedup keys for one posting. That is the 2026-07-23 double-warning
+        # again, surviving its own fix; a headless playtest on
+        # Indianapolis->Nashville caught it saying "speed limit drops to 55 in
+        # 3 miles" twice in a row. It was inaudible until the ambient queue
+        # stopped swallowing text-identical lines, which is what that
+        # suppression had been hiding.
+        prev = math.floor(self.position_mi / LIMIT_SCAN_STRIDE_MI) * LIMIT_SCAN_STRIDE_MI
         end = min(self.total_miles, self.position_mi + LIMIT_WARNING_MAX_LEAD_MI)
         while prev < end:
             mi = min(end, prev + LIMIT_SCAN_STRIDE_MI)

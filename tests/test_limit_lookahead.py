@@ -264,3 +264,50 @@ def test_spoken_short_miles_units():
     assert _spoken_short_miles(0.2, True) == "a quarter mile"
     assert _spoken_short_miles(0.5, True) == "half a mile"
     assert _spoken_short_miles(0.5, False) == "800 meters"
+
+
+def test_one_posting_warns_once_however_the_frames_land(world):
+    """A headless playtest on Indianapolis->Nashville said "speed limit drops
+    to 55 in 3 miles" twice in a row. There is only ONE drop to 55 on that
+    route, at mile 284.9.
+
+    _check_limit_drop_ahead dedups on the boundary mile, and the boundary was
+    moving: the scan strode from position_mi, so every probe sat at
+    position + k * stride and the fine anchor floored to a different
+    hundredth as the truck rolled -- 284.91 on one frame, 284.90 on the next.
+    Two keys, one posting.
+
+    This is the 2026-07-23 double-warning surviving its own fix, which
+    anchored the fine probe to absolute hundredths but left the scan itself
+    anchored to the truck. It was inaudible until the ambient queue stopped
+    swallowing text-identical lines -- the suppression that was also
+    silencing Darren was hiding it.
+    """
+    from freight_fate.sim.trip import Trip
+    from freight_fate.sim.vehicle import TruckState
+    from freight_fate.sim.weather import WeatherSystem
+
+    route = world.route_from_cities(["Indianapolis", "Nashville"])
+    trip = Trip(route, TruckState(), WeatherSystem("midwest", seed=1), seed=3)
+    trip.truck.velocity_mps = 65.0 / 2.23694
+
+    warned = []
+    real = Trip._check_limit_drop_ahead
+
+    def spy(self):
+        before = set(self._warned_limit_drops)
+        real(self)
+        warned.extend(set(self._warned_limit_drops) - before)
+
+    Trip._check_limit_drop_ahead = spy
+    try:
+        trip.position_mi = 270.0
+        while trip.position_mi < 286.5:
+            trip.position_mi += 0.02
+            trip._check_limit_drop_ahead()
+    finally:
+        Trip._check_limit_drop_ahead = real
+
+    assert warned, "the drop to 55 never warned at all"
+    assert len(warned) == len(set(warned)), f"one posting keyed more than once: {warned}"
+    assert len(warned) == 1, f"one posting warned {len(warned)} times: {warned}"
