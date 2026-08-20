@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **The horn runs on brake air, like a real truck's.** The air horn and
+  the brakes share the tanks, so leaning on the horn for a long stretch
+  costs measurable air pressure -- a quick blast costs almost nothing.
+  The compressor wins it back the same way it always has.
+
 - **The horn can move an animal off the road.** One good blast at an
   animal hazard gives it a chance to clear before you reach it -- dogs,
   coyotes, and livestock usually move; deer and elk freeze more often

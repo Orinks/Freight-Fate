@@ -46,6 +46,7 @@ class DrivingControlsMixin:
     def _handle_key(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYUP and event.key == pygame.K_h:
             self.ctx.audio.horn_stop()
+            self.truck.horn_on = False
             return
         if event.type != pygame.KEYDOWN:
             return
@@ -60,6 +61,7 @@ class DrivingControlsMixin:
             self._set_status("Event voice stopped.")
         elif key == pygame.K_ESCAPE:
             self.ctx.audio.horn_stop()
+            self.truck.horn_on = False
             self.ctx.push_state(PauseMenuState(self.ctx, self))
         elif key == pygame.K_e:
             self._toggle_engine()
@@ -93,6 +95,7 @@ class DrivingControlsMixin:
             self._toggle_parking_brake()
         elif key == pygame.K_h:
             self.ctx.audio.horn_start()
+            self.truck.horn_on = True
             self._horn_scare_animals()
         elif key == pygame.K_t:
             if getattr(event, "mod", 0) & pygame.KMOD_ALT:
@@ -549,7 +552,8 @@ class DrivingControlsMixin:
         button = event.button
         if event.type == pygame.CONTROLLERBUTTONUP:
             if button == pygame.CONTROLLER_BUTTON_LEFTSTICK:
-                self.ctx.audio.horn_stop()  # release L3 to stop the horn
+                self.ctx.audio.horn_stop()
+            self.truck.horn_on = False  # release L3 to stop the horn
             return
         if event.type != pygame.CONTROLLERBUTTONDOWN:
             return
@@ -569,9 +573,11 @@ class DrivingControlsMixin:
             self._toggle_cruise()
         elif button == pygame.CONTROLLER_BUTTON_START:
             self.ctx.audio.horn_stop()
+            self.truck.horn_on = False
             self.ctx.push_state(PauseMenuState(self.ctx, self))
         elif button == pygame.CONTROLLER_BUTTON_LEFTSTICK:
             self.ctx.audio.horn_start()
+            self.truck.horn_on = True
             self._horn_scare_animals()
         elif button == pygame.CONTROLLER_BUTTON_RIGHTSTICK:
             self._toggle_engine_brake()
@@ -635,6 +641,7 @@ class DrivingControlsMixin:
     def on_controller_disconnect(self) -> None:
         # Pause so an unplugged pad mid-drive does not leave the truck rolling.
         self.ctx.audio.horn_stop()
+        self.truck.horn_on = False
         self.ctx.push_state(PauseMenuState(self.ctx, self))
 
     def _toggle_engine(self) -> None:

@@ -549,3 +549,23 @@ def test_the_welcome_sign_is_deterministic_and_authored(world):
     assert sign.startswith("Welcome to Texas"), sign
     assert sign == welcome_sign("Texas", _random.Random(7 ^ zlib.crc32(b"Texas")))
     assert welcome_sign("Atlantis", _random.Random(1)) == ""
+
+
+def test_the_horn_drains_the_air_tanks(world):
+    """Real trucks run the horn off the brake air (Brandon, 2026-08-20).
+    Leaning on it for a minute costs measurable air; releasing stops the
+    draw; the compressor wins it back."""
+    from freight_fate.sim.vehicle import TruckState
+
+    t = TruckState()
+    before = t.primary_air_psi
+    t.horn_on = True
+    for _ in range(60 * 60):  # a full minute of leaning on it
+        t._consume_brake_air(1 / 60)
+    drained = before - t.primary_air_psi
+    assert 5.0 <= drained <= 10.0, f"a minute of horn drained {drained:.2f} psi"
+    t.horn_on = False
+    mid = t.primary_air_psi
+    for _ in range(60):
+        t._consume_brake_air(1 / 60)
+    assert t.primary_air_psi == mid, "released horn must not draw"

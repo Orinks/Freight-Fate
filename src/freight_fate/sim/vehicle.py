@@ -324,6 +324,7 @@ class TruckState:
     engine_brake_stage: int = 0  # 0 = off, 1..JAKE_STAGES = cylinders engaged
     emergency_brake: bool = False
     parking_brake: bool = False
+    horn_on: bool = False  # the air horn valve is open; drains the tanks
     primary_air_psi: float = 125.0
     secondary_air_psi: float = 125.0
     trailer_air_psi: float = 125.0
@@ -1295,7 +1296,19 @@ class TruckState:
             self.trailer_air_psi = self._clamp_air_psi(self.trailer_air_psi + rate * 0.85 * dt)
         self._sync_air_compressor()
 
+    # The air horn draws off the same tanks as the service brakes -- one
+    # small valve against four brake chambers, so it is charged at half the
+    # hold rate of a full brake application (an in-model ratio, stated as
+    # such). Leaning on the horn for a minute costs real air; a blast costs
+    # almost nothing; the existing low-air machinery does any warning
+    # (Brandon, 2026-08-20: same air for brakes and horn, like a real truck).
+    HORN_AIR_PSI_PER_S = 0.125
+
     def _consume_brake_air(self, dt: float) -> None:
+        if self.horn_on:
+            draw = self.HORN_AIR_PSI_PER_S * dt
+            self.primary_air_psi -= draw
+            self.secondary_air_psi -= draw * 0.5
         application = max(0.0, min(1.0, self.brake))
         if self.emergency_brake:
             application = 1.0
