@@ -120,6 +120,36 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Ramp-terminal fallback weights calibrated against the bake**
+      (2026-08-20). 8,205 of 18,011 baked interchanges carry a READ control
+      from OSM; the split is 88.7/11.3 signal-to-stop within URBAN_RADIUS_MI
+      of a route city and 64.3/35.7 outside it. The seeded fallback asserted
+      70/25 and 30/50, so rural ramps got roughly twice the stop signs
+      reality carries. Now 84.3/10.7 and 51.4/28.6 -- the signal:stop ratio
+      is read, the free-flow share is still assumed and says so.
+
+- [ ] **Bake the ramp's far-end road class so free flow can be READ.**
+      The bake stores `signal` or `stop` and nothing else: zero of 8,205
+      records say `none`, because OSM tags controls that exist and is silent
+      where a ramp merges freely. So "no control" is never a reading, and
+      the runtime infers it from `FREEWAY_VIA_RE` -- "the via names an
+      interstate". Measured against the ramps OSM did tag, that test fires
+      on 2,865 of 8,205 ramps KNOWN to carry a light or a stop sign: it is
+      wrong 34.9% of the time, because `via` is signage (what the exit is
+      signed toward) rather than the class of road the ramp lands on.
+      Tighter string tests do better -- all-interstate via with no surface
+      destination is 12.4% wrong, and adding "no exit number" reaches 0.7%
+      -- but the strict one only fires on 103 untagged ramps, so genuine
+      interstate-to-interstate junctions would fall back to the roll and
+      collect lights and stop signs again, which is the 2026-08-17 complaint
+      in a new costume. Not fixable by picking a better string: the honest
+      fix is a bake pass recording whether the ramp link's far end joins a
+      motorway, emitting an explicit `none` where it does. The Geofabrik
+      extracts are cached locally (25 GB, `~/.cache/freight-fate-osm`) and
+      `tools/build_interchanges_rampcontrols.py` already walks ramp-link
+      ways, so it is an extension of that pass rather than a new crawl.
+      Deferred past the 2026-08-20 tester build by the owner.
+
 - [x] **Destination approach assistance brings the truck to a stop at the
       arrival point.** Shipped 2026-08-20 after three failed attempts, all
       of which passed a test built on stand-in objects while the real game

@@ -908,6 +908,13 @@ def test_the_destination_approach_assist_actually_brings_the_truck_to_a_stop():
         # approach assist is the only thing that can bring the truck up.
         driving._ramp_control = ""
         driving._ramp_terminal_done = True
+        # Chain-capable destinations flow off the ramp onto city streets at
+        # whatever legal speed the ramp let through, which is the street
+        # chain's business and has its own suite. Hold the ramp so this test
+        # is about the arrival point it is named for; whether the chain
+        # starts otherwise varies with the career the run happens to build,
+        # and the assertion below would follow it.
+        driving._begin_surface_chain = lambda: False
 
         for _ in range(60 * 600):
             driving.truck.throttle = 0.0  # the assist is the only input

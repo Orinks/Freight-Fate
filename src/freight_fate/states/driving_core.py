@@ -322,8 +322,26 @@ STOP_ROLL_DAMAGE = 0.2  # lighter clip for blowing the stop sign
 # the interchange's own `via`, which is baked from OSM.
 FREEWAY_VIA_RE = re.compile(r"\bI[-\s]?\d")
 
-RAMP_CONTROL_URBAN_WEIGHTS = (0.70, 0.95)
-RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)
+# Cumulative (signal, stop) thresholds for a ramp terminal OSM never tagged:
+# roll < signal_w is a light, < stop_w is a stop sign, above is free flow.
+#
+# The signal-to-stop SPLIT is calibrated, not invented. Of the 8,205 baked
+# interchanges where OSM does tag a control, the split is 88.7 / 11.3 within
+# URBAN_RADIUS_MI of a route city and 64.3 / 35.7 outside it -- both readings,
+# since a signal and a stop sign are equally tagged when either exists. The
+# old rural pair asserted 30 / 50, handing out roughly twice the stop signs
+# reality has and half the lights, which is what made every country exit feel
+# like a farm road.
+#
+# The free-flow SHARE is the assumed part and is left where it was (5 percent
+# urban, 20 percent rural), because it cannot be read: OSM records controls
+# that exist and says nothing at all where a ramp merges freely, so absence of
+# a tag is not evidence of absence of a control. Deriving it properly means
+# baking the ramp's far-end road class -- see ROADMAP.
+_URBAN_FREE_FLOW = 0.05
+_RURAL_FREE_FLOW = 0.20
+RAMP_CONTROL_URBAN_WEIGHTS = (0.843, 1.0 - _URBAN_FREE_FLOW)
+RAMP_CONTROL_RURAL_WEIGHTS = (0.514, 1.0 - _RURAL_FREE_FLOW)
 # Grace past the end of the ramp before a taken-but-never-stopped exit counts
 # as blown. Distance alone is not enough under trip pacing: at 40 mph the same
 # half mile can pass in barely a second, before the driver can hear the arrival

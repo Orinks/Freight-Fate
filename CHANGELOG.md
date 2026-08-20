@@ -813,6 +813,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Country ramps were handing out far too many stop signs.** Where the map
+  data does not say what waits at the end of an off-ramp, the game guesses --
+  and out of town it was guessing a stop sign half the time and a traffic light
+  only three times in ten. Checked against the eight thousand ramps the map
+  data does describe, the real proportions are closer to a light two thirds of
+  the time. Rural exits should stop feeling like farm roads; town exits change
+  much less, because those were already close.
+
 - **Destination approach assistance now actually stops you at the door.** It
   promised to slow and stop at the facility arrival point, but only ever held
   the brake once you had already arrived -- so if you were still rolling it did
