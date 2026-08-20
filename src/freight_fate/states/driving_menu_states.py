@@ -886,7 +886,15 @@ class ArrivalState(MenuState):
         self._settle()
 
     def _settle_bobtail(self, hours: float, trip_damage: float) -> None:
-        """Empty reposition run: relocate to the destination city, no pay."""
+        """Empty reposition run: relocate to the destination city.
+
+        A self-serve bobtail (owner-operators only) carries no pay. A
+        carrier-ASSIGNED reposition (``job.assigned``) still pays -- at the
+        reduced empty-mile rate ``make_reposition_job`` already baked into
+        ``job.pay`` -- and still earns mileage XP the way any other
+        completed drive does, because it IS a completed dispatch
+        assignment, just an empty one.
+        """
         d = self.driving
         p = self.ctx.profile
         job = d.job
@@ -901,6 +909,26 @@ class ArrivalState(MenuState):
                 f"{driver_charges:,.0f} dollars, now settled."
             )
         p.store_truck_condition(d.truck)
+        announcements: list[str] = []
+        if job.assigned:
+            on_time = hours <= job.deadline_game_h
+            p.money += job.pay
+            previous_level = p.career.level
+            standing = enforcement.standing_band(p)
+            announcements = p.career.record_delivery(
+                job.distance_mi,
+                job.pay,
+                on_time,
+                trip_damage,
+                standing_rate=standing_xp_rate(standing),
+            )
+            announcements.extend(self._handle_fleet_promotion(previous_level, announcements))
+            pay_clause = (
+                f"Dispatch paid the reposition at the reduced empty-mile rate: "
+                f"{job.pay:,.0f} dollars. You now have {p.money:,.0f} dollars. "
+            )
+        else:
+            pay_clause = "No load and no pay. "
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
@@ -911,9 +939,10 @@ class ArrivalState(MenuState):
             (
                 f"Bobtailed empty to {job.spoken_destination} in {hours:.1f} hours. "
                 f"It is {clock_text(to_local(p.game_hours, d.trip.destination_timezone))}. "
-                f"No load and no pay, but you are "
-                f"parked at {self.terminal.name} and can open the {job.spoken_destination} "
-                f"dispatch board. Fuel {d.truck.fuel_fraction * 100:.0f} percent."
+                f"{pay_clause}"
+                f"You are parked at {self.terminal.name} and can open the "
+                f"{job.spoken_destination} dispatch board. "
+                f"Fuel {d.truck.fuel_fraction * 100:.0f} percent."
             ),
         )
         if trip_damage > 1:
@@ -921,6 +950,7 @@ class ArrivalState(MenuState):
                 f"The empty run added {trip_damage:.0f} percent truck damage. "
                 "Visit the garage when you can."
             )
+        self.summary_parts.extend(announcements)
         result = self.ctx.award_achievement("bobtail_done", announce=False)
         if result is not None:
             self.summary_parts.append(result.message)

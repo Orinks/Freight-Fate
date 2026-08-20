@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import random
 import zlib
 
 from ..models import enforcement, solvency
@@ -94,6 +95,17 @@ def _job_from_payload(data: dict) -> Job:
 
 # Empty-drive range for shopping another city's board.
 BOBTAIL_RANGE_MI = 400.0
+
+# Company drivers don't get to bobtail on a whim (that's the owner-operator
+# menu item above); instead dispatch occasionally sends them empty to a
+# nearby city where freight is thicker (ROADMAP: "Company drivers get
+# ASSIGNED repositions"). Roughly one board in eight-to-ten -- often enough
+# to matter, rare enough that it reads as an occasional dispatch call, not
+# the norm.
+ASSIGNED_REPOSITION_BOARD_CHANCE = 1.0 / 9.0
+# How many of the nearest reachable cities are even considered as reposition
+# destinations, before freight density narrows that down further.
+ASSIGNED_REPOSITION_CANDIDATE_COUNT = 3
 
 # How long a manual "Save game" waits for its cloud backup result before
 # handing the attempt back to the background retry. Long enough for a normal
@@ -985,6 +997,15 @@ def open_freight_market(ctx) -> list[Job]:
             carrier_key=getattr(p, "carrier_key", ""),
             direct_freight=p.business_status == INDEPENDENT_AUTHORITY,
         )
+        reposition = assigned_reposition_for_board(ctx, board, key)
+        if reposition is not None and jobs:
+            # Replaces a slot rather than adding one: the board still shows
+            # exactly as many entries as the player's level and trust earn.
+            # The farthest ordinary offer goes -- the one least likely to be
+            # what a driver actually wanted -- and the list is re-sorted by
+            # distance the same way board.offers() leaves it.
+            jobs[-1] = reposition
+            jobs.sort(key=lambda j: j.distance_mi)
         lever_note = _add_forced_board_job(ctx, board, jobs)
         p.dispatch_board_cache = {
             "key": key,
@@ -996,6 +1017,53 @@ def open_freight_market(ctx) -> list[Job]:
         # Queued behind the board announcement, which interrupts.
         ctx.say(lever_note, interrupt=False)
     return jobs
+
+
+def assigned_reposition_for_board(ctx, board: JobBoard, key: dict) -> Job | None:
+    """Occasionally slot a carrier-ASSIGNED reposition onto a company
+    driver's board (ROADMAP: "Company drivers get ASSIGNED repositions").
+
+    Owner-operators already have the self-serve "Bobtail to a nearby city"
+    menu item for repositioning on their own dime; this is dispatch doing it
+    TO a company driver instead, so it only ever fires for company drivers.
+    Seeded off the board's own cache key so the same board shows (or does
+    not show) the same reposition every time it is reopened, exactly like
+    the rest of the cached offers -- see dispatch_cache_key and
+    ASSIGNED_REPOSITION_BOARD_CHANCE.
+    """
+    p = ctx.profile
+    if is_owner_operator(getattr(p, "business_status", COMPANY_DRIVER)):
+        return None
+    seed = zlib.crc32(repr(sorted(key.items())).encode())
+    rng = random.Random(seed)
+    if rng.random() >= ASSIGNED_REPOSITION_BOARD_CHANCE:
+        return None
+    candidates = sorted(board._candidates(p.current_city), key=lambda c: c[1])
+    nearby = [c for c in candidates if c[1] <= BOBTAIL_RANGE_MI]
+    if not nearby:  # never strand a remote start: offer the nearest few
+        nearby = candidates[:ASSIGNED_REPOSITION_CANDIDATE_COUNT]
+    if not nearby:
+        return None
+
+    def freight_density(city_key: str) -> int:
+        # Cheap proxy for "the board there would have more jobs": how many
+        # freight locations that city has, without actually generating a
+        # second board's worth of offers just to compare counts.
+        return len(ctx.world.city(city_key).locations)
+
+    thickest = sorted(nearby, key=lambda c: (-freight_density(c[0]), c[1]))[
+        :ASSIGNED_REPOSITION_CANDIDATE_COUNT
+    ]
+    destination = rng.choice(thickest)[0]
+    from ..models.jobs import make_reposition_job
+
+    return make_reposition_job(
+        ctx.world,
+        p.current_city,
+        destination,
+        assigned=True,
+        carrier_key=getattr(p, "carrier_key", ""),
+    )
 
 
 def _add_forced_board_job(ctx, board: JobBoard, jobs: list[Job]) -> str:
@@ -1324,15 +1392,24 @@ class JobBoardState(MenuState):
             label = self._job_label(job, i + 1)
             if locked:
                 label = label.replace("Job ", "Locked job ", 1)
+            help_text = (
+                (
+                    f"Carrier-assigned reposition: an empty deadhead to "
+                    f"{job.spoken_destination}. Route inspection after accepting "
+                    "covers rest, fuel, toll, weather, and restrictions."
+                )
+                if job.bobtail
+                else (
+                    f"Load offer from {job.origin_facility_text()} to "
+                    f"{job.destination_facility_text()}. Route inspection after "
+                    "pickup covers rest, fuel, toll, weather, and restrictions."
+                )
+            )
             items.append(
                 MenuItem(
                     label,
                     lambda j=job: self._accept(j),
-                    help=(
-                        f"Load offer from {job.origin_facility_text()} to "
-                        f"{job.destination_facility_text()}. Route inspection after "
-                        "pickup covers rest, fuel, toll, weather, and restrictions."
-                    ),
+                    help=help_text,
                 )
             )
         items.append(MenuItem("Back to terminal", self.go_back))
@@ -1340,17 +1417,27 @@ class JobBoardState(MenuState):
 
     def _build_assignment_items(self) -> list[MenuItem]:
         job = self._assigned_job()
+        assignment_help = (
+            (
+                "Dispatch assigned this reposition; it is an empty deadhead, "
+                "not a load. Accepting starts that drive directly -- no pickup "
+                "facility to stop at. Route inspection after accepting covers "
+                "rest, fuel, toll, weather, and restrictions."
+            )
+            if job.bobtail
+            else (
+                "Dispatch assigned this load; new hires run the load and "
+                "lane dispatch picks. Accepting creates a local deadhead "
+                "pickup drive from your terminal to the named origin "
+                "facility. Route inspection after pickup covers rest, fuel, "
+                "toll, weather, and restrictions."
+            )
+        )
         items = [
             MenuItem(
                 f"Accept assigned dispatch: {self._describe_job(job)}",
                 lambda j=job: self._accept(j),
-                help=(
-                    "Dispatch assigned this load; new hires run the load and "
-                    "lane dispatch picks. Accepting creates a local deadhead "
-                    "pickup drive from your terminal to the named origin "
-                    "facility. Route inspection after pickup covers rest, fuel, "
-                    "toll, weather, and restrictions."
-                ),
+                help=assignment_help,
             )
         ]
         remaining = declines_remaining(self.ctx.profile)
@@ -1388,8 +1475,13 @@ class JobBoardState(MenuState):
         driver cannot hear is not a reward yet. On demand, never automatic."""
         others = [self.jobs[i] for i in self._assigned_queue[1:]]
         lines = [
-            f"{job.weight_tons:.0f} tons of {job.cargo.label} to "
-            f"{job.spoken_destination}, {self.ctx.settings.distance_text(job.distance_mi)}"
+            (
+                f"a reposition to {job.spoken_destination}, "
+                f"{self.ctx.settings.distance_text(job.distance_mi)}, no cargo"
+                if job.bobtail
+                else f"{job.weight_tons:.0f} tons of {job.cargo.label} to "
+                f"{job.spoken_destination}, {self.ctx.settings.distance_text(job.distance_mi)}"
+            )
             for job in others
         ]
         self.ctx.say(
@@ -1453,6 +1545,8 @@ class JobBoardState(MenuState):
         )
 
     def _describe_job(self, job: Job, index: int | None = None) -> str:
+        if job.bobtail:
+            return self._describe_reposition(job, index)
         p = self.ctx.profile
         business = build_business_settlement(
             p.business_status,
@@ -1472,6 +1566,24 @@ class JobBoardState(MenuState):
             display_pay=business.gross_pay,
             market_preview=self._market_preview(business),
             distance_text=self.ctx.settings.distance_text(job.distance_mi),
+        )
+
+    def _describe_reposition(self, job: Job, index: int | None = None) -> str:
+        """Board line for a carrier-ASSIGNED reposition.
+
+        Skips Job.describe() and build_business_settlement() on purpose:
+        those price and phrase a real load's cargo, and running a
+        zero-weight reposition through the same math would show the
+        loaded per-mile wage floor instead of job.pay's already-reduced
+        empty-mile rate -- a preview the settlement then would not honor.
+        """
+        prefix = f"Job {index} of {len(self.jobs)}: " if index is not None else ""
+        return (
+            f"{prefix}Carrier-assigned reposition: drive empty to "
+            f"{job.spoken_destination}, "
+            f"{self.ctx.settings.distance_text(job.distance_mi)}. No cargo. "
+            f"Pays {job.pay:,.0f} dollars, the reduced empty-mile rate. "
+            f"You will see the {job.spoken_destination} dispatch board on arrival."
         )
 
     def _job_label(self, job: Job, index: int) -> str:
@@ -1698,6 +1810,9 @@ class JobBoardState(MenuState):
             )
             return
         self._confirm_risky_job = None
+        if job.bobtail:
+            self._accept_reposition(job)
+            return
         from .driving import DRIVE_PHASE_PICKUP, DrivingState
 
         try:
@@ -1740,6 +1855,48 @@ class JobBoardState(MenuState):
         # first_dispatch is retired as an award (folded into "first_day" at
         # pickup completion, see city_pickup.py); the catalog entry and id
         # stay so the cloud validator's allow-list never sees a removed id.
+
+    def _accept_reposition(self, job: Job) -> None:
+        """Accept a carrier-ASSIGNED reposition straight off the board.
+
+        There is no pickup facility to deadhead to -- the whole job IS the
+        deadhead -- so this skips facility_approach_route and the pickup
+        phase entirely, the same city-to-city drive BobtailDestState._start
+        builds for a self-serve bobtail.
+        """
+        from .driving import DrivingState
+
+        p = self.ctx.profile
+        route = self.ctx.world.supported_route(job.origin, job.destination)
+        if route is None:
+            # A cached board can outlive the world it was built from, same
+            # as the facility case above.
+            p.dispatch_board_cache = None
+            self.jobs = [j for j in self.jobs if j is not job]
+            self._assigned_queue = (
+                self._assignment_queue() if dispatch_policy(p).assigns_load else []
+            )
+            self.refresh(keep_index=False)
+            self.ctx.audio.play("ui/warning")
+            self.ctx.say(
+                "That route is no longer on the network. Dispatch pulled the "
+                "offer; the board will refresh with new loads.",
+                interrupt=True,
+            )
+            return
+        driving = DrivingState(self.ctx, job, route)
+        p.dispatch_board_cache = None
+        p.active_trip = driving.snapshot()
+        self.ctx.save_profile()
+        self.ctx.say(
+            f"Dispatch assignment accepted: reposition to {job.spoken_destination}, "
+            f"{self.ctx.settings.distance_text(route.miles, precise=True)} on "
+            f"{route.highways[0]}. No cargo, and pay is the reduced empty-mile "
+            f"rate: {job.pay:,.0f} dollars. You will see the "
+            f"{job.spoken_destination} dispatch board on arrival.",
+            interrupt=True,
+        )
+        self.ctx.push_state(driving)
 
     def _slip_seat_note(self, job: Job) -> str:
         """Draw the assigned tractor and say why, or nothing if it is not new.
@@ -1842,6 +1999,8 @@ class JobDetailState(MenuState):
 
     def _detail_lines(self) -> list[str]:
         job = self.job
+        if job.bobtail:
+            return self._reposition_detail_lines(job)
         p = self.ctx.profile
         business = build_business_settlement(
             p.business_status,
@@ -1888,3 +2047,15 @@ class JobDetailState(MenuState):
             lines.append(f"Endorsement: {job.cargo.endorsement.replace('_', ' ')}.")
         lines.append("Route details happen after pickup: rest, fuel, tolls, weather, and stops.")
         return lines
+
+    def _reposition_detail_lines(self, job: Job) -> list[str]:
+        world = self.ctx.world
+        return [
+            "This is a carrier-assigned reposition: dispatch is sending you "
+            "empty to a nearby city where freight is thicker, not a loaded haul.",
+            f"Destination: {world.spoken_city(job.destination, qualified=True)}.",
+            f"Distance: {self.ctx.settings.distance_text(job.distance_mi)}.",
+            f"Pay: {job.pay:,.0f} dollars, the reduced empty-mile rate for deadhead miles.",
+            "No cargo, no trailer program, no endorsement needed.",
+            "Route details happen after accepting: rest, fuel, tolls, weather, and stops.",
+        ]

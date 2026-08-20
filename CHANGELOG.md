@@ -3,6 +3,17 @@
 ## Unreleased
 
 ### Added
+- **Company drivers occasionally get sent empty to a nearby city, dispatch's
+  call, not yours.** The dispatch board now sometimes carries a
+  carrier-assigned reposition alongside the usual loads: a deadhead run to
+  a nearby city where freight is running thicker. It pays a reduced rate
+  for the empty miles, same as a real carrier pays deadhead, and it still
+  earns career experience like any other completed run. Turning one down
+  costs dispatch trust, not money -- there is no load to walk away from,
+  but there is still an assignment. This only shows up for company
+  drivers; owner-operators keep repositioning on their own terms from the
+  "Bobtail to a nearby city" menu.
+
 - **The horn runs on brake air, like a real truck's -- protection valve
   included.** The air horn and the brakes share the tanks, so leaning on
   the horn costs measurable pressure -- but a real tractor's pressure

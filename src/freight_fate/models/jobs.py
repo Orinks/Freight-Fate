@@ -32,7 +32,7 @@ from ..sim.trip_models import (
 )
 from .business_constants import DIRECT_FREIGHT_PAY_MULT
 from .market import Market, market_condition
-from .start_options import DEFAULT_START_KEY, start_option
+from .start_options import DEFAULT_START_KEY, pay_plan_for_key, start_option
 from .trailers import (
     TANK_CAPACITY_TONS,
     equipment_text_for_cargo,
@@ -240,6 +240,13 @@ class Job:
     origin_locality: str = ""
     destination_locality: str = ""
     bobtail: bool = False  # empty reposition run: relocate, no cargo or pay
+    # A carrier-ASSIGNED reposition (dispatch sent you empty to a nearby city)
+    # rather than a driver-chosen bobtail (self-serve, owner-operators only).
+    # Always False when bobtail is False. Distinguishes the settlement and
+    # abandon-penalty rules: an assigned reposition still pays a reduced
+    # empty-mile rate and still earns mileage XP, and walking away from it
+    # costs reputation, not the flat dollar penalty a real load carries.
+    assigned: bool = False
     # Speakable city names, set at dispatch. Legacy payloads predate these
     # fields, but there origin/destination hold the old spoken display name,
     # so the fallback properties below always read cleanly.
@@ -388,6 +395,7 @@ def job_payload(job: Job) -> dict:
         "deadline_game_h": job.deadline_game_h,
         "market_mult": job.market_mult,
         "bobtail": job.bobtail,
+        "assigned": job.assigned,
         "deadline_covers_rest": job.deadline_covers_rest,
     }
 
@@ -424,6 +432,7 @@ def job_from_payload(data: dict) -> Job:
         origin_locality=str(data.get("origin_locality", "")),
         destination_locality=str(data.get("destination_locality", "")),
         bobtail=bool(data.get("bobtail", False)),
+        assigned=bool(data.get("assigned", False)),
         origin_spoken=str(data.get("origin_spoken", "")),
         destination_spoken=str(data.get("destination_spoken", "")),
         deadline_covers_rest=bool(data.get("deadline_covers_rest", False)),
@@ -448,14 +457,36 @@ def normalize_job_cities(job: Job, world: World) -> Job:
     return job
 
 
-def make_reposition_job(world: World, origin: str, destination: str) -> Job | None:
-    """A zero-pay empty 'bobtail' run to relocate to a nearby city.
+# Carriers really do pay empty (deadhead) miles, just at a reduced rate --
+# there is no freight paying the bill, only the value of getting the truck
+# to where freight is. 60 percent of the loaded per-mile floor is the
+# industry's common shape for deadhead/reposition pay, so an ASSIGNED
+# reposition (dispatch sent you, not a self-serve bobtail) pays that share
+# of the carrier's loaded practical-mile rate (CompanyPayPlan.min_per_mile,
+# the same floor a real load's wage is built on in
+# business.company_driver_pay). A self-serve bobtail keeps paying nothing:
+# that one is the driver's own choice to burn fuel, not dispatch's.
+ASSIGNED_REPOSITION_PAY_FRACTION = 0.6
+
+
+def make_reposition_job(
+    world: World,
+    origin: str,
+    destination: str,
+    *,
+    assigned: bool = False,
+    carrier_key: str | None = None,
+) -> Job | None:
+    """An empty 'bobtail' run to relocate to a nearby city.
 
     Reuses the normal delivery drive for fuel, weather, and save/resume, but
-    carries no cargo and pays nothing. It is player-chosen personal conveyance,
-    so the ELD records it as off duty instead of freight-duty driving; on
-    arrival the player simply parks at the destination city's hub and can shop
-    its dispatch board.
+    carries no cargo. A self-serve bobtail (``assigned=False``, the default)
+    is player-chosen personal conveyance and pays nothing; the ELD records it
+    as off duty instead of freight-duty driving. A carrier-ASSIGNED
+    reposition (``assigned=True``) is dispatch's call, not the driver's, so it
+    pays a reduced per-mile rate -- see ASSIGNED_REPOSITION_PAY_FRACTION.
+    Either way, on arrival the player simply parks at the destination city's
+    hub and can shop its dispatch board.
     """
     origin = world.resolve_city_key(origin)
     destination = world.resolve_city_key(destination)
@@ -465,6 +496,10 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
     miles = round(route.miles, 1)
     dest = world.city(destination)
     dest_loc = dest.locations[0] if dest.locations else None
+    pay = 0.0
+    if assigned:
+        plan = pay_plan_for_key(carrier_key)
+        pay = round(miles * plan.min_per_mile * ASSIGNED_REPOSITION_PAY_FRACTION, 2)
     return Job(
         CARGO_CATALOG["general"],
         0.0,
@@ -472,12 +507,13 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
         "company yard",
         destination,
         miles,
-        0.0,
+        pay,
         required_hours(miles, route, world) * 3.0 + 24.0,
         origin_type="company_yard",
         destination_location=dest_loc.name if dest_loc else f"{dest.name} yard",
         destination_type=dest_loc.type if dest_loc else "company_yard",
         bobtail=True,
+        assigned=assigned,
         # Always state-qualified: a dispatch names places the player may
         # never have heard of, and "McCall, Idaho" orients where "McCall"
         # cannot (player request).
