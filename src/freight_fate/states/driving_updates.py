@@ -2123,9 +2123,14 @@ class DrivingUpdateMixin:
             growth = 0.5 + 0.5 * min(1.0, (t.rpm - JAKE_MIN_RPM) / rpm_span)
             volume = JAKE_STAGE_GAIN[stage - 1] * growth
             key = f"engine/jake_{nearest}"
-            if key != self._jake_cue_key:
+            # Compare what will really SOUND, not the band we asked for. On
+            # the classic voice every band maps to one synth cut, so caching
+            # the band key restarted that same file over itself every time
+            # rpm crossed a boundary -- which on a grade is constantly.
+            sounding = audio.voice_key(key)
+            if sounding != self._jake_cue_key:
                 audio.start_loop(CH_JAKE, key, volume=volume, fade_ms=120)
-                self._jake_cue_key = key
+                self._jake_cue_key = sounding
             else:
                 audio.set_loop_volume(CH_JAKE, volume)
         elif self._jake_cue_key is not None:

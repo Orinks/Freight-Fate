@@ -813,6 +813,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **One engine brake voice, not two.** Switching the engine brake between the
+  recorded and the classic synthesized voice only took effect if the truck
+  happened to be at one particular engine speed. Anywhere else the switch did
+  nothing and you carried on hearing the voice you had just left, so a single
+  descent could give you both. It now changes over wherever you are in the rev
+  range, and on the classic voice the growl no longer restarts itself each time
+  the revs cross a band.
+
 - **The assists take your destination exit again.** With lane keeping doing the
   steering, the truck announced that it would take the exit and ease to ramp
   speed, then held highway speed through it and told you that you had missed it.

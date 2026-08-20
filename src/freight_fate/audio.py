@@ -2184,6 +2184,17 @@ class AudioEngine:
             return JAKE_CLASSIC_KEY
         return key
 
+    def voice_key(self, key: str) -> str:
+        """The key this one will really sound as, after the jake A/B.
+
+        Public because a caller that caches "which cut is playing" has to
+        cache the ROUTED key. Caching the band key instead meant that on the
+        classic voice -- where every band maps to the one synth cut -- each
+        rpm band change looked like a new sound and restarted the same file
+        over itself, 120 ms of crossfade at a time, all the way down a grade.
+        """
+        return self._voice_key(key)
+
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         """Play a one-shot. ``pan`` -1.0 = full left, 0 = center, 1.0 = right."""
         self._impl.play(self._voice_key(key), volume, pan)
@@ -2246,9 +2257,21 @@ class AudioEngine:
         if loop is None:
             return
         key, volume = loop[0], loop[1]
-        if key not in (JAKE_RECORDED_KEY, JAKE_CLASSIC_KEY):
-            return  # some other band's cut: no classic alternative to swap to
-        self.start_loop(CH_JAKE, JAKE_RECORDED_KEY, volume=volume, fade_ms=120)
+        if not key.startswith(JAKE_BAND_PREFIX):
+            return  # not a jake loop at all; nothing to swap
+        # EVERY band, not just 1600. A descent runs through 1200 to 2200, so
+        # guarding on the one band meant flipping the setting anywhere else
+        # did nothing at all -- the old voice kept sounding until rpm next
+        # crossed a boundary, and the driver heard the setting they had just
+        # left (owner, 2026-08-19: "either the synthesized brake plays or the
+        # recorded one, not both"). Restart on the band that is actually
+        # sounding; _voice_key picks the voice.
+        # Leaving classic, the synth stood in for every band, so 1600 -- the
+        # cut it was made from -- is the honest band to come back on. Leaving
+        # real, restart the band that is sounding and let _voice_key pick the
+        # voice.
+        band = JAKE_RECORDED_KEY if key == JAKE_CLASSIC_KEY else key
+        self.start_loop(CH_JAKE, band, volume=volume, fade_ms=120)
 
     def has_asset(self, key: str) -> bool:
         """Whether a sound key resolves (pack, licensed overlay, or loose).

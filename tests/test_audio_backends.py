@@ -534,16 +534,30 @@ def test_jake_voice_setting_routes_the_synth_key_and_applies_live(monkeypatch):
         a.shutdown()
 
 
-def test_jake_voice_leaves_other_engine_bands_alone(monkeypatch):
-    """Only the 1600 band has a classic alternative; any other key on the
-    jake channel (a different rpm band) must not be touched by the toggle."""
+def test_the_jake_toggle_re_voices_whatever_band_is_sounding(monkeypatch):
+    """This asserted the opposite -- that a band other than 1600 "must not be
+    touched by the toggle" -- on the premise that only 1600 had a classic
+    alternative.
+
+    That premise stopped being true on 2026-08-17, when _voice_key was made
+    to map EVERY band to the one synth cut so a driver on classic could not
+    hear Jerry's recording at the other bands. Leaving the sounding band
+    alone then meant the toggle silently did nothing on five of the six
+    bands, and the voice you had just left kept playing (owner, 2026-08-19:
+    "either the synthesized brake plays or the recorded one, not both").
+
+    A loop on a NON-jake channel is still none of this toggle's business,
+    which is what the guard checks now.
+    """
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
     try:
+        a.set_jake_voice(False)
         a.start_loop(audio.CH_JAKE, "engine/jake_1800", volume=0.4)
         a.set_jake_voice(True)
         loop = a._impl._loops[audio.CH_JAKE]
-        assert loop[0] == "engine/jake_1800"
+        assert loop[0] == audio.JAKE_CLASSIC_KEY, "the 1800 band kept the old voice"
+        assert loop[1] == 0.4
         a.stop_loop(audio.CH_JAKE)
     finally:
         a.shutdown()
@@ -1013,3 +1027,53 @@ def test_the_classic_jake_voice_covers_every_rpm_band():
         assert JAKE_CLASSIC_KEY not in recorded
     finally:
         engine.shutdown()
+
+
+def test_the_jake_voice_switch_applies_on_every_band_not_just_1600(monkeypatch):
+    """Owner, 2026-08-19: "either the synthesized brake plays or the recorded
+    one, not both. Both is annoying."
+
+    The live swap guarded on the sounding loop being JAKE_RECORDED_KEY or
+    JAKE_CLASSIC_KEY -- the 1600 band. A descent runs 1200 through 2200, so
+    flipping the setting on any other band did nothing at all: the voice you
+    had just left kept sounding until rpm next crossed a boundary. One
+    descent, both voices.
+    """
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    try:
+        a.set_jake_voice(False)
+        # Growling on a band that is NOT 1600 -- the case the guard missed.
+        a.start_loop(audio.CH_JAKE, "engine/jake_1400", volume=0.5)
+        assert a._impl._loops[audio.CH_JAKE][0] == "engine/jake_1400"
+
+        a.set_jake_voice(True)  # classic, live, mid-growl on 1400
+        assert a._impl._loops[audio.CH_JAKE][0] == audio.JAKE_CLASSIC_KEY, (
+            "the switch did nothing off the 1600 band"
+        )
+        assert a._impl._loops[audio.CH_JAKE][1] == 0.5  # level carries across
+
+        a.set_jake_voice(False)  # back to real, live
+        assert a._impl._loops[audio.CH_JAKE][0].startswith(audio.JAKE_BAND_PREFIX)
+        a.stop_loop(audio.CH_JAKE)
+    finally:
+        a.shutdown()
+
+
+def test_the_classic_jake_is_not_restarted_by_every_rpm_band(monkeypatch):
+    """On classic every band maps to one synth cut, so a caller caching the
+    BAND key saw each rpm crossing as a new sound and restarted the same file
+    over itself -- 120 ms of crossfade at a time, all the way down a grade.
+    ``voice_key`` exists so the drive can cache what will actually sound."""
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    try:
+        a.set_jake_voice(True)
+        bands = [f"engine/jake_{rpm}" for rpm in (1200, 1400, 1600, 1800, 2000, 2200)]
+        assert len({a.voice_key(b) for b in bands}) == 1, (
+            "the classic voice should resolve every band to one cut"
+        )
+        a.set_jake_voice(False)
+        assert len({a.voice_key(b) for b in bands}) == len(bands)
+    finally:
+        a.shutdown()
