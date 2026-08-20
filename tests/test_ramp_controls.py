@@ -184,16 +184,18 @@ def test_a_gore_is_a_departure_not_a_merge():
 def test_a_service_ramp_walks_to_a_road_end():
     m = _topo_tools()
     graph = m.build_ramp_link_graph([([1, 2, 3], "yes")], motorway_node_ids={1})
-    terminals, tolled = m.walk_far_ends(graph, 1)
+    terminals, tolled, ends = m.walk_far_ends(graph, 1)
     assert terminals == {"road-end"} and not tolled
+    assert ends == {3}
     assert m.classify_gore(terminals, tolled) == "surface"
 
 
 def test_a_system_ramp_walks_back_onto_the_mainline():
     m = _topo_tools()
     graph = m.build_ramp_link_graph([([1, 2, 3], "yes")], motorway_node_ids={1, 3})
-    terminals, tolled = m.walk_far_ends(graph, 1)
+    terminals, tolled, ends = m.walk_far_ends(graph, 1)
     assert terminals == {"motorway"}
+    assert ends == set()
     assert m.classify_gore(terminals, tolled) == "motorway"
 
 
@@ -202,7 +204,7 @@ def test_a_reversed_oneway_ramp_walks_against_node_order():
     # Drawn 3 -> 2 -> 1 with oneway=-1: travel is 1 -> 2 -> 3.
     graph = m.build_ramp_link_graph([([3, 2, 1], "-1")], motorway_node_ids={1, 3})
     assert graph["gores"] == [1]
-    terminals, _ = m.walk_far_ends(graph, 1)
+    terminals, _, _ = m.walk_far_ends(graph, 1)
     assert terminals == {"motorway"}
 
 
@@ -211,7 +213,7 @@ def test_a_toll_booth_on_the_chain_vetoes_free_flow():
     nothing about that is free flow."""
     m = _topo_tools()
     graph = m.build_ramp_link_graph([([1, 2, 3], "yes")], motorway_node_ids={1, 3})
-    terminals, tolled = m.walk_far_ends(graph, 1, toll_nodes={2})
+    terminals, tolled, _ = m.walk_far_ends(graph, 1, toll_nodes={2})
     assert tolled
     assert m.classify_gore(terminals, tolled) == ""
 
@@ -221,8 +223,9 @@ def test_a_ramp_ending_on_a_trunk_is_not_a_proven_merge():
     the walk reports it and the verdict stays conservative."""
     m = _topo_tools()
     graph = m.build_ramp_link_graph([([1, 2, 3], "yes")], motorway_node_ids={1}, trunk_node_ids={3})
-    terminals, tolled = m.walk_far_ends(graph, 1)
+    terminals, tolled, ends = m.walk_far_ends(graph, 1)
     assert terminals == {"trunk"}
+    assert ends == {3}
     assert m.classify_gore(terminals, tolled) == "surface"
 
 
@@ -239,9 +242,10 @@ def test_one_surface_chain_outvotes_any_number_of_merges():
         "toll": set(),
         "grid": m._GoreGrid([(40.0, -80.0, 1), (40.001, -80.001, 10)]),
     }
-    far_end, gores = m.classify_exit_far_end(40.0005, -80.0005, topo, 500.0)
+    far_end, gores, ends = m.classify_exit_far_end(40.0005, -80.0005, topo, 500.0)
     assert gores == 2
     assert far_end == "surface"
+    assert 12 in ends
 
 
 def test_an_all_merge_exit_reads_as_motorway():
@@ -255,16 +259,17 @@ def test_an_all_merge_exit_reads_as_motorway():
         "toll": set(),
         "grid": m._GoreGrid([(40.0, -80.0, 1), (40.001, -80.001, 10)]),
     }
-    far_end, gores = m.classify_exit_far_end(40.0005, -80.0005, topo, 500.0)
+    far_end, gores, ends = m.classify_exit_far_end(40.0005, -80.0005, topo, 500.0)
     assert far_end == "motorway" and gores == 2
+    assert ends == set()
 
 
 def test_no_gore_in_range_is_no_verdict():
     m = _topo_tools()
     graph = m.build_ramp_link_graph([([1, 2, 3], "yes")], motorway_node_ids={1})
     topo = {"graph": graph, "toll": set(), "grid": m._GoreGrid([(41.0, -81.0, 1)])}
-    far_end, gores = m.classify_exit_far_end(40.0, -80.0, topo, 500.0)
-    assert far_end == "" and gores == 0
+    far_end, gores, ends = m.classify_exit_far_end(40.0, -80.0, topo, 500.0)
+    assert far_end == "" and gores == 0 and ends == set()
 
 
 def _fake_driver(via, ramp_far_end):
@@ -340,6 +345,46 @@ def test_the_walk_stops_at_the_crossroad_not_at_the_far_mainline():
         motorway_node_ids={1, 5},
         crossroad_node_ids={3},
     )
-    terminals, tolled = m.walk_far_ends(graph, 1)
+    terminals, tolled, ends = m.walk_far_ends(graph, 1)
     assert terminals == {"crossroad"}
+    assert ends == {3}
     assert m.classify_gore(terminals, tolled) == "surface"
+
+
+def test_controls_are_read_at_the_walked_terminal_itself():
+    """A signal 60 m from where the chain actually ends is a reading; the
+    same signal matched from an exit-wide 1400 m circle is how a neighbor's
+    light ended up baked onto a system interchange."""
+    m = _topo_tools()
+    graph = m.build_ramp_link_graph(
+        [([1, 2, 3], "yes")], motorway_node_ids={1}, crossroad_node_ids={3}
+    )
+    topo = {
+        "graph": graph,
+        "toll": set(),
+        "roundabout": set(),
+        "terminal_locs": {3: (40.0, -80.0)},
+        # one signal ~50 m north of the terminal, one stop 3 km away
+        "control_grid": m._GoreGrid([(40.00045, -80.0, "signal"), (40.027, -80.0, "stop")]),
+        "grid": m._GoreGrid([(40.001, -80.001, 1)]),
+    }
+    _, _, ends = m.classify_exit_far_end(40.001, -80.001, topo, 500.0)
+    kinds = m.controls_at_terminals(ends, topo)
+    assert kinds == {"signal"}
+
+
+def test_a_roundabout_terminal_reads_as_yieldish():
+    m = _topo_tools()
+    graph = m.build_ramp_link_graph(
+        [([1, 2, 3], "yes")], motorway_node_ids={1}, crossroad_node_ids={3}
+    )
+    topo = {
+        "graph": graph,
+        "toll": set(),
+        "roundabout": {3},
+        "terminal_locs": {3: (40.0, -80.0)},
+        "control_grid": m._GoreGrid([]),
+        "grid": m._GoreGrid([(40.001, -80.001, 1)]),
+    }
+    _, _, ends = m.classify_exit_far_end(40.001, -80.001, topo, 500.0)
+    assert m.controls_at_terminals(ends, topo) == {"roundabout"}
