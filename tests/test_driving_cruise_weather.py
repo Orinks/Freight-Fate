@@ -3812,3 +3812,70 @@ def test_the_gap_row_speaks_the_seconds_not_just_the_word():
         assert state._acc_gap_label() == "normal, 3 seconds"
     finally:
         app.shutdown()
+
+
+def test_cruise_leaves_the_jake_alone_on_a_slick_flat_road():
+    """A storm ease is drums-only: the jake retards the drive axle, which on
+    soaked pavement is how a tractor swaps ends, so a driver shuts it off in
+    rain and cruise must hold itself to the same rule. The thunderstorm
+    safe-speed ease from 65 to 40 used to play the jake on flat, soaked I-24
+    (owner playtest, 2026-08-20)."""
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        app.ctx.settings.descent_speed_control = "realistic"
+        driving = _cruising(app)
+        driving.trip.engine_brake_ban_at = lambda mile: None
+        driving.trip.grade_at = lambda mile: 0.0
+        driving.weather.current = WeatherKind.THUNDERSTORM
+        assert driving.weather.effects.grip < 0.7, "the premise: a storm is slick"
+        t = driving.truck
+        # The storm ease: cruise target far below the truck's speed, level road.
+        driving._cruise_mph = 40.0
+        dt = 1 / 60
+        stages = []
+        for _ in range(int(12 * 60)):
+            t.grade = 0.0
+            t.throttle = 0.0
+            driving._update_cruise(dt, False, False, False)
+            t.auto_shift()
+            t.update(dt)
+            stages.append(t.engine_brake_stage)
+        assert max(stages) == 0, f"cruise raised jake stage {max(stages)} on slick flat road"
+        assert t.speed_mph < 55.0, "the drums still have to do the slowing"
+    finally:
+        app.shutdown()
+
+
+def test_cruise_keeps_the_retarder_on_a_slick_downgrade():
+    """The exception is a real grade: dropping a retarder that is holding the
+    hill puts the whole descent onto the drums, the greater evil the release
+    branch's own comment records. Slick flat road gets the drums; a slick
+    grade keeps the retarder."""
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        app.ctx.settings.descent_speed_control = "realistic"
+        driving = _cruising(app)
+        driving.trip.engine_brake_ban_at = lambda mile: None
+        driving.trip.grade_at = lambda mile: -0.06
+        driving.weather.current = WeatherKind.THUNDERSTORM
+        t = driving.truck
+        dt = 1 / 60
+        for _ in range(int(12 * 60)):
+            t.grade = -0.06
+            ramp = dt * 2.2
+            t.throttle = max(0.0, t.throttle - ramp * 2)
+            t.brake = max(0.0, t.brake - ramp * 3)
+            driving._update_cruise(dt, False, False, False)
+            t.auto_shift()
+            t.update(dt)
+        assert driving._cruise_jake_stage >= 1, "a held grade keeps its retarder, storm or not"
+    finally:
+        app.shutdown()

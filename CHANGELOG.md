@@ -813,6 +813,18 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Cruise control no longer uses the engine brake on slick flat road.** In
+  rain or worse, slowing to a lowered safe speed is done on the service
+  brakes, the way a real driver switches the jake off in a storm -- the
+  engine brake only slows the drive wheels, which on a soaked road is how a
+  truck loses its back end. A retarder already holding a real downgrade
+  stays on, because dropping it would put the whole hill on the brake drums.
+
+- **One imported radio station stopped spelling its web address.** The
+  station announcing itself as "TheRadioStorm dot com" now calls itself The
+  Radio Storm, matching its own name. It is a different broadcaster than the
+  four Radiostorm channels near it on the dial.
+
 - **The speed keeper settles at a lowered limit instead of surging past it.**
   Approaching a lower posted limit, the keeper used to release its brake and
   then power back up through the new number before braking again, so on
