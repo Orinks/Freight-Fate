@@ -448,6 +448,7 @@ class DrivingUpdateMixin:
         # assists' floors, ahead of the physics -- see _apply_hazard_brake.
         # _update_hazard, which decides it, runs at the end of the frame.
         self._apply_hazard_brake()
+        self._update_horn_protection()
 
         self._update_auto_jake(dt)
         self._track_driving_badges(dt)
@@ -3101,6 +3102,23 @@ class DrivingUpdateMixin:
             priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
         )
+
+    def _update_horn_protection(self) -> None:
+        """The pressure protection valve, audibly: below its threshold the
+        horn dies mid-blast and the brakes keep their air (FMVSS 121 -- see
+        TruckState.HORN_PROTECTION_PSI). Say why once; the driver hearing
+        the horn cut out otherwise reads as a broken speaker."""
+        t = self.truck
+        if t.horn_on and not t.horn_available:
+            self.ctx.audio.horn_stop()
+            t.horn_on = False
+            self.ctx.say_event(
+                "The horn cut out: air pressure is low, and the protection "
+                "valve saves what is left for the brakes.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.STATUS,
+            )
 
     def _horn_scare_animals(self) -> None:
         """The horn's one real power: moving an animal off the road.

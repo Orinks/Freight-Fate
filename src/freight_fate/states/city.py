@@ -7,6 +7,7 @@ import zlib
 
 from ..models import enforcement, solvency
 from ..models.business import (
+    COMPANY_DRIVER,
     INDEPENDENT_AUTHORITY,
     build_business_settlement,
     carrier_name,
@@ -287,12 +288,23 @@ class CityMenuState(MenuState):
                 "and switch here; company drivers can look at what the fleet "
                 "may assign next.",
             ),
-            MenuItem(
-                "Bobtail to a nearby city",
-                self._bobtail,
-                help="Drive empty to a nearby city to see its dispatch "
-                "board. Costs fuel and hours of service; no load, no "
-                "pay. Use it when local freight is thin.",
+            # Owner-operators only (owner ruling, 2026-08-20): a company
+            # driver's tractor goes where dispatch sends it -- repositioning
+            # on a whim is the owner's privilege because it is the owner's
+            # fuel. Company drivers will get ASSIGNED repositions from
+            # dispatch instead (ROADMAP).
+            *(
+                [
+                    MenuItem(
+                        "Bobtail to a nearby city",
+                        self._bobtail,
+                        help="Drive empty to a nearby city to see its dispatch "
+                        "board. Costs fuel and hours of service; no load, no "
+                        "pay. Use it when local freight is thin.",
+                    )
+                ]
+                if is_owner_operator(getattr(self.ctx.profile, "business_status", COMPANY_DRIVER))
+                else []
             ),
             MenuItem(
                 self._garage_label,

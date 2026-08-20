@@ -3,10 +3,13 @@
 ## Unreleased
 
 ### Added
-- **The horn runs on brake air, like a real truck's.** The air horn and
-  the brakes share the tanks, so leaning on the horn for a long stretch
-  costs measurable air pressure -- a quick blast costs almost nothing.
-  The compressor wins it back the same way it always has.
+- **The horn runs on brake air, like a real truck's -- protection valve
+  included.** The air horn and the brakes share the tanks, so leaning on
+  the horn costs measurable pressure -- but a real tractor's pressure
+  protection valve means the horn can never take the brakes down with it:
+  run the air low enough and the horn goes silent while the brakes keep
+  what is left. Honk your way across Kansas and the truck stays safe; the
+  serenade just ends early.
 
 - **The horn can move an animal off the road.** One good blast at an
   animal hazard gives it a chance to clear before you reach it -- dogs,
@@ -34,12 +37,12 @@
   hairpins and all. Thanks to Jerry, whose Farmington-to-Montana run over
   Red Mountain Pass is why this exists.
 
-- **Cruise control adapts to the weather, like a real adaptive system.**
-  When rain, snow, fog, or a storm lowers the safe speed below your set
-  speed, adaptive cruise eases down to it and says so -- "Thunderstorm;
-  adaptive cruise easing to 40 miles per hour" -- then climbs back on its
-  own as the weather lifts. The safe speed was already being spoken as
-  guidance on the status keys; now the automation honors it too. Thanks to
+- **Cruise control adapts to the weather -- on purpose, better than the
+  real thing.** Real adaptive cruise gets blinded by heavy rain and simply
+  quits; this one slows to the safe speed instead and says so --
+  "Thunderstorm; adaptive cruise easing to 40 miles per hour" -- then
+  climbs back as the weather lifts. The safe speed was already spoken as
+  guidance on the status keys; now the automation honors it. Thanks to
   Brandon for the suggestion.
 
 - **Traffic jams where traffic really jams.** The game now knows how many

@@ -4311,6 +4311,27 @@ section below and the Unreleased changelog; the release-line view:
       today; promotion splits the leg and adds US-160 toward Four Corners);
       a spoken line at job assignment when a route includes an advisory
       road would be honest ("this run uses Red Mountain Pass").
+- [ ] **Company drivers get ASSIGNED repositions; the self-serve bobtail
+      is owner-operator only (owner ruling, 2026-08-20).** The menu gate
+      shipped same-day: a company driver's tractor goes where dispatch
+      sends it, so "Bobtail to a nearby city" now appears only for
+      leased and independent operators. The other half is the feature:
+      dispatch occasionally assigns a company driver an on-duty
+      reposition (deadhead to where the freight is), paid the way
+      carriers really pay empty miles. Design note for the abandonment
+      interplay: an ASSIGNED reposition is an assignment -- walking away
+      from one should cost standing with the carrier (reputation, not
+      money), unlike the owner's own penalty-free turnback shipped today.
+
+- [ ] **Weigh-in-motion bypass -- the dashboard transponder (Brandon,
+      2026-08-20).** Real trucks run PrePass-style transponders: the
+      scale weighs them at highway speed and a green or red light says
+      bypass or pull in; nobody stops at every open scale any more.
+      Fits the game as equipment with a progression angle (fleet
+      provides it at some tier; owner-operators subscribe), a natural
+      audio moment (the green-light chirp at highway speed), and it
+      rides the scale flow reworked 2026-08-20. Red-light pulls and
+      random compliance checks keep the scale content reachable.
 - [ ] **Domain-named imported stations: 75 of 5,241 read a URL aloud.**
       "TheRadioStorm.com", "SoftRockRadio.net", and 73 more speak their
       TLD to every screen reader; two entries' whole name is just ".org"
