@@ -3879,3 +3879,25 @@ def test_cruise_keeps_the_retarder_on_a_slick_downgrade():
         assert driving._cruise_jake_stage >= 1, "a held grade keeps its retarder, storm or not"
     finally:
         app.shutdown()
+
+
+def test_the_resume_line_names_the_zone_cap_it_will_actually_hold(monkeypatch):
+    """Clear of the queue inside a heavy-traffic zone posting 20, the resume
+    line used to say the SET speed while the zone cap silently held the
+    working target at 23 -- minutes of open-looking road with the words
+    contradicting the truck (Brandon, 2026-08-20). The line now names the
+    capped number and why."""
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        driving = _cruising(app, set_mph=70.0)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        monkeypatch.setattr(driving, "_acc_posted_limit_ahead", lambda: (20.0, "heavy traffic"))
+        driving._engage_cruise(70.0, transition=True)
+        line = next(s for s in events if "Open road" in s)
+        assert "resuming at 20 miles per hour through the heavy traffic" in line, line
+        assert "70" not in line, line
+    finally:
+        app.shutdown()

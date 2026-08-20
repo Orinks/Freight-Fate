@@ -813,6 +813,13 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Adaptive cruise says the speed it will actually hold after traffic
+  clears.** Passing a slow vehicle inside a congestion or work zone, the
+  resume announcement used to name your set speed while the zone quietly
+  held the truck far below it -- so you heard "resuming at seventy" and sat
+  at twenty-three. The announcement now names the held number and the
+  reason, like "resuming at 20 miles per hour through the heavy traffic."
+
 - **The Five-by-Two and Out badge means the bunk again.** It awarded for any
   night's sleep, including a motel room -- the one night you specifically did
   not spend in the sleeper. Motel nights no longer count; sleeping in your
