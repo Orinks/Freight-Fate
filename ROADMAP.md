@@ -128,27 +128,64 @@ onto exit signalling.
       reality carries. Now 84.3/10.7 and 51.4/28.6 -- the signal:stop ratio
       is read, the free-flow share is still assumed and says so.
 
-- [ ] **Bake the ramp's far-end road class so free flow can be READ.**
-      The bake stores `signal` or `stop` and nothing else: zero of 8,205
-      records say `none`, because OSM tags controls that exist and is silent
-      where a ramp merges freely. So "no control" is never a reading, and
-      the runtime infers it from `FREEWAY_VIA_RE` -- "the via names an
-      interstate". Measured against the ramps OSM did tag, that test fires
-      on 2,865 of 8,205 ramps KNOWN to carry a light or a stop sign: it is
-      wrong 34.9% of the time, because `via` is signage (what the exit is
-      signed toward) rather than the class of road the ramp lands on.
-      Tighter string tests do better -- all-interstate via with no surface
-      destination is 12.4% wrong, and adding "no exit number" reaches 0.7%
-      -- but the strict one only fires on 103 untagged ramps, so genuine
-      interstate-to-interstate junctions would fall back to the roll and
-      collect lights and stop signs again, which is the 2026-08-17 complaint
-      in a new costume. Not fixable by picking a better string: the honest
-      fix is a bake pass recording whether the ramp link's far end joins a
-      motorway, emitting an explicit `none` where it does. The Geofabrik
-      extracts are cached locally (25 GB, `~/.cache/freight-fate-osm`) and
-      `tools/build_interchanges_rampcontrols.py` already walks ramp-link
-      ways, so it is an extension of that pass rather than a new crawl.
-      Deferred past the 2026-08-20 tester build by the owner.
+- [x] **Ramp far-end road class baked from walked link topology**
+      (2026-08-20). The bake walks every exit's motorway_link chains from the
+      gore: 384 exits whose every chain merges back onto a motorway now carry
+      an explicit `ramp_control: none` (derived, and the source string says
+      from what), and 14,897 exits with a chain that touches a surface road
+      carry `ramp_far_end: surface`, which SUPPRESSES the runtime's via-signage
+      free-flow guess -- via points where the exit is signed toward, not at the
+      road the ramp lands on, and walked topology disagreed with it on 27.5%
+      of the 15,281 exits it could judge. The walk stops at crossroad nodes
+      (link nodes shared with a vehicular non-motorway way; footpaths
+      excluded), a toll booth on the chain vetoes free flow, and a chain
+      ending on a trunk stays conservative. Unjudged: 2,504 exits with no gore
+      in range, 226 with no verdict; those keep the old via guess plus dice.
+      213 exits carry a READ signal at a topology-proven merge -- the reading
+      wins per the provenance rule, but most are probably the control pass's
+      1400m radius catching a neighbor's signal; the follow-up below re-reads
+      them precisely.
+
+- [ ] **Read the terminal control at the walked terminal node, not in a
+      1.4-2km circle** (owner-approved 2026-08-20). The far-end walk knows the
+      exact node where each ramp chain ends; controls should be read within
+      tens of meters of THAT node -- including signals mapped per-approach on
+      the crossroad way, which the link-membership read misses entirely --
+      instead of matching any control node within 1400m (pinned) or 2000m
+      (estimated) of the whole exit. Better recall on untagged terminals,
+      and it re-judges the 213 signal-at-proven-merge contradictions above.
+      Same pass should read `highway=give_way` and `junction=roundabout` at
+      the terminal for the yield work below.
+
+- [ ] **Yield as a ramp-terminal control, on real cross traffic** (design
+      settled with the owner 2026-08-20). Rural diamonds and roundabout
+      terminals are commonly yield-controlled; the game only knows
+      signal/stop/none, so those exits dice into lights and stop signs that
+      do not exist there. The mechanism is the CROSS BUBBLE, the mainline
+      traffic bubble rotated 90 degrees: when a terminal announces, a short
+      simulated stretch of crossroad spawns real TrafficVehicle entities
+      (AADT-seeded at the edges, simulated after that) driving through the
+      conflict point. They platoon behind slow cars -- the real burst-then-gap
+      rhythm -- react to a player nosing into the window (brake, horn, or a
+      clip at THEIR closing speed), and pan/loudness come from simulated
+      position, so finding the gap is a listening skill. Owner's call, and
+      right: scripted audio sweeps were considered and rejected -- cross
+      traffic must be NPCs. The same bubble upgrades all three existing
+      terminals: cross traffic runs the orthogonal signal phase (you hear why
+      you are waiting, and the green is audible as the cross stream dying),
+      and the stop sign's unconditional "Clear; pull ahead" starts waiting
+      for a real gap. Yield rules: roll through at 15 or under in a gap;
+      stopping is always legal; crossing an occupied window is the clip
+      machinery. Roundabout terminals fold into yield v1 (US entry conflicts
+      left-only), spoken as a roundabout. The car ahead on the ramp runs the
+      same gap acceptance, so it sometimes stops dead at a busy yield -- the
+      classic rear-end setup, spoken by the following-gap machinery. Assist
+      slows to roll speed and only stops for an occupied window. Ontology
+      row for the yield in the same change. Build order: terminal-precision
+      read above (with give_way/roundabout) -> cross bubble + yield terminal
+      -> lead-car yielding -> stop/signal clear calls adopt the bubble.
+      Mainline merge symmetry (NPCs yielding to the player from on-ramps)
+      stays out of scope with the parked merge-yield AI feel item.
 
 - [x] **Destination approach assistance brings the truck to a stop at the
       arrival point.** Shipped 2026-08-20 after three failed attempts, all

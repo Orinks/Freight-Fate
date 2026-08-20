@@ -813,6 +813,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **What waits at the end of an exit ramp now comes from the map's real road
+  connections.** The game walks each exit's actual ramps: where every ramp
+  merges straight onto another freeway, you get a clean merge with no light or
+  stop sign that could never exist there, and where a ramp really does end at
+  a street crossing, an exit that is signed toward an interstate no longer
+  slips past as free-flowing just because of the sign. Roughly one exit in
+  four used to be called wrong by that shortcut.
+
 - **Country ramps were handing out far too many stop signs.** Where the map
   data does not say what waits at the end of an off-ramp, the game guesses --
   and out of town it was guessing a stop sign half the time and a traffic light

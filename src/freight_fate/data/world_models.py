@@ -518,7 +518,15 @@ class Interchange:
     ``ramp_control`` is what governs the ramp terminal where the off-ramp
     meets the surface road: ``signal`` (a traffic light on a ramp-link node),
     ``stop`` (a stop sign), ``none`` (free-flow), or ``""`` when OSM had no
-    control tagged -- the runtime then falls back to a seeded heuristic."""
+    control tagged -- the runtime then falls back to a seeded heuristic.
+
+    ``ramp_far_end`` is what the exit's ramp chains reach, walked from OSM
+    link topology: ``motorway`` (every chain merges onto another motorway;
+    such exits also carry ``ramp_control: none``), ``surface`` (at least one
+    chain ends off the motorway network), or ``""`` when the walk could not
+    judge. ``surface`` tells the runtime NOT to guess free flow off the
+    exit's ``via`` signage, which points where the exit is signed toward,
+    not at the road the ramp lands on."""
 
     at_mi: float
     exit_ref: str = ""
@@ -528,6 +536,7 @@ class Interchange:
     highway: str = ""
     source: str = ""
     ramp_control: str = ""
+    ramp_far_end: str = ""
 
     @property
     def spoken_phrase(self) -> str:
