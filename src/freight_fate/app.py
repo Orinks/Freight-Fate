@@ -582,7 +582,11 @@ class GameContext:
             elif self._event_pacer.should_flush(text, priority):
                 # The channel is backed up past the point of truth: purging
                 # and speaking fresh IS the queued line's honest delivery.
+                # The purge can still have cut a line that was genuinely
+                # mid-sentence, so it is handed back and requeued behind this
+                # one exactly as an interrupt's would be -- never dropped.
                 transcript.info("[pacer] stale event backlog flushed")
+                cut = self._event_pacer.take_flush_cut()
                 interrupt = True
             self.speech.say_event(text, interrupt)
         else:

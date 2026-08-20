@@ -1245,7 +1245,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                         leg_start + (leg.miles - seg.end_mi),
                         leg_start + (leg.miles - seg.start_mi),
                     )
-                runs.append([s, e, seg.your_side(forward), seg.divided])
+                # Capped like every other answer about lanes the DRIVER has
+                # (Trip.lane_count_at). The bake records real OSM counts up to
+                # six and keeps them for traffic capacity, but the callout is
+                # spoken and lane_label has three names -- so "down to five
+                # lanes your side" named a road the driver cannot be placed on
+                # (owner playtest, Denver->Silverthorne, 2026-08-19). Capping
+                # lane_count_at alone left this path reading the raw bake.
+                runs.append([s, e, min(MAX_DRIVABLE_LANES, seg.your_side(forward)), seg.divided])
         if not runs:
             return []
         runs.sort(key=lambda r: r[0])

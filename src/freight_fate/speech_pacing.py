@@ -293,6 +293,9 @@ class EventSpeechPacer:
         # that moment plausibly cut it off mid-sentence; it is handed back to
         # the caller so the player still hears it.
         self._protected: tuple[str, EventPriority, float] | None = None
+        # Set by should_flush when its purge cut a line still speaking;
+        # collected once by take_flush_cut. See that method.
+        self._flush_cut: tuple[str, EventPriority] | None = None
 
     def _duration_s(self, text: str) -> float:
         return self.BASE_UTTERANCE_S + len(text) / self.CHARS_PER_S
@@ -418,6 +421,16 @@ class EventSpeechPacer:
         if priority >= EventPriority.ROUTE:
             self._protected = (text, EventPriority(priority), self._clear_at)
 
+    def take_flush_cut(self) -> tuple[str, EventPriority] | None:
+        """The line a stale flush cut off mid-sentence, once, for requeueing.
+
+        ``note_interrupt`` returns its cut directly; ``should_flush`` cannot,
+        because its return value is the flush verdict. Same contract either
+        way: a ROUTE or CRITICAL line still plausibly speaking is handed back.
+        """
+        cut, self._flush_cut = self._flush_cut, None
+        return cut
+
     def _take_protected(self, cutting_text: str | None = None):
         """Hand over the protected line if it was plausibly cut mid-speech.
 
@@ -520,10 +533,12 @@ class EventSpeechPacer:
         in front of it.
         """
         now = self._clock()
+        self._flush_cut = None
         if self._purge_next:
             # Coming back from a pause. Whatever the voice was still holding
             # when the player stepped away is about a mile they have already
-            # been told about, so the first line back purges it.
+            # been told about, so the first line back purges it -- and that
+            # one really is stale, so it is dropped rather than rescued.
             self._purge_next = False
             self._clear_at = now + self._duration_s(text)
             self._protected = None
@@ -532,10 +547,29 @@ class EventSpeechPacer:
         start = max(now, self._clear_at)
         budget = self.WAIT_BUDGET_S.get(EventPriority(priority), self.STALE_WAIT_S)
         if start - now > budget:
-            # A stale flush takes the whole backlog, protected slot included:
-            # everything in it described miles already driven.
+            # A stale flush takes the backlog -- everything in it described
+            # miles already driven -- but NOT a protected line that is still
+            # speaking. The incoming line starting stale says nothing about
+            # the outgoing one: a CRITICAL warning that began this very tick
+            # is not stale, and dropping it here broke the class's own
+            # never-dropped contract silently, with no requeue.
+            #
+            # An engine stall was stepped on exactly this way by the
+            # route-start merge cue (owner playtest, 2026-08-19). It was
+            # latent until that cue stopped being AMBIENT -- as chatter it was
+            # dropped by would_start_stale before ever reaching here.
+            #
+            # Narrowly CRITICAL only. A backlog of stale ROUTE announcements
+            # really does describe road already driven and is right to go --
+            # rescuing those turned one flush into a recital of everything it
+            # had just purged. A safety call is the exception: it is the one
+            # line whose worth does not decay while it waits.
+            held = self._protected
+            if held is not None and held[1] is EventPriority.CRITICAL:
+                self._flush_cut = self._take_protected(text)
+            else:
+                self._protected = None
             self._clear_at = now + self._duration_s(text)
-            self._protected = None
             self._track(text, EventPriority(priority))
             return True
         self._clear_at = start + self._duration_s(text)

@@ -813,6 +813,29 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The assists take your destination exit again.** With lane keeping doing the
+  steering, the truck announced that it would take the exit and ease to ramp
+  speed, then held highway speed through it and told you that you had missed it.
+  Two things were wrong: the assist that slows for a ramp only ran if you had
+  signalled, which you never do when lane keeping is taking the exit for you,
+  and re-setting cruise on the approach made it forget the exit entirely. The
+  truck still holds the posted limit until it genuinely has to slow, then eases
+  down for the ramp.
+
+- **Lane callouts never name a lane you cannot be in.** The road could announce
+  dropping to five lanes, which is more lanes than the truck has names for.
+
+- **The first instruction of a run cannot go missing.** "Merge onto I-70 west"
+  and other act-now directions -- which way through an interchange, which way
+  down a street -- could be dropped as passing chatter. A heads-up about a turn
+  still ahead is deliberately allowed to lapse, because one arriving after you
+  have passed the turn is worse than none.
+
+- **A safety call is never talked over.** When the truck cleared a backed-up
+  queue of announcements to speak something fresh, a warning that was still
+  being spoken could be cut off and lost. It is now finished behind whatever
+  interrupted it.
+
 - **A speed limit warning no longer stutters.** Approaching a lower limit could
   announce the same drop twice in a row, a fraction of a second apart, which
   sounded like two different signs coming up.

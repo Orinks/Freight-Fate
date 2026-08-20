@@ -1402,3 +1402,51 @@ def test_no_never_dropped_line_rides_the_droppable_ambient_default() -> None:
     assert not offenders, "SAFETY lines riding the droppable ambient default: " + ", ".join(
         offenders
     )
+
+
+def test_a_stale_flush_never_steps_on_a_safety_call() -> None:
+    """The class promises a ROUTE or CRITICAL line still speaking is handed
+    back, never dropped. ``note_interrupt`` honoured that; ``should_flush``
+    did not -- its purge cleared the protected slot outright.
+
+    An engine stall was stepped on exactly that way by the route-start merge
+    cue on the owner's Denver playtest: the stall spoke CRITICAL, the merge
+    cue flushed a moment later, and the stall was gone with no requeue. It
+    was latent until that cue stopped being AMBIENT, because as chatter it
+    had been dropped before ever reaching the flush.
+
+    Narrowly CRITICAL: a backlog of stale ROUTE announcements really does
+    describe road already driven, and rescuing those turned one flush into a
+    recital of everything it had purged.
+    """
+    from freight_fate.speech_pacing import EventPriority, EventSpeechPacer
+
+    now = [0.0]
+    pacer = EventSpeechPacer(clock=lambda: now[0])
+
+    # A safety call starts speaking.
+    pacer.note_interrupt("Brake now! Stopped traffic ahead.", EventPriority.CRITICAL)
+    # A route line arrives while it is still mid-sentence, far enough behind
+    # the projection to flush.
+    now[0] += 0.05
+    assert pacer.should_flush("Merge onto US-40 west toward Salt Lake City.", EventPriority.ROUTE)
+    cut = pacer.take_flush_cut()
+    assert cut is not None, "the safety call was purged with no requeue"
+    assert cut[0] == "Brake now! Stopped traffic ahead."
+    # Collected once only.
+    assert pacer.take_flush_cut() is None
+
+
+def test_a_stale_flush_still_discards_a_stale_route_backlog() -> None:
+    """The other half, and why the rescue is narrow. Route announcements go
+    stale by their nature -- they describe road already driven -- so a flush
+    that handed them all back would perform the very backlog it purged."""
+    from freight_fate.speech_pacing import EventPriority, EventSpeechPacer
+
+    now = [0.0]
+    pacer = EventSpeechPacer(clock=lambda: now[0])
+
+    pacer.note_queued("Next stop in 5 miles: service plaza.", EventPriority.ROUTE)
+    now[0] += 0.05
+    if pacer.should_flush("Zone ahead; speed limit 45.", EventPriority.ROUTE):
+        assert pacer.take_flush_cut() is None, "a stale route backlog was resurrected"

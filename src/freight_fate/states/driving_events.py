@@ -729,9 +729,25 @@ class DrivingEventMixin:
         if event.kind == TripEventKind.GPS_CUE:
             if event.data.get("zone") is not None:
                 return EventPriority.ROUTE
-            if getattr(event.data.get("cue"), "kind", "") == "traffic":
+            cue_kind = getattr(event.data.get("cue"), "kind", "")
+            if cue_kind == "traffic":
                 return EventPriority.ROUTE
             if self._is_lane_closure_pressure(event):
+                return EventPriority.ROUTE
+            # The direction itself: which way onto the highway, which way
+            # through an interchange, which way down a street. Lose one and
+            # the driver goes the wrong way, so none of them may age out.
+            # The route-start merge -- "Merge onto I-70 West toward
+            # Silverthorne; 67 miles", the first instruction of the whole run
+            # -- was dropped as stale chatter on the owner's Denver playtest.
+            # The ADVANCE half stays ambient: a heads-up that arrives late is
+            # worse than one that never comes, which is the lesson the turn
+            # approach cue already carries.
+            if not event.data.get("advance") and cue_kind in (
+                "onramp",
+                "maneuver",
+                "local_turn",
+            ):
                 return EventPriority.ROUTE
         if event.kind == TripEventKind.STOP_AHEAD or event.data.get("planned"):
             return EventPriority.ROUTE
@@ -1432,7 +1448,16 @@ class DrivingEventMixin:
         if stop is None or self._ramp_mi is not None:
             self._reset_exit_lane_state()
             return
-        if self._exit_signal_on:
+        # The signal is how a driver COMMITS to an exit -- but with lane
+        # keeping automated they never press it, because the game itself says
+        # "lane keeping will take this exit". Gating the speed assist on the
+        # signal therefore switched it off for exactly the preset that
+        # promises the most help: the announcement said "adaptive cruise will
+        # ease to 40 for the ramp", nothing eased, and the truck went through
+        # the gore at 53 and missed the exit (owner playtest, Denver->
+        # Silverthorne, 2026-08-19). Automated lane keeping IS the commitment.
+        committed = self._exit_signal_on or self.ctx.settings.lane_is_automated()
+        if committed:
             self._update_exit_countdown(stop)
             self._update_exit_speed_assist(stop)
         if self.ctx.settings.lane_is_automated():
@@ -3106,6 +3131,18 @@ class DrivingEventMixin:
         # of making an audible step.
         self._cruise_mph = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, round(target_mph)))
         self._speed_control_target_mph = self._cruise_mph
+        # An armed exit still ahead keeps its cap across a cruise session.
+        # Cancelling cruise clears _cruise_exit_mph, and on the Denver run the
+        # descent cancelled it a mile before the ramp; the driver re-engaged
+        # at 53 and the fresh session had forgotten the exit entirely, so
+        # nothing ever eased for it. The cap is a property of the road ahead,
+        # not of the cruise session that happened to be running when the exit
+        # was announced -- so re-arming it here rather than leaving it to the
+        # announcement, which has already been made and will not repeat.
+        if self._cruise_exit_mph is None and self._exit_stop is not None:
+            ahead = self._exit_stop.at_mi - self.trip.position_mi
+            if ahead > 0 and (self._exit_signal_on or self.ctx.settings.lane_is_automated()):
+                self._cruise_exit_mph = min(self._cruise_mph, RAMP_CRUISE_TARGET_MPH)
         # Chase a working setpoint that starts at road speed, so a big resume
         # error eases on rather than landing on the pedal at once. Engaging at
         # the current speed (a plain K-set) seeds it at the target, so there is

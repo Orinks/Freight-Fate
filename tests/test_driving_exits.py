@@ -807,3 +807,51 @@ def test_destination_exit_scan_stays_on_the_final_approach():
         details = DrivingState._scan_destination_exit_details(driving)
         if details is not None:
             assert details[0] >= total - DESTINATION_EXIT_SCAN_WINDOW_MI
+
+
+def test_the_exit_speed_assist_runs_when_lane_keeping_takes_the_exit():
+    """Owner playtest, Denver->Silverthorne, 2026-08-19: "why did all assists
+    not stop at my destination exit?"
+
+    Because the assist was gated on ``_exit_signal_on``, and the signal is
+    how a DRIVER commits to an exit. With lane keeping automated they never
+    press it -- the game itself says "lane keeping will take this exit" -- so
+    the gate switched the assist off for precisely the preset that promises
+    the most help. His transcript:
+
+        In 5 miles, exit 209, destination exit. Lane keeping will take this
+        exit. Adaptive cruise will ease to 40 miles per hour for the ramp.
+        ...
+        53 miles per hour ... adaptive cruise set at 53 miles per hour
+        You were going too fast for the ramp and missed exit 209.
+
+    Automated lane keeping IS the commitment, so it arms the assist the same
+    way a signal does.
+    """
+    import inspect
+
+    from freight_fate.states.driving_events import DrivingEventMixin
+
+    src = inspect.getsource(DrivingEventMixin._update_exit_preparation)
+    assert "lane_is_automated()" in src, "the assist is still signal-only"
+    committed = src.split("committed =", 1)[1].split("\n", 1)[0]
+    assert "_exit_signal_on" in committed and "lane_is_automated" in committed
+
+
+def test_a_fresh_cruise_session_inherits_an_armed_exit_s_ramp_cap():
+    """The other half of the same miss, and either alone was enough.
+
+    Cancelling cruise clears ``_cruise_exit_mph``. On the Denver run the
+    descent cancelled it about a mile from the ramp, the driver re-engaged at
+    53, and the new session had forgotten the exit -- its own line said
+    "adaptive cruise set at 53 miles per hour" with no "for the ramp" note,
+    which is the tell. The cap belongs to the road ahead, not to whichever
+    cruise session happened to be running when the exit was announced.
+    """
+    import inspect
+
+    from freight_fate.states.driving_events import DrivingEventMixin
+
+    src = inspect.getsource(DrivingEventMixin._engage_cruise)
+    assert "_cruise_exit_mph" in src, "engaging cruise ignores an armed exit"
+    assert "RAMP_CRUISE_TARGET_MPH" in src

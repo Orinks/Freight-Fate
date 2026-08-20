@@ -97,11 +97,20 @@ def _lane_callouts(trip, mileposts):
 
 
 def test_lane_change_callouts_widen_and_narrow(world):
-    trip = _trip(["Albuquerque", "Gallup"])  # runs 4 -> 3 -> 4 -> 2
+    """Albuquerque->Gallup baked 4 -> 3 -> 4 -> 2 lanes, and this asserted all
+    three transitions.
+
+    MAX_DRIVABLE_LANES caps the spoken count at three, so the first three runs
+    collapse to one and only the narrowing to two survives. That is the point
+    of the cap rather than a loss: "widens to four lanes" named a lane the
+    driver cannot be placed in, because lane_label has three names. The
+    remaining callout is the one a driver can act on.
+    """
+    trip = _trip(["Albuquerque", "Gallup"])  # capped: 3 -> 2
     msgs = _lane_callouts(trip, [4.0, 6.0, 11.0, 15.0, 40.0])
-    assert any("widens to four lanes" in m for m in msgs)
-    assert any("Down to three lanes" in m for m in msgs)
-    assert any("Down to two lanes" in m for m in msgs)
+    assert any("Down to two lanes" in m for m in msgs), msgs
+    # Nothing may name a fourth or fifth lane any more.
+    assert not [m for m in msgs if "four lanes" in m or "five lanes" in m], msgs
 
 
 def test_short_runs_collapse_no_spam(world):
@@ -176,3 +185,45 @@ def test_traffic_capacity_still_uses_the_real_lane_count(world):
     assert three > six
     # The real count is what keeps this freeway out of the jam band.
     assert six < 1.0 < three
+
+
+def test_no_lane_callout_names_a_lane_the_driver_cannot_be_in(world):
+    """Owner playtest, Denver->Silverthorne, 2026-08-19: the transcript said
+    "Down to five lanes your side".
+
+    MAX_DRIVABLE_LANES was applied in Trip.lane_count_at, but the lane-count
+    CALLOUT builds its runs straight from leg.lane_segments, so it read the
+    raw OSM count and named a road the driver cannot be placed on. Capping
+    one path is not capping the concept.
+    """
+    from freight_fate.sim.trip import Trip
+    from freight_fate.sim.trip_models import MAX_DRIVABLE_LANES
+    from freight_fate.sim.vehicle import TruckState
+    from freight_fate.sim.weather import WeatherSystem
+
+    route = world.route_from_cities(["Denver", "Silverthorne"])
+    trip = Trip(route, TruckState(), WeatherSystem("mountain", seed=1), seed=2)
+    runs = trip._build_lane_runs()
+    assert runs, "the route has no baked lane data to check"
+    worst = max(run[2] for run in runs)
+    assert worst <= MAX_DRIVABLE_LANES, f"a run claims {worst} lanes your side"
+
+
+def test_the_route_start_merge_instruction_is_never_dropped(world):
+    """The first instruction of the whole run -- "Merge onto I-70 West toward
+    Silverthorne; 67 miles" -- was dropped as stale chatter on the owner's
+    Denver playtest.
+
+    Which way onto the highway, which way through an interchange, which way
+    down a street: lose one and the driver goes the wrong way. The ADVANCE
+    half stays droppable, because a heads-up arriving late is worse than one
+    that never comes.
+    """
+    import inspect
+
+    from freight_fate.states.driving_events import DrivingEventMixin
+
+    src = inspect.getsource(DrivingEventMixin._event_priority)
+    for kind in ("onramp", "maneuver", "local_turn"):
+        assert f'"{kind}"' in src, f"{kind} cues can still age out"
+    assert 'event.data.get("advance")' in src, "the advance half lost its exemption"
