@@ -2611,9 +2611,14 @@ class DrivingEventMixin:
                 )
             elif not self._ramp_waiting_at_light:
                 self._ramp_waiting_at_light = True
+                # ROUTE, not the ambient default: names an automation (the ramp
+                # assist) that just took the brakes, same as the stop-sign
+                # sibling above (automation-handoff sweep, 2026-08-20, the
+                # deferred 2026-08-15 audit).
                 self.ctx.say_event(
                     "Stopped at the red light. Assistance is holding the brakes for green.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                     category=SpeechCategory.CONFIRMATION,
                 )
             return
@@ -3183,9 +3188,14 @@ class DrivingEventMixin:
         if not self._selected_stop_assist_said:
             self._selected_stop_assist_said = True
             self._pause_speed_control()
+            # ROUTE, not the ambient default: an automation naming that it just
+            # took the brakes, same class as the ramp assist's own braking-for
+            # line (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
             self.ctx.say_event(
                 f"Planned rest-stop stopping assistance braking for the entrance to {stop.spoken_name}.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
         return False
@@ -3436,9 +3446,14 @@ class DrivingEventMixin:
         t = self.truck
         if braking or t.emergency_brake or t.air_brakes_holding or not t.engine_on or t.stalled:
             self._cancel_keeper()
+            # ROUTE, not the ambient default: the automation just released the
+            # throttle, and a driver who assumed it still held speed needs to
+            # hear that (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
             self.ctx.say_event(
                 "Speed keeper canceled; automatic speed control off.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
             return
@@ -3472,9 +3487,16 @@ class DrivingEventMixin:
                     "construction": "Construction zone ahead",
                     "heavy traffic": "Heavy traffic ahead",
                 }.get(ahead[1], "Posted limit lower")
+                # ROUTE, not the ambient default: same family as the adaptive
+                # cruise easing line below (4054) -- an assist saying it is
+                # about to change how fast the truck is going is a
+                # consequence, not colour, and this one governs the same class
+                # of dropped-stale incident (automation-handoff sweep,
+                # 2026-08-20, the deferred 2026-08-15 audit).
                 self.ctx.say_event(
                     f"{reason}; speed keeper easing to {self.ctx.settings.speed_text(ahead[0])}.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                     category=SpeechCategory.CONFIRMATION,
                 )
                 # This line already named the number for a plain posted-limit
@@ -3554,10 +3576,13 @@ class DrivingEventMixin:
             return
         # An assist that speeds the truck up on its own has to say so: the
         # zone entry announced the law, not what the truck is about to do.
+        # ROUTE, not the ambient default, for the same reason (automation-
+        # handoff sweep, 2026-08-20, the deferred 2026-08-15 audit).
         self.ctx.say_event(
             f"Speed keeper holding {self.ctx.settings.speed_text(limit)} "
             f"through the {zone_reason} zone.",
             interrupt=False,
+            priority=EventPriority.ROUTE,
             category=SpeechCategory.CONFIRMATION,
         )
 
@@ -3895,10 +3920,14 @@ class DrivingEventMixin:
                 # every time; only saying so waits.
                 if self._descent_cue_s <= 0.0 and not self._terse_speech():
                     self._descent_cue_s = DESCENT_CUE_COOLDOWN_S
+                    # ROUTE, not the ambient default: names an automation that
+                    # just took the brakes for a grade (automation-handoff
+                    # sweep, 2026-08-20, the deferred 2026-08-15 audit).
                     self.ctx.say_event(
                         "Descent control holding "
                         f"{self.ctx.settings.speed_text(self._descent_hold_mph())}.",
                         interrupt=False,
+                        priority=EventPriority.ROUTE,
                         category=SpeechCategory.CONFIRMATION,
                     )
             if not t.transmission.automatic and t.rpm < 1100:
@@ -3949,9 +3978,13 @@ class DrivingEventMixin:
                 t.engine_brake_stage = 0
         if braking or t.emergency_brake or t.air_brakes_holding or not t.engine_on or t.stalled:
             self._cancel_cruise()
+            # ROUTE, not the ambient default: the automation just released the
+            # throttle (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
             self.ctx.say_event(
                 "Adaptive cruise canceled; automatic speed control off.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
             return
@@ -3959,10 +3992,15 @@ class DrivingEventMixin:
         if zone_reason is not None and self._speed_control_armed and self.ctx.settings.speed_keeper:
             self._cancel_cruise(preserve_session=True)
             self._engage_keeper(limit, zone_reason, target_mph=limit, announce=False)
+            # ROUTE, not the ambient default: cruise handing off to the
+            # keeper is the automation changing which system holds the
+            # throttle (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
             self.ctx.say_event(
                 f"{zone_reason.title()} zone. Speed keeper holding "
                 f"{self.ctx.settings.speed_text(self._keeper_mph)}.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
             return

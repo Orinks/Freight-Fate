@@ -8,7 +8,7 @@ from ..sim.trip_models import (
     APPROACH_REACTION_S,
     APPROACH_SETTLE_S,
 )
-from ..speech_pacing import SpeechCategory
+from ..speech_pacing import EventPriority, SpeechCategory
 from .driving_core import (
     CRUISE_MIN_MPH,
     KEEPER_MIN_MPH,
@@ -252,9 +252,13 @@ class SpeedControlStateMixin:
         t = self.truck
         if t.emergency_brake:
             self._disarm_speed_control()
+            # ROUTE, not the ambient default: the automation just released the
+            # throttle (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
             self.ctx.say_event(
                 "Automatic speed control canceled.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
             return
@@ -288,11 +292,15 @@ class SpeedControlStateMixin:
             if not self.ctx.settings.speed_keeper:
                 return
             self._engage_keeper(limit, zone_reason, target_mph=limit, announce=False)
+            # ROUTE, not the ambient default: the automation is re-engaging on
+            # its own (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
             self.ctx.say_event(
                 "Automatic speed control resuming. Speed keeper holding "
                 f"{self.ctx.settings.speed_text(self._keeper_mph)} through the "
                 f"{zone_reason} zone.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
             return

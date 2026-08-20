@@ -154,7 +154,16 @@ class EngineBrakeZoneMixin:
                 "using the brakes instead of the engine brake."
             )
         self.ctx.audio.play("ui/notify", volume=0.6)
-        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.CONFIRMATION)
+        # ROUTE, not the ambient default: an assist silently switching how it
+        # is braking is a consequence, not colour, same class as the
+        # adaptive-cruise easing line (automation-handoff sweep, 2026-08-20,
+        # the deferred 2026-08-15 audit).
+        self.ctx.say_event(
+            message,
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=SpeechCategory.CONFIRMATION,
+        )
 
     def _jake_zone_exempt(self) -> bool:
         """The ordinance's own carve-outs: emergencies and real downgrades."""
