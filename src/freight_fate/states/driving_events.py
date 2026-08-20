@@ -3654,8 +3654,15 @@ class DrivingEventMixin:
             f"Following gap {gap:.0f} seconds. K or braking cancels."
         )
         if transition:
+            # ROUTE: automation retaking the pedals after a zone, the same
+            # handoff as the keeper's resume line (driving_speed_control 291,
+            # already ROUTE). The quiet rung still silences it by category;
+            # ROUTE only stops a busy channel eating it at standard.
             self.ctx.say_event(
-                f"Open road. {message}", interrupt=False, category=SpeechCategory.CONFIRMATION
+                f"Open road. {message}",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.CONFIRMATION,
             )
         else:
             self.ctx.say(message)

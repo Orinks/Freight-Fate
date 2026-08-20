@@ -74,7 +74,7 @@ from ..sim.enforcement_posts import (
     post_seed,
 )
 from ..sim.trip_models import ENFORCEMENT_WARNING_MAX_MI, SCALE_WARNING_REAL_S
-from ..speech_pacing import SpeechCategory
+from ..speech_pacing import EventPriority, SpeechCategory
 from ..speech_text import SpokenMessage
 from .driving_core import *
 from .driving_siren import (
@@ -421,8 +421,15 @@ class EnforcementWatchMixin:
         self._schedule_sound(
             PASS_MARKER_LEAD_S, "events/police_siren", volume, TABLEAU_SHOULDER_PAN
         )
+        # ROUTE: this line exists solely to stop the siren reading as YOUR
+        # pull-over (the tester misread that created it). A busy channel
+        # dropping the explainer recreates exactly that confusion, so it
+        # waits its turn instead of dying stale.
         self.ctx.say_event(
-            self._tableau_intro_message(post), interrupt=False, category=SpeechCategory.STATUS
+            self._tableau_intro_message(post),
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=SpeechCategory.STATUS,
         )
 
     def _play_tableau_pass(self, post) -> None:
