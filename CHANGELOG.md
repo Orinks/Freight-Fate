@@ -832,6 +832,11 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The animal you brake for has a name too.** "An animal in the road" is
+  now a dog, a coyote, loose livestock, or a raccoon -- alongside the deer
+  and elk that were already named by region -- so the brake call says what
+  you are braking for. Animals are exactly as common as before.
+
 - **Road debris says what it is.** "Debris in the road" is now a ladder
   fallen from a truck, loose lumber, a mattress, spilled cargo boxes, a
   shredded tarp, or tire retread -- named on the warning and named again

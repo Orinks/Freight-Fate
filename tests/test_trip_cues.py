@@ -461,3 +461,21 @@ def test_debris_speaks_its_kind_and_the_split_keeps_the_old_rate(world):
     # what was cleared.
     names = {h.name for h in debris.values()}
     assert "the ladder" in names and "the mattress" in names
+
+
+def test_the_animal_brake_call_names_the_animal(world):
+    """Same rule as the debris split: 'an animal in the road' says nothing
+    about what you are braking for (Brandon, 2026-08-20). The named split
+    sums to the 0.7 the generic entry carried, so animals stay exactly as
+    common, and every entry keeps animal=True so the dawn-dusk-night
+    eligibility window still governs them all."""
+    from freight_fate.sim.trip_models import HAZARDS
+
+    animals = {
+        h.text: h
+        for h in HAZARDS
+        if h.name in ("the dog", "the coyote", "the livestock", "the raccoon", "the animal")
+    }
+    assert len(animals) == 5, sorted(animals)
+    assert all(h.animal for h in animals.values())
+    assert abs(sum(h.weight for h in animals.values()) - 0.7) < 1e-9
