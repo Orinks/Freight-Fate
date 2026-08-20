@@ -233,6 +233,7 @@ class DrivingState(
         # clobbering the first (see _handle_trip_event's HAZARD branch), so
         # the resolution line can name everything that just cleared.
         self._hazard_names: list[str] = []
+        self._horn_scare_tried = False
         self._hazard_slow_hint_said = False
         self._automatic_braking_announced = False
         self._automatic_braking_escalated = False

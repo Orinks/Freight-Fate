@@ -479,3 +479,73 @@ def test_the_animal_brake_call_names_the_animal(world):
     assert len(animals) == 5, sorted(animals)
     assert all(h.animal for h in animals.values())
     assert abs(sum(h.weight for h in animals.values()) - 0.7) < 1e-9
+
+
+def _horn_host(names, tried=False, seed=0, pos=100.0):
+
+    cleared = []
+
+    class _Trip:
+        position_mi = pos
+
+    class _Host:
+        _hazard_deadline = 1.0
+        _hazard_names = names
+        _horn_scare_tried = tried
+        trip_seed = seed
+        trip = _Trip()
+
+        def _hazard_names_text(self):
+            return " and ".join(names)
+
+        def _finish_hazard_clear(self, message):
+            cleared.append(message)
+
+    return _Host(), cleared
+
+
+def test_the_horn_moves_a_movable_animal(world):
+    """Shane's ask (2026-08-20): the air horn's one real power. Seeded on
+    the hazard, so the same deer makes the same choice every retry; some
+    seed in a short scan must clear a dog (70 percent) and the ladder must
+    never care how loud you are."""
+    from freight_fate.states.driving_updates import DrivingUpdateMixin as DrivingUpdatesMixin
+
+    outcomes = []
+    for seed in range(10):
+        host, cleared = _horn_host(["the dog"], seed=seed)
+        DrivingUpdatesMixin._horn_scare_animals(host)
+        outcomes.append(bool(cleared))
+        assert host._horn_scare_tried, "an attempt must always spend the one try"
+    assert any(outcomes), "no dog moved across ten seeds at 70 percent"
+
+    host, cleared = _horn_host(["the ladder"], seed=0)
+    DrivingUpdatesMixin._horn_scare_animals(host)
+    assert not cleared
+    assert not host._horn_scare_tried, "a ladder must not spend the animal try"
+
+
+def test_the_horn_gets_one_attempt_per_hazard(world):
+    from freight_fate.states.driving_updates import DrivingUpdateMixin as DrivingUpdatesMixin
+
+    host, cleared = _horn_host(["the dog"], tried=True, seed=3)
+    DrivingUpdatesMixin._horn_scare_animals(host)
+    assert not cleared, "a second blast must not re-roll the animal"
+
+
+def test_the_welcome_sign_is_deterministic_and_authored(world):
+    """The welcome-sign content shipped as data with its speaking left as
+    'gameplay-layer follow-on' -- and sat silent until Brandon asked why
+    state signs are not read (2026-08-20). Now appended to the crossing
+    line (billboard chatter switch governs it); the pick is crc32-seeded
+    so the same trip reads the same sign every run -- str hash() is
+    process-randomized and must never seed it."""
+    import random as _random
+    import zlib
+
+    from freight_fate.data.state_welcome import welcome_sign
+
+    sign = welcome_sign("Texas", _random.Random(7 ^ zlib.crc32(b"Texas")))
+    assert sign.startswith("Welcome to Texas"), sign
+    assert sign == welcome_sign("Texas", _random.Random(7 ^ zlib.crc32(b"Texas")))
+    assert welcome_sign("Atlantis", _random.Random(1)) == ""

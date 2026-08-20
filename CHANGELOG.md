@@ -3,6 +3,21 @@
 ## Unreleased
 
 ### Added
+- **The horn can move an animal off the road.** One good blast at an
+  animal hazard gives it a chance to clear before you reach it -- dogs,
+  coyotes, and livestock usually move; deer and elk freeze more often
+  than they bolt, so braking stays the instruction and the horn is a
+  bonus, never the plan. One try per animal: the one that ignored you has
+  decided. Thanks to Shane for the idea -- and to Brandon for the rebuttal,
+  because the animals that just stare at you are in there too.
+
+- **State welcome signs are read at the border.** Crossing a state line
+  now reads that state's welcome sign -- the nickname and a true bit of
+  roadside trivia, the way the real sign does. The lines were written for
+  every state a while ago and had never been wired to speak; Brandon
+  asked why, which was a fair question. The billboard chatter switch
+  governs them.
+
 - **A real freight detour around the Million Dollar Highway.** A new
   drivable corridor runs from Durango west on US-160 and north on US-491
   and US-191 -- through Mancos, Cortez, Dove Creek, and Monticello to Moab
