@@ -813,6 +813,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **One engine brake voice, not two.** The engine brake setting picks between a
+  real recording and the older synthesized voice -- but only one engine speed
+  actually had a recording, so a descent gave you the recording at that speed
+  and the synth everywhere else, whichever setting you chose. Now each setting
+  plays only its own voice, all the way down a grade. The growl still gets
+  louder with the revs and the retard stage; what it no longer does is change
+  voice halfway down.
+
 - **One engine brake voice, not two.** Switching the engine brake between the
   recorded and the classic synthesized voice only took effect if the truck
   happened to be at one particular engine speed. Anywhere else the switch did

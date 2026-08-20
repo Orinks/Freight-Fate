@@ -553,7 +553,10 @@ def test_the_jake_toggle_re_voices_whatever_band_is_sounding(monkeypatch):
     a = AudioEngine()
     try:
         a.set_jake_voice(False)
+        # Asking for the 1800 band on "real" sounds the one recording -- that
+        # is the routing. What this pins is that the toggle re-voices it.
         a.start_loop(audio.CH_JAKE, "engine/jake_1800", volume=0.4)
+        assert a._impl._loops[audio.CH_JAKE][0] == audio.JAKE_RECORDED_KEY
         a.set_jake_voice(True)
         loop = a._impl._loops[audio.CH_JAKE]
         assert loop[0] == audio.JAKE_CLASSIC_KEY, "the 1800 band kept the old voice"
@@ -1011,7 +1014,7 @@ def test_the_classic_jake_voice_covers_every_rpm_band():
     and the recorded cut at every other band; rpm moves constantly on a
     descent, so the two voices alternated.
     """
-    from freight_fate.audio import JAKE_CLASSIC_KEY, AudioEngine
+    from freight_fate.audio import JAKE_CLASSIC_KEY, JAKE_RECORDED_KEY, AudioEngine
     from freight_fate.states.driving_updates import JAKE_LOOP_RPMS
 
     engine = AudioEngine()
@@ -1023,7 +1026,17 @@ def test_the_classic_jake_voice_covers_every_rpm_band():
 
         engine._jake_voice_classic = False
         recorded = {engine._voice_key(k) for k in bands}
-        assert recorded == set(bands), "the recorded voice keeps its per-band cuts"
+        # CORRECTED 2026-08-19. This asserted "the recorded voice keeps its
+        # per-band cuts", and that belief left the bug half-fixed for two
+        # days: those per-band cuts are SYNTHS. There is one real jake
+        # recording, engine/jake_1600; 1200, 1400, 1800, 2000 and 2200 are
+        # the older synthesized set. So "real" had the identical fault
+        # mirrored -- the recording at 1600, a synth everywhere else -- and
+        # the owner heard both voices whichever setting he chose. One voice
+        # per setting has to mean one voice in BOTH directions.
+        assert recorded == {JAKE_RECORDED_KEY}, (
+            "real must collapse to the one recording too; the other bands are synths"
+        )
         assert JAKE_CLASSIC_KEY not in recorded
     finally:
         engine.shutdown()
@@ -1044,8 +1057,10 @@ def test_the_jake_voice_switch_applies_on_every_band_not_just_1600(monkeypatch):
     try:
         a.set_jake_voice(False)
         # Growling on a band that is NOT 1600 -- the case the guard missed.
+        # Asking for the 1400 band on "real" sounds the one recording -- that
+        # is the routing, and the whole point of it.
         a.start_loop(audio.CH_JAKE, "engine/jake_1400", volume=0.5)
-        assert a._impl._loops[audio.CH_JAKE][0] == "engine/jake_1400"
+        assert a._impl._loops[audio.CH_JAKE][0] == audio.JAKE_RECORDED_KEY
 
         a.set_jake_voice(True)  # classic, live, mid-growl on 1400
         assert a._impl._loops[audio.CH_JAKE][0] == audio.JAKE_CLASSIC_KEY, (
@@ -1074,6 +1089,43 @@ def test_the_classic_jake_is_not_restarted_by_every_rpm_band(monkeypatch):
             "the classic voice should resolve every band to one cut"
         )
         a.set_jake_voice(False)
-        assert len({a.voice_key(b) for b in bands}) == len(bands)
+        assert len({a.voice_key(b) for b in bands}) == 1, (
+            "real must resolve to one voice too -- there is only one recording"
+        )
+    finally:
+        a.shutdown()
+
+
+def test_one_jake_voice_sounds_whatever_the_rpm_in_both_directions(monkeypatch):
+    """Owner, 2026-08-19: "both the synth and the recording play when the jake
+    is used despite the setting."
+
+    There is exactly ONE real jake recording (engine/jake_1600). The other
+    five band files -- 1200, 1400, 1800, 2000, 2200 -- are synths, kept from
+    before it was made.
+
+    2026-08-17 fixed the classic direction: every band maps to the synth, so
+    "classic" stopped meaning "synth at 1600, the recording everywhere else".
+    The REAL direction had the identical fault mirrored and was left alone --
+    band keys passed straight through, so "real" meant the recording at 1600
+    and a synth at every other band. Rpm moves constantly on a descent, so
+    both voices sounded whichever setting was chosen.
+    """
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    try:
+        bands = [f"engine/jake_{rpm}" for rpm in (1200, 1400, 1600, 1800, 2000, 2200)]
+
+        a.set_jake_voice(False)
+        assert {a.voice_key(b) for b in bands} == {audio.JAKE_RECORDED_KEY}
+
+        a.set_jake_voice(True)
+        assert {a.voice_key(b) for b in bands} == {audio.JAKE_CLASSIC_KEY}
+
+        # The Learn game sounds entry demos the classic cut by name, so asking
+        # for it explicitly must never be re-voiced into the other one.
+        for classic in (False, True):
+            a.set_jake_voice(classic)
+            assert a.voice_key(audio.JAKE_CLASSIC_KEY) == audio.JAKE_CLASSIC_KEY
     finally:
         a.shutdown()

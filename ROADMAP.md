@@ -1095,6 +1095,16 @@ onto exit signalling.
       to "feel right" in the meantime -- the Poisson number is the physically
       correct occupancy and the representation is what is short.
 
+- [ ] **FLAKY: `test_speed_keeper_eases_for_a_lower_posted_limit_and_says_so`
+      fails about a quarter of the time (measured 2026-08-19).** The final
+      assertion misses by under half a mph -- 15.47 against a <= 15.0 -- so
+      it is a margin in the keeper's ease window, not a wrong behaviour.
+
+      Rate measured on BOTH sides before blaming anything, per the rule:
+      3/10 with that session's changes, 2/10 without. Pre-existing and
+      unrelated to them. Worth fixing because a one-in-four flake pollutes
+      every gate run and trains people to re-run rather than read.
+
 - [ ] **START HERE: facility approach zones still overlap, and the keeper
       eases for a zone three quarters of a mile away (tester log,
       2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED

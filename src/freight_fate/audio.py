@@ -2173,16 +2173,36 @@ class AudioEngine:
         swaps it for the classic synth cut when the setting calls for it, so
         neither call site needs to know the A/B exists.
         """
-        if self._jake_voice_classic and key.startswith(JAKE_BAND_PREFIX):
-            # EVERY rpm band, not just the 1600 one. The drive picks a cut per
-            # band -- engine/jake_1200 through _2200 -- and the classic voice
-            # has a single synthesized cut, so matching only the 1600 key left
-            # a driver on "classic" hearing the synth at 1600 and Jerry's
-            # recording at every other band. Rpm moves constantly on a
-            # descent, so the two voices alternated: the owner heard both at
-            # once (2026-08-17). One voice per setting, whatever the rpm.
-            return JAKE_CLASSIC_KEY
-        return key
+        if key == JAKE_CLASSIC_KEY:
+            # Asked for the classic cut BY NAME -- the Learn game sounds entry
+            # that exists to demo it. Never re-voiced, or the demo of one
+            # voice would play the other.
+            return key
+        if not key.startswith(JAKE_BAND_PREFIX):
+            return key
+        # ONE voice per setting, whatever the rpm -- and that is true in BOTH
+        # directions, which is what took three goes to get right.
+        #
+        # There is exactly one real jake recording (engine/jake_1600) and one
+        # synth cut kept from before it (engine/jake_1600_synth). The other
+        # five band files -- 1200, 1400, 1800, 2000, 2200 -- are all synths.
+        #
+        # 2026-08-17 fixed the classic direction: every band maps to the
+        # synth, so "classic" stopped meaning "synth at 1600, Jerry's
+        # recording everywhere else". The REAL direction was left alone, and
+        # it had the same fault in mirror image -- band keys passed straight
+        # through, so "real" meant the recording at 1600 and a synth at every
+        # other band. Rpm moves constantly on a descent, so the two voices
+        # alternated and the owner heard both, whichever setting he chose
+        # (2026-08-19: "both the synth and the recording play when the jake is
+        # used despite the setting").
+        #
+        # The single recording therefore stands for every band on "real", the
+        # way the single synth already stood for every band on "classic".
+        # Level still tracks rpm and retard stage (JAKE_STAGE_GAIN), so the
+        # growl still answers the grade; what it no longer does is change
+        # voice halfway down one.
+        return JAKE_CLASSIC_KEY if self._jake_voice_classic else JAKE_RECORDED_KEY
 
     def voice_key(self, key: str) -> str:
         """The key this one will really sound as, after the jake A/B.
