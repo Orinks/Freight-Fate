@@ -130,21 +130,17 @@ onto exit signalling.
 
 - [x] **Ramp far-end road class baked from walked link topology**
       (2026-08-20). The bake walks every exit's motorway_link chains from the
-      gore: 384 exits whose every chain merges back onto a motorway now carry
+      gore: 597 exits whose every chain merges back onto a motorway now carry
       an explicit `ramp_control: none` (derived, and the source string says
       from what), and 14,897 exits with a chain that touches a surface road
       carry `ramp_far_end: surface`, which SUPPRESSES the runtime's via-signage
       free-flow guess -- via points where the exit is signed toward, not at the
       road the ramp lands on, and walked topology disagreed with it on 27.5%
-      of the 15,281 exits it could judge. The walk stops at crossroad nodes
+      of the 15,494 exits it could judge. The walk stops at crossroad nodes
       (link nodes shared with a vehicular non-motorway way; footpaths
       excluded), a toll booth on the chain vetoes free flow, and a chain
       ending on a trunk stays conservative. Unjudged: 2,504 exits with no gore
-      in range, 226 with no verdict; those keep the old via guess plus dice.
-      213 exits carry a READ signal at a topology-proven merge -- the reading
-      wins per the provenance rule, but most are probably the control pass's
-      1400m radius catching a neighbor's signal; the follow-up below re-reads
-      them precisely.
+      in range, 13 with no verdict; those keep the old via guess plus dice.
 
 - [ ] **Read the terminal control at the walked terminal node, not in a
       1.4-2km circle** (owner-approved 2026-08-20). The far-end walk knows the
