@@ -836,6 +836,22 @@ class PlaytestHarness:
     def _accept_assigned_job(self, rank: int) -> None:
         assert self.app is not None
         board = self.app.state
+        # The harness stages FREIGHT runs: if dispatch's assignment is a
+        # reposition (the feature working -- dispatch's call, not yours),
+        # spend a decline to reach freight instead.
+        while (
+            board.jobs
+            and getattr(board.jobs[0], "bobtail", False)
+            and any(item.text.startswith("Decline") for item in board.items)
+        ):
+            decline_index = next(
+                i for i, item in enumerate(board.items) if item.text.startswith("Decline")
+            )
+            for _ in range(len(board.items)):
+                if board.index == decline_index:
+                    break
+                board.handle_event(key_event(pygame.K_DOWN))
+            board.handle_event(key_event(pygame.K_RETURN))
         for _ in range(rank):
             decline_index = next(
                 (i for i, item in enumerate(board.items) if item.text.startswith("Decline")), None

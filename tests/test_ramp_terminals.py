@@ -524,7 +524,12 @@ def test_interchange_parser_accepts_and_validates_ramp_control():
     }
     ix = _parse_interchange(raw, 50.0, "A", "B", "I-99")
     assert ix.ramp_control == "signal"
-    raw["ramp_control"] = "roundabout"
+    # Yield and roundabout became legal controls with the cross bubble
+    # (2026-08-20); junk still refuses to load.
+    for control in ("yield", "roundabout"):
+        raw["ramp_control"] = control
+        assert _parse_interchange(raw, 50.0, "A", "B", "I-99").ramp_control == control
+    raw["ramp_control"] = "flagger"
     with pytest.raises(ValueError):
         _parse_interchange(raw, 50.0, "A", "B", "I-99")
 

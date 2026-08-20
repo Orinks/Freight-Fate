@@ -771,6 +771,17 @@ SELF_EXPLANATORY: dict[str, str] = {
     "traffic/motorcycle_pass": "As the car pass.",
     "traffic/bus_pass": "As the car pass.",
     "traffic/tractor_pass": "As the car pass.",
+    # Cross traffic at a ramp terminal drives through in front of the
+    # stopped truck: same reasoning as the passes, a vehicle crossing
+    # sounds like a vehicle crossing, and the terminal callout has
+    # already named the intersection it belongs to.
+    "traffic/car_cross": "A vehicle crossing in front sounds like one.",
+    "traffic/box_truck_cross": "As the car cross.",
+    "traffic/semi_cross": "As the car cross.",
+    "traffic/pickup_cross": "As the car cross.",
+    "traffic/motorcycle_cross": "As the car cross.",
+    "traffic/bus_cross": "As the car cross.",
+    "traffic/tractor_cross": "As the car cross.",
     "poi/facility_gate": "Ambient bed for a place the game has already named.",
     "poi/rest_stop_night": "Ambient bed for a place the game has already named.",
     "facility/dock_gate": "Menu feedback at a facility, not a road cue.",
