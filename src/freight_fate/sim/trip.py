@@ -2497,7 +2497,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # "somebody is braking hard" was sprinkled evenly down an empty
         # interstate at one vehicle in seven (owner, 2026-08-19).
         self.traffic_manager._braking_zones = tuple(
-            (max(0.0, zone.start_mi - 1.0), zone.end_mi)
+            (max(0.0, zone.start_mi - 1.0), zone.end_mi, getattr(zone, "reason", ""))
             for zone in self.zones
             if getattr(zone, "reason", "") in ("heavy traffic", "construction")
         )

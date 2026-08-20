@@ -852,6 +852,13 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Brake lights say why, when the road knows.** A slowdown inside a work
+  zone or a rated jam now names its cause -- "Brake lights half a mile
+  ahead. Road work is the cause." -- instead of leaving you guessing. A
+  slowdown with no known cause stays unexplained on purpose: sometimes a
+  jam really is just a wave in the traffic, and the game will not invent
+  a crash that is not there.
+
 - **The animal you brake for has a name too.** "An animal in the road" is
   now a dog, a coyote, loose livestock, or a raccoon -- alongside the deer
   and elk that were already named by region -- so the brake call says what

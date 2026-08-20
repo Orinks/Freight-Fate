@@ -494,6 +494,19 @@ class TrafficManager:
                 return True
         return self._merge_plausible_at(mile)
 
+    def _braking_reason_at(self, mile: float) -> str:
+        """Why traffic is braking here, when the road knows: the zone's own
+        reason. Empty when nothing mile-mapped explains it -- which is
+        honest, because phantom waves are real; the cue then says nothing
+        about cause rather than inventing one (Brandon, 2026-08-20, asking
+        WHY the brake lights). Live 511 incidents are announced separately
+        and are not yet mile-mapped; attributing them lands with the
+        incident-feed expansion on ROADMAP."""
+        for zone in getattr(self, "_braking_zones", ()) or ():
+            if zone[0] <= mile <= zone[1]:
+                return str(zone[2]) if len(zone) > 2 else ""
+        return ""
+
     def _vehicle_intent(self, vehicle) -> str:
         intent = getattr(vehicle, "intent", None)
         if intent is not None:
@@ -819,7 +832,12 @@ class TrafficManager:
             message = merging_traffic_cue(vehicle_class, gap)
             kind = "merging"
         elif intent == "braking":
-            message = brake_lights_cue(gap, speed, bare)
+            cause = {
+                "construction": "Road work is the cause.",
+                "construction merge": "Road work is the cause.",
+                "heavy traffic": "Traffic is backing up ahead.",
+            }.get(self._braking_reason_at(vehicle.position_mi), "")
+            message = brake_lights_cue(gap, speed, bare, cause)
             kind = "braking"
         elif intent == "following":
             message = slow_lead_cue(vehicle_class, gap, speed, bare)

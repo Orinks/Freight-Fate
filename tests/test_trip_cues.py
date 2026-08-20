@@ -569,3 +569,24 @@ def test_the_horn_drains_the_air_tanks(world):
     for _ in range(60):
         t._consume_brake_air(1 / 60)
     assert t.primary_air_psi == mid, "released horn must not draw"
+
+
+def test_brake_lights_name_the_cause_when_the_road_knows_it(world):
+    """Brandon asked WHY the brake lights (2026-08-20). A braking cue inside
+    a construction or congestion zone names the cause; outside any
+    mile-mapped zone it says nothing about cause -- phantom waves are real
+    and inventing a reason would be worse than silence."""
+    from freight_fate.sim.traffic_manager import TrafficManager
+    from freight_fate.speech_text import brake_lights_cue
+
+    caused = brake_lights_cue("half a mile", "30 miles per hour", "30", "Road work is the cause.")
+    assert "Road work is the cause." in caused.normal
+    assert "Road work" not in caused.terse, "the cause must not bloat terse mode"
+    plain = brake_lights_cue("half a mile", "30 miles per hour", "30")
+    assert "cause" not in plain.normal.lower()
+
+    mgr = TrafficManager.__new__(TrafficManager)
+    mgr._braking_zones = ((10.0, 14.0, "construction"), (20.0, 25.0, "heavy traffic"))
+    assert mgr._braking_reason_at(12.0) == "construction"
+    assert mgr._braking_reason_at(22.0) == "heavy traffic"
+    assert mgr._braking_reason_at(50.0) == ""
