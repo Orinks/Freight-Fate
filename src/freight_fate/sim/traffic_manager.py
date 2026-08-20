@@ -810,6 +810,22 @@ class TrafficManager:
                         self._floor_speed(self._posted_limit_at(vehicle.position_mi)),
                         vehicle.target_speed_mph - 8.0 * dt,
                     )
+            elif intent in ("merging", "braking"):
+                # Merging and braking are TRANSIENT states, not careers. The
+                # spawn-time target (8 to 22 under the limit) used to be
+                # permanent, so a semi "getting onto the highway" ran ramp
+                # speed for the rest of its life -- a rolling blockade on
+                # the open road (Brandon, 2026-08-20). A real merger builds
+                # to road speed once the lane change is done; a braking car
+                # recovers when whatever it braked for has passed. Inside a
+                # heavy-traffic zone the recovery caps at the zone's own
+                # pace, never the posted limit.
+                pace = self._zone_pace_at(vehicle.position_mi)
+                cruise = (
+                    pace if pace is not None else self._posted_limit_at(vehicle.position_mi) + 1.0
+                )
+                if vehicle.target_speed_mph < cruise:
+                    vehicle.target_speed_mph = min(cruise, vehicle.target_speed_mph + 4.0 * dt)
             delta = vehicle.target_speed_mph - vehicle.speed_mph
             vehicle.speed_mph += max(-6.0 * dt, min(4.0 * dt, delta))
             vehicle.position_mi += max(0.0, vehicle.speed_mph) * game_hours

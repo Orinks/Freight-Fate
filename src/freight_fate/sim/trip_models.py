@@ -608,7 +608,12 @@ HAZARDS: tuple[HazardDef, ...] = (
     HazardDef("retread debris from a blown tire", 1.0, dodgeable=True, name="the tire debris"),
     # The move-over law in action: shift a lane away from the shoulder.
     HazardDef("a vehicle stopped on the shoulder", 1.0, dodgeable=True, name="the stopped vehicle"),
-    HazardDef("a slow vehicle ahead", 0.9, dodgeable=True, name="the slow vehicle"),
+    # "A slow vehicle ahead" is deliberately NOT here any more (owner call,
+    # 2026-08-20, from Brandon's report): a slow vehicle in the flow is the
+    # traffic bubble's job -- real NPCs with real speeds, spoken by the
+    # slow-lead/merging/brake-lights cues and handled by the following
+    # machinery -- not a scripted phantom that is slow to be slow. The
+    # scripted staples that remain are genuine incidents, not flow traffic.
     HazardDef("a sudden lane closure ahead", 0.8, dodgeable=True, name="the lane closure"),
     HazardDef("stopped traffic around a fender bender", 0.9, name="the stopped traffic"),
     # Wildlife: dawn/dusk/night, regional species.

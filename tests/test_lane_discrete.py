@@ -137,7 +137,7 @@ def test_set_lane_count_clamps_the_lane():
 def test_fixed_lane_hazards_are_dodgeable_and_sweeping_ones_are_not():
     assert hazard_is_dodgeable("debris on the road")
     assert hazard_is_dodgeable("a vehicle stopped on the shoulder")
-    assert hazard_is_dodgeable("a slow vehicle ahead")
+    assert hazard_is_dodgeable("a mattress lying in the lane")
     assert not hazard_is_dodgeable("a deer crossing the road")
     assert not hazard_is_dodgeable("ice on the bridge deck")
     assert not hazard_is_dodgeable("a dust storm dropping visibility")

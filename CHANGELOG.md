@@ -334,6 +334,14 @@
   landed after a lane change could be silently dropped when the speech
   channel was busy. Twenty-seven of them now wait their turn instead of
   vanishing, so the truck never changes who is driving without saying so.
+- **Slow vehicles on the highway are real traffic now, not a scripted
+  scare.** The old "a slow vehicle ahead -- dodge or brake!" hazard could
+  fire anywhere with nothing actually there; it is gone. A slow vehicle you
+  catch up to is now always a real one from the traffic around you, spoken
+  with its type, gap, and actual speed. And vehicles that merge in from a
+  ramp or brake for a moment now build back up to road speed the way real
+  drivers do, instead of trundling along under the limit forever -- no more
+  semis crawling down the interstate just to be slow.
 - **How much company you have on the road comes from the real road now.** How
   many vehicles you meet used to be a rough guess -- mostly whether the leg
   passed near a town. It now comes from how many vehicles the road actually

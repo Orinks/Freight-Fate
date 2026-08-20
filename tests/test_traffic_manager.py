@@ -781,3 +781,36 @@ def test_hard_braking_follows_the_congestion_not_the_dice():
 
     assert manager._braking_plausible_at(12.0)
     assert not manager._braking_plausible_at(40.0)
+
+
+def test_merging_and_braking_are_transient_not_careers():
+    """A merger runs ramp speed only until the lane change is done; a
+    braking car brakes for a moment. The spawn-time slow target used to be
+    permanent, which kept 8-to-22-under rolling blockades on the open road
+    (Brandon, 2026-08-20: "semis don't go so slow getting onto the
+    highway")."""
+    manager = _manager()
+    at_mi = 8.0
+    limit = manager._posted_limit_at(at_mi)
+    spawn_mph = limit - 15.0  # the merging draw's midpoint: a real deficit
+    slowpokes = []
+    for intent in ("merging", "braking"):
+        vehicle = TrafficVehicle(
+            key=f"traffic:0:99:{intent}",
+            position_mi=at_mi,
+            speed_mph=spawn_mph,
+            target_speed_mph=spawn_mph,
+            relative_lane=0,
+            intent=intent,
+            vehicle_class="semi",
+        )
+        slowpokes.append(vehicle)
+    manager.vehicles = list(slowpokes)
+    for _ in range(120):  # two minutes of real time, well past any ramp
+        manager.update(dt=1.0, position_mi=at_mi - 1.5, time_scale=1.0)
+    for vehicle in slowpokes:
+        pace = manager._zone_pace_at(vehicle.position_mi)
+        cruise = pace if pace is not None else manager._posted_limit_at(vehicle.position_mi)
+        assert vehicle.speed_mph >= cruise - 3.0, (
+            f"{vehicle.intent} vehicle never recovered: {vehicle.speed_mph:.0f} mph"
+        )
