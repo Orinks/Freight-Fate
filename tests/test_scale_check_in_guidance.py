@@ -101,7 +101,7 @@ def test_open_scale_notice_teaches_the_exit_key_then_the_rest_key(monkeypatch):
         assert len(notices) == 1
         notice = notices[0]
         assert "All trucks must pull in" in notice
-        assert "signal for the scale exit with X" in notice
+        assert "Signal for the scale exit with X" in notice
         assert "Once you are stopped at the scale, press T to check in" in notice
         # The old instruction that planned a truck stop instead is gone.
         assert "press T for inspection check-in" not in notice
@@ -138,10 +138,10 @@ def test_scale_notice_lookahead_sample_covers_the_real_sentence():
 
     real = (
         "Open weigh station ahead in two miles: Northbound Platte River "
-        "Port of Entry. All trucks must pull in. Slow below fifteen and "
-        f"signal for the scale exit with {control_hint('take_exit', 'controller')}. "
-        "Once you are stopped at the scale, press "
-        f"{control_hint('rest', 'controller')} to check in."
+        "Port of Entry. All trucks must pull in. Signal for the scale "
+        f"exit with {control_hint('take_exit', 'controller')}; the ramp "
+        "brings you down to the scale. Once you are stopped at the scale, "
+        f"press {control_hint('rest', 'controller')} to check in."
     )
     assert ramp_arrival_grace_seconds(SCALE_NOTICE_SAMPLE, 0.0) >= ramp_arrival_grace_seconds(
         real, 0.0
@@ -173,7 +173,7 @@ def test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed(monkeypatc
         # overstated the road left, and against the fixed approach line it
         # read as the scale receding while the truck closed (2026-08-15).
         reminders = [s for s in spoken if s.startswith("Weigh station in ")]
-        assert reminders == ["Weigh station in half a mile. Slow below fifteen for the scale."]
+        assert reminders == ["Weigh station in half a mile. Signal for the scale exit."]
         kwargs = next(k for text, k in events if k and "Weigh station in " in text)
         assert kwargs.get("priority") is EventPriority.ROUTE
     finally:
@@ -204,7 +204,7 @@ def test_reminder_speaks_the_road_actually_left(monkeypatch):
         d._check_weigh_station_enforcement(scale.at_mi - 0.2)
 
         reminders = [s for s in spoken if s.startswith("Weigh station in ")]
-        assert reminders == ["Weigh station in a quarter mile. Slow below fifteen for the scale."]
+        assert reminders == ["Weigh station in a quarter mile. Signal for the scale exit."]
     finally:
         app.shutdown()
 
@@ -273,7 +273,7 @@ def test_rest_key_at_speed_defers_to_the_open_scale(monkeypatch):
         assert len(firsts) == 1
         line = firsts[0]
         assert "All trucks must stop" in line
-        assert "signal for the scale exit with X" in line
+        assert "Signal for the scale exit with X" in line
         assert "Rest planning can wait until you are past the scale" in line
         # Queued on the event voice behind the scale warning, never over it.
         kwargs = next(k for text, k in events if "Weigh station first" in text)

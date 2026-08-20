@@ -237,3 +237,25 @@ def test_company_driver_road_wear_service_is_carrier_billed(monkeypatch):
         assert "carrier account" in spoken[-1]
     finally:
         app.shutdown()
+
+
+def test_a_weigh_station_offers_no_bed_and_no_motel(monkeypatch):
+    """Nobody sleeps in an active inspection facility, and there is no motel
+    on the far side of the platform. The scale menu was the generic
+    truck-stop template -- lot sleep, a 95 dollar motel room, a loyalty
+    readout -- at an open scale (owner playtest, 2026-08-20)."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        _quiet(app, monkeypatch)
+        driving = _driving(app)
+        scale = _stop(driving, "I-24 Weigh Station")
+        scale.type = "weigh_station"
+        scale.actions = ()
+        state = RestStopState(app.ctx, driving, scale)
+        labels = _labels(state)
+        assert not any("Sleep" in label for label in labels), labels
+        assert not any("Motel" in label for label in labels), labels
+    finally:
+        app.shutdown()

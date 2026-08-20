@@ -813,6 +813,16 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Weigh stations work like real weigh stations.** The announcement no
+  longer tells you to slow below fifteen on the open interstate -- you stay
+  at road speed, signal for the scale exit, and the ramp itself brings you
+  down to the scale, which is how the pull-in was always judged anyway. The
+  scale's ramp no longer invents a stop sign at its end or quotes the
+  highway's speed limit at it, and the scale stopped offering a motel room
+  and lot sleeping -- it is an inspection, not a truck stop. Terminal
+  callouts everywhere also stopped naming a speed limit when the road behind
+  the intersection has none on record.
+
 - **Cruise control no longer uses the engine brake on slick flat road.** In
   rain or worse, slowing to a lowered safe speed is done on the service
   brakes, the way a real driver switches the jake off in a storm -- the

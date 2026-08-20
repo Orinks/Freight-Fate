@@ -154,9 +154,10 @@ WEIGH_STATION_REMINDER_MI = 0.5
 # spoken lead undershoots and the notice lands with no road left to act on.
 SCALE_NOTICE_SAMPLE = (
     "Open weigh station ahead in two miles: Northbound Platte River Port "
-    "of Entry. All trucks must pull in. Slow below fifteen and signal for "
-    "the scale exit with right bumper plus D-pad down. Once you are "
-    "stopped at the scale, press right bumper plus D-pad down to check in."
+    "of Entry. All trucks must pull in. Signal for the scale exit with "
+    "right bumper plus D-pad down; the ramp brings you down to the scale. "
+    "Once you are stopped at the scale, press right bumper plus D-pad down "
+    "to check in."
 )
 
 # The fines for the things an officer sees rather than clocks -- chain law,
@@ -583,7 +584,7 @@ class EnforcementWatchMixin:
         # is actually left.
         self.ctx.say_event(
             f"Weigh station in {self.ctx.settings.short_distance_text(ahead)}. "
-            "Slow below fifteen for the scale.",
+            "Signal for the scale exit.",
             interrupt=False,
             priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
@@ -607,8 +608,8 @@ class EnforcementWatchMixin:
         distance = self.ctx.settings.distance_text(ahead, precise=True)
         self.ctx.say_event(
             f"Weigh station first: {stop.name}, {distance} ahead. All trucks "
-            "must stop. Slow below fifteen and signal for the scale exit "
-            f"with {self.ctx.control_hint('take_exit')}. Rest planning can "
+            "must stop. Signal for the scale exit with "
+            f"{self.ctx.control_hint('take_exit')}. Rest planning can "
             "wait until you are past the scale.",
             interrupt=False,
             priority=EventPriority.ROUTE,

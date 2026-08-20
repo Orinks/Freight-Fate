@@ -388,3 +388,38 @@ def test_a_roundabout_terminal_reads_as_yieldish():
     }
     _, _, ends = m.classify_exit_far_end(40.001, -80.001, topo, 500.0)
     assert m.controls_at_terminals(ends, topo) == {"roundabout"}
+
+
+def test_a_scale_ramp_flows_to_the_scale_not_a_dice_roll(world):
+    """A weigh station's ramp is its own deceleration lane into the
+    inspection queue -- no crossroad, no light, no stop sign. The dice used
+    to put a stop sign there, spoken with the mainline's limit on its far
+    side (owner playtest, 2026-08-20)."""
+    from freight_fate.states.driving_events import DrivingEventMixin
+
+    class _Stop:
+        at_mi = 10.0
+        type = "weigh_station"
+
+    class _Trip:
+        def ramp_control_at(self, mi, tol_mi=2.0):
+            raise AssertionError("a scale ramp never consults the baked control")
+
+        def interchange_at(self, mi, tol_mi=2.0):
+            return None
+
+        def _near_city(self, mi):
+            return False
+
+    fake = type(
+        "D",
+        (),
+        {
+            "trip": _Trip(),
+            "trip_seed": 0,
+            "_ramp_meets_a_freeway": DrivingEventMixin._ramp_meets_a_freeway,
+        },
+    )()
+    for seed in range(20):
+        fake.trip_seed = seed
+        assert DrivingEventMixin._ramp_control_for(fake, _Stop()) == "none"

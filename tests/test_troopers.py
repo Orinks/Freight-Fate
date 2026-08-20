@@ -689,7 +689,7 @@ def test_weigh_station_warning_is_spoken_before_bypass(monkeypatch):
         # The notice teaches the exit key first; the rest key only once
         # stopped at the scale. "Press T" at speed plans a sleep stop, which
         # is the instruction that used to march drivers into the bypass.
-        assert "signal for the scale exit with X" in spoken[0]
+        assert "Signal for the scale exit with X" in spoken[0]
         assert "Once you are stopped at the scale, press T to check in" in spoken[0]
         # Its own earcon, not the shared inspection cue (owner ruling,
         # 2026-08-14): testers could not tell the scale-ahead warning apart

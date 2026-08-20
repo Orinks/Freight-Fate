@@ -2002,6 +2002,15 @@ class DrivingEventMixin:
         signs, and a share flow free like a cloverleaf loop. Pure function
         of the trip seed, the stop, and baked data, so the signal-on
         announcement a mile out and the ramp itself always agree."""
+        if getattr(stop, "type", "") == "weigh_station":
+            # A scale has its own deceleration ramp flowing straight into
+            # the inspection lane -- no public crossroad, no light, no stop
+            # sign. The scale bar itself is the terminal, and the arrival
+            # stop machinery already owns it ("At the scale. Stop now").
+            # The dice used to put a stop sign here, spoken with the
+            # MAINLINE's limit on its far side (owner playtest, 2026-08-20,
+            # "Stop sign at ramp end. Limit 70").
+            return "none"
         control = self.trip.ramp_control_at(stop.at_mi)
         if not control and self._ramp_meets_a_freeway(stop):
             # A system interchange: this ramp ends in a merge onto another
@@ -2279,9 +2288,10 @@ class DrivingEventMixin:
                 if self._terse_speech():
                     # One compact line with everything a driver needs
                     # (owner spec 2026-07-23): distance, target, limit.
+                    limit_text = self._approach_limit_text()
+                    limit_clause = f", speed limit {limit_text}" if limit_text else ""
                     self.ctx.say_event(
-                        f"{threshold} {unit_word} to stop bar, "
-                        f"speed limit {self._approach_limit_text()}.",
+                        f"{threshold} {unit_word} to stop bar{limit_clause}.",
                         interrupt=False,
                         priority=EventPriority.ROUTE,
                         category=SpeechCategory.NAVIGATION,
@@ -2373,16 +2383,20 @@ class DrivingEventMixin:
         if self._ramp_control == "stop":
             if gap_mi <= 0:
                 return "At the stop bar. Stop sign; brake to a full stop."
+            limit_text = self._approach_limit_text()
+            limit_clause = f", speed limit {limit_text}" if limit_text else ""
             return (
                 f"Stop sign, about {self._short_distance_text(gap_mi)} to the "
-                f"stop bar, speed limit {self._approach_limit_text()}."
+                f"stop bar{limit_clause}."
             )
         phase = self._ramp_light_phase()
         if gap_mi <= 0:
             return f"At the stop bar. The light is {phase}."
+        limit_text = self._approach_limit_text()
+        limit_clause = f", speed limit {limit_text}" if limit_text else ""
         return (
             f"Light {phase}, about {self._short_distance_text(gap_mi)} to the "
-            f"stop bar, speed limit {self._approach_limit_text()}."
+            f"stop bar{limit_clause}."
         )
 
     def _short_distance_text(self, miles: float) -> str:
@@ -2410,6 +2424,15 @@ class DrivingEventMixin:
         bar_mi += 0.05
         bar_mi = min(bar_mi, max(0.0, self.trip.total_miles - 0.01))
         limit, _ = self.trip.speed_limit_at(bar_mi)
+        # Screened for self-contradiction, not extremity: a street behind a
+        # ramp terminal is never posted at the corridor's own highway number,
+        # so a probe that comes back with one found no street zone at all --
+        # it read the mainline through the gap and told the owner "Stop sign
+        # at ramp end. Limit 70" at two exits running (playtest, 2026-08-20).
+        # Better no limit clause than a wrong one.
+        corridor_limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        if limit >= corridor_limit and corridor_limit > RAMP_MAX_MPH:
+            return ""
         return self.ctx.settings.speed_text(limit)
 
     def _announce_ramp_terminal(self) -> None:
@@ -2445,8 +2468,9 @@ class DrivingEventMixin:
                 )
             else:
                 message = "Traffic light at the end of the ramp, currently green."
+            approach_clause = f" Speed limit {limit_text} on the approach." if limit_text else ""
             self.ctx.say_event(
-                f"{message} Speed limit {limit_text} on the approach.",
+                f"{message}{approach_clause}",
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
@@ -2454,16 +2478,17 @@ class DrivingEventMixin:
         elif self._ramp_control == "stop":
             self.ctx.audio.play("ui/notify", volume=0.7)
             if self._terse_speech():
+                limit_clause = f" Limit {limit_text}." if limit_text else ""
                 self.ctx.say_event(
-                    f"Stop sign at ramp end. Limit {limit_text}.",
+                    f"Stop sign at ramp end.{limit_clause}",
                     interrupt=False,
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,
                 )
                 return
+            approach_clause = f" Speed limit {limit_text} on the approach." if limit_text else ""
             self.ctx.say_event(
-                "Stop sign at the end of the ramp. Brake to a full stop there. "
-                f"Speed limit {limit_text} on the approach.",
+                f"Stop sign at the end of the ramp. Brake to a full stop there.{approach_clause}",
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
@@ -2931,17 +2956,22 @@ class DrivingEventMixin:
                     if stop.exit_label
                     else f"You take the exit for {stop.spoken_name}."
                 )
+            scale_ramp = getattr(stop, "type", "") == "weigh_station"
             if self._terse_speech():
                 terminal = {
                     "signal": " Traffic light at the end.",
                     "stop": " Stop sign at the end.",
                 }.get(self._ramp_control, "")
+                if scale_ramp:
+                    terminal = " The scale is at the end."
                 message = f"{take} Half a mile of ramp.{terminal}"
             else:
                 ending = {
                     "signal": "traffic light at the end, then brake to a stop at the entrance",
                     "stop": "stop sign at the end, then brake to a stop at the entrance",
                 }.get(self._ramp_control, "brake to a stop at the end")
+                if scale_ramp:
+                    ending = "roll down to the scale and stop at the bar"
                 message = f"{take} Half a mile of ramp; {ending}."
             self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)
         else:
