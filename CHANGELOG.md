@@ -819,7 +819,10 @@
   stop sign that could never exist there, and where a ramp really does end at
   a street crossing, an exit that is signed toward an interstate no longer
   slips past as free-flowing just because of the sign. Roughly one exit in
-  four used to be called wrong by that shortcut.
+  four used to be called wrong by that shortcut. Lights and stop signs are
+  also now read at the actual intersection where each ramp ends instead of
+  anywhere near the exit, which fixes a few hundred ramps that had borrowed
+  a neighboring road's traffic light.
 
 - **Country ramps were handing out far too many stop signs.** Where the map
   data does not say what waits at the end of an off-ramp, the game guesses --

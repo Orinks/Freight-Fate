@@ -142,16 +142,20 @@ onto exit signalling.
       ending on a trunk stays conservative. Unjudged: 2,504 exits with no gore
       in range, 13 with no verdict; those keep the old via guess plus dice.
 
-- [ ] **Read the terminal control at the walked terminal node, not in a
-      1.4-2km circle** (owner-approved 2026-08-20). The far-end walk knows the
-      exact node where each ramp chain ends; controls should be read within
-      tens of meters of THAT node -- including signals mapped per-approach on
-      the crossroad way, which the link-membership read misses entirely --
-      instead of matching any control node within 1400m (pinned) or 2000m
-      (estimated) of the whole exit. Better recall on untagged terminals,
-      and it re-judges the 213 signal-at-proven-merge contradictions above.
-      Same pass should read `highway=give_way` and `junction=roundabout` at
-      the terminal for the yield work below.
+- [x] **Terminal controls read at the walked terminal node** (2026-08-20).
+      Controls are read within 120 m of the node where the walk says the
+      ramp actually ends -- including signals mapped per-approach on the
+      crossroad way, which link-membership could never see -- instead of
+      anywhere in a 1.4-2 km circle around the exit. Result across the
+      world: 7,387 terminal-precise reads (275 of them corrected a
+      different exit-wide read), 277 exit-wide fallback reads remaining on
+      exits the walk could not judge, and every one of the 213
+      signal-at-a-proven-merge contradictions resolved -- the neighbor's
+      control dropped, the merge baked. Proven merges rose to 597.
+      1,387 exits end at a give-way or roundabout terminal: read and
+      counted, NOT yet baked, because the game has no yield terminal to
+      play them on. One warm-cache `--force` re-run writes them when the
+      cross-bubble yield below ships.
 
 - [ ] **Yield as a ramp-terminal control, on real cross traffic** (design
       settled with the owner 2026-08-20). Rural diamonds and roundabout
