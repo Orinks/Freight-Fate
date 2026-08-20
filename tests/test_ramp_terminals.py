@@ -1472,7 +1472,7 @@ def test_the_stranded_prompts_ask_for_route_priority():
 
     src = Path(__file__).resolve().parents[1] / "src" / "freight_fate"
     text = (src / "states" / "driving_events.py").read_text(encoding="utf-8")
-    for marker in ("short of the stop sign", "short of the light. Drive"):
+    for marker in ("short of {noun}", "short of the light. Drive"):
         i = text.index(marker)
         window = text[i : i + 1400]
         assert "EventPriority.ROUTE" in window, marker

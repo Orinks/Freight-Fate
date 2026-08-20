@@ -3,6 +3,21 @@
 ## Unreleased
 
 ### Added
+- **Cross traffic is real at ramp ends: listen for your gap.** The road a
+  ramp ends on now carries simulated vehicles -- cars, pickups, semis,
+  even a farm tractor -- each one audible in the ear it comes from, close
+  or far by how it sounds. At a stop sign, "clear, pull ahead" now waits
+  for a real gap and names what is crossing while you hold. At a red
+  light the cross street is audibly busy, and a green is the sound of
+  that stream dying. Running a sign or a light meets whatever is really
+  there: an empty crossroad lets the gamble pay, a near miss earns a
+  hard horn, and a vehicle in the window is still the clip it always was.
+- **Yield signs and roundabouts at ramp ends, where the map really has
+  them.** About fourteen hundred exits whose ramps truly end at a give-way
+  or a roundabout now say so and play by yield rules: slow, listen for
+  your gap, roll through at low speed if the road is clear, and stop only
+  when it is not. Stopping is always legal, and route-transition
+  assistance rolls a clear yield instead of braking to a needless stop.
 - **The horn runs on brake air, like a real truck's -- protection valve
   included.** The air horn and the brakes share the tanks, so leaning on
   the horn costs measurable pressure -- but a real tractor's pressure

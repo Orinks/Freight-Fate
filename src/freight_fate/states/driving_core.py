@@ -309,6 +309,9 @@ RAMP_ASSIST_HOLD_MI = 60.0 / 5280.0
 RAMP_ASSIST_RELEASE_BAND = 0.05
 GREEN_ROLL_MPH = 25.0  # green lets you roll the terminal up to this
 STOP_ROLL_CLIP_MPH = 15.0  # blowing a stop sign this fast clips cross traffic
+# A yield taken in a real gap is legal at or under this -- the whole point of
+# the sign is that a clear road never demands the stop.
+YIELD_ROLL_MPH = 15.0
 RED_RUN_DAMAGE = 0.3  # collision severity for running the red
 STOP_ROLL_DAMAGE = 0.2  # lighter clip for blowing the stop sign
 # Heuristic control mix when OSM has none baked: (signal, stop) cumulative

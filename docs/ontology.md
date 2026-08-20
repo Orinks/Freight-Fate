@@ -238,6 +238,10 @@ from the words, and synonyms cost them a re-read.
 | A street maneuver the route asks for | turn | corner, junction, intersection, manoeuvre | `_is_judged_turn`, `local_turn` cues |
 | The speed a turn has to be taken under | advise ("Advise 20", the pacenote word) | turn limit, corner advisory, max speed | `_turn_speed_mph` |
 | The loop-back after missing the destination exit, the facility gate, the stop at the end of the destination ramp, or a turn | safe turnaround | U-turn, turnaround point, loop | `_handle_missed_destination_exit`, `_handle_missed_facility_gate`, `_loop_back_to_destination_terminal`, `_handle_missed_turn` |
+| The give-way control at a ramp terminal: slow for the gap, stop only if the road is not clear | yield ("Yield at ramp end", "Through the yield in a gap") | give way (the OSM tag, not a spoken word), yield sign as the noun in short cues | `_ramp_control == "yield"`, `YIELD_ROLL_MPH` |
+| The circular terminal a ramp can end at, played by yield rules against circulating traffic | roundabout | traffic circle, rotary, circle | `_ramp_control == "roundabout"` |
+| The vehicles crossing in front of a stopped truck at a ramp terminal | cross traffic | crossing cars, the crossroad's traffic | `CrossTraffic`, `sim/cross_traffic.py` |
+| The opening in cross traffic a driver pulls out into | gap, always yours ("wait for your gap", "Gap in traffic") | window, opening, break | `CrossTraffic.clear_to_cross` |
 | The fine for engine braking in one | engine brake citation | jake ticket, noise fine | `EngineBrakeZoneMixin._fine_engine_braking` |
 | An offense that counts toward losing the CDL | serious violation | strike, point, demerit, infraction | `DrivingRecord.record_serious_violation` |
 | The career-long enforcement history | your record | rap sheet, history, file | `DrivingRecord` |

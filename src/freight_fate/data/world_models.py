@@ -517,8 +517,10 @@ class Interchange:
 
     ``ramp_control`` is what governs the ramp terminal where the off-ramp
     meets the surface road: ``signal`` (a traffic light on a ramp-link node),
-    ``stop`` (a stop sign), ``none`` (free-flow), or ``""`` when OSM had no
-    control tagged -- the runtime then falls back to a seeded heuristic.
+    ``stop`` (a stop sign), ``yield`` (a give-way at the terminal),
+    ``roundabout`` (the terminal node sits on a roundabout way), ``none``
+    (free-flow), or ``""`` when OSM had no control tagged -- the runtime
+    then falls back to a seeded heuristic.
 
     ``ramp_far_end`` is what the exit's ramp chains reach, walked from OSM
     link topology: ``motorway`` (every chain merges onto another motorway;

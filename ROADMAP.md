@@ -152,13 +152,32 @@ onto exit signalling.
       exits the walk could not judge, and every one of the 213
       signal-at-a-proven-merge contradictions resolved -- the neighbor's
       control dropped, the merge baked. Proven merges rose to 597.
-      1,387 exits end at a give-way or roundabout terminal: read and
-      counted, NOT yet baked, because the game has no yield terminal to
-      play them on. One warm-cache `--force` re-run writes them when the
-      cross-bubble yield below ships.
+      1,387 exits end at a give-way or roundabout terminal: baked as
+      `yield`/`roundabout` on 2026-08-20 once the cross-bubble yield below
+      shipped (precedence within a terminal's kinds: signal, then
+      roundabout, then stop, then give-way).
 
-- [ ] **Yield as a ramp-terminal control, on real cross traffic** (design
-      settled with the owner 2026-08-20). Rural diamonds and roundabout
+- [x] **Yield as a ramp-terminal control, on real cross traffic** (design
+      settled with the owner 2026-08-20; cross bubble + yield terminal +
+      stop/signal clear calls shipped 2026-08-20). What shipped:
+      `sim/cross_traffic.py` simulates the crossroad per controlled
+      terminal -- seeded Poisson arrivals per side at design-constant rates
+      keyed to control kind and near-city (the crossroad's own AADT is not
+      baked yet; when it is, the rates should read it), platooning under a
+      braking-invariant following envelope, cross traffic queuing on the
+      player's green and flowing on the red, per-vehicle crossing cues
+      panned to their ear with class-specific timing. The stop sign's
+      "Clear; pull ahead" waits for a real gap and names the nearest
+      crosser; yield/roundabout terminals announce, judge the roll-through
+      at the line, and the assist rolls a clear yield and holds for an
+      occupied one; violations meet what the bubble actually holds (hit /
+      forced gap / empty road) instead of scripted certainty. Remaining
+      slices, deliberately deferred:
+      - [ ] Lead-car yielding (the car ahead on the ramp runs the same gap
+            acceptance and sometimes stops dead -- the rear-end setup).
+      - [ ] Crossroad AADT baked per terminal so arrival rates become
+            read/derived instead of design constants.
+      Rural diamonds and roundabout
       terminals are commonly yield-controlled; the game only knows
       signal/stop/none, so those exits dice into lights and stop signs that
       do not exist there. The mechanism is the CROSS BUBBLE, the mainline

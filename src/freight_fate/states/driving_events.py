@@ -5,6 +5,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from ..message_log import MessageCategory
+from ..sim.cross_traffic import CROSS_SOUND_LEAD_S, CrossTraffic
 from ..speech_pacing import EventPriority, SpeechCategory
 from ..speech_text import (
     SpokenMessage,
@@ -2138,6 +2139,22 @@ class DrivingEventMixin:
         self._ramp_bar_tick_timer = 0.0
         self._ramp_assist_said = False
         self._ramp_assist_brake = 0.0
+        self._ramp_waiting_at_sign = False
+        # The cross bubble: a controlled terminal means a real crossroad, so
+        # simulate it. Seeded like the control itself so the same terminal
+        # always carries the same traffic day; the near-city split reuses the
+        # same urban/rural judgment the control dice already trust.
+        self._cross_bubble = (
+            CrossTraffic(
+                seed=(self.trip_seed << 16) ^ int(stop.at_mi * 100.0) ^ 0x5AFE,
+                # A roundabout entry is gap acceptance against circulating
+                # traffic: yield rates, spoken as a roundabout.
+                control="yield" if self._ramp_control == "roundabout" else self._ramp_control,
+                near_city=self.trip._near_city(stop.at_mi),
+            )
+            if self._ramp_control in ("signal", "stop", "yield", "roundabout")
+            else None
+        )
 
     def _ramp_light_phase(self) -> str:
         cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
@@ -2161,10 +2178,11 @@ class DrivingEventMixin:
         # green, red, or stop sign -- carried it through the rest of the run
         # and out into the menus (Shane, 2026-08-03).
         self._update_ramp_bar_ticks(dt)
+        self._update_cross_bubble(dt)
         if self._ramp_mi is None or self._ramp_terminal_done:
             return
-        if self._ramp_control == "stop":
-            # A stop sign has no phases, but its bar needs a position just
+        if self._ramp_control in ("stop", "yield", "roundabout"):
+            # A sign has no phases, but its bar needs a position just
             # as much as a light's: without the countdown, the ticks, and
             # the stopped-short guidance, the sign was one announce line
             # and then silence until the damage message (playtest
@@ -2244,6 +2262,71 @@ class DrivingEventMixin:
                 category=SpeechCategory.NAVIGATION,
             )
 
+    def _update_cross_bubble(self, dt: float) -> None:
+        """Run the crossroad's own traffic while the terminal is live.
+
+        Real seconds, like the light: the terminal already stops the clock
+        compressing, and a gap that shrank at 4x would be unreadable. Each
+        vehicle fires its crossing cue half a cue-length before it reaches
+        the conflict point, panned to the ear it comes from, so the peak of
+        the doppler lands on the actual crossing -- the gap IS the audio.
+        """
+        bubble = getattr(self, "_cross_bubble", None)
+        if bubble is None:
+            return
+        if self._ramp_mi is None or self._ramp_terminal_done:
+            # The terminal released the driver; the crossroad is behind them.
+            self._cross_bubble = None
+            return
+        if self._ramp_control == "signal":
+            # The cross street runs the orthogonal phase. Yellow counts as
+            # ours: real cross traffic is already stopped by then.
+            bubble.player_has_green = self._ramp_light_phase() != "red"
+        bubble.update(dt)
+        # The crossroad fades in down the ramp: nothing until the terminal
+        # callout distance, full presence at the bar.
+        closeness = 1.0 - min(1.0, max(0.0, self._ramp_mi) / RAMP_CONTROL_ANNOUNCE_MI)
+        if closeness <= 0.05:
+            return
+        for vehicle in bubble.vehicles:
+            if vehicle.sound_started or vehicle.position_mi >= 0.0 or vehicle.speed_mph <= 1.0:
+                continue
+            eta = -vehicle.position_mi * 3600.0 / vehicle.speed_mph
+            if eta > CROSS_SOUND_LEAD_S.get(vehicle.vehicle_class, 1.2):
+                continue
+            vehicle.sound_started = True
+            key = "traffic/" + vehicle.vehicle_class.replace(" ", "_") + "_cross"
+            self.ctx.audio.play(
+                key,
+                volume=0.25 + 0.6 * closeness,
+                pan=-0.7 if vehicle.from_side == "left" else 0.7,
+            )
+
+    def _cross_violation_meets(self):
+        """(what a terminal violation met, the vehicle it met).
+
+        "hit" is a vehicle inside the conflict window, "near" is one arriving
+        within a horn's length, "empty" is the gamble that happened to pay.
+        With no bubble to consult (older saves mid-ramp), the old certainty
+        stands: the violation hits.
+        """
+        bubble = getattr(self, "_cross_bubble", None)
+        if bubble is None:
+            return "hit", None
+        vehicle = bubble.occupant()
+        if vehicle is not None:
+            return "hit", vehicle
+        vehicle = bubble.approaching(2.0)
+        if vehicle is not None:
+            return "near", vehicle
+        return "empty", None
+
+    def _cross_vehicle_sound(self, vehicle) -> str:
+        """The crossing cue for the vehicle a violation met."""
+        if vehicle is None:
+            return "traffic/car_cross"
+        return "traffic/" + vehicle.vehicle_class.replace(" ", "_") + "_cross"
+
     def _update_ramp_queue_guidance(self) -> None:
         """Tell a driver stopped short of the stop bar to close the gap.
 
@@ -2265,17 +2348,24 @@ class DrivingEventMixin:
         # reads as a light stuck in a loop. Far back is a drive, and the red
         # phase is exactly the time to make it.
         gap_mi = self._ramp_mi - RAMP_ACCESS_MI
-        if self._ramp_control == "stop":
+        if self._ramp_control in ("stop", "yield", "roundabout"):
+            noun = {
+                "stop": "the stop sign",
+                "yield": "the yield line",
+                "roundabout": "the roundabout entry",
+            }[self._ramp_control]
+            # A stop sign demands the stop at the bar; a yield only asks for
+            # the gap there.
+            tail = (
+                "stop again at the bar"
+                if self._ramp_control == "stop"
+                else "take your gap at the bar"
+            )
             if gap_mi > RAMP_CREEP_MI:
                 gap = self._short_distance_text(gap_mi)
-                message = (
-                    f"You are stopped about {gap} short of the stop sign. "
-                    "Drive up and stop again at the bar."
-                )
+                message = f"You are stopped about {gap} short of {noun}. Drive up and {tail}."
             else:
-                message = (
-                    "You are stopped short of the stop sign. Creep ahead and stop again at the bar."
-                )
+                message = f"You are stopped short of {noun}. Creep ahead and {tail}."
             # ROUTE, not the ambient default. This is an instruction about a
             # STANDING condition -- the truck is stopped short of the bar and
             # stays stopped until the driver acts -- so the staleness rule that
@@ -2559,6 +2649,40 @@ class DrivingEventMixin:
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
             )
+        elif self._ramp_control in ("yield", "roundabout"):
+            self.ctx.audio.play("ui/notify", volume=0.7)
+            terse_noun = "Roundabout" if self._ramp_control == "roundabout" else "Yield"
+            if self._terse_speech():
+                limit_clause = f" Limit {limit_text}." if limit_text else ""
+                self.ctx.say_event(
+                    f"{terse_noun} at ramp end.{limit_clause}",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                    category=SpeechCategory.NAVIGATION,
+                )
+                return
+            # The instruction is the sign's real rule: slow for the gap, and
+            # the stop is only owed when the road is not clear. "Brake to a
+            # stop" here would teach the stop-sign habit at a sign whose
+            # whole point is that a clear road never demands it.
+            if self._ramp_control == "roundabout":
+                message = (
+                    "Roundabout at the end of the ramp. Yield to traffic in "
+                    "the circle: slow, listen for your gap, and stop only if "
+                    "it is not clear."
+                )
+            else:
+                message = (
+                    "Yield sign at the end of the ramp. Slow, listen for "
+                    "your gap, and stop only if the road is not clear."
+                )
+            approach_clause = f" Speed limit {limit_text} on the approach." if limit_text else ""
+            self.ctx.say_event(
+                f"{message}{approach_clause}",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.NAVIGATION,
+            )
 
     def _update_ramp_terminal_assist(self) -> None:
         """Route-transition assistance works the pedals for the terminal.
@@ -2576,7 +2700,10 @@ class DrivingEventMixin:
             return
         if self._ramp_mi is None or self._ramp_terminal_done:
             return
-        if self._ramp_control not in ("signal", "stop") or not self._ramp_light_announced:
+        if (
+            self._ramp_control not in ("signal", "stop", "yield", "roundabout")
+            or not self._ramp_light_announced
+        ):
             return
         if self._ramp_waiting_at_light:
             # Holding for green: the assist keeps the brakes on.
@@ -2596,15 +2723,58 @@ class DrivingEventMixin:
                     self.truck.throttle = 0.0
                     self.truck.brake = max(self.truck.brake, 0.4)
                 return
+        if self._ramp_control in ("yield", "roundabout"):
+            bubble = getattr(self, "_cross_bubble", None)
+            if bubble is None or bubble.clear_to_cross():
+                # A clear yield is rolled, not stopped: the assist holds the
+                # crossing at roll speed and the gap verdict lands at the
+                # line. Braking to a dead stop on a clear yield is the
+                # rear-end setup the roadmap warns the LEAD car will pull.
+                if gap_mi <= bar_tick_range_mi(self.truck) and speed > YIELD_ROLL_MPH - 3:
+                    self.truck.throttle = 0.0
+                    self.truck.brake = max(self.truck.brake, 0.4)
+                return
+            # Not clear: fall through and brake for the line like a stop.
         if speed <= RED_STOP_MPH and gap_mi <= RAMP_ASSIST_HOLD_MI:
             # At the bar with the truck stopped: the assist owns the hold.
             self.truck.throttle = 0.0
             self.truck.brake = 1.0
             self._ramp_assist_brake = 0.0
-            if self._ramp_control == "stop":
+            if self._ramp_control in ("stop", "yield", "roundabout"):
+                # The assist holds the stop; the release now waits for the
+                # bubble's gap, same as an unassisted stop. The hold above
+                # keeps the brakes on through the wait.
+                noun = {
+                    "stop": "sign",
+                    "yield": "yield",
+                    "roundabout": "roundabout entry",
+                }[self._ramp_control]
+                bubble = getattr(self, "_cross_bubble", None)
+                if bubble is not None and not bubble.clear_to_cross():
+                    if not self._ramp_waiting_at_sign:
+                        self._ramp_waiting_at_sign = True
+                        nearest = bubble.approaching(8.0)
+                        what = (
+                            f"A {nearest.vehicle_class} crossing from the {nearest.from_side}"
+                            if nearest is not None
+                            else "Cross traffic"
+                        )
+                        self.ctx.say_event(
+                            f"Stopped at the {noun}. {what}; assistance is holding for your gap.",
+                            interrupt=False,
+                            priority=EventPriority.ROUTE,
+                            category=SpeechCategory.NAVIGATION,
+                        )
+                    return
                 self._ramp_terminal_done = True
+                message = (
+                    "Gap in traffic. Clear; pull ahead to the entrance."
+                    if self._ramp_waiting_at_sign
+                    else f"Stopped at the {noun}. Clear; pull ahead to the entrance."
+                )
+                self._ramp_waiting_at_sign = False
                 self.ctx.say_event(
-                    "Stopped at the sign. Clear; pull ahead to the entrance.",
+                    message,
                     interrupt=False,
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,
@@ -2648,7 +2818,12 @@ class DrivingEventMixin:
             # the session comes back on its own past it rather than waiting
             # for a departure that never happens on a ramp.
             self._pause_speed_control(resume_when_rolling=True)
-            what = "light" if self._ramp_control == "signal" else "stop sign"
+            what = {
+                "signal": "light",
+                "stop": "stop sign",
+                "yield": "yield",
+                "roundabout": "roundabout",
+            }.get(self._ramp_control, "stop sign")
             self.ctx.say_event(
                 f"Route-transition assistance braking for the {what}.",
                 interrupt=False,
@@ -2681,26 +2856,54 @@ class DrivingEventMixin:
                     return  # still braking down to the stop bar
                 self._ramp_terminal_done = True
                 self._ramp_waiting_at_light = False
+                # What the run actually meets is the bubble's answer now,
+                # not the old certainty: cross traffic flows on the player's
+                # red, so this usually finds a vehicle -- but a gambler who
+                # threads a real gap gets away with it, exactly like the road.
+                met, vehicle = self._cross_violation_meets()
+                pan = -0.4 if vehicle is None or vehicle.from_side == "left" else 0.4
                 if speed > STOP_ROLL_CLIP_MPH:
-                    self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=-0.4)
-                    self.ctx.audio.play("vehicle/collision")
-                    self.ctx.controller.rumble.impact(RED_RUN_DAMAGE)
-                    # A driver already hard on the brakes, carried through by
-                    # the load, did not make a preventable mistake. The
-                    # violation still stands; the discipline does not.
-                    self.truck.apply_collision(
-                        RED_RUN_DAMAGE,
-                        preventable=not self.truck.pushed_through_by_surge(),
-                    )
+                    if met == "hit":
+                        self.ctx.audio.play(self._cross_vehicle_sound(vehicle), volume=1.0, pan=pan)
+                        self.ctx.audio.play("vehicle/collision")
+                        self.ctx.controller.rumble.impact(RED_RUN_DAMAGE)
+                        # A driver already hard on the brakes, carried through
+                        # by the load, did not make a preventable mistake. The
+                        # violation still stands; the discipline does not.
+                        self.truck.apply_collision(
+                            RED_RUN_DAMAGE,
+                            preventable=not self.truck.pushed_through_by_surge(),
+                        )
+                        self.ctx.say_event(
+                            "You ran the red light at the ramp end and cross traffic "
+                            "clipped the trailer! Total damage "
+                            f"{self.truck.damage_pct:.0f} percent.",
+                            interrupt=True,
+                            category=SpeechCategory.SAFETY,
+                        )
+                    elif met == "near":
+                        self.ctx.audio.play(self._cross_vehicle_sound(vehicle), volume=1.0, pan=pan)
+                        self.ctx.say_event(
+                            "You ran the red light at the ramp end. Cross traffic "
+                            "brakes hard and leans on the horn.",
+                            interrupt=True,
+                            category=SpeechCategory.CONFIRMATION,
+                        )
+                    else:
+                        self.ctx.say_event(
+                            "You ran the red light at the ramp end. Nothing was "
+                            "crossing; nothing will be next time.",
+                            interrupt=True,
+                            category=SpeechCategory.CONFIRMATION,
+                        )
+                elif met == "empty":
                     self.ctx.say_event(
-                        "You ran the red light at the ramp end and cross traffic "
-                        "clipped the trailer! Total damage "
-                        f"{self.truck.damage_pct:.0f} percent.",
+                        "You crept through the red light. Nothing was crossing this time.",
                         interrupt=True,
-                        category=SpeechCategory.SAFETY,
+                        category=SpeechCategory.CONFIRMATION,
                     )
                 else:
-                    self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=-0.4)
+                    self.ctx.audio.play(self._cross_vehicle_sound(vehicle), volume=1.0, pan=pan)
                     self.ctx.say_event(
                         "You crept through the red light. Cross traffic leans on the horn.",
                         interrupt=True,
@@ -2727,16 +2930,135 @@ class DrivingEventMixin:
         if self._ramp_control == "stop":
             if speed > RED_STOP_MPH and not past_bar:
                 return  # still braking down to the stop bar
-            self._ramp_terminal_done = True
             if speed <= RED_STOP_MPH:
+                # Stopped at the sign: the clear call now waits for a real
+                # gap in the cross bubble instead of arriving with the stop.
+                # The crossing cues are the information -- each one is a
+                # vehicle in the ear it comes from -- and "clear" is spoken
+                # only when the window is genuinely open.
+                bubble = getattr(self, "_cross_bubble", None)
+                if bubble is not None and not bubble.clear_to_cross():
+                    if not self._ramp_waiting_at_sign:
+                        self._ramp_waiting_at_sign = True
+                        nearest = bubble.approaching(8.0)
+                        what = (
+                            f"A {nearest.vehicle_class} crossing from the {nearest.from_side}"
+                            if nearest is not None
+                            else "Cross traffic"
+                        )
+                        self.ctx.say_event(
+                            f"Stopped at the sign. {what}; wait for your gap.",
+                            interrupt=False,
+                            priority=EventPriority.ROUTE,
+                            category=SpeechCategory.NAVIGATION,
+                        )
+                    return
+                self._ramp_terminal_done = True
+                message = (
+                    "Gap in traffic. Clear; pull ahead to the entrance."
+                    if self._ramp_waiting_at_sign
+                    else "Stopped at the sign. Clear; pull ahead to the entrance."
+                )
+                self._ramp_waiting_at_sign = False
                 self.ctx.say_event(
-                    "Stopped at the sign. Clear; pull ahead to the entrance.",
+                    message,
                     interrupt=False,
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,
                 )
-            elif speed > STOP_ROLL_CLIP_MPH:
-                self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=0.4)
+                return
+            self._ramp_terminal_done = True
+            # Same honesty as the light: the bubble says what the blown sign
+            # actually met. A stop-sign crossroad is often empty -- that is
+            # what makes rolling one tempting, and what makes the day a
+            # semi IS crossing the lesson it should be.
+            met, vehicle = self._cross_violation_meets()
+            pan = 0.4 if vehicle is None or vehicle.from_side == "right" else -0.4
+            if speed > STOP_ROLL_CLIP_MPH:
+                if met == "hit":
+                    self.ctx.audio.play(self._cross_vehicle_sound(vehicle), volume=1.0, pan=pan)
+                    self.ctx.audio.play("vehicle/collision")
+                    self.ctx.controller.rumble.impact(STOP_ROLL_DAMAGE)
+                    self.truck.apply_collision(
+                        STOP_ROLL_DAMAGE,
+                        preventable=not self.truck.pushed_through_by_surge(),
+                    )
+                    self.ctx.say_event(
+                        "You blew the stop sign at the ramp end and clipped cross "
+                        f"traffic! Total damage {self.truck.damage_pct:.0f} percent.",
+                        interrupt=True,
+                        category=SpeechCategory.SAFETY,
+                    )
+                elif met == "near":
+                    self.ctx.audio.play(self._cross_vehicle_sound(vehicle), volume=1.0, pan=pan)
+                    self.ctx.say_event(
+                        "You blew the stop sign at the ramp end. Cross traffic "
+                        "brakes hard and leans on the horn.",
+                        interrupt=True,
+                        category=SpeechCategory.CONFIRMATION,
+                    )
+                else:
+                    self.ctx.say_event(
+                        "You blew the stop sign at the ramp end. The crossroad "
+                        "was empty; it will not always be.",
+                        interrupt=True,
+                        category=SpeechCategory.CONFIRMATION,
+                    )
+            elif met == "empty":
+                self.ctx.say_event(
+                    "You rolled the stop sign at the ramp end. Nothing was crossing this time.",
+                    interrupt=True,
+                    category=SpeechCategory.CONFIRMATION,
+                )
+            else:
+                self.ctx.audio.play(self._cross_vehicle_sound(vehicle), volume=1.0, pan=pan)
+                self.ctx.say_event(
+                    "You rolled the stop sign at the ramp end. Cross traffic leans on the horn.",
+                    interrupt=True,
+                    category=SpeechCategory.CONFIRMATION,
+                )
+            return
+        if self._ramp_control in ("yield", "roundabout"):
+            # The yield rule, straight from the sign: a gap taken at roll
+            # speed is the clean crossing, stopping is always legal, and an
+            # occupied window is the clip machinery -- at THEIR closing
+            # speed, because you rolled under their bumper.
+            noun = "roundabout" if self._ramp_control == "roundabout" else "yield"
+            if speed <= RED_STOP_MPH:
+                # Stopped: exactly the stop sign's wait, spoken for a yield.
+                bubble = getattr(self, "_cross_bubble", None)
+                if bubble is not None and not bubble.clear_to_cross():
+                    if not self._ramp_waiting_at_sign:
+                        self._ramp_waiting_at_sign = True
+                        nearest = bubble.approaching(8.0)
+                        what = (
+                            f"A {nearest.vehicle_class} crossing from the {nearest.from_side}"
+                            if nearest is not None
+                            else "Cross traffic"
+                        )
+                        self.ctx.say_event(
+                            f"Stopped at the {noun}. {what}; wait for your gap.",
+                            interrupt=False,
+                            priority=EventPriority.ROUTE,
+                            category=SpeechCategory.NAVIGATION,
+                        )
+                    return
+                self._ramp_terminal_done = True
+                self._ramp_waiting_at_sign = False
+                self.ctx.say_event(
+                    "Gap in traffic. Clear; pull ahead to the entrance.",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                    category=SpeechCategory.NAVIGATION,
+                )
+                return
+            if not past_bar:
+                return  # still rolling down to the line; the gap decides there
+            self._ramp_terminal_done = True
+            met, vehicle = self._cross_violation_meets()
+            pan = 0.4 if vehicle is None or vehicle.from_side == "right" else -0.4
+            if met == "hit":
+                self.ctx.audio.play(self._cross_vehicle_sound(vehicle), volume=1.0, pan=pan)
                 self.ctx.audio.play("vehicle/collision")
                 self.ctx.controller.rumble.impact(STOP_ROLL_DAMAGE)
                 self.truck.apply_collision(
@@ -2744,16 +3066,31 @@ class DrivingEventMixin:
                     preventable=not self.truck.pushed_through_by_surge(),
                 )
                 self.ctx.say_event(
-                    "You blew the stop sign at the ramp end and clipped cross "
-                    f"traffic! Total damage {self.truck.damage_pct:.0f} percent.",
+                    f"You rolled the {noun} into cross traffic and it clipped "
+                    f"the trailer! Total damage {self.truck.damage_pct:.0f} percent.",
                     interrupt=True,
                     category=SpeechCategory.SAFETY,
                 )
-            else:
-                self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=0.4)
+            elif met == "near":
+                self.ctx.audio.play(self._cross_vehicle_sound(vehicle), volume=1.0, pan=pan)
                 self.ctx.say_event(
-                    "You rolled the stop sign at the ramp end. Cross traffic leans on the horn.",
+                    f"You forced the gap at the {noun}. Cross traffic brakes "
+                    "hard and leans on the horn.",
                     interrupt=True,
+                    category=SpeechCategory.CONFIRMATION,
+                )
+            elif speed > YIELD_ROLL_MPH:
+                self.ctx.say_event(
+                    f"Through the {noun}, but far too fast. Brake hard for the entrance.",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                    category=SpeechCategory.CONFIRMATION,
+                )
+            else:
+                self.ctx.say_event(
+                    f"Through the {noun} in a gap. Pull ahead to the entrance.",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
                     category=SpeechCategory.CONFIRMATION,
                 )
             return
@@ -2766,7 +3103,7 @@ class DrivingEventMixin:
         # the driver needs to brake for it.
         self.trip.controlled_ramp = (
             self._ramp_mi is not None
-            and self._ramp_control in ("signal", "stop")
+            and self._ramp_control in ("signal", "stop", "yield", "roundabout")
             and not self._ramp_terminal_done
         )
         self.trip.dock_run_in = (
