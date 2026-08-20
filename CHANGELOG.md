@@ -813,6 +813,11 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The Five-by-Two and Out badge means the bunk again.** It awarded for any
+  night's sleep, including a motel room -- the one night you specifically did
+  not spend in the sleeper. Motel nights no longer count; sleeping in your
+  own bunk, including a cramped night in a parking lot, still does.
+
 - **Weigh stations work like real weigh stations.** The announcement no
   longer tells you to slow below fifteen on the open interstate -- you stay
   at road speed, signal for the scale exit, and the ramp itself brings you

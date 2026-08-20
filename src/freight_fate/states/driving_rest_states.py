@@ -1257,7 +1257,10 @@ class RestStopState(_FuelPumpMixin, MenuState):
             f"Hours of service reset and you wake fresh. You have "
             f"{p.money:,.0f} dollars. {_deadline_text(d)}{_wake_air_instruction(d)}"
         )
-        self.ctx.award_achievement("slept_on_route")
+        # No Five-by-Two here: the badge is ten hours IN THE BUNK, and a
+        # motel bed is the night you specifically did not spend in it
+        # (owner report, 2026-08-20). The cramped-lot sleep keeps the
+        # award -- the stop has no beds, so the lot night IS a bunk night.
 
     def _emergency_lot_sleep(self) -> None:
         """Bed down in a break/fuel stop's lot when out of hours: a legal HOS
@@ -1837,7 +1840,10 @@ class ParkingFullState(_FuelPumpMixin, MenuState):
             "to start the engine.",
             interrupt=True,
         )
-        self.ctx.award_achievement("slept_on_route")
+        # No Five-by-Two here: the badge is ten hours IN THE BUNK, and a
+        # motel bed is the night you specifically did not spend in it
+        # (owner report, 2026-08-20). The cramped-lot sleep keeps the
+        # award -- the stop has no beds, so the lot night IS a bunk night.
 
     def _shoulder(self) -> None:
         self.ctx.push_state(
