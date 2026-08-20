@@ -592,7 +592,19 @@ class HazardDef:
 
 HAZARDS: tuple[HazardDef, ...] = (
     # Nationwide staples: plausible on any interstate, in any conditions.
-    HazardDef("debris on the road", 1.2, dodgeable=True, name="the debris"),
+    # Named debris, not "debris": a driver clearing a lane blind needs to
+    # know WHAT is in it -- a ladder and a mattress are different dodges
+    # (Brandon, 2026-08-20). The split's weights sum to the 1.2 the one
+    # generic entry carried, so debris is exactly as common as before; the
+    # types and their rough mix follow AAA's road-debris studies (ladders,
+    # lumber, and furniture leading the non-tire counts). A thin generic
+    # entry survives as the honest fallback for the unidentifiable.
+    HazardDef("a ladder fallen from a truck in the lane", 0.25, dodgeable=True, name="the ladder"),
+    HazardDef("loose lumber dropped across the lane", 0.25, dodgeable=True, name="the lumber"),
+    HazardDef("a mattress lying in the lane", 0.2, dodgeable=True, name="the mattress"),
+    HazardDef("spilled cargo boxes across the lane", 0.2, dodgeable=True, name="the boxes"),
+    HazardDef("a shredded truck tarp in the lane", 0.15, dodgeable=True, name="the tarp"),
+    HazardDef("debris on the road", 0.15, dodgeable=True, name="the debris"),
     HazardDef("retread debris from a blown tire", 1.0, dodgeable=True, name="the tire debris"),
     # The move-over law in action: shift a lane away from the shoulder.
     HazardDef("a vehicle stopped on the shoulder", 1.0, dodgeable=True, name="the stopped vehicle"),

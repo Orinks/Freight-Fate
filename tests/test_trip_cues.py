@@ -439,3 +439,25 @@ def test_the_gate_zone_never_swallows_the_streets_before_it(world):
         for zone in zones:
             if zone.limit_mph == 25.0:
                 assert zone.start_mi < gate[0].start_mi, "a 25 street sits wholly inside the gate"
+
+
+def test_debris_speaks_its_kind_and_the_split_keeps_the_old_rate(world):
+    """ "Debris in the road" told a blind driver nothing about the dodge --
+    a ladder and a mattress are different problems (Brandon, 2026-08-20).
+    The named split must sum to the 1.2 weight the one generic entry
+    carried, so debris stays exactly as common as it was."""
+    from freight_fate.sim.trip_models import HAZARDS
+
+    debris = {
+        h.text: h
+        for h in HAZARDS
+        if h.name
+        in ("the ladder", "the lumber", "the mattress", "the boxes", "the tarp", "the debris")
+    }
+    assert len(debris) == 6, sorted(debris)
+    assert all(h.dodgeable for h in debris.values())
+    assert abs(sum(h.weight for h in debris.values()) - 1.2) < 1e-9
+    # Every named entry resolves to its own noun, so the cleared line says
+    # what was cleared.
+    names = {h.name for h in debris.values()}
+    assert "the ladder" in names and "the mattress" in names
