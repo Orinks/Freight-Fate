@@ -130,32 +130,32 @@ onto exit signalling.
 
 - [x] **Ramp far-end road class baked from walked link topology**
       (2026-08-20). The bake walks every exit's motorway_link chains from the
-      gore: 384 exits whose every chain merges back onto a motorway now carry
+      gore: 597 exits whose every chain merges back onto a motorway now carry
       an explicit `ramp_control: none` (derived, and the source string says
       from what), and 14,897 exits with a chain that touches a surface road
       carry `ramp_far_end: surface`, which SUPPRESSES the runtime's via-signage
       free-flow guess -- via points where the exit is signed toward, not at the
       road the ramp lands on, and walked topology disagreed with it on 27.5%
-      of the 15,281 exits it could judge. The walk stops at crossroad nodes
+      of the 15,494 exits it could judge. The walk stops at crossroad nodes
       (link nodes shared with a vehicular non-motorway way; footpaths
       excluded), a toll booth on the chain vetoes free flow, and a chain
       ending on a trunk stays conservative. Unjudged: 2,504 exits with no gore
-      in range, 226 with no verdict; those keep the old via guess plus dice.
-      213 exits carry a READ signal at a topology-proven merge -- the reading
-      wins per the provenance rule, but most are probably the control pass's
-      1400m radius catching a neighbor's signal; the follow-up below re-reads
-      them precisely.
+      in range, 13 with no verdict; those keep the old via guess plus dice.
 
-- [ ] **Read the terminal control at the walked terminal node, not in a
-      1.4-2km circle** (owner-approved 2026-08-20). The far-end walk knows the
-      exact node where each ramp chain ends; controls should be read within
-      tens of meters of THAT node -- including signals mapped per-approach on
-      the crossroad way, which the link-membership read misses entirely --
-      instead of matching any control node within 1400m (pinned) or 2000m
-      (estimated) of the whole exit. Better recall on untagged terminals,
-      and it re-judges the 213 signal-at-proven-merge contradictions above.
-      Same pass should read `highway=give_way` and `junction=roundabout` at
-      the terminal for the yield work below.
+- [x] **Terminal controls read at the walked terminal node** (2026-08-20).
+      Controls are read within 120 m of the node where the walk says the
+      ramp actually ends -- including signals mapped per-approach on the
+      crossroad way, which link-membership could never see -- instead of
+      anywhere in a 1.4-2 km circle around the exit. Result across the
+      world: 7,387 terminal-precise reads (275 of them corrected a
+      different exit-wide read), 277 exit-wide fallback reads remaining on
+      exits the walk could not judge, and every one of the 213
+      signal-at-a-proven-merge contradictions resolved -- the neighbor's
+      control dropped, the merge baked. Proven merges rose to 597.
+      1,387 exits end at a give-way or roundabout terminal: read and
+      counted, NOT yet baked, because the game has no yield terminal to
+      play them on. One warm-cache `--force` re-run writes them when the
+      cross-bubble yield below ships.
 
 - [ ] **Yield as a ramp-terminal control, on real cross traffic** (design
       settled with the owner 2026-08-20). Rural diamonds and roundabout
@@ -6201,6 +6201,18 @@ Deliver -> Earn and level up -> Repeat
       correct leg, and facility data should carry enough road name, distance,
       gate speed, and dock-approach detail to make warehouses, terminals,
       ports, and industrial yards feel distinct.
+- [ ] **Locally-2D world: crossing axes instead of one route line (owner
+      musing, 2026-08-20).** Today the sim is one-dimensional -- the route is
+      a line and every NPC lives on it. The cross bubble (yield design above)
+      is deliberately the first second axis: a short simulated stretch of
+      crossroad, spawned where it matters and despawned after. The same shape
+      scales without an engine rewrite: N crossing axes at named points --
+      ramp terminals, facility approach chains, in-town errand grids -- each
+      a small 1-D sim of its own, joined at conflict points. "2D where you
+      stand, 1-D where you drive." A fully routable 2D street network stays
+      out of scope until the axis model runs out of road; if it ever does,
+      the OSM graph the bakes already walk is the substrate a real network
+      sim would read.
 - [ ] International expansion, beginning with research into Canada and the
       United Kingdom: country profiles need driving side, units, currency,
       local trucking terms, hours-of-service rules, weather fallbacks, legal

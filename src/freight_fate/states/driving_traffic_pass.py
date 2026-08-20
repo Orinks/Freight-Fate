@@ -130,4 +130,11 @@ def _traffic_vehicle_pass_sound(vehicle) -> str:
         "box truck": "traffic/box_truck_pass",
         "service vehicle": "traffic/box_truck_pass",
         "car": "traffic/car_pass",
+        # Classes added for the cross-bubble expansion (2026-08-20). They do
+        # not spawn on the mainline yet; the keys exist so the day a spawner
+        # deals one, it already has a voice.
+        "pickup": "traffic/pickup_pass",
+        "motorcycle": "traffic/motorcycle_pass",
+        "bus": "traffic/bus_pass",
+        "tractor": "traffic/tractor_pass",
     }.get(vehicle_class, "traffic/car_pass")
