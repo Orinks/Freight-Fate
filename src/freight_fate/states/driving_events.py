@@ -365,6 +365,7 @@ class DrivingEventMixin:
                 # A fresh hazard starts the assist from an open pedal, with
                 # nothing measured yet from the last one.
                 self._hazard_names = [name]
+                self._horn_scare_tried = False
                 self._hazard_dodgeable = dodgeable
                 self._hazard_deadline = new_deadline
                 self._release_hazard_brake()
@@ -375,6 +376,7 @@ class DrivingEventMixin:
                 # overwrite this used to be (Shane's deer, 2026-08-14).
                 self._clear_hazard()
                 self._hazard_names = [name]
+                self._horn_scare_tried = False
                 self._hazard_dodgeable = dodgeable
                 self._hazard_deadline = new_deadline
                 self._release_hazard_brake()
@@ -444,7 +446,30 @@ class DrivingEventMixin:
             cue = event.data.get("cue")
             state = getattr(cue, "near_text", event.message)
             add_unique_stat(self.ctx.profile, "states_crossed", str(state))
-            self._speak_ambient_event(event.message, sound, category=self._event_category(event))
+            message = event.message
+            # The welcome sign: authored content that sat unwired since it
+            # shipped ("the placement that actually speaks these is
+            # gameplay-layer follow-on" -- its own docstring), until Brandon
+            # asked why state signs are not read (2026-08-20). The into
+            # state rides the cue id's last segment, built from into_state
+            # in _build_navigation_cues. Rides the billboard chatter switch
+            # -- it is literally roadside signage -- and picks seeded so a
+            # replayed crossing reads the same sign.
+            if self.ctx.settings.chatter_billboards and cue is not None:
+                import zlib
+
+                from ..data.state_welcome import welcome_sign
+
+                into_state = str(getattr(cue, "key", "")).rsplit(":", 1)[-1]
+                # crc32, not hash(): str hash is randomized per process and
+                # would pick a different sign on every launch.
+                sign = welcome_sign(
+                    into_state,
+                    random.Random(self.trip_seed ^ zlib.crc32(into_state.encode("utf-8"))),
+                )
+                if sign:
+                    message = f"{message} {sign}"
+            self._speak_ambient_event(message, sound, category=self._event_category(event))
             self.ctx.award_achievement("state_crossing", event=True)
         elif kind == TripEventKind.TIMEZONE_CROSSING:
             if sound is not None:

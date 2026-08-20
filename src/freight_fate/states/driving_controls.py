@@ -93,6 +93,7 @@ class DrivingControlsMixin:
             self._toggle_parking_brake()
         elif key == pygame.K_h:
             self.ctx.audio.horn_start()
+            self._horn_scare_animals()
         elif key == pygame.K_t:
             if getattr(event, "mod", 0) & pygame.KMOD_ALT:
                 # The AMT's manual-mode button: flips the transmission
@@ -571,6 +572,7 @@ class DrivingControlsMixin:
             self.ctx.push_state(PauseMenuState(self.ctx, self))
         elif button == pygame.CONTROLLER_BUTTON_LEFTSTICK:
             self.ctx.audio.horn_start()
+            self._horn_scare_animals()
         elif button == pygame.CONTROLLER_BUTTON_RIGHTSTICK:
             self._toggle_engine_brake()
         elif button == pygame.CONTROLLER_BUTTON_DPAD_UP:

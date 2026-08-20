@@ -3102,6 +3102,40 @@ class DrivingUpdateMixin:
             category=SpeechCategory.NAVIGATION,
         )
 
+    def _horn_scare_animals(self) -> None:
+        """The horn's one real power: moving an animal off the road.
+
+        Shane's ask (2026-08-20), and it is what the air horn is FOR on a
+        real highway -- but it works the way animals work, not the way a
+        button works. Livestock, dogs, and coyotes mostly move; deer and
+        elk freeze as often as they bolt, which is why braking stays the
+        instruction and the horn is a bonus, never the plan. One attempt
+        per hazard: an animal that ignored the first blast has decided.
+        Seeded on the hazard so a save-scummed retry hears the same deer
+        make the same choice.
+        """
+        if self._hazard_deadline is None or self._horn_scare_tried:
+            return
+        from ..sim.trip_models import HAZARDS
+
+        freeze_prone = {h.name for h in HAZARDS if h.animal and h.name in ("the deer", "the elk")}
+        movable = {h.name for h in HAZARDS if h.animal}
+        names = [n for n in self._hazard_names if n in movable]
+        if not names:
+            return  # a ladder does not care how loud you are
+        self._horn_scare_tried = True
+        rng = random.Random((self.trip_seed << 8) ^ int(self.trip.position_mi * 50.0))
+        cleared = all(rng.random() < (0.4 if name in freeze_prone else 0.7) for name in names)
+        if not cleared or len(names) != len(self._hazard_names):
+            # Frozen in the headlights, or something unscareable is out
+            # there too. Say nothing: the hazard machinery's own countdown
+            # is still the instruction, and a "it did not work" line would
+            # talk over the braking the driver should be doing.
+            return
+        self._finish_hazard_clear(
+            f"The horn does it: {self._hazard_names_text()} clears the road. Well done."
+        )
+
     def _hazard_names_text(self) -> str:
         """The pending hazard(s), joined for a resolution line.
 
