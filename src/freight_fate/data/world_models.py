@@ -647,6 +647,12 @@ class Leg:
     interchanges: tuple[Interchange, ...] = ()
     speed_limits: tuple[SpeedLimitSample, ...] = ()
     traffic_volumes: tuple[TrafficVolumeSample, ...] = ()
+    # A published truck warning on this road -- CDOT-style "truckers beware"
+    # campaigns, non-truck-route passes. Text carries its own source. Routing
+    # treats it as strong avoidance, never refusal: it is warnings and
+    # carrier policy, not statute (verified against CDOT and the CCR for
+    # US-550 Red Mountain Pass, 2026-08-20 -- no length rule exists).
+    truck_advisory: str = ""
     hpms_terrain: HpmsTerrain | None = None
     # Driving lanes per direction, baked from HPMS through-lane counts
     # (leg-level median); 0 means unbaked and the runtime default applies.
@@ -827,6 +833,7 @@ class LazyLeg(Leg):
         restrictions=_DEFER,
         lane_segments=_DEFER,
         divided: bool | None = None,
+        truck_advisory: str = "",
         meta_complete: bool | None = None,
         *,
         detail_source: tuple | None = None,
@@ -842,6 +849,7 @@ class LazyLeg(Leg):
         s(self, "local_cue", local_cue)
         s(self, "local_speed_mph", local_speed_mph)
         s(self, "divided", divided)
+        s(self, "truck_advisory", truck_advisory)
         s(self, "meta_complete", meta_complete)
         s(self, "_detail_source", detail_source)
         # A deferred field left at the sentinel stays absent so __getattr__ can

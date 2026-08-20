@@ -809,3 +809,34 @@ def test_world_data_contains_real_weigh_station_stops(world):
         assert stop.source
         assert stop.actions == ("inspect",)
         assert stop.spoken_name.startswith("weigh station:")
+
+
+def test_dispatch_detours_around_a_truck_advisory_where_a_road_exists(world):
+    """US-550 over Red Mountain Pass carries a truck advisory (CDOT-style
+    warnings and carrier policy -- verified 2026-08-20 that no statute
+    exists, so it is strong avoidance, never refusal). Through freight from
+    Farmington takes the real detour: US-160/491/191 through Cortez and
+    Monticello to Moab, the road carriers actually use."""
+    r = world.shortest_route("farmington_nm_us", "grand_junction_co_us")
+    assert r is not None
+    assert "moab_ut_us" in r.cities, r.cities
+    assert not any({leg.a, leg.b} == {"durango_co_us", "montrose_co_us"} for leg in r.legs), (
+        "through freight was routed over the warned pass"
+    )
+
+
+def test_a_warned_pass_still_serves_its_own_endpoints(world):
+    """A pair of towns whose only road is the warned one still routes -- the
+    advisory is a warning, not a wall, and Durango-to-Montrose freight has
+    no other road."""
+    r = world.shortest_route("durango_co_us", "montrose_co_us")
+    assert r is not None
+    assert r.cities == ["durango_co_us", "montrose_co_us"], r.cities
+
+
+def test_the_detour_leg_is_dispatchable(world):
+    """The Cortez/Moab detour is supported freight metadata, not just a graph
+    edge: a supported route from Farmington north must exist and use it."""
+    r = world.supported_route("farmington_nm_us", "salt_lake_city_ut_us")
+    assert r is not None
+    assert "moab_ut_us" in r.cities, r.cities

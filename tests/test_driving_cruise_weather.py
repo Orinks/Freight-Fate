@@ -3930,3 +3930,94 @@ def test_cruise_never_raises_the_jake_on_a_climb():
         assert max(stages) == 0, f"cruise raised jake stage {max(stages)} on an upgrade"
     finally:
         app.shutdown()
+
+
+def test_cruise_eases_to_the_weather_safe_speed_and_says_so_once(monkeypatch):
+    """A real adaptive system treats the weather like any other road fact:
+    the safe speed was computed and spoken as guidance since live weather
+    shipped, and enforced by nothing -- cruise held a set seventy through a
+    thunderstorm until the driver tapped it down (Brandon's suggestion,
+    2026-08-20; owner-approved same day)."""
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    app = App()
+    events = []
+    try:
+        driving = _cruising(app, set_mph=70.0)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        driving.trip.engine_brake_ban_at = lambda mile: None
+        driving.trip.grade_at = lambda mile: 0.0
+        driving.weather.current = WeatherKind.THUNDERSTORM
+        t = driving.truck
+        dt = 1 / 60
+        for _ in range(int(20 * 60)):
+            t.grade = 0.0
+            driving._update_cruise(dt, False, False, False)
+            t.auto_shift()
+            t.update(dt)
+        assert t.speed_mph <= 40.0 + 2.0, f"held {t.speed_mph:.1f} in a thunderstorm"
+        eased = [e for e in events if "adaptive cruise easing to 40" in e]
+        assert eased == ["Thunderstorm; adaptive cruise easing to 40 miles per hour."], events[:6]
+    finally:
+        app.shutdown()
+
+
+def test_the_weather_cap_lifts_with_the_weather(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    app = App()
+    events = []
+    try:
+        driving = _cruising(app, set_mph=70.0)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        driving.trip.engine_brake_ban_at = lambda mile: None
+        driving.trip.grade_at = lambda mile: 0.0
+        driving.weather.current = WeatherKind.THUNDERSTORM
+        t = driving.truck
+        dt = 1 / 60
+        for _ in range(int(20 * 60)):
+            t.grade = 0.0
+            driving._update_cruise(dt, False, False, False)
+            t.auto_shift()
+            t.update(dt)
+        assert t.speed_mph <= 42.0
+        driving.weather.current = WeatherKind.CLEAR
+        for _ in range(int(40 * 60)):
+            t.grade = 0.0
+            ramp = dt * 2.2
+            t.brake = max(0.0, t.brake - ramp * 3)
+            driving._update_cruise(dt, False, False, False)
+            t.auto_shift()
+            t.update(dt)
+        assert t.speed_mph > 55.0, f"never climbed back after the storm: {t.speed_mph:.1f}"
+        # The next front is news again.
+        driving.weather.current = WeatherKind.HEAVY_RAIN
+        for _ in range(int(5 * 60)):
+            t.grade = 0.0
+            t.brake = max(0.0, t.brake - dt * 2.2 * 3)
+            driving._update_cruise(dt, False, False, False)
+            t.auto_shift()
+            t.update(dt)
+        assert any("Heavy rain; adaptive cruise easing to 45" in e for e in events), events[-4:]
+    finally:
+        app.shutdown()
+
+
+def test_the_resume_line_names_the_weather_cap(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    app = App()
+    events = []
+    try:
+        driving = _cruising(app, set_mph=70.0)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        monkeypatch.setattr(driving, "_acc_posted_limit_ahead", lambda: (75.0, None))
+        driving.weather.current = WeatherKind.SNOW
+        driving._engage_cruise(70.0, transition=True)
+        line = next(s for s in events if "Open road" in s)
+        assert "resuming at 35 miles per hour in the snow" in line, line
+    finally:
+        app.shutdown()

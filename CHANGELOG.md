@@ -3,6 +3,25 @@
 ## Unreleased
 
 ### Added
+- **A real freight detour around the Million Dollar Highway.** A new
+  drivable corridor runs from Durango west on US-160 and north on US-491
+  and US-191 -- through Mancos, Cortez, Dove Creek, and Monticello to Moab
+  -- the road real carriers use instead of US-550's high passes. Dispatch
+  now routes through freight that way: Colorado's DOT publishes standing
+  truck warnings for the passes and most carriers ban them, so the game
+  treats the pass as a road to avoid, not a road to forbid. Loads that
+  genuinely serve Durango, Silverton country, or Montrose still drive it,
+  hairpins and all. Thanks to Jerry, whose Farmington-to-Montana run over
+  Red Mountain Pass is why this exists.
+
+- **Cruise control adapts to the weather, like a real adaptive system.**
+  When rain, snow, fog, or a storm lowers the safe speed below your set
+  speed, adaptive cruise eases down to it and says so -- "Thunderstorm;
+  adaptive cruise easing to 40 miles per hour" -- then climbs back on its
+  own as the weather lifts. The safe speed was already being spoken as
+  guidance on the status keys; now the automation honors it too. Thanks to
+  Brandon for the suggestion.
+
 - **Traffic jams where traffic really jams.** The game now knows how many
   vehicles a day each stretch of road actually carries, taken from the federal
   highway survey, so congestion is placed from real volumes instead of a rough

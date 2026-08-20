@@ -68,6 +68,15 @@ def _load_base_world_data(root: Path) -> dict:
     return load_world_data(root)
 
 
+# Routing cost multiplier for a leg carrying a truck_advisory (see
+# shortest_route). Calibrated, not tasted: carriers accept the ~1.7x
+# distance detour through Cortez and Moab rather than run the warned
+# US-550 passes, so any factor clearing that ratio encodes the observed
+# decision; 2.5 clears it with margin while a pair of towns whose only
+# road is the warned one still routes.
+TRUCK_ADVISORY_COST_MULT = 2.5
+
+
 class World(WorldServiceMixin):
     def __init__(self, data: dict) -> None:
         geo = data.get("geo") if isinstance(data.get("geo"), dict) else {}
@@ -156,6 +165,7 @@ class World(WorldServiceMixin):
                     local_cue="",
                     local_speed_mph=0.0,
                     divided=leg["divided"] if isinstance(leg.get("divided"), bool) else None,
+                    truck_advisory=str(leg.get("truck_advisory", "")).strip(),
                     meta_complete=meta_complete,
                     detail_source=(corridor, miles, leg_from, leg_to, from_state, highway),
                 )
@@ -424,6 +434,16 @@ class World(WorldServiceMixin):
                     continue
                 nxt = leg.other(city)
                 cost = leg.miles * penalties.get(leg, 1.0) if has_penalties else leg.miles
+                if leg.truck_advisory:
+                    # Strong avoidance, never refusal. Calibrated against the
+                    # decision real carriers make at Red Mountain Pass: they
+                    # accept the ~1.7x-distance detour through Cortez and
+                    # Moab rather than run a warned pass, so the multiplier
+                    # only has to clear that ratio for the detour to win
+                    # wherever one exists; 2.5 clears it with margin. A pair
+                    # of towns whose ONLY road is the warned one still
+                    # routes -- the advisory is a warning, not a wall.
+                    cost *= TRUCK_ADVISORY_COST_MULT
                 nd = d + cost
                 if nd < dist.get(nxt, float("inf")):
                     dist[nxt] = nd
