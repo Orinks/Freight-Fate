@@ -3729,13 +3729,20 @@ class DrivingUpdateMixin:
                     # rounding that made the route key say "0 miles" to a
                     # gate; the colloquial form is what the reminder below
                     # already speaks, so the two now agree.
+                    # No mainline speed demand: a real scale has its own
+                    # deceleration ramp, and "slow below fifteen" spoken here
+                    # had the owner crawling an open interstate at twenty for
+                    # five miles, obeying the sentence to the letter
+                    # (playtest, 2026-08-20). The bypass judgment never
+                    # needed it -- taking the scale's exit is what counts --
+                    # and the ramp glide owns the slowing.
                     f"Open weigh station ahead in "
                     f"{self.ctx.settings.short_distance_text(ahead)}: "
-                    f"{stop.name}. All trucks must pull in. Slow below fifteen "
-                    "and signal for the scale exit with "
-                    f"{self.ctx.control_hint('take_exit')}. Once you are "
-                    "stopped at the scale, press "
-                    f"{self.ctx.control_hint('rest')} to check in.",
+                    f"{stop.name}. All trucks must pull in. Signal for "
+                    "the scale exit with "
+                    f"{self.ctx.control_hint('take_exit')}; the ramp brings "
+                    "you down to the scale. Once you are stopped at the "
+                    f"scale, press {self.ctx.control_hint('rest')} to check in.",
                     interrupt=False,
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,

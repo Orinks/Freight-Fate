@@ -925,9 +925,13 @@ class RestStopState(_FuelPumpMixin, MenuState):
                     "The clock and your deadline advance 10 hours.",
                 )
             )
-        else:
-            # No proper sleeper facility here, but you can always bed down in the
-            # lot -- a legal reset, just cramped and poor rest.
+        elif getattr(self.stop, "type", "") != "weigh_station":
+            # No proper sleeper facility here, but you can always bed down in
+            # the lot -- a legal reset, just cramped and poor rest. Except at
+            # a scale: nobody sleeps in an active inspection facility, and
+            # there is no motel on the far side of the platform (the scale
+            # was offering both, plus a loyalty program -- owner playtest,
+            # 2026-08-20).
             items.append(
                 MenuItem(
                     "Sleep 10 hours in the lot",
