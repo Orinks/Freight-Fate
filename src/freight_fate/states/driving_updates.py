@@ -3171,7 +3171,19 @@ class DrivingUpdateMixin:
         self.ctx.controller.rumble.alert(intensity=0.4)
         message = terse_silent(message_text)
         self._last_event_message = message
-        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.CONFIRMATION)
+        # ROUTE, not the ambient default: this is the outcome of a SAFETY
+        # event the driver just acted on, and at AMBIENT it queued behind
+        # the urgent call that preceded it and was dropped as stale -- in
+        # STANDARD mode, where confirmations are supposed to speak in full
+        # (Shane, Killeen-Del Rio run, 2026-08-20: found the swerve-clear
+        # only in the review keys). Same promotion the creep guidance and
+        # the ramp-light family already earned for the same failure.
+        self.ctx.say_event(
+            message,
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=SpeechCategory.CONFIRMATION,
+        )
         self.ctx.award_achievement("hazard_avoided", event=True)
         self._hazard_names = []
 
