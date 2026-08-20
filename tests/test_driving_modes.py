@@ -102,8 +102,19 @@ def test_speed_keeper_ease_window_follows_the_driving_mode(monkeypatch):
             > driving._keeper_ease_mi(20.0, 4.0)
             > driving._keeper_ease_mi(20.0, 1.0)
         )
-        # But never past the ceiling, so a long access road is not crawled.
-        assert driving._keeper_ease_mi(20.0, 40.0) == pytest.approx(KEEPER_EASE_MAX_MI)
+        # The ceiling trims the discretionary reaction budget so a long
+        # access road is not crawled -- but never the PHYSICAL shed, which
+        # the window's docstring promises is a floor. At 40x the 25-to-20
+        # shed alone outruns the cap, so the window follows the physics
+        # (clamping it was how the keeper arrived at 15.47 over a 15 sign
+        # on long-route draws -- the one-in-four flake, fixed 2026-08-20).
+        window_40x = driving._keeper_ease_mi(20.0, 40.0)
+        assert window_40x > KEEPER_EASE_MAX_MI
+        # The cap still binds where reaction, not physics, is the bigger
+        # ask: a one-mph trim at 30x wants little shed road, and the six-plus
+        # seconds of hearing-and-deciding it would otherwise buy are what the
+        # ceiling exists to trim.
+        assert driving._keeper_ease_mi(24.0, 30.0) == pytest.approx(KEEPER_EASE_MAX_MI)
 
         # A bigger drop buys more road than the base window at the same pacing.
         assert driving._keeper_ease_mi(5.0, 1.0) > driving._keeper_ease_mi(24.0, 1.0)
