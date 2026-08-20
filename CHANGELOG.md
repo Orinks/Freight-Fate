@@ -328,6 +328,12 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+- **Speech about the truck's own automation always arrives now.** Lines like
+  an assist taking or releasing the pedals, the speed keeper changing what it
+  holds, "Jake off", the gear direction you just selected, and where you
+  landed after a lane change could be silently dropped when the speech
+  channel was busy. Twenty-seven of them now wait their turn instead of
+  vanishing, so the truck never changes who is driving without saying so.
 - **How much company you have on the road comes from the real road now.** How
   many vehicles you meet used to be a rough guess -- mostly whether the leg
   passed near a town. It now comes from how many vehicles the road actually
