@@ -3387,6 +3387,17 @@ class DrivingEventMixin:
         self._keeper_throttle = max(
             0.0, min(KEEPER_MAX_THROTTLE, self._keeper_throttle + error * 0.1 * dt)
         )
+        if ahead is not None and t.speed_mph >= ahead[0]:
+            # Easing toward a lower number: rebuild throttle under it freely,
+            # never through it. The snub cycle deliberately rides a band
+            # around the eased target (one application, held, released -- the
+            # air model's price list), and on a compressed clock the
+            # release-and-rebuild peak poked half a mile per hour over the
+            # sign's own number right at the sign -- the keeper burning fuel
+            # to defeat its own easing, and the 15.47-against-15 flake
+            # (ROADMAP 2026-08-19). Coasting at the boundary caps the peak at
+            # the number; the snub thresholds below it are untouched.
+            self._keeper_throttle = 0.0
         t.throttle = self._keeper_throttle
         self._keeper_snub_brakes(dt, over=-error, target_mph=target_mph)
 
