@@ -2067,7 +2067,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
 
     def ramp_control_at(self, route_mile: float, tol_mi: float = 2.0) -> str:
         """Baked OSM ramp-terminal control at the interchange nearest a route
-        mile: ``signal``/``stop``/``none``, or ``""`` when no interchange
+        mile: ``signal``/``stop``/``yield``/``roundabout``/``none``, or
+        ``""`` when no interchange
         within ``tol_mi`` carries one (the caller then uses its heuristic)."""
         best = ""
         best_dist = tol_mi

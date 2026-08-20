@@ -398,13 +398,20 @@ class DrivingState(
         self._ramp_terminal_miss_count = 0
         # Ramp terminal control for the active ramp: what meets you where the
         # ramp joins the surface road, and the light's cycle state if a signal.
-        self._ramp_control = ""  # "signal" | "stop" | "none" | "" (no ramp)
+        # "signal" | "stop" | "yield" | "roundabout" | "none" | "" (no ramp)
+        self._ramp_control = ""
         self._ramp_light_offset_s = 0.0  # seeded phase into the light cycle
         self._ramp_light_timer = 0.0  # real seconds since the ramp was taken
         self._ramp_light_announced = False
         self._ramp_light_last_phase = ""  # "red" | "yellow" | "green", once announced
         self._ramp_terminal_done = False
         self._ramp_waiting_at_light = False
+        # Stopped at the sign with cross traffic rolling: the clear call is
+        # waiting on the bubble's gap.
+        self._ramp_waiting_at_sign = False
+        # The living crossroad at a controlled terminal (sim.cross_traffic);
+        # built per ramp by _begin_ramp_terminal, None between ramps.
+        self._cross_bubble = None
         self._ramp_creep_prompt_said = False
         self._ramp_gap_milestones_said: set[int] = set()
         self._ramp_bar_tick_timer = 0.0

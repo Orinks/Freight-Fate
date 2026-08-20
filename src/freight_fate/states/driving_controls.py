@@ -1135,6 +1135,8 @@ class DrivingControlsMixin:
             ending = {
                 "signal": ", where the ramp ends at a traffic light",
                 "stop": ", where the ramp ends at a stop sign",
+                "yield": ", where the ramp ends at a yield",
+                "roundabout": ", where the ramp ends at a roundabout",
             }.get(self._ramp_control_for(stop), "")
             parts.append(
                 f"{self.trip.planned_prefix(stop)}{stop.spoken_name} "

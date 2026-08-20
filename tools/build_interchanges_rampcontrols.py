@@ -274,8 +274,12 @@ def bake_ramp_controls_for_leg(
     radius match against ramp-link control nodes, kept for exits the walk
     could not judge; then ``none`` derived from an all-motorway far end.
     Exits none of that reaches stay empty for the runtime's seeded weights.
-    Yields and roundabouts found at terminals are counted, not baked -- the
-    game has no yield terminal to play them on yet.
+    Yields and roundabouts found at terminals bake as ``yield`` and
+    ``roundabout`` (the game plays both by gap acceptance against the cross
+    bubble since 2026-08-20). Precedence within a terminal's kinds: signal,
+    then roundabout, then stop, then yield -- a give_way node AT a
+    roundabout entry is the roundabout's own furniture, and a signalized
+    roundabout or terminal is worked as its light.
 
     Returns how many interchanges got a control or a far end."""
     interchanges = list(leg.get("corridor", {}).get("interchanges", ()))
@@ -333,7 +337,15 @@ def bake_ramp_controls_for_leg(
         # -- the control, best evidence first.
         wide_read = "motorway_link way at this exit" in str(ix.get("ramp_control_source", ""))
         precise = (
-            "signal" if "signal" in terminal_kinds else "stop" if "stop" in terminal_kinds else ""
+            "signal"
+            if "signal" in terminal_kinds
+            else "roundabout"
+            if "roundabout" in terminal_kinds
+            else "stop"
+            if "stop" in terminal_kinds
+            else "yield"
+            if "give_way" in terminal_kinds
+            else ""
         )
         if precise and (not ix.get("ramp_control") or force):
             if wide_read and ix.get("ramp_control") not in ("", precise, None):
@@ -525,8 +537,8 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
         )
         print(
             f"    {stats.get('yieldish_terminals', 0):,} exits end at a "
-            "give-way or roundabout terminal (counted, not baked -- the "
-            "yield terminal is not in the game yet)."
+            "give-way or roundabout terminal (baked as yield/roundabout "
+            "where that outranked the other kinds present)."
         )
         print(
             f"    {stats.get('contradictions', 0):,} exits carry a READ "
