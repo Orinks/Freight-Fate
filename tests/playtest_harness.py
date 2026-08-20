@@ -841,7 +841,7 @@ class PlaytestHarness:
         # spend a decline to reach freight instead.
         while (
             board.jobs
-            and getattr(board.jobs[0], "bobtail", False)
+            and getattr(board._assigned_job(), "bobtail", False)
             and any(item.text.startswith("Decline") for item in board.items)
         ):
             decline_index = next(
