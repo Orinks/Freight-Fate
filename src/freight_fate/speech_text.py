@@ -179,9 +179,14 @@ def merging_traffic_cue(vehicle_class: str, gap: str) -> SpokenMessage:
     )
 
 
-def brake_lights_cue(gap: str, speed_text: str, speed_value: str) -> SpokenMessage:
+def brake_lights_cue(gap: str, speed_text: str, speed_value: str, cause: str = "") -> SpokenMessage:
+    # The cause rides only the full form: terse mode's compact slots stay
+    # compact, and an UNKNOWN cause adds no clause at all -- brake lights
+    # with nothing mile-mapped behind them are usually a wave in the
+    # traffic, and inventing a reason would be worse than silence.
+    cause_clause = f" {cause}" if cause else ""
     return SpokenMessage(
-        f"Brake lights {gap} ahead. Ease down and leave room for {speed_text}.",
+        f"Brake lights {gap} ahead.{cause_clause} Ease down and leave room for {speed_text}.",
         f"Brake lights, {gap}, {speed_value}.",
     )
 
