@@ -76,7 +76,7 @@ def _scale_check_in_guidance():
         notice = rig.lines_with("Open weigh station")[0]
         if "press T for inspection check-in" in notice:
             findings.append("the announcement still teaches the rest key at speed")
-        if "signal for the scale exit" not in notice:
+        if "ignal for the scale exit" not in notice:  # capital-S since the mainline-crawl rewording
             findings.append("the announcement never teaches the exit key")
 
         # Jerry's press: T immediately, mid-announcement in real audio.
