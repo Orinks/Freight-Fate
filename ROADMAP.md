@@ -6201,6 +6201,18 @@ Deliver -> Earn and level up -> Repeat
       correct leg, and facility data should carry enough road name, distance,
       gate speed, and dock-approach detail to make warehouses, terminals,
       ports, and industrial yards feel distinct.
+- [ ] **Locally-2D world: crossing axes instead of one route line (owner
+      musing, 2026-08-20).** Today the sim is one-dimensional -- the route is
+      a line and every NPC lives on it. The cross bubble (yield design above)
+      is deliberately the first second axis: a short simulated stretch of
+      crossroad, spawned where it matters and despawned after. The same shape
+      scales without an engine rewrite: N crossing axes at named points --
+      ramp terminals, facility approach chains, in-town errand grids -- each
+      a small 1-D sim of its own, joined at conflict points. "2D where you
+      stand, 1-D where you drive." A fully routable 2D street network stays
+      out of scope until the axis model runs out of road; if it ever does,
+      the OSM graph the bakes already walk is the substrate a real network
+      sim would read.
 - [ ] International expansion, beginning with research into Canada and the
       United Kingdom: country profiles need driving side, units, currency,
       local trucking terms, hours-of-service rules, weather fallbacks, legal
