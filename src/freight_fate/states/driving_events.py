@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..message_log import MessageCategory
-from ..speech_pacing import SpeechCategory
+from ..speech_pacing import EventPriority, SpeechCategory
 from ..speech_text import (
     SpokenMessage,
     cruise_curve_dropped,
@@ -1259,7 +1259,12 @@ class DrivingEventMixin:
             # Queue behind whichever event is currently speaking. Usually that
             # is the exit callout; if a critical warning preempted it, the
             # warning must finish before the confirmation.
-            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.NAVIGATION)
+            self.ctx.say_event(
+                message,
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.NAVIGATION,
+            )
         else:
             self.ctx.say(message)
 
@@ -1936,6 +1941,7 @@ class DrivingEventMixin:
                 f"{surface._distance_text(route.miles)} to the "
                 f"{merge_leg.highway} on-ramp.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
             )
         return True
@@ -1958,6 +1964,7 @@ class DrivingEventMixin:
         self.ctx.say_event(
             f"Up the ramp and onto {merge_leg.highway}. Merge left when clear.",
             interrupt=False,
+            priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
         )
 
@@ -2539,6 +2546,7 @@ class DrivingEventMixin:
                         self.ctx.say_event(
                             "Stopped at the red light. Hold the brakes for green.",
                             interrupt=False,
+                            priority=EventPriority.ROUTE,
                             category=SpeechCategory.NAVIGATION,
                         )
                     return
@@ -2597,6 +2605,7 @@ class DrivingEventMixin:
                 self.ctx.say_event(
                     "Stopped at the sign. Clear; pull ahead to the entrance.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,
                 )
             elif speed > STOP_ROLL_CLIP_MPH:
@@ -4352,6 +4361,7 @@ class DrivingEventMixin:
         self.ctx.say_event(
             f"At {self._destination_facility_text()}. Stop to dock.",
             interrupt=False,
+            priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
         )
 

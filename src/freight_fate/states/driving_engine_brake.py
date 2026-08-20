@@ -190,6 +190,7 @@ class EngineBrakeZoneMixin:
             f"No engine brake zone in {distance}, coming into {spoken}. "
             "Switch the engine brake off before the zone.",
             interrupt=False,
+            priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
         )
 

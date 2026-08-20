@@ -813,6 +813,12 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Arrival and turn calls cannot go missing.** "You are at the dock, stop to
+  check in", the warning coming into a facility gate, the merge instruction off
+  a ramp and the hold at a red light could all be dropped as passing chatter
+  when a lot was happening at once. That is the same way a tester once drove
+  past a stop he had chosen. They are always spoken now.
+
 - **Most cars are just travelling now, not merging into you.** About one vehicle
   in six ahead of you was merging across your lane, and another one in seven was
   braking hard -- anywhere on the road, with no on-ramp or jam in sight. So

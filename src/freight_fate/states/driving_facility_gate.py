@@ -26,7 +26,7 @@ from ..sim.trip_models import (
     FACILITY_GATE_LIMIT_MPH,
     FACILITY_GATE_ZONE_MI,
 )
-from ..speech_pacing import SpeechCategory
+from ..speech_pacing import EventPriority, SpeechCategory
 from .driving_core import *
 
 # Game minutes one loop through the safe turnaround costs -- the same charge
@@ -89,7 +89,14 @@ class FacilityGateMixin:
             message = f"Facility gate in {distance}. Slow to {target} to make the entrance."
         self._gate_grace_s = self._gate_miss_grace_seconds(message)
         self.ctx.audio.play("ui/warning")
-        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.NAVIGATION)
+        # Never dropped: this line starts the gate miss clock, so losing it
+        # costs the driver the gate itself.
+        self.ctx.say_event(
+            message,
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=SpeechCategory.NAVIGATION,
+        )
 
     def _seed_gate_grace_at_gate(self, message: str) -> None:
         """Open the reaction window at the gate itself when no pre-gate

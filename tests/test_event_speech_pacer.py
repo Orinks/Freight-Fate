@@ -1341,7 +1341,7 @@ def test_an_assist_changing_the_trucks_speed_is_never_dropped_as_chatter() -> No
     assert "priority == EventPriority.AMBIENT" in say_src
 
 
-def test_no_safety_line_can_be_dropped_as_stale_chatter() -> None:
+def test_no_never_dropped_line_rides_the_droppable_ambient_default() -> None:
     """R1's never-dropped contract, checked against the code rather than
     assumed from the table.
 
@@ -1355,6 +1355,13 @@ def test_no_safety_line_can_be_dropped_as_stale_chatter() -> None:
     caught twice in one day (an adaptive-cruise line, then the brake
     lockout the adversarial battery caught). Making the traffic channel
     busier is what turned a latent race into a real one.
+
+    Widened to unrecoverable NAVIGATION when the same sweep found twelve
+    more, among them "At <facility>. Stop to dock" and the gate warning that
+    starts the miss clock -- the arrival half of the very bug that made a
+    tester drive past a stop he had chosen on 2026-08-11. The approach notice
+    was fixed then; the arrival call never was. NAVIGATION_ADVISORY stays out:
+    the heads-up is droppable by design.
     """
     import pathlib
     import re
@@ -1375,9 +1382,22 @@ def test_no_safety_line_can_be_dropped_as_stale_chatter() -> None:
                         end = i
                         break
             call = seg[:end]
-            if "SpeechCategory.SAFETY" not in call:
+            # SAFETY and unrecoverable NAVIGATION both carry R1's
+            # never-dropped contract. NAVIGATION_ADVISORY is the heads-up and
+            # IS droppable by design, so it is excluded deliberately.
+            unrecoverable = "SpeechCategory.SAFETY" in call or (
+                "SpeechCategory.NAVIGATION" in call and "NAVIGATION_ADVISORY" not in call
+            )
+            if not unrecoverable:
                 continue
             if "interrupt=False" in call and "priority=" not in call:
+                # One deliberate exception: the turn APPROACH cue. It fires
+                # while the corner is still ahead, so a warning that survives
+                # to be spoken after the turn was missed is worse than one
+                # that never arrives -- going stale is the right end for a
+                # lead announcement. The act-now turn call is protected.
+                if path.name == "driving_turns.py":
+                    continue
                 offenders.append(f"{path.name}:{src[: match.start()].count(chr(10)) + 1}")
     assert not offenders, "SAFETY lines riding the droppable ambient default: " + ", ".join(
         offenders

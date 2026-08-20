@@ -3089,6 +3089,7 @@ class DrivingUpdateMixin:
         self.ctx.say_event(
             f"{abs(pct):.1f} percent {direction} ahead{length}. {advice}",
             interrupt=False,
+            priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
         )
 
@@ -3562,6 +3563,7 @@ class DrivingUpdateMixin:
                     self.ctx.settings.speed_value(limit),
                 ),
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
             )
 

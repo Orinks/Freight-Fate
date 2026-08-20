@@ -245,6 +245,14 @@ class TurnCommitmentMixin:
             if sound:
                 pan = -TURN_CUE_PAN if cue.direction == "left" else TURN_CUE_PAN
                 self.ctx.audio.play(sound, pan=pan)
+            # Deliberately left on the droppable ambient default, unlike the
+            # act-now navigation calls raised to ROUTE alongside it. This is
+            # the APPROACH cue -- it fires while the corner is still ahead --
+            # and a quarter-mile warning that survives to be spoken AFTER the
+            # turn has been missed is worse than one that never arrives:
+            # test_missed_turn_speaks_at_urgent_only caught exactly that, the
+            # stale cue landing on top of the miss announcement. Going stale
+            # is the correct end for a lead announcement.
             self.ctx.say_event(message, interrupt=False, category=SpeechCategory.NAVIGATION)
             return
         if ahead > 0:

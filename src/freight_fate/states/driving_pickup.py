@@ -50,6 +50,7 @@ class DrivingPickupMixin:
         self.ctx.say_event(
             f"At {self._pickup_facility_text()}. Stop to check in.",
             interrupt=False,
+            priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
         )
         if speed_control_paused:
