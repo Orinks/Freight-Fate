@@ -575,6 +575,12 @@ class EnforcementWatchMixin:
             return
         if self._exit_is_armed_for(stop):
             return
+        if self._weigh_station_transponder_verdict.get(key) == "green":
+            # A weigh-in-motion green light already told this driver they
+            # need no exit for this scale. "Signal for the scale exit" would
+            # contradict that, so the reminder stays silent rather than
+            # reintroducing an instruction the verdict just retired.
+            return
         self._weigh_station_reminder_key = key
         # The distance was hard-coded to the threshold, so a reminder that
         # fired at two hundred yards still announced "half a mile" -- and

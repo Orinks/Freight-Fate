@@ -8,15 +8,18 @@ from ..models.business import (
     INDEPENDENT_AUTHORITY,
     LEASED_OWNER_OPERATOR,
     OWNER_OPERATOR_BUY_IN,
+    WEIGH_STATION_TRANSPONDER_SIGNUP_FEE,
     authority_activation_eligibility,
     authority_readiness_eligibility,
     business_path_label,
     business_status_summary,
     has_authority_readiness,
+    has_weigh_station_transponder,
     is_owner_operator,
     next_business_unlock,
     owner_operator_eligibility,
     status_label,
+    weigh_station_transponder_eligibility,
 )
 from ..models.career import (
     ENDORSEMENT_COURSE_COSTS,
@@ -139,6 +142,28 @@ class BusinessStatusState(MenuState):
                             help="Hear the remaining authority prep requirements.",
                         )
                     )
+            if has_weigh_station_transponder(p):
+                items.append(
+                    MenuItem(
+                        "Weigh station transponder: subscribed",
+                        self._summary,
+                        help="Open scales run a weigh-in-motion check on this "
+                        "truck instead of demanding every truck pull in.",
+                    )
+                )
+            else:
+                ok, _reasons = weigh_station_transponder_eligibility(p)
+                if ok:
+                    items.append(
+                        MenuItem(
+                            "Subscribe to weigh station transponder: "
+                            f"{WEIGH_STATION_TRANSPONDER_SIGNUP_FEE:,.0f} dollars",
+                            self._subscribe_transponder,
+                            help="A clean truck can be waved past most open scales "
+                            "instead of pulling in. Adds a small per-mile "
+                            "settlement reserve once active.",
+                        )
+                    )
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -210,6 +235,27 @@ class BusinessStatusState(MenuState):
             f"{p.money:,.0f} dollars left. Own authority can unlock after "
             "the final delivery, reputation, trailer program, and cash gates. "
             "For now you remain leased on."
+        )
+        self.refresh()
+
+    def _subscribe_transponder(self) -> None:
+        p = self.ctx.profile
+        ok, reasons = weigh_station_transponder_eligibility(p)
+        if not ok:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Transponder subscription locked. " + " ".join(reasons))
+            self.refresh()
+            return
+        p.money -= WEIGH_STATION_TRANSPONDER_SIGNUP_FEE
+        p.weigh_station_transponder = True
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/cash")
+        self.ctx.say(
+            "Weigh station transponder subscription active. You paid "
+            f"{WEIGH_STATION_TRANSPONDER_SIGNUP_FEE:,.0f} dollars. You have "
+            f"{p.money:,.0f} dollars left. A clean truck now gets a "
+            "weigh-in-motion check at most open scales instead of a mandatory "
+            "pull-in, with a small per-mile settlement reserve while it is active."
         )
         self.refresh()
 

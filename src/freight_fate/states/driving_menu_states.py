@@ -1024,6 +1024,7 @@ class ArrivalState(MenuState):
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=getattr(p, "owned_trailers", ()),
             reputation=p.career.reputation,
+            transponder=has_weigh_station_transponder(p),
         )
         no_on_time_bonus_business = build_business_settlement(
             p.business_status,
@@ -1034,6 +1035,7 @@ class ArrivalState(MenuState):
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=getattr(p, "owned_trailers", ()),
             reputation=p.career.reputation,
+            transponder=has_weigh_station_transponder(p),
         )
         reputation_before = p.career.reputation
         trust_bonus = (
@@ -1049,6 +1051,7 @@ class ArrivalState(MenuState):
             driver_charges=driver_charges,
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=getattr(p, "owned_trailers", ()),
+            transponder=has_weigh_station_transponder(p),
         )
         gross_pay = business.gross_pay
         on_time_bonus_paid = max(0.0, gross_pay - no_on_time_bonus_business.gross_pay)

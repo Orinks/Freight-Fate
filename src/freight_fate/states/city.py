@@ -11,6 +11,7 @@ from ..models.business import (
     INDEPENDENT_AUTHORITY,
     build_business_settlement,
     carrier_name,
+    has_weigh_station_transponder,
     is_owner_operator,
     pay_label,
     status_label,
@@ -1463,6 +1464,7 @@ class JobBoardState(MenuState):
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=p.visible_owned_trailers(),
             reputation=p.career.reputation,
+            transponder=has_weigh_station_transponder(p),
         )
         return job.describe(
             index,
@@ -1523,6 +1525,7 @@ class JobBoardState(MenuState):
                     driver_charges=0.0,
                     carrier_key=getattr(p, "carrier_key", ""),
                     owned_trailers=p.visible_owned_trailers(),
+                    transponder=has_weigh_station_transponder(p),
                 )
                 candidates.append((-business.net_before_advance, index))
             else:
@@ -1852,6 +1855,7 @@ class JobDetailState(MenuState):
             carrier_key=getattr(p, "carrier_key", ""),
             owned_trailers=p.visible_owned_trailers(),
             reputation=p.career.reputation,
+            transponder=has_weigh_station_transponder(p),
         )
         dollars_per_mile = business.gross_pay / max(job.distance_mi, 1.0)
         s = self.ctx.settings

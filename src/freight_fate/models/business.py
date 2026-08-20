@@ -52,6 +52,19 @@ AUTHORITY_INSURANCE_PER_MILE = 0.14
 AUTHORITY_COMPLIANCE_PER_MILE = 0.06
 AUTHORITY_FACTORING_FEE_SHARE = 0.035
 
+# A PrePass-style weigh-in-motion transponder: the fleet's own equipment, so
+# a company driver gets one issued once dispatch trusts them with it, the
+# same shape as an endorsement the carrier sponsors at a level. An
+# owner-operator has no fleet behind them and buys the subscription
+# themselves, carried as a per-mile settlement reserve like every other
+# owner-operator recurring cost in this file (trailer program, insurance).
+WEIGH_STATION_TRANSPONDER_LEVEL = 4
+# A real PrePass lease deposit plus activation runs in this neighborhood; an
+# assumed startup cost, not a measured one, sized against the trailer
+# program's own lease deposits above.
+WEIGH_STATION_TRANSPONDER_SIGNUP_FEE = 180.0
+WEIGH_STATION_TRANSPONDER_PER_MILE = 0.015
+
 
 @dataclass(frozen=True)
 class BusinessCharge:
@@ -123,6 +136,37 @@ def carrier_key(profile) -> str:
 
 def has_authority_readiness(profile) -> bool:
     return bool(getattr(profile, "authority_readiness", False))
+
+
+def has_weigh_station_transponder(profile) -> bool:
+    """Whether this driver's cab carries a weigh-in-motion bypass transponder.
+
+    A company driver's fleet issues one once dispatch trusts them with it --
+    no purchase, just the level gate, matching how ``ENDORSEMENT_LEVELS``
+    grants carrier-sponsored training. An owner-operator has no fleet paying
+    their bills and only has one if they bought the subscription themselves.
+    """
+    status = getattr(profile, "business_status", COMPANY_DRIVER)
+    if is_owner_operator(status):
+        return bool(getattr(profile, "weigh_station_transponder", False))
+    return profile.career.level >= WEIGH_STATION_TRANSPONDER_LEVEL
+
+
+def weigh_station_transponder_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
+    """Whether an owner-operator can subscribe to the transponder now."""
+    if not is_owner_operator(getattr(profile, "business_status", COMPANY_DRIVER)):
+        return False, (
+            "Company drivers get a fleet transponder free once dispatch "
+            f"trusts them with it, at level {WEIGH_STATION_TRANSPONDER_LEVEL}.",
+        )
+    if has_weigh_station_transponder(profile):
+        return False, ("The weigh station transponder subscription is already active.",)
+    if profile.money < WEIGH_STATION_TRANSPONDER_SIGNUP_FEE:
+        return False, (
+            f"Have {WEIGH_STATION_TRANSPONDER_SIGNUP_FEE:,.0f} dollars first "
+            "for the transponder lease and activation.",
+        )
+    return True, ()
 
 
 def authority_readiness_eligibility(profile) -> tuple[bool, tuple[str, ...]]:
@@ -275,7 +319,13 @@ def _business_status_summary(profile) -> str:
                 f"Own authority active. Level {rank.level}: {rank.title}. "
                 "Direct freight pays higher gross. You pay fuel, repairs, "
                 "insurance, trailer reserve, truck reserve, compliance "
-                "reserve, and factoring costs. " + next_business_unlock(profile)
+                "reserve, and factoring costs. "
+                + (
+                    "Weigh station transponder subscription is active. "
+                    if has_weigh_station_transponder(profile)
+                    else ""
+                )
+                + next_business_unlock(profile)
             )
         start_mode = getattr(profile, "start_mode", "")
         lead = (
@@ -289,6 +339,11 @@ def _business_status_summary(profile) -> str:
             "maintenance reserve, insurance, trailer program, truck reserve, "
             "and settlement fees. "
             + ("Authority prep reserve is set. " if has_authority_readiness(profile) else "")
+            + (
+                "Weigh station transponder subscription is active. "
+                if has_weigh_station_transponder(profile)
+                else ""
+            )
             + next_business_unlock(profile)
         )
     ok, reasons = owner_operator_eligibility(profile)
@@ -346,8 +401,10 @@ def direct_freight_gross(gross_pay: float) -> float:
     return round(gross_pay, 2)
 
 
-def owner_operator_charges(job: Job, gross_pay: float) -> tuple[BusinessCharge, ...]:
-    return (
+def owner_operator_charges(
+    job: Job, gross_pay: float, *, transponder: bool = False
+) -> tuple[BusinessCharge, ...]:
+    charges = [
         BusinessCharge(
             "maintenance reserve", round(job.distance_mi * OWNER_MAINTENANCE_PER_MILE, 2)
         ),
@@ -360,7 +417,15 @@ def owner_operator_charges(job: Job, gross_pay: float) -> tuple[BusinessCharge, 
             "truck payment reserve", round(job.distance_mi * OWNER_TRUCK_PAYMENT_PER_MILE, 2)
         ),
         BusinessCharge("settlement service fee", round(gross_pay * OWNER_SETTLEMENT_FEE_SHARE, 2)),
-    )
+    ]
+    if transponder:
+        charges.append(
+            BusinessCharge(
+                "weigh station transponder subscription",
+                round(job.distance_mi * WEIGH_STATION_TRANSPONDER_PER_MILE, 2),
+            )
+        )
+    return tuple(charges)
 
 
 def independent_authority_charges(job: Job, gross_pay: float) -> tuple[BusinessCharge, ...]:
@@ -372,6 +437,8 @@ def independent_authority_charges_for_trailers(
     job: Job,
     gross_pay: float,
     owned_trailers: tuple[str, ...] | list[str] = (),
+    *,
+    transponder: bool = False,
 ) -> tuple[BusinessCharge, ...]:
     owned_trailer_charge = owned_trailer_charge_per_mile(job.cargo.key, owned_trailers)
     if owned_trailer_charge is None:
@@ -384,7 +451,7 @@ def independent_authority_charges_for_trailers(
             "owned trailer reserve",
             round(job.distance_mi * owned_trailer_charge, 2),
         )
-    return (
+    charges = [
         BusinessCharge(
             "maintenance reserve", round(job.distance_mi * OWNER_MAINTENANCE_PER_MILE, 2)
         ),
@@ -400,7 +467,15 @@ def independent_authority_charges_for_trailers(
             round(job.distance_mi * AUTHORITY_COMPLIANCE_PER_MILE, 2),
         ),
         BusinessCharge("factoring fee", round(gross_pay * AUTHORITY_FACTORING_FEE_SHARE, 2)),
-    )
+    ]
+    if transponder:
+        charges.append(
+            BusinessCharge(
+                "weigh station transponder subscription",
+                round(job.distance_mi * WEIGH_STATION_TRANSPONDER_PER_MILE, 2),
+            )
+        )
+    return tuple(charges)
 
 
 def _uncollected(driver_charges: float, raw_net: float) -> float:
@@ -425,10 +500,13 @@ def build_business_settlement(
     carrier_key: str | None = None,
     owned_trailers: tuple[str, ...] | list[str] = (),
     reputation: float | None = None,
+    transponder: bool = False,
 ) -> BusinessSettlement:
     if status == INDEPENDENT_AUTHORITY:
         gross_pay = direct_freight_gross(gross_pay)
-        charges = independent_authority_charges_for_trailers(job, gross_pay, owned_trailers)
+        charges = independent_authority_charges_for_trailers(
+            job, gross_pay, owned_trailers, transponder=transponder
+        )
         raw = gross_pay - driver_charges - sum(charge.amount for charge in charges)
         return BusinessSettlement(
             status,
@@ -441,7 +519,7 @@ def build_business_settlement(
         )
     if is_owner_operator(status):
         gross_pay = owner_operator_gross(gross_pay)
-        charges = owner_operator_charges(job, gross_pay)
+        charges = owner_operator_charges(job, gross_pay, transponder=transponder)
         raw = gross_pay - driver_charges - sum(charge.amount for charge in charges)
         return BusinessSettlement(
             status,

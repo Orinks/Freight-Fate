@@ -21,6 +21,7 @@ from ..data.buffs import buffs_for_stop
 from ..data.world import Route
 from ..models.business import (
     build_business_settlement,
+    has_weigh_station_transponder,
     is_owner_operator,
     pay_label,
     player_pays_operating_costs,
@@ -852,6 +853,19 @@ WEIGH_STATION_BYPASS_MPH = 15.0
 # reaches this number (owner ruling, 2026-08-14: "pretty steep"). What a
 # caught bypass costs is priced in models/enforcement, with every other fine.
 WEIGH_STATION_BYPASS_CATCH_CHANCE = 0.85
+# A transponder-equipped truck gets a weigh-in-motion verdict instead of the
+# blanket "all trucks must pull in" demand (see EnforcementWatchMixin's scale
+# handling in driving_updates.py / driving_enforcement.py, and
+# models.business.has_weigh_station_transponder for who has one). PrePass
+# publicly reports the large majority of transponder-equipped, in-compliance
+# trucks bypassing an open scale -- this is a design constant informed by
+# that public figure, not a measurement of anything in this game, and it
+# only ever applies to a truck that is not overweight (see
+# WEIGH_STATION_TRANSPONDER_BYPASS_SHARE's use in
+# _resolve_transponder_verdict). The remainder are red-lighted anyway,
+# matching how real weigh-in-motion programs still spot-check compliant
+# carriers rather than waving every one through every time.
+WEIGH_STATION_TRANSPONDER_BYPASS_SHARE = 0.9
 UNSAFE_DAMAGE_STOP_PCT = 65.0
 AMBIENT_EVENT_SPACING_S = 2.5  # keep low-priority chatter from stacking
 # Once the lights come on, a compliance tracker (0..1) judges whether you are

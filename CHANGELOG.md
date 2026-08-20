@@ -3,6 +3,17 @@
 ## Unreleased
 
 ### Added
+- **A weigh station transponder can wave a clean truck past the scale.**
+  Company drivers get one free once dispatch trusts them with it, at
+  career level 4; owner-operators can subscribe to one from Business
+  status. With a transponder, an open scale now runs a quick check as you
+  approach: a green light means you are cleared to keep rolling with no
+  exit needed, and a red light sends you in to pull in exactly as before.
+  A legal load is cleared most of the time, but never every time -- real
+  weigh stations still spot-check compliant trucks, and an overweight
+  load is always called in. No transponder yet, and nothing changes:
+  every open scale still asks every truck to pull in.
+
 - **The horn runs on brake air, like a real truck's -- protection valve
   included.** The air horn and the brakes share the tanks, so leaning on
   the horn costs measurable pressure -- but a real tractor's pressure
