@@ -4280,6 +4280,20 @@ section below and the Unreleased changelog; the release-line view:
       says inspection station, the clock, and the current menu item -- no
       parking report, no live lot lookup, no brand amenities -- and the
       loyalty row is gated to hospitality stops.
+- [ ] **Cruise should honor the weather's safe speed (Brandon's suggestion,
+      2026-08-20).** `weather.effects.safe_speed_mph` exists, is spoken as
+      guidance on the status keys, and is consumed by NOTHING: adaptive
+      cruise holds a set 70 through a thunderstorm until the driver taps it
+      down (which is what the owner's own storm playtest this morning
+      actually was -- the ease in that log was his fingers, not the
+      automation). Proposed: ACC caps its working target at the safe speed
+      the same way it caps for posted limits, announced once per weather
+      change ("Heavy rain; adaptive cruise easing to 45"), releasing as the
+      weather lifts; the resume line names it like any other cap.
+      Recommended default-on with no new setting -- ACC already enforces
+      posted limits automatically and this is the same class of road fact,
+      a driver who wants to out-drive the rain can cancel and do it by
+      hand -- but it changes feel, so the owner decides.
 - [ ] **The graph routes 53-foot trailers over the Million Dollar Highway
       (Jerry's Farmington-to-Superior run, 2026-08-20).** Durango's only
       northbound edge is US-550 over Red Mountain, Molas, and Coal Bank
