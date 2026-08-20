@@ -3269,9 +3269,11 @@ class DrivingEventMixin:
                 "construction": " through the construction zone",
                 "heavy traffic": " through the heavy traffic",
             }.get(limit_reason, " for the lower limit")
-        safe_mph = self.weather.effects.safe_speed_mph
-        if safe_mph < effective_mph:
-            effective_mph = safe_mph
+        effects = self.weather.effects
+        if (effects.grip < 1.0 or effects.visibility_mi < 8.0) and (
+            effects.safe_speed_mph < effective_mph
+        ):
+            effective_mph = effects.safe_speed_mph
             exit_note = f" in the {self.weather.current.value}"
         self.ctx.audio.play("ui/notify", volume=0.5)
         message = (
@@ -4048,8 +4050,16 @@ class DrivingEventMixin:
         # which is what the owner's own storm playtest was actually showing
         # (2026-08-20, Brandon's suggestion). Same once-per-cap latch as
         # the posted limit above; releases as the weather lifts.
-        safe_mph = self.weather.effects.safe_speed_mph
-        if safe_mph < target_mph:
+        # Only weather that actually degrades the road caps: grip under 1.0
+        # or meaningfully shortened sight lines. CLEAR and CLOUDY carry a 70
+        # in safe_speed_mph as a GUIDANCE number for the status keys, and
+        # capping at it made every 75-and-up western limit unreachable in
+        # perfect weather (caught by the full sweep: a resume test stalled
+        # at exactly 70.0).
+        effects = self.weather.effects
+        adverse = effects.grip < 1.0 or effects.visibility_mi < 8.0
+        safe_mph = effects.safe_speed_mph
+        if adverse and safe_mph < target_mph:
             target_mph = safe_mph
             if self._acc_weather_cap_said is None or safe_mph < self._acc_weather_cap_said - 0.5:
                 self._acc_weather_cap_said = safe_mph
