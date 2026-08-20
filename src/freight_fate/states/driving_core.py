@@ -336,8 +336,14 @@ FREEWAY_VIA_RE = re.compile(r"\bI[-\s]?\d")
 # The free-flow SHARE is the assumed part and is left where it was (5 percent
 # urban, 20 percent rural), because it cannot be read: OSM records controls
 # that exist and says nothing at all where a ramp merges freely, so absence of
-# a tag is not evidence of absence of a control. Deriving it properly means
-# baking the ramp's far-end road class -- see ROADMAP.
+# a tag is not evidence of absence of a control. The far-end bake (2026-08-20)
+# shrank the pool these weights govern: exits whose ramp chains provably merge
+# onto another motorway carry ramp_control=none outright, and a proven surface
+# terminal suppresses the via guess above, so the dice now decide only the
+# exits topology could not judge plus the surface terminals OSM left untagged.
+# The shares are NOT recalibrated for that smaller pool -- free flow at a
+# surface terminal (a channelized merge onto a frontage road) still exists and
+# still cannot be read, so the assumption stands, declared here.
 _URBAN_FREE_FLOW = 0.05
 _RURAL_FREE_FLOW = 0.20
 RAMP_CONTROL_URBAN_WEIGHTS = (0.843, 1.0 - _URBAN_FREE_FLOW)

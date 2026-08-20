@@ -6,9 +6,15 @@ way the maxspeed module is. For every baked interchange it looks for OSM
 ``highway=traffic_signals`` and ``highway=stop`` nodes that are *members of a
 motorway_link way* near the exit -- that membership is exactly the ramp
 terminal control, no surface-road topology needed. Positive findings bake a
-``ramp_control`` of ``signal`` or ``stop`` onto the interchange record; when
-neither is tagged the field is left absent so the runtime keeps its seeded
-heuristic (absence of a tag is not evidence of free flow).
+``ramp_control`` of ``signal`` or ``stop`` onto the interchange record.
+
+Where neither is tagged, absence is not evidence of free flow -- so the pass
+also walks the exit's motorway_link topology (see the far-end section below):
+an exit whose every ramp chain merges back onto a motorway bakes an explicit
+``ramp_control: none`` plus ``ramp_far_end: motorway``, and a chain that
+touches a surface road bakes ``ramp_far_end: surface`` so the runtime stops
+guessing free flow off signage. Only exits neither half could judge are left
+to the runtime's seeded heuristic.
 """
 
 from __future__ import annotations
@@ -295,6 +301,14 @@ def bake_ramp_controls_for_leg(
                 ix["ramp_control_source"] = RAMP_CONTROL_SOURCE
                 touched = True
         if topo is not None and (not had_far_end or force):
+            if force:
+                # Re-judging: clear anything the previous walk derived so a
+                # changed verdict cannot leave a contradictory record behind.
+                if str(ix.get("ramp_control_source", "")).startswith("derived from ramp_far_end"):
+                    ix.pop("ramp_control", None)
+                    ix.pop("ramp_control_source", None)
+                ix.pop("ramp_far_end", None)
+                ix.pop("ramp_far_end_source", None)
             # The gore sits at the junction itself, so the search is tighter
             # than the control radius by design.
             far_radius = (
@@ -491,8 +505,32 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
 # far end, so the match radii are much tighter than the control pass's.
 RAMP_FAR_END_NEAR_JUNCTION_M = 500.0
 RAMP_FAR_END_NEAR_GEOM_M = 1200.0
-RAMP_TOPO_CACHE_VERSION = 2
+RAMP_TOPO_CACHE_VERSION = 3
 RAMP_TOPO_WALK_CAP = 600  # visited nodes per gore; a real ramp complex is far smaller
+# Ways that can meet a ramp at a node without being a road the ramp ends at:
+# a marked footpath crossing a system ramp is not a terminal, and counting it
+# as one turned real freeway-to-freeway merges into "surface" verdicts on the
+# first national run. Vehicular service ways stay in -- a ramp meeting a
+# frontage or access road at grade genuinely is a controllable terminal.
+NON_VEHICULAR_HIGHWAYS = frozenset(
+    (
+        "footway",
+        "cycleway",
+        "path",
+        "steps",
+        "pedestrian",
+        "bridleway",
+        "corridor",
+        "platform",
+        "crossing",
+        "elevator",
+        "escape",
+        "proposed",
+        "construction",
+        "abandoned",
+        "razed",
+    )
+)
 RAMP_FAR_END_SOURCE = (
     "derived: this exit's motorway_link chains walked from the gore in a "
     f"local Geofabrik extract, accessed {ACCESSED_DATE}. 'motorway' means "
@@ -763,7 +801,7 @@ def _build_ramp_topo_from_pbf(
                 if str(k) == "highway":
                     highway = str(v)
                     break
-            if highway in ("motorway", "motorway_link"):
+            if highway in ("motorway", "motorway_link") or highway in NON_VEHICULAR_HIGHWAYS:
                 return
             for node_ref in way.nodes:
                 ref = getattr(node_ref, "ref", None)
