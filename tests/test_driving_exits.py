@@ -855,3 +855,44 @@ def test_a_fresh_cruise_session_inherits_an_armed_exit_s_ramp_cap():
     src = inspect.getsource(DrivingEventMixin._engage_cruise)
     assert "_cruise_exit_mph" in src, "engaging cruise ignores an armed exit"
     assert "RAMP_CRUISE_TARGET_MPH" in src
+
+
+def test_the_destination_approach_assist_slows_before_the_arrival_point():
+    """Owner, Odessa delivery, 2026-08-19: "it did not stop me. I stopped, and
+    when I did the message that said stopped and holding was true."
+
+    The setting promises "slows and stops at the selected facility arrival
+    point". Only the stopping half existed: _handle_arrival_gate applies full
+    brake, and it runs inside ``if self.trip.finished`` -- true only once the
+    truck is AT the point. So the assist could hold a truck that had already
+    stopped and nothing more, while reporting as though it had done the work.
+
+    The ease is priced like the exit assist's ramp glide: road speed stands
+    until the truck is inside the distance it needs to shed.
+    """
+    import inspect
+
+    from freight_fate.states.driving_core import (
+        APPROACH_ASSIST_DECEL_MPS2,
+        MPH_PER_MPS,
+    )
+    from freight_fate.states.driving_updates import DrivingUpdateMixin
+
+    # It runs every frame, not only once the trip has finished.
+    update_src = inspect.getsource(DrivingUpdateMixin.update)
+    hook = update_src.index("_update_destination_approach_assist")
+    finished = update_src.index("if self.trip.finished:")
+    assert hook < finished, "the approach assist still runs only after arrival"
+
+    # And it only ever takes speed off.
+    src = inspect.getsource(DrivingUpdateMixin._update_destination_approach_assist)
+    assert "self.truck.speed_mph <= cap_mph" in src, "no leave-alone branch"
+    assert "throttle = 0.0" in src
+
+    # The profile stops the truck in the road it has left, not sooner.
+    def cap(miles):
+        return (2.0 * APPROACH_ASSIST_DECEL_MPS2 * miles * 1609.344) ** 0.5 * MPH_PER_MPS
+
+    assert cap(1.0) > 60.0, "a mile out it must not be dragging the truck down"
+    assert cap(0.05) < 30.0, "a tenth of that out it must genuinely be slowing"
+    assert cap(0.25) > cap(0.1) > cap(0.05)

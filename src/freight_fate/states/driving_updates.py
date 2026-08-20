@@ -552,6 +552,10 @@ class DrivingUpdateMixin:
         self._update_brake_heat_cue(dt)
         self._update_traction_cues()
         self._update_chain_law()
+        # Before the trip.finished branch on purpose: the arrival gate below
+        # only runs once the truck has ALREADY arrived, so it can hold the
+        # brake but can never slow the approach. See the method.
+        self._update_destination_approach_assist()
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
@@ -3903,6 +3907,47 @@ class DrivingUpdateMixin:
         if t.brake >= 0.4 and t.speed_mph > 10.0 and t.brake_temp_c >= t.specs.brake_fade_temp_c:
             self.ctx.audio.play("vehicle/brake_squeal", volume=0.8)
             self._brake_squeal_cooldown_s = 4.0
+
+    def _update_destination_approach_assist(self) -> None:
+        """Ease the truck down so it ARRIVES stopped, not so it stops on arrival.
+
+        The setting promises "slows and stops at the selected facility
+        arrival point". Only the stopping half existed: the arrival gate
+        applies full brake, and it runs inside ``if self.trip.finished`` --
+        true only once the truck is AT the point. So the assist could hold a
+        truck that had already stopped, and nothing more. The owner drove a
+        delivery to Odessa, braked himself, and the assist announced "stopped
+        and holding" as though it had done it (2026-08-19: "it did not stop
+        me. I stopped").
+
+        Priced like the exit assist's ramp glide rather than as a fixed
+        trigger distance: road speed stands until the truck is inside the
+        distance it needs to shed, then the cap follows the deceleration
+        down. A driver already slower than the cap is left alone -- this only
+        ever takes speed off, never adds it, and never steers.
+        """
+        if not self.ctx.settings.destination_approach_assist:
+            return
+        trip = self.trip
+        if trip.finished or not trip._is_facility_approach_route():
+            return
+        remaining_m = max(0.0, trip.remaining_miles) * 1609.344
+        if remaining_m <= 0.0:
+            return
+        # v = sqrt(2 a d): the fastest this truck may still be doing and stop
+        # in the road it has left, at a comfortable rate.
+        cap_mph = (2.0 * APPROACH_ASSIST_DECEL_MPS2 * remaining_m) ** 0.5 * MPH_PER_MPS
+        if self.truck.speed_mph <= cap_mph:
+            return
+        # Over the cap: shed. Throttle first -- braking against a held pedal
+        # is how an assist ends up fighting the driver.
+        self.truck.throttle = 0.0
+        self.truck.brake = max(self.truck.brake, APPROACH_ASSIST_BRAKE)
+        if self._cruise_mph is not None or self._keeper_mph is not None:
+            # The assist has the pedals for the arrival; automatic control
+            # must not hold a speed against it. Paused rather than cancelled,
+            # the way the exit assist pauses for a ramp.
+            self._pause_speed_control(resume_when_rolling=False)
 
     def _update_traction_cues(self) -> None:
         """Speak the physical traction states once, on the edge they begin.

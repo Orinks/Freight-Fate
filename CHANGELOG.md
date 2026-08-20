@@ -813,6 +813,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Destination approach assistance now actually slows you down.** It promised
+  to slow and stop at the facility arrival point, but only ever held the brake
+  once you had already arrived -- so if you were still rolling it did nothing,
+  and if you stopped yourself it announced that it was holding as though it had
+  done the work. It now eases the truck down over the approach so you arrive
+  stopped, easing later the slower you already are, and never speeds you up or
+  steers.
+
 - **One engine brake voice, not two.** The engine brake setting picks between a
   real recording and the older synthesized voice -- but only one engine speed
   actually had a recording, so a descent gave you the recording at that speed

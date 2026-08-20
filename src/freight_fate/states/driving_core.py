@@ -294,6 +294,12 @@ RAMP_TERMINAL_GRACE_MI = 0.02  # rolling this far past the bar commits the viola
 # to brake application against the nominal full-service figure, and holds the
 # stop once the truck is within the hold window short of the bar.
 RAMP_ASSIST_DECEL_START_MPS2 = 0.6
+# The destination approach: how hard the assist is willing to shed to ARRIVE
+# stopped, and the brake it uses. Gentler than the ramp figure -- an approach
+# is a street chain with a gate at the end, and the point is that the stop is
+# comfortable rather than a grab.
+APPROACH_ASSIST_DECEL_MPS2 = 0.9
+APPROACH_ASSIST_BRAKE = 0.4
 RAMP_ASSIST_FULL_DECEL_MPS2 = 3.0
 RAMP_ASSIST_HOLD_MI = 60.0 / 5280.0
 # How far the demand has to fall below the pedal the assist is already holding
