@@ -1640,8 +1640,17 @@ class DrivingControlsMixin:
             or self._overspeed_active
         )
         if throttle_overridden and self._throttle_latch.release():
+            # ROUTE, not the ambient default: a safety system (hazard,
+            # emergency brake, overspeed, brake override) is silently
+            # surrendering the throttle here, unlike the plain settings-off
+            # release above -- the driver needs to know the latch let go
+            # without their own gesture (automation-handoff sweep,
+            # 2026-08-20, the deferred 2026-08-15 audit).
             self.ctx.say_event(
-                "Throttle released.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                "Throttle released.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.CONFIRMATION,
             )
         if (key_up or pad_throttle > 0.05) and self._brake_latch.release():
             self.ctx.say_event(

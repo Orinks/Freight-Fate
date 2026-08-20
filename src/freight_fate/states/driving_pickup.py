@@ -57,10 +57,14 @@ class DrivingPickupMixin:
             self._announce_pickup_speed_control_pause()
 
     def _announce_pickup_speed_control_pause(self) -> None:
+        # ROUTE, not the ambient default: the automation just released the
+        # throttle (automation-handoff sweep, 2026-08-20, the deferred
+        # 2026-08-15 audit).
         self.ctx.say_event(
             "Automatic speed control paused for pickup. It will resume after "
             "you depart with the load.",
             interrupt=False,
+            priority=EventPriority.ROUTE,
             category=SpeechCategory.CONFIRMATION,
         )
 

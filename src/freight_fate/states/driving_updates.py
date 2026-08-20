@@ -325,8 +325,15 @@ class DrivingUpdateMixin:
         if key_up and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
+                # ROUTE, not the ambient default: an automation (the engine
+                # brake) just released, and a driver who assumed it still held
+                # needs to hear that (automation-handoff sweep, 2026-08-20,
+                # the deferred 2026-08-15 audit).
                 self.ctx.say_event(
-                    "Jake off.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                    "Jake off.",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                    category=SpeechCategory.CONFIRMATION,
                 )
             t.throttle = min(1.0, t.throttle + ramp)
         elif backing:
@@ -336,8 +343,14 @@ class DrivingUpdateMixin:
         if pad_throttle > 0.05 and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
+                # ROUTE, not the ambient default: same as the keyboard branch
+                # above (automation-handoff sweep, 2026-08-20, the deferred
+                # 2026-08-15 audit).
                 self.ctx.say_event(
-                    "Jake off.", interrupt=False, category=SpeechCategory.CONFIRMATION
+                    "Jake off.",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                    category=SpeechCategory.CONFIRMATION,
                 )
             t.throttle = max(t.throttle, pad_throttle)
         # Keyboard ramps the brake up and down; the analog trigger sets a direct
@@ -360,7 +373,15 @@ class DrivingUpdateMixin:
         # ramps (reverse arrest, hazard events) go through their own cancels.
         if self._cruise_mph is not None and (braking_key or emergency) and not backing:
             self._cancel_cruise()
-            self.ctx.say_event("Cruise off.", interrupt=False, category=SpeechCategory.CONFIRMATION)
+            # ROUTE, not the ambient default: the automation just released the
+            # throttle (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
+            self.ctx.say_event(
+                "Cruise off.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.CONFIRMATION,
+            )
         if emergency:
             # no ramp: slams to full application instantly, plus spring brakes
             if not t.emergency_brake and abs(t.velocity_mps) > 1:
@@ -762,7 +783,16 @@ class DrivingUpdateMixin:
                     f"Press {brake_hint} to release the parking brake."
                 )
             )
-            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
+            # ROUTE, not the ambient default: same reasoning as the lockout
+            # lines below -- this is the reason the truck can now move, a
+            # standing instruction until the driver acts (automation-handoff
+            # sweep, 2026-08-20, the deferred 2026-08-15 audit).
+            self.ctx.say_event(
+                message,
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.STATUS,
+            )
             # air_ready is retired as an award (folded into "first_day" at
             # pickup completion, see city_pickup.py); the catalog entry and
             # id stay so the cloud validator's allow-list never sees a
@@ -833,18 +863,29 @@ class DrivingUpdateMixin:
                 if want == "forward":
                     tr.gear = 1
                     self._set_status("Forward gear selected.")
+                    # ROUTE, not the ambient default: the driver's only
+                    # confirmation of which way the truck is now geared, and a
+                    # missed one leaves a blind driver guessing direction
+                    # (automation-handoff sweep, 2026-08-20, the deferred
+                    # 2026-08-15 audit).
                     self.ctx.say_event(
                         "Forward gear selected.",
                         interrupt=False,
+                        priority=EventPriority.ROUTE,
                         category=SpeechCategory.CONFIRMATION,
                     )
                     return False
                 tr.gear = REVERSE
                 self._cancel_cruise()
                 self._set_status("Reverse selected. Backing slowly.")
+                # ROUTE, not the ambient default: same reasoning as the
+                # forward-gear line above -- direction confusion for a blind
+                # driver is a safety issue (automation-handoff sweep,
+                # 2026-08-20, the deferred 2026-08-15 audit).
                 self.ctx.say_event(
                     "Reverse selected. Backing slowly.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                     category=SpeechCategory.CONFIRMATION,
                 )
                 return True
@@ -1115,16 +1156,24 @@ class DrivingUpdateMixin:
         if curve_assisting:
             if not self._curve_assist_active and self._curve_assist_cue_s <= 0.0:
                 self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
+                # ROUTE, not the ambient default: names an automation taking
+                # the pedals (automation-handoff sweep, 2026-08-20, the
+                # deferred 2026-08-15 audit).
                 self.ctx.say_event(
                     "Curve speed assistance slowing.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                     category=SpeechCategory.CONFIRMATION,
                 )
         elif self._curve_assist_active and self._curve_assist_cue_s <= 0.0:
             self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
+            # ROUTE, not the ambient default: names the automation handing the
+            # pedals back (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
             self.ctx.say_event(
                 "Curve speed assistance released.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
         self._curve_assist_active = curve_assisting
@@ -1142,15 +1191,23 @@ class DrivingUpdateMixin:
         if transition_assisting:
             self.truck.brake = max(self.truck.brake, 0.4)
             if not self._transition_assist_active:
+                # ROUTE, not the ambient default: names an automation taking
+                # the pedals (automation-handoff sweep, 2026-08-20, the
+                # deferred 2026-08-15 audit).
                 self.ctx.say_event(
                     "Route-transition assistance slowing.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                     category=SpeechCategory.CONFIRMATION,
                 )
         elif self._transition_assist_active:
+            # ROUTE, not the ambient default: names the automation handing the
+            # pedals back (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
             self.ctx.say_event(
                 "Route-transition assistance released.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
         self._transition_assist_active = transition_assisting
@@ -1290,9 +1347,14 @@ class DrivingUpdateMixin:
             self._finish_hazard_clear(f"You swerve around {names}. Well done.")
             return
         if not quiet:
+            # ROUTE, not the ambient default: the driver's only confirmation
+            # of where a lane change landed, same class as the lane-open
+            # precedent in driving_lane_gap.py (automation-handoff sweep,
+            # 2026-08-20, the deferred 2026-08-15 audit).
             self.ctx.say_event(
                 f"In {lane_phrase(lane.lane, lane.lane_count)}.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
 
@@ -3428,9 +3490,14 @@ class DrivingUpdateMixin:
         self._microsleep_cooldown_gm = MICROSLEEP_COOLDOWN_GM
         self._microsleep_misses = 0
         if not silent:
+            # ROUTE, not the ambient default: the outcome of a driver's own
+            # reaction to an urgent warning, same class as the hazard-clear
+            # precedent (automation-handoff sweep, 2026-08-20, the deferred
+            # 2026-08-15 audit).
             self.ctx.say_event(
                 "You caught it. Pull over and sleep before the next one.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
 
@@ -3736,9 +3803,14 @@ class DrivingUpdateMixin:
         # announcing and steering for it under the trooper's lights -- that
         # is how a scale bypass became a failure-to-stop cascade.
         if self._stand_down_exit_for_stop():
+            # ROUTE, not the ambient default: names an automation standing
+            # down, right after an interrupting enforcement line that could
+            # otherwise bump it stale (automation-handoff sweep, 2026-08-20,
+            # the deferred 2026-08-15 audit).
             self.ctx.say_event(
                 "Exit approach canceled; plan it again after the stop.",
                 interrupt=False,
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
 

@@ -430,7 +430,14 @@ class DamageBandMixin:
                 f"Holding {speed_text(cap)}."
             )
         )
-        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
+        # ROUTE, not the ambient default: cruise is silently holding a lower
+        # speed than the driver set, the same class as the adaptive-cruise
+        # easing line -- an assist changing what the truck does is a
+        # consequence, not colour (automation-handoff sweep, 2026-08-20, the
+        # deferred 2026-08-15 audit).
+        self.ctx.say_event(
+            message, interrupt=False, priority=EventPriority.ROUTE, category=SpeechCategory.STATUS
+        )
 
     # -- recovery ---------------------------------------------------------------
 
