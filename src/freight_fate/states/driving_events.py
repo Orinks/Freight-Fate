@@ -4190,8 +4190,22 @@ class DrivingEventMixin:
         # zones close the stalk too (unless a real downgrade exempts them --
         # see driving_engine_brake). The drums below still answer either way,
         # so losing the retarder never costs the ability to hold the speed.
+        # And not on a slick surface unless a grade demands it: an engine
+        # brake retards only the drive axle, which on wet pavement is how a
+        # tractor swaps ends, so drivers switch the jake off in a storm and
+        # an automatic manager holds itself to the same rule. The drum
+        # pressure two branches up already keys on this same grip line; the
+        # retarder path never did, so a thunderstorm safe-speed ease from
+        # 65 to 40 played the jake on flat, soaked I-24 (owner playtest,
+        # 2026-08-20). A real DOWNGRADE is the exception, deliberately: the
+        # comment above already records why a retarder holding a grade is
+        # never dropped -- doing so puts the whole hill onto the drums,
+        # which is the greater evil. Slick flat road gets the drums; a
+        # slick grade keeps the retarder and the driver keeps the choice.
         may_retard = (
-            self.ctx.settings.descent_speed_control != "off" and self._assist_jake_allowed()
+            self.ctx.settings.descent_speed_control != "off"
+            and self._assist_jake_allowed()
+            and (self.weather.effects.grip >= 0.7 or self._on_downgrade())
         )
         wanted = 0
         if may_retard and over > CRUISE_JAKE_OVER_MPH and t.throttle <= 0.05:
