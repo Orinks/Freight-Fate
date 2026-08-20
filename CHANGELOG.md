@@ -813,6 +813,16 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Most cars are just travelling now, not merging into you.** About one vehicle
+  in six ahead of you was merging across your lane, and another one in seven was
+  braking hard -- anywhere on the road, with no on-ramp or jam in sight. So
+  roughly a third of everything you came up on demanded that you swerve or
+  brake, when on a real highway almost everything is simply going the same way
+  you are. Merging traffic now only comes from places where a ramp actually
+  feeds in, and hard braking only where traffic is genuinely backed up. On a
+  long interstate leg that makes a merge about ten times rarer than it was, and
+  the ones you do meet are where you would expect them.
+
 - **Hazard instructions cannot go missing on a busy road.** Two safety lines --
   the follow-up telling you a hazard is still in your lane and to nearly stop,
   and the reminder that you are still reversing away from your destination --

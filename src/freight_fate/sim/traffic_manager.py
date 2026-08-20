@@ -60,6 +60,24 @@ NO_SPAWN_BEHIND_MI = 0.6
 # the opening line of a run is never somebody merging into a truck that has
 # not got up to speed yet. Everything else about the draw is unchanged.
 MERGE_FREE_START_MI = 3.0
+
+# How far past an interchange a vehicle can still be merging into you. An
+# on-ramp feeds traffic in over a taper of a few hundred yards, so this is
+# generous rather than tight.
+#
+# WHY IT IS POSITIONAL AT ALL (owner, 2026-08-19: "why do we have to clear
+# every single car? Have to swerve around every single one when most are just
+# passing"). Merging was drawn UNIFORMLY along the leg at a weight of 1.2
+# against 7.3 total -- one vehicle in six, anywhere, with no on-ramp in sight.
+# Braking was another one in seven, equally unconditioned. So roughly a third
+# of everything ahead demanded action, on a road where in reality almost
+# everything is just travelling.
+#
+# Both are positional in life and both now have the data to be positional
+# here: merges happen at interchanges (0.22 per mile on I-65, spaced two and
+# a half to six miles), and hard braking happens in congestion, which is now
+# placed from real HPMS volumes rather than a dice roll.
+MERGE_WINDOW_MI = 0.45
 # How far a bubble vehicle runs before it leaves the highway, drawn per
 # vehicle. Nobody shares a whole corridor with you, and the upper end is what
 # bounds how long a slow one can hold the lane in front of the truck.
@@ -206,6 +224,10 @@ class TrafficManager:
         # beside ``hour``; the weekday curve is the safe default because it is
         # the busier of the two.
         self._weekend = False
+        # (start_mi, end_mi) spans where traffic has a reason to be braking:
+        # the congestion zones the trip placed from real volumes. Set by the
+        # trip, because the manager does not own zone placement.
+        self._braking_zones: tuple[tuple[float, float], ...] = ()
         # The driving state mirrors the player's discrete lane here each
         # frame so same-lane checks and spoken relative lanes stay honest.
         self.player_lane = 0
@@ -445,6 +467,33 @@ class TrafficManager:
             return f"{mph:.0f}"
         return f"{mph * 1.609344:.0f}"
 
+    def _merge_plausible_at(self, mile: float) -> bool:
+        """Whether a vehicle here could be merging in from a ramp."""
+        found = self._leg_and_offset_at(mile)
+        if found is None:
+            return False
+        leg, offset = found
+        for interchange in getattr(leg, "interchanges", ()) or ():
+            at = getattr(interchange, "at_mi", None)
+            if at is None:
+                continue
+            if 0.0 <= offset - at <= MERGE_WINDOW_MI:
+                return True
+        return False
+
+    def _braking_plausible_at(self, mile: float) -> bool:
+        """Whether traffic here has a reason to be stopping hard.
+
+        Congestion is placed from real volumes now, so "somebody is on the
+        brakes" can follow the jam instead of being sprinkled evenly down an
+        empty interstate. A ramp is the other honest place for it: that is
+        where traffic slows to leave.
+        """
+        for zone in getattr(self, "_braking_zones", ()) or ():
+            if zone[0] <= mile <= zone[1]:
+                return True
+        return self._merge_plausible_at(mile)
+
     def _vehicle_intent(self, vehicle) -> str:
         intent = getattr(vehicle, "intent", None)
         if intent is not None:
@@ -666,10 +715,18 @@ class TrafficManager:
                     weights=(3.0, 1.5, 1.0, 0.6),
                 )[0]
             else:
-                intent = rng.choices(
-                    ("cruising", "following", "merging", "braking", "passing"),
-                    weights=(3.0, 1.5, 1.2, 1.0, 0.6),
-                )[0]
+                # Merging and braking only where the road gives a reason for
+                # them; their weight goes back to plain travelling elsewhere,
+                # which is what almost everything on a highway is doing.
+                options = ["cruising", "following", "passing"]
+                weights = [3.0, 1.5, 0.6]
+                if self._merge_plausible_at(mile):
+                    options.append("merging")
+                    weights.append(1.2)
+                if self._braking_plausible_at(mile):
+                    options.append("braking")
+                    weights.append(1.0)
+                intent = rng.choices(options, weights=weights)[0]
             vehicle_class = rng.choices(
                 ("car", "box truck", "semi", "service vehicle"),
                 weights=(5.0, 1.4, 2.0, 0.3),

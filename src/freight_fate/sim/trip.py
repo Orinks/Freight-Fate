@@ -2474,6 +2474,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             # density model reads the same curve congestion does.
             weekend=self._is_weekend_now(),
         )
+        # Where traffic has a reason to be on the brakes: the congestion the
+        # trip placed from real volumes, plus its approach. Before this,
+        # "somebody is braking hard" was sprinkled evenly down an empty
+        # interstate at one vehicle in seven (owner, 2026-08-19).
+        self.traffic_manager._braking_zones = tuple(
+            (max(0.0, zone.start_mi - 1.0), zone.end_mi)
+            for zone in self.zones
+            if getattr(zone, "reason", "") in ("heavy traffic", "construction")
+        )
         self._check_zones()
         self._check_chain_law()
         self._check_speed_limit()

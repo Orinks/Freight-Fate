@@ -8,6 +8,17 @@ from freight_fate.sim.vehicle import TruckState
 from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
 
+def _ramp_miles(manager) -> list[float]:
+    """Route miles just past each on-ramp -- where a merge can come from."""
+    out: list[float] = []
+    for start, leg in zip(manager.leg_starts, manager.route.legs, strict=False):
+        for interchange in getattr(leg, "interchanges", ()) or ():
+            at = getattr(interchange, "at_mi", None)
+            if at is not None:
+                out.append(start + at + 0.1)
+    return sorted(out)
+
+
 def _manager(seed: int = 1) -> TrafficManager:
     world = get_world()
     route = world.route_from_cities(["Chicago", "Indianapolis"])
@@ -600,20 +611,44 @@ def test_the_opening_miles_of_a_run_spawn_nobody_merging():
 
     assert opening, "the sweep must actually place vehicles in the window"
     assert "merging" not in opening
-    # The intent is withheld at the start, not removed from the game.
+    # The intent is withheld at the start, not removed from the game -- but a
+    # merge now needs an on-ramp to come from, so this looks where one is
+    # rather than anywhere past the window.
+    for seed in range(40):
+        manager = _manager(seed=seed)
+        for ramp_mile in _ramp_miles(manager)[:6]:
+            if ramp_mile < MERGE_FREE_START_MI:
+                continue
+            manager._spawned_cells.clear()
+            manager.vehicles.clear()
+            manager._replenish(ramp_mile)
+            later += [v.intent for v in manager.vehicles if v.position_mi >= MERGE_FREE_START_MI]
     assert "merging" in later
 
 
 def test_the_merge_free_window_only_covers_the_start_of_the_route():
-    """Mid-route the draw is untouched -- this is a start-of-run rule."""
+    """Mid-route the start-of-run rule stops applying -- but a merge still
+    needs a ramp to come from.
+
+    This used to sample anywhere past MERGE_FREE_START_MI and expect a merge,
+    which passed only because merging was drawn uniformly along the whole
+    leg. It is positional now (see
+    test_merging_only_happens_where_a_ramp_feeds_in), so the sample has to
+    look where an on-ramp actually feeds in.
+    """
     from freight_fate.sim.traffic_manager import MERGE_FREE_START_MI
 
     intents: list[str] = []
     for seed in range(40):
         manager = _manager(seed=seed)
-        manager._replenish(60.0)
-        intents += [v.intent for v in manager.vehicles if v.position_mi >= MERGE_FREE_START_MI]
-    assert "merging" in intents
+        for ramp_mile in _ramp_miles(manager)[:6]:
+            if ramp_mile < MERGE_FREE_START_MI:
+                continue
+            manager._spawned_cells.clear()
+            manager.vehicles.clear()
+            manager._replenish(ramp_mile)
+            intents += [v.intent for v in manager.vehicles if v.position_mi >= MERGE_FREE_START_MI]
+    assert "merging" in intents, "no merge anywhere near an on-ramp"
 
 
 def test_traffic_density_reads_the_road_s_real_volume():
@@ -655,3 +690,71 @@ def test_a_leg_with_no_baked_volume_drives_exactly_as_before():
     # The old shape is still there, reached only when the bake has nothing.
     assert "0.22 + leg.miles / 900.0" in src
     assert "if volume is None" in src
+
+
+def test_merging_only_happens_where_a_ramp_feeds_in():
+    """Owner, 2026-08-19: "why do we have to clear every single car? Have to
+    swerve around every single one when most are just passing."
+
+    Because merging was drawn UNIFORMLY along the leg at a weight of 1.2
+    against 7.3 total -- one vehicle in six, anywhere, with no on-ramp in
+    sight -- and braking was another one in seven, equally unconditioned. So
+    roughly a third of everything ahead demanded action on a road where
+    almost everything is really just travelling.
+
+    Both are positional in life and both now have data: interchanges are
+    baked (0.22 per mile on I-65) and congestion is placed from real HPMS
+    volumes. On a 192-mile leg with 42 interchanges only about a tenth of the
+    road can produce a merge, so the same share of vehicles now works out
+    around ten times rarer overall.
+    """
+    from freight_fate.data.world import get_world
+    from freight_fate.sim.traffic_manager import MERGE_WINDOW_MI, TrafficManager
+
+    world = get_world()
+    leg = next(
+        leg
+        for leg in world.legs
+        if (leg.highway or "").startswith("I-")
+        and leg.miles > 100
+        and getattr(leg, "interchanges", ())
+    )
+    ramps = [i.at_mi for i in leg.interchanges if getattr(i, "at_mi", None) is not None]
+    assert ramps
+
+    manager = TrafficManager.__new__(TrafficManager)
+    manager.route = type("R", (), {"legs": [leg], "cities": [leg.a, leg.b]})()
+    manager.leg_starts = [0.0]
+
+    # Right after a ramp: a merge is plausible.
+    assert manager._merge_plausible_at(ramps[0] + 0.1)
+    # Well clear of every ramp: it is not.
+    far = max(
+        (m for m in [r + MERGE_WINDOW_MI * 4 for r in ramps] if m < leg.miles),
+        default=None,
+    )
+    clear = next(
+        (
+            m
+            for m in [ramps[0] + MERGE_WINDOW_MI + 0.5]
+            if all(not (0.0 <= m - r <= MERGE_WINDOW_MI) for r in ramps)
+        ),
+        None,
+    )
+    if clear is not None:
+        assert not manager._merge_plausible_at(clear)
+    assert far is None or isinstance(far, float)
+
+
+def test_hard_braking_follows_the_congestion_not_the_dice():
+    """The other half. "Somebody is on the brakes" used to be sprinkled evenly
+    down an empty interstate; it now needs a jam or a ramp to explain it."""
+    from freight_fate.sim.traffic_manager import TrafficManager
+
+    manager = TrafficManager.__new__(TrafficManager)
+    manager._braking_zones = ((10.0, 14.0),)
+    manager.route = type("R", (), {"legs": [], "cities": []})()
+    manager.leg_starts = []
+
+    assert manager._braking_plausible_at(12.0)
+    assert not manager._braking_plausible_at(40.0)
