@@ -832,6 +832,13 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Road debris says what it is.** "Debris in the road" is now a ladder
+  fallen from a truck, loose lumber, a mattress, spilled cargo boxes, a
+  shredded tarp, or tire retread -- named on the warning and named again
+  when you clear it, because a ladder and a mattress are different dodges.
+  Debris is exactly as common as before; it just stopped being anonymous.
+  Thanks to Brandon for the ask.
+
 - **A delayed stop announcement says the distance that is true when it
   speaks.** Notices about truck stops ahead wait their turn behind more
   important speech, and one that waited could still say "in 5 miles" with
