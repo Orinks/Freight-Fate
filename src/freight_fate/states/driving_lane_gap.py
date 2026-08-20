@@ -166,7 +166,17 @@ class LaneGapMixin:
         else:
             message = f"Clear of the {vehicle}. {name.capitalize()} lane open."
         self.ctx.audio.play("ui/notify", volume=0.45)
-        self.ctx.say_event(message, interrupt=False, category=SpeechCategory.STATUS)
+        # ROUTE priority: "the lane you were boxed out of is open" is the
+        # transition a driver is actively waiting on to merge back, and at
+        # the ambient default it was dropped as stale behind the very
+        # traffic flurry that boxed them out (Shane, 2026-08-20). Category
+        # stays STATUS so the verbosity ladder still governs HOW it speaks.
+        self.ctx.say_event(
+            message,
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=SpeechCategory.STATUS,
+        )
 
     # -- the on-demand readout ------------------------------------------------
 

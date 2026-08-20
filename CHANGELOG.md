@@ -852,6 +852,13 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The all-clear after a dodge is spoken again.** "You swerve around the
+  brake lights. Well done." and "Clear of the semi. Right lane open." could
+  be silently dropped right after the urgent call that caused them -- the
+  busiest moment on the road was exactly when the outcome went missing, and
+  the words survived only in the speech review keys. Both now wait their
+  turn and always speak.
+
 - **Brake lights say why, when the road knows.** A slowdown inside a work
   zone or a rated jam now names its cause -- "Brake lights half a mile
   ahead. Road work is the cause." -- instead of leaving you guessing. A
