@@ -4275,6 +4275,19 @@ section below and the Unreleased changelog; the release-line view:
       on the profile as `radio_favorites` (additive, no migration; PR #150's
       approach). The imported/web tiers made this necessary: the dial is
       six and a half thousand stations now.
+- [ ] **Domain-named imported stations: 75 of 5,241 read a URL aloud.**
+      "TheRadioStorm.com", "SoftRockRadio.net", and 73 more speak their
+      TLD to every screen reader; two entries' whole name is just ".org"
+      or ".fm" (the cleaner's empty-name fallback leaking a domain
+      remnant). Needs a reviewed sweep, not a blanket strip: for many the
+      ending IS the brand (KNAC.COM, 1.fm, SmoothJazz.com). Proposed
+      cleaner rule for the mechanical subset: a single-token CamelCase
+      domain splits into words and drops its TLD ("TheRockHD.com" -> "The
+      Rock HD"); the rest are one-by-one calls. The Radio Storm itself was
+      renamed by hand 2026-08-20 after the owner hit it on the dial --
+      note it is a DIFFERENT broadcaster than the four curated
+      Radiostorm.com channels, so five storm-named stations on the dial is
+      honest, just crowded.
 - [ ] **Imported-tier follow-ups.** Re-sweep the 371 HLS streams PR #150's
       build dropped (we bundle BASSHLS, so they play here); consider real
       FCC contour radii or curated `range_miles`/`site_elev_ft` overlays
