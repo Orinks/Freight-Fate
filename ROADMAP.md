@@ -1073,10 +1073,24 @@ onto exit signalling.
       that volume by a single lane and parked a permanent phantom jam on a
       road that flows.
 
-      STILL OPEN: NPC spawn density (`_leg_density`) does not read AADT at
-      all -- it varies by rush hour, night and metro bias only. So the road's
-      BEHAVIOUR is now real while its vehicle COUNT is not. Wiring the two
-      together is 1.10 work: it would change traffic everywhere on the map.
+      NPC spawn density (`_leg_density`) now reads the same AADT chain
+      congestion does -- vehicles per mile from this hour's share of the
+      day's volume, Poisson per spawn cell -- so a quiet rural highway is
+      measurably sparser than a busy freeway at the hour it is quieter. The
+      ORDER is real; the absolute COUNT still is not, because the bubble
+      caps at `MAX_BUBBLE_VEHICLES` (~5/mile) while a median road at peak
+      wants thirteen in your direction. Lifting that cap is 1.10 work with a
+      performance question attached.
+
+- [ ] **Congestion queue re-pacing when the clock moves the zone.** The
+      braking lead in an injected jam now paces the zone's live prevailing
+      speed (Brandon's held-at-25-in-a-45-zone fix, 2026-08-20), but the
+      following/cruising queue vehicles keep the speed they were seeded with
+      for the life of the zone -- so a jam that eases from the 26 band to the
+      45 band as rush hour ends keeps its old slower metal until the truck
+      passes it. They never take an exit either, by design; re-pacing them
+      from the zone's refreshed number would let a clearing jam audibly speed
+      up around the player.
 
 - [x] **FHWA HPMS Terrain_Type baked per leg -- SHIPPED 2026-08-19.** 1,273 of
       1,290 legs. Exists because the world's own `terrain` field is derived
@@ -4311,6 +4325,27 @@ section below and the Unreleased changelog; the release-line view:
       today; promotion splits the leg and adds US-160 toward Four Corners);
       a spoken line at job assignment when a route includes an advisory
       road would be honest ("this run uses Red Mountain Pass").
+- [ ] **Company drivers get ASSIGNED repositions; the self-serve bobtail
+      is owner-operator only (owner ruling, 2026-08-20).** The menu gate
+      shipped same-day: a company driver's tractor goes where dispatch
+      sends it, so "Bobtail to a nearby city" now appears only for
+      leased and independent operators. The other half is the feature:
+      dispatch occasionally assigns a company driver an on-duty
+      reposition (deadhead to where the freight is), paid the way
+      carriers really pay empty miles. Design note for the abandonment
+      interplay: an ASSIGNED reposition is an assignment -- walking away
+      from one should cost standing with the carrier (reputation, not
+      money), unlike the owner's own penalty-free turnback shipped today.
+
+- [ ] **Weigh-in-motion bypass -- the dashboard transponder (Brandon,
+      2026-08-20).** Real trucks run PrePass-style transponders: the
+      scale weighs them at highway speed and a green or red light says
+      bypass or pull in; nobody stops at every open scale any more.
+      Fits the game as equipment with a progression angle (fleet
+      provides it at some tier; owner-operators subscribe), a natural
+      audio moment (the green-light chirp at highway speed), and it
+      rides the scale flow reworked 2026-08-20. Red-light pulls and
+      random compliance checks keep the scale content reachable.
 - [ ] **Domain-named imported stations: 75 of 5,241 read a URL aloud.**
       "TheRadioStorm.com", "SoftRockRadio.net", and 73 more speak their
       TLD to every screen reader; two entries' whole name is just ".org"

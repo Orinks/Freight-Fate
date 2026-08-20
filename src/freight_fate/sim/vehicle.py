@@ -1303,9 +1303,22 @@ class TruckState:
     # almost nothing; the existing low-air machinery does any warning
     # (Brandon, 2026-08-20: same air for brakes and horn, like a real truck).
     HORN_AIR_PSI_PER_S = 0.125
+    # FMVSS 121 requires accessories to be pressure-protected so they can
+    # never deplete the brake circuits: a pressure protection valve closes
+    # and the HORN goes silent, the brakes keep their air. Typical closing
+    # pressures sit around 70 psi. So the honk-to-zero spring-brake lockout
+    # is mechanically impossible on a compliant tractor -- the first version
+    # of this feature got that wrong and a realism audit caught it
+    # (2026-08-20; 49 CFR 571.121 and NHTSA interpretation nht95-2.25).
+    HORN_PROTECTION_PSI = 70.0
+
+    @property
+    def horn_available(self) -> bool:
+        """Whether the pressure protection valve is still feeding the horn."""
+        return self.air_pressure_psi > self.HORN_PROTECTION_PSI
 
     def _consume_brake_air(self, dt: float) -> None:
-        if self.horn_on:
+        if self.horn_on and self.horn_available:
             draw = self.HORN_AIR_PSI_PER_S * dt
             self.primary_air_psi -= draw
             self.secondary_air_psi -= draw * 0.5

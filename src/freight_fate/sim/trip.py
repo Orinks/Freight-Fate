@@ -2495,9 +2495,19 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # Where traffic has a reason to be on the brakes: the congestion the
         # trip placed from real volumes, plus its approach. Before this,
         # "somebody is braking hard" was sprinkled evenly down an empty
-        # interstate at one vehicle in seven (owner, 2026-08-19).
+        # interstate at one vehicle in seven (owner, 2026-08-19). The zone's
+        # limit rides along as the pace braking traffic settles at in there:
+        # without it the manager's generic floor held a braking lead at 25 in
+        # a zone whose own math said traffic prevails at 45 (Brandon,
+        # 2026-08-20). Read live each tick, because _zone_is_active refreshes
+        # a congestion zone's number from the clock.
         self.traffic_manager._braking_zones = tuple(
-            (max(0.0, zone.start_mi - 1.0), zone.end_mi, getattr(zone, "reason", ""))
+            (
+                max(0.0, zone.start_mi - 1.0),
+                zone.end_mi,
+                getattr(zone, "reason", ""),
+                zone.limit_mph,
+            )
             for zone in self.zones
             if getattr(zone, "reason", "") in ("heavy traffic", "construction")
         )

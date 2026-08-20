@@ -551,10 +551,13 @@ def test_the_welcome_sign_is_deterministic_and_authored(world):
     assert welcome_sign("Atlantis", _random.Random(1)) == ""
 
 
-def test_the_horn_drains_the_air_tanks(world):
-    """Real trucks run the horn off the brake air (Brandon, 2026-08-20).
-    Leaning on it for a minute costs measurable air; releasing stops the
-    draw; the compressor wins it back."""
+def test_the_horn_drains_the_air_tanks_to_the_protection_valve(world):
+    """Real trucks run the horn off the brake air (Brandon, 2026-08-20) --
+    and FMVSS 121 pressure protection means the horn can never take the
+    brakes down with it: below the valve's threshold the horn goes silent
+    and the draw stops (realism audit, 2026-08-20; the first version let
+    you honk to a spring-brake lockout, which a compliant tractor cannot
+    do)."""
     from freight_fate.sim.vehicle import TruckState
 
     t = TruckState()
@@ -569,6 +572,14 @@ def test_the_horn_drains_the_air_tanks(world):
     for _ in range(60):
         t._consume_brake_air(1 / 60)
     assert t.primary_air_psi == mid, "released horn must not draw"
+    # Honk forever: the valve floors the drain at its threshold.
+    t.horn_on = True
+    for _ in range(60 * 60 * 30):
+        t._consume_brake_air(1 / 60)
+    assert t.air_pressure_psi >= t.HORN_PROTECTION_PSI - 1.0, (
+        f"the horn drained past the protection valve: {t.air_pressure_psi:.1f}"
+    )
+    assert not t.horn_available, "below threshold the horn must be dead"
 
 
 def test_brake_lights_name_the_cause_when_the_road_knows_it(world):
@@ -619,3 +630,20 @@ def test_the_status_browse_says_how_much_to_the_next_level(world):
         assert "to level" in career_lines[0] or "top career level" in career_lines[0]
     finally:
         app.shutdown()
+
+
+def test_abandoning_a_bobtail_costs_nothing(world):
+    """No load, no contract, nothing to breach, nothing to fine (Shane,
+    2026-08-20). A loaded job still pays the five hundred and the
+    reputation; an empty reposition just turns around."""
+    from types import SimpleNamespace
+
+    from freight_fate.states.driving_pause_states import AbandonJobConfirmationState
+
+    host = AbandonJobConfirmationState.__new__(AbandonJobConfirmationState)
+    host.driving = SimpleNamespace(job=SimpleNamespace(bobtail=True))
+    assert host._is_bobtail()
+    host.driving = SimpleNamespace(job=SimpleNamespace(bobtail=False))
+    assert not host._is_bobtail()
+    host.driving = SimpleNamespace(job=None)
+    assert not host._is_bobtail()

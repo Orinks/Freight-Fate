@@ -397,7 +397,22 @@ class AbandonJobConfirmationState(MenuState):
         super().__init__(ctx)
         self.driving = driving
 
+    def _is_bobtail(self) -> bool:
+        # An empty reposition has no load, no contract, and no pay -- there
+        # is nothing to breach, so there is nothing to fine (Shane,
+        # 2026-08-20: "you have no freight and you're not getting paid
+        # anyhow"). The hours still pass either way.
+        return bool(getattr(getattr(self.driving, "job", None), "bobtail", False))
+
     def announce_entry(self) -> None:
+        if self._is_bobtail():
+            self.ctx.say(
+                f"{self.title} You are running empty, so turning back costs "
+                "nothing but the time already spent. You will return to "
+                f"{self.ctx.world.spoken_city(self.ctx.profile.current_city)}. "
+                f"{self.current_text()}"
+            )
+            return
         self.ctx.say(
             f"{self.title} Abandoning gives up this load. You will pay a five "
             "hundred dollar penalty, take a reputation hit, and return to "
@@ -424,8 +439,10 @@ class AbandonJobConfirmationState(MenuState):
         from .city import CityMenuState
 
         p = self.ctx.profile
-        p.money -= 500.0
-        p.career.reputation = max(0.0, p.career.reputation - 5.0)
+        bobtail = self._is_bobtail()
+        if not bobtail:
+            p.money -= 500.0
+            p.career.reputation = max(0.0, p.career.reputation - 5.0)
         p.store_truck_condition(self.driving.truck)
         # the hours spent on the failed run still happened: keep the world
         # clock consistent with the HOS and fatigue already accrued
@@ -438,8 +455,15 @@ class AbandonJobConfirmationState(MenuState):
         self.ctx.pop_state()  # close the pause menu
         self.ctx.replace_state(CityMenuState(self.ctx))
         # interrupt=True so this overrides any menu re-announcement during unwind
-        self.ctx.say(
-            f"Job abandoned. You paid a five hundred dollar penalty and "
-            f"returned to {self.ctx.world.spoken_city(p.current_city)}.",
-            interrupt=True,
-        )
+        if bobtail:
+            self.ctx.say(
+                "Reposition called off. No freight, no penalty; the hours "
+                f"still count. Back in {self.ctx.world.spoken_city(p.current_city)}.",
+                interrupt=True,
+            )
+        else:
+            self.ctx.say(
+                f"Job abandoned. You paid a five hundred dollar penalty and "
+                f"returned to {self.ctx.world.spoken_city(p.current_city)}.",
+                interrupt=True,
+            )

@@ -130,6 +130,38 @@ def test_active_jam_sets_the_prevailing_speed(world):
     assert night_limit > limit
 
 
+def test_jam_traffic_settles_at_the_zone_speed_not_the_generic_floor(world):
+    """Brandon, 2026-08-20: a heavy-traffic zone posting 45 dropped the truck
+    to 25 and held it there. The injected braking lead -- which never takes
+    an exit -- ratcheted down to the manager's generic 45-percent-of-posted
+    floor (25 on that 55 corridor), well under the zone's own prevailing
+    speed, and the speed keeper followed it for the rest of the zone with
+    no visible lead to blame. Braking traffic in a zone settles at the
+    zone's number, so the keeper's target does too."""
+    # 1 PM puts the synthetic jam in the light band: prevailing exactly 45.
+    trip = _synthetic_trip(world, start_hour=13.0)
+    jam = [z for z in trip.zones if z.reason == "heavy traffic"][0]
+    assert trip._zone_is_active(jam)
+    assert jam.limit_mph == pytest.approx(45.0)
+    manager = trip.traffic_manager
+    manager.vehicles = []
+    manager.rolling_bubble = False
+    trip.position_mi = jam.start_mi + 0.1
+    trip._check_zones()  # entering the live jam injects the queue
+    lead = next(
+        v for v in manager.vehicles if v.key.startswith("congestion:") and v.intent == "braking"
+    )
+    # The trap this pins: the generic floor sits under the zone's number.
+    floor = manager._floor_speed(manager._posted_limit_at(lead.position_mi))
+    assert floor < jam.limit_mph
+    trip.update(0.01)  # publishes the braking zones, pace included
+    # Ride just behind the lead long enough for the old ratchet to have
+    # reached its floor; time_scale zero freezes positions so the gap holds.
+    for _ in range(8):
+        manager.update(dt=1.0, position_mi=lead.position_mi - 0.5, time_scale=0.0)
+    assert lead.target_speed_mph == pytest.approx(jam.limit_mph)
+
+
 def test_entering_a_live_jam_fills_it_with_slow_traffic(world):
     trip = _synthetic_trip(world, start_hour=17.0)
     jam = [z for z in trip.zones if z.reason == "heavy traffic"][0]
