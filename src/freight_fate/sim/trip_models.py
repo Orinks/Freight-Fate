@@ -639,7 +639,17 @@ HAZARDS: tuple[HazardDef, ...] = (
         regions=("rockies", "great_basin", "pacific_northwest"),
         name="the elk",
     ),
-    HazardDef("an animal on the road", 0.7, animal=True, name="the animal"),  # generic fallback
+    # Named animals for the generic slot, same rule as the debris split
+    # above: the brake call should say WHAT is in the road (Brandon,
+    # 2026-08-20). Deer and elk keep their regional entries; these are the
+    # nationwide commoners, weights summing to the 0.7 the one generic
+    # entry carried. Dogs lead -- the most common domestic animal struck
+    # on highways -- and loose livestock is the rural West's staple.
+    HazardDef("a dog loose on the road", 0.2, animal=True, name="the dog"),
+    HazardDef("a coyote crossing the road", 0.15, animal=True, name="the coyote"),
+    HazardDef("loose livestock on the road", 0.15, animal=True, name="the livestock"),
+    HazardDef("a raccoon in the lane", 0.1, animal=True, name="the raccoon"),
+    HazardDef("an animal on the road", 0.1, animal=True, name="the animal"),  # honest fallback
     # Wet weather only.
     HazardDef(
         "standing water flooding the lane",
