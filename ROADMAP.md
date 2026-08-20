@@ -157,13 +157,35 @@ onto exit signalling.
       Same pass should read `highway=give_way` and `junction=roundabout` at
       the terminal for the yield work below.
 
-- [ ] **Yield as a ramp-terminal control** (owner-approved direction
-      2026-08-20, design in progress). Rural diamonds and roundabout
+- [ ] **Yield as a ramp-terminal control, on real cross traffic** (design
+      settled with the owner 2026-08-20). Rural diamonds and roundabout
       terminals are commonly yield-controlled; the game only knows
-      signal/stop/none, so those exits currently dice into lights and stop
-      signs that do not exist there. Needs the spoken/gameplay design (slow,
-      look, roll on when clear -- distinct from a stop) and NPC traffic that
-      yields the same way, before the give_way/roundabout data is read.
+      signal/stop/none, so those exits dice into lights and stop signs that
+      do not exist there. The mechanism is the CROSS BUBBLE, the mainline
+      traffic bubble rotated 90 degrees: when a terminal announces, a short
+      simulated stretch of crossroad spawns real TrafficVehicle entities
+      (AADT-seeded at the edges, simulated after that) driving through the
+      conflict point. They platoon behind slow cars -- the real burst-then-gap
+      rhythm -- react to a player nosing into the window (brake, horn, or a
+      clip at THEIR closing speed), and pan/loudness come from simulated
+      position, so finding the gap is a listening skill. Owner's call, and
+      right: scripted audio sweeps were considered and rejected -- cross
+      traffic must be NPCs. The same bubble upgrades all three existing
+      terminals: cross traffic runs the orthogonal signal phase (you hear why
+      you are waiting, and the green is audible as the cross stream dying),
+      and the stop sign's unconditional "Clear; pull ahead" starts waiting
+      for a real gap. Yield rules: roll through at 15 or under in a gap;
+      stopping is always legal; crossing an occupied window is the clip
+      machinery. Roundabout terminals fold into yield v1 (US entry conflicts
+      left-only), spoken as a roundabout. The car ahead on the ramp runs the
+      same gap acceptance, so it sometimes stops dead at a busy yield -- the
+      classic rear-end setup, spoken by the following-gap machinery. Assist
+      slows to roll speed and only stops for an occupied window. Ontology
+      row for the yield in the same change. Build order: terminal-precision
+      read above (with give_way/roundabout) -> cross bubble + yield terminal
+      -> lead-car yielding -> stop/signal clear calls adopt the bubble.
+      Mainline merge symmetry (NPCs yielding to the player from on-ramps)
+      stays out of scope with the parked merge-yield AI feel item.
 
 - [x] **Destination approach assistance brings the truck to a stop at the
       arrival point.** Shipped 2026-08-20 after three failed attempts, all
