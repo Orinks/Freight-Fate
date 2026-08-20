@@ -4280,6 +4280,20 @@ section below and the Unreleased changelog; the release-line view:
       says inspection station, the clock, and the current menu item -- no
       parking report, no live lot lookup, no brand amenities -- and the
       loyalty row is gated to hospitality stops.
+- [ ] **The graph routes 53-foot trailers over the Million Dollar Highway
+      (Jerry's Farmington-to-Superior run, 2026-08-20).** Durango's only
+      northbound edge is US-550 over Red Mountain, Molas, and Coal Bank
+      passes -- 289 surveyed curves, 33 advising 25 mph or under, all real
+      -- so every Farmington-to-north load is forced across it. Two gaps:
+      the leg carries no baked restriction although CDOT restricts long
+      combination vehicles on the pass (bake it from the CDOT source and
+      label it read), and the realistic freight detour does not exist in
+      the graph (a Cortez/US-491 corridor toward Moab and I-70; Moab is in
+      the world but unconnected down there -- the add-leg workflow covers
+      this). Owner call on the design: once the restriction is baked,
+      should dispatch refuse the pass for long trailers, warn and allow,
+      or price it? Keeping the pass drivable is the fun; sending every
+      load over it unwarned is the bug.
 - [ ] **Domain-named imported stations: 75 of 5,241 read a URL aloud.**
       "TheRadioStorm.com", "SoftRockRadio.net", and 73 more speak their
       TLD to every screen reader; two entries' whole name is just ".org"
