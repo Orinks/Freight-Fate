@@ -1073,10 +1073,24 @@ onto exit signalling.
       that volume by a single lane and parked a permanent phantom jam on a
       road that flows.
 
-      STILL OPEN: NPC spawn density (`_leg_density`) does not read AADT at
-      all -- it varies by rush hour, night and metro bias only. So the road's
-      BEHAVIOUR is now real while its vehicle COUNT is not. Wiring the two
-      together is 1.10 work: it would change traffic everywhere on the map.
+      NPC spawn density (`_leg_density`) now reads the same AADT chain
+      congestion does -- vehicles per mile from this hour's share of the
+      day's volume, Poisson per spawn cell -- so a quiet rural highway is
+      measurably sparser than a busy freeway at the hour it is quieter. The
+      ORDER is real; the absolute COUNT still is not, because the bubble
+      caps at `MAX_BUBBLE_VEHICLES` (~5/mile) while a median road at peak
+      wants thirteen in your direction. Lifting that cap is 1.10 work with a
+      performance question attached.
+
+- [ ] **Congestion queue re-pacing when the clock moves the zone.** The
+      braking lead in an injected jam now paces the zone's live prevailing
+      speed (Brandon's held-at-25-in-a-45-zone fix, 2026-08-20), but the
+      following/cruising queue vehicles keep the speed they were seeded with
+      for the life of the zone -- so a jam that eases from the 26 band to the
+      45 band as rush hour ends keeps its old slower metal until the truck
+      passes it. They never take an exit either, by design; re-pacing them
+      from the zone's refreshed number would let a clearing jam audibly speed
+      up around the player.
 
 - [x] **FHWA HPMS Terrain_Type baked per leg -- SHIPPED 2026-08-19.** 1,273 of
       1,290 legs. Exists because the world's own `terrain` field is derived

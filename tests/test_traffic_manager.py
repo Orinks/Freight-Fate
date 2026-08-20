@@ -281,6 +281,29 @@ def test_braking_vehicle_slows_and_creates_lead_situation():
     assert "Brake lights" in situation.message
 
 
+def test_braking_vehicle_in_a_zone_paces_the_zone_speed():
+    """Inside a handed-over zone, braking traffic settles at the zone's own
+    prevailing speed instead of ratcheting to the generic 45-percent-of-posted
+    floor -- which sat at 25 on a 55 corridor whose heavy-traffic zone posted
+    45, and parked the speed keeper there (Brandon, 2026-08-20)."""
+    manager = _manager()
+    manager.rolling_bubble = False
+    manager._braking_zones = ((4.0, 8.0, "heavy traffic", 45.0),)
+    manager.vehicles = [TrafficVehicle("brake", 5.5, 49.0, 49.0, 0, "braking", "car")]
+
+    for _ in range(8):
+        manager.update(dt=1.0, position_mi=5.0, time_scale=0.0)
+
+    braking = manager.vehicles[0]
+    assert braking.target_speed_mph == 45.0
+    # Outside any zone the old floor still governs: the merge-window case.
+    manager._braking_zones = ()
+    for _ in range(8):
+        manager.update(dt=1.0, position_mi=5.0, time_scale=0.0)
+    floor = manager._floor_speed(manager._posted_limit_at(5.5))
+    assert braking.target_speed_mph == floor
+
+
 def test_next_situation_only_announces_vehicle_once():
     manager = _manager()
     manager.vehicles = [TrafficVehicle("lead", 0.7, 42.0, 42.0, 0, "following", "semi")]

@@ -507,6 +507,15 @@ class TrafficManager:
                 return str(zone[2]) if len(zone) > 2 else ""
         return ""
 
+    def _zone_pace_at(self, mile: float) -> float | None:
+        """The prevailing speed of the braking zone covering this mile, when
+        the trip handed one over. Older two- and three-element tuples carry
+        no pace and answer None."""
+        for zone in getattr(self, "_braking_zones", ()) or ():
+            if zone[0] <= mile <= zone[1] and len(zone) > 3 and zone[3]:
+                return float(zone[3])
+        return None
+
     def _vehicle_intent(self, vehicle) -> str:
         intent = getattr(vehicle, "intent", None)
         if intent is not None:
@@ -783,10 +792,24 @@ class TrafficManager:
             intent = self._vehicle_intent(vehicle)
             vehicle.relative_lane = self.player_lane - vehicle.lane
             if intent == "braking" and 0.0 <= gap <= 1.8:
-                vehicle.target_speed_mph = max(
-                    self._floor_speed(self._posted_limit_at(vehicle.position_mi)),
-                    vehicle.target_speed_mph - 8.0 * dt,
-                )
+                # Inside a zone the pace is the zone's own prevailing speed,
+                # not the generic 45-percent-of-posted floor. The generic
+                # floor sits at 25 on a 55 corridor whose heavy-traffic zone
+                # posts 45 -- so the injected braking lead, which never takes
+                # an exit, ratcheted down to 25 and parked the speed keeper
+                # there for the rest of a zone that had just announced
+                # "traffic slowing to 45" (Brandon, 2026-08-20). The zone's
+                # number is what its own AADT math says traffic is doing
+                # here, so a braking vehicle converges on it from either
+                # side.
+                pace = self._zone_pace_at(vehicle.position_mi)
+                if pace is not None:
+                    vehicle.target_speed_mph = pace
+                else:
+                    vehicle.target_speed_mph = max(
+                        self._floor_speed(self._posted_limit_at(vehicle.position_mi)),
+                        vehicle.target_speed_mph - 8.0 * dt,
+                    )
             delta = vehicle.target_speed_mph - vehicle.speed_mph
             vehicle.speed_mph += max(-6.0 * dt, min(4.0 * dt, delta))
             vehicle.position_mi += max(0.0, vehicle.speed_mph) * game_hours
