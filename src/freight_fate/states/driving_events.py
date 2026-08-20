@@ -2023,15 +2023,26 @@ class DrivingEventMixin:
     def _ramp_meets_a_freeway(self, stop) -> bool:
         """Whether this exit's ramp lands on another freeway.
 
-        Read off the baked interchange's own ``via``, so it is a fact about
-        the road rather than a roll. 4,999 of the world's 18,011 exits lead
-        to an interstate and every one of them used to take its chances with
-        the urban/rural weights below, which handed stop signs to roughly
-        half the rural ones -- a stop sign where an interstate meets an
-        interstate does not exist (owner, 2026-08-17).
+        The baked ``ramp_far_end`` answers first: it is walked link topology,
+        a fact about the road the ramp reaches. ``surface`` in particular
+        SUPPRESSES the ``via`` guess below -- via is signage (where the exit
+        points), not the road the ramp lands on, and measured against walked
+        topology the signage guess called a controlled surface terminal
+        "free flow" on about a third of the exits it fired on.
+
+        The via fallback survives for exits the walk could not judge: 4,999
+        of the world's 18,011 exits lead to an interstate and every one of
+        them used to take its chances with the urban/rural weights below,
+        which handed stop signs to roughly half the rural ones -- a stop
+        sign where an interstate meets an interstate does not exist (owner,
+        2026-08-17).
         """
         interchange = self.trip.interchange_at(stop.at_mi)
         if interchange is None:
+            return False
+        if interchange.ramp_far_end == "motorway":
+            return True
+        if interchange.ramp_far_end == "surface":
             return False
         return bool(FREEWAY_VIA_RE.search((interchange.via or "").upper()))
 

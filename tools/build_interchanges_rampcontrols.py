@@ -257,9 +257,12 @@ def bake_ramp_controls_for_leg(
     rate_limit: float,
     force: bool = False,
     junction_refs: dict[str, list[tuple[float, float]]] | None = None,
+    topo: dict[str, Any] | None = None,
+    stats: dict[str, int] | None = None,
 ) -> int:
     """Set ``ramp_control`` on the leg's interchanges from nearby ramp-link
-    control nodes. Returns how many interchanges got a control."""
+    control nodes, and ``ramp_far_end`` from the walked link topology.
+    Returns how many interchanges got a control or a far end."""
     interchanges = list(leg.get("corridor", {}).get("interchanges", ()))
     if not interchanges:
         return 0
@@ -270,26 +273,61 @@ def bake_ramp_controls_for_leg(
     if not geom:
         return 0
     leg_miles = float(leg["miles"])
+    stats = stats if stats is not None else {}
     baked = 0
     for ix in interchanges:
-        if ix.get("ramp_control") and not force:
+        had_control = bool(ix.get("ramp_control"))
+        had_far_end = bool(ix.get("ramp_far_end"))
+        if had_control and had_far_end and not force:
             continue
         estimate = _exit_location(geom, float(ix.get("at_mi", 0.0)), leg_miles)
         (lat, lon), radius_m = _pinned_exit_location(ix, estimate, junction_refs or {})
-        kinds = {
-            kind
-            for plat, plon, kind in points
-            if _haversine_mi(lat, lon, plat, plon) * 1609.34 <= radius_m
-        }
-        if "signal" in kinds:
-            control = "signal"
-        elif "stop" in kinds:
-            control = "stop"
-        else:
-            continue  # untagged: the runtime heuristic stands in
-        ix["ramp_control"] = control
-        ix["ramp_control_source"] = RAMP_CONTROL_SOURCE
-        baked += 1
+        touched = False
+        if not had_control or force:
+            kinds = {
+                kind
+                for plat, plon, kind in points
+                if _haversine_mi(lat, lon, plat, plon) * 1609.34 <= radius_m
+            }
+            control = "signal" if "signal" in kinds else "stop" if "stop" in kinds else ""
+            if control:
+                ix["ramp_control"] = control
+                ix["ramp_control_source"] = RAMP_CONTROL_SOURCE
+                touched = True
+        if topo is not None and (not had_far_end or force):
+            # The gore sits at the junction itself, so the search is tighter
+            # than the control radius by design.
+            far_radius = (
+                RAMP_FAR_END_NEAR_JUNCTION_M
+                if radius_m == RAMP_CONTROL_NEAR_JUNCTION_M
+                else RAMP_FAR_END_NEAR_GEOM_M
+            )
+            far_end, gores = classify_exit_far_end(lat, lon, topo, far_radius)
+            stats["exits"] = stats.get("exits", 0) + 1
+            if not gores:
+                stats["no_gore"] = stats.get("no_gore", 0) + 1
+            if far_end == "motorway" and ix.get("ramp_control") in ("signal", "stop"):
+                # Self-contradiction: a READ control at a proven merge. Trust
+                # the reading, bake no far end, and count it loudly -- these
+                # are the records a re-judged rule would want back.
+                stats["contradictions"] = stats.get("contradictions", 0) + 1
+            elif far_end:
+                stats[f"far_{far_end}"] = stats.get(f"far_{far_end}", 0) + 1
+                ix["ramp_far_end"] = far_end
+                ix["ramp_far_end_source"] = RAMP_FAR_END_SOURCE
+                touched = True
+                if far_end == "motorway" and not ix.get("ramp_control"):
+                    ix["ramp_control"] = "none"
+                    ix["ramp_control_source"] = RAMP_CONTROL_NONE_SOURCE
+                    stats["none_baked"] = stats.get("none_baked", 0) + 1
+            # Measure the signage guess the far end replaces: how often would
+            # FREEWAY_VIA_RE's call have disagreed with walked topology?
+            if far_end:
+                via_says_freeway = bool(re.search(r"\bI[-\s]?\d", str(ix.get("via", "")).upper()))
+                if via_says_freeway != (far_end == "motorway"):
+                    stats["via_disagrees"] = stats.get("via_disagrees", 0) + 1
+        if touched:
+            baked += 1
     return baked
 
 
@@ -306,7 +344,12 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
         corridor = leg.get("corridor", {})
         if not corridor.get("interchanges") or len(corridor.get("route_points", ())) < 2:
             continue
-        if not args.force and all(ix.get("ramp_control") for ix in corridor["interchanges"]):
+        if not args.force and all(
+            ix.get("ramp_control") and ix.get("ramp_far_end") for ix in corridor["interchanges"]
+        ):
+            # Done means a control AND a far-end verdict. Exits topology could
+            # not judge (no gore in range) keep the leg eligible and are
+            # re-walked on later runs, which costs a lookup and nothing else.
             continue
         if not args.max_legs or len(target_legs) < args.max_legs:
             target_legs.append(leg)
@@ -344,10 +387,22 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
         pbf_paths, bounds, cache_path, rebuild=args.rebuild_local_index
     )
     print(f"    using {len(points)} ramp-link control nodes", flush=True)
+    topo = load_or_build_ramp_topo_index(
+        pbf_paths, bounds, _ramp_topo_cache_path(pbf_paths), rebuild=args.rebuild_local_index
+    )
+    print(
+        f"    using ramp topology: {topo['gore_count']:,} gores over "
+        f"{topo['link_way_count']:,} link ways "
+        f"({topo['untagged_oneway_ways']:,} untagged oneway, treated as "
+        f"drawn-forward; {len(topo['toll']):,} toll booths, "
+        f"{len(topo['give_way']):,} give-way nodes on ramp links)",
+        flush=True,
+    )
     junction_refs: dict[str, list[tuple[float, float]]] = {}
     if JUNCTION_INDEX_DEFAULT.exists():
         junction_refs = load_junction_ref_map(JUNCTION_INDEX_DEFAULT)
 
+    stats: dict[str, int] = {}
     baked_total = 0
     baked_legs = 0
     processed = 0
@@ -359,7 +414,13 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
         )
         try:
             baked = bake_ramp_controls_for_leg(
-                leg, points, args.rate_limit, force=args.force, junction_refs=junction_refs
+                leg,
+                points,
+                args.rate_limit,
+                force=args.force,
+                junction_refs=junction_refs,
+                topo=topo,
+                stats=stats,
             )
         except Exception as exc:  # noqa: BLE001 - one bad leg must not abort the batch
             print(f"    skipped: {type(exc).__name__}: {exc}", flush=True)
@@ -375,14 +436,516 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
 
     print(
         f"\n{processed} legs processed, {baked_legs} touched, "
-        f"{baked_total} interchanges given ramp controls."
+        f"{baked_total} interchanges given ramp controls or far ends."
     )
+    examined = stats.get("exits", 0)
+    if examined:
+        # The loud accounting the provenance rule asks for: how much of this
+        # bake is walked topology, how much is still nothing, and how often
+        # the old signage guess it replaces would have called it wrong.
+        motorway = stats.get("far_motorway", 0)
+        surface = stats.get("far_surface", 0)
+        print(
+            f"Far-end topology over {examined:,} exits: "
+            f"{motorway:,} merge onto a motorway "
+            f"({stats.get('none_baked', 0):,} baked ramp_control=none, derived), "
+            f"{surface:,} end at a surface road, "
+            f"{stats.get('no_gore', 0):,} had no gore in range, "
+            f"{examined - motorway - surface - stats.get('no_gore', 0):,} "
+            "walked without a verdict (toll plaza or overrun)."
+        )
+        print(
+            f"    {stats.get('contradictions', 0):,} exits carry a READ "
+            "signal/stop at a topology-proven merge (reading kept, no far "
+            "end baked)."
+        )
+        judged = motorway + surface
+        if judged:
+            print(
+                f"    The via-signage guess would have disagreed with walked "
+                f"topology on {stats.get('via_disagrees', 0):,} of "
+                f"{judged:,} judged exits "
+                f"({100.0 * stats.get('via_disagrees', 0) / judged:.1f}%)."
+            )
     if args.write and baked_legs:
         save_world(data)
         print(f"Wrote {WORLD_SOURCE_PATH}")
     elif not args.write:
         print("(dry run; pass --write to update the world source)")
     return 0
+
+
+# --- Ramp far-end topology: whether the exit's ramps merge onto another ---
+# --- motorway, walked from OSM link-way connectivity (ROADMAP 2026-08-20) ---
+#
+# OSM tags controls that exist and is silent where a ramp merges freely, so
+# "no control" can never be read off a node. It CAN be read off topology: an
+# exit whose every motorway_link chain ends by rejoining a highway=motorway
+# way has nothing at its far end but a merge. That is baked as an explicit
+# ``ramp_control: none`` (derived, and its source string says from what), and
+# the far-end fact itself is baked as ``ramp_far_end`` so the runtime stops
+# guessing free flow from `via` signage -- measured 34.9% wrong -- on exits
+# whose ramps provably end at a surface road.
+#
+# The gore sits AT the junction, unlike the terminal control at the ramp's
+# far end, so the match radii are much tighter than the control pass's.
+RAMP_FAR_END_NEAR_JUNCTION_M = 500.0
+RAMP_FAR_END_NEAR_GEOM_M = 1200.0
+RAMP_TOPO_CACHE_VERSION = 2
+RAMP_TOPO_WALK_CAP = 600  # visited nodes per gore; a real ramp complex is far smaller
+RAMP_FAR_END_SOURCE = (
+    "derived: this exit's motorway_link chains walked from the gore in a "
+    f"local Geofabrik extract, accessed {ACCESSED_DATE}. 'motorway' means "
+    "every chain merges onto a highway=motorway way; 'surface' means at "
+    "least one chain ends off the motorway network: "
+    "https://www.openstreetmap.org/"
+)
+RAMP_CONTROL_NONE_SOURCE = (
+    "derived from ramp_far_end=motorway: every exit-ramp chain merges onto "
+    "another motorway, so nothing stops traffic at the far end. Free flow is "
+    "inferred from read OSM link topology, not from a tag -- OSM does not "
+    f"tag the absence of a control. Geofabrik extract accessed {ACCESSED_DATE}"
+)
+
+
+def build_ramp_link_graph(
+    link_ways: list[tuple[list[int], str]],
+    motorway_node_ids: set[int],
+    trunk_node_ids: set[int] | None = None,
+    crossroad_node_ids: set[int] | None = None,
+) -> dict[str, Any]:
+    """Directed ramp-link graph from motorway_link ways.
+
+    ``link_ways`` is (node id list, oneway tag value) per way. oneway is not
+    implied on motorway_link, but ramps are overwhelmingly drawn in travel
+    direction even when the tag is missing, so an untagged way is treated as
+    forward and counted so the report can say how much rests on that.
+
+    ``crossroad_node_ids`` are link nodes shared with any road that is not a
+    motorway or another link -- the at-grade touch points where a control can
+    stand. Without them the walk sails THROUGH a diamond's crossroad
+    intersection onto the on-ramp and back to the mainline, and a plain
+    service exit reads as a system merge (caught on the first smoke leg:
+    every diamond whose off-ramp and on-ramp share the intersection node).
+
+    Membership sets are intersected down to link nodes: the walk only ever
+    asks "is this LINK node also on a motorway/trunk/crossroad way"."""
+    out_edges: dict[int, list[int]] = {}
+    link_nodes: set[int] = set()
+    untagged = 0
+    for node_ids, oneway in link_ways:
+        ids = [int(n) for n in node_ids]
+        if len(ids) < 2:
+            continue
+        link_nodes.update(ids)
+        ow = (oneway or "").strip().lower()
+        pairs = list(zip(ids, ids[1:], strict=False))
+        if ow in ("-1", "reverse"):
+            pairs = [(b, a) for a, b in pairs]
+        elif ow in ("no", "false", "0"):
+            pairs = pairs + [(b, a) for a, b in pairs]
+        elif ow not in ("yes", "true", "1"):
+            untagged += 1
+        for a, b in pairs:
+            out_edges.setdefault(a, []).append(b)
+    mainline = link_nodes & set(motorway_node_ids)
+    trunk = link_nodes & set(trunk_node_ids or ())
+    crossroad = (link_nodes & set(crossroad_node_ids or ())) - mainline
+    # A gore: a link node ON the mainline with a link edge leaving it. An
+    # on-ramp's merge point is also on the mainline but has only an INBOUND
+    # link edge, so requiring an out-edge keeps entrances out of the set.
+    gores = sorted(n for n in mainline if out_edges.get(n))
+    return {
+        "out": out_edges,
+        "mainline": mainline,
+        "trunk": trunk,
+        "crossroad": crossroad,
+        "gores": gores,
+        "untagged_oneway_ways": untagged,
+    }
+
+
+def walk_far_ends(
+    graph: dict[str, Any], start: int, toll_nodes: set[int] | frozenset[int] = frozenset()
+) -> tuple[set[str], bool]:
+    """(terminal kinds, passed a toll booth) for every chain leaving a gore.
+
+    Terminals: ``motorway`` (the chain rejoins a mainline node -- a merge),
+    ``crossroad`` (the chain touches a node shared with a surface road -- an
+    at-grade meeting where a control can stand; the walk stops there rather
+    than sailing through a diamond's intersection onto the on-ramp),
+    ``trunk`` (ends on a trunk way; free flow is LIKELY but trunks carry
+    signals too, so it is not treated as one), ``road-end`` (the link data
+    ends off the motorway network -- a surface terminal the crossroad set
+    did not carry, or a data edge; either way, not a proven merge),
+    ``overrun`` (walk cap hit)."""
+    out = graph["out"]
+    mainline = graph["mainline"]
+    trunk = graph["trunk"]
+    crossroad = graph.get("crossroad", frozenset())
+    seen = {start}
+    frontier = [start]
+    terminals: set[str] = set()
+    tolled = False
+    steps = 0
+    while frontier:
+        node = frontier.pop()
+        for nxt in out.get(node, ()):
+            if nxt in seen:
+                continue
+            seen.add(nxt)
+            steps += 1
+            if steps > RAMP_TOPO_WALK_CAP:
+                terminals.add("overrun")
+                return terminals, tolled
+            if nxt in toll_nodes:
+                tolled = True
+            if nxt in mainline:
+                terminals.add("motorway")
+                continue
+            if nxt in crossroad:
+                terminals.add("trunk" if nxt in trunk else "crossroad")
+                continue
+            if not out.get(nxt):
+                terminals.add("trunk" if nxt in trunk else "road-end")
+                continue
+            frontier.append(nxt)
+    if not terminals:
+        terminals.add("road-end")
+    return terminals, tolled
+
+
+def classify_gore(terminals: set[str], tolled: bool) -> str:
+    """One gore's verdict: ``motorway``, ``surface``, or ``""`` (no call).
+
+    A toll plaza on an all-motorway chain vetoes free flow -- conventional
+    booths stop every truck -- and an overrun walk proves nothing."""
+    if "overrun" in terminals:
+        return ""
+    if terminals == {"motorway"}:
+        return "" if tolled else "motorway"
+    return "surface"
+
+
+def _gore_distance_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    # Local haversine so the pure topology half of this module imports and
+    # tests standalone, without build_interchanges wiring its globals in.
+    rlat1, rlat2 = math.radians(lat1), math.radians(lat2)
+    dlat = rlat2 - rlat1
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2) ** 2 + math.cos(rlat1) * math.cos(rlat2) * math.sin(dlon / 2) ** 2
+    return 2 * EARTH_RADIUS_MI * math.asin(math.sqrt(a)) * 1609.34
+
+
+class _GoreGrid:
+    """0.1-degree bucket index over gore points; radii here are under 1.3 km
+    so a 3x3 neighborhood always covers the search circle."""
+
+    def __init__(self, points: list[tuple[float, float, int]]) -> None:
+        self.cells: dict[tuple[int, int], list[tuple[float, float, int]]] = {}
+        for lat, lon, node_id in points:
+            self.cells.setdefault((int(lat * 10), int(lon * 10)), []).append((lat, lon, node_id))
+
+    def near(self, lat: float, lon: float, radius_m: float) -> list[int]:
+        clat, clon = int(lat * 10), int(lon * 10)
+        found: list[int] = []
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                for plat, plon, node_id in self.cells.get((clat + dy, clon + dx), ()):
+                    if _gore_distance_m(lat, lon, plat, plon) <= radius_m:
+                        found.append(node_id)
+        return found
+
+
+def classify_exit_far_end(
+    lat: float, lon: float, topo: dict[str, Any], radius_m: float
+) -> tuple[str, int]:
+    """(far end, gores found) for the exit at a location.
+
+    ``surface`` wins over ``motorway``: one ramp chain ending at a surface
+    road means the interchange has a controlled or controllable terminal,
+    whatever its other ramps do. ``motorway`` needs every gore in range to
+    walk clean. Gores from the opposite carriageway land in range too; at a
+    pure system interchange they are also merges, and at a service
+    interchange they also end at the crossroad, so they push the verdict the
+    right way in both shapes."""
+    gore_ids = topo["grid"].near(lat, lon, radius_m)
+    if not gore_ids:
+        return "", 0
+    verdicts = set()
+    for gore in gore_ids:
+        terminals, tolled = walk_far_ends(topo["graph"], gore, topo["toll"])
+        verdicts.add(classify_gore(terminals, tolled))
+    if "surface" in verdicts:
+        return "surface", len(gore_ids)
+    if verdicts == {"motorway"}:
+        return "motorway", len(gore_ids)
+    return "", len(gore_ids)
+
+
+def _build_ramp_topo_from_pbf(
+    pbf_path: Path, bounds: list[LocalBounds], label: str = "1/1"
+) -> dict[str, Any]:
+    """One extract's pruned ramp topology: three filtered passes.
+
+    Ways first (link ways + mainline/trunk membership), then tagged nodes
+    (toll booths, give-way, for the veto and the report), then gore-candidate
+    node locations by id -- and finally the graph is pruned to what the
+    in-bounds gores can actually reach, so the cache stays small."""
+    try:
+        import osmium  # type: ignore[import-not-found]
+    except ImportError as exc:
+        raise SystemExit(
+            "Reading --pbf requires the tooling dependency group: "
+            "uv sync --group dev --group tooling"
+        ) from exc
+
+    progress = _LocalIndexProgress(f"PBF {label} ramp topology", LOCAL_INDEX_PROGRESS_INTERVAL_SEC)
+
+    class WayHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
+        def __init__(self) -> None:
+            super().__init__()
+            self.link_ways: list[tuple[list[int], str]] = []
+            self.motorway_nodes: set[int] = set()
+            self.trunk_nodes: set[int] = set()
+            self.ways_seen = 0
+
+        def way(self, way: Any) -> None:
+            self.ways_seen += 1
+            progress.maybe(f"{self.ways_seen:,} ways; {len(self.link_ways):,} link ways")
+            tags = {str(k): str(v) for k, v in way.tags}
+            highway = tags.get("highway")
+            refs = [
+                int(node_ref.ref)
+                for node_ref in way.nodes
+                if getattr(node_ref, "ref", None) is not None
+            ]
+            if highway == "motorway_link":
+                self.link_ways.append((refs, tags.get("oneway", "")))
+            elif highway == "motorway":
+                self.motorway_nodes.update(refs)
+            elif highway == "trunk":
+                self.trunk_nodes.update(refs)
+
+    ways = WayHandler()
+    print(f"    reading ramp topology from PBF {label}: {pbf_path}", flush=True)
+    ways.apply_file(
+        str(pbf_path),
+        filters=[
+            osmium.filter.EntityFilter(osmium.osm.WAY),
+            osmium.filter.TagFilter(
+                ("highway", "motorway_link"),
+                ("highway", "motorway"),
+                ("highway", "trunk"),
+            ),
+        ],
+    )
+    link_node_ids: set[int] = set()
+    for refs, _ in ways.link_ways:
+        link_node_ids.update(refs)
+
+    class CrossroadHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
+        """Link nodes shared with any road that is not the motorway network:
+        the at-grade points where a ramp actually meets the surface street.
+        Scans every highway way, so it keeps only the intersection with the
+        already-known link nodes."""
+
+        def __init__(self) -> None:
+            super().__init__()
+            self.crossroad: set[int] = set()
+            self.ways_seen = 0
+
+        def way(self, way: Any) -> None:
+            self.ways_seen += 1
+            progress.maybe(f"crossroads: {self.ways_seen:,} ways; {len(self.crossroad):,} nodes")
+            highway = ""
+            for k, v in way.tags:
+                if str(k) == "highway":
+                    highway = str(v)
+                    break
+            if highway in ("motorway", "motorway_link"):
+                return
+            for node_ref in way.nodes:
+                ref = getattr(node_ref, "ref", None)
+                if ref is not None and int(ref) in link_node_ids:
+                    self.crossroad.add(int(ref))
+
+    crossings = CrossroadHandler()
+    crossings.apply_file(
+        str(pbf_path),
+        filters=[
+            osmium.filter.EntityFilter(osmium.osm.WAY),
+            osmium.filter.KeyFilter("highway"),
+        ],
+    )
+    graph = build_ramp_link_graph(
+        ways.link_ways, ways.motorway_nodes, ways.trunk_nodes, crossings.crossroad
+    )
+
+    class TaggedNodeHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
+        def __init__(self) -> None:
+            super().__init__()
+            self.toll: set[int] = set()
+            self.give_way: set[int] = set()
+
+        def node(self, node: Any) -> None:
+            tags = {str(k): str(v) for k, v in node.tags}
+            if tags.get("barrier") == "toll_booth":
+                self.toll.add(int(node.id))
+            elif tags.get("highway") == "give_way":
+                self.give_way.add(int(node.id))
+
+    tagged = TaggedNodeHandler()
+    tagged.apply_file(
+        str(pbf_path),
+        filters=[
+            osmium.filter.EntityFilter(osmium.osm.NODE),
+            osmium.filter.TagFilter(("barrier", "toll_booth"), ("highway", "give_way")),
+        ],
+    )
+
+    gore_points: list[tuple[float, float, int]] = []
+    if graph["gores"]:
+
+        class GoreLocationHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
+            def node(self, node: Any) -> None:
+                if not node.location.valid():
+                    return
+                lat = float(node.location.lat)
+                lon = float(node.location.lon)
+                if _inside_any_bounds(lat, lon, bounds):
+                    gore_points.append((lat, lon, int(node.id)))
+
+        GoreLocationHandler().apply_file(
+            str(pbf_path),
+            filters=[
+                osmium.filter.EntityFilter(osmium.osm.NODE),
+                osmium.filter.IdFilter(graph["gores"]),
+            ],
+        )
+
+    # Prune to what the in-bounds gores can reach: the cache carries exactly
+    # the walkable subgraph, not a whole state's link network.
+    reachable: set[int] = set()
+    for _, _, gore in gore_points:
+        if gore in reachable:
+            continue
+        seen = {gore}
+        frontier = [gore]
+        steps = 0
+        while frontier and steps <= RAMP_TOPO_WALK_CAP * 4:
+            node = frontier.pop()
+            for nxt in graph["out"].get(node, ()):
+                if nxt not in seen:
+                    seen.add(nxt)
+                    steps += 1
+                    if nxt not in graph["mainline"] and nxt not in graph["crossroad"]:
+                        frontier.append(nxt)
+        reachable |= seen
+    out_pruned = {n: targets for n, targets in graph["out"].items() if n in reachable}
+    print(
+        f"    retained {len(gore_points):,} in-bounds gores, "
+        f"{len(out_pruned):,} graph nodes "
+        f"(of {len(ways.link_ways):,} link ways; "
+        f"{graph['untagged_oneway_ways']:,} untagged oneway), {label}",
+        flush=True,
+    )
+    return {
+        "out": out_pruned,
+        "mainline": sorted(graph["mainline"] & reachable),
+        "trunk": sorted(graph["trunk"] & reachable),
+        "crossroad": sorted(graph["crossroad"] & reachable),
+        "toll": sorted(tagged.toll & reachable),
+        "give_way": sorted(tagged.give_way & reachable),
+        "gores": gore_points,
+        "untagged_oneway_ways": graph["untagged_oneway_ways"],
+        "link_way_count": len(ways.link_ways),
+    }
+
+
+def _ramp_topo_cache_path(pbf_paths: list[Path]) -> Path:
+    if len(pbf_paths) == 1:
+        name = pbf_paths[0].name
+        for suffix in (".osm.pbf", ".pbf"):
+            if name.endswith(suffix):
+                name = name[: -len(suffix)]
+                break
+        return pbf_paths[0].with_name(f"{name}.ramptopo.json")
+    return pbf_paths[0].with_name("freight-fate-ramptopo.json")
+
+
+def load_or_build_ramp_topo_index(
+    pbf_paths: list[Path],
+    bounds: list[LocalBounds],
+    cache_path: Path,
+    rebuild: bool = False,
+) -> dict[str, Any]:
+    """Merged, walk-ready topology across the extracts, cached like the
+    control-node index. Node ids are globally unique so merging is a union."""
+    merged: dict[str, Any] | None = None
+    if not rebuild and cache_path.exists():
+        try:
+            payload = json.loads(cache_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = None
+        if (
+            payload is not None
+            and payload.get("version") == RAMP_TOPO_CACHE_VERSION
+            and payload.get("pbfs") == _pbf_set_metadata(pbf_paths)
+            and payload.get("bounds_digest") == _bounds_digest(bounds)
+        ):
+            merged = payload["topo"]
+            print(
+                f"Loaded ramp-topology cache: {cache_path} ({len(merged['gores']):,} gores)",
+                flush=True,
+            )
+    if merged is None:
+        merged = {
+            "out": {},
+            "mainline": [],
+            "trunk": [],
+            "crossroad": [],
+            "toll": [],
+            "give_way": [],
+            "gores": [],
+            "untagged_oneway_ways": 0,
+            "link_way_count": 0,
+        }
+        for i, pbf_path in enumerate(pbf_paths, start=1):
+            part = _build_ramp_topo_from_pbf(pbf_path, bounds, label=f"{i}/{len(pbf_paths)}")
+            merged["out"].update({str(k): v for k, v in part["out"].items()})
+            for key in ("mainline", "trunk", "crossroad", "toll", "give_way", "gores"):
+                merged[key].extend(part[key])
+            merged["untagged_oneway_ways"] += part["untagged_oneway_ways"]
+            merged["link_way_count"] += part["link_way_count"]
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(
+            json.dumps(
+                {
+                    "version": RAMP_TOPO_CACHE_VERSION,
+                    "pbfs": _pbf_set_metadata(pbf_paths),
+                    "bounds_digest": _bounds_digest(bounds),
+                    "topo": merged,
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    # Walk-ready shape: int keys, sets, and the spatial grid.
+    return {
+        "graph": {
+            "out": {int(k): v for k, v in merged["out"].items()},
+            "mainline": set(merged["mainline"]),
+            "trunk": set(merged["trunk"]),
+            "crossroad": set(merged["crossroad"]),
+        },
+        "toll": set(merged["toll"]),
+        "give_way": set(merged["give_way"]),
+        "grid": _GoreGrid([(p[0], p[1], int(p[2])) for p in merged["gores"]]),
+        "untagged_oneway_ways": merged["untagged_oneway_ways"],
+        "link_way_count": merged["link_way_count"],
+        "gore_count": len(merged["gores"]),
+    }
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]
