@@ -860,61 +860,67 @@ def test_a_fresh_cruise_session_inherits_an_armed_exit_s_ramp_cap():
 def test_the_destination_approach_assist_actually_brings_the_truck_to_a_stop():
     """Owner, Odessa, 2026-08-19: "I did, and it's wrong. Never stopped."
 
-    Simulated rather than inspected, because inspection is what let this
-    through twice. The first version only ran inside ``if trip.finished`` --
-    true once the truck is already AT the point -- so it could hold a stopped
-    truck and nothing else. The second gated on
-    ``_is_facility_approach_route``, which asks "is this route a same-city
-    street chain to a gate": False for an ordinary city-to-city delivery, so
-    it never ran on the deliveries it exists for and the owner went past the
-    market at 38 mph.
+    Driven on the REAL harness -- a real App, a real dispatch, the real ramp
+    and the real clock -- because a stand-in is what let this through three
+    times. Every earlier version of this test built fake trip and truck
+    objects, and every one of them passed while the game drove straight past
+    the market:
 
-    A fixed brake pressure then overshot the profile -- 0.4 on a loaded rig
-    is about 1.5 m/s^2 against the 0.9 the curve is drawn for -- and parked
-    the truck 143 feet short, where the cap no longer binds and the assist
-    lets go. Stopping short and sitting there is its own failure.
+    * v1 only ran inside ``if trip.finished``, true once the truck is already
+      AT the point, so it could hold a stopped truck and nothing else.
+    * v2 gated on ``_is_facility_approach_route`` -- "is this a same-city
+      street chain to a gate", False for an ordinary delivery -- so it never
+      ran on the deliveries it exists for.
+    * v3 measured ``trip.remaining_miles``, which is distance to the route
+      END and reads 3.2 mi with the truck yards from the market. The fake
+      trip decremented that number, so it looked right; the real one does
+      not.
+
+    None of those are visible without the real ramp underneath, which is the
+    whole reason this test costs a full App boot.
     """
-    from freight_fate.sim.vehicle import TruckState
-    from freight_fate.states.driving_updates import DrivingUpdateMixin
+    from driving_feature_helpers import quiet_trip, start_drive
 
-    class _Trip:
-        finished = False
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import DOCKING_MAX_MPH
 
-        def __init__(self, remaining):
-            self.remaining_miles = remaining
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.destination_approach_assist = True
+        spoken: list[str] = []
+        app.ctx.speech.say_event = speech_stub(spoken)
 
-        def _is_facility_approach_route(self):
-            return False  # an ordinary delivery, not a same-city street chain
+        # Onto the destination ramp at ramp speed, hands off from there.
+        destination = driving._destination_exit_stop()
+        assert destination is not None
+        driving._exit_stop = destination
+        driving._exit_lane_alignment = 1.0
+        driving._exit_signal_on = True  # signalled for it, like a driver
+        driving.trip.position_mi = destination.at_mi
+        driving.truck.velocity_mps = 40.0 / 2.23694
+        driving._update_exit(0.0)
+        assert driving._ramp_mi is not None, f"never got onto the ramp: {spoken[-1:]}"
+        # This ramp ends in a stop sign, and the ramp-terminal assist stops
+        # the truck for THAT -- which passed this test even with the broken
+        # distance underneath it. Clear the terminal so the destination
+        # approach assist is the only thing that can bring the truck up.
+        driving._ramp_control = ""
+        driving._ramp_terminal_done = True
 
-    class _Ctx:
-        class settings:
-            destination_approach_assist = True
-
-    class _Driving:
-        _cruise_mph = None
-        _keeper_mph = None
-        _destination_exit_taken = True
-
-        def __init__(self, truck, trip):
-            self.truck, self.trip, self.ctx = truck, trip, _Ctx()
-
-        def _pause_speed_control(self, **kwargs):
-            pass
-
-    for start_mph in (25.0, 38.0, 50.0):
-        truck = TruckState()
-        truck.velocity_mps = start_mph / 2.23694
-        trip = _Trip(0.40)
-        driving = _Driving(truck, trip)
-        for _ in range(6000):
-            truck.throttle = 0.0  # hands off: the assist is the only input
-            DrivingUpdateMixin._update_destination_approach_assist(driving)
-            truck.update(1 / 60)
-            trip.remaining_miles -= abs(truck.velocity_mps) / 60 / 1609.344
-            if truck.speed_mph <= 0.5 or trip.remaining_miles < -0.02:
+        for _ in range(60 * 600):
+            driving.truck.throttle = 0.0  # the assist is the only input
+            if app.state is not driving:
                 break
-        feet = trip.remaining_miles * 5280.0
-        assert truck.speed_mph <= 0.5, f"from {start_mph:.0f} mph it never stopped"
-        assert -60.0 < feet < 60.0, (
-            f"from {start_mph:.0f} mph it stopped {feet:+.0f} ft from the gate"
+            driving.update(1 / 60)
+            if driving._ramp_mi is None:
+                break
+
+        past = [line for line in spoken if "Drove past" in line]
+        assert not past, f"the assist let the truck run the gate: {past[0]}"
+        assert driving.truck.speed_mph <= DOCKING_MAX_MPH, (
+            f"stopped nowhere: still doing {driving.truck.speed_mph:.1f} mph"
         )
+    finally:
+        app.shutdown()

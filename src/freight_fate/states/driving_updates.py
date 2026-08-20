@@ -3929,25 +3929,40 @@ class DrivingUpdateMixin:
         if not self.ctx.settings.destination_approach_assist:
             return
         trip = self.trip
-        if trip.finished:
-            return
-        # NOT gated on _is_facility_approach_route: that asks "is this route a
-        # same-city street chain to a gate", which is False for an ordinary
-        # city-to-city delivery -- so gating on it meant the assist never ran
-        # on the very deliveries it exists for. The owner drove Midland to
-        # Odessa with it on and went straight past the market at 38 mph
-        # (2026-08-19). The run-in to a destination is a run-in whatever the
-        # route is made of.
+        # HOW FAR TO THE GATE -- which is not the same as how far to the end
+        # of the route. trip.remaining_miles measures the route, and it stays
+        # parked while the truck is on the ramp: the harness showed it reading
+        # 3.200 mi with the truck crawling yards from the market, so the cap
+        # came out at 215 mph and the assist waved the truck through. The
+        # arrival lives on the ramp instead -- _ramp_mi counts down from
+        # RAMP_LENGTH_MI to the stop, and the dock opens when it reaches zero
+        # at docking speed; anything faster is a blown stop and the driver is
+        # told they drove past (owner, three runs, 2026-08-19/20).
         #
-        # The exit gate stands in for "the destination is genuinely ahead of
-        # you": before it is taken the truck is still on the highway, and a
-        # driver who misses the exit gets the reroute rather than the brakes.
-        # Distance does the rest -- the cap is above any road speed until the
-        # last tenth of a mile, so this cannot bite early.
-        if not (self._destination_exit_taken or trip._is_facility_approach_route()):
+        # A same-city street chain to a gate has no ramp, so that route shape
+        # still measures off the route, which for it is the same thing.
+        remaining_mi = None
+        ramp_stop = getattr(self, "_ramp_stop", None)
+        if self._ramp_mi is not None and getattr(ramp_stop, "type", "") == "delivery_destination":
+            remaining_mi = self._ramp_mi
+        elif not trip.finished and trip._is_facility_approach_route():
+            remaining_mi = trip.remaining_miles
+        if remaining_mi is None:
             return
-        remaining_m = max(0.0, trip.remaining_miles) * 1609.344
+        # No margin held back, deliberately. Stopping short is not a safer
+        # version of stopping: the dock opens at the END of the ramp, so a
+        # truck halted two hundred feet shy of it with the brake held is a
+        # truck that never arrives -- which is what a reserve of exactly that
+        # size did on the first run after the clock fix. The gentle rate below
+        # is the margin.
+        remaining_m = max(0.0, remaining_mi) * 1609.344
         if remaining_m <= 0.0:
+            # At the point or past it: whatever is still on has to come off.
+            if self.truck.speed_mph > DOCKING_MAX_MPH:
+                self.truck.throttle = 0.0
+                self.truck.brake = 1.0
+                if self._cruise_mph is not None or self._keeper_mph is not None:
+                    self._pause_speed_control(resume_when_rolling=False)
             return
         # v = sqrt(2 a d): the fastest this truck may still be doing and stop
         # in the road it has left, at a comfortable rate.

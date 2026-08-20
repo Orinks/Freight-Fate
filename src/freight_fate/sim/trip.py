@@ -279,6 +279,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # stop sign; the driving state maintains it every frame. It pins the
         # clock to real time (see effective_time_scale).
         self.controlled_ramp = False
+        # True while the ramp being driven ends at the delivery destination
+        # itself. Same clock bargain as a controlled ramp, for the same
+        # reason: the last half mile to the dock is where the truck has to
+        # shed forty to nothing, and compression spent it in a frame. The
+        # approach assist watched its cap fall to the truck's speed and had
+        # the road disappear underneath it on the very next frame -- 560 feet
+        # gone at once, so it never got to brake (real-harness run,
+        # 2026-08-20).
+        self.dock_run_in = False
         # A police stop is in progress: the clock stops compressing until it
         # resolves, so the distance the stop is judged by is honest miles.
         self.pull_over_active = False
@@ -403,13 +412,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             # from 74 mph consumed 2.18 miles and tripped the felony line
             # before the truck had slowed to 50.
             return min(full, 1.0)
-        if self.controlled_ramp or self.controlled_turn:
+        if self.controlled_ramp or self.controlled_turn or self.dock_run_in:
             # A ramp ending in a light or a sign plays out in real time
             # from the gore: the stop-sign warning must buy human reaction
             # seconds, not compressed ones. A hot entry used to burn the
             # whole half mile in a few real seconds. A street corner is the
             # same bargain -- "Advise 20" is only plannable if the miles to
-            # the corner take real seconds to pass.
+            # the corner take real seconds to pass. A ramp that ends at the
+            # dock is the third: stopping there is the same braking problem,
+            # whether or not a sign is what asks for it.
             return min(full, 1.0)
         if self._severe_curve_decompression():
             # Same law for a hard bend: the pacenote lead is sized in real

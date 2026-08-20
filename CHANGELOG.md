@@ -813,13 +813,22 @@
   privately; they just stay off your profile.
 
 ### Fixed
-- **Destination approach assistance now actually slows you down.** It promised
-  to slow and stop at the facility arrival point, but only ever held the brake
-  once you had already arrived -- so if you were still rolling it did nothing,
-  and if you stopped yourself it announced that it was holding as though it had
-  done the work. It now eases the truck down over the approach so you arrive
-  stopped, easing later the slower you already are, and never speeds you up or
-  steers.
+- **Destination approach assistance now actually stops you at the door.** It
+  promised to slow and stop at the facility arrival point, but only ever held
+  the brake once you had already arrived -- so if you were still rolling it did
+  nothing, and if you stopped yourself it announced that it was holding as
+  though it had done the work. With it on you now roll down the destination
+  ramp, come to a stop at the arrival point, and hear "stopped and holding,
+  press Enter to continue into the facility" without touching the brake
+  yourself. It eases later the slower you already are, and never speeds you up
+  or steers.
+
+- **The last half mile to a delivery no longer flies past.** Time still runs
+  compressed on the open road, but the ramp down to your destination now runs
+  on the real clock, the way a ramp ending in a stop sign already did. Without
+  that, the final few hundred feet went by faster than anyone -- or the
+  approach assist -- could brake for, and you would be told you drove past a
+  facility you never had a chance to stop at.
 
 - **One engine brake voice, not two.** The engine brake setting picks between a
   real recording and the older synthesized voice -- but only one engine speed

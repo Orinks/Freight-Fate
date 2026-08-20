@@ -2667,6 +2667,10 @@ class DrivingEventMixin:
             and self._ramp_control in ("signal", "stop")
             and not self._ramp_terminal_done
         )
+        self.trip.dock_run_in = (
+            self._ramp_mi is not None
+            and getattr(self._ramp_stop, "type", "") == "delivery_destination"
+        )
         # And the road left to an exit the driver has signalled for, which the
         # clock reads to decide whether the approach itself is close enough to
         # be driven in real time. None once the ramp is taken -- from there

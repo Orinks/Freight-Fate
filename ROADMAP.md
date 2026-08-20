@@ -120,6 +120,18 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Destination approach assistance brings the truck to a stop at the
+      arrival point.** Shipped 2026-08-20 after three failed attempts, all
+      of which passed a test built on stand-in objects while the real game
+      drove past the market. The distance it steers by is the ramp countdown
+      (`_ramp_mi`), not `trip.remaining_miles`, which measures the route end
+      and reads over three miles with the truck yards from the gate. The run-in
+      down a destination ramp now also holds the real clock (`Trip.dock_run_in`),
+      the way a ramp ending in a light or a sign already did -- compression was
+      eating the last 560 feet in a single frame, so no braking profile could
+      have fitted. Its test drives a real App down a real ramp with the ramp
+      terminal cleared, because the stop-sign assist was hiding the failure.
+
 - [ ] **There is no way to back a career up on demand (Brandon, 2026-08-15).**
       A career can only travel upward two ways: the background queue after a
       save, and "Keep this computer's save and back it up" -- which
@@ -5461,7 +5473,7 @@ From a batch of player reports:
   enforcement: getting pulled over and on-the-spot fines.
 
 - [x] **Driving assistance presets and descent control.** Shipped for the current snapshot: Realistic, Balanced, All assists, and Custom coordinate optional lane, emergency-braking, stop-and-go, and interactive descent support without changing inherent adaptive-cruise behavior or simulation settings. Automatic exits, destination stops, yard entry, and docking remain deferred to Career 1.9 or later. On the 1.9 line, lane drift itself lives in the Driving assistance category but stays preset-independent like the speed keeper: presets tune warnings and support, never whether the lane task runs, so fresh careers keep the centered-lane accessible default.
-- [ ] **De-duplicate assist chatter on fast ramps.** A 2026-07-15 logged playtest of the four 1.9 assists showed curve speed assistance and route-transition assistance both firing on the same too-fast exit ramp (the ramp adds curve weight, and both brake and announce back-to-back). With the realistic preset both are on by default, so every hot ramp speaks two assist lines; the ramp case should speak one. Same playtest confirmed the destination approach assist deliberately does not cover the ramp-end stop sign -- players can still roll it with the assist on, which may deserve a clearer spoken hint.
+- [ ] **De-duplicate assist chatter on fast ramps.** A 2026-07-15 logged playtest of the four 1.9 assists showed curve speed assistance and route-transition assistance both firing on the same too-fast exit ramp (the ramp adds curve weight, and both brake and announce back-to-back). With the realistic preset both are on by default, so every hot ramp speaks two assist lines; the ramp case should speak one. Same playtest confirmed the destination approach assist deliberately does not cover the ramp-end stop sign -- players can still roll it with the assist on, which may deserve a clearer spoken hint. (The assist does now stop at the arrival point itself, 2026-08-20; the sign at the end of an ordinary ramp is still the terminal assist's job.)
 - [x] **Speed keeper for low-speed zones.** Shipped: K starts a job-scoped speed-control session that uses the speed keeper on facility roads, in gate queues, work zones, and congestion -- where adaptive cruise is deliberately unavailable -- then automatically hands off to adaptive cruise on the open road, so players who cannot keep the accelerator held (or whose fingers tire) are not locked out of those stretches. It pauses through the planned pickup, persists through pickup saves, and resumes once the loaded truck is rolling. It restores the chosen cruise target across zones, follows queued traffic, and eases to ramp speed when the destination exit is announced before releasing control on the ramp. It fully disarms on other braking or hazards so it cannot restart unexpectedly. Preset-independent and on by default, toggleable in Settings, Gameplay.
 - [ ] **Driving assistance presets and descent control.** Built and then withdrawn from the 1.8 nightly line after playtesting (the underlying assists need the 1.9 driving arc around them); the work lives on feat/career-1.9 and ships with 1.9. Release-merge note: the withdrawal was a git revert of merge 9b406fe (plus 9f2dbff and b971684) on dev, so merging feat/career-1.9 back will NOT re-apply this content on its own -- the release merge must first revert the revert commit on dev, then merge.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
