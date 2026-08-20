@@ -860,6 +860,12 @@
   reputation hit -- there is no freight and no contract, so there is
   nothing to breach. The hours you spent still pass. A loaded job still
   costs you both, as it should.
+- **Heavy traffic moves at the speed the warning promised.** In a heavy
+  traffic zone, the queue ahead used to sink well below the zone's own
+  speed -- a zone announced as "traffic slowing to 45" could drag the
+  speed keeper down to 25 and hold it there for the length of the jam,
+  with nothing audible ahead to explain it. Traffic in a jam now settles
+  at the zone's number, so the truck does too. Owed to Brandon.
 
 - **The experience check is really in the game this time.** How much
   experience to the next level now reads in two places: the driving
