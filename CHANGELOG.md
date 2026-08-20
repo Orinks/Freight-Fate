@@ -852,6 +852,11 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The Back to the Holler billboard explains itself.** The song tribute
+  read as three unconnected fragments unless you already knew what a
+  holler was; it now says what a holler is, what the song is, and lands
+  the trucker joke with its logic showing.
+
 - **The all-clear after a dodge is spoken again.** "You swerve around the
   brake lights. Well done." and "Clear of the semi. Right lane open." could
   be silently dropped right after the urgent call that caused them -- the
