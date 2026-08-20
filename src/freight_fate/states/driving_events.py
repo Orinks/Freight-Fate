@@ -3243,6 +3243,7 @@ class DrivingEventMixin:
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
         self._acc_limit_cap_said = None
+        self._acc_weather_cap_said = None
         gap = self._acc_gap_seconds()
         effective_mph = (
             min(self._cruise_mph, self._cruise_exit_mph)
@@ -3268,6 +3269,10 @@ class DrivingEventMixin:
                 "construction": " through the construction zone",
                 "heavy traffic": " through the heavy traffic",
             }.get(limit_reason, " for the lower limit")
+        safe_mph = self.weather.effects.safe_speed_mph
+        if safe_mph < effective_mph:
+            effective_mph = safe_mph
+            exit_note = f" in the {self.weather.current.value}"
         self.ctx.audio.play("ui/notify", volume=0.5)
         message = (
             f"Adaptive cruise {'resuming' if transition else 'set'} at "
@@ -4036,6 +4041,30 @@ class DrivingEventMixin:
             # news again.
             self._acc_limit_cap_said = None
         self._acc_limit_capped = limit_capped
+        # The weather's safe speed, enforced like any other road fact. The
+        # number was computed and SPOKEN as guidance since live weather
+        # shipped, and consumed by nothing: cruise held a set seventy
+        # through a thunderstorm until the driver tapped it down by hand --
+        # which is what the owner's own storm playtest was actually showing
+        # (2026-08-20, Brandon's suggestion). Same once-per-cap latch as
+        # the posted limit above; releases as the weather lifts.
+        safe_mph = self.weather.effects.safe_speed_mph
+        if safe_mph < target_mph:
+            target_mph = safe_mph
+            if self._acc_weather_cap_said is None or safe_mph < self._acc_weather_cap_said - 0.5:
+                self._acc_weather_cap_said = safe_mph
+                kind = self.weather.current.value
+                self.ctx.say_event(
+                    f"{kind.capitalize()}; adaptive cruise easing to "
+                    f"{self.ctx.settings.speed_text(safe_mph)}.",
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                    category=SpeechCategory.CONFIRMATION,
+                )
+        elif safe_mph >= self._cruise_mph:
+            # Weather no longer binds at this set speed: the next front is
+            # news again.
+            self._acc_weather_cap_said = None
         # The preview goes on last so it can only ever move the number the
         # caps already agreed on, and it is clamped against the posted cap:
         # banking momentum for a hill must never bank it past the limit.

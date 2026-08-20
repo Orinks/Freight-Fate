@@ -105,6 +105,7 @@ class SpeedControlStateMixin:
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
         self._acc_limit_cap_said = None
+        self._acc_weather_cap_said = None
         self._construction_slowdown = None
 
     def _clear_keeper(self) -> None:

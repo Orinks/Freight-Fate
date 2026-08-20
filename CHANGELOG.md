@@ -3,6 +3,14 @@
 ## Unreleased
 
 ### Added
+- **Cruise control adapts to the weather, like a real adaptive system.**
+  When rain, snow, fog, or a storm lowers the safe speed below your set
+  speed, adaptive cruise eases down to it and says so -- "Thunderstorm;
+  adaptive cruise easing to 40 miles per hour" -- then climbs back on its
+  own as the weather lifts. The safe speed was already being spoken as
+  guidance on the status keys; now the automation honors it too. Thanks to
+  Brandon for the suggestion.
+
 - **Traffic jams where traffic really jams.** The game now knows how many
   vehicles a day each stretch of road actually carries, taken from the federal
   highway survey, so congestion is placed from real volumes instead of a rough

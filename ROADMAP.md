@@ -4280,8 +4280,8 @@ section below and the Unreleased changelog; the release-line view:
       says inspection station, the clock, and the current menu item -- no
       parking report, no live lot lookup, no brand amenities -- and the
       loyalty row is gated to hospitality stops.
-- [ ] **Cruise should honor the weather's safe speed (Brandon's suggestion,
-      2026-08-20).** `weather.effects.safe_speed_mph` exists, is spoken as
+- [x] **Cruise honors the weather's safe speed** (Brandon's suggestion,
+      owner-approved and shipped the same day, 2026-08-20).** `weather.effects.safe_speed_mph` exists, is spoken as
       guidance on the status keys, and is consumed by NOTHING: adaptive
       cruise holds a set 70 through a thunderstorm until the driver taps it
       down (which is what the owner's own storm playtest this morning
