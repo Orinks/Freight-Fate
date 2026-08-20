@@ -852,6 +852,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The experience check is really in the game this time.** How much
+  experience to the next level now reads in two places: the driving
+  status browse ("Career: level 6, Company Driver. 600 experience to
+  level 7.") and the career stats screen. The number was computed and
+  written into a summary last week -- and that summary turned out to be
+  connected to nothing, which is why it never spoke. Owed to Brandon
+  twice over.
+
 - **The Back to the Holler billboard explains itself.** The song tribute
   read as three unconnected fragments unless you already knew what a
   holler was; it now says what a holler is, what the song is, and lands
