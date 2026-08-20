@@ -4275,6 +4275,13 @@ section below and the Unreleased changelog; the release-line view:
       on the profile as `radio_favorites` (additive, no migration; PR #150's
       approach). The imported/web tiers made this necessary: the dial is
       six and a half thousand stations now.
+- [ ] **The scale's arrival announcement still reads the truck-stop
+      script.** The menu was gated 2026-08-20 (no lot sleep, no motel at an
+      inspection), but the spoken arrival at a weigh station still recites
+      "no truck parking... Loyalty program: Loyalty points: 0" and plays
+      the truck-stop ambience name -- the POI announce path has one
+      template for every stop type. A scale arrival should say the scale
+      things: open or closed, get in line, check in.
 - [ ] **Domain-named imported stations: 75 of 5,241 read a URL aloud.**
       "TheRadioStorm.com", "SoftRockRadio.net", and 73 more speak their
       TLD to every screen reader; two entries' whole name is just ".org"
