@@ -590,3 +590,32 @@ def test_brake_lights_name_the_cause_when_the_road_knows_it(world):
     assert mgr._braking_reason_at(12.0) == "construction"
     assert mgr._braking_reason_at(22.0) == "heavy traffic"
     assert mgr._braking_reason_at(50.0) == ""
+
+
+def test_the_status_browse_says_how_much_to_the_next_level(world):
+    """xp_to_next_level shipped 2026-08-17 from Brandon's report and ended
+    up with zero callers -- the answer existed and nothing spoke it. He
+    asked again 2026-08-20 and was exactly right. The driving status browse
+    now carries it."""
+    import os
+
+    os.environ.setdefault("FREIGHT_FATE_NO_SPEECH", "1")
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        from tests.driving_feature_helpers import start_drive  # type: ignore
+    except Exception:
+        import sys
+        from pathlib import Path
+
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from driving_feature_helpers import start_drive  # type: ignore
+    try:
+        driving = start_drive(app)
+        lines = driving.status_lines()
+        career_lines = [ln for ln in lines if ln.startswith("Career:")]
+        assert len(career_lines) == 1, lines
+        assert "to level" in career_lines[0] or "top career level" in career_lines[0]
+    finally:
+        app.shutdown()

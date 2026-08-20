@@ -33,6 +33,7 @@ class CareerStatsState(MenuState):
 
     def _lines(self) -> list[str]:
         from ..models import enforcement
+        from ..models.career import xp_to_next_level
         from ..models.jobs import ENDORSEMENT_LABELS
         from ..models.solvency import debt_line
 
@@ -56,7 +57,12 @@ class CareerStatsState(MenuState):
         # is on this screen already.
         owed = debt_line(p)
         return [
-            f"Level {career.level} driver, {career.xp:.0f} experience",
+            f"Level {career.level} driver, {career.xp:.0f} experience"
+            + (
+                f", {xp_owed:,.0f} to level {career.level + 1}"
+                if (xp_owed := xp_to_next_level(career.xp)) is not None
+                else ", top level"
+            ),
             f"Reputation: {career.reputation:.0f} out of 100",
             enforcement.dispatch_trust_line(p),
             enforcement.career_menu_status(p),

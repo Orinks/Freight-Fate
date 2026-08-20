@@ -1185,6 +1185,27 @@ class DrivingControlsMixin:
             return "reverse"
         return f"gear {tr.gear}"
 
+    def _career_status_line(self) -> str:
+        """Level, rank, and the number still owed to the next level.
+
+        The owed figure shipped into Career.summary() on 2026-08-17 -- built
+        from Brandon's report of that day -- and summary() turned out to
+        have no callers at all, so the answer existed and nothing spoke it.
+        He asked again on 2026-08-20 ("this is still not in this build"),
+        and he was exactly right. The status browse is where a driver asks
+        mid-run.
+        """
+        from ..models.career import xp_to_next_level
+
+        career = self.ctx.profile.career
+        owed = xp_to_next_level(career.xp)
+        tail = (
+            f"{owed:,.0f} experience to level {career.level + 1}"
+            if owed is not None
+            else "top career level"
+        )
+        return f"Career: level {career.level}, {career.rank.title}. {tail}."
+
     def status_lines(self) -> list[str]:
         t = self.truck
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
@@ -1200,6 +1221,7 @@ class DrivingControlsMixin:
             self.trip.npc_traffic_status(),
             f"Progress: {self.trip.progress_percent} percent there",
             f"Route: {progress}",
+            self._career_status_line(),
             f"Fuel: {t.fuel_fraction * 100:.0f} percent",
             f"Air brakes: {self._air_status_text(detailed=True)}",
             f"Weather: {self.weather.report_lead(self.ctx.settings.imperial_units)}",
