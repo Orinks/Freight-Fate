@@ -32,7 +32,7 @@ lining up on a dock must never be scolded for doing their job.
 from __future__ import annotations
 
 from ..sim.trip_models import FACILITY_GATE_ZONE_MI
-from ..speech_pacing import SpeechCategory
+from ..speech_pacing import EventPriority, SpeechCategory
 from .driving_core import *
 
 # The rungs, in miles backed along the route since reverse was engaged.
@@ -121,5 +121,9 @@ class WrongWayMixin:
             self.ctx.say_event(
                 "You are still in reverse, backing away from your destination.",
                 interrupt=False,
+                # Never dropped, for the same reason as the hazard follow-up:
+                # a reminder that you are still going backwards down a live
+                # lane is not chatter, however busy the road has got.
+                priority=EventPriority.ROUTE,
                 category=SpeechCategory.SAFETY,
             )

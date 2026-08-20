@@ -813,6 +813,12 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Hazard instructions cannot go missing on a busy road.** Two safety lines --
+  the follow-up telling you a hazard is still in your lane and to nearly stop,
+  and the reminder that you are still reversing away from your destination --
+  could be dropped as passing chatter when a lot was happening at once, which
+  is exactly when they matter. They are always spoken now.
+
 - **The truck always tells you why it will not move.** Pressing the accelerator
   against a set parking brake, or before the air is up, explains itself -- but
   that line could be dropped as passing chatter if the road happened to be busy

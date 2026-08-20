@@ -3170,7 +3170,18 @@ class DrivingUpdateMixin:
                 if self.trip.has_open_adjacent_lane_at()
                 else "It is still in your lane. Nearly stop."
             )
-            self.ctx.say_event(hint, interrupt=False, category=SpeechCategory.SAFETY)
+            # ROUTE: not interrupting (it follows the hazard call rather
+            # than cutting it) but never droppable. A live hazard still in
+            # your lane telling you to nearly stop is the last line in the
+            # game that may be binned as stale chatter -- and the stale-drop
+            # branch tests PRIORITY, never category, so SAFETY at the ambient
+            # default was droppable in exactly the busy moment it matters.
+            self.ctx.say_event(
+                hint,
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.SAFETY,
+            )
         self._hazard_deadline -= dt
         self._track_assisted_deceleration(dt)
         assist_may_act = (

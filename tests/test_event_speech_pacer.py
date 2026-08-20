@@ -1339,3 +1339,46 @@ def test_an_assist_changing_the_trucks_speed_is_never_dropped_as_chatter() -> No
         __import__("freight_fate.app", fromlist=["GameContext"]).GameContext.say_event
     )
     assert "priority == EventPriority.AMBIENT" in say_src
+
+
+def test_no_safety_line_can_be_dropped_as_stale_chatter() -> None:
+    """R1's never-dropped contract, checked against the code rather than
+    assumed from the table.
+
+    The stale-ambient drop tests PRIORITY and never CATEGORY, so a SAFETY
+    line that forgot to pass a priority defaulted to AMBIENT and became
+    droppable -- in exactly the busy moment it matters most. Two were:
+    the hazard follow-up "It is still in your lane. Nearly stop", and the
+    reminder that you are still reversing down a live lane.
+
+    Found in a pre-ship review, after the same bug class had already been
+    caught twice in one day (an adaptive-cruise line, then the brake
+    lockout the adversarial battery caught). Making the traffic channel
+    busier is what turned a latent race into a real one.
+    """
+    import pathlib
+    import re
+
+    offenders = []
+    for path in sorted(pathlib.Path("src/freight_fate").rglob("*.py")):
+        src = path.read_text(encoding="utf-8")
+        for match in re.finditer(r"say_event\(", src):
+            seg = src[match.start() : match.start() + 800]
+            depth = 0
+            end = 0
+            for i, ch in enumerate(seg):
+                if ch == "(":
+                    depth += 1
+                elif ch == ")":
+                    depth -= 1
+                    if depth == 0:
+                        end = i
+                        break
+            call = seg[:end]
+            if "SpeechCategory.SAFETY" not in call:
+                continue
+            if "interrupt=False" in call and "priority=" not in call:
+                offenders.append(f"{path.name}:{src[: match.start()].count(chr(10)) + 1}")
+    assert not offenders, "SAFETY lines riding the droppable ambient default: " + ", ".join(
+        offenders
+    )
