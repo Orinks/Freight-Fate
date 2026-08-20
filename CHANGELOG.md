@@ -837,12 +837,14 @@
   callouts everywhere also stopped naming a speed limit when the road behind
   the intersection has none on record.
 
-- **Cruise control no longer uses the engine brake on slick flat road.** In
-  rain or worse, slowing to a lowered safe speed is done on the service
-  brakes, the way a real driver switches the jake off in a storm -- the
-  engine brake only slows the drive wheels, which on a soaked road is how a
-  truck loses its back end. A retarder already holding a real downgrade
-  stays on, because dropping it would put the whole hill on the brake drums.
+- **Cruise control only reaches for the engine brake on a real downgrade.**
+  It used to raise the jake wherever it found itself over target: on flat
+  soaked road slowing for a storm, and even on climbs, barking away speed
+  the hill was about to eat anyway. Holding a load back on a grade is what
+  the engine brake is for; slowing to a target speed is the service brakes'
+  job, and that split is now enforced. A retarder already holding a
+  downgrade stays on, wet or dry, because dropping it would put the whole
+  hill on the brake drums.
 
 - **One imported radio station stopped spelling its web address.** The
   station announcing itself as "TheRadioStorm dot com" now calls itself The

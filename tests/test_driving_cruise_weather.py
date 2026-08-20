@@ -3901,3 +3901,32 @@ def test_the_resume_line_names_the_zone_cap_it_will_actually_hold(monkeypatch):
         assert "70" not in line, line
     finally:
         app.shutdown()
+
+
+def test_cruise_never_raises_the_jake_on_a_climb():
+    """Overspeed carried into an upgrade is the hill's to eat: a real driver
+    powers up a grade, never barks the retarder at it (Brandon, 2026-08-20).
+    The raise path now honors _on_downgrade's own doctrine."""
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        app.ctx.settings.descent_speed_control = "realistic"
+        driving = _cruising(app, set_mph=55.0)
+        driving.trip.engine_brake_ban_at = lambda mile: None
+        driving.trip.grade_at = lambda mile: 0.03
+        t = driving.truck
+        t.velocity_mps = 70.0 / 2.23694  # fifteen over the set speed, uphill
+        dt = 1 / 60
+        stages = []
+        for _ in range(int(10 * 60)):
+            t.grade = 0.03
+            t.throttle = 0.0
+            driving._update_cruise(dt, False, False, False)
+            t.auto_shift()
+            t.update(dt)
+            stages.append(t.engine_brake_stage)
+        assert max(stages) == 0, f"cruise raised jake stage {max(stages)} on an upgrade"
+    finally:
+        app.shutdown()
