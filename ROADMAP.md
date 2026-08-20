@@ -2860,13 +2860,25 @@ onto exit signalling.
       feed exists. Eleven states stay no_api with dated notes: OH, TX,
       OR, WA (key walls -- could return if the project ever ships API
       keys), CA and TN (dead DNS), MD, MI, MO, NJ, VA (404/403/SPA).
-- [ ] **Incidents for the WZDx-only states.** The platform-wide death
-      of the old `/api/events` endpoints means the ten WZDx states get
-      construction only; live incidents work on the three CARS states.
-      Find per-state incident feeds (or CARS siblings) for the big
-      WZDx states, FL and NY first. Tester demand on record: Brandon
-      singled out the Minnesota incident alerts as a favorite and asked
-      for the same in more states (2026-08-20).
+- [x] **Incidents for Florida and New York -- SHIPPED 2026-08-20**,
+      the two biggest WZDx-only states. fl511.com and 511ny.org carry
+      no incidents on their WZDx feeds, but both serve their own list
+      pages from an open DataTables JSON endpoint
+      (`POST /List/GetData/Incidents`) with the full incident text,
+      and `/map/mapIcons/Incidents` supplies the map-pin coordinates;
+      the new `list511` parser joins the two on the event id (verified
+      keyless 2026-08-20: FL 22 incidents, NY 105). Work zones stay on
+      each state's WZDx feed via a per-state `construction_parser`
+      override. Tester demand on record: Brandon singled out the
+      Minnesota incident alerts as a favorite and asked for the same
+      in more states (2026-08-20).
+- [ ] **Incidents for the remaining WZDx-only states.** Nine WZDx
+      states (AZ, CT, GA, ID, NV, NC, PA, UT, WI) still get
+      construction only. The FL/NY `list511` endpoints are the same
+      site platform most of them run; probe each site's
+      `/List/GetData/Incidents` and `/map/mapIcons/Incidents` and
+      move the live ones over -- likely just registry entries, no
+      new parser.
 - [x] Cruise vs. curve brake, the deeper fix -- SHIPPED 2026-07-22
       (owner direction, same-day playtest): a pacenote now caps the
       cruise working target to the bend's advisory (like the armed-exit

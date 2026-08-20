@@ -17,6 +17,9 @@ Parsers:
   ``cars``   — Castle Rock CARS GraphQL platform (``POST /api/graphql``
                MapFeatures query).  Used by Indiana 511IN, Minnesota 511MN,
                and Colorado COtrip.
+  ``list511`` — The 511 sites' own list-page JSON rows joined with the
+               map-pin locations (Florida FL511 and New York 511NY
+               incidents).  Lives in ``real_traffic_list511``.
 """
 
 from __future__ import annotations
@@ -948,6 +951,7 @@ class TrafficEventParsers:
             "minor": "low",
             "medium": "medium",
             "moderate": "medium",
+            "intermediate": "medium",  # FL511's middle tier
             "high": "high",
             "major": "high",
             "severe": "high",
