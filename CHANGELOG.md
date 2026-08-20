@@ -813,6 +813,13 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **A delayed stop announcement says the distance that is true when it
+  speaks.** Notices about truck stops ahead wait their turn behind more
+  important speech, and one that waited could still say "in 5 miles" with
+  two miles left and the place in sight. A waiting notice now updates its
+  distance the moment it is finally spoken, and stays silent if you have
+  already passed the stop.
+
 - **Adaptive cruise says the speed it will actually hold after traffic
   clears.** Passing a slow vehicle inside a congestion or work zone, the
   resume announcement used to name your set speed while the zone quietly

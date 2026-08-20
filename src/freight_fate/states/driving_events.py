@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from ..message_log import MessageCategory
@@ -10,6 +11,7 @@ from ..speech_text import (
     cruise_curve_dropped,
     cruise_curve_easing,
     roadside_chatter,
+    stop_callout,
 )
 from ..units import spoken_feet_or_meters
 from .base import TimedMessageState
@@ -101,6 +103,12 @@ class PendingAmbient:
     category: SpeechCategory | None
     waited_s: float = 0.0
     key: str | None = None
+    # A line that counts down toward something can re-render at delivery, so
+    # a wait never makes it lie: the 12-second age cap is REAL seconds, and
+    # under time compression that is miles -- a travel plaza queued at "in 5
+    # miles" was performed with two left and the building in sight (Brandon,
+    # 2026-08-20). Returning None means the moment passed; drop, not speak.
+    render: Callable[[], str | None] | None = None
 
 
 class DrivingEventMixin:
@@ -135,6 +143,7 @@ class DrivingEventMixin:
         log: bool = True,
         category: SpeechCategory | None = None,
         key: str | None = None,
+        render: Callable[[], str | None] | None = None,
     ) -> None:
         if log:
             # The drain call below passes log=False so a line that does
@@ -169,8 +178,11 @@ class DrivingEventMixin:
                         waiting.message = message
                         waiting.sound = sound
                         waiting.category = category
+                        waiting.render = render
                         return
-            self._pending_ambient_events.append(PendingAmbient(message, sound, category, key=key))
+            self._pending_ambient_events.append(
+                PendingAmbient(message, sound, category, key=key, render=render)
+            )
             while len(self._pending_ambient_events) > AMBIENT_QUEUE_MAX:
                 self._pending_ambient_events.popleft()
             return
@@ -201,10 +213,16 @@ class DrivingEventMixin:
         if self._ambient_event_cooldown_s > 0.0 or not self._pending_ambient_events:
             return
         pending = self._pending_ambient_events.popleft()
+        message = pending.message
+        if pending.render is not None:
+            # Say the distance as of NOW, not as of when it queued.
+            message = pending.render()
+            if message is None:
+                return  # the moment passed while it waited; drop, not lie
         # Already logged the moment it queued; speaking it now must not log
         # it a second time.
         self._speak_ambient_event(
-            pending.message,
+            message,
             pending.sound,
             log=False,
             category=pending.category,
@@ -527,11 +545,34 @@ class DrivingEventMixin:
             # interrupted; everything else keeps its spacing.
             priority = self._event_priority(event)
             if not self._demoted_from_interrupt(event) and self._should_space_ambient_event(event):
+                render = None
+                stop = event.data.get("stop")
+                if kind == TripEventKind.STOP_AHEAD and stop is not None:
+                    # The queue's age cap is real seconds; the distance in
+                    # this line decays in game miles. Re-render at delivery
+                    # so a wait never makes it lie -- "Pilot in 5 miles"
+                    # was performed with two left (Brandon, 2026-08-20).
+                    def render(stop=stop):
+                        ahead = stop.at_mi - self.trip.position_mi
+                        if ahead <= 0:
+                            return None
+                        return stop_callout(
+                            planned_prefix=self.trip.planned_prefix(stop),
+                            typed_name=self.trip.name_facility(stop.name, stop.spoken_name),
+                            plain_name=stop.name,
+                            exit_label=stop.exit_label,
+                            distance=self.trip._ahead_text(ahead),
+                            parking_normal=stop.parking_text,
+                            parking_certainty=stop.parking,
+                            exit_hint=self.trip.exit_hint,
+                        )
+
                 self._speak_ambient_event(
                     event.message,
                     sound if kind != TripEventKind.ZONE_ENTER else None,
                     category=self._event_category(event),
                     key=self._ambient_key(event),
+                    render=render,
                 )
             else:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
