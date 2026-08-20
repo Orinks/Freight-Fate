@@ -4356,17 +4356,21 @@ section below and the Unreleased changelog; the release-line view:
       today; promotion splits the leg and adds US-160 toward Four Corners);
       a spoken line at job assignment when a route includes an advisory
       road would be honest ("this run uses Red Mountain Pass").
-- [ ] **Company drivers get ASSIGNED repositions; the self-serve bobtail
-      is owner-operator only (owner ruling, 2026-08-20).** The menu gate
-      shipped same-day: a company driver's tractor goes where dispatch
-      sends it, so "Bobtail to a nearby city" now appears only for
-      leased and independent operators. The other half is the feature:
-      dispatch occasionally assigns a company driver an on-duty
-      reposition (deadhead to where the freight is), paid the way
-      carriers really pay empty miles. Design note for the abandonment
-      interplay: an ASSIGNED reposition is an assignment -- walking away
-      from one should cost standing with the carrier (reputation, not
-      money), unlike the owner's own penalty-free turnback shipped today.
+- [x] **Company drivers get ASSIGNED repositions; the self-serve bobtail
+      is owner-operator only (owner ruling, 2026-08-20).** Shipped: the
+      dispatch board for a company driver occasionally (seeded off the
+      board's own cache key, roughly one board in eight-to-ten) includes
+      a carrier-assigned reposition -- an empty deadhead to a nearby city
+      picked toward wherever has more freight locations, standing in for
+      one of the board's ordinary slots rather than adding a ninth. It
+      logs on-duty driving (not personal conveyance, unlike the self-serve
+      bobtail), pays 60 percent of the carrier's loaded per-mile floor
+      (`ASSIGNED_REPOSITION_PAY_FRACTION` in `models/jobs.py`), and earns
+      mileage XP like any other completed drive. Abandoning one costs
+      reputation only, never the five-hundred-dollar load penalty --
+      `Job.assigned` distinguishes it from a self-serve bobtail (penalty
+      free) and from a real load (money and reputation) in
+      `driving_pause_states.AbandonJobConfirmationState`.
 
 - [ ] **Weigh-in-motion bypass -- the dashboard transponder (Brandon,
       2026-08-20).** Real trucks run PrePass-style transponders: the

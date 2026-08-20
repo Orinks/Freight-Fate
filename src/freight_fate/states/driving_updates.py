@@ -862,7 +862,12 @@ class DrivingUpdateMixin:
         mode = self.ctx.settings.hos_mode
         p = self.ctx.profile
 
-        if self.job.bobtail:
+        # A self-serve bobtail is the driver's own personal conveyance, off
+        # duty by FMCSA's own rule. A carrier-ASSIGNED reposition is the
+        # opposite: dispatch sent the truck there for the carrier's benefit,
+        # which is on-duty driving like any other move (ROADMAP: "Company
+        # drivers get ASSIGNED repositions").
+        if self.job.bobtail and not self.job.assigned:
             self.hos.off_duty(gm)
         elif moving:
             self.hos.drive(gm)

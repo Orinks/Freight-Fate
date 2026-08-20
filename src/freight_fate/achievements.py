@@ -794,7 +794,7 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "bobtail_done",
         "Room Enough to Turn Around",
-        "You ran a bobtail reposition -- no trailer, no load, no pay, just a tractor finding its next job. Turning a rig around takes a lot less acreage without the box.",
+        "You ran a bobtail reposition -- no trailer, no load, just a tractor finding its next job. Turning a rig around takes a lot less acreage without the box.",
         "career",
         "The Willis Brothers - Give Me 40 Acres",
     ),

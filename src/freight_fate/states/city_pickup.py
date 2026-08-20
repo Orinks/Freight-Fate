@@ -28,6 +28,12 @@ def job_origin_exists(job: Job, world) -> bool:
     resolves the pickup facility, so this is what stands between a stale save
     and a hard failure there.
     """
+    if job.bobtail:
+        # A reposition's origin is a synthetic company yard, never a real
+        # facility -- there is nothing here for a data update to retire. A
+        # route that stops existing is instead handled gracefully at accept
+        # time (BobtailDestState._start, JobBoardState._accept_reposition).
+        return True
     try:
         world.facility_location(job.origin, job.origin_location)
     except KeyError:

@@ -397,14 +397,38 @@ class AbandonJobConfirmationState(MenuState):
         super().__init__(ctx)
         self.driving = driving
 
+    # Abandoning a real load costs 500 dollars and 5 reputation (breach of a
+    # paying contract). An assigned reposition carries no freight and no pay,
+    # so there is no contract to breach and no money at stake -- but walking
+    # off a dispatch ASSIGNMENT still costs the carrier's trust, the same
+    # shape as declining one outright (dispatch_policy.DECLINE_REPUTATION_
+    # PENALTY), just heavier, because this one was already accepted and
+    # driven before it was abandoned.
+    ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY = 3.0
+
     def _is_bobtail(self) -> bool:
-        # An empty reposition has no load, no contract, and no pay -- there
-        # is nothing to breach, so there is nothing to fine (Shane,
-        # 2026-08-20: "you have no freight and you're not getting paid
-        # anyhow"). The hours still pass either way.
+        # An empty reposition has no load and no contract -- there is
+        # nothing to breach. The hours still pass either way.
         return bool(getattr(getattr(self.driving, "job", None), "bobtail", False))
 
+    def _is_assigned_reposition(self) -> bool:
+        # Dispatch sent the driver empty (job.assigned), as opposed to a
+        # self-serve bobtail the driver chose from the menu. There is still
+        # no freight and no pay to lose, but walking away from an
+        # ASSIGNMENT is walking away from dispatch, not just from a drive.
+        job = getattr(self.driving, "job", None)
+        return self._is_bobtail() and bool(getattr(job, "assigned", False))
+
     def announce_entry(self) -> None:
+        if self._is_assigned_reposition():
+            self.ctx.say(
+                f"{self.title} Walking away from a dispatch assignment costs "
+                "standing, not money: no freight, no fine, but reputation "
+                "takes a hit. You will return to "
+                f"{self.ctx.world.spoken_city(self.ctx.profile.current_city)}. "
+                f"{self.current_text()}"
+            )
+            return
         if self._is_bobtail():
             self.ctx.say(
                 f"{self.title} You are running empty, so turning back costs "
@@ -420,6 +444,19 @@ class AbandonJobConfirmationState(MenuState):
             f"{self.current_text()}"
         )
 
+    def _abandon_help_text(self) -> str:
+        if self._is_assigned_reposition():
+            return (
+                "Walk away from this dispatch assignment. Costs reputation, "
+                "no money, and returns you to the origin city."
+            )
+        if self._is_bobtail():
+            return "Give up this empty run. No freight, no penalty, returns you to the origin city."
+        return (
+            "Give up this job. Costs five hundred dollars and "
+            "reputation, and returns you to the origin city."
+        )
+
     def build_items(self) -> list[MenuItem]:
         return [
             MenuItem(
@@ -430,8 +467,7 @@ class AbandonJobConfirmationState(MenuState):
             MenuItem(
                 "Yes, abandon the job",
                 self._confirm,
-                help="Give up this job. Costs five hundred dollars and "
-                "reputation, and returns you to the origin city.",
+                help=self._abandon_help_text(),
             ),
         ]
 
@@ -440,7 +476,13 @@ class AbandonJobConfirmationState(MenuState):
 
         p = self.ctx.profile
         bobtail = self._is_bobtail()
-        if not bobtail:
+        assigned_reposition = self._is_assigned_reposition()
+        if assigned_reposition:
+            p.career.reputation = max(
+                0.0,
+                p.career.reputation - self.ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY,
+            )
+        elif not bobtail:
             p.money -= 500.0
             p.career.reputation = max(0.0, p.career.reputation - 5.0)
         p.store_truck_condition(self.driving.truck)
@@ -455,7 +497,14 @@ class AbandonJobConfirmationState(MenuState):
         self.ctx.pop_state()  # close the pause menu
         self.ctx.replace_state(CityMenuState(self.ctx))
         # interrupt=True so this overrides any menu re-announcement during unwind
-        if bobtail:
+        if assigned_reposition:
+            self.ctx.say(
+                "Dispatch assignment abandoned. Walking away from a dispatch "
+                "assignment costs standing, not money: reputation down, no "
+                f"fine. Back in {self.ctx.world.spoken_city(p.current_city)}.",
+                interrupt=True,
+            )
+        elif bobtail:
             self.ctx.say(
                 "Reposition called off. No freight, no penalty; the hours "
                 f"still count. Back in {self.ctx.world.spoken_city(p.current_city)}.",

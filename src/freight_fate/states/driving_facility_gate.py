@@ -133,7 +133,9 @@ class FacilityGateMixin:
         the missed destination exit, whose loops are the same maneuver.
         """
         p = self.ctx.profile
-        if self.job.bobtail:
+        # Self-serve bobtail is personal conveyance, off duty. A carrier-
+        # ASSIGNED reposition is on-duty driving, same as any other move.
+        if self.job.bobtail and not self.job.assigned:
             self.hos.off_duty(minutes)
         else:
             # The loop is a real, if slow, drive through the next safe
