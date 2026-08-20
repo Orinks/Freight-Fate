@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- **Live traffic alerts now cover Florida and New York.** With Traffic
+  source set to real time, drives through Florida and New York now hear
+  real crashes, closures, and other incidents from each state's own 511
+  service, the way Indiana, Minnesota, and Colorado already do -- not
+  just road work. Alerts are spoken as you approach them, with the road
+  name and which lanes are affected.
+
 - **The horn runs on brake air, like a real truck's -- protection valve
   included.** The air horn and the brakes share the tanks, so leaning on
   the horn costs measurable pressure -- but a real tractor's pressure

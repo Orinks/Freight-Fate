@@ -572,10 +572,12 @@ class TestRealTrafficProviderConstruction:
 
     def test_all_states_have_parser(self):
         """Every state in STATE_APIS has a valid parser key."""
-        valid_parsers = {"ohgo", "iteris", "wzdx", "cars", "no_api"}
+        valid_parsers = {"ohgo", "iteris", "wzdx", "cars", "list511", "no_api"}
         for key, config in STATE_APIS.items():
             assert "parser" in config, f"{key} missing parser"
             assert config["parser"] in valid_parsers, f"{key} has unknown parser {config['parser']}"
+            if "construction_parser" in config:
+                assert config["construction_parser"] in valid_parsers, key
 
     def test_cars_states_have_bounds_and_layer_slugs(self):
         """CARS GraphQL states carry a parseable bounding box and layer slugs."""
@@ -842,18 +844,18 @@ class TestWZDxParser:
         This is the live roster from the 2026-08-09 sweep: the old per-site
         /api/events endpoints are gone everywhere, but these sites publish a
         WZDx v4.x feed at /api/wzdx, so both fetches read it.  Colorado and
-        Minnesota moved to the CARS GraphQL parser; the rest of the old
-        roster (California, Maryland, Michigan, Missouri, New Jersey,
-        Oregon, Tennessee, Texas, Virginia, Washington) went dark and sits
-        on no_api."""
+        Minnesota moved to the CARS GraphQL parser; Florida and New York
+        moved their incident fetch to the list511 parser 2026-08-20 (their
+        work zones still ride WZDx, checked by TestList511Parser); the rest
+        of the old roster (California, Maryland, Michigan, Missouri, New
+        Jersey, Oregon, Tennessee, Texas, Virginia, Washington) went dark
+        and sits on no_api."""
         wzdx_keys = (
             "arizona",
             "connecticut",
-            "florida",
             "georgia",
             "idaho",
             "nevada",
-            "new york",
             "north carolina",
             "pennsylvania",
             "utah",
@@ -1350,6 +1352,203 @@ class TestCarsParser:
             )
             == []
         )
+
+
+# --- Test list511 list-page parser -------------------------------------------
+
+
+class TestList511Parser:
+    """list511 parser covers Florida FL511 and New York 511NY incidents.
+
+    Fixtures are real list rows and map pins recorded 2026-08-20 from
+    POST https://fl511.com/List/GetData/Incidents,
+    POST https://511ny.org/List/GetData/Incidents, and the matching
+    GET /map/mapIcons/Incidents endpoints, trimmed to what the parser
+    reads.
+    """
+
+    FL_CRASH = {
+        "DT_RowId": "815973",
+        "id": 815973,
+        "roadwayName": "SR-70",
+        "description": (
+            "Multi-vehicle crash in Manatee County on SR-70 East, before "
+            "Lorraine Rd. Left turn lane blocked. Last updated at 03:54 PM."
+        ),
+        "severity": "Intermediate",
+        "isFullClosure": False,
+        "direction": "Eastbound",
+        "laneDescription": "Left turn lane blocked",
+        "locationDescription": None,
+        "county": "Manatee",
+        "startDate": "8/20/26, 3:15 PM",
+        "endDate": None,
+    }
+
+    NY_TRUCK_RESTRICTION = {
+        "DT_RowId": "4496799",
+        "id": 4496799,
+        "roadwayName": "George Washington Bridge Upper Level",
+        "description": (
+            "Truck restrictions on George Washington Bridge Upper Level "
+            "westbound ramp from West 179th Street (New York) All lanes open "
+            "until further notice. Trucks wider than 10 ft or longer than "
+            "110 ft are prohibited.<div class='cellSpacer'><i><b>Comments:"
+            "</b></i> Until further notice. trucks wider than 10 ft or "
+            "longer than 110 ft are prohibited.</div>"
+        ),
+        "severity": "Minor",
+        "isFullClosure": False,
+        "laneDescription": "All lanes open",
+        "locationDescription": "West 179th Street|",
+        "county": "New York",
+        "startDate": "5/19/25, 6:27 AM",
+        "endDate": None,
+    }
+
+    NY_CRASH = {
+        "DT_RowId": "4674401",
+        "id": 4674401,
+        "roadwayName": "I-90 - NYS Thruway",
+        "description": (
+            "Crash on I-90 - NYS Thruway eastbound at After Exit 41 (I-90) - "
+            "Waterloo (Rte 414) starting 4:23 PM, 08/20/2026 "
+            "[CARS CAD-262320295]"
+        ),
+        "severity": None,
+        "isFullClosure": False,
+        "laneDescription": None,
+        "locationDescription": "After Exit 41 (I-90) - Waterloo (Rte 414)|",
+        "county": "Seneca",
+        "startDate": "8/20/26, 4:23 PM",
+        "endDate": None,
+    }
+
+    NY_ROAD_CLOSED = {
+        "DT_RowId": "4498570",
+        "id": 4498570,
+        "roadwayName": "NY 218",
+        "description": (
+            "DOT Debris and Emergency maintenance and Road Closure on NY 218 "
+            "both directions between Mountain House Lane (Cornwall) and Grant "
+            "Road (Highlands) all lanes of 2 lanes closed until further notice"
+            "<div class='cellSpacer'><i><b>Comments:</b></i> Until further "
+            "notice</div>"
+        ),
+        "severity": "Major",
+        "isFullClosure": True,
+        "laneDescription": "all lanes closed",
+        "locationDescription": "Mountain House Lane|Grant Road",
+        "county": "Orange",
+        "startDate": "5/20/26, 5:25 PM",
+        "endDate": None,
+    }
+
+    FL_ICONS = {
+        "item1": {"url": "/Generated/Content/Images/511/map_exclamationMarkOrangeBlue.svg"},
+        "item2": [
+            {"itemId": "815973", "location": [27.431793, -82.396087], "icon": {}, "title": ""},
+        ],
+    }
+
+    NY_ICONS = {
+        "item1": {"url": "/Generated/Content/Images/511/map_exclamationMarkOrangeBlue.svg"},
+        "item2": [
+            {"itemId": "4496799", "location": [40.84938, -73.939624], "icon": {}, "title": ""},
+            {"itemId": "4674401", "location": [42.921147, -76.936964], "icon": {}, "title": ""},
+        ],
+    }
+
+    def test_list511_states_in_state_apis(self):
+        """Florida and New York ride list511 incidents plus WZDx zones."""
+        for key in ("florida", "new york"):
+            config = STATE_APIS[key]
+            assert config["parser"] == "list511", key
+            # The events endpoint is a list layer name, not a URL path
+            assert config["events_endpoint"] == "Incidents", key
+            assert not config["events_endpoint"].startswith("/"), key
+            # Work zones stay on the WZDx feed
+            assert config["construction_parser"] == "wzdx", key
+            assert config["construction_endpoint"] == "/api/wzdx", key
+
+    def test_parse_florida_crash(self):
+        """An FL row parses with pin coordinates and Intermediate → medium."""
+        provider = RealTrafficProvider()
+        locations = provider._parse_list511_icon_locations(self.FL_ICONS)
+        events = provider._parse_list511_events([self.FL_CRASH], locations, "florida")
+        assert len(events) == 1
+        event = events[0]
+        assert event.id == "815973"
+        assert event.event_type == "incident"
+        assert event.severity == "medium"
+        assert event.road_name == "SR-70"
+        assert event.county == "Manatee"
+        assert event.latitude == 27.431793
+        assert event.longitude == -82.396087
+        assert event.lanes_affected == "Left turn lane blocked"
+        # The site-clock sentence is stripped from the spoken text
+        assert "Last updated" not in event.description
+        assert event.description.endswith("Left turn lane blocked.")
+
+    def test_parse_ny_html_stripped(self):
+        """The cellSpacer comment div never reaches the spoken text."""
+        provider = RealTrafficProvider()
+        locations = provider._parse_list511_icon_locations(self.NY_ICONS)
+        events = provider._parse_list511_events([self.NY_TRUCK_RESTRICTION], locations, "new york")
+        event = events[0]
+        assert "<" not in event.description
+        assert "Comments" not in event.description
+        assert event.description.startswith("Truck restrictions on George Washington Bridge")
+        assert event.severity == "low"  # Minor
+        # Trailing "|" separator dropped from the location text
+        assert event.location_text == "West 179th Street"
+        assert event.latitude == 40.84938
+
+    def test_parse_ny_cad_suffix_and_null_severity(self):
+        """A CAD source tag is stripped; a null severity falls back to low."""
+        provider = RealTrafficProvider()
+        events = provider._parse_list511_events([self.NY_CRASH], {}, "new york")
+        event = events[0]
+        assert "[CARS" not in event.description
+        assert event.description.endswith("starting 4:23 PM, 08/20/2026")
+        assert event.severity == "low"
+        assert event.lanes_affected is None
+
+    def test_full_closure_outranks_row_severity(self):
+        """isFullClosure forces high severity and joins location parts."""
+        provider = RealTrafficProvider()
+        events = provider._parse_list511_events([self.NY_ROAD_CLOSED], {}, "new york")
+        event = events[0]
+        assert event.severity == "high"
+        assert event.location_text == "Mountain House Lane, Grant Road"
+
+    def test_missing_pin_keeps_event_without_coordinates(self):
+        """A row without a map pin still parses; coordinates stay None."""
+        provider = RealTrafficProvider()
+        events = provider._parse_list511_events([self.FL_CRASH], {}, "florida")
+        assert len(events) == 1
+        assert events[0].latitude is None
+        assert events[0].longitude is None
+
+    def test_icon_locations_malformed(self):
+        """Malformed pin payloads yield an empty location map, not a crash."""
+        provider = RealTrafficProvider()
+        assert provider._parse_list511_icon_locations(None) == {}
+        assert provider._parse_list511_icon_locations([]) == {}
+        assert provider._parse_list511_icon_locations({"item2": "nope"}) == {}
+        assert (
+            provider._parse_list511_icon_locations(
+                {"item2": [{"itemId": "1", "location": [None, None]}, "junk", {}]}
+            )
+            == {}
+        )
+
+    def test_empty_and_malformed_rows(self):
+        """Empty, id-less, and non-dict rows are skipped."""
+        provider = RealTrafficProvider()
+        assert provider._parse_list511_events([], {}, "florida") == []
+        rows = [{}, "junk", {"id": None, "description": "x"}, {"id": 5, "description": ""}]
+        assert provider._parse_list511_events(rows, {}, "florida") == []
 
 
 class TestZoneNeedsRoomForItsTaper:

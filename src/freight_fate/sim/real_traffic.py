@@ -13,6 +13,10 @@ Parsers (full format notes in ``real_traffic_parsers``):
   ``wzdx``   — Work Zone Data Exchange standard (GeoJSON FeatureCollection),
                camelCase and v4.x snake_case ``core_details`` layouts.
   ``cars``   — Castle Rock CARS GraphQL platform (``POST /api/graphql``).
+  ``list511`` — The 511 sites' own list-page JSON (``POST
+               /List/GetData/<layer>``) joined with the map-pin locations
+               (``GET /map/mapIcons/<layer>``).  Fills the incident gap on
+               WZDx-only sites; keyless.
   ``no_api`` — Stub for states without a working public 511 API.  Returns
                empty data so the simulation falls back to procedurally
                generated construction zones without log warnings.
@@ -36,6 +40,7 @@ if TYPE_CHECKING:
     pass
 
 from ..net import ssl_context
+from .real_traffic_list511 import List511Parsers
 from .real_traffic_parsers import TrafficEvent, TrafficEventParsers
 
 log = logging.getLogger(__name__)
@@ -50,9 +55,17 @@ log = logging.getLogger(__name__)
 #                ``construction_endpoint`` hold the deployment's layer slug
 #                for each fetch (slugs vary per site), and ``bounds`` is the
 #                statewide "south,west,north,east" query box.
+#   "list511" — The 511 site's own list JSON.  ``events_endpoint`` holds the
+#                list layer name (e.g. "Incidents"); text rides
+#                POST /List/GetData/<layer> and coordinates come from
+#                GET /map/mapIcons/<layer>, joined on the event id.
 #   "no_api"  — No working public 511 API.  Returns empty data so the
 #                simulation falls back to procedurally generated construction
 #                zones without log warnings.
+#
+# ``construction_parser`` (optional) overrides ``parser`` for the
+# construction fetch only, for sites whose incidents and work zones live on
+# different platforms (Florida and New York: list511 incidents + WZDx zones).
 #
 # States with no working public 511 API are listed with ``parser: "no_api"`` so
 # the coverage is explicit: unsupported states still return empty data gracefully.
@@ -101,6 +114,8 @@ STATE_APIS: dict[str, dict[str, str]] = {
     # The old per-site /api/events endpoints are gone everywhere, but these
     # sites publish a live WZDx v4.x work-zone feed at /api/wzdx (verified
     # 2026-08-09), so both fetches read it; incidents simply don't appear.
+    # Florida and New York (below) keep their WZDx work zones but now pull
+    # incidents from the list511 endpoints instead.
     "arizona": {
         "base_url": "https://az511.com",
         "events_endpoint": "/api/wzdx",
@@ -115,12 +130,23 @@ STATE_APIS: dict[str, dict[str, str]] = {
         "name": "Connecticut CTroads",
         "parser": "wzdx",
     },
+    # ── list511: incidents from the site's list JSON, zones from WZDx ────
+    # fl511.com and 511ny.org publish work zones at /api/wzdx but no
+    # incidents there.  Their own list pages ride an open DataTables-style
+    # JSON endpoint (POST /List/GetData/<layer>) carrying the full incident
+    # text, and /map/mapIcons/<layer> supplies id -> [lat, lon] for the map
+    # pins; the two join on the event id.  Both fetched keyless 2026-08-20:
+    # FL 22 incidents, NY 105 incidents, shape {"recordsTotal": N,
+    # "data": [{id, roadwayName, description, severity, isFullClosure,
+    # laneDescription, county, ...}]}.  (Each site also documents a
+    # developer API, but that one requires a registered key.)
     "florida": {
         "base_url": "https://fl511.com",
-        "events_endpoint": "/api/wzdx",
+        "events_endpoint": "Incidents",
         "construction_endpoint": "/api/wzdx",
         "name": "Florida FL511",
-        "parser": "wzdx",
+        "parser": "list511",
+        "construction_parser": "wzdx",
     },
     "georgia": {
         "base_url": "https://511ga.org",
@@ -143,12 +169,14 @@ STATE_APIS: dict[str, dict[str, str]] = {
         "name": "Nevada NVRoads",
         "parser": "wzdx",
     },
+    # See the florida note: same platform, verified keyless 2026-08-20.
     "new york": {
         "base_url": "https://511ny.org",
-        "events_endpoint": "/api/wzdx",
+        "events_endpoint": "Incidents",
         "construction_endpoint": "/api/wzdx",
         "name": "New York 511NY",
-        "parser": "wzdx",
+        "parser": "list511",
+        "construction_parser": "wzdx",
     },
     "north carolina": {
         "base_url": "https://drivenc.gov",
@@ -246,6 +274,17 @@ RETRY_AFTER_S = 120.0  # Wait 2 minutes before retrying failed state
 # events (verified statewide against 511in.org: 484 uncollapsed events).
 CARS_GRAPHQL_ENDPOINT = "/api/graphql"
 CARS_GRAPHQL_ZOOM = 15
+# list511 fetch shape.  The list endpoint is DataTables-style: it needs the
+# paging fields and at least one column definition or it answers with an
+# empty ``data`` array, and it caps a page at 100 rows regardless of the
+# requested length (verified 2026-08-20 against 511ny.org: 107 incidents
+# came back 100 + 7).  The page cap bounds a runaway feed, not a real state:
+# the busiest live roster (NY) fits in two pages.
+LIST511_LIST_ENDPOINT = "/List/GetData/{layer}"
+LIST511_ICONS_ENDPOINT = "/map/mapIcons/{layer}"
+LIST511_PAGE_LENGTH = 100
+LIST511_MAX_PAGES = 10
+
 CARS_MAP_FEATURES_QUERY = (
     "query MapFeatures($input: MapFeaturesArgs!) {"
     " mapFeaturesQuery(input: $input) {"
@@ -286,7 +325,7 @@ class TrafficData:
         }
 
 
-class RealTrafficProvider(TrafficEventParsers):
+class RealTrafficProvider(TrafficEventParsers, List511Parsers):
     """Cached, non-blocking source of real-time traffic data per state.
 
     ``request(state)`` kicks off a background fetch for the specified state.
@@ -377,9 +416,13 @@ class RealTrafficProvider(TrafficEventParsers):
         thread.start()
 
     def _fetch_construction_from_api(self, state: str) -> TrafficData:
-        """Fetch construction data from the state's construction endpoint."""
+        """Fetch construction data from the state's construction endpoint.
+
+        ``construction_parser`` overrides ``parser`` for states whose work
+        zones live on a different platform than their incidents (the
+        list511 states keep their WZDx work-zone feed)."""
         api_config = STATE_APIS[state]
-        parser = api_config.get("parser", "ohgo")
+        parser = api_config.get("construction_parser", api_config.get("parser", "ohgo"))
 
         if parser == "cars":
             events = self._fetch_cars_events(
@@ -453,6 +496,70 @@ class RealTrafficProvider(TrafficEventParsers):
         with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S, context=ssl_context()) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         return self._parse_cars_events(data, state, construction=construction)
+
+    def _http_post_form_json(self, url: str, fields: dict[str, str]) -> dict | list:
+        """POST a form-encoded body and decode the JSON response."""
+        req = urllib.request.Request(
+            url,
+            data=urllib.parse.urlencode(fields).encode("utf-8"),
+            headers={
+                "User-Agent": self._default_user_agent,
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S, context=ssl_context()) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    def _fetch_list511_events(self, state: str, layer: str) -> list[TrafficEvent]:
+        """Fetch one list layer from a list511 site and join in coordinates.
+
+        Pages through ``POST /List/GetData/<layer>`` (the server caps a page
+        at 100 rows), then reads ``GET /map/mapIcons/<layer>`` for the map
+        pins' ``id -> [lat, lon]``.  A pin fetch failure degrades to events
+        without coordinates rather than losing the batch; the distance
+        filters simply skip those.
+        """
+        api_config = STATE_APIS[state]
+        base = api_config["base_url"]
+
+        rows: list[dict] = []
+        for page in range(LIST511_MAX_PAGES):
+            data = self._http_post_form_json(
+                f"{base}{LIST511_LIST_ENDPOINT.format(layer=layer)}",
+                {
+                    "draw": str(page + 1),
+                    "start": str(page * LIST511_PAGE_LENGTH),
+                    "length": str(LIST511_PAGE_LENGTH),
+                    "columns[0][data]": "description",
+                    "columns[0][name]": "description",
+                    "order[0][column]": "0",
+                    "order[0][dir]": "asc",
+                    "search[value]": "",
+                    "search[regex]": "false",
+                },
+            )
+            if not isinstance(data, dict):
+                break
+            page_rows = data.get("data")
+            if not isinstance(page_rows, list) or not page_rows:
+                break
+            rows.extend(r for r in page_rows if isinstance(r, dict))
+            try:
+                total = int(data.get("recordsTotal", 0))
+            except (TypeError, ValueError):
+                total = 0
+            if len(rows) >= total:
+                break
+
+        locations: dict[str, tuple[float, float]] = {}
+        try:
+            icons = self._http_get_json(f"{base}{LIST511_ICONS_ENDPOINT.format(layer=layer)}")
+            locations = self._parse_list511_icon_locations(icons)
+        except Exception as e:
+            log.debug(f"list511 map pins unavailable for {state}/{layer}: {e}")
+
+        return self._parse_list511_events(rows, locations, state)
 
     def get_construction_near_route(
         self,
@@ -552,6 +659,8 @@ class RealTrafficProvider(TrafficEventParsers):
             events = self._fetch_cars_events(
                 state, api_config["events_endpoint"], construction=False
             )
+        elif parser == "list511":
+            events = self._fetch_list511_events(state, api_config["events_endpoint"])
         else:
             data = self._http_get_json(f"{api_config['base_url']}{api_config['events_endpoint']}")
             if parser == "iteris":
