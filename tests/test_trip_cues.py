@@ -619,3 +619,20 @@ def test_the_status_browse_says_how_much_to_the_next_level(world):
         assert "to level" in career_lines[0] or "top career level" in career_lines[0]
     finally:
         app.shutdown()
+
+
+def test_abandoning_a_bobtail_costs_nothing(world):
+    """No load, no contract, nothing to breach, nothing to fine (Shane,
+    2026-08-20). A loaded job still pays the five hundred and the
+    reputation; an empty reposition just turns around."""
+    from types import SimpleNamespace
+
+    from freight_fate.states.driving_pause_states import AbandonJobConfirmationState
+
+    host = AbandonJobConfirmationState.__new__(AbandonJobConfirmationState)
+    host.driving = SimpleNamespace(job=SimpleNamespace(bobtail=True))
+    assert host._is_bobtail()
+    host.driving = SimpleNamespace(job=SimpleNamespace(bobtail=False))
+    assert not host._is_bobtail()
+    host.driving = SimpleNamespace(job=None)
+    assert not host._is_bobtail()

@@ -852,6 +852,12 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Turning back from an empty reposition costs nothing.** Abandoning a
+  bobtail run no longer charges the five hundred dollar penalty or the
+  reputation hit -- there is no freight and no contract, so there is
+  nothing to breach. The hours you spent still pass. A loaded job still
+  costs you both, as it should.
+
 - **The experience check is really in the game this time.** How much
   experience to the next level now reads in two places: the driving
   status browse ("Career: level 6, Company Driver. 600 experience to
