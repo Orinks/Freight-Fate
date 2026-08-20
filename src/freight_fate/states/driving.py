@@ -329,6 +329,11 @@ class DrivingState(
         # A scale crossed with its own exit armed: judged after the exit watch
         # runs, later in the same frame, never on ramp speed alone.
         self._weigh_station_pending = None
+        # Weigh-in-motion verdicts for a transponder-equipped truck, keyed by
+        # _weigh_station_key(stop): "green" or "red", rolled once at the
+        # notice point in EnforcementWatchMixin._resolve_transponder_verdict
+        # and read both by the bypass judgment and by the half-mile reminder.
+        self._weigh_station_transponder_verdict: dict[str, str] = {}
         self._unsafe_damage_stop_key = ""
         # Compliance tracker for the active stop: 0..1, judged from behavior
         # (signaling and slowing), not distance. Reset on every stop-ending path.

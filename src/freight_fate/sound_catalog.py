@@ -589,6 +589,28 @@ _ENFORCEMENT = SoundCategory(
             "is unmistakable before a word is spoken.",
         ),
         SoundEntry(
+            "Scale green light",
+            (Cue("events/scale_green", volume=0.8),),
+            "A weigh-in-motion transponder cleared this truck as it "
+            "approached an open scale: keep rolling, no exit needed. Follows "
+            "right behind the open-scale notice, never instead of it.",
+            when="A weigh station transponder only -- the fleet issues one "
+            "free at career level 4, or an owner-operator can subscribe from "
+            "Business status. Without one, every open scale still demands "
+            "every truck pull in.",
+        ),
+        SoundEntry(
+            "Scale red light",
+            (Cue("events/scale_red", volume=0.7),),
+            "A weigh-in-motion transponder called this truck in anyway: "
+            "signal for the scale exit and pull in, the same as any driver "
+            "without a transponder. Compliant trucks are still red-lighted "
+            "sometimes, and an overweight load always is.",
+            when="A weigh station transponder only -- the fleet issues one "
+            "free at career level 4, or an owner-operator can subscribe from "
+            "Business status.",
+        ),
+        SoundEntry(
             "Weigh station",
             # Deliberately louder and longer than the road plays it. This bed
             # is the quietest thing in the catalog by a wide margin -- a flat

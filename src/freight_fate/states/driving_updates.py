@@ -3816,6 +3816,15 @@ class DrivingUpdateMixin:
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,
                 )
+                # A transponder-equipped truck gets a weigh-in-motion verdict
+                # on top of the notice above, never instead of it -- the
+                # "signal for the scale exit" instruction still has to be
+                # true for the driver who gets red-lighted. Queued right
+                # behind the notice (both ROUTE, interrupt=False), so a
+                # green truck hears "you don't need that exit" before it
+                # would reach the gore.
+                if self.ctx.profile is not None and has_weigh_station_transponder(self.ctx.profile):
+                    self._resolve_transponder_verdict(stop, key)
             self._check_scale_reminder(stop, ahead, key)
             if key in self.enforcement_events:
                 continue
@@ -3825,6 +3834,12 @@ class DrivingUpdateMixin:
                 and self._scale_is_open(stop)
                 and self.truck.speed_mph > WEIGH_STATION_BYPASS_MPH
             ):
+                if self._weigh_station_transponder_verdict.get(key) == "green":
+                    # Weigh-in-motion cleared this truck. Rolling past at
+                    # mainline speed is exactly what a green light
+                    # authorizes, not a bypass to defer or fine.
+                    self.enforcement_events.add(key)
+                    continue
                 if self._exit_is_armed_for(stop):
                     # Signaled for this scale's own ramp. Whether that is a
                     # check-in or a miss is not decided here: the exit watch
@@ -3837,6 +3852,54 @@ class DrivingUpdateMixin:
                     continue
                 self.enforcement_events.add(key)
                 self._charge_weigh_station_bypass(stop)
+
+    def _resolve_transponder_verdict(self, stop, key: str) -> None:
+        """Roll and speak the weigh-in-motion verdict for a transponder truck.
+
+        Fires once, at the same point the open-scale notice latches. Seeded
+        off the trip seed and this stop's own key -- the same named-draw
+        shape as ``_charge_weigh_station_bypass`` -- so a reload cannot
+        re-roll a scale already passed.
+        """
+        if self._cargo_is_overweight():
+            # A truck over the legal limit is always red-lighted; no roll
+            # needed. Nothing in the game currently tracks cargo weight
+            # against a legal gross limit (ROADMAP.md: "Nothing ever weighs
+            # the truck"), so this is presently always False and every truck
+            # takes the seeded roll below -- wired here so the day that state
+            # lands, every overweight truck is red-lighted with no other
+            # change.
+            verdict = "red"
+        else:
+            roll = random.Random(f"{self.trip_seed}:scale-transponder:{key}").random()
+            verdict = "green" if roll < WEIGH_STATION_TRANSPONDER_BYPASS_SHARE else "red"
+        self._weigh_station_transponder_verdict[key] = verdict
+        if verdict == "green":
+            self.ctx.audio.play("events/scale_green", volume=0.8)
+            self.ctx.say_event(
+                "Green light. You are cleared past the scale; keep rolling.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.NAVIGATION,
+            )
+        else:
+            self.ctx.audio.play("events/scale_red", volume=0.7)
+            self.ctx.say_event(
+                "Red light. Pull in to the scale.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.NAVIGATION,
+            )
+
+    def _cargo_is_overweight(self) -> bool:
+        """Whether this load is over the legal gross weight limit.
+
+        No part of the game currently weighs the truck against a legal
+        limit -- see ROADMAP.md's "Nothing ever weighs the truck" entry.
+        Always False until that lands; kept as its own method so
+        ``_resolve_transponder_verdict`` needs no change when it does.
+        """
+        return False
 
     def _exit_is_armed_for(self, stop) -> bool:
         """Whether this stop's own exit is the one the driver is committed to."""

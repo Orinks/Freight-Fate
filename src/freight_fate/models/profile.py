@@ -718,6 +718,11 @@ class Profile:
     carrier_key: str = DEFAULT_START_KEY
     start_mode: str = START_MODE_COMPANY
     authority_readiness: bool = False
+    # Owner-operator-purchased weigh-in-motion bypass subscription (see
+    # models/business.has_weigh_station_transponder). Company drivers never
+    # set this -- their fleet issues one free at
+    # business.WEIGH_STATION_TRANSPONDER_LEVEL instead.
+    weigh_station_transponder: bool = False
     trailer_programs: list[str] = field(default_factory=list)
     owned_trailers: list[str] = field(default_factory=list)
     career: Career = field(default_factory=Career)

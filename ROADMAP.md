@@ -2080,13 +2080,25 @@ onto exit signalling.
       directions, and the owner-operator start is the mode that feels it.
       Found by the 2026-08-11 realism audit; full report in
       `docs/realism-audit-2026-08.md`.
-- [ ] **Nothing ever weighs the truck.** Loads routinely gross to about
-      87,000 lb against the 80,000 lb federal limit, and "overweight"
-      appears nowhere in `src/`. Meanwhile every open scale costs a
-      mandatory 15 minutes of duty-window time with no bypass concept,
-      where a clean real carrier is waved through 85-90 percent of the
-      time. So the game charges for scales but never enforces the thing
-      scales exist for -- punishing and unrealistic in the same feature.
+- [x] **PrePass-style weigh-in-motion bypass -- SHIPPED 2026-08-20** (owner-
+      approved design, from Brandon's realism-audit report below). A
+      transponder-equipped truck now gets a green/red verdict as it
+      approaches an open scale instead of the blanket "all trucks must pull
+      in": green rolls past with no charge, red pulls in exactly like the
+      old flow. Company drivers get one free at career level 4
+      (`business.WEIGH_STATION_TRANSPONDER_LEVEL`); owner-operators
+      subscribe from Business status for a per-mile settlement reserve
+      (`business.has_weigh_station_transponder`, `owner_operator_charges`).
+      The bypass share is a named seeded roll off the trip seed and the
+      stop, in `driving_updates._resolve_transponder_verdict`.
+
+      STILL OPEN, and why this is not a full close of the finding below:
+      the game still never weighs the truck against a legal gross limit --
+      `_cargo_is_overweight` is wired to always red-light an overweight
+      load the moment that state exists, but nothing computes it yet, so
+      every load takes the legal-truck bypass roll today. Loads routinely
+      gross to about 87,000 lb against the 80,000 lb federal limit, and
+      "overweight" still appears nowhere else in `src/`.
 - [ ] **Relaxed hours-of-service mode misreports the law.** It multiplies
       the legal limits by 1.25 and then speaks 13.75 hours as "the
       11-hour driving limit". Whatever the mode does to the numbers, the

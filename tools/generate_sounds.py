@@ -5,16 +5,18 @@ ELEVENLABS_API_KEY env var or local ignored .env), requests each effect, and
 converts the returned MP3 to the project's Ogg Vorbis convention with ffmpeg.
 Never run at runtime and the key is never bundled.
 
-One cue is procedural instead: the weigh-station warning is pure numpy
-arithmetic (same deterministic-numpy tradition as generate_radio.py's
-generate_static/generate_fringe), so it needs no API key and spends no
-credits. It is generated as part of the default "everything" run, and can
-also be built alone with --weigh-station-warning.
+Some cues are procedural instead: the weigh-station warning and the two
+weigh-in-motion transponder verdicts are pure numpy arithmetic (same
+deterministic-numpy tradition as generate_radio.py's
+generate_static/generate_fringe), so they need no API key and spend no
+credits. Both are generated as part of the default "everything" run, and can
+also be built alone with --weigh-station-warning / --scale-verdict.
 
 Usage:
     uv run python tools/generate_sounds.py            # generate the default set
     uv run python tools/generate_sounds.py events/police_siren
     uv run python tools/generate_sounds.py --weigh-station-warning  # procedural, no credits
+    uv run python tools/generate_sounds.py --scale-verdict  # procedural, no credits
 """
 
 from __future__ import annotations
@@ -105,6 +107,31 @@ SPECS: dict[str, tuple[str, float, float]] = {
         "and positive, heard inside a truck cab, no speech, no music, "
         "no whoosh",
         0.9,
+        0.65,
+    ),
+    # A weigh-in-motion transponder's verdict as a truck approaches an open
+    # scale: distinct from the ramp light pair above (a different situation,
+    # never heard in the same approach) and readable on its own before the
+    # spoken line lands. Procedural fallbacks ship first -- see
+    # generate_scale_verdict_cues below -- because the ElevenLabs key was
+    # dead when these were added (2026-08-20); regenerate from these SPECS
+    # once a working key is available, same as every other cue here.
+    "events/scale_green": (
+        "Short bright electronic readout chirp meaning cleared to proceed, "
+        "for an audio driving game weigh station transponder, a quick "
+        "friendly upward two-note bell tone like a toll transponder success "
+        "beep, light and positive, heard inside a truck cab, no speech, "
+        "no music, no whoosh",
+        0.7,
+        0.65,
+    ),
+    "events/scale_red": (
+        "Short firm electronic readout tone meaning pull in for inspection, "
+        "for an audio driving game weigh station transponder, two low "
+        "descending buzzer-tinged notes, serious but not harsh, distinct "
+        "from the ramp stop-light cue, heard inside a truck cab, no speech, "
+        "no music, no siren",
+        0.7,
         0.65,
     ),
     "events/hazard_clear": (
@@ -493,6 +520,57 @@ def generate_weigh_station_warning() -> None:
     _write_synth_asset(sample, rate, f"{WEIGH_STATION_WARNING_KEY}.ogg")
 
 
+# The weigh-in-motion transponder verdict, procedural like the weigh-station
+# warning above -- same deterministic-numpy tradition (no random source, a
+# rebuild reproduces the same PCM), and only a fallback: SPECS above still
+# carries the ElevenLabs prompts for whenever a working key is available.
+SCALE_GREEN_KEY = "events/scale_green"
+SCALE_RED_KEY = "events/scale_red"
+
+
+def _synth_scale_verdict(rate: int, *, rising: bool):
+    """One deterministic two-note transponder readout tone.
+
+    Same "readout beep" family as this file's weigh-station-warning part
+    two -- a short bright tone stepping between two notes -- so the pair
+    reads as kin to the scale cue that precedes it, while staying clear of
+    the ramp traffic light pair (events/ramp_light_green,
+    events/ramp_light_red): different frequencies, and never heard in the
+    same approach as those, since a scale's own ramp has no public
+    crossroad or signal (see driving_events._ramp_control_for). Rising for
+    the green verdict, falling for red -- the same up/down convention the
+    ramp light pair already teaches, so the direction is learnable even
+    without ever having heard this specific pair before.
+    """
+    import numpy as np
+
+    note_s = 0.11
+    gap = np.zeros(int(0.035 * rate))
+    low_hz, high_hz = 1320.0, 1760.0
+    first_hz, second_hz = (low_hz, high_hz) if rising else (high_hz, low_hz)
+
+    def _note(hz: float):
+        t = np.arange(int(note_s * rate)) / rate
+        tone = np.sin(2.0 * np.pi * hz * t) * np.exp(-t / 0.09)
+        return _synth_edge_fade(tone, rate, attack_s=0.004, release_s=0.02)
+
+    sample = np.concatenate([_note(first_hz), gap, _note(second_hz)])
+    peak = float(np.max(np.abs(sample))) or 1.0
+    return 0.85 * sample / peak
+
+
+def generate_scale_verdict_cues() -> None:
+    """Write the two procedural transponder-verdict cues.
+
+    Pure arithmetic, no API credits -- part of the default "everything" run
+    alongside generate_weigh_station_warning, and buildable alone the same
+    way with --scale-verdict.
+    """
+    rate = 44100
+    _write_synth_asset(_synth_scale_verdict(rate, rising=True), rate, f"{SCALE_GREEN_KEY}.ogg")
+    _write_synth_asset(_synth_scale_verdict(rate, rising=False), rate, f"{SCALE_RED_KEY}.ogg")
+
+
 # --- Procedural traffic pass and crossing synths (no API, deterministic) ---
 #
 # The ElevenLabs key went dead mid-expansion (401, 2026-08-20), so these
@@ -621,10 +699,15 @@ def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     do_all = not argv
     want_procedural = do_all or "--weigh-station-warning" in argv
+    want_scale_verdict = do_all or "--scale-verdict" in argv
     if "--weigh-station-warning" in argv:
         argv.remove("--weigh-station-warning")
+    if "--scale-verdict" in argv:
+        argv.remove("--scale-verdict")
     if want_procedural:
         generate_weigh_station_warning()
+    if want_scale_verdict:
+        generate_scale_verdict_cues()
     if "--synth-traffic" in argv:
         argv.remove("--synth-traffic")
         generate_synth_traffic(argv or None)
