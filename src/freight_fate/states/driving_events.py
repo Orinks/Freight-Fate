@@ -3209,6 +3209,24 @@ class DrivingEventMixin:
             else self._cruise_mph
         )
         exit_note = " for the ramp" if self._cruise_exit_mph is not None else ""
+        # Name the number the truck will actually hold. The resume line used
+        # to speak the SET speed while a zone cap silently pinned the working
+        # target far below it: clear of the visible queue in a heavy-traffic
+        # zone posting 20, cruise said "resuming at 70" and held 23 -- the
+        # zone's 20 plus the ACC offset -- for the rest of the zone, minutes
+        # of open-looking road with the announcement contradicting the truck
+        # (Brandon, 2026-08-20). The queue ahead is real even when the bubble
+        # happens to be showing empty road; the words just have to match.
+        posted, limit_reason = self._acc_posted_limit_ahead()
+        cap_mph = (
+            posted if limit_reason in RESTRICTED_ZONE_REASONS else posted + ACC_LIMIT_OFFSET_MPH
+        )
+        if cap_mph < effective_mph:
+            effective_mph = cap_mph
+            exit_note = {
+                "construction": " through the construction zone",
+                "heavy traffic": " through the heavy traffic",
+            }.get(limit_reason, " for the lower limit")
         self.ctx.audio.play("ui/notify", volume=0.5)
         message = (
             f"Adaptive cruise {'resuming' if transition else 'set'} at "
