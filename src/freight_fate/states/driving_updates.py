@@ -3929,7 +3929,22 @@ class DrivingUpdateMixin:
         if not self.ctx.settings.destination_approach_assist:
             return
         trip = self.trip
-        if trip.finished or not trip._is_facility_approach_route():
+        if trip.finished:
+            return
+        # NOT gated on _is_facility_approach_route: that asks "is this route a
+        # same-city street chain to a gate", which is False for an ordinary
+        # city-to-city delivery -- so gating on it meant the assist never ran
+        # on the very deliveries it exists for. The owner drove Midland to
+        # Odessa with it on and went straight past the market at 38 mph
+        # (2026-08-19). The run-in to a destination is a run-in whatever the
+        # route is made of.
+        #
+        # The exit gate stands in for "the destination is genuinely ahead of
+        # you": before it is taken the truck is still on the highway, and a
+        # driver who misses the exit gets the reroute rather than the brakes.
+        # Distance does the rest -- the cap is above any road speed until the
+        # last tenth of a mile, so this cannot bite early.
+        if not (self._destination_exit_taken or trip._is_facility_approach_route()):
             return
         remaining_m = max(0.0, trip.remaining_miles) * 1609.344
         if remaining_m <= 0.0:
@@ -3939,10 +3954,20 @@ class DrivingUpdateMixin:
         cap_mph = (2.0 * APPROACH_ASSIST_DECEL_MPS2 * remaining_m) ** 0.5 * MPH_PER_MPS
         if self.truck.speed_mph <= cap_mph:
             return
-        # Over the cap: shed. Throttle first -- braking against a held pedal
-        # is how an assist ends up fighting the driver.
+        # Over the cap: shed, with the pedal MODULATED to how far over it is.
+        # A fixed pressure overshoots -- 0.4 on a loaded rig is about
+        # 1.5 m/s^2 against the 0.9 the curve is drawn for, so the truck shed
+        # faster than the profile and came to rest 143 feet short of the gate,
+        # where the cap is no longer binding and the assist lets go. Stopping
+        # short and sitting there is its own failure: nothing arrives.
+        #
+        # Tracking the curve instead means easing off as the truck comes back
+        # under it, so speed follows the profile down and reaches zero AT the
+        # point rather than before it.
         self.truck.throttle = 0.0
-        self.truck.brake = max(self.truck.brake, APPROACH_ASSIST_BRAKE)
+        over = (self.truck.speed_mph - cap_mph) / max(cap_mph, 1.0)
+        pressure = APPROACH_ASSIST_BRAKE * min(1.0, max(0.25, over * 3.0))
+        self.truck.brake = max(self.truck.brake, pressure)
         if self._cruise_mph is not None or self._keeper_mph is not None:
             # The assist has the pedals for the arrival; automatic control
             # must not hold a speed against it. Paused rather than cancelled,

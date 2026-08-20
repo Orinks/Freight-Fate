@@ -857,42 +857,64 @@ def test_a_fresh_cruise_session_inherits_an_armed_exit_s_ramp_cap():
     assert "RAMP_CRUISE_TARGET_MPH" in src
 
 
-def test_the_destination_approach_assist_slows_before_the_arrival_point():
-    """Owner, Odessa delivery, 2026-08-19: "it did not stop me. I stopped, and
-    when I did the message that said stopped and holding was true."
+def test_the_destination_approach_assist_actually_brings_the_truck_to_a_stop():
+    """Owner, Odessa, 2026-08-19: "I did, and it's wrong. Never stopped."
 
-    The setting promises "slows and stops at the selected facility arrival
-    point". Only the stopping half existed: _handle_arrival_gate applies full
-    brake, and it runs inside ``if self.trip.finished`` -- true only once the
-    truck is AT the point. So the assist could hold a truck that had already
-    stopped and nothing more, while reporting as though it had done the work.
+    Simulated rather than inspected, because inspection is what let this
+    through twice. The first version only ran inside ``if trip.finished`` --
+    true once the truck is already AT the point -- so it could hold a stopped
+    truck and nothing else. The second gated on
+    ``_is_facility_approach_route``, which asks "is this route a same-city
+    street chain to a gate": False for an ordinary city-to-city delivery, so
+    it never ran on the deliveries it exists for and the owner went past the
+    market at 38 mph.
 
-    The ease is priced like the exit assist's ramp glide: road speed stands
-    until the truck is inside the distance it needs to shed.
+    A fixed brake pressure then overshot the profile -- 0.4 on a loaded rig
+    is about 1.5 m/s^2 against the 0.9 the curve is drawn for -- and parked
+    the truck 143 feet short, where the cap no longer binds and the assist
+    lets go. Stopping short and sitting there is its own failure.
     """
-    import inspect
-
-    from freight_fate.states.driving_core import (
-        APPROACH_ASSIST_DECEL_MPS2,
-        MPH_PER_MPS,
-    )
+    from freight_fate.sim.vehicle import TruckState
     from freight_fate.states.driving_updates import DrivingUpdateMixin
 
-    # It runs every frame, not only once the trip has finished.
-    update_src = inspect.getsource(DrivingUpdateMixin.update)
-    hook = update_src.index("_update_destination_approach_assist")
-    finished = update_src.index("if self.trip.finished:")
-    assert hook < finished, "the approach assist still runs only after arrival"
+    class _Trip:
+        finished = False
 
-    # And it only ever takes speed off.
-    src = inspect.getsource(DrivingUpdateMixin._update_destination_approach_assist)
-    assert "self.truck.speed_mph <= cap_mph" in src, "no leave-alone branch"
-    assert "throttle = 0.0" in src
+        def __init__(self, remaining):
+            self.remaining_miles = remaining
 
-    # The profile stops the truck in the road it has left, not sooner.
-    def cap(miles):
-        return (2.0 * APPROACH_ASSIST_DECEL_MPS2 * miles * 1609.344) ** 0.5 * MPH_PER_MPS
+        def _is_facility_approach_route(self):
+            return False  # an ordinary delivery, not a same-city street chain
 
-    assert cap(1.0) > 60.0, "a mile out it must not be dragging the truck down"
-    assert cap(0.05) < 30.0, "a tenth of that out it must genuinely be slowing"
-    assert cap(0.25) > cap(0.1) > cap(0.05)
+    class _Ctx:
+        class settings:
+            destination_approach_assist = True
+
+    class _Driving:
+        _cruise_mph = None
+        _keeper_mph = None
+        _destination_exit_taken = True
+
+        def __init__(self, truck, trip):
+            self.truck, self.trip, self.ctx = truck, trip, _Ctx()
+
+        def _pause_speed_control(self, **kwargs):
+            pass
+
+    for start_mph in (25.0, 38.0, 50.0):
+        truck = TruckState()
+        truck.velocity_mps = start_mph / 2.23694
+        trip = _Trip(0.40)
+        driving = _Driving(truck, trip)
+        for _ in range(6000):
+            truck.throttle = 0.0  # hands off: the assist is the only input
+            DrivingUpdateMixin._update_destination_approach_assist(driving)
+            truck.update(1 / 60)
+            trip.remaining_miles -= abs(truck.velocity_mps) / 60 / 1609.344
+            if truck.speed_mph <= 0.5 or trip.remaining_miles < -0.02:
+                break
+        feet = trip.remaining_miles * 5280.0
+        assert truck.speed_mph <= 0.5, f"from {start_mph:.0f} mph it never stopped"
+        assert -60.0 < feet < 60.0, (
+            f"from {start_mph:.0f} mph it stopped {feet:+.0f} ft from the gate"
+        )
