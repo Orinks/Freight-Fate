@@ -58765,7 +58765,7 @@
    "call_sign": "",
    "format": "variety",
    "id": "rb-web-ab534ac4-79c4-4b1d-beaa-890ee994bcdf",
-   "name": "TheRadioStorm.com",
+   "name": "The Radio Storm",
    "real_stream": true,
    "safe_for_streaming": false,
    "source": "community radio directory",
@@ -58773,7 +58773,8 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "http://listen.theradiostorm.com:8242/stream",
-   "supported": true
+   "supported": true,
+   "notes": "Renamed from 'TheRadioStorm.com' 2026-08-20: the station's own site title is 'The Radio Storm', and a screen reader spelling out a domain is exactly the raw-source-text the curation rules bar. NOT the same broadcaster as the curated Radiostorm.com (Topeka) channels -- different outfit, own Shoutcast host, verified live 2026-08-20."
   },
   {
    "always_available": true,
