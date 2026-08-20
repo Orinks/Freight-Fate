@@ -1035,6 +1035,13 @@ def assigned_reposition_for_board(ctx, board: JobBoard, key: dict) -> Job | None
     p = ctx.profile
     if is_owner_operator(getattr(p, "business_status", COMPANY_DRIVER)):
         return None
+    if int(getattr(p.career, "deliveries", 0) or 0) < 1:
+        # A brand-new hire's first dispatch is freight, never a deadhead --
+        # no yard repositions a driver it has not yet put a load behind.
+        # This also keeps the new-career flow deterministic: the roll below
+        # hashes the market seed, so without this gate roughly one new
+        # career in nine started on a reposition instead of a pickup.
+        return None
     seed = zlib.crc32(repr(sorted(key.items())).encode())
     rng = random.Random(seed)
     if rng.random() >= ASSIGNED_REPOSITION_BOARD_CHANCE:

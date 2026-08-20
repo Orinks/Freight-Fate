@@ -26,6 +26,9 @@ def _find_reposition(app, *, owner_operator=False, trials=600):
     for i in range(trials):
         p = Profile(name=f"Seed{i}", current_city=cities[i % len(cities)])
         p.market.seed = i
+        # One run behind them: a brand-new hire's FIRST dispatch is always
+        # freight (see the deliveries gate in assigned_reposition_for_board).
+        p.career.deliveries = 1
         if owner_operator:
             p.business_status = LEASED_OWNER_OPERATOR
         app.ctx.profile = p
@@ -55,6 +58,31 @@ def test_assigned_reposition_shows_for_company_driver_never_for_owner_operator()
         # gate is unconditional, not just an unlucky roll.
         oo_p, oo_job = _find_reposition(app, owner_operator=True)
         assert oo_p is None and oo_job is None
+    finally:
+        app.shutdown()
+
+
+def test_a_new_hires_first_dispatch_is_never_a_reposition():
+    """Before the first delivery the roll never runs: every new career's
+    first assignment is freight, deterministically -- the roll hashes the
+    random market seed, so without the gate one new career in nine started
+    on a deadhead and every new-career test flow flaked with it."""
+    from freight_fate.app import App
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import assigned_reposition_for_board, dispatch_cache_key
+
+    app = App()
+    try:
+        board = JobBoard(app.ctx.world)
+        cities = list(app.ctx.world.cities.keys())
+        for i in range(200):
+            p = Profile(name=f"Fresh{i}", current_city=cities[i % len(cities)])
+            p.market.seed = i
+            app.ctx.profile = p
+            assert p.career.deliveries == 0
+            job = assigned_reposition_for_board(app.ctx, board, dispatch_cache_key(p))
+            assert job is None, f"seed {i}: a first dispatch offered a reposition"
     finally:
         app.shutdown()
 

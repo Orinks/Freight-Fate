@@ -815,7 +815,13 @@ class PlaytestHarness:
     def _choose_unlocked_job(self, rank: int) -> None:
         assert self.app is not None
         board = self.app.state
-        unlocked = [(i, job) for i, job in enumerate(board.jobs) if not board._locked_reason(job)]
+        unlocked = [
+            (i, job)
+            for i, job in enumerate(board.jobs)
+            # The harness stages FREIGHT runs: an assigned reposition on the
+            # board is the feature working, not the job this preset wants.
+            if not board._locked_reason(job) and not getattr(job, "bobtail", False)
+        ]
         assert unlocked
         unlocked.sort(key=lambda item: item[1].distance_mi)
         target_index, _job = unlocked[rank % len(unlocked)]
