@@ -359,7 +359,15 @@ SONG_TRIBUTE_BILLBOARDS = (
     "West Texas cotton flats made Waylon Jennings. One question -- Are You Sure Hank Done It This Way -- and outlaw country was born.",
     "Somewhere out there is Lubbock, Texas. Mac Davis kept it in his rear view mirror until he missed it.",
     "Redwood country, far off this road: trees taller than your rig is long. Andrew Gabbard wrote one called Redwood.",
-    "Up any of these hollers: a porch, a banjo, somebody picking. Dirty Grass Soul calls it Back to the Holler. No trailers past the cattle gate.",
+    # Rewritten 2026-08-20 after a tester was honestly befuddled: the old
+    # form was three fragments with no connective tissue ("Up any of these
+    # hollers: a porch, a banjo, somebody picking. Dirty Grass Soul calls
+    # it Back to the Holler. No trailers past the cattle gate.") -- a
+    # riddle unless you already knew that a holler is an Appalachian
+    # hollow, that picking means playing, and that the last line is a
+    # trucker joke. Spoken text gets one pass at the ear; it has to carry
+    # its own context.
+    "The little valleys off this road are called hollers: a porch, a banjo, somebody picking. Dirty Grass Soul wrote the song about going home to one -- Back to the Holler. Leave the trailer, though; a holler road has never turned a rig around.",
 )
 
 # The whole weighting mechanism for the tribute pool: the corridor-agnostic
