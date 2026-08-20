@@ -1993,3 +1993,54 @@ def test_only_standard_can_reach_the_already_said_gate() -> None:
             f"{rung} now reaches the already-said gate for {offenders}; "
             "that gate is standard's alone (Darren, 2026-08-19)"
         )
+
+
+def test_a_queued_stop_notice_speaks_the_distance_it_delivers_at(monkeypatch):
+    """The ambient queue's age cap is real seconds; a stop notice's distance
+    decays in game miles. Queued at "in 5 miles" behind a hazard, the line
+    used to be performed with two miles left and the building in sight
+    (Brandon, 2026-08-20). A queued line with a render speaks the distance
+    as of delivery, and drops silently once the stop is behind the truck."""
+    from freight_fate.speech_pacing import SpeechCategory
+    from freight_fate.states.driving_events import DrivingEventMixin, PendingAmbient
+
+    spoken = []
+
+    class _Host:
+        _pending_ambient_events = None
+        _ambient_event_cooldown_s = 0.0
+        _hazard_deadline = None
+
+        def _speak_ambient_event(self, message, sound=None, **kw):
+            spoken.append(message)
+
+    import collections
+
+    host = _Host()
+    host._pending_ambient_events = collections.deque(
+        [
+            PendingAmbient(
+                "Pilot Travel Center in 5 miles.",
+                None,
+                SpeechCategory.NAVIGATION_ADVISORY,
+                render=lambda: "Pilot Travel Center in 2 miles.",
+            )
+        ]
+    )
+    DrivingEventMixin._update_ambient_events(host, 0.0)
+    assert spoken == ["Pilot Travel Center in 2 miles."]
+
+    spoken.clear()
+    host._ambient_event_cooldown_s = 0.0
+    host._pending_ambient_events = collections.deque(
+        [
+            PendingAmbient(
+                "Pilot Travel Center in 5 miles.",
+                None,
+                SpeechCategory.NAVIGATION_ADVISORY,
+                render=lambda: None,  # the stop fell behind while it waited
+            )
+        ]
+    )
+    DrivingEventMixin._update_ambient_events(host, 0.0)
+    assert spoken == []
