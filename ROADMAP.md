@@ -2831,7 +2831,9 @@ onto exit signalling.
       of the old `/api/events` endpoints means the ten WZDx states get
       construction only; live incidents work on the three CARS states.
       Find per-state incident feeds (or CARS siblings) for the big
-      WZDx states, FL and NY first.
+      WZDx states, FL and NY first. Tester demand on record: Brandon
+      singled out the Minnesota incident alerts as a favorite and asked
+      for the same in more states (2026-08-20).
 - [x] Cruise vs. curve brake, the deeper fix -- SHIPPED 2026-07-22
       (owner direction, same-day playtest): a pacenote now caps the
       cruise working target to the bend's advisory (like the armed-exit
