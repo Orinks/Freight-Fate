@@ -257,5 +257,6 @@ def test_a_weigh_station_offers_no_bed_and_no_motel(monkeypatch):
         labels = _labels(state)
         assert not any("Sleep" in label for label in labels), labels
         assert not any("Motel" in label for label in labels), labels
+        assert not any("Loyalty" in label for label in labels), labels
     finally:
         app.shutdown()

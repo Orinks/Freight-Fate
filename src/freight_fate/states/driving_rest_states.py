@@ -809,6 +809,21 @@ class RestStopState(_FuelPumpMixin, MenuState):
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient(_poi_ambient_key(self.stop, self.driving.trip.local_hour))
         parts = [f"{self.stop.spoken_name}."]
+        if getattr(self.stop, "type", "") == "weigh_station":
+            # An inspection, not hospitality: no parking chatter, no live lot
+            # lookup, no brand amenities. The one-template announce read a
+            # scale its truck-stop script -- "no truck parking... Loyalty
+            # program: Loyalty points: 0" -- at an open scale (owner
+            # playtest, 2026-08-20).
+            parts.extend(
+                [
+                    "Inspection station.",
+                    f"It is {clock_text(self.driving.trip.local_hour)}.",
+                    self.current_text(),
+                ]
+            )
+            self.ctx.say(" ".join(parts))
+            return
         if self.stop.parking_text:
             parts.append(f"{self.stop.parking_text}.")
 
@@ -867,17 +882,19 @@ class RestStopState(_FuelPumpMixin, MenuState):
         actions = set(self.stop.actions)
         items: list[MenuItem] = []
 
-        # Loyalty program status
-        p = self.ctx.profile
-        loyalty_summary = p.loyalty.summary()
-        items.append(
-            MenuItem(
-                f"Loyalty program: {loyalty_summary}",
-                self._loyalty_menu,
-                help="Check your loyalty points, shower credits, and redeem rewards "
-                "at this truck stop.",
+        # Loyalty program status -- at hospitality stops. A scale hands out
+        # citations, not points.
+        if getattr(self.stop, "type", "") != "weigh_station":
+            p = self.ctx.profile
+            loyalty_summary = p.loyalty.summary()
+            items.append(
+                MenuItem(
+                    f"Loyalty program: {loyalty_summary}",
+                    self._loyalty_menu,
+                    help="Check your loyalty points, shower credits, and redeem "
+                    "rewards at this truck stop.",
+                )
             )
-        )
 
         if "fuel" in actions:
             items.append(

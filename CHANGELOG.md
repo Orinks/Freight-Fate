@@ -819,7 +819,9 @@
   down to the scale, which is how the pull-in was always judged anyway. The
   scale's ramp no longer invents a stop sign at its end or quotes the
   highway's speed limit at it, and the scale stopped offering a motel room
-  and lot sleeping -- it is an inspection, not a truck stop. Terminal
+  and lot sleeping or reciting a loyalty-points balance -- pulling in now
+  announces an inspection station, not a truck stop's parking report.
+  Terminal
   callouts everywhere also stopped naming a speed limit when the road behind
   the intersection has none on record.
 
