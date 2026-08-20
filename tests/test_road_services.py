@@ -257,5 +257,41 @@ def test_a_weigh_station_offers_no_bed_and_no_motel(monkeypatch):
         labels = _labels(state)
         assert not any("Sleep" in label for label in labels), labels
         assert not any("Motel" in label for label in labels), labels
+        assert not any("Loyalty" in label for label in labels), labels
+    finally:
+        app.shutdown()
+
+
+def test_a_motel_bed_is_not_five_by_two(monkeypatch):
+    """The badge is ten hours in the bunk; a motel room is the night you
+    specifically did not spend in it. Every sleep path used to award it
+    (owner report, 2026-08-20). The cramped-lot sleep keeps it -- the stop
+    has no beds, so a lot night is a bunk night."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_rest_states import RestStopState
+
+    app = App()
+    try:
+        _quiet(app, monkeypatch)
+        driving = _driving(app)
+        awards = []
+        monkeypatch.setattr(app.ctx, "award_achievement", lambda key, **kw: awards.append(key))
+        stop = _stop(driving, "Roadside Stop")
+        stop.actions = ("break",)  # no sleeper facility: motel and lot offered
+        state = RestStopState(app.ctx, driving, stop)
+        app.push_state(state)
+        app.ctx.profile.money = 10_000.0
+        # A tired driver beds down in the truck's own bunk in the lot: that
+        # night counts (the guard refuses a fresh driver an emergency sleep).
+        driving.hos.drive(600)
+        app.ctx.profile.fatigue = 80.0
+        state._emergency_lot_sleep()
+        assert "slept_on_route" in awards, awards
+        awards.clear()
+        # A day later, the motel night must not award it.
+        driving.hos.drive(600)
+        app.ctx.profile.fatigue = 80.0
+        state._motel_sleep()
+        assert "slept_on_route" not in awards, awards
     finally:
         app.shutdown()

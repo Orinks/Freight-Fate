@@ -813,13 +813,20 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **The Five-by-Two and Out badge means the bunk again.** It awarded for any
+  night's sleep, including a motel room -- the one night you specifically did
+  not spend in the sleeper. Motel nights no longer count; sleeping in your
+  own bunk, including a cramped night in a parking lot, still does.
+
 - **Weigh stations work like real weigh stations.** The announcement no
   longer tells you to slow below fifteen on the open interstate -- you stay
   at road speed, signal for the scale exit, and the ramp itself brings you
   down to the scale, which is how the pull-in was always judged anyway. The
   scale's ramp no longer invents a stop sign at its end or quotes the
   highway's speed limit at it, and the scale stopped offering a motel room
-  and lot sleeping -- it is an inspection, not a truck stop. Terminal
+  and lot sleeping or reciting a loyalty-points balance -- pulling in now
+  announces an inspection station, not a truck stop's parking report.
+  Terminal
   callouts everywhere also stopped naming a speed limit when the road behind
   the intersection has none on record.
 
