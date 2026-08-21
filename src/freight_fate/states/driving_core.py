@@ -83,6 +83,7 @@ from ..sim.trip_models import (
     APPROACH_REACTION_S,
     DESTINATION_LOCAL_APPROACH_MI,
     METERS_PER_MILE,
+    RAMP_MIN_DESIGN_MPH,
     acceleration_lane_mi,
 )
 from ..sim.trip_models import RAMP_MAX_MPH as TRIP_RAMP_MAX_MPH
@@ -242,7 +243,11 @@ RAMP_CREEP_MI = 0.04  # within ~200 ft of the bar, "creep"; farther is a drive
 # because the arrival speed zones are built from the same number: the
 # destination approach must never cap below the speed the ramp needs.
 RAMP_MAX_MPH = TRIP_RAMP_MAX_MPH
-RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
+# How far under a ramp's own design speed automatic control aims. Was the
+# gap between a flat 40 and a flat 45; now it is the gap itself, applied to
+# whatever number the ramp earns.
+RAMP_CRUISE_HEADROOM_MPH = 5.0
+RAMP_CRUISE_TARGET_MPH = RAMP_MAX_MPH - RAMP_CRUISE_HEADROOM_MPH
 # Ceiling on the light throttle exit speed assistance uses to HOLD that target
 # once it has slowed the truck to it. Deliberately small: the assist is keeping
 # a truck rolling to its own gore, not driving it.

@@ -1220,12 +1220,17 @@ def test_arming_the_scales_exit_and_not_taking_it_is_still_a_bypass(monkeypatch)
     Too fast for the ramp is a miss, and a miss past an open scale is the
     same bypass it would be with no signal at all -- otherwise flicking the
     signal on would buy a free pass at any speed.
+
+    "Too fast" is past what the gore accepts, which is road speed as the posts
+    judge it -- not the old flat 45 (owner, 2026-08-21). Sixty-two on this
+    corridor now takes the ramp and sheds on it, so the speeding truck here is
+    well clear of that.
     """
     from freight_fate.app import App
 
     app = App()
     try:
-        d, _stop, spoken = _scale_crossing(app, monkeypatch, mph=62.0, armed=True)
+        d, _stop, spoken = _scale_crossing(app, monkeypatch, mph=95.0, armed=True)
         assert d._ramp_stop is None
         assert d._pull_over == "lights"
         assert [s for s in spoken if "Scale bypass enforcement" in s]

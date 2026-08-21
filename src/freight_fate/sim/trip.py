@@ -1211,9 +1211,13 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         if ahead is None or ahead <= 0.0:
             return False
         speed = self.truck.speed_mph
-        if speed <= RAMP_MAX_MPH:
+        # The exit's own ramp speed, not one number for every ramp: a
+        # directional connector off a 75 is taken far faster than a ramp onto
+        # a surface street, so the road that needs decompressing differs too.
+        ramp_mph = self.ramp_speed_at(self.position_mi + ahead)
+        if speed <= ramp_mph:
             return False  # already slow enough for the gore: nothing to shed
-        window = approach_shed_mi(speed, RAMP_MAX_MPH) * EXIT_APPROACH_DECOMPRESS_SLACK
+        window = approach_shed_mi(speed, ramp_mph) * EXIT_APPROACH_DECOMPRESS_SLACK
         return ahead <= window
 
     @staticmethod
@@ -2190,6 +2194,26 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                     best_dist = dist
                     best = ix.ramp_control
         return best
+
+    def ramp_speed_at(self, route_mile: float) -> float:
+        """The speed the ramp at this mile is actually built for.
+
+        Not a flat number for every exit in the country. AASHTO sets a ramp's
+        design speed as a share of the road it leaves, and the share depends
+        on what kind of ramp it is: a DIRECTIONAL connector -- freeway to
+        freeway -- takes about 85 percent, one landing on a surface road
+        about 70, because that one has a terminal to stop you at the end.
+        The interchange bake already knows which is which (`ramp_far_end`),
+        so this needs no new data.
+
+        Both callers must agree or the truck is told one number and judged by
+        another, which is why this lives here rather than in the driving
+        layer: the trip's own approach window and every spoken exit line read
+        it from one place.
+        """
+        interchange = self.interchange_at(route_mile)
+        directional = getattr(interchange, "ramp_far_end", "") == "motorway"
+        return ramp_speed_mph(self._corridor_limit_at(route_mile), directional=directional)
 
     def interchange_at(self, route_mile: float, tol_mi: float = 2.0):
         """The baked interchange nearest a route mile, or None.

@@ -907,7 +907,7 @@ class DrivingControlsMixin:
             and 0 < ahead <= SAFE_SPEED_EXIT_MI
         )
         if getattr(self, "_ramp_mi", None) is not None or exit_armed:
-            safe = min(safe, RAMP_MAX_MPH)
+            safe = min(safe, self._armed_ramp_mph())
             context = " for the ramp"
         self.ctx.say(f"Safe speed {self.ctx.settings.speed_text(safe)}{context}.")
 

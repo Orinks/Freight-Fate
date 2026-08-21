@@ -1340,7 +1340,7 @@ class DrivingEventMixin:
             "stop": " The ramp ends at a stop sign.",
         }.get(self._ramp_control_for(stop), "")
         ahead_text = self.ctx.settings.distance_text(ahead, precise=True)
-        ramp_text = self.ctx.settings.speed_text(RAMP_MAX_MPH)
+        ramp_text = self.ctx.settings.speed_text(self._armed_ramp_mph(stop))
         if self.ctx.settings.lane_is_automated():
             self._exit_lane_alignment = EXIT_LANE_READY
             self._exit_lane_ready_said = True
@@ -1355,13 +1355,14 @@ class DrivingEventMixin:
                 granted = "Exit lane set for you by lane keeping."
             message = (
                 f"{head} {ahead_text} ahead. {granted}{lane_hint} "
-                f"Slow to {ramp_text} or less for the ramp.{ending}" + self._cap_cruise_for_ramp()
+                f"Slow to {ramp_text} or less for the ramp.{ending}"
+                + self._cap_cruise_for_ramp(stop)
             )
         else:
             message = (
                 f"{head} {ahead_text} ahead.{lane_hint} "
                 "Move right for the exit lane, then slow to "
-                f"{ramp_text} or less for the ramp.{ending}" + self._cap_cruise_for_ramp()
+                f"{ramp_text} or less for the ramp.{ending}" + self._cap_cruise_for_ramp(stop)
             )
         if self._is_selected_stop(stop):
             self._selected_stop_assist_armed = self.ctx.settings.selected_stop_assist
@@ -1403,7 +1404,69 @@ class DrivingEventMixin:
         else:
             self.ctx.say(message)
 
-    def _cap_cruise_for_ramp(self) -> str:
+    def _armed_ramp_mph(self, stop=None) -> float:
+        """Ramp speed for the exit this truck is actually taking.
+
+        Every exit used to demand the same 45, and every cruise the same 40 --
+        one number for a loop off a 55 and a directional connector off a 75
+        alike. The owner drove it and said so (2026-08-21). This asks the road
+        instead: `Trip.ramp_speed_at` reads the corridor limit and the baked
+        `ramp_far_end`, and AASHTO's share does the rest.
+
+        Falls back to the old constant when nothing is armed, so callers that
+        ask out of context behave exactly as before.
+        """
+        # The caller may hand the stop in: the exit callout builds its
+        # sentence BEFORE _exit_stop is assigned, and without it this fell
+        # back to the old flat number and quietly undid the whole change.
+        stop = stop or self._ramp_stop or self._exit_stop
+        at_mi = getattr(stop, "at_mi", None)
+        if at_mi is None:
+            return RAMP_MAX_MPH
+        return self.trip.ramp_speed_at(at_mi)
+
+    def _gore_acceptance_mph(self, stop=None) -> float:
+        """How fast the truck may still be doing when it enters the exit.
+
+        NOT the ramp's design speed, which is what you slow to ALONG it. A
+        deceleration lane is a full lane beside the through lanes and exists
+        so a driver leaves at road speed and sheds inside it -- demanding ramp
+        speed at the gore makes the driver do the lane's job on the highway,
+        which is the whole complaint (owner, 2026-08-21).
+
+        So the gore accepts road speed, and the ramp's own number governs from
+        there. Collapsing the two is what briefly made a ramp off a 55 stricter
+        than the flat 45 it replaced -- tightening exactly where the change was
+        supposed to loosen.
+        """
+        at_mi = getattr(stop or self._ramp_stop or self._exit_stop, "at_mi", None)
+        if at_mi is None:
+            return RAMP_MAX_MPH
+        corridor, _ = self.trip.speed_limit_at(at_mi)
+        # "Road speed" is what the posts let a truck do, not the number on the
+        # sign to the decimal: the same leeway the enforcement layer gives
+        # before a speed is a speed at all. Judged at the sign's exact number
+        # the gate refused its own assist -- the exit speed assist stands down
+        # once the truck is at or under acceptance, a downgrade then put it a
+        # fraction over with cruise already paused, and the truck that did
+        # everything right missed its exit. The old flat pair had this
+        # headroom built in (45 accepted, 40 aimed for); this keeps it.
+        #
+        # Never below the old flat acceptance: a slow corridor must not make
+        # taking an exit harder than it has ever been.
+        return max(RAMP_MAX_MPH, corridor + SPEEDING_LEEWAY_MPH)
+
+    def _armed_ramp_cruise_mph(self, stop=None) -> float:
+        """What automatic control aims for on that ramp.
+
+        A little under the ramp's own number, for the same reason the flat 40
+        sat under the flat 45: the cruise loop has a two-mph brake deadband
+        and downhill runs at it, and it must not leave the truck hovering
+        just over the ramp's speed at the gore.
+        """
+        return max(RAMP_MIN_DESIGN_MPH, self._armed_ramp_mph(stop) - RAMP_CRUISE_HEADROOM_MPH)
+
+    def _cap_cruise_for_ramp(self, stop=None) -> str:
         """Bring automatic speed control down to ramp speed for an armed exit.
 
         Arming an exit commits the truck to leaving the highway, so the cruise
@@ -1417,13 +1480,15 @@ class DrivingEventMixin:
             # Remember the cap so cruise resumes at ramp speed, but say
             # nothing: the keeper is already holding a low zone speed.
             if self._speed_control_armed and self._speed_control_target_mph is not None:
-                self._cruise_exit_mph = min(self._speed_control_target_mph, RAMP_CRUISE_TARGET_MPH)
+                self._cruise_exit_mph = min(
+                    self._speed_control_target_mph, self._armed_ramp_cruise_mph(stop)
+                )
             return ""
-        # The ramp accepts 45 mph or less, but the cruise loop deliberately
-        # targets 40. Its normal two-mph brake deadband, downhill acceleration,
+        # Cruise aims a little under the ramp's own number (the old 40 under
+        # a flat 45). Its normal two-mph brake deadband, downhill acceleration,
         # and frame timing must not leave the truck hovering just above the
-        # hard acceptance boundary at the gore point.
-        capped = min(self._cruise_mph, RAMP_CRUISE_TARGET_MPH)
+        # ramp's speed as it comes off.
+        capped = min(self._cruise_mph, self._armed_ramp_cruise_mph(stop))
         if self._cruise_exit_mph is not None and self._cruise_exit_mph <= capped:
             # The destination-exit announcement already capped cruise and said
             # so; pressing X right after must not repeat the whole sentence.
@@ -1646,7 +1711,7 @@ class DrivingEventMixin:
             self.ctx.say_event(
                 f"Exit lane in {self.ctx.settings.distance_text(ahead, precise=True)}. "
                 f"Signal is on; steer right "
-                f"for the exit lane and slow to {RAMP_MAX_MPH:.0f}.{pressure_text}",
+                f"for the exit lane and slow to {self._armed_ramp_mph():.0f}.{pressure_text}",
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
@@ -1662,7 +1727,8 @@ class DrivingEventMixin:
         if 0 <= ahead <= EXIT_COMMIT_WINDOW_MI and not self._exit_commit_said:
             self._exit_commit_said = True
             self.ctx.say_event(
-                f"At the exit gore. Hold the exit lane and stay under {RAMP_MAX_MPH:.0f}.",
+                f"At the exit gore. Hold the exit lane and stay under "
+                f"{self._armed_ramp_mph():.0f}.",
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
@@ -1689,7 +1755,7 @@ class DrivingEventMixin:
             # the assist's own brake. A destination exit still holds like any
             # arrival; every other exit is a transit stop.
             self._pause_speed_control(resume_when_rolling=stop.type != "delivery_destination")
-        if self.truck.speed_mph <= RAMP_MAX_MPH:
+        if self.truck.speed_mph <= self._gore_acceptance_mph(stop):
             # Down to ramp speed. HOLD it to the gore rather than handing back
             # an empty pedal: the assist took the throttle to slow the truck,
             # and with automatic speed control paused behind it nothing else
@@ -1734,7 +1800,7 @@ class DrivingEventMixin:
             return
         if t.brake > 0.01 or t.emergency_brake or t.transmission.in_reverse:
             return
-        short_by = RAMP_CRUISE_TARGET_MPH - t.speed_mph
+        short_by = self._armed_ramp_cruise_mph() - t.speed_mph
         if short_by <= 0.0:
             return  # coasting between the target and the ramp limit is fine
         t.throttle = max(t.throttle, min(EXIT_HOLD_MAX_THROTTLE, short_by / 10.0))
@@ -1881,7 +1947,9 @@ class DrivingEventMixin:
             self._destination_exit_response_s = DESTINATION_EXIT_RESPONSE_GRACE_S
             # Cruise stays engaged down the ramp approach, capped at the ramp
             # target, rather than handing the pedal back cold.
-            message = self._destination_exit_announcement(stop, ahead) + self._cap_cruise_for_ramp()
+            message = self._destination_exit_announcement(stop, ahead) + self._cap_cruise_for_ramp(
+                stop
+            )
             self.ctx.audio.play("ui/notify", volume=0.7)
             # ROUTE: this line carries "lane keeping will take this exit",
             # which is the only warning the driver gets that the truck is
@@ -3519,7 +3587,11 @@ class DrivingEventMixin:
                     category=SpeechCategory.CONFIRMATION,
                 )
             return
-        if self.truck.speed_mph <= RAMP_MAX_MPH:
+        # The stop goes in by hand: _exit_stop was cleared above, and without
+        # it the gate fell back to the flat 45 and refused a truck doing the
+        # road speed it had just been told was fine -- the third gate the
+        # roadmap note said to look for (2026-08-21).
+        if self.truck.speed_mph <= self._gore_acceptance_mph(stop):
             self._reset_exit_lane_state()
             self._exit_signal_on = False
             self._ramp_mi = RAMP_LENGTH_MI
@@ -3619,7 +3691,7 @@ class DrivingEventMixin:
         already carry. Bounded by the road it lives on: never shorter than the
         terminal-to-driveway stretch, never longer than the ramp itself.
         """
-        speed = max(self.truck.speed_mph, RAMP_MAX_MPH)
+        speed = max(self.truck.speed_mph, self._armed_ramp_mph())
         miles = EXIT_WARNING_REAL_S * speed * self.trip.effective_time_scale / 3600.0
         return max(RAMP_ACCESS_MI, min(miles, RAMP_LENGTH_MI))
 
@@ -3798,7 +3870,7 @@ class DrivingEventMixin:
         if self._cruise_exit_mph is None and self._exit_stop is not None:
             ahead = self._exit_stop.at_mi - self.trip.position_mi
             if ahead > 0 and (self._exit_signal_on or self.ctx.settings.lane_is_automated()):
-                self._cruise_exit_mph = min(self._cruise_mph, RAMP_CRUISE_TARGET_MPH)
+                self._cruise_exit_mph = min(self._cruise_mph, self._armed_ramp_cruise_mph())
         # Chase a working setpoint that starts at road speed, so a big resume
         # error eases on rather than landing on the pedal at once. Engaging at
         # the current speed (a plain K-set) seeds it at the target, so there is

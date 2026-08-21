@@ -229,11 +229,20 @@ def _armed_exit_at(app, monkeypatch, *, ahead_mi: float, time_scale: float = 1.0
     ``time_scale`` is set on the settings, not the trip: the drive re-reads it
     from there every frame, so a trip-only assignment lasts exactly one tick.
     """
+    from freight_fate.states.driving import RAMP_MAX_MPH
+
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
     app.ctx.settings.time_scale = time_scale
     driving = start_drive(app)
     quiet_trip(driving)
     open_limits(driving)
+    # Pin the ramp's number the way open_limits pins the road's: the cap's
+    # floor is the exit's OWN ramp speed now, and the assigned route (and so
+    # the stop this helper lands on) varies between App instances. These
+    # tests are about what cruise does on the approach, not which ramp the
+    # dispatcher happened to hand out, and the pacing test in particular
+    # compares three App instances that must read the same road.
+    driving.trip.ramp_speed_at = lambda mile: RAMP_MAX_MPH
     driving.trip.zones = []
     driving.trip.curves = []
     driving.trip.traffic_context = lambda: None
@@ -282,12 +291,16 @@ def test_shane_2026_08_15_the_ramp_cap_no_longer_lands_miles_from_the_exit(monke
     ramp is genuinely close.
     """
     from freight_fate.app import App
-    from freight_fate.states.driving import RAMP_CRUISE_TARGET_MPH, RAMP_MAX_MPH
+    from freight_fate.states.driving import RAMP_MAX_MPH
 
     app = App()
     try:
         driving, stop = _armed_exit_at(app, monkeypatch, ahead_mi=4.5)
-        assert driving._cruise_exit_mph == pytest.approx(RAMP_CRUISE_TARGET_MPH)
+        # The ramp's own number now, not one constant for every exit in
+        # the country -- Shane's point was that the cap must not land
+        # miles from the exit, and that is what this asserts (owner,
+        # 2026-08-21).
+        assert driving._cruise_exit_mph == pytest.approx(driving._armed_ramp_cruise_mph())
 
         # Four and a half miles out, the cap is not the thing holding the
         # truck: road speed stands, and it is never under ramp speed.
@@ -318,7 +331,6 @@ def test_the_ramp_cap_glides_down_as_the_exit_closes(monkeypatch):
     """Measured off the distance, the way the report asked: the cap comes down
     smoothly with the road left, and lands on the ramp target at the gore."""
     from freight_fate.app import App
-    from freight_fate.states.driving import RAMP_CRUISE_TARGET_MPH
 
     app = App()
     try:
@@ -328,8 +340,9 @@ def test_the_ramp_cap_glides_down_as_the_exit_closes(monkeypatch):
             driving.trip.position_mi = stop.at_mi - ahead
             caps.append(driving._ramp_approach_cap_mph())
         assert caps == sorted(caps, reverse=True), caps
-        assert caps[-1] == pytest.approx(RAMP_CRUISE_TARGET_MPH)
-        assert min(caps) >= RAMP_CRUISE_TARGET_MPH
+        ramp_cruise = driving._armed_ramp_cruise_mph()
+        assert caps[-1] == pytest.approx(ramp_cruise)
+        assert min(caps) >= ramp_cruise
     finally:
         app.shutdown()
 

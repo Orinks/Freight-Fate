@@ -338,6 +338,20 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+- **Every exit now asks for its own ramp speed, and you may leave the
+  highway at road speed.** Taking an exit used to mean the same thing
+  everywhere: be under forty-five at the gore, with adaptive cruise easing
+  to forty, whether the ramp fed a stop sign off a fifty-five or carried you
+  straight onto another interstate at seventy. Now each exit names the speed
+  its ramp is really built for -- about seventy percent of the road's limit
+  for a ramp onto an ordinary street, about eighty-five for a connector onto
+  another freeway -- and that is the number you hear in "slow to" and "stay
+  under", in the safe-speed reading, and in what adaptive cruise eases to at
+  the ramp. The gore itself accepts road speed: the deceleration lane is
+  there so you leave at highway speed and slow down inside it, and a truck
+  that did exactly that on a downgrade no longer hears that it was going
+  too fast and missed its exit. Route-transition assistance and exit speed
+  assistance slow you to the ramp's own number along the ramp instead.
 - **A line cut off by urgent warnings finishes once -- it no longer
   repeats after every one of them.** When something urgent interrupted
   the truck mid-sentence, the cut line came back so it could finish;

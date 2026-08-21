@@ -1351,50 +1351,48 @@ onto exit signalling.
       narrows the worklist rather than closing it. Longer benches across more
       features are the cheap next step before anyone reads all 201 by hand.
 
-- [ ] **START HERE: finish threading the per-exit ramp speed (parked
-      2026-08-21, `git stash` "WIP exit ramp speed threading 2026-08-21").**
-      The model landed in 35427880: `Trip.ramp_speed_at`, `ramp_speed_mph`
-      and `deceleration_lane_mi`, all from AASHTO via TxDOT, reusing the
-      acceleration-lane work from the same day. What is parked on the stash is
-      the threading of it through every exit -- owner wants this for ALL exit
-      kinds (stops, destinations, scales) and asked for it in the next build.
+- [x] **Per-exit ramp speed threaded through every exit (SHIPPED
+      2026-08-21).** The model landed in 35427880 (`Trip.ramp_speed_at`,
+      `ramp_speed_mph`, `deceleration_lane_mi`, AASHTO via TxDOT); the
+      threading through every exit site -- stops, destinations, scales --
+      followed the same day. Every spoken ramp number, the safe-speed reading,
+      the cruise cap and both assists now read the exit's own figure.
 
-      THE CRUX, and the thing that cost the session: TWO NUMBERS, NOT ONE.
+      THE CRUX, kept here because it cost a session: TWO NUMBERS, NOT ONE.
 
         * GORE ACCEPTANCE -- how fast the truck may still be doing when it
           enters the exit. A deceleration lane is a full lane beside the
           through lanes and exists so a driver leaves at ROAD speed and sheds
-          inside it. Demanding ramp speed at the gore makes the driver do the
-          lane's job on the highway, which is the owner's original complaint.
-          Use `_gore_acceptance_mph()`: `max(RAMP_MAX_MPH, corridor limit)`,
-          never below the old flat 45 so a slow corridor cannot make taking an
-          exit HARDER than it has always been.
+          inside it. `_gore_acceptance_mph(stop)` is
+          `max(RAMP_MAX_MPH, posted limit at the gore + SPEEDING_LEEWAY_MPH)`:
+          road speed as the posts judge it, never below the old flat 45 so a
+          slow corridor cannot make taking an exit HARDER than it ever was.
+          The leeway is the headroom the old 45-over-40 pair had built in;
+          judged at the sign's exact number the gate refused its own assist --
+          the exit speed assist stands down at acceptance, a downgrade put the
+          truck a fraction over with cruise already paused, and it missed.
         * RAMP DESIGN SPEED -- what the truck slows to along the ramp, from
           `Trip.ramp_speed_at`: 85 percent of mainline for a directional
           connector (`ramp_far_end == "motorway"`), 70 percent for one landing
-          on a surface road, floored at 30.
+          on a surface road, floored at 30. Automatic control aims
+          `RAMP_CRUISE_HEADROOM_MPH` under it.
 
-      Collapsing them is the trap. Doing so briefly made a ramp off a 55 mph
-      road demand 38 where the flat rule asked 45 -- tightening exactly where
-      the change was meant to loosen -- and it silently broke the harness,
-      because a truck at 40 could no longer take an exit it had always taken.
+      Collapsing them is the trap: it made a ramp off a 55 demand 38 where
+      the flat rule asked 45, tightening exactly where the change was meant
+      to loosen. The other trap is the STOP ARGUMENT: the gore gate and the
+      exit callout both run where `_exit_stop` is already cleared or not yet
+      set, and without the stop handed in the helpers fall back to the flat
+      45 and quietly undo the whole change -- that was the third gate the
+      parked note said to look for.
 
-      STATE OF THE STASH: the exit, ramp-terminal, features, speech-ladder and
-      Shane's `test_cruise_resume_ramp` suites all pass (297 + 14). THREE
-      `test_playtest_harness` tests still fail and were NOT diagnosed:
-      `test_rest_stop_arrival_cue_allows_immediate_parking_brake_stop`,
-      `test_realistic_cruise_eases_for_destination_exit_without_speeding_fine
-      [construction]`, and one that appeared after the acceptance split. Two
-      acceptance gates were converted; look for a third that still compares
-      against the ramp's design speed, and check the harness's own scripted
-      braking, which was written against the flat 45.
+      A driver's own lower cruise setting still beats the ramp's figure: the
+      spoken approach target is `min(cruise, exit cap)`. The ramp number is
+      a ceiling, not a demand.
 
-      Tests were updated to read the exit's own number rather than a literal
-      (`driving._armed_ramp_cruise_mph()`), which is right and should stay --
-      but note the spoken status line reports `min(cruise, exit cap)` while
-      `_cruise_exit_mph` stores the ramp's figure, so a driver's own lower
-      cruise setting wins. That is deliberate: the ramp number is a ceiling,
-      not a demand.
+      Still open from this: `deceleration_lane_mi` is modelled but unused.
+      The ramp is a flat `RAMP_LENGTH_MI` of 0.5 that stands in for the
+      deceleration lane plus the ramp proper; sizing the shed from the real
+      lane length (and its downhill multiplier) is the next slice.
 
 - [ ] **Two riders from the New Haven log, both still open.**
       1. The status readout speaks `_keeper_mph` (the SET speed) rather than

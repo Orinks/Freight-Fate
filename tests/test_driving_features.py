@@ -2419,7 +2419,10 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
         driving._check_destination_exit()
 
         assert driving._cruise_mph == 60.0
-        assert driving._cruise_exit_mph == 40.0
+        # The ramp's own number, not a flat 40 for every exit in the
+        # country: it comes off the corridor limit and whether the ramp
+        # is directional (owner, 2026-08-21).
+        assert driving._cruise_exit_mph == driving._armed_ramp_cruise_mph()
         message, interrupt = events[-1]
         assert interrupt is False
         assert "exit " in message
@@ -2429,19 +2432,26 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
         assert "Press X" not in message
         assert "X takes" not in message
         assert (
-            "Adaptive cruise holds road speed, then eases to 40 miles per hour at the ramp"
-            in message
+            "Adaptive cruise holds road speed, then eases to "
+            f"{driving._armed_ramp_cruise_mph():.0f} miles per hour at the ramp" in message
         )
 
+        # The ramp approach target is this exit's own, so read it rather than
+        # spelling a number that now depends on the road (owner, 2026-08-21).
+        ramp_target = f"{driving._armed_ramp_cruise_mph():.0f} miles per hour"
         driving._adjust_cruise(-1)
         assert said[-1] == (
-            "Open-road cruise target 55 miles per hour. Ramp approach target 40 miles per hour."
+            f"Open-road cruise target 55 miles per hour. Ramp approach target {ramp_target}."
         )
         for _tap in range(3):
             driving._adjust_cruise(-1)
-        assert said[-1] == (
-            "Open-road cruise target 40 miles per hour. Ramp approach target 40 miles per hour."
-        )
+        # Wound below the ramp's own number, the driver's setting wins: the
+        # approach target is never ABOVE what they asked the truck to do.
+        # Wound below the ramp's own number, the driver's setting wins: the
+        # spoken approach target is never ABOVE what they asked the truck to
+        # do, even though the ramp's own figure is what got stored.
+        spoken_target = min(driving._cruise_mph, driving._cruise_exit_mph)
+        assert said[-1].endswith(f"Ramp approach target {spoken_target:.0f} miles per hour.")
     finally:
         app.shutdown()
 
@@ -2514,10 +2524,13 @@ def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
         driving._engage_cruise(60.0)
 
         driving._check_destination_exit()  # announces the exit and caps cruise
-        assert driving._cruise_exit_mph == 40.0
+        # The ramp's own number, not a flat 40 for every exit in the
+        # country: it comes off the corridor limit and whether the ramp
+        # is directional (owner, 2026-08-21).
+        assert driving._cruise_exit_mph == driving._armed_ramp_cruise_mph()
         assert (
-            "Adaptive cruise holds road speed, then eases to 40 miles per hour at the ramp"
-            in said[-1]
+            "Adaptive cruise holds road speed, then eases to "
+            f"{driving._armed_ramp_cruise_mph():.0f} miles per hour at the ramp" in said[-1]
         )
 
         said.clear()
@@ -2527,7 +2540,10 @@ def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
         # older "Signaling for ..." callout when the cancel/confirm model landed.
         assert "Signal on for" in said[-1]
         assert "Adaptive cruise" not in said[-1]  # already said, and already capped
-        assert driving._cruise_exit_mph == 40.0
+        # The ramp's own number, not a flat 40 for every exit in the
+        # country: it comes off the corridor limit and whether the ramp
+        # is directional (owner, 2026-08-21).
+        assert driving._cruise_exit_mph == driving._armed_ramp_cruise_mph()
     finally:
         app.shutdown()
 
@@ -2567,10 +2583,13 @@ def test_signaling_for_an_exit_eases_cruise_to_ramp_speed(monkeypatch):
         driving._take_exit()
 
         assert driving._exit_stop is stop
-        assert driving._cruise_exit_mph == 40.0
+        # The ramp's own number, not a flat 40 for every exit in the
+        # country: it comes off the corridor limit and whether the ramp
+        # is directional (owner, 2026-08-21).
+        assert driving._cruise_exit_mph == driving._armed_ramp_cruise_mph()
         assert (
-            "Adaptive cruise holds road speed, then eases to 40 miles per hour at the ramp"
-            in said[-1]
+            "Adaptive cruise holds road speed, then eases to "
+            f"{driving._armed_ramp_cruise_mph():.0f} miles per hour at the ramp" in said[-1]
         )
 
         # Three miles out the ramp target is a plan, not a brake: the cap is

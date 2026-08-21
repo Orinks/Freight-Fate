@@ -854,7 +854,9 @@ def test_a_fresh_cruise_session_inherits_an_armed_exit_s_ramp_cap():
 
     src = inspect.getsource(DrivingEventMixin._engage_cruise)
     assert "_cruise_exit_mph" in src, "engaging cruise ignores an armed exit"
-    assert "RAMP_CRUISE_TARGET_MPH" in src
+    # The ramp number is per-exit now, not one constant for every ramp in
+    # the country (owner, 2026-08-21).
+    assert "_armed_ramp_cruise_mph" in src
 
 
 def test_the_destination_approach_assist_actually_brings_the_truck_to_a_stop():

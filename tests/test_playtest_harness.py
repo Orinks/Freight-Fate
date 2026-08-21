@@ -541,13 +541,20 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
         harness.app.ctx.settings.automatic_transmission = True
         harness.app.ctx.settings.time_scale = 10.0
         harness.start_route("Chicago", "Indianapolis", trip_seed=0)
+        destination = harness.driving._destination_exit_stop()
+        ramp_cruise_mph = harness.driving._armed_ramp_cruise_mph(destination)
+        gore_mph = harness.driving._gore_acceptance_mph(destination)
         result = harness.drive_destination_exit_with_speed_control(
             set_mph=70.0,
             restricted_zone_reason=restricted_zone_reason,
         )
 
     assert result.destination_exit_speed_mph is not None
-    assert result.destination_exit_speed_mph <= RAMP_MAX_MPH
+    # The gore accepts road speed -- the deceleration lane exists so a driver
+    # leaves at it and sheds inside it -- and the ramp's own number governs
+    # from there (owner, 2026-08-21). The flat 45 was never the gate's job.
+    assert gore_mph > RAMP_MAX_MPH
+    assert result.destination_exit_speed_mph <= gore_mph
     assert result.speeding_tickets == 0, result.transcript_text
     # Cruise never held the truck over the limit far enough for a post to
     # read a speed out of it, and nothing was written.
@@ -555,7 +562,10 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
     assert result.speeding_tickets == 0
     assert "Lights and siren" not in result.transcript_text
     assert "destination exit" in result.transcript_text
-    assert "Adaptive cruise will ease to 40 miles per hour for the ramp" in result.transcript_text
+    # The line names the ramp's own number now, and says when the ease
+    # happens rather than implying it starts at the callout.
+    assert "Adaptive cruise holds road speed, then eases to" in result.transcript_text
+    assert "at the ramp" in result.transcript_text
     # The exit key is a turn signal now: "Signal on for ..." replaced the older
     # "Signaling for ..." callout when the cancel/confirm model landed.
     assert "Signal on for" in result.transcript_text
@@ -566,8 +576,11 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
     assert result.deliveries == 1
     if restricted_zone_reason is not None:
         assert "Speed keeper holding 45 miles per hour" in result.transcript_text
+        # Clear of the zone, cruise comes back at the ramp's own approach
+        # number for THIS exit, not a flat 40 for every exit in the country.
         assert (
-            "Adaptive cruise resuming at 40 miles per hour for the ramp" in result.transcript_text
+            f"Adaptive cruise resuming at {ramp_cruise_mph:.0f} miles per hour for the ramp"
+            in result.transcript_text
         )
 
 
@@ -668,12 +681,33 @@ def test_signaled_downhill_exit_keeps_cruise_below_ramp_limit(monkeypatch):
                 break
 
         entry_speed = driving.truck.speed_mph
+        gore_acceptance = driving._gore_acceptance_mph(stop)
+        ramp_mph = driving._armed_ramp_mph(stop)
+        assert driving._ramp_mi is not None, harness.result.transcript_text
 
-    assert driving._ramp_mi is not None, harness.result.transcript_text
-    assert entry_speed <= RAMP_MAX_MPH
-    assert "Adaptive cruise will ease to 40 miles per hour for the ramp" in (
-        harness.result.transcript_text
-    )
+        # Now the ramp's own job: the truck came off at road speed and the
+        # deceleration lane sheds it. Run the ramp until it is down to the
+        # ramp's number, well before the terminal.
+        ramp_speed = None
+        for _frame in range(20_000):
+            driving.truck.air_pressure_psi = driving.truck.specs.air_governor_cut_out_psi
+            driving.update(1 / 60)
+            if driving._ramp_mi is None:
+                break
+            if driving.truck.speed_mph <= ramp_mph:
+                ramp_speed = driving.truck.speed_mph
+                break
+
+    # Two numbers, not one. The gore accepts road speed -- the deceleration
+    # lane exists so a driver leaves at it -- and the ramp's own number is
+    # what the truck comes down to ALONG the ramp (owner, 2026-08-21). A
+    # downgrade with cruise paused must not put the truck a fraction over
+    # the gate and cost it the exit it signalled for.
+    assert entry_speed <= gore_acceptance, (entry_speed, gore_acceptance)
+    assert gore_acceptance >= 70.0  # road speed, not the flat 45
+    assert ramp_mph < RAMP_MAX_MPH  # a surface ramp off this corridor earns less
+    assert ramp_speed is not None, harness.result.transcript_text
+    assert "Adaptive cruise holds road speed, then eases to" in (harness.result.transcript_text)
     assert "going too fast for the ramp" not in harness.result.transcript_text
 
 
@@ -694,6 +728,12 @@ def test_rest_stop_arrival_cue_allows_immediate_parking_brake_stop(monkeypatch):
         # The question here is whether the spoken arrival point leaves real
         # seconds to stop in, not whether the driver made the exit lane.
         harness.app.ctx.settings.lane_keeping = "full"
+        # Nor whether an assist slows the ramp: the docstring's 40 is the
+        # speed under test. With the assist on, a surface ramp off this
+        # corridor earns 38 and the truck gets braked to it, arrives at the
+        # terminal a light phase later, and sits stopped at a red with no
+        # scripted driver to pull it ahead on the green.
+        harness.app.ctx.settings.route_transition_assist = False
         harness.start_route("Chicago", "Indianapolis", trip_seed=0)
         driving = harness.driving
         assert driving is not None

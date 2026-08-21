@@ -211,8 +211,6 @@ def _ramp_speed_control_handback():
     Neither survived a full gate before, because no scenario drove a ramp
     terminal and then asked whether automatic speed control had come back.
     """
-    from freight_fate.states.driving import RAMP_MAX_MPH
-
     name = "ramp_speed_control_handback"
     rig = Rig()
     findings: list[str] = []
@@ -262,6 +260,11 @@ def _ramp_speed_control_handback():
             findings.append("no exit ever came within signalling range")
             return _outcome(name, rig, findings, "")
         exit_stop = d._exit_stop
+        # The gore accepts road speed -- the deceleration lane exists so a
+        # driver leaves at it and sheds inside it -- and the ramp's own number
+        # governs from there (owner, 2026-08-21). Read it now, while the exit
+        # is still armed: the helper falls back to the flat 45 without a stop.
+        gore_mph = d._gore_acceptance_mph(exit_stop)
 
         # 1. Far from the gore the signal itself must not slow the truck: the
         #    approach cap has to stay clear of the set speed.
@@ -296,8 +299,10 @@ def _ramp_speed_control_handback():
         if entry_mph is None:
             findings.append("the signalled exit was never taken at all")
             return _outcome(name, rig, findings, "")
-        if entry_mph > RAMP_MAX_MPH:
-            findings.append(f"entered the gore at {entry_mph:.1f} mph, over the ramp's limit")
+        if entry_mph > gore_mph:
+            findings.append(
+                f"entered the gore at {entry_mph:.1f} mph, over the {gore_mph:.0f} the gore accepts"
+            )
 
         # 2. The ramp takes the pedals, never the session.
         if not d._speed_control_armed:

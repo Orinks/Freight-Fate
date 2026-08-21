@@ -1215,7 +1215,11 @@ class DrivingUpdateMixin:
         # limit announced itself slowing and released over and over down a
         # single ramp -- and re-made the brake application, and paid the air
         # for it, every time round (bench, 2026-08-11).
-        ramp_hold_mph = RAMP_CRUISE_TARGET_MPH if self._transition_assist_active else RAMP_MAX_MPH
+        ramp_hold_mph = (
+            self._armed_ramp_cruise_mph()
+            if self._transition_assist_active
+            else self._armed_ramp_mph()
+        )
         transition_assisting = (
             self.ctx.settings.route_transition_assist
             and self._ramp_mi is not None
