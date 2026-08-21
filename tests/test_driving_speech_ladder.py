@@ -2050,3 +2050,112 @@ def test_a_queued_stop_notice_speaks_the_distance_it_delivers_at(monkeypatch):
     )
     DrivingEventMixin._update_ambient_events(host, 0.0)
     assert spoken == []
+
+
+def test_the_stop_bar_countdown_shrinks_on_the_quieter_rungs():
+    """The bar has an instrument as well as a voice, so the voice says less.
+
+    Inside RAMP_BAR_TICK_RANGE_MI a centre tick speeds up as the bar closes
+    and fuses to a solid tone at the end -- rate carries distance, silence
+    means stopped. Every spoken milestone inside that range was speech
+    restating what the driver was already listening to: four calls on every
+    ramp terminal, the last two of them audible twice. Standard keeps the
+    calls the tick cannot make; quiet keeps one (owner, 2026-08-21).
+    """
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.driving_core import (
+        RAMP_BAR_TICK_RANGE_MI,
+        RAMP_GAP_MILESTONES_FT,
+    )
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Rungs", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Buffalo",
+            "company yard",
+            "Rochester",
+            route.miles,
+            1000.0,
+            12.0,
+        )
+        d = DrivingState(app.ctx, job, route, phase="delivery")
+        app.ctx.settings.imperial_units = True
+
+        app.ctx.settings.driving_speech = "standard"
+        standard = d._ramp_bar_milestones()
+        app.ctx.settings.driving_speech = "quiet"
+        quiet = d._ramp_bar_milestones()
+
+        assert len(standard) == 2, "two calls at standard, down from four"
+        assert len(standard) < len(RAMP_GAP_MILESTONES_FT)
+        assert len(quiet) == 1, "quiet says the far call and lets the tick do the rest"
+        assert quiet[0] == standard[0], "the quiet call is the FARTHEST, not the nearest"
+        # Nothing spoken inside the tick's own reach, on either rung.
+        for threshold in standard:
+            assert threshold / 5280.0 > RAMP_BAR_TICK_RANGE_MI, threshold
+
+        # Metric gets the same NUMBER of calls, not one more: the tick rule
+        # alone left it a third call at 100 metres with no imperial twin.
+        app.ctx.settings.imperial_units = False
+        app.ctx.settings.driving_speech = "standard"
+        assert len(d._ramp_bar_milestones()) == 2
+        app.ctx.settings.driving_speech = "quiet"
+        assert len(d._ramp_bar_milestones()) == 1
+    finally:
+        app.shutdown()
+
+
+def test_the_quiet_stop_bar_call_is_the_distance_and_nothing_else():
+    """Quiet gets one call for the whole approach, so it carries one fact.
+
+    It used to render as "1000 feet to stop bar, speed limit 25" -- but by the
+    time it lands the driver has already been told this is a bar and what the
+    limit is, so both halves are a re-read (owner, 2026-08-21).
+    """
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.driving_core import RAMP_ACCESS_MI
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Rungs", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Buffalo",
+            "company yard",
+            "Rochester",
+            route.miles,
+            1000.0,
+            12.0,
+        )
+        d = DrivingState(app.ctx, job, route, phase="delivery")
+        app.ctx.settings.imperial_units = True
+        app.ctx.settings.driving_speech = "quiet"
+        spoken: list[str] = []
+        app.ctx.say_event = lambda text, **k: spoken.append(text)
+        app.ctx.audio.play = lambda *a, **k: None
+
+        d._ramp_light_announced = True
+        d._ramp_waiting_at_light = False
+        d._ramp_mi = RAMP_ACCESS_MI + (900.0 / 5280.0)
+        d.truck.engine_on = True
+        d.truck.velocity_mps = 30.0 / 2.23694
+        d._update_ramp_gap_countdown()
+
+        assert spoken, "the far call still speaks on quiet"
+        assert spoken[0] == "1000 feet."
+        assert "stop bar" not in spoken[0]
+        assert "speed limit" not in spoken[0]
+    finally:
+        app.shutdown()

@@ -939,6 +939,18 @@
   confirmation before anything changes. Your other careers keep backing up
   privately; they just stay off your profile.
 
+### Changed
+- **Less talking on the way down to a stop sign or a light.** The stop bar
+  counts itself down out loud four times on the way in, and the last two of
+  those land inside the range where the bar's own tick is already speeding up
+  under you -- the same distance told twice, once in words and once in sound.
+  On the standard setting you now get two calls instead of four -- the ones
+  further out, that the tick cannot make. On quiet you get one, and it is just
+  the distance: "one thousand feet", not "one thousand feet to stop bar, speed
+  limit twenty five". By the time it lands you have already been told this is
+  a bar and what the limit is, so saying either again is a re-read. The tick
+  carries the distance from there.
+
 ### Fixed
 - **A cut exit instruction no longer comes back after you have passed the
   exit.** When an urgent warning cuts off something the truck was part-way

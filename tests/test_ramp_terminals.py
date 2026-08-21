@@ -690,9 +690,14 @@ def test_rolling_countdown_speaks_each_milestone_once():
             d._update_ramp_gap_countdown()
             d._update_ramp_gap_countdown()  # same gap again: no repeat
         bar_calls = [t for t in spoken if "to the bar" in t]
-        assert len(bar_calls) == len(RAMP_GAP_MILESTONES_FT)
+        # Only the calls the bar's own tick cannot make: inside its range
+        # the tick rate already carries the distance, so speaking it there
+        # was the same fact twice (owner, 2026-08-21).
+        expected = d._ramp_bar_milestones()
+        assert len(expected) < len(RAMP_GAP_MILESTONES_FT)
+        assert len(bar_calls) == len(expected)
         assert bar_calls[0] == "1000 feet to the bar."
-        assert bar_calls[-1] == "150 feet to the bar."
+        assert bar_calls[-1] == f"{expected[-1]} feet to the bar."
 
         # Stopped: the countdown yields to the stopped-driver guidance.
         spoken.clear()
@@ -726,7 +731,10 @@ def test_stop_sign_bar_has_position():
             d._ramp_mi = RAMP_ACCESS_MI + feet / 5280.0
             d._update_ramp_light(0.05)
         bar_calls = [t for t in spoken if "to the bar" in t]
-        assert len(bar_calls) == len(RAMP_GAP_MILESTONES_FT)
+        # The tick covers the near calls now; see the countdown test above.
+        expected = d._ramp_bar_milestones()
+        assert len(expected) < len(RAMP_GAP_MILESTONES_FT)
+        assert len(bar_calls) == len(expected)
         assert bar_calls[0] == "1000 feet to the bar."
 
         # Parking-sensor beeps run for the sign too (outside the solid zone).

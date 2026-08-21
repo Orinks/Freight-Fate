@@ -2386,6 +2386,39 @@ class DrivingEventMixin:
                 category=SpeechCategory.NAVIGATION,
             )
 
+    def _ramp_bar_milestones(self) -> tuple[int, ...]:
+        """Which distances to the stop bar are worth SAYING on this rung.
+
+        The bar already has a non-spoken instrument: inside
+        ``RAMP_BAR_TICK_RANGE_MI`` a centre tick speeds up as the bar closes,
+        and fuses to a solid tone at the end. Rate carries distance, silence
+        means stopped. So a spoken milestone inside that range is speech
+        restating what the driver is already listening to -- four calls on
+        every ramp terminal, of which the last two were audible twice.
+
+        Standard keeps the calls the tick cannot make, the ones out beyond its
+        range. Quiet keeps one: the rung means less automatic speech, the
+        terminal callout has already named the light or the sign, and the tick
+        does the rest of the work (owner, 2026-08-21).
+        """
+        imperial = self.ctx.settings.imperial_units
+        thresholds = RAMP_GAP_MILESTONES_FT if imperial else RAMP_GAP_MILESTONES_M
+        unit_mi = 1.0 / 5280.0 if imperial else 1.0 / 1609.344
+        outside_tick = tuple(
+            threshold for threshold in thresholds if threshold * unit_mi > RAMP_BAR_TICK_RANGE_MI
+        )
+        # Never silent: a unit system whose milestones all sit inside the tick
+        # range still gets its farthest call, so the bar is never announced by
+        # sound alone to a driver who has the tick turned down.
+        if not outside_tick:
+            outside_tick = thresholds[:1]
+        if self._terse_speech():
+            return outside_tick[:1]
+        # Two is the owner's number (2026-08-21), and it makes both unit
+        # systems behave alike: the tick rule alone left metric with a third
+        # call at 100 metres that imperial had no equivalent for.
+        return outside_tick[:2]
+
     def _update_cross_bubble(self, dt: float) -> None:
         """Run the crossroad's own traffic while the terminal is live.
 
@@ -2557,21 +2590,21 @@ class DrivingEventMixin:
         if self.truck.speed_mph <= RED_STOP_MPH:
             return
         gap_mi = self._ramp_mi - RAMP_ACCESS_MI
-        thresholds = (
-            RAMP_GAP_MILESTONES_FT if self.ctx.settings.imperial_units else RAMP_GAP_MILESTONES_M
-        )
+        thresholds = self._ramp_bar_milestones()
         unit_mi = 1.0 / 5280.0 if self.ctx.settings.imperial_units else 1.0 / 1609.344
         unit_word = "feet" if self.ctx.settings.imperial_units else "meters"
         for threshold in thresholds:
             if gap_mi <= threshold * unit_mi and threshold not in self._ramp_gap_milestones_said:
                 self._ramp_gap_milestones_said.add(threshold)
                 if self._terse_speech():
-                    # One compact line with everything a driver needs
-                    # (owner spec 2026-07-23): distance, target, limit.
-                    limit_text = self._approach_limit_text()
-                    limit_clause = f", speed limit {limit_text}" if limit_text else ""
+                    # The distance, and nothing else. Quiet gets ONE call for
+                    # the whole approach, and by the time it lands the driver
+                    # has already been told this is a bar and what the limit
+                    # is -- so repeating either of those is the wordiness the
+                    # rung exists to remove (owner, 2026-08-21, replacing the
+                    # compact-line spec of 2026-07-23 for this line only).
                     self.ctx.say_event(
-                        f"{threshold} {unit_word} to stop bar{limit_clause}.",
+                        f"{threshold} {unit_word}.",
                         interrupt=False,
                         priority=EventPriority.ROUTE,
                         category=SpeechCategory.NAVIGATION,
