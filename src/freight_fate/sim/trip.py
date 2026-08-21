@@ -339,6 +339,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         self._announced_navigation: set[str] = set()
         self._charged_tolls: set[str] = set()
         self._active_zone: Zone | None = None
+        if outbound:
+            # Pulling OUT of a yard starts the truck already standing inside
+            # the gate zone, and you do not "enter" a zone you begin in. Left
+            # unseeded, the first tick announced the gate's 15 and then, a few
+            # seconds later when the pacer's breather opened, announced the
+            # access road's 25 -- two facility zone lines inside the first few
+            # hundred feet, which is what a driver hears as being told the
+            # same thing twice (owner, 2026-08-21). Seeding it means the first
+            # zone line of the run is the one that is actually news: the
+            # street, once the gate is behind. The departure cue has already
+            # said you are coming out of the gate.
+            self._active_zone = self._active_zone_at(0.0)
         # Whether the current _active_zone's ZONE_ENTER colour line has been
         # spoken. A gated entry (see _check_zones) leaves this False so the
         # next open window speaks for whichever zone is actually current --

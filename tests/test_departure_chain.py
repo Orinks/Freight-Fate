@@ -312,3 +312,50 @@ def test_the_acceleration_lane_is_real_road_and_the_keeper_drives_it():
         assert d._departure_ramp_mi is None
     finally:
         app.shutdown()
+
+
+def test_pulling_out_does_not_announce_the_zone_it_starts_inside():
+    """You do not "enter" a zone you begin standing in.
+
+    Outbound, the gate zone and the access-road zone both start at mile zero.
+    Unseeded, the first tick announced the gate's limit and the next open
+    pacing window announced the street's -- two facility zone lines inside the
+    first few hundred feet, heard as being told the same thing twice (owner,
+    2026-08-21). Driven the other way the opening zone IS news, because the
+    driver has just come off a ramp onto streets, so that one still speaks.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import Trip
+    from freight_fate.sim.vehicle import TruckState
+    from freight_fate.sim.weather import WeatherSystem
+
+    app = App()
+    try:
+        city, location = _turn_level_facility(app.ctx.world)
+        outbound_route = app.ctx.world.facility_departure_route(city, location)
+        inbound_route = app.ctx.world.facility_approach_route(city, location)
+
+        def _trip(route, outbound):
+            return Trip(
+                route,
+                TruckState(),
+                WeatherSystem(seed=3),
+                seed=11,
+                hazard_scale=0.0,
+                outbound=outbound,
+            )
+
+        out = _trip(outbound_route, True)
+        # The zone under the wheels at the start is already the active one, so
+        # nothing announces it -- and it is the gate, the one the departure cue
+        # has just spoken about.
+        assert out._active_zone is not None
+        assert out._active_zone.reason == "facility gate"
+        assert out._active_zone.start_mi == 0.0
+
+        # Inbound keeps its opening announcement: coming off the ramp onto a
+        # street, the limit is the first thing the driver needs.
+        inn = _trip(inbound_route, False)
+        assert inn._active_zone is None
+    finally:
+        app.shutdown()

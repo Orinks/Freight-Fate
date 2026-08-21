@@ -282,6 +282,10 @@ def test_the_gate_warning_names_a_limit_that_is_really_posted(monkeypatch):
         assert corridor > FACILITY_GATE_LIMIT_MPH
 
         # Taking the destination exit puts the driveway's own limit back.
+        # This is the NO-CHAIN case: a facility whose own streets become the
+        # trip posts its gate from that chain instead, and posting one here as
+        # well would announce the same gate twice.
+        d._surface_chain_route = lambda: None
         d._destination_exit_taken = True
         d._post_gate_zone()
         posted, reason = d.trip.speed_limit_at(d.trip.total_miles - 0.3)
@@ -384,5 +388,27 @@ def test_snapshot_round_trips_the_miss_count(monkeypatch):
         resumed = DrivingState.from_snapshot(app.ctx, d.snapshot())
         assert resumed is not None
         assert resumed._gate_miss_count == 2
+    finally:
+        app.shutdown()
+
+
+def test_a_facility_with_its_own_streets_does_not_get_a_second_gate_zone(monkeypatch):
+    """One gate, one announcement.
+
+    A facility whose approach is a real street chain drives those streets as a
+    trip of their own, and that trip builds a gate zone at its end. Posting one
+    on the highway trip as well put the same gate on the map twice, so the
+    driver heard it announced coming off the ramp and again on the streets
+    (owner, 2026-08-21).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d._surface_chain_route = lambda: object()  # this facility has streets
+        d._destination_exit_taken = True
+        d._post_gate_zone()
+        assert not any(zone.reason == "facility gate" for zone in d.trip.zones)
     finally:
         app.shutdown()

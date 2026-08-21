@@ -56,6 +56,12 @@ class FacilityGateMixin:
         """
         if any(zone.reason == "facility gate" for zone in self.trip.zones):
             return
+        if self._surface_chain_route() is not None:
+            # This facility's own streets are about to become the trip, and
+            # that chain builds its own gate zone at the end of itself. Posting
+            # one here as well would announce the same gate twice: once off the
+            # ramp on the highway trip, once again on the streets.
+            return
         self.trip.zones.append(self.trip.facility_gate_zone())
         self.trip.zones.sort(key=lambda zone: zone.start_mi)
 
