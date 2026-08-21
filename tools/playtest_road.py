@@ -30,9 +30,11 @@ every spoken line, no window, no speech::
 
     uv run python tools/playtest_road.py --find downgrade --cruise 70 --headless 8
 
-``--find`` takes: downgrade, upgrade, zone, limit-drop, stop, curve,
-interchange, toll, chain-law. ``--routes`` picks a named set (mountain,
-rolling, flat, all) unless ``--from``/``--to`` name a pair.
+``--find`` takes: downgrade, upgrade, zone, limit-drop, stop, scale, curve,
+interchange, toll, chain-law. ``scale`` ranks OPEN weigh stations first -- a
+closed one is silent by design, so driving to it proves nothing. ``--routes``
+picks a named set (mountain, rolling, flat, all) unless ``--from``/``--to``
+name a pair.
 
 ``--routes random`` draws instead from the whole map, so a session is not
 always testing the same ten corridors -- half the named ones are mountain,
@@ -108,6 +110,7 @@ FEATURES = (
     "zone",
     "limit-drop",
     "stop",
+    "scale",
     "curve",
     "interchange",
     "toll",
@@ -173,6 +176,7 @@ class Hit:
     run_mi: float
     limit_mph: float
     label: str
+    trip_seed: int | None = None  # the per-trip roll this was found under
 
     def describe(self) -> str:
         run = f", running {self.run_mi:.1f} mi" if self.run_mi >= 0.1 else ""
@@ -194,13 +198,21 @@ def load_world():
     return get_world()
 
 
-def _build_trip(world, origin: str, destination: str):
+def _build_trip(world, origin: str, destination: str, seed: int | None = None):
+    """The trip the search reads -- built on the SAME seed the drive will use.
+
+    Everything drawn per trip rather than baked into the map hangs off this
+    seed: work zones, patrol posts, and whether a given weigh station is open
+    today. Searching on one seed and then driving on another is how a scan
+    could promise an open scale and hand over a dark one (found 2026-08-20,
+    benching the weigh-in-motion bypass).
+    """
     from freight_fate.sim.trip import Trip
     from freight_fate.sim.vehicle import TruckState
     from freight_fate.sim.weather import WeatherSystem
 
     route = world.supported_route(origin, destination)
-    return route, Trip(route, TruckState(), WeatherSystem())
+    return route, Trip(route, TruckState(), WeatherSystem(), seed=seed)
 
 
 def _grade_hits(trip, origin, destination, sign, min_pct, min_run) -> list[Hit]:
@@ -298,6 +310,44 @@ def _stop_hits(trip, origin, destination) -> list[Hit]:
                 0.0,
                 limit,
                 f"{getattr(stop, 'type', 'stop')}: {name}",
+            )
+        )
+    return hits
+
+
+def _scale_hits(trip, origin, destination) -> list[Hit]:
+    """Weigh stations, the OPEN ones first.
+
+    A closed scale is silent by design -- its guards stay inert so that
+    hearing nothing means "dark", not "missed it". Landing at one is a
+    playtest that proves nothing, so openness is read here (the same seeded
+    draw the drive itself reads, off ``trip.posts``) and reported rather than
+    discovered at fifty-five miles an hour.
+    """
+    from freight_fate.sim.enforcement_posts import KIND_FIXED_SCALE
+
+    open_anchors = {
+        post.anchor for post in getattr(trip, "posts", None) or [] if post.kind == KIND_FIXED_SCALE
+    }
+    hits = []
+    for stop in getattr(trip, "stops", None) or []:
+        if getattr(stop, "type", "") != "weigh_station":
+            continue
+        limit, _ = trip.speed_limit_at(max(0.0, stop.at_mi - DEFAULT_LEAD_MI))
+        is_open = stop.key in open_anchors
+        name = getattr(stop, "name", "") or stop.key
+        hits.append(
+            Hit(
+                origin,
+                destination,
+                stop.at_mi,
+                trip.total_miles,
+                # Magnitude is what the sort ranks on, and an open scale is
+                # the only kind worth driving to.
+                1.0 if is_open else 0.0,
+                0.0,
+                limit,
+                f"{'OPEN' if is_open else 'closed'} scale: {name}",
             )
         )
     return hits
@@ -420,12 +470,12 @@ def _chain_law_hits(trip, origin, destination) -> list[Hit]:
     return hits
 
 
-def find_feature(world, pairs, feature: str, args) -> list[Hit]:
+def find_feature(world, pairs, feature: str, args, seed: int | None = None) -> list[Hit]:
     """Every matching feature across the given routes, best first."""
     hits: list[Hit] = []
     for origin, destination in pairs:
         try:
-            _, trip = _build_trip(world, origin, destination)
+            _, trip = _build_trip(world, origin, destination, seed)
         except Exception as exc:  # an unroutable pair must not kill the sweep
             print(f"  (skipped {origin} -> {destination}: {exc})")
             continue
@@ -438,6 +488,8 @@ def find_feature(world, pairs, feature: str, args) -> list[Hit]:
             hits += _limit_drop_hits(trip, origin, destination, args.min_drop)
         elif feature == "stop":
             hits += _stop_hits(trip, origin, destination)
+        elif feature == "scale":
+            hits += _scale_hits(trip, origin, destination)
         elif feature == "curve":
             hits += _curve_hits(trip, origin, destination, args.max_advisory)
         elif feature == "interchange":
@@ -446,11 +498,43 @@ def find_feature(world, pairs, feature: str, args) -> list[Hit]:
             hits += _toll_hits(trip, origin, destination)
         elif feature == "chain-law":
             hits += _chain_law_hits(trip, origin, destination)
+    for hit in hits:
+        hit.trip_seed = seed
     if feature in ("downgrade", "upgrade"):
         hits.sort(key=lambda h: (-h.run_mi, -h.magnitude))
     else:
         hits.sort(key=lambda h: (-h.magnitude, h.at_mi))
     return hits
+
+
+# How many per-trip rolls to try before giving up on finding an OPEN scale.
+# Whether a station is open is a seeded draw over its own key, so a route with
+# one scale on it is roughly a coin flip per seed.
+SCALE_SEED_TRIES = 24
+
+
+def find_feature_seeded(world, pairs, feature: str, args) -> list[Hit]:
+    """``find_feature`` on a pinned seed, re-rolled when the find is empty.
+
+    An open weigh station is the case this exists for: it is silent when
+    closed, by design, so a playtest sent to a dark one learns nothing and
+    cannot tell that from the feature being broken. Re-rolling the trip is
+    the same thing a player does by starting another run.
+    """
+    if args.trip_seed is not None:
+        return find_feature(world, pairs, feature, args, args.trip_seed)
+
+    tries = SCALE_SEED_TRIES if feature == "scale" else 1
+    for attempt in range(tries):
+        seed = random.randrange(2**31)
+        hits = find_feature(world, pairs, feature, args, seed)
+        if feature == "scale":
+            hits = [h for h in hits if h.label.startswith("OPEN")]
+        if hits:
+            if attempt:
+                print(f"  (took {attempt + 1} trip rolls to find one open)")
+            return hits
+    return []
 
 
 def build_driving(ctx, hit: Hit, args):
@@ -485,6 +569,16 @@ def build_driving(ctx, hit: Hit, args):
     origin_key = ctx.world.resolve_city_key(hit.origin)
     destination_key = ctx.world.resolve_city_key(hit.destination)
     ctx.profile = Profile(name="Playtest", current_city=origin_key)
+    if args.level:
+        # A bench career starts at level one, which silently switches off
+        # every level-gated behaviour a playtest might be here for -- the
+        # weigh-in-motion transponder a company driver is issued at four
+        # above all, whose absence looks exactly like the feature not
+        # working. Set the XP, not the level: the level is derived.
+        from freight_fate.models.career import LEVEL_XP, MAX_CAREER_LEVEL
+
+        level = max(1, min(args.level, MAX_CAREER_LEVEL))
+        ctx.profile.career.xp = LEVEL_XP[level - 1]
     # A bench career is not somebody's first drive. Without this the profile
     # defaults to tutorial_done=False, first-run teaching outranks the rung
     # by design (GameContext._ladder_applies), and the driving speech ladder
@@ -514,7 +608,15 @@ def build_driving(ctx, hit: Hit, args):
         destination_spoken=ctx.world.spoken_city(destination_key),
     )
     driving = DrivingState(
-        ctx, job, route, phase="delivery", start_hour=args.hour if args.hour is not None else 9.0
+        ctx,
+        job,
+        route,
+        phase="delivery",
+        start_hour=args.hour if args.hour is not None else 9.0,
+        # The seed the feature was FOUND under. Without it DrivingState draws
+        # its own, and the drive gets a different set of work zones, patrol
+        # posts and open scales than the search just promised.
+        trip_seed=hit.trip_seed,
     )
 
     trip, truck = driving.trip, driving.truck
@@ -543,6 +645,7 @@ def _print_setup(ctx, driving, hit: Hit, start_mi: float, args) -> None:
     limit, reason = trip.speed_limit_at(start_mi)
     print(f"\n=== playtest: {hit.origin} -> {hit.destination} ===")
     print(f"  target            : {hit.label} at mile {hit.at_mi:.1f}")
+    print(f"  trip seed         : {hit.trip_seed}  (--trip-seed to drive this exact run again)")
     print(f"  starting at mile  : {start_mi:.1f} of {trip.total_miles:.0f}")
     print(f"  posted limit here : {limit:.0f} mph{f' ({reason})' if reason else ''}")
     print(f"  rolling at        : {args.speed:.0f} mph, {args.cargo:.0f} t aboard")
@@ -668,6 +771,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--find", dest="feature", choices=FEATURES, help="road feature to start at")
     p.add_argument("--at", type=float, help="start at this mile instead of searching")
     p.add_argument("--pick", type=int, default=0, help="which search result to use (0 = best)")
+    p.add_argument(
+        "--trip-seed",
+        type=int,
+        help="pin the per-trip roll: work zones, patrol posts, and which weigh "
+        "stations are open. Printed on every run, so a session can be repeated",
+    )
     p.add_argument("--scan", action="store_true", help="list what was found and exit")
     p.add_argument("--min-pct", type=float, default=3.0, help="grade search: minimum percent")
     p.add_argument("--min-run", type=float, default=1.0, help="grade search: minimum miles")
@@ -677,6 +786,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--no-cruise", action="store_true", help="leave cruise off")
     p.add_argument("--speed", type=float, default=62.0, help="rolling speed at the start")
     p.add_argument("--cargo", type=float, default=20.0, help="payload in tons")
+    p.add_argument(
+        "--level",
+        type=int,
+        help="career level to drive at (gates the weigh-station transponder at 4, "
+        "load choice at 8)",
+    )
     p.add_argument("--cargo-type", default="general", help="cargo catalog key")
     p.add_argument(
         "--max-advisory", type=float, default=45.0, help="curve search: slowest advisory to accept"
@@ -765,13 +880,16 @@ def main(argv: list[str] | None = None) -> int:
         pairs = ROUTE_SETS[args.routes]
     if args.at is not None:
         origin, destination = pairs[0]
-        _, trip = _build_trip(world, origin, destination)
+        seed = args.trip_seed if args.trip_seed is not None else random.randrange(2**31)
+        _, trip = _build_trip(world, origin, destination, seed)
         limit, _ = trip.speed_limit_at(args.at)
-        hit = Hit(origin, destination, args.at, trip.total_miles, 0.0, 0.0, limit, "chosen mile")
+        hit = Hit(
+            origin, destination, args.at, trip.total_miles, 0.0, 0.0, limit, "chosen mile", seed
+        )
         args.lead = 0.0
     else:
         print(f"Searching {len(pairs)} route(s) for a {args.feature}...")
-        hits = find_feature(world, pairs, args.feature, args)
+        hits = find_feature_seeded(world, pairs, args.feature, args)
         if not hits:
             hint = {
                 "downgrade": "Loosen --min-pct / --min-run",
