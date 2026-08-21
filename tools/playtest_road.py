@@ -887,6 +887,24 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
+    if not args.headless:
+        # playtest_road builds its own App and calls run() directly, which
+        # means it never passes through the guard freight_fate.app.main uses.
+        # Launching one while a game was already open gave the owner two
+        # windows, the new drive rolling unfocused behind the old one, and an
+        # open weigh station that came and went unheard (2026-08-21). A bench
+        # is exempt: it opens no window and several are fine at once.
+        from freight_fate.single_instance import SingleInstanceGuard
+
+        guard = SingleInstanceGuard()
+        if not guard.acquire():
+            print(
+                "Freight Fate is already running. Close it first -- a second "
+                "window would start rolling behind the one you are looking at.",
+                file=sys.stderr,
+            )
+            return 1
+
     if args.sandbox:
         # Before anything resolves a save path: a playtest career belongs in a
         # data dir with no driver identity, so nothing it does reaches the

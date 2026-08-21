@@ -183,6 +183,23 @@ class TrafficSituation:
     interrupt: bool = False
 
 
+# Why traffic is braking, said in the driver's words, keyed by the Zone
+# reason the trip stamped on that mile. A module constant rather than an
+# inline dict so the vocabulary can be checked against the reasons the
+# generator actually produces: a zone kind the table has never heard of
+# silently loses its explanation, and a table key nothing produces is dead
+# vocabulary that reads like coverage. Both are invisible in play.
+#
+# Absent on purpose: anything not mile-mapped. A slowdown with nothing
+# behind it says nothing about cause -- phantom waves are real, and an
+# invented crash would be worse than silence (Brandon, 2026-08-20).
+BRAKING_CAUSE_LINES = {
+    "construction": "Road work is the cause.",
+    "construction merge": "Road work is the cause.",
+    "heavy traffic": "Traffic is backing up ahead.",
+}
+
+
 class TrafficManager:
     def __init__(
         self,
@@ -871,11 +888,7 @@ class TrafficManager:
             message = merging_traffic_cue(vehicle_class, gap)
             kind = "merging"
         elif intent == "braking":
-            cause = {
-                "construction": "Road work is the cause.",
-                "construction merge": "Road work is the cause.",
-                "heavy traffic": "Traffic is backing up ahead.",
-            }.get(self._braking_reason_at(vehicle.position_mi), "")
+            cause = BRAKING_CAUSE_LINES.get(self._braking_reason_at(vehicle.position_mi), "")
             message = brake_lights_cue(gap, speed, bare, cause)
             kind = "braking"
         elif intent == "following":

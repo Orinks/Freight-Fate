@@ -309,3 +309,75 @@ def _weather_cap_releases_when_the_sky_does():
         )
     finally:
         rig.close()
+
+
+@scenario(
+    "brake_lights_never_invent_a_cause",
+    "Brandon's why: a slowdown names its cause only where the road really has one, and never guesses.",
+)
+def _brake_lights_never_invent_a_cause():
+    """The vocabulary and the map have to stay married.
+
+    Brandon asked WHY the brake lights, 2026-08-20, and the answer was
+    deliberately partial: a slowdown inside a work zone or a rated jam names
+    its cause, and one with nothing mile-mapped behind it says nothing --
+    because phantom waves are real and an invented crash is worse than
+    silence.
+
+    That leaves two ways to rot, both silent. A zone reason the generator
+    produces but the cause table has never heard of simply loses its
+    explanation, and nobody notices because the line still reads fine. A
+    cause-table key no zone ever carries is dead vocabulary that looks like
+    coverage. This checks both directions against the real Zone reasons, and
+    then checks the shape of the line an unknown cause produces -- the case
+    that has to stay clean, since it is the common one.
+    """
+    import re
+
+    from freight_fate.sim.traffic_manager import BRAKING_CAUSE_LINES
+    from freight_fate.speech_text import brake_lights_cue
+
+    findings: list[str] = []
+
+    # The reasons the trip generator actually stamps on a Zone. A literal, so
+    # that adding a zone kind is a visible diff here rather than a silently
+    # uncovered case -- but checked against the REAL table, not against
+    # another copy of itself.
+    generated = {"construction", "construction merge", "heavy traffic"}
+    explained = set(BRAKING_CAUSE_LINES)
+
+    unexplained = generated - explained
+    if unexplained:
+        findings.append(
+            f"these zone reasons reach the road with no cause line: {sorted(unexplained)}"
+        )
+    dead = explained - generated
+    if dead:
+        findings.append(f"the cause table explains reasons nothing ever produces: {sorted(dead)}")
+
+    # An unknown cause must add no clause at all -- no dangling sentence, no
+    # doubled space where the clause would have gone.
+    bare = brake_lights_cue("half a mile", "forty miles per hour", "40", "")
+    for rendering in (bare.render(False), bare.render(True)):
+        if not rendering:
+            continue
+        if "  " in rendering:
+            findings.append(f"an unexplained slowdown leaves a doubled space: {rendering!r}")
+        if re.search(r"\.\s*\.", rendering):
+            findings.append(f"an unexplained slowdown leaves an empty sentence: {rendering!r}")
+
+    # And a known cause must actually appear, in the full form only: terse
+    # slots stay compact by design.
+    named = brake_lights_cue("half a mile", "forty miles per hour", "40", "Road work is the cause.")
+    if "Road work is the cause." not in named.render(False):
+        findings.append("a known cause never reaches the spoken line")
+    terse = named.render(True)
+    if terse and "Road work is the cause." in terse:
+        findings.append("the cause clause leaked into the terse rendering, which must stay compact")
+
+    return _outcome(
+        "brake_lights_never_invent_a_cause",
+        None,
+        findings,
+        "every mapped reason has a cause line, and an unmapped one stays honestly silent",
+    )
