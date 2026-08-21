@@ -919,6 +919,10 @@ def test_missed_destination_exit_speaks_at_urgent_only() -> None:
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        # tutorial_done=True for the same reason _real_driving sets it: a
+        # freshly created career defaults it False, and the first-run
+        # exemption then hands this test a rung that silences nothing.
+        app.ctx.profile.tutorial_done = True
         spoken: list[str] = []
         app.ctx.speech.say_event = speech_stub(spoken)
         driving.trip.position_mi = driving.trip.total_miles
@@ -927,8 +931,10 @@ def test_missed_destination_exit_speaks_at_urgent_only() -> None:
 
         driving.update(1 / 60)
 
-        assert spoken
-        assert "missed the destination exit" in spoken[-1].lower()
+        # Membership, not spoken[-1]: this frame crosses the whole route at
+        # once, so anything else the road owed the driver speaks in the same
+        # tick and the last slot is nobody's contract.
+        assert any("missed the destination exit" in line.lower() for line in spoken)
     finally:
         app.shutdown()
 
