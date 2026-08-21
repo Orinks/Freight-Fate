@@ -205,6 +205,41 @@ def describe(sandbox: Path) -> str:
     return "\n".join(lines)
 
 
+def open_session(sandbox: Path, log_path: Path) -> Path:
+    """Announce a live playtest so tools/playtest_watch.py can follow it.
+
+    Both launchers write this -- the sandbox one and playtest_road's
+    ``--sandbox`` -- because the watcher's job is the same either way, and
+    the one thing it cannot work out for itself is when the player has quit
+    rather than simply parked the truck and gone quiet.
+    """
+    SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
+    SESSION_FILE.write_text(
+        json.dumps(
+            {
+                "pid": os.getpid(),
+                "sandbox": str(sandbox),
+                "log": str(log_path),
+                "started": time.time(),
+                "running": True,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    return SESSION_FILE
+
+
+def close_session() -> None:
+    """Mark the session over. Best effort: a hard crash never reaches here,
+    which is why the watcher also checks whether the pid is still alive."""
+    with contextlib.suppress(OSError, ValueError):
+        state = json.loads(SESSION_FILE.read_text(encoding="utf-8"))
+        state["running"] = False
+        state["ended"] = time.time()
+        SESSION_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
+
+
 def parse_args(argv: list[str] | None = None) -> tuple[argparse.Namespace, list[str]]:
     """This tool's own options, and whatever is left for the game itself.
 
@@ -246,25 +281,7 @@ def main(argv: list[str] | None = None) -> int:
     os.environ.setdefault("FREIGHT_FATE_LOG", "INFO")
     print(f"\nSession log: {log_path}")
 
-    # The watcher (tools/playtest_watch.py) reads this to know a session is
-    # live, which log it is writing, and -- the part it cannot work out for
-    # itself -- when the player has actually quit rather than simply parked
-    # the truck and gone quiet for a while.
-    session = SESSION_FILE
-    session.parent.mkdir(parents=True, exist_ok=True)
-    session.write_text(
-        json.dumps(
-            {
-                "pid": os.getpid(),
-                "sandbox": str(sandbox),
-                "log": str(log_path),
-                "started": time.time(),
-                "running": True,
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
+    session = open_session(sandbox, log_path)
     print(f"Session file: {session}")
 
     from freight_fate.app import main as game_main
@@ -273,14 +290,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return game_main()
     finally:
-        # Best effort: a hard crash leaves ``running`` true and the watcher
-        # falls back to noticing the pid is gone, which is why it carries
-        # both signals rather than trusting this one.
-        with contextlib.suppress(OSError):
-            state = json.loads(session.read_text(encoding="utf-8"))
-            state["running"] = False
-            state["ended"] = time.time()
-            session.write_text(json.dumps(state, indent=2), encoding="utf-8")
+        close_session()
 
 
 if __name__ == "__main__":

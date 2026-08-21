@@ -15,6 +15,12 @@ Find a feature and drive it::
     uv run python tools/playtest_road.py --from Denver --to "Grand Junction" \\
         --find downgrade --min-pct 5 --cruise 70 --cargo 20
 
+Every run is sandboxed: a throwaway data directory with no driver
+identity, so a playtest career cannot back itself up to the owner's account
+or touch their public profile. ``--no-sandbox`` opts out, deliberately and
+out loud. A ``--headless`` bench writes its own transcript
+(``logs/playtest-bench.log``) so it can never rotate a live drive's log away.
+
 Look before you drive (searches, prints, exits)::
 
     uv run python tools/playtest_road.py --find downgrade --scan
@@ -833,10 +839,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--headless", type=float, default=0.0, help="bench for N minutes, no window")
     p.add_argument("--log", help="transcript path (default logs/playtest.log)")
     p.add_argument(
-        "--sandbox",
-        action="store_true",
-        help="drive in a throwaway data dir that cannot back up or publish anything",
+        "--no-sandbox",
+        dest="sandbox",
+        action="store_false",
+        help="drive in the REAL data dir, with the real driver: careers back up to the cloud",
     )
+    p.set_defaults(sandbox=True)
     args = p.parse_args(argv)
     if args.no_cruise:
         args.cruise = 0.0
@@ -852,6 +860,14 @@ def main(argv: list[str] | None = None) -> int:
         # Before anything resolves a save path: a playtest career belongs in a
         # data dir with no driver identity, so nothing it does reaches the
         # owner's cloud backups or public profile.
+        #
+        # ON BY DEFAULT since 2026-08-20, because the opt-in version was a
+        # trap. A bench run started to answer one question about the engine
+        # brake, with the flag simply not typed, created a "Playtest" career
+        # in the real save directory and uploaded it to the owner's account
+        # minutes after that account had been deliberately emptied. The tool
+        # cannot tell a throwaway career from a real one; the only safe
+        # default is the one that cannot reach the account at all.
         from playtest_sandbox import audit, describe, prepare
 
         sandbox = prepare()
@@ -860,8 +876,18 @@ def main(argv: list[str] | None = None) -> int:
             print("Refusing to drive: the sandbox is not isolated.", file=sys.stderr)
             return 1
         print()
+    else:
+        sandbox = None
 
-    log_path = Path(args.log) if args.log else ROOT / "logs" / "playtest.log"
+    if args.log:
+        log_path = Path(args.log)
+    elif args.headless:
+        # A bench and a live drive both defaulting to playtest.log meant a
+        # bench run mid-session rotated the transcript out from under the
+        # person driving, and pointed the session watcher at the wrong road.
+        log_path = ROOT / "logs" / "playtest-bench.log"
+    else:
+        log_path = ROOT / "logs" / "playtest.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     os.environ["FREIGHT_FATE_LOG_FILE"] = str(log_path)
     os.environ.setdefault("FREIGHT_FATE_LOG", "INFO")
@@ -970,6 +996,12 @@ def main(argv: list[str] | None = None) -> int:
                 return super().__new__(cls)
 
         main_menu.MainMenuState = _DriveThenMenu
+        if sandbox is not None:
+            # Announce the live session so tools/playtest_watch.py can follow
+            # this drive the same way it follows a sandbox launch.
+            from playtest_sandbox import open_session
+
+            open_session(sandbox, log_path)
         print("\n  G grade, J engine brake, K cruise, Down arrow brakes (hands cruise back).")
         print("  To leave: Escape pauses; quit to the main menu, then Exit as usual.")
         print(f"  Transcript: {log_path}\n")
@@ -977,6 +1009,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\nDone. Transcript written to {log_path}")
         return 0
     finally:
+        if sandbox is not None:
+            from playtest_sandbox import close_session
+
+            close_session()
         app.shutdown()
         if settings_before is not None:
             settings_path.write_bytes(settings_before)
