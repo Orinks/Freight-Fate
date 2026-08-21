@@ -3350,6 +3350,8 @@ class DrivingEventMixin:
             self._ramp_end_said = False
             self._ramp_arrival_grace_s = 0.0
             self._destination_exit_taken = stop.type == "delivery_destination"
+            if self._destination_exit_taken:
+                self._post_gate_zone()
             # The ramp is a single lane peeling off the right side.
             self.lane.lane = 0
             self.lane.offset = 0.0

@@ -930,6 +930,27 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **A facility approach posts one speed limit, and changes it once, at the
+  gate.** Driving in to a warehouse or yard used to hear the speed limit
+  change every few hundred feet -- fifteen, then twenty-five, then fifteen
+  again -- all of it called "facility access road", with nothing under the
+  wheels actually changing. Those numbers were never posted speeds: the map
+  data guesses twenty-five where a street has a name and fifteen where it
+  does not, and the game was reading that guess aloud as a sign. The access
+  road now holds one limit for the whole run in, and the only change you
+  hear is the fifteen at the gate itself, which is real.
+- **"Slow to fifteen for the gate" is now a limit your truck really has.**
+  On the last stretch to a delivery, the warning to slow for the facility
+  entrance named a speed that was posted nowhere -- the road still carried
+  the highway's number, so cruise and the speed keeper held highway speed
+  straight through the entrance and you were sent around the block. Once
+  you have taken your exit, the gate's fifteen is the posted limit, so the
+  assists slow for it and the warning means what it says.
+- **A heads-up about the limit ahead no longer talks over the limit you
+  just entered.** Entering a zone and being warned about the next one could
+  land in the same breath, leaving two speeds in the air with no way to
+  tell which one was in force. The warning now waits a moment for the
+  arrival to finish speaking.
 - **Pressing the rest key on a scale ramp sends you to the scale, not to
   bed.** An open weigh station tells you to stop at the scale and press the
   rest key to check in. Doing exactly that, while still rolling down the

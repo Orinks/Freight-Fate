@@ -260,6 +260,48 @@ def test_reapproach_after_a_miss_arrives_normally(monkeypatch):
         app.shutdown()
 
 
+def test_the_gate_warning_names_a_limit_that_is_really_posted(monkeypatch):
+    """ "Slow to 15" has to be the number in force, not a number nothing posts.
+
+    The arrival zones are dropped at trip start so no silent low limit writes
+    speeding fines under a spoken 65 on the final freeway miles. That left the
+    pre-gate warning naming 15 while the last half mile still read the
+    corridor's own limit, so every assist held the corridor number straight
+    through the entrance and into the loop-back (owner playtest, 2026-08-21).
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import FACILITY_GATE_LIMIT_MPH
+
+    app = App()
+    try:
+        d = _driving(app)
+        # While the truck is still on the highway, nothing has changed: the
+        # arrival zones stay off the map.
+        assert not any(zone.reason == "facility gate" for zone in d.trip.zones)
+        corridor, _ = d.trip.speed_limit_at(d.trip.total_miles - 0.3)
+        assert corridor > FACILITY_GATE_LIMIT_MPH
+
+        # Taking the destination exit puts the driveway's own limit back.
+        d._destination_exit_taken = True
+        d._post_gate_zone()
+        posted, reason = d.trip.speed_limit_at(d.trip.total_miles - 0.3)
+        assert reason == "facility gate"
+        assert posted == FACILITY_GATE_LIMIT_MPH
+
+        spoken = _capture_events(app, monkeypatch)
+        d.trip.position_mi = d.trip.total_miles - 0.3
+        d.truck.engine_on = True
+        d.truck.velocity_mps = 40.0 / 2.23694
+        d._check_gate_approach_warning(0.016)
+        # The spoken target and the posted limit are the same number.
+        assert app.ctx.settings.speed_text(posted) in spoken[0]
+        # Posting it twice would stack two gate zones on one driveway.
+        d._post_gate_zone()
+        assert [z.reason for z in d.trip.zones].count("facility gate") == 1
+    finally:
+        app.shutdown()
+
+
 def test_terse_mode_hears_the_essential_cues(monkeypatch):
     from freight_fate.app import App
 

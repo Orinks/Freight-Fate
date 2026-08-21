@@ -159,6 +159,10 @@ class DrivingState(
             # were already silenced as freeway chatter, but they stayed
             # enforceable -- a silent 35 under a spoken 65, writing real
             # speeding fines on the final highway miles (owner-hit on I-10).
+            # The gate's own 15 comes back the moment the destination exit is
+            # taken (_post_gate_zone): by then the last half mile is the
+            # facility's driveway rather than the interstate, and the pre-gate
+            # warning has to be naming a limit that is really in force.
             self.trip.zones = [
                 zone
                 for zone in self.trip.zones

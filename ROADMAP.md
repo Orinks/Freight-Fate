@@ -1224,14 +1224,26 @@ onto exit signalling.
       fresh-career route draw (each drawn route's time compression), found
       only after two wrong theories died to measurements.
 
-- [ ] **START HERE: facility approach zones still overlap, and the keeper
-      eases for a zone three quarters of a mile away (tester log,
-      2026-08-18).** The gate-zone fix in 8608e9fc was real but only NARROWED
-      this. Zones still overlap each other and `_active_zone_at` takes the
-      LOWEST limit among overlapping zones, so a 15 zone that starts later
-      still wins at a position posted 25.
+- [x] **Facility approach zones: one posted limit for the chain, changed
+      once at the gate (2026-08-21).** Root cause was never the overlap
+      geometry -- it was that the per-leg speeds are not readings at all.
+      `_resolve_speed` in `tools/build_local_geometry.py` assumes 25 for a
+      named street and 15 for an unnamed public road wherever OSM carries no
+      `maxspeed`, and the shipped layer is that fallback essentially end to
+      end: all 11,732 named segments are exactly 25 and 1,477 of 1,478
+      unnamed ones are exactly 15. Half the segments are also under 0.2 mi,
+      shorter than any published speed zone (TxDOT wants a zone "as long as
+      possible" and 0.200 mi even for a transition; Ohio DOT sets 0.5 mi for
+      a new non-contiguous zone). So the chain now builds ONE access-road
+      zone at the highest limit its legs offer, plus the gate zone -- two
+      zones, one real change, and the deliberate overlap at the gate is the
+      only one left. Owner playtest 2026-08-21 ("a message says speed 15 and
+      the speed never changes") and the New Haven tester log below are the
+      same bug. Per-street zones can return the day the bake carries real
+      `maxspeed` WITH its provenance; until then the layer has nothing to
+      post per street.
 
-      THE REPRODUCTION IS A REAL LOG, not a bench:
+      THE ORIGINAL REPRODUCTION WAS A REAL LOG, not a bench:
       `C:/ff-tester/FreightFate/logs/game.log`, New Haven, Sargent Drive
       approach, keeper set at 25. Read it with `grep -a` (padded). The
       damning nine milliseconds:
@@ -1246,15 +1258,18 @@ onto exit signalling.
       The same instant says the 15 zone is 0.75 mi AHEAD and that it is in
       force NOW. The limit under the wheels was 25 throughout.
 
-      THE FIX: approach zones must not overlap at all. Each leg owns its
-      stretch exclusively, and the gate zone takes only what is left after
-      the last street's zone ENDS rather than being laid on top of it. Assert
-      non-overlap in a test -- do not eyeball the zone list, which is exactly
-      how this was missed: the corrected Rochester list `(0.31,0.54,25)` and
-      `(0.40,0.54,15)` was printed, read as fixed, and the overlap went
-      unnoticed.
+      The "each leg owns its stretch exclusively" fix written here was
+      aimed at the wrong layer: tidying overlap between zones that should
+      not have existed would have kept announcing the name gap as a sign.
 
-      TWO SEPARATE FAULTS RIDE ALONG AND BOTH ARE REAL:
+      DO NOT bench this with hand-written zones. Four synthetic benches over
+      two sessions all came back CLEAN because tidy non-overlapping zones
+      were written by hand every time; the bug lived only in what
+      `_facility_speed_zones` actually produces. The pin is
+      `test_the_access_road_posts_one_limit_and_the_gate`, which walks the
+      real baked chain and asserts the posted limit changes exactly once.
+
+- [ ] **Two riders from the New Haven log, both still open.**
       1. The status readout speaks `_keeper_mph` (the SET speed) rather than
          the target in force, so S says "holding 25" while the truck holds
          15. It should say the live number, e.g. "holding 15, set 25".
@@ -1262,10 +1277,14 @@ onto exit signalling.
          so is an earcon at quiet. An unrequested 10 mph speed change is
          exactly what the owner's own quiet rule says must be spoken.
 
-      DO NOT bench this with hand-written zones. Four synthetic benches over
-      two sessions all came back CLEAN because tidy non-overlapping zones
-      were written by hand every time; the bug lives only in the overlap that
-      `_facility_speed_zones` actually produces.
+- [ ] **Facility approach speeds have no provenance field.** The segments in
+      `facility_approaches.json` carry `speed_mph` with no way to tell a read
+      OSM `maxspeed` from the bake's class default, which is why the runtime
+      had to stop trusting all of them at once. A re-bake should write
+      `speed_source` (read/assumed) per segment, and report the assumed ratio
+      in the layer's `meta` -- today it would read about 13,209 of 13,210.
+      With that in place the chain can zone per street again wherever the
+      street was really measured.
 
 - [x] **Bake-time provenance and sanity rules -- the substrate for three
       separate data bugs found on 2026-08-17/18. RULE SHIPPED 2026-08-18.**

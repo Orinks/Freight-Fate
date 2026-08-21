@@ -41,6 +41,24 @@ GATE_WARNING_MAX_MI = FACILITY_ACCESS_TAIL_MI
 
 
 class FacilityGateMixin:
+    def _post_gate_zone(self) -> None:
+        """Put the gate's 15 back on the map, now that the exit is behind.
+
+        The arrival zones are stripped at trip start so nothing posts a silent
+        low limit under a spoken 65 on the final freeway miles. That left the
+        pre-gate warning naming a speed that was posted nowhere: it said "slow
+        to 15" while the last half mile still read the corridor's 55, so every
+        assist held 55 straight through the entrance and into the loop-back
+        (owner playtest, 2026-08-21). Once the destination exit is taken the
+        road under the truck IS the facility's own, so the 15 the warning names
+        is the number in force -- and a facility with a street chain never
+        reaches here, because its chain builds a gate zone of its own.
+        """
+        if any(zone.reason == "facility gate" for zone in self.trip.zones):
+            return
+        self.trip.zones.append(self.trip.facility_gate_zone())
+        self.trip.zones.sort(key=lambda zone: zone.start_mi)
+
     def _gate_warning_window_mi(self) -> float:
         """How far out the pre-gate speed warning fires, and how far back a
         miss repositions -- a full spoken window, so the retry is winnable."""

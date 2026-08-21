@@ -1543,38 +1543,52 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # fallback keeps a distance but can no longer exceed its own road.
         gate_start = max(0.0, total - min(FACILITY_GATE_ZONE_MI, total * FACILITY_GATE_MAX_SHARE))
         if self._is_facility_approach_route():
-            # Tier-1 surface routes zone each street at its own baked speed
-            # (25 named, 15 unnamed service ways); the blanket access-road
-            # limit remains the fallback for single-leg approaches.
+            # ONE posted limit for the whole chain, and the gate at the end.
+            #
+            # The chain used to be zoned street by street at each leg's baked
+            # speed, which announced a limit change every few hundred feet:
+            # Aberdeen's warehouse is six zones in nine tenths of a mile, all
+            # of them named "facility access road", so the driver hears the
+            # same road post 15, then 25, then 15 again with nothing under
+            # the wheels changing (owner playtest, 2026-08-21).
+            #
+            # None of those numbers is a reading. _resolve_speed in
+            # tools/build_local_geometry.py takes the real OSM maxspeed
+            # covering the most miles, and where no way on the run carries
+            # one it ASSUMES -- 25 for a named street, 15 for an unnamed
+            # public road. The shipped layer is that fallback almost end to
+            # end: all 11,732 named segments read exactly 25 and 1,477 of
+            # 1,478 unnamed ones read exactly 15, so a 15-to-25 "change" is
+            # the bake reporting whether OSM had a NAME for the way, dressed
+            # as a posted sign. Half the segments are also under two tenths
+            # of a mile, shorter than any published speed zone: TxDOT wants a
+            # zone "as long as possible" and 0.200 mile even for a mere
+            # transition, and Ohio DOT sets half a mile for a new zone that
+            # does not adjoin one.
+            #
+            # So the access road takes the highest limit its legs offer --
+            # the street default wherever the chain touches a real street,
+            # and the yard-service 15 only where every leg is an unnamed
+            # service way. Per-street zones can come back the day the bake
+            # carries real maxspeed with its provenance (ROADMAP).
             if any(leg.local_speed_mph > 0 for leg in self.route.legs):
-                zones: list[Zone] = []
-                for leg_start, leg in zip(self._leg_starts, self.route.legs, strict=True):
-                    speed = leg.local_speed_mph or FACILITY_ACCESS_LIMIT_MPH
-                    if zones and zones[-1].limit_mph == speed:
-                        # Same street speed continues: one zone, one callout.
-                        zones[-1] = Zone(
-                            zones[-1].start_mi,
-                            leg_start + leg.miles,
-                            speed,
-                            "facility access road",
-                        )
-                    else:
-                        zones.append(
-                            Zone(leg_start, leg_start + leg.miles, speed, "facility access road")
-                        )
+                chain_limit = max(
+                    (leg.local_speed_mph for leg in self.route.legs if leg.local_speed_mph > 0),
+                    default=FACILITY_ACCESS_LIMIT_MPH,
+                )
                 # The last street IS the gate approach. Never earlier than the
                 # leg it belongs to, so it can never reach back over streets
                 # the driver is still meant to be doing 25 on.
                 last_leg_start = self._leg_starts[-1] if self._leg_starts else gate_start
-                zones.append(
+                return [
+                    Zone(0.0, total, chain_limit, "facility access road"),
                     Zone(
                         max(gate_start, last_leg_start),
                         total,
                         FACILITY_GATE_LIMIT_MPH,
                         "facility gate",
-                    )
-                )
-                return zones
+                    ),
+                ]
             # Graduated fallback (owner design, 2026-07-24): a long
             # synthetic approach is an arterial before it is an access
             # road -- 45 out wide, 25 for the last stretch, 15 at the
@@ -1617,8 +1631,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         )
         return [
             Zone(approach_start, total, DESTINATION_APPROACH_LIMIT_MPH, "destination approach"),
-            Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"),
+            self.facility_gate_zone(),
         ]
+
+    def facility_gate_zone(self) -> Zone:
+        """The yard entrance's own posted limit, over the road that carries it.
+
+        Public because the delivery run has to be able to POST it late: the
+        driving state drops the arrival zones while the truck is still on the
+        freeway (they wrote silent speeding fines under a spoken 65), and puts
+        this one back once the destination exit has been taken and the last
+        miles really are the facility's driveway."""
+        total = self.route.miles
+        gate_start = max(0.0, total - min(FACILITY_GATE_ZONE_MI, total * FACILITY_GATE_MAX_SHARE))
+        return Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate")
 
     def _is_facility_approach_route(self) -> bool:
         """A street chain to a gate, never a same-city highway dispatch.
@@ -2666,7 +2692,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         pending = self._pending_zone_warning
         if pending is not None and self.position_mi < pending:
             return
-        if due:
+        # Never a heads-up in the same breath as an arrival. A zone landing
+        # this frame is about to say the number now in force, and the warning
+        # says a different number for road further on -- spoken together they
+        # are two limits with nothing to tell them apart, which is the same
+        # confusion one-warning-at-a-time was written to end. Held, not lost:
+        # the zone is not marked announced, so it warns from the next tick.
+        entering = self._active_zone_at(self.position_mi) is not self._active_zone
+        if due and not entering:
             ahead, zone = min(due, key=lambda pair: pair[0])
             self._announced_zone_warnings.add(_zone_key(zone))
             self._pending_zone_warning = zone.start_mi

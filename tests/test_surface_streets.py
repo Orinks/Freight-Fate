@@ -67,29 +67,45 @@ def test_navigation_cues_speak_the_baked_maneuvers(world):
     assert geometry.segments[0].cue.rstrip(".") in spoken
 
 
-def test_surface_zones_follow_the_street_speeds(world):
-    route, _geometry = _turn_level_route(world)
+def test_the_access_road_posts_one_limit_and_the_gate(world):
+    """One number for the chain, one change at the gate -- never a new posting
+    every few hundred feet.
+
+    The chain used to be zoned street by street, which announced a limit
+    change per leg: half of all baked segments are under two tenths of a mile,
+    so a driver heard the same "facility access road" post 15, then 25, then
+    15 again with nothing under the wheels changing. None of those numbers is
+    a reading -- the bake assumes 25 for a named street and 15 for an unnamed
+    one wherever OSM carries no maxspeed, which is very nearly everywhere --
+    so a change between them was the data reporting whether the way had a
+    NAME, dressed as a sign.
+    """
+    route, geometry = _turn_level_route(world)
     trip = _trip(route)
     street_zones = [z for z in trip.zones if z.reason == "facility access road"]
-    assert street_zones
-    # Zones tile the whole route and carry the baked street speeds.
+    assert len(street_zones) == 1
     assert street_zones[0].start_mi == 0.0
-    assert street_zones[-1].end_mi == pytest.approx(trip.total_miles)
-    # The bake now carries REAL posted limits (30s, 35s, 45s...), so the
-    # invariant is the test's own name: each zone speaks a speed that the
-    # baked street data actually holds, inside the plausible street band.
-    baked_speeds = {segment.speed_mph for segment in _geometry.segments}
-    for zone in street_zones:
-        assert zone.limit_mph in baked_speeds
-        assert 5.0 <= zone.limit_mph <= 65.0
-    # Adjacent same-speed streets merge: no zero-length or duplicate zones.
-    for a, b in zip(street_zones, street_zones[1:], strict=False):
-        assert b.start_mi == pytest.approx(a.end_mi)
-        assert a.limit_mph != b.limit_mph or len(street_zones) == 1
+    assert street_zones[0].end_mi == pytest.approx(trip.total_miles)
+    # It speaks a speed the baked street data actually holds, and never a
+    # lower crawl than the best street on the chain offers.
+    baked_speeds = {segment.speed_mph for segment in geometry.segments}
+    assert street_zones[0].limit_mph == max(baked_speeds)
+    assert 5.0 <= street_zones[0].limit_mph <= 65.0
     # The gate zone still caps the final stretch.
     assert any(
         z.reason == "facility gate" and z.limit_mph == FACILITY_GATE_LIMIT_MPH for z in trip.zones
     )
+    # And walking the chain, the posted limit changes exactly once: at the
+    # gate. Anything else is a message promising a change that is not one.
+    step = max(trip.total_miles / 400.0, 0.001)
+    seen: list[float] = []
+    mile = 0.0
+    while mile <= trip.total_miles:
+        limit, _ = trip.speed_limit_at(mile)
+        if not seen or limit != seen[-1]:
+            seen.append(limit)
+        mile += step
+    assert seen == [street_zones[0].limit_mph, FACILITY_GATE_LIMIT_MPH]
 
 
 def test_single_leg_approaches_keep_the_blanket_zone(world):

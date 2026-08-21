@@ -1031,7 +1031,11 @@ def test_facility_gate_warns_before_final_low_speed_zone(world):
     trip = Trip(route, truck, weather, seed=2)
 
     trip.position_mi = trip.total_miles - 2.0
-    events = trip.update(0.0)
+    # Two ticks, because the teleport lands ON a zone change: an advance
+    # warning never shares a breath with the arrival line for the zone the
+    # truck is entering, so it comes on the following tick. Driven rather
+    # than teleported, that is a sixtieth of a second later.
+    events = [*trip.update(0.0), *trip.update(0.0)]
 
     warnings = [event.message for event in events if event.kind == TripEventKind.GPS_CUE]
     assert "In 2 miles, facility gate ahead. Speed limit 15." in warnings
@@ -1065,10 +1069,12 @@ def test_zone_entry_is_worded_apart_from_its_advance_warning(world, monkeypatch)
     monkeypatch.setattr(trip._event_breather, "_clock", clock)
 
     trip.position_mi = gate.start_mi - 2.0
+    # Two ticks: the teleport lands on a zone change, and a warning never
+    # shares a breath with the arrival line for the zone being entered.
     # The street chain speaks navigation cues too; pick the gate warning out.
     warning = next(
         e.message
-        for e in trip.update(0.0)
+        for e in (*trip.update(0.0), *trip.update(0.0))
         if e.kind == TripEventKind.GPS_CUE and "facility gate" in e.message
     )
     # Two miles out: a heads-up, and the gate limit is not in force yet.
