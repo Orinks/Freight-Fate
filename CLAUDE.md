@@ -149,6 +149,51 @@ reads as a survey.
 Which layers are screened, and what each measured, belongs in `ROADMAP.md`.
 This file is how to behave; that one is where things stand.
 
+## Working with the owner
+
+Rules Josh set on 2026-08-21, after each was learned the hard way.
+
+**Fix it; do not flag it.** Finding a real defect means fixing it END TO END
+before reporting: the code, the regression test that would have caught it,
+CHANGELOG and ROADMAP if either moves, the full suite plus the adversarial
+battery, the commit and push, and the living-document reply to whoever
+reported it. Then one short report of what changed. Ask first only when the
+work spends money, is hard to reverse, or turns on a design rule only the
+owner sets -- "it is a separate report" is not a reason to hand it back.
+
+**Stay steerable: background anything that would block.** A foreground tool
+call holds the turn and queues whatever the owner types next. Background any
+single call over ~30 seconds (full suites, the adversarial battery, OSM
+scans, release builds, world re-bakes). Then go do something that needs
+neither the CPU nor the result -- never sit in a foreground `until ... sleep`
+loop waiting for a background task, which throws away the whole point. At
+most four background agents; exactly ONE pytest run in flight anywhere, ever.
+And never pipe a test run to `tail`: the shell reports the pipeline's status,
+so `pytest | tail` exits 0 while pytest is failing. Redirect to a file and
+read the count.
+
+**A manual playtest means the OWNER drives it.** Speech on, at the wheel,
+hearing it -- that is the only thing that answers whether something feels
+right. `--headless` is a different tool for a different question ("does this
+machinery fire at all", "does the transcript contain the line"). It never
+substitutes: reporting a bench as the playtest he asked for hands him a
+verdict nobody listened to. When he asks for one, land the code, tell him
+what to drive and what to listen for, then stop.
+
+**Everything written in the living document is for a player.** No file names,
+function names, constants, commit hashes, or internal vocabulary ("zone
+builder", "the runtime", "provenance", "regression"), and no counts only a
+maintainer wants. Say what the TRUCK did and what it does now. The status
+words -- FIXED, PARTLY FIXED, OPEN, RECORDED -- are shared vocabulary and
+stay. Re-read the document immediately before writing a reply, and read it
+back afterwards; testers keep editing for a minute or two after the save that
+fired the watcher.
+
+**Tell a research subagent to write its findings file FIRST and rewrite it as
+it goes.** One instructed to write at the end loses everything if the host
+dies. Subagents also never background their own commands -- a detached
+process outlives the agent that started it.
+
 ## Code conventions
 
 - Keep practical code files at or below 1000 lines; split oversized modules.

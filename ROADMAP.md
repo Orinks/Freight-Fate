@@ -1327,8 +1327,15 @@ onto exit signalling.
       found by a tester rather than by us. The work: walk every `say_event`
       with `interrupt=True` and ask whether the sentence is still true a few
       seconds later; where it names a maneuver, a keypress, or a number that
-      moves, give it a `valid` callable. 201 sites carry `interrupt=True` and
-      7 carry a `valid`; that grep over `states/` is the worklist.
+      moves, give it a `valid` callable.
+
+      THE WORKLIST IS SMALLER THAN IT FIRST LOOKED: 78 `say_event` calls in
+      `states/` actually interrupt (explicit `interrupt=True` or the default,
+      which IS True), 9 of them now gated. 33 are in `driving_events.py` and
+      32 in `driving_updates.py`, so two files carry five sixths of it. An
+      earlier note here said 201 -- that was `grep -c interrupt=True`, which
+      also counts `ctx.say()` calls, other APIs and tests. Brace-match the
+      `say_event(` calls instead.
 
       PROGRESS 2026-08-21, and the method that works: reasoning from the
       source guesses at which lines name a moment. DRIVING them says. The
