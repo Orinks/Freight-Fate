@@ -75,6 +75,19 @@ NETWORK_LOGGERS = (
     "freight_fate.online_activation",
 )
 
+# What the watcher can and cannot see here, said plainly because the closing
+# summary is only worth reading if it does not overstate itself. These
+# loggers speak on FAILURE -- a refused upload, an unreachable site. A
+# request that succeeds writes nothing, so silence here is not proof that
+# nothing was sent. Reading the public drivers board, for instance, works in
+# a sandbox and leaves no trace in the log at all.
+#
+# That is fine, because the sandbox's guarantee was never "no packets". It is
+# that nothing can be PUBLISHED: with no online.json there is no driver, and
+# cloud backup, the presence heartbeat and the profile update are all branches
+# the game never takes. The identity audit below is what actually proves that;
+# this channel only catches something trying and failing.
+
 # Raw text that means a crash even when it arrives outside the log format --
 # faulthandler writes native tracebacks straight into the file with no
 # level, no logger, and no timestamp.
@@ -257,7 +270,7 @@ class Watcher:
 
         if logger.startswith(NETWORK_LOGGERS):
             self.network.append(f"{logger}: {message}")
-            return [f"NETWORK from a sandboxed session -- {logger}: {message}"]
+            return [f"ONLINE trouble in a sandboxed session -- {logger}: {message}"]
 
         if level in ("ERROR", "CRITICAL"):
             self.errors.append(f"{logger}: {message}")
@@ -312,10 +325,14 @@ class Watcher:
             out.append(f"  ...and {len(self.warnings) - 5} more warnings in the log")
         if self.network:
             out.append(
-                f"  NETWORK: {_count(len(self.network), 'online call')} from a sandboxed session"
+                f"  NETWORK: {_count(len(self.network), 'online call')} logged a problem "
+                "from a sandboxed session"
             )
         else:
-            out.append("  network: nothing reached the site, as intended")
+            # Deliberately not "nothing reached the site": these loggers speak
+            # on failure, and a read that worked -- the public drivers board --
+            # leaves no line at all. See NETWORK_LOGGERS.
+            out.append("  network: no online call reported a problem")
         if sandbox is not None:
             out.extend(_sandbox_verdict(sandbox))
         return out
