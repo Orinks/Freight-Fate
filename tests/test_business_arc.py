@@ -920,3 +920,80 @@ def test_late_company_driver_still_uses_company_settlement_until_buy_in():
 
     assert settlement.status == COMPANY_DRIVER
     assert settlement.business_charges == ()
+
+
+# --- the transponder row an owner-operator cannot afford yet -----------------
+#
+# It used to appear only once the fee was already in the bank, so the driver
+# with most to gain from knowing the transponder exists was the one told
+# nothing about it -- and the eligibility reasons were computed at that call
+# site and discarded (owner, 2026-08-21).
+
+
+def _owner_operator_in_business_menu(app, *, money: float):
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import BusinessStatusState
+
+    app.ctx.profile = Profile(name="Lease Op", current_city="Chicago")
+    p = app.ctx.profile
+    p.business_status = LEASED_OWNER_OPERATOR
+    p.career.xp = LEVEL_XP[OWNER_OPERATOR_LEVEL - 1]
+    p.money = money
+    app.push_state(BusinessStatusState(app.ctx))
+    return app.state
+
+
+def test_transponder_shows_as_locked_when_the_fee_is_out_of_reach():
+    from freight_fate.app import App
+    from freight_fate.models.business import WEIGH_STATION_TRANSPONDER_SIGNUP_FEE
+
+    app = App()
+    try:
+        menu = _owner_operator_in_business_menu(
+            app, money=WEIGH_STATION_TRANSPONDER_SIGNUP_FEE - 1.0
+        )
+        assert any("Weigh station transponder locked" in item.text for item in menu.items), (
+            f"no locked transponder row: {[i.text for i in menu.items]}"
+        )
+        assert not any("Subscribe to weigh station transponder" in item.text for item in menu.items)
+    finally:
+        app.shutdown()
+
+
+def test_the_locked_transponder_row_says_what_it_is_waiting_on(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.business import WEIGH_STATION_TRANSPONDER_SIGNUP_FEE
+
+    app = App()
+    try:
+        menu = _owner_operator_in_business_menu(
+            app, money=WEIGH_STATION_TRANSPONDER_SIGNUP_FEE - 1.0
+        )
+        spoken: list[str] = []
+        monkeypatch.setattr(app.ctx, "say", lambda text, *a, **k: spoken.append(text))
+        row = next(i for i in menu.items if "Weigh station transponder locked" in i.text)
+        row.action()
+
+        assert spoken, "the locked row answered with silence"
+        said = spoken[-1]
+        # The money reason, not the generic next-business-unlock answer: a
+        # locked row that answers a different question teaches nothing.
+        assert f"{WEIGH_STATION_TRANSPONDER_SIGNUP_FEE:,.0f}" in said, said
+    finally:
+        app.shutdown()
+
+
+def test_the_subscribe_row_returns_once_the_fee_is_affordable():
+    from freight_fate.app import App
+    from freight_fate.models.business import WEIGH_STATION_TRANSPONDER_SIGNUP_FEE
+
+    app = App()
+    try:
+        menu = _owner_operator_in_business_menu(
+            app, money=WEIGH_STATION_TRANSPONDER_SIGNUP_FEE + 1.0
+        )
+        assert any("Subscribe to weigh station transponder" in item.text for item in menu.items)
+        assert not any("Weigh station transponder locked" in item.text for item in menu.items)
+    finally:
+        app.shutdown()

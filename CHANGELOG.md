@@ -328,6 +328,13 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+- **Owner-operators can see the weigh station transponder before they can
+  afford it.** Business status only listed the transponder subscription
+  once you already had the signup fee in the bank, so a lease operator
+  saving toward it had no way to know it existed. The row is always there
+  now: it reads as locked until you can afford it, and choosing it says
+  what it is still waiting on. Company drivers are unaffected -- their
+  carrier issues one free at career level 4.
 - **Speech about the truck's own automation always arrives now.** Lines like
   an assist taking or releasing the pedals, the speed keeper changing what it
   holds, "Jake off", the gear direction you just selected, and where you

@@ -152,7 +152,7 @@ class BusinessStatusState(MenuState):
                     )
                 )
             else:
-                ok, _reasons = weigh_station_transponder_eligibility(p)
+                ok, reasons = weigh_station_transponder_eligibility(p)
                 if ok:
                     items.append(
                         MenuItem(
@@ -162,6 +162,21 @@ class BusinessStatusState(MenuState):
                             help="A clean truck can be waved past most open scales "
                             "instead of pulling in. Adds a small per-mile "
                             "settlement reserve once active.",
+                        )
+                    )
+                else:
+                    # Locked, but SHOWN -- the same shape as the authority
+                    # items above. Without this the subscription appeared
+                    # only once the driver could already afford it, so the
+                    # owner-operator with most to gain from knowing the
+                    # transponder exists was the one told nothing about it,
+                    # and the eligibility reasons were computed here and
+                    # thrown away (owner, 2026-08-21).
+                    items.append(
+                        MenuItem(
+                            "Weigh station transponder locked",
+                            lambda locked=reasons: self._locked_transponder(locked),
+                            help="Hear what the weigh station transponder still needs.",
                         )
                     )
         items.append(MenuItem("Back", self.go_back))
@@ -185,6 +200,16 @@ class BusinessStatusState(MenuState):
 
     def _next_unlock(self) -> None:
         self.ctx.say(next_business_unlock(self.ctx.profile))
+
+    def _locked_transponder(self, reasons: tuple[str, ...]) -> None:
+        """What the transponder subscription is still waiting on.
+
+        Its own reader rather than ``_next_unlock``: that speaks the next
+        BUSINESS unlock, which is a different question from why this one
+        item is greyed, and answering the wrong question is how a locked
+        row teaches a player nothing.
+        """
+        self.ctx.say("Weigh station transponder. " + (" ".join(reasons) or "Not available yet."))
 
     def _become_owner_operator(self) -> None:
         p = self.ctx.profile
