@@ -1283,8 +1283,39 @@ onto exit signalling.
       had to stop trusting all of them at once. A re-bake should write
       `speed_source` (read/assumed) per segment, and report the assumed ratio
       in the layer's `meta` -- today it would read about 13,209 of 13,210.
-      With that in place the chain can zone per street again wherever the
-      street was really measured.
+
+- [ ] **Real street limits for the approach: OSM cannot supply them; the
+      state vehicle code can.** Owner asked (2026-08-21) whether facility
+      approaches and city streets have real posted limits we could use
+      instead of the baked 25/15. Measured against the cached extracts, over
+      the road classes an approach chain is actually built from:
+
+      | state | `service` tagged | `residential` tagged |
+      |---|---|---|
+      | South Dakota | 0.2% (176 of 97,723) | 1.9% |
+      | Ohio | 0.5% (5,437 of 1,119,405) | 14.0% |
+      | California | 1.3% | 5.7% |
+      | New York | 1.0% | 11.1% |
+
+      Arterials are a different story (`primary` runs 48-65% tagged), which
+      is why the corridor maxspeed bake worked. But the yard and driveway
+      class is 1% or less EVERYWHERE, so "read the posted limit" is not
+      available for the last mile at any coverage worth having. Reproduce
+      with the handler in this item's commit message.
+
+      What IS readable is the law that governs an unposted street: every
+      state's vehicle code sets a statutory limit for business and residence
+      districts that applies with no sign present (e.g. Virginia Code
+      46.2-874 sets 25). That is a READ value from a published legal source,
+      per-state, and it is what a real driver is actually held to on these
+      streets. It would replace the blanket 25 with the state's own number
+      and give the spoken limit a citation, the way `tools/toll_rates.py`
+      does. The yard's own internal road is not covered by the vehicle code
+      at all -- a private facility posts its own 5 to 15 -- so the gate's 15
+      stays an assumption and should be labeled one.
+
+      Needs an owner call before building: it is a 50-state legal table plus
+      a re-bake, and it changes the spoken limit on every approach.
 
 - [x] **Bake-time provenance and sanity rules -- the substrate for three
       separate data bugs found on 2026-08-17/18. RULE SHIPPED 2026-08-18.**
