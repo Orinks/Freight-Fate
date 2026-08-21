@@ -381,7 +381,15 @@ class GameContext:
         handed back behind itself.
         """
         text, priority = cut
-        transcript.info("[pacer] cut line requeued")
+        # Name the line. A bare "cut line requeued" says a hand-back happened
+        # and not what came back, which is the one thing an audit needs: four
+        # separate lines have now been found coming back after their moment
+        # had passed (the scale exit, the destination exit, the hazard dodge
+        # call, the dock hold prompt), each by a tester hearing it rather than
+        # by anyone reading a bench transcript. With the text here, a
+        # playtest log answers the question by itself -- grep the requeues,
+        # read each one, ask whether it was still true.
+        transcript.info(f"[pacer] cut line requeued: {text}")
         self._event_pacer.note_queued(text, priority)
         if self.settings.sapi_events:
             self.speech.say_event(text, interrupt=False)

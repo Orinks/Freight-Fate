@@ -1581,3 +1581,51 @@ def test_a_hazard_call_does_not_come_back_once_the_hazard_is_clear() -> None:
     pacer2.should_flush(hazard_line, EventPriority.CRITICAL)
     pacer2._track(hazard_line, EventPriority.CRITICAL, None, lambda: live["deadline"])
     assert pacer2.note_interrupt("Deer in the road!") is None
+
+
+def test_an_enforcement_stop_instruction_dies_once_the_truck_has_stopped() -> None:
+    """Found by driving it, not by a report: `playtest_road --find scale`
+    requeued both of these.
+
+    "Signal and brake to a stop on the shoulder" handed back after the truck
+    IS stopped demands a pull-over that already happened, and its escalation
+    threatens spike strips and felony charges over a stop the driver made.
+    These carry the heaviest consequence of any line in the game, so they are
+    the last ones that should be able to speak out of their moment.
+    """
+    stop_call = (
+        "Scale bypass enforcement. Lights and siren behind you: signal with X "
+        "and brake to a stop on the shoulder."
+    )
+    final_call = (
+        "Final failure-to-stop warning. Brake to a full stop now or troopers "
+        "will end the stop with spike strips and felony charges."
+    )
+
+    def _rescued(line: str, stop_live: bool):
+        pacer, _ = make_pacer()
+        pacer.should_flush(line, EventPriority.CRITICAL)
+        pacer._track(line, EventPriority.CRITICAL, None, lambda: stop_live)
+        return pacer.note_interrupt("Deer in the road!")
+
+    for line in (stop_call, final_call):
+        # Stop still running: handed back so it finishes, which is the point.
+        assert _rescued(line, True) == (line, EventPriority.CRITICAL)
+        # Stop over: it must not come back and demand it again.
+        assert _rescued(line, False) is None, line
+
+
+def test_the_overspeed_nag_dies_once_the_driver_has_slowed() -> None:
+    """`playtest_road --find limit-drop` requeued "Limit 35."
+
+    Terse renders the overspeed warning as the bare limit, and a cut line is
+    handed back to finish -- so a driver who lifted off in the meantime was
+    told off for a speed they were no longer doing, quoting a limit that by
+    then might belong to road behind them.
+    """
+    nag = "Limit 35."
+    over = {"active": False}
+    pacer, _ = make_pacer()
+    pacer.should_flush(nag, EventPriority.ROUTE)
+    pacer._track(nag, EventPriority.ROUTE, None, lambda: over["active"])
+    assert pacer.note_interrupt("Brake now!") is None

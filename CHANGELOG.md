@@ -976,6 +976,18 @@
   carries the distance from there.
 
 ### Fixed
+- **A trooper stop no longer repeats its demand after you have pulled over.**
+  When an urgent line cuts something off mid sentence, the game hands that
+  line back so it finishes. Two of the heaviest lines in the game could come
+  back at the wrong moment: "lights and siren behind you, signal and brake to
+  a stop on the shoulder" could arrive after you were already stopped with
+  the officer at your window, and the final warning could threaten spike
+  strips and felony charges over a stop you had already made. Both now only
+  speak while the stop is still unresolved.
+- **The speed warning stops nagging once you have slowed down.** Same cause:
+  the over-the-limit warning could be handed back after you had already
+  lifted off, telling you about a speed you were no longer doing and quoting
+  a limit that by then belonged to road behind you.
 - **"Press Enter to continue into the facility" stops asking once you have
   pressed it.** When an urgent line cuts off something the truck was part way
   through saying, the game hands that line back so it finishes. For the hold

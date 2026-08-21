@@ -3753,6 +3753,14 @@ class DrivingUpdateMixin:
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
+                # Only while the truck is still over. Terse renders this as
+                # "Limit 35." and a cut line is handed back to finish, so a
+                # driver who lifted off in the meantime got told off for a
+                # speed they were no longer doing -- and told a limit that may
+                # by then belong to road behind them. Found by driving it:
+                # `playtest_road --find limit-drop` requeued this exact line
+                # (2026-08-21).
+                valid=lambda: self._overspeed_active,
             )
 
     def _log_overspeed(self, event: str, speed: float, limit: float) -> None:
@@ -3841,7 +3849,19 @@ class DrivingUpdateMixin:
         # you about enforcement"; the siren says what it is.
         self._play_enforcement_marker(volume=0.9)
         self._hold_stop_siren()
-        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)
+        self.ctx.say_event(
+            message,
+            interrupt=True,
+            category=SpeechCategory.NAVIGATION,
+            # Only while the stop is still unresolved. This names a maneuver
+            # with a consequence on it -- signal, brake, pull onto the
+            # shoulder -- and a cut line is handed back so it can finish.
+            # Handed back after the truck is stopped and the trooper is at
+            # the window, it demands a pull-over that already happened. Found
+            # by driving it: `playtest_road --find scale` requeued exactly
+            # this line (2026-08-21).
+            valid=lambda: self.trip.pull_over_active,
+        )
         # One demand at a time: an exit armed for a ramp must not keep
         # announcing and steering for it under the trooper's lights -- that
         # is how a scale bypass became a failure-to-stop cascade.
@@ -4491,7 +4511,15 @@ class DrivingUpdateMixin:
                 "stop on the shoulder."
             )
         self.ctx.audio.play("ui/warning")
-        self.ctx.say_event(message, interrupt=True, category=SpeechCategory.NAVIGATION)
+        self.ctx.say_event(
+            message,
+            interrupt=True,
+            category=SpeechCategory.NAVIGATION,
+            # Same rule as the stop instruction it escalates: a failure-to-stop
+            # warning handed back after the driver HAS stopped threatens spike
+            # strips over a stop they already made.
+            valid=lambda: self.trip.pull_over_active,
+        )
 
     def _settle_engine_to_idle(self) -> None:
         """Snap engine RPM and audio to idle for a menu-driven stop.

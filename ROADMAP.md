@@ -1327,8 +1327,22 @@ onto exit signalling.
       found by a tester rather than by us. The work: walk every `say_event`
       with `interrupt=True` and ask whether the sentence is still true a few
       seconds later; where it names a maneuver, a keypress, or a number that
-      moves, give it a `valid` callable. `grep -rn "interrupt=True"` over
-      `states/` is the worklist. Cheap per site, and it ends the family.
+      moves, give it a `valid` callable. 201 sites carry `interrupt=True` and
+      7 carry a `valid`; that grep over `states/` is the worklist.
+
+      PROGRESS 2026-08-21, and the method that works: reasoning from the
+      source guesses at which lines name a moment. DRIVING them says. The
+      requeue log now names the line it hands back (`[pacer] cut line
+      requeued: <text>`), which turns any bench transcript into the audit --
+      grep the requeues, read each, ask whether it was still true. Four short
+      `playtest_road --headless` benches over zones, scales, curves and limit
+      drops surfaced three more in twenty minutes: both enforcement stop
+      instructions and the overspeed nag, all now gated.
+
+      The sampling is thin -- four benches, four requeues, and one bench
+      produced none at all on a re-run with a different seed -- so this
+      narrows the worklist rather than closing it. Longer benches across more
+      features are the cheap next step before anyone reads all 201 by hand.
 
 - [ ] **Two riders from the New Haven log, both still open.**
       1. The status readout speaks `_keeper_mph` (the SET speed) rather than
