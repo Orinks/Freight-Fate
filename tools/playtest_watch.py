@@ -362,8 +362,15 @@ def _duration(seconds: float) -> str:
     return f"{seconds / 60:.0f} min"
 
 
+# Nouns whose plural is not the noun plus "s". Small on purpose: the summary
+# is read by a person, and "0 crashs" undermines every other number beside it.
+_PLURALS = {"crash": "crashes"}
+
+
 def _count(n: int, noun: str) -> str:
-    return f"{n} {noun}" if n == 1 else f"{n} {noun}s"
+    if n == 1:
+        return f"{n} {noun}"
+    return f"{n} {_PLURALS.get(noun, noun + 's')}"
 
 
 def emit(text: str) -> None:

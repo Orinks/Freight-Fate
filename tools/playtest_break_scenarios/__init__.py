@@ -18,6 +18,7 @@ from . import (
     radio_weather,
     resources,
     settings_misc,
+    unlawful,
 )
 
 __all__ = [
@@ -29,4 +30,5 @@ __all__ = [
     "dispatch_saveload",
     "radio_weather",
     "settings_misc",
+    "unlawful",
 ]
