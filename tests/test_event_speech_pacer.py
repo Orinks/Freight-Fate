@@ -1555,3 +1555,29 @@ def test_a_rescued_line_dies_when_its_moment_has_passed() -> None:
     pacer2.should_flush(exit_line, EventPriority.ROUTE)
     pacer2._track(exit_line, EventPriority.ROUTE, None, lambda: not passed["gone"])
     assert pacer2.note_interrupt("Brake lights ahead!") is None
+
+
+def test_a_hazard_call_does_not_come_back_once_the_hazard_is_clear() -> None:
+    """Shane, 2026-08-21, on "Change lanes or brake! Retread debris from a
+    blown tire.": the line repeated two or three times.
+
+    A cut line is handed back so it finishes -- that is what rescued the
+    missing "you swerve around the brake lights". But a dodge call handed back
+    after the truck is clear tells the driver to swerve around something that
+    is no longer there. Same rule the scale and the destination exit already
+    carry: a rescued line has to still be true.
+    """
+    hazard_line = "Change lanes or brake! Retread debris from a blown tire."
+    live = {"deadline": True}
+    pacer, _ = make_pacer()
+    pacer.should_flush(hazard_line, EventPriority.CRITICAL)
+    pacer._track(hazard_line, EventPriority.CRITICAL, None, lambda: live["deadline"])
+    # Still live: cut by something louder, handed back to finish.
+    assert pacer.note_interrupt("Deer in the road!") == (hazard_line, EventPriority.CRITICAL)
+
+    # Cleared: the same cut must not bring the dodge call back.
+    live["deadline"] = False
+    pacer2, _ = make_pacer()
+    pacer2.should_flush(hazard_line, EventPriority.CRITICAL)
+    pacer2._track(hazard_line, EventPriority.CRITICAL, None, lambda: live["deadline"])
+    assert pacer2.note_interrupt("Deer in the road!") is None

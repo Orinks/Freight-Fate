@@ -976,6 +976,16 @@
   carries the distance from there.
 
 ### Fixed
+- **A dodge call no longer comes back after you are already clear.** When an
+  urgent warning cuts off something the truck was part-way through saying,
+  the game hands that line back so it finishes. For a hazard call like
+  "change lanes or brake, retread debris from a blown tire" that could arrive
+  after you were past it, telling you to swerve around something that is no
+  longer there. A hazard line now only comes back while the hazard is still
+  live. If you noticed one of these repeating but found only a single copy in
+  message review, that is not a second bug: review deliberately collapses a
+  line repeated back to back, so pressing a status key twice does not make
+  you step over a duplicate.
 - **A cut exit instruction no longer comes back after you have passed the
   exit.** When an urgent warning cuts off something the truck was part-way
   through saying, the game hands that line back so it finishes. The exit

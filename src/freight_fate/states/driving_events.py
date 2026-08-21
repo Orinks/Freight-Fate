@@ -420,7 +420,21 @@ class DrivingEventMixin:
                     else f"{message} {suffix}"
                 )
             self._last_event_message = message
-            self.ctx.say_event(message, interrupt=True, category=self._event_category(event))
+            self.ctx.say_event(
+                message,
+                interrupt=True,
+                category=self._event_category(event),
+                # A hazard call may only come back while the hazard is still
+                # live. An interrupting line hands back what it cut so the cut
+                # line finishes rather than vanishing, which is what rescued
+                # "you swerve around the brake lights" -- but handed back after
+                # the truck is clear, "Change lanes or brake!" tells the driver
+                # to dodge something that is no longer there. Same rule the
+                # scale and destination exit instructions already carry: a
+                # rescued line has to still be TRUE (Shane, 2026-08-21, on the
+                # retread debris call).
+                valid=lambda: self._hazard_deadline is not None,
+            )
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
         elif kind == TripEventKind.WEATHER_CHANGE:
