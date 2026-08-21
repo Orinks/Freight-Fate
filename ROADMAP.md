@@ -2099,6 +2099,38 @@ onto exit signalling.
       every load takes the legal-truck bypass roll today. Loads routinely
       gross to about 87,000 lb against the 80,000 lb federal limit, and
       "overweight" still appears nowhere else in `src/`.
+- [ ] **Weigh-in-motion bypass should be per-site, not everywhere.** Today
+      every open scale runs the transponder verdict on one flat seeded
+      share, so a transponder effectively works at every scale in the
+      country. It does not work that way. There are roughly 680-750 fixed
+      weigh stations in the US; PrePass covers 550+ sites in 44 states and
+      Drivewyze 900+ across 47 states and provinces, the two do not
+      overlap cleanly, and a carrier normally subscribes to one -- so a
+      real driver meets plenty of open scales that simply do not know
+      them. Bypass is negotiated per site with each state DOT.
+
+      Three real rules worth having, in the order they are worth doing:
+
+      1. A bypass-equipped flag baked per scale in the world data, so some
+         scales give a verdict and some are always the old flow. Provenance
+         rule applies: a flag we invent is **assumed**, and must say so --
+         published participating-site lists are the **read** source where
+         one can be had.
+      2. Safety score gates it. California, Alabama and Idaho refuse bypass
+         to carriers with an ISS score above 75, which maps straight onto
+         the reputation and driving-record state the game already keeps:
+         a driver with a poor record loses the privilege in those states
+         while keeping it elsewhere. This is the half with the most
+         gameplay in it.
+      3. Two states put the verdict on a sign instead of in the cab.
+         Wisconsin and Idaho require following the message board rather
+         than an in-cab signal, which is a genuinely different spoken
+         experience from a green tone and worth its own line.
+
+      Sources: prepass.com/bypass, drivewyze.com/resources/coverage-map,
+      drivewyze.com/help/bypass-restrictions. Raised by the owner during
+      the 2026-08-21 playtest session, after driving the scale flow by
+      hand; deferred to the following week.
 - [ ] **Relaxed hours-of-service mode misreports the law.** It multiplies
       the legal limits by 1.25 and then speaks 13.75 hours as "the
       11-hour driving limit". Whatever the mode does to the numbers, the
