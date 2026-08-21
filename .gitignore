@@ -118,3 +118,7 @@ data/radio-cache/
 
 # ElevenLabs voice-provisioning cache (name -> voice_id on the owner's account)
 tools/.radio_voices.json
+
+# Manual-playtest sandbox data dir (tools/playtest_sandbox.py). Throwaway
+# careers, no driver identity, never for commit.
+saves-playtest/

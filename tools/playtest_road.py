@@ -702,6 +702,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--hour", type=float, help="clock hour to start at")
     p.add_argument("--headless", type=float, default=0.0, help="bench for N minutes, no window")
     p.add_argument("--log", help="transcript path (default logs/playtest.log)")
+    p.add_argument(
+        "--sandbox",
+        action="store_true",
+        help="drive in a throwaway data dir that cannot back up or publish anything",
+    )
     args = p.parse_args(argv)
     if args.no_cruise:
         args.cruise = 0.0
@@ -712,6 +717,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+
+    if args.sandbox:
+        # Before anything resolves a save path: a playtest career belongs in a
+        # data dir with no driver identity, so nothing it does reaches the
+        # owner's cloud backups or public profile.
+        from playtest_sandbox import audit, describe, prepare
+
+        sandbox = prepare()
+        print(describe(sandbox))
+        if audit(sandbox):
+            print("Refusing to drive: the sandbox is not isolated.", file=sys.stderr)
+            return 1
+        print()
 
     log_path = Path(args.log) if args.log else ROOT / "logs" / "playtest.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
