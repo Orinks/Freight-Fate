@@ -976,6 +976,15 @@
   carries the distance from there.
 
 ### Fixed
+- **Moving over to avoid something no longer drags it into your new lane.**
+  A hazard you can steer around is answered by being in a different lane
+  from it. But the game was re-reading which lane the hazard was in every
+  time anything else came up -- and it read the lane the TRUCK was in, so if
+  a second piece of debris turned up while you were still moving over, the
+  first one moved with you. You would be told to change lanes, do it, and be
+  told to change lanes again, two or three times over. Doing what you were
+  told was what brought the instruction back. A hazard now stays in the lane
+  it was in.
 - **A dodge call no longer comes back after you are already clear.** When an
   urgent warning cuts off something the truck was part-way through saying,
   the game hands that line back so it finishes. For a hazard call like

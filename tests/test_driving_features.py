@@ -5027,3 +5027,56 @@ def test_the_destination_exit_call_outranks_chatter(monkeypatch):
         assert priority == EventPriority.ROUTE, (text, priority)
     finally:
         app.shutdown()
+
+
+def test_a_folded_hazard_does_not_follow_the_truck_into_its_new_lane(monkeypatch):
+    """The lane belongs to the hazard, not to the truck.
+
+    Shane, 2026-08-21: "the repeating happened everytime I was changing lanes
+    until the two-three repeats are done." Dodging is answered by being in a
+    different lane from the hazard -- but the hazard's lane was re-stamped to
+    the truck's CURRENT lane on every hazard event, folds included. So a
+    hazard folding in while the driver was answering the last one moved with
+    them: dodge, get re-armed in the lane just reached, dodge again. Obeying
+    the instruction is what made the instruction come back.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_SAFE_MPH
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH + 10.0) / 2.2369362920544
+        driving.lane.lane = 0
+
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Change lanes or brake! Retread debris from a blown tire.",
+                {"deadline_s": 4.0, "dodgeable": True, "name": "the tire debris"},
+            )
+        )
+        assert driving._hazard_lane == 0
+
+        # The driver does exactly what they were told and moves over.
+        driving.lane.lane = 1
+
+        # A second hazard folds in while the first is still live. It must not
+        # drag the hazard into lane 1 with the truck.
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH + 10.0) / 2.2369362920544
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Change lanes or brake! A shredded tire carcass.",
+                {"deadline_s": 4.0, "dodgeable": True, "name": "the carcass"},
+            )
+        )
+        assert driving._hazard_lane == 0, "the hazard stayed where it was"
+        # And the dodge the driver already made still counts as an answer.
+        assert driving.lane.lane != driving._hazard_lane
+    finally:
+        app.shutdown()

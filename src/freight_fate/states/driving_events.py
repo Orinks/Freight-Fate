@@ -369,6 +369,7 @@ class DrivingEventMixin:
                 self._horn_scare_tried = False
                 self._hazard_dodgeable = dodgeable
                 self._hazard_deadline = new_deadline
+                self._hazard_lane = self.lane.lane
                 self._release_hazard_brake()
             elif self.truck.speed_mph <= self._hazard_target_mph():
                 # A hazard is already pending, but the driver has already
@@ -380,6 +381,7 @@ class DrivingEventMixin:
                 self._horn_scare_tried = False
                 self._hazard_dodgeable = dodgeable
                 self._hazard_deadline = new_deadline
+                self._hazard_lane = self.lane.lane
                 self._release_hazard_brake()
             else:
                 # Still live: fold the new one in rather than clobber it.
@@ -390,7 +392,14 @@ class DrivingEventMixin:
                 self._hazard_names.append(name)
                 self._hazard_dodgeable = self._hazard_dodgeable and dodgeable
                 self._hazard_deadline = min(self._hazard_deadline, new_deadline)
-            self._hazard_lane = self.lane.lane
+            # _hazard_lane is stamped by the two FRESH branches above and by
+            # nothing else. Re-stamping it here put the hazard in whatever
+            # lane the truck had just reached, so a hazard folding in while
+            # the driver was answering the last one moved with them: dodge,
+            # get re-armed in the new lane, dodge again. "The repeating
+            # happened every time I was changing lanes until the two-three
+            # repeats are done" -- Shane, 2026-08-21, and that is the loop.
+            # The lane belongs to the hazard, not to the truck.
             self._hazard_slow_hint_said = False
             # A dodgeable hazard leaves the wheel alone: adaptive cruise or
             # the keeper stays armed through the lane change that answers it,
