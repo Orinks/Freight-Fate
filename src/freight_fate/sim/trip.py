@@ -188,6 +188,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         bobtail: bool = False,
         destination_label: str = "",
         destination_approach_mi: float | None = None,
+        local_state: str = "",
     ) -> None:
         self.route = route
         self.truck = truck
@@ -221,6 +222,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # chain is driven as a route of its own after this one -- the arrival
         # zones then size the approach from the synthetic exit instead.
         self.destination_approach_mi = destination_approach_mi
+        # Which state's vehicle code governs this run's local streets. A
+        # facility approach chain is built from local geometry that carries no
+        # state segments, so state_at() cannot answer for it -- the driving
+        # layer, which knows the city, passes it in. Empty falls back to the
+        # baked segments, then to the old blanket access-road speed.
+        self.local_state = local_state
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
@@ -1566,13 +1573,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             # transition, and Ohio DOT sets half a mile for a new zone that
             # does not adjoin one.
             #
-            # So the access road takes the highest limit its legs offer --
-            # the street default wherever the chain touches a real street,
-            # and the yard-service 15 only where every leg is an unnamed
-            # service way. Per-street zones can come back the day the bake
-            # carries real maxspeed with its provenance (ROADMAP).
+            # So the access road takes ONE limit, and it comes from the law
+            # rather than from the name gap: the state's own statutory limit
+            # for a business district, which is exactly the rule that governs
+            # a street with no sign on it (see data/street_limits.py). Where
+            # the table has no row for the state, the old behaviour stands --
+            # the highest limit the legs offer, so a chain that touches a real
+            # street is never held to the yard-service crawl.
             if any(leg.local_speed_mph > 0 for leg in self.route.legs):
-                chain_limit = max(
+                chain_limit = self._statutory_street_mph() or max(
                     (leg.local_speed_mph for leg in self.route.legs if leg.local_speed_mph > 0),
                     default=FACILITY_ACCESS_LIMIT_MPH,
                 )
@@ -1596,15 +1605,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             # real city posts. Short approaches stay all-access-road.
             zones = []
             access_start = max(0.0, total - FACILITY_ACCESS_TAIL_MI)
+            # The access-road stretch is a street like any other, so it takes
+            # the same statutory number the tier-1 chain does. The arterial
+            # band out wide does not: no statute writes a default for an
+            # arterial, and 45 there is the owner's design call, not a law.
+            access_mph = self._statutory_street_mph() or FACILITY_ACCESS_LIMIT_MPH
             if access_start > 0.5:
                 zones.append(
                     Zone(0.0, access_start, FACILITY_ARTERIAL_LIMIT_MPH, "facility approach")
                 )
-                zones.append(
-                    Zone(access_start, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road")
-                )
+                zones.append(Zone(access_start, total, access_mph, "facility access road"))
             else:
-                zones.append(Zone(0.0, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road"))
+                zones.append(Zone(0.0, total, access_mph, "facility access road"))
             zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
             return zones
         # Everything else ends on the highway, comes off at the destination
@@ -1633,6 +1645,29 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             Zone(approach_start, total, DESTINATION_APPROACH_LIMIT_MPH, "destination approach"),
             self.facility_gate_zone(),
         ]
+
+    def _statutory_street_mph(self) -> float | None:
+        """This run's statutory street limit, or None where nothing covers it.
+
+        None rather than a fallback number on purpose: the caller has its own
+        older fallback, and a silent substitution here would hide which states
+        the legal table actually reaches.
+        """
+        from ..data.street_limits import load_street_limits
+
+        state = self.local_state
+        if not state:
+            # Only the corridor bake carries state per leg; a street chain has
+            # none, and a synthetic approach may be a bare route with no city
+            # list at all. Not knowing simply means no statutory number -- it
+            # must never stop the zones being built.
+            try:
+                state = self.state_at(0.0)
+            except (AttributeError, IndexError, KeyError):
+                return None
+        if not state:
+            return None
+        return load_street_limits().statutory_mph(state)
 
     def facility_gate_zone(self) -> Zone:
         """The yard entrance's own posted limit, over the road that carries it.

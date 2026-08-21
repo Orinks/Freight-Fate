@@ -1284,8 +1284,8 @@ onto exit signalling.
       `speed_source` (read/assumed) per segment, and report the assumed ratio
       in the layer's `meta` -- today it would read about 13,209 of 13,210.
 
-- [ ] **Real street limits for the approach: OSM cannot supply them; the
-      state vehicle code can.** Owner asked (2026-08-21) whether facility
+- [x] **Real street limits for the approach: OSM cannot supply them, the
+      state vehicle code can, and now does (SHIPPED 2026-08-21).** Owner asked (2026-08-21) whether facility
       approaches and city streets have real posted limits we could use
       instead of the baked 25/15. Measured against the cached extracts, over
       the road classes an approach chain is actually built from:
@@ -1314,8 +1314,52 @@ onto exit signalling.
       at all -- a private facility posts its own 5 to 15 -- so the gate's 15
       stays an assumption and should be labeled one.
 
-      Needs an owner call before building: it is a 50-state legal table plus
-      a re-bake, and it changes the spoken limit on every approach.
+      BUILT, and no re-bake was needed: the limit is a per-state constant and
+      the runtime already knows the state, so it is a 49-row file read at
+      load (`tools/statutory_limits.py` curates it with citations,
+      `data/street_limits.py` loads it). 45 of 49 jurisdictions verified
+      against primary sources; 3,919 of 5,037 facilities (78 percent) now
+      drive a cited statutory number instead of the blanket 25.
+
+      FOUR THINGS THE RESEARCH FOUND THAT THE DESIGN HAD TO ABSORB, all of
+      them cases where reading the number off the page would have been wrong:
+
+      1. SOME STATES WRITE NO STREET DEFAULT AT ALL. Connecticut, Louisiana,
+         Mississippi, Missouri, Nevada, New York, Oklahoma, Tennessee and
+         Vermont have no business/residence/urban category; their statutory
+         answer for an unsigned city street is the statewide ceiling, 50 to
+         80 mph. A row can now declare `no_district_default` so "checked,
+         there is none" reads differently from a row nobody filled in, and
+         the parser refuses any OTHER empty row.
+      2. A LIMIT CAN EXIST AND STILL NOT APPLY UNPOSTED. Pennsylvania writes
+         35 urban and 25 residence, then 75 Pa.C.S. 3362(b)(1) makes both
+         ineffective without signs at each end of the zone and every half
+         mile. `signs_required` now discards the row: real in the statute,
+         false on the road.
+      3. NATIONAL SUMMARY TABLES ARE WRONG. Secondary sources report Illinois
+         at 20 mph urban effective October 2025; the bill stalled and the
+         ILGA text still reads 30. This is why the research prompt forbade
+         summary tables and required the code section itself.
+      4. THE INVERSIONS ARE REAL. Colorado posts residence 30 ABOVE business
+         25; Iowa, Nebraska and Oregon put business BELOW residence. Nothing
+         here can be collapsed to one number per state.
+
+      Georgia, Mississippi, New Mexico and Tennessee stay on the fallback:
+      their official codes are LexisNexis-published and render nothing to a
+      fetcher, so the figures exist only from secondary sources. Anyone with
+      Lexis access can verify those four and flip `verified` -- that is the
+      whole change.
+
+- [x] **The gate's 15 is an assumption, and is now labeled as one
+      (2026-08-21).** No vehicle code reaches inside a private facility -- a
+      yard's road is the owner's to sign, and real distribution centers post
+      anywhere from 5 to 15 -- so there is no citation to be had and none was
+      invented. Closed by labeling rather than by research: the constant in
+      `sim/trip_models.py` now says it is the game's own number and why,
+      which matters more than usual now that it sits directly beside the
+      cited statutory street limits. Chasing an OSHA or insurance guideline
+      would have produced another assumption wearing a better hat, which is
+      exactly what the provenance rule forbids.
 
 - [x] **Bake-time provenance and sanity rules -- the substrate for three
       separate data bugs found on 2026-08-17/18. RULE SHIPPED 2026-08-18.**

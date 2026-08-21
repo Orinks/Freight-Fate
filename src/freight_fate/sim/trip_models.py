@@ -289,6 +289,15 @@ RAMP_MAX_MPH = 45.0
 # road a mile or two before the exit and dragged the truck down to a crawl
 # while it was still on the freeway (tester report, Shane, 2026-08-15).
 DESTINATION_APPROACH_LIMIT_MPH = RAMP_MAX_MPH
+# ASSUMED, and it cannot be otherwise. The street outside takes its number
+# from the state vehicle code (see data/street_limits.py, which cites the
+# section for each state), but no vehicle code reaches inside a private
+# facility: a yard's own road is the owner's to sign, and real distribution
+# centers post anywhere from 5 to 15. So this is the game's number, chosen at
+# the top of that observed range because it has to be slow enough to make the
+# entrance and fast enough not to be a crawl -- not a limit anybody
+# legislated. Labeled here rather than left looking like the statutory
+# figures it now sits next to.
 FACILITY_GATE_LIMIT_MPH = 15.0
 FACILITY_GATE_ZONE_MI = 0.5
 # ...but never more than this share of the approach. A gate zone longer

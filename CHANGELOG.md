@@ -3,6 +3,16 @@
 ## Unreleased
 
 ### Added
+- **City streets into a facility now run at your state's own speed limit.**
+  The last mile in to a warehouse or yard used to be a flat twenty-five
+  everywhere in the country. It now uses the speed each state's own law sets
+  for a street with no sign on it, so the run in is thirty-five in Idaho,
+  Kentucky, and North Carolina, thirty across much of the south and midwest,
+  twenty in Iowa, Nebraska, Oregon, and the District of Columbia, and
+  twenty-five where that is what the state says. Four states in five are
+  covered; the rest keep the old twenty-five, either because their law sets
+  no street speed at all or because their statute book could not be read
+  first-hand. The gate itself is still fifteen everywhere.
 - **Cross traffic is real at ramp ends: listen for your gap.** The road a
   ramp ends on now carries simulated vehicles -- cars, pickups, semis,
   even a farm tractor -- each one audible in the ear it comes from, close

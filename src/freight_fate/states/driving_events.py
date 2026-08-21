@@ -1936,6 +1936,18 @@ class DrivingEventMixin:
             return True
         return stop.type == "delivery_destination" and self.ctx.settings.lane_is_automated()
 
+    def _city_state(self, city: str) -> str:
+        """The spoken state name for a city key, or "" when the world is silent.
+
+        A street chain's legs carry no state segments -- they are built from
+        local geometry, not from the corridor bake -- so the trip cannot work
+        out for itself whose vehicle code governs its streets. The city can.
+        """
+        try:
+            return self.ctx.world.city(city).state
+        except (AttributeError, KeyError, ValueError):
+            return ""
+
     def _surface_chain_route(self):
         """The destination facility's tier-1 street chain, or None.
 
@@ -1978,6 +1990,7 @@ class DrivingEventMixin:
             career_hours=old.career_hours,
             bobtail=old.bobtail,
             destination_label=old.destination_label,
+            local_state=self._city_state(self.job.destination),
         )
         surface.game_minutes = old.game_minutes  # deadline and clock continuity
         surface.toll_charges = old.toll_charges  # settlement reads the live trip
@@ -2038,6 +2051,7 @@ class DrivingEventMixin:
             hazard_scale=0.0,  # no random hazards on the first city miles
             career_hours=highway.career_hours,
             bobtail=highway.bobtail,
+            local_state=self._city_state(self.job.origin),
         )
         self._highway_trip = highway
         self.trip = surface

@@ -152,6 +152,13 @@ class DrivingState(
                     else (job.destination, job.destination_location)
                 )
             ),
+            # Whose vehicle code governs a same-city facility approach: the
+            # route's own legs carry no state on a synthetic approach, so the
+            # destination city answers for it. A real corridor run ignores
+            # this and reads the state under the wheels per leg.
+            local_state=self._city_state(
+                job.origin if phase == DRIVE_PHASE_PICKUP else job.destination
+            ),
         )
         if phase == DRIVE_PHASE_DELIVERY:
             # The destination exit, ramp terminal, and street chain own the
