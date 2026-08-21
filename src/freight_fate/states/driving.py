@@ -596,6 +596,10 @@ class DrivingState(
         self._lane_change_timer = 0.0
         self._lane_signal_timer = 0.0
         self._merge_deadline: float | None = None
+        # Miles of acceleration lane still ahead after pulling out of a
+        # facility. None once the lane is behind the truck (or when the run
+        # never started at a facility at all).
+        self._departure_ramp_mi: float | None = None
         # Lanes on our side last tick, so a road that narrows under the truck
         # can be told apart from a driver who steered into the cones.
         self._lane_count_seen: int | None = None

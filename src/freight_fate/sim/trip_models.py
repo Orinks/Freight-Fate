@@ -1102,4 +1102,114 @@ class NavigationCue:
     direction: str = ""
 
 
+# -- Getting onto the highway: the acceleration lane -------------------------
+#
+# Two different questions, two different sources, and they disagree on purpose.
+#
+# HOW LONG IS THE LANE is a question about concrete that already exists, so it
+# comes from the design standard the interchange was built to: AASHTO Green
+# Book Table 10-3, reproduced as Table 3-13 of TxDOT's Roadway Design Manual
+# (May 2022), which is free to read. Feet of acceleration lane needed from a
+# STOP, by the highway's design speed.
+#
+# HOW FAST THE TRUCK GETS is a question about a loaded rig, and the AASHTO
+# figures cannot answer it -- they were derived from passenger cars, which the
+# Mack-Blackwell review (MBTC FR 2094/3003, 2008) says plainly while showing
+# every truck-based study landing "substantially longer". So the truck's own
+# curve comes from Long, TRR 1737 (2000), for a loaded 200 lb/hp WB-15.
+#
+# Keeping both is the point. The lane is sized for a car and the truck is a
+# truck, so a loaded rig reaches the taper BELOW highway speed -- and that is
+# the real outcome, not a fault to design away. The Green Book's own target is
+# only 75 percent of highway speed, and the CDL manual answers slow
+# acceleration with a BIGGER GAP rather than more speed: "Because of slow
+# acceleration and the space large vehicles require, you may need a much
+# larger gap to enter traffic than you would in a car."
+ACCELERATION_LANE_FT: dict[float, float] = {
+    40.0: 360.0,
+    50.0: 720.0,
+    55.0: 960.0,
+    60.0: 1200.0,
+    65.0: 1410.0,
+    70.0: 1620.0,
+    75.0: 1790.0,
+}
+
+# Long's model: a = ALPHA - BETA * v, feet and feet per second. Asymptotic top
+# speed is ALPHA / BETA, about 65 mph, which is why a loaded truck stops
+# gaining meaningfully long before an empty one would.
+TRUCK_ACCEL_ALPHA_FPS2 = 1.90
+TRUCK_ACCEL_BETA = 0.0199
+
+# Grade term, applied as -G*g. Trustworthy only over this band: past it the
+# model claims a loaded truck cannot climb 6 percent at all, which is false --
+# it climbs, slowly. Outside the band the flat figure stands and the grade is
+# left to the physics the truck already has.
+GRADE_MODEL_MIN_PCT = -4.0
+GRADE_MODEL_MAX_PCT = 2.0
+
+# AASHTO's own grade multipliers on the lane length (TxDOT Table 3-14), for
+# the uphill ramp that actually hurts. Upgrades need more room; downgrades
+# need less.
+ACCELERATION_LANE_GRADE_FACTOR: tuple[tuple[float, float], ...] = (
+    (-3.0, 0.6),  # 3 to 4 percent down
+    (-5.0, 0.55),
+    (3.0, 1.5),  # 3 to 4 percent up
+    (5.0, 2.2),  # 5 to 6 percent up
+)
+
+
+def acceleration_lane_mi(highway_mph: float, grade_pct: float = 0.0) -> float:
+    """Miles of acceleration lane an entrance at ``highway_mph`` really has.
+
+    Interpolated between the table's design speeds, then adjusted for grade.
+    Never shorter than the 40 mph entry, because no built ramp is.
+    """
+    speeds = sorted(ACCELERATION_LANE_FT)
+    if highway_mph <= speeds[0]:
+        feet = ACCELERATION_LANE_FT[speeds[0]]
+    elif highway_mph >= speeds[-1]:
+        feet = ACCELERATION_LANE_FT[speeds[-1]]
+    else:
+        lo = max(s for s in speeds if s <= highway_mph)
+        hi = min(s for s in speeds if s >= highway_mph)
+        if lo == hi:
+            feet = ACCELERATION_LANE_FT[lo]
+        else:
+            span = (highway_mph - lo) / (hi - lo)
+            feet = ACCELERATION_LANE_FT[lo] + span * (
+                ACCELERATION_LANE_FT[hi] - ACCELERATION_LANE_FT[lo]
+            )
+    factor = 1.0
+    for threshold, value in ACCELERATION_LANE_GRADE_FACTOR:
+        downhill_enough = threshold < 0 and grade_pct <= threshold
+        uphill_enough = threshold > 0 and grade_pct >= threshold
+        if downhill_enough or uphill_enough:
+            factor = value
+    return feet * factor / 5280.0
+
+
+def truck_merge_speed_mph(highway_mph: float, entry_mph: float, lane_mi: float) -> float:
+    """What a loaded truck is really doing at the end of that lane.
+
+    Long's curve integrated over the lane, capped at the highway's own limit:
+    a truck that had a running start does not keep accelerating past the sign
+    just because the lane is long.
+    """
+    v = max(0.0, entry_mph) * 5280.0 / 3600.0  # feet per second
+    top = TRUCK_ACCEL_ALPHA_FPS2 / TRUCK_ACCEL_BETA
+    remaining = max(0.0, lane_mi) * 5280.0
+    # Step the curve rather than solve it: the closed form is awkward in
+    # distance and this runs once per departure, not per frame.
+    step = 10.0
+    while remaining > 0.0 and v < top:
+        accel = TRUCK_ACCEL_ALPHA_FPS2 - TRUCK_ACCEL_BETA * v
+        if accel <= 0.0:
+            break
+        # v dv = a dx
+        v = math.sqrt(max(0.0, v * v + 2.0 * accel * min(step, remaining)))
+        remaining -= step
+    return min(highway_mph, v * 3600.0 / 5280.0)
+
+
 __all__ = [name for name in globals() if not name.startswith("__")]

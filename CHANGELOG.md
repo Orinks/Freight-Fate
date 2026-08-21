@@ -940,6 +940,23 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Pulling out of a warehouse or yard now gets you a real run-up to the
+  highway.** Leaving a facility used to hand you onto the highway at whatever
+  the last corner left you doing, with no ramp to build speed on and, if you
+  had automatic speed control armed, nothing driving for you when you got
+  there. Three things were wrong at once. The game was treating the last
+  stretch of street before the on-ramp as if it were the yard entrance and
+  holding you to fifteen. There was no acceleration lane at all. And the
+  pause that automatic speed control takes when you stop somewhere was never
+  being lifted when you drove away, so it followed you out of the yard and
+  refused to engage for the rest of the run. Now the fifteen sits at the
+  entrance where it belongs, the on-ramp has a real acceleration lane whose
+  length comes from the same tables real interchanges are built to, and the
+  speed keeper drives that lane for you and builds toward the speed of the
+  road you are joining. If you are still under the speed of traffic when the
+  lane runs out, the truck says so and tells you to take a big gap -- because
+  a loaded rig genuinely does merge slower than a car, and now the game is
+  honest about it rather than pretending otherwise.
 - **A facility approach posts one speed limit, and changes it once, at the
   gate.** Driving in to a warehouse or yard used to hear the speed limit
   change every few hundred feet -- fifteen, then twenty-five, then fifteen

@@ -1269,6 +1269,38 @@ onto exit signalling.
       `test_the_access_road_posts_one_limit_and_the_gate`, which walks the
       real baked chain and asserts the posted limit changes exactly once.
 
+- [x] **Leaving a facility: the acceleration lane, and three faults under one
+      tester report (2026-08-21).** Brandon reported the truck stopping at the
+      merge with cruise refusing until he got rolling again. Three separate
+      causes, all real, found by driving a genuine departure chain out of
+      Aberdeen rather than by reading:
+      1. The gate zone was placed on the chain's LAST stretch. Correct
+         inbound; driven outbound that stretch is the on-ramp, so the game
+         posted 15 exactly where the truck should have been winding up. A
+         `Trip` now knows which way its chain is being driven.
+      2. There was no acceleration lane at all -- the streets handed straight
+         to the highway. One now exists, sized from AASHTO Green Book Table
+         10-3 (via TxDOT Roadway Design Manual Table 3-13) with AASHTO's own
+         grade multipliers, and the truck's own curve from Long, TRR 1737
+         (2000). Keeping both sources is deliberate: the lane is sized for a
+         passenger car and the truck is a truck, so merging BELOW highway
+         speed is the designed outcome, not a fault. The Green Book's own
+         target is 75 percent of highway speed and the CDL manual answers
+         slow acceleration with a bigger gap, not more speed.
+      3. The stop pause outlived its stop. An arrival pause is deliberately
+         never lifted by the resume path -- only a departure clears one -- and
+         nothing cleared it, so the pause earned by arriving to load followed
+         the driver onto the road. Pulling out of the gate clears it now.
+      And a fourth found while verifying: the trip swap lands late in the
+      frame, so for one tick the new road read as open highway and the keeper
+      handed to cruise, which cannot hold below its minimum speed. The truck
+      coasted the entire lane at zero throttle. The keeper takes the lane
+      directly now.
+
+      MEASURED, not assumed: out of Aberdeen the truck went from coasting the
+      lane at zero throttle to working it at 0.42-0.50 throttle and gaining
+      speed the whole way.
+
 - [ ] **Two riders from the New Haven log, both still open.**
       1. The status readout speaks `_keeper_mph` (the SET speed) rather than
          the target in force, so S says "holding 25" while the truck holds

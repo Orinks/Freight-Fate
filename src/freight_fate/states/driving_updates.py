@@ -564,6 +564,7 @@ class DrivingUpdateMixin:
         self._check_gate_approach_warning(dt)
         self._update_turn_commitment(dt)
         self._update_exit(self.trip.last_moved_mi, dt)
+        self._update_departure_ramp(self.trip.last_moved_mi)
         # Immediately after the exit watch, which is what turns a signaled
         # scale exit into a ramp. Only now can a scale crossing be told apart
         # from a check-in.

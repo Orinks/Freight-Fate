@@ -2052,10 +2052,21 @@ class DrivingEventMixin:
             career_hours=highway.career_hours,
             bobtail=highway.bobtail,
             local_state=self._city_state(self.job.origin),
+            # Driven outbound: the gate is the first thing behind you,
+            # and this chain ends at the on-ramp.
+            outbound=True,
         )
         self._highway_trip = highway
         self.trip = surface
         self._departure_chain = True
+        # Pulling out of the gate ENDS the stop that paused automatic speed
+        # control. An arrival pause is deliberately never lifted by the resume
+        # path -- only a departure clears one -- and nothing was clearing this
+        # one, so the pause a driver earned by arriving to load survived being
+        # loaded and followed them onto the road: armed, paused, and refusing
+        # to engage for the rest of the run (Brandon, 2026-08-21). This is the
+        # departure that clears it.
+        self._clear_stop_pause()
         if announce:
             first = route.legs[0]
             street = first.local_cue.rstrip(".") if first.local_cue else f"Start on {first.highway}"
@@ -2085,9 +2096,79 @@ class DrivingEventMixin:
         self.lane.lane = 0
         self.lane.offset = 0.0
         merge_leg = highway.route.legs[0]
+        # The acceleration lane is a real stretch of road with a real length,
+        # not a moment. Handing straight to the highway meant arriving at the
+        # taper doing whatever the last corner left you at -- about 17 mph in
+        # a measured run, which is the "came to a stop" a tester reported
+        # (Brandon, 2026-08-21). Now the lane exists, sized from the highway
+        # it feeds, and the truck has room to build speed on it.
+        highway_mph, _ = highway.speed_limit_at(0.0)
+        self._departure_ramp_mi = acceleration_lane_mi(highway_mph, highway.grade_at(0.0))
+        lane_text = spoken_feet_or_meters(
+            self._departure_ramp_mi, imperial=self.ctx.settings.imperial_units
+        )
+        # Hand the lane to the KEEPER explicitly, here, rather than leaving it
+        # to the resume path to work out. The swap happens late in the frame,
+        # so for one tick the new road looks like open highway with no zone on
+        # it -- and the keeper duly handed off to cruise, which cannot hold
+        # below its own minimum speed. The result was cruise nominally engaged
+        # and nothing at all touching the throttle: the truck coasted the
+        # entire acceleration lane at zero throttle (measured out of Aberdeen,
+        # 2026-08-21). The keeper is the automation for this stretch and it
+        # takes it directly.
+        if self.ctx.settings.speed_keeper and self._speed_control_armed:
+            if self._cruise_mph is not None:
+                self._cancel_cruise(preserve_session=True)
+            self._engage_keeper(
+                highway_mph,
+                "acceleration lane",
+                target_mph=highway_mph,
+                announce=False,
+            )
         self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=-0.6)
         self.ctx.say_event(
-            f"Up the ramp and onto {merge_leg.highway}. Merge left when clear.",
+            f"Up the ramp onto {merge_leg.highway}. {lane_text} of acceleration "
+            "lane; build your speed and look for a gap.",
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+            category=SpeechCategory.NAVIGATION,
+        )
+
+    def _update_departure_ramp(self, moved_mi: float) -> None:
+        """Run down the acceleration lane after pulling out of a facility.
+
+        The lane is the one place a loaded truck is SUPPOSED to be slower than
+        the road it is joining. The Green Book sizes these lanes for a
+        passenger car -- 75 percent of highway speed is its own design target
+        -- so a rig that reaches the taper under the limit has not failed at
+        anything, and the game must not pretend otherwise. What a real driver
+        does about it is take a bigger gap, which is what the closing line
+        says.
+        """
+        if self._departure_ramp_mi is None:
+            return
+        self._departure_ramp_mi -= max(0.0, moved_mi)
+        if self._departure_ramp_mi > 0.0:
+            return
+        self._departure_ramp_mi = None
+        limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        speed = self.truck.speed_mph
+        short_by = limit - speed
+        # Under the limit by enough to matter is the NORMAL outcome for a
+        # loaded truck, so it is said as a fact about the gap you need, never
+        # as a fault. Only a truck that is genuinely up to speed gets the
+        # plain merge line.
+        if short_by >= MERGE_UNDER_SPEED_MPH:
+            message = (
+                f"Lane ending at {self.ctx.settings.speed_text(speed)}. "
+                f"You are under the {self.ctx.settings.speed_text(limit)} traffic is "
+                "running, so take a big gap and keep building speed once you are in."
+            )
+        else:
+            message = "Lane ending. Merge left when clear."
+        self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=-0.6)
+        self.ctx.say_event(
+            message,
             interrupt=False,
             priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
@@ -3842,6 +3923,16 @@ class DrivingEventMixin:
             t.throttle = 0.0
             return
         limit, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
+        if zone_reason is None and self._departure_ramp_mi is not None:
+            # The acceleration lane is a low-speed regime like a zone, and the
+            # keeper is the tool for those -- it exists because holding an
+            # accelerator down is exactly what some players cannot do. Handing
+            # to cruise here handed to nothing: cruise refuses below its own
+            # minimum holding speed, so a driver coming off yard streets at
+            # twenty had no automation at all until they had got themselves
+            # back up to road speed by hand (Brandon, 2026-08-21). The keeper
+            # stays on and builds toward the road's own limit instead.
+            zone_reason = "acceleration lane"
         if zone_reason is None:
             target_mph = self._speed_control_target_mph or limit
             self._cancel_keeper(preserve_session=True)
@@ -3957,9 +4048,14 @@ class DrivingEventMixin:
         # zone entry announced the law, not what the truck is about to do.
         # ROUTE, not the ambient default, for the same reason (automation-
         # handoff sweep, 2026-08-20, the deferred 2026-08-15 audit).
+        spoken = (
+            f"Speed keeper building to {self.ctx.settings.speed_text(limit)} for the merge."
+            if zone_reason == "acceleration lane"
+            else f"Speed keeper holding {self.ctx.settings.speed_text(limit)} "
+            f"through the {zone_reason} zone."
+        )
         self.ctx.say_event(
-            f"Speed keeper holding {self.ctx.settings.speed_text(limit)} "
-            f"through the {zone_reason} zone.",
+            spoken,
             interrupt=False,
             priority=EventPriority.ROUTE,
             category=SpeechCategory.CONFIRMATION,

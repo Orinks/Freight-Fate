@@ -74,7 +74,12 @@ def test_complete_surface_transition_chain_has_ordered_spoken_cues(monkeypatch):
         assert approach_snapshot["surface_chain"] is True
         result.assert_ordered(
             "Out of the gate and onto city streets",
-            "Up the ramp and onto",
+            # The on-ramp line now names its acceleration lane too, but
+            # both live in ONE spoken line -- the ordered matcher walks
+            # forward through the transcript, so asking for the second
+            # phrase after the first looks for it in a LATER line and
+            # never finds it.
+            "Up the ramp onto",
             "Off the ramp and onto city streets",
         )
         result.assert_screen_reader_friendly()

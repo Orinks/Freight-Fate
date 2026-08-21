@@ -288,6 +288,16 @@ class SpeedControlStateMixin:
         ):
             return
         limit, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
+        if zone_reason is None and self._departure_ramp_mi is not None:
+            # An acceleration lane is open road by the map and a low-speed
+            # regime by the truck, and that gap left it with NO automation at
+            # all: the keeper had already dropped on the yard's corners, and
+            # cruise refuses below its own holding speed, so a driver pulling
+            # out of a facility had to get the rig back up to road speed by
+            # hand before anything would take over (Brandon, 2026-08-21). The
+            # keeper is exactly the tool for the low-speed stretch -- that is
+            # why it exists -- so it bridges this one too.
+            zone_reason = "acceleration lane"
         if zone_reason is not None:
             if not self.ctx.settings.speed_keeper:
                 return
@@ -295,10 +305,16 @@ class SpeedControlStateMixin:
             # ROUTE, not the ambient default: the automation is re-engaging on
             # its own (automation-handoff sweep, 2026-08-20, the deferred
             # 2026-08-15 audit).
-            self.ctx.say_event(
-                "Automatic speed control resuming. Speed keeper holding "
+            resuming = (
+                "Automatic speed control resuming. Speed keeper building to "
+                f"{self.ctx.settings.speed_text(self._keeper_mph)} for the merge."
+                if zone_reason == "acceleration lane"
+                else "Automatic speed control resuming. Speed keeper holding "
                 f"{self.ctx.settings.speed_text(self._keeper_mph)} through the "
-                f"{zone_reason} zone.",
+                f"{zone_reason} zone."
+            )
+            self.ctx.say_event(
+                resuming,
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,

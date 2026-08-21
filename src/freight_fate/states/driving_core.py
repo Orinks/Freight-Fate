@@ -83,6 +83,7 @@ from ..sim.trip_models import (
     APPROACH_REACTION_S,
     DESTINATION_LOCAL_APPROACH_MI,
     METERS_PER_MILE,
+    acceleration_lane_mi,
 )
 from ..sim.trip_models import RAMP_MAX_MPH as TRIP_RAMP_MAX_MPH
 from ..sim.vehicle import (
@@ -391,6 +392,14 @@ LANE_MIN_MPH = 10.0  # below this there is nothing to steer
 LANE_TAP_CHANGE_S = 2.5  # assist-off timed drift across the line
 LANE_SIGNAL_CLICK_S = 0.45  # turn-signal cadence during a tap change
 MERGE_WINDOW_S = 8.0  # time to vacate a coned-off lane after the warning
+# How far under the traffic's speed a truck has to be at the end of an
+# acceleration lane before the game says so. Below this it is up to speed for
+# practical purposes; at or above it, the gap is what matters and the line
+# says to take a big one. Not tuned: it is the shortfall the Green Book's own
+# design target implies -- 75 percent of a 65 mph highway is 49, about 16 mph
+# short -- rounded down so the line fires a little before that rather than
+# only at the design worst case.
+MERGE_UNDER_SPEED_MPH = 12.0
 MERGE_BARRELS_DAMAGE = 0.25  # collision severity for riding into the barrels
 SIDESWIPE_DAMAGE = 0.35  # changing lanes into occupied space costs more
 DODGE_CLEARANCE_AHEAD_MI = 0.35  # target lane must be clear this far ahead...

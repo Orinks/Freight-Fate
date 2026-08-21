@@ -189,6 +189,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         destination_label: str = "",
         destination_approach_mi: float | None = None,
         local_state: str = "",
+        outbound: bool = False,
     ) -> None:
         self.route = route
         self.truck = truck
@@ -228,6 +229,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # layer, which knows the city, passes it in. Empty falls back to the
         # baked segments, then to the old blanket access-road speed.
         self.local_state = local_state
+        # Which END of a facility street chain the gate is at. The same baked
+        # chain is driven both ways -- in to the dock, and back out to the
+        # on-ramp when a run starts at a facility -- and the gate is a fixed
+        # place on it, not "the last half mile" of whichever direction you
+        # happen to be going. Driven outbound it is the FIRST thing you pass.
+        self.outbound = outbound
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
@@ -1589,14 +1596,31 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 # leg it belongs to, so it can never reach back over streets
                 # the driver is still meant to be doing 25 on.
                 last_leg_start = self._leg_starts[-1] if self._leg_starts else gate_start
-                return [
-                    Zone(0.0, total, chain_limit, "facility access road"),
-                    Zone(
+                if self.outbound:
+                    # Leaving the yard: the gate is behind you within the
+                    # first street, and the chain ENDS at the on-ramp. Posting
+                    # it at the end instead held the truck to 15 exactly where
+                    # it should have been winding up to merge, and cruise
+                    # refuses to engage inside a gate zone at all -- so the
+                    # merge came with a crawl and no automation (Brandon,
+                    # 2026-08-21). Same chain, same gate, other end.
+                    first_leg_end = self._leg_starts[1] if len(self._leg_starts) > 1 else total
+                    gate_zone = Zone(
+                        0.0,
+                        min(first_leg_end, FACILITY_GATE_ZONE_MI),
+                        FACILITY_GATE_LIMIT_MPH,
+                        "facility gate",
+                    )
+                else:
+                    gate_zone = Zone(
                         max(gate_start, last_leg_start),
                         total,
                         FACILITY_GATE_LIMIT_MPH,
                         "facility gate",
-                    ),
+                    )
+                return [
+                    Zone(0.0, total, chain_limit, "facility access road"),
+                    gate_zone,
                 ]
             # Graduated fallback (owner design, 2026-07-24): a long
             # synthetic approach is an arterial before it is an access
@@ -1617,7 +1641,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 zones.append(Zone(access_start, total, access_mph, "facility access road"))
             else:
                 zones.append(Zone(0.0, total, access_mph, "facility access road"))
-            zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
+            if self.outbound:
+                zones.append(
+                    Zone(
+                        0.0,
+                        min(total, FACILITY_GATE_ZONE_MI),
+                        FACILITY_GATE_LIMIT_MPH,
+                        "facility gate",
+                    )
+                )
+            else:
+                zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
             return zones
         # Everything else ends on the highway, comes off at the destination
         # exit, and finishes on the facility's own local road. Two bands, the
