@@ -1434,11 +1434,18 @@ class DrivingEventMixin:
         # enough to shed for. Arming five miles out and dropping straight to
         # ramp speed is the "keeper goes to 40 miles away from the exit"
         # report (Shane, 2026-08-15).
-        action = "will ease to" if self.truck.speed_mph > self._cruise_exit_mph + 1.0 else "holding"
-        return (
-            f" Adaptive cruise {action} "
-            f"{self.ctx.settings.speed_text(self._cruise_exit_mph)} for the ramp."
-        )
+        target = self.ctx.settings.speed_text(self._cruise_exit_mph)
+        if self.truck.speed_mph > self._cruise_exit_mph + 1.0:
+            # Say WHEN, not just what. "Adaptive cruise will ease to 40 for
+            # the ramp", heard five miles out, reads as "I am going to 40 now"
+            # -- and the owner drove it and reported the truck slowing early
+            # when it had done nothing of the kind: _ramp_approach_cap_mph
+            # holds road speed until about half a mile out and only then
+            # sheds. The behaviour was right and the sentence was wrong, which
+            # is worse than the reverse, because nobody goes looking for a bug
+            # in a truck that is behaving (owner playtest, 2026-08-21).
+            return f" Adaptive cruise holds road speed, then eases to {target} at the ramp."
+        return f" Adaptive cruise holding {target} for the ramp."
 
     def _ramp_approach_cap_mph(self) -> float | None:
         """The armed exit's cap right now, measured off the road still left.
@@ -2436,7 +2443,16 @@ class DrivingEventMixin:
         if not outside_tick:
             outside_tick = thresholds[:1]
         if self._terse_speech():
-            return outside_tick[:1]
+            # Quiet gets the far call and the HANDOFF call -- the one at the
+            # distance where the tick starts, so the words hand the driver to
+            # the sound rather than simply stopping (owner, after driving it,
+            # 2026-08-21: "leave 300 in because that's when the stop bar beeps
+            # come in, so the sound will do the guiding at that point"). In
+            # feet that is 300 exactly; in metres the nearest milestone to the
+            # same physical distance.
+            handoff = min(thresholds, key=lambda t: abs(t * unit_mi - RAMP_BAR_TICK_RANGE_MI))
+            far = outside_tick[0]
+            return (far,) if handoff == far else (far, handoff)
         # Two is the owner's number (2026-08-21), and it makes both unit
         # systems behave alike: the tick rule alone left metric with a third
         # call at 100 metres that imperial had no equivalent for.

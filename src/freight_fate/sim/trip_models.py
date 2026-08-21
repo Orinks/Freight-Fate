@@ -1189,6 +1189,83 @@ def acceleration_lane_mi(highway_mph: float, grade_pct: float = 0.0) -> float:
     return feet * factor / 5280.0
 
 
+# Getting OFF is the same problem mirrored, and the same sources answer it.
+# A deceleration lane is a full-width lane BESIDE the through lanes: a driver
+# leaves at road speed and sheds inside it, which is the whole reason it
+# exists. AASHTO Green Book Table 10-5 (TxDOT Roadway Design Manual Table
+# 3-15), feet of deceleration lane by the highway's design speed, for a ramp
+# whose own controlling speed is a stop.
+#
+# This is why "be under 45 before the gore" was wrong. It made the driver do
+# the lane's job on the through lanes, so an exit at highway speed read as a
+# violation instead of as normal driving, and every exit demanded the same 40
+# whether it fed a stop sign or another interstate (owner playtest,
+# 2026-08-21).
+DECELERATION_LANE_FT: dict[float, float] = {
+    30.0: 235.0,
+    40.0: 315.0,
+    50.0: 435.0,
+    55.0: 480.0,
+    60.0: 530.0,
+    65.0: 570.0,
+    70.0: 615.0,
+    75.0: 660.0,
+}
+
+# AASHTO ramp design speed as a share of the mainline (Green Book, and the
+# same TxDOT chapter): 70 to 85 percent is the desirable band and 50 percent
+# the floor. A DIRECTIONAL ramp -- freeway to freeway, which the interchange
+# bake already marks as `ramp_far_end == "motorway"` -- takes the top of that
+# band; a ramp landing on a surface road takes the lower end, because its own
+# terminal is going to stop you anyway. Only a loop drops toward 25, and
+# nothing in the bake can tell us a loop, so the floor here is the
+# semi-directional minimum rather than the loop one.
+RAMP_DIRECTIONAL_SHARE = 0.85
+RAMP_SURFACE_SHARE = 0.70
+RAMP_MIN_DESIGN_MPH = 30.0
+
+
+def deceleration_lane_mi(highway_mph: float, grade_pct: float = 0.0) -> float:
+    """Miles of deceleration lane an exit at ``highway_mph`` really has.
+
+    Interpolated between the table's design speeds. The grade multipliers are
+    the acceleration table's, inverted in sense: downhill needs MORE room to
+    shed, uphill less, which is the opposite of what it needs to build speed.
+    """
+    speeds = sorted(DECELERATION_LANE_FT)
+    if highway_mph <= speeds[0]:
+        feet = DECELERATION_LANE_FT[speeds[0]]
+    elif highway_mph >= speeds[-1]:
+        feet = DECELERATION_LANE_FT[speeds[-1]]
+    else:
+        lo = max(s for s in speeds if s <= highway_mph)
+        hi = min(s for s in speeds if s >= highway_mph)
+        feet = (
+            DECELERATION_LANE_FT[lo]
+            if lo == hi
+            else DECELERATION_LANE_FT[lo]
+            + (highway_mph - lo) / (hi - lo) * (DECELERATION_LANE_FT[hi] - DECELERATION_LANE_FT[lo])
+        )
+    factor = 1.0
+    for threshold, value in ACCELERATION_LANE_GRADE_FACTOR:
+        if threshold < 0 and grade_pct <= threshold:
+            factor = 1.0 / value  # downhill: harder to shed, so more lane
+        elif threshold > 0 and grade_pct >= threshold:
+            factor = 1.0 / value
+    return feet * factor / 5280.0
+
+
+def ramp_speed_mph(highway_mph: float, *, directional: bool = False) -> float:
+    """The speed this ramp is built for, from the road it leaves.
+
+    Never the flat 45 the game used to demand of every exit: on a 70 mph
+    freeway a directional connector is designed for about 60, and a ramp onto
+    a surface road for about 50 with its terminal doing the rest.
+    """
+    share = RAMP_DIRECTIONAL_SHARE if directional else RAMP_SURFACE_SHARE
+    return max(RAMP_MIN_DESIGN_MPH, round(highway_mph * share))
+
+
 def truck_merge_speed_mph(highway_mph: float, entry_mph: float, lane_mi: float) -> float:
     """What a loaded truck is really doing at the end of that lane.
 

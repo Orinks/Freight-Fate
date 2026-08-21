@@ -2095,19 +2095,30 @@ def test_the_stop_bar_countdown_shrinks_on_the_quieter_rungs():
 
         assert len(standard) == 2, "two calls at standard, down from four"
         assert len(standard) < len(RAMP_GAP_MILESTONES_FT)
-        assert len(quiet) == 1, "quiet says the far call and lets the tick do the rest"
-        assert quiet[0] == standard[0], "the quiet call is the FARTHEST, not the nearest"
-        # Nothing spoken inside the tick's own reach, on either rung.
+        assert standard == (1000, 500)
+        # Nothing spoken inside the tick's own reach on STANDARD: out there
+        # the tick cannot help, which is the whole reason those calls survive.
         for threshold in standard:
             assert threshold / 5280.0 > RAMP_BAR_TICK_RANGE_MI, threshold
 
-        # Metric gets the same NUMBER of calls, not one more: the tick rule
-        # alone left it a third call at 100 metres with no imperial twin.
+        # Quiet is the far call plus the HANDOFF -- the distance where the
+        # tick starts, so the words pass the driver to the sound rather than
+        # simply stopping (owner, after driving it, 2026-08-21).
+        assert quiet == (1000, 300)
+        assert quiet[0] == standard[0], "the far call is the same on both rungs"
+        assert quiet[-1] / 5280.0 == pytest.approx(RAMP_BAR_TICK_RANGE_MI), (
+            "the quiet handoff call sits exactly where the tick begins"
+        )
+
+        # Metric behaves the same way against the same physical distances.
         app.ctx.settings.imperial_units = False
         app.ctx.settings.driving_speech = "standard"
-        assert len(d._ramp_bar_milestones()) == 2
+        assert d._ramp_bar_milestones() == (300, 150)
         app.ctx.settings.driving_speech = "quiet"
-        assert len(d._ramp_bar_milestones()) == 1
+        metric_quiet = d._ramp_bar_milestones()
+        assert len(metric_quiet) == 2
+        # 100 m is the milestone nearest the tick's 91 m reach.
+        assert metric_quiet == (300, 100)
     finally:
         app.shutdown()
 
@@ -2157,5 +2168,12 @@ def test_the_quiet_stop_bar_call_is_the_distance_and_nothing_else():
         assert spoken[0] == "1000 feet."
         assert "stop bar" not in spoken[0]
         assert "speed limit" not in spoken[0]
+
+        # And the handoff call, when the bar is close enough that the tick is
+        # about to take over, is just as bare.
+        d._ramp_mi = RAMP_ACCESS_MI + (290.0 / 5280.0)
+        d._update_ramp_gap_countdown()
+        assert spoken[-1] == "300 feet."
+        assert len(spoken) == 2, "one far call, one handoff call, nothing else"
     finally:
         app.shutdown()

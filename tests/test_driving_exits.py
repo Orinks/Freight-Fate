@@ -820,7 +820,7 @@ def test_the_exit_speed_assist_runs_when_lane_keeping_takes_the_exit():
     the most help. His transcript:
 
         In 5 miles, exit 209, destination exit. Lane keeping will take this
-        exit. Adaptive cruise will ease to 40 miles per hour for the ramp.
+        exit. Adaptive cruise holds road speed, then eases to 40 miles per hour at the ramp.
         ...
         53 miles per hour ... adaptive cruise set at 53 miles per hour
         You were going too fast for the ramp and missed exit 209.
@@ -929,5 +929,59 @@ def test_the_destination_approach_assist_actually_brings_the_truck_to_a_stop():
         assert driving.truck.speed_mph <= DOCKING_MAX_MPH, (
             f"stopped nowhere: still doing {driving.truck.speed_mph:.1f} mph"
         )
+    finally:
+        app.shutdown()
+
+
+def test_the_ramp_cruise_line_says_when_the_ease_happens():
+    """Owner playtest, 2026-08-21: heard "adaptive cruise will ease to 40 for
+    the ramp" five miles from the exit and reported the truck slowing early.
+
+    It was not slowing. `_ramp_approach_cap_mph` holds road speed until about
+    half a mile out and only then sheds -- Shane's August report fixed that.
+    The sentence was what lied, by naming the end state with no sense of when.
+    A behaviour that is right described by words that are wrong is the worse
+    failure of the two: nobody goes looking for a bug in a truck that is
+    behaving.
+    """
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.driving_core import RAMP_CRUISE_TARGET_MPH
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Ramp", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Buffalo",
+            "company yard",
+            "Rochester",
+            route.miles,
+            1000.0,
+            12.0,
+        )
+        d = DrivingState(app.ctx, job, route, phase="delivery")
+        d.truck.velocity_mps = 65.0 / 2.23694
+        d._cruise_mph = 65.0
+
+        line = d._cap_cruise_for_ramp()
+        # Rolling well above ramp speed: the line must place the ease at the
+        # ramp, not imply it starts now.
+        assert "holds road speed" in line
+        assert "at the ramp" in line
+        assert "will ease to" not in line
+
+        # And the cap itself proves the claim: road speed stands miles out.
+        stop = type("S", (), {"at_mi": 100.0})()
+        d._exit_stop = stop
+        d._cruise_exit_mph = RAMP_CRUISE_TARGET_MPH
+        d.trip.position_mi = 95.0
+        assert d._ramp_approach_cap_mph() > 65.0, "cruise is untouched five miles out"
+        d.trip.position_mi = 99.9
+        assert d._ramp_approach_cap_mph() == RAMP_CRUISE_TARGET_MPH
     finally:
         app.shutdown()

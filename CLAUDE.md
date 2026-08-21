@@ -177,8 +177,20 @@ hearing it -- that is the only thing that answers whether something feels
 right. `--headless` is a different tool for a different question ("does this
 machinery fire at all", "does the transcript contain the line"). It never
 substitutes: reporting a bench as the playtest he asked for hands him a
-verdict nobody listened to. When he asks for one, land the code, tell him
-what to drive and what to listen for, then stop.
+verdict nobody listened to.
+
+**Launch the scenario for him, with the watcher on it.** Handing over a
+command to paste is half the job. Start it -- `tools/playtest_road.py --find
+<feature>` for a road feature, `tools/playtest_sandbox.py --launch` for
+anything needing dispatch, a dock or the menus -- in the background, and put
+`tools/playtest_watch.py` on that session's log under the Monitor tool so its
+stdout becomes live notifications. It reports errors and any network call
+immediately (a sandboxed session must never reach the site), checks in every
+few minutes on where the drive got to, and summarises when the game exits.
+Then say what to drive and what to listen for, and let him drive. One game at
+a time: `SingleInstanceGuard` refuses a second window. Log paths are
+`logs/playtest.log` for playtest_road and `logs/playtest-manual.log` for the
+sandbox launcher.
 
 **Everything written in the living document is for a player.** No file names,
 function names, constants, commit hashes, or internal vocabulary ("zone

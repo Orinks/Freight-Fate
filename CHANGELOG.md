@@ -969,11 +969,13 @@
   those land inside the range where the bar's own tick is already speeding up
   under you -- the same distance told twice, once in words and once in sound.
   On the standard setting you now get two calls instead of four -- the ones
-  further out, that the tick cannot make. On quiet you get one, and it is just
-  the distance: "one thousand feet", not "one thousand feet to stop bar, speed
-  limit twenty five". By the time it lands you have already been told this is
-  a bar and what the limit is, so saying either again is a re-read. The tick
-  carries the distance from there.
+  further out, that the tick cannot make. On quiet you get two as well, but
+  different ones: the far call, and then one right where the tick starts, so
+  the words hand you over to the beeps rather than just stopping. Both are
+  now bare distances -- "one thousand feet", not "one thousand feet to stop
+  bar, speed limit twenty five". By the time they land you have already been
+  told this is a bar and what the limit is, so saying either again is a
+  re-read.
 
 ### Fixed
 - **A trooper stop no longer repeats its demand after you have pulled over.**

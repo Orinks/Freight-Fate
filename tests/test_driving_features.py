@@ -2428,7 +2428,10 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
         assert "slow down" in message.lower()
         assert "Press X" not in message
         assert "X takes" not in message
-        assert "Adaptive cruise will ease to 40 miles per hour for the ramp" in message
+        assert (
+            "Adaptive cruise holds road speed, then eases to 40 miles per hour at the ramp"
+            in message
+        )
 
         driving._adjust_cruise(-1)
         assert said[-1] == (
@@ -2512,7 +2515,10 @@ def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
 
         driving._check_destination_exit()  # announces the exit and caps cruise
         assert driving._cruise_exit_mph == 40.0
-        assert "Adaptive cruise will ease to 40 miles per hour for the ramp" in said[-1]
+        assert (
+            "Adaptive cruise holds road speed, then eases to 40 miles per hour at the ramp"
+            in said[-1]
+        )
 
         said.clear()
         driving._take_exit()
@@ -2562,7 +2568,10 @@ def test_signaling_for_an_exit_eases_cruise_to_ramp_speed(monkeypatch):
 
         assert driving._exit_stop is stop
         assert driving._cruise_exit_mph == 40.0
-        assert "Adaptive cruise will ease to 40 miles per hour for the ramp" in said[-1]
+        assert (
+            "Adaptive cruise holds road speed, then eases to 40 miles per hour at the ramp"
+            in said[-1]
+        )
 
         # Three miles out the ramp target is a plan, not a brake: the cap is
         # nowhere near the set speed, and cruise is still holding the road.
