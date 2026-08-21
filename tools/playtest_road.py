@@ -123,9 +123,19 @@ FEATURES = (
     "chain-law",
 )
 SCAN_STEP_MI = 0.1
-# How far before the feature the truck is placed: far enough that an advance
-# warning has somewhere to land, close enough that you are not driving to it.
+# How far before the feature the SEARCH looks back to report a posted limit.
+# Only a reporting distance; the drive's own lead is computed below.
 DEFAULT_LEAD_MI = 1.8
+
+# How much REAL time the driver gets before the feature arrives.
+#
+# The lead used to be 1.8 miles flat, and miles are not what a person
+# experiences: the trip compresses distance as well as clock, so at 65 mph
+# with the compression wound up, 1.8 miles is about five seconds. The window
+# had not even taken focus before an open weigh station came and went (owner,
+# 2026-08-21). Twenty-five seconds is long enough to find the window, hear
+# the truck, and still be waiting when the callout lands.
+LEAD_REAL_SECONDS = 25.0
 
 
 def random_pairs(world, *, count: int, max_miles: float, seed: int) -> list[tuple[str, str]]:
@@ -558,6 +568,21 @@ def find_feature_seeded(world, pairs, feature: str, args) -> list[Hit]:
     return []
 
 
+def _lead_for_seconds(trip, speed_mph: float, seconds: float = LEAD_REAL_SECONDS) -> float:
+    """Miles that take ``seconds`` of REAL time at this speed.
+
+    The trip's effective time scale compresses distance, so a lead written in
+    miles shrinks to nothing at speed -- which is how a playtest launched at
+    an open scale arrived before its own window did.
+    """
+    # The CONFIGURED scale, not the effective one. Effective ramps from 4x at
+    # a standstill toward the full setting around 50 mph, so reading it while
+    # the truck is still parked reports 4x and hands back a lead that shrinks
+    # to nothing the moment the drive is actually up to speed.
+    scale = max(1.0, float(getattr(trip, "time_scale", 1.0) or 1.0))
+    return max(0.5, speed_mph * scale * seconds / 3600.0)
+
+
 def build_driving(ctx, hit: Hit, args):
     """A DrivingState already rolling at the feature, set up as asked."""
     from freight_fate.models.jobs import CARGO_CATALOG, Job
@@ -641,7 +666,8 @@ def build_driving(ctx, hit: Hit, args):
     )
 
     trip, truck = driving.trip, driving.truck
-    start_mi = max(0.0, min(trip.total_miles - 1.0, hit.at_mi - args.lead))
+    lead_mi = args.lead if args.lead is not None else _lead_for_seconds(trip, args.speed)
+    start_mi = max(0.0, min(trip.total_miles - 1.0, hit.at_mi - lead_mi))
     trip.position_mi = start_mi
     if args.weather:
         from freight_fate.sim.weather import WeatherKind
@@ -802,7 +828,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--min-pct", type=float, default=3.0, help="grade search: minimum percent")
     p.add_argument("--min-run", type=float, default=1.0, help="grade search: minimum miles")
     p.add_argument("--min-drop", type=float, default=10.0, help="limit search: minimum mph drop")
-    p.add_argument("--lead", type=float, default=DEFAULT_LEAD_MI, help="miles to start ahead of it")
+    p.add_argument(
+        "--lead",
+        type=float,
+        help="miles to start ahead of the feature (default: enough for "
+        f"{LEAD_REAL_SECONDS:.0f} real seconds at the starting speed)",
+    )
     p.add_argument("--cruise", type=float, default=0.0, help="engage cruise at this speed")
     p.add_argument("--no-cruise", action="store_true", help="leave cruise off")
     p.add_argument("--speed", type=float, default=62.0, help="rolling speed at the start")

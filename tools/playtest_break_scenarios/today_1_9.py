@@ -223,3 +223,89 @@ def _named_hazards_keep_their_frequency():
         findings,
         "debris and animals are named, and exactly as common as they were",
     )
+
+
+@scenario(
+    "weather_cap_releases_when_the_sky_does",
+    "Fight the storm cap with the cruise key, then clear the sky: the cap must hold, then let go.",
+)
+def _weather_cap_releases_when_the_sky_does():
+    """Brandon's weather-cruise ask, driven by somebody arguing with it.
+
+    Two failures a clean unit test does not reach. First, a driver who
+    simply refuses the cap -- holding the cruise-up key through a
+    thunderstorm -- must not be able to ratchet past the safe speed; if
+    they could, the cap is advice with extra steps. Second, and worse, a
+    cap that fails to RELEASE leaves the truck governed on a dry road with
+    nothing to explain it, which is indistinguishable from a broken speed
+    keeper. The promise is explicit: clear-day driving is untouched.
+    """
+    rig = Rig()
+    findings: list[str] = []
+    try:
+        d, t = rig.d, rig.d.truck
+        pygame = rig.pygame
+        rig.prepare(speed_mph=68.0)
+        rig.press(pygame.K_k)  # cruise on around 68
+
+        d.weather.current = rig.WeatherKind.THUNDERSTORM
+        rig.step(600)
+        safe = d.weather.effects.safe_speed_mph
+        if safe >= 68.0:
+            return _outcome(
+                "weather_cap_releases_when_the_sky_does",
+                rig,
+                findings,
+                f"this storm's safe speed is {safe:.0f}, no cap to test below 68",
+            )
+
+        # Argue with it: twenty presses of cruise-up in the storm, on an
+        # empty road so the only thing holding the truck down is the cap.
+        top = 0.0
+        for _ in range(20):
+            d.trip.traffic_manager.vehicles = []
+            d.trip.traffic_pressures = []
+            rig.press(pygame.K_EQUALS)
+            rig.step(30)
+            top = max(top, t.speed_mph)
+        if top > safe + 4.0:
+            findings.append(
+                f"holding the cruise-up key through the storm reached {top:.0f} mph "
+                f"against a safe speed of {safe:.0f}"
+            )
+        if not rig.said("easing to"):
+            findings.append("the storm cap was applied with nothing said about it")
+
+        # Now the sky clears. The cap has to let go on its own.
+        #
+        # Judged on a road with nothing else on it: the first version of this
+        # ran into a hazard, read the resulting near-stop as a cap that never
+        # released, and reported a bug that was a braking event. A stopped
+        # truck and a governed truck look identical from the speedometer, so
+        # the traffic has to be gone before the question means anything.
+        d.weather.current = rig.WeatherKind.CLEAR
+        recovered = 0.0
+        for _ in range(240):
+            d.trip.traffic_manager.vehicles = []
+            d.trip.traffic_pressures = []
+            rig.step(25)
+            recovered = max(recovered, t.speed_mph)
+            if recovered > safe + 5.0:
+                break
+
+        clear_safe = d.weather.effects.safe_speed_mph
+        if clear_safe < 68.0:
+            findings.append(f"clear weather still reports a safe speed of {clear_safe:.0f}")
+        elif recovered < safe + 5.0:
+            findings.append(
+                f"the sky cleared and the truck never got above {recovered:.0f} mph, "
+                f"about the storm's {safe:.0f}; the cap looks stuck"
+            )
+        return _outcome(
+            "weather_cap_releases_when_the_sky_does",
+            rig,
+            findings,
+            f"the cap held at {safe:.0f} against twenty presses, then let go when it cleared",
+        )
+    finally:
+        rig.close()
