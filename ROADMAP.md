@@ -1312,6 +1312,24 @@ onto exit signalling.
       mule every long haul and asked what gives. The note now speaks the hold
       text for a dedicated driver and stays silent for one in good standing.
 
+- [ ] **Audit every interrupting line for whether it is still TRUE when it
+      comes back.** A cut line is handed back so it finishes rather than
+      vanishing -- Shane asked for that, and it is what rescued the missing
+      "you swerve around the brake lights". But a handed-back line that names
+      a MOMENT rather than a fact is stale by the time it returns, and four
+      have now been fixed one at a time, each after a different tester named a
+      different sentence:
+        * the scale exit instruction, once the scale is behind (2026-08-21)
+        * the destination exit instruction, once the gore is behind
+        * the hazard dodge call, once the hazard is clear
+        * the dock hold prompt, once the driver has pressed the key
+      That is a pattern, and patching it per report is how the next one gets
+      found by a tester rather than by us. The work: walk every `say_event`
+      with `interrupt=True` and ask whether the sentence is still true a few
+      seconds later; where it names a maneuver, a keypress, or a number that
+      moves, give it a `valid` callable. `grep -rn "interrupt=True"` over
+      `states/` is the worklist. Cheap per site, and it ends the family.
+
 - [ ] **Two riders from the New Haven log, both still open.**
       1. The status readout speaks `_keeper_mph` (the SET speed) rather than
          the target in force, so S says "holding 25" while the truck holds

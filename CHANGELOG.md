@@ -976,6 +976,14 @@
   carries the distance from there.
 
 ### Fixed
+- **"Press Enter to continue into the facility" stops asking once you have
+  pressed it.** When an urgent line cuts off something the truck was part way
+  through saying, the game hands that line back so it finishes. For the hold
+  prompt at a dock that could arrive after you had already pressed the key and
+  the dock menu was open, asking for something you had just done. It now only
+  comes back while the key still does something. The prompt itself was only
+  ever said once; the extra copies were the hand-back, which is capped at one
+  in this build.
 - **Moving over to avoid something no longer drags it into your new lane.**
   A hazard you can steer around is answered by being in a different lane
   from it. But the game was re-reading which lane the hazard was in every

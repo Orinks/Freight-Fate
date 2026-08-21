@@ -412,3 +412,33 @@ def test_a_facility_with_its_own_streets_does_not_get_a_second_gate_zone(monkeyp
         assert not any(zone.reason == "facility gate" for zone in d.trip.zones)
     finally:
         app.shutdown()
+
+
+def test_the_hold_prompt_does_not_come_back_once_the_menu_is_open(monkeypatch):
+    """ "Press Enter to continue" must not be handed back after Enter.
+
+    The prompt speaks once -- the say-once flag sees to that, and a real
+    roll-in produces exactly one. The repeats Shane heard at a dock came from
+    the speech layer handing a cut line back so it can finish, which is right
+    in general and wrong for a line that asks for a keypress the driver has
+    since made (Shane, 2026-08-21).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        app.ctx.settings.destination_approach_assist = True
+        spoken = _capture_events(app, monkeypatch)
+        _at_gate(d, mph=0.2, warned=False)
+        d._handle_arrival_gate()
+        holds = [t for t in spoken if "stopped and holding" in t]
+        assert len(holds) == 1, f"the prompt spoke {len(holds)} times"
+
+        # Said once and only once, however long the driver sits there.
+        for _ in range(50):
+            d._handle_arrival_gate()
+        holds = [t for t in spoken if "stopped and holding" in t]
+        assert len(holds) == 1
+    finally:
+        app.shutdown()

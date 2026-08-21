@@ -5084,6 +5084,14 @@ class DrivingEventMixin:
                     "Destination approach stopped and holding. Press Enter, or controller A, to continue into the facility.",
                     interrupt=True,
                     category=SpeechCategory.NAVIGATION,
+                    # Only while the key still does something. A cut line is
+                    # handed back so it finishes, and this one asks for a
+                    # keypress -- handed back after the driver has pressed it
+                    # and the dock menu is open, it asks for a press that has
+                    # already happened (Shane, 2026-08-21, three of these at
+                    # one dock). Third line in this family after the scale and
+                    # the destination exit; the rule is the same every time.
+                    valid=lambda: not self._arrival_menu_open,
                 )
             return
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
