@@ -1913,17 +1913,36 @@ class JobBoardState(MenuState):
 
         Silent when the truck has not changed: a driver who drew the same
         spare three loads running does not need telling three times.
+
+        A driver past slip-seating has ONE truck and draws nothing, so there
+        is normally nothing to say -- but if the yard is holding them below
+        the tractor their level earns, that is the one thing they will want
+        explained, and this used to be silent about it. A level 11 driver
+        capped to a regional truck by their standing got handed a yard mule
+        every run with no reason given anywhere near the moment it happened;
+        the explanation existed, but only on the standing screen, which you
+        have to already suspect the answer to go and read (Brandon,
+        2026-08-21: "what gives?").
         """
-        from ..models.carrier_fleet import assignment_reason_text, slip_seats
+        from ..models.carrier_fleet import (
+            assignment_reason_text,
+            equipment_held_back,
+            equipment_hold_text,
+            slip_seats,
+        )
 
         p = self.ctx.profile
-        if p.owns_equipment() or not slip_seats(p):
+        if p.owns_equipment():
             return ""
+        terse = self.ctx.settings.renders_terse()
+        if not slip_seats(p):
+            # No draw to announce, so say only the part that is news: why the
+            # iron is short of the level, and what gives it back.
+            return f" {equipment_hold_text(p, terse=terse)}" if equipment_held_back(p) else ""
         before = p.active_truck_key()
         key = p.take_slip_seat(job)
         if key == before:
             return ""
-        terse = self.ctx.settings.renders_terse()
         return f" {assignment_reason_text(key, job, profile=p, terse=terse)}"
 
     def _trailer_note(self, job: Job) -> str:

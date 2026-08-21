@@ -940,6 +940,16 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **If the yard hands you a lesser truck than your level earned, it now tells
+  you why, when it happens.** Once you have your own truck, dispatch used to
+  say nothing at all about it -- so a driver whose dispatch trust had quietly
+  capped what the yard would hand over kept drawing a smaller rig every run
+  with no explanation anywhere near the moment it happened. The reason was
+  only ever on the dispatch trust screen, which you would have to already
+  suspect the answer to go and read. Now taking a load tells you what your
+  level had earned, what is holding it back, and the exact thing that gives
+  it back to you. Drivers in good standing hear nothing, because there is
+  nothing to explain.
 - **Pulling out of a warehouse or yard now gets you a real run-up to the
   highway.** Leaving a facility used to hand you onto the highway at whatever
   the last corner left you doing, with no ramp to build speed on and, if you

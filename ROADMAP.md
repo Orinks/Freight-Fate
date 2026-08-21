@@ -1301,6 +1301,17 @@ onto exit signalling.
       lane at zero throttle to working it at 0.42-0.50 throttle and gaining
       speed the whole way.
 
+- [x] **A held-back truck explains itself at dispatch (2026-08-21).** The
+      carrier caps the fleet tier by dispatch trust, and `equipment_hold_text`
+      has said so well for a while -- its own docstring calls this "the most
+      frequent moment in the whole change and the easiest to read as a bug".
+      It was unreachable for the drivers who hit it: `_slip_seat_note`
+      returned early for anyone past `DEDICATED_TRUCK_LEVEL`, so from level 9
+      up the dispatch moment said nothing and the reason lived only on the
+      standing readout. Brandon, level 11 and capped to regional, drew a yard
+      mule every long haul and asked what gives. The note now speaks the hold
+      text for a dedicated driver and stays silent for one in good standing.
+
 - [ ] **Two riders from the New Haven log, both still open.**
       1. The status readout speaks `_keeper_mph` (the SET speed) rather than
          the target in force, so S says "holding 25" while the truck holds

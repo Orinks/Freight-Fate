@@ -254,3 +254,45 @@ def test_the_assignment_reason_is_spoken_plainly():
         assert marker not in lowered
     heavy = _job(140.0, 24.0)
     assert "heavy" in assignment_reason_text(assigned_truck_key(profile, heavy), heavy)
+
+
+def test_a_dedicated_driver_hears_why_the_yard_held_their_truck_back():
+    """The one thing a held-back driver will ask, said where they will ask it.
+
+    From level 9 a driver stops slip-seating and has one truck, so there is no
+    draw to announce at dispatch -- and the note went silent entirely. That
+    silence covered the case that most needs words: a driver whose standing
+    has capped the yard below the tractor their level earns. Brandon, level
+    11, drew a regional-tier yard mule every long haul and asked "what
+    gives?". The explanation existed the whole time, on the standing screen,
+    which you have to already suspect the answer to go and read.
+    """
+    from freight_fate.models.carrier_fleet import (
+        DEDICATED_TRUCK_LEVEL,
+        eligible_fleet_tier,
+        equipment_held_back,
+        equipment_hold_text,
+        slip_seats,
+    )
+
+    profile = _profile_at_level(11)
+    assert not slip_seats(profile), "level 11 is past slip-seating"
+    assert DEDICATED_TRUCK_LEVEL < 11
+
+    # Trust on the floor is what caps the yard's iron.
+    profile.career.reputation = 0.0
+    assert equipment_held_back(profile) is True
+
+    spoken = equipment_hold_text(profile)
+    assert spoken, "a held-back driver must be given a reason"
+    # It names all three: what the level earned, why it is being withheld,
+    # and the thing that gives it back.
+    assert eligible_fleet_tier(profile).label in spoken
+    assert "dispatch trust" in spoken
+    assert "comes back to you" in spoken
+
+    # A driver in good standing at the same level hears nothing -- there is
+    # nothing to explain, and the note must not nag.
+    fine = _profile_at_level(11)
+    assert equipment_held_back(fine) is False
+    assert equipment_hold_text(fine) == ""
