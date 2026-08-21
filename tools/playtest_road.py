@@ -387,8 +387,21 @@ def _curve_hits(trip, origin, destination, max_advisory) -> list[Hit]:
     return hits
 
 
+# What waits at a ramp's far end, ranked by how much there is to hear. A
+# signal or a stop puts the cross bubble in front of you -- real traffic on
+# the road the ramp lands on, a gap to wait for, a green that is the sound of
+# that stream dying. A free merge onto another freeway has none of that, so a
+# search for "somewhere to test the ramp end" should not offer it first.
+RAMP_CONTROL_RANK = {"signal": 4.0, "stop": 3.0, "yield": 2.0, "none": 1.0}
+
+
 def _interchange_hits(trip, origin, destination) -> list[Hit]:
-    """Real signed exits, for testing the exit callout and ramp handling."""
+    """Real signed exits, for testing the exit callout and ramp handling.
+
+    The label carries what the map says is at the END of the ramp, because
+    that is the half a playtest usually means: the terminal control and the
+    road class it lands on decide whether there is anything to listen to.
+    """
     hits, offset = [], 0.0
     for i, leg in enumerate(trip.route.legs):
         forward = trip.route.cities[i] == leg.a
@@ -399,16 +412,18 @@ def _interchange_hits(trip, origin, destination) -> list[Hit]:
                 continue
             limit, _ = trip.speed_limit_at(max(0.0, at - DEFAULT_LEAD_MI))
             label = ic.name or (ic.destinations[0] if ic.destinations else "")
+            control = getattr(ic, "ramp_control", "") or "unmapped"
+            far_end = getattr(ic, "ramp_far_end", "") or "unmapped"
             hits.append(
                 Hit(
                     origin,
                     destination,
                     at,
                     trip.total_miles,
-                    0.0,
+                    RAMP_CONTROL_RANK.get(control, 0.0),
                     0.0,
                     limit,
-                    f"exit {ic.exit_ref or '?'} {label}".strip(),
+                    f"exit {ic.exit_ref or '?'} {label} [{control} -> {far_end}]".strip(),
                 )
             )
         offset += leg.miles
