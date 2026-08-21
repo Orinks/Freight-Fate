@@ -1361,11 +1361,21 @@ class DrivingEventMixin:
             # Queue behind whichever event is currently speaking. Usually that
             # is the exit callout; if a critical warning preempted it, the
             # warning must finish before the confirmation.
+            #
+            # And it may only come back while the exit is still THERE. A line
+            # cut by an urgent warning is handed back so it finishes rather
+            # than vanishing, which is right -- but "move right for the exit
+            # lane" handed back after the gore is behind the truck instructs a
+            # maneuver that no longer exists. That is the same fault the scale
+            # exit line was given a validity check for on 21 August; this one
+            # was missed because the report only ever named the scale.
+            exit_mi = getattr(stop, "at_mi", None)
             self.ctx.say_event(
                 message,
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
+                valid=(None if exit_mi is None else (lambda: self.trip.position_mi < exit_mi)),
             )
         else:
             self.ctx.say(message)

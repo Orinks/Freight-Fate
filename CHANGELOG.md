@@ -940,6 +940,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **A cut exit instruction no longer comes back after you have passed the
+  exit.** When an urgent warning cuts off something the truck was part-way
+  through saying, the game hands that line back so it finishes. The exit
+  instruction was not checking whether the exit was still there, so "move
+  right for the exit lane" could arrive after the ramp was already behind
+  you -- the same wrong-moment repeat that was fixed for the weigh station,
+  in a place nobody had reported it yet. It now speaks only while the exit is
+  still ahead of you.
 - **If the yard hands you a lesser truck than your level earned, it now tells
   you why, when it happens.** Once you have your own truck, dispatch used to
   say nothing at all about it -- so a driver whose dispatch trust had quietly

@@ -1485,3 +1485,73 @@ def test_a_stale_flush_still_discards_a_stale_route_backlog() -> None:
     now[0] += 0.05
     if pacer.should_flush("Zone ahead; speed limit 45.", EventPriority.ROUTE):
         assert pacer.take_flush_cut() is None, "a stale route backlog was resurrected"
+
+
+def test_a_construction_zone_line_is_rescued_once_like_any_other() -> None:
+    """Darren and Jerry, 2026-08-21: the repeat the build note describes at a
+    scale happens in a work zone too.
+
+    The cap is keyed on the line's own words, so it was always going to cover
+    this -- but "was always going to" is not a test, and the report named a
+    place the suite had never driven. These are the real work-zone lines,
+    behind the run of urgent lines a busy taper produces.
+    """
+    work_zone = (
+        "Work zone active. The right lane is closed; keep left and watch the barrels. "
+        "Speed limit 45."
+    )
+    urgent = [
+        "Brake lights ahead!",
+        "Cones in your lane!",
+        "Flagger stopping traffic!",
+        "Truck merging left!",
+        "Barrels in the shoulder!",
+    ]
+    pacer, _ = make_pacer()
+    pacer.should_flush(work_zone, EventPriority.ROUTE)
+    rescues = 0
+    for warning in urgent:
+        cut = pacer.note_interrupt(warning)
+        if cut is not None and cut[0] == work_zone:
+            rescues += 1
+            pacer.note_queued(*cut)
+    assert rescues == 1, f"the work zone line was replayed {rescues} times"
+
+
+def test_the_merge_taper_line_is_rescued_once_too() -> None:
+    """The other half of a work zone: the taper's own merge instruction, which
+    is the line a driver can least afford to hear four times while deciding
+    which way to go."""
+    taper = "Construction merge taper. The right lane closes ahead; merge left now. Speed limit 55."
+    pacer, _ = make_pacer()
+    pacer.should_flush(taper, EventPriority.ROUTE)
+    rescues = 0
+    for n in range(1, 5):
+        cut = pacer.note_interrupt(f"Hazard {n}!")
+        if cut is not None and cut[0] == taper:
+            rescues += 1
+            pacer.note_queued(*cut)
+    assert rescues == 1, f"the taper line was replayed {rescues} times"
+
+
+def test_a_rescued_line_dies_when_its_moment_has_passed() -> None:
+    """A cut line comes back so it can finish -- but only while it is still
+    true. "Move right for the exit lane" handed back after the gore is behind
+    the truck instructs a maneuver that no longer exists, which is the build
+    note's own complaint about being told to signal for an exit when there is
+    no exit left to take.
+    """
+    exit_line = "Exit 14A, half a mile ahead. Move right for the exit lane."
+    passed = {"gone": False}
+    pacer, _ = make_pacer()
+    pacer.should_flush(exit_line, EventPriority.ROUTE)
+    pacer._track(exit_line, EventPriority.ROUTE, None, lambda: not passed["gone"])
+    # Cut while the exit is still ahead: handed back, as it should be.
+    assert pacer.note_interrupt("Brake lights ahead!") == (exit_line, EventPriority.ROUTE)
+
+    # Now the truck is past it. The same cut must NOT bring it back.
+    passed["gone"] = True
+    pacer2, _ = make_pacer()
+    pacer2.should_flush(exit_line, EventPriority.ROUTE)
+    pacer2._track(exit_line, EventPriority.ROUTE, None, lambda: not passed["gone"])
+    assert pacer2.note_interrupt("Brake lights ahead!") is None
