@@ -989,6 +989,25 @@ class DrivingEventMixin:
         # a sleep stop past it -- the scale comes first, then the plan.
         if self.truck.speed_mph > DOCKING_MAX_MPH and self._scale_outranks_rest_planning():
             return
+        # ...and the scale's own RAMP claims the key too, at any speed. The
+        # guard above only fires while the scale is still AHEAD, and a truck
+        # on the ramp is already past its mile: the rest key fell straight
+        # through to sleep planning and answered "the scale is behind you,
+        # plan the next sleep-capable stop" to a driver doing exactly what
+        # the scale had just told them to do -- press this key at the scale
+        # (owner playtest, 2026-08-21). Jerry's 2026-08-12 report was the
+        # same confusion one step earlier, before the ramp; that fix guarded
+        # the approach and left the ramp itself open.
+        # Stopped ON the scale falls through on purpose: the check-in below
+        # is what the key means there.
+        ramp = self._ramp_stop
+        on_scale_ramp = ramp is not None and getattr(ramp, "type", "") == "weigh_station"
+        if on_scale_ramp and self.truck.speed_mph > DOCKING_MAX_MPH:
+            self.ctx.say(
+                f"On the ramp for {ramp.spoken_name}. Come to a full stop at the "
+                f"scale, then press {rest_hint} to check in."
+            )
+            return
         stop = self.trip.nearest_stop_within()
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             if stop is None:

@@ -911,6 +911,14 @@
   privately; they just stay off your profile.
 
 ### Fixed
+- **Pressing the rest key on a scale ramp sends you to the scale, not to
+  bed.** An open weigh station tells you to stop at the scale and press the
+  rest key to check in. Doing exactly that, while still rolling down the
+  scale's own ramp, used to answer with sleep-stop planning instead --
+  "the scale is behind you, plan the next sleep-capable stop" -- because the
+  truck was already past the scale's mile on the map. On the ramp the key
+  now says what it should: come to a full stop at the scale, then press it
+  to check in. Stopping first and pressing it always worked and still does.
 - **Turning back from an empty reposition costs nothing.** Abandoning a
   bobtail run no longer charges the five hundred dollar penalty or the
   reputation hit -- there is no freight and no contract, so there is

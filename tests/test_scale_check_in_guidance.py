@@ -562,3 +562,62 @@ def test_rest_key_stopped_at_the_scale_opens_the_scale_menu(monkeypatch):
         assert pushed.stop.key == scale.key
     finally:
         app.shutdown()
+
+
+# --- on the scale's own ramp (owner playtest, 2026-08-21) --------------------
+#
+# The guard above only fires while the scale is still AHEAD. A truck on the
+# scale's ramp is past its mile, so the rest key fell through to sleep
+# planning and answered "the scale is behind you, plan the next sleep-capable
+# stop" to a driver doing precisely what the scale had just told them to do.
+# Jerry's report was this same confusion one step earlier; the fix for it
+# guarded the approach and left the ramp open.
+
+
+def test_rest_key_on_the_scale_ramp_sends_you_to_the_scale(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        scale, _plaza = _with_scale(d)
+        spoken, _events = _capture(app, monkeypatch)
+        # On the ramp, past the scale's mile, still rolling.
+        d._ramp_stop = scale
+        d.trip.position_mi = scale.at_mi + 0.1
+        d.truck.velocity_mps = 8.0
+
+        d._try_rest_stop()
+
+        assert spoken, "the rest key said nothing on the scale ramp"
+        said = " ".join(spoken)
+        assert "behind you" not in said, f"the ramp still reports the scale as passed: {said!r}"
+        assert "sleep-capable" not in said, f"the ramp still offers sleep planning: {said!r}"
+        assert scale.spoken_name in said
+        assert "check in" in said.lower()
+    finally:
+        app.shutdown()
+
+
+def test_rest_key_stopped_on_the_scale_opens_the_check_in(monkeypatch):
+    """Stopped ON the scale must still reach the real check-in, not the
+    ramp advice above: that branch is for a truck still rolling."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        scale, _plaza = _with_scale(d)
+        spoken, _events = _capture(app, monkeypatch)
+        opened: list = []
+        monkeypatch.setattr(d, "_open_poi_stop", lambda stop: opened.append(stop))
+        d._ramp_stop = scale
+        d.trip.position_mi = scale.at_mi
+        d.truck.velocity_mps = 0.0
+
+        d._try_rest_stop()
+
+        assert opened, f"stopped at the scale never opened a stop menu; said {spoken!r}"
+        assert opened[0].type == "weigh_station"
+    finally:
+        app.shutdown()
