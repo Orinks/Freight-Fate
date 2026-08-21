@@ -264,6 +264,13 @@ class EventSpeechPacer:
     RECENT_LIMIT = 256
     RECENT_MEMORY_S = 300.0
 
+    # After a line is rescued once, further cuts within this window drop it
+    # instead of replaying it -- long enough to cover any burst of stacked
+    # urgent lines (the trooper escalation runs well under this), short
+    # enough that the same words minutes later are a new moment that earns
+    # its own rescue.
+    RESCUE_ONCE_WINDOW_S = 30.0
+
     def __init__(self, clock=None) -> None:
         self._clock = clock or time.monotonic
         self._clear_at = 0.0
@@ -296,6 +303,9 @@ class EventSpeechPacer:
         # Set by should_flush when its purge cut a line still speaking;
         # collected once by take_flush_cut. See that method.
         self._flush_cut: tuple[str, EventPriority] | None = None
+        # text -> until when further rescues of it are refused. See
+        # _take_protected: one rescue per line per window.
+        self._rescued_until: dict[str, float] = {}
 
     def _duration_s(self, text: str) -> float:
         return self.BASE_UTTERANCE_S + len(text) / self.CHARS_PER_S
@@ -438,6 +448,15 @@ class EventSpeechPacer:
         cut, and a line whose projected finish had already passed was heard
         in full, not destroyed. A line cutting itself is one line, not two,
         so it is never handed back behind its own delivery.
+
+        And at most ONE rescue per line per window. A rescued line is
+        re-queued and re-protected, so without this a CHAIN of urgent lines
+        replays it after every one of them -- the 21 August build note has
+        "Signal for the scale exit" speaking five times through a trooper
+        escalation, and the transponder's green light three times. One
+        rescue is the whole contract (the cut line gets to finish once);
+        a line cut a second time in a moment that busy has been overtaken
+        by events, and message review holds the words.
         """
         held = self._protected
         self._protected = None
@@ -446,6 +465,9 @@ class EventSpeechPacer:
         text, priority, done_at = held
         if self._clock() >= done_at or text == cutting_text:
             return None
+        if self._clock() < self._rescued_until.get(text, 0.0):
+            return None
+        self._rescued_until[text] = self._clock() + self.RESCUE_ONCE_WINDOW_S
         return text, priority
 
     def note_interrupt(

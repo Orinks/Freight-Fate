@@ -536,6 +536,37 @@ def test_the_hand_back_happens_at_most_once_per_cut() -> None:
     assert pacer.note_interrupt("Sharp curve ahead.") == (HAZARD, EventPriority.CRITICAL)
 
 
+def test_a_rescued_line_is_not_rescued_again_by_the_next_cut() -> None:
+    """The trooper-escalation loop from the 21 August build note: a rescued
+    line is requeued and re-protected, so a CHAIN of urgent lines used to
+    replay it after every one -- "Signal for the scale exit" spoke five
+    times. One rescue per line per window; the second cut drops it."""
+    pacer, _ = make_pacer()
+    escalations = [f"Failure to stop, warning {n}." for n in range(1, 6)]
+    pacer.should_flush(STOP_LINE, EventPriority.ROUTE)
+    rescues = 0
+    for warning in escalations:
+        cut = pacer.note_interrupt(warning)
+        if cut is not None and cut[0] == STOP_LINE:
+            rescues += 1
+            # the app requeues the rescue behind the warning, re-protecting it
+            pacer.note_queued(*cut)
+    assert rescues == 1, f"the stop line was replayed {rescues} times"
+
+
+def test_the_same_words_minutes_later_earn_a_fresh_rescue() -> None:
+    """The cap is a window, not a life sentence: a genuinely new moment that
+    happens to use the same words is cut and rescued like any other."""
+    pacer, clock = make_pacer()
+    pacer.should_flush(STOP_LINE, EventPriority.ROUTE)
+    cut = pacer.note_interrupt(HAZARD)
+    assert cut == (STOP_LINE, EventPriority.ROUTE)
+    pacer.note_queued(*cut)
+    clock.now += pacer.RESCUE_ONCE_WINDOW_S + 1.0
+    pacer.should_flush(STOP_LINE, EventPriority.ROUTE)
+    assert pacer.note_interrupt(HAZARD) == (STOP_LINE, EventPriority.ROUTE)
+
+
 def test_say_event_requeues_the_route_line_a_hazard_cut() -> None:
     """ctx.say_event: safety line first, then the line it stepped on."""
     from freight_fate.app import App
@@ -599,8 +630,12 @@ def test_a_repeated_hazard_cannot_ping_pong_the_requeue() -> None:
         app.shutdown()
 
 
-def test_a_requeued_line_cut_again_comes_back_again() -> None:
-    """Two genuine warnings in a row still may not destroy the stop notice."""
+def test_a_requeued_line_cut_again_is_dropped_not_replayed() -> None:
+    """Two genuine warnings in a row do not destroy the stop notice -- it is
+    rescued once and finishes -- but they do not replay it either. This test
+    used to pin the opposite (a rescue after EVERY cut); the 21 August build
+    note ruled the repeat the bug: a chain of five trooper warnings spoke
+    "Signal for the scale exit" five times. One rescue is the contract."""
     from freight_fate.app import App
 
     app = App()
@@ -614,7 +649,7 @@ def test_a_requeued_line_cut_again_comes_back_again() -> None:
         app.ctx.say_event(HAZARD, interrupt=True)
         app.ctx.say_event("Emergency vehicle approaching from behind.", interrupt=True)
 
-        assert calls.count((STOP_LINE, False)) == 3  # original, requeue, requeue
+        assert calls.count((STOP_LINE, False)) == 2  # original, one rescue
     finally:
         app.shutdown()
 

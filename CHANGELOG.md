@@ -328,6 +328,13 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+- **A line cut off by urgent warnings finishes once -- it no longer
+  repeats after every one of them.** When something urgent interrupted
+  the truck mid-sentence, the cut line came back so it could finish;
+  but a chain of warnings replayed it after each one, so "Signal for the
+  scale exit" could speak five times through a trooper escalation, even
+  after the scale was behind you. It now comes back exactly once. This
+  was the known repeat issue in the 21 August build note.
 - **Owner-operators can see the weigh station transponder before they can
   afford it.** Business status only listed the transponder subscription
   once you already had the signup fee in the bank, so a lease operator
