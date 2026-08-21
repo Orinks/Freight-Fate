@@ -111,6 +111,15 @@ simulates the vehicles around the truck right now -- the ones a player hears
 and reacts to. `RealTrafficProvider` fetches real-world incident data for the
 route ahead. A sentence about "traffic" should make clear which one it means.
 
+Spoken, the second one is a **live road report** -- never an "alert", and
+never phrased as the state of the road ahead. It is a state DOT feed
+describing the real road today, and the simulation does not act on it: a
+reported closure does not close anything. Calling it an alert made a driver
+believe the road in front of him was shut, and it was not (Brandon,
+2026-08-21). The spoken frame carries the provenance the same way a data
+`source` field does -- this came from outside, and the road under the wheels
+is the game's own.
+
 Three providers -- weather, traffic and parking -- reach the network. All of
 them must degrade to the baked data silently; nothing in the drive may block on
 one.

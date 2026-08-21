@@ -940,6 +940,30 @@
   privately; they just stay off your profile.
 
 ### Changed
+- **Real-world traffic reports now say they are real-world traffic reports.**
+  With Traffic source set to real time, the game reads out crashes and
+  closures from each state's own traffic service. Those describe the real
+  road today, and the game does not act on them -- so being told "traffic
+  alert: closed in both directions" and then driving the road with nothing
+  in the way was the game claiming something it never meant. They are now
+  spoken as a live road report, which is what they are: news from outside
+  the cab, like a radio bulletin, about a road you may or may not be near.
+  The road under your wheels is still the game's own. We looked at making
+  the closure real and decided against it -- a real closure reported today
+  should not be able to make a route you already accepted impassable
+  halfway through it.
+- **The semis out there are governed now, so you can actually get around
+  one.** Every vehicle on the road took its speed from the posted limit,
+  which is right for cars but wrong for a truck: a semi would cruise at
+  seventy five on a seventy road, and in the states that hold trucks to a
+  lower limit than cars it would run sixty five past you while you were
+  legally pinned at fifty five. Passing one took forever because there was
+  barely anything to pass, and sometimes nothing at all. Heavy trucks now
+  run governed, the way real fleets run them -- most are set around sixty
+  five, and they vary a little from one another, so you will see one slowly
+  reeling in another the way you do out on the road. Cars are unchanged:
+  they still go by at the speed their own limit allows, which is exactly
+  what you should hear when your rig is held below it.
 - **Less talking on the way down to a stop sign or a light.** The stop bar
   counts itself down out loud four times on the way in, and the last two of
   those land inside the range where the bar's own tick is already speeding up

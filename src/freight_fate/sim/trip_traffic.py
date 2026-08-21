@@ -290,7 +290,18 @@ class TripTrafficMixin:
             event_key = f"real_traffic:{event.id}"
             if event_key in self._announced_real_traffic:
                 continue
-            message = f"Traffic alert: {event.description}"
+            # "Live road report", not "traffic alert". These come from a
+            # state DOT feed and describe the REAL road today; the simulation
+            # does not act on them at all. Called an alert, a reported closure
+            # read as the state of the road ahead -- a driver was told a toll
+            # road was shut in both directions, drove it, and nothing stopped
+            # him, in three states (Brandon, 2026-08-21). Naming the source
+            # makes the line true: it is news from outside, the same way a
+            # radio traffic bulletin is, and the road under the wheels is the
+            # game's own. Enforcing these was considered and declined -- a
+            # live feed must not be able to make an accepted route impassable
+            # mid-run (owner call, 2026-08-21).
+            message = f"Live road report: {event.description}"
             if event.lanes_affected:
                 message += f". {event.lanes_affected} affected."
             self._emit(TripEventKind.GPS_CUE, message, real_traffic_event=event)

@@ -102,6 +102,22 @@ TRAFFIC_SPEED_OFFSETS_MPH = {
 # street, and the old flat floors did the same damage in miniature.
 TRAFFIC_MIN_SPEED_SHARE = 0.45
 TRAFFIC_MIN_SPEED_MPH = 15.0
+# A heavy truck out there is governed, like the player's is. ATRI's annual
+# Operational Costs of Trucking survey has asked about limiters since 2011 and
+# finds around 85 percent of fleets running them, most commonly set at 65 --
+# so a semi is not simply a car with a different pass-by clip, and must not be
+# drawn at car speeds. Without this an NPC semi cruised the posted number and
+# then some: 75 on a 70 road, and 65 to 75 in a split-limit state alongside a
+# player rig legally held to 55. Passing one took forever because there was
+# almost nothing to pass (Brandon, 2026-08-21).
+# 65 is the MODE, not the only setting -- fleets differ, so each truck carries
+# its own governor drawn from a band around it. One flat number put every semi
+# on the interstate at exactly the same speed, which is its own kind of wrong:
+# real traffic has trucks slowly overtaking other trucks.
+GOVERNED_TRUCK_BAND_MPH = (62.0, 68.0)
+# Which classes are governed. A service vehicle is a pickup or a van and is
+# not, whatever it is towing.
+GOVERNED_CLASSES = ("semi", "box truck")
 # Used only where the route cannot answer for a mile at all (off the end of the
 # last leg); every real spawn reads the leg it lands on.
 DEFAULT_LIMIT_MPH = 65.0
@@ -380,7 +396,7 @@ class TrafficManager:
                 )[0]
                 position_mi = start + rng.uniform(low, high)
                 limit_mph = self._posted_limit_at(position_mi)
-                base_speed = self._intent_speed(intent, limit_mph, rng)
+                base_speed = self._intent_speed(intent, limit_mph, rng, vehicle_class)
                 rush_slowdown = rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
                 speed = max(
                     self._floor_speed(limit_mph), base_speed - weather_slowdown - rush_slowdown
@@ -684,10 +700,25 @@ class TrafficManager:
         """The slowest a moving vehicle gets here from speed draws alone."""
         return max(TRAFFIC_MIN_SPEED_MPH, limit_mph * TRAFFIC_MIN_SPEED_SHARE)
 
-    def _intent_speed(self, intent: str, limit_mph: float, rng: random.Random) -> float:
-        """A speed for this intent on a road posted at ``limit_mph``."""
+    def _intent_speed(
+        self,
+        intent: str,
+        limit_mph: float,
+        rng: random.Random,
+        vehicle_class: str = "car",
+    ) -> float:
+        """A speed for this intent on a road posted at ``limit_mph``.
+
+        A governed class never comes out above its limiter, whatever the
+        posting and whatever the intent -- a "passing" semi passes by using
+        the whole of its governor, not by exceeding it.
+        """
         low, high = TRAFFIC_SPEED_OFFSETS_MPH[intent]
-        return limit_mph + rng.uniform(low, high)
+        speed = limit_mph + rng.uniform(low, high)
+        if vehicle_class in GOVERNED_CLASSES:
+            governor = rng.uniform(*GOVERNED_TRUCK_BAND_MPH)
+            return min(speed, governor)
+        return speed
 
     def _cell_rng(self, cell: int) -> random.Random:
         """A generator belonging to one cell of road.
@@ -771,7 +802,7 @@ class TrafficManager:
                 weights=(5.0, 1.4, 2.0, 0.3),
             )[0]
             limit_mph = self._posted_limit_at(mile)
-            base_speed = self._intent_speed(intent, limit_mph, rng)
+            base_speed = self._intent_speed(intent, limit_mph, rng, vehicle_class)
             rush_slowdown = rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
             speed = max(self._floor_speed(limit_mph), base_speed - weather_slowdown - rush_slowdown)
             lane = 1 if intent == "passing" else 0

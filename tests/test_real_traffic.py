@@ -463,7 +463,7 @@ def test_trip_announces_nearby_real_incident():
     trip._check_real_traffic_events()
 
     messages = [e.message for e in trip._events]
-    assert any("Traffic alert" in m and "Jackknifed truck" in m for m in messages)
+    assert any("Live road report" in m and "Jackknifed truck" in m for m in messages)
     assert any("2 right lanes affected" in m for m in messages)
 
     # A later check must not repeat the same incident.
@@ -496,7 +496,7 @@ def test_trip_does_not_announce_construction_as_traffic_alert():
 
     trip._check_real_traffic_events()
 
-    assert not any("Traffic alert" in e.message for e in trip._events)
+    assert not any("Live road report" in e.message for e in trip._events)
 
 
 def test_trip_skips_incident_beyond_radius():
@@ -521,4 +521,35 @@ def test_trip_skips_incident_beyond_radius():
 
     trip._check_real_traffic_events()
 
-    assert not any("Traffic alert" in e.message for e in trip._events)
+    assert not any("Live road report" in e.message for e in trip._events)
+
+
+def test_a_live_report_never_claims_the_road_ahead_is_shut():
+    """The game does not act on these, so it must not speak as if it did.
+
+    A state DOT feed describes the real road today. Called a "traffic alert",
+    a reported closure read as the state of the road in front of the truck --
+    a driver was told a toll road was closed in both directions, took it, and
+    nothing stopped him, in three states (Brandon, 2026-08-21). Enforcing them
+    was declined: a live feed must not make an accepted route impassable
+    mid-run. So the frame has to carry the provenance instead.
+    """
+    from freight_fate.sim.real_traffic_parsers import TrafficEvent
+
+    closure = TrafficEvent(
+        id="x1",
+        event_type="incident",
+        severity="high",
+        description="I-88 in both directions: Closed.",
+        county="",
+        lanes_affected="all lanes closed",
+    )
+    message = f"Live road report: {closure.description}"
+    if closure.lanes_affected:
+        message += f". {closure.lanes_affected} affected."
+
+    assert message.startswith("Live road report:")
+    # The word that made it read as the game's own road is gone.
+    assert "alert" not in message.lower()
+    # The feed's own words survive: the report is still reported.
+    assert "Closed" in message
