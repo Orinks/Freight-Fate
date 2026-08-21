@@ -333,8 +333,13 @@
   the truck mid-sentence, the cut line came back so it could finish;
   but a chain of warnings replayed it after each one, so "Signal for the
   scale exit" could speak five times through a trooper escalation, even
-  after the scale was behind you. It now comes back exactly once. This
-  was the known repeat issue in the 21 August build note.
+  after the scale was behind you. It now comes back exactly once - and
+  only while it is still true: an instruction whose moment has passed,
+  or a damage total the truck has already left behind, stays quiet
+  instead of replaying stale. The weigh-in-motion verdict speaks once,
+  and a green transponder truck's scale announcement no longer tells
+  you to signal for an exit you need no part of. This was the known
+  repeat issue in the 21 August build note.
 - **Owner-operators can see the weigh station transponder before they can
   afford it.** Business status only listed the transponder subscription
   once you already had the signup fee in the bank, so a lease operator
