@@ -408,7 +408,11 @@ class EventSpeechPacer:
     # -- the backlog projection ---------------------------------------------------
 
     def _track(
-        self, text: str, priority: EventPriority, category: SpeechCategory | None = None
+        self,
+        text: str,
+        priority: EventPriority,
+        category: SpeechCategory | None = None,
+        valid=None,
     ) -> None:
         """Remember the newest line worth rescuing if an interrupt lands on it.
 
@@ -429,7 +433,7 @@ class EventSpeechPacer:
             self._protected = None
             return
         if priority >= EventPriority.ROUTE:
-            self._protected = (text, EventPriority(priority), self._clear_at)
+            self._protected = (text, EventPriority(priority), self._clear_at, valid)
 
     def take_flush_cut(self) -> tuple[str, EventPriority] | None:
         """The line a stale flush cut off mid-sentence, once, for requeueing.
@@ -462,8 +466,16 @@ class EventSpeechPacer:
         self._protected = None
         if held is None:
             return None
-        text, priority, done_at = held
+        text, priority, done_at, valid = held
         if self._clock() >= done_at or text == cutting_text:
+            return None
+        if valid is not None and not valid():
+            # The moment the line described has passed -- the scale is behind
+            # the truck, the damage total has moved on. Replaying the words
+            # verbatim would state something that is no longer true, which is
+            # worse than the silence (the adversarial battery's "44% total
+            # damage while the truck was at 51%", and the scale-exit
+            # instruction offered after the scale). Message review holds it.
             return None
         if self._clock() < self._rescued_until.get(text, 0.0):
             return None
@@ -475,6 +487,7 @@ class EventSpeechPacer:
         text: str,
         priority: EventPriority = EventPriority.CRITICAL,
         category: SpeechCategory | None = None,
+        valid=None,
     ) -> tuple[str, EventPriority] | None:
         """An interrupting line purges the channel: the projection restarts.
 
@@ -486,7 +499,7 @@ class EventSpeechPacer:
         cut = self._take_protected(text)
         self._purge_next = False
         self._clear_at = self._clock() + self._duration_s(text)
-        self._track(text, priority, category)
+        self._track(text, priority, category, valid)
         return cut
 
     def note_queued(
@@ -494,6 +507,7 @@ class EventSpeechPacer:
         text: str,
         priority: EventPriority = EventPriority.AMBIENT,
         category: SpeechCategory | None = None,
+        valid=None,
     ) -> None:
         """Extend the projection for a line delivered queued, no verdict asked.
 
@@ -503,7 +517,7 @@ class EventSpeechPacer:
         the main voice rather than the pacer."""
         start = max(self._clock(), self._clear_at)
         self._clear_at = start + self._duration_s(text)
-        self._track(text, EventPriority(priority), category)
+        self._track(text, EventPriority(priority), category, valid)
 
     def note_channel_purged(self) -> tuple[str, EventPriority] | None:
         """Speech outside the pacer's view purged the channel events ride on.
@@ -545,7 +559,12 @@ class EventSpeechPacer:
         budget = self.WAIT_BUDGET_S.get(EventPriority(priority), self.STALE_WAIT_S)
         return start - self._clock() > budget
 
-    def should_flush(self, text: str, priority: EventPriority = EventPriority.AMBIENT) -> bool:
+    def should_flush(
+        self,
+        text: str,
+        priority: EventPriority = EventPriority.AMBIENT,
+        valid=None,
+    ) -> bool:
         """Decide a queued line's fate and update the projection either way.
 
         Returns True when the line would otherwise start stale -- the caller
@@ -564,7 +583,7 @@ class EventSpeechPacer:
             self._purge_next = False
             self._clear_at = now + self._duration_s(text)
             self._protected = None
-            self._track(text, EventPriority(priority))
+            self._track(text, EventPriority(priority), valid=valid)
             return True
         start = max(now, self._clear_at)
         budget = self.WAIT_BUDGET_S.get(EventPriority(priority), self.STALE_WAIT_S)
@@ -592,10 +611,10 @@ class EventSpeechPacer:
             else:
                 self._protected = None
             self._clear_at = now + self._duration_s(text)
-            self._track(text, EventPriority(priority))
+            self._track(text, EventPriority(priority), valid=valid)
             return True
         self._clear_at = start + self._duration_s(text)
-        self._track(text, EventPriority(priority))
+        self._track(text, EventPriority(priority), valid=valid)
         return False
 
     def reset(self) -> None:

@@ -595,12 +595,18 @@ class EnforcementWatchMixin:
         # distance, the pair read as the scale moving further away while the
         # truck closed on it (gate harness, 2026-08-15). Speak the road that
         # is actually left.
+        # valid: an instruction to signal for an exit dies the moment the
+        # exit is behind the truck. Without this, a rescue after a chain of
+        # failure-to-stop warnings replayed "Signal for the scale exit" when
+        # there was no exit left to take (21 August build note).
+        scale_mi = stop.at_mi
         self.ctx.say_event(
             f"Weigh station in {self.ctx.settings.short_distance_text(ahead)}. "
             "Signal for the scale exit.",
             interrupt=False,
             priority=EventPriority.ROUTE,
             category=SpeechCategory.NAVIGATION,
+            valid=lambda: self.trip.position_mi < scale_mi,
         )
 
     def _scale_outranks_rest_planning(self) -> bool:

@@ -3446,7 +3446,17 @@ class DrivingUpdateMixin:
                 self._disarm_speed_control()
                 message = f"{message} Automatic speed control canceled."
             self._last_event_message = message
-            self.ctx.say_event(message, interrupt=True, category=SpeechCategory.SAFETY)
+            # valid: a damage total is only true at the moment it was
+            # computed. A rescue replaying it after ANOTHER collision stated
+            # a percentage the truck had already left behind (adversarial
+            # battery: "spoke 44% while the truck was at 51%").
+            spoken_pct = self.truck.damage_pct
+            self.ctx.say_event(
+                message,
+                interrupt=True,
+                category=SpeechCategory.SAFETY,
+                valid=lambda: abs(self.truck.damage_pct - spoken_pct) < 0.5,
+            )
 
     # -- microsleeps (severe fatigue) ----------------------------------------------
 
@@ -3892,6 +3902,27 @@ class DrivingUpdateMixin:
                 # line hard-coded "press T", and T at speed planned a sleep
                 # stop past the scale -- the instruction itself marched a
                 # tester into the bypass charge (report, 2026-08-12).
+                # A transponder truck's verdict is rolled BEFORE the notice
+                # is worded (silent, deterministic, so this is the same
+                # verdict either way): a green truck used to be told "Signal
+                # for the scale exit" and then, one sentence later, that it
+                # needed no exit -- the notice contradicting itself a breath
+                # too late (adversarial battery). A red truck, and every
+                # truck without a transponder, still gets the full pull-in
+                # instruction, which stays true for them.
+                verdict = ""
+                if self.ctx.profile is not None and has_weigh_station_transponder(self.ctx.profile):
+                    verdict = self._roll_transponder_verdict(stop, key)
+                if verdict == "green":
+                    instruction = "Your transponder answers it at road speed."
+                else:
+                    instruction = (
+                        "All trucks must pull in. Signal for the scale exit "
+                        f"with {self.ctx.control_hint('take_exit')}; the ramp "
+                        "brings you down to the scale. Once you are stopped "
+                        f"at the scale, press {self.ctx.control_hint('rest')} "
+                        "to check in."
+                    )
                 self.ctx.say_event(
                     # short_distance_text, not distance_text: the plain form
                     # rounds to whole miles, so a scale first seen inside half
@@ -3911,24 +3942,16 @@ class DrivingUpdateMixin:
                     # and the ramp glide owns the slowing.
                     f"Open weigh station ahead in "
                     f"{self.ctx.settings.short_distance_text(ahead)}: "
-                    f"{stop.name}. All trucks must pull in. Signal for "
-                    "the scale exit with "
-                    f"{self.ctx.control_hint('take_exit')}; the ramp brings "
-                    "you down to the scale. Once you are stopped at the "
-                    f"scale, press {self.ctx.control_hint('rest')} to check in.",
+                    f"{stop.name}. {instruction}",
                     interrupt=False,
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,
                 )
-                # A transponder-equipped truck gets a weigh-in-motion verdict
-                # on top of the notice above, never instead of it -- the
-                # "signal for the scale exit" instruction still has to be
-                # true for the driver who gets red-lighted. Queued right
-                # behind the notice (both ROUTE, interrupt=False), so a
-                # green truck hears "you don't need that exit" before it
-                # would reach the gore.
-                if self.ctx.profile is not None and has_weigh_station_transponder(self.ctx.profile):
-                    self._resolve_transponder_verdict(stop, key)
+                # The verdict line itself queues right behind the notice
+                # (both ROUTE, interrupt=False): green says keep rolling,
+                # red says pull in.
+                if verdict:
+                    self._speak_transponder_verdict(stop, verdict)
             self._check_scale_reminder(stop, ahead, key)
             if key in self.enforcement_events:
                 continue
@@ -3965,6 +3988,21 @@ class DrivingUpdateMixin:
         shape as ``_charge_weigh_station_bypass`` -- so a reload cannot
         re-roll a scale already passed.
         """
+        self._speak_transponder_verdict(stop, self._roll_transponder_verdict(stop, key))
+
+    def _roll_transponder_verdict(self, stop, key: str) -> str:
+        """The weigh-in-motion verdict for this scale, rolled once, silent.
+
+        Split out of :meth:`_resolve_transponder_verdict` so the open-scale
+        notice can be worded by the verdict BEFORE either is spoken: a green
+        truck used to be told "Signal for the scale exit" and then, one
+        sentence later, that it needed no exit -- a contradiction the notice
+        resolved a breath too late (adversarial battery). Idempotent: a
+        stored verdict is returned, never re-rolled.
+        """
+        held = self._weigh_station_transponder_verdict.get(key)
+        if held:
+            return held
         if self._cargo_is_overweight():
             # A truck over the legal limit is always red-lighted; no roll
             # needed. Nothing in the game currently tracks cargo weight
@@ -3978,21 +4016,34 @@ class DrivingUpdateMixin:
             roll = random.Random(f"{self.trip_seed}:scale-transponder:{key}").random()
             verdict = "green" if roll < WEIGH_STATION_TRANSPONDER_BYPASS_SHARE else "red"
         self._weigh_station_transponder_verdict[key] = verdict
+        return verdict
+
+    def _speak_transponder_verdict(self, stop, verdict: str) -> None:
+        scale_mi = stop.at_mi
         if verdict == "green":
             self.ctx.audio.play("events/scale_green", volume=0.8)
+            # valid: never rescued. One verdict, one line (the adversarial
+            # watcher's rule) -- a hazard cutting it used to make the
+            # clearance speak twice, and the scale_green tone already
+            # carried the verdict; the status keys can re-answer.
             self.ctx.say_event(
                 "Green light. You are cleared past the scale; keep rolling.",
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
+                valid=lambda: False,
             )
         else:
             self.ctx.audio.play("events/scale_red", volume=0.7)
+            # A red is an instruction that demands action, so a cut one IS
+            # rescued -- but only while the scale is still ahead to pull
+            # in to.
             self.ctx.say_event(
                 "Red light. Pull in to the scale.",
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,
+                valid=lambda: self.trip.position_mi < scale_mi,
             )
 
     def _cargo_is_overweight(self) -> bool:

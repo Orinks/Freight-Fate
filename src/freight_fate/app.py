@@ -456,8 +456,15 @@ class GameContext:
         key: str | None = None,
         force: bool = False,
         category: SpeechCategory | None = None,
+        valid=None,
     ) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
+
+        ``valid``, when given, is a zero-argument callable answering "is this
+        line still true?" -- consulted if the line is cut mid-sentence and
+        offered a rescue. A line whose moment has passed (the scale is behind
+        the truck, the damage total has moved on) is dropped instead of
+        replayed verbatim; message review holds the words either way.
 
         With the dedicated SAPI event voice enabled, events speak on their own
         channel, where ``interrupt`` only cuts off a previous event -- so an
@@ -578,8 +585,8 @@ class GameContext:
         cut = None
         if self.settings.sapi_events:
             if interrupt:
-                cut = self._event_pacer.note_interrupt(text, priority, category)
-            elif self._event_pacer.should_flush(text, priority):
+                cut = self._event_pacer.note_interrupt(text, priority, category, valid)
+            elif self._event_pacer.should_flush(text, priority, valid=valid):
                 # The channel is backed up past the point of truth: purging
                 # and speaking fresh IS the queued line's honest delivery.
                 # The purge can still have cut a line that was genuinely
@@ -591,10 +598,10 @@ class GameContext:
             self.speech.say_event(text, interrupt)
         else:
             if interrupt:
-                cut = self._event_pacer.note_interrupt(text, priority, category)
+                cut = self._event_pacer.note_interrupt(text, priority, category, valid)
                 _stop_main_speech(self.speech)
             else:
-                self._event_pacer.note_queued(text, priority, category)
+                self._event_pacer.note_queued(text, priority, category, valid)
             self.speech.say(text, interrupt=False)
         self._engage_speech_duck()
         if cut is not None:

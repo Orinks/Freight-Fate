@@ -76,29 +76,14 @@ def break_harness():
 # Findings that are real, verified, and not yet fixed. Keyed by scenario name;
 # the value is why it is still open, spoken plainly enough to act on.
 KNOWN_OPEN = {
-    # One root cause, two scenarios, found by the 2026-08-20 playtest session.
-    # GameContext._requeue_cut_event hands a ROUTE line back when an
-    # interrupting line cuts it off, and nothing caps how many times that can
-    # happen. The scale-bypass ladder is three escalating warnings in a row,
-    # so one reminder is heard five times; a hazard during the weigh-in-motion
-    # clearance turns one green light into three. Worse, the line is
-    # re-spoken frozen: "Weigh station in half a mile" is still offered after
-    # the scale is behind the truck.
-    #
-    # The one hand-back is deliberate and pinned by
-    # test_a_requeued_line_cut_again_comes_back_again, so the fix is not a
-    # cap -- it is giving the requeue the re-render/drop treatment
-    # PendingAmbient.render already gives the queued path (bd9ccb6c).
-    "scale_bypass_to_the_end": (
-        "the pacer re-speaks a rescued ROUTE line once per interrupt, so the "
-        "scale-exit instruction is heard five times, four of them after the "
-        "truck has passed the scale"
-    ),
-    "prepass_green_is_not_a_bypass_charge": (
-        "same requeue resurrection: a hazard during the weigh-in-motion "
-        "clearance makes the green light speak three times. The clearance "
-        "itself is correct -- no bypass charge follows a green"
-    ),
+    # The requeue-resurrection pair (scale_bypass_to_the_end and
+    # prepass_green_is_not_a_bypass_charge) was fixed 2026-08-21 and their
+    # entries deleted: the owner's build note ruled the repeat the bug, so
+    # rescues are capped at one per line per window AND carry a validity
+    # check -- the re-render/drop treatment this comment used to prescribe
+    # (a line whose moment passed is dropped, not replayed frozen). The
+    # test that pinned a rescue after every cut was revised to the new
+    # contract in the same change.
     "short_hop_streak_xp_farming": (
         "25-mile hops earn 4.6x the XP efficiency of a 500-mile haul, and short "
         "hauls are the faster ones to drive; the streak bonus is now capped at "
