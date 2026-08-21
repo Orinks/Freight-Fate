@@ -102,6 +102,12 @@ CRASH_MARKERS = (
 # quote back as "the last thing the driver heard".
 TRANSCRIPT_NOISE = ("[ladder]", "[pacer]")
 
+# Instrumentation, not speech: a line the TRUCK wrote about what it did, with
+# no player-facing utterance behind it. Counting these as spoken would inflate
+# every check-in, and calling them "silenced" would be a lie -- nothing was
+# cut. They get their own tally.
+TRANSCRIPT_INSTRUMENTS = ("[jake]",)
+
 # Lines the game logs on every start no matter what; flagging them as warnings
 # would train the operator to ignore the warning channel on the first minute
 # of every session.
@@ -225,6 +231,7 @@ class Watcher:
         self.started = time.monotonic()
         self.spoken = 0
         self.silenced = 0
+        self.instrumented = 0
         self.last_spoken: str | None = None
         self.errors: list[str] = []
         self.warnings: list[str] = []
@@ -260,6 +267,9 @@ class Watcher:
         message = match["message"]
 
         if logger == TRANSCRIPT_LOGGER:
+            if message.startswith(TRANSCRIPT_INSTRUMENTS):
+                self.instrumented += 1
+                return []
             if message.startswith(TRANSCRIPT_NOISE):
                 self.silenced += 1
                 return []
@@ -307,6 +317,7 @@ class Watcher:
             f"SESSION ENDED after {_duration(time.monotonic() - self.started)}: "
             f"{_count(self.spoken, 'line')} spoken, "
             f"{self.silenced} silenced by the rung or the pacer, "
+            f"{self.instrumented} truck-state notes, "
             f"{_count(len(self.crashes), 'crash')}, "
             f"{_count(len(self.errors), 'error')}, "
             f"{_count(len(self.warnings), 'warning')}."

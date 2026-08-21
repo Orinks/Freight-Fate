@@ -334,6 +334,10 @@ class DrivingState(
         # notice point in EnforcementWatchMixin._resolve_transponder_verdict
         # and read both by the bypass judgment and by the half-mile reminder.
         self._weigh_station_transponder_verdict: dict[str, str] = {}
+        # Last retarder stage written to the transcript, so _trace_engine_brake
+        # logs a CHANGE rather than a frame. -1 rather than 0: the first
+        # observation is worth a line even if the jake starts down.
+        self._traced_jake_stage = -1
         self._unsafe_damage_stop_key = ""
         # Compliance tracker for the active stop: 0..1, judged from behavior
         # (signaling and slowing), not distance. Reset on every stop-ending path.

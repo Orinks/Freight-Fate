@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from .. import engine_audio
+from ..app import transcript
 from ..audio import (
     CH_AIR,
     CH_BRAKE,
@@ -222,8 +223,39 @@ class DrivingUpdateMixin:
         ):
             self._critical_respeak_at = self._critical_call_age_s + CRITICAL_RESPEAK_DELAY_S
 
+    def _trace_engine_brake(self) -> None:
+        """Write a transcript line whenever the retarder changes stage.
+
+        The jake is audible and nothing else. It speaks no line of its own,
+        so "did the engine brake just come up on level road?" -- an ordinary
+        playtest question, asked mid-drive by the owner on 2026-08-20 -- had
+        no answer anywhere: not in the transcript, not in the session log,
+        not in the save. The only way to settle it was to rebuild the road
+        on a bench and hope the conditions matched.
+
+        One line per CHANGE, never per frame, carrying the road that
+        explains it: a stage rising on a real downgrade is the retarder
+        doing its job, and the same stage rising on the flat is the bug the
+        question was about. Prefixed like the pacer and ladder lines so the
+        transcript stays sortable into "what the driver heard" and "what the
+        truck did".
+        """
+        stage = self.truck.engine_brake_stage
+        if stage == self._traced_jake_stage:
+            return
+        self._traced_jake_stage = stage
+        grade_pct = self.trip.grade_at(self.trip.position_mi) * 100.0
+        transcript.info(
+            "[jake] stage %d at mile %.1f, %.0f mph, grade %+.1f percent",
+            stage,
+            self.trip.position_mi,
+            self.truck.speed_mph,
+            grade_pct,
+        )
+
     def update(self, dt: float) -> None:
         t = self.truck
+        self._trace_engine_brake()
         # A fresh loaded run out of a chain-capable origin starts on the
         # facility's streets. Decided on the first tick, never on a resume:
         # from_snapshot marks the check done and re-enters a chain itself.

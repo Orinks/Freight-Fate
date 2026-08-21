@@ -147,3 +147,79 @@ def _jake_stays_off_where_it_does_not_belong():
         )
     finally:
         rig.close()
+
+
+@scenario(
+    "named_hazards_keep_their_frequency",
+    "Brandon's naming asks: debris and animals say what they are, and are no more common than before.",
+)
+def _named_hazards_keep_their_frequency():
+    """Splitting one hazard into six is a frequency change unless it is not.
+
+    Brandon asked what kind of debris and what kind of animal, 2026-08-20,
+    and the answer was to replace one generic entry with a family of named
+    ones. That is arithmetic: the family's weights have to sum to what the
+    single entry carried, or the split quietly makes debris commoner and the
+    road busier than it was. The comments in trip_models state the totals
+    the split was built to preserve -- 1.2 for debris, 0.7 for the
+    nationwide animals -- so this checks the code against its own promise.
+
+    Nothing here drives; it is a table with an invariant, and the invariant
+    is the sort that survives review and dies to the next edit.
+    """
+    from freight_fate.sim.trip_models import HAZARDS
+
+    findings: list[str] = []
+
+    debris_family = {
+        "a ladder fallen from a truck in the lane",
+        "loose lumber dropped across the lane",
+        "a mattress lying in the lane",
+        "spilled cargo boxes across the lane",
+        "a shredded truck tarp in the lane",
+        "debris on the road",
+    }
+    animal_family = {
+        "a dog loose on the road",
+        "a coyote crossing the road",
+        "loose livestock on the road",
+        "a raccoon in the lane",
+        "an animal on the road",
+    }
+    by_text = {h.text: h for h in HAZARDS}
+
+    for label, family, expected, generic in (
+        ("debris", debris_family, 1.2, "debris on the road"),
+        ("nationwide animals", animal_family, 0.7, "an animal on the road"),
+    ):
+        missing = sorted(family - by_text.keys())
+        if missing:
+            findings.append(f"{label}: these entries are gone from the table: {missing}")
+            continue
+        total = sum(by_text[text].weight for text in family)
+        if abs(total - expected) > 0.001:
+            findings.append(
+                f"{label} now weigh {total:.3f} against the {expected} the split promised "
+                "to preserve; the road got busier without anyone deciding to"
+            )
+        # The anonymous fallback is meant to be the rare unidentifiable one,
+        # not the common case wearing a family as cover.
+        share = by_text[generic].weight / total if total else 1.0
+        if share > 0.2:
+            findings.append(
+                f"{label}: the unnamed fallback is {share:.0%} of the family, "
+                "so 'what is it?' still usually has no answer"
+            )
+
+    # And the contract the naming exists for: a hazard the driver has to
+    # clear must be nameable when they clear it.
+    for hazard in HAZARDS:
+        if (hazard.dodgeable or hazard.animal) and not hazard.name:
+            findings.append(f"hazard {hazard.text!r} has no name to clear it by")
+
+    return _outcome(
+        "named_hazards_keep_their_frequency",
+        None,
+        findings,
+        "debris and animals are named, and exactly as common as they were",
+    )
