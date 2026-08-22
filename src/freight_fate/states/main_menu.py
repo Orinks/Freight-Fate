@@ -1144,9 +1144,14 @@ class SettingsCategoryState(MenuState):
                     help="Driving mode controls pacing and pressure. Relaxed "
                     "gives wider hazard response windows, gentler "
                     "collision damage and fatigue, calmer speech, and the most "
-                    "real time. Standard keeps balanced pressure and moves the "
-                    "clock twice as fast, so a driving day takes half as long "
-                    "and decisions arrive sooner.",
+                    "time to respond. Standard keeps balanced pressure and moves "
+                    "the clock twice as fast, so a driving day takes half as long "
+                    "and decisions arrive sooner. Real time keeps Standard's "
+                    "pressure and runs the driving clock at the speed of a real "
+                    "clock, so a mile takes as long as it really would. With the "
+                    "weather source set to real world it is the most true to "
+                    "life the game gets. You can change it mid-drive from the "
+                    "pause menu.",
                 ),
                 MenuItem(
                     lambda: f"Hours of service: {self._hos_label()}",
@@ -1807,7 +1812,7 @@ class SettingsCategoryState(MenuState):
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
-        return {10.0: "relaxed", 20.0: "standard"}.get(scale, f"{scale:g} times")
+        return {10.0: "relaxed", 20.0: "standard", 1.0: "real time"}.get(scale, f"{scale:g} times")
 
     def _hos_label(self) -> str:
         return {

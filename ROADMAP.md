@@ -120,6 +120,20 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Real time driving mode (owner, 2026-08-22).** The Driving mode row
+      is Relaxed, Standard, Real time: `TIME_SCALES` gains 1.0, the tuning
+      table gives it standard's pressure field for field (a clock, not a
+      difficulty -- what the retired Realistic should have been), and the
+      label is the same "real time" the Traffic source row already speaks.
+      `Trip.effective_time_scale` keeps the parked 2x fast-forward for the
+      compressed pacings only; at 1x the wall clock is the promise, parked
+      included. Mid-drive switching needed no new wiring: the driving loop
+      already re-reads `settings.time_scale` every frame and the pause menu
+      opens the full Settings tree. Breaks and sleep still jump the clock
+      through `_advance_rest_clock`, so nobody sits through a ten-hour rest.
+      Tests: row cycle and Left/Right walk, tuning equality, 1x rolling and
+      parked, settings round-trip of 1.0 without migration.
+
 - [x] **Ramp-terminal fallback weights calibrated against the bake**
       (2026-08-20). 8,205 of 18,011 baked interchanges carry a READ control
       from OSM; the split is 88.7/11.3 signal-to-stop within URBAN_RADIUS_MI

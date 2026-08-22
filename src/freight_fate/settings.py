@@ -33,7 +33,11 @@ log = logging.getLogger(__name__)
 # the furthest thing from it -- real driving is 1x, and 40x made the driving
 # day flash past. A save that still carries it lands on standard and is told
 # once (RETIRED_TIME_SCALE below).
-TIME_SCALES = (10.0, 20.0)
+# Real time (1x) joined the row on 2026-08-22: the driving clock runs at the
+# speed of the wall clock, which with live weather is as true to life as the
+# game gets. It is last in the cycle so the two compressed pacings keep their
+# places, and like the others it can be changed mid-drive from the pause menu.
+TIME_SCALES = (10.0, 20.0, 1.0)
 RETIRED_TIME_SCALE = 40.0
 TIME_SCALE_FALLBACK = 20.0
 # Budget for the "your pacing row lost a setting" line, spent one visit at a
@@ -198,8 +202,9 @@ class Settings:
     automatic_direction_changes: str = "simple"  # simple/deliberate
     # Distance compression while driving. Relaxed (10x) by default: new players
     # get the most real time to hear and react to spoken events; veterans can
-    # step up to standard in Settings, Gameplay. Those are the only two
-    # offered -- see TIME_SCALES for why the third went.
+    # step up to standard in Settings, Gameplay, or all the way to real time
+    # (1x), where the driving clock keeps pace with the wall clock. See
+    # TIME_SCALES for the three offered and why the old Realistic went.
     time_scale: float = 10.0
     # Spoken once (up to PACE_RETIRED_NOTICES times) to a player whose saved
     # pacing was the retired Realistic, because their truck now bills the

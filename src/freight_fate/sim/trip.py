@@ -430,7 +430,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         ``time_scale``."""
         full = self.time_scale
         if self.waiting and self.truck.parking_brake and self.truck.speed_mph < 1.0:
-            return full * PARKED_TIME_SCALE_MULT
+            # Deliberate waiting fast-forwards the compressed pacings. Real
+            # time promises the wall clock, parked included: a 2x wait there
+            # would be the one place the mode's name lied.
+            return full * PARKED_TIME_SCALE_MULT if full > 1.0 else full
         if self.pull_over_active:
             # Lights behind you: the whole encounter runs on the real clock.
             # PULL_OVER_IGNORE_MI is 2 raw trip miles, but braking takes real

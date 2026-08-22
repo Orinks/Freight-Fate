@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
 @dataclass(frozen=True)
@@ -16,16 +16,23 @@ class DrivingModeTuning:
     routine_speech_interval_s: float
 
 
-# The two pacing settings the row offers. "Realistic" (40x) was retired on
+# The three pacing settings the row offers. "Realistic" (40x) was retired on
 # 2026-08-19: it carried standard's pressure tuning field for field and
 # differed only in compressing the clock twice as hard, so the row's one
 # realistic-sounding choice was also its least realistic -- real driving is
 # 1x. Retiring it costs no tuning, because there was none of its own to
 # lose; a save still carrying 40x migrates to standard in Settings.load,
 # and any other scale still falls through to standard's pressure here.
+#
+# "Real time" (1x, added 2026-08-22) is the choice that name was reaching
+# for: the driving clock runs at wall-clock speed. It is a clock, not a
+# difficulty, so it carries standard's pressure field for field -- the same
+# hazards, damage, fatigue and speech spacing, spread over real hours.
+_STANDARD = DrivingModeTuning("standard", 1.0, 1.0, 1.0, 1.0, 2.5, 12.0)
 _MODES = {
     10.0: DrivingModeTuning("relaxed", 0.55, 1.5, 0.6, 0.8, 5.0, 18.0),
-    20.0: DrivingModeTuning("standard", 1.0, 1.0, 1.0, 1.0, 2.5, 12.0),
+    20.0: _STANDARD,
+    1.0: replace(_STANDARD, name="real time"),
 }
 
 

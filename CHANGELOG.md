@@ -4,6 +4,17 @@
 
 ### Added
 
+- **Real time joins the driving mode row.** Under Settings, Gameplay,
+  Difficulty and hours of service, the Driving mode row now offers Relaxed,
+  Standard, and Real time. Real time runs the driving clock at the speed of a
+  real clock, so a mile takes as long as it really would and a driving day
+  takes a real day; it keeps Standard's pressure, hazards, and speech. Set
+  the weather source to real world as well and the drive is as true to life
+  as the game gets. Like the other two it can be changed mid-drive from the
+  pause menu, and the clock follows at once. Parked waiting with the brake
+  set, which fast-forwards the other two pacings, stays at real speed in
+  Real time. Breaks and sleep at stops still pass the clock the way they
+  always have.
 - **A Radio app on the driver tablet.** Under Tab, Driver apps, Radio: it
   says what is playing, switches the radio on or off, saves the tuned
   station to your favorites or removes it, lists your favorites, and lists

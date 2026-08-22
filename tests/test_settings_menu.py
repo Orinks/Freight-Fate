@@ -1592,7 +1592,7 @@ def test_a_pacing_the_row_still_offers_is_left_alone():
 
     from freight_fate.settings import Settings
 
-    for saved in (10.0, 20.0, 30.0):
+    for saved in (1.0, 10.0, 20.0, 30.0):
         settings = Settings()
         settings.path.parent.mkdir(parents=True, exist_ok=True)
         settings.path.write_text(json.dumps({"time_scale": saved}), encoding="utf-8")
@@ -1631,7 +1631,7 @@ def test_the_driving_mode_row_explains_the_retired_pacing():
         app.shutdown()
 
 
-def test_the_driving_mode_row_cycles_only_the_two_offered_paces():
+def test_the_driving_mode_row_cycles_relaxed_standard_and_real_time():
     from freight_fate.app import App
 
     app = App()
@@ -1641,15 +1641,22 @@ def test_the_driving_mode_row_cycles_only_the_two_offered_paces():
         while not cat.items[cat.index].text.startswith("Driving mode"):
             cat.handle_event(key_event(pygame.K_DOWN))
         seen = []
-        for _ in range(4):
+        for _ in range(6):
             seen.append(cat.items[cat.index].text)
             cat.handle_event(key_event(pygame.K_RIGHT))
         assert seen == [
             "Driving mode: relaxed",
             "Driving mode: standard",
+            "Driving mode: real time",
             "Driving mode: relaxed",
             "Driving mode: standard",
+            "Driving mode: real time",
         ], seen
+        # Real time is the 1x clock, and Left walks the row back the same way.
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.time_scale == 1.0
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.time_scale == 20.0
     finally:
         app.shutdown()
 

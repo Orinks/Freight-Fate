@@ -1,4 +1,4 @@
-"""Driving-pressure distinctions for Relaxed and Standard."""
+"""Driving-pressure distinctions for Relaxed, Standard and Real time."""
 
 import pygame
 import pytest
@@ -24,6 +24,61 @@ def test_driving_mode_tuning_keeps_standard_baseline_and_softens_only_relaxed():
     # sets the raw trip value has to keep driving. 40x is reachable in play
     # regardless: PARKED_TIME_SCALE_MULT doubles standard while parked.
     assert tuning_for_time_scale(40.0).name == "standard"
+
+
+def test_real_time_is_standard_pressure_on_the_real_clock():
+    """Real time (1x) differs from standard only in the clock. It carries
+    standard's pressure tuning field for field, the same way the retired
+    Realistic did: the row's third choice is a clock, not a difficulty."""
+    from freight_fate.sim.driving_modes import tuning_for_time_scale
+
+    real = tuning_for_time_scale(1.0)
+    standard = tuning_for_time_scale(20.0)
+
+    assert real.name == "real time"
+    assert standard.name == "standard"
+    for field in (
+        "hazard_frequency",
+        "reaction_window",
+        "collision_damage",
+        "fatigue_rate",
+        "ambient_spacing_s",
+        "routine_speech_interval_s",
+    ):
+        assert getattr(real, field) == getattr(standard, field), field
+
+
+def test_real_time_runs_the_real_clock_rolling_and_parked(world):
+    """At real time the clock is real at every speed, and stays real while
+    parked with the brake set: the two-times parked fast-forward belongs to
+    the compressed pacings, which it keeps."""
+    from test_weather_trip import make_trip
+
+    from freight_fate.sim.trip import FULL_COMPRESSION_MPH, PARKED_TIME_SCALE_MULT
+
+    trip, truck = make_trip(world, time_scale=1.0)
+    truck.velocity_mps = 0.0
+    truck.parking_brake = True
+    assert trip.effective_time_scale == pytest.approx(1.0)
+    trip.waiting = True
+    assert trip.effective_time_scale == pytest.approx(1.0)
+    before = trip.game_minutes
+    trip.update(60.0)
+    assert trip.game_minutes - before == pytest.approx(1.0)
+
+    trip.waiting = False
+    truck.parking_brake = False
+    truck.velocity_mps = (FULL_COMPRESSION_MPH + 10.0) / 2.23694
+    assert trip.effective_time_scale == pytest.approx(1.0)
+    truck.velocity_mps = 20.0 / 2.23694
+    assert trip.effective_time_scale == pytest.approx(1.0)
+
+    # The compressed pacings keep their parked fast-forward.
+    trip, truck = make_trip(world, time_scale=20.0)
+    truck.velocity_mps = 0.0
+    truck.parking_brake = True
+    trip.waiting = True
+    assert trip.effective_time_scale == pytest.approx(20.0 * PARKED_TIME_SCALE_MULT)
 
 
 def test_pause_settings_mode_change_updates_active_trip_pressure(monkeypatch):

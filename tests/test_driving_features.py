@@ -1079,8 +1079,10 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "settings are grouped into categories" in help_text
     assert "open a category to see its settings" in help_text
     assert "driving mode changes trip pacing and pressure" in help_text
-    assert "relaxed gives more real time, wider hazard windows" in help_text
+    assert "relaxed gives more time to respond, wider hazard windows" in help_text
     assert "standard keeps balanced timing and consequences" in help_text
+    assert "real time keeps standard's pressure and runs the driving clock" in help_text
+    assert "changed mid-drive from the pause menu" in help_text
     assert "real violations keep their normal consequences" in help_text
     assert "adaptive cruise" in help_text
     assert "three second clear-weather gap" in help_text

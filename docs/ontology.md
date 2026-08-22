@@ -93,6 +93,7 @@ belongs to the truck you own in this game, not to the driver.
 | Lane keeping (the setting) | `lane_keeping` | `settings.py`, `states/main_menu.py` |
 | The lane you came out of being open again | `LaneGapMixin` | `states/driving_lane_gap.py` |
 | Driving mode tuning | `DrivingModeTuning` | `sim/driving_modes.py` |
+| Driving mode (the setting): relaxed, standard, real time | `time_scale`, `TIME_SCALES` | `settings.py`, `states/main_menu.py` |
 | Pedal latch | `PedalLatch` | `sim/pedal_latch.py` |
 | A tank load and its sloshing wave | `LiquidLoad`, `SloshAxis` | `sim/surge.py` |
 | Stop-cue geometry from stopping distance | -- | `states/driving_stops.py` |
@@ -214,6 +215,7 @@ from the words, and synonyms cost them a re-read.
 | A populated place beside the corridor, spoken when the driver asks where they are | town ("In Pine", "Nearest town, Cicero") | village (that is the bake's category name, not a spoken word), settlement, locality, place | `Landmark.category == "village"`, `DrivingLocationMixin._speak_current_town` |
 | Which way the truck is travelling, worded the way the shields sign it | direction, spoken as "Eastbound" | heading, bearing, compass direction (the signed direction is not the geometry) | `_leg_heading`, `DrivingLocationMixin._speak_current_direction` |
 | One drive, start to finish | run | trip, haul | `Trip` |
+| The pacing choice on the Driving mode row | relaxed, standard, real time | realistic (retired), 1x, normal speed, pacing level | `Settings.time_scale`, `TIME_SCALES`, `mode_name` |
 | A truck stop or service POI | stop | POI, waypoint | `Stop`, `RoadStop` |
 | The level band | rank | tier, grade | `CareerRank` |
 | A group of related achievements | category | group, section, tab | `AchievementCategory` |
