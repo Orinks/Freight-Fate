@@ -8,6 +8,7 @@ from freight_fate.settings import Settings
 from freight_fate.sim import Trip, TruckState, WeatherSystem
 from freight_fate.sim.trip import TripEvent, TripEventKind
 from freight_fate.sim.trip_models import LANDMARK_MIN_SPACING_MI
+from freight_fate.speech_text import _UNCUT_CHATTER_CATEGORIES
 
 RAW_MARKERS = ("osm_id", "amenity=", "highway=", "node/", "way/")
 
@@ -324,8 +325,15 @@ def test_terse_speaks_every_chatter_category_its_switch_leaves_on(
 
         assert len(heard) == 1, heard
         assert name in heard[0]
-        # Short form, not the full line: the name and the fact, no framing.
-        assert len(heard[0]) < len(spoken)
+        if category in _UNCUT_CHATTER_CATEGORIES:
+            # A billboard is not a label with framing around it, so there is
+            # no framing to drop: it is the sign's own words and its payload
+            # is usually the last sentence (Brandon, 2026-08-22). The switch
+            # is what turns billboards down; terse does not paraphrase them.
+            assert heard[0] == spoken
+        else:
+            # Short form, not the full line: the name and the fact, no framing.
+            assert len(heard[0]) < len(spoken)
     finally:
         app.shutdown()
 
@@ -456,8 +464,9 @@ def test_roadside_chatter_short_forms_keep_the_fact():
             "You are passing Ozark beside Fort Novosel, the home of Army Aviation, "
             "where every Army helicopter pilot learns to fly."
         ): "Ozark beside Fort Novosel.",
-        # A billboard is its gag, with the framing dropped -- and a two-beat
-        # gag keeps its punchline.
+        # The lead-in stripping itself, on a billboard-shaped line. Real
+        # billboards come through under their own category and are never cut
+        # at all -- see test_a_billboard_is_never_cut_down.
         "Billboard: Free ice water.": "Free ice water.",
         "Billboard: Eat here. Get gas.": "Eat here. Get gas.",
     }
@@ -488,3 +497,55 @@ def test_every_baked_chatter_line_renders_a_shorter_terse_form(world):
             if landmark.category in named:
                 assert landmark.name in terse
     assert checked > 2_000
+
+
+def test_a_billboard_is_never_cut_down():
+    """Brandon, 2026-08-22: the billboards and the signs you pass should read
+    in full at quiet.
+
+    Every other chatter category is a label wrapped in framing, so terse drops
+    the framing and loses nothing. A billboard is the sign's own words, and
+    the payload is usually the last sentence -- cutting it to the opening
+    clause leaves the setup without the punchline. Both billboard categories
+    keep the whole line, framing included, at every rung.
+    """
+    from freight_fate.speech_text import _UNCUT_CHATTER_CATEGORIES, roadside_chatter
+
+    signs = [
+        (
+            "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile "
+            "wide that was punched out by a rock from space. It is bigger than it "
+            "sounds. Much bigger."
+        ),
+        (
+            "Billboard: Idaho panhandle country. Colby Acuff and the Western White "
+            "Pines both grew up here."
+        ),
+    ]
+    for category in _UNCUT_CHATTER_CATEGORIES:
+        for spoken in signs:
+            message = roadside_chatter(spoken, category)
+            assert message.normal == spoken
+            assert message.render(True) == spoken, f"{category} lost its punchline"
+
+    # A label still shortens, so this spares the gags without undoing terse.
+    label = roadside_chatter("Entering Hot Springs National Park.", "national_park")
+    assert label.render(True) == "Hot Springs National Park."
+
+
+def test_every_billboard_category_is_spared_the_cut():
+    """The spared set and the switch must name the same categories.
+
+    A new billboard bake category that rode the billboards switch but missed
+    the spared set would be silently cut back down, which is the bug this
+    fixed arriving again under a different key.
+    """
+    from freight_fate.settings import CHATTER_CATEGORY_FIELDS
+    from freight_fate.speech_text import _UNCUT_CHATTER_CATEGORIES
+
+    on_the_switch = {
+        category
+        for category, field in CHATTER_CATEGORY_FIELDS.items()
+        if field == "chatter_billboards"
+    }
+    assert on_the_switch == set(_UNCUT_CHATTER_CATEGORIES)

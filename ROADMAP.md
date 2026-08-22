@@ -2391,6 +2391,20 @@ onto exit signalling.
       Villages are untouched; they answer to the place-callouts ladder.
       Principle (2) above, in miniature: the switch is the ladder, and
       verbosity stops overriding it.
+
+      BILLBOARDS ARE NOW EXEMPT FROM THE CUT (2026-08-22). "The name and
+      the fact" is the right short form for a category whose line is a
+      LABEL wrapped in framing -- a river, a park boundary, a pass. A
+      billboard is not a label: it is the sign's own words, and the payload
+      is usually the last sentence, so the cut handed back the setup without
+      the punchline ("Meteor Crater is ahead, a hole in the desert nearly a
+      mile wide", never "It is bigger than it sounds. Much bigger."). The
+      function already spared gags under sixty characters for exactly this
+      reason; the placed billboard signs run long and were cut anyway, which
+      is what Brandon heard. Both billboard categories now keep the whole
+      line at every rung, framing included, and the dedicated billboards
+      switch is the control for a player who wants fewer of them -- it was
+      always the better one than hearing half of each.
 - [x] **Exit traffic speaks only for the exit you are taking -- landed
       2026-08-15** (owner, the same day as the chattiness note above: "when
       exits come up, the game announces traffic info for that exit. Suppress

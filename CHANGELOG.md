@@ -1141,6 +1141,16 @@
   re-read.
 
 ### Fixed
+- **Billboards and roadside signs read in full on quiet.** Quiet shortens the
+  roadside colour by keeping the name and dropping the words around it, which
+  works for a river crossing or a park boundary -- the name is the whole point
+  of those. A billboard is not a name. It is what the sign actually says, and
+  the joke is usually the last line, so shortening one left you the setup
+  without the punchline: "Meteor Crater is ahead, a hole in the desert nearly a
+  mile wide" and never "It is bigger than it sounds. Much bigger." Billboards
+  and the roadside signs you pass now read in full at every setting. If you
+  find them too talkative, the billboards switch turns them off outright, which
+  was always the better control than hearing half of each.
 - **Career stats now tells you what you are driving and what earns the next
   truck.** The screen you go to when you want to know where you stand did not
   mention your truck at all. If the yard was holding better equipment back
