@@ -1583,6 +1583,16 @@ onto exit signalling.
       Whatever lands: the 15 mph FLOOR has to go, or the advisory stays
       silent at exactly the speeds that need it.
 
+- [x] **T plans the next sleep stop at any distance (FIXED 2026-08-22).**
+      The planner's candidate filter was bounded by `_exit_window_mi()` -- the
+      exit-SIGNAL window, five-odd miles sized in real seconds -- so T seven
+      miles short of Hanging Lake declined and worked a minute later (owner).
+      Candidates are now every sleep-capable stop ahead on the route, nearest
+      first; `_speak_selected_sleep_stop` says "press X" inside the window and
+      "you will be told when its exit comes up; press X then" beyond it,
+      since X does nothing out there yet. The plan persists in
+      `trip.planned_stop_key` exactly as before; nothing arms until X.
+
 - [ ] **Two riders from the New Haven log, one still open.**
       1. [x] FIXED 2026-08-22: the status readout (S) and `status_lines()`
          now speak what the keeper is HOLDING -- `_keeper_ease_target`'s

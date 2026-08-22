@@ -229,7 +229,7 @@ def test_rolling_t_without_sleep_stop_gives_recovery_guidance(driving_app):
 
     assert app.state is driving
     assert driving._selected_stop_key is None
-    assert "No sleep-capable route stop is close enough ahead" in spoken[-1]
+    assert "No sleep-capable route stop is ahead on this route" in spoken[-1]
     assert "driving status menu" in spoken[-1]
 
 
@@ -326,3 +326,32 @@ def test_controller_rest_planning_names_controller_exit_control(monkeypatch, dri
 
     assert "Press D-pad down to signal" in spoken[-1]
     assert "Press X" not in spoken[-1]
+
+
+@pytest.mark.smoke
+def test_t_plans_a_sleep_stop_well_beyond_the_exit_window(driving_app):
+    """Owner, Hanging Lake, 2026-08-22: T seven miles out answered "no
+    sleep-capable route stop is close enough ahead to plan", and worked a
+    minute later with nothing changed but the odometer. Planning was bounded
+    by the exit window -- the five-odd miles inside which an exit can be
+    SIGNALLED -- which has nothing to do with deciding where to sleep.
+
+    T plans the next sleep-capable stop however far ahead it is. Inside the
+    window it says press X; beyond it, it says you will be told when the
+    exit comes up, because X does nothing out there yet."""
+    app, driving, spoken = driving_app
+    stop = sleep_stop(driving, ahead=20.0)
+    assert driving._exit_window_mi() < 20.0
+    driving.truck.velocity_mps = 60.0 / 2.23694
+
+    driving.handle_event(key_event(pygame.K_t, mod=0))
+
+    assert driving.trip.planned_stop_key == stop.key
+    assert driving._selected_stop_key == stop.key
+    assert "Planned sleep stop selected: public rest area: Prairie View Rest Area" in spoken[-1]
+    assert "20 miles ahead" in spoken[-1] or "20.0 miles ahead" in spoken[-1]
+    assert "You will be told when its exit comes up; press X to signal then." in spoken[-1]
+    assert "Press X to signal for this exit." not in spoken[-1]
+    # Nothing is armed or signalled by the plan itself.
+    assert driving._exit_stop is None
+    assert not driving._exit_signal_on

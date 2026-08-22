@@ -899,6 +899,15 @@
 
 ### Fixed
 
+- **T plans the next sleep stop however far ahead it is.** Pressing T seven
+  miles short of a rest area used to answer "no sleep-capable route stop is
+  close enough ahead to plan," then work a minute later with nothing changed
+  but the odometer -- planning was looking only as far as you could signal
+  for an exit, about five miles, which has nothing to do with deciding where
+  to sleep. T now plans the next sleep-capable stop on your route wherever
+  it is. Inside signalling range it tells you to press X; further out it
+  tells you you will be told when the exit comes up, and to press X then.
+
 - **The speed readout tells you what the speed keeper is actually holding.**
   Easing for a corner or a lower limit, the keeper was holding fifteen while
   the readout insisted it was "holding twenty-five" -- the number you had

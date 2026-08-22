@@ -1512,8 +1512,16 @@ def test_t_plans_rest_instead_of_opening_roadside_sleep_while_moving(monkeypatch
         driving.handle_event(key_event(pygame.K_t))
 
         assert isinstance(app.state, DrivingState)
-        assert spoken[-1].startswith("No sleep-capable route stop is close enough ahead to plan")
-        assert "stop safely away from a route point" in spoken[-1]
+        # T plans the NEXT sleep-capable stop anywhere ahead now (owner,
+        # 2026-08-22: planning used to stop looking at the five-mile exit
+        # window), so with one further up this route it plans rather than
+        # declines. Either way, what it must never do while rolling is open
+        # roadside sleep.
+        assert spoken[-1].startswith("Planned sleep stop selected") or spoken[-1].startswith(
+            "No sleep-capable route stop is ahead on this route"
+        )
+        if spoken[-1].startswith("No sleep-capable"):
+            assert "stop safely away from a route point" in spoken[-1]
         assert driving.trip.game_minutes == minutes_before
         assert not driving.truck.parking_brake
     finally:

@@ -1107,18 +1107,27 @@ class DrivingEventMixin:
             )
             return
 
+        # The NEXT sleep-capable stop ahead, however far. This used to look
+        # only as far as the exit window -- the five-odd miles inside which an
+        # exit can be SIGNALLED -- so T seven miles short of a rest area
+        # answered "no sleep-capable route stop is close enough ahead to
+        # plan", and worked a minute later with nothing changed but the
+        # odometer (owner, Hanging Lake, 2026-08-22). Planning a stop is a
+        # decision about hours, not about the turn signal; where the exit
+        # window matters is what the confirmation tells the driver to do
+        # next, below.
         candidates = [
             candidate
             for candidate in self.trip.stops
-            if 0 < candidate.at_mi - self.trip.position_mi <= self._exit_window_mi()
+            if candidate.at_mi > self.trip.position_mi
             and "sleep" in candidate.actions
             and candidate.parking != "none"
         ]
         candidates.sort(key=lambda candidate: candidate.at_mi)
         if not candidates:
-            self._set_status("No sleep-capable route stop close enough ahead to plan.")
+            self._set_status("No sleep-capable route stop ahead on this route.")
             self.ctx.say(
-                "No sleep-capable route stop is close enough ahead to plan. "
+                "No sleep-capable route stop is ahead on this route. "
                 f"Open the driving status menu with {status_hint} and review upcoming "
                 "route points. If you must rest, stop "
                 "safely away from a route point and use emergency shoulder sleep."
@@ -1162,10 +1171,17 @@ class DrivingEventMixin:
             else "Planned rest-stop stopping assistance is off; brake to a complete stop at the entrance."
         )
         prefix = "Still selected" if repeated else "Planned sleep stop selected"
-        message = (
-            f"{prefix}: {stop.spoken_name}, {distance} ahead{exit_text}. "
-            f"Press {self.ctx.control_hint('take_exit')} to signal for this exit. {assist}"
-        )
+        # Inside the exit window the signal is the next thing to do; beyond
+        # it the exit cannot be signalled yet, and saying "press X" to a
+        # driver twenty miles out asks for a press that does nothing.
+        if ahead <= self._exit_window_mi():
+            next_step = f"Press {self.ctx.control_hint('take_exit')} to signal for this exit."
+        else:
+            next_step = (
+                "You will be told when its exit comes up; press "
+                f"{self.ctx.control_hint('take_exit')} to signal then."
+            )
+        message = f"{prefix}: {stop.spoken_name}, {distance} ahead{exit_text}. {next_step} {assist}"
         self._set_status(message)
         self.ctx.say(message)
 
