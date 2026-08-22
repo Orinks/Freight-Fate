@@ -173,8 +173,19 @@ def test_an_active_review_session_is_not_dragged_forward() -> None:
     assert log.previous_message().text == "One."
 
 
-def test_a_lapsed_session_also_clears_the_category_filter() -> None:
-    """A filter left on Event hid the whole delivery settlement in playtest."""
+def test_a_lapsed_session_keeps_the_filter_but_never_hides_in_silence() -> None:
+    """Two tester reports pull opposite ways, and both are right.
+
+    A filter left on Event once hid a whole delivery settlement in review, so
+    the lapse used to clear it. But clearing it meant Tim S, who sets the
+    filter to Event precisely because it makes the cab navigable, lost his
+    choice every time he spent eleven seconds driving instead of browsing --
+    which reads as the filter dropping at random (2026-08-21).
+
+    The harm in the first report was SILENCE, not filtering: the settlement
+    was unreachable without any sign it existed. So the preference stands,
+    and the log can say what the filter is keeping out.
+    """
     clock = FakeClock()
     log = MessageLog(clock=clock)
 
@@ -185,8 +196,17 @@ def test_a_lapsed_session_also_clears_the_category_filter() -> None:
     clock.advance(REVIEW_WINDOW_S + 1)
     log.add("Delivery complete.", MessageCategory.GENERAL)
 
+    # The driver's choice survives the lapse.
+    assert log.category_name() == "Event"
+    assert log.previous_message().text == "Hazard ahead."
+    # And the settlement is not silently gone: the log knows it is out there.
+    assert log.hidden_newer_count() == 1
+
+    # Winding the filter back the way the player does reaches it, as ever.
+    assert log.previous_category() == "General"
+    assert log.previous_category() == "All"
     assert log.previous_message().text == "Delivery complete."
-    assert log.category_name() == "All"
+    assert log.hidden_newer_count() == 0
 
 
 def test_copying_after_a_lapse_copies_the_newest() -> None:

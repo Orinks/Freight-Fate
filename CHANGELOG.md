@@ -928,7 +928,10 @@
   Sound country on the way up the valley, Hank Williams's Alabama,
   Johnny Cash's delta bottomland, and the Franklin County Trucking
   Company's own home turf on the road through Missouri. Billboards
-  still respect the roadside chatter setting.
+  still respect the roadside chatter setting. Twenty-two of the jokes
+  were written by Tim K, who sent a page of them over -- the washing
+  machine full of rocks, the six-space parking lot and the burger that
+  needs a second trailer are all his.
 
 - **Learn what every sound means before you meet it at speed.** A new
   Learn game sounds screen on the main menu, and on the pause menu while
@@ -1013,6 +1016,19 @@
   re-read.
 
 ### Fixed
+- **The message review filter stays where you put it.** Locking review to a
+  single category made it much easier to navigate, but the choice was being
+  thrown away roughly ten seconds after your last press -- so if you went
+  back to driving for a moment, the next press quietly put you back to all
+  messages. It felt random because it was a timer. Your choice now stands
+  until you change it. It used to be cleared for a reason, mind: a filter
+  left on events once hid a whole delivery settlement. So review can now tell
+  you when the filter is holding newer messages back, rather than letting
+  them disappear without a word.
+- **Texas billboards stay in Texas.** A couple of the song tributes named a
+  real place -- Lubbock, the West Texas cotton flats -- while sitting in the
+  pool for signs that belong anywhere, so you could pass them in Maine. They
+  have moved to the road they are about.
 - **A trooper stop no longer repeats its demand after you have pulled over.**
   When an urgent line cuts something off mid sentence, the game hands that
   line back so it finishes. Two of the heaviest lines in the game could come

@@ -307,6 +307,12 @@ CORRIDOR_BILLBOARDS: dict[str, tuple[str, ...]] = {
     ),
     # Song tribute -- Abilene, Texas (George Hamilton the Fourth).
     "I-20": (
+        # Moved off the corridor-less tribute pool 2026-08-21: that pool is
+        # for songs whose whole point is being from everywhere at once, and
+        # these two name a place. On the loose pool they played in Maine
+        # (owner). I-20 is the West Texas run they are actually about.
+        "West Texas cotton flats made Waylon Jennings. One question -- Are You Sure Hank Done It This Way -- and outlaw country was born.",
+        "Somewhere out there is Lubbock, Texas. Mac Davis kept it in his rear view mirror until he missed it.",
         "Abilene ahead. George Hamilton the Fourth made the town sound gentle as a Sunday. Watch for crosswinds.",
     ),
 }
@@ -356,8 +362,6 @@ _CORRIDOR_BY_NUMBER = {_highway_key(k): v for k, v in CORRIDOR_BILLBOARDS.items(
 SONG_TRIBUTE_BILLBOARDS = (
     "Hank Snow claimed he'd been everywhere. This mile marker confirms it.",
     "The girl on the billboard? Wrong billboard. Del Reeves saw her a few hundred miles back. Eyes on the road.",
-    "West Texas cotton flats made Waylon Jennings. One question -- Are You Sure Hank Done It This Way -- and outlaw country was born.",
-    "Somewhere out there is Lubbock, Texas. Mac Davis kept it in his rear view mirror until he missed it.",
     "Redwood country, far off this road: trees taller than your rig is long. Andrew Gabbard wrote one called Redwood.",
     # Rewritten 2026-08-20 after a tester was honestly befuddled: the old
     # form was three fragments with no connective tissue ("Up any of these
