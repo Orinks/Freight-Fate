@@ -899,6 +899,19 @@
 
 ### Fixed
 
+- **Coming off the ramp onto city streets, you hear the first corner and
+  the speed keeper takes the streets at once.** When the first turn was
+  only a few hundred feet past the bottom of the ramp, its instruction was
+  spoken a moment after "off the ramp and onto city streets" and got
+  dropped for arriving too late -- twice in a row at Spokane, so "turn
+  right onto West Main Avenue" was never heard at all. And the truck rolled
+  off the ramp with automatic speed control still paused, so nothing slowed
+  it for that corner but your own brake. The off-the-ramp line now carries
+  the first corner in the same breath -- "start on unnamed public road,
+  then right turn onto West Main Avenue, 250 feet, advise 20" -- a corner
+  call that already says "now" is never dropped as stale, and the speed
+  keeper comes back the instant the streets begin.
+
 - **The destination ramp no longer stops you a mile short of the gate when
   city streets follow it.** With the approach assistance finally able to
   brake, it stopped the truck dead at the bottom of the destination ramp

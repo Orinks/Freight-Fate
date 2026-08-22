@@ -645,3 +645,77 @@ def test_the_ramp_is_not_the_arrival_when_a_street_chain_follows_it(monkeypatch)
         assert d.truck.brake > 0.0
     finally:
         app.shutdown()
+
+
+def test_off_the_ramp_carries_the_first_corner_and_hands_speed_control_back(monkeypatch):
+    """Owner, Spokane, 2026-08-22: "the assist did not stop and I had to
+    brake to start the turn onto city streets."
+
+    The chain begins 264 feet before a right onto West Main Avenue. Raised on
+    its own a frame after the swap, that corner's call queued as a droppable
+    lead behind the off-the-ramp line and the gate warning, went stale, and
+    was dropped -- twice, the second time after the loop-back -- so it was
+    never heard. And the truck came off at 21 with nothing holding it: the
+    ramp's transit pause was still on, so the keeper that would have eased
+    for the corner had not come back.
+
+    The first corner is spoken IN the handoff line, at that line's priority,
+    and the pause ends at the handoff.
+    """
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        app.ctx.settings.destination_approach_assist = True
+        app.ctx.settings.speed_keeper = True
+        for city, location in (
+            ("spokane_wa_us", "Spokane metro freight market"),
+            ("kenosha_wi_us", "Kenosha Cross-Dock"),
+            ("gary_in_us", "Gary Company Yard"),
+        ):
+            d.job.destination, d.job.destination_location = city, location
+            d._destination_chain_ahead = None
+            route = d._surface_chain_route()
+            if route is not None and len(route.legs) > 1 and route.legs[0].miles <= 0.1:
+                break
+        else:
+            pytest.skip("no baked chain with a corner inside the first tenth of a mile")
+
+        def capture(message, *a, **kw):
+            spoken.append((message, kw.get("priority")))
+
+        monkeypatch.setattr(app.ctx, "say_event", capture)
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+
+        # The ramp's transit pause, exactly as the terminal leaves it.
+        d._speed_control_armed = True
+        d._pause_speed_control(resume_when_rolling=True)
+        assert d._speed_control_paused_at_stop
+
+        d.trip.position_mi = d.trip.total_miles
+        d.trip.finished = True
+        assert d._begin_surface_chain(announce=True)
+
+        message, priority = spoken[-1]
+        first_street = d.trip.route.legs[1].highway
+        assert message.startswith("Off the ramp and onto city streets")
+        assert first_street in message, message
+        assert "Then " in message and "turn onto" in message.lower() or "turn" in message.lower()
+        from freight_fate.speech_pacing import EventPriority
+
+        assert priority == EventPriority.ROUTE
+        # Spoken here, so the commitment loop must not raise it again.
+        corner = d._turn_cue_in_play()
+        assert corner is not None and corner.key in d._turn_advised
+        assert d.trip.controlled_turn is True
+        # And the pause is gone: the next frame may hand the streets to the
+        # keeper without waiting on a driver who is off the brake.
+        assert not d._speed_control_paused_at_stop
+    finally:
+        app.shutdown()

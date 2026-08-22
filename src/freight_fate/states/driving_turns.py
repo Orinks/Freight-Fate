@@ -71,6 +71,9 @@ TURN_MISS_LOOP_MIN = 8.0
 # How far past the corner it stays the corner in play, and where a completed
 # turn puts the truck back on the road.
 TURN_COMMIT_TAIL_MI = 0.15
+# Inside this the approach call drops the distance and says "now" -- and is
+# an act-now instruction rather than a lead, which changes how it is paced.
+TURN_NOW_MI = 0.05
 # The pursuit guide starts leaning into the corner this far out, reaching its
 # full lean at the corner itself.
 TURN_GUIDE_LEAD_MI = 0.2
@@ -198,7 +201,7 @@ class TurnCommitmentMixin:
         direction = str(cue.direction).strip().lower()
         street = self._turn_street_text(cue)
         target = settings.speed_text(self._turn_speed_mph(cue))
-        if ahead_mi <= 0.05:
+        if ahead_mi <= TURN_NOW_MI:
             call = f"Turn {direction} now onto {street}."
         else:
             distance = settings.short_distance_text(ahead_mi)
@@ -258,15 +261,31 @@ class TurnCommitmentMixin:
             if sound:
                 pan = -TURN_CUE_PAN if cue.direction == "left" else TURN_CUE_PAN
                 self.ctx.audio.play(sound, pan=pan)
-            # Deliberately left on the droppable ambient default, unlike the
-            # act-now navigation calls raised to ROUTE alongside it. This is
-            # the APPROACH cue -- it fires while the corner is still ahead --
-            # and a quarter-mile warning that survives to be spoken AFTER the
-            # turn has been missed is worse than one that never arrives:
-            # test_missed_turn_speaks_at_urgent_only caught exactly that, the
-            # stale cue landing on top of the miss announcement. Going stale
-            # is the correct end for a lead announcement.
-            self.ctx.say_event(message, interrupt=False, category=SpeechCategory.NAVIGATION)
+            # A LEAD is deliberately left on the droppable ambient default,
+            # unlike the act-now navigation calls raised to ROUTE alongside
+            # it: a quarter-mile warning that survives to be spoken AFTER the
+            # turn has been missed is worse than one that never arrives
+            # (test_missed_turn_speaks_at_urgent_only caught exactly that, the
+            # stale cue landing on top of the miss announcement). Going stale
+            # is the correct end for a lead.
+            #
+            # A call that already says "now" is not a lead. It is the only
+            # instruction the driver gets for a corner they are already at --
+            # a cold arrival, or a loop-back onto a corner closer to the start
+            # of the street chain than one spoken window -- and dropped as
+            # stale it leaves the driver with nothing: "Turn right now onto
+            # West Main Avenue" was dropped twice on one arrival and never
+            # once heard (owner, Spokane, 2026-08-22). ROUTE, like the
+            # trip's own near call.
+            if max(0.0, ahead) <= TURN_NOW_MI:
+                self.ctx.say_event(
+                    message,
+                    interrupt=False,
+                    priority=EventPriority.ROUTE,
+                    category=SpeechCategory.NAVIGATION,
+                )
+            else:
+                self.ctx.say_event(message, interrupt=False, category=SpeechCategory.NAVIGATION)
             return
         if ahead > 0:
             return

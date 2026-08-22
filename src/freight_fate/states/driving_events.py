@@ -2157,13 +2157,50 @@ class DrivingEventMixin:
         self._destination_assist_brake = 0.0
         self._reset_exit_lane_state()
         self._exit_signal_on = False
+        # The ramp's transit pause ends HERE, not a frame later on a
+        # no-braking condition: the streets begin with the truck at whatever
+        # speed the terminal let through and, on this chain, a corner 264 feet
+        # on. Nothing held that speed down -- cruise was paused for the ramp,
+        # the keeper had not come back, and the driver was on the brake
+        # because of it, which is the one thing that keeps the keeper from
+        # coming back (owner, Spokane, 2026-08-22: "I had to brake to start
+        # the turn onto city streets"). The terminal is honoured by driving
+        # through it; automatic speed control belongs to the street zones
+        # from the first foot of them.
+        self._clear_stop_pause()
+        # The first corner, if the chain starts inside its own window: it is
+        # spoken in THIS line, at this line's priority, or it is not heard at
+        # all. Raised on its own a frame later it queued behind the
+        # off-the-ramp announcement and the gate warning as a droppable lead,
+        # went stale, and was dropped -- twice on one arrival, the second
+        # time after the loop-back, so "Turn right onto West Main Avenue"
+        # was never once spoken (owner, Spokane, 2026-08-22).
+        first_corner = ""
+        corner = self._turn_cue_in_play()
+        if corner is not None:
+            ahead = corner.at_mi - self.trip.position_mi
+            if 0.0 < ahead <= self._turn_window_mi():
+                call = self._turn_approach_text(corner, ahead)
+                first_corner = " Then " + call[:1].lower() + call[1:]
+                self._turn_advised.add(corner.key)
+                self.trip.controlled_turn = True
+                sound = _local_turn_sound(corner)
+                if sound:
+                    pan = -TURN_CUE_PAN if corner.direction == "left" else TURN_CUE_PAN
+                    self.ctx.audio.play(sound, pan=pan)
         if announce:
             first = route.legs[0]
             street = first.local_cue.rstrip(".") if first.local_cue else f"Start on {first.highway}"
             self.ctx.audio.play("ui/notify", volume=0.7)
+            message = (
+                f"Off the ramp and onto city streets: {street[:1].lower()}{street[1:]}."
+                f"{first_corner} "
+                f"{self.trip._distance_text(route.miles)} to the facility gate."
+            )
+            if first_corner:
+                self._turn_grace_s = self._turn_grace_seconds(message)
             self.ctx.say_event(
-                f"Off the ramp and onto city streets: {street[:1].lower()}{street[1:]}. "
-                f"{self.trip._distance_text(route.miles)} to the facility gate.",
+                message,
                 interrupt=False,
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.NAVIGATION,

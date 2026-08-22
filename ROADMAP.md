@@ -1496,6 +1496,21 @@ onto exit signalling.
           with "paused" the only status. It now leaves a holding controller
           alone until the truck is over what the gore accepts.
 
+      Third Spokane drive (2026-08-22), the ramp handoff itself: the chain
+      starts 264 ft before a right onto West Main Avenue. Its approach call
+      was raised a frame after the swap as a droppable ambient lead, queued
+      behind the ROUTE off-the-ramp line and the gate warning, went stale and
+      was dropped -- twice, the second time after the loop-back (whose
+      reposition floors at the chain start, closer than one spoken window).
+      Speed control was still under the ramp's transit pause and the owner
+      was on the brake, which is the one condition that keeps the keeper from
+      resuming. Fixed three ways: `_begin_surface_chain` folds the first
+      corner into its own ROUTE line when the chain starts inside the corner's
+      window (marks it advised, sets `controlled_turn`, plays the panned
+      earcon); a "now" approach call (`TURN_NOW_MI`) is ROUTE, never a lead;
+      and the transit pause is cleared at the handoff so the street zones
+      re-engage the keeper on the first frame.
+
       Known rough edge, recorded rather than tuned: the tracker maps needed
       deceleration onto the pedal through `assist_full_decel_mps2` and lags a
       rising demand, so the last few metres on a downgrade street finish at a

@@ -664,3 +664,46 @@ def test_a_corner_you_are_already_slow_enough_for_still_buys_real_seconds(monkey
         assert d.trip.effective_time_scale == 1.0
     finally:
         app.shutdown()
+
+
+def test_a_now_corner_call_is_never_a_droppable_lead(monkeypatch):
+    """A cold arrival at a corner -- or a loop-back onto one closer to the
+    chain start than a spoken window -- gets the "now" form, and that is the
+    only instruction the driver will get for it. Dropped as stale behind the
+    handoff line it left the owner with nothing, twice on one arrival
+    (Spokane, 2026-08-22). A lead may go stale; a "now" call may not."""
+    from freight_fate.app import App
+    from freight_fate.speech_pacing import EventPriority
+
+    app = App()
+    spoken = []
+    try:
+        d = _driving(app)
+        _street_chain(d)
+
+        def capture(message, *a, **kw):
+            spoken.append((message, kw.get("priority")))
+
+        monkeypatch.setattr(app.ctx, "say_event", capture)
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+
+        # Arrive cold, 150 feet from the corner, over its speed.
+        d.trip.position_mi = 0.6 - 150.0 / 5280.0  # the corner is at 0.6
+        _mph(d, 30.0)
+        d._update_turn_commitment(0.016)
+        message, priority = spoken[-1]
+        assert message.startswith("Turn left now onto") or message.startswith("Turn right now onto")
+        assert priority == EventPriority.ROUTE
+
+        # A quarter mile out it is a lead, and a lead stays droppable.
+        d2 = _driving(app)
+        _street_chain(d2)
+        spoken.clear()
+        d2.trip.position_mi = 0.6 - 0.25
+        _mph(d2, 30.0)
+        d2._update_turn_commitment(0.016)
+        message, priority = spoken[-1]
+        assert "now" not in message.split(" onto ")[0]
+        assert priority is None
+    finally:
+        app.shutdown()
