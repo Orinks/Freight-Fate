@@ -34,6 +34,7 @@ class CareerStatsState(MenuState):
     def _lines(self) -> list[str]:
         from ..models import enforcement
         from ..models.career import xp_to_next_level
+        from ..models.carrier_fleet import equipment_status_lines
         from ..models.jobs import ENDORSEMENT_LABELS
         from ..models.solvency import debt_line
 
@@ -67,6 +68,12 @@ class CareerStatsState(MenuState):
             enforcement.dispatch_trust_line(p),
             enforcement.career_menu_status(p),
             enforcement.standing_text(p),
+            # What the driver is actually in, and what stands between them and
+            # the next tier. The hold was spoken at the dispatch hand-over and
+            # at the level-up that brought no truck, and nowhere a player could
+            # go and ASK -- which is what this screen is for (Brandon,
+            # 2026-08-22).
+            *equipment_status_lines(p),
             f"Balance: {p.money:,.0f} dollars",
             *([owed] if owed else []),
             endorsements,

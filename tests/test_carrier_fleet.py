@@ -296,3 +296,42 @@ def test_a_dedicated_driver_hears_why_the_yard_held_their_truck_back():
     fine = _profile_at_level(11)
     assert equipment_held_back(fine) is False
     assert equipment_hold_text(fine) == ""
+
+
+def test_the_stats_screen_answers_what_is_holding_the_next_truck_back():
+    """Brandon, 2026-08-22: "it still does not tell me whats holding me back
+    from driving the next level truck".
+
+    The hold was already explained -- at the dispatch hand-over, and at the
+    level-up that arrived without a truck. Both are moments. A driver who
+    wants to know where they stand goes to the career stats screen and asks,
+    and that screen did not mention equipment at all, so the answer only ever
+    reached a player who happened to be listening when it went by.
+    """
+    from freight_fate.models.carrier_fleet import (
+        eligible_fleet_tier,
+        equipment_status_lines,
+        next_fleet_tier,
+    )
+
+    # Held back: what he is in, then why, then what gives it back.
+    held = _profile_at_level(11)
+    held.career.reputation = 0.0
+    lines = equipment_status_lines(held)
+    assert len(lines) == 2
+    assert lines[0].startswith("Truck: ")
+    assert eligible_fleet_tier(held).label in lines[1]
+    assert "comes back to you" in lines[1]
+
+    # In good standing there is nothing to explain, so the screen says what
+    # the next tier costs instead of nagging about a hold that is not there.
+    fine = _profile_at_level(11)
+    lines = equipment_status_lines(fine)
+    assert len(lines) == 1
+    upcoming = next_fleet_tier(fine)
+    assert f"Level {upcoming.min_level} earns the {upcoming.label}." in lines[0]
+
+    # And at the top of the ladder there is no next tier to name.
+    top = _profile_at_level(20)
+    assert next_fleet_tier(top) is None
+    assert "the carrier's best equipment" in equipment_status_lines(top)[0]

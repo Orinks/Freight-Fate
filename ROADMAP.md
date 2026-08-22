@@ -1339,6 +1339,16 @@ onto exit signalling.
       mule every long haul and asked what gives. The note now speaks the hold
       text for a dedicated driver and stays silent for one in good standing.
 
+      AND SOMEWHERE HE CAN GO AND ASK (2026-08-22). Brandon re-tested and
+      reported the career stats screen still silent on it, which is the same
+      gap one layer up: both the dispatch note and the withheld level-up are
+      MOMENTS, and a moment the player had to be present for is not a record.
+      That screen exists to answer "where do I stand" and did not mention
+      equipment at all. It now carries what the driver is in and which tier
+      it belongs to, the hold and what clears it when there is one, and
+      otherwise the level that earns the next tier -- so the question is
+      answerable at any time, not only when the game happens to raise it.
+
 - [ ] **Audit every interrupting line for whether it is still TRUE when it
       comes back.** A cut line is handed back so it finishes rather than
       vanishing -- Shane asked for that, and it is what rescued the missing

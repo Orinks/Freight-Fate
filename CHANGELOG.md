@@ -1141,6 +1141,14 @@
   re-read.
 
 ### Fixed
+- **Career stats now tells you what you are driving and what earns the next
+  truck.** The screen you go to when you want to know where you stand did not
+  mention your truck at all. If the yard was holding better equipment back
+  from you, that was said when dispatch handed you a tractor and when a
+  level-up arrived without one -- both moments you had to be there for. Career
+  stats now carries the tractor you are in and the fleet it belongs to, and
+  either the reason the better iron is being kept from you and what gives it
+  back, or the level that earns the next fleet.
 - **Canceling a planned stop gives you the road back straight away.** Signal
   for an exit and the drive drops out of its usual pacing for the approach,
   so you have real time to set up the braking. Press the key again to call
