@@ -14,6 +14,14 @@ does not block the unsigned bundle on downloaded builds, while still not
 requiring an Apple Developer ID.
 
 Run from the repository root: ``uv run python tools/build_release.py``
+
+``--rust`` packages the Rust port instead: ``cargo build --release -p
+freight-fate`` (``--cargo-target-dir`` picks the Cargo target directory),
+then the same ``FreightFate/`` folder layout -- executable renamed to
+``FreightFate``, the vendored SDL2/BASS/Prism libraries beside it, the
+runtime data tree under ``freight_fate/data``, the packs, ``build_info.json``
+and the docs -- staged under ``build/FreightFate`` and archived exactly as
+the Python build is. The Python mode stays the default.
 """
 
 from __future__ import annotations
@@ -521,6 +529,26 @@ def run_nuitka() -> Path:
     return build_dir
 
 
+def verify_sound_packs(root: Path) -> None:
+    """Open the staged packs and prove they carry what the game reads."""
+    assets_pack = _load_tool("pack_sounds")._load_assets_pack()
+    pack_names = assets_pack.SoundPack(root / "freight_fate" / "sounds.pak").names()
+    if not any(name.endswith((".ogg", ".wav")) for name in pack_names):
+        raise RuntimeError("Packaged sound pack contains no audio files")
+
+    if "engine_classic/idle.ogg" not in pack_names:
+        raise RuntimeError(
+            "Packaged sound pack predates the classic engine voice, so the "
+            "Settings engine-voice option would fall back silently; rebuild "
+            "the committed pack with tools/pack_sounds.py on a builder "
+            "machine and commit it"
+        )
+
+    music_pack_names = assets_pack.SoundPack(root / "freight_fate" / "music.pak").names()
+    if not any(name.startswith("music/") for name in music_pack_names):
+        raise RuntimeError("Packaged music pack contains no music files")
+
+
 def verify_packaged_payload(build_dir: Path) -> None:
     root = runtime_root(build_dir)
     exe = root / (APP_NAME + (".exe" if sys.platform == "win32" else ""))
@@ -563,22 +591,7 @@ def verify_packaged_payload(build_dir: Path) -> None:
             f"packed in sounds.pak: {exposed_assets.relative_to(root)}"
         )
 
-    assets_pack = _load_tool("pack_sounds")._load_assets_pack()
-    pack_names = assets_pack.SoundPack(root / "freight_fate" / "sounds.pak").names()
-    if not any(name.endswith((".ogg", ".wav")) for name in pack_names):
-        raise RuntimeError("Packaged sound pack contains no audio files")
-
-    if "engine_classic/idle.ogg" not in pack_names:
-        raise RuntimeError(
-            "Packaged sound pack predates the classic engine voice, so the "
-            "Settings engine-voice option would fall back silently; rebuild "
-            "the committed pack with tools/pack_sounds.py on a builder "
-            "machine and commit it"
-        )
-
-    music_pack_names = assets_pack.SoundPack(root / "freight_fate" / "music.pak").names()
-    if not any(name.startswith("music/") for name in music_pack_names):
-        raise RuntimeError("Packaged music pack contains no music files")
+    verify_sound_packs(root)
 
     if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
         raise RuntimeError(
@@ -760,6 +773,293 @@ def archive(build_dir: Path, label: str) -> Path:
     return out
 
 
+# -- Rust mode ----------------------------------------------------------------
+#
+# ``--rust`` packages the Rust port (``crates/freight-fate``) instead of the
+# Nuitka build. The staged folder keeps the Python layout the in-game updater
+# and ``verify_archive`` already expect -- a top-level ``FreightFate`` folder
+# holding ``FreightFate(.exe)``, ``build_info.json``, the docs, and a
+# ``freight_fate/`` package folder with the packs -- with two differences the
+# Rust binary dictates: the runtime data tree ships on disk under
+# ``freight_fate/data`` (``ff_core::data::data_resources::data_root`` looks
+# for ``<exe dir>/freight_fate/data``; there is no baked module), and the
+# native libraries (SDL2, BASS and its plugins, Prism) sit flat beside the
+# executable, which is where the crates' build scripts stage them and where
+# their loaders look first.
+
+# ``[[bin]] name`` in crates/freight-fate/Cargo.toml. The staged copy is
+# renamed to APP_NAME: ``updater::is_frozen`` (both ports) accepts the stem
+# case-insensitively, but the apply script, ``extracted_root`` and
+# ``verify_archive`` all spell it ``FreightFate``.
+RUST_PACKAGE = "freight-fate"
+RUST_BIN_STEM = "freightfate"
+RUST_STAGE_DIR = BUILD / APP_NAME
+# Loose runtime data files the Rust binary reads through
+# ``ff_core::data::data_resources`` (the same list ``tools/bake_data.py``
+# compiles into the Python build) plus the street-limit layer it reads
+# directly. ``world_data`` ships the files ``world_loader`` opens -- index,
+# geo, the per-country city list and the leg shards -- and the gameplay
+# screens under ``us/gameplay``; ``world_source``, the geometry layer and
+# every tool-only file stay home.
+RUST_DATA_FILES = (
+    "buffs.json",
+    "city_services.json",
+    "facility_approaches.json",
+    "facility_endpoints.json",
+    "local_approaches.json",
+    "local_geometry.json",
+    "radio_catalog.json",
+    "radio_imported.json",
+    "street_limits.json",
+    "world_data/index.json",
+    "world_data/geo.json",
+    "world_data/us/cities.json",
+    "world_data/us/gameplay/curves.jsonl",
+    "world_data/us/gameplay/curve_artifacts.jsonl",
+)
+RUST_DATA_GLOBS = ("world_data/us/legs/*.json",)
+# The committed loose sound tree (``assets/sounds``) travels as editable
+# files: the Rust asset loader reads it beside the pack. The licensed overlay
+# never ships loose.
+LOOSE_SOUND_TREE = Path("assets") / "sounds"
+LICENSED_SOUND_TREE = "sounds-licensed"
+# Git LFS writes this text in place of a pack that was never fetched.
+LFS_POINTER_PREFIX = b"version https://git-lfs"
+# Build-only leftovers in the Cargo profile directory that are not runtime
+# libraries even though they carry a native suffix on some platforms.
+CARGO_NON_RUNTIME_SUFFIXES = {".pdb", ".d", ".rlib", ".lib", ".exp"}
+
+
+def rust_exe_name(platform_name: str = sys.platform) -> str:
+    """The executable file name the staged build ships."""
+    return APP_NAME + (".exe" if platform_name == "win32" else "")
+
+
+def cargo_exe_name(platform_name: str = sys.platform) -> str:
+    """The executable file name ``cargo build`` writes."""
+    return RUST_BIN_STEM + (".exe" if platform_name == "win32" else "")
+
+
+def cargo_build_command(target_dir: Path | None = None) -> list[str]:
+    cmd = ["cargo", "build", "--release", "-p", RUST_PACKAGE]
+    if target_dir is not None:
+        cmd.extend(["--target-dir", str(target_dir)])
+    return cmd
+
+
+def cargo_profile_dir(target_dir: Path | None = None) -> Path:
+    """Where ``cargo build --release`` leaves the binary and staged libraries."""
+    return (target_dir if target_dir is not None else ROOT / "target") / "release"
+
+
+def is_lfs_pointer(path: Path) -> bool:
+    """True when ``path`` is a Git LFS pointer rather than the real file."""
+    try:
+        if path.stat().st_size > 1024:
+            return False
+        with open(path, "rb") as f:
+            return f.read(len(LFS_POINTER_PREFIX)) == LFS_POINTER_PREFIX
+    except OSError:
+        return False
+
+
+def require_real_pack(path: Path) -> None:
+    """Refuse to stage a pack that is only a Git LFS pointer."""
+    if not path.exists():
+        raise RuntimeError(f"Sound pack was not found: {path}")
+    if is_lfs_pointer(path):
+        raise RuntimeError(
+            f"{path.name} is a Git LFS pointer, not the pack itself; run "
+            "`git lfs pull` in this checkout before building"
+        )
+
+
+def rust_data_files(package_dir: Path = PACKAGE_DIR) -> list[Path]:
+    """The data files to ship, as paths relative to ``package_dir``."""
+    data_dir = package_dir / "data"
+    files: list[Path] = []
+    for relative in RUST_DATA_FILES:
+        source = data_dir / relative
+        if not source.is_file():
+            raise RuntimeError(f"Runtime data file is missing from the checkout: {source}")
+        files.append(Path("data") / relative)
+    for pattern in RUST_DATA_GLOBS:
+        matches = sorted(data_dir.glob(pattern))
+        if not matches:
+            raise RuntimeError(f"No runtime data files match {pattern} under {data_dir}")
+        files.extend(Path("data") / path.relative_to(data_dir) for path in matches)
+    return files
+
+
+def rust_loose_sound_files(package_dir: Path = PACKAGE_DIR) -> list[Path]:
+    """The committed loose sound tree, relative to ``package_dir``."""
+    tree = package_dir / LOOSE_SOUND_TREE
+    if not tree.is_dir():
+        raise RuntimeError(f"Committed sound tree was not found: {tree}")
+    return [
+        path.relative_to(package_dir)
+        for path in sorted(tree.rglob("*"))
+        if path.is_file() and "__pycache__" not in path.parts
+    ]
+
+
+def rust_native_libraries(profile_dir: Path, exts: set[str] | None = None) -> list[Path]:
+    """Shared libraries the crates' build scripts staged beside the binary.
+
+    Top level only: ``deps/`` holds proc-macro DLLs that are build-time
+    artifacts, not runtime libraries.
+    """
+    suffixes = exts or platform_native_exts()
+    return sorted(
+        path
+        for path in profile_dir.iterdir()
+        if path.is_file()
+        and path.suffix.lower() in suffixes
+        and path.suffix.lower() not in CARGO_NON_RUNTIME_SUFFIXES
+    )
+
+
+def plan_rust_layout(
+    profile_dir: Path,
+    package_dir: Path = PACKAGE_DIR,
+    platform_name: str = sys.platform,
+    native_exts: set[str] | None = None,
+) -> list[tuple[Path, Path]]:
+    """Every (source, destination relative to the staged folder) pair.
+
+    Pure: nothing is copied, so tests can check the plan against a fake
+    profile directory and package tree without running cargo.
+    """
+    exe = profile_dir / cargo_exe_name(platform_name)
+    if not exe.is_file():
+        raise RuntimeError(f"cargo build left no executable at {exe}")
+    plan: list[tuple[Path, Path]] = [(exe, Path(rust_exe_name(platform_name)))]
+    for lib in rust_native_libraries(profile_dir, native_exts):
+        plan.append((lib, Path(lib.name)))
+    package = Path("freight_fate")
+    for relative in rust_data_files(package_dir):
+        plan.append((package_dir / relative, package / relative))
+    for relative in rust_loose_sound_files(package_dir):
+        plan.append((package_dir / relative, package / relative))
+    # The game's fallback location for BASS add-on plugins
+    # (``audio::assets::plugin_lib_dir`` is ``<exe dir>/freight_fate/lib``);
+    # the copy beside bass.dll is what normally loads, this one covers a
+    # player who swaps in their own BASS.
+    if ADDON_LIB_DIR.is_dir():
+        suffixes = native_exts or platform_native_exts()
+        for path in sorted(ADDON_LIB_DIR.iterdir()):
+            if path.is_file() and path.suffix.lower() in suffixes:
+                plan.append((path, package / "lib" / path.name))
+    return plan
+
+
+def run_cargo(target_dir: Path | None = None) -> Path:
+    """Build the release binary and return the profile directory."""
+    subprocess.run(cargo_build_command(target_dir), cwd=ROOT, check=True)
+    return cargo_profile_dir(target_dir)
+
+
+def stage_rust_build(profile_dir: Path, build_dir: Path = RUST_STAGE_DIR) -> Path:
+    """Assemble the Rust release folder from the plan plus the packs and docs."""
+    require_real_pack(PACKAGE_DIR / "sounds.pak")
+    require_real_pack(PACKAGE_DIR / "music.pak")
+    plan = plan_rust_layout(profile_dir)
+    if build_dir.exists():
+        shutil.rmtree(build_dir)
+    build_dir.mkdir(parents=True)
+    for source, relative in plan:
+        destination = build_dir / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+    if sys.platform != "win32":
+        exe = build_dir / rust_exe_name()
+        exe.chmod(exe.stat().st_mode | 0o755)
+    stage_sound_pack(build_dir)
+    return build_dir
+
+
+def verify_rust_payload(build_dir: Path) -> None:
+    """Prove the staged Rust folder holds what the binary loads."""
+    exe = build_dir / rust_exe_name()
+    required = [
+        exe,
+        build_dir / "build_info.json",
+        build_dir / "LICENSE.txt",
+        build_dir / "CHANGELOG.md",
+        build_dir / "USER_MANUAL.md",
+        build_dir / "USER_MANUAL.html",
+        build_dir / "ALPHA_TEST_BOOK.md",
+        build_dir / "ALPHA_TEST_BOOK.html",
+        build_dir / "SOUND_CREDITS.md",
+        build_dir / "freight_fate" / "sounds.pak",
+        build_dir / "freight_fate" / "music.pak",
+        build_dir / "freight_fate" / LOOSE_SOUND_TREE / "CREDITS.md",
+    ]
+    required.extend(build_dir / "freight_fate" / "data" / relative for relative in RUST_DATA_FILES)
+    missing = [path for path in required if not path.exists()]
+    if missing:
+        raise RuntimeError(
+            "Rust payload is incomplete: "
+            + ", ".join(path.relative_to(build_dir).as_posix() for path in missing)
+        )
+    if not list(
+        (build_dir / "freight_fate" / "data" / "world_data" / "us" / "legs").glob("*.json")
+    ):
+        raise RuntimeError("Rust payload ships no leg shards under world_data/us/legs")
+
+    package = build_dir / "freight_fate"
+    leaked = [
+        path.relative_to(build_dir).as_posix()
+        for path in package.rglob("*")
+        if path.name in ("world_source", "__pycache__", LICENSED_SOUND_TREE) or path.suffix == ".py"
+    ]
+    if leaked:
+        raise RuntimeError(
+            "Rust payload ships source-only files: " + ", ".join(sorted(leaked)[:10])
+        )
+
+    if sys.platform == "win32":
+        for name in ("SDL2.dll", "bass.dll", "prism.dll"):
+            if not (build_dir / name).exists():
+                raise RuntimeError(f"Rust payload is missing the native library {name}")
+    elif not native_files(build_dir):
+        print(
+            "Warning: no native libraries staged beside the executable; the game "
+            "will need system SDL2/BASS/Prism on this platform."
+        )
+
+    verify_sound_packs(build_dir)
+
+    if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
+        raise RuntimeError(f"Packaged executable is not runnable: {exe.relative_to(build_dir)}")
+
+
+def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
+    """The whole ``--rust`` pipeline, ending with the verified archive."""
+    profile_dir = run_cargo(target_dir)
+    build_dir = stage_rust_build(profile_dir)
+    stamp_build_info(build_dir, label)
+    stage_release_docs(build_dir)
+    verify_rust_payload(build_dir)
+    if sys.platform == "darwin":
+        # No .app bundle yet for the Rust port: ad-hoc sign the bare binary
+        # so Gatekeeper does not refuse it outright.
+        subprocess.run(
+            ["codesign", "--force", "--sign", "-", str(build_dir / rust_exe_name())], check=True
+        )
+    if run_smoke:
+        smoke_check(build_dir)
+    else:
+        # The Rust binary's ``--smoke`` is not wired yet (main.rs is still
+        # the stub); pass ``--smoke`` once it is.
+        print("Skipped the smoke check (pass --smoke to boot the staged Rust build).")
+    strip_user_data(build_dir)
+    DIST.mkdir(parents=True, exist_ok=True)
+    out = archive(build_dir, label)
+    verify_archive(out)
+    return out
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", default="", help="release label override, e.g. nightly-20260610")
@@ -769,6 +1069,21 @@ def main() -> int:
         action="store_true",
         help="only verify release-critical runtime dependencies",
     )
+    parser.add_argument(
+        "--rust",
+        action="store_true",
+        help="package the Rust port (cargo build --release -p freight-fate) instead of Nuitka",
+    )
+    parser.add_argument(
+        "--cargo-target-dir",
+        default="",
+        help="--rust only: Cargo target directory (default: target/)",
+    )
+    parser.add_argument(
+        "--smoke",
+        action="store_true",
+        help="--rust only: boot the staged Rust build headless (off until the binary supports --smoke)",
+    )
     args = parser.parse_args()
 
     if args.check_dependencies:
@@ -777,6 +1092,13 @@ def main() -> int:
         return 0
 
     label = args.tag or project_version()
+
+    if args.rust:
+        target_dir = Path(args.cargo_target_dir).resolve() if args.cargo_target_dir else None
+        out = build_rust(label, target_dir, run_smoke=args.smoke and not args.skip_smoke)
+        print(f"Built {out} ({out.stat().st_size / 1e6:.1f} MB)")
+        return 0
+
     verify_release_dependencies()
     if BUILD.exists():
         shutil.rmtree(BUILD)

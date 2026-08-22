@@ -120,6 +120,14 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **Rust port: release built by `tools/build_release.py --rust`**
+      (2026-08-22). Stages `build/FreightFate/` -- `FreightFate.exe`, the
+      vendored SDL2/BASS/Prism libraries, `freight_fate/data/` on disk, both
+      packs, `build_info.json`, the docs -- and archives it like the Python
+      build; refuses LFS pointer packs. CI job still to add; the macOS
+      `.app` bundle and the binary's `--smoke` are not wired yet, so the
+      staged-build smoke is opt-in.
+
 - [x] **Real time driving mode (owner, 2026-08-22).** The Driving mode row
       is Relaxed, Standard, Real time: `TIME_SCALES` gains 1.0, the tuning
       table gives it standard's pressure field for field (a clock, not a
