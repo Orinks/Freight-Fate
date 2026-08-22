@@ -1022,9 +1022,10 @@
   back to driving for a moment, the next press quietly put you back to all
   messages. It felt random because it was a timer. Your choice now stands
   until you change it. It used to be cleared for a reason, mind: a filter
-  left on events once hid a whole delivery settlement. So review can now tell
-  you when the filter is holding newer messages back, rather than letting
-  them disappear without a word.
+  left on events once hid a whole delivery settlement. So review now counts
+  what the filter is keeping out -- pick a category and it tells you how many
+  newer messages sit outside it, and it says so again when you reach the
+  newest one the filter shows, instead of answering with silence.
 - **Texas billboards stay in Texas.** A couple of the song tributes named a
   real place -- Lubbock, the West Texas cotton flats -- while sitting in the
   pool for signs that belong anywhere, so you could pass them in Maine. They

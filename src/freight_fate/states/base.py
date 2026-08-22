@@ -17,7 +17,7 @@ import pygame
 
 if TYPE_CHECKING:
     from ..app import GameContext
-    from ..message_log import Message
+    from ..message_log import Message, MessageLog
 
 
 def end_sentence(text: str) -> str:
@@ -152,13 +152,13 @@ class State:
         if key == pygame.K_LEFTBRACKET:
             category = log.previous_category()
             if category:
-                self.ctx.say(f"{category} messages.", review=False)
+                self.ctx.say(f"{category} messages.{self._hidden_notice(log)}", review=False)
             return True
 
         if key == pygame.K_RIGHTBRACKET:
             category = log.next_category()
             if category:
-                self.ctx.say(f"{category} messages.", review=False)
+                self.ctx.say(f"{category} messages.{self._hidden_notice(log)}", review=False)
             return True
 
         if key == pygame.K_COMMA and ctrl:
@@ -174,7 +174,17 @@ class State:
             return True
 
         if key == pygame.K_PERIOD:
-            self._speak_review_message(log.next_message())
+            message = log.next_message()
+            if message is None:
+                # Already on the newest one this filter shows. Saying nothing
+                # is what let a whole delivery settlement sit invisible behind
+                # a filter left on Event, so the end of the list is exactly
+                # where the count has to be spoken.
+                notice = self._hidden_notice(log)
+                if notice:
+                    self.ctx.say(notice.strip(), review=False)
+                return True
+            self._speak_review_message(message)
             return True
 
         if key == pygame.K_c and ctrl:
@@ -188,13 +198,33 @@ class State:
             return True
         return False
 
+    def _hidden_notice(self, log: MessageLog) -> str:
+        """How many newer messages the chosen category is holding back.
+
+        Empty when nothing is filtered out, so the common case stays silent.
+        The filter is the driver's stated preference and now survives a lapse
+        in review (Tim S, 2026-08-21) -- which is safe only while the review
+        keeps saying what the preference costs.
+        """
+        hidden = log.hidden_newer_count()
+        if not hidden:
+            return ""
+        plural = "message" if hidden == 1 else "messages"
+        return f" {hidden} newer {plural} outside this filter."
+
     def _speak_review_message(self, message: Message | None) -> None:
         if message is None:
             return
         # Reviewing is a deliberate act: silence the event voice first, or a
         # hazard call still playing talks over the line being reviewed.
         self.ctx.stop_event_speech()
-        self.ctx.say(message.text, review=False)
+        log = self.ctx.message_log
+        visible = log.filtered_messages()
+        # Only on the newest one the filter shows: appending the count to
+        # every step back through the history would read it a dozen times.
+        at_newest = bool(visible) and log.index >= len(visible) - 1
+        notice = self._hidden_notice(log) if at_newest else ""
+        self.ctx.say(f"{message.text}{notice}", review=False)
 
 
 class TimedMessageState(State):

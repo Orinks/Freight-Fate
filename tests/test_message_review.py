@@ -233,3 +233,77 @@ def test_a_replay_stops_the_event_voice(monkeypatch):
         assert stopped == [True]
     finally:
         app.shutdown()
+
+
+def test_a_filter_says_what_it_is_holding_back(monkeypatch):
+    """The filter keeps the driver's choice, so it must never keep a secret.
+
+    Tim S sets the category to Event because it makes the cab navigable, and
+    that preference now survives a lapse instead of dropping back to All.
+    The bug that used to be prevented by dropping it -- a settlement sitting
+    invisible behind a filter, with nothing to say it was there -- is
+    prevented instead by counting it out loud (2026-08-21).
+    """
+    from freight_fate.app import App
+    from freight_fate.message_log import MessageCategory
+    from freight_fate.states.main_menu import MainMenuState
+
+    app = App()
+    main_speech = []
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        app.ctx.message_log.add("Brake now! Debris on the road.", MessageCategory.EVENT)
+        monkeypatch.setattr(
+            app.ctx.speech, "say", lambda text, interrupt=True: main_speech.append(text)
+        )
+
+        # Wind the filter round to Event, the way the brackets do.
+        app.dispatch_to_state(key_event(pygame.K_RIGHTBRACKET))
+        app.dispatch_to_state(key_event(pygame.K_RIGHTBRACKET))
+        assert main_speech[-1] == "Event messages."
+
+        # The settlement lands in a category the filter hides.
+        app.ctx.message_log.add(
+            "Delivery complete. You earned 900 dollars.", MessageCategory.GENERAL
+        )
+
+        # Stepping to the newest thing the filter shows says what is beyond it.
+        app.dispatch_to_state(key_event(pygame.K_COMMA))
+        assert main_speech[-1] == (
+            "Brake now! Debris on the road. 1 newer message outside this filter."
+        )
+
+        # And pressing forward at the end of the list does not answer in silence.
+        app.dispatch_to_state(key_event(pygame.K_PERIOD))
+        assert main_speech[-1] == "1 newer message outside this filter."
+
+        # Winding back to All reaches it, and the notice stops.
+        app.dispatch_to_state(key_event(pygame.K_LEFTBRACKET))
+        app.dispatch_to_state(key_event(pygame.K_LEFTBRACKET))
+        assert main_speech[-1] == "All messages."
+        app.dispatch_to_state(key_event(pygame.K_COMMA))
+        assert main_speech[-1] == "Delivery complete. You earned 900 dollars."
+    finally:
+        app.shutdown()
+
+
+def test_an_unfiltered_review_never_mentions_a_filter(monkeypatch):
+    """The common case stays exactly as quiet as it was."""
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import MainMenuState
+
+    app = App()
+    main_speech = []
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        app.ctx.say("Fuel is running low.")
+        monkeypatch.setattr(
+            app.ctx.speech, "say", lambda text, interrupt=True: main_speech.append(text)
+        )
+
+        app.dispatch_to_state(key_event(pygame.K_COMMA))
+        assert main_speech[-1] == "Fuel is running low."
+        app.dispatch_to_state(key_event(pygame.K_PERIOD))
+        assert main_speech[-1] == "Fuel is running low."
+    finally:
+        app.shutdown()
