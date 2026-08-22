@@ -2117,6 +2117,14 @@ class DrivingEventMixin:
         self._highway_trip = old
         self.trip = surface
         self._surface_chain = True
+        # A latched destination arrival belongs to the trip it began on. The
+        # ramp's arrival stopped the truck at the ramp's end; the street chain
+        # is a fresh approach with its own point half a mile on, and carrying
+        # the latch over would hold the pedals -- throttle off, speed control
+        # paused -- for the whole chain and coast the truck to a halt in the
+        # road.
+        self._destination_arrival_active = False
+        self._destination_assist_brake = 0.0
         self._reset_exit_lane_state()
         self._exit_signal_on = False
         if announce:

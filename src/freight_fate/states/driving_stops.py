@@ -74,6 +74,35 @@ def assist_full_decel_mps2(truck) -> float:
     return max(0.5, min(RAMP_ASSIST_FULL_DECEL_MPS2, truck.full_service_decel_mps2()))
 
 
+def arrival_servo_brake(applied: float, needed_mps2: float, truck) -> float:
+    """The application an ARRIVAL should be holding: the stop profile itself.
+
+    ``assist_servo_brake`` above is for a bar -- a stop sign, a light -- and
+    it floors the pedal at the assist's own start rate, because at a bar
+    stopping a little short is fine and the floor is what keeps the pedal from
+    fanning on a long approach. A facility gate is the opposite case: it opens
+    AT the point, a truck halted a length short of it never arrives, and the
+    road in is short. So this has no floor. It asks for exactly the
+    deceleration that brings the truck to rest at the point, from the moment
+    the arrival begins, and it rises the instant the demand does. Because the
+    demand on a uniform stop is monotone there is nothing to fan; the release
+    band is kept only so a demand that dips a hair under the pedal does not
+    cost an application coming back.
+
+    Floored at the start rate, the arrival waited until the road needed
+    0.6 m/s2 -- about 35 metres out at street speed -- then chased a demand
+    that climbs faster than the pedal follows it, and crossed the gate at
+    12 mph with the brake at full (bench, 2026-08-21).
+    """
+    full = assist_full_decel_mps2(truck)
+    wanted = min(1.0, max(0.0, needed_mps2) / full)
+    if wanted > applied:
+        return wanted
+    if wanted < applied - RAMP_ASSIST_RELEASE_BAND:
+        return wanted
+    return applied
+
+
 def assist_servo_brake(applied: float, needed_mps2: float, truck) -> float:
     """The application a stopping assist should be holding right now.
 

@@ -899,6 +899,22 @@
 
 ### Fixed
 
+- **Destination approach assistance now actually stops the truck at the
+  facility, and says so when it starts.** Three drivers reported the same
+  thing -- "it did not stop me; I had to" -- and each fix before this one
+  covered the ramp and left the streets alone. The assist's brake was being
+  applied after the truck had already moved for the frame and wiped before
+  the next one, so the truck never felt it: on the street chain into a
+  delivery it crossed the arrival point at fourteen miles an hour with your
+  foot the only thing that stopped it. The assist now takes the pedals about
+  a block out, holds them to the gate, and brakes on the stop profile itself
+  so the truck comes to rest where the gate is. The speed keeper no longer
+  re-engages into that arrival and holds a street limit against it. And the
+  assist announces itself -- "Destination approach assistance slowing" -- the
+  way curve, exit and route-transition assistance already do; before, its
+  only line came after the truck was already stopped, which to a blind
+  driver is the same as an assist that is not working.
+
 - **City turns give you time to hear them again.** On the streets in to a
   facility, the truck is usually already crawling under the speed each
   corner asks for -- so the game skipped the corner advisory, which was

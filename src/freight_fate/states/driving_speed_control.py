@@ -274,6 +274,21 @@ class SpeedControlStateMixin:
             # the pause above, is what keeps a transit pause from re-engaging
             # on the creep to the bar.
             return
+        if self._destination_arrival_active:
+            # The arrival owns the pedals, exactly as the ramp above does.
+            # Without this the facility's own street chain had no guard at
+            # all: the chain is built of zones, every zone re-engages the
+            # keeper, and the keeper then holds the street limit straight
+            # through the arrival point while the approach assist tries to
+            # brake against it. Measured: the truck reached the market at
+            # 13.8 mph (owner, Spokane, 2026-08-21: "it did not automatically
+            # stop at the destination; I had to stop" -- the same sentence as
+            # Odessa on 2026-08-19, whose fix only ever covered the ramp).
+            #
+            # Deliberately narrower than "the whole chain": the keeper
+            # holding a street limit through the turns is useful and stays.
+            # Only the final shed is the arrival's, and only while it lasts.
+            return
         if (
             braking
             or t.air_brakes_holding

@@ -442,3 +442,144 @@ def test_the_hold_prompt_does_not_come_back_once_the_menu_is_open(monkeypatch):
         assert len(holds) == 1
     finally:
         app.shutdown()
+
+
+def _surface_chain_driving(app, monkeypatch):
+    """A real facility street chain, driven the way an arrival really is.
+
+    Not a stand-in: the docstring on
+    ``test_the_destination_approach_assist_actually_brings_the_truck_to_a_stop``
+    records three fake-object versions of this that all passed while the game
+    drove past the market. The chain is a separate same-city Trip
+    (``_begin_surface_chain``), and only a real one has the zones that
+    re-engage the keeper.
+    """
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    d = start_drive(app)
+    quiet_trip(d)
+    release_air_brakes(d)
+    app.ctx.settings.destination_approach_assist = True
+    app.ctx.settings.speed_keeper = True
+    for city, location in (
+        ("spokane_wa_us", "Spokane metro freight market"),
+        ("kenosha_wi_us", "Kenosha Cross-Dock"),
+        ("gary_in_us", "Gary Company Yard"),
+    ):
+        d.job.destination, d.job.destination_location = city, location
+        if d._surface_chain_route() is not None:
+            break
+    else:
+        pytest.skip("no baked facility street chain available in this world")
+    d.trip.position_mi = d.trip.total_miles
+    d.trip.finished = True
+    assert d._begin_surface_chain(announce=False)
+    return d
+
+
+def test_the_approach_assist_stops_the_truck_on_a_facility_street_chain(monkeypatch):
+    """Owner, Spokane, 2026-08-21: "it did not automatically stop at the
+    destination; I had to stop." The third report of the same sentence --
+    Odessa 2026-08-19 is in the exits suite, and that fix covered the RAMP.
+
+    A ramp-to-gate arrival works: the truck comes in at 45, the cap binds a
+    tenth of a mile out and the shed is long and gentle. A STREET CHAIN does
+    not: the keeper holds the zone limit, the cap does not bind until about
+    25 metres out, and 15 mph cannot be shed in 25 metres. Measured before
+    this test existed, the truck crossed the arrival point at 14.1 mph.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import FACILITY_GATE_LIMIT_MPH
+    from freight_fate.states.driving_core import DOCKING_MAX_MPH
+
+    app = App()
+    try:
+        d = _surface_chain_driving(app, monkeypatch)
+        _capture_events(app, monkeypatch)
+        trip = d.trip
+        d.truck.start_engine()
+        d.truck.transmission.automatic = True
+        d.truck.transmission.gear = 4
+        d.truck.velocity_mps = 15.0 / 2.23694
+        # Automatic speed control is ARMED coming off the highway, which is
+        # what lets the zone keeper re-engage itself on the chain -- the very
+        # thing that drives the truck through the arrival point.
+        d._speed_control_armed = True
+
+        # What the owner actually asked for: the truck stops itself. The
+        # driver never touches a pedal in this test, so anything that halts
+        # the rig is the assist. Measured as the end-to-end outcome rather
+        # than the speed at one instant -- crossing the point at 8 mph and
+        # halting a truck-length later is a different complaint from rolling
+        # through at 14 with nothing on the brake, and only the driver's
+        # pedal foot tells them apart.
+        past_the_point_mi = 0.0
+        speed_at_point = None
+        stopped_at = None
+        for _frame in range(60 * 900):
+            d.update(1 / 60)
+            if speed_at_point is None and (
+                trip.remaining_miles <= 0.0 or trip.finished or d.trip is not trip
+            ):
+                speed_at_point = d.truck.speed_mph
+            if speed_at_point is not None:
+                # Integrated, not read off the trip: position_mi jumps when
+                # the chain trip is swapped out at the arrival, so the only
+                # honest measure of how far the truck ran past the point is
+                # its own speed through the frames after it.
+                past_the_point_mi += d.truck.velocity_mps / 1609.344 / 60.0
+            if d.truck.speed_mph <= DOCKING_MAX_MPH:
+                stopped_at = past_the_point_mi
+                break
+        assert speed_at_point is not None, "never reached the arrival point"
+        assert stopped_at is not None, (
+            f"the truck never stopped; it was still doing {d.truck.speed_mph:.1f} mph. "
+            "The approach assist is supposed to stop it without the driver braking."
+        )
+        # Under the gate zone's own limit on the way in, so the arrival is
+        # not scored as a blown gate.
+        assert speed_at_point <= FACILITY_GATE_LIMIT_MPH, speed_at_point
+        # How far past the point it may run is pinned separately, below.
+    finally:
+        app.shutdown()
+
+
+def test_the_approach_assist_stops_within_a_truck_length_of_the_gate(monkeypatch):
+    """The other half of the Spokane report: stopping means stopping AT the
+    gate, not a city block past it.
+
+    The first version of the fix stopped the truck 347 feet past the point at
+    8 mph, because the assist re-decided every frame against its own curve --
+    over it, brake; under it, stand down -- and standing down zeroed the
+    servo and handed the pedals back. An arrival that has begun is LATCHED
+    now: it keeps the pedals to the point and the servo tracks the road's
+    real demand down, so the truck stops where the gate is."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import DOCKING_MAX_MPH
+
+    app = App()
+    try:
+        d = _surface_chain_driving(app, monkeypatch)
+        _capture_events(app, monkeypatch)
+        trip = d.trip
+        d.truck.start_engine()
+        d.truck.transmission.automatic = True
+        d.truck.transmission.gear = 4
+        d.truck.velocity_mps = 15.0 / 2.23694
+        d._speed_control_armed = True
+
+        past_mi = 0.0
+        arrived = False
+        for _frame in range(60 * 900):
+            d.update(1 / 60)
+            if not arrived and (trip.remaining_miles <= 0.0 or trip.finished or d.trip is not trip):
+                arrived = True
+            if arrived:
+                past_mi += d.truck.velocity_mps / 1609.344 / 60.0
+            if d.truck.speed_mph <= DOCKING_MAX_MPH:
+                break
+        # A tractor-trailer is about 70 feet. Stopping at the gate means
+        # stopping within its own length of it, not a city block later.
+        assert past_mi * 5280.0 <= 70.0, f"stopped {past_mi * 5280:.0f} feet past the gate"
+    finally:
+        app.shutdown()

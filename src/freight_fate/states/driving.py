@@ -446,6 +446,12 @@ class DrivingState(
         self._critical_call_age_s = 0.0
         self._critical_respeak_at: float | None = None
         self._destination_exit_taken = False
+        # True only while the destination approach assist is actually shedding
+        # for the arrival point. The zone keeper refuses to re-engage into it,
+        # the way it already refuses on a ramp -- without that the keeper held
+        # a street limit straight through the market gate.
+        self._destination_arrival_active = False
+        self._destination_assist_brake = 0.0
         self._missed_destination_exit_said = False
         self._destination_exit_announced_key = ""
         self._destination_exit_response_s = 0.0

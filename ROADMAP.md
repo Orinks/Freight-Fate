@@ -1448,6 +1448,46 @@ onto exit signalling.
       categories (`assists_fight_descent`, `floor_it_through_town`,
       `scale_check_in_guidance` among them) if that test ever wants one.
 
+- [x] **Destination approach assistance stops the truck on the street chain
+      (FIXED 2026-08-22).** Owner, Spokane, 2026-08-21: "destination
+      assistance did not automatically stop at the destination; I had to
+      stop." Third report of that sentence (Odessa 2026-08-19 before it).
+      Measured on a real facility street chain with the keeper holding: the
+      truck crossed the arrival point at 13.8 mph.
+
+      THE ROOT CAUSE WAS FRAME ORDER, not the model. `_update_destination_
+      approach_assist` ran AFTER `t.update(dt)` in `DrivingUpdateMixin.update`,
+      so the brake it set was never integrated: the keyboard brake ramp at the
+      top of the next frame decayed it to ~0 before the physics ran. A bench
+      that recorded the pedals at the physics call showed `brk=0.00` the whole
+      way to the gate while the assist's own state said 0.40. Every earlier fix
+      to this assist (v1 finished-only, v2 same-city gate, v3 remaining_miles,
+      and the 2026-08-19 ramp fix) tuned a number against a pedal the truck
+      never felt; the ramp case only "worked" because a 45 mph arrival is so
+      far over the curve that even the decayed remnant did something. It now
+      runs with the other assists' pedal floors, ahead of the physics.
+
+      Three more things landed with it, each measured:
+        * The arrival is LATCHED once it begins; it no longer re-decides each
+          frame against its own curve and hand the pedals back under it.
+        * It brakes on the stop profile itself from the latch, via a new
+          floorless `arrival_servo_brake` -- a gate is not a bar; stopping
+          short of a gate that opens AT the point is the failure.
+        * The zone keeper refuses to re-engage while an arrival is active
+          (`_destination_arrival_active`), the way it already refuses on a
+          ramp; before, every zone on the chain handed it back and it held the
+          street limit against the shed.
+        * It speaks "Destination approach assistance slowing." (ROUTE /
+          CONFIRMATION) when it takes the pedals. Its only line used to fire
+          after the truck was stopped.
+
+      Known rough edge, recorded rather than tuned: the tracker maps needed
+      deceleration onto the pedal through `assist_full_decel_mps2` and lags a
+      rising demand, so the last few metres on a downgrade street finish at a
+      firm application. It stops within a truck length of the point (pinned by
+      `test_the_approach_assist_stops_within_a_truck_length_of_the_gate`), but a
+      grade feed-forward would make the finish gentler.
+
 - [x] **Street corners buy real seconds even when they have nothing to advise
       (FIXED 2026-08-21).** Owner's Spokane arrival fired four turn cues in
       fifteen real seconds -- 23:26:22, :25, :27, :35, the last two seconds

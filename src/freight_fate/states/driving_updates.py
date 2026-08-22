@@ -32,6 +32,7 @@ from .driving_rest_states import (
     TrafficStopState,
     _log_enforcement,
 )
+from .driving_stops import arrival_servo_brake
 
 # The zone-entry line rides ROUTE now (queued, willing to wait this long
 # behind other speech before flushing). Until the line has had that long to
@@ -504,6 +505,14 @@ class DrivingUpdateMixin:
         # assists' floors, ahead of the physics -- see _apply_hazard_brake.
         # _update_hazard, which decides it, runs at the end of the frame.
         self._apply_hazard_brake()
+        # The destination arrival's pedals, for the same reason, and it is
+        # the reason that cost three reports: this ran AFTER the physics
+        # step, so the brake it set was never integrated -- the keyboard ramp
+        # at the top of the next frame decayed it to nothing before
+        # t.update() ran, and the physics saw 0.00 the whole way to the gate
+        # while the assist's own bookkeeping said 0.40. Every earlier fix to
+        # this assist tuned a number against a pedal the truck never felt.
+        self._update_destination_approach_assist()
         self._update_horn_protection()
 
         self._update_auto_jake(dt)
@@ -610,10 +619,9 @@ class DrivingUpdateMixin:
         self._update_brake_heat_cue(dt)
         self._update_traction_cues()
         self._update_chain_law()
-        # Before the trip.finished branch on purpose: the arrival gate below
-        # only runs once the truck has ALREADY arrived, so it can hold the
-        # brake but can never slow the approach. See the method.
-        self._update_destination_approach_assist()
+        # The destination approach assist used to run here -- after the
+        # physics step, which is why its brake never reached the truck. It
+        # now runs with the other assists' pedal floors, ahead of t.update().
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
@@ -4245,6 +4253,8 @@ class DrivingUpdateMixin:
         ever takes speed off, never adds it, and never steers.
         """
         if not self.ctx.settings.destination_approach_assist:
+            self._destination_arrival_active = False
+            self._destination_assist_brake = 0.0
             return
         trip = self.trip
         # HOW FAR TO THE GATE -- which is not the same as how far to the end
@@ -4266,6 +4276,7 @@ class DrivingUpdateMixin:
         elif not trip.finished and trip._is_facility_approach_route():
             remaining_mi = trip.remaining_miles
         if remaining_mi is None:
+            self._destination_arrival_active = False
             return
         # No margin held back, deliberately. Stopping short is not a safer
         # version of stopping: the dock opens at the END of the ramp, so a
@@ -4282,30 +4293,74 @@ class DrivingUpdateMixin:
                 if self._cruise_mph is not None or self._keeper_mph is not None:
                     self._pause_speed_control(resume_when_rolling=False)
             return
-        # v = sqrt(2 a d): the fastest this truck may still be doing and stop
-        # in the road it has left, at a comfortable rate.
-        cap_mph = (2.0 * APPROACH_ASSIST_DECEL_MPS2 * remaining_m) ** 0.5 * MPH_PER_MPS
-        if self.truck.speed_mph <= cap_mph:
-            return
-        # Over the cap: shed, with the pedal MODULATED to how far over it is.
-        # A fixed pressure overshoots -- 0.4 on a loaded rig is about
-        # 1.5 m/s^2 against the 0.9 the curve is drawn for, so the truck shed
-        # faster than the profile and came to rest 143 feet short of the gate,
-        # where the cap is no longer binding and the assist lets go. Stopping
-        # short and sitting there is its own failure: nothing arrives.
+        # WHEN THE ARRIVAL TAKES THE PEDALS. The trigger is the game's ordinary
+        # approach comfort curve with a pedal-build allowance in front of it --
+        # the truck spends ``lag`` seconds at its current speed while the brake
+        # comes up, THEN sheds at ``a``:
         #
-        # Tracking the curve instead means easing off as the truck comes back
-        # under it, so speed follows the profile down and reaches zero AT the
-        # point rather than before it.
+        #     v * lag  +  v^2 / (2a)  =  remaining
+        #
+        # whose positive root is the fastest it may still be doing and stop in
+        # the road it has left. Solved, not approximated: taking the lag off
+        # the distance first and then applying sqrt(2 a d) under-triggers,
+        # because it prices the lag at the speed AFTER the shed. And priced at
+        # the comfort rate, not the firmer rate the servo below will brake at:
+        # triggering on the firm rate meant starting at the last metre that
+        # could possibly work, and a throttle still decaying ate the margin.
+        a = APPROACH_DECEL_MPS2
+        lag = APPROACH_ASSIST_REACTION_S
+        cap_mps = -a * lag + ((a * lag) ** 2 + 2.0 * a * remaining_m) ** 0.5
+        if not self._destination_arrival_active:
+            if self.truck.velocity_mps <= cap_mps:
+                return
+            # LATCHED from here to the gate. This used to re-decide every
+            # frame against the curve: over it, brake; under it, stand down
+            # and hand the pedals back. Standing down is what zeroed the servo
+            # and -- until the zone keeper learned to stay paused -- let the
+            # keeper wind the truck back up toward the street limit, so the
+            # assist chased a hair over the curve the whole way down and the
+            # truck crossed the arrival point at 13.8 mph with the driver's
+            # foot the only thing that stopped it (owner, Spokane,
+            # 2026-08-21; Odessa, 2026-08-19, whose fix covered the ramp).
+            # An arrival that has begun does not un-begin.
+            self._destination_arrival_active = True
+            self._destination_assist_brake = 0.0
+            # ROUTE, not the ambient default: an automation naming that it
+            # has the pedals, the same class as "Route-transition assistance
+            # slowing". This assist used to take the brakes WITHOUT A WORD --
+            # the only line it owned fired after the truck was already
+            # stopped -- which for a blind driver is indistinguishable from
+            # an assist that is not working, and is the likeliest reason it
+            # was reported three times as "it did not stop me".
+            self.ctx.say_event(
+                "Destination approach assistance slowing.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
+                category=SpeechCategory.CONFIRMATION,
+            )
+        # The arrival owns the pedals: throttle off, and automatic speed
+        # control paused the ARRIVAL way -- held until departure, never lifted
+        # on its own -- so nothing holds a street limit against the shed.
         self.truck.throttle = 0.0
-        over = (self.truck.speed_mph - cap_mph) / max(cap_mph, 1.0)
-        pressure = APPROACH_ASSIST_BRAKE * min(1.0, max(0.25, over * 3.0))
-        self.truck.brake = max(self.truck.brake, pressure)
         if self._cruise_mph is not None or self._keeper_mph is not None:
-            # The assist has the pedals for the arrival; automatic control
-            # must not hold a speed against it. Paused rather than cancelled,
-            # the way the exit assist pauses for a ramp.
             self._pause_speed_control(resume_when_rolling=False)
+        # HOW HARD. The stop profile itself, from the moment the arrival
+        # begins: the deceleration that brings the truck to rest AT the point,
+        # recomputed each tick and mapped onto the pedal by
+        # ``arrival_servo_brake`` -- which, unlike the ramp assist's servo,
+        # has no floor, because a gate is not a bar. Floored at the ramp's
+        # start rate the arrival waited until the road needed 0.6 m/s2, about
+        # 35 metres out at street speed, then chased a demand that climbs
+        # faster than the pedal follows and crossed the gate at 12 mph with
+        # the brake at full. Tracking the profile from the latch cannot stop
+        # short: if the pedal takes off more than the profile needs, the
+        # demand falls and the pedal eases with it, and the truck rolls the
+        # rest of the way to the point.
+        needed = (self.truck.velocity_mps**2) / (2.0 * remaining_m)
+        self._destination_assist_brake = arrival_servo_brake(
+            self._destination_assist_brake, needed, self.truck
+        )
+        self.truck.brake = max(self.truck.brake, self._destination_assist_brake)
 
     def _update_traction_cues(self) -> None:
         """Speak the physical traction states once, on the edge they begin.

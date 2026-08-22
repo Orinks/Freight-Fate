@@ -306,6 +306,14 @@ RAMP_ASSIST_DECEL_START_MPS2 = 0.6
 # is a street chain with a gate at the end, and the point is that the stop is
 # comfortable rather than a grab.
 APPROACH_ASSIST_DECEL_MPS2 = 0.9
+# Seconds of road the arrival shed starts EARLY, so the brake has time to
+# build before the stop profile binds. Not a change to where the truck
+# stops -- the profile still aims at the arrival point -- only to when it
+# begins. The exit approach prices its own road the same way
+# (APPROACH_REACTION_S); this is the shorter arrival-speed version of the
+# same budget, because a truck already down to street speed needs the
+# pressure built, not a driver reaction.
+APPROACH_ASSIST_REACTION_S = 3.0
 APPROACH_ASSIST_BRAKE = 0.4
 RAMP_ASSIST_FULL_DECEL_MPS2 = 3.0
 RAMP_ASSIST_HOLD_MI = 60.0 / 5280.0
