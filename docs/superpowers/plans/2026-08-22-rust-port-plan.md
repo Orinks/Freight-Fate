@@ -56,7 +56,7 @@ needs them.
 
 ## Wave 1 — leaf modules (parallel)
 
-- [ ] T1.1 `data`: world_constants, world_loader, world_models (LazyLeg →
+- [x] T1.1 `data`: world_constants, world_loader, world_models (LazyLeg →
       OnceCell), world_parsing, world_corridor, world_local_data,
       world_services, world, curves, regions, legacy_aliases, amenities,
       big_bucks, billboards, state_welcome, street_limits, grades, buffs,
@@ -65,31 +65,31 @@ needs them.
       test_billboards, test_buffs, test_amenities, test_street_limits,
       test_local_approaches, test_local_geometry, test_facility_endpoints,
       test_city_keys, test_divided_data, test_lane_data, test_speed_limit_data.
-- [ ] T1.2 `sim` leaves: hos, timezones, season, weather, transmission, lane,
+- [x] T1.2 `sim` leaves: hos, timezones, season, weather, transmission, lane,
       lane_guidance, surge, cross_traffic, pedal_latch, driving_modes,
       road_event_pacing, vehicle, real_traffic_parsers, real_traffic_list511.
       Tests: test_hos*, test_timezones, test_season, test_weather*,
       test_transmission, test_lane_keeping, test_lane_guidance, test_surge,
       test_cross_traffic, test_pedal_latch, test_vehicle, test_physics_bench.
-- [ ] T1.3 `models` A: economy, market, loyalty, safety_record, cargo_condition,
+- [x] T1.3 `models` A: economy, market, loyalty, safety_record, cargo_condition,
       trailers, career_ladder, business_constants, save_migration, enforcement,
       solvency. Tests: test_market, test_loyalty*, test_save_compat,
       test_career_progression, test_per_truck_condition, test_solvency*.
-- [ ] T1.4 `models` B: career, start_options, trailer_yard, trucks,
+- [x] T1.4 `models` B: career, start_options, trailer_yard, trucks,
       carrier_fleet, career_training, career_objectives,
       career_level_guidance, dispatch_policy. Tests: test_carrier_fleet,
       test_trailer_yard, test_career_training, test_career_level_guidance,
       test_dispatch_policy, test_career_pacing.
-- [ ] T1.5 `settings` (73 fields, 19 migrations) + `achievements` catalog +
+- [x] T1.5 `settings` (73 fields, 19 migrations) + `achievements` catalog +
       tests (test_settings*, test_achievements*, test_achievement_flavor_relocated).
-- [ ] T1.6 audio-side pure logic: audio_fades, audio_loops (SustainLoop math),
+- [x] T1.6 audio-side pure logic: audio_fades, audio_loops (SustainLoop math),
       engine_audio, rumble, sound_catalog, sound_demo (facade-only), music,
       radio_content, radio (physics, catalog, playlists, url canon), cab_filter
       (rustfft), assets_pack, ladder_earcons, lane_guide_tone. Tests:
       test_audio_fades, test_audio_loops, test_engine_audio, test_rumble,
       test_cab_filter, test_sound_pack, test_radio_*, test_lane_guide_tone,
       test_music*, test_write_asset_ogg.
-- [ ] T1.7 network tier: net, online_presence (identity, keyring, heartbeat),
+- [x] T1.7 network tier: net, online_presence (identity, keyring, heartbeat),
       online_activation, online_journal, cloud_saves, cloud_save_integrity
       (canonical JSON first), profile_invariants,
       profile_integrity_invariants, updater, discord_presence, real_weather,
@@ -101,13 +101,13 @@ needs them.
 
 ## Wave 2 — simulation spine and profile
 
-- [ ] T2.1 `sim.trip_models`, `sim.trip_route_helpers`, `sim.enforcement_posts`,
+- [x] T2.1 `sim.trip_models`, `sim.trip_route_helpers`, `sim.enforcement_posts`,
       `sim.enforcement_observe`, `sim.traffic_manager`, `sim.trip_traffic`,
       `sim.trip_road_events`, `sim.trip` (one struct, impl per mixin file).
       Tests: test_trip*, test_traffic_manager, test_traffic_bubble,
       test_congestion, test_enforcement_*, test_troopers (pure parts),
       test_limit_lookahead, test_maxspeed (pure parts).
-- [ ] T2.2 `models.jobs`, `models.business`, `models.settlement`,
+- [x] T2.2 `models.jobs`, `models.business`, `models.settlement`,
       `models.profile` (HMAC signing, .ffsave container, data_dir, save
       listener), `spoken_advice`, `playtest_levers`, `single_instance`,
       `units` consumers. Tests: test_jobs*, test_business_arc, test_models,
@@ -115,10 +115,10 @@ needs them.
 
 ## Wave 3 — engine and shell
 
-- [ ] T3.1 `audio`: facade (`AudioEngine`), `BassAudio`, `NullAudio`, engine
+- [x] T3.1 `audio`: facade (`AudioEngine`), `BassAudio`, `NullAudio`, engine
       ring, held-alert watchdogs, radio connect thread, shutdown ordering.
       Tests: test_audio_backends, test_audio_engine*, test_facility_naming.
-- [ ] T3.2 `speech`: Prism `Speech` (pick_backend by priority, SAPI event
+- [x] T3.2 `speech`: Prism `Speech` (pick_backend by priority, SAPI event
       voice, Narrator gate, retry-once, refresh poll), `GameContext`
       say/say_event/ladder/pacer/duck/transcript wiring.
 - [ ] T3.3 `controller` + SDL event shell: `App`, event pump, state stack,
