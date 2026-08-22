@@ -1481,6 +1481,21 @@ onto exit signalling.
           CONFIRMATION) when it takes the pedals. Its only line used to fire
           after the truck was stopped.
 
+      Driven by the owner the next morning (Spokane again, 2026-08-22) and
+      two more fell out, both fixed the same session:
+        * The RAMP branch treated the ramp's end as the gate even when a
+          street chain follows -- which the decayed pedal had hidden. Now
+          the brake works it stopped the truck dead at the bottom of the ramp
+          with a mile of city to go, speed control paused the arrival way for
+          all of it. `_destination_street_chain_ahead()` (memoised) gates the
+          ramp branch off; the chain's own trip carries the arrival.
+        * `_update_exit_speed_assist` paused speed control on reach, not on
+          need. Right for the flat 45 (every truck at road speed was over
+          it); wrong once the gore accepts road speed -- it paused cruise,
+          did nothing, and the truck ran 60 to 69 down a 3.7 percent grade
+          with "paused" the only status. It now leaves a holding controller
+          alone until the truck is over what the gore accepts.
+
       Known rough edge, recorded rather than tuned: the tracker maps needed
       deceleration onto the pedal through `assist_full_decel_mps2` and lags a
       rising demand, so the last few metres on a downgrade street finish at a

@@ -1758,24 +1758,37 @@ class DrivingEventMixin:
         ahead = stop.at_mi - self.trip.position_mi
         if not 0 < ahead <= 1.5:
             return
-        if self._cruise_mph is not None or self._keeper_mph is not None:
-            # The assist takes the pedals for the ramp; the session is not its
-            # to end. Disarming here was the first of the three places that
-            # left both controllers dead for the rest of the run (Shane,
-            # 2026-08-15) -- and the keeper has to come off too, or it fights
-            # the assist's own brake. A destination exit still holds like any
-            # arrival; every other exit is a transit stop.
-            self._pause_speed_control(resume_when_rolling=stop.type != "delivery_destination")
         if self.truck.speed_mph <= self._gore_acceptance_mph(stop):
-            # Down to ramp speed. HOLD it to the gore rather than handing back
-            # an empty pedal: the assist took the throttle to slow the truck,
-            # and with automatic speed control paused behind it nothing else
-            # is driving. Left alone the truck coasted the rest of the
-            # approach down to a dead stop in the through lane, a quarter mile
-            # short of its own exit -- worst at real-time pacing, where the
-            # coast has the most seconds to finish.
+            if self._cruise_mph is not None or self._keeper_mph is not None:
+                # Nothing to shed and a controller already holding the road:
+                # leave it. This used to pause speed control the moment the
+                # exit came inside its reach, whether or not it had anything
+                # to brake for -- right for the old flat 45, where every
+                # truck at road speed was over it, wrong now that the gore
+                # accepts road speed. Paused with nothing to do, the assist
+                # coasted; on a 3.7 percent downgrade the truck ran from 60 to
+                # 69 with "automatic speed control paused" the only thing the
+                # status said (owner, Spokane, twice, 2026-08-21/22). Cruise
+                # holds the grade and its own ramp glide eases to the ramp's
+                # number at the gore, which is what the callout promised.
+                return
+            # Down to ramp speed with nobody on the pedals. HOLD it to the
+            # gore rather than handing back an empty one: left alone the
+            # truck coasted the rest of the approach down to a dead stop in
+            # the through lane, a quarter mile short of its own exit -- worst
+            # at real-time pacing, where the coast has the most seconds to
+            # finish.
             self._hold_exit_approach_speed()
             return
+        if self._cruise_mph is not None or self._keeper_mph is not None:
+            # Over what the gore accepts: the assist takes the pedals for the
+            # ramp; the session is not its to end. Disarming here was the
+            # first of the three places that left both controllers dead for
+            # the rest of the run (Shane, 2026-08-15) -- and the keeper has to
+            # come off too, or it fights the assist's own brake. A destination
+            # exit still holds like any arrival; every other exit is a
+            # transit stop.
+            self._pause_speed_control(resume_when_rolling=stop.type != "delivery_destination")
         self.truck.brake = max(self.truck.brake, 0.35)
         if self._assist_exit_slowing_said:
             return
@@ -2084,6 +2097,23 @@ class DrivingEventMixin:
         if not any(leg.local_speed_mph > 0 for leg in route.legs):
             return None
         return route
+
+    def _destination_street_chain_ahead(self) -> bool:
+        """Whether this delivery's ramp hands off to a street chain.
+
+        Decides where the ARRIVAL is. With a chain, the ramp's end is a
+        driving continuation (see ``_update_ramp_terminal``'s handoff) and
+        the gate is up to a mile of streets further on; without one, the ramp
+        ends at the gate. The destination approach assist stopped the truck
+        dead at the end of a ramp that had a mile of city still to drive, and
+        left automatic speed control paused the arrival way for all of it
+        (owner, Spokane, 2026-08-22: "it didn't stop where I can pull in").
+        Memoised: the answer is a property of the job, and the world lookup
+        behind it is not free per frame.
+        """
+        if self._destination_chain_ahead is None:
+            self._destination_chain_ahead = self._surface_chain_route() is not None
+        return self._destination_chain_ahead
 
     def _begin_surface_chain(self, *, announce: bool = True) -> bool:
         """Swap the finished highway trip for the facility's street chain.

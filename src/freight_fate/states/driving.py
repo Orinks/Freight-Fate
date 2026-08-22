@@ -452,6 +452,9 @@ class DrivingState(
         # a street limit straight through the market gate.
         self._destination_arrival_active = False
         self._destination_assist_brake = 0.0
+        self._destination_chain_ahead: bool | None = (
+            None  # memo, see _destination_street_chain_ahead
+        )
         self._missed_destination_exit_said = False
         self._destination_exit_announced_key = ""
         self._destination_exit_response_s = 0.0

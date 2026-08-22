@@ -4269,9 +4269,19 @@ class DrivingUpdateMixin:
         #
         # A same-city street chain to a gate has no ramp, so that route shape
         # still measures off the route, which for it is the same thing.
+        #
+        # And a ramp that hands off to a street chain is NEITHER: its end is a
+        # driving continuation, not the gate, and the chain's own trip carries
+        # the arrival a mile further on. Treating it as the gate stopped the
+        # truck dead at the bottom of the ramp with the city still to drive
+        # (owner, Spokane, 2026-08-22).
         remaining_mi = None
         ramp_stop = getattr(self, "_ramp_stop", None)
-        if self._ramp_mi is not None and getattr(ramp_stop, "type", "") == "delivery_destination":
+        if (
+            self._ramp_mi is not None
+            and getattr(ramp_stop, "type", "") == "delivery_destination"
+            and not self._destination_street_chain_ahead()
+        ):
             remaining_mi = self._ramp_mi
         elif not trip.finished and trip._is_facility_approach_route():
             remaining_mi = trip.remaining_miles

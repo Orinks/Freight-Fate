@@ -583,3 +583,65 @@ def test_the_approach_assist_stops_within_a_truck_length_of_the_gate(monkeypatch
         assert past_mi * 5280.0 <= 70.0, f"stopped {past_mi * 5280:.0f} feet past the gate"
     finally:
         app.shutdown()
+
+
+def test_the_ramp_is_not_the_arrival_when_a_street_chain_follows_it(monkeypatch):
+    """Owner, Spokane, 2026-08-22: "it didn't stop where I can pull it in."
+
+    With the pedal finally reaching the truck, the assist stopped it dead at
+    the bottom of the destination ramp -- a mile of city streets short of the
+    gate -- and left automatic speed control paused the arrival way for the
+    whole chain. The ramp's end is a driving continuation when a chain
+    follows (the ramp terminal hands off "at whatever legal speed the
+    terminal let through"); the arrival is the chain's own, a mile on.
+    """
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_LENGTH_MI
+
+    app = App()
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        app.ctx.settings.destination_approach_assist = True
+        for city, location in (
+            ("spokane_wa_us", "Spokane metro freight market"),
+            ("kenosha_wi_us", "Kenosha Cross-Dock"),
+            ("gary_in_us", "Gary Company Yard"),
+        ):
+            d.job.destination, d.job.destination_location = city, location
+            d._destination_chain_ahead = None
+            if d._surface_chain_route() is not None:
+                break
+        else:
+            pytest.skip("no baked facility street chain available in this world")
+        assert d._destination_street_chain_ahead()
+
+        # On the destination ramp, well inside the distance a 30 mph truck
+        # needs to stop: exactly where the ramp-as-gate branch latched.
+        destination = d._destination_exit_stop()
+        assert destination is not None
+        d._ramp_stop = destination
+        d._ramp_mi = 0.05
+        d.truck.start_engine()
+        d.truck.transmission.automatic = True
+        d.truck.transmission.gear = 6
+        d.truck.velocity_mps = 30.0 / 2.23694
+        d.truck.brake = 0.0
+        d._update_destination_approach_assist()
+
+        assert not d._destination_arrival_active
+        assert d.truck.brake == 0.0
+        assert d._destination_assist_brake == 0.0
+
+        # And the same ramp IS the arrival when nothing follows it: the
+        # ramp-to-dock delivery the 2026-08-19 fix was made for still stops.
+        d._destination_chain_ahead = False
+        d._ramp_mi = RAMP_LENGTH_MI * 0.1
+        d._update_destination_approach_assist()
+        assert d._destination_arrival_active
+        assert d.truck.brake > 0.0
+    finally:
+        app.shutdown()

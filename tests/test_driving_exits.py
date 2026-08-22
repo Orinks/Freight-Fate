@@ -987,3 +987,51 @@ def test_the_ramp_cruise_line_says_when_the_ease_happens():
         assert d._ramp_approach_cap_mph() == RAMP_CRUISE_TARGET_MPH
     finally:
         app.shutdown()
+
+
+def test_the_exit_assist_leaves_cruise_alone_while_it_has_nothing_to_shed(monkeypatch):
+    """Owner, Spokane, twice (2026-08-21 and -22): on the run-in to the
+    destination exit the status said "automatic speed control paused" and the
+    truck ran from 60 to 69 down a 3.7 percent grade.
+
+    The exit speed assist paused speed control the moment the exit came
+    inside its reach, whether or not it had anything to brake for. That was
+    right for the old flat 45, where every truck at road speed was over it.
+    Now that the gore accepts road speed a truck at the limit is UNDER the
+    gate, so the assist paused cruise and then did nothing -- and with cruise
+    gone, nothing held the grade. It must leave a holding controller alone
+    until it has work, and only then take the pedals.
+    """
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import RoadStop
+
+    app = App()
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        app.ctx.settings.exit_speed_assist = True
+        d.trip.speed_limit_at = lambda _mile: (60.0, None)
+        d.truck.start_engine()
+        d.truck.transmission.automatic = True
+        d.truck.transmission.gear = 10
+        d.truck.velocity_mps = 60.0 / 2.23694
+        stop = RoadStop("Downgrade Travel Plaza", d.trip.position_mi + 1.0, "truck_stop", ("fuel",))
+        d._exit_stop = stop
+        d._engage_cruise(60.0)
+        assert d._cruise_mph == 60.0
+
+        # At road speed, under what the gore accepts: nothing to shed.
+        d._update_exit_speed_assist(stop)
+        assert d._cruise_mph == 60.0, "cruise was paused with nothing to brake for"
+        assert d.truck.brake == 0.0
+
+        # Over the gate: now it has work, and it takes the pedals.
+        d.truck.velocity_mps = (d._gore_acceptance_mph(stop) + 5.0) / 2.23694
+        d._update_exit_speed_assist(stop)
+        assert d._cruise_mph is None
+        assert d.truck.brake > 0.0
+    finally:
+        app.shutdown()

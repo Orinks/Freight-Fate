@@ -899,6 +899,24 @@
 
 ### Fixed
 
+- **The destination ramp no longer stops you a mile short of the gate when
+  city streets follow it.** With the approach assistance finally able to
+  brake, it stopped the truck dead at the bottom of the destination ramp
+  and left automatic speed control paused for the mile of streets still to
+  drive. The bottom of a ramp that leads onto streets is not the gate; the
+  assistance now waits for the real arrival at the end of the street chain,
+  and a ramp that ends at the gate still stops there.
+
+- **Adaptive cruise no longer pauses on the run-in to an exit with nothing
+  to brake for.** Exit speed assistance used to take the pedals the moment
+  an exit came within a mile and a half, whether or not you were over what
+  the ramp accepts -- so at road speed with nothing to shed it paused
+  cruise and then did nothing, and on a downgrade the truck ran from sixty
+  to sixty-nine with "automatic speed control paused" the only thing the
+  status readout would say. It now leaves cruise holding until it actually
+  has work, which is what "holds road speed, then eases at the ramp"
+  promised.
+
 - **Destination approach assistance now actually stops the truck at the
   facility, and says so when it starts.** Three drivers reported the same
   thing -- "it did not stop me; I had to" -- and each fix before this one
