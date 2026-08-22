@@ -2,7 +2,11 @@
 //!
 //! Prism ships as a C library (`prism.dll` / `libprism.so` / `libprism.dylib`)
 //! and has no crate on crates.io, so the C ABI is declared by hand here and the
-//! platform binary is vendored under `vendor/bin/`.
+//! platform binary is vendored under `vendor/<os>-<arch>/`.
+//!
+//! The declarations follow the cffi `cdef` that ships in the `prismatoid`
+//! Python package, which is what Freight Fate's Python speech layer was
+//! written against; the vendored binaries are prismatoid 0.17.3.
 //!
 //! The library is opened at run time rather than linked, so a machine without
 //! Prism still starts the application — it just loses speech output. See
@@ -15,7 +19,7 @@ use std::os::raw::{c_char, c_int, c_void};
 
 mod loader;
 
-pub use loader::{library_file_name, Api};
+pub use loader::{library_file_name, vendor_dir, Api, PATH_ENV_VARS, REQUIRED_SYMBOLS};
 
 /// Opaque Prism library context.
 #[repr(C)]
@@ -87,7 +91,9 @@ pub const PRISM_ERROR_ALREADY_INITIALIZED: PrismError = 15;
 pub const PRISM_ERROR_BACKEND_NOT_AVAILABLE: PrismError = 16;
 pub const PRISM_ERROR_UNKNOWN: PrismError = 17;
 pub const PRISM_ERROR_INVALID_AUDIO_FORMAT: PrismError = 18;
-pub const PRISM_ERROR_COUNT: PrismError = 19;
+pub const PRISM_ERROR_INTERNAL_BACKEND_LIMIT_EXCEEDED: PrismError = 19;
+pub const PRISM_ERROR_BACKEND_ENTERED_UNDEFINED_STATE: PrismError = 20;
+pub const PRISM_ERROR_COUNT: PrismError = 21;
 
 /// Well-known backend identifiers, matching Prism's own registry hashes.
 pub mod backend_id {
@@ -108,14 +114,49 @@ pub mod backend_id {
     pub const UIA: PrismBackendId = 0x6238_F019_DB67_8F8E;
     pub const ZDSR: PrismBackendId = 0x3D93_C56C_9E7F_2A2E;
     pub const ZOOM_TEXT: PrismBackendId = 0xAE43_9D62_DC7B_1479;
+    pub const BOY_PC_READER: PrismBackendId = 0x285A_BA1C_16F3_300F;
+    pub const PC_TALKER: PrismBackendId = 0x344B_9519_62E3_B835;
+    pub const SENSE_READER: PrismBackendId = 0xED47_6089_0B55_C2F2;
+    pub const SYSTEM_ACCESS: PrismBackendId = 0x8380_F2A3_7B2C_3EB6;
+    pub const WINDOW_EYES: PrismBackendId = 0x9120_D899_0878_5C13;
+    pub const SPIEL: PrismBackendId = 0x478B_44F1_4AD3_D89C;
 }
 
 /// Backend feature bits, as returned by `prism_backend_get_features`.
+///
+/// Bit positions follow prismatoid's `BackendFeatures` dataclass exactly; bit
+/// 1 is unassigned upstream. `IS_SUPPORTED_AT_RUNTIME` is the live check --
+/// whether the screen reader or engine is actually reachable right now --
+/// and the rest say which entry points the backend implements at all.
 pub mod features {
     pub const IS_SUPPORTED_AT_RUNTIME: u64 = 1 << 0;
     pub const SUPPORTS_SPEAK: u64 = 1 << 2;
     pub const SUPPORTS_SPEAK_TO_MEMORY: u64 = 1 << 3;
     pub const SUPPORTS_BRAILLE: u64 = 1 << 4;
+    pub const SUPPORTS_OUTPUT: u64 = 1 << 5;
+    pub const SUPPORTS_IS_SPEAKING: u64 = 1 << 6;
+    pub const SUPPORTS_STOP: u64 = 1 << 7;
+    pub const SUPPORTS_PAUSE: u64 = 1 << 8;
+    pub const SUPPORTS_RESUME: u64 = 1 << 9;
+    pub const SUPPORTS_SET_VOLUME: u64 = 1 << 10;
+    pub const SUPPORTS_GET_VOLUME: u64 = 1 << 11;
+    pub const SUPPORTS_SET_RATE: u64 = 1 << 12;
+    pub const SUPPORTS_GET_RATE: u64 = 1 << 13;
+    pub const SUPPORTS_SET_PITCH: u64 = 1 << 14;
+    pub const SUPPORTS_GET_PITCH: u64 = 1 << 15;
+    pub const SUPPORTS_REFRESH_VOICES: u64 = 1 << 16;
+    pub const SUPPORTS_COUNT_VOICES: u64 = 1 << 17;
+    pub const SUPPORTS_GET_VOICE_NAME: u64 = 1 << 18;
+    pub const SUPPORTS_GET_VOICE_LANGUAGE: u64 = 1 << 19;
+    pub const SUPPORTS_GET_VOICE: u64 = 1 << 20;
+    pub const SUPPORTS_SET_VOICE: u64 = 1 << 21;
+    pub const SUPPORTS_GET_CHANNELS: u64 = 1 << 22;
+    pub const SUPPORTS_GET_SAMPLE_RATE: u64 = 1 << 23;
+    pub const SUPPORTS_GET_BIT_DEPTH: u64 = 1 << 24;
+    pub const PERFORMS_SILENCE_TRIMMING_ON_SPEAK: u64 = 1 << 25;
+    pub const PERFORMS_SILENCE_TRIMMING_ON_SPEAK_TO_MEMORY: u64 = 1 << 26;
+    pub const SUPPORTS_SPEAK_SSML: u64 = 1 << 27;
+    pub const SUPPORTS_SPEAK_TO_MEMORY_SSML: u64 = 1 << 28;
 }
 
 /// Callback invoked with rendered PCM when speaking to memory.
@@ -136,6 +177,7 @@ pub type FnRegistryCount = unsafe extern "C" fn(*mut PrismContext) -> usize;
 pub type FnRegistryIdAt = unsafe extern "C" fn(*mut PrismContext, usize) -> PrismBackendId;
 pub type FnRegistryId = unsafe extern "C" fn(*mut PrismContext, *const c_char) -> PrismBackendId;
 pub type FnRegistryName = unsafe extern "C" fn(*mut PrismContext, PrismBackendId) -> *const c_char;
+pub type FnRegistryPriority = unsafe extern "C" fn(*mut PrismContext, PrismBackendId) -> c_int;
 pub type FnRegistryExists = unsafe extern "C" fn(*mut PrismContext, PrismBackendId) -> bool;
 pub type FnRegistryAcquire =
     unsafe extern "C" fn(*mut PrismContext, PrismBackendId) -> *mut PrismBackend;
@@ -146,11 +188,22 @@ pub type FnBackendName = unsafe extern "C" fn(*mut PrismBackend) -> *const c_cha
 pub type FnBackendInitialize = unsafe extern "C" fn(*mut PrismBackend) -> PrismError;
 pub type FnBackendSpeak =
     unsafe extern "C" fn(*mut PrismBackend, *const c_char, bool) -> PrismError;
+pub type FnBackendSpeakToMemory = unsafe extern "C" fn(
+    *mut PrismBackend,
+    *const c_char,
+    Option<PrismAudioCallback>,
+    *mut c_void,
+) -> PrismError;
 pub type FnBackendBraille = unsafe extern "C" fn(*mut PrismBackend, *const c_char) -> PrismError;
 pub type FnBackendVoid = unsafe extern "C" fn(*mut PrismBackend) -> PrismError;
 pub type FnBackendSetF32 = unsafe extern "C" fn(*mut PrismBackend, f32) -> PrismError;
 pub type FnBackendGetF32 = unsafe extern "C" fn(*mut PrismBackend, *mut f32) -> PrismError;
 pub type FnBackendGetBool = unsafe extern "C" fn(*mut PrismBackend, *mut bool) -> PrismError;
+pub type FnBackendSetUsize = unsafe extern "C" fn(*mut PrismBackend, usize) -> PrismError;
+pub type FnBackendGetUsize = unsafe extern "C" fn(*mut PrismBackend, *mut usize) -> PrismError;
+/// `(backend, voice index, out name)`: the string is owned by the backend.
+pub type FnBackendGetIndexedStr =
+    unsafe extern "C" fn(*mut PrismBackend, usize, *mut *const c_char) -> PrismError;
 pub type FnErrorString = unsafe extern "C" fn(PrismError) -> *const c_char;
 
 #[cfg(test)]
@@ -200,7 +253,67 @@ mod tests {
     fn error_codes_are_contiguous_from_ok() {
         assert_eq!(PRISM_OK, 0);
         assert_eq!(PRISM_ERROR_NOT_INITIALIZED, 1);
-        assert_eq!(PRISM_ERROR_COUNT, 19);
+        assert_eq!(PRISM_ERROR_INVALID_AUDIO_FORMAT, 18);
+        assert_eq!(PRISM_ERROR_BACKEND_ENTERED_UNDEFINED_STATE, 20);
+        assert_eq!(PRISM_ERROR_COUNT, 21);
+    }
+
+    #[test]
+    fn feature_bits_match_prismatoid() {
+        // Positions copied from prismatoid's BackendFeatures dataclass; the
+        // game's backend selection reads four of them and every settings
+        // screen goes wrong if one is off by a bit.
+        use features::*;
+        assert_eq!(IS_SUPPORTED_AT_RUNTIME, 1);
+        assert_eq!(SUPPORTS_SPEAK, 1 << 2);
+        assert_eq!(SUPPORTS_OUTPUT, 1 << 5);
+        assert_eq!(SUPPORTS_STOP, 1 << 7);
+        assert_eq!(SUPPORTS_SET_VOLUME, 1 << 10);
+        assert_eq!(SUPPORTS_SET_RATE, 1 << 12);
+        assert_eq!(SUPPORTS_SET_PITCH, 1 << 14);
+        assert_eq!(SUPPORTS_COUNT_VOICES, 1 << 17);
+        assert_eq!(SUPPORTS_GET_VOICE_NAME, 1 << 18);
+        assert_eq!(SUPPORTS_SET_VOICE, 1 << 21);
+        assert_eq!(SUPPORTS_SPEAK_TO_MEMORY_SSML, 1 << 28);
+        let all = [
+            IS_SUPPORTED_AT_RUNTIME,
+            SUPPORTS_SPEAK,
+            SUPPORTS_SPEAK_TO_MEMORY,
+            SUPPORTS_BRAILLE,
+            SUPPORTS_OUTPUT,
+            SUPPORTS_IS_SPEAKING,
+            SUPPORTS_STOP,
+            SUPPORTS_PAUSE,
+            SUPPORTS_RESUME,
+            SUPPORTS_SET_VOLUME,
+            SUPPORTS_GET_VOLUME,
+            SUPPORTS_SET_RATE,
+            SUPPORTS_GET_RATE,
+            SUPPORTS_SET_PITCH,
+            SUPPORTS_GET_PITCH,
+            SUPPORTS_REFRESH_VOICES,
+            SUPPORTS_COUNT_VOICES,
+            SUPPORTS_GET_VOICE_NAME,
+            SUPPORTS_GET_VOICE_LANGUAGE,
+            SUPPORTS_GET_VOICE,
+            SUPPORTS_SET_VOICE,
+            SUPPORTS_GET_CHANNELS,
+            SUPPORTS_GET_SAMPLE_RATE,
+            SUPPORTS_GET_BIT_DEPTH,
+            PERFORMS_SILENCE_TRIMMING_ON_SPEAK,
+            PERFORMS_SILENCE_TRIMMING_ON_SPEAK_TO_MEMORY,
+            SUPPORTS_SPEAK_SSML,
+            SUPPORTS_SPEAK_TO_MEMORY_SSML,
+        ];
+        // Every constant is one distinct bit and bit 1 stays unassigned.
+        let mut seen = 0u64;
+        for bit in all {
+            assert_eq!(bit.count_ones(), 1);
+            assert_eq!(seen & bit, 0, "duplicate feature bit {bit:#x}");
+            seen |= bit;
+        }
+        assert_eq!(seen & 2, 0, "bit 1 is unassigned upstream");
+        assert_eq!(seen.count_ones(), 28);
     }
 
     #[test]
@@ -217,6 +330,12 @@ mod tests {
             backend_id::UIA,
             backend_id::ZDSR,
             backend_id::ZOOM_TEXT,
+            backend_id::BOY_PC_READER,
+            backend_id::PC_TALKER,
+            backend_id::SENSE_READER,
+            backend_id::SYSTEM_ACCESS,
+            backend_id::WINDOW_EYES,
+            backend_id::SPIEL,
         ];
         for (index, first) in ids.iter().enumerate() {
             assert_ne!(*first, backend_id::INVALID);

@@ -89,3 +89,78 @@ fn linux_ships_no_speech_library() {
         "a Linux library is vendored again; see the comment on this test"
     );
 }
+
+#[cfg(windows)]
+#[test]
+fn the_vendored_windows_library_exports_every_required_symbol() {
+    // Loaded by its vendored path, not through `Api::get`, so a system-wide
+    // or staged copy cannot stand in for the file that ships.
+    let path = vendor_dir().join("windows-x86_64").join("prism.dll");
+    // SAFETY: loading Prism runs benign initialisers; no function is called.
+    let library = unsafe { libloading::Library::new(&path) }
+        .unwrap_or_else(|err| panic!("{} did not load: {err}", path.display()));
+    let mut missing = Vec::new();
+    for name in prism_sys::REQUIRED_SYMBOLS {
+        let symbol = format!("{name}\0");
+        // SAFETY: the pointer is only checked for presence, never called.
+        if unsafe { library.get::<*const std::ffi::c_void>(symbol.as_bytes()) }.is_err() {
+            missing.push(*name);
+        }
+    }
+    assert!(
+        missing.is_empty(),
+        "vendored prism.dll is missing {missing:?}; prism-sys resolves every one \
+         of these and refuses to load a library without them"
+    );
+}
+
+#[cfg(windows)]
+#[test]
+fn the_vendored_windows_library_names_the_error_codes_it_knows() {
+    // The error enum grew two entries after the PortkeyDrop copy was taken
+    // (INTERNAL_BACKEND_LIMIT_EXCEEDED = 19, BACKEND_ENTERED_UNDEFINED_STATE
+    // = 20, per prismatoid's cdef). The vendored 0.17.3 library's string
+    // table stops at 18, though: 19 and 20 read back as "Unknown error",
+    // exactly like an out-of-range code. The constants stay because the
+    // library can still return them; this pins what the string table knows
+    // so a future DLL that names them (or renumbers) is noticed.
+    let api = prism_sys::Api::get().expect("vendored prism.dll loads on Windows");
+    let text_of = |code| unsafe {
+        let text = (api.error_string)(code);
+        assert!(!text.is_null(), "error_string({code}) returned null");
+        std::ffi::CStr::from_ptr(text)
+            .to_string_lossy()
+            .into_owned()
+    };
+    assert_eq!(text_of(prism_sys::PRISM_OK), "Success");
+    assert_eq!(text_of(prism_sys::PRISM_ERROR_UNKNOWN), "Unknown error");
+    assert_eq!(
+        text_of(prism_sys::PRISM_ERROR_INVALID_AUDIO_FORMAT),
+        "Invalid audio format"
+    );
+    let beyond = text_of(prism_sys::PRISM_ERROR_COUNT);
+    assert_eq!(beyond, "Unknown error");
+    // Every code through 18 except UNKNOWN itself has its own message.
+    let mut seen = std::collections::HashSet::new();
+    for code in 0..=prism_sys::PRISM_ERROR_INVALID_AUDIO_FORMAT {
+        let text = text_of(code);
+        if code != prism_sys::PRISM_ERROR_UNKNOWN {
+            assert_ne!(
+                text, beyond,
+                "error code {code} has no message in this library"
+            );
+        }
+        assert!(
+            seen.insert(text.clone()),
+            "error code {code} repeats {text:?}"
+        );
+    }
+    assert_eq!(
+        text_of(prism_sys::PRISM_ERROR_INTERNAL_BACKEND_LIMIT_EXCEEDED),
+        beyond
+    );
+    assert_eq!(
+        text_of(prism_sys::PRISM_ERROR_BACKEND_ENTERED_UNDEFINED_STATE),
+        beyond
+    );
+}

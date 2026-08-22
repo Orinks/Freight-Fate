@@ -1,0 +1,20 @@
+//! World and route data (port of `freight_fate/data/`).
+pub mod amenities;
+pub mod big_bucks;
+pub mod billboards;
+pub mod buffs;
+pub mod curves;
+pub mod data_resources;
+pub mod grades;
+pub mod legacy_aliases;
+pub mod regions;
+pub mod state_welcome;
+pub mod street_limits;
+pub mod world;
+pub mod world_constants;
+pub mod world_corridor;
+pub mod world_loader;
+pub mod world_local_data;
+pub mod world_models;
+pub mod world_parsing;
+pub mod world_services;

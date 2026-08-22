@@ -5,11 +5,37 @@
 //! Ported module by module from `src/freight_fate/` (Python); each module
 //! here keeps the name of the Python module it replaces.
 
+// Python-compatibility shims (no Python original).
 pub mod pyfmt;
 pub mod pyrandom;
-pub mod units;
 
+// Top-level modules of the Python package.
+pub mod achievements;
+pub mod assets_pack;
+pub mod audio_fades;
+pub mod audio_loops;
+pub mod cab_filter;
+pub mod cloud_save_integrity;
+pub mod engine_audio;
 pub mod input_hints;
+pub mod ladder_earcons;
+pub mod lane_guide_tone;
 pub mod message_log;
+pub mod music;
+pub mod playtest_levers;
+pub mod profile_integrity_invariants;
+pub mod profile_invariants;
+pub mod radio;
+pub mod radio_content;
+pub mod rumble;
+pub mod settings;
+pub mod sound_catalog;
 pub mod speech_pacing;
 pub mod speech_text;
+pub mod spoken_advice;
+pub mod units;
+
+// Packages.
+pub mod data;
+pub mod models;
+pub mod sim;
