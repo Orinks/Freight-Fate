@@ -1448,6 +1448,71 @@ onto exit signalling.
       categories (`assists_fight_descent`, `floor_it_through_town`,
       `scale_check_in_guidance` among them) if that test ever wants one.
 
+- [x] **Street corners buy real seconds even when they have nothing to advise
+      (FIXED 2026-08-21).** Owner's Spokane arrival fired four turn cues in
+      fifteen real seconds -- 23:26:22, :25, :27, :35, the last two seconds
+      before the truck stopped. Cause: `_update_turn_commitment` early-returns
+      when the truck is already at or under the corner's advised speed, and
+      that return was the ONLY path that never set `trip.controlled_turn`.
+      The keeper was holding 14-15 through the facility zones, under every
+      corner, so the whole chain ran at full compression. `controlled_turn`
+      is what pins `effective_time_scale` to 1.0, so the miles between
+      corners were passing in a tenth of the real time they should have.
+      The advisory still stays quiet for a crawling truck; the clock no
+      longer does.
+
+- [ ] **Corner speed from real geometry, not a clamp (researched 2026-08-21,
+      owner asked for real numbers).** Today `_turn_speed_mph` is the street's
+      posted limit clamped between `FACILITY_GATE_LIMIT_MPH` (15) and
+      `TURN_CORNER_MAX_MPH` (20). Both ends are assumed constants with no
+      cited basis, and the 15 floor is why the assist stayed SILENT on the
+      owner's Spokane arrival: `_update_turn_commitment` skips the whole
+      advisory when the truck is already at or below the corner speed, and
+      the keeper was holding 14-15 through the facility zones.
+
+      DATA WE ALREADY HAVE AND THROW AWAY: `tools/build_local_geometry.py`
+      `turn_direction()` computes the signed heading change through every
+      junction and keeps only its SIGN. The magnitude is the corner's real
+      turn angle, derived from read OSM geometry, and baking it is a small
+      change to a builder that already runs.
+
+      DATA GATHERED (all free, all citable):
+
+        * **TxDOT Roadway Design Manual Table 13-7** -- WB-67 minimum simple
+          curve radius BY TURN ANGLE: 60 deg 200 ft, 75 deg 145, 90 deg 125,
+          105 deg 115, 120 deg 105. Radius as a function of the one thing the
+          bake can measure, for our own design vehicle.
+        * **AASHTO WB-67 centreline turning radius 41 ft** (Green Book
+          p. 2-77) -- the vehicle's own minimum path, distinct from the
+          intersection's edge curve above.
+        * **AASHTO side friction by design speed** -- already in the repo,
+          `data/curves.py AASHTO_SIDE_FRICTION`, but it stops at 20 mph
+          (0.27). Cross-checks against TxDOT Table 4-4, whose 20 mph normal
+          crown minimum radius of 99 ft implies e+f = 400/(15*99) = 0.269.
+        * **Static rollover threshold >= 0.35 g** is the satisfactory
+          criterion for a loaded combination (NHTSA DOT HS 811 734; FHWA
+          vehicle characteristics study). Rearward amplification is about 1.0
+          for a tractor-semitrailer, so the trailer does not amplify it.
+        * **Measured turn speeds** -- TTI 0-4365-4 "Turn Speeds and Crashes
+          Within Right-Turn Lanes": 85th percentile mid-turn speed 13 to
+          21 mph over corner radii of 27 to 86 ft, free-flow. A calibration
+          target, and mostly passenger cars, so a loaded truck belongs at or
+          under the bottom of that band.
+
+      THE OPEN DECISION, and why this is not landed yet: which radius
+      governs. `V = sqrt(15 R (e+f))` with e = 0 at an at-grade intersection
+      gives 22-24 mph off TxDOT's 125 ft edge curve for a 90 deg turn --
+      FASTER than today's clamp, and plainly wrong for a loaded semi. Off the
+      vehicle's own 41 ft path it gives about 10 mph at 0.15 g, which matches
+      CDL practice (5-10 mph through a corner) and the bottom of the TTI
+      band. The edge curve is what the swept path uses; the vehicle radius is
+      what the tractor tracks. Picking one, or the smaller of the two, is a
+      real modelling choice and wants deciding on purpose rather than by
+      whichever makes the number look right -- which AGENTS.md forbids.
+
+      Whatever lands: the 15 mph FLOOR has to go, or the advisory stays
+      silent at exactly the speeds that need it.
+
 - [ ] **Two riders from the New Haven log, both still open.**
       1. The status readout speaks `_keeper_mph` (the SET speed) rather than
          the target in force, so S says "holding 25" while the truck holds

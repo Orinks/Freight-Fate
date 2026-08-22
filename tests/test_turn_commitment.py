@@ -627,3 +627,40 @@ def test_the_road_bed_leans_on_an_exit_ramp(monkeypatch):
         assert d._curve_steer_demand() == RAMP_GUIDE_DEMAND
     finally:
         app.shutdown()
+
+
+def test_a_corner_you_are_already_slow_enough_for_still_buys_real_seconds(monkeypatch):
+    """Owner, arriving in Spokane 2026-08-21: "I missed the turn."
+
+    Four corners spoke in fifteen real seconds -- 23:26:22, :25, :27, :35 --
+    because the speed keeper was holding 14 through the facility zones, under
+    every corner's own advised speed. The commitment loop takes an early
+    return there ("already slow enough to make it"), and that return was also
+    the only path that never set ``controlled_turn``. So the clock stayed
+    compressed and a downtown street chain arrived as a burst nobody could
+    act on.
+
+    Being slow enough to MAKE the corner is not the same as being given time
+    to HEAR about it. The advisory may stay quiet; the clock may not stay
+    compressed.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _street_chain(d, time_scale=40.0)
+        _capture(app, monkeypatch)
+        d.trip.position_mi = 0.4
+        # Under the corner's own advised speed, the way the keeper holds a
+        # truck through a facility zone.
+        _mph(d, 10.0)
+        assert d.truck.speed_mph <= d._turn_speed_mph(d._turn_cue_in_play())
+        assert d.trip.effective_time_scale > 1.0
+
+        d._update_turn_commitment(0.016)
+
+        assert d.trip.controlled_turn is True
+        assert d.trip.effective_time_scale == 1.0
+    finally:
+        app.shutdown()

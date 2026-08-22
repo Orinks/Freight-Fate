@@ -229,8 +229,21 @@ class TurnCommitmentMixin:
                 # Already slow enough to make it: the route's own maneuver cue
                 # is the whole story, and an advisory a crawling truck cannot
                 # fail is noise. The gate's speed warning works the same way.
+                #
+                # The CLOCK is a separate question, and conflating the two is
+                # what made a downtown arrival unfollowable: this return used
+                # to leave `controlled_turn` alone, so a truck held under
+                # every corner's speed by the keeper took the whole chain at
+                # full compression and heard four corners in fifteen real
+                # seconds (owner, Spokane, 2026-08-21: "I missed the turn").
+                # Being slow enough to MAKE a corner is not being given time
+                # to HEAR about it, and the route's own maneuver cue -- the
+                # whole story here, by the comment above -- still has to
+                # arrive far enough ahead to be acted on.
                 if ahead <= 0:
                     self._resolve_turn(cue)
+                elif ahead <= self._turn_window_mi():
+                    self.trip.controlled_turn = True
                 return
             if ahead > self._turn_window_mi():
                 return

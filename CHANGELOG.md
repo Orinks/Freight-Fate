@@ -899,6 +899,16 @@
 
 ### Fixed
 
+- **City turns give you time to hear them again.** On the streets in to a
+  facility, the truck is usually already crawling under the speed each
+  corner asks for -- so the game skipped the corner advisory, which was
+  right, but it also skipped putting the clock back to real time, which was
+  not. The run in to a downtown delivery could fire four turn instructions
+  in fifteen seconds, two or three seconds apart, which is no time to hear a
+  street name and steer. Every corner now buys its real seconds whether or
+  not it has anything to advise, so a street chain arrives as a sequence you
+  can follow instead of a burst you can only miss.
+
 - **You can always get out of reverse again.** Shifting back to a forward
   gear means holding the throttle at a standstill, and holding the throttle
   is also half of the gesture that latches the pedal. The latch caught
