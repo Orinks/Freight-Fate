@@ -514,9 +514,15 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs models::jobs CARGO_CATALOG"]
     fn test_only_tank_cargo_gets_a_liquid_load() {
+        use crate::models::jobs::cargo_type;
+        for key in ["general", "electronics", "steel", "grain", "refrigerated"] {
+            let cargo: &dyn LiquidCargo = cargo_type(key).unwrap();
+            assert!(liquid_load_for(Some(cargo), 20.0).is_none(), "{key}");
+        }
         assert!(liquid_load_for(None, 20.0).is_none());
+        let fuel: &dyn LiquidCargo = cargo_type("fuel_bulk").unwrap();
+        assert!(liquid_load_for(Some(fuel), 13.0).is_some());
     }
 
     #[test]
@@ -686,24 +692,17 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs models::jobs CARGO_CATALOG and models::trailers TANK_CAPACITY_TONS"]
     fn test_how_full_the_tank_is_comes_from_the_load_weight() {
-        // The same job always drives the same way: with a fixed fill the
-        // wave's period is a function of the load alone.
-        struct Tank;
-        impl LiquidCargo for Tank {
-            fn tank(&self) -> bool {
-                true
-            }
-            fn baffled(&self) -> bool {
-                true
-            }
-            fn fill_fraction(&self, weight_tons: f64) -> f64 {
-                (weight_tons / 26.0).min(1.0)
-            }
-        }
-        let a = liquid_load_for(Some(&Tank), 13.0).unwrap();
-        let b = liquid_load_for(Some(&Tank), 13.0).unwrap();
+        use crate::models::jobs::cargo_type;
+        use crate::models::trailers::TANK_CAPACITY_TONS;
+        let cargo = cargo_type("fuel_bulk").unwrap();
+        assert!((cargo.fill_fraction(TANK_CAPACITY_TONS / 2.0) - 0.5).abs() < 1e-9);
+        assert_eq!(cargo.fill_fraction(TANK_CAPACITY_TONS * 2.0), 1.0);
+        assert_eq!(cargo_type("general").unwrap().fill_fraction(13.0), 0.0);
+        // The same job therefore always drives the same way.
+        let tank: &dyn LiquidCargo = cargo;
+        let a = liquid_load_for(Some(tank), 13.0).unwrap();
+        let b = liquid_load_for(Some(tank), 13.0).unwrap();
         assert_eq!(a.fill_fraction, b.fill_fraction);
         assert_eq!(a.period_s(), b.period_s());
     }

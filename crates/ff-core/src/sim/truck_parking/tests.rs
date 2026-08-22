@@ -563,8 +563,18 @@ fn test_parse_stop_rejects_implausible_parking_spaces() {}
 fn test_stop_parking_label_speaks_capacity_when_surveyed() {}
 
 #[test]
-#[ignore = "needs sim::trip_models (RoadStop.parking_text)"]
-fn test_road_stop_parking_text_speaks_capacity_when_surveyed() {}
+fn test_road_stop_parking_text_speaks_capacity_when_surveyed() {
+    use crate::sim::trip_models::RoadStop;
+
+    let mut stop = RoadStop::new("Rest Area", 10.0, "public_rest_area");
+    stop.parking = "confirmed".to_string();
+    stop.parking_spaces = 22;
+    assert_eq!(stop.parking_text(), "confirmed truck parking, 22 spaces");
+    let mut silent = RoadStop::new("Rest Area", 10.0, "public_rest_area");
+    silent.parking = "likely".to_string();
+    silent.parking_spaces = 22;
+    assert_eq!(silent.parking_text(), "");
+}
 
 #[test]
 #[ignore = "needs sim::hos (parking_full_probability)"]

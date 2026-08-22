@@ -565,33 +565,6 @@ mod tests {
 
     // -- tests/test_loyalty_integration.py -----------------------------------
 
-    #[test]
-    #[ignore = "needs models::profile"]
-    fn test_profile_has_loyalty_account() {
-        // A new Profile carries a fresh LoyaltyAccount (0 points, 0 credits).
-    }
-
-    #[test]
-    #[ignore = "needs models::profile"]
-    fn test_profile_serialization_includes_loyalty() {
-        // profile.to_dict()["loyalty"] carries total_points 50.0, shower_credits 1.
-    }
-
-    #[test]
-    #[ignore = "needs models::profile"]
-    fn test_profile_deserialization_restores_loyalty() {
-        // Profile.from_dict(profile.to_dict()) restores 75 points, 1 credit, 75 gal.
-    }
-
-    #[test]
-    #[ignore = "needs models::profile"]
-    fn test_profile_from_dict_without_loyalty() {
-        // A save dict with no "loyalty" key loads with a fresh account.
-    }
-
-    #[test]
-    #[ignore = "needs models::profile"]
-    fn test_loyalty_persists_across_saves() {
-        // 100 gallons at Love's survives to_dict/from_dict: 100 points, 1 credit.
-    }
+    // The five `tests/test_loyalty_integration.py` cases run against the real
+    // `Profile` in `models::profile::tests` (same names).
 }

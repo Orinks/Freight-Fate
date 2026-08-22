@@ -14,7 +14,7 @@ use std::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 
 use crate::models::career_ladder::{
-    next_rank_for_level, rank_for_level, CareerRank, MAX_CAREER_LEVEL, STARTER_CARRIER_NAME,
+    next_rank_for_level, rank_for_level, CareerRank, MAX_CAREER_LEVEL,
 };
 use crate::models::enforcement::StandingProfile;
 use crate::pyfmt::{fmt_f, fmt_grouped};
@@ -497,14 +497,8 @@ pub trait CareerProfile: StandingProfile {
 
 /// `business.carrier_name(profile)`: the carrier on the profile, or the
 /// starter carrier when the profile carries none.
-// TODO(lead): wire to models::business::carrier_name when business lands.
 pub fn carrier_name_of<P: StandingProfile + ?Sized>(profile: &P) -> String {
-    let name = profile.carrier_name();
-    if name.is_empty() {
-        STARTER_CARRIER_NAME.to_string()
-    } else {
-        name.to_string()
-    }
+    crate::models::business::carrier_name(profile)
 }
 
 /// What the career-side modules read off a `Job` (`models::jobs`, wave 2):

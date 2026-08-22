@@ -147,21 +147,174 @@ mod tests {
         }
     }
 
-    #[test]
-    #[ignore = "needs models::profile (Profile.load)"]
-    fn test_pre_condition_1_9_save_converts_to_per_truck_records() {}
+    use crate::models::business_constants::LEASED_OWNER_OPERATOR;
+    use crate::models::profile::{
+        decode_save_bytes, signature_for, tests::with_data_dir, Profile, SAVE_VERSION,
+    };
+    use crate::profile_invariants::check_profile_invariants;
+    use crate::sim::vehicle::TruckSpecs;
+    use std::path::{Path, PathBuf};
+
+    /// Write a save with flat condition fields, as builds before version 11 did.
+    ///
+    /// The default version 10 is a 1.9-line save from before per-truck
+    /// condition records (a real tester career shape); these must keep
+    /// migrating. Version 4 and earlier is the 1.8 line, which the load gate
+    /// refuses. Written as plain JSON at the legacy `.json` path, the oldest
+    /// container shape every one of these builds could read.
+    fn write_flat_condition_save(
+        truck: &str,
+        owned: &[&str],
+        fuel: f64,
+        damage: f64,
+        tires: f64,
+        grime: f64,
+        signed: bool,
+    ) -> PathBuf {
+        let p = Profile::named("Legacy");
+        let packed_path = p.save().unwrap();
+        let (mut data, _) =
+            decode_save_bytes(&std::fs::read(&packed_path).unwrap()).unwrap();
+        std::fs::remove_file(&packed_path).unwrap();
+        for key in [
+            "truck_conditions",
+            "migration_notice_pending",
+            "integrity_modified",
+            "integrity_notice_pending",
+            "created_line", // the marker postdates every flat-field build
+            "_signature",
+            "_signature_version",
+        ] {
+            data.remove(key);
+        }
+        data.insert("version".into(), json!(10));
+        // The fan-out only treats `truck` as the driven tractor for an
+        // owner-operator; a company driver runs whatever the carrier assigned.
+        data.insert("business_status".into(), json!(LEASED_OWNER_OPERATOR));
+        data.insert("truck".into(), json!(truck));
+        data.insert("owned_trucks".into(), json!(owned));
+        data.insert("truck_fuel_gal".into(), json!(fuel));
+        data.insert("truck_damage_pct".into(), json!(damage));
+        data.insert("tire_wear_pct".into(), json!(tires));
+        data.insert("road_grime_pct".into(), json!(grime));
+        if signed {
+            data.insert("_signature_version".into(), json!(1));
+            let signature = signature_for(&data, None);
+            data.insert("_signature".into(), json!(signature));
+        }
+        let path = packed_path.with_extension("json");
+        std::fs::write(
+            &path,
+            serde_json::to_string(&Value::Object(data)).unwrap(),
+        )
+        .unwrap();
+        path
+    }
+
+    fn default_flat_save() -> PathBuf {
+        write_flat_condition_save(
+            "heavy_hauler",
+            &["rig", "heavy_hauler"],
+            120.0,
+            40.0,
+            10.0,
+            60.0,
+            true,
+        )
+    }
+
+    fn profile_value(profile: &Profile) -> Value {
+        Value::Object(profile.to_dict())
+    }
+
+    fn invalid_twin(path: &Path) -> PathBuf {
+        PathBuf::from(format!("{}.invalid", path.display()))
+    }
 
     #[test]
-    #[ignore = "needs models::profile (Profile.load)"]
-    fn test_pre_condition_1_9_save_is_rewritten_to_disk_on_load() {}
+    fn test_pre_condition_1_9_save_converts_to_per_truck_records() {
+        with_data_dir(|_| {
+            let path = default_flat_save();
+            let loaded = Profile::load(&path).unwrap();
+
+            // Condition records are plain dicts on this line.
+            let hauler = &loaded.truck_conditions["heavy_hauler"];
+            assert_eq!(hauler["fuel_gal"], 120.0);
+            assert_eq!(hauler["damage_pct"], 40.0);
+            assert_eq!(hauler["tire_wear_pct"], 10.0);
+
+            let rig = &loaded.truck_conditions["rig"];
+            assert_eq!(rig["fuel_gal"], TruckSpecs::default().fuel_tank_gal);
+            // Parked trucks inherit the one saved wear and damage set rather than
+            // starting pristine -- a swap must not launder a beaten-up career.
+            assert_eq!(rig["damage_pct"], 40.0);
+            assert_eq!(rig["tire_wear_pct"], 10.0);
+
+            // Road grime rides the active truck's record.
+            assert_eq!(loaded.road_grime_pct(), 60.0);
+
+            // The one-time conversion notice belongs to the 1.8-and-earlier format;
+            // a 1.9-line save just converts quietly.
+            assert!(!loaded.migration_notice_pending);
+            assert!(check_profile_invariants(&profile_value(&loaded)).is_empty());
+        });
+    }
 
     #[test]
-    #[ignore = "needs models::profile (Profile.load)"]
-    fn test_signed_flat_condition_save_is_not_quarantined() {}
+    fn test_pre_condition_1_9_save_is_rewritten_to_disk_on_load() {
+        with_data_dir(|_| {
+            let path = default_flat_save();
+            let loaded = Profile::load(&path).unwrap();
+            // The conversion re-homes the career in the packed container; the old
+            // plain-JSON file stays behind only as a .json.bak rollback copy.
+            assert!(!path.exists());
+            let path = loaded.path();
+            let (on_disk, _) = decode_save_bytes(&std::fs::read(&path).unwrap()).unwrap();
+            assert_eq!(on_disk["version"], json!(SAVE_VERSION));
+            assert!(on_disk.contains_key("truck_conditions"));
+            for legacy in LEGACY_TRUCK_FIELDS {
+                assert!(!on_disk.contains_key(legacy), "{legacy}");
+            }
+            // Grime rides on the truck that got dirty, like every other kind of
+            // wear, so the migrated figure lands in the records rather than on
+            // the profile.
+            assert_eq!(
+                on_disk["truck_conditions"]["heavy_hauler"]["grime_pct"],
+                60.0
+            );
+            // The rewrite also stamps the created-on marker, so this career never
+            // needs the save-version backfill test again.
+            assert_eq!(on_disk["created_line"], "1.9");
+            // The rewritten save loads cleanly, is validly signed, and migrates no more.
+            let again = Profile::load(&path).unwrap();
+            assert!(!again.needs_migration_resave);
+            assert_eq!(again.truck_conditions["heavy_hauler"]["fuel_gal"], 120.0);
+        });
+    }
 
     #[test]
-    #[ignore = "needs models::profile (Profile.load)"]
-    fn test_migration_clamps_impossible_legacy_values() {}
+    fn test_signed_flat_condition_save_is_not_quarantined() {
+        with_data_dir(|_| {
+            let path = default_flat_save();
+            let loaded = Profile::load(&path).unwrap(); // a signature mismatch would mark
+            assert_eq!(loaded.name, "Legacy");
+            assert!(!loaded.integrity_modified);
+            assert!(!invalid_twin(&path).exists());
+        });
+    }
+
+    #[test]
+    fn test_migration_clamps_impossible_legacy_values() {
+        with_data_dir(|_| {
+            let path =
+                write_flat_condition_save("rig", &["rig"], 9_000.0, 250.0, -5.0, 60.0, true);
+            let loaded = Profile::load(&path).unwrap();
+            let rig = &loaded.truck_conditions["rig"];
+            assert_eq!(rig["fuel_gal"], TruckSpecs::default().fuel_tank_gal);
+            assert_eq!(rig["damage_pct"], 100.0);
+            assert_eq!(rig["tire_wear_pct"], 0.0);
+        });
+    }
 
     #[test]
     #[ignore = "needs states::save_notice and the app shell"]
@@ -180,14 +333,50 @@ mod tests {
     fn test_bought_truck_starts_fresh_and_each_keeps_its_own_condition() {}
 
     #[test]
-    #[ignore = "needs models::profile and profile_invariants"]
-    fn test_invariants_flag_bad_per_truck_records() {}
+    fn test_invariants_flag_bad_per_truck_records() {
+        with_data_dir(|_| {
+            let mut p = Profile::named("Bad Fleet");
+            p.owned_trucks = vec!["rig".into(), "heavy_hauler".into()];
+            p.provision_truck_condition("heavy_hauler", None);
+            p.provision_truck_condition("rig", None);
+            p.truck_conditions["heavy_hauler"].insert("fuel_gal".into(), json!(9_000.0));
+            p.truck_conditions["rig"].insert("damage_pct".into(), json!(-5.0));
+            let violations = check_profile_invariants(&profile_value(&p));
+            assert!(violations.iter().any(|v| v.code == "fuel_range"));
+            // Wear and damage share one code here; the detail names the bad meter.
+            assert!(violations
+                .iter()
+                .any(|v| v.code == "condition_range" && v.detail.contains("damage")));
+        });
+    }
 
     #[test]
-    #[ignore = "needs models::profile (save/load)"]
-    fn test_condition_round_trips_through_save_and_load() {}
+    fn test_condition_round_trips_through_save_and_load() {
+        with_data_dir(|_| {
+            let mut p = Profile::named("Round Trip");
+            p.truck = "rig".into();
+            p.set_truck_fuel_gal(77.0);
+            p.set_truck_damage_pct(3.5);
+            let path = p.save().unwrap();
+            let loaded = Profile::load(&path).unwrap();
+            assert_eq!(loaded.truck_fuel_gal(), 77.0);
+            assert_eq!(loaded.truck_damage_pct(), 3.5);
+            assert!(!loaded.migration_notice_pending);
+            assert!(check_profile_invariants(&profile_value(&loaded)).is_empty());
+        });
+    }
 
     #[test]
-    #[ignore = "needs models::profile (save/load)"]
-    fn test_unknown_truck_key_condition_is_preserved() {}
+    fn test_unknown_truck_key_condition_is_preserved() {
+        with_data_dir(|_| {
+            let mut p = Profile::named("Future Fleet");
+            p.owned_trucks = vec!["rig".into(), "hover_truck".into()];
+            p.provision_truck_condition("hover_truck", None);
+            p.truck_conditions["hover_truck"].insert("damage_pct".into(), json!(12.0));
+            let path = p.save().unwrap();
+            let loaded = Profile::load(&path).unwrap();
+            assert_eq!(loaded.truck_conditions["hover_truck"]["damage_pct"], 12.0);
+            assert!(check_profile_invariants(&profile_value(&loaded)).is_empty());
+        });
+    }
 }

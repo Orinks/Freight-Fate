@@ -864,16 +864,36 @@ fn clock_from_dict_keeps_the_python_edges() {
 }
 
 #[test]
-#[ignore = "needs models::profile (Profile.load of a version-2 save)"]
 fn test_v2_profile_loads_with_fresh_clock_and_no_fatigue() {
-    // TODO(port): a version-2 profile without hos/fatigue loads with
-    // HosClock::new() and fatigue 0.0.
+    use crate::models::profile::{tests::with_data_dir, Profile};
+    // A version-2 save predates the clock and the fatigue meter. Version 2 is
+    // a 1.8-line number, so the load gate would refuse it on disk; the shape
+    // tolerance it pinned lives in `from_dict`, which every entry point runs.
+    with_data_dir(|_| {
+        let p = Profile::named("V2 Driver");
+        let mut data = p.to_dict();
+        data.insert("version".to_string(), json!(2));
+        data.remove("_signature");
+        data.remove("_signature_version");
+        data.remove("hos");
+        data.remove("fatigue");
+        let loaded = Profile::from_dict(&data);
+        assert_eq!(loaded.hos, HosClock::new());
+        assert_eq!(loaded.fatigue, 0.0);
+    });
 }
 
 #[test]
-#[ignore = "needs models::profile (Profile.save/load round trip)"]
 fn test_profile_persists_hos_and_fatigue() {
-    // TODO(port): hos.drive(345) and fatigue 67.5 survive save + load.
+    use crate::models::profile::{tests::with_data_dir, Profile};
+    with_data_dir(|_| {
+        let mut p = Profile::named("Tired Driver");
+        p.hos.drive(345.0);
+        p.fatigue = 67.5;
+        let loaded = Profile::load(&p.save().unwrap()).unwrap();
+        assert_eq!(loaded.hos.driving_min, 345.0);
+        assert_eq!(loaded.fatigue, 67.5);
+    });
 }
 
 #[test]
@@ -934,10 +954,16 @@ fn duty_log_prunes_coalesces_and_reads_back_tolerantly() {
 }
 
 #[test]
-#[ignore = "needs models::profile (Profile.save/load of the duty log)"]
 fn test_profile_persists_duty_log() {
-    // TODO(port): one on_duty_not_driving row at "Chicago terminal" survives
-    // save + load.
+    use crate::models::profile::{tests::with_data_dir, Profile};
+    with_data_dir(|_| {
+        let mut p = Profile::named("Log Driver");
+        p.duty_log
+            .record("on_duty_not_driving", 6.0, 6.25, "Chicago terminal", "pre-trip");
+        let loaded = Profile::load(&p.save().unwrap()).unwrap();
+        assert_eq!(loaded.duty_log.segments.len(), 1);
+        assert_eq!(loaded.duty_log.segments[0].location, "Chicago terminal");
+    });
 }
 
 // -- day/night ---------------------------------------------------------------------
@@ -985,35 +1011,131 @@ fn clock_text_pads_minutes_and_wraps_negative_hours() {
     assert_eq!(duty_status_label("yard_move"), "yard move");
 }
 
+// -- Trip-backed day/night cases (tests/test_weather_trip.py::make_trip) --------
+
+/// `make_trip(world, start, end, seed, start_hour)`: a quiet Chicago run with
+/// an automatic, running truck and the rolling traffic bubble off.
+fn make_trip(start: &str, end: &str, seed: i64, start_hour: f64) -> crate::sim::trip::Trip {
+    use crate::data::world::get_world;
+    use crate::sim::trip::{Trip, TripOptions};
+    use crate::sim::vehicle::TruckState;
+    use crate::sim::weather::test_support::new_system;
+
+    let route = get_world().route_options(start, end, 3, false).unwrap()[0].clone();
+    let mut truck = TruckState::default();
+    truck.transmission.automatic = true;
+    truck.start_engine();
+    let mut trip = Trip::new(
+        route,
+        truck,
+        new_system("great_lakes", Some(1), None, None, true),
+        TripOptions {
+            seed: Some(seed),
+            start_hour,
+            ..Default::default()
+        },
+    );
+    trip.traffic_manager.rolling_bubble = false;
+    trip
+}
+
 #[test]
-#[ignore = "needs sim::trip and data::world (night zone layout)"]
 fn test_night_zone_layout_is_deterministic() {
-    // TODO(port): two trips at 23:00 with the same seed lay out the same zones.
+    let a = make_trip("Chicago", "Indianapolis", 11, 23.0);
+    let b = make_trip("Chicago", "Indianapolis", 11, 23.0);
+    assert_eq!(a.zones, b.zones);
 }
 
 #[test]
-#[ignore = "needs sim::trip and data::world (congestion zones follow the clock)"]
 fn test_night_produces_sparser_traffic() {
-    // TODO(port): heavy-traffic zones are active at the evening rush and
-    // inactive at 3 AM.
+    // Congestion zones are fixed in space (volume-prone stretches) but
+    // follow the clock: the same stretch that jams at the evening rush is
+    // open road in the small hours.
+    use crate::data::world::get_world;
+    use crate::data::world_models::{Route, TrafficVolumeSample};
+    use crate::sim::trip::{Trip, TripOptions};
+    use crate::sim::vehicle::TruckState;
+    use crate::sim::weather::test_support::new_system;
+    use std::sync::Arc;
+
+    let cached = get_world().route_options("Atlanta", "Dallas", 3, false).unwrap()[0].clone();
+    let mut detail = cached.legs[0].corridor().clone();
+    detail.traffic_volumes = vec![
+        TrafficVolumeSample {
+            at_mi: 0.0,
+            aadt: 150000.0,
+            lanes: 3,
+            source: String::new(),
+        },
+        TrafficVolumeSample {
+            at_mi: 12.0,
+            aadt: 20000.0,
+            lanes: 2,
+            source: String::new(),
+        },
+    ];
+    let mut legs = cached.legs.clone();
+    legs[0] = Arc::new((*cached.legs[0]).clone().with_detail(detail));
+    let route = Route::new(cached.cities.clone(), legs);
+
+    let trip_at = |hour: f64| {
+        let mut truck = TruckState::default();
+        truck.transmission.automatic = true;
+        Trip::new(
+            route.clone(),
+            truck,
+            new_system("atlantic_southeast", Some(1), None, None, true),
+            TripOptions {
+                seed: Some(2),
+                start_hour: hour,
+                ..Default::default()
+            },
+        )
+    };
+
+    let rush = trip_at(17.0);
+    let mut jams: Vec<_> = rush
+        .zones
+        .iter()
+        .filter(|z| z.reason == "heavy traffic")
+        .cloned()
+        .collect();
+    assert!(!jams.is_empty() && jams.iter().all(|z| z.aadt.is_some()));
+    assert!(jams.iter_mut().any(|z| rush.zone_is_active(z)));
+
+    let night = trip_at(3.0);
+    let mut night_jams: Vec<_> = night
+        .zones
+        .iter()
+        .filter(|z| z.reason == "heavy traffic")
+        .cloned()
+        .collect();
+    assert!(!night_jams.is_empty());
+    assert!(!night_jams.iter_mut().any(|z| night.zone_is_active(z)));
 }
 
 #[test]
-#[ignore = "needs sim::trip and data::world (corridor traffic density)"]
 fn test_rush_hour_increases_corridor_traffic_density() {
-    // TODO(port): leg traffic density at 8 AM exceeds midday.
+    let rush = make_trip("Chicago", "Indianapolis", 2, 8.0);
+    let midday = make_trip("Chicago", "Indianapolis", 2, 12.0);
+    let leg = rush.route.legs[0].clone();
+    assert!(
+        rush.leg_traffic_density(&leg, 0.0, false) > midday.leg_traffic_density(&leg, 0.0, false)
+    );
 }
 
 #[test]
-#[ignore = "needs sim::trip and data::world (hazard risk at night)"]
 fn test_night_raises_hazard_risk() {
-    // TODO(port): night hazard risk is day risk + 0.10.
+    let day = make_trip("Chicago", "Indianapolis", 2, 12.0);
+    let night = make_trip("Chicago", "Indianapolis", 2, 23.0);
+    assert!(approx(night.hazard_risk(), day.hazard_risk() + 0.10));
 }
 
 #[test]
-#[ignore = "needs sim::trip and data::world (Trip.current_hour)"]
 fn test_trip_current_hour_advances_with_game_time() {
-    // TODO(port): 6 AM start + 18 h of game minutes is midnight.
+    let mut trip = make_trip("Chicago", "Indianapolis", 2, 6.0);
+    trip.game_minutes = 18.0 * 60.0;
+    assert!(trip.current_hour().abs() < 1e-9); // 6 AM + 18 h = midnight
 }
 
 // -- fatigue ---------------------------------------------------------------------
@@ -1335,9 +1457,32 @@ fn test_pre_1_5_snapshot_resumes_with_fresh_clock() {
 }
 
 #[test]
-#[ignore = "needs sim::trip and data::world (inspections only in violation)"]
 fn test_inspections_fire_only_in_violation() {
-    // TODO(port): no INSPECTION events while legal, at least one in violation.
+    use crate::sim::trip_models::TripEventKind;
+
+    let run_trip = |violating: bool| {
+        let mut trip = make_trip("Chicago", "Indianapolis", 5, 12.0);
+        trip.truck.start_engine();
+        trip.truck.throttle = 0.85;
+        trip.hos_violation = violating;
+        let mut inspections = 0;
+        for _ in 0..(60 * 60 * 30) {
+            trip.truck.auto_shift();
+            trip.truck.update(1.0 / 60.0);
+            inspections += trip
+                .update(1.0 / 60.0)
+                .iter()
+                .filter(|e| e.kind == TripEventKind::Inspection)
+                .count();
+            if trip.finished {
+                break;
+            }
+        }
+        inspections
+    };
+
+    assert_eq!(run_trip(false), 0);
+    assert!(run_trip(true) >= 1);
 }
 
 #[test]
@@ -1348,10 +1493,30 @@ fn test_inspection_fines_escalate_and_hit_reputation() {
 }
 
 #[test]
-#[ignore = "needs sim::trip and data::world (weigh station evidence)"]
 fn test_route_backed_weigh_station_emits_evidence() {
-    // TODO(port): a route weigh station emits one INSPECTION with context
-    // "weigh_station" and evidence ("HOS/ELD violation",).
+    use crate::sim::trip_models::{RoadStop, TripEventKind};
+
+    let mut trip = make_trip("Chicago", "Indianapolis", 5, 12.0);
+    let mut scale = RoadStop::new("Example Scale", 10.0, "weigh_station");
+    scale.actions = vec!["inspect".to_string()];
+    trip.stops = vec![scale];
+    trip.position_mi = 10.1;
+    trip.hos_violation = true;
+    trip.events = Vec::new();
+
+    trip.check_inspections(1.0);
+
+    let events: Vec<_> = trip
+        .events
+        .iter()
+        .filter(|e| e.kind == TripEventKind::Inspection)
+        .collect();
+    assert_eq!(events.len(), 1);
+    assert_eq!(events[0].data.context.as_deref(), Some("weigh_station"));
+    assert_eq!(
+        events[0].data.evidence,
+        Some(vec!["HOS/ELD violation".to_string()])
+    );
 }
 
 #[test]

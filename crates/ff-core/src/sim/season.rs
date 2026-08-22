@@ -357,9 +357,21 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs models::profile (Profile.anchor_calendar_to)"]
     fn test_profile_calendar_offset_changes_date_without_changing_career_time() {
-        // TODO(port): port with models::profile; the date_text side is covered above.
+        use crate::models::profile::Profile;
+        // `_hours_for_day(200) + 15.0`: career hours that land on day 200.
+        let target = (200.0 - CAREER_START_DAY_OF_YEAR).rem_euclid(365.0) * 24.0 + 15.0;
+        let mut profile = Profile::named("Established");
+        profile.game_hours = 30.0;
+        profile.anchor_calendar_to(target);
+
+        assert_eq!(profile.game_hours, 30.0);
+        assert_eq!(date_text(profile.calendar_game_hours()), date_text(target));
+        assert_eq!(
+            profile.calendar_game_hours().rem_euclid(24.0),
+            profile.game_hours.rem_euclid(24.0)
+        );
+        assert!((0..365).contains(&profile.calendar_offset_days));
     }
 
     #[test]

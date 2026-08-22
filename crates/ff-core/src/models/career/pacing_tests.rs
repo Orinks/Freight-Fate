@@ -37,19 +37,9 @@ const SENIOR_SPECIALTY_RATE: f64 = 0.45;
 /// Share of runs on premium mid-level freight.
 const PREMIUM_RATE: f64 = 0.30;
 
-// `JobBoard.distance_cap(level)` from `models/jobs.py` (wave 2): the caps
-// the pacing model deals against.
-// TODO(lead): wire to models::jobs::JobBoard::distance_cap when jobs lands.
-const LEVEL_DISTANCE_CAPS: [(i64, f64); 5] =
-    [(1, 300.0), (2, 450.0), (3, 650.0), (4, 850.0), (5, 1200.0)];
-const LEVEL_DISTANCE_CAP_STEP_MI: f64 = 120.0;
-const MAX_DISPATCH_DISTANCE_MI: f64 = 3000.0;
-
+// `JobBoard.distance_cap(level)`: the caps the pacing model deals against.
 fn distance_cap(level: i64) -> f64 {
-    if let Some((_, cap)) = LEVEL_DISTANCE_CAPS.iter().find(|(l, _)| *l == level) {
-        return *cap;
-    }
-    MAX_DISPATCH_DISTANCE_MI.min(1200.0 + LEVEL_DISTANCE_CAP_STEP_MI * (level - 5) as f64)
+    crate::models::jobs::JobBoard::distance_cap(level)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

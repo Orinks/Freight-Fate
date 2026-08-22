@@ -321,30 +321,120 @@ mod tests {
         assert_eq!(m.summary(), "Market watch: steel tight.");
     }
 
+    fn uniform_market(mult: f64) -> Market {
+        let mut market = Market::with_seed(0);
+        market.multipliers = MARKET_CARGO_KEYS
+            .iter()
+            .map(|k| (k.to_string(), mult))
+            .collect();
+        market
+    }
+
     #[test]
-    #[ignore = "needs models::jobs (JobBoard) and the world"]
     fn test_job_pay_scales_with_market() {
-        // Identical board seeds generate the same jobs, so pay isolates the
-        // market: tight / loose pay ratio is 1.3 / 0.8 and describe() says
-        // "Market is tight." / "Market is loose.".
+        use crate::data::world::get_world;
+        use crate::models::jobs::{JobBoard, OfferOptions};
+        let tight = uniform_market(1.3);
+        let loose = uniform_market(0.8);
+        let no_endorsements: &[&str] = &[];
+        // identical board seeds generate the same jobs, so pay isolates the market
+        let jobs_tight = JobBoard::seeded(get_world(), 11).offers(
+            "Chicago",
+            no_endorsements,
+            OfferOptions {
+                market: Some(&tight),
+                ..Default::default()
+            },
+        );
+        let jobs_loose = JobBoard::seeded(get_world(), 11).offers(
+            "Chicago",
+            no_endorsements,
+            OfferOptions {
+                market: Some(&loose),
+                ..Default::default()
+            },
+        );
+        assert!(!jobs_tight.is_empty() && jobs_tight.len() == jobs_loose.len());
+        for (jh, jc) in jobs_tight.iter().zip(&jobs_loose) {
+            assert_eq!(jh.cargo.key, jc.cargo.key);
+            assert!((jh.pay / jc.pay - 1.3 / 0.8).abs() < 0.01);
+            assert!(jh.describe_plain().contains("Market is tight."));
+            assert!(jc.describe_plain().contains("Market is loose."));
+        }
     }
 
     #[test]
-    #[ignore = "needs models::jobs (JobBoard) and the world"]
     fn test_steady_market_is_not_called_out_per_job() {
-        // No job description mentions "Market is" under a steady market.
+        use crate::data::world::get_world;
+        use crate::models::jobs::{JobBoard, OfferOptions};
+        let steady = uniform_market(1.0);
+        let no_endorsements: &[&str] = &[];
+        let jobs = JobBoard::seeded(get_world(), 11).offers(
+            "Chicago",
+            no_endorsements,
+            OfferOptions {
+                market: Some(&steady),
+                ..Default::default()
+            },
+        );
+        assert!(!jobs.is_empty());
+        assert!(jobs
+            .iter()
+            .all(|j| !j.describe_plain().contains("Market is")));
     }
 
     #[test]
-    #[ignore = "needs models::profile (save/load)"]
     fn test_profile_persists_market_state() {
-        // seed, day and multipliers survive Profile.save / Profile.load.
+        use crate::models::profile::{tests::with_data_dir, Profile};
+        with_data_dir(|_| {
+            let mut p = Profile::named("Market Test");
+            p.market.advance_to(5);
+            let snapshot = p.market.multipliers.clone();
+            let path = p.save().unwrap();
+            let loaded = Profile::load(&path).unwrap();
+            assert_eq!(loaded.market.seed, p.market.seed);
+            assert_eq!(loaded.market.day, 5);
+            assert_eq!(loaded.market.multipliers, snapshot);
+        });
     }
 
     #[test]
-    #[ignore = "needs models::profile (save/load)"]
     fn test_profile_load_migrates_legacy_market() {
-        // A save with 8 classes loads with the full catalog, the 8 untouched.
+        use crate::models::profile::{tests::with_data_dir, Profile};
+        // Saved by a build that only knew 8 cargo classes; loading must fill in
+        // the full catalog without touching the classes the save already had.
+        with_data_dir(|_| {
+            let mut p = Profile::named("Legacy Market");
+            let legacy: IndexMap<String, f64> = [
+                "bulk",
+                "container",
+                "electronics",
+                "food",
+                "general",
+                "machinery",
+                "refrigerated",
+                "retail",
+            ]
+            .iter()
+            .map(|key| (key.to_string(), p.market.multipliers[*key]))
+            .collect();
+            p.market.multipliers = legacy.clone();
+            let path = p.save().unwrap();
+            let loaded = Profile::load(&path).unwrap();
+            let mut keys: Vec<&str> = loaded
+                .market
+                .multipliers
+                .keys()
+                .map(String::as_str)
+                .collect();
+            keys.sort_unstable();
+            let mut expected: Vec<&str> = MARKET_CARGO_KEYS.to_vec();
+            expected.sort_unstable();
+            assert_eq!(keys, expected);
+            for (key, value) in &legacy {
+                assert_eq!(loaded.market.multipliers[key], *value);
+            }
+        });
     }
 
     // -- serde shape ---------------------------------------------------------

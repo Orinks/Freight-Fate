@@ -291,14 +291,14 @@ fn test_first_twenty_thresholds_stay_save_compatible() {
 }
 
 #[test]
-#[ignore = "needs models::profile (Profile.to_dict / from_dict round trip)"]
 fn test_streak_survives_the_save_round_trip() {
-    // profile.career.on_time_streak = 4; Profile.from_dict(profile.to_dict())
-    // keeps it. The field itself round-trips through serde here:
-    let mut career = Career::new();
-    career.on_time_streak = 4;
-    let reloaded: Career = serde_json::from_value(serde_json::to_value(&career).unwrap()).unwrap();
-    assert_eq!(reloaded.on_time_streak, 4);
+    use crate::models::profile::{tests::with_data_dir, Profile};
+    with_data_dir(|_| {
+        let mut profile = Profile::named_in("Streak Save", "Chicago");
+        profile.career.on_time_streak = 4;
+        let reloaded = Profile::from_dict(&profile.to_dict());
+        assert_eq!(reloaded.career.on_time_streak, 4);
+    });
 }
 
 #[test]

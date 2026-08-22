@@ -700,8 +700,25 @@ fn test_toggling_the_jake_cannot_farm_warnings_forever() {}
 fn test_the_fatigue_out_of_service_actually_holds_the_truck() {}
 
 #[test]
-#[ignore = "needs models::business (build_business_settlement) and models::jobs"]
-fn test_a_fine_a_load_cannot_cover_stays_owed_and_is_said_so() {}
+fn test_a_fine_a_load_cannot_cover_stays_owed_and_is_said_so() {
+    use crate::models::business::build_business_settlement_basic;
+    use crate::models::jobs::{cargo_type, Job};
+    let job = Job::new(
+        cargo_type("general").unwrap(),
+        5.0,
+        "Buffalo",
+        "yard",
+        "Rochester",
+        40.0,
+        120.0,
+        8.0,
+    );
+    let settled = build_business_settlement_basic("company_driver", &job, 120.0, true, 2_000.0);
+    assert_eq!(settled.net_before_advance, 0.0);
+    // The shortfall is owed, not quietly forgiven.
+    assert!(settled.uncollected_charges > 0.0);
+    assert!(settled.uncollected_charges < 2_000.0);
+}
 
 #[test]
 #[ignore = "needs states::city (JobBoardState) and the app shell"]

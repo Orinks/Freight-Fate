@@ -10,17 +10,12 @@ use crate::pyfmt::{fmt_f, fmt_grouped};
 #[cfg(test)]
 mod tests;
 
-// The business gates this module names. `models::business` (wave 2) owns
-// them; these are the Python values, repeated so the objectives can speak
-// them now.
-// TODO(lead): wire to models::business (OWNER_OPERATOR_*, AUTHORITY_*).
-pub const OWNER_OPERATOR_LEVEL: i64 = 18;
-pub const OWNER_OPERATOR_REPUTATION: f64 = 80.0;
-pub const OWNER_OPERATOR_DELIVERIES: i64 = 35;
-pub const OWNER_OPERATOR_WORKING_CAPITAL: f64 = 10_000.0;
-pub const AUTHORITY_READY_LEVEL: i64 = 21;
-pub const AUTHORITY_READY_WORKING_CAPITAL: f64 = 25_000.0;
-pub const AUTHORITY_ACTIVATION_LEVEL: i64 = 25;
+// The business gates this module names, owned by `models::business`.
+pub use crate::models::business::{
+    AUTHORITY_ACTIVATION_LEVEL, AUTHORITY_READY_LEVEL, AUTHORITY_READY_WORKING_CAPITAL,
+    OWNER_OPERATOR_DELIVERIES, OWNER_OPERATOR_LEVEL, OWNER_OPERATOR_REPUTATION,
+    OWNER_OPERATOR_WORKING_CAPITAL,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CareerObjective {

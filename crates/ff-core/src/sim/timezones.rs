@@ -494,43 +494,162 @@ mod tests {
         assert_eq!(py_floordiv(-24.0, 24.0), -1.0);
     }
 
+    // --- trip crossings: helpers ------------------------------------------------------
+
+    use crate::data::world::get_world;
+    use crate::data::world_models::{
+        CorridorDetail, Leg, Route, RoutePoint, StateCrossing, StateMileage,
+    };
+    use crate::sim::trip::{Trip, TripOptions};
+    use crate::sim::trip_models::TripEventKind;
+    use crate::sim::vehicle::TruckState;
+    use crate::sim::weather::test_support::new_system;
+
+    fn rp(at_mi: f64, lat: f64, lon: f64) -> RoutePoint {
+        RoutePoint { at_mi, lat, lon }
+    }
+
+    /// A stylized east-to-middle Tennessee leg: Eastern until the boundary at
+    /// the halfway point, Central beyond it. Kept under 70 miles so the trip
+    /// places no traffic or patrols for the synthetic endpoint cities.
+    fn tennessee_leg() -> Leg {
+        Leg::new("A", "B", 60.0, "I-40", "hills", Vec::new()).with_detail(CorridorDetail {
+            state_miles: vec![StateMileage::new("Tennessee", 60.0)],
+            route_points: vec![
+                rp(0.0, 35.96, -83.92),
+                rp(20.0, 35.90, -85.00),
+                rp(30.0, 36.00, -85.80),
+                rp(40.0, 36.10, -86.30),
+                rp(60.0, 36.16, -86.78),
+            ],
+            ..Default::default()
+        })
+    }
+
+    /// A stylized Kingman-to-Barstow: sparse route points thirty miles apart
+    /// with the Arizona-California line carried as an exact state crossing.
+    fn desert_interstate_leg() -> Leg {
+        Leg::new("A", "B", 90.0, "I-40", "mountain", Vec::new()).with_detail(CorridorDetail {
+            state_miles: vec![
+                StateMileage::new("Arizona", 49.3),
+                StateMileage::new("California", 40.7),
+            ],
+            state_crossings: vec![StateCrossing {
+                at_mi: 49.3,
+                from_state: "Arizona".into(),
+                state: "California".into(),
+                place: "the Colorado River".into(),
+                source: String::new(),
+            }],
+            route_points: vec![
+                rp(0.0, 35.19, -114.05),
+                rp(30.0, 34.80, -114.16),
+                rp(60.0, 34.80, -114.59),
+                rp(90.0, 34.83, -115.03),
+            ],
+            ..Default::default()
+        })
+    }
+
+    fn ab(leg: Leg) -> Route {
+        Route::from_legs(vec!["A".to_string(), "B".to_string()], vec![leg])
+    }
+
+    fn ba(leg: Leg) -> Route {
+        Route::from_legs(vec!["B".to_string(), "A".to_string()], vec![leg])
+    }
+
+    fn trip(route: Route, start_hour: f64) -> Trip {
+        Trip::new(
+            route,
+            TruckState::default(),
+            new_system("mid_south", Some(1), None, None, true),
+            TripOptions {
+                seed: Some(2),
+                start_hour,
+                ..Default::default()
+            },
+        )
+    }
+
+    fn crossings(trip: &Trip) -> Vec<(f64, &'static str)> {
+        trip.timezone_crossings
+            .iter()
+            .map(|c| (c.at_mi, c.to_zone.key))
+            .collect()
+    }
+
+    fn timezone_events(trip: &Trip) -> Vec<String> {
+        trip.events
+            .iter()
+            .filter(|e| e.kind == TripEventKind::TimezoneCrossing)
+            .map(|e| e.text().to_string())
+            .collect()
+    }
+
     // --- trip crossings -------------------------------------------------------------
 
     #[test]
-    #[ignore = "needs sim::trip (Trip over a synthetic Tennessee leg)"]
     fn test_trip_finds_the_boundary_from_route_geometry() {
-        // TODO(port): Trip over the stylized Tennessee leg: start EASTERN,
-        // destination CENTRAL, one crossing at 30.0 mi to "central".
+        let trip = trip(ab(tennessee_leg()), 12.0);
+        assert_eq!(trip.start_timezone, EASTERN);
+        assert_eq!(trip.destination_timezone(), CENTRAL);
+        assert_eq!(crossings(&trip), vec![(30.0, "central")]);
+        assert_eq!(trip.timezone_at(20.0), EASTERN);
+        assert_eq!(trip.timezone_at(35.0), CENTRAL);
     }
 
     #[test]
-    #[ignore = "needs sim::trip (state crossing beats sparse route points)"]
     fn test_clock_changes_at_the_state_crossing_not_the_next_sparse_point() {
-        // TODO(port): the Kingman-Barstow leg crosses at 49.3 mi to "pacific".
+        let trip = trip(ab(desert_interstate_leg()), 12.0);
+        assert_eq!(crossings(&trip), vec![(49.3, "pacific")]);
+        assert_eq!(trip.timezone_at(48.0).key, "mountain");
+        assert_eq!(trip.timezone_at(50.0).key, "pacific");
     }
 
     #[test]
-    #[ignore = "needs sim::trip (reversed state crossing)"]
     fn test_clock_changes_at_the_state_crossing_reversed() {
-        // TODO(port): traversed the other way the border sits at 40.7 trip miles.
+        let trip = trip(ba(desert_interstate_leg()), 12.0);
+        // Traversed the other way the border sits at 90 - 49.3 trip miles.
+        let rounded: Vec<(f64, &str)> = crossings(&trip)
+            .into_iter()
+            .map(|(at, key)| ((at * 10.0).round() / 10.0, key))
+            .collect();
+        assert_eq!(rounded, vec![(40.7, "mountain")]);
+        assert_eq!(trip.timezone_at(39.0).key, "pacific");
+        assert_eq!(trip.timezone_at(42.0).key, "mountain");
     }
 
     #[test]
-    #[ignore = "needs sim::trip (reversed route mirrors the boundary)"]
     fn test_trip_reversed_route_mirrors_the_boundary() {
-        // TODO(port): start CENTRAL, destination EASTERN, crossing at 40.0 mi.
+        let trip = trip(ba(tennessee_leg()), 12.0);
+        assert_eq!(trip.start_timezone, CENTRAL);
+        assert_eq!(trip.destination_timezone(), EASTERN);
+        // The crossing lands on the first sampled point inside the new zone.
+        assert_eq!(crossings(&trip), vec![(40.0, "eastern")]);
     }
 
     #[test]
-    #[ignore = "needs sim::trip (timezone crossing event)"]
     fn test_crossing_announces_the_new_local_clock_once() {
-        // TODO(port): "Crossing into Central Time. It is now 11 AM." once only.
+        let mut trip = trip(ab(tennessee_leg()), 12.0);
+        trip.position_mi = 35.0;
+        trip.check_timezone();
+        let events = timezone_events(&trip);
+        assert_eq!(events.len(), 1);
+        // Noon on the Eastern reference clock is 11 AM Central.
+        assert_eq!(events[0], "Crossing into Central Time. It is now 11 AM.");
+        trip.check_timezone();
+        assert_eq!(timezone_events(&trip).len(), 1);
     }
 
     #[test]
-    #[ignore = "needs sim::trip (timezone crossing event)"]
     fn test_crossing_east_announces_the_eastern_clock() {
-        // TODO(port): "Crossing into Eastern Time. It is now 12 PM."
+        let mut trip = trip(ba(tennessee_leg()), 12.0);
+        trip.position_mi = 45.0;
+        trip.check_timezone();
+        let events = timezone_events(&trip);
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0], "Crossing into Eastern Time. It is now 12 PM.");
     }
 
     #[test]
@@ -540,43 +659,95 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs sim::trip (Trip.local_hour)"]
     fn test_local_hour_follows_the_truck_across_the_boundary() {
-        // TODO(port): local_hour 12.0 before the boundary, 11.0 after it.
+        let mut trip = trip(ab(tennessee_leg()), 12.0);
+        assert_eq!(trip.local_hour(), 12.0);
+        trip.position_mi = 35.0;
+        assert_eq!(trip.local_hour(), 11.0);
     }
 
     #[test]
-    #[ignore = "needs sim::trip and data::world (restore past the boundary)"]
     fn test_restore_past_the_boundary_does_not_reannounce() {
-        // TODO(port): a restore beyond the boundary adopts CENTRAL silently.
+        // restore() walks real corridor data, so use a real route: resuming a
+        // save from beyond the boundary must adopt the zone silently.
+        let world = get_world();
+        let route = world.route_options("Atlanta", "Dallas", 3, false).unwrap()[0].clone();
+        let mut trip = Trip::new(
+            route,
+            TruckState::default(),
+            new_system("atlantic_southeast", Some(1), None, None, true),
+            TripOptions::seeded(2),
+        );
+        let first = trip
+            .timezone_crossings
+            .iter()
+            .find(|c| c.to_zone == CENTRAL)
+            .copied()
+            .expect("a crossing into Central");
+        trip.restore(first.at_mi + 5.0, 120.0);
+        trip.check_timezone();
+        assert!(timezone_events(&trip).is_empty());
+        assert_eq!(trip.current_timezone(), CENTRAL);
     }
 
     #[test]
-    #[ignore = "needs sim::trip (boundary zigzag dwell filter)"]
     fn test_boundary_zigzag_is_not_a_crossing() {
-        // TODO(port): a road that pokes over the line and back has no crossings.
+        // A road that pokes over the line and comes back within the dwell
+        // window must not move the clock at all.
+        let leg = Leg::new("A", "B", 60.0, "I-40", "hills", Vec::new()).with_detail(
+            CorridorDetail {
+                state_miles: vec![StateMileage::new("Tennessee", 60.0)],
+                route_points: vec![
+                    rp(0.0, 35.96, -83.92),
+                    rp(25.0, 35.90, -85.60), // briefly over the line
+                    rp(30.0, 35.90, -85.20), // and straight back
+                    rp(60.0, 35.96, -84.50),
+                ],
+                ..Default::default()
+            },
+        );
+        let trip = trip(ab(leg), 12.0);
+        assert!(trip.timezone_crossings.is_empty());
+        assert_eq!(trip.destination_timezone(), EASTERN);
     }
 
     // --- destination-local deadlines --------------------------------------------------
 
     #[test]
-    #[ignore = "needs sim::trip (Trip.deadline_clock_text)"]
     fn test_deadline_reads_in_the_destination_zone() {
-        // TODO(port): "9 PM Central Time" and "7 AM Central Time tomorrow".
+        let trip = trip(ab(tennessee_leg()), 12.0);
+        assert_eq!(trip.deadline_clock_text(10.0, None), "9 PM Central Time");
+        assert_eq!(trip.deadline_clock_text(20.0, None), "7 AM Central Time tomorrow");
     }
 
     #[test]
-    #[ignore = "needs sim::trip (Trip.deadline_clock_text)"]
     fn test_deadline_clock_is_anchored_at_trip_start() {
-        // TODO(port): the appointment holds after three hours of driving.
+        let mut trip = trip(ab(tennessee_leg()), 12.0);
+        let before = trip.deadline_clock_text(10.0, None);
+        trip.game_minutes = 180.0; // three hours of driving later...
+        assert_eq!(trip.deadline_clock_text(10.0, None), before); // ...the appointment holds
     }
 
     // --- real world data ---------------------------------------------------------------
 
     #[test]
-    #[ignore = "needs sim::trip and data::world (Atlanta to Dallas)"]
     fn test_atlanta_to_dallas_crosses_into_central() {
-        // TODO(port): start EASTERN, destination CENTRAL, ("eastern", "central") crossing.
+        let world = get_world();
+        let route = world.route_options("Atlanta", "Dallas", 3, false).unwrap()[0].clone();
+        let trip = Trip::new(
+            route,
+            TruckState::default(),
+            new_system("atlantic_southeast", Some(1), None, None, true),
+            TripOptions::seeded(2),
+        );
+        assert_eq!(trip.start_timezone, EASTERN);
+        assert_eq!(trip.destination_timezone(), CENTRAL);
+        let keys: Vec<(&str, &str)> = trip
+            .timezone_crossings
+            .iter()
+            .map(|c| (c.from_zone.key, c.to_zone.key))
+            .collect();
+        assert!(keys.contains(&("eastern", "central")));
     }
 
     #[test]

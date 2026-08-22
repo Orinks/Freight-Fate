@@ -178,46 +178,137 @@ fn test_heavy_hauler_burns_more_fuel() {
 // -- profile persistence -----------------------------------------------------------
 
 #[test]
-#[ignore = "needs models::profile (Profile.save / Profile.load)"]
 fn test_profile_persists_truck_and_upgrades() {
-    // A leased owner-operator with truck "heavy_hauler", owned_trucks
-    // ["rig", "heavy_hauler"] and upgrades {engine_tune: 2, aero_kit: 1}
-    // saves and loads back identical; truck_specs() torque is the hauler's
-    // times 1.2. The spec half holds here:
-    let specs = build_truck_specs(
-        "heavy_hauler",
-        &upgrades(&[("engine_tune", 2), ("aero_kit", 1)]),
-    );
-    let hauler = &truck_model_or_panic("heavy_hauler").specs;
-    assert!((specs.max_torque_nm - hauler.max_torque_nm * 1.2).abs() < 1e-6);
+    use crate::models::business_constants::LEASED_OWNER_OPERATOR;
+    use crate::models::profile::{tests::with_data_dir, Profile};
+    with_data_dir(|_| {
+        let mut p = Profile::named("Garage Test");
+        p.business_status = LEASED_OWNER_OPERATOR.to_string();
+        p.truck = "heavy_hauler".to_string();
+        p.owned_trucks = vec!["rig".to_string(), "heavy_hauler".to_string()];
+        p.upgrades = [("engine_tune".to_string(), 2), ("aero_kit".to_string(), 1)]
+            .into_iter()
+            .collect();
+        let path = p.save().unwrap();
+        let loaded = Profile::load(&path).unwrap();
+        assert_eq!(loaded.truck, "heavy_hauler");
+        assert_eq!(loaded.owned_trucks, vec!["rig", "heavy_hauler"]);
+        assert_eq!(loaded.upgrades, p.upgrades);
+        let specs = loaded.truck_specs();
+        let hauler = &truck_model_or_panic("heavy_hauler").specs;
+        assert!((specs.max_torque_nm - hauler.max_torque_nm * 1.2).abs() < 1e-6);
+    });
 }
 
 #[test]
-#[ignore = "needs models::profile (legacy save load)"]
 fn test_old_save_without_truck_fields_loads_with_defaults() {
-    // A legacy unsigned JSON save missing truck, owned_trucks, upgrades,
-    // market, trailer_programs, owned_trailers, the wear fields and
-    // active_buffs loads with truck "rig", no owned trucks, no upgrades, no
-    // programs or trailers, zero wear, and a fresh market.
-    unimplemented!("needs Profile.load")
+    use crate::models::profile::{
+        decode_save_bytes, tests::with_data_dir, Profile, SIGNATURE_FIELD,
+        SIGNATURE_VERSION_FIELD,
+    };
+    with_data_dir(|_| {
+        let p = Profile::named("Legacy");
+        let path = p.save().unwrap();
+        let (mut data, _) = decode_save_bytes(&std::fs::read(&path).unwrap()).unwrap();
+        std::fs::remove_file(&path).unwrap();
+        for legacy_missing in [
+            "truck",
+            "owned_trucks",
+            "upgrades",
+            "market",
+            "trailer_programs",
+            "owned_trailers",
+            "tire_wear_pct",
+            "brake_wear_pct",
+            "engine_wear_pct",
+            "road_grime_pct",
+            "active_buffs",
+            SIGNATURE_FIELD,
+            SIGNATURE_VERSION_FIELD,
+        ] {
+            data.remove(legacy_missing);
+        }
+        // An old install left this save as plain unsigned JSON.
+        let legacy_path = path.with_extension("json");
+        std::fs::write(
+            &legacy_path,
+            serde_json::to_string(&serde_json::Value::Object(data)).unwrap(),
+        )
+        .unwrap();
+        let loaded = Profile::load(&legacy_path).unwrap();
+        assert_eq!(loaded.truck, "rig");
+        assert!(loaded.owned_trucks.is_empty());
+        assert!(loaded.visible_owned_trucks().is_empty());
+        assert!(loaded.upgrades.is_empty());
+        assert!(loaded.active_trailer_programs().is_empty());
+        assert!(loaded.visible_owned_trailers().is_empty());
+        assert_eq!(loaded.tire_wear_pct(), 0.0);
+        assert_eq!(loaded.brake_wear_pct(), 0.0);
+        assert_eq!(loaded.engine_wear_pct(), 0.0);
+        assert_eq!(loaded.road_grime_pct(), 0.0);
+        assert!(loaded.active_buffs.is_empty());
+        // Per-truck condition is reached through the flat names on this line;
+        // they route to the active truck's record rather than a typed accessor.
+        assert_eq!(loaded.truck_damage_pct(), 0.0);
+        assert_eq!(
+            loaded
+                .truck_conditions
+                .get("rig")
+                .and_then(|r| r.get("damage_pct"))
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0),
+            0.0
+        );
+        assert!(!loaded.market.multipliers.is_empty()); // fresh market seeded on load
+    });
 }
 
 #[test]
-#[ignore = "needs models::profile (load_truck_condition / store_truck_condition)"]
 fn test_truck_condition_round_trips_through_profile() {
-    // Profile fuel 120, damage 8, tire 12, brake 34, engine 5.5 load into a
-    // TruckState, wear is added, and store_truck_condition reads it back as
-    // fuel 90, tire 13.5, brake 36, engine 5.75.
-    unimplemented!("needs Profile")
+    use crate::models::profile::Profile;
+    let mut p = Profile::named("Wear Sync");
+    p.set_truck_fuel_gal(120.0);
+    p.set_truck_damage_pct(8.0);
+    p.set_tire_wear_pct(12.0);
+    p.set_brake_wear_pct(34.0);
+    p.set_engine_wear_pct(5.5);
+    let mut truck = TruckState::default();
+    p.load_truck_condition(&mut truck);
+    assert_eq!(truck.fuel_gal, 120.0);
+    assert_eq!(truck.damage_pct, 8.0);
+    assert_eq!(truck.tire_wear_pct, 12.0);
+    assert_eq!(truck.brake_wear_pct, 34.0);
+    assert_eq!(truck.engine_wear_pct, 5.5);
+
+    truck.tire_wear_pct += 1.5;
+    truck.brake_wear_pct += 2.0;
+    truck.engine_wear_pct += 0.25;
+    truck.fuel_gal -= 30.0;
+    p.store_truck_condition(&truck);
+    assert_eq!(p.truck_fuel_gal(), 90.0);
+    assert_eq!(p.tire_wear_pct(), 13.5);
+    assert_eq!(p.brake_wear_pct(), 36.0);
+    assert_eq!(p.engine_wear_pct(), 5.75);
 }
 
 #[test]
-#[ignore = "needs models::profile (Profile.truck_specs / active_truck_key)"]
 fn test_company_driver_profile_uses_assigned_standard_tractor() {
-    // A company driver with truck "heavy_hauler", owned trucks and upgrades
-    // still drives the assigned "rig" with stock specs: visible_owned_trucks
-    // is empty, active_truck_key is "rig", truck_specs equals TruckSpecs().
-    unimplemented!("needs Profile")
+    use crate::models::profile::Profile;
+    let mut p = Profile::named("Assigned Rig");
+    p.truck = "heavy_hauler".to_string();
+    p.owned_trucks = vec!["rig".to_string(), "heavy_hauler".to_string()];
+    p.upgrades = [
+        ("engine_tune".to_string(), 2),
+        ("long_range_tank".to_string(), 1),
+    ]
+    .into_iter()
+    .collect();
+
+    let specs = p.truck_specs();
+
+    assert!(p.visible_owned_trucks().is_empty());
+    assert_eq!(p.active_truck_key(), "rig");
+    assert_eq!(specs, TruckSpecs::default());
 }
 
 #[test]

@@ -1,1 +1,268 @@
-//! Port of `freight_fate/speech.py` — not yet ported.
+//! Port of `freight_fate/speech.py` — screen reader output via Prism.
+//!
+//! Prism is a screen reader abstraction layer that unifies NVDA, JAWS, SAPI,
+//! VoiceOver, Speech Dispatcher, and many other backends behind one API. This
+//! module wraps it in a small game-friendly interface that:
+//!
+//! * never crashes the game if speech is unavailable (silent fallback),
+//! * picks the best backend that is actually usable on this machine: Prism's
+//!   `acquire_best` cannot be trusted for this -- it returns the highest
+//!   priority backend that already has a live cached instance (whatever the
+//!   game happens to be holding), and otherwise ranks by static registry
+//!   priority whether or not that screen reader is running -- so the registry
+//!   is enumerated in priority order and every candidate is validated against
+//!   its live `is_supported_at_runtime` check,
+//! * treats Prism's `UIA` backend (the route to Narrator, via UI Automation
+//!   notifications) as a gated last resort: it reports runtime support on every
+//!   modern Windows whether or not anyone is listening, so it is skipped unless
+//!   Narrator is actually running -- and even then it only wins when no other
+//!   voice works, because the backend raises every notification with
+//!   `NotificationProcessing_ImportantAll`, which Narrator queues without
+//!   ever cancelling: interrupt and stop are no-ops, so menu browsing through
+//!   it piles up unread items,
+//! * keeps watching while the game runs: if the player switches screen readers
+//!   mid-session (NVDA off, Narrator on, back to NVDA), a periodic health check
+//!   re-detects the running one and reconnects speech instead of going silent,
+//! * prefers `output` (speech + braille) and falls back to `speak`,
+//! * can be disabled with the `FREIGHT_FATE_NO_SPEECH=1` environment variable
+//!   (used by the headless test suite and CI), and forced to a specific backend
+//!   with `FREIGHT_FATE_SPEECH_BACKEND=<name>` (for example `SAPI`).
+//!
+//! # Threading: everything Prism runs on the main thread
+//!
+//! Two Prism [`prism::Context`]s probing backends from different threads crash
+//! inside Prism (found while porting: the registry's runtime checks are not
+//! re-entrant across threads). So there is exactly one context per process,
+//! it is created on the main thread, and every call on it -- construction,
+//! the 3 s health poll, speaking, configuring, shutdown -- happens on the
+//! thread that runs the game loop. [`Speech`] is deliberately not `Send` or
+//! `Sync`; background threads hand text back to the main thread and let it
+//! speak, exactly as the Python game did.
+//!
+//! # Shape of the port
+//!
+//! The one Python class becomes three things: the [`SpeechSink`] trait (what
+//! `GameContext` needs from a speech object), the Prism-backed [`Speech`]
+//! (`speech::live`), and the test doubles [`CaptureSpeech`] and [`NullSpeech`]
+//! (`speech::capture`). The Prism calls themselves sit behind the
+//! [`backend::VoiceRegistry`] / [`backend::VoiceBackend`] traits so the
+//! selection logic -- `pick_backend`, the event voice, the refresh poll -- is
+//! tested against fake registries exactly as `tests/test_speech_audio.py`
+//! tests it against `FakeContext` and `RecordingBackend`.
+
+use ff_core::settings::Settings;
+
+pub mod backend;
+pub mod capture;
+pub mod fakes;
+pub mod live;
+
+// The event-voice pacer moved to its own module when it grew repeat
+// suppression and priority; re-exported here because it is part of what a
+// caller means by "the speech channel", and every existing import says so.
+pub use ff_core::speech_pacing::{EventPriority, EventSpeechPacer};
+
+pub use backend::{
+    narrator_running, pick_backend, pick_backend_gated, pick_event_backend,
+    preserve_backend_default_pitch, usable, BackendId, PrismRegistry, PrismVoice, VoiceBackend,
+    VoiceFeatures, VoiceRegistry,
+};
+pub use capture::{
+    CaptureProfile, CaptureSpeech, ConfigureCall, NullSpeech, SpeechChannel, SpokenEntry,
+};
+pub use live::{Speech, SpeechConfig};
+
+/// Seconds between runtime health checks of the speech backend. Short enough
+/// that a player who switches screen readers hears the game again within a few
+/// seconds, long enough that the registry scan costs nothing per frame.
+pub const REFRESH_INTERVAL_S: f64 = 3.0;
+
+/// Preferred separate event voice per platform; the first one that exists wins.
+/// These are the controllable software TTS engines, not screen readers: SAPI is
+/// Windows, AVSpeech is macOS, Speech Dispatcher is Linux. `select_event_backend`
+/// falls back to whatever the machine actually has, so this is only a hint.
+pub const EVENT_BACKEND: &str = "SAPI";
+
+/// Ranks the UIA backend below every other voice even while Narrator is
+/// running. Prism's UIA backend raises all notifications with
+/// `NotificationProcessing_ImportantAll`, which Narrator queues without ever
+/// cancelling -- interrupt and stop are no-ops -- so menu browsing through it
+/// stacks up unread items. Until that is fixed upstream (the fix is
+/// `ImportantMostRecent` for the interrupt case), UIA is only for machines
+/// where nothing else can speak at all: queued speech beats silence.
+pub const UIA_LAST_RESORT_PRIORITY: i32 = -1;
+
+/// Environment variable that disables speech entirely (no Prism is loaded).
+pub const NO_SPEECH_ENV: &str = "FREIGHT_FATE_NO_SPEECH";
+
+/// Environment variable that forces a specific Prism backend by registry name.
+pub const SPEECH_BACKEND_ENV: &str = "FREIGHT_FATE_SPEECH_BACKEND";
+
+/// Settings keys whose preview speaks through the voice that setting adjusts,
+/// paired with the backend feature that voice must support.
+pub const PREVIEW_FEATURES: [(&str, PreviewFeature); 4] = [
+    ("speech_rate", PreviewFeature::Rate),
+    ("speech_pitch", PreviewFeature::Pitch),
+    ("speech_volume", PreviewFeature::Volume),
+    ("speech_voice", PreviewFeature::Voice),
+];
+
+/// The backend capability a settings preview needs, one per adjustable
+/// speech setting (`Speech._PREVIEW_FEATURES` in Python).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PreviewFeature {
+    Rate,
+    Pitch,
+    Volume,
+    Voice,
+}
+
+impl PreviewFeature {
+    /// The feature a settings key previews through, or `None` for a setting
+    /// that is not voice-adjustable (`speech_verbosity`, ...).
+    pub fn for_setting(setting: &str) -> Option<Self> {
+        PREVIEW_FEATURES
+            .iter()
+            .find(|(key, _)| *key == setting)
+            .map(|(_, feature)| *feature)
+    }
+
+    /// Whether `features` lets a voice be adjusted along this axis.
+    pub fn supported_by(self, features: VoiceFeatures) -> bool {
+        match self {
+            PreviewFeature::Rate => features.supports_set_rate,
+            PreviewFeature::Pitch => features.supports_set_pitch,
+            PreviewFeature::Volume => features.supports_set_volume,
+            PreviewFeature::Voice => features.supports_set_voice,
+        }
+    }
+}
+
+/// What `GameContext` needs from a speech object: the public surface of the
+/// Python `Speech` class, method for method.
+///
+/// Two channels: `say` is the main voice (menus, info keys, everything the
+/// player asked for), `say_event` the dedicated event voice (road events,
+/// warnings) that falls back to the main channel when no separate voice is
+/// bound. `interrupt` cuts off the previous utterance on that channel.
+///
+/// The "Speech is now using X." line a backend switch produces is spoken by
+/// the object itself, straight through the new main voice and bypassing the
+/// message log -- exactly what `Speech.refresh(announce=True)` did in Python,
+/// where it called its own `say`. No hook and no returned list, because the
+/// caller never saw that line in Python either; a test double that wants to
+/// see it records what `say` received.
+pub trait SpeechSink {
+    /// Speak (and braille, where supported) `text` on the main channel.
+    fn say(&mut self, text: &str, interrupt: bool);
+
+    /// Speak on the dedicated event voice (SAPI), so the player's screen
+    /// reader cannot talk over it; falls back to the main channel.
+    fn say_event(&mut self, text: &str, interrupt: bool);
+
+    /// Silence in-progress main speech without cutting off event speech.
+    fn stop_main(&mut self);
+
+    /// Silence in-progress event speech without cutting off main speech.
+    fn stop_event(&mut self);
+
+    /// Silence any in-progress speech on both channels.
+    fn stop(&mut self);
+
+    /// Periodic health check, driven every frame by the game loop.
+    fn poll(&mut self, dt: f64);
+
+    /// Make the next `poll` re-detect immediately (the window regained focus).
+    fn request_refresh(&mut self);
+
+    /// Whether a main voice is bound right now.
+    fn available(&self) -> bool;
+
+    /// Registry name of the main voice; `"none"` when there is none.
+    fn backend_name(&self) -> String;
+
+    /// Whether events currently have their own backend. Without one,
+    /// `say_event` falls back to the main channel, so events and menu speech
+    /// share a single voice and can cut each other.
+    fn has_separate_event_voice(&self) -> bool;
+
+    /// Registry name of the event voice; `"none"` when events share the main
+    /// voice.
+    fn event_backend_name(&self) -> String;
+
+    /// Whether any bound voice honors the in-game rate setting.
+    fn supports_rate(&self) -> bool;
+
+    /// Whether any bound voice honors the in-game pitch setting.
+    fn supports_pitch(&self) -> bool;
+
+    /// Whether any bound voice honors the in-game volume setting.
+    fn supports_volume(&self) -> bool;
+
+    /// Whether the dedicated event voice honors the in-game rate setting.
+    fn event_supports_rate(&self) -> bool;
+
+    /// Usable backends that can serve as a separate event voice (the
+    /// controllable software voices other than the main one), in registry
+    /// order.
+    fn event_backend_options(&self) -> Vec<String>;
+
+    /// Choose which backend speaks driving events (`None` = the main voice).
+    /// The name is a preference: when it is not on this machine the best
+    /// available separate software voice is used instead.
+    fn select_event_backend(&mut self, name: Option<&str>);
+
+    /// Installed voice names from the first backend that lets us pick one;
+    /// empty when none does.
+    fn voice_names(&self) -> Vec<String>;
+
+    /// Push speech parameters to every backend that supports them; `None`
+    /// leaves that parameter alone. Values are remembered so a backend swap
+    /// mid-session can re-apply them to the new voice.
+    fn configure(
+        &mut self,
+        rate: Option<f64>,
+        pitch: Option<f64>,
+        volume: Option<f64>,
+        voice: Option<&str>,
+    );
+
+    /// Speak a settings preview through the voice affected by `setting`
+    /// (`"speech_rate"`, `"speech_pitch"`, `"speech_volume"`,
+    /// `"speech_voice"`). `false` when no bound voice can be adjusted that way
+    /// or the setting is not voice-adjustable.
+    fn say_adjustment_preview(&mut self, setting: &str, text: &str, interrupt: bool) -> bool;
+
+    /// Re-detect which screen reader or voice should be speaking. `true` when
+    /// the main voice changed; with `announce` the new voice says so.
+    fn refresh(&mut self, announce: bool) -> bool;
+
+    /// Release the backends and context. Safe to call more than once.
+    fn shutdown(&mut self);
+}
+
+/// `GameContext.apply_speech`: reflect the speech settings on the sink.
+///
+/// Selects the event voice the player chose (or the main voice when
+/// `sapi_events` is off), records the voice actually bound when the saved
+/// one was not on this machine (a Windows save's SAPI opened on macOS) so
+/// the menu and later sessions reflect reality, and pushes rate, pitch,
+/// volume and voice. Lives here rather than in the app shell so the settings
+/// side of speech has one definition.
+pub fn apply_speech_settings(sink: &mut dyn SpeechSink, settings: &mut Settings) {
+    let preference = settings.sapi_events.then(|| settings.event_backend.clone());
+    sink.select_event_backend(preference.as_deref());
+    if settings.sapi_events {
+        let actual = sink.event_backend_name();
+        if actual != "none" && actual != "unknown" && actual != settings.event_backend {
+            settings.event_backend = actual;
+        }
+    }
+    let voice = (!settings.speech_voice.is_empty()).then(|| settings.speech_voice.clone());
+    sink.configure(
+        Some(settings.speech_rate),
+        Some(settings.speech_pitch),
+        Some(settings.speech_volume),
+        voice.as_deref(),
+    );
+}

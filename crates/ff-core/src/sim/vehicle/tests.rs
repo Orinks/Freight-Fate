@@ -1598,12 +1598,35 @@ fn test_liquid_freight_is_hard_to_ruin_because_liquid_does_not_break() {}
 fn test_a_tank_load_is_described_in_words_that_fit_a_tank() {}
 
 #[test]
-#[ignore = "needs models::jobs CARGO_CATALOG and models::trailers"]
-fn test_tank_freight_is_gated_to_the_back_half_of_the_career() {}
+fn test_tank_freight_is_gated_to_the_back_half_of_the_career() {
+    use crate::models::jobs::cargo_type;
+    use crate::models::trailers::trailer_keys_for_cargo;
+    for key in ["fuel_bulk", "liquid_food"] {
+        let cargo = cargo_type(key).unwrap();
+        assert!(
+            cargo.min_level >= 16,
+            "tank work belongs to the back half of the arc"
+        );
+        assert_eq!(cargo.endorsement, Some("tank"));
+        assert!(cargo.tank);
+        assert_eq!(trailer_keys_for_cargo(key), ["tank"]);
+    }
+}
 
+/// Sanitation forbids baffles in a food-grade tank, so the gentlest cargo in
+/// the game travels in the most vicious equipment.
 #[test]
-#[ignore = "needs models::jobs CARGO_CATALOG"]
-fn test_liquid_food_is_the_harder_one_and_pays_for_it() {}
+fn test_liquid_food_is_the_harder_one_and_pays_for_it() {
+    use crate::models::jobs::cargo_type;
+    let fuel = cargo_type("fuel_bulk").unwrap();
+    let milk = cargo_type("liquid_food").unwrap();
+    assert!(fuel.baffled);
+    assert!(!milk.baffled);
+    assert!(milk.min_level > fuel.min_level);
+    assert!(milk.rate_per_mile > fuel.rate_per_mile);
+    // And both pay over the dry freight that shares their level band.
+    assert!(fuel.rate_per_mile > cargo_type("chemicals").unwrap().rate_per_mile);
+}
 
 #[test]
 #[ignore = "needs models::career"]

@@ -39,70 +39,206 @@ fn test_start_options_are_grounded_and_player_facing() {
     }
 }
 
+/// `_job(miles, pay)`: a general-freight Chicago to Milwaukee load.
+fn real_job(miles: f64, pay: f64) -> crate::models::jobs::Job {
+    crate::models::jobs::Job::new(
+        crate::models::jobs::cargo_type("general").unwrap(),
+        12.0,
+        "Chicago",
+        "Chicago yard",
+        "Milwaukee",
+        miles,
+        pay,
+        6.0,
+    )
+}
+
 #[test]
-#[ignore = "needs models::business (company_driver_pay)"]
 fn test_company_carrier_pay_plans_have_distinct_benefits() {
-    // company_driver_pay on an 80-mile/600-dollar job pays more at
-    // great_lakes_training than northstar; a 500-mile/500-dollar floor job
-    // pays more at prairie_link; a 300-mile/3000-dollar job pays more at
-    // summit_value. The plans themselves carry the knobs:
-    let northstar = pay_plan_for_key(Some(DEFAULT_START_KEY));
-    let training = pay_plan_for_key(Some("great_lakes_training"));
-    let prairie = pay_plan_for_key(Some("prairie_link"));
-    let summit = pay_plan_for_key(Some("summit_value"));
-    assert!(training.stop_pay > northstar.stop_pay);
-    assert!(prairie.min_per_mile > northstar.min_per_mile);
-    assert!(summit.pay_share > northstar.pay_share);
-    assert!(summit.on_time_bonus_share > northstar.on_time_bonus_share);
+    use crate::models::business::company_driver_pay;
+    let short_job = real_job(80.0, 600.0);
+    let long_floor_job = real_job(500.0, 500.0);
+    let high_gross_job = real_job(300.0, 3000.0);
+
+    let northstar = company_driver_pay(&short_job, short_job.pay, true, Some(DEFAULT_START_KEY), None);
+    let training = company_driver_pay(&short_job, short_job.pay, true, Some("great_lakes_training"), None);
+    assert!(training > northstar);
+
+    let northstar_long = company_driver_pay(
+        &long_floor_job,
+        long_floor_job.pay,
+        true,
+        Some(DEFAULT_START_KEY),
+        None,
+    );
+    let prairie = company_driver_pay(
+        &long_floor_job,
+        long_floor_job.pay,
+        true,
+        Some("prairie_link"),
+        None,
+    );
+    assert!(prairie > northstar_long);
+
+    let northstar_bonus = company_driver_pay(
+        &high_gross_job,
+        high_gross_job.pay,
+        true,
+        Some(DEFAULT_START_KEY),
+        None,
+    );
+    let summit = company_driver_pay(
+        &high_gross_job,
+        high_gross_job.pay,
+        true,
+        Some("summit_value"),
+        None,
+    );
+    assert!(summit > northstar_bonus);
 }
 
 #[test]
-#[ignore = "needs models::business (build_business_settlement)"]
 fn test_carrier_key_changes_settlement_math() {
-    // build_business_settlement(COMPANY_DRIVER, 80-mile job, on time, no
-    // driver charges) nets more at great_lakes_training than northstar, and
-    // carries no business charges.
-    unimplemented!("needs build_business_settlement")
+    use crate::models::business::{build_business_settlement, SettlementTerms};
+    let job = real_job(80.0, 600.0);
+
+    let northstar = build_business_settlement(
+        COMPANY_DRIVER,
+        &job,
+        job.pay,
+        true,
+        0.0,
+        &SettlementTerms {
+            carrier_key: Some(DEFAULT_START_KEY),
+            ..Default::default()
+        },
+    );
+    let training = build_business_settlement(
+        COMPANY_DRIVER,
+        &job,
+        job.pay,
+        true,
+        0.0,
+        &SettlementTerms {
+            carrier_key: Some("great_lakes_training"),
+            ..Default::default()
+        },
+    );
+
+    assert!(training.net_before_advance > northstar.net_before_advance);
+    assert!(training.business_charges.is_empty());
 }
 
 #[test]
-#[ignore = "needs models::jobs (JobBoard._cargo_weight) and the world"]
 fn test_carrier_key_can_bias_job_mix_weighting() {
-    // JobBoard._cargo_weight(Kansas City, "grain") is higher for prairie_link
-    // than northstar. The bonus it reads is here:
-    assert!(
-        start_option(Some("prairie_link")).cargo_weight_bonus_for("grain")
-            > start_option(Some(DEFAULT_START_KEY)).cargo_weight_bonus_for("grain")
-    );
+    use crate::data::world::get_world;
+    use crate::models::jobs::JobBoard;
+    let world = get_world();
+    let kansas_city = world.city("Kansas City").unwrap();
+
+    let baseline = JobBoard::cargo_weight(kansas_city, "grain", DEFAULT_START_KEY, 1);
+    let prairie = JobBoard::cargo_weight(kansas_city, "grain", "prairie_link", 1);
+
+    assert!(prairie > baseline);
 }
 
 #[test]
-#[ignore = "needs models::jobs (JobBoard._destination_weight) and the world"]
 fn test_company_carriers_have_distinct_dispatch_weighting() {
-    // Short-lane ratio is higher for great_lakes_training, same-region ratio
-    // higher for prairie_link, and summit_value weights a cap-distance lane up.
-    // The dispatch profiles those read:
+    use crate::data::world::get_world;
+    use crate::models::jobs::JobBoard;
+    let world = get_world();
+    let board = JobBoard::seeded(world, 1);
+    let miles_between = |a: &str, b: &str| -> f64 {
+        world
+            .supported_route(a, b, None)
+            .unwrap()
+            .expect("a supported route")
+            .miles()
+    };
+    let chicago = world.resolve_city_key("Chicago");
+    let milwaukee = world.resolve_city_key("Milwaukee");
+    let kc_key = world.resolve_city_key("Kansas City");
+    let short = (milwaukee.clone(), miles_between(&chicago, &milwaukee), 1);
+    let long = (kc_key.clone(), miles_between(&chicago, &kc_key), 1);
+
+    let northstar_short_ratio = board.destination_weight(&chicago, &short, 2, DEFAULT_START_KEY, None)
+        / board.destination_weight(&chicago, &long, 2, DEFAULT_START_KEY, None);
+    let training_short_ratio =
+        board.destination_weight(&chicago, &short, 2, "great_lakes_training", None)
+            / board.destination_weight(&chicago, &long, 2, "great_lakes_training", None);
+    assert!(training_short_ratio > northstar_short_ratio);
+
+    let origin_region = &world.cities[&kc_key].region;
+    let mut same_region = None;
+    let mut other_region = None;
+    for dest in world.city_names() {
+        if dest == kc_key {
+            continue;
+        }
+        let Ok(Some(route)) = world.supported_route(&kc_key, &dest, None) else {
+            continue;
+        };
+        let candidate = (dest.clone(), route.miles(), route.legs.len());
+        if &world.cities[&dest].region == origin_region {
+            same_region.get_or_insert(candidate);
+        } else {
+            other_region.get_or_insert(candidate);
+        }
+        if same_region.is_some() && other_region.is_some() {
+            break;
+        }
+    }
+    let same_region = same_region.expect("a same-region destination");
+    let other_region = other_region.expect("an other-region destination");
+    let prairie_region_ratio = board.destination_weight(&kc_key, &same_region, 2, "prairie_link", None)
+        / board.destination_weight(&kc_key, &other_region, 2, "prairie_link", None);
+    let northstar_region_ratio =
+        board.destination_weight(&kc_key, &same_region, 2, DEFAULT_START_KEY, None)
+            / board.destination_weight(&kc_key, &other_region, 2, DEFAULT_START_KEY, None);
+    assert!(prairie_region_ratio > northstar_region_ratio);
+
+    let cap = JobBoard::distance_cap(5);
+    let candidate = (world.resolve_city_key("Los Angeles"), cap, 3);
+    let denver = world.resolve_city_key("Denver");
     assert!(
-        start_option(Some("great_lakes_training"))
-            .dispatch
-            .short_haul_bias
-            > 0.0
+        board.destination_weight(&denver, &candidate, 5, "summit_value", None)
+            > board.destination_weight(&denver, &candidate, 5, DEFAULT_START_KEY, None)
     );
-    assert!(start_option(Some("prairie_link")).dispatch.regional_bias > 0.0);
-    assert!(start_option(Some("summit_value")).dispatch.long_haul_bias > 0.0);
 }
 
 #[test]
-#[ignore = "needs models::jobs (JobBoard._make_job) and the world"]
 fn test_training_carrier_adds_modest_deadline_slack() {
-    // The same 92-mile Chicago to Milwaukee job gets a later deadline_game_h
-    // at great_lakes_training than at northstar.
-    assert!(
-        start_option(Some("great_lakes_training"))
-            .dispatch
-            .deadline_slack
-            > 1.0
-    );
+    use crate::data::world::get_world;
+    use crate::models::jobs::{JobBoard, OfferOptions};
+    // The same Chicago to Milwaukee offer gets a later deadline_game_h at
+    // great_lakes_training than at northstar: `offer_to` at one seed is the
+    // `_make_job` call with the carrier's slack applied.
+    let world = get_world();
+    let no_endorsements: &[&str] = &[];
+    let northstar = JobBoard::seeded(world, 8)
+        .offer_to(
+            "Chicago",
+            "Milwaukee",
+            no_endorsements,
+            OfferOptions {
+                carrier_key: Some(DEFAULT_START_KEY),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    let training = JobBoard::seeded(world, 8)
+        .offer_to(
+            "Chicago",
+            "Milwaukee",
+            no_endorsements,
+            OfferOptions {
+                carrier_key: Some("great_lakes_training"),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+
+    assert!(training.deadline_game_h > northstar.deadline_game_h);
 }
 
 #[test]
@@ -142,22 +278,32 @@ fn test_owner_operator_start_applies_owned_equipment_and_costs() {
     assert!(p.career.level() < 18); // the buy-in gate is still ahead
 }
 
+/// The owner-operator buys a brand-new truck, so nothing starts worn.
+///
+/// Compared against a freshly built record rather than a hand-written list of
+/// fields: adding a new condition dimension that defaults to a worn value
+/// fails here instead of quietly shipping a hand-me-down.
 #[test]
-#[ignore = "needs models::profile (_fresh_condition: nine condition dimensions)"]
 fn test_owner_operator_start_truck_is_pristine_on_every_condition_dimension() {
-    // The owner-operator buys a brand-new truck, so nothing starts worn:
-    // truck_conditions["rig"] equals _fresh_condition(tank) on every key, and
-    // the spoken-side properties read full tank, zero damage/tire/brake/
-    // engine/grime/chain wear, all_season tires, no chains. The four-field
-    // record the fake carries is pristine:
-    let mut p = FakeProfile::named("Pristine Start");
+    use crate::models::profile::{fresh_condition, Profile};
+    let mut p = Profile::named_in("Pristine Start", "Chicago");
     apply_start_option(&mut p, start_option(Some(OWNER_OPERATOR_START_KEY)));
+
     let tank = p.truck_specs().fuel_tank_gal;
     let record = &p.truck_conditions["rig"];
-    assert_eq!(record.fuel_gal, tank);
-    assert_eq!(record.damage_pct, 0.0);
-    assert_eq!(record.tire_wear_pct, 0.0);
-    assert_eq!(record.grime_pct, 0.0);
+
+    assert_eq!(*record, fresh_condition(tank));
+    // Spelled out through the spoken-side accessors too, so a rename that
+    // leaves the record intact but detaches a reader still fails.
+    assert!((p.truck_fuel_gal() - tank).abs() < 1e-9);
+    assert_eq!(p.truck_damage_pct(), 0.0);
+    assert_eq!(p.tire_wear_pct(), 0.0);
+    assert_eq!(p.brake_wear_pct(), 0.0);
+    assert_eq!(p.engine_wear_pct(), 0.0);
+    assert_eq!(p.road_grime_pct(), 0.0);
+    assert_eq!(p.chain_wear_pct(), 0.0);
+    assert_eq!(p.tire_type(), "all_season");
+    assert!(!p.chains_owned());
 }
 
 #[test]

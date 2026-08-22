@@ -320,21 +320,164 @@ fn test_a_live_report_never_claims_the_road_ahead_is_shut() {
     assert!(message.contains("Closed"));
 }
 
+// --- Trip-level incident announcements ----------------------------------------
+
+fn incident_leg() -> crate::data::world_models::Leg {
+    use crate::data::world_models::{CorridorDetail, Leg, RoutePoint, StateMileage};
+
+    Leg::new(
+        "columbus_oh_us",
+        "cincinnati_oh_us",
+        100.0,
+        "I-71",
+        "flat",
+        Vec::new(),
+    )
+    .with_detail(CorridorDetail {
+        route_points: vec![
+            RoutePoint {
+                at_mi: 0.0,
+                lat: 39.9612,
+                lon: -82.9988,
+            }, // Columbus
+            RoutePoint {
+                at_mi: 50.0,
+                lat: 39.53,
+                lon: -83.65,
+            },
+            RoutePoint {
+                at_mi: 100.0,
+                lat: 39.1031,
+                lon: -84.5120,
+            }, // Cincinnati
+        ],
+        state_miles: vec![StateMileage::new("Ohio", 100.0)],
+        ..Default::default()
+    })
+}
+
+fn incident_trip(provider: Arc<RealTrafficProvider>) -> crate::sim::trip::Trip {
+    use crate::data::world_models::Route;
+    use crate::sim::trip::{Trip, TripOptions};
+    use crate::sim::trip_traffic::TrafficProvider;
+    use crate::sim::vehicle::{TruckSpecs, TruckState};
+    use crate::sim::weather::test_support::new_system;
+
+    let route = Route::from_legs(
+        vec!["columbus_oh_us".to_string(), "cincinnati_oh_us".to_string()],
+        vec![incident_leg()],
+    );
+    let provider: Arc<dyn TrafficProvider> = provider;
+    Trip::new(
+        route,
+        TruckState::new(TruckSpecs::default()),
+        new_system("heartland", None, None, None, true),
+        TripOptions {
+            time_scale: 1.0,
+            seed: Some(42),
+            traffic_provider: Some(provider),
+            ..Default::default()
+        },
+    )
+}
+
+/// `provider._cache["ohio"] = ...`; a fresh empty construction entry keeps
+/// trip construction off the network.
+fn seed_ohio_cache(provider: &RealTrafficProvider, events: Vec<TrafficEvent>) {
+    let now = wall_time();
+    provider.seed_cache("ohio", TrafficData::new("ohio", events, now, now, "test"));
+    provider.seed_cache(
+        "ohio:construction",
+        TrafficData::new("ohio", Vec::new(), now, now, "test"),
+    );
+}
+
+fn live_reports(trip: &crate::sim::trip::Trip) -> Vec<String> {
+    trip.events.iter().map(|e| e.text().to_string()).collect()
+}
+
 // Trip-level incident announcements (test_trip_announces_nearby_real_incident,
 // test_trip_does_not_announce_construction_as_traffic_alert,
 // test_trip_skips_incident_beyond_radius) drive Trip._check_real_traffic_events
 // and belong with sim::trip.
 #[test]
-#[ignore = "needs sim::trip (Trip._check_real_traffic_events) and data::world"]
-fn test_trip_announces_nearby_real_incident() {}
+fn test_trip_announces_nearby_real_incident() {
+    // An incident near the truck's actual position is spoken once.
+    // Regression for the 1.9 crash: the checker called a nonexistent
+    // Trip._leg_at, so any drive with Traffic source set to real time died
+    // on the first simulation tick.
+    let provider = Arc::new(RealTrafficProvider::offline());
+    let mut incident = located(
+        event("inc-1", "high", "Jackknifed truck on I-71 southbound", "Franklin"),
+        39.95,
+        -83.0,
+    );
+    incident.lanes_affected = Some("2 right lanes".to_string());
+    seed_ohio_cache(&provider, vec![incident]);
+    let mut trip = incident_trip(provider);
+
+    trip.check_real_traffic_events();
+
+    let messages = live_reports(&trip);
+    assert!(messages
+        .iter()
+        .any(|m| m.contains("Live road report") && m.contains("Jackknifed truck")));
+    assert!(messages.iter().any(|m| m.contains("2 right lanes affected")));
+
+    // A later check must not repeat the same incident.
+    trip.next_real_traffic_check_mi = 0.0;
+    let before = trip.events.len();
+    trip.check_real_traffic_events();
+    assert_eq!(trip.events.len(), before);
+}
 
 #[test]
-#[ignore = "needs sim::trip (Trip._check_real_traffic_events) and data::world"]
-fn test_trip_does_not_announce_construction_as_traffic_alert() {}
+fn test_trip_does_not_announce_construction_as_traffic_alert() {
+    // Construction-typed events near the truck stay out of traffic alerts:
+    // the WZDx states return their whole work-zone feed from request().
+    let provider = Arc::new(RealTrafficProvider::offline());
+    let work_zone = located(
+        TrafficEvent::new(
+            "wz-1",
+            "construction",
+            "medium",
+            "Lane closed on I-71 northbound",
+            "Franklin",
+        ),
+        39.95,
+        -83.0,
+    );
+    seed_ohio_cache(&provider, vec![work_zone]);
+    let mut trip = incident_trip(provider);
+
+    trip.check_real_traffic_events();
+
+    assert!(!live_reports(&trip)
+        .iter()
+        .any(|m| m.contains("Live road report")));
+}
 
 #[test]
-#[ignore = "needs sim::trip (Trip._check_real_traffic_events) and data::world"]
-fn test_trip_skips_incident_beyond_radius() {}
+fn test_trip_skips_incident_beyond_radius() {
+    // The truck sits at Columbus (mile 0); an incident near Cincinnati is
+    // about 100 miles away and must stay silent.
+    let provider = Arc::new(RealTrafficProvider::offline());
+    seed_ohio_cache(
+        &provider,
+        vec![located(
+            event("inc-2", "high", "Bridge closure near Cincinnati", "Hamilton"),
+            39.11,
+            -84.50,
+        )],
+    );
+    let mut trip = incident_trip(provider);
+
+    trip.check_real_traffic_events();
+
+    assert!(!live_reports(&trip)
+        .iter()
+        .any(|m| m.contains("Live road report")));
+}
 
 // --- test_real_construction_zones.py: TestRealTrafficProviderConstruction
 
