@@ -2344,6 +2344,7 @@ class DrivingUpdateMixin:
             # nothing restarts the stream afterward (a network stall ends the
             # same way), so quietly re-tune it here; if the station is truly
             # unreachable the radio's own fallback machinery speaks the switch.
+            self._radio_now_playing = None
             self._radio_reconnect_timer -= 1.5
             if self._radio_reconnect_timer <= 0.0:
                 self._radio_reconnect_timer = 9.0
@@ -2351,12 +2352,18 @@ class DrivingUpdateMixin:
                 if action.fallback_used:
                     self.radio.write_settings(self.ctx.settings)
                     self.ctx.settings.save()
+                if action.fallback_used or action.retried:
                     self.ctx.say_event(
                         action.message, interrupt=False, category=SpeechCategory.STATUS
                     )
             self._radio_fringe_signal = None
             return
         self._radio_reconnect_timer = 0.0
+        # What the stream says it is playing, read on the same tick that
+        # judges its signal. Only real streams carry ICY song metadata.
+        self._radio_now_playing = (
+            self.ctx.audio.radio_now_playing() if reception.station.real_stream else None
+        )
         # Cache what the per-frame fringe renderer needs: thinning signal and
         # the dial frequency (for the picket flutter rate). Satellite and
         # built-in stations have no fringe.
@@ -2858,6 +2865,27 @@ class DrivingUpdateMixin:
         action = self.radio.tune_category(direction, self._radio_backend)
         self._finish_radio_action(action)
 
+    def _tune_radio_to(self, station_id: str) -> str:
+        """Tune to one station by id from the Radio app; the spoken result.
+
+        Unlike the dial keys this switches a radio that is off back on:
+        picking a station from a list is asking to hear it. The engine
+        still has to be running -- the app cannot give the radio power.
+        """
+        if not self.truck.engine_on:
+            self.ctx.audio.play("ui/error")
+            return "The engine is off. The radio has no power."
+        self._sync_radio_settings()
+        was_off = not self.radio.enabled
+        self.radio.enabled = True
+        action = self.radio.select_station(station_id, self._radio_backend)
+        self.radio.write_settings(self.ctx.settings)
+        self.ctx.settings.save()
+        message = action.message
+        if was_off:
+            message = f"Radio on. {message}"
+        return message
+
     def _speak_radio_status(self) -> None:
         self._sync_radio_settings()
         status = self.radio.status_text()
@@ -2866,6 +2894,34 @@ class DrivingUpdateMixin:
             # the same explanation the Tab radio screen gives goes here too.
             status = f"{status} The engine is off, so the radio has no power right now."
         self.ctx.say(status)
+
+    def _radio_now_playing_text(self) -> str:
+        """One spoken sentence: the song the tuned station reports, or why
+        there is none. Shared by Shift+Y, the Tab radio screen, and the
+        Radio app, so the three never disagree."""
+        if not self.radio.enabled:
+            return "The radio is off."
+        if not self.truck.engine_on:
+            return "The engine is off, so the radio has no power right now."
+        station = self.radio.current_station()
+        if not station.real_stream:
+            return f"{station.display_name} does not send song information."
+        if not self.ctx.audio.music_playing():
+            return f"{station.display_name} is still connecting; nothing is playing yet."
+        # Re-read rather than trust the tick's copy: the key is the one place
+        # a player asks at an exact moment, and a title that changed in the
+        # last second is the title they are asking about.
+        title = self.ctx.audio.radio_now_playing()
+        if title is None:
+            title = self._radio_now_playing
+        if not title:
+            return f"{station.display_name} is not sending song information right now."
+        self._radio_now_playing = title
+        return f"Now playing on {station.display_name}: {title}."
+
+    def _speak_radio_now_playing(self) -> None:
+        self._sync_radio_settings()
+        self.ctx.say(self._radio_now_playing_text())
 
     def _toggle_radio_favorite(self) -> None:
         self._sync_radio_settings()

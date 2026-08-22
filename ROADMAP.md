@@ -4717,6 +4717,29 @@ section below and the Unreleased changelog; the release-line view:
 
 ### Radio
 
+- [x] **Radio app on the driver tablet (2026-08-22).** Tab, Driver apps,
+      Radio: now playing, power, save/remove the tuned station, a favorites
+      list, a stations-in-range list, and Search stations -- a text field
+      (the shared `TextEntryState`, extracted from career naming) over
+      `RadioState.search`, which walks the whole allowed dial by name, call
+      sign, or format, in-range hits first, capped at `RADIO_SEARCH_LIMIT`
+      with the cap spoken. Every tune goes through `select_station`, so the
+      streamer-safe gate and the dead-stream ban hold; tuning from a list
+      switches a radio that was off back on.
+- [x] **Now playing (2026-08-22).** ICY `StreamTitle` read off the BASS
+      channel (`AudioEngine.radio_now_playing`, `parse_icy_stream_title`),
+      polled on the reception tick; Shift+Y speaks it, the Tab radio screen
+      and the Radio app carry it, and the drivers board line reads
+      "listening to <station>: <song>" while the stream says. Built-in and
+      playlist stations say they send no song information.
+- [x] **Slow stations are not dead stations (2026-08-22).** Connect and read
+      timeouts 8/10 s -> 30/30 s, and `RadioState.play` gives a station one
+      fresh connect ("is slow to answer, trying again", spoken by the
+      reconnect tick) before the session ban and the same-band handover.
+- [ ] **Personal playlist and built-in stations could report a track.** The
+      now-playing line covers ICY streams only; a playlist file's tags
+      (BASS_TAG_ID3/OGG) and the fictional stations' rotation titles are
+      both knowable and both say "no song information" today.
 - [x] **The in-cab radio follows the map.** M toggles, semicolon and
       apostrophe tune the currently receivable stations, Y speaks status,
       Tab has a Radio screen. (The dial moved off the brackets when

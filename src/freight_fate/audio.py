@@ -24,11 +24,13 @@ extension: ``play("ui/menu_select")`` plays
 from __future__ import annotations
 
 import contextlib
+import ctypes
 import io
 import logging
 import math
 import os
 import random
+import re
 import struct
 import sys
 import threading
@@ -221,11 +223,41 @@ BASS_NO_SOUND_DEVICE = 0
 # on a station that has gone dark that is the operating system's own TCP
 # timeout, far longer than a player will wait and far too long to spend
 # inside a frame. The connect runs on a worker thread, bounded by these.
-# (Pattern from PR #150 by CatalystForChaos.)
-RADIO_CONNECT_TIMEOUT_MS = 8000  # give up on a station that will not answer
-RADIO_READ_TIMEOUT_MS = 10000  # and on one that answers then stalls
+# (Pattern from PR #150 by CatalystForChaos.) Thirty seconds, not the eight
+# this started at: small Icecast stations behind a home connection (Darren
+# Duff radio, 2026-08-22) can take longer than that to answer, and at eight
+# the radio wrote them off as dead and handed over while they were still
+# coming. The price is a longer silence on a station that really is gone.
+RADIO_CONNECT_TIMEOUT_MS = 30000  # give up on a station that will not answer
+RADIO_READ_TIMEOUT_MS = 30000  # and on one that answers then stalls
 # How long shutdown waits for a connect still in flight before freeing BASS.
 RADIO_SHUTDOWN_JOIN_S = 2.0
+
+
+def parse_icy_stream_title(raw) -> str | None:
+    """The song a Shoutcast/Icecast stream says it is playing, or None.
+
+    ICY metadata arrives as ``StreamTitle='Artist - Title';StreamUrl='';``
+    in whatever bytes the station felt like sending -- UTF-8 from most
+    Icecast mounts, Latin-1 from older Shoutcast ones -- so it is decoded
+    leniently and only the title field is kept. Empty, missing, or
+    whitespace-only titles are None, not "", so callers can say "no song
+    information" instead of reading out nothing.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, bytes):
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            text = raw.decode("latin-1", errors="replace")
+    else:
+        text = str(raw)
+    match = re.search(r"StreamTitle='(.*?)';", text, re.S)
+    if match is None:
+        return None
+    title = " ".join(match.group(1).split())
+    return title or None
 
 
 def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
@@ -949,6 +981,9 @@ class _PygameBackend:
     def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
         raise RuntimeError("radio stream unavailable")
 
+    def radio_now_playing(self) -> str | None:
+        return None
+
     def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
         """Play one media file from disk on the music channel.
 
@@ -1061,8 +1096,10 @@ class _BassBackend:
             BASS_CONFIG_NET_READTIMEOUT,
             BASS_CONFIG_NET_TIMEOUT,
             BASS_POS_BYTE,
+            BASS_TAG_META,
             BASS_ChannelBytes2Seconds,
             BASS_ChannelGetLength,
+            BASS_ChannelGetTags,
             BASS_ChannelSetAttribute,
             BASS_ChannelSlideAttribute,
             BASS_SetConfig,
@@ -1076,6 +1113,8 @@ class _BassBackend:
 
         self._FileStream = FileStream
         self._URLStream = URLStream
+        self._get_tags = BASS_ChannelGetTags
+        self._TAG_META = BASS_TAG_META
         self._BassError = BassError
         self._bass_call = bass_call
         self._slide = BASS_ChannelSlideAttribute
@@ -1930,6 +1969,29 @@ class _BassBackend:
         except Exception:
             return False
 
+    def radio_now_playing(self) -> str | None:
+        """The song title the playing stream reports in its ICY metadata.
+
+        Read straight off the BASS channel each call: the tag block is a
+        pointer into BASS's own buffer, so this is a string copy, not a
+        network round trip. None when nothing is streaming, when the stream
+        carries no metadata, or when the last title block was empty.
+        """
+        stream = self._music_stream
+        if stream is None or not self.music_playing():
+            return None
+        try:
+            addr = self._get_tags(stream.handle, self._TAG_META)
+        except Exception:
+            return None
+        if not addr:
+            return None
+        try:
+            raw = ctypes.string_at(addr)
+        except Exception:
+            return None
+        return parse_icy_stream_title(raw)
+
     def stop_music(self, fade_ms: int = 1000) -> None:
         # Cancel before the early return: a radio still connecting has no
         # stream yet, and stopping the radio must orphan that connect too.
@@ -2064,6 +2126,9 @@ class _NullBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None: ...
     def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
         raise RuntimeError("radio stream unavailable")
+
+    def radio_now_playing(self) -> str | None:
+        return None
 
     def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
         raise RuntimeError("audio disabled")
@@ -2564,6 +2629,12 @@ class AudioEngine:
     def music_playing(self) -> bool:
         """Whether the music channel is still producing sound."""
         return self._impl.music_playing()
+
+    def radio_now_playing(self) -> str | None:
+        """The song the playing radio stream reports, or None when it
+        reports nothing (or nothing is streaming)."""
+        impl = getattr(self._impl, "radio_now_playing", None)
+        return impl() if impl is not None else None
 
     def stop_music(self, fade_ms: int = 1000) -> None:
         self._impl.stop_music(fade_ms)

@@ -3,6 +3,25 @@
 ## Unreleased
 
 ### Added
+
+- **A Radio app on the driver tablet.** Under Tab, Driver apps, Radio: it
+  says what is playing, switches the radio on or off, saves the tuned
+  station to your favorites or removes it, lists your favorites, and lists
+  every station that comes in where you are. Search stations asks you to type
+  part of a name, call sign, or format, the same way you type a driver name,
+  and lists every match on the whole dial, the ones you can get here first;
+  Enter on any station tunes it, and a favorite that is out of range says so
+  instead. Picking a station switches a radio that was off back on.
+
+- **Shift and Y says what the station is playing.** Real streams that send
+  song information get "Now playing on <station>: <artist> - <title>"; a
+  station that does not send it, or is still connecting, says that instead.
+  The same line is on the Tab radio screen and in the Radio app, and the
+  drivers board shows it after the station name while the radio is on.
+
+- **Phoenix Fire FM is on the dial as a named station.** Requested by Jerry.
+  It used to be there only as the community directory's "PhoenixFireFM" row.
+
 - **City streets into a facility now run at your state's own speed limit.**
   The last mile in to a warehouse or yard used to be a flat twenty-five
   everywhere in the country. It now uses the speed each state's own law sets
@@ -338,6 +357,15 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+
+- **A slow station is no longer written off as dead.** The radio now waits
+  thirty seconds for a station to answer instead of eight, and a station
+  that does not come up on the first try gets one more connect on the spot,
+  with "is slow to answer, trying again" spoken, before the radio hands over
+  to the next station. Darren Duff radio and other small stations were being
+  dropped while they were still answering. The cost: a station that really is
+  gone stays quiet a little longer before the handover.
+
 - **Every exit now asks for its own ramp speed, and you may leave the
   highway at road speed.** Taking an exit used to mean the same thing
   everywhere: be under forty-five at the gore, with adaptive cruise easing

@@ -199,7 +199,10 @@ class DrivingControlsMixin:
             else:
                 self._tune_radio(1)
         elif key == pygame.K_y:
-            self._speak_radio_status()
+            if event.mod & pygame.KMOD_SHIFT:
+                self._speak_radio_now_playing()
+            else:
+                self._speak_radio_status()
         elif key == pygame.K_F1:
             self._speak_driving_help()
 
@@ -343,6 +346,9 @@ class DrivingControlsMixin:
             "O saves or unsaves the "
             "current station as a favorite, "
             "and Y speaks radio station, volume, and streamer-safe status. "
+            "Shift and Y speaks the song the station is playing, when it "
+            "says. The Driver apps tablet has a Radio app to search the "
+            "whole dial, tune a station by name, and keep your favorites. "
             "The Tab status menu includes a radio screen with the currently "
             "receivable stations. "
             "E starts the engine, and stops it only below 5 miles per hour. "

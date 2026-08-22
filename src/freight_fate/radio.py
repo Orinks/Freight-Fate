@@ -18,6 +18,10 @@ log = logging.getLogger(__name__)
 SAFE_ROUTE_PLAYLIST = "route_playlist"
 SAFE_FALLBACK_STATION_ID = "ff-safety-satellite"
 RADIO_CATALOG_RESOURCE = "radio_catalog.json"
+# How many search hits the Radio app lists. A screen reader walks a list one
+# row at a time, so past this a search is a narrower search, not a longer
+# list; the app says how many more there were.
+RADIO_SEARCH_LIMIT = 40
 RADIO_IMPORTED_RESOURCE = "radio_imported.json"
 EARTH_RADIUS_MI = 3958.8
 # Personal playlists: files dropped into the Playlists folder become
@@ -123,6 +127,10 @@ class RadioAction:
     enabled: bool
     reception: RadioReception
     fallback_used: bool = False
+    # The station did not answer and a fresh connect has been started in its
+    # place; the message says so. Spoken by the reconnect tick like a
+    # handover, so a silent radio is never a silent mystery.
+    retried: bool = False
 
 
 def load_radio_catalog() -> tuple[RadioStation, ...]:
@@ -766,6 +774,11 @@ class RadioState:
         # Stations that refused to play this session: off the dial until the
         # next session rather than a dead stop on every pass of the band.
         self.unplayable_ids: set[str] = set()
+        # Connects that failed this session, by station id. One failure is a
+        # slow server or a dropped packet, not a dead station: the ban above
+        # waits for a second (owner, 2026-08-22, Darren Duff radio written
+        # off while it was still answering).
+        self._connect_failures: dict[str, int] = {}
         # Multi-site stations (KZYX, WNPN/ripr, KENW, SDPB...): every row
         # sharing a normalized stream URL, keyed by that identity. Built
         # once per catalog -- the catalog itself never changes after
@@ -805,6 +818,8 @@ class RadioState:
         # A playlist that would not play earlier deserves another chance once
         # its file has been edited; the session-long ban is for dead streams.
         self.unplayable_ids -= stale | {station.id for station in loaded}
+        for station_id in stale | {station.id for station in loaded}:
+            self._connect_failures.pop(station_id, None)
 
     def apply_settings(self, settings) -> None:
         self.volume = self._clamp_volume(float(getattr(settings, "radio_volume", self.volume)))
@@ -863,6 +878,77 @@ class RadioState:
 
     def available_stations(self) -> tuple[RadioStation, ...]:
         return tuple(reception.station for reception in self.receivable_stations())
+
+    def search(
+        self, query: str, *, limit: int = RADIO_SEARCH_LIMIT
+    ) -> tuple[list[tuple[RadioStation, RadioReception | None]], int]:
+        """Stations on the whole dial whose name, call sign, or format
+        contains ``query``: ``(hits, total)``, hits capped at ``limit``.
+
+        The whole allowed dial, not only what is in range -- a driver
+        searching for a web station they heard about should find it from
+        anywhere, and a terrestrial one they cannot get yet is still worth
+        knowing about. In-range hits come first, strongest signal first;
+        the rest follow by name, each paired with None. Streamer-safe mode
+        and the session's dead-stream ban apply exactly as they do to the
+        dial, and a multi-site station is one hit, its best site.
+        """
+        needle = " ".join(query.lower().split())
+        if not needle:
+            return [], 0
+        receivable = {r.station.id: r for r in self.receivable_stations()}
+        hits: dict[str, tuple[RadioStation, RadioReception | None]] = {}
+        for station in self.catalog:
+            if not self._station_allowed(station):
+                continue
+            haystack = " ".join(
+                (station.display_name, station.name, station.call_sign, station.format)
+            ).lower()
+            if needle not in haystack:
+                continue
+            identity = station_identity(station)
+            reception = receivable.get(station.id)
+            kept = hits.get(identity)
+            if kept is None or (reception is not None and kept[1] is None):
+                hits[identity] = (station, reception)
+        ordered = sorted(
+            hits.values(),
+            key=lambda hit: (
+                hit[1] is None,
+                -(hit[1].signal if hit[1] is not None else 0.0),
+                hit[0].display_name.lower(),
+            ),
+        )
+        return ordered[:limit], len(ordered)
+
+    def favorites(self) -> list[tuple[RadioStation, RadioReception | None]]:
+        """Saved stations, each with its reception here (None when out of
+        range), in-range first, then by name -- the same shape as search."""
+        receivable = {r.station.id: r for r in self.receivable_stations()}
+        seen: dict[str, tuple[RadioStation, RadioReception | None]] = {}
+        for station in self.catalog:
+            if station.id not in self.favorite_ids or not self._station_allowed(station):
+                continue
+            identity = station_identity(station)
+            reception = receivable.get(station.id)
+            kept = seen.get(identity)
+            if kept is None or (reception is not None and kept[1] is None):
+                seen[identity] = (station, reception)
+        return sorted(
+            seen.values(),
+            key=lambda hit: (
+                hit[1] is None,
+                -(hit[1].signal if hit[1] is not None else 0.0),
+                hit[0].display_name.lower(),
+            ),
+        )
+
+    def is_favorite(self, station: RadioStation) -> bool:
+        return bool(self._identity_ids(station) & self.favorite_ids)
+
+    def band_name(self, station: RadioStation) -> str:
+        """The dial category a station sits in, as the dial speaks it."""
+        return DIAL_CATEGORY_NAMES.get(_dial_group(station), "Radio")
 
     def station_list_lines(self, limit: int = 12, distance_text=None) -> list[str]:
         lines = []
@@ -1090,8 +1176,25 @@ class RadioState:
         try:
             backend.play_station(station, self.volume)
         except Exception:
-            # A stream that refuses to play leaves the dial for the rest of
-            # the session (it returns next session; streams have bad days),
+            # One refusal is not a dead station. The first time a stream
+            # fails to come up this session it gets a fresh connect on the
+            # spot and the radio says so; only a second failure writes it
+            # off (below), because a small Icecast host behind a home line
+            # can simply be slow, and a radio that hands over at the first
+            # miss teaches the player that the station is gone when it is
+            # not (owner, 2026-08-22, Darren Duff radio).
+            failures = self._connect_failures.get(station.id, 0) + 1
+            self._connect_failures[station.id] = failures
+            if failures < 2 and self._retry_connect(backend, station):
+                return RadioAction(
+                    f"{station.display_name} is slow to answer. Trying again.",
+                    station,
+                    enabled=True,
+                    reception=reception,
+                    retried=True,
+                )
+            # A stream that refuses to play twice leaves the dial for the rest
+            # of the session (it returns next session; streams have bad days),
             # and the radio hands over to the next station on the same band
             # rather than dropping the player to the silent fallback.
             original = reception
@@ -1118,6 +1221,16 @@ class RadioState:
         return RadioAction(
             self._play_message(prefix, reception), station, enabled=True, reception=reception
         )
+
+    def _retry_connect(self, backend: RadioPlaybackBackend, station: RadioStation) -> bool:
+        """Start one more connect for a station that just refused; True if
+        the backend accepted the attempt (a streaming backend answers later,
+        so acceptance is all that can be known here)."""
+        try:
+            backend.play_station(station, self.volume)
+        except Exception:
+            return False
+        return True
 
     @staticmethod
     def _refusal_clause(station: RadioStation) -> str:

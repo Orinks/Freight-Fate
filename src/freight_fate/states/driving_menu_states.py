@@ -326,6 +326,7 @@ class DrivingStatusScreenState(MenuState):
                 if d.truck.engine_on
                 else ("The engine is off, so the radio has no power right now.",)
             ),
+            *((d._radio_now_playing_text(),) if d.truck.engine_on and d.radio.enabled else ()),
             (
                 "Streamer-safe mode is off: real public streams and personal playlists are on the dial."
                 if not settings.radio_streamer_safe
@@ -358,6 +359,7 @@ class DriverAppsState(MenuState):
         "returns to the status screens."
     )
     APPS = (
+        ("Radio", "radio", "Tune, search, and save radio stations."),
         ("Navigation", "navigation", "Open GPS guidance, route progress, and exit context."),
         ("Weather", "weather", "Open conditions, forecast, and safe-speed guidance."),
         ("Traffic", "traffic", "Open traffic pace and reported slowdowns ahead."),
@@ -387,6 +389,11 @@ class DriverAppsState(MenuState):
         return items
 
     def _open_app(self, app_key: str) -> None:
+        if app_key == "radio":
+            from .driving_radio_app import RadioAppState
+
+            self.ctx.push_state(RadioAppState(self.ctx, self.driving))
+            return
         self.ctx.push_state(DriverAppScreenState(self.ctx, self.driving, app_key))
 
 

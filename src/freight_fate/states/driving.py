@@ -211,6 +211,11 @@ class DrivingState(
         # Re-tune cadence for a real stream that went silent (a dock bed
         # borrowed the music channel, or the connection stalled mid-drive).
         self._radio_reconnect_timer = 0.0
+        # The song the tuned stream last reported (ICY StreamTitle), polled on
+        # the reception tick; None when nothing is streaming or the station
+        # sends no song information. Shift+Y speaks it, the Tab radio screen
+        # and the drivers board line carry it.
+        self._radio_now_playing: str | None = None
         # The radio draws power from the engine: last power state, so the
         # per-frame sync starts or stops playback only on the transition.
         self._radio_powered = self.truck.engine_on

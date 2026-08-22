@@ -1,9 +1,9 @@
 {
  "counts": {
-  "dropped_collisions": 2345,
+  "dropped_collisions": 2346,
   "dropped_unreachable": 848,
   "fcc_placed": 648,
-  "stations": 5242
+  "stations": 5241
  },
  "notes": "Automated tier under the curated radio_catalog.json. Built by tools/import_radio_catalog.py from the PR #150 catalog (CatalystForChaos): Radio Browser stream URLs joined to Wikidata transmitter coordinates (CC0) on FCC call sign. Coverage radii are that catalog's per-band defaults, not FCC contours. Curated call signs win: collisions are dropped at build and load time. Streams tools/check_radio_streams.py could not reach are left out; see radio_stream_health.json. Rows with id rb-fcc-* are Radio Browser stations placed at their FCC-licensed transmitter site, with coverage from licensed power rather than a per-band default.",
  "schema": 1,
@@ -82264,21 +82264,6 @@
    "station_type": "web",
    "stream_format": "aac+",
    "stream_url": "https://servidor15-1.brlogic.com:7328/live?source=website",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "comedy, country, hiphop",
-   "id": "rb-web-3bd92b97-04ca-4f0f-9040-143dc2c1d4a5",
-   "name": "PhoenixFireFM",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "mp3",
-   "stream_url": "http://listen.jjhof.com:6969/stream",
    "supported": true
   },
   {

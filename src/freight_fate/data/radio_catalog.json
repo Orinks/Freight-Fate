@@ -16384,6 +16384,23 @@
       "stream_format": "mp3",
       "stream_url": "http://darrenduff.com:1979/stream.mp3",
       "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "",
+      "codec": "mp3",
+      "format": "various music",
+      "id": "phoenix-fire-fm",
+      "name": "Phoenix Fire FM",
+      "notes": "Requested by Jerry (tester, 2026-08-22), who supplied the stream in an M3U. Verified live the same day: HTTP 200, Content-Type audio/mpeg, Icecast 2.4.4, 192 kbps, icy-genre Various. The name here is the station's own icy-name. The community directory already carried this stream as 'PhoenixFireFM' with raw tags for a format; this curated row replaces that import.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "tester request with the station's own stream URL, checked 2026-08-22",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "mp3",
+      "stream_url": "http://listen.jjhof.com:6969/stream",
+      "supported": true
     }
   ]
 }

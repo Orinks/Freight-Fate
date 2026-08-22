@@ -5470,6 +5470,14 @@ class DrivingEventMixin:
         from ..discord_presence import PresenceState
 
         clause = f"listening to {self.radio.current_station().display_name}"
+        # And the song, when the stream says: broadcast metadata the station
+        # itself publishes to every listener, so no more private than the
+        # station name. The tick's copy, not a fresh read -- presence is
+        # built often, and a title that changes mid-second can wait for the
+        # next tick.
+        title = self._radio_now_playing if self.radio.current_station().real_stream else None
+        if title:
+            clause = f"{clause}: {title}"
         detail = f"{base.detail}, {clause}" if base.detail else clause
         return PresenceState(base.activity, detail)
 
