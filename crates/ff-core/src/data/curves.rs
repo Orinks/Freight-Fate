@@ -37,8 +37,8 @@ use std::collections::{HashMap, HashSet};
 use once_cell::sync::OnceCell;
 use serde::Deserialize;
 
-use super::data_resources::read_data_text;
-use super::world::get_world;
+use super::data_resources::{baked, read_data_text};
+use super::world::{get_world, World};
 use super::world_models::{Leg, Route};
 
 pub const HAIRPIN_MAX_MPH: i64 = 25;
@@ -258,8 +258,14 @@ pub fn leg_design_speed(leg: &Leg) -> f64 {
 /// `"a:b"` -> radius floor, for legs flat enough to judge. Absent key
 /// means "do not screen this leg's curves".
 pub fn screenable_legs() -> HashMap<String, f64> {
+    screenable_legs_of(get_world())
+}
+
+/// [`screenable_legs`] against a world handed in, so the baker can screen
+/// against the world it just loaded instead of the process singleton.
+pub fn screenable_legs_of(world: &World) -> HashMap<String, f64> {
     let mut out = HashMap::new();
-    for leg in &get_world().legs {
+    for leg in &world.legs {
         if !leg_is_level(leg) {
             continue;
         }
@@ -286,9 +292,9 @@ fn is_flat_ground_artifact(row: &CurveRow, floor: f64) -> bool {
 }
 
 /// `"a:b"` keys, both directions, for interstate-class legs.
-fn interstate_leg_keys() -> HashSet<String> {
+fn interstate_leg_keys(world: &World) -> HashSet<String> {
     let mut keys = HashSet::new();
-    for leg in &get_world().legs {
+    for leg in &world.legs {
         if leg.highway.to_uppercase().starts_with("I-") {
             keys.insert(format!("{}:{}", leg.a, leg.b));
             keys.insert(format!("{}:{}", leg.b, leg.a));
@@ -407,10 +413,7 @@ fn is_meta_line(line: &str) -> bool {
 /// mountains, and a radius no through highway of any class can bend to).
 /// Missing file reads as "nothing flagged" rather than an error, the same
 /// fail-open the interstate screen takes when curves.jsonl itself is absent.
-fn flagged_artifact_keys() -> HashSet<(String, i64)> {
-    let Some(text) = read_data_text("world_data/us/gameplay/curve_artifacts.jsonl") else {
-        return HashSet::new();
-    };
+fn flagged_artifact_keys_from(text: &str) -> HashSet<(String, i64)> {
     let mut keys = HashSet::new();
     for line in text.lines() {
         if line.trim().is_empty() || is_meta_line(line) {
@@ -428,11 +431,40 @@ static CACHE: OnceCell<HashMap<String, Vec<CurveRecord>>> = OnceCell::new();
 /// module `_CACHE`). Public so sweep tests can walk every leg.
 pub fn load() -> &'static HashMap<String, Vec<CurveRecord>> {
     CACHE.get_or_init(|| {
+        // A baked build already holds the screened table: the screens ran at
+        // bake time, against this same world, through the code below.
+        if let Some(container) = baked() {
+            return container.curves().expect("baked curve table decodes");
+        }
+        let curve_text = read_data_text("world_data/us/gameplay/curves.jsonl");
+        let artifact_text =
+            read_data_text("world_data/us/gameplay/curve_artifacts.jsonl").unwrap_or_default();
+        build_from_sources(
+            curve_text.as_deref().unwrap_or(""),
+            &artifact_text,
+            get_world(),
+        )
+    })
+}
+
+/// The screened per-leg curve table built from the two JSONL texts and the
+/// world they were baked against.
+///
+/// This is the body of [`load`], lifted out so the baker can call it with the
+/// world it loaded and the files it read. One implementation of the four
+/// screens, so the container and the JSON tree cannot screen differently.
+pub fn build_from_sources(
+    curves_jsonl: &str,
+    artifacts_jsonl: &str,
+    world: &World,
+) -> HashMap<String, Vec<CurveRecord>> {
+    {
         let mut by_leg: HashMap<String, Vec<CurveRecord>> = HashMap::new();
-        if let Some(text) = read_data_text("world_data/us/gameplay/curves.jsonl") {
-            let interstate_legs = interstate_leg_keys();
-            let flagged_artifacts = flagged_artifact_keys();
-            let screenable = screenable_legs();
+        {
+            let text = curves_jsonl;
+            let interstate_legs = interstate_leg_keys(world);
+            let flagged_artifacts = flagged_artifact_keys_from(artifacts_jsonl);
+            let screenable = screenable_legs_of(world);
             for line in text.lines() {
                 if line.trim().is_empty() || is_meta_line(line) {
                     continue;
@@ -490,7 +522,7 @@ pub fn load() -> &'static HashMap<String, Vec<CurveRecord>> {
             .into_iter()
             .map(|(key, rows)| (key, screen_geometry(&rows)))
             .collect()
-    })
+    }
 }
 
 /// Baked curves for `"a_slug:b_slug"`, bake direction. Connector arcs are

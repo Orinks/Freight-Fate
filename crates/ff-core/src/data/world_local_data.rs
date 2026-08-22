@@ -8,11 +8,13 @@
 //! raw-text screens as the Python loader.
 
 use std::path::Path;
+use std::sync::Arc;
 
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use super::data_resources::read_text_at;
+use super::baked::BakedData;
+use super::data_resources::{baked_at, read_text_at};
 use super::world_constants::{
     set_contains, CITY_SERVICE_ORDER, CITY_SERVICE_SOURCE_TYPES, RAW_POI_TEXT_MARKERS,
 };
@@ -42,6 +44,23 @@ fn read_runtime_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<Opti
 
 fn s(text: &str) -> String {
     text.trim().to_string()
+}
+
+/// The baked container standing in for a loose file that is not on disk.
+///
+/// A release ships `world.ffdata` and none of these five JSON files, so a
+/// caller that names one by path -- the `--smoke` check does, and so does any
+/// tool reaching past `World` -- would otherwise read an empty map and think
+/// the data layer was simply thin. `None` whenever the file exists (the JSON
+/// tree always wins) or there is no container beside it.
+fn baked_stand_in(path: &Path, expected_name: &str) -> Result<Option<Arc<BakedData>>, DataError> {
+    if path.exists() || path.file_name() != Some(std::ffi::OsStr::new(expected_name)) {
+        return Ok(None);
+    }
+    match path.parent() {
+        Some(dir) => baked_at(dir),
+        None => Ok(None),
+    }
 }
 
 // ---------------------------------------------------------------- city services
@@ -92,7 +111,10 @@ pub type CityServiceData = IndexMap<String, IndexMap<String, CityServiceEntry>>;
 
 pub fn load_city_service_data(path: &Path) -> Result<CityServiceData, DataError> {
     let Some(raw) = read_runtime_json::<CityServicesFile>(path)? else {
-        return Ok(IndexMap::new());
+        return match baked_stand_in(path, "city_services.json")? {
+            Some(container) => container.city_service_data(),
+            None => Ok(IndexMap::new()),
+        };
     };
     let p = path.display();
     let mut out: CityServiceData = IndexMap::new();
@@ -205,7 +227,10 @@ struct LocalApproachesFile {
 
 pub fn load_local_approaches(path: &Path) -> Result<IndexMap<String, LocalApproach>, DataError> {
     let Some(raw) = read_runtime_json::<LocalApproachesFile>(path)? else {
-        return Ok(IndexMap::new());
+        return match baked_stand_in(path, "local_approaches.json")? {
+            Some(container) => container.local_approaches(),
+            None => Ok(IndexMap::new()),
+        };
     };
     let p = path.display();
     let mut out = IndexMap::new();
@@ -326,7 +351,10 @@ struct LocalGeometriesFile {
 
 pub fn load_local_geometries(path: &Path) -> Result<IndexMap<String, LocalGeometry>, DataError> {
     let Some(raw) = read_runtime_json::<LocalGeometriesFile>(path)? else {
-        return Ok(IndexMap::new());
+        return match baked_stand_in(path, "local_geometry.json")? {
+            Some(container) => container.local_geometries(),
+            None => Ok(IndexMap::new()),
+        };
     };
     let p = path.display();
     let mut out = IndexMap::new();
@@ -464,7 +492,10 @@ pub fn load_facility_endpoints(
     path: &Path,
 ) -> Result<IndexMap<String, FacilityEndpoint>, DataError> {
     let Some(raw) = read_runtime_json::<FacilityEndpointsFile>(path)? else {
-        return Ok(IndexMap::new());
+        return match baked_stand_in(path, "facility_endpoints.json")? {
+            Some(container) => container.facility_endpoints(),
+            None => Ok(IndexMap::new()),
+        };
     };
     let p = path.display();
     let mut out = IndexMap::new();
@@ -598,7 +629,10 @@ pub fn load_facility_approaches(
     path: &Path,
 ) -> Result<IndexMap<String, FacilityApproach>, DataError> {
     let Some(raw) = read_runtime_json::<FacilityApproachesFile>(path)? else {
-        return Ok(IndexMap::new());
+        return match baked_stand_in(path, "facility_approaches.json")? {
+            Some(container) => container.facility_approaches(),
+            None => Ok(IndexMap::new()),
+        };
     };
     let p = path.display();
     let mut out = IndexMap::new();

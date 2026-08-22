@@ -20,7 +20,7 @@ mod leg;
 pub use interchange::{
     destinations_without_via, format_route_ref, join_destinations, route_token, Interchange,
 };
-pub use leg::{CorridorDetail, DetailSource, Leg, Route, NO_LEG_ID};
+pub use leg::{CorridorBuilder, CorridorDetail, DetailSource, Leg, Route, NO_LEG_ID};
 
 /// The errors the Python data layer raised: `ValueError` for data that
 /// fails validation, `KeyError` for an unknown city/facility/service, and

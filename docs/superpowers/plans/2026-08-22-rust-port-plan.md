@@ -98,6 +98,16 @@ needs them.
       test_profile_integrity_invariants, test_updater, test_discord_presence,
       test_real_weather, test_real_traffic, test_real_construction_zones,
       test_truck_parking*, test_portable_saves.
+- [x] T1.8 baked binary world data: `data::baked`, a versioned memory-mapped
+      container (`freight_fate/data/world.ffdata`) holding everything the
+      game loads -- eager city and leg tables, one zstd frame per leg
+      corridor, one per side map and one for the screened curve table, the
+      small loose files as compressed JSON text. `ff-bake` builds it through
+      the shipped loaders (`--check` re-bakes and compares bytes);
+      `tools/build_release.py --rust` ships it instead of the JSON tree. The
+      JSON readers stay and win wherever the tree is on disk, so a source
+      checkout is unchanged. 142 MB -> 7.3 MB; `World::load()` 248 ms -> 24
+      ms. Tests: data_baked, test_build_release_rust.
 
 ## Wave 2 — simulation spine and profile
 

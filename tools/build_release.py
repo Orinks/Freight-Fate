@@ -17,11 +17,12 @@ Run from the repository root: ``uv run python tools/build_release.py``
 
 ``--rust`` packages the Rust port instead: ``cargo build --release -p
 freight-fate`` (``--cargo-target-dir`` picks the Cargo target directory),
-then the same ``FreightFate/`` folder layout -- executable renamed to
-``FreightFate``, the vendored SDL2/BASS/Prism libraries beside it, the
-runtime data tree under ``freight_fate/data``, the packs, ``build_info.json``
-and the docs -- staged under ``build/FreightFate`` and archived exactly as
-the Python build is. The Python mode stays the default.
+then ``ff-bake`` to turn the JSON data tree into ``world.ffdata``, then the
+same ``FreightFate/`` folder layout -- executable renamed to ``FreightFate``,
+the vendored SDL2/BASS/Prism libraries beside it, the baked data container
+under ``freight_fate/data``, the packs, ``build_info.json`` and the docs --
+staged under ``build/FreightFate`` and archived exactly as the Python build
+is. The Python mode stays the default.
 """
 
 from __future__ import annotations
@@ -794,14 +795,21 @@ def archive(build_dir: Path, label: str) -> Path:
 RUST_PACKAGE = "freight-fate"
 RUST_BIN_STEM = "freightfate"
 RUST_STAGE_DIR = BUILD / APP_NAME
-# Loose runtime data files the Rust binary reads through
-# ``ff_core::data::data_resources`` (the same list ``tools/bake_data.py``
-# compiles into the Python build) plus the street-limit layer it reads
-# directly. ``world_data`` ships the files ``world_loader`` opens -- index,
-# geo, the per-country city list and the leg shards -- and the gameplay
-# screens under ``us/gameplay``; ``world_source``, the geometry layer and
-# every tool-only file stay home.
-RUST_DATA_FILES = (
+# The baked binary data container. ``ff-bake`` builds it out of the JSON
+# tree through the game's own loaders, and the release ships it INSTEAD of
+# that tree: 142 MB of JSON becomes roughly 7 MB, and the game maps it rather
+# than parsing 94 MB of leg shards before the menu. See
+# ``ff_core::data::baked``.
+RUST_BAKED_FILE = "world.ffdata"
+# The container's first eight bytes (``ff_core::data::baked::MAGIC``). Checked
+# in the staged payload so a wrong or truncated file fails the build.
+BAKED_MAGIC = b"FFDATA\x00\x00"
+RUST_BAKE_PACKAGE = "ff-core"
+RUST_BAKE_BIN = "ff-bake"
+# The runtime JSON files the container replaces. Nothing here is staged; the
+# list is what ``verify_rust_payload`` checks did NOT leak into the payload,
+# so a half-migrated build that ships both is caught rather than shipped.
+RUST_BAKED_SOURCE_FILES = (
     "buffs.json",
     "city_services.json",
     "facility_approaches.json",
@@ -817,7 +825,12 @@ RUST_DATA_FILES = (
     "world_data/us/gameplay/curves.jsonl",
     "world_data/us/gameplay/curve_artifacts.jsonl",
 )
-RUST_DATA_GLOBS = ("world_data/us/legs/*.json",)
+# Loose runtime data files still shipped as files, because the container does
+# not cover them. Empty today -- everything the game loads is baked -- and
+# kept so a new runtime data file has somewhere to be registered before
+# anyone has to teach the baker about it.
+RUST_DATA_FILES: tuple[str, ...] = ()
+RUST_DATA_GLOBS: tuple[str, ...] = ()
 # The committed loose sound tree (``assets/sounds``) travels as editable
 # files: the Rust asset loader reads it beside the pack. The licensed overlay
 # never ships loose.
@@ -850,6 +863,35 @@ def cargo_build_command(target_dir: Path | None = None) -> list[str]:
 def cargo_profile_dir(target_dir: Path | None = None) -> Path:
     """Where ``cargo build --release`` leaves the binary and staged libraries."""
     return (target_dir if target_dir is not None else ROOT / "target") / "release"
+
+
+def bake_command(out: Path, target_dir: Path | None = None, check: bool = False) -> list[str]:
+    """``ff-bake`` over the checked-in data tree."""
+    cmd = ["cargo", "run", "--release", "-p", RUST_BAKE_PACKAGE, "--bin", RUST_BAKE_BIN]
+    if target_dir is not None:
+        cmd.extend(["--target-dir", str(target_dir)])
+    cmd.extend(["--", "--data-dir", str(PACKAGE_DIR / "data"), "--out", str(out)])
+    if check:
+        cmd.append("--check")
+    return cmd
+
+
+def bake_world_data(target_dir: Path | None = None, out: Path | None = None) -> Path:
+    """Build the baked data container and return where it landed.
+
+    Runs before staging so the container is just another file in the layout
+    plan, and so a data tree that fails to load fails the build here rather
+    than in front of a player.
+    """
+    source = PACKAGE_DIR / "data"
+    if not (source / "world_data").is_dir():
+        raise RuntimeError(f"Runtime data tree is missing from the checkout: {source}")
+    destination = out if out is not None else BUILD / RUST_BAKED_FILE
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(bake_command(destination, target_dir), cwd=ROOT, check=True)
+    if not destination.is_file():
+        raise RuntimeError(f"ff-bake wrote no container at {destination}")
+    return destination
 
 
 def is_lfs_pointer(path: Path) -> bool:
@@ -924,19 +966,27 @@ def plan_rust_layout(
     package_dir: Path = PACKAGE_DIR,
     platform_name: str = sys.platform,
     native_exts: set[str] | None = None,
+    baked_data: Path | None = None,
 ) -> list[tuple[Path, Path]]:
     """Every (source, destination relative to the staged folder) pair.
 
     Pure: nothing is copied, so tests can check the plan against a fake
-    profile directory and package tree without running cargo.
+    profile directory and package tree without running cargo. ``baked_data``
+    is the container ``bake_world_data`` produced; it is required, because a
+    payload without it has no world at all.
     """
     exe = profile_dir / cargo_exe_name(platform_name)
     if not exe.is_file():
         raise RuntimeError(f"cargo build left no executable at {exe}")
+    if baked_data is None or not baked_data.is_file():
+        raise RuntimeError(
+            "the baked data container is missing; run bake_world_data() before staging"
+        )
     plan: list[tuple[Path, Path]] = [(exe, Path(rust_exe_name(platform_name)))]
     for lib in rust_native_libraries(profile_dir, native_exts):
         plan.append((lib, Path(lib.name)))
     package = Path("freight_fate")
+    plan.append((baked_data, package / "data" / RUST_BAKED_FILE))
     for relative in rust_data_files(package_dir):
         plan.append((package_dir / relative, package / relative))
     for relative in rust_loose_sound_files(package_dir):
@@ -959,11 +1009,15 @@ def run_cargo(target_dir: Path | None = None) -> Path:
     return cargo_profile_dir(target_dir)
 
 
-def stage_rust_build(profile_dir: Path, build_dir: Path = RUST_STAGE_DIR) -> Path:
+def stage_rust_build(
+    profile_dir: Path,
+    build_dir: Path = RUST_STAGE_DIR,
+    baked_data: Path | None = None,
+) -> Path:
     """Assemble the Rust release folder from the plan plus the packs and docs."""
     require_real_pack(PACKAGE_DIR / "sounds.pak")
     require_real_pack(PACKAGE_DIR / "music.pak")
-    plan = plan_rust_layout(profile_dir)
+    plan = plan_rust_layout(profile_dir, baked_data=baked_data)
     if build_dir.exists():
         shutil.rmtree(build_dir)
     build_dir.mkdir(parents=True)
@@ -995,17 +1049,40 @@ def verify_rust_payload(build_dir: Path) -> None:
         build_dir / "freight_fate" / "music.pak",
         build_dir / "freight_fate" / LOOSE_SOUND_TREE / "CREDITS.md",
     ]
-    required.extend(build_dir / "freight_fate" / "data" / relative for relative in RUST_DATA_FILES)
+    data_dir = build_dir / "freight_fate" / "data"
+    container = data_dir / RUST_BAKED_FILE
+    required.append(container)
+    required.extend(data_dir / relative for relative in RUST_DATA_FILES)
     missing = [path for path in required if not path.exists()]
     if missing:
         raise RuntimeError(
             "Rust payload is incomplete: "
             + ", ".join(path.relative_to(build_dir).as_posix() for path in missing)
         )
-    if not list(
-        (build_dir / "freight_fate" / "data" / "world_data" / "us" / "legs").glob("*.json")
-    ):
-        raise RuntimeError("Rust payload ships no leg shards under world_data/us/legs")
+    # Not just present: the real container. A truncated copy, or the wrong
+    # file under the right name, must not reach a player as "no world data".
+    with open(container, "rb") as f:
+        if f.read(8) != BAKED_MAGIC:
+            raise RuntimeError(f"{RUST_BAKED_FILE} is not a Freight Fate baked data container")
+    if container.stat().st_size < 1_000_000:
+        raise RuntimeError(
+            f"{RUST_BAKED_FILE} is only {container.stat().st_size} bytes; "
+            "the real container holds the whole map"
+        )
+    # And the JSON it replaced stays home: shipping both doubles the download
+    # and leaves two answers to every question.
+    doubled = [
+        relative
+        for relative in RUST_BAKED_SOURCE_FILES
+        if (data_dir / relative).exists() and relative not in RUST_DATA_FILES
+    ]
+    if (data_dir / "world_data").exists():
+        doubled.append("world_data/")
+    if doubled:
+        raise RuntimeError(
+            "Rust payload ships the JSON the baked container replaced: "
+            + ", ".join(sorted(doubled)[:10])
+        )
 
     package = build_dir / "freight_fate"
     leaked = [
@@ -1037,7 +1114,8 @@ def verify_rust_payload(build_dir: Path) -> None:
 def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
     """The whole ``--rust`` pipeline, ending with the verified archive."""
     profile_dir = run_cargo(target_dir)
-    build_dir = stage_rust_build(profile_dir)
+    baked_data = bake_world_data(target_dir)
+    build_dir = stage_rust_build(profile_dir, baked_data=baked_data)
     stamp_build_info(build_dir, label)
     stage_release_docs(build_dir)
     verify_rust_payload(build_dir)

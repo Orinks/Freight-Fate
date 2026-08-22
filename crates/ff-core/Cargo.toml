@@ -32,6 +32,9 @@ once_cell.workspace = true
 parking_lot.workspace = true
 regex.workspace = true
 ed25519-dalek.workspace = true
+memmap2.workspace = true
+bincode.workspace = true
+zstd.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true

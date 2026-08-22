@@ -1,5 +1,6 @@
 //! World and route data (port of `freight_fate/data/`).
 pub mod amenities;
+pub mod baked;
 pub mod big_bucks;
 pub mod billboards;
 pub mod buffs;

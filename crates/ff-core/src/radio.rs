@@ -349,11 +349,12 @@ fn station_from_dict(row: &Value) -> RadioStation {
 }
 
 fn read_stations(path: &Path) -> Result<Option<Vec<RadioStation>>, CatalogError> {
-    if !path.exists() {
+    // Through the data-resource reader, not `fs` directly: a release ships
+    // the baked container instead of the loose catalogs, and the reader is
+    // where that fallback lives.
+    let Some(text) = crate::data::data_resources::read_text_at(path) else {
         return Ok(None);
-    }
-    let text = std::fs::read_to_string(path)
-        .map_err(|e| CatalogError::Unreadable(path.to_path_buf(), e.to_string()))?;
+    };
     let data: Value = serde_json::from_str(&text)
         .map_err(|e| CatalogError::Unreadable(path.to_path_buf(), e.to_string()))?;
     let rows = data

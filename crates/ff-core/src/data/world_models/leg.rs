@@ -51,6 +51,37 @@ pub struct DetailSource {
     pub highway: String,
 }
 
+/// Builds one leg's corridor detail on first touch. The baked container hands
+/// a leg one of these instead of raw JSON: it holds the mapped container and
+/// this leg's own offset, and decompresses that one frame when the leg is
+/// first driven.
+pub type CorridorBuilder = Arc<dyn Fn() -> Result<CorridorDetail, DataError> + Send + Sync>;
+
+/// Where a lazy leg's corridor comes from: the raw JSON a leg shard carried,
+/// or a builder that fetches it from somewhere else.
+enum Deferred {
+    Json(DetailSource),
+    Builder(CorridorBuilder),
+}
+
+impl Clone for Deferred {
+    fn clone(&self) -> Self {
+        match self {
+            Deferred::Json(source) => Deferred::Json(source.clone()),
+            Deferred::Builder(build) => Deferred::Builder(Arc::clone(build)),
+        }
+    }
+}
+
+impl fmt::Debug for Deferred {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Deferred::Json(source) => write!(f, "{source:?}"),
+            Deferred::Builder(_) => f.write_str("CorridorBuilder"),
+        }
+    }
+}
+
 /// `Leg::id` of a leg built outside a world (local street chains, tests).
 /// World legs are numbered by their index in `World::legs`; that index is
 /// what the routing penalty maps key on, standing in for Python's
@@ -106,7 +137,7 @@ pub struct Leg {
     /// just to gate dispatch.
     pub meta_complete: Option<bool>,
     corridor: OnceCell<Result<CorridorDetail, DataError>>,
-    detail_source: Mutex<Option<DetailSource>>,
+    detail_source: Mutex<Option<Deferred>>,
 }
 
 impl Leg {
@@ -164,7 +195,24 @@ impl Leg {
         source: DetailSource,
     ) -> Self {
         let leg = Leg::new(a, b, miles, highway, terrain, stops);
-        *leg.detail_source.lock() = Some(source);
+        *leg.detail_source.lock() = Some(Deferred::Json(source));
+        leg
+    }
+
+    /// A leg whose corridor detail comes from `build` on first read -- the
+    /// baked container's leg, which decompresses its own frame instead of
+    /// parsing a raw JSON corridor it never had to hold.
+    pub fn lazy_built(
+        a: &str,
+        b: &str,
+        miles: f64,
+        highway: &str,
+        terrain: &str,
+        stops: Vec<Stop>,
+        build: CorridorBuilder,
+    ) -> Self {
+        let leg = Leg::new(a, b, miles, highway, terrain, stops);
+        *leg.detail_source.lock() = Some(Deferred::Builder(build));
         leg
     }
 
@@ -205,7 +253,7 @@ impl Leg {
                 let source = self.detail_source.lock().take();
                 match source {
                     None => Ok(CorridorDetail::default()),
-                    Some(src) => build_leg_corridor(
+                    Some(Deferred::Json(src)) => build_leg_corridor(
                         &src.corridor,
                         src.miles,
                         &src.leg_from,
@@ -213,6 +261,7 @@ impl Leg {
                         &src.from_state,
                         &src.highway,
                     ),
+                    Some(Deferred::Builder(build)) => build(),
                 }
             })
             .as_ref()

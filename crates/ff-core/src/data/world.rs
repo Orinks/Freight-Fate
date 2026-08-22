@@ -16,7 +16,8 @@ use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
 use serde_json::Value;
 
-use super::data_resources::{data_root, read_text_at};
+use super::baked::{BakedData, CorridorRef};
+use super::data_resources::{baked_at, data_root, read_text_at};
 use super::legacy_aliases::LEGACY_CITY_SLUGS;
 use super::world_constants::{
     ALTERNATE_ROUTE_EXTRA_RATIO, ALTERNATE_ROUTE_MAX_EXTRA_MILES, ALTERNATE_ROUTE_MIN_EXTRA_MILES,
@@ -28,8 +29,8 @@ use super::world_local_data::{
     load_local_approaches, load_local_geometries, CityServiceData,
 };
 use super::world_models::{
-    City, DataError, DetailSource, FacilityApproach, FacilityEndpoint, HomeTerminal, Leg,
-    LocalApproach, LocalGeometry, Location, Route,
+    City, CorridorDetail, DataError, DetailSource, FacilityApproach, FacilityEndpoint,
+    HomeTerminal, Leg, LocalApproach, LocalGeometry, Location, Route,
 };
 use super::world_parsing::{
     expand_market_locations, is_legacy_market_name, market_tags_for_city, merge_overlay,
@@ -87,6 +88,10 @@ pub struct World {
     facility_endpoints_cache: Lazy<IndexMap<String, FacilityEndpoint>>,
     local_approaches_cache: Lazy<IndexMap<String, LocalApproach>>,
     local_geometries_cache: Lazy<IndexMap<String, LocalGeometry>>,
+    /// The baked container this world came out of, kept alive because every
+    /// lazy leg's corridor builder reads through its mapping. None on the
+    /// JSON path, which is every source checkout and every test.
+    baked: Option<Arc<BakedData>>,
 }
 
 impl std::fmt::Debug for World {
@@ -268,6 +273,7 @@ impl World {
             facility_endpoints_cache: OnceCell::new(),
             local_approaches_cache: OnceCell::new(),
             local_geometries_cache: OnceCell::new(),
+            baked: None,
         })
     }
 
@@ -287,10 +293,114 @@ impl World {
         World::load_from(data_root())
     }
 
-    /// Load the world whose `world_data/` tree and loose runtime files live
-    /// under `data_dir` (the Python package's `data/` folder).
+    /// Load the world whose data lives under `data_dir` (the Python
+    /// package's `data/` folder): the baked container if one is there, the
+    /// `world_data/` JSON tree otherwise.
     pub fn load_from(data_dir: &Path) -> Result<World, DataError> {
         World::load_with_overlay(data_dir, None)
+    }
+
+    /// Load from the JSON tree, ignoring any baked container beside it.
+    ///
+    /// The baker calls this: the container is built from what the JSON
+    /// loaders produce, so baking must never read a container.
+    pub fn load_from_json(data_dir: &Path) -> Result<World, DataError> {
+        World::load_json_with_overlay(data_dir, None)
+    }
+
+    /// Build the world out of an opened baked container.
+    ///
+    /// The container already holds cities as `World::from_data_at` finished
+    /// them -- parsed, market-expanded, validated -- and legs with their
+    /// eager fields and a corridor offset each. What is rebuilt here is only
+    /// the derived tables (facility index, alias maps, adjacency), which are
+    /// pure in-memory work over data already in hand: a few milliseconds, and
+    /// no second source of truth to drift.
+    pub fn from_baked(container: Arc<BakedData>, data_dir: PathBuf) -> Result<World, DataError> {
+        let baked_cities = container.take_cities()?;
+        let mut cities: IndexMap<String, City> = IndexMap::with_capacity(baked_cities.len());
+        let mut facilities_by_id: HashMap<String, Location> = HashMap::new();
+        for baked in baked_cities {
+            let city = City::from(baked);
+            validate_city_locations(&city.name, &city.locations, &mut facilities_by_id)?;
+            cities.insert(city.key.clone(), city);
+        }
+        let (city_aliases, ambiguous_spoken) = build_city_aliases(&cities);
+        let mut legacy_names_by_key: IndexMap<String, Vec<String>> = IndexMap::new();
+        for (old_name, slug) in LEGACY_CITY_SLUGS {
+            if cities.contains_key(*slug) && old_name != slug {
+                legacy_names_by_key
+                    .entry(slug.to_string())
+                    .or_default()
+                    .push(old_name.to_string());
+            }
+        }
+        let legacy_facility_ids = build_legacy_facility_ids(&cities, &legacy_names_by_key);
+        let service_city_keys = build_service_city_keys(&cities, &legacy_names_by_key);
+
+        let baked_legs = container.take_legs()?;
+        let mut legs: Vec<Arc<Leg>> = Vec::with_capacity(baked_legs.len());
+        for (index, baked) in baked_legs.into_iter().enumerate() {
+            let held = Arc::clone(&container);
+            // Three numbers, captured by value: the builder holds the mapping
+            // and this leg's own frame, so nothing has to keep the decoded
+            // leg table alive for the life of the world.
+            let at = CorridorRef {
+                offset: baked.corridor_offset,
+                stored_len: baked.corridor_stored_len,
+                raw_len: baked.corridor_raw_len,
+            };
+            let mut built = Leg::lazy_built(
+                &baked.a,
+                &baked.b,
+                baked.miles,
+                &baked.highway,
+                &baked.terrain,
+                baked.stops.into_iter().map(Into::into).collect(),
+                Arc::new(move || -> Result<CorridorDetail, DataError> { held.corridor_at(at) }),
+            );
+            built.id = index;
+            built.lanes = baked.lanes;
+            built.local_cue = baked.local_cue;
+            built.local_speed_mph = baked.local_speed_mph;
+            built.divided = baked.divided;
+            built.truck_advisory = baked.truck_advisory;
+            built.meta_complete = baked.meta_complete;
+            legs.push(Arc::new(built));
+        }
+        let mut adjacency: HashMap<String, Vec<Arc<Leg>>> = cities
+            .keys()
+            .map(|name| (name.clone(), Vec::new()))
+            .collect();
+        for leg in &legs {
+            adjacency
+                .get_mut(&leg.a)
+                .ok_or_else(|| DataError::key(format!("Unknown city: {}", leg.a)))?
+                .push(Arc::clone(leg));
+            adjacency
+                .get_mut(&leg.b)
+                .ok_or_else(|| DataError::key(format!("Unknown city: {}", leg.b)))?
+                .push(Arc::clone(leg));
+        }
+        Ok(World {
+            cities,
+            legs,
+            facilities_by_id,
+            city_aliases,
+            ambiguous_spoken,
+            legacy_names_by_key,
+            legacy_facility_ids,
+            service_city_keys,
+            adjacency,
+            supported_route_cache: Mutex::new(HashMap::new()),
+            data_dir,
+            city_service_data_cache: OnceCell::new(),
+            facility_approaches_cache: OnceCell::new(),
+            facility_endpoints_cache: OnceCell::new(),
+            local_approaches_cache: OnceCell::new(),
+            local_geometries_cache: OnceCell::new(),
+            baked: Some(container),
+        })
     }
 
     /// Load the world, optionally merging an additive overlay on top.
@@ -303,6 +413,24 @@ impl World {
     /// deliberately does not pass an overlay yet; this is the loader
     /// capability the online tier will build on.
     pub fn load_with_overlay(data_dir: &Path, overlay: Option<&Path>) -> Result<World, DataError> {
+        // An overlay is a JSON merge onto raw world data, so it takes the
+        // JSON path even in a baked build. Nothing passes one yet (see the
+        // doc comment); a release that starts to will need the container to
+        // ship the raw shapes too, and the loader will say so rather than
+        // quietly dropping the overlay.
+        if overlay.is_none() {
+            if let Some(container) = baked_at(data_dir)? {
+                return World::from_baked(container, data_dir.to_path_buf());
+            }
+        }
+        World::load_json_with_overlay(data_dir, overlay)
+    }
+
+    /// [`load_with_overlay`](World::load_with_overlay) against the JSON tree.
+    pub fn load_json_with_overlay(
+        data_dir: &Path,
+        overlay: Option<&Path>,
+    ) -> Result<World, DataError> {
         let mut data = load_world_data(&data_dir.join("world_data"))?;
         if let Some(overlay) = overlay {
             if let Some(text) = read_text_at(overlay) {
@@ -322,7 +450,10 @@ impl World {
     pub fn city_service_data(&self) -> Result<&CityServiceData, DataError> {
         self.city_service_data_cache
             .get_or_init(|| {
-                let raw = load_city_service_data(&self.data_dir.join("city_services.json"))?;
+                let raw = match &self.baked {
+                    Some(container) => container.city_service_data()?,
+                    None => load_city_service_data(&self.data_dir.join("city_services.json"))?,
+                };
                 Ok(raw
                     .into_iter()
                     .map(|(name, services)| (self.resolve_city_key(&name), services))
@@ -335,8 +466,12 @@ impl World {
     pub fn facility_approaches(&self) -> Result<&IndexMap<String, FacilityApproach>, DataError> {
         self.facility_approaches_cache
             .get_or_init(|| {
-                let raw =
-                    load_facility_approaches(&self.data_dir.join("facility_approaches.json"))?;
+                let raw = match &self.baked {
+                    Some(container) => container.facility_approaches()?,
+                    None => {
+                        load_facility_approaches(&self.data_dir.join("facility_approaches.json"))?
+                    }
+                };
                 Ok(self.remap_facility_ids(raw))
             })
             .as_ref()
@@ -346,7 +481,12 @@ impl World {
     pub fn facility_endpoints(&self) -> Result<&IndexMap<String, FacilityEndpoint>, DataError> {
         self.facility_endpoints_cache
             .get_or_init(|| {
-                let raw = load_facility_endpoints(&self.data_dir.join("facility_endpoints.json"))?;
+                let raw = match &self.baked {
+                    Some(container) => container.facility_endpoints()?,
+                    None => {
+                        load_facility_endpoints(&self.data_dir.join("facility_endpoints.json"))?
+                    }
+                };
                 Ok(self.remap_facility_ids(raw))
             })
             .as_ref()
@@ -356,7 +496,10 @@ impl World {
     pub fn local_approaches(&self) -> Result<&IndexMap<String, LocalApproach>, DataError> {
         self.local_approaches_cache
             .get_or_init(|| {
-                let raw = load_local_approaches(&self.data_dir.join("local_approaches.json"))?;
+                let raw = match &self.baked {
+                    Some(container) => container.local_approaches()?,
+                    None => load_local_approaches(&self.data_dir.join("local_approaches.json"))?,
+                };
                 Ok(self.remap_local_ids(raw))
             })
             .as_ref()
@@ -366,7 +509,10 @@ impl World {
     pub fn local_geometries(&self) -> Result<&IndexMap<String, LocalGeometry>, DataError> {
         self.local_geometries_cache
             .get_or_init(|| {
-                let raw = load_local_geometries(&self.data_dir.join("local_geometry.json"))?;
+                let raw = match &self.baked {
+                    Some(container) => container.local_geometries()?,
+                    None => load_local_geometries(&self.data_dir.join("local_geometry.json"))?,
+                };
                 Ok(self.remap_local_ids(raw))
             })
             .as_ref()

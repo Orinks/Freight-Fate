@@ -54,7 +54,7 @@ asked for.
 | Secret store | keyring | `keyring` 3 with native features on | Same service name `"Freight Fate driver token"`. |
 | Discord | pypresence | `discord-rich-presence` | No asyncio leak workaround needed. |
 | Archives | zipfile/tarfile/gzip/zlib | `zip`, `tar`, `flate2` | gzip level 9 mtime 0 for cloud content. |
-| JSON | json | `serde`/`serde_json` | World data stays JSON; lazy corridors via `OnceCell`. |
+| JSON | json | `serde`/`serde_json` | The data tree is authored and reviewed as JSON; the release ships it baked (see Baked data). Lazy corridors via `OnceCell` on both paths. |
 | Randomness | `random.Random` | `pyrandom`: bit-exact MT19937 + CPython seeding (int, str via sha512), `random/uniform/randrange/randint/choice/choices/sample/expovariate/getstate/setstate` | 119 transcript tests pin seed-derived lines. |
 | Float formatting | f-strings, `round()` | `pyfmt`: `round()` half-even, `round(x, n)`, `{:,.0f}` grouping; Rust `{:.N}` already matches Python on ties | Spoken strings are asserted verbatim. |
 
@@ -79,7 +79,61 @@ asked for.
   first-letter jump, text entry and the `+`/`-` fallbacks keep working.
 - Data: loaded from `src/freight_fate/data/` relative to the executable
   (frozen) or the repo (dev) through one `data_root()`; the Python package's
-  data tree is the shipped data tree. `sounds.pak`/`music.pak` unchanged.
+  data tree is the source of truth. A release ships it baked into one
+  `world.ffdata` beside the loose files (see Baked data below);
+  `sounds.pak`/`music.pak` unchanged.
+
+## Baked data
+
+The shipped data folder is ~142 MB of JSON, 94 MB of it the fifty state leg
+shards. The heavy per-mile corridor is already lazy, but the *parse* is not:
+serde_json walks every byte of those shards at startup to hand each lazy leg
+its raw `Value`, which is ~0.25 s before the menu in release and several
+hundred MB of retained `Value` trees. `ff_core::data::baked` replaces that
+with one memory-mapped binary container, `freight_fate/data/world.ffdata`.
+
+**Format.** A 32-byte header (magic `FFDATA\0\0`, u32 format version, flags,
+then the directory's offset and length), the section payloads, then the
+directory itself as a bincode `Vec<Section>` of `{name, offset, stored, raw,
+codec}`. A section is stored raw, as one zstd frame, or -- for the corridors
+-- as a *region* of independent zstd frames that each leg addresses by its
+own offset, so driving one leg decompresses one leg. A container whose
+version does not match the build is refused by name, with the re-bake command
+in the message; it is never half-read.
+
+**What is eager.** The city table (already parsed, market-expanded and
+validated) and every leg's endpoint fields plus its corridor offset. That is
+two small sections. Everything else -- each leg's corridor, the five
+nationwide side maps, the screened curve table -- is decoded on first touch,
+exactly where the JSON path decoded it on first touch. `street_limits.json`,
+`buffs.json` and the two radio catalogs ride along as their compressed JSON
+*text* and are parsed by the same parsers, because they are small and hold
+free-form JSON the model keeps as `Value`.
+
+**Measured** (owner's machine, 2026-08-22, release profile): 142 MB of JSON
+becomes a 7.3 MB container; `World::load()` goes from 248 ms to 24 ms cold;
+one leg's corridor decompresses and decodes in 0.09 ms. Baking takes ~3 s.
+
+**Both paths stay alive.** The JSON tree always wins where it exists, so a
+source checkout and the whole test suite behave exactly as before; the
+container is consulted only where the loose file is absent. The baker runs
+the shipped loaders (`World::load_from_json`, `curves::build_from_sources`,
+`world_local_data::load_*`) rather than parsing anything itself, so the two
+cannot describe different worlds. `crates/ff-core/tests/data_baked.rs` bakes
+the real tree and compares the two worlds field by field.
+
+**Re-baking.** The bake is deterministic -- same tree, byte-identical file --
+so a rebuild diffs as unchanged and `--check` is a byte comparison:
+
+```
+cargo run --release -p ff-core --bin ff-bake -- \
+    --data-dir src/freight_fate/data --out <dir>/world.ffdata
+cargo run --release -p ff-core --bin ff-bake -- \
+    --data-dir src/freight_fate/data --out <dir>/world.ffdata --check
+```
+
+`tools/build_release.py --rust` runs the baker itself and ships the container
+*instead of* the JSON tree, refusing a payload that carries both.
 
 ## Tests
 
@@ -99,9 +153,9 @@ asked for.
 ## Build and release
 
 - `cargo build --release` produces `target/release/freightfate.exe` plus the
-  vendored DLLs copied by build scripts. `tools/build_release.py` grows a
-  Rust mode later (layout: exe, DLLs, `freight_fate/data/`, packs,
-  `build_info.json`); not part of this port's first milestone.
+  vendored DLLs copied by build scripts. `tools/build_release.py --rust`
+  stages exe, DLLs, `freight_fate/data/world.ffdata` (baked by `ff-bake`),
+  packs and `build_info.json`.
 - Linux/macOS: SDL2 and BASS libraries for those targets are vendored when
   available; the loader degrades (no audio / no speech) rather than failing to
   start, like Prism does today.

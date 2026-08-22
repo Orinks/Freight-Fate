@@ -25,7 +25,7 @@ def load_build_release_module():
 def make_package_tree(package_dir: Path, build_release) -> None:
     """A package tree carrying every shipped data file plus source-only noise."""
     data = package_dir / "data"
-    for relative in build_release.RUST_DATA_FILES:
+    for relative in build_release.RUST_DATA_FILES + build_release.RUST_BAKED_SOURCE_FILES:
         path = data / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("{}\n", encoding="utf-8")
@@ -49,6 +49,14 @@ def make_package_tree(package_dir: Path, build_release) -> None:
     licensed = package_dir / "assets" / "sounds-licensed" / "engine"
     licensed.mkdir(parents=True)
     (licensed / "idle.ogg").write_bytes(b"never ships loose")
+
+
+def make_container(path: Path, build_release, size: int = 2_000_000) -> Path:
+    """A stand-in for what ``ff-bake`` writes: right magic, plausible size."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    magic = build_release.BAKED_MAGIC
+    path.write_bytes(magic + bytes(size - len(magic)))
+    return path
 
 
 def make_profile_dir(profile_dir: Path, exe_name: str) -> None:
@@ -76,8 +84,13 @@ def planned(tmp_path, monkeypatch):
     monkeypatch.setattr(build_release, "ADDON_LIB_DIR", addon)
     profile_dir = tmp_path / "target" / "release"
     make_profile_dir(profile_dir, "freightfate.exe")
+    baked = make_container(tmp_path / "build" / build_release.RUST_BAKED_FILE, build_release)
     plan = build_release.plan_rust_layout(
-        profile_dir, package_dir=package_dir, platform_name="win32", native_exts={".dll"}
+        profile_dir,
+        package_dir=package_dir,
+        platform_name="win32",
+        native_exts={".dll"},
+        baked_data=baked,
     )
     return build_release, plan, profile_dir, package_dir
 
@@ -102,18 +115,52 @@ def test_exe_name_follows_the_platform():
     assert build_release.cargo_exe_name("linux") == "freightfate"
 
 
-def test_plan_ships_the_runtime_data_tree_and_nothing_source_only(planned):
+def test_plan_ships_the_baked_container_instead_of_the_json_tree(planned):
     build_release, plan, _, _ = planned
     dests = destinations(plan)
+    assert f"freight_fate/data/{build_release.RUST_BAKED_FILE}" in dests
+    # Everything the container holds stays home: 142 MB of JSON is exactly
+    # what shipping the container was for.
+    for relative in build_release.RUST_BAKED_SOURCE_FILES:
+        assert f"freight_fate/data/{relative}" not in dests
+    assert not any("/world_data/" in dest for dest in dests)
+    assert "freight_fate/data/world_data/us/legs/TX.json" not in dests
     for relative in build_release.RUST_DATA_FILES:
         assert f"freight_fate/data/{relative}" in dests
-    assert "freight_fate/data/world_data/us/legs/TX.json" in dests
-    assert "freight_fate/data/world_data/us/legs/CA.json" in dests
     assert not any("world_source" in dest for dest in dests)
     assert not any("__pycache__" in dest for dest in dests)
     assert not any(dest.endswith(".py") for dest in dests)
     assert not any("/geometry/" in dest for dest in dests)
-    assert "freight_fate/data/world_data/us/gameplay/ramps.jsonl" not in dests
+
+
+def test_plan_refuses_to_stage_without_a_baked_container(planned, tmp_path):
+    build_release, _, profile_dir, package_dir = planned
+    with pytest.raises(RuntimeError, match="baked data container is missing"):
+        build_release.plan_rust_layout(
+            profile_dir, package_dir=package_dir, platform_name="win32", native_exts={".dll"}
+        )
+    with pytest.raises(RuntimeError, match="baked data container is missing"):
+        build_release.plan_rust_layout(
+            profile_dir,
+            package_dir=package_dir,
+            platform_name="win32",
+            native_exts={".dll"},
+            baked_data=tmp_path / "nowhere" / "world.ffdata",
+        )
+
+
+def test_bake_command_names_the_data_tree_and_the_container(tmp_path):
+    build_release = load_build_release_module()
+    out = tmp_path / "world.ffdata"
+    cmd = build_release.bake_command(out)
+    assert cmd[:7] == ["cargo", "run", "--release", "-p", "ff-core", "--bin", "ff-bake"]
+    assert cmd[cmd.index("--out") + 1] == str(out)
+    assert cmd[cmd.index("--data-dir") + 1] == str(build_release.PACKAGE_DIR / "data")
+    assert "--check" not in cmd
+    target = tmp_path / "t18"
+    checked = build_release.bake_command(out, target, check=True)
+    assert checked[checked.index("--target-dir") + 1] == str(target)
+    assert checked[-1] == "--check"
 
 
 def test_plan_ships_committed_sounds_but_never_the_licensed_overlay(planned):
@@ -147,15 +194,31 @@ def test_plan_refuses_a_profile_dir_without_the_binary(tmp_path):
         build_release.plan_rust_layout(profile_dir, package_dir=package_dir, platform_name="win32")
 
 
-def test_plan_refuses_a_checkout_missing_a_runtime_data_file(tmp_path):
+def test_plan_refuses_a_checkout_missing_a_loose_runtime_data_file(tmp_path, monkeypatch):
+    """A file registered as shipping loose has to be there.
+
+    ``RUST_DATA_FILES`` is empty today -- the container covers everything the
+    game loads -- so the rule is exercised through a file added to it, which
+    is what registering a new runtime data file looks like.
+    """
     build_release = load_build_release_module()
     package_dir = tmp_path / "src" / "freight_fate"
     make_package_tree(package_dir, build_release)
-    (package_dir / "data" / "radio_catalog.json").unlink()
+    monkeypatch.setattr(build_release, "RUST_DATA_FILES", ("late_addition.json",))
     profile_dir = tmp_path / "target" / "release"
     make_profile_dir(profile_dir, "freightfate")
-    with pytest.raises(RuntimeError, match="radio_catalog.json"):
-        build_release.plan_rust_layout(profile_dir, package_dir=package_dir, platform_name="linux")
+    baked = make_container(tmp_path / "build" / build_release.RUST_BAKED_FILE, build_release)
+    with pytest.raises(RuntimeError, match="late_addition.json"):
+        build_release.plan_rust_layout(
+            profile_dir, package_dir=package_dir, platform_name="linux", baked_data=baked
+        )
+
+
+def test_bake_refuses_a_checkout_without_a_data_tree(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.setattr(build_release, "PACKAGE_DIR", tmp_path / "src" / "freight_fate")
+    with pytest.raises(RuntimeError, match="Runtime data tree is missing"):
+        build_release.bake_world_data(out=tmp_path / "world.ffdata")
 
 
 def test_lfs_pointer_is_refused_with_a_pull_hint(tmp_path):
