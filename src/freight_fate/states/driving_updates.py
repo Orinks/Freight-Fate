@@ -4249,8 +4249,10 @@ class DrivingUpdateMixin:
         Priced like the exit assist's ramp glide rather than as a fixed
         trigger distance: road speed stands until the truck is inside the
         distance it needs to shed, then the cap follows the deceleration
-        down. A driver already slower than the cap is left alone -- this only
-        ever takes speed off, never adds it, and never steers.
+        down. A driver already slower than the cap is left alone; this never
+        steers, and the only speed it ever adds is a walk over the last
+        lengths to the point, because the dock opens at the point and not a
+        truck-length short of it.
         """
         if not self.ctx.settings.destination_approach_assist:
             self._destination_arrival_active = False
@@ -4355,22 +4357,54 @@ class DrivingUpdateMixin:
         if self._cruise_mph is not None or self._keeper_mph is not None:
             self._pause_speed_control(resume_when_rolling=False)
         # HOW HARD. The stop profile itself, from the moment the arrival
-        # begins: the deceleration that brings the truck to rest AT the point,
-        # recomputed each tick and mapped onto the pedal by
+        # begins, recomputed each tick and mapped onto the pedal by
         # ``arrival_servo_brake`` -- which, unlike the ramp assist's servo,
         # has no floor, because a gate is not a bar. Floored at the ramp's
         # start rate the arrival waited until the road needed 0.6 m/s2, about
         # 35 metres out at street speed, then chased a demand that climbs
         # faster than the pedal follows and crossed the gate at 12 mph with
-        # the brake at full. Tracking the profile from the latch cannot stop
-        # short: if the pedal takes off more than the profile needs, the
-        # demand falls and the pedal eases with it, and the truck rolls the
-        # rest of the way to the point.
-        needed = (self.truck.velocity_mps**2) / (2.0 * remaining_m)
-        self._destination_assist_brake = arrival_servo_brake(
-            self._destination_assist_brake, needed, self.truck
+        # the brake at full.
+        #
+        # The profile aims at a WALK at the point, not at rest, and it asks
+        # the brake only for the share of that the road is not already
+        # taking. A profile to zero speed is exact for a truck whose only
+        # retarder is the brake; the real one has rolling resistance, drag
+        # and grade shedding speed underneath it, and the servo holds the
+        # pedal a band above the demand, so the truck always came down
+        # harder than the profile -- and an arrival that undershoots does
+        # not self-correct: the demand falls as the square of the speed while
+        # the road left falls linearly, so it converges on a stop SHORT of
+        # the point, with the brake held and the throttle forced to zero.
+        # Nine metres short at two hundredths of a mile an hour, the dock
+        # never opening, is what Jerry's Hobbs arrival looked like
+        # (2026-08-22); the bench found the street chain does the same thing
+        # on an upgrade. The dock opens only AT the point, so the last
+        # lengths are a creep the assist holds, throttle against the road if
+        # it has to, until the point's own full-brake branch above stops it.
+        v = self.truck.velocity_mps
+        creep = ARRIVAL_CREEP_MPH / 2.23694
+        # What the road takes off on its own, m/s2: positive when it slows
+        # the truck, negative when gravity is pushing it down to the gate.
+        road = self.truck.resistance_force() / self.truck.gross_mass_kg
+        needed = max(0.0, v * v - creep * creep) / (2.0 * remaining_m)
+        if v > creep:
+            self._destination_assist_brake = arrival_servo_brake(
+                self._destination_assist_brake, needed - road, self.truck
+            )
+            self.truck.brake = max(self.truck.brake, self._destination_assist_brake)
+            return
+        # At the walk, short of the point: the brake is off and the throttle
+        # holds the pace -- the road's balancing pedal plus a nudge for the
+        # shortfall, capped so it is a creep and never a launch. Nothing is
+        # added while anyone else has a foot on the brake: a driver braking
+        # at the gate, the hazard assist, a stop ahead all win.
+        self._destination_assist_brake = 0.0
+        if self.truck.brake > 0.0 or self.truck.parking_brake:
+            return
+        pedal = self.truck.hold_throttle() + ARRIVAL_CREEP_THROTTLE_GAIN * (creep - v)
+        self.truck.throttle = max(
+            self.truck.throttle, min(ARRIVAL_CREEP_THROTTLE_MAX, max(0.0, pedal))
         )
-        self.truck.brake = max(self.truck.brake, self._destination_assist_brake)
 
     def _update_traction_cues(self) -> None:
         """Speak the physical traction states once, on the edge they begin.

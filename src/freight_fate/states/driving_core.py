@@ -322,6 +322,22 @@ RAMP_ASSIST_HOLD_MI = 60.0 / 5280.0
 # brake application by the air system, so a servo that chases every dip in the
 # demand empties the tanks on one approach.
 RAMP_ASSIST_RELEASE_BAND = 0.05
+# The destination approach assist's last lengths to the gate. The dock opens
+# only AT the point, so the arrival profile aims to reach it at a walk, not at
+# rest: an assist that targets zero speed at the point converges on a stop
+# short of it the moment anything besides its own brake takes speed off --
+# rolling resistance, drag, an upgrade, the servo's release band -- and with
+# the throttle held to zero it can never roll the remainder (Jerry, Hobbs,
+# 2026-08-22: nine metres short, brake held, dock never opened). Two miles an
+# hour sits inside the gate's own creep band (DELIVERY_PARK_MPH) and well
+# above docking speed, so the point still has something to stop.
+ARRIVAL_CREEP_MPH = 2.0
+# The most pedal the creep may use to hold that walk against the road: enough
+# for a grossed-out rig on the steepest gate approach, never a lunge.
+ARRIVAL_CREEP_THROTTLE_MAX = 0.35
+# Proportional gain from creep shortfall (m/s) to throttle, on top of the
+# feed-forward that balances the road (TruckState.hold_throttle).
+ARRIVAL_CREEP_THROTTLE_GAIN = 0.5
 GREEN_ROLL_MPH = 25.0  # green lets you roll the terminal up to this
 STOP_ROLL_CLIP_MPH = 15.0  # blowing a stop sign this fast clips cross traffic
 # A yield taken in a real gap is legal at or under this -- the whole point of

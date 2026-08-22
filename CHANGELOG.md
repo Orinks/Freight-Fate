@@ -899,6 +899,19 @@
 
 ### Fixed
 
+- **Destination approach assistance now delivers the truck to the gate, not
+  a truck length short of it.** With the assist on, the truck could come down
+  to a crawl just short of the entrance and sit there, brake held, the dock
+  never opening -- you heard "Destination approach assistance slowing", then
+  8 miles per hour, then 2, then nothing. Hobbs Food Processing Plant did
+  exactly that on 22 August, and the same thing could happen at any delivery
+  where the road itself was taking speed off, such as an entrance at the top
+  of a grade. The assist now brings the truck down to a walking pace, rolls
+  it the last few lengths to the entrance -- with a touch of throttle uphill
+  if it needs it -- and stops it there, so the pull-in opens on its own. It
+  no longer tells you to "come to a complete stop" at an entrance it is
+  already stopping you at.
+
 - **T plans the next sleep stop however far ahead it is.** Pressing T seven
   miles short of a rest area used to answer "no sleep-capable route stop is
   close enough ahead to plan," then work a minute later with nothing changed

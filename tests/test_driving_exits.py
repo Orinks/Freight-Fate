@@ -916,11 +916,13 @@ def test_the_destination_approach_assist_actually_brings_the_truck_to_a_stop():
         # is about the arrival point it is named for; whether the chain
         # starts otherwise varies with the career the run happens to build,
         # and the assertion below would follow it.
+        driving._destination_chain_ahead = False
         driving._begin_surface_chain = lambda: False
+        driving.truck.start_engine()
 
         for _ in range(60 * 600):
             driving.truck.throttle = 0.0  # the assist is the only input
-            if app.state is not driving:
+            if app.state is not driving or driving._arrival_menu_open:
                 break
             driving.update(1 / 60)
             if driving._ramp_mi is None:
@@ -930,6 +932,13 @@ def test_the_destination_approach_assist_actually_brings_the_truck_to_a_stop():
         assert not past, f"the assist let the truck run the gate: {past[0]}"
         assert driving.truck.speed_mph <= DOCKING_MAX_MPH, (
             f"stopped nowhere: still doing {driving.truck.speed_mph:.1f} mph"
+        )
+        # Stopped is not arrived. The first fix passed this test with the
+        # truck parked 32 metres short of the gate and the dock never opening
+        # (Jerry, Hobbs, 2026-08-22); the facility overshoot suite drives
+        # that end to end, and this one at least insists the gate was reached.
+        assert driving._ramp_mi is None, (
+            f"stopped {driving._ramp_mi * 1609.344:.1f} m short of the gate"
         )
     finally:
         app.shutdown()

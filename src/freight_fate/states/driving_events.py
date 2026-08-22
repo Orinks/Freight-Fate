@@ -3541,6 +3541,19 @@ class DrivingEventMixin:
                     self._open_poi_stop(stop, settle=True)
                 return
             stop = self._ramp_stop
+            if (
+                stop.type == "delivery_destination"
+                and self._destination_arrival_active
+                and self.truck.speed_mph <= DELIVERY_PARK_MPH
+            ):
+                # The destination approach assist is walking the truck over
+                # the point and its own full brake at the point lands it a
+                # moment later, so "come to a complete stop" here would be an
+                # instruction the truck is already carrying out -- and at the
+                # quiet rung an interrupt for it. The dock line that follows
+                # names the place. A truck that somehow keeps rolling still
+                # meets the blown-stop rule below once it is clear past.
+                return
             if not self._ramp_end_said:
                 if (
                     stop.type == "delivery_destination"

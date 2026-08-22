@@ -217,6 +217,19 @@ onto exit signalling.
       eating the last 560 feet in a single frame, so no braking profile could
       have fitted. Its test drives a real App down a real ramp with the ramp
       terminal cleared, because the stop-sign assist was hiding the failure.
+      Re-fixed 2026-08-22 (Jerry, Hobbs): the stop profile aimed at rest AT
+      the point, which is exact only for a truck whose sole retarder is the
+      brake; rolling resistance, drag, grade and the servo's release band all
+      took more off, and an undershooting profile converges on a stop SHORT
+      of the point -- nine metres short on the bench, throttle forced to
+      zero, dock never opening. The profile now aims at a walk
+      (`ARRIVAL_CREEP_MPH`) at the point, asks the brake only for the share
+      the road is not already taking, holds the walk on the throttle over the
+      last lengths, and lets the point's own full brake land it. Pinned end
+      to end on the real harness -- level, uphill, downhill, from the top of
+      the ramp, and on a street chain uphill -- by "the dock opened", not
+      "the truck stopped", because the latter passed with the truck parked
+      32 metres short.
 
 - [ ] **There is no way to back a career up on demand (Brandon, 2026-08-15).**
       A career can only travel upward two ways: the background queue after a

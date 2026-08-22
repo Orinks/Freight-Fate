@@ -719,3 +719,155 @@ def test_off_the_ramp_carries_the_first_corner_and_hands_speed_control_back(monk
         assert not d._speed_control_paused_at_stop
     finally:
         app.shutdown()
+
+
+def _ramp_gate_driving(app, *, start_mph: float, ramp_mi=None, grade=None):
+    """On the destination ramp with the terminal already honored, hands off.
+
+    The shape of Jerry's Hobbs arrival (2026-08-22): the ramp light was
+    green, the route-transition assist let go, and the destination approach
+    assist took the truck from about 16 mph with the terminal-to-driveway
+    stretch left to run. ``ramp_mi`` None leaves the whole ramp ahead.
+    """
+    from driving_feature_helpers import quiet_trip, start_drive
+
+    d = start_drive(app)
+    quiet_trip(d)
+    app.ctx.settings.destination_approach_assist = True
+    # Jerry drove with the keeper on; the assist has to own the pedals
+    # against it, not only against an idle throttle.
+    app.ctx.settings.speed_keeper = True
+    destination = d._destination_exit_stop()
+    assert destination is not None
+    d._exit_stop = destination
+    d._exit_lane_alignment = 1.0
+    d._exit_signal_on = True
+    d.trip.position_mi = destination.at_mi
+    d.truck.velocity_mps = 40.0 / 2.23694
+    d._update_exit(0.0)
+    assert d._ramp_mi is not None
+    d._ramp_control = ""
+    d._ramp_terminal_done = True
+    # The ramp IS the gate here. Whether the career the run happens to build
+    # has a street chain behind its destination varies; with one, the ramp's
+    # end is a driving continuation and the arrival is the chain's own (that
+    # shape has its own tests below). Pin the no-chain shape.
+    d._destination_chain_ahead = False
+    d._surface_chain_route = lambda: None
+    d._begin_surface_chain = lambda: False
+    if ramp_mi is not None:
+        d._ramp_mi = ramp_mi
+    if grade is not None:
+        d.trip.grade_at = lambda mile: grade
+    d.truck.start_engine()
+    d.truck.transmission.automatic = True
+    d.truck.velocity_mps = start_mph / 2.23694
+    return d
+
+
+def _drive_hands_off(app, d, *, seconds: int = 300):
+    """Frames until the dock opens, or None. The driver touches nothing."""
+    for frame in range(60 * seconds):
+        if app.state is not d or d._arrival_menu_open:
+            return frame / 60.0
+        d.truck.throttle = 0.0
+        d.update(1 / 60)
+    return None
+
+
+@pytest.mark.parametrize(
+    ("label", "start_mph", "ramp_mi", "grade"),
+    [
+        ("through the ramp light, level", 16.0, "access", None),
+        # Fast enough that the assist has the pedals; the grade then takes
+        # speed off for free, which is where a brake-only profile stops short.
+        ("through the ramp light, 3 percent up to the gate", 30.0, "access", 0.03),
+        ("through the ramp light, 3 percent down to the gate", 16.0, "access", -0.03),
+        ("from the top of the ramp", 40.0, None, None),
+    ],
+)
+def test_the_approach_assist_delivers_the_truck_to_the_dock(
+    monkeypatch, label, start_mph, ramp_mi, grade
+):
+    """Jerry, Hobbs Food Processing Plant, 2026-08-22: through the ramp light
+    on green, "Destination approach assistance slowing", 8 miles per hour,
+    2 miles per hour -- and then nothing. He sat, went into settings, turned
+    the assist off, and the dock opened five seconds after he resumed.
+
+    Measured on this harness the assist had parked the truck nine metres
+    short of the gate at two hundredths of a mile an hour, brake held, and
+    the dock opens only AT the gate. The stop profile it tracked was exact
+    for a truck whose only retarder is the brake; the real one also has
+    rolling resistance, drag and grade taking speed off underneath it, and
+    the servo holds the pedal a band above the demand, so the truck always
+    came down harder than the profile and an arrival that undershoots
+    converges on a stop short of the point. With the throttle forced to zero
+    it could never roll the last few lengths.
+
+    So the requirement is the dock, not a stop: hands off from the moment the
+    assist speaks, the dock menu opens. Level, uphill, downhill, and from the
+    top of the ramp.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RAMP_ACCESS_MI
+
+    app = App()
+    try:
+        d = _ramp_gate_driving(
+            app,
+            start_mph=start_mph,
+            ramp_mi=RAMP_ACCESS_MI if ramp_mi == "access" else ramp_mi,
+            grade=grade,
+        )
+        spoken = _capture_events(app, monkeypatch)
+        arrived_at = _drive_hands_off(app, d)
+        assert arrived_at is not None, (
+            f"{label}: the dock never opened; the truck is doing "
+            f"{d.truck.speed_mph:.2f} mph with {(d._ramp_mi or 0.0) * 1609.344:.1f} m "
+            "of ramp still ahead of it"
+        )
+        assert d._ramp_terminal_miss_count == 0, f"{label}: blew the gate and looped back"
+        blown = [line for line in spoken if "Drove past" in line]
+        assert not blown, f"{label}: {blown[0]}"
+        # The assist walks the truck over the point at two miles an hour and
+        # its own brake lands it; the ramp must not bark "come to a complete
+        # stop" at a driver whose truck is already doing exactly that.
+        ordered = [line for line in spoken if "Come to a complete stop" in line]
+        assert not ordered, f"{label}: {ordered[0]}"
+        assert any("Destination approach assistance slowing" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+def test_the_approach_assist_delivers_the_truck_to_a_street_chain_gate_uphill(monkeypatch):
+    """The same promise on a facility street chain, with the gate at the top
+    of a grade: the road takes speed off for free there, which is exactly
+    where a brake-only profile stops short."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _surface_chain_driving(app, monkeypatch)
+        _capture_events(app, monkeypatch)
+        # The helper fakes the chain start; in the game the ramp that fed it
+        # has already marked the destination exit taken, which is what routes
+        # the finished chain to the gate handler and not the missed-exit loop.
+        d._destination_exit_taken = True
+        d.trip.grade_at = lambda mile: 0.03
+        d.truck.start_engine()
+        d.truck.transmission.automatic = True
+        d.truck.transmission.gear = 4
+        d.truck.velocity_mps = 15.0 / 2.23694
+        d._speed_control_armed = True
+        held = None
+        for frame in range(60 * 600):
+            if d._arrival_full_stop_said:
+                held = frame / 60.0
+                break
+            d.update(1 / 60)
+        assert held is not None, (
+            f"never held at the gate: {d.truck.speed_mph:.2f} mph, "
+            f"{d.trip.remaining_miles * 1609.344:.1f} m short"
+        )
+    finally:
+        app.shutdown()
