@@ -890,6 +890,27 @@
   sounding like a bear sighting: drivers talk about troopers working a
   work zone, and about logs being checked at the scale.
 
+- **Reverse no longer announces itself, because the beep already does.**
+  Selecting reverse used to speak a line on top of the reverse beep, which
+  starts at the same moment and keeps going for as long as you are in
+  reverse. The beep is the better cue of the two, so the sentence is gone.
+  Coming back out to a forward gear still says so: nothing beeps for that.
+  The status readout still has the words if you ask for it.
+
+### Fixed
+
+- **You can always get out of reverse again.** Shifting back to a forward
+  gear means holding the throttle at a standstill, and holding the throttle
+  is also half of the gesture that latches the pedal. The latch caught
+  first, and it cancelled the shift when it did, so tapping the throttle and
+  then holding it -- exactly what you do when you are pumping the pedal
+  trying to get moving -- left you in reverse every single time, with the
+  throttle latched and no way out but one clean, uninterrupted hold that
+  nothing tells you about. Now the shift out of reverse wins the pedal: the
+  latch steps aside, the gear changes, and the throttle comes back to your
+  hand rather than pulling the truck away by itself. Taking reverse in the
+  first place is unchanged, and still refuses to be grabbed by a latch.
+
 ### Added
 
 - **Game sound can step back while the road talks.** A new option drops

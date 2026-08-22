@@ -932,7 +932,11 @@ def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch)
         assert driving.truck.transmission.gear != REVERSE
         driving._update_reverse_controls(accelerating=False, braking_key=False)
         assert hold(driving, braking_key=True)
-        assert "[event] Reverse selected. Backing slowly." in result.transcript
+        # The gear is the outcome; reverse itself says nothing now, because
+        # the beep runs for as long as the truck is in reverse and a one-shot
+        # sentence cannot (owner, 2026-08-21).
+        assert driving.truck.transmission.gear == REVERSE
+        assert "[event] Reverse selected. Backing slowly." not in result.transcript
 
         driving.truck.transmission.gear = 1
         result.transcript.clear()
@@ -944,7 +948,8 @@ def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch)
 
         driving._update_reverse_controls(accelerating=False, braking_key=False)
         assert hold(driving, braking_key=True)
-        assert "[event] Reverse selected. Backing slowly." in result.transcript
+        assert driving.truck.transmission.gear == REVERSE
+        assert "[event] Reverse selected. Backing slowly." not in result.transcript
 
 
 # Six full simulated deliveries in one test, under coverage tracing on a

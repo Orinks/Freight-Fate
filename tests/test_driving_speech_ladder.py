@@ -1470,10 +1470,20 @@ def _spoken_line_count_for_scenario(name: str, rung: str) -> int:
 # the battery's 34 scenarios never reach a CONFIRMATION or STATUS call site
 # that survives the pre-existing per-condition repeat suppression, so their
 # rung-to-rung counts are flat and would make this a vacuous test. This one
-# reliably says "Reverse selected. Backing slowly." (CONFIRMATION) once and
-# then a fresh "engine is screaming at redline" STATUS readout on each
-# further mile of engine wear -- both EARCON-silenced at quiet and
-# urgent_only, both full words at coaching and standard.
+# reliably says a fresh "engine is screaming at redline" STATUS readout on
+# each further mile of engine wear -- EARCON-silenced at quiet and
+# urgent_only, full words at coaching and standard.
+#
+# It used to anchor on "Reverse selected. Backing slowly." (CONFIRMATION)
+# as well. That line is gone: the reverse beep runs for as long as the truck
+# is in reverse and says the same thing better than a one-shot sentence
+# (owner, 2026-08-21). Re-measuring the battery afterwards, this scenario
+# reaches MONEY, NAVIGATION, SAFETY and STATUS and no longer touches a
+# CONFIRMATION call site at all, so STATUS is the honest anchor here.
+# Thirteen other scenarios do still carry both; swapping to one would trade
+# away this scenario's other pinned property -- no navigation advisory, so
+# quiet and urgent_only tie exactly -- which is what the rest of this test
+# is about.
 _SCENARIO = "reverse_down_the_route"
 
 
@@ -1487,13 +1497,15 @@ def test_a_drive_gets_quieter_as_the_rung_tightens() -> None:
     }
     counts = {rung: len(lines) for rung, lines in transcripts.items()}
 
-    # Non-vacuous: the top rung must actually carry a CONFIRMATION line and
-    # a STATUS line -- the two categories quiet and urgent_only cut to
-    # EARCON -- or a tie further down the ladder would pass for the wrong
-    # reason (nothing to cut) rather than because the gate did its job.
+    # Non-vacuous: the top rung must actually carry a line from a category
+    # quiet and urgent_only cut to EARCON, or a tie further down the ladder
+    # would pass for the wrong reason (nothing left to cut) rather than
+    # because the gate did its job.
     standard_text = "\n".join(transcripts["standard"])
-    assert "Reverse selected. Backing slowly." in standard_text  # CONFIRMATION
     assert "screaming at redline" in standard_text  # STATUS
+    # And that it is really cut, not merely present at the top -- the anchor
+    # is only worth something if the rung acts on it.
+    assert "screaming at redline" not in "\n".join(transcripts["quiet"])
 
     # This scenario's STATUS readout carries a climbing damage number, so
     # every re-fire is a genuine WORSENING and standard's TRANSITIONS row

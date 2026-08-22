@@ -35,9 +35,11 @@ differently.
 - **Reverse takes a fresh press, held.** Holding the brake through a stop no
   longer selects reverse, and a quick tap at a stop no longer selects it
   either. Stop fully, release the Down arrow, then press it again and hold it
-  for a moment. You will hear "Reverse selected." The same press-and-hold on
-  the Up arrow brings forward gear back. This is now true whichever direction
-  change style you have set.
+  for a moment. The reverse beep starts, and keeps going the whole time you
+  are in reverse. The same press-and-hold on the Up arrow brings forward gear
+  back and says so. This is now true whichever direction change style you
+  have set. If you latch the throttle by habit while you are doing it, the
+  shift still wins: coming out of reverse always beats the latch.
 - **Braking cancels automatic speed control, and Shift+K brings it back.**
   Any service brake or emergency brake press drops it immediately and says so.
   Shift+K resumes the last speed you had set, like the stalk in a car.

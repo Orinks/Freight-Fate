@@ -911,16 +911,12 @@ class DrivingUpdateMixin:
                 tr.gear = REVERSE
                 self._cancel_cruise()
                 self._set_status("Reverse selected. Backing slowly.")
-                # ROUTE, not the ambient default: same reasoning as the
-                # forward-gear line above -- direction confusion for a blind
-                # driver is a safety issue (automation-handoff sweep,
-                # 2026-08-20, the deferred 2026-08-15 audit).
-                self.ctx.say_event(
-                    "Reverse selected. Backing slowly.",
-                    interrupt=False,
-                    priority=EventPriority.ROUTE,
-                    category=SpeechCategory.CONFIRMATION,
-                )
+                # No spoken line: the reverse beep is already running and it
+                # keeps running the whole time the truck is in reverse, which
+                # a one-shot sentence cannot do -- and it says the same thing
+                # (owner, 2026-08-21). The status readout still carries the
+                # words for anyone who asks for it. Coming back OUT of
+                # reverse still speaks: nothing beeps for forward gear.
                 return True
         else:
             self._direction_armed = ""

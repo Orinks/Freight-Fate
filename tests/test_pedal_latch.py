@@ -272,3 +272,74 @@ def test_latching_the_brake_at_a_standstill_never_grabs_reverse(monkeypatch):
         assert "Reverse selected. Backing slowly." not in events
     finally:
         app.shutdown()
+
+
+def test_the_throttle_latch_never_traps_the_truck_in_reverse(monkeypatch):
+    """Owner, 2026-08-21, at the scale: "I can't get out of reverse?"
+
+    Both gestures share the throttle key, and the shift OUT of reverse is a
+    press-and-hold at a standstill -- the same shape as the latch's second
+    press. The catch lands first (half a second against six tenths) and used
+    to wipe the pending shift, so every tap-then-hold left the truck in
+    reverse with a latched throttle and no way out but a clean hold from
+    rest, which nothing tells a driver to do.
+
+    Grabbing reverse by accident is dangerous and the catch still wins there
+    (see the brake test below). Ending up in forward gear at a standstill is
+    not, and being unable to leave reverse is a trap, so the shift back to
+    forward wins the pedal.
+    """
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    class FakeKeys:
+        def __init__(self, held):
+            self.held = held
+
+        def __getitem__(self, key):
+            return key in self.held
+
+    app = App()
+    events = []
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        release_air_brakes(driving)
+        # Flat ground: the yard sits on a slight grade, and a truck rolling
+        # down it is a different reason to refuse a direction change than
+        # the one under test here.
+        driving.trip.grade_at = lambda mile: 0.0
+        driving.truck.grade = 0.0
+        assert driving.truck.transmission.automatic
+        assert abs(driving.truck.velocity_mps) < 0.3  # parked at the yard
+
+        # Into reverse the way the guard leaves open: one clean hold from
+        # rest, no preceding tap, so the latch gesture never starts.
+        held.add(pygame.K_DOWN)
+        _drive_frames(driving, held, 1.2)
+        held.discard(pygame.K_DOWN)
+        _drive_frames(driving, held, 0.3)
+        assert driving.truck.transmission.in_reverse, events
+
+        # Back out of it with the throttle, tapping first the way a driver
+        # pumping at a standstill does. This is the shape that used to trap.
+        held.add(pygame.K_UP)
+        _drive_frames(driving, held, 0.2)
+        held.discard(pygame.K_UP)
+        _drive_frames(driving, held, 0.2)
+        held.add(pygame.K_UP)
+        _drive_frames(driving, held, 2.0)
+        held.discard(pygame.K_UP)
+        _drive_frames(driving, held, 0.3)
+
+        assert not driving.truck.transmission.in_reverse, events
+        assert "Forward gear selected." in events
+        # The pedal comes back to the hand rather than catching: a truck that
+        # has just changed direction must not pull away hands-free.
+        assert not driving._throttle_latch.latched
+    finally:
+        app.shutdown()

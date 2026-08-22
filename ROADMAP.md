@@ -1394,6 +1394,57 @@ onto exit signalling.
       deceleration lane plus the ramp proper; sizing the shed from the real
       lane length (and its downhill multiplier) is the next slice.
 
+- [x] **The reverse trap: the throttle latch ate the shift out of reverse
+      (FIXED 2026-08-21).** Owner hit it at the I-40 scale mid-playtest --
+      "I can't get out of reverse?" -- and the log showed the truck at 0 mph
+      in reverse with "Throttle latched / Throttle released" cycling.
+
+      Both gestures live on the throttle key at a standstill. The latch
+      catches at `CATCH_HOLD_S` 0.5s; the direction change needs
+      `DIRECTION_CHANGE_HOLD_S` 0.6s; and the catch cleared `_direction_armed`
+      on the way past, killing the shift a tenth of a second before it would
+      have fired. Worse, once latched there is no rising edge left, so it
+      could not re-arm at all. The only escape was a single clean hold from
+      rest with no tap in front of it, which nothing documents -- and a
+      driver pumping the pedal never produces one.
+
+      Now a pending shift back to FORWARD survives the catch: the latch drops
+      itself into `manual` instead, so the held key keeps driving the pedal,
+      the gear changes, and the truck does not pull away hands-free. Taking
+      reverse still loses to the catch, which is the property
+      `test_latching_the_brake_at_a_standstill_never_grabs_reverse` pins:
+      rolling into reverse is the dangerous direction, ending up in forward
+      at a standstill is not.
+
+      TWO THINGS THE INVESTIGATION GOT WRONG, recorded so the next one does
+      not repeat them:
+
+        * "The truck creeps in reverse" was a rig artefact. The yard sits on
+          a grade and the bench had not flattened it. Measured properly --
+          90 seconds idling, in gear and in reverse, on the level -- creep is
+          0.000 m/s both ways. A standstill threshold change was written and
+          reverted. Any bench touching a standstill must pin `grade_at` and
+          `truck.grade`, exactly as it pins the speed limits.
+        * A truck rolling on a grade in reverse still cannot arm the shift,
+          because in reverse the brake key means "back up" and there is no
+          key that stops you. The parking brake IS the escape and it works.
+          Left alone deliberately rather than loosening the threshold on the
+          back of a misdiagnosis.
+
+- [x] **Reverse stopped announcing itself (owner ruling, 2026-08-21).** The
+      spoken "Reverse selected. Backing slowly." sat on top of the reverse
+      beep, which starts at the same instant and runs the whole time the
+      truck is in reverse -- a better cue than a one-shot sentence. The line
+      is gone from speech; `_status_text` still carries it for the readout,
+      and the forward shift still speaks because nothing beeps for it.
+      Follow-on: `test_driving_speech_ladder`'s count test anchored its
+      non-vacuousness on that line as its CONFIRMATION example. Re-measuring
+      the battery, `reverse_down_the_route` now reaches only MONEY,
+      NAVIGATION, SAFETY and STATUS, so the anchor is STATUS alone plus a
+      check that quiet really cuts it. Thirteen scenarios do still carry both
+      categories (`assists_fight_descent`, `floor_it_through_town`,
+      `scale_check_in_guidance` among them) if that test ever wants one.
+
 - [ ] **Two riders from the New Haven log, both still open.**
       1. The status readout speaks `_keeper_mph` (the SET speed) rather than
          the target in force, so S says "holding 25" while the truck holds

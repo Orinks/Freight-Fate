@@ -1605,6 +1605,28 @@ class DrivingControlsMixin:
         ):
             event = latch.update(bool(held), dt)
             if event == "latched":
+                if self._direction_armed == "forward":
+                    # ...but never over the shift BACK to forward, which is
+                    # the same press-and-hold on the same pedal. The catch
+                    # lands first by design (half a second against six
+                    # tenths) and used to wipe the pending shift with it, so
+                    # a driver pumping the throttle in reverse re-armed and
+                    # lost it every single time, and once the latch caught
+                    # there was no rising edge left to arm with at all. The
+                    # only way out was one clean hold from rest, which
+                    # nothing tells anybody to do (owner, at the scale,
+                    # 2026-08-21: "I can't get out of reverse?").
+                    #
+                    # Taking reverse by accident is dangerous, so the catch
+                    # still wins there. Ending up in forward gear at a
+                    # standstill is not, and being stuck in reverse is a
+                    # trap, so the shift takes the pedal. Dropping the latch
+                    # lands it in "manual": a key still held keeps driving
+                    # the pedal without starting a fresh gesture, and a truck
+                    # that just changed direction does not pull away
+                    # hands-free.
+                    latch.release()
+                    continue
                 # The latch gesture's second press is also a press-and-hold
                 # at whatever speed the truck has -- at a standstill that
                 # would arm a direction change and grab reverse a tenth of

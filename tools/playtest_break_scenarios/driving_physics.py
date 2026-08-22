@@ -156,7 +156,7 @@ def _reverse_route():
             findings.append(
                 f"backed {backed_mi:.1f} miles down the interstate (to route mile "
                 f"{d.trip.position_mi:.2f}) with no wrong-way or off-route feedback of any "
-                "kind after the initial 'Reverse selected' -- a blind player has no way to "
+                "kind after the reverse beep started -- a blind player has no way to "
                 "know the trip is unwinding"
             )
         if d.hos.driving_min <= 0.0:

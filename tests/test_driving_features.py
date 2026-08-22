@@ -595,7 +595,13 @@ def test_automatic_reverse_selection_is_spoken(monkeypatch):
 
         assert _hold_direction_control(driving, braking_key=True)
 
-        assert events[-1] == ("Reverse selected. Backing slowly.", False)
+        # Reverse says nothing: the beep is already running and keeps running
+        # the whole time the truck is in reverse, which a one-shot sentence
+        # cannot do (owner, 2026-08-21). The gear is the outcome to assert,
+        # and the status readout still carries the words on request.
+        assert driving.truck.transmission.in_reverse
+        assert driving._status_text == "Reverse selected. Backing slowly."
+        assert "Reverse selected. Backing slowly." not in [line for line, _ in events]
     finally:
         app.shutdown()
 
