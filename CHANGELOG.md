@@ -899,6 +899,13 @@
 
 ### Fixed
 
+- **The speed readout tells you what the speed keeper is actually holding.**
+  Easing for a corner or a lower limit, the keeper was holding fifteen while
+  the readout insisted it was "holding twenty-five" -- the number you had
+  set, not the one the truck was doing. It now says the live number and the
+  set one only when they differ: "speed keeper holding fifteen for the
+  corner, set twenty-five."
+
 - **Coming off the ramp onto city streets, you hear the first corner and
   the speed keeper takes the streets at once.** When the first turn was
   only a few hundred feet past the bottom of the ramp, its instruction was

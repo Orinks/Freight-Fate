@@ -1583,10 +1583,12 @@ onto exit signalling.
       Whatever lands: the 15 mph FLOOR has to go, or the advisory stays
       silent at exactly the speeds that need it.
 
-- [ ] **Two riders from the New Haven log, both still open.**
-      1. The status readout speaks `_keeper_mph` (the SET speed) rather than
-         the target in force, so S says "holding 25" while the truck holds
-         15. It should say the live number, e.g. "holding 15, set 25".
+- [ ] **Two riders from the New Haven log, one still open.**
+      1. [x] FIXED 2026-08-22: the status readout (S) and `status_lines()`
+         now speak what the keeper is HOLDING -- `_keeper_ease_target`'s
+         number with its reason -- and the set speed only when it differs:
+         "speed keeper holding 15 miles per hour for the corner, set 25".
+         Owner hit it on the Spokane street chain the same day.
       2. "Posted limit lower; speed keeper easing to 15" is CONFIRMATION and
          so is an earcon at quiet. An unrequested 10 mph speed change is
          exactly what the owner's own quiet rule says must be spoken.

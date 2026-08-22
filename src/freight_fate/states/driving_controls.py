@@ -802,6 +802,30 @@ class DrivingControlsMixin:
 
     # -- info keys ---------------------------------------------------------------------
 
+    def _keeper_holding_text(self) -> str:
+        """What the speed keeper is holding RIGHT NOW, for a readout.
+
+        The keeper's set speed and the speed it is holding are two numbers
+        whenever it is easing for something ahead -- a corner's advise, a
+        lower limit, the gate zone -- and the readout spoke only the first.
+        S said "holding 25" while the truck held 15 down a facility street,
+        which reads as the keeper ignoring the road (New Haven log; owner,
+        Spokane, 2026-08-22: "the truck slows to 15 while the speed stays
+        25"). Say the live number, and the set one only when it differs.
+        """
+        held = self._keeper_mph
+        easing = self._keeper_ease_target
+        if easing is not None and self.trip.position_mi < easing[0] and easing[1] < held:
+            reason = {
+                "turn": "for the corner",
+                "posted limit": "for the lower limit",
+            }.get(easing[2], f"for the {easing[2]}")
+            return (
+                f"speed keeper holding {self.ctx.settings.speed_text(easing[1])} {reason}, "
+                f"set {self.ctx.settings.speed_text(held)}"
+            )
+        return f"speed keeper holding {self.ctx.settings.speed_text(held)}"
+
     def _speak_speed(self) -> None:
         t = self.truck
         gear = self._gear_text()
@@ -815,8 +839,7 @@ class DrivingControlsMixin:
             f"{self.ctx.settings.speed_text(self._cruise_mph)}"
             if self._cruise_mph is not None
             else (
-                ", automatic speed control, speed keeper holding "
-                f"{self.ctx.settings.speed_text(self._keeper_mph)}{keeper_target}"
+                f", automatic speed control, {self._keeper_holding_text()}{keeper_target}"
                 if self._keeper_mph is not None
                 else (
                     f", automatic speed control paused{keeper_target}"
@@ -1246,11 +1269,7 @@ class DrivingControlsMixin:
                     f"{self.ctx.settings.speed_text(context.lead.speed_mph)}",
                 )
         elif self._keeper_mph is not None:
-            lines.insert(
-                1,
-                f"Speed control: speed keeper holding "
-                f"{self.ctx.settings.speed_text(self._keeper_mph)}",
-            )
+            lines.insert(1, f"Speed control: {self._keeper_holding_text()}")
             target = (
                 self.ctx.settings.speed_text(self._speed_control_target_mph)
                 if self._speed_control_target_mph is not None

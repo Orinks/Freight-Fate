@@ -600,6 +600,12 @@ def build_driving(ctx, hit: Hit, args):
         s.predictive_cruise = args.predictive_cruise == "on"
     if args.lane_keeping:
         s.lane_keeping = args.lane_keeping
+    if args.planned_stop_assist:
+        # Off by default and outside every preset, so a rest-stop drive that
+        # wants to hear the entrance stop has to ask for it here -- the
+        # sandbox copies the player's real settings on every launch and must
+        # never leak a playtest flag back into them.
+        s.selected_stop_assist = args.planned_stop_assist == "on"
     if args.curve_assist:
         s.curve_speed_assist = args.curve_assist == "on"
     if args.transmission:
@@ -852,6 +858,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--descent", choices=("off", "realistic", "interactive"), help="descent speed control"
     )
     p.add_argument("--assists", help="driving assistance preset, e.g. realistic, all")
+    p.add_argument(
+        "--planned-stop-assist",
+        choices=("on", "off"),
+        help="planned rest-stop stopping assistance (default off; no preset sets it)",
+    )
     p.add_argument("--predictive-cruise", choices=("on", "off"), help="grade preview for cruise")
     p.add_argument(
         "--lane-keeping",

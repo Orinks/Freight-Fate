@@ -5114,3 +5114,53 @@ def test_a_folded_hazard_does_not_follow_the_truck_into_its_new_lane(monkeypatch
         assert driving.lane.lane != driving._hazard_lane
     finally:
         app.shutdown()
+
+
+def test_the_speed_readout_says_what_the_keeper_is_holding_not_just_what_is_set(monkeypatch):
+    """Owner, Spokane, 2026-08-22: "the truck slows to 15 while the speed
+    stays 25." The keeper was easing for the corners and the gate zone, and
+    S kept saying "holding 25" -- the SET speed -- while the truck held 15.
+    The readout says the live number, and the set one only when it differs.
+    """
+    from driving_feature_helpers import quiet_trip, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    said: list[str] = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say", lambda text, *a, **k: said.append(text))
+        driving.truck.start_engine()
+        driving.truck.velocity_mps = 15.0 / 2.23694
+        driving._speed_control_armed = True
+        driving._keeper_mph = 25.0
+        driving._speed_control_target_mph = 25.0
+
+        # Easing for a corner a block ahead: the truck is at 15 for it.
+        driving._keeper_ease_target = (driving.trip.position_mi + 0.1, 15.0, "turn")
+        driving._speak_speed()
+        assert (
+            "speed keeper holding 15 miles per hour for the corner, set 25 miles per hour"
+            in said[-1]
+        )
+        assert "holding 25 miles per hour," not in said[-1]
+        status = "\n".join(driving.status_lines())
+        assert (
+            "Speed control: speed keeper holding 15 miles per hour for the corner, set 25" in status
+        )
+
+        # Nothing to ease for: one number, as before.
+        driving._keeper_ease_target = None
+        driving._speak_speed()
+        assert "speed keeper holding 25 miles per hour" in said[-1]
+        assert "set 25" not in said[-1]
+
+        # The eased point already behind the truck is no longer what it holds.
+        driving._keeper_ease_target = (driving.trip.position_mi - 0.01, 15.0, "turn")
+        driving._speak_speed()
+        assert "speed keeper holding 25 miles per hour" in said[-1]
+        assert "for the corner" not in said[-1]
+    finally:
+        app.shutdown()
