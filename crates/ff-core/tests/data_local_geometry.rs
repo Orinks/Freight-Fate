@@ -123,8 +123,11 @@ fn test_facility_geometry_stays_estimated_fallback() {
 }
 
 #[test]
-#[ignore = "needs sim::trip (Trip.navigation_cues)"]
 fn test_local_geometry_trip_uses_local_turn_cues() {
+    use ff_core::sim::trip::{Trip, TripOptions};
+    use ff_core::sim::vehicle::TruckState;
+    use ff_core::sim::weather::{WeatherKind, WeatherSystem};
+
     // city_service_route was retired with the drive-to-city-services feature;
     // this test only needs a turn-level Route, built straight from the local
     // geometry data it used to wrap.
@@ -148,10 +151,38 @@ fn test_local_geometry_trip_uses_local_turn_cues() {
             )
         })
         .collect();
-    let _route = Route::from_legs(vec![city.clone(); legs.len() + 1], legs);
-    // Python: Trip(route, TruckState(), weather, seed=1).navigation_cues ...
-    // cues[0].near_text.startswith("Start on "), no "merge onto", every later
-    // cue starts with "Turn left onto"/"Turn right onto"/"Continue onto".
+    let route = Route::from_legs(vec![city.clone(); legs.len() + 1], legs);
+    let mut weather = WeatherSystem::new("great_lakes", Some(1), None, None, true);
+    weather.current = WeatherKind::Clear;
+    let trip = Trip::new(
+        route,
+        TruckState::default(),
+        weather,
+        TripOptions {
+            seed: Some(1),
+            world: Some(world),
+            ..Default::default()
+        },
+    );
+
+    let cues: Vec<_> = trip
+        .navigation_cues
+        .iter()
+        .filter(|cue| cue.kind == "local_turn")
+        .collect();
+
+    assert!(!cues.is_empty());
+    assert!(cues[0].near_text.starts_with("Start on "));
+    assert!(!cues
+        .iter()
+        .any(|cue| cue.near_text.to_lowercase().contains("merge onto")));
+    // Directional bake: every boundary cue is a turn with a side or an
+    // explicit continue, never the old directionless "Turn onto".
+    assert!(cues[1..].iter().all(|cue| {
+        cue.near_text.starts_with("Turn left onto")
+            || cue.near_text.starts_with("Turn right onto")
+            || cue.near_text.starts_with("Continue onto")
+    }));
 }
 
 #[test]

@@ -37,30 +37,65 @@ fn street_route() -> Route {
     Route::from_legs(vec![city.to_string(); legs.len() + 1], legs)
 }
 
+fn street_trip() -> ff_core::sim::trip::Trip {
+    use ff_core::sim::trip::{Trip, TripOptions};
+    use ff_core::sim::vehicle::TruckState;
+    use ff_core::sim::weather::WeatherSystem;
+
+    let mut truck = TruckState::default();
+    truck.transmission.automatic = true;
+    truck.start_engine();
+    let weather = WeatherSystem::new("great_lakes", Some(1), None, None, true);
+    Trip::new(
+        street_route(),
+        truck,
+        weather,
+        TripOptions {
+            seed: Some(3),
+            world: Some(world()),
+            ..Default::default()
+        },
+    )
+}
+
+fn local_turn_messages(events: &[ff_core::sim::trip_models::TripEvent]) -> Vec<String> {
+    use ff_core::sim::trip_models::TripEventKind;
+
+    events
+        .iter()
+        .filter(|e| {
+            e.kind == TripEventKind::GpsCue
+                && e.data.cue.as_ref().is_some_and(|cue| cue.kind == "local_turn")
+        })
+        .map(|e| e.text().to_string())
+        .collect()
+}
+
 // -- one maneuver at a time ------------------------------------------------
 
 #[test]
-#[ignore = "needs sim::trip (Trip.update GPS_CUE events)"]
 fn test_departure_tick_speaks_only_the_first_street_maneuver() {
     // Regression: a street chain used to read its whole itinerary on the
     // first tick -- start, turn, and continue cues all inside the generic
     // lookahead -- burying the maneuver that was actually next.
-    let route = street_route();
-    assert_eq!(route.legs.len(), 3);
-    // Python: spoken = _local_turn_messages(trip.update(1 / 60)); len == 1 and
-    // "East Navarre Street" in spoken[0].
+    let mut trip = street_trip();
+    let spoken = local_turn_messages(&trip.update(1.0 / 60.0));
+    assert_eq!(spoken.len(), 1, "{spoken:?}");
+    assert!(spoken[0].contains("East Navarre Street"));
 }
 
 #[test]
-#[ignore = "needs sim::trip (Trip.update GPS_CUE events)"]
 fn test_next_street_maneuver_waits_for_the_previous_junction() {
-    let route = street_route();
-    assert_eq!(
-        route.legs[1].local_cue,
-        "Turn left onto North Michigan Street."
-    );
-    // Python: at position 0.04 the turn stays quiet; at 0.16 exactly one cue
-    // speaks and it is "Turn left onto North Michigan Street".
+    let mut trip = street_trip();
+    trip.update(1.0 / 60.0); // announces the start cue only
+    // Still short of the first boundary: the turn stays quiet.
+    trip.position_mi = 0.04;
+    assert!(local_turn_messages(&trip.update(1.0 / 60.0)).is_empty());
+    // Past it: the left turn becomes the nearest maneuver and speaks.
+    trip.position_mi = 0.16;
+    let spoken = local_turn_messages(&trip.update(1.0 / 60.0));
+    assert_eq!(spoken.len(), 1, "{spoken:?}");
+    assert!(spoken[0].contains("Turn left onto North Michigan Street"));
 }
 
 // -- spoken road names -------------------------------------------------------

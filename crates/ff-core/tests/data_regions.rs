@@ -58,12 +58,38 @@ fn test_every_region_covered_in_flavor_tables() {
 }
 
 #[test]
-#[ignore = "needs sim::trip::HAZARDS"]
 fn test_every_region_has_local_hazard_flavor() {
     // Every canonical region is named by at least one region-specific hazard,
     // so no region falls back to only the nationwide staples.
+    use ff_core::sim::trip_models::HAZARDS;
+
+    let tagged: std::collections::HashSet<&str> = HAZARDS
+        .iter()
+        .filter_map(|hazard| hazard.regions)
+        .flat_map(|regions| regions.iter().copied())
+        .collect();
+    let missing: Vec<&str> = REGIONS
+        .iter()
+        .copied()
+        .filter(|region| !tagged.contains(region))
+        .collect();
+    assert!(
+        missing.is_empty(),
+        "regions with no local hazard flavor: {missing:?}"
+    );
 }
 
 #[test]
-#[ignore = "needs sim::trip::HAZARDS"]
-fn test_hazard_region_tags_are_canonical() {}
+fn test_hazard_region_tags_are_canonical() {
+    use ff_core::sim::trip_models::HAZARDS;
+
+    for hazard in HAZARDS {
+        for region in hazard.regions.unwrap_or(&[]) {
+            assert!(
+                REGIONS.contains(region),
+                "{:?} tags unknown region {region:?}",
+                hazard.text
+            );
+        }
+    }
+}

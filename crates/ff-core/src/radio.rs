@@ -552,38 +552,13 @@ pub fn load_full_catalog(data_root: &Path) -> Result<Vec<RadioStation>, CatalogE
     Ok(stations)
 }
 
-/// Where the shipped data tree lives. `FREIGHT_FATE_DATA_DIR` overrides; a
-/// frozen build has `<exe dir>/freight_fate/data`; a source checkout has
-/// the repo's `src/freight_fate/data`.
+/// Where the shipped data tree lives: the same root every other data
+/// loader uses (`FREIGHT_FATE_DATA_ROOT` override, `<exe dir>/freight_fate/data`
+/// in a frozen build, the repo's `src/freight_fate/data` from source).
+/// `FREIGHT_FATE_DATA_DIR` is the *saves* directory and must not be read
+/// here: tests that point it at a temp dir broke every radio test.
 pub fn default_data_root() -> PathBuf {
-    if let Some(dir) = std::env::var_os("FREIGHT_FATE_DATA_DIR") {
-        return PathBuf::from(dir);
-    }
-    let mut candidates: Vec<PathBuf> = Vec::new();
-    if let Ok(exe) = std::env::current_exe() {
-        if let Some(dir) = exe.parent() {
-            candidates.push(dir.join("freight_fate").join("data"));
-            candidates.push(dir.join("data"));
-        }
-    }
-    candidates.push(
-        Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("..")
-            .join("..")
-            .join("src")
-            .join("freight_fate")
-            .join("data"),
-    );
-    candidates
-        .iter()
-        .find(|dir| dir.join(RADIO_CATALOG_RESOURCE).exists())
-        .cloned()
-        .unwrap_or_else(|| {
-            candidates
-                .into_iter()
-                .last()
-                .expect("at least one candidate")
-        })
+    crate::data::data_resources::data_root().to_path_buf()
 }
 
 static DEFAULT_CATALOG: Lazy<Vec<RadioStation>> = Lazy::new(|| {

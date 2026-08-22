@@ -464,17 +464,47 @@ mod tests {
     #[ignore = "needs models::career (Career.record_delivery and the XP constants)"]
     fn test_exported_xp_ceiling_bounds_every_honest_career() {}
 
+    /// The money rule's floor is this figure; a new profile must equal it.
     #[test]
-    #[ignore = "needs models::profile (Profile().money)"]
-    fn test_exported_starting_money_matches_a_fresh_career() {}
+    fn test_exported_starting_money_matches_a_fresh_career() {
+        let data = invariant_data(&world_data_root(), &inputs()).unwrap();
+        assert_eq!(
+            data["startingMoney"].as_f64().unwrap(),
+            crate::models::profile::Profile::new().money
+        );
+    }
 
     #[test]
     #[ignore = "needs models::start_options (all_start_options)"]
     fn test_exported_starting_money_max_covers_every_start_option() {}
 
+    /// The export must describe the record the game actually writes.
+    ///
+    /// The server checks every truck_conditions record against this list and
+    /// rejects a save carrying a key it does not know. The list used to come
+    /// off the TruckCondition dataclass, which this line stopped using --
+    /// records are plain dicts, and they grew brake wear, engine wear and
+    /// traction gear while the dataclass kept four fields.
     #[test]
-    #[ignore = "needs models::profile (provision_truck_condition)"]
-    fn test_exported_condition_fields_match_a_real_record() {}
+    fn test_exported_condition_fields_match_a_real_record() {
+        let mut profile = crate::models::profile::Profile::new();
+        profile.provision_truck_condition("rig", None);
+        let mut written: Vec<String> = profile.truck_conditions["rig"].keys().cloned().collect();
+        written.sort();
+        let mut inputs = inputs();
+        inputs.truck_condition_fields = crate::models::profile::CONDITION_FIELDS
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+        let data = invariant_data(&world_data_root(), &inputs).unwrap();
+        let exported: Vec<String> = data["truckConditionFields"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_str().unwrap().to_string())
+            .collect();
+        assert_eq!(exported, written);
+    }
 
     #[test]
     fn test_exported_profile_fields_include_the_created_on_marker() {

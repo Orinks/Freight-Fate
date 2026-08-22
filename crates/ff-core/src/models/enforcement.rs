@@ -561,27 +561,7 @@ pub fn standing_way_back<P: StandingProfile + ?Sized>(profile: &P) -> String {
     String::new()
 }
 
-/// `career.xp_rate_clause(band)`: one sentence saying the career has slowed,
-/// and why. Empty when it has not. Keyed by the band strings above, exactly
-/// as `career.STANDING_XP_RATE` is.
-// TODO(lead): replace with models::career::xp_rate_clause once career lands.
-fn xp_rate_clause(band: &str) -> String {
-    let rate = match band {
-        "full" => 1.0,
-        "guarded" => 0.9,
-        "poor" => 0.75,
-        "last chance" => 0.6,
-        _ => 1.0,
-    };
-    if rate >= 1.0 {
-        return String::new();
-    }
-    format!(
-        "While your dispatch trust is {band}, the carrier keeps you on \
-         routine freight, so career experience comes in more slowly until it \
-         is back up."
-    )
-}
+use crate::models::career::xp_rate_clause;
 
 /// Everything dispatch trust is doing to this driver, on demand, in one go.
 ///

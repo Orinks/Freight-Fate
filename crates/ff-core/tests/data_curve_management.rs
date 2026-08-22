@@ -388,10 +388,36 @@ fn test_salt_river_canyon_untouched_by_the_new_screen() {
     );
 }
 
+// -- TestTripCurveIntegration --------------------------------------------------
+
+/// `Trip(route, TruckState(), _MockWeather(), time_scale=10.0, seed=42)`.
+fn curve_trip(route: Route) -> ff_core::sim::trip::Trip {
+    use ff_core::sim::trip::{Trip, TripOptions};
+    use ff_core::sim::vehicle::TruckState;
+    use ff_core::sim::weather::WeatherSystem;
+
+    Trip::new(
+        route,
+        TruckState::default(),
+        WeatherSystem::new("heartland", Some(1), None, None, true),
+        TripOptions {
+            time_scale: 10.0,
+            seed: Some(42),
+            ..Default::default()
+        },
+    )
+}
+
+fn abilene_dallas() -> Option<Route> {
+    World::load_from(&data_dir())
+        .unwrap()
+        .shortest_route("abilene_tx_us", "dallas_tx_us", None, false)
+        .unwrap()
+}
+
 // -- TestTripCurveIntegration (needs sim::trip) -----------------------------
 
 #[test]
-#[ignore = "needs sim::trip (Trip, TruckState, WeatherSystem)"]
 fn test_place_curves_empty_short_approach() {
     // A very short approach route (single leg, < 10 mi) gets no curves.
     //
@@ -415,25 +441,22 @@ fn test_place_curves_empty_short_approach() {
         vec!["abilene_tx_us".to_string(), "abilene_tx_us".to_string()],
         vec![leg],
     );
-    // Python: Trip(route, TruckState(), _MockWeather(), time_scale=10.0,
-    // seed=42).curves == [] -- until Trip is ported, the route's own curves
-    // stand in for the deepest consumer.
-    assert!(route_curves(&route, &route.cities, false).is_empty());
+    assert!(curve_trip(route).curves.is_empty());
 }
 
 #[test]
-#[ignore = "needs sim::trip (Trip._place_curves keeps connectors for physics)"]
 fn test_interstate_artifact_never_reaches_trip_curves() {
     // The Abilene I-20 mile-4 artifacts stay out of the live trip.
+    // `Trip::place_curves` keeps connectors for physics, so this checks the
+    // deepest consumer path, not just the spoken one.
     let world = World::load_from(&data_dir()).unwrap();
     let route = supported(&world, "abilene_tx_us", "fort_worth_tx_us");
     assert!(
         route.legs.iter().all(|leg| leg.highway.starts_with("I-")),
         "this fixture route is meant to be interstate the whole way"
     );
-    // Python: trip = Trip(route, TruckState(), _MockWeather(), time_scale=10.0, seed=42)
-    let curves = route_curves(&route, &route.cities, false);
-    let mainline: Vec<_> = curves.iter().filter(|c| !c.connector).collect();
+    let trip = curve_trip(route);
+    let mainline: Vec<_> = trip.curves.iter().filter(|c| !c.connector).collect();
     assert!(
         !mainline.is_empty(),
         "the route should still have real curves"
@@ -443,18 +466,14 @@ fn test_interstate_artifact_never_reaches_trip_curves() {
 }
 
 #[test]
-#[ignore = "needs sim::trip (Trip.curves resolve leg miles to trip miles)"]
 fn test_place_curves_highway_route() {
     // A highway route resolves curves from leg-relative to trip miles.
-    let world = World::load_from(&data_dir()).unwrap();
-    let Some(route) = world
-        .shortest_route("abilene_tx_us", "dallas_tx_us", None, false)
-        .unwrap()
-    else {
+    let Some(route) = abilene_dallas() else {
         return;
     };
-    let total_miles = route.miles();
-    for cr in route_curves(&route, &route.cities, false) {
+    let trip = curve_trip(route);
+    let total_miles = trip.total_miles();
+    for cr in &trip.curves {
         assert!((0.0..=total_miles).contains(&cr.start_mi));
         assert!((0.0..=total_miles).contains(&cr.end_mi));
         assert!((cr.start_mi - cr.end_mi).abs() < 5.0); // no mile-long outliers
@@ -463,20 +482,67 @@ fn test_place_curves_highway_route() {
 }
 
 #[test]
-#[ignore = "needs sim::trip (Trip.curve_at)"]
-fn test_curve_at_inside() {}
+fn test_curve_at_inside() {
+    // curve_at returns the curve containing a milepost.
+    let Some(route) = abilene_dallas() else {
+        return;
+    };
+    let trip = curve_trip(route);
+    let Some(cr) = trip.curves.first().copied() else {
+        return;
+    };
+    let mid = (cr.start_mi + cr.end_mi) / 2.0;
+    let found = trip.curve_at(mid).expect("the curve containing its midpoint");
+    assert_eq!(found.start_mi, cr.start_mi);
+}
 
 #[test]
-#[ignore = "needs sim::trip (Trip.curve_at)"]
-fn test_curve_at_none() {}
+fn test_curve_at_none() {
+    // Outside all curves, curve_at returns None.
+    let Some(route) = abilene_dallas() else {
+        return;
+    };
+    let trip = curve_trip(route);
+    assert!(trip.curve_at(-1.0).is_none());
+    assert!(trip.curve_at(trip.total_miles() + 1.0).is_none());
+}
 
 #[test]
-#[ignore = "needs sim::trip (Trip.update emits CURVE events)"]
-fn test_check_curves_emits_for_sharp_curve() {}
+fn test_check_curves_emits_for_sharp_curve() {
+    // A sharp curve ahead generates a CURVE event with a pacenote.
+    use ff_core::sim::trip_models::TripEventKind;
+
+    let Some(route) = abilene_dallas() else {
+        return;
+    };
+    let mut trip = curve_trip(route);
+    trip.truck.start_engine();
+    trip.truck.velocity_mps = 60.0 * 0.44704; // 60 mph in m/s
+    let Some(first) = trip.curves.first().copied() else {
+        return;
+    };
+    // Position the truck before the first curve
+    trip.position_mi = (first.start_mi - 1.0).max(0.0);
+    let events = trip.update(0.1);
+    for ev in events.iter().filter(|e| e.kind == TripEventKind::Curve) {
+        assert!(ev.text().contains("advisory") || ev.text().contains("curve"));
+    }
+}
 
 #[test]
-#[ignore = "needs sim::trip (Trip.restore seeds announced curves)"]
-fn test_restore_seeds_announced_curves() {}
+fn test_restore_seeds_announced_curves() {
+    // Restoring a save seeds curves behind the position as announced.
+    let Some(route) = abilene_dallas() else {
+        return;
+    };
+    let mut trip = curve_trip(route);
+    let Some(first) = trip.curves.first().copied() else {
+        return;
+    };
+    trip.restore(first.start_mi + 0.5, 10.0);
+    let expected_key = format!("curve:{:.3}:{}", first.start_mi, first.direction);
+    assert!(trip.announced_curves.contains(&expected_key));
+}
 
 // --- flat-ground class screen (owner audit, 2026-08-19) ---------------------
 

@@ -48,6 +48,25 @@ fn turn_level_route(world: &World) -> Option<(Route, LocalGeometry)> {
     None
 }
 
+fn street_trip(route: Route) -> ff_core::sim::trip::Trip {
+    use ff_core::sim::trip::{Trip, TripOptions};
+    use ff_core::sim::vehicle::TruckState;
+    use ff_core::sim::weather::WeatherSystem;
+
+    let mut truck = TruckState::default();
+    truck.transmission.automatic = true;
+    Trip::new(
+        route,
+        truck,
+        WeatherSystem::new("heartland", Some(1), None, None, true),
+        TripOptions {
+            seed: Some(2),
+            world: Some(world()),
+            ..Default::default()
+        },
+    )
+}
+
 #[test]
 fn test_turn_level_route_carries_segment_cues_and_speeds() {
     let Some((route, geometry)) = turn_level_route(world()) else {
@@ -62,44 +81,77 @@ fn test_turn_level_route_carries_segment_cues_and_speeds() {
 }
 
 #[test]
-#[ignore = "needs sim::trip (Trip.navigation_cues)"]
 fn test_navigation_cues_speak_the_baked_maneuvers() {
+    let Some((route, geometry)) = turn_level_route(world()) else {
+        return; // no turn-level city service geometry in the shipped data
+    };
+    let trip = street_trip(route);
+    let spoken = trip
+        .navigation_cues
+        .iter()
+        .map(|cue| cue.near_text.as_str())
+        .collect::<Vec<_>>()
+        .join(" | ");
     // Every road-change maneuver from the baked data is announced verbatim
     // (same-road consecutive segments collapse into the previous cue).
-    let Some((route, geometry)) = turn_level_route(world()) else {
-        return;
-    };
-    assert!(!route.legs.is_empty());
-    assert!(!geometry.segments[0].cue.is_empty());
+    for pair in geometry.segments.windows(2) {
+        let (prev, segment) = (&pair[0], &pair[1]);
+        if segment.road != prev.road {
+            assert!(spoken.contains(segment.cue.trim_end_matches('.')), "{spoken}");
+        }
+    }
+    assert!(spoken.contains(geometry.segments[0].cue.trim_end_matches('.')));
 }
 
 #[test]
-#[ignore = "needs sim::trip (Trip.zones and speed_limit_at)"]
 fn test_the_access_road_posts_one_limit_and_the_gate() {
     // One number for the chain, one change at the gate -- never a new posting
-    // every few hundred feet.
-    //
-    // The chain used to be zoned street by street, which announced a limit
-    // change per leg: half of all baked segments are under two tenths of a mile,
-    // so a driver heard the same "facility access road" post 15, then 25, then
-    // 15 again with nothing under the wheels changing. None of those numbers is
-    // a reading -- the bake assumes 25 for a named street and 15 for an unnamed
-    // one wherever OSM carries no maxspeed, which is very nearly everywhere --
-    // so a change between them was the data reporting whether the way had a
-    // NAME, dressed as a sign.
-    let Some((_route, geometry)) = turn_level_route(world()) else {
+    // every few hundred feet (owner playtest, 2026-08-21).
+    use ff_core::sim::trip_models::FACILITY_GATE_LIMIT_MPH;
+
+    let Some((route, geometry)) = turn_level_route(world()) else {
         return;
     };
+    let mut trip = street_trip(route);
+    let street_zones: Vec<_> = trip
+        .zones
+        .iter()
+        .filter(|z| z.reason == "facility access road")
+        .cloned()
+        .collect();
+    assert_eq!(street_zones.len(), 1);
+    assert_eq!(street_zones[0].start_mi, 0.0);
+    assert!((street_zones[0].end_mi - trip.total_miles()).abs() < 1e-9);
+    // It speaks a speed the baked street data actually holds, and never a
+    // lower crawl than the best street on the chain offers.
     let baked_max = geometry
         .segments
         .iter()
         .map(|s| s.speed_mph)
         .fold(f64::MIN, f64::max);
-    assert!((5.0..=65.0).contains(&baked_max));
+    assert_eq!(street_zones[0].limit_mph, baked_max);
+    assert!((5.0..=65.0).contains(&street_zones[0].limit_mph));
+    // The gate zone still caps the final stretch.
+    assert!(trip
+        .zones
+        .iter()
+        .any(|z| z.reason == "facility gate" && z.limit_mph == FACILITY_GATE_LIMIT_MPH));
+    // And walking the chain, the posted limit changes exactly once: at the
+    // gate.
+    let step = (trip.total_miles() / 400.0).max(0.001);
+    let mut seen: Vec<f64> = Vec::new();
+    let mut mile = 0.0;
+    while mile <= trip.total_miles() {
+        let (limit, _) = trip.speed_limit_at(mile);
+        if seen.last().is_none_or(|last| *last != limit) {
+            seen.push(limit);
+        }
+        mile += step;
+    }
+    assert_eq!(seen, vec![street_zones[0].limit_mph, FACILITY_GATE_LIMIT_MPH]);
 }
 
 #[test]
-#[ignore = "needs sim::trip (Trip.zones)"]
 fn test_single_leg_approaches_keep_the_blanket_zone() {
     let world = world();
     let route = world
@@ -108,5 +160,13 @@ fn test_single_leg_approaches_keep_the_blanket_zone() {
     if route.legs.iter().any(|leg| leg.local_speed_mph > 0.0) {
         return; // this facility gained turn-level data; blanket no longer applies
     }
-    assert_eq!(route.legs.len(), 1);
+    let trip = street_trip(route);
+    let access: Vec<_> = trip
+        .zones
+        .iter()
+        .filter(|z| z.reason == "facility access road")
+        .collect();
+    assert_eq!(access.len(), 1);
+    assert_eq!(access[0].limit_mph, 25.0);
+    assert!((access[0].end_mi - trip.total_miles()).abs() < 1e-9);
 }
