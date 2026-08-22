@@ -1,0 +1,59 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/prism-sys",
+    "crates/prism",
+    "crates/bass-sys",
+    "crates/ff-core",
+    "crates/freight-fate",
+]
+
+[workspace.package]
+version = "1.9.0"
+edition = "2021"
+rust-version = "1.85"
+license = "PolyForm-Noncommercial-1.0.0"
+repository = "https://github.com/Orinks/Freight-fate"
+authors = ["Joshua Tubbs (Orinks)"]
+
+[workspace.dependencies]
+anyhow = "1"
+thiserror = "2"
+log = "0.4"
+env_logger = "0.11"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+tempfile = "3"
+libloading = "0.8"
+sha2 = "0.10"
+hmac = "0.12"
+hex = "0.4"
+base64 = "0.22"
+flate2 = "1"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+tar = "0.4"
+ureq = { version = "3", default-features = false, features = ["rustls", "json", "gzip", "platform-verifier"] }
+ed25519-dalek = { version = "2", default-features = false, features = ["alloc"] }
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
+discord-rich-presence = "0.2"
+rustfft = "6"
+realfft = "3"
+indexmap = { version = "2", features = ["serde"] }
+once_cell = "1"
+parking_lot = "0.12"
+regex = "1"
+sdl2 = "0.38"
+url = "2"
+form_urlencoded = "1"
+webbrowser = "1"
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_System_Diagnostics_ToolHelp", "Win32_Security", "Win32_Storage_FileSystem"] }
+proptest = "1"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true
+
+[profile.dev]
+opt-level = 1

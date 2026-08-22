@@ -1,0 +1,38 @@
+[package]
+name = "ff-core"
+description = "Freight Fate core: world data, models, simulation, spoken text — no platform dependencies"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lib]
+name = "ff_core"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow.workspace = true
+thiserror.workspace = true
+log.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+sha2.workspace = true
+hmac.workspace = true
+hex.workspace = true
+base64.workspace = true
+flate2.workspace = true
+zip.workspace = true
+rustfft.workspace = true
+realfft.workspace = true
+indexmap.workspace = true
+once_cell.workspace = true
+parking_lot.workspace = true
+regex.workspace = true
+ed25519-dalek.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+proptest.workspace = true
