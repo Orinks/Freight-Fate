@@ -1489,3 +1489,43 @@ def test_the_stranded_prompts_ask_for_route_priority():
         i = text.index(marker)
         window = text[i : i + 1400]
         assert "EventPriority.ROUTE" in window, marker
+
+
+def test_canceling_the_plan_gives_the_road_back(monkeypatch):
+    """Shane P, 2026-08-21: plan a stop, cancel it, and the drive stays slow
+    all the way to the exit you just gave up on.
+
+    The clock drops out of compression while the truck is approaching an exit
+    it has signalled for, so the approach is driven in real time and the
+    braking is winnable. The stop itself is deliberately kept after a cancel,
+    so passing it can say the exit went by unused -- but that made a canceled
+    signal read as a live approach, and the road stayed in real time until
+    the exit was behind. Canceling means staying on the highway, and the
+    highway gets its pace back at once.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(d.ctx, "say", speech_stub())
+        monkeypatch.setattr(d.ctx, "say_event", speech_stub())
+        stop = _FakeStop(at_mi=d.trip.position_mi + 4.0)
+        stop.spoken_name = "Test Plaza"
+        stop.exit_label = ""
+        d._exit_stop = stop
+        d._exit_signal_on = False
+
+        d._toggle_exit_signal()
+        assert d._exit_signal_on
+        d._update_exit(0.0)
+        assert d.trip.exit_approach_mi == pytest.approx(4.0, abs=0.01)
+
+        # Second press: the plan is off, and the exit is still ahead.
+        d._toggle_exit_signal()
+        assert not d._exit_signal_on
+        assert d._exit_stop is stop, "the stop is kept so passing it can say so"
+        d._update_exit(0.0)
+        assert d.trip.exit_approach_mi is None
+    finally:
+        app.shutdown()

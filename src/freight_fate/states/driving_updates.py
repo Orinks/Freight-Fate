@@ -211,6 +211,9 @@ class DrivingUpdateMixin:
             self._pacenote_text(curve, ahead, speed),
             interrupt=True,
             category=SpeechCategory.NAVIGATION,
+            # The refreshed call checks the bend before speaking; the rescue
+            # path speaks it again later, so it has to check too.
+            valid=self._curve_call_still_true(curve),
         )
 
     def _note_critical_speech_stopped(self) -> None:

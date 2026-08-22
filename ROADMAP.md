@@ -1323,6 +1323,8 @@ onto exit signalling.
         * the destination exit instruction, once the gore is behind
         * the hazard dodge call, once the hazard is clear
         * the dock hold prompt, once the driver has pressed the key
+        * the curve call and its cruise clause, once the bend is behind or
+          the truck has slowed for it (Shane P, 2026-08-21)
       That is a pattern, and patching it per report is how the next one gets
       found by a tester rather than by us. The work: walk every `say_event`
       with `interrupt=True` and ask whether the sentence is still true a few
@@ -1331,7 +1333,7 @@ onto exit signalling.
 
       THE WORKLIST IS SMALLER THAN IT FIRST LOOKED: 78 `say_event` calls in
       `states/` actually interrupt (explicit `interrupt=True` or the default,
-      which IS True), 9 of them now gated. 33 are in `driving_events.py` and
+      which IS True), 13 of them now gated. 33 are in `driving_events.py` and
       32 in `driving_updates.py`, so two files carry five sixths of it. An
       earlier note here said 201 -- that was `grep -c interrupt=True`, which
       also counts `ctx.say()` calls, other APIs and tests. Brace-match the
@@ -1349,7 +1351,8 @@ onto exit signalling.
       The sampling is thin -- four benches, four requeues, and one bench
       produced none at all on a re-run with a different seed -- so this
       narrows the worklist rather than closing it. Longer benches across more
-      features are the cheap next step before anyone reads all 201 by hand.
+      features are the cheap next step before anyone reads the remaining
+      sixty-five by hand.
 
 - [x] **Per-exit ramp speed threaded through every exit (SHIPPED
       2026-08-21).** The model landed in 35427880 (`Trip.ramp_speed_at`,

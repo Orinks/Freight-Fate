@@ -72,6 +72,32 @@ class DrivingPacenoteMixin:
             terse += f", then {_DIRECTION_WORD[linked.direction]}"
         return SpokenMessage(call, terse=f"{terse}.")
 
+    def _curve_call_still_true(self, curve):
+        """A test for whether a rescued curve call is still worth speaking.
+
+        A call cut off mid-sentence is offered back once so the road's
+        information is not lost to an interruption. Offered back after the
+        bend, though, it tells the driver to slow for a corner they are
+        already through -- the same stale-rescue fault as the weigh station
+        and the debris call, and the reason a curve call plus its cruise
+        clause came back repeatedly through one bend (Shane P, 2026-08-21).
+
+        The test is the one the refreshed re-speak already applies: the bend
+        still ahead, and the truck still carrying more speed than it advises.
+        Returns None when there is no curve to test, which leaves the rescue
+        ungated exactly as before.
+        """
+        if curve is None:
+            return None
+
+        def still_true() -> bool:
+            return (
+                curve.start_mi - self.trip.position_mi > 0.0
+                and self.truck.speed_mph > curve.advisory_mph + PACENOTE_MARGIN_MPH
+            )
+
+        return still_true
+
     def _pacenote_linked(self, curve):
         """The next curve when it follows within a breath of this one."""
         for other in self.trip.curves_within(

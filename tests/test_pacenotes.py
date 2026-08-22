@@ -326,3 +326,57 @@ def test_linked_follower_rides_the_tail_not_its_own_call(monkeypatch):
         assert len(spoken) == 1
     finally:
         app.shutdown()
+
+
+def test_a_curve_call_carries_its_own_expiry(monkeypatch):
+    """A cut curve call is offered back once; it must still be true by then.
+
+    Shane P heard the curve call and its cruise clause come back repeatedly
+    through one bend (2026-08-21). Capping the rescue at one stopped the
+    pile-up, but the survivor was still ungated: replayed a second later it
+    can name a corner the truck is already through, or tell a driver who has
+    just braked to brake. Every curve call now hands the rescue a test.
+    """
+    app_module = pytest.importorskip("freight_fate.app")
+    app = app_module.App()
+
+    def _call_with_expiry(cruise_mph=None):
+        captured = []
+
+        def capture(text, interrupt=True, review=True, remember=True, **pacing):
+            captured.append((str(text), pacing.get("valid")))
+
+        monkeypatch.setattr(app.ctx, "say_event", capture)
+        driving.trip.curves = (curve,)
+        driving.trip._announced_curves = set()
+        driving.trip.position_mi = pos
+        driving.truck.velocity_mps = 65.0 * 0.44704
+        driving._cruise_mph = cruise_mph
+        for event in driving.trip.update(0):
+            if event.kind == TripEventKind.CURVE:
+                driving._handle_trip_event(event)
+        assert captured, "a 40 mph bend at 65 demands a call"
+        return captured[0]
+
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.curve_speed_assist = True
+        pos = driving.trip.position_mi
+        curve = _curve(pos + 0.3, "R", advisory=40)
+
+        for cruise_mph in (None, 65.0):
+            text, valid = _call_with_expiry(cruise_mph)
+            assert valid is not None, f"no expiry on {text!r}"
+            assert valid() is True
+
+            # Braked for the bend: the rescue has nothing left to say.
+            driving.truck.velocity_mps = 35.0 * 0.44704
+            assert valid() is False
+
+            # Or through it at speed, which is the miserable one to hear.
+            driving.truck.velocity_mps = 65.0 * 0.44704
+            driving.trip.position_mi = curve.end_mi + 0.05
+            assert valid() is False
+    finally:
+        app.shutdown()

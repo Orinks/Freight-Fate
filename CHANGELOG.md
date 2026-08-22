@@ -1016,6 +1016,21 @@
   re-read.
 
 ### Fixed
+- **Canceling a planned stop gives you the road back straight away.** Signal
+  for an exit and the drive drops out of its usual pacing for the approach,
+  so you have real time to set up the braking. Press the key again to call
+  the stop off, though, and that slower pacing used to stay with you all the
+  way to the exit you had just given up on -- it felt like the truck refusing
+  to get back up to speed. Canceling means you are staying on the highway,
+  and the drive picks its pace back up the moment you do.
+- **A curve call no longer comes back after the bend.** When something
+  urgent cut a curve call off mid-sentence, the game handed that call back
+  so the road's warning was not lost to the interruption -- but it handed it
+  back whether or not it was still true. Through one bend that could mean
+  hearing the call, and the adaptive cruise clause with it, again after you
+  had already braked, or after you were through the corner. A curve call now
+  expires: it only comes back while the bend is still ahead of you and you
+  are still carrying too much speed for it.
 - **The message review filter stays where you put it.** Locking review to a
   single category made it much easier to navigate, but the choice was being
   thrown away roughly ten seconds after your last press -- so if you went

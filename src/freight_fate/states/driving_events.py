@@ -519,6 +519,10 @@ class DrivingEventMixin:
                 else event.message
             )
             self._last_event_message = message
+            # A rescued curve call has to still be true when it comes back:
+            # past the bend, or already slowed for it, and the words are a
+            # lie by the time they are spoken (Shane P, 2026-08-21).
+            curve_valid = self._curve_call_still_true(curve)
             # A curve call sounds like any other announcement until it has
             # a signature: a short cue panned to the curve's side marks
             # "road shape ahead", never a steering command -- the owner
@@ -552,6 +556,7 @@ class DrivingEventMixin:
                         cruise_curve_easing(message, self.ctx.settings.speed_text(advisory)),
                         interrupt=True,
                         category=self._event_category(event),
+                        valid=curve_valid,
                     )
                 else:
                     self._cancel_cruise()
@@ -559,6 +564,7 @@ class DrivingEventMixin:
                         cruise_curve_dropped(message),
                         interrupt=True,
                         category=self._event_category(event),
+                        valid=curve_valid,
                     )
             else:
                 # Interrupt, always: a pacenote queued behind landmark chatter
@@ -566,7 +572,12 @@ class DrivingEventMixin:
                 # quarter mile (owner's AZ-260 log, 2026-07-19 -- the words
                 # were honest when emitted and stale when finally spoken).
                 # Ambient lines can wait; the road cannot.
-                self.ctx.say_event(message, interrupt=True, category=self._event_category(event))
+                self.ctx.say_event(
+                    message,
+                    interrupt=True,
+                    category=self._event_category(event),
+                    valid=curve_valid,
+                )
             # Open the re-arm window: if Ctrl silences this call before it
             # finishes, it gets one refreshed re-speak (owner worry,
             # 2026-07-20 -- his stop-speech reflex vs a safety cue).
@@ -3383,9 +3394,15 @@ class DrivingEventMixin:
         # clock reads to decide whether the approach itself is close enough to
         # be driven in real time. None once the ramp is taken -- from there
         # ``controlled_ramp`` owns the clock -- or once the exit is behind.
+        # A canceled signal is not an approach. The stop itself is kept until
+        # the truck passes it, so the game can say the exit went by unused --
+        # but reading THAT as "still approaching an exit" held the clock in
+        # real time all the way to a stop the driver had already begged off,
+        # which from the seat is the road refusing to speed back up (Shane P,
+        # 2026-08-21).
         ahead_to_exit = (
             None
-            if self._exit_stop is None or self._ramp_mi is not None
+            if self._exit_stop is None or self._ramp_mi is not None or self._exit_signal_canceled
             else self._exit_stop.at_mi - self.trip.position_mi
         )
         self.trip.exit_approach_mi = (
