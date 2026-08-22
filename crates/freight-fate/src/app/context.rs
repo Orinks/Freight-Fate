@@ -1,0 +1,824 @@
+//! [`GameContext`]: the shared services handed to every state (the
+//! `GameContext` class of `freight_fate/app.py`), plus the state stack it
+//! owns in this port.
+//!
+//! # Why the stack lives here
+//!
+//! In Python a state called `self.ctx.push_state(...)` and the new screen's
+//! `enter()` spoke *immediately*, in the middle of the caller's handler; the
+//! transcript tests pin that order. Rust cannot hand a state `&mut App`
+//! while `App` is calling into it, so the stack is `Vec<Rc<RefCell<dyn
+//! State>>>` owned by the context: a lifecycle call on any state that is not
+//! currently borrowed runs at once, exactly as in Python, and the one case
+//! that cannot -- `exit()` on the very state whose handler asked to be
+//! popped (it is borrowed mutably for the duration of its own handler) -- is
+//! queued and run the moment that handler returns ([`GameContext::run_deferred`],
+//! which the app calls after every dispatch). Only that `exit` moves; every
+//! `enter` and every other `exit` keeps its Python position.
+//!
+//! The speech delivery half (`say`, `say_event`, the ladder, the pacer, the
+//! duck) is in `app::speech_delivery`.
+
+use std::cell::RefCell;
+use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
+use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+use ff_core::achievements::{award, AchievementAward};
+use ff_core::data::world::World;
+use ff_core::message_log::{MessageCategory, MessageLog};
+use ff_core::models::economy::Economy;
+use ff_core::models::profile::Profile;
+use ff_core::music::music_track_duration_s;
+use ff_core::playtest_levers::LeverContext;
+use ff_core::settings::Settings;
+use ff_core::sim::real_traffic::RealTrafficProvider;
+use ff_core::sim::real_weather::RealWeatherProvider;
+use ff_core::sim::truck_parking::TruckParkingProvider;
+use ff_core::speech_pacing::EventSpeechPacer;
+use ff_core::speech_text::achievement_announced;
+
+use crate::audio::{Audio, VolumeUpdate};
+use crate::cloud_saves::CloudSaves;
+use crate::controller::ControllerManager;
+use crate::discord_presence::DiscordPresence;
+use crate::net::UreqTransport;
+use crate::online_journal::{queue_achievement, JournalOutbox};
+use crate::online_presence::{OnlineIdentity, OnlinePresence};
+use crate::speech::{apply_speech_settings, SpeechSink};
+use crate::states::base::{Key, Mods, State};
+
+use super::Say;
+
+/// A state on the stack.
+pub type SharedState = Rc<RefCell<dyn State>>;
+
+/// Wrap a state for the stack.
+pub fn share<S: State + 'static>(state: S) -> SharedState {
+    Rc::new(RefCell::new(state))
+}
+
+/// The system clipboard (SDL's in the windowed app, a string in headless
+/// runs). `pygame.scrap` / `write_clipboard_text`.
+pub trait Clipboard {
+    fn get_text(&self) -> Option<String>;
+    /// True when the text landed on the clipboard.
+    fn set_text(&mut self, text: &str) -> bool;
+}
+
+/// An in-memory clipboard for headless runs and tests.
+#[derive(Debug, Default)]
+pub struct MemoryClipboard {
+    pub text: Option<String>,
+}
+
+impl Clipboard for MemoryClipboard {
+    fn get_text(&self) -> Option<String> {
+        self.text.clone()
+    }
+
+    fn set_text(&mut self, text: &str) -> bool {
+        self.text = Some(text.to_string());
+        true
+    }
+}
+
+/// `pygame.key.get_pressed()` / `get_mods()`: the keys currently held, as
+/// the app tracks them from the key events it dispatched.
+#[derive(Debug, Default)]
+pub struct HeldKeys {
+    held: HashSet<Key>,
+    mods: Mods,
+}
+
+impl HeldKeys {
+    pub fn is_pressed(&self, key: Key) -> bool {
+        self.held.contains(&key)
+    }
+
+    pub fn mods(&self) -> Mods {
+        self.mods
+    }
+
+    pub fn press(&mut self, key: Key, mods: Mods) {
+        self.held.insert(key);
+        self.mods = mods;
+    }
+
+    pub fn release(&mut self, key: Key, mods: Mods) {
+        self.held.remove(&key);
+        self.mods = mods;
+    }
+
+    pub fn clear(&mut self) {
+        self.held.clear();
+        self.mods = Mods::NONE;
+    }
+}
+
+struct StackEntry {
+    state: SharedState,
+    /// `paces_main_speech`, read when the state was pushed: the stack's
+    /// top may be borrowed for its own handler when `say` needs the answer.
+    paces_main_speech: bool,
+}
+
+enum Deferred {
+    Enter(SharedState),
+    Exit(SharedState),
+}
+
+/// The online and sharing services the app runs beside the game.
+pub struct Services {
+    pub presence: DiscordPresence,
+    pub online: OnlinePresence,
+    pub cloud: CloudSaves,
+    pub journal: JournalOutbox,
+    pub mastodon: JournalOutbox,
+}
+
+/// Shared services handed to every state.
+pub struct GameContext {
+    pub speech: Box<dyn SpeechSink>,
+    pub audio: Box<dyn Audio>,
+    pub controller: ControllerManager,
+    pub settings: Settings,
+    pub world: &'static World,
+    pub economy: Economy,
+    pub profile: Option<Profile>,
+    pub message_log: MessageLog,
+    pub achievement_notice: String,
+    pub achievement_notice_timer: f64,
+    /// True while a playtest-lever scenario runs unsaved (see
+    /// `playtest_levers::apply_continue_levers`); `save_profile` honors it.
+    pub playtest_sandbox: bool,
+    /// Driving-school sandbox: the profile is a throwaway copy and must
+    /// never reach disk; the real save is restored when school ends.
+    pub school_sandbox: bool,
+    pub school_real_profile: Option<Profile>,
+    /// Anti-backlog projection for the dedicated event voice: queued driving
+    /// events that would start speaking stale get flushed instead.
+    pub event_pacer: EventSpeechPacer,
+    pub clipboard: Box<dyn Clipboard>,
+    pub services: Services,
+    pub input: HeldKeys,
+    /// `App.running`.
+    pub running: bool,
+
+    // -- speech delivery state (app::speech_delivery) -------------------------------
+    /// Whether the game mix is currently stepped down under the event voice
+    /// (Settings > Audio; see `engage_speech_duck`).
+    pub(crate) speech_ducked: bool,
+    /// Deadline for a duck an earcon opened, in real seconds. Zero when the
+    /// duck belongs to a spoken line, which the pacer's projection ends.
+    pub(crate) earcon_duck_until: f64,
+    /// True only while a control the player actually pressed is being
+    /// handled. See `player_asked`: a readout somebody asked for cuts the
+    /// line in progress even at the wheel, where unasked-for lines queue.
+    pub(crate) speech_requested: bool,
+    /// FIRST_OCCURRENCE and TRANSITIONS need memory of what has already
+    /// been said; Settings cannot hold it, so it lives here beside the
+    /// pacer. `ladder_said` is leg-scoped ("once per leg"), `ladder_last`
+    /// is the last text seen per key so a re-assertion can be told from a
+    /// change of state.
+    pub(crate) ladder_said: HashSet<(String, String)>,
+    pub(crate) ladder_last: HashMap<String, String>,
+
+    // -- music rotation ----------------------------------------------------------------
+    music_pool_positions: HashMap<(String, Vec<String>), usize>,
+    music_pool_last: HashMap<String, String>,
+    music_rotation_pool: Option<(String, Vec<String>)>,
+    music_rotation_track: Option<String>,
+    music_rotation_elapsed_s: f64,
+
+    // -- live-data providers, lazy and session-long -----------------------------------
+    real_weather: Option<Arc<RealWeatherProvider>>,
+    real_traffic: Option<Arc<RealTrafficProvider>>,
+    truck_parking: Option<Arc<TruckParkingProvider>>,
+
+    // -- the state stack ----------------------------------------------------------------
+    stack: Vec<StackEntry>,
+    deferred: Vec<Deferred>,
+}
+
+/// Everything [`GameContext::new`] takes.
+pub struct ContextParts {
+    pub speech: Box<dyn SpeechSink>,
+    pub audio: Box<dyn Audio>,
+    pub controller: ControllerManager,
+    pub settings: Settings,
+    pub world: &'static World,
+    pub economy: Economy,
+    pub message_log: MessageLog,
+    pub clipboard: Box<dyn Clipboard>,
+    pub services: Services,
+}
+
+impl GameContext {
+    pub fn new(parts: ContextParts) -> Self {
+        // The S4 ladder's earcons (LADDER_EARCONS) can play from any screen
+        // the silencing gate fires on, not only the Learn game sounds screen
+        // that used to be the sole registrant. Idempotent and cheap, so doing
+        // it once here means the drive never has to wait on that screen
+        // having been visited first.
+        ff_core::ladder_earcons::register_ladder_earcons();
+        // Same reason, same shape: the guide tone must exist before a drive
+        // starts, not only after the Learn screen has been opened.
+        ff_core::lane_guide_tone::register_lane_guide_tone();
+        Self {
+            speech: parts.speech,
+            audio: parts.audio,
+            controller: parts.controller,
+            settings: parts.settings,
+            world: parts.world,
+            economy: parts.economy,
+            profile: None,
+            message_log: parts.message_log,
+            achievement_notice: String::new(),
+            achievement_notice_timer: 0.0,
+            playtest_sandbox: false,
+            school_sandbox: false,
+            school_real_profile: None,
+            event_pacer: EventSpeechPacer::new(),
+            clipboard: parts.clipboard,
+            services: parts.services,
+            input: HeldKeys::default(),
+            running: false,
+            speech_ducked: false,
+            earcon_duck_until: 0.0,
+            speech_requested: false,
+            ladder_said: HashSet::new(),
+            ladder_last: HashMap::new(),
+            music_pool_positions: HashMap::new(),
+            music_pool_last: HashMap::new(),
+            music_rotation_pool: None,
+            music_rotation_track: None,
+            music_rotation_elapsed_s: 0.0,
+            real_weather: None,
+            real_traffic: None,
+            truck_parking: None,
+            stack: Vec::new(),
+            deferred: Vec::new(),
+        }
+    }
+
+    /// True when both the master `online_services` switch and the
+    /// individual `setting` are enabled.
+    ///
+    /// The master governs the orinks.net and sharing services only (drivers
+    /// board, profile sharing, cloud backup, Mastodon, Discord presence).
+    /// Live-data simulation sources -- weather, traffic, parking -- follow
+    /// their own Settings toggles and are deliberately NOT gated here (owner
+    /// ruling, 2026-08-08: two testers lost real weather to the master
+    /// switch without a word of explanation).
+    pub fn online_enabled(&self, setting: bool) -> bool {
+        self.settings.online_services && setting
+    }
+
+    // -- live-data providers ----------------------------------------------------------
+
+    /// Shared NWS provider when real weather is enabled, else None.
+    ///
+    /// Created lazily and kept for the whole session so its cache spans trips.
+    pub fn real_weather_provider(&mut self) -> Option<&RealWeatherProvider> {
+        if !self.settings.real_weather {
+            return None;
+        }
+        if self.real_weather.is_none() {
+            self.real_weather = Some(Arc::new(RealWeatherProvider::with_nws(Arc::new(
+                UreqTransport,
+            ))));
+        }
+        self.real_weather.as_deref()
+    }
+
+    /// Start fetching a city's live weather before any drive needs it.
+    ///
+    /// The provider caches observations per station, so a trip leaving this
+    /// city finds its first route cell already answered and starts live
+    /// instead of holding "loading". Quietly a no-op when real weather is
+    /// off or the city is unknown.
+    pub fn warm_real_weather(&mut self, city_key: &str) {
+        let key = self.world.resolve_city_key(city_key);
+        let Some(city) = self.world.cities.get(&key) else {
+            return;
+        };
+        let (lat, lon) = (city.lat, city.lon);
+        let Some(provider) = self.real_weather_provider() else {
+            return;
+        };
+        if lat != 0.0 || lon != 0.0 {
+            provider.request(&format!("city:{key}"), lat, lon);
+        }
+    }
+
+    /// Shared state 511 provider when real traffic is enabled, else None.
+    pub fn real_traffic_provider(&mut self) -> Option<&RealTrafficProvider> {
+        if !self.settings.real_traffic {
+            return None;
+        }
+        if self.real_traffic.is_none() {
+            self.real_traffic = Some(Arc::new(RealTrafficProvider::new(Arc::new(UreqTransport))));
+        }
+        self.real_traffic.as_deref()
+    }
+
+    /// Shared TPIMS provider when real parking is enabled, else None.
+    pub fn truck_parking_provider(&mut self) -> Option<&TruckParkingProvider> {
+        if !self.settings.real_parking {
+            return None;
+        }
+        if self.truck_parking.is_none() {
+            self.truck_parking = Some(Arc::new(TruckParkingProvider::new(Arc::new(UreqTransport))));
+        }
+        self.truck_parking.as_deref()
+    }
+
+    // -- state stack ----------------------------------------------------------------------
+
+    /// The active state, or None when the stack is empty.
+    pub fn state(&self) -> Option<SharedState> {
+        self.stack.last().map(|entry| Rc::clone(&entry.state))
+    }
+
+    /// Every state on the stack, bottom first.
+    pub fn states(&self) -> Vec<SharedState> {
+        self.stack
+            .iter()
+            .map(|entry| Rc::clone(&entry.state))
+            .collect()
+    }
+
+    pub fn stack_len(&self) -> usize {
+        self.stack.len()
+    }
+
+    /// Whether the active state paces main-channel speech (the Python
+    /// `getattr(self._app.state, "paces_main_speech", False)`).
+    pub fn top_paces_main_speech(&self) -> bool {
+        self.stack
+            .last()
+            .is_some_and(|entry| entry.paces_main_speech)
+    }
+
+    fn enter_now_or_later(&mut self, state: &SharedState) {
+        match state.try_borrow_mut() {
+            Ok(mut s) => s.enter(self),
+            Err(_) => self.deferred.push(Deferred::Enter(Rc::clone(state))),
+        }
+    }
+
+    fn exit_now_or_later(&mut self, state: &SharedState) {
+        match state.try_borrow_mut() {
+            Ok(mut s) => s.exit(self),
+            Err(_) => self.deferred.push(Deferred::Exit(Rc::clone(state))),
+        }
+    }
+
+    /// Run every lifecycle call that had to wait for a borrowed state (the
+    /// state that asked to be popped during its own handler). The app calls
+    /// this after every dispatch and update; harmless when nothing waits.
+    pub fn run_deferred(&mut self) {
+        while !self.deferred.is_empty() {
+            let pending: Vec<Deferred> = self.deferred.drain(..).collect();
+            for call in pending {
+                match call {
+                    Deferred::Enter(state) => match state.try_borrow_mut() {
+                        Ok(mut s) => s.enter(self),
+                        Err(_) => {
+                            log::error!("a state stayed borrowed past its dispatch; enter dropped")
+                        }
+                    },
+                    Deferred::Exit(state) => match state.try_borrow_mut() {
+                        Ok(mut s) => s.exit(self),
+                        Err(_) => {
+                            log::error!("a state stayed borrowed past its dispatch; exit dropped")
+                        }
+                    },
+                }
+            }
+        }
+    }
+
+    /// Push `state` and enter it (`push_state(state, should_enter=True)`).
+    pub fn push_state<S: State + 'static>(&mut self, state: S) {
+        self.push_shared_with(share(state), true);
+    }
+
+    pub fn push_state_with<S: State + 'static>(&mut self, state: S, should_enter: bool) {
+        self.push_shared_with(share(state), should_enter);
+    }
+
+    /// Push an already-shared state (a factory's product, the harness).
+    pub fn push_shared(&mut self, state: SharedState) {
+        self.push_shared_with(state, true);
+    }
+
+    pub fn push_shared_with(&mut self, shared: SharedState, should_enter: bool) {
+        let paces_main_speech = shared
+            .try_borrow()
+            .map(|s| s.paces_main_speech())
+            .unwrap_or(false);
+        self.stack.push(StackEntry {
+            state: Rc::clone(&shared),
+            paces_main_speech,
+        });
+        if should_enter {
+            self.enter_now_or_later(&shared);
+        }
+    }
+
+    /// Lift the top state off the stack, without deciding what follows.
+    ///
+    /// Emptying the stack only ends the game when the player backed out of
+    /// the last state; the rebuilding methods below empty it on their way to
+    /// a new state, so they use this instead of `pop_state`.
+    fn take_top(&mut self, should_exit: bool) {
+        if let Some(entry) = self.stack.pop() {
+            if should_exit {
+                self.exit_now_or_later(&entry.state);
+            }
+        }
+    }
+
+    /// `pop_state()` with the defaults: exit the top, re-enter the revealed.
+    pub fn pop_state(&mut self) {
+        self.pop_state_with(true, true);
+    }
+
+    pub fn pop_state_with(&mut self, should_exit: bool, reentry: bool) {
+        self.take_top(should_exit);
+        match self.state() {
+            Some(revealed) => {
+                if reentry {
+                    self.enter_now_or_later(&revealed);
+                }
+            }
+            None => self.running = false,
+        }
+    }
+
+    pub fn replace_state<S: State + 'static>(&mut self, state: S) {
+        self.replace_shared_with(share(state), true, true);
+    }
+
+    pub fn replace_state_with<S: State + 'static>(
+        &mut self,
+        state: S,
+        should_exit: bool,
+        reentry: bool,
+    ) {
+        self.replace_shared_with(share(state), should_exit, reentry);
+    }
+
+    pub fn replace_shared_with(&mut self, state: SharedState, should_exit: bool, reentry: bool) {
+        self.take_top(should_exit);
+        self.push_shared_with(state, reentry);
+    }
+
+    pub fn reset_to<S: State + 'static>(&mut self, state: S) {
+        self.reset_shared_with(share(state), true, true);
+    }
+
+    pub fn reset_to_with<S: State + 'static>(
+        &mut self,
+        state: S,
+        should_exit: bool,
+        reentry: bool,
+    ) {
+        self.reset_shared_with(share(state), should_exit, reentry);
+    }
+
+    pub fn reset_shared_with(&mut self, state: SharedState, should_exit: bool, reentry: bool) {
+        while !self.stack.is_empty() {
+            self.take_top(should_exit);
+        }
+        self.push_shared_with(state, reentry);
+    }
+
+    pub fn quit(&mut self) {
+        self.running = false;
+    }
+
+    /// Apply a radio settings change to a covered drive, right now.
+    ///
+    /// Flipping streamer-safe from the pause settings is a promise about
+    /// what is on the air at this moment; the active drive must react while
+    /// the menu still covers it, not at some later reception tick.
+    pub fn apply_active_radio_settings(&mut self) {
+        let target = self
+            .stack
+            .iter()
+            .rev()
+            .map(|entry| Rc::clone(&entry.state))
+            .find(|state| state.try_borrow().is_ok_and(|s| s.applies_radio_settings()));
+        if let Some(state) = target {
+            if let Ok(mut s) = state.try_borrow_mut() {
+                s.apply_radio_settings_now(self);
+            }
+        }
+    }
+
+    /// Whether a drive under the menus has its radio on (the main menu's
+    /// `_driving_radio_active`).
+    pub fn driving_radio_active(&self) -> bool {
+        for entry in self.stack.iter().rev() {
+            if let Ok(state) = entry.state.try_borrow() {
+                if let Some(radio) = state.radio() {
+                    return radio.enabled;
+                }
+            }
+        }
+        false
+    }
+
+    // -- profile and settings reflectors ------------------------------------------------
+
+    pub fn save_profile(&mut self) {
+        // Driving-school sandbox: the profile is a throwaway copy and must
+        // never reach disk; the real save is restored when school ends.
+        // Playtest-lever sandbox: a forced scenario run is temporary by
+        // default -- the career file on disk stays exactly as it was.
+        if self.school_sandbox || self.playtest_sandbox {
+            return;
+        }
+        if let Some(profile) = &self.profile {
+            if let Err(e) = profile.save() {
+                log::error!("Could not save the profile: {e}");
+            }
+        }
+    }
+
+    pub fn apply_volumes(&mut self) {
+        let update = VolumeUpdate::default()
+            .master(self.settings.master_volume)
+            .sfx(self.settings.sfx_volume)
+            .music(self.settings.music_volume)
+            .weather(self.settings.weather_volume)
+            .engine(self.settings.engine_volume)
+            .ui(self.settings.ui_volume);
+        self.audio.set_volumes(&update);
+        self.audio
+            .set_engine_voice(self.settings.engine_voice == "classic");
+        self.audio
+            .set_jake_voice(self.settings.jake_voice == "classic");
+    }
+
+    /// Reflect the Discord presence setting (e.g. after a settings change).
+    pub fn apply_presence(&mut self) {
+        let enabled = self.online_enabled(self.settings.discord_presence);
+        self.services.presence.set_enabled(enabled);
+    }
+
+    /// Reflect the drivers-board setting (e.g. after a settings change).
+    pub fn apply_online_presence(&mut self) {
+        let enabled = self.online_enabled(self.settings.online_presence)
+            && !self.settings.profile_sharing_pending_off;
+        self.services.online.set_enabled(enabled);
+        self.services.journal.set_enabled(enabled);
+    }
+
+    /// Reflect the cloud backup setting (e.g. after a settings change).
+    pub fn apply_cloud_saves(&mut self) {
+        let enabled = self.online_enabled(self.settings.cloud_saves);
+        self.services.cloud.set_enabled(enabled);
+    }
+
+    /// Reflect the Mastodon sharing setting (e.g. after a settings change).
+    pub fn apply_mastodon_sharing(&mut self) {
+        let enabled = self.online_enabled(self.settings.mastodon_sharing);
+        self.services.mastodon.set_enabled(enabled);
+    }
+
+    /// The backup service, for the Cloud backup menu.
+    pub fn cloud_saves_service(&self) -> &CloudSaves {
+        &self.services.cloud
+    }
+
+    /// Adopt freshly confirmed account credentials (setup flow). The drivers
+    /// board and cloud backup share them.
+    pub fn adopt_online_identity(&mut self, identity: Option<OnlineIdentity>) {
+        self.services.online.set_identity(identity.clone());
+        self.services.cloud.set_identity(identity.clone());
+        self.services.journal.set_identity(identity.clone());
+        self.services.mastodon.set_identity(identity);
+    }
+
+    /// Reflect the controller setting (e.g. after a settings change).
+    pub fn apply_controller(&mut self) {
+        self.controller
+            .set_enabled(self.settings.controller_enabled);
+    }
+
+    /// Reflect the haptics setting (e.g. after a settings change).
+    pub fn apply_haptics(&mut self) {
+        self.controller
+            .set_haptics_enabled(self.settings.haptics_enabled);
+    }
+
+    /// Name a control for a spoken prompt, following the active device.
+    pub fn control_hint(&self, action: &str) -> String {
+        self.controller.hint(action)
+    }
+
+    pub fn apply_speech(&mut self) {
+        apply_speech_settings(self.speech.as_mut(), &mut self.settings);
+    }
+
+    /// Put `text` on the system clipboard; true when it landed.
+    pub fn write_clipboard_text(&mut self, text: &str) -> bool {
+        self.clipboard.set_text(text)
+    }
+
+    // -- music --------------------------------------------------------------------------
+
+    /// Advance a session-local music pool without immediate repeats.
+    pub fn next_music_track(&mut self, pool_name: &str, sequence: &[&str]) -> String {
+        if sequence.is_empty() {
+            return String::new();
+        }
+        if sequence.len() == 1 {
+            let track = sequence[0].to_string();
+            self.music_pool_last
+                .insert(pool_name.to_string(), track.clone());
+            return track;
+        }
+        let key = (
+            pool_name.to_string(),
+            sequence.iter().map(|s| s.to_string()).collect::<Vec<_>>(),
+        );
+        let previous = self.music_pool_positions.get(&key).copied();
+        let mut index = previous.map_or(0, |p| (p + 1) % sequence.len());
+        if Some(sequence[index]) == self.music_pool_last.get(pool_name).map(String::as_str) {
+            index = (index + 1) % sequence.len();
+        }
+        self.music_pool_positions.insert(key, index);
+        let track = sequence[index].to_string();
+        self.music_pool_last
+            .insert(pool_name.to_string(), track.clone());
+        track
+    }
+
+    /// Play or refresh a pool without jarring compatible menu restarts
+    /// (`play_music_sequence(pool, sequence, fade_ms=1500, advance=False)`).
+    pub fn play_music_sequence(&mut self, pool_name: &str, sequence: &[&str]) -> String {
+        self.play_music_sequence_with(pool_name, sequence, 1500, false)
+    }
+
+    pub fn play_music_sequence_with(
+        &mut self,
+        pool_name: &str,
+        sequence: &[&str],
+        fade_ms: u32,
+        advance: bool,
+    ) -> String {
+        if !advance {
+            if let (Some((pool, _)), Some(track)) =
+                (&self.music_rotation_pool, &self.music_rotation_track)
+            {
+                if pool == pool_name {
+                    let track = track.clone();
+                    self.music_rotation_pool = Some((
+                        pool_name.to_string(),
+                        sequence.iter().map(|s| s.to_string()).collect(),
+                    ));
+                    return track;
+                }
+            }
+        }
+        let track = self.next_music_track(pool_name, sequence);
+        if track.is_empty() {
+            self.clear_music_rotation();
+            return track;
+        }
+        self.music_rotation_pool = Some((
+            pool_name.to_string(),
+            sequence.iter().map(|s| s.to_string()).collect(),
+        ));
+        self.music_rotation_track = Some(track.clone());
+        self.music_rotation_elapsed_s = 0.0;
+        self.audio.play_music_with(&track, fade_ms);
+        track
+    }
+
+    /// Advance music beds when their one-shot playback ends.
+    pub fn update_music_rotation(&mut self, dt: f64) {
+        let (Some(_), Some(track)) = (&self.music_rotation_pool, &self.music_rotation_track) else {
+            // No menu bed is rotating. A drive sitting under this menu
+            // (pause, settings, a traffic stop...) keeps its own playlist
+            // turning over, so the music does not fall silent when the
+            // current track ends.
+            self.tick_covered_music(dt);
+            return;
+        };
+        self.music_rotation_elapsed_s += dt.max(0.0);
+        if self.music_rotation_elapsed_s < music_track_duration_s(track) {
+            return;
+        }
+        let (pool_name, sequence) = self.music_rotation_pool.clone().expect("checked above");
+        let refs: Vec<&str> = sequence.iter().map(String::as_str).collect();
+        self.play_music_sequence_with(&pool_name, &refs, 1500, true);
+    }
+
+    fn tick_covered_music(&mut self, dt: f64) {
+        let n = self.stack.len();
+        if n < 2 {
+            return;
+        }
+        let target = self.stack[..n - 1]
+            .iter()
+            .rev()
+            .map(|entry| Rc::clone(&entry.state))
+            .find(|state| state.try_borrow().is_ok_and(|s| s.ticks_covered_music()));
+        if let Some(state) = target {
+            if let Ok(mut s) = state.try_borrow_mut() {
+                s.tick_covered_music(self, dt);
+            }
+        }
+    }
+
+    pub fn clear_music_rotation(&mut self) {
+        self.music_rotation_pool = None;
+        self.music_rotation_track = None;
+        self.music_rotation_elapsed_s = 0.0;
+    }
+
+    /// The track the menu rotation is playing, if any.
+    pub fn music_rotation_track(&self) -> Option<&str> {
+        self.music_rotation_track.as_deref()
+    }
+
+    // -- achievements ----------------------------------------------------------------------
+
+    /// `award_achievement(id)` with the defaults (`interrupt=False`,
+    /// `announce=True`).
+    pub fn award_achievement(&mut self, achievement_id: &str) -> Option<AchievementAward> {
+        self.award_achievement_with(achievement_id, false, true)
+    }
+
+    pub fn award_achievement_with(
+        &mut self,
+        achievement_id: &str,
+        interrupt: bool,
+        announce: bool,
+    ) -> Option<AchievementAward> {
+        let result = award(self.profile.as_mut()?, achievement_id)?;
+        // Through the guard: a sandboxed session's achievements evaporate
+        // with the rest of the run instead of leaking to disk.
+        self.save_profile();
+        let earned_at_ms = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_millis() as i64)
+            .unwrap_or(0);
+        let achievement = result.achievement;
+        if queue_achievement(
+            &self.services.journal,
+            achievement.id,
+            achievement.name,
+            achievement.description,
+            earned_at_ms,
+        ) {
+            self.services.journal.flush_async();
+        }
+        self.achievement_notice = result.message.normal.clone();
+        self.achievement_notice_timer = 12.0;
+        if !announce {
+            return Some(result);
+        }
+        self.audio.play_with("ui/level_up", 0.8, 0.0);
+        // Live, an achievement is its earcon and its name; the flavor prose
+        // is never read at speed (research doc R9). The full record still
+        // reaches the review log, and the achievements menu keeps it for
+        // good.
+        self.say_with(
+            achievement_announced(achievement.name),
+            Say::new().interrupt(interrupt).review(false),
+        );
+        self.message_log
+            .add(&result.message.normal, MessageCategory::General);
+        Some(result)
+    }
+}
+
+impl LeverContext for GameContext {
+    fn world(&self) -> &World {
+        self.world
+    }
+
+    /// The levers only run once a career is loaded; calling this with no
+    /// profile is a programming error, as `ctx.profile.x` on `None` was.
+    fn profile_mut(&mut self) -> &mut Profile {
+        self.profile
+            .as_mut()
+            .expect("playtest levers run with a loaded profile")
+    }
+
+    fn set_playtest_sandbox(&mut self, sandbox: bool) {
+        self.playtest_sandbox = sandbox;
+    }
+
+    fn save_profile(&mut self) {
+        GameContext::save_profile(self);
+    }
+}

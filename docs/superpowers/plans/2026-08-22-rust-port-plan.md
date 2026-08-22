@@ -121,7 +121,7 @@ needs them.
 - [x] T3.2 `speech`: Prism `Speech` (pick_backend by priority, SAPI event
       voice, Narrator gate, retry-once, refresh poll), `GameContext`
       say/say_event/ladder/pacer/duck/transcript wiring.
-- [ ] T3.3 `controller` + SDL event shell: `App`, event pump, state stack,
+- [x] T3.3 `controller` + SDL event shell: `App`, event pump, state stack,
       `State`/`MenuState`/`TextEntryState`, render, logging, env vars,
       `--smoke`, `--headless`. Tests: test_app*, test_controller*,
       test_menu*, test_text_entry*.
@@ -149,5 +149,5 @@ needs them.
 - [ ] T5.1 Port the 119 app-shell transcript test files against the Rust
       harness (parallel, by file).
 - [ ] T5.2 Adversarial battery (`tests/adversarial`) with `KNOWN_OPEN`.
-- [ ] T5.3 Release layout: `tools/build_release.py --rust`, `build_info.json`,
+- [x] T5.3 Release layout: `tools/build_release.py --rust`, `build_info.json`,
       DLL staging, CHANGELOG/ROADMAP entries.
