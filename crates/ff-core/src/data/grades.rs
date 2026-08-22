@@ -1,1 +1,375 @@
-//! Port of `freight_fate/data/grades.py` — not yet ported.
+//! Load-time screen for elevation artifacts in the baked grade data (port of
+//! `freight_fate/data/grades.py`).
+//!
+//! All 146,496 grade segments in the world come from one place -- an
+//! OpenRouteService route elevation profile over SRTM, segmented by terrain --
+//! and a few hundred of them describe a slope no road of their class and
+//! terrain can hold. 455 exceed 8 percent; the steepest is +14.4 percent on
+//! I-5. The tell is the same one the curve sweep left behind: the extremes sit
+//! on 0.2 and 0.3 mile spans, which is the length of a bridge or an overpass,
+//! and a profile crossing a structure reads the deck rather than the road
+//! under it.
+//!
+//! WHY THIS SCREEN CANNOT COPY `curves` AND EXEMPT THE MOUNTAINS. There,
+//! mountain terrain is never flagged, because a real switchback lives there.
+//! Here the single worst record -- the I-5 14.4 -- is itself labelled
+//! `mountain`, and the label is coarse enough (3,098 segments carry it) that
+//! exempting it would shelter most of the interstate artifacts. Road class
+//! replaces terrain as the discriminator because it carries a harder fact: the
+//! interstate system is designed to a 6 percent maximum, and the famously
+//! brutal exceptions -- I-70 west of Denver, I-17 out of Phoenix, I-80 over
+//! Donner -- sit at 6 to 7. There is no 12 percent interstate. US and state
+//! routes really do climb harder (US-550 over Red Mountain Pass, CA-299
+//! through the Trinity Alps), so their ceilings are set well above anything
+//! real and only catch the frankly impossible.
+//!
+//! WHY THIS ONE CLAMPS WHERE `curves` DROPS. Curves are discrete events and a
+//! dropped one is simply never announced. Grades tile the leg continuously,
+//! and `Trip.grade_at` falls through to a synthesized terrain average for any
+//! mile no segment covers -- so dropping a spike out of the middle of a real
+//! climb would replace a measured-but-noisy reading with an invented one.
+//! Clamping keeps the sign, keeps the climb, and caps the physics at what the
+//! road can actually hold.
+//!
+//! The bake is never edited (see the provenance rule in `CLAUDE.md`). A
+//! clamped segment records the adjustment in its own `source`, so a later
+//! reader can see that this value was derived here rather than read from the
+//! profile.
+
+use super::world_models::GradeSegment;
+use crate::pyfmt::fmt_f;
+
+/// Steepest sustained grade a road of each class is built to, in percent.
+/// Interstates are designed to 6; 7 leaves room for the handful of real
+/// mountain exceptions without admitting anything the class cannot hold. The
+/// other two are deliberately loose -- they exist to catch profile noise, not
+/// to argue with a genuinely severe US or state route pass.
+pub const CLASS_CEILING_PCT: &[(&str, f64)] = &[("interstate", 7.0), ("us", 10.0), ("state", 12.0)];
+
+/// Ceiling implied by terrain, which is the other half of the
+/// self-contradiction: a segment on level ground cannot also be a 14 percent
+/// wall. Measured against the data, flat sits at 4.98 percent for its 99th
+/// percentile and hills at 7.61, so these cut the tail and nothing else.
+/// `mountain` gets a number only so the lookup is total; class governs there
+/// in every case that matters.
+pub const TERRAIN_CEILING_PCT: &[(&str, f64)] =
+    &[("flat", 6.0), ("hills", 8.0), ("mountain", 12.0)];
+
+/// WHICH terrain, though. The bake's own label is derived from net elevation
+/// change end to end and is wrong often enough to matter: checked against
+/// FHWA HPMS Terrain_Type over 1,273 legs it agreed on only 67 percent. The
+/// single worst grade record in the world -- the I-5 14.4 -- sits on a leg the
+/// label calls `mountain` (ceiling 12) while HPMS calls that ground LEVEL.
+///
+/// So the HPMS class leads where it exists, and the segment's own label is the
+/// fallback. HPMS speaks in Green Book terms; these are its names in ours.
+pub const HPMS_TERRAIN_TO_LABEL: &[(i64, &str)] = &[(1, "flat"), (2, "hills"), (3, "mountain")];
+
+/// The ceiling for a road class (`interstate`, `us`, `state`).
+pub fn class_ceiling_pct(class: &str) -> f64 {
+    CLASS_CEILING_PCT
+        .iter()
+        .find(|(k, _)| *k == class)
+        .map(|(_, v)| *v)
+        .unwrap_or_else(|| panic!("unknown road class {class:?}"))
+}
+
+/// The ceiling for a terrain label, or the loosest one for an unknown label.
+pub fn terrain_ceiling_pct(terrain: &str) -> f64 {
+    TERRAIN_CEILING_PCT
+        .iter()
+        .find(|(k, _)| *k == terrain)
+        .map(|(_, v)| *v)
+        .unwrap_or_else(|| {
+            TERRAIN_CEILING_PCT
+                .iter()
+                .map(|(_, v)| *v)
+                .fold(f64::MIN, f64::max)
+        })
+}
+
+/// The spoken terrain label for an HPMS class (1, 2, 3), if known.
+pub fn hpms_terrain_label(hpms_terrain: i64) -> Option<&'static str> {
+    HPMS_TERRAIN_TO_LABEL
+        .iter()
+        .find(|(k, _)| *k == hpms_terrain)
+        .map(|(_, label)| *label)
+}
+
+fn clamp_note(raw: f64, capped: f64, ceiling: f64, road_class: &str, terrain: &str) -> String {
+    // Python: `{raw:+.2f}` / `{capped:+.2f}` / `{ceiling:.0f}`.
+    format!(
+        " Slope clamped at load from {} to {} percent -- derived, not read: \
+         above the {} percent ceiling for {road_class} in {terrain} terrain \
+         (freight_fate.data.grades).",
+        signed(raw, 2),
+        signed(capped, 2),
+        fmt_f(ceiling, 0)
+    )
+}
+
+/// Python `f"{x:+.Nf}"`: always-signed fixed precision.
+fn signed(x: f64, prec: usize) -> String {
+    let text = fmt_f(x, prec);
+    if text.starts_with('-') {
+        text
+    } else {
+        format!("+{text}")
+    }
+}
+
+/// `interstate`, `us` or `state` from a leg's highway designation.
+///
+/// Anything not designated `I-n` or `US-n` is treated as a state route,
+/// which is the loosest ceiling -- an unknown designation should never be
+/// screened harder than a known one.
+pub fn road_class(highway: &str) -> &'static str {
+    let name = highway.trim().to_uppercase();
+    if name.starts_with("I-") && name[2..].chars().next().is_some_and(|c| c.is_ascii_digit()) {
+        return "interstate";
+    }
+    if name.starts_with("US-") {
+        return "us";
+    }
+    "state"
+}
+
+/// The stricter of what the road class and the terrain allow.
+pub fn grade_ceiling_pct(highway: &str, terrain: &str) -> f64 {
+    let by_class = class_ceiling_pct(road_class(highway));
+    let by_terrain = terrain_ceiling_pct(terrain);
+    by_class.min(by_terrain)
+}
+
+/// Cap slopes the road cannot hold, leaving every plausible one untouched.
+///
+/// Returns equal segments where nothing was capped, so an unscreened world
+/// round-trips identically.
+pub fn screen_grade_segments(
+    segments: &[GradeSegment],
+    highway: &str,
+    hpms_terrain: Option<i64>,
+) -> Vec<GradeSegment> {
+    // HPMS leads where the leg has a class; the segment's own label is the
+    // fallback, and stays the fallback rather than being overwritten, so a
+    // leg HPMS never classified screens exactly as it did before.
+    let leg_terrain = hpms_terrain
+        .filter(|t| *t != 0)
+        .and_then(hpms_terrain_label);
+    let mut screened = Vec::with_capacity(segments.len());
+    for segment in segments {
+        let terrain = leg_terrain.unwrap_or(segment.terrain.as_str());
+        let ceiling = grade_ceiling_pct(highway, terrain);
+        if segment.avg_grade_pct.abs() <= ceiling {
+            screened.push(segment.clone());
+            continue;
+        }
+        let capped = if segment.avg_grade_pct > 0.0 {
+            ceiling
+        } else {
+            -ceiling
+        };
+        let note = clamp_note(
+            segment.avg_grade_pct,
+            capped,
+            ceiling,
+            road_class(highway),
+            terrain,
+        );
+        screened.push(GradeSegment {
+            start_mi: segment.start_mi,
+            end_mi: segment.end_mi,
+            avg_grade_pct: capped,
+            terrain: segment.terrain.clone(),
+            source: format!("{}{}", segment.source, note).trim().to_string(),
+        });
+    }
+    screened
+}
+
+#[cfg(test)]
+mod tests {
+    //! Port of `tests/test_world_grades.py`.
+    use super::*;
+    use crate::data::data_resources::read_data_text;
+    use crate::data::world_corridor::build_leg_corridor;
+
+    fn seg(pct: f64, terrain: &str, start: f64, span: f64) -> GradeSegment {
+        GradeSegment::new(
+            start,
+            start + span,
+            pct,
+            terrain,
+            "OpenRouteService route elevation.",
+        )
+    }
+
+    fn mseg(pct: f64) -> GradeSegment {
+        seg(pct, "mountain", 10.0, 0.3)
+    }
+
+    #[test]
+    fn test_road_class_reads_the_highway_designation() {
+        assert_eq!(road_class("I-5"), "interstate");
+        assert_eq!(road_class("I-70"), "interstate");
+        assert_eq!(road_class("US-550"), "us");
+        assert_eq!(road_class("CA-299"), "state");
+        assert_eq!(road_class(""), "state");
+    }
+
+    #[test]
+    fn test_ceiling_is_the_stricter_of_class_and_terrain() {
+        // An interstate in the mountains is governed by its class; the same
+        // interstate labelled flat is governed by the terrain.
+        assert_eq!(
+            grade_ceiling_pct("I-5", "mountain"),
+            class_ceiling_pct("interstate")
+        );
+        assert_eq!(
+            grade_ceiling_pct("I-5", "flat"),
+            terrain_ceiling_pct("flat")
+        );
+        assert_eq!(
+            grade_ceiling_pct("CA-299", "mountain"),
+            class_ceiling_pct("state")
+        );
+    }
+
+    #[test]
+    fn test_the_worst_baked_slope_is_clamped_to_the_interstate_ceiling() {
+        // +14.42 percent on I-5, the steepest record in the world data. No
+        // interstate anywhere is built past 7.
+        let screened = screen_grade_segments(&[mseg(14.42)], "I-5", None);
+        assert_eq!(screened[0].avg_grade_pct, class_ceiling_pct("interstate"));
+    }
+
+    #[test]
+    fn test_clamping_keeps_the_sign_so_a_descent_stays_a_descent() {
+        let screened = screen_grade_segments(&[mseg(-14.42)], "I-5", None);
+        assert_eq!(screened[0].avg_grade_pct, -class_ceiling_pct("interstate"));
+    }
+
+    #[test]
+    fn test_clamping_leaves_the_span_and_terrain_alone() {
+        let screened = screen_grade_segments(&[seg(14.42, "mountain", 10.0, 0.3)], "I-5", None);
+        assert_eq!((screened[0].start_mi, screened[0].end_mi), (10.0, 10.3));
+        assert_eq!(screened[0].terrain, "mountain");
+    }
+
+    #[test]
+    fn test_a_flat_labelled_segment_is_capped_below_its_class_ceiling() {
+        // 8.3 percent over a fifth of a mile on ground the bake itself called
+        // flat -- the self-contradiction that proves it is a structure, not road.
+        let screened = screen_grade_segments(&[seg(8.3, "flat", 10.0, 0.2)], "I-22", None);
+        assert_eq!(screened[0].avg_grade_pct, terrain_ceiling_pct("flat"));
+    }
+
+    #[test]
+    fn test_a_real_mountain_interstate_grade_is_left_exactly_as_baked() {
+        // The Eisenhower approach on I-70 is about 7 percent and genuinely is
+        // that steep. The screen must not touch it.
+        let original = mseg(6.8);
+        assert_eq!(
+            screen_grade_segments(std::slice::from_ref(&original), "I-70", None),
+            vec![original]
+        );
+    }
+
+    #[test]
+    fn test_a_steep_us_route_pass_is_left_alone() {
+        // US-550 over Red Mountain Pass really does climb like this; only the
+        // interstate class carries the tight ceiling.
+        let original = mseg(9.4);
+        assert_eq!(
+            screen_grade_segments(std::slice::from_ref(&original), "US-550", None),
+            vec![original]
+        );
+    }
+
+    #[test]
+    fn test_an_untouched_segment_keeps_its_original_source_string() {
+        let original = mseg(3.0);
+        let screened = screen_grade_segments(std::slice::from_ref(&original), "I-5", None);
+        assert_eq!(screened[0].source, original.source);
+    }
+
+    #[test]
+    fn test_a_clamped_segment_says_in_its_source_that_the_value_was_derived() {
+        let screened = screen_grade_segments(&[mseg(14.42)], "I-5", None);
+        assert!(screened[0].source.contains("derived"));
+        assert!(screened[0].source.contains("14.42"));
+        assert!(screened[0]
+            .source
+            .starts_with("OpenRouteService route elevation."));
+    }
+
+    #[test]
+    fn test_the_baked_i5_leg_loads_with_no_impossible_slope() {
+        let text = read_data_text("world_data/us/legs/CA.json").expect("CA shard");
+        let data: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let leg = data["legs"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|lg| lg["from"] == "chico_ca_us" && lg["to"] == "santa_rosa_ca_us")
+            .expect("the I-5 fixture leg");
+        let raw = leg["corridor"]["grade_segments"].as_array().unwrap();
+        let worst_raw = raw
+            .iter()
+            .map(|g| g["avg_grade_pct"].as_f64().unwrap().abs())
+            .fold(0.0, f64::max);
+        assert!(worst_raw > 14.0, "fixture no longer has the artifact");
+
+        let built = build_leg_corridor(
+            &leg["corridor"],
+            leg["miles"].as_f64().unwrap(),
+            leg["from"].as_str().unwrap(),
+            leg["to"].as_str().unwrap(),
+            "CA",
+            leg["highway"].as_str().unwrap(),
+        )
+        .unwrap();
+        let worst = built
+            .grade_segments
+            .iter()
+            .map(|s| s.avg_grade_pct.abs())
+            .fold(0.0, f64::max);
+        assert!(worst <= class_ceiling_pct("interstate"));
+    }
+
+    #[test]
+    fn test_the_grade_ceiling_prefers_hpms_terrain_over_the_bake_label() {
+        // The bake's own terrain label is derived from NET elevation change and
+        // agreed with FHWA HPMS on only 67 percent of 1,273 legs.
+        //
+        // The single worst grade record in the world -- +14.4 percent on I-5 --
+        // sits on a leg the label calls "mountain", which would allow 12, while
+        // HPMS calls that ground LEVEL, which allows 6. Class already capped it at
+        // 7; reading the real terrain caps it where it belongs.
+        assert_eq!(
+            HPMS_TERRAIN_TO_LABEL,
+            &[(1, "flat"), (2, "hills"), (3, "mountain")]
+        );
+        let wall = GradeSegment::new(0.0, 0.3, 14.4, "mountain", "profile");
+
+        // Label alone: class ceiling for an interstate, 7.
+        let by_label = &screen_grade_segments(std::slice::from_ref(&wall), "I-5", None)[0];
+        assert_eq!(by_label.avg_grade_pct, 7.0);
+
+        // HPMS says level, so the terrain ceiling of 6 is the stricter one.
+        let by_hpms = &screen_grade_segments(&[wall], "I-5", Some(1))[0];
+        assert_eq!(by_hpms.avg_grade_pct, 6.0);
+        assert!(by_hpms.source.to_lowercase().contains("clamped"));
+    }
+
+    #[test]
+    fn test_a_leg_hpms_never_classified_screens_exactly_as_before() {
+        // The fallback has to be a true no-op, or adding this bake would quietly
+        // change the screening of every leg HPMS has nothing to say about.
+        let seg = GradeSegment::new(0.0, 0.3, 9.5, "hills", "profile");
+        assert_eq!(
+            screen_grade_segments(std::slice::from_ref(&seg), "I-70", None),
+            screen_grade_segments(&[seg], "I-70", None)
+        );
+    }
+}

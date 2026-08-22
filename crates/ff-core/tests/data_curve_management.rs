@@ -1,0 +1,621 @@
+//! Tests for the curve management tier on the unified curve pipeline (port of
+//! `tests/test_curve_management.py`).
+//!
+//! Covers curve data loading (`data::curves`, the single loader) against the
+//! real world; the Trip integration cases (`TestTripCurveIntegration`) are
+//! ported with their bodies but ignored until `sim::trip` lands. The pure
+//! geometry-screen and radius-floor tests live inline in `curves.rs`.
+
+mod data_support;
+
+use std::collections::{HashMap, HashSet};
+
+use data_support::{data_dir, supported, world};
+use ff_core::data::curves::{
+    curve_severity, leg_curves, leg_design_speed, leg_is_level, load, min_radius_ft, route_curves,
+    screenable_legs, CurveRecord, HAIRPIN_DEFLECTION_DEG, HAIRPIN_MAX_MPH,
+    INTERSTATE_MAX_DEFLECTION_DEG, INTERSTATE_MIN_RADIUS_FT,
+};
+use ff_core::data::data_resources::read_data_text;
+use ff_core::data::world::World;
+use ff_core::data::world_models::{
+    CorridorDetail, GradeSegment, Leg, Route, RouteCheckpoint, StateMileage,
+};
+
+fn is_interstate(leg: &Leg) -> bool {
+    leg.highway.to_uppercase().starts_with("I-")
+}
+
+/// Same test `RouteCurve::severity` uses, for the plain `CurveRecord`
+/// rows `leg_curves` returns.
+fn is_hairpin(rec: &CurveRecord) -> bool {
+    rec.advisory_mph <= HAIRPIN_MAX_MPH || rec.deflection_deg >= HAIRPIN_DEFLECTION_DEG
+}
+
+// -- TestCurveLoading --------------------------------------------------------
+
+#[test]
+fn test_unknown_leg_returns_empty_tuple() {
+    assert!(leg_curves("nonexistent_leg_xyz", true).is_empty());
+}
+
+#[test]
+fn test_connectors_are_filtered_by_default() {
+    let mainline = leg_curves("aberdeen_sd_us:pierre_sd_us", true);
+    let everything = leg_curves("aberdeen_sd_us:pierre_sd_us", false);
+    assert!(mainline.iter().all(|c| !c.connector));
+    assert!(everything.len() >= mainline.len());
+    assert!(
+        everything.iter().any(|c| c.connector),
+        "this leg's interchange arcs should be present when asked for"
+    );
+}
+
+// -- TestInterstateArtifactScreen -------------------------------------------
+// Geometry artifacts never reach an interstate mainline.
+//
+// The dense sweep baked departure geometry and interchange vertices as
+// mainline on some interstate legs, which read as 80-250 ft "hairpins" on
+// roads that physically cannot bend that hard. The loader screens them.
+
+#[test]
+fn test_no_impossibly_sharp_interstate_mainline_curve() {
+    let world = world();
+    let mut offenders = Vec::new();
+    for leg in &world.legs {
+        if !is_interstate(leg) {
+            continue;
+        }
+        for rec in leg_curves(&format!("{}:{}", leg.a, leg.b), true) {
+            if rec.min_radius_ft < INTERSTATE_MIN_RADIUS_FT {
+                offenders.push((leg.highway.clone(), format!("{}:{}", leg.a, leg.b), rec));
+            }
+        }
+    }
+    assert!(
+        offenders.is_empty(),
+        "{} interstate mainline curves below {INTERSTATE_MIN_RADIUS_FT} ft: {:?}",
+        offenders.len(),
+        &offenders[..offenders.len().min(5)]
+    );
+}
+
+#[test]
+fn test_no_switchback_deflection_on_interstate_mainline() {
+    // A 150-degree bend on interstate mainline is a mis-tagged loop ramp.
+    let world = world();
+    let mut offenders = Vec::new();
+    for leg in &world.legs {
+        if !is_interstate(leg) {
+            continue;
+        }
+        for rec in leg_curves(&format!("{}:{}", leg.a, leg.b), true) {
+            if rec.deflection_deg >= INTERSTATE_MAX_DEFLECTION_DEG {
+                offenders.push((leg.highway.clone(), format!("{}:{}", leg.a, leg.b), rec));
+            }
+        }
+    }
+    assert!(
+        offenders.is_empty(),
+        "{} interstate switchbacks: {:?}",
+        offenders.len(),
+        &offenders[..offenders.len().min(5)]
+    );
+}
+
+#[test]
+fn test_no_hairpin_severity_on_interstate_mainline() {
+    // The screen's whole point: no interstate mainline hairpin calls.
+    //
+    // Driven through `route_curves` -- the path every consumer takes --
+    // one leg at a time, so a mixed-class route cannot mask or fake a
+    // failure with some other road's legitimately sharp bend.
+    let world = world();
+    for leg in &world.legs {
+        if !is_interstate(leg) {
+            continue;
+        }
+        let route = Route::new(vec![leg.a.clone(), leg.b.clone()], vec![leg.clone()]);
+        for cur in route_curves(&route, &route.cities, true) {
+            assert_ne!(
+                cur.severity(),
+                "hairpin",
+                "{} {}:{} still calls a hairpin at mile {:.2} (radius {} ft)",
+                leg.highway,
+                leg.a,
+                leg.b,
+                cur.apex_mi,
+                cur.min_radius_ft
+            );
+        }
+    }
+}
+
+#[test]
+fn test_abilene_fort_worth_mile_four_hairpins_are_gone() {
+    // Flat I-20 had three 104-111 ft "hairpins" at mile 4.
+    let recs = leg_curves("abilene_tx_us:fort_worth_tx_us", true);
+    assert!(
+        !recs.is_empty(),
+        "this leg is swept and should still have real curves"
+    );
+    let near_four: Vec<_> = recs
+        .iter()
+        .filter(|r| (3.5..=4.5).contains(&r.apex_mi))
+        .collect();
+    assert!(
+        near_four.is_empty(),
+        "artifact cluster survived: {near_four:?}"
+    );
+    assert!(recs.iter().map(|r| r.min_radius_ft).min().unwrap() >= INTERSTATE_MIN_RADIUS_FT);
+}
+
+#[test]
+fn test_akron_cleveland_mile_thirty_seven_hairpin_is_gone() {
+    // I-77 carried two 82 ft "hairpins" from interchange geometry.
+    let recs = leg_curves("akron_oh_us:cleveland_oh_us", true);
+    assert!(!recs.is_empty());
+    assert!(recs
+        .iter()
+        .all(|r| r.min_radius_ft >= INTERSTATE_MIN_RADIUS_FT));
+
+    // The real bends on this leg stay. Pinned as a PROPERTY rather than a
+    // count: the flat-ground screen took this leg from 21 mainline curves
+    // to 11, and every one it removed is below the 1,482 ft floor a 65 mph
+    // road may bend to -- including the two 82 ft, 160-degree records this
+    // test is named for. A bare "at least fifteen" would have had to be
+    // relaxed to keep passing, which says nothing; this says what must be
+    // true of whatever survives.
+    let leg = world()
+        .legs
+        .iter()
+        .find(|leg| leg.a == "akron_oh_us" && leg.b == "cleveland_oh_us")
+        .unwrap();
+    let floor = min_radius_ft(leg_design_speed(leg));
+    assert!(recs.len() >= 8);
+    assert!(
+        recs.iter().all(|r| (r.min_radius_ft as f64) >= floor),
+        "a curve under the {floor:.0} ft floor survived on {}",
+        leg.highway
+    );
+}
+
+#[test]
+fn test_interstate_connector_arcs_are_untouched() {
+    // Ramps really are that sharp; physics still wants them.
+    let everything = leg_curves("abilene_tx_us:fort_worth_tx_us", false);
+    assert!(
+        everything
+            .iter()
+            .any(|r| r.connector && r.min_radius_ft < 150),
+        "interchange ramp arcs should survive the screen"
+    );
+}
+
+#[test]
+fn test_million_dollar_highway_switchbacks_survive() {
+    // US-550 Durango-Montrose really does switch back. Never screen it.
+    let recs = leg_curves("durango_co_us:montrose_co_us", true);
+    assert!(recs.len() >= 250);
+    assert!(recs.iter().map(|r| r.min_radius_ft).min().unwrap() < 100);
+    assert!(recs.iter().map(|r| r.deflection_deg).fold(0.0, f64::max) >= 150.0);
+}
+
+#[test]
+fn test_glenwood_canyon_interstate_curves_survive() {
+    // Real I-70 canyon geometry sits above the floor and must stay.
+    let recs = leg_curves("glenwood_springs_co_us:grand_junction_co_us", true);
+    assert!(recs.len() >= 55);
+    assert!(
+        recs.iter().map(|r| r.min_radius_ft).min().unwrap() < 500,
+        "Glenwood Canyon's genuinely sharp bends should still be here"
+    );
+}
+
+#[test]
+fn test_us_highway_mountain_hairpins_survive() {
+    // US-40 over the Rockies keeps its real sharp curves.
+    //
+    // The interstate screen never applies to US routes; the separate
+    // flat-terrain screen (below) only takes the one Denver-departure
+    // artifact, so the mountain bends this leg is famous for stay.
+    let recs = leg_curves("denver_co_us:salt_lake_city_ut_us", true);
+    assert!(recs
+        .iter()
+        .any(|r| r.min_radius_ft < INTERSTATE_MIN_RADIUS_FT));
+}
+
+// -- TestUSRouteArtifactScreen ----------------------------------------------
+// A second, narrower screen for artifacts road class alone can't catch.
+//
+// US and state routes can carry the same city-departure sweep artifact an
+// interstate can, but they also carry real switchbacks the interstate
+// screen would wrongly delete (US-550, the Salt River Canyon) -- so this
+// screen is gated on local terrain (flat ground can't hold a real
+// hairpin), not on road class. See `tools/screen_curve_artifacts.py`.
+
+#[test]
+fn test_denver_us40_departure_kink_is_gone() {
+    // The flat-Denver-metro kink at mile 1.7 was the reported case.
+    let recs = leg_curves("denver_co_us:salt_lake_city_ut_us", true);
+    let near_departure: Vec<_> = recs.iter().filter(|r| r.apex_mi < 2.0).collect();
+    assert!(
+        !near_departure.iter().any(|r| is_hairpin(r)),
+        "flat-terrain departure artifact survived: {near_departure:?}"
+    );
+}
+
+#[test]
+fn test_flagged_artifacts_are_absent_from_every_leg() {
+    // Every `(leg, seq)` the offline screen names is actually gone.
+    //
+    // Round-trips `curve_artifacts.jsonl` against the loaded data so a
+    // stale baked file (screen re-run, loader not updated, or vice versa)
+    // fails loudly instead of silently drifting.
+    let text = read_data_text("world_data/us/gameplay/curve_artifacts.jsonl")
+        .expect("curve_artifacts.jsonl should exist once artifacts are flagged");
+    let mut flagged_legs: HashSet<String> = HashSet::new();
+    let mut count = 0;
+    for line in text.lines() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        let row: serde_json::Value = serde_json::from_str(line).unwrap();
+        if row.get("meta").is_some() {
+            continue;
+        }
+        flagged_legs.insert(row["leg"].as_str().unwrap().to_string());
+        count += 1;
+    }
+    assert!(count > 0);
+
+    let world = world();
+    let by_key: HashMap<String, &Leg> = world
+        .legs
+        .iter()
+        .map(|leg| (format!("{}:{}", leg.a, leg.b), leg.as_ref()))
+        .collect();
+    for leg_key in &flagged_legs {
+        let Some(leg) = by_key.get(leg_key) else {
+            continue;
+        };
+        assert!(
+            !is_interstate(leg),
+            "{leg_key} is flagged but is interstate mainline -- that screen is a separate, unconditional rule"
+        );
+    }
+}
+
+#[test]
+fn test_city_departure_hairpins_are_gone_off_the_mountains() {
+    // Terrain alone could not see a departure kink on rolling ground.
+    //
+    // Reported 2026-08-11: hairpins "and not just on mountains either". The
+    // flat screen caught the artifact only where the city sat on flat
+    // ground, so the same 43 ft kink a mile out of Hazard on KY-80 -- and
+    // 112 like it -- rode through on "hills".
+    for leg_key in [
+        "hot_springs_ar_us:fort_smith_ar_us",
+        "hot_springs_ar_us:little_rock_ar_us",
+        "rochester_mn_us:winona_mn_us",
+        "oxford_ms_us:memphis_tn_us",
+    ] {
+        let recs = leg_curves(leg_key, true);
+        assert!(!recs.is_empty(), "{leg_key}");
+        let near_departure: Vec<_> = recs
+            .iter()
+            .filter(|r| r.apex_mi < 2.5 && is_hairpin(r))
+            .collect();
+        assert!(
+            near_departure.is_empty(),
+            "{leg_key}: departure artifact survived: {near_departure:?}"
+        );
+    }
+}
+
+#[test]
+fn test_the_leg_end_rule_cuts_by_terrain_within_a_single_leg() {
+    // KY-80 out of Hazard carries both cases half a mile apart.
+    //
+    // A 43 ft kink at mile 1.06 on hills is departure geometry and goes; a
+    // real 80 ft switchback at mile 2.48, where the road is already into the
+    // mountains, stays. Position alone would have taken both, which is why
+    // the rule asks the terrain as well.
+    let recs = leg_curves("hazard_ky_us:london_ky_us", true);
+    let near: Vec<_> = recs
+        .iter()
+        .filter(|r| r.apex_mi < 2.5 && is_hairpin(r))
+        .collect();
+    assert!(
+        !near.is_empty(),
+        "the mountain switchback at mile 2.48 must survive"
+    );
+    assert!(
+        near.iter().all(|r| r.min_radius_ft >= 50),
+        "the hills kink at mile 1.06 should be gone: {near:?}"
+    );
+}
+
+#[test]
+fn test_a_mountain_town_keeps_the_switchback_on_its_doorstep() {
+    // The leg-end rule spares mountain terrain, and has to.
+    //
+    // US-119 leaves Charleston straight into the mountains, and a real
+    // switchback sits within the first mile. Deleting by position alone
+    // would have taken it.
+    let recs = leg_curves("charleston_wv_us:pikeville_ky_us", true);
+    assert!(recs.iter().any(|r| r.apex_mi < 2.5 && is_hairpin(r)));
+}
+
+#[test]
+fn test_no_surviving_curve_is_tighter_than_a_road_can_bend() {
+    // A radius floor for every class, the sibling of the interstate 300 ft.
+    //
+    // 50 ft is tighter than a loaded tractor-trailer's own turning circle,
+    // so nothing that bends harder is a road. The floor sits just under the
+    // tightest genuine switchback the world carries (US-550 at 54 ft), which
+    // is why it can be applied everywhere without a terrain test.
+    let offenders: Vec<(&String, &CurveRecord)> = load()
+        .iter()
+        .flat_map(|(leg_key, recs)| recs.iter().map(move |rec| (leg_key, rec)))
+        .filter(|(_, rec)| !rec.connector && rec.min_radius_ft < 50)
+        .collect();
+    assert!(
+        offenders.is_empty(),
+        "impossible mainline radii survived: {:?}",
+        &offenders[..offenders.len().min(5)]
+    );
+}
+
+#[test]
+fn test_million_dollar_highway_untouched_by_the_new_screen() {
+    // A mountain corridor keeps every switchback under the new screen too.
+    let recs = leg_curves("durango_co_us:montrose_co_us", true);
+    assert!(recs.len() >= 250);
+    assert!(
+        recs.iter().any(is_hairpin),
+        "US-550's real hairpins must survive the flat-terrain screen"
+    );
+}
+
+#[test]
+fn test_salt_river_canyon_untouched_by_the_new_screen() {
+    // Globe->Show Low (US-60) keeps its mountain switchbacks too.
+    let recs = leg_curves("globe_az_us:show_low_az_us", true);
+    assert!(
+        recs.iter().any(is_hairpin),
+        "the Salt River Canyon's real hairpins must survive the screen"
+    );
+}
+
+// -- TestTripCurveIntegration (needs sim::trip) -----------------------------
+
+#[test]
+#[ignore = "needs sim::trip (Trip, TruckState, WeatherSystem)"]
+fn test_place_curves_empty_short_approach() {
+    // A very short approach route (single leg, < 10 mi) gets no curves.
+    //
+    // Curves are only meaningful on highway-length legs; short facility
+    // approaches should have no curve placement.
+    let leg = Leg::new(
+        "abilene_tx_us",
+        "abilene_tx_us",
+        5.0,
+        "US-83",
+        "flat",
+        Vec::new(),
+    )
+    .with_detail(CorridorDetail {
+        checkpoints: vec![RouteCheckpoint::new("Midpoint", 2.5, "place", "", "US-83")],
+        state_miles: vec![StateMileage::new("Texas", 5.0)],
+        grade_segments: vec![GradeSegment::new(0.0, 5.0, 0.0, "flat", "test")],
+        ..Default::default()
+    });
+    let route = Route::from_legs(
+        vec!["abilene_tx_us".to_string(), "abilene_tx_us".to_string()],
+        vec![leg],
+    );
+    // Python: Trip(route, TruckState(), _MockWeather(), time_scale=10.0,
+    // seed=42).curves == [] -- until Trip is ported, the route's own curves
+    // stand in for the deepest consumer.
+    assert!(route_curves(&route, &route.cities, false).is_empty());
+}
+
+#[test]
+#[ignore = "needs sim::trip (Trip._place_curves keeps connectors for physics)"]
+fn test_interstate_artifact_never_reaches_trip_curves() {
+    // The Abilene I-20 mile-4 artifacts stay out of the live trip.
+    let world = World::load_from(&data_dir()).unwrap();
+    let route = supported(&world, "abilene_tx_us", "fort_worth_tx_us");
+    assert!(
+        route.legs.iter().all(|leg| leg.highway.starts_with("I-")),
+        "this fixture route is meant to be interstate the whole way"
+    );
+    // Python: trip = Trip(route, TruckState(), _MockWeather(), time_scale=10.0, seed=42)
+    let curves = route_curves(&route, &route.cities, false);
+    let mainline: Vec<_> = curves.iter().filter(|c| !c.connector).collect();
+    assert!(
+        !mainline.is_empty(),
+        "the route should still have real curves"
+    );
+    assert!(!mainline.iter().any(|c| c.severity() == "hairpin"));
+    assert!(!mainline.iter().any(|c| (3.5..=4.5).contains(&c.apex_mi)));
+}
+
+#[test]
+#[ignore = "needs sim::trip (Trip.curves resolve leg miles to trip miles)"]
+fn test_place_curves_highway_route() {
+    // A highway route resolves curves from leg-relative to trip miles.
+    let world = World::load_from(&data_dir()).unwrap();
+    let Some(route) = world
+        .shortest_route("abilene_tx_us", "dallas_tx_us", None, false)
+        .unwrap()
+    else {
+        return;
+    };
+    let total_miles = route.miles();
+    for cr in route_curves(&route, &route.cities, false) {
+        assert!((0.0..=total_miles).contains(&cr.start_mi));
+        assert!((0.0..=total_miles).contains(&cr.end_mi));
+        assert!((cr.start_mi - cr.end_mi).abs() < 5.0); // no mile-long outliers
+        assert!(cr.direction == 'L' || cr.direction == 'R');
+    }
+}
+
+#[test]
+#[ignore = "needs sim::trip (Trip.curve_at)"]
+fn test_curve_at_inside() {}
+
+#[test]
+#[ignore = "needs sim::trip (Trip.curve_at)"]
+fn test_curve_at_none() {}
+
+#[test]
+#[ignore = "needs sim::trip (Trip.update emits CURVE events)"]
+fn test_check_curves_emits_for_sharp_curve() {}
+
+#[test]
+#[ignore = "needs sim::trip (Trip.restore seeds announced curves)"]
+fn test_restore_seeds_announced_curves() {}
+
+// --- flat-ground class screen (owner audit, 2026-08-19) ---------------------
+
+#[test]
+fn test_no_mainline_curve_bends_tighter_than_its_class_on_flat_ground() {
+    // Owner, 2026-08-19: "cruising down the highway or turnpike in a car, it
+    // hardly ever curves. I want an honest audit."
+    //
+    // The audit found the map disagreeing with the road. The MEDIAN interstate
+    // curve radius in the bake was 1,342 ft against a 1,330 ft design floor --
+    // half of them at or below what a 70 mph road may legally bend to -- and
+    // the tenth percentile across all mainline was 281 ft, an intersection
+    // rather than a highway. Interstate curve callouts ran 5.7 per hundred
+    // miles.
+    //
+    // Rough country still earns a tight bend: this screens flat ground only,
+    // so the Rockies and US-550 drive the way they should.
+    let world = world();
+    let screenable = screenable_legs();
+    let mut offenders = Vec::new();
+    for leg in &world.legs {
+        let Some(floor) = screenable.get(&format!("{}:{}", leg.a, leg.b)) else {
+            continue; // not flat enough to judge; see the canyon test below
+        };
+        for curve in leg_curves(&format!("{}:{}", leg.a, leg.b), true) {
+            if (curve.min_radius_ft as f64) < *floor {
+                offenders.push((
+                    leg.a.clone(),
+                    leg.b.clone(),
+                    leg.highway.clone(),
+                    curve.min_radius_ft,
+                    *floor,
+                ));
+            }
+        }
+    }
+    assert!(
+        offenders.is_empty(),
+        "{} flat-ground curves under floor: {:?}",
+        offenders.len(),
+        &offenders[..offenders.len().min(5)]
+    );
+}
+
+#[test]
+fn test_rough_country_keeps_its_tight_bends() {
+    // The other half, and the reason this screens terrain rather than radius.
+    //
+    // A blanket radius floor would flatten the best driving in the game. A
+    // mountain leg is allowed to bend tighter than any design table, because
+    // real ones do.
+    let world = world();
+    let floor_70 = min_radius_ft(70.0);
+    let mut kept_tight = 0;
+    for leg in &world.legs {
+        if leg_is_level(leg) {
+            continue;
+        }
+        for curve in leg_curves(&format!("{}:{}", leg.a, leg.b), true) {
+            if (curve.min_radius_ft as f64) < floor_70 {
+                kept_tight += 1;
+            }
+        }
+    }
+    assert!(
+        kept_tight > 500,
+        "only {kept_tight} tight curves survive off flat ground"
+    );
+}
+
+#[test]
+fn test_a_canyon_tagged_flat_is_not_screened_as_level_ground() {
+    // The world's terrain label is derived from NET elevation change, so a
+    // road that climbs and drops all the way along without getting anywhere
+    // reads as flat. I-70 through Glenwood Canyon is tagged flat, and its
+    // curves are cut into rock walls.
+    //
+    // Caught by test_glenwood_canyon_interstate_curves_survive when the screen
+    // first went in and took 21 real curves off it. Two proxies were tried and
+    // both failed -- the label itself, then feet of relief per mile, which
+    // calibrated against HPMS at a Youden's J of 0.29. The screen reads the
+    // real HPMS terrain class now, and HPMS calls this leg mountainous.
+    let canyon = world()
+        .legs
+        .iter()
+        .find(|leg| leg.a == "glenwood_springs_co_us" && leg.b == "grand_junction_co_us")
+        .unwrap();
+    assert_eq!(canyon.terrain, "flat"); // the label really is wrong
+    assert!(!leg_is_level(canyon)); // HPMS is not
+}
+
+#[test]
+fn test_the_radius_floor_follows_the_leg_s_own_posted_limit() {
+    // Design speed comes from the baked OSM maxspeed sweep, not a guess at
+    // the road's class. A 55 mph US route and a 70 mph interstate are held to
+    // different floors because they are different roads, and the data says
+    // which is which.
+    let speeds: Vec<f64> = world()
+        .legs
+        .iter()
+        .map(|leg| leg_design_speed(leg))
+        .collect();
+    let distinct: HashSet<u64> = speeds.iter().map(|s| s.to_bits()).collect();
+    assert!(
+        distinct.len() > 1,
+        "every leg fell back to the same default speed"
+    );
+    let max = speeds.iter().cloned().fold(f64::MIN, f64::max);
+    let min = speeds.iter().cloned().fold(f64::MAX, f64::min);
+    assert!(max >= 65.0);
+    // The floor tracks it rather than being pinned per class.
+    assert!(min_radius_ft(max) > min_radius_ft(min));
+}
+
+#[test]
+fn test_the_terrain_bake_says_what_kind_of_value_it_carries() {
+    // AGENTS.md: a baked record must make plain whether it was read, derived
+    // or assumed. The HPMS class is READ; that one value stands for a whole leg
+    // is DERIVED, and the source string has to say both.
+    let baked: Vec<_> = world()
+        .legs
+        .iter()
+        .filter(|leg| leg.hpms_terrain().is_some())
+        .collect();
+    assert!(!baked.is_empty(), "no leg carries an HPMS terrain class");
+    let source = &baked[0].hpms_terrain().unwrap().source;
+    assert!(source.contains("HPMS"));
+    let lowered = source.to_lowercase();
+    assert!(lowered.contains("modal") || lowered.contains("derived"));
+    assert!(baked
+        .iter()
+        .all(|leg| (1..=3).contains(&leg.hpms_terrain().unwrap().terrain_type)));
+}
+
+#[test]
+fn severity_bands_match_the_advisory_speed() {
+    assert_eq!(curve_severity(25, 30.0), "hairpin");
+    assert_eq!(curve_severity(45, 160.0), "hairpin");
+    assert_eq!(curve_severity(35, 30.0), "sharp");
+    assert_eq!(curve_severity(50, 30.0), "moderate");
+    assert_eq!(curve_severity(55, 30.0), "gentle");
+}
