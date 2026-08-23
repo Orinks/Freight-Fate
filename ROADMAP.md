@@ -120,6 +120,28 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **Rust port: decide what `DriveRef::with` / `read` / `call` should do
+      when the borrow fails (2026-08-23).** All three answer `None` when the
+      drive is already borrowed, and every caller turns that into a
+      plausible-looking default -- which is how two screens came to state
+      something false about the truck. The rest stop's fuel row read
+      "Fuel: tank is full" at any tank level, because `build_items` holds the
+      drive and `fuel_label` reached for it again; and calling a roadside
+      mechanic or chaining up from the pause menu emptied the pause menu,
+      because those actions rebuilt the rows from inside the same borrow and
+      the rebuild came back with nothing. Both are fixed by passing the
+      already-borrowed drive in (`fuel_label(ctx, d)`, the shape `tire_label`
+      always had) and by rebuilding after the borrow is back, and both are
+      pinned by tests. What is not fixed is the trap: a failed borrow is a
+      programming error, not a state of the world, and today it is silent.
+      Proposal, for the owner to rule on: `debug_assert!` on the failed
+      `try_borrow_mut` inside all three, plus a logged warning in release, so
+      the next one shows up on a bench instead of in a player's ear. The
+      remaining `unwrap_or_default()` fallbacks on `build_items`
+      (`RestStopState`, `ParkingFullState`, `PauseMenuState`,
+      `FacilityArrivalState`) each still degrade to an empty menu if a new
+      caller nests a borrow.
+
 - [ ] **Rust port: release built by `tools/build_release.py --rust`**
       (2026-08-22). Stages `build/FreightFate/` -- `FreightFate.exe`, the
       vendored SDL2/BASS/Prism libraries, `freight_fate/data/world.ffdata`
@@ -140,12 +162,38 @@ onto exit signalling.
       `cargo fmt --all --check` on Linux, then `cargo clippy --all-targets
       --locked -D warnings`, `cargo test -p ff-core` and
       `cargo test -p freight-fate` on Windows, with the same headless trio
-      the Python jobs use and Git LFS on -- two committed-pack tests assert
-      the real packs' byte length and hash, and an LFS pointer is a file
-      that exists, so their "not present, skip" guard never fires. Windows
-      only: SDL2 and BASS are vendored for windows-x86_64 alone, so a Linux
-      runner has nothing to link against and nothing to load. Vendor each
-      platform's libraries before adding its runner.
+      the Python jobs use. Windows only: SDL2 and BASS are vendored for
+      windows-x86_64 alone, so a Linux runner has nothing to link against and
+      nothing to load. Vendor each platform's libraries before adding its
+      runner.
+
+      **The Rust job follows the same LFS rule as the Python one, and must
+      keep following it (2026-08-23).** It first checked out with `lfs: true`,
+      taking roughly 270 MB per push, 261 MB of that music.pak. Both runs on
+      the port branch then died at CHECKOUT with "This repository exceeded its
+      LFS budget" and the test job never ran a test. The two workflows share
+      one budget, so half a fix is no fix: this job now checks out with
+      `lfs: false` and pulls sounds.pak alone (7.5 MB, what the suite actually
+      reaches for), non-fatally, exactly as `ci.yml` does. DO NOT PUT
+      `lfs: true` BACK.
+
+      The original argument for fetching everything was that
+      `test_committed_pack_has_freight_fate_header` and
+      `test_committed_music_pack_has_freight_fate_header` guard with "if the
+      file does not exist, skip", and a pointer is a file that EXISTS -- so
+      the guard never fired and the byte-length assertion ran against 130
+      bytes of pointer text. That is fixed rather than worked around:
+      `ff_core::assets_pack::pack_available` / `is_lfs_pointer` tell a pointer
+      from a pack, and every Rust test that reads the shipped bytes now skips
+      on a pointer with a note on the log naming it -- the two committed-pack
+      header tests, the shipped-recording lookups and durations in
+      `audio_backends.rs`, the horn stream in `audio_loops.rs`,
+      `verify_sound_assets` in `audio_sound_pack.rs`, and the music-catalog
+      sweep in `audio_speech_audio.rs`. The note is not decoration: a green
+      run that quietly tested no audio at all is the failure this is guarding
+      against, and the same red window the Python side is riding out
+      (allowance resets on the 1st) hides a real failure just as well here.
+      Read the job log, not the badge.
 
 - [x] **Rust port: the validator invariants export has a shipped code path
       (`ff-invariants`, 2026-08-22).** The Rust half of

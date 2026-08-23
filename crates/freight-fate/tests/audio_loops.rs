@@ -15,11 +15,15 @@ mod audio_loops {
         HORN_LOOP_START, SFX_EXTENSIONS,
     };
 
-    use crate::audio_support::{bass_rig, wait_for};
+    use crate::audio_support::{bass_rig, shipped_sounds, wait_for};
 
     /// A real, non-looping BASS stream for the horn (the engine keeps the
-    /// device up), or None when BASS is absent.
+    /// device up), or None when BASS is absent -- or when the horn recording
+    /// itself is not here to stream, which is a checkout without LFS.
     fn horn_stream() -> Option<(crate::audio_support::Rig, safe::Stream)> {
+        if !shipped_sounds() {
+            return None;
+        }
         let rig = bass_rig()?;
         let (data, _ext) = asset_bytes("vehicle/horn", SFX_EXTENSIONS).expect("vehicle/horn");
         let stream = safe::stream_create_mem(&data, 0).expect("horn stream");

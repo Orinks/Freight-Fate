@@ -660,3 +660,66 @@ fn test_overshoot_clears_assist_then_stopped_t_recovers() {
 fn test_three_missed_microsleeps_force_a_stop() {
     // Three drifted nods put the truck out of service on the shoulder.
 }
+
+#[test]
+fn test_calling_the_mechanic_leaves_the_pause_menu_with_its_rows() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    with_drive(&drive, |d| d.trip.truck.damage_pct = 60.0);
+    let mut state = PauseMenuState::with_drive(DriveRef::of(&drive));
+    Menu::enter(&mut state, &mut app.ctx);
+    assert!(!labels(&state, &app.ctx).is_empty());
+
+    activate(&mut state, &mut app.ctx, "Call a roadside mechanic");
+
+    let rows = labels(&state, &app.ctx);
+    assert!(
+        rows.iter().any(|row| row == "Resume driving"),
+        "the pause menu lost its rows: {rows:?}"
+    );
+    assert!(
+        rows.iter()
+            .any(|row| row == "Call a roadside mechanic: not needed yet"),
+        "the mechanic row did not re-read the repaired truck: {rows:?}"
+    );
+}
+
+#[test]
+fn test_hanging_chains_leaves_the_pause_menu_with_its_rows() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    {
+        let profile = app.ctx.profile.as_mut().expect("a career");
+        profile.set_chains_owned(true);
+    }
+    let mut state = PauseMenuState::with_drive(DriveRef::of(&drive));
+    Menu::enter(&mut state, &mut app.ctx);
+    assert!(labels(&state, &app.ctx)
+        .iter()
+        .any(|row| row.starts_with("Install snow chains")));
+
+    activate(&mut state, &mut app.ctx, "Install snow chains");
+
+    let rows = labels(&state, &app.ctx);
+    assert!(
+        rows.iter().any(|row| row == "Resume driving"),
+        "the pause menu lost its rows: {rows:?}"
+    );
+    assert!(
+        rows.iter().any(|row| row.starts_with("Remove snow chains")),
+        "the chain row did not turn around: {rows:?}"
+    );
+
+    activate(&mut state, &mut app.ctx, "Remove snow chains");
+
+    let rows = labels(&state, &app.ctx);
+    assert!(
+        rows.iter().any(|row| row == "Resume driving"),
+        "the pause menu lost its rows: {rows:?}"
+    );
+    assert!(
+        rows.iter()
+            .any(|row| row.starts_with("Install snow chains")),
+        "the chain row did not turn back: {rows:?}"
+    );
+}

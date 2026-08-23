@@ -15,6 +15,7 @@ use ff_core::sim::trip_models::RoadStop;
 
 use crate::app::GameContext;
 use crate::states::base::Menu;
+use crate::states::driving::DrivingState;
 use crate::states::driving_core::{
     advance_rest_clock, hos_mut_of, player_pays_operating_costs, profile_mut_of, profile_of,
     FUEL_STOP_MIN,
@@ -28,22 +29,22 @@ pub trait FuelPump: Menu {
     fn fueled_here(&self) -> bool;
     fn set_fueled_here(&mut self, fueled: bool);
 
-    fn fuel_label(&self, ctx: &mut GameContext) -> String {
-        let Some((need, region)) = self.drive().with(ctx, |d, _| {
-            (
-                d.trip.truck.specs.fuel_tank_gal - d.trip.truck.fuel_gal,
-                d.trip.current_region().to_string(),
-            )
-        }) else {
-            return "Fuel: tank is full".to_string();
-        };
+    /// The fuel row, given the drive the caller already holds.
+    ///
+    /// Takes the drive rather than reaching for it, exactly as
+    /// `RestStopState::tire_label` does, because the menus that show this
+    /// row build their rows INSIDE `DriveRef::call` -- the drive is already
+    /// borrowed there, a second borrow can only fail, and the failure used
+    /// to fall through to "tank is full" on a tank that was nearly empty.
+    fn fuel_label(&self, ctx: &GameContext, d: &DrivingState) -> String {
+        let need = d.trip.truck.specs.fuel_tank_gal - d.trip.truck.fuel_gal;
         if need < 1.0 {
             return "Fuel: tank is full".to_string();
         }
         if !player_pays_operating_costs(&profile_of(ctx).business_status) {
             return format!("Refuel {} gallons on the carrier fuel card", fmt_f(need, 0));
         }
-        let cost = ctx.economy.fuel_cost(&region, need) + 35.0;
+        let cost = ctx.economy.fuel_cost(d.trip.current_region(), need) + 35.0;
         format!(
             "Refuel {} gallons for {} dollars",
             fmt_f(need, 0),

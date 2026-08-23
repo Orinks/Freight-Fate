@@ -205,7 +205,7 @@ impl PauseMenuState {
     }
 
     fn mechanic(&mut self, ctx: &mut GameContext) {
-        let Some(()) = self.driving.clone().call(self, ctx, |s, ctx, d| {
+        let done = self.driving.clone().call(self, ctx, |_s, ctx, d| {
             let damage = d.trip.truck.damage_pct;
             if damage <= FIELD_REPAIR_DAMAGE_PCT {
                 ctx.say(&format!(
@@ -213,11 +213,11 @@ impl PauseMenuState {
                      is past {} percent.",
                     fmt_f(FIELD_REPAIR_DAMAGE_PCT, 0)
                 ));
-                return;
+                return None;
             }
             if d.trip.truck.speed_mph() > 3.0 {
                 ctx.say("Come to a complete stop first.");
-                return;
+                return None;
             }
             let cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE);
             let carrier_paid = !player_pays_operating_costs(&profile_of(ctx).business_status);
@@ -246,18 +246,26 @@ impl PauseMenuState {
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx)
             );
-            s.refresh(ctx, true);
-            ctx.say(&text);
-        }) else {
+            Some(text)
+        });
+        // `refresh()` rebuilds these rows through the same drive the closure
+        // was holding, so it has to run after the borrow is back. Called from
+        // inside, the rebuild found the drive busy and left the pause menu
+        // with no rows at all -- "No options available" after a repair that
+        // in fact worked.
+        let Some(Some(text)) = done else {
             return;
         };
+        self.refresh(ctx, true);
+        ctx.say(&text);
     }
 
     fn install_chains(&mut self, ctx: &mut GameContext) {
-        self.driving.clone().call(self, ctx, |s, ctx, d| {
+        // Same rule as `mechanic`: rebuild the rows once the drive is free.
+        let done = self.driving.clone().call(self, ctx, |_s, ctx, d| {
             if d.trip.truck.speed_mph() > 3.0 {
                 ctx.say("Come to a complete stop first.");
-                return;
+                return None;
             }
             let night = is_night(d.trip.local_hour());
             let minutes = CHAIN_INSTALL_MIN * if night { CHAIN_INSTALL_NIGHT_MULT } else { 1.0 };
@@ -294,16 +302,21 @@ impl PauseMenuState {
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx)
             );
-            s.refresh(ctx, true);
-            ctx.say(&text);
+            Some(text)
         });
+        let Some(Some(text)) = done else {
+            return;
+        };
+        self.refresh(ctx, true);
+        ctx.say(&text);
     }
 
     fn remove_chains(&mut self, ctx: &mut GameContext) {
-        self.driving.clone().call(self, ctx, |s, ctx, d| {
+        // Same rule as `mechanic`: rebuild the rows once the drive is free.
+        let done = self.driving.clone().call(self, ctx, |_s, ctx, d| {
             if d.trip.truck.speed_mph() > 3.0 {
                 ctx.say("Come to a complete stop first.");
-                return;
+                return None;
             }
             advance_rest_clock(
                 d,
@@ -333,9 +346,13 @@ impl PauseMenuState {
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx)
             );
-            s.refresh(ctx, true);
-            ctx.say(&text);
+            Some(text)
         });
+        let Some(Some(text)) = done else {
+            return;
+        };
+        self.refresh(ctx, true);
+        ctx.say(&text);
     }
 
     fn emergency_shoulder_sleep(&mut self, ctx: &mut GameContext) {

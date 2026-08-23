@@ -183,7 +183,7 @@ impl RestStopState {
         }
 
         if has("fuel") {
-            let label = self.fuel_label(ctx);
+            let label = self.fuel_label(ctx, d);
             items.push(
                 MenuItem::new(label, |s: &mut Self, ctx| s.refuel(ctx)).help(
                     "Fill the tank at this region's diesel price, plus a 35 dollar service fee. \

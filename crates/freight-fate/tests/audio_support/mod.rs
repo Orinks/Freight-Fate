@@ -16,7 +16,8 @@ use std::sync::{Arc, Mutex, MutexGuard, Once};
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
-use freight_fate::audio::{Audio, AudioEngine};
+use ff_core::assets_pack;
+use freight_fate::audio::{assets_dir, Audio, AudioEngine};
 
 static AUDIO_LOCK: Mutex<()> = Mutex::new(());
 static HEADLESS: Once = Once::new();
@@ -61,6 +62,82 @@ pub fn bass_rig() -> Option<Rig> {
         return None;
     }
     Some(rig)
+}
+
+/// The facade on the BASS backend AND the shipped recordings, or `None`
+/// (with a note) when either is missing.
+///
+/// A test that opens a real stream needs both: BASS to open it, and recorded
+/// bytes for it to open. On a checkout without LFS the pack is a pointer, so
+/// every lookup comes back empty and the stream the test then measures was
+/// never created -- it would fail on a missing horn, which says nothing about
+/// the mixer, the fades or the jake routing it meant to pin.
+pub fn bass_rig_with_recordings() -> Option<Rig> {
+    if !shipped_sounds() {
+        return None;
+    }
+    bass_rig()
+}
+
+// ---------------------------------------------------------------------------
+// Shipped audio
+//
+// The same guard `ff_core::assets_pack`'s own tests use, asked from the game
+// crate's side: a test that reads the real recordings needs the pack to be
+// materialised, and a Git LFS pointer is a file that EXISTS -- so an
+// existence check reads an unmaterialised pack as present and the lookup
+// then fails against 130 bytes of pointer text.
+//
+// The predicate lives in `ff_core::assets_pack` (`pack_available`), which
+// this crate already depends on, rather than being duplicated here: the two
+// crates share one definition of what "the pack is here" means. What is
+// local is only the skip note, because the two sides skip for different
+// reasons -- ff-core cannot check a header it does not have, these tests
+// cannot decode a recording they do not have.
+
+/// Whether the shipped `sounds.pak` (or a loose sound tree standing in for
+/// it) can answer a lookup, saying out loud why not when it cannot.
+///
+/// The note matters more than the skip: CI checks out without LFS on purpose
+/// (fetching the packs on every push exhausted the repository's LFS budget),
+/// so a silent skip would turn a green run into one that proved nothing about
+/// the audio at all.
+pub fn shipped_sounds() -> bool {
+    shipped_pack(assets_pack::DEFAULT_PACK_NAME, "recordings")
+}
+
+/// Whether the shipped `music.pak` (or a loose tree) can answer a lookup.
+pub fn shipped_music() -> bool {
+    shipped_pack(assets_pack::DEFAULT_MUSIC_PACK_NAME, "music")
+}
+
+fn shipped_pack(name: &str, what: &str) -> bool {
+    // A builder machine carries the loose sound tree instead, and the lookup
+    // falls back to it: the pack being absent there is not a missing asset.
+    // A clean clone has only `engine_classic/`, so `ui/` is the marker that
+    // the real tree is present (the Python helper checks the same folder).
+    if assets_dir().join("ui").is_dir() {
+        return true;
+    }
+    let path = assets_pack::default_pack_dir().join(name);
+    if assets_pack::pack_available(&path) {
+        return true;
+    }
+    if assets_pack::is_lfs_pointer(&path) {
+        eprintln!(
+            "SKIPPING: no shipped {what}. {} is a Git LFS pointer, not the pack. \
+             CI checks out without LFS on purpose (fetching the packs on every push \
+             exhausted the repository's LFS budget); run \
+             `git lfs pull --include=\"src/freight_fate/{name}\"` to check this locally.",
+            path.display()
+        );
+    } else {
+        eprintln!(
+            "SKIPPING: no shipped {what}. Neither the loose sound tree nor {} is here.",
+            path.display()
+        );
+    }
+    false
 }
 
 /// Poll `cond` every 10 ms for up to `timeout`.

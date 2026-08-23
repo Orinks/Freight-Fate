@@ -38,6 +38,39 @@ pub const PACK_MAGIC: &[u8; 6] = b"FFPK1\0";
 pub const DEFAULT_PACK_NAME: &str = "sounds.pak";
 pub const DEFAULT_MUSIC_PACK_NAME: &str = "music.pak";
 
+/// The first bytes of a Git LFS pointer file.
+///
+/// A pointer is a ~130 byte text stub standing in for the real object, and it
+/// EXISTS -- which is the whole trap. An existence check alone reads an
+/// unmaterialised pack as present, so a test guarded with "if the file is not
+/// there, skip" never skips and asserts against 130 bytes of text instead.
+///
+/// CI checks out without LFS deliberately: music.pak is 250 MB and sounds.pak
+/// 7.5 MB, and fetching both on every push exhausted the repository's LFS
+/// budget (see `.github/workflows/rust.yml`, and `ci.yml` for the Python
+/// side). A pointer here is the ordinary case on a runner, not a fault.
+pub const LFS_POINTER_MAGIC: &[u8] = b"version https://git-lfs";
+
+/// Whether `path` is a Git LFS pointer standing in for the real file.
+pub fn is_lfs_pointer(path: &Path) -> bool {
+    let Ok(mut file) = std::fs::File::open(path) else {
+        return false;
+    };
+    let mut head = [0u8; LFS_POINTER_MAGIC.len()];
+    match file.read_exact(&mut head) {
+        Ok(()) => head == LFS_POINTER_MAGIC,
+        Err(_) => false,
+    }
+}
+
+/// Whether a pack is really here, rather than an LFS pointer to it.
+///
+/// What a test that wants the shipped bytes has to ask: `Path::exists` is not
+/// enough (see [`LFS_POINTER_MAGIC`]).
+pub fn pack_available(path: &Path) -> bool {
+    path.exists() && !is_lfs_pointer(path)
+}
+
 /// Fixed zip timestamp so identical inputs produce identical packs.
 const EPOCH: (u16, u8, u8, u8, u8, u8) = (1980, 1, 1, 0, 0, 0);
 
@@ -798,11 +831,42 @@ mod tests {
         Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/freight_fate")
     }
 
+    /// Whether the shipped pack at `path` is really here, saying out loud
+    /// why it is not when it is not.
+    ///
+    /// The skip has to be audible. A checkout without LFS leaves a pointer
+    /// where the pack should be, and a pointer is a file that EXISTS -- so
+    /// the old "if it is not there, skip" guard never fired and these
+    /// assertions ran against 130 bytes of pointer text. Now they skip, and
+    /// a run that quietly tested nothing would be the worse failure, so the
+    /// reason goes in the log naming the pointer.
+    fn committed_pack(path: &Path) -> bool {
+        if pack_available(path) {
+            return true;
+        }
+        let name = path
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
+        if is_lfs_pointer(path) {
+            eprintln!(
+                "SKIPPING {}: it is a Git LFS pointer, not the pack. CI checks out \
+                 without LFS on purpose (fetching the packs on every push exhausted \
+                 the repository's LFS budget); run \
+                 `git lfs pull --include=\"src/freight_fate/{name}\"` to check this \
+                 locally.",
+                path.display()
+            );
+        } else {
+            eprintln!("SKIPPING {}: not present (LFS)", path.display());
+        }
+        false
+    }
+
     #[test]
     fn test_committed_pack_has_freight_fate_header() {
         let path = committed_pack_dir().join(DEFAULT_PACK_NAME);
-        if !path.exists() {
-            eprintln!("sounds.pak not present (LFS); skipping");
+        if !committed_pack(&path) {
             return;
         }
         let pack_bytes = std::fs::read(&path).unwrap();
@@ -826,8 +890,7 @@ mod tests {
     #[test]
     fn test_committed_music_pack_has_freight_fate_header() {
         let path = committed_pack_dir().join(DEFAULT_MUSIC_PACK_NAME);
-        if !path.exists() {
-            eprintln!("music.pak not present (LFS); skipping");
+        if !committed_pack(&path) {
             return;
         }
         // Split out of sounds.pak on 2026-08-14 alongside the radio

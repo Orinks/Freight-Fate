@@ -50,7 +50,7 @@ impl ParkingFullState {
 
     /// `enter()` run while the drive is still in hand -- see `drive_ref`.
     pub fn enter_over_drive(&mut self, ctx: &mut GameContext, driving: &mut DrivingState) {
-        let items = self.rows(ctx);
+        let items = self.rows(ctx, driving);
         self.menu.items = items;
         self.menu.index = self.menu.index.min(self.menu.items.len().saturating_sub(1));
         if let Some(key) = self.menu.open_sound_key.clone() {
@@ -78,13 +78,13 @@ impl ParkingFullState {
         ));
     }
 
-    fn rows(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
+    fn rows(&mut self, ctx: &mut GameContext, d: &mut DrivingState) -> Vec<MenuItem<Self>> {
         let mut items: Vec<MenuItem<Self>> = Vec::new();
         if self.stop.actions.iter().any(|a| a == "fuel") {
             // First: a driver turned away at 2 AM needs the tank before they
             // need the choice of where to sleep, and running dry between
             // overnight stops is the failure this ordering exists to prevent.
-            let label = self.fuel_label(ctx);
+            let label = self.fuel_label(ctx, d);
             items.push(
                 MenuItem::new(label, |s: &mut Self, ctx| s.refuel(ctx)).help(
                     "The lot is full, but the pumps are open. Fill the tank at this region's \
@@ -232,7 +232,10 @@ impl Menu for ParkingFullState {
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        self.rows(ctx)
+        self.driving
+            .clone()
+            .call(self, ctx, |s, ctx, d| s.rows(ctx, d))
+            .unwrap_or_default()
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {

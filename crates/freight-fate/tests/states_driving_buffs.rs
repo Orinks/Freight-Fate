@@ -13,10 +13,29 @@ mod states_driving_menus_support;
 use ff_core::models::business::{COMPANY_DRIVER, LEASED_OWNER_OPERATOR};
 use ff_core::sim::trip_models::RoadStop;
 use freight_fate::app::testing::TestApp;
-use freight_fate::app::SharedState;
+use freight_fate::app::{GameContext, SharedState};
+use freight_fate::states::base::Menu;
 use freight_fate::states::driving_menu_states::DriveRef;
-use freight_fate::states::driving_rest_states::RestStopState;
+use freight_fate::states::driving_rest_states::{ParkingFullState, RestStopState};
 use states_driving_menus_support::*;
+
+/// Activate the row whose HELP contains `needle`.
+///
+/// The fuel row is found this way rather than by its label, because the
+/// label changes face with the tank ("Fuel: tank is full" against "Refuel
+/// 110 gallons for ...") -- see
+/// `test_rest_stop_fuel_row_reads_the_same_tank_as_the_lot_screen` below.
+fn activate_by_help<M: Menu>(state: &mut M, ctx: &mut GameContext, needle: &str) {
+    let items = state.build_items(ctx);
+    let found = items
+        .iter()
+        .find(|item| item.help_text(state, ctx).contains(needle))
+        .cloned();
+    match found {
+        Some(item) => (item.action)(state, ctx),
+        None => panic!("no row whose help mentions {needle:?}"),
+    }
+}
 
 /// `tests/test_buffs.py::_driving`: a Denver -> Salt Lake City run under a
 /// chosen business status.
@@ -116,7 +135,7 @@ fn test_shower_is_free_after_fueling_at_pilot() {
 
     let priced = row(&mut state, &mut app.ctx, "Shower").text(&state, &app.ctx);
     assert_eq!(priced, "Shower: 15 dollars", "{priced}");
-    activate(&mut state, &mut app.ctx, "Refuel");
+    activate_by_help(&mut state, &mut app.ctx, "Fill the tank");
     let free = row(&mut state, &mut app.ctx, "Shower").text(&state, &app.ctx);
     assert!(free.contains("free with your fuel purchase"), "{free}");
 
@@ -183,5 +202,59 @@ fn test_big_bucks_buffs_require_running_bobtail() {
     assert!(
         texts.iter().any(|t| t.to_lowercase().contains("brisket")),
         "{texts:?}"
+    );
+}
+
+// -- the fuel row reads the tank it is standing at -------------------------
+
+/// The rest stop's fuel row used to read "Fuel: tank is full" on any tank.
+///
+/// `RestStopState::build_items` runs `rows()` inside
+/// `self.driving.clone().call(...)`, which holds the drive's `RefCell`
+/// borrow. `rows()` called `FuelPump::fuel_label(ctx)`, which reached the
+/// drive a SECOND time through `DriveRef::with` -- a nested
+/// `try_borrow_mut` on the same cell, which can only fail. `with` returning
+/// `None` fell through to the "tank is full" string, so a nearly empty tank
+/// was announced as a full one and the gallons and the price were never
+/// spoken.
+///
+/// `fuel_label` now takes the already-borrowed drive, the shape the sibling
+/// `tire_label(ctx, d)` two rows below always had. Python has no borrow to
+/// lose -- `self.driving` is a plain reference -- so this was a port
+/// regression, not shipped behaviour.
+///
+/// Same truck (40 of 150 gallons) at the same stop, on two screens that
+/// build their rows differently: they have to agree.
+#[test]
+fn test_rest_stop_fuel_row_reads_the_same_tank_as_the_lot_screen() {
+    let mut app = TestApp::new();
+    let drive = buff_drive(&mut app, LEASED_OWNER_OPERATOR);
+    with_drive(&drive, |d| d.trip.truck.fuel_gal = 40.0);
+
+    let mut rest = rest_stop(&drive, "Pilot Travel Center", &["fuel", "break"]);
+    let rest_rows = build_labels(&mut rest, &mut app.ctx);
+    let rest_fuel = rest_rows
+        .iter()
+        .find(|row| row.starts_with("Fuel") || row.starts_with("Refuel"))
+        .expect("a fuel row");
+
+    let mut lot = ParkingFullState::with_drive(
+        DriveRef::of(&drive),
+        buff_stop(&drive, "Pilot Travel Center", &["fuel", "break"]),
+    );
+    let lot_rows = build_labels(&mut lot, &mut app.ctx);
+    let lot_fuel = lot_rows
+        .iter()
+        .find(|row| row.starts_with("Fuel") || row.starts_with("Refuel"))
+        .expect("a fuel row");
+
+    // Same truck, same stop, same tank: the two screens must agree, and
+    // both must name the gallons rather than claim a full tank.
+    assert_eq!(rest_fuel, lot_fuel);
+    // The dollar figure rides this session's fuel market, so pin the part
+    // the bug erased: the gallons, and that it is an offer to refuel at all.
+    assert!(
+        rest_fuel.starts_with("Refuel 110 gallons for ") && rest_fuel.ends_with(" dollars"),
+        "{rest_fuel:?}"
     );
 }

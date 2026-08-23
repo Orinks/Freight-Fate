@@ -23,7 +23,10 @@ mod audio_backends {
     use ff_core::pyrandom::PyRandom;
     use freight_fate::audio::*;
 
-    use crate::audio_support::{bass_rig, rig, sine_wav, wait_for, IcyServer};
+    use crate::audio_support::{
+        bass_rig, bass_rig_with_recordings, rig, shipped_music, shipped_sounds, sine_wav, wait_for,
+        IcyServer,
+    };
 
     /// Every facade call must be safe regardless of backend.
     fn exercise(a: &mut AudioEngine) {
@@ -168,7 +171,10 @@ mod audio_backends {
     fn test_sound_lookup_prefers_ogg_when_available() {
         // asset_bytes answers from the pack on clean clones and from the
         // loose tree on builder machines; the extension preference holds
-        // either way.
+        // either way. Neither one here means there is nothing to prefer.
+        if !shipped_sounds() {
+            return;
+        }
         for key in [
             "weather/rain_light",
             "weather/snow_wind",
@@ -190,6 +196,9 @@ mod audio_backends {
         // Looping beds may resolve to WAV (lossy edges break loop seams --
         // tools/fix_loop_seams.py); the licensed overlay's file wins where
         // present. One-shots stay ogg.
+        if !shipped_sounds() {
+            return;
+        }
         let idle = asset_bytes("engine/idle", SFX_EXTENSIONS).unwrap().1;
         assert!(idle == "ogg" || idle == "wav");
         assert_eq!(
@@ -212,13 +221,17 @@ mod audio_backends {
 
     #[test]
     fn test_engine_start_recording_is_short_one_shot() {
-        let Some(_r) = bass_rig() else { return };
+        let Some(_r) = bass_rig_with_recordings() else {
+            return;
+        };
         assert!(shipped_duration_s("engine/start").unwrap() <= 4.25);
     }
 
     #[test]
     fn test_vehicle_horn_and_shift_recordings_are_short_one_shots() {
-        let Some(_r) = bass_rig() else { return };
+        let Some(_r) = bass_rig_with_recordings() else {
+            return;
+        };
         assert!(shipped_duration_s("vehicle/horn").unwrap() <= 1.0);
         assert!(shipped_duration_s("vehicle/gear_shift").unwrap() <= 0.8);
     }
@@ -229,7 +242,9 @@ mod audio_backends {
         // to know when it stops sounding is to measure the clip. Read from
         // the container's own headers -- no decoder, no audio device -- and
         // cross-checked here against an actual decode.
-        let Some(_r) = bass_rig() else { return };
+        let Some(_r) = bass_rig_with_recordings() else {
+            return;
+        };
         for key in [
             "driver/yawn",
             "events/spike_strip",
@@ -259,6 +274,11 @@ mod audio_backends {
 
     #[test]
     fn test_bass_music_never_loops_catalog_tracks() {
+        // Every catalog track has to open, which needs the music pack: with
+        // only a pointer there is no track to open and no looping to check.
+        if !shipped_music() {
+            return;
+        }
         let Some(mut r) = bass_rig() else { return };
         let bass = r.engine.bass().unwrap();
         assert!(bass.music_stream_handle().is_none());
@@ -380,7 +400,9 @@ mod audio_backends {
         // crossfade ring; a clean clone (synthesized engine/idle only) falls
         // back to the single pitched loop. Either way rpm tracking must be
         // safe.
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         let have_all_cuts = ENGINE_BANDS
             .iter()
             .all(|(key, _rpm)| asset_bytes(key, SFX_EXTENSIONS).is_some());
@@ -432,13 +454,18 @@ mod audio_backends {
         // The jake A/B needs both cuts shipped -- the routing has nothing to
         // route to otherwise. (The Python test looked in the loose tree; the
         // Rust checkout carries them in the pack.)
+        if !shipped_sounds() {
+            return;
+        }
         assert!(asset_bytes(JAKE_RECORDED_KEY, SFX_EXTENSIONS).is_some());
         assert!(asset_bytes(JAKE_CLASSIC_KEY, SFX_EXTENSIONS).is_some());
     }
 
     #[test]
     fn test_jake_voice_setting_routes_the_synth_key_and_applies_live() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         // has_asset resolves the key the player-facing catalog and the real
         // drive both use -- the routing must be invisible to callers.
         assert!(r.engine.has_asset(JAKE_RECORDED_KEY));
@@ -467,7 +494,9 @@ mod audio_backends {
     fn test_the_jake_toggle_re_voices_whatever_band_is_sounding() {
         // A loop on a NON-jake channel is none of this toggle's business;
         // every jake band is (see the Python docstring's history).
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.set_jake_voice(false);
         // Asking for the 1800 band on "real" sounds the one recording -- that
         // is the routing. What this pins is that the toggle re-voices it.
@@ -514,7 +543,9 @@ mod audio_backends {
         // A clean clone carries only the synthesized engine/idle: the ring
         // cannot form, and the legacy single pitched loop must come up
         // instead.
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine
             .bass_mut()
             .unwrap()
@@ -535,7 +566,9 @@ mod audio_backends {
 
     #[test]
     fn test_silent_engine_start_skips_the_ignition_crank() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.bass_mut().unwrap().record_requested_keys(true);
         r.engine.engine_start_with(false); // resume / menu-return path
         assert!(r.engine.engine_running());
@@ -549,7 +582,9 @@ mod audio_backends {
 
     #[test]
     fn test_deliberate_engine_start_plays_crank_and_arms_crossfade() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.bass_mut().unwrap().record_requested_keys(true);
         r.engine.engine_start(); // deliberate ignition
         let bass = r.engine.bass().unwrap();
@@ -628,7 +663,9 @@ mod audio_backends {
 
     #[test]
     fn test_road_noise_loop_tracks_speed() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.set_road_noise(30.0);
         let entry = r.engine.backend().loop_entry(CH_ROAD).expect("road loop");
         assert_eq!(entry.0, "vehicle/road");
@@ -639,7 +676,9 @@ mod audio_backends {
 
     #[test]
     fn test_new_context_loops_enter_mixer_at_full_gain() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.set_wind(2.0);
         let entry = r.engine.backend().loop_entry(CH_WEATHER_B).unwrap();
         assert_eq!(entry.0, "weather/wind");
@@ -653,7 +692,9 @@ mod audio_backends {
 
     #[test]
     fn test_horn_uses_reserved_loop_slot() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.horn_start();
         assert_eq!(
             r.engine.backend().loop_entry(CH_HORN).unwrap().0,
@@ -665,7 +706,9 @@ mod audio_backends {
 
     #[test]
     fn test_bass_horn_sustains_then_rings_out_on_release() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.horn_start();
         r.engine.horn_start(); // key autorepeat must not stack a second horn
         let bass = r.engine.bass().unwrap();
@@ -683,7 +726,9 @@ mod audio_backends {
 
     #[test]
     fn test_bass_horn_press_during_release_tail_does_not_stack() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.horn_start();
         r.engine.horn_stop(); // tail is now ringing out on the channel
         let bass = r.engine.bass().unwrap();
@@ -844,7 +889,9 @@ mod audio_backends {
         // Dropping a `Stream` frees the BASS handle; the backend must hold it
         // until playback ends, or every one-shot (menu sounds, horn, warnings)
         // is cut off instantly.
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.play("ui/menu_move");
         let bass = r.engine.bass().unwrap();
         let retained = bass.retained_handles();
@@ -855,7 +902,9 @@ mod audio_backends {
 
     #[test]
     fn test_bass_fading_loops_stay_alive_during_fade() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.set_weather_with(Some("weather/rain_light"), 0.8);
         assert!(!r.engine.bass().unwrap().loop_channels().is_empty());
         r.engine.set_weather(None); // 1200 ms fade-out
@@ -880,7 +929,9 @@ mod audio_backends {
 
     #[test]
     fn test_bass_road_noise_frequency_changes_with_speed() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.set_road_noise(15.0);
         let (base, target) = r.engine.bass().unwrap().road_noise_frequency().unwrap();
         assert!((target - base * 0.85).abs() < 1e-6);
@@ -917,7 +968,9 @@ mod audio_backends {
 
     #[test]
     fn test_the_jake_voice_switch_applies_on_every_band_not_just_1600() {
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.set_jake_voice(false);
         // Growling on a band that is NOT 1600 -- the case the guard missed.
         r.engine
@@ -1004,7 +1057,9 @@ mod audio_backends {
     fn test_held_alert_lapses_on_its_own_and_cues_latch() {
         // The dead man's switches (ALERT_HOLD_TIMEOUT_S / CUE_HOLD_TIMEOUT_S):
         // a tone whose owner stops re-asserting it goes quiet on its own.
-        let Some(mut r) = bass_rig() else { return };
+        let Some(mut r) = bass_rig_with_recordings() else {
+            return;
+        };
         r.engine.hold_alert("vehicle/bar_solid");
         assert_eq!(
             r.engine.backend().loop_entry(CH_ALERT).unwrap().0,

@@ -1,0 +1,351 @@
+//! Shared rigging for the `test_driving_cruise_weather.py` port.
+//!
+//! # What replaced the monkeypatches
+//!
+//! The Python file reached a deterministic road by patching methods on the
+//! live trip:
+//!
+//! | Python | here |
+//! |---|---|
+//! | `open_limits(driving)` -- `speed_limit_at -> (200, None)` | [`bench_road`] bakes a 200 mph `SpeedLimitSample` on the leg, which is the record `speed_limit_at` reads |
+//! | `trip.speed_limit_at = lambda m: (L, "reason")` | a [`Zone`] over the whole road, which is how `speed_limit_at` returns a reason at all |
+//! | `trip.grade_at = lambda m: g` | a baked `GradeSegment` over the whole leg |
+//! | `trip.traffic_context = lambda: None` | an empty traffic manager with the rolling bubble off |
+//! | `pygame.key.get_pressed` -> `NoKeys`/`Keys` | [`hold`] / [`release_keys`] writing the drive's real held-key set |
+//!
+//! Rust has no seam for an inherent method, so each of these builds the road
+//! that ANSWERS the way the patch did. That is stricter than the patch was:
+//! the whole trip is fixed rather than whatever route dispatch drew.
+//!
+//! # Where the transcript comes from
+//!
+//! Python patched `ctx.say`/`ctx.say_event` and so recorded every line the
+//! states SUBMITTED. The harness here records at `ctx.speech`, below the
+//! driving verbosity ladder and the event pacer, so [`spoken`] is what a
+//! player actually hears. Where that changes an expectation the case says so
+//! at the assertion.
+
+#![allow(dead_code)]
+
+use ff_core::data::world_models::{CorridorDetail, GradeSegment, Leg, Route, SpeedLimitSample};
+use ff_core::sim::trip::{Trip, TripOptions};
+use ff_core::sim::trip_models::NavigationCue;
+use ff_core::sim::weather::{WeatherKind, WeatherSystem};
+use freight_fate::playtest::harness::{PlaytestHarness, StartDelivery};
+use freight_fate::states::base::{InputEvent, Key, Mods};
+use freight_fate::states::driving::DrivingState;
+
+pub const MPS_PER_MPH: f64 = 1.0 / 2.23694;
+pub const MPH_PER_MPS: f64 = 2.23694;
+pub const DT: f64 = 1.0 / 60.0;
+
+/// `pytest.approx` at its default relative tolerance.
+pub fn approx(a: f64, b: f64) -> bool {
+    (a - b).abs() <= 1e-6 * b.abs().max(1.0)
+}
+
+/// `pytest.approx(b, abs=tol)`.
+pub fn approx_abs(a: f64, b: f64, tol: f64) -> bool {
+    (a - b).abs() <= tol
+}
+
+/// One long straight leg with a baked posted limit and a baked grade, and
+/// nothing else on it.
+pub fn bench_road(drive: &mut DrivingState, limit_mph: f64, grade_pct: f64, time_scale: f64) {
+    bench_road_with(drive, &[(0.0, limit_mph)], grade_pct, time_scale);
+}
+
+/// [`bench_road`] with more than one posting: `(at_mi, mph)` in order, which
+/// is how a road that CHANGES its number mid-leg is described to
+/// `speed_limit_at` (Python patched it with a conditional lambda).
+pub fn bench_road_with(
+    drive: &mut DrivingState,
+    limits: &[(f64, f64)],
+    grade_pct: f64,
+    time_scale: f64,
+) {
+    let city = drive.trip.route.cities[0].clone();
+    let miles = 400.0;
+    let detail = CorridorDetail {
+        speed_limits: limits
+            .iter()
+            .map(|(at_mi, mph)| SpeedLimitSample {
+                at_mi: *at_mi,
+                mph: Some(*mph),
+                source: "test bench".to_string(),
+                hgv: false,
+            })
+            .collect(),
+        grade_segments: vec![GradeSegment::new(0.0, miles, grade_pct, "flat", "test bench")],
+        ..Default::default()
+    };
+    let leg = Leg::new(&city, &city, miles, "I 90", "flat", Vec::new()).with_detail(detail);
+    let route = Route::from_legs(vec![city.clone(), city], vec![leg]);
+    let truck = drive.trip.truck.clone();
+    let mut weather = WeatherSystem::new("heartland", Some(3), None, None, true);
+    weather.current = WeatherKind::Clear;
+    let mut trip = Trip::new(
+        route,
+        truck,
+        weather,
+        TripOptions {
+            seed: Some(3),
+            time_scale,
+            ..Default::default()
+        },
+    );
+    quiet(&mut trip);
+    // `driving.trip.zones = []` and `driving.trip.curves = []`: a real bend or
+    // a posted zone rightly caps cruise, and neither is what the bench is for.
+    // A street chain keeps ITS zones -- they are how the street's limit is
+    // posted at all -- so this clearing lives here and not in `quiet`.
+    trip.zones.clear();
+    trip.curves.clear();
+    drive.trip = trip;
+    drive.reset_turn_state_for_trip();
+    // `driving._destination_exit_taken = True`: isolate cruise from exit setup.
+    drive.destination_exit_taken = true;
+}
+
+/// `quiet_trip(driving)` on a trip that is not yet the drive's.
+pub fn quiet(trip: &mut Trip) {
+    trip.set_npc_vehicles(Vec::new());
+    trip.traffic_manager.rolling_bubble = false;
+    trip.traffic_pressures.clear();
+    trip.hazard_check_mi = 1e9;
+    trip.inspection_check_mi = 1e9;
+}
+
+/// `start_drive(app)`: new career, accept the assigned dispatch, depart.
+pub fn start_drive(profile_name: &str) -> PlaytestHarness {
+    let mut harness = PlaytestHarness::new();
+    harness.start_delivery(StartDelivery::named(profile_name));
+    harness.with_drive(|d, _| {
+        // The origin yard may carry a turn-level street chain; these feature
+        // tests exercise highway machinery, so skip the departure chain.
+        d.departure_checked = true;
+        d.truck_mut().set_air_ready(false);
+        d.trip.zones.retain(|zone| zone.aadt.is_none());
+        d.weather_mut().current = WeatherKind::Clear;
+    });
+    harness
+}
+
+/// `start_drive` + `quiet_trip` + [`bench_road`]: the rig most cases here use.
+pub fn bench_drive(profile_name: &str, limit_mph: f64, grade_pct: f64) -> PlaytestHarness {
+    bench_drive_with(profile_name, &[(0.0, limit_mph)], grade_pct)
+}
+
+/// [`bench_drive`] over a road whose posted number changes.
+pub fn bench_drive_with(
+    profile_name: &str,
+    limits: &[(f64, f64)],
+    grade_pct: f64,
+) -> PlaytestHarness {
+    let mut harness = start_drive(profile_name);
+    let limits = limits.to_vec();
+    harness.with_drive(move |d, _| {
+        bench_road_with(d, &limits, grade_pct, 1.0);
+        d.truck_mut().set_air_ready(false);
+    });
+    harness.app.ctx.settings.time_scale = 1.0;
+    harness
+}
+
+/// One frame of the drive (`driving.update(dt)`), with the pacer's clock kept
+/// honest -- see `PlaytestHarness::advance_frame_clock`.
+pub fn frame(harness: &mut PlaytestHarness, dt: f64) {
+    harness.advance_clock(dt);
+    harness.with_drive(move |d, ctx| d.update_frame(ctx, dt));
+}
+
+pub fn frames(harness: &mut PlaytestHarness, count: usize, dt: f64) {
+    for _ in 0..count {
+        frame(harness, dt);
+    }
+}
+
+/// `keys.pressed = {...}`: exactly these keys held, nothing else.
+pub fn hold(harness: &mut PlaytestHarness, keys: &[Key]) {
+    for key in [
+        Key::Up,
+        Key::Down,
+        Key::Left,
+        Key::Right,
+        Key::LShift,
+        Key::Space,
+    ] {
+        harness.app.ctx.input.release(key, Mods::NONE);
+    }
+    for key in keys {
+        harness.app.ctx.input.press(*key, Mods::NONE);
+    }
+}
+
+/// `keys.pressed = set()`.
+pub fn release_keys(harness: &mut PlaytestHarness) {
+    hold(harness, &[]);
+}
+
+/// `key_event(key, unicode)` handed straight to the drive.
+pub fn press(harness: &mut PlaytestHarness, key: Key, text: Option<char>) {
+    harness.press_key(key, text);
+}
+
+/// A Shift-modified press at the wheel (`mod=pygame.KMOD_LSHIFT`).
+pub fn press_shift(harness: &mut PlaytestHarness, key: Key) {
+    harness.with_drive(move |d, ctx| {
+        d.handle_key_event(
+            ctx,
+            &InputEvent::KeyDown {
+                key,
+                mods: Mods::SHIFT,
+                text: None,
+            },
+        )
+    });
+}
+
+/// Every line said so far, both channels, in submission order.
+pub fn spoken(harness: &PlaytestHarness) -> Vec<String> {
+    harness.app.speech().lines()
+}
+
+pub fn last(harness: &PlaytestHarness) -> String {
+    spoken(harness).last().cloned().unwrap_or_default()
+}
+
+pub fn said_any(harness: &PlaytestHarness, needle: &str) -> bool {
+    spoken(harness).iter().any(|line| line.contains(needle))
+}
+
+/// `facility_street_chain(driving)`: swap the drive onto a deterministic
+/// two-block facility street chain.
+///
+/// The deadhead shape a tester reported: 25 mph streets with a judged left
+/// turn between them, which advises the trailer corner cap of 20. Both blocks
+/// are long enough that the facility gate zone stays clear of the corner, so a
+/// test can watch the corner on its own.
+pub fn facility_street_chain(drive: &mut DrivingState, time_scale: f64) {
+    let city = drive.trip.route.cities[0].clone();
+    let legs = vec![
+        Leg::local(
+            &city,
+            1.2,
+            "East Navarre Street",
+            "Start on East Navarre Street.",
+            25.0,
+        ),
+        Leg::local(
+            &city,
+            1.2,
+            "North Michigan Street",
+            "Turn left onto North Michigan Street.",
+            25.0,
+        ),
+    ];
+    street_chain(drive, vec![city.clone(), city.clone(), city], legs, time_scale);
+}
+
+/// `short_block_street_chain(driving, block_mi=0.08)`: a street chain whose
+/// second corner arrives inside the first one's tail.
+///
+/// The other half of the tester's deadhead report: turns "coming up really
+/// quickly". A 420-foot block is an ordinary city block and shorter than the
+/// stretch one corner stays in play for, so the second corner is already in
+/// front of the truck while the first is still being taken -- and it turns
+/// onto an unnamed service way, which advises the 15 mph gate crawl rather
+/// than the 20 a named street's corner gets.
+///
+/// Returns `(first_cue, second_cue)`.
+pub fn short_block_street_chain(
+    drive: &mut DrivingState,
+    block_mi: f64,
+    time_scale: f64,
+) -> (NavigationCue, NavigationCue) {
+    let city = drive.trip.route.cities[0].clone();
+    let legs = vec![
+        Leg::local(
+            &city,
+            1.2,
+            "East Navarre Street",
+            "Start on East Navarre Street.",
+            25.0,
+        ),
+        Leg::local(
+            &city,
+            block_mi,
+            "North Michigan Street",
+            "Turn left onto North Michigan Street.",
+            25.0,
+        ),
+        Leg::local(
+            &city,
+            1.2,
+            "the service road",
+            "Turn right onto the service road.",
+            15.0,
+        ),
+    ];
+    street_chain(
+        drive,
+        vec![city.clone(), city.clone(), city.clone(), city],
+        legs,
+        time_scale,
+    );
+    let turns = turn_cues(drive);
+    assert_eq!(turns.len(), 2, "the short-block chain needs both corners");
+    (turns[0].clone(), turns[1].clone())
+}
+
+/// The `local:turn:` navigation cues on the drive's trip, in order.
+pub fn turn_cues(drive: &DrivingState) -> Vec<NavigationCue> {
+    drive
+        .trip
+        .navigation_cues
+        .iter()
+        .filter(|cue| cue.key.starts_with("local:turn:"))
+        .cloned()
+        .collect()
+}
+
+fn street_chain(
+    drive: &mut DrivingState,
+    cities: Vec<String>,
+    legs: Vec<Leg>,
+    time_scale: f64,
+) {
+    let route = Route::from_legs(cities, legs);
+    let truck = drive.trip.truck.clone();
+    let mut weather = WeatherSystem::new("heartland", Some(3), None, None, true);
+    weather.current = WeatherKind::Clear;
+    let mut trip = Trip::new(
+        route,
+        truck,
+        weather,
+        TripOptions {
+            seed: Some(3),
+            time_scale,
+            ..Default::default()
+        },
+    );
+    // `trip.traffic_context = lambda: None` plus the hazard/inspection pushes.
+    quiet(&mut trip);
+    drive.trip = trip;
+    drive.reset_turn_state_for_trip();
+    drive.destination_exit_taken = true;
+}
+
+/// `roll_to(driving, mile)`: run frames until the truck reaches `mile`;
+/// returns the `(mile, mph)` trace.
+pub fn roll_to(harness: &mut PlaytestHarness, mile: f64, limit_frames: usize) -> Vec<(f64, f64)> {
+    let mut trace = Vec::new();
+    for _ in 0..limit_frames {
+        if harness.read_drive(|d| d.trip.position_mi) >= mile {
+            break;
+        }
+        frame(harness, DT);
+        trace.push(harness.read_drive(|d| (d.trip.position_mi, d.truck().speed_mph())));
+    }
+    trace
+}
