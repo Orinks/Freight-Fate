@@ -165,17 +165,17 @@ fn test_accepting_pushes_setup_with_activation_already_started() {
 }
 
 #[test]
-#[ignore = "needs states::main_menu: _first_state_after_career_creation"]
+#[ignore = "unblocked: main_menu::first_state_after_career_creation exists; the case is not written yet"]
 fn test_creating_a_first_career_reaches_the_offer() {}
 
 #[test]
-#[ignore = "needs states::main_menu: _first_state_after_career_creation"]
+#[ignore = "unblocked: main_menu::first_state_after_career_creation exists; the case is not written yet"]
 fn test_creating_a_later_career_goes_straight_to_the_city_menu() {}
 
 #[test]
-#[ignore = "needs states::main_menu: the New career flow"]
+#[ignore = "unblocked: states::main_menu exists; the New career flow case is not written yet"]
 fn test_the_welcome_is_heard_in_full_and_then_the_offer() {}
 
 #[test]
-#[ignore = "needs states::main_menu and states::city: the New career flow"]
+#[ignore = "unblocked: both modules exist; the New career flow case is not written yet"]
 fn test_saying_no_is_heard_before_the_city_menu_announcement() {}

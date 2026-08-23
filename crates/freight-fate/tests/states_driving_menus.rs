@@ -575,16 +575,12 @@ fn test_reaching_for_a_drive_that_is_already_held_fails_loudly() {
 // -- not portable without the harness ------------------------------------------------------
 
 #[test]
-#[ignore = "needs the playtest harness: a whole pickup-to-delivery flow"]
+#[ignore = "unblocked: PlaytestHarness exists; the pickup-to-delivery case is not written yet"]
 fn test_unloading_burns_fuel_only_while_the_engine_runs() {
     // arrive_running -> reach_destination_facility -> shut the engine down ->
     // take the primary row -> finish the timed state -> ArrivalState, and the
     // tank is untouched because nothing idled through the unload.
 }
 
-#[test]
-#[ignore = "needs the playtest harness: the pickup flow reaches this screen"]
-fn test_the_primary_action_stays_the_first_item() {
-    // Whatever the facility's first row is worded as (dock, or drop and hook),
-    // the engine row never displaces it.
-}
+// `test_the_primary_action_stays_the_first_item` is live in
+// `crates/freight-fate/tests/states_city_pickup.rs`.

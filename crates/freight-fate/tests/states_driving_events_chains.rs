@@ -356,7 +356,7 @@ fn test_the_missed_destination_exit_loops_back_a_whole_window() {
 }
 
 #[test]
-#[ignore = "needs states::driving_rest_states"]
+#[ignore = "unblocked: states::driving_rest_states exists; the case is not written yet"]
 fn test_the_rest_key_opens_a_route_points_menu() {
     // `tests/test_driving_exits.py`: T at a standstill beside a stop opens
     // that stop's own menu.

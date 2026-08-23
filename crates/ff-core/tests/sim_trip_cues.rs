@@ -540,11 +540,11 @@ fn test_the_animal_brake_call_names_the_animal() {
 }
 
 #[test]
-#[ignore = "needs app shell (DrivingUpdateMixin._horn_scare_animals)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingUpdateMixin._horn_scare_animals"]
 fn test_the_horn_moves_a_movable_animal() {}
 
 #[test]
-#[ignore = "needs app shell (DrivingUpdateMixin._horn_scare_animals)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingUpdateMixin._horn_scare_animals"]
 fn test_the_horn_gets_one_attempt_per_hazard() {}
 
 /// `zlib.crc32(data)`: the IEEE CRC-32 Python's zlib module computes.
@@ -608,9 +608,9 @@ fn test_brake_lights_name_the_cause_when_the_road_knows_it() {
 }
 
 #[test]
-#[ignore = "needs app shell (driving status browse)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- driving status browse"]
 fn test_the_status_browse_says_how_much_to_the_next_level() {}
 
 #[test]
-#[ignore = "needs app shell (AbandonJobConfirmationState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- AbandonJobConfirmationState"]
 fn test_abandoning_a_bobtail_costs_nothing() {}

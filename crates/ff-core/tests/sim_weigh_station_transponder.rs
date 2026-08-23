@@ -94,21 +94,21 @@ fn test_transponder_settlement_charge_only_when_subscribed() {
 }
 
 #[test]
-#[ignore = "needs app shell (transponder verdict in DrivingState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- transponder verdict in DrivingState"]
 fn test_below_the_gate_the_scale_still_demands_every_truck() {}
 
 #[test]
-#[ignore = "needs app shell (transponder verdict in DrivingState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- transponder verdict in DrivingState"]
 fn test_transponder_green_bypasses_without_a_charge() {}
 
 #[test]
-#[ignore = "needs app shell (transponder verdict in DrivingState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- transponder verdict in DrivingState"]
 fn test_transponder_red_pulls_in_like_the_old_flow() {}
 
 #[test]
-#[ignore = "needs app shell (transponder verdict in DrivingState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- transponder verdict in DrivingState"]
 fn test_overweight_load_is_always_red_lighted() {}
 
 #[test]
-#[ignore = "needs app shell (transponder verdict seeded off trip seed and stop)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- transponder verdict seeded off trip seed and stop"]
 fn test_transponder_verdict_is_seeded_off_trip_seed_and_stop() {}

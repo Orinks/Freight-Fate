@@ -659,7 +659,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs app shell (states::driving_core::timezone_crossing_message)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- states::driving_core::timezone_crossing_message"]
     fn test_terse_speech_says_only_the_zone() {
         // TODO(port): terse crossing message is "Central Time."
     }
@@ -759,7 +759,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs app shell (JobBoardState detail lines)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- JobBoardState detail lines"]
     fn test_dispatch_detail_quotes_the_local_appointment() {
         // TODO(port): the F1 detail says "deliver by about" and names a zone.
     }

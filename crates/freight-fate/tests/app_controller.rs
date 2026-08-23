@@ -284,7 +284,7 @@ fn test_duplicate_button_down_not_forwarded() {
 }
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_duplicate_button_down_does_not_double_toggle() {}
 
 #[test]
@@ -397,27 +397,27 @@ fn test_setting_toggle_gates_controller() {
 // -- driving -----------------------------------------------------------------
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_analog_trigger_drives_throttle() {}
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_held_partial_trigger_does_not_machinegun_brake_sound() {}
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_controller_info_buttons_speak() {}
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_controller_speed_control_handoff_status_adjustment_and_brake() {}
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_paused_speed_control_can_be_canceled_by_keyboard_or_controller() {}
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_controller_disconnect_pauses_driving() {}
 
 #[test]

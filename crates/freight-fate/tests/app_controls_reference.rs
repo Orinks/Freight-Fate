@@ -65,9 +65,9 @@ fn test_help_state_opens_to_a_chosen_page() {
 }
 
 #[test]
-#[ignore = "needs states::driving_pause_states and states::driving"]
+#[ignore = "unblocked: both modules exist; the case is not written yet"]
 fn test_pause_menu_offers_controls_and_help() {}
 
 #[test]
-#[ignore = "needs states::driving_pause_states and states::driving"]
+#[ignore = "unblocked: both modules exist; the case is not written yet"]
 fn test_pause_menu_emergency_shoulder_sleep_sits_between_mechanic_and_settings() {}

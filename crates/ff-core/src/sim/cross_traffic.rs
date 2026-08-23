@@ -632,38 +632,38 @@ mod tests {
     // -- the terminal asks the bubble ------------------------------------------
 
     #[test]
-    #[ignore = "needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
     fn test_the_stop_sign_clear_waits_for_the_gap() {}
 
     #[test]
-    #[ignore = "needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
     fn test_the_stop_sign_clear_is_immediate_on_an_empty_road() {}
 
     #[test]
-    #[ignore = "needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
     fn test_blowing_an_empty_stop_sign_hits_nothing() {}
 
     #[test]
-    #[ignore = "needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
     fn test_the_yield_waits_when_stopped_in_traffic() {}
 
     #[test]
-    #[ignore = "needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
     fn test_a_clear_yield_is_rolled_not_stopped() {}
 
     #[test]
-    #[ignore = "needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
     fn test_a_roundabout_speaks_as_a_roundabout() {}
 
     #[test]
-    #[ignore = "needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
     fn test_rolling_a_yield_into_an_occupied_window_clips() {}
 
     #[test]
-    #[ignore = "needs states::driving_events (DrivingEventMixin._ramp_control_for)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._ramp_control_for)"]
     fn test_a_baked_yield_control_passes_through_the_chooser() {}
 
     #[test]
-    #[ignore = "needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
     fn test_blowing_an_occupied_stop_sign_still_clips() {}
 }

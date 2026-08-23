@@ -349,7 +349,7 @@ fn test_live_announce_is_name_only_in_both_modes() {
 /// `achievement_announced(name)` on `say`, builds the full "New achievement!"
 /// record, and lands that record in the message log.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_award_speaks_the_short_line_and_logs_the_flavor() {
     unimplemented!("needs app shell: GameContext::award_achievement + message log");
 }
@@ -358,7 +358,7 @@ fn test_award_speaks_the_short_line_and_logs_the_flavor() {
 /// chime `ui/level_up` plays once, and `Profile.load` sees
 /// `["first_delivery"]`.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_award_achievement_persists_and_deduplicates_notification() {
     unimplemented!("needs app shell: GameContext::award_achievement + Profile::load");
 }
@@ -366,7 +366,7 @@ fn test_award_achievement_persists_and_deduplicates_notification() {
 /// Python: `award_achievement(..., event=True)` still speaks on the screen
 /// reader channel, never on `say_event`.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_event_achievement_speaks_through_screen_reader() {
     unimplemented!("needs app shell: GameContext::award_achievement(event=True)");
 }
@@ -374,7 +374,7 @@ fn test_event_achievement_speaks_through_screen_reader() {
 /// Python: the previous delivery ran the exact reverse lane; `ArrivalState`
 /// awards `return_trip`, rewrites `last_route`, and pins `home_city`.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_return_trip_badge_needs_the_reverse_of_the_last_route() {
     unimplemented!("needs app shell: DrivingState + ArrivalState");
 }
@@ -383,7 +383,7 @@ fn test_return_trip_badge_needs_the_reverse_of_the_last_route() {
 /// "Out on the Road" holds "Earned: Signed..." and "Career and Rank" holds
 /// "Locked: Breaker, Breaker".
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_main_menu_achievement_path_is_keyboard_accessible() {
     unimplemented!("needs app shell: main_menu achievement states");
 }
@@ -391,7 +391,7 @@ fn test_main_menu_achievement_path_is_keyboard_accessible() {
 /// Python: the Deep Cuts category with nothing earned announces
 /// "Deep Cuts. 0 of N earned." and every row reads the hidden name.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_category_with_nothing_earned_still_reads_naturally() {
     unimplemented!("needs app shell: AchievementCategoryState");
 }
@@ -399,7 +399,7 @@ fn test_category_with_nothing_earned_still_reads_naturally() {
 /// Python: a first-ever `ArrivalState` earns first_delivery alone; the
 /// settlement names it without its flavor paragraph.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_delivery_settlement_awards_only_first_delivery_on_a_first_run() {
     unimplemented!("needs app shell: ArrivalState settlement");
 }
@@ -407,28 +407,28 @@ fn test_delivery_settlement_awards_only_first_delivery_on_a_first_run() {
 /// Python: first_on_time/clean_delivery/speed_limit_saint land on runs
 /// 2/3/4; five_deliveries on run 5.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_rookie_chain_achievements_clear_their_delivery_floors() {
     unimplemented!("needs app shell: repeated ArrivalState deliveries");
 }
 
 /// Python: completing the pickup awards the merged first_day badge.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_pickup_completion_awards_the_merged_first_day_badge() {
     unimplemented!("needs app shell: PickupFacilityState");
 }
 
 /// Python: eastbound_delivery fires only when the destination lies east.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_eastbound_badge_fires_only_on_an_eastbound_delivery() {
     unimplemented!("needs app shell: ArrivalState");
 }
 
 /// Python: a suppressed award collects without the chime or speech.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_suppressed_award_collects_without_chime_or_speech() {
     unimplemented!("needs app shell: GameContext::award_achievement(suppress)");
 }
@@ -436,33 +436,33 @@ fn test_suppressed_award_collects_without_chime_or_speech() {
 /// Python: the state-line crossing keeps its gameplay prompt ahead of the
 /// achievement announce.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_state_crossing_keeps_gameplay_prompt_before_achievement() {
     unimplemented!("needs app shell: DrivingState trip events");
 }
 
 /// Python: sixty-nine has to be HELD for a mile, not passed through.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_the_number_that_means_nothing_takes_a_whole_mile() {
     unimplemented!("needs app shell: DrivingState::_track_driving_badges");
 }
 
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_eighty_eight_miles_an_hour_is_noticed() {
     unimplemented!("needs app shell: DrivingState::_track_driving_badges");
 }
 
 /// Python: one touch of the service brake restarts the jake-only descent.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_a_jake_only_descent_is_ruined_by_one_touch_of_the_brake() {
     unimplemented!("needs app shell: DrivingState::_track_driving_badges");
 }
 
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_cooking_the_drums_is_its_own_badge() {
     unimplemented!("needs app shell: DrivingState::_track_driving_badges");
 }
@@ -470,13 +470,13 @@ fn test_cooking_the_drums_is_its_own_badge() {
 /// Python: holding a station across three states, and a catch past 1.3x
 /// the flat contour; 1.05x is not a fringe catch.
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_the_radio_badges_follow_the_signal() {
     unimplemented!("needs app shell: DrivingState::_track_radio_badges");
 }
 
 #[test]
-#[ignore = "needs app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet"]
 fn test_a_new_station_restarts_the_three_state_tally() {
     unimplemented!("needs app shell: DrivingState::_track_radio_badges");
 }

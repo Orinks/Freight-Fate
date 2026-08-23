@@ -327,7 +327,7 @@ fn test_reentering_the_screen_stops_a_running_held_demo() {
 }
 
 #[test]
-#[ignore = "needs states::driving_siren (register_enforcement_sounds, SIGNATURE_KEY)"]
+#[ignore = "unblocked: states::driving_siren exists; the case is not written yet"]
 fn test_the_enforcement_marker_plays_on_a_cold_open() {}
 
 #[test]
@@ -379,7 +379,7 @@ fn test_the_main_menu_offers_learn_game_sounds() {
 }
 
 #[test]
-#[ignore = "needs states::driving (PauseMenuState)"]
+#[ignore = "unblocked: states::driving_pause_states::PauseMenuState exists; the case is not written yet"]
 fn test_the_pause_menu_offers_learn_game_sounds() {}
 
 #[test]

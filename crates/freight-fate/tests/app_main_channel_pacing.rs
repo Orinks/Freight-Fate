@@ -29,7 +29,7 @@ fn calls(app: &TestApp) -> Vec<(String, bool)> {
 }
 
 #[test]
-#[ignore = "needs states::driving (DrivingState.paces_main_speech)"]
+#[ignore = "unblocked: states::driving exists; the case is not written yet"]
 fn test_the_driving_state_declares_main_channel_pacing() {}
 
 #[test]
@@ -174,7 +174,7 @@ fn test_nested_presses_restore_rather_than_latch() {
 }
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_pressing_an_info_key_at_the_wheel_cuts_the_line_in_progress() {}
 
 /// `say` with an explicit `interrupt=False` queues everywhere.

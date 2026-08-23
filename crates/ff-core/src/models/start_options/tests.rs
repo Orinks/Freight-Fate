@@ -339,7 +339,7 @@ fn test_owner_operator_start_text_describes_a_new_truck() {
 // `test_new_company_career_choice_creates_company_profile` is live in `crates/freight-fate/tests/states_main_menu.rs`.
 
 #[test]
-#[ignore = "needs freight_fate::app (App, TruckShopState, UpgradeShopState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs freight_fate::app (App, TruckShopState, UpgradeShopState)"]
 fn test_owner_operator_start_unlocks_equipment_systems() {
     // The owner-operator start leaves a LEASED_OWNER_OPERATOR profile that
     // owns "rig"; the truck shop says "currently driving" and "buy for", and
@@ -348,7 +348,7 @@ fn test_owner_operator_start_unlocks_equipment_systems() {
 }
 
 #[test]
-#[ignore = "needs freight_fate::app (App, CityMenuState, first_day_orientation_message)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs freight_fate::app (App, CityMenuState, first_day_orientation_message)"]
 fn test_first_day_briefing_names_owner_operator_costs() {
     // The orientation names "leased to Northstar Freight Lines", "own a
     // brand-new truck", "working capital", "fuel, repairs, truck wear"; the

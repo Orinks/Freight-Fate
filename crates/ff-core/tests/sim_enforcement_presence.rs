@@ -478,7 +478,7 @@ fn test_the_observation_seed_is_position_quantised_never_time_quantised() {
 }
 
 #[test]
-#[ignore = "needs app shell (road-joint audio and the enforcement RNG stream)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- road-joint audio and the enforcement RNG stream"]
 fn test_road_joint_audio_does_not_consume_the_enforcement_stream() {}
 
 #[test]
@@ -682,19 +682,19 @@ fn test_the_siren_is_off_the_shared_sfx_bus() {}
 // `test_a_trooper_who_never_caught_up_loses_you` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
-#[ignore = "needs app shell (scale approach cues)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- scale approach cues"]
 fn test_a_closed_scale_says_nothing_and_an_open_one_speaks() {}
 
 #[test]
-#[ignore = "needs app shell (scale bypass)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- scale bypass"]
 fn test_taking_the_scales_own_ramp_is_never_a_bypass() {}
 
 #[test]
-#[ignore = "needs app shell (scale bypass)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- scale bypass"]
 fn test_arming_the_scales_exit_and_not_taking_it_is_still_a_bypass() {}
 
 #[test]
-#[ignore = "needs app shell (scale bypass)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- scale bypass"]
 fn test_rolling_past_an_open_scale_is_still_a_bypass() {}
 
 // --- calibration: what presence costs a clean driver, and a reckless one ----
@@ -874,7 +874,7 @@ fn test_how_loud_the_road_sounds_comes_from_the_road() {
 // `test_an_empty_crossover_is_never_audible` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
-#[ignore = "needs app shell (the open scale reads the safety record)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- the open scale reads the safety record"]
 fn test_an_open_scale_reads_the_safety_record_aloud() {}
 
 // --- pacing -----------------------------------------------------------------

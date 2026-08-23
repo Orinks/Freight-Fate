@@ -593,7 +593,7 @@ fn test_manual_update_check_explains_source_builds() {
 }
 
 #[test]
-#[ignore = "needs app shell: packaged logging"]
+#[ignore = "unblocked: the app shell exists; the packaged-logging case is not written yet"]
 fn test_packaged_logging_writes_info_to_game_log() {}
 
 #[test]
@@ -651,7 +651,7 @@ fn test_pickup_facility_exit_arms_fresh_packaged_update_check() {}
 fn test_drive_exit_does_not_arm_fresh_update_check() {}
 
 #[test]
-#[ignore = "needs app shell: the remind-later help text"]
+#[ignore = "unblocked: the app shell exists; the remind-later help case is not written yet"]
 fn test_remind_later_help_describes_terminal_exit_check() {}
 
 // -- AppImage -------------------------------------------------------------------
@@ -916,7 +916,7 @@ fn test_stash_for_manual_install_leaves_folders_in_place() {
 }
 
 #[test]
-#[ignore = "needs app shell: UpdateDownloadState parks a manual update"]
+#[ignore = "unblocked: UpdateDownloadState exists (states/update.rs); the case is not written yet"]
 fn test_download_state_parks_update_when_not_auto_appliable() {}
 
 #[test]

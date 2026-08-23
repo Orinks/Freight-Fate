@@ -444,7 +444,7 @@ fn test_a_suspended_record_says_when_it_clears() {
 }
 
 #[test]
-#[ignore = "needs states::driving_rest_states (_major_offense_text)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_rest_states (_major_offense_text)"]
 fn test_the_lifetime_line_states_the_facts_and_the_way_forward() {}
 
 #[test]
@@ -737,85 +737,85 @@ fn test_slowed_experience_stays_under_the_exported_cloud_ceiling() {
 // --- the road, the stops, the board: app-shell cases ------------------------
 
 #[test]
-#[ignore = "needs states::driving (FelonyStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (FelonyStopState) and the app shell"]
 fn test_running_from_the_stop_writes_a_major_offense_on_the_career() {}
 
 #[test]
-#[ignore = "needs states::driving (FelonyStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (FelonyStopState) and the app shell"]
 fn test_a_second_pursuit_ends_this_career_driving_for_good() {}
 
 #[test]
-#[ignore = "needs states::driving (TrafficStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell"]
 fn test_a_stop_that_suspends_the_cdl_does_not_send_you_back_out_driving() {}
 
 #[test]
-#[ignore = "needs states::driving (TrafficStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell"]
 fn test_an_ordinary_ticket_still_pulls_back_onto_the_highway() {}
 
 #[test]
-#[ignore = "needs states::driving (TrafficStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell"]
 fn test_the_suspended_stop_says_the_run_is_over_and_why() {}
 
 #[test]
-#[ignore = "needs states::driving (EnforcementStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (EnforcementStopState) and the app shell"]
 fn test_an_enforcement_stop_that_suspends_also_ends_the_run() {}
 
 #[test]
-#[ignore = "needs states::driving (TrafficStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell"]
 fn test_a_serious_speeding_ticket_moves_the_ladder_and_says_so() {}
 
 #[test]
-#[ignore = "needs states::driving (TrafficStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell"]
 fn test_a_mild_speeding_ticket_is_money_only() {}
 
 #[test]
-#[ignore = "needs states::driving (_update_enforcement_watch) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_enforcement_watch) and the app shell"]
 fn test_speeding_nobody_saw_never_touches_the_licence() {}
 
 #[test]
-#[ignore = "needs states::driving (FelonyStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (FelonyStopState) and the app shell"]
 fn test_debug_hours_mode_freezes_the_ladder() {}
 
 #[test]
-#[ignore = "needs states::driving (_microsleep_drift_off_road) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_microsleep_drift_off_road) and the app shell"]
 fn test_running_off_the_road_asleep_costs_reputation_and_is_spoken() {}
 
 #[test]
-#[ignore = "needs states::driving (_microsleep_drift_off_road) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_microsleep_drift_off_road) and the app shell"]
 fn test_terse_speech_still_hears_every_consequence() {}
 
 #[test]
-#[ignore = "needs states::driving (_microsleep_drift_off_road) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_microsleep_drift_off_road) and the app shell"]
 fn test_repeat_fatigue_events_speak_the_real_count() {}
 
 // `test_a_clean_driver_hears_and_pays_nothing_new` is live in `crates/freight-fate/tests/states_city.rs`.
 
 #[test]
-#[ignore = "needs states::driving (_update_pursuit_optin) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_pursuit_optin) and the app shell"]
 fn test_holding_the_run_key_states_the_cost_before_it_counts() {}
 
 #[test]
-#[ignore = "needs states::driving (_update_pursuit_optin) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_pursuit_optin) and the app shell"]
 fn test_holding_the_run_key_through_the_warning_lands_the_full_offense() {}
 
 #[test]
-#[ignore = "needs states::driving (_update_pursuit_optin) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_pursuit_optin) and the app shell"]
 fn test_the_second_pursuit_takes_twice_as_long_to_choose() {}
 
 #[test]
-#[ignore = "needs states::driving (snapshot) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (snapshot) and the app shell"]
 fn test_reloading_mid_stop_does_not_cancel_the_stop() {}
 
 #[test]
-#[ignore = "needs states::driving (EnforcementStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (EnforcementStopState) and the app shell"]
 fn test_a_paid_stop_is_not_charged_again_on_the_next_resume() {}
 
 #[test]
-#[ignore = "needs states::driving_engine_brake and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_engine_brake and the app shell"]
 fn test_toggling_the_jake_cannot_farm_warnings_forever() {}
 
 #[test]
-#[ignore = "needs states::driving (_microsleep_drift_off_road) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_microsleep_drift_off_road) and the app shell"]
 fn test_the_fatigue_out_of_service_actually_holds_the_truck() {}
 
 #[test]
@@ -848,5 +848,5 @@ fn test_a_fine_a_load_cannot_cover_stays_owed_and_is_said_so() {
 // `test_a_floor_reputation_company_driver_loses_the_carrier` is live in `crates/freight-fate/tests/states_city.rs`.
 
 #[test]
-#[ignore = "needs states::driving_rest_states (EnforcementStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_rest_states (EnforcementStopState) and the app shell"]
 fn test_a_settled_stop_is_read_back_as_history_not_as_a_fresh_charge() {}

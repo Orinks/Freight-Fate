@@ -105,7 +105,7 @@ fn test_working_always_digs_a_driver_out_however_deep_they_are() {
 }
 
 #[test]
-#[ignore = "needs states::driving (ArrivalState), the world and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (ArrivalState), the world and the app shell"]
 fn test_a_settlement_under_collection_still_pays_the_driver() {
     // A real delivery under a 51,000 balance still pays at least 70 percent of
     // a clean run, says "Balance owed" and "three quarters always reaches
@@ -113,7 +113,7 @@ fn test_a_settlement_under_collection_still_pays_the_driver() {
 }
 
 #[test]
-#[ignore = "needs states::driving (ArrivalState), the world and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (ArrivalState), the world and the app shell"]
 fn test_collection_and_an_advance_together_still_leave_the_driver_paid() {
     // One capped budget covers both; a big balance uses it all and the
     // advance waits; a small balance clears and the advance gets the rest.
@@ -324,7 +324,7 @@ fn test_no_advance_while_a_balance_is_already_being_collected() {
 // --- the two big moments are reviewable, not one-shot ----------------------
 
 #[test]
-#[ignore = "needs states::career_setback and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::career_setback and the app shell"]
 fn test_the_setback_lands_as_a_re_readable_screen_that_escape_acknowledges() {
     // CareerSetbackNoticeState lists every line plus Continue; Escape clears
     // the pending notice.
@@ -357,7 +357,7 @@ fn test_the_notice_survives_a_save_and_reload() {
 // --- a level-up must not promise a truck the yard is withholding -----------
 
 #[test]
-#[ignore = "needs models::carrier_fleet and states::driving_menu_states"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs models::carrier_fleet and states::driving_menu_states"]
 fn test_a_level_up_does_not_promise_iron_the_yard_is_holding_back() {}
 
 /// No fuel, no reset wear, no wash: nothing changed hands.
@@ -504,11 +504,11 @@ fn test_debt_lines_point_at_out_of_pocket_payoff_when_hard_capped() {
 // --- the same payoff item at truck stops -------------------------------------
 
 #[test]
-#[ignore = "needs states::driving (RestStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (RestStopState) and the app shell"]
 fn test_the_rest_stop_only_offers_payoff_when_something_is_owed() {}
 
 #[test]
-#[ignore = "needs states::driving (RestStopState) and the app shell"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (RestStopState) and the app shell"]
 fn test_the_rest_stop_payoff_item_pushes_pay_debt_state() {}
 
 // --- spoken lines, pinned verbatim --------------------------------------------

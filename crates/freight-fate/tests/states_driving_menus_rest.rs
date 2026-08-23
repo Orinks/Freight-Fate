@@ -640,26 +640,12 @@ fn test_abandoning_an_assigned_reposition_costs_standing_not_money() {
 
 // -- not portable without the harness --------------------------------------------------------
 
-#[test]
-#[ignore = "needs the playtest harness: the assist drives the truck into the menu"]
-fn test_selected_stop_assist_reaches_full_stop_and_sleep_menu() {
-    // T then X, 4,000 frames of the real loop, and the drive parks itself at
-    // the stop: the rest menu opens on "Sleep 2 hours in sleeper berth", and
-    // the spoken order is selected -> armed -> braking -> stopped -> the row.
-}
+// `test_selected_stop_assist_reaches_full_stop_and_sleep_menu` and
+// `test_overshoot_clears_assist_then_stopped_t_recovers` are live on the
+// harness in `crates/freight-fate/tests/transcript_rest_stop_assist.rs`.
 
-#[test]
-#[ignore = "needs the playtest harness: the overshoot path runs in _update_exit"]
-fn test_overshoot_clears_assist_then_stopped_t_recovers() {
-    // Blowing past the ramp clears the plan and the assist, and a stopped T
-    // at the stop still opens the rest menu.
-}
-
-#[test]
-#[ignore = "needs states::driving_updates fatigue frames to force the stop"]
-fn test_three_missed_microsleeps_force_a_stop() {
-    // Three drifted nods put the truck out of service on the shoulder.
-}
+// `test_three_missed_microsleeps_force_a_stop` is live in
+// `crates/freight-fate/tests/states_driving_updates.rs`.
 
 #[test]
 fn test_calling_the_mechanic_leaves_the_pause_menu_with_its_rows() {

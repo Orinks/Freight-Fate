@@ -18,6 +18,7 @@ use ff_core::models::profile::Profile;
 use ff_core::sim::trip_models::{
     NavigationCue, RoadStop, TrafficPressure, TripEvent, TripEventData, TripEventKind, Zone,
 };
+use ff_core::sim::weather::WeatherKind;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::speech_text::SpokenMessage;
 
@@ -50,8 +51,12 @@ fn a_real_drive(app: &mut TestApp) -> DrivingState {
         Some(12.0),
     );
     // The bubble is its own suite's business; an empty road keeps these
-    // deterministic (`driving_feature_helpers.quiet_trip`).
+    // deterministic (`driving_feature_helpers.quiet_trip`). The weather is
+    // the other half of that helper: the trip seed is unseeded, so a drive
+    // that does not pin the sky draws a real condition and an ice day caps
+    // the safe speed under whatever the test is measuring.
     drive.trip.set_npc_vehicles(Vec::new());
+    drive.trip.weather.current = WeatherKind::Clear;
     drive
 }
 

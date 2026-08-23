@@ -3103,13 +3103,13 @@ fn test_trip_requests_first_cell_weather_at_construction() {
 }
 
 #[test]
-#[ignore = "needs App and states::city"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs App and states::city"]
 fn test_city_menu_warms_the_weather_provider() {
     // TODO(port): port once the Rust App and states::city is available.
 }
 
 #[test]
-#[ignore = "needs App"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs App"]
 fn test_live_data_providers_ignore_the_online_services_master_switch() {
     // TODO(port): port once the Rust App is available.
 }

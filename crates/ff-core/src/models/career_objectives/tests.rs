@@ -138,7 +138,7 @@ fn test_late_company_driver_plan_points_to_owner_operator_prep() {
 // `test_owner_operator_first_day_terminal_keeps_cash_cushion_guidance` is live in `crates/freight-fate/tests/states_city.rs`.
 
 #[test]
-#[ignore = "needs freight_fate::app (App, CityMenuState, JobBoardState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs freight_fate::app (App, CityMenuState, JobBoardState)"]
 fn test_out_of_sync_owner_operator_uses_career_guidance() {
     // Owner-operator start past day one: the city menu says "Career
     // objective:" with "Fuel, maintenance, insurance" and lists "Career plan";

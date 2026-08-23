@@ -18,6 +18,8 @@
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
+use ff_core::sim::enforcement_posts::{method_by_kind, EnforcementPost, KIND_MEDIAN};
+use ff_core::sim::hos;
 use ff_core::sim::trip_models::{TripEvent, TripEventData, TripEventKind, Zone};
 use ff_core::sim::vehicle::{HIGH_IDLE_DEFAULT_RPM, HIGH_IDLE_STEP_RPM};
 use ff_core::sim::weather::WeatherKind;
@@ -66,9 +68,29 @@ fn a_drive_between(
     job.destination_location = format!("{destination} freight market");
     let mut drive = DrivingState::new(&mut app.ctx, job, route, None, DRIVE_PHASE_DELIVERY, None);
     // The bubble is its own suite's business; an empty road keeps these
-    // deterministic (`driving_feature_helpers.quiet_trip`).
+    // deterministic (`driving_feature_helpers.quiet_trip`). The weather is
+    // the other half of that helper: the trip seed is unseeded, so a drive
+    // that does not pin the sky draws a real condition and an ice day caps
+    // the safe speed under whatever the test is measuring.
     drive.trip.set_npc_vehicles(Vec::new());
+    drive.trip.weather.current = WeatherKind::Clear;
     drive
+}
+
+/// `enforcement_helpers.always_observing_post(at_mi, reach_mi)`: a staffed
+/// median post that has already announced itself and sees everything inside
+/// its reach, so a readout has no excuse for missing it.
+fn observing_post(at_mi: f64, reach_mi: f64) -> EnforcementPost {
+    EnforcementPost {
+        method: method_by_kind(KIND_MEDIAN).to_string(),
+        reach_mi,
+        facing: "both".to_string(),
+        staffed: true,
+        notice: 1.0,
+        announced: true,
+        leg_index: 0,
+        ..EnforcementPost::new(at_mi, KIND_MEDIAN)
+    }
 }
 
 fn key(k: Key) -> InputEvent {
@@ -1285,16 +1307,32 @@ fn test_grade_key_names_a_grade_that_steepens_without_letting_up() {}
 fn test_grade_key_says_nothing_else_steep_while_on_a_steep_grade() {}
 
 #[test]
-#[ignore = "needs states::driving_enforcement (the always-observing post helper)"]
 fn test_upcoming_key_never_reports_enforcement() {
-    // U is the road, not the police (owner ruling, 2026-08-15). With a patrol
-    // post four miles out and `hos_mode` in each of realistic / relaxed /
-    // debug_off, the readout must not contain "enforcement", "patrol",
-    // "trooper", "police" or "bear".
+    // U is the road, not the police (owner ruling, 2026-08-15). Enforcement
+    // heads-ups still reach the player on the CB; this key does not recite
+    // them in any hours-of-service mode, enforced or not.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    for mode in ["realistic", "relaxed", "debug_off"] {
+        app.ctx.settings.hos_mode = mode.to_string();
+        d.trip.position_mi = 4.0;
+        d.trip.posts = vec![observing_post(6.0, 4.0)];
+        app.clear_speech();
+
+        d.handle_key_event(&mut app.ctx, &key(Key::U));
+
+        let report = last(&app).to_lowercase();
+        assert!(d.trip.next_patrol_within(15.0).is_some(), "{mode}");
+        for word in ["enforcement", "patrol", "trooper", "police", "bear"] {
+            assert!(!report.contains(word), "{mode}: {word}: {report}");
+        }
+    }
+    // The branch that used to gate this on the mode.
+    assert!(!hos::HOS_NON_ENFORCED_MODES.is_empty());
 }
 
 #[test]
-#[ignore = "needs states::driving_location (the listed-exit cue)"]
+#[ignore = "unblocked: states::driving_location exists; the case is not written yet"]
 fn test_upcoming_key_does_not_repeat_the_next_exit_key() {
     // `trip.next_exit_cue()` is the listed exit; U stopped echoing it.
 }
@@ -1307,76 +1345,63 @@ fn test_controller_back_button_stops_the_driving_voice() {
 }
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_cruise_holds_its_speed_under_a_latched_throttle() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_a_hand_held_key_still_stands_the_assists_down() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_the_latch_ramps_back_in_when_the_authority_releases() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_keeper_holds_a_zone_speed_under_a_latched_throttle() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_releasing_the_latch_leaves_cruise_holding() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_curve_assist_drains_a_latched_throttle() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_latch_first_mode_keeps_the_old_override_meaning() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_curve_assist_jake_arrives_once_the_latched_throttle_drains() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_the_brake_key_hard_releases_the_latch_and_cancels_cruise() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the frame loop)"]
+#[ignore = "unblocked: states::driving_updates exists; the frame-loop case is not written yet"]
 fn test_a_hand_held_key_stands_the_keeper_down() {}
 
-#[test]
-#[ignore = "needs states::driving_rest_states (the rest-stop menus)"]
-fn test_rolling_t_plans_exact_sleep_stop_without_silently_selecting_exit() {
-    // T while rolling plans the next sleep-capable stop; it must not arm the
-    // exit signal on its own, and a second T repeats the plan.
-}
-
-#[test]
-#[ignore = "needs states::driving_rest_states (the rest-stop menus)"]
-fn test_x_cancel_clears_explicit_assist_but_keeps_route_plan() {}
-
-#[test]
-#[ignore = "needs states::driving_rest_states (the rest-stop menus)"]
-fn test_rolling_t_without_sleep_stop_gives_recovery_guidance() {}
-
-#[test]
-#[ignore = "needs states::driving_rest_states (the rest-stop menus)"]
-fn test_t_during_police_stop_names_the_trooper_action() {}
+// `test_rolling_t_plans_exact_sleep_stop_without_silently_selecting_exit`,
+// `test_x_cancel_clears_explicit_assist_but_keeps_route_plan`,
+// `test_rolling_t_without_sleep_stop_gives_recovery_guidance` and
+// `test_t_during_police_stop_names_the_trooper_action` are live in
+// `crates/freight-fate/tests/transcript_rest_stop_assist.rs`.
 
 // `test_the_planner_sees_past_the_corner_it_is_already_easing_for` is live in `crates/freight-fate/tests/states_driving_turns.rs`.
 
 #[test]
-#[ignore = "needs states::driving_menu_states (the Tab status screens)"]
+#[ignore = "unblocked: states::driving_menu_states exists; the case is not written yet"]
 fn test_the_tab_key_opens_the_status_screen() {}
 
 #[test]
-#[ignore = "needs states::driving_pause_states (the pause menu)"]
+#[ignore = "unblocked: states::driving_pause_states exists; the case is not written yet"]
 fn test_escape_and_start_open_the_pause_menu() {}
 
 #[test]
-#[ignore = "needs states::driving_updates (the radio dial)"]
+#[ignore = "unblocked: states::driving_updates exists; the radio-dial case is not written yet"]
 fn test_the_radio_dial_keys_tune_jump_and_change_volume() {
     // Page Up / `;` tunes down, Page Down / `'` tunes up, Ctrl jumps a whole
     // category, Shift moves the radio volume in ten percent steps.

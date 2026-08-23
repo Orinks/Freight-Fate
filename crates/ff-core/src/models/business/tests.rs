@@ -358,76 +358,19 @@ fn transponder_eligibility_follows_the_status_and_the_fee() {
 
 // -- tests/test_settlement_accounting.py ----------------------------------------
 
-fn accounting_job(cargo: &str, destination_type: &str, pay: f64, distance: f64) -> Job {
-    let mut job = Job::new(
-        cargo_type(cargo).unwrap(),
-        18.0,
-        "New York",
-        "New York pickup",
-        "Philadelphia",
-        distance,
-        pay,
-        12.0,
-    );
-    job.origin_type = "air_cargo".to_string();
-    job.destination_location = "Philadelphia receiver".to_string();
-    job.destination_type = destination_type.to_string();
-    job
-}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_carrier_paid_charges_do_not_increase_player_progression() {
-    // The pure half: the company settlement the arrival books against.
-    let job = accounting_job("electronics", "retail_distribution", 2500.0, 78.0);
-    let expected = build_business_settlement_basic(COMPANY_DRIVER, &job, 2875.0, true, 0.0);
-    assert!(expected.net_before_advance > 0.0);
-    assert!(expected.business_charges.is_empty());
-}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_delivery_stores_wear_and_road_grime() {}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_a_carried_balance_is_collected_at_a_capped_share_not_all_at_once() {}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_owner_operator_settlement_deducts_business_costs() {
-    let job = accounting_job("electronics", "retail_distribution", 2500.0, 78.0);
-    let expected = build_business_settlement_basic(LEASED_OWNER_OPERATOR, &job, 2875.0, true, 0.0);
-    assert!(expected.business_charge_total() > 0.0);
-}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_pay_advance_is_repaid_from_settlement() {}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_settlement_time_cannot_be_faster_than_practical_road_average() {}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_pay_advance_repayment_never_drives_net_pay_negative() {}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_pay_advance_load_cooldown_resets_at_settlement() {}
-
-#[test]
-#[ignore = "needs app shell (DrivingState.from_snapshot)"]
-fn test_restored_toll_charges_do_not_duplicate_or_pay_out() {}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_toll_route_does_not_pay_more_than_equal_non_toll_route() {}
-
-#[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
-fn test_repaid_advance_still_counts_as_lifetime_earnings() {}
+// Every case of this file is live on the app shell in
+// `crates/freight-fate/tests/transcript_settlement_accounting.rs`:
+// `test_carrier_paid_charges_do_not_increase_player_progression`,
+// `test_delivery_stores_wear_and_road_grime`,
+// `test_a_carried_balance_is_collected_at_a_capped_share_not_all_at_once`,
+// `test_owner_operator_settlement_deducts_business_costs`,
+// `test_pay_advance_is_repaid_from_settlement`,
+// `test_settlement_time_cannot_be_faster_than_practical_road_average`,
+// `test_pay_advance_repayment_never_drives_net_pay_negative`,
+// `test_pay_advance_load_cooldown_resets_at_settlement`,
+// `test_restored_toll_charges_do_not_duplicate_or_pay_out`,
+// `test_toll_route_does_not_pay_more_than_equal_non_toll_route` and
+// `test_repaid_advance_still_counts_as_lifetime_earnings`.
 
 // -- tests/test_settlement_readout_leaner.py ------------------------------------
 

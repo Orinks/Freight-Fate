@@ -144,7 +144,7 @@ fn test_the_earcon_duck_lets_go_on_its_own() {
 }
 
 #[test]
-#[ignore = "inspects Python source for the setting check at every duck engage point; the Rust engage points are engage_earcon_duck / engage_speech_duck (both gated) plus the driving-state ducks, pinned when states::driving lands"]
+#[ignore = "Python swept its own source text for the setting check at every duck engage point; a source sweep has no Rust equivalent. The Rust engage points are engage_earcon_duck / engage_speech_duck, both gated, plus the driving-state ducks"]
 fn test_nothing_anywhere_ducks_when_the_player_turned_ducking_off() {}
 
 #[test]

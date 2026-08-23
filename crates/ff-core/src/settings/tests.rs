@@ -580,7 +580,7 @@ const SETTINGS_PENDING_FEATURES: [&str; 1] = [
 /// `src/freight_fate`; until the states are ported most consumers do not
 /// exist yet, so it waits.
 #[test]
-#[ignore = "needs app shell (the states that consume the settings)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- the states that consume the settings"]
 fn test_no_settings_field_is_a_phantom() {
     let root = game_root().join("crates");
     let mut sources = Vec::new();

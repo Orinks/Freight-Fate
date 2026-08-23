@@ -386,7 +386,7 @@ fn test_higher_level_reaches_farther_destinations() {
 }
 
 #[test]
-#[ignore = "needs app shell (DrivingState / ArrivalState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState / ArrivalState"]
 fn test_bobtail_relocates_to_a_nearby_city_without_pay() {
     // A Denver -> Cheyenne reposition is a bobtail with no pay; the arrival
     // relocates the profile to cheyenne_wy_us, pays nothing, counts no
@@ -397,11 +397,11 @@ fn test_bobtail_relocates_to_a_nearby_city_without_pay() {
 }
 
 #[test]
-#[ignore = "needs app shell (ArrivalState settlement)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- ArrivalState settlement"]
 fn test_bobtail_settlement_collects_fines_carried_over() {}
 
 #[test]
-#[ignore = "needs app shell (DrivingState._update_hours_and_fatigue)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState._update_hours_and_fatigue"]
 fn test_bobtail_personal_conveyance_records_off_duty_hos_time() {}
 
 #[test]
@@ -891,15 +891,15 @@ fn test_offer_to_unknown_destination_returns_none() {
 }
 
 #[test]
-#[ignore = "needs app shell (states::city._add_forced_board_job)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- states::city._add_forced_board_job"]
 fn test_forced_board_job_lands_on_the_board() {}
 
 #[test]
-#[ignore = "needs app shell (states::city._add_forced_board_job)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- states::city._add_forced_board_job"]
 fn test_forced_board_job_skips_when_already_offered() {}
 
 #[test]
-#[ignore = "needs app shell (states::city.JobBoardState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- states::city.JobBoardState"]
 fn test_assigned_dispatch_hands_out_the_forced_load_first() {}
 
 // -- tests/test_dispatch_job_detail.py ------------------------------------------

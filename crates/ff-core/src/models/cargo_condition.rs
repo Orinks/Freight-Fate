@@ -545,54 +545,54 @@ mod tests {
     // -- cues, status, snapshot, settlement lines -----------------------------
 
     #[test]
-    #[ignore = "needs states::driving (_update_cargo_condition) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_cargo_condition) and the app shell"]
     fn test_each_condition_rung_speaks_once_while_driving() {}
 
     #[test]
-    #[ignore = "needs states::driving (_update_cargo_condition) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_cargo_condition) and the app shell"]
     fn test_the_coaching_tail_speaks_once_per_episode() {}
 
     #[test]
-    #[ignore = "needs states::driving (_update_cargo_condition) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_cargo_condition) and the app shell"]
     fn test_terse_cargo_cues_keep_the_consequence() {}
 
     #[test]
-    #[ignore = "needs states::driving and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving and the app shell"]
     fn test_the_bend_is_fed_to_the_truck_from_the_road() {}
 
     #[test]
-    #[ignore = "needs states::driving and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving and the app shell"]
     fn test_a_connector_ramp_is_not_treated_as_a_signed_bend() {}
 
     #[test]
-    #[ignore = "needs states::driving (DrivingStatusScreenState) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (DrivingStatusScreenState) and the app shell"]
     fn test_the_load_line_names_the_freights_condition() {}
 
     #[test]
-    #[ignore = "needs states::driving and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving and the app shell"]
     fn test_the_job_sets_the_fragility_the_truck_carries() {}
 
     #[test]
-    #[ignore = "needs states::driving (snapshot) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (snapshot) and the app shell"]
     fn test_cargo_condition_round_trips_through_a_snapshot() {}
 
     #[test]
-    #[ignore = "needs states::driving (snapshot) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (snapshot) and the app shell"]
     fn test_a_snapshot_without_cargo_keys_resumes_clean() {}
 
     #[test]
-    #[ignore = "needs states::driving_menu_states (ArrivalState) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_menu_states (ArrivalState) and the app shell"]
     fn test_the_settlement_line_names_the_finding_the_cost_and_the_claim() {}
 
     #[test]
-    #[ignore = "needs states::driving_menu_states (ArrivalState) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_menu_states (ArrivalState) and the app shell"]
     fn test_a_company_drivers_claim_sits_with_the_carrier() {}
 
     #[test]
-    #[ignore = "needs states::driving_menu_states (ArrivalState) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_menu_states (ArrivalState) and the app shell"]
     fn test_terse_settlement_line_keeps_every_number() {}
 
     #[test]
-    #[ignore = "needs states::driving (_update_cargo_condition) and the app shell"]
+    #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_cargo_condition) and the app shell"]
     fn test_a_load_ruined_in_one_hit_warns_once_at_the_state_it_is_in() {}
 }

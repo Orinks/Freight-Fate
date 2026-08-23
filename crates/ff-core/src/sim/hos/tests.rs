@@ -1304,162 +1304,162 @@ fn arrival_note_spells_the_gap_in_hours() {
 // -- driving state integration ----------------------------------------------------------
 
 #[test]
-#[ignore = "needs app shell (DrivingState._update_hours_and_fatigue + say_event)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState._update_hours_and_fatigue + say_event"]
 fn test_hos_violation_speech_interrupts_but_threshold_warning_does_not() {
     // TODO(port): the 2-hour warning is spoken without interrupt, the
     // violation with interrupt.
 }
 
 #[test]
-#[ignore = "needs app shell (severe fatigue drift warning)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- severe fatigue drift warning"]
 fn test_severe_fatigue_drift_warning_is_urgent() {
     // TODO(port): "You are dangerously drowsy" is spoken interrupting.
 }
 
 #[test]
-#[ignore = "needs app shell (hazard deadline scaling)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- hazard deadline scaling"]
 fn test_fatigued_driver_gets_a_shorter_hazard_window() {
     // TODO(port): fatigue 100 shortens a 6 s hazard deadline by 2.4 s, floored
     // at HAZARD_MIN_REACTION_S.
 }
 
 #[test]
-#[ignore = "needs app shell (RestStopState menu)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState menu"]
 fn test_rest_stop_menu_break_and_sleep() {
     // TODO(port): the rest stop menu's break advances 30 game minutes and
     // the sleep 600, resetting the clock and fatigue.
 }
 
 #[test]
-#[ignore = "needs app shell (RestStopState food and coffee break)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState food and coffee break"]
 fn test_food_and_coffee_break_boosts_alertness_without_resetting_break_rule() {
     // TODO(port): 15 game minutes, fatigue minus 8, since_break unchanged.
 }
 
 #[test]
-#[ignore = "needs app shell (RestStopState.build_items)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState.build_items"]
 fn test_sleep_capable_stop_offers_sleeper_split_choices() {
     // TODO(port): sleeper stops list 2/3/7/8-hour sleeper-berth items.
 }
 
 #[test]
-#[ignore = "needs app shell (RestStopState sleeper split action)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState sleeper split action"]
 fn test_split_sleeper_rest_action_advances_clock_and_speaks_status() {
     // TODO(port): an 8-hour sleeper rest says "Sleeper split pending" and the
     // slept_on_route badge follows; the 2-hour rest says "Sleeper split credited".
 }
 
 #[test]
-#[ignore = "needs app shell (engine shutdown on sleep)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- engine shutdown on sleep"]
 fn test_sleeping_shuts_down_a_running_engine() {
     // TODO(port): sleeping kills a running engine, says so once, air drains.
 }
 
 #[test]
-#[ignore = "needs app shell (ParkingFullState and shoulder sleep)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- ParkingFullState and shoulder sleep"]
 fn test_full_parking_offers_drive_on_and_shoulder() {
     // TODO(port): a full lot offers Drive on / shoulder; shoulder sleep resets
     // HOS, floors fatigue at 30, fines and damages the truck.
 }
 
 #[test]
-#[ignore = "needs app shell (pause menu emergency shoulder sleep)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- pause menu emergency shoulder sleep"]
 fn test_emergency_shoulder_sleep_pause_menu_constraints() {
     // TODO(port): stopped, away from stops and over hours the pause menu
     // offers Emergency shoulder sleep with the cancel item focused.
 }
 
 #[test]
-#[ignore = "needs app shell (T key roadside sleep confirmation at 0.0 and 0.5 mph)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- T key roadside sleep confirmation at 0.0 and 0.5 mph"]
 fn test_t_opens_roadside_sleep_confirmation_at_safe_stop() {
     // TODO(port): parametrized over (0.0, Return) and (0.5, Escape): T at a
     // safe stop opens the confirmation and cancelling returns to the road.
 }
 
 #[test]
-#[ignore = "needs app shell (T while rolling plans a rest stop; 0.5001, 1.0, 3.0 mph)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- T while rolling plans a rest stop; 0.5001, 1.0, 3.0 mph"]
 fn test_t_plans_rest_instead_of_opening_roadside_sleep_while_moving() {
     // TODO(port): parametrized over three rolling speeds: T never opens
     // roadside sleep while moving.
 }
 
 #[test]
-#[ignore = "needs app shell (parking brake at walking pace)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- parking brake at walking pace"]
 fn test_parking_brake_settles_walking_pace_before_pause() {
     // TODO(port): P at 1 mph stops the truck and sets the brake; T then opens
     // the rest stop.
 }
 
 #[test]
-#[ignore = "needs app shell (shoulder sleep revalidation)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- shoulder sleep revalidation"]
 fn test_shoulder_sleep_revalidates_stop_and_unwinds_without_stale_pause_speech() {
     // TODO(port): a rolling truck is refused with "complete stop first"; a
     // stopped one sleeps SLEEP_MIN without a stale "Paused." line.
 }
 
 #[test]
-#[ignore = "needs app shell (controller rest binding)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- controller rest binding"]
 fn test_controller_rest_binding_opens_roadside_sleep_confirmation() {
     // TODO(port): D-pad down with the modifier opens the confirmation.
 }
 
 #[test]
-#[ignore = "needs app shell (fatigue shoulder sleep with HOS off)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- fatigue shoulder sleep with HOS off"]
 fn test_hos_off_still_allows_fatigue_emergency_shoulder_sleep() {
     // TODO(port): the shoulder sleep reason exists stopped, escalates at
     // severe fatigue, vanishes while moving.
 }
 
 #[test]
-#[ignore = "needs app shell (RestStopState lot sleep items)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState lot sleep items"]
 fn test_break_only_stop_always_offers_emergency_lot_sleep() {
     // TODO(port): a break-only stop offers "Sleep 10 hours in the lot".
 }
 
 #[test]
-#[ignore = "needs app shell (rest stop during the day)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- rest stop during the day"]
 fn test_parking_never_full_during_the_day() {
     // TODO(port): a 6 AM start opens the rest stop, never the full-lot menu.
 }
 
 #[test]
-#[ignore = "needs app shell (CityMenuState sleep)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- CityMenuState sleep"]
 fn test_city_sleep_resets_hours_and_advances_the_clock() {
     // TODO(port): city sleep advances 10 hours and resets HOS and fatigue.
 }
 
 #[test]
-#[ignore = "needs app shell (CityMenuState rested-sleep confirmation)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- CityMenuState rested-sleep confirmation"]
 fn test_city_sleep_when_already_rested_needs_a_second_enter() {
     // TODO(port): a rested driver gets a warning first, a tired one sleeps.
 }
 
 #[test]
-#[ignore = "needs app shell (JobBoardState hours warning)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- JobBoardState hours warning"]
 fn test_dispatch_warns_before_accepting_job_that_exceeds_current_hos() {
     // TODO(port): the first accept says "Hours warning", the second accepts.
 }
 
 #[test]
-#[ignore = "needs app shell (JobBoardState board-wide hours warning)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- JobBoardState board-wide hours warning"]
 fn test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos() {
     // TODO(port): "every listed dispatch would need an extra legal rest".
 }
 
 #[test]
-#[ignore = "needs app shell (JobBoardState after a reset)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- JobBoardState after a reset"]
 fn test_dispatch_does_not_warn_after_hours_reset() {
     // TODO(port): a 10-hour reset clears the dispatch hours warning.
 }
 
 #[test]
-#[ignore = "needs app shell (DrivingState snapshot round trip)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState snapshot round trip"]
 fn test_snapshot_roundtrip_preserves_hos_fatigue_and_fines() {
     // TODO(port): driving_min 372, warned marks and hos_fine_count 2 survive.
 }
 
 #[test]
-#[ignore = "needs app shell (pre-1.5 snapshot resume)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- pre-1.5 snapshot resume"]
 fn test_pre_1_5_snapshot_resumes_with_fresh_clock() {
     // TODO(port): a snapshot without HOS keys resumes with HosClock::new().
 }
@@ -1494,7 +1494,7 @@ fn test_inspections_fire_only_in_violation() {
 }
 
 #[test]
-#[ignore = "needs app shell (inspection fines and reputation)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- inspection fines and reputation"]
 fn test_inspection_fines_escalate_and_hit_reputation() {
     // TODO(port): two inspections cost HOS_FINES[0] + HOS_FINES[1] and
     // 2 * HOS_REPUTATION_HIT reputation.
@@ -1528,19 +1528,19 @@ fn test_route_backed_weigh_station_emits_evidence() {
 }
 
 #[test]
-#[ignore = "needs app shell (out-of-service traffic stop)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- out-of-service traffic stop"]
 fn test_serious_hos_inspection_orders_out_of_service_reset() {
     // TODO(port): the stop itself applies the fine, SLEEP_MIN and the reset.
 }
 
 #[test]
-#[ignore = "needs app shell (HOS clock on compressed game time)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- HOS clock on compressed game time"]
 fn test_hos_clock_runs_on_game_time() {
     // TODO(port): driving_min gains effective_time_scale / 60 per real second.
 }
 
 #[test]
-#[ignore = "needs app shell (parking brake arms waiting)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- parking brake arms waiting"]
 fn test_players_own_parking_brake_press_arms_waiting() {
     // TODO(port): the player's P press arms trip.waiting; leaving disarms it.
 }

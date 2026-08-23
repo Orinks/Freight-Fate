@@ -17,7 +17,7 @@ fn hub(app: &mut TestApp) -> freight_fate::app::SharedState {
 }
 
 #[test]
-#[ignore = "needs states::main_menu: MainMenuState's Online item"]
+#[ignore = "unblocked: MainMenuState's Online item exists; the case is not written yet"]
 fn test_main_menu_online_item_opens_the_hub() {}
 
 #[test]

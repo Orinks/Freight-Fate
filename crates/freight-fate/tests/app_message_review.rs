@@ -40,11 +40,11 @@ struct BareState;
 impl State for BareState {}
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_hazard_warning_and_outcome_replay_on_a_comma_and_period() {}
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_collision_outcome_replays_on_a_and_message_review() {}
 
 #[test]
@@ -100,7 +100,7 @@ fn test_menu_navigation_stays_out_of_the_review_log() {
 }
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_pausing_mid_run_leaves_no_trace_in_the_history() {}
 
 #[test]
@@ -131,7 +131,7 @@ fn test_review_replay_stops_the_event_voice() {
 }
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "unblocked: states::driving exists; the case is simply not written yet"]
 fn test_a_replay_stops_the_event_voice() {}
 
 #[test]

@@ -21,6 +21,7 @@ use ff_core::sim::enforcement_observe::OBSERVE_HOLD_MI;
 use ff_core::sim::hos;
 use ff_core::sim::lane::LANE_WIDTH;
 use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::weather::WeatherKind;
 
 use freight_fate::app::testing::{stepping_clock, TestApp};
 use freight_fate::audio::{Audio, AudioError, SustainLoopSpec, VolumeUpdate, CH_AIR};
@@ -67,8 +68,12 @@ fn a_drive(app: &mut TestApp) -> DrivingState {
     job.destination_location = "Rochester freight market".to_string();
     let mut drive = DrivingState::new(&mut app.ctx, job, route, None, DRIVE_PHASE_DELIVERY, None);
     // The bubble is its own suite's business; an empty road keeps these
-    // deterministic (`driving_feature_helpers.quiet_trip`).
+    // deterministic (`driving_feature_helpers.quiet_trip`). The weather is
+    // the other half of that helper: the trip seed is unseeded, so a drive
+    // that does not pin the sky draws a real condition and an ice day caps
+    // the safe speed under whatever the test is measuring.
     drive.trip.set_npc_vehicles(Vec::new());
+    drive.trip.weather.current = WeatherKind::Clear;
     drive
 }
 
@@ -1413,7 +1418,7 @@ fn test_the_descent_advisory_names_controls_the_driver_actually_has() {
 // run the moment those screens exist.
 
 #[test]
-#[ignore = "needs states::driving_rest_states"]
+#[ignore = "unblocked: states::driving_rest_states exists; the case is not written yet"]
 fn test_a_clean_stop_opens_the_traffic_stop_screen() {
     // `test_speeding_consequences.test_being_seen_is_the_only_thing_that_costs_money`:
     // once the truck is stopped the encounter hands off to the roadside
@@ -1430,7 +1435,7 @@ fn test_a_clean_stop_opens_the_traffic_stop_screen() {
 }
 
 #[test]
-#[ignore = "needs states::driving_rest_states"]
+#[ignore = "unblocked: states::driving_rest_states exists; the case is not written yet"]
 fn test_running_from_the_stop_is_a_held_choice() {
     // `_update_pursuit_optin`: holding shift+X through the warning is the
     // only road to a felony, and it pushes `FelonyStopState`.

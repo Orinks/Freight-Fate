@@ -688,11 +688,11 @@ fn test_resolve_keep_mine_rejection_logs_the_raw_reason_but_the_tag_never_speaks
 // -- the save-listener hook -------------------------------------------------------
 
 #[test]
-#[ignore = "needs the Profile port: profile.save() invokes the save listener"]
+#[ignore = "unblocked: models::profile is ported; the save-listener case is not written yet"]
 fn test_every_profile_save_queues_a_backup() {}
 
 #[test]
-#[ignore = "needs the Profile port: a failing listener must not break profile.save()"]
+#[ignore = "unblocked: models::profile is ported; the failing-listener case is not written yet"]
 fn test_a_failing_listener_never_breaks_the_local_save() {}
 
 // -- download and restore ----------------------------------------------------------
@@ -2282,31 +2282,31 @@ fn test_app_loop_speaks_queued_background_refusals() {
 // -- the Save game item at the terminal speaks the backup result ------------------
 
 #[test]
-#[ignore = "needs app shell: CityMenuState._save"]
+#[ignore = "unblocked: CityMenuState::save exists (states/city/terminal.rs); the case is not written yet"]
 fn test_terminal_save_speaks_the_accepted_backup() {}
 
 #[test]
-#[ignore = "needs app shell: CityMenuState._save"]
+#[ignore = "unblocked: CityMenuState::save exists (states/city/terminal.rs); the case is not written yet"]
 fn test_terminal_save_says_when_the_latest_save_is_already_backed_up() {}
 
 #[test]
-#[ignore = "needs app shell: CityMenuState._save"]
+#[ignore = "unblocked: CityMenuState::save exists (states/city/terminal.rs); the case is not written yet"]
 fn test_terminal_save_speaks_a_rejection_with_the_career_named() {}
 
 #[test]
-#[ignore = "needs app shell: CityMenuState._save"]
+#[ignore = "unblocked: CityMenuState::save exists (states/city/terminal.rs); the case is not written yet"]
 fn test_terminal_save_with_cloud_off_mentions_it_only_when_an_account_exists() {}
 
 #[test]
-#[ignore = "needs app shell: CityMenuState._save and BACKUP_RESULT_WAIT_S"]
+#[ignore = "unblocked: CityMenuState::save and the backup watch exist; the case is not written yet"]
 fn test_terminal_save_hands_a_silent_attempt_back_to_the_background() {}
 
 #[test]
-#[ignore = "needs app shell: the playtest sandbox guard in CityMenuState._save"]
+#[ignore = "unblocked: CityMenuState::save exists; the sandbox-guard case is not written yet"]
 fn test_sandbox_save_never_reaches_the_cloud() {}
 
 #[test]
-#[ignore = "needs app shell: CityMenuState.exit drops the pending announcement"]
+#[ignore = "unblocked: CityMenuState exists; the exit case is not written yet"]
 fn test_leaving_the_terminal_drops_the_pending_backup_announcement() {}
 
 // -- threaded shutdown flush --------------------------------------------------------

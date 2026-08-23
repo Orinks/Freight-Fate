@@ -15,6 +15,7 @@ use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::weather::WeatherKind;
 
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::{share, GameContext, SharedState};
@@ -61,8 +62,12 @@ pub fn a_drive_between(
         None,
     );
     // The bubble is its own suite's business; an empty road keeps these
-    // deterministic (`driving_feature_helpers.quiet_trip`).
+    // deterministic (`driving_feature_helpers.quiet_trip`). The weather is
+    // the other half of that helper: the trip seed is unseeded, so a drive
+    // that does not pin the sky draws a real condition and an ice day caps
+    // the safe speed under whatever the test is measuring.
     drive.trip.set_npc_vehicles(Vec::new());
+    drive.trip.weather.current = WeatherKind::Clear;
     let shared = share(drive);
     // `should_enter = false`: entering a drive starts audio and speech these
     // tests are not about, and every screen here is pushed over a drive that

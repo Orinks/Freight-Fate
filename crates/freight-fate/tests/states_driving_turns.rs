@@ -15,7 +15,7 @@ use ff_core::models::profile::Profile;
 use ff_core::settings::Settings;
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::TripEventKind;
-use ff_core::sim::weather::WeatherSystem;
+use ff_core::sim::weather::{WeatherKind, WeatherSystem};
 
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{InputEvent, Key, Mods};
@@ -57,7 +57,12 @@ fn a_drive(app: &mut TestApp) -> DrivingState {
         DRIVE_PHASE_DELIVERY,
         Some(12.0),
     );
+    // `quiet_trip(driving)`: an empty road, and a pinned sky. The trip seed
+    // is unseeded, so a drive that does not pin the weather draws a real
+    // condition -- and an ice day's safe speed sits under the advisories
+    // these cases measure.
     drive.trip.set_npc_vehicles(Vec::new());
+    drive.trip.weather.current = WeatherKind::Clear;
     drive
 }
 

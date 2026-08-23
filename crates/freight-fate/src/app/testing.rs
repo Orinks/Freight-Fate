@@ -24,6 +24,10 @@ use crate::speech::{CaptureSpeech, SpeechSink};
 use super::App;
 
 static ENV_LOCK: Mutex<()> = Mutex::new(());
+/// Which thread holds [`ENV_LOCK`] right now, as the hash of its `ThreadId`,
+/// or 0 for nobody. Only [`EnvGuard`] writes it, so it is accurate for as
+/// long as a guard is alive and cleared the moment one drops.
+static ENV_OWNER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 static DIR_COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
 /// A fresh directory under the system temp dir, removed on drop (the
@@ -58,6 +62,26 @@ impl Drop for TempDir {
     }
 }
 
+/// Holds the environment lock and remembers which thread it belongs to, so
+/// [`env_lock`] can tell a real self-deadlock from an honest queue.
+pub struct EnvGuard {
+    _inner: MutexGuard<'static, ()>,
+}
+
+impl Drop for EnvGuard {
+    fn drop(&mut self) {
+        ENV_OWNER.store(0, std::sync::atomic::Ordering::SeqCst);
+    }
+}
+
+fn thread_key() -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    std::thread::current().id().hash(&mut h);
+    // 0 means "nobody", so never hand it back as a thread's key.
+    h.finish() | 1
+}
+
 /// Take the environment lock (poison-tolerant: a failed test must not take
 /// the rest of the file down with it).
 ///
@@ -65,18 +89,45 @@ impl Drop for TempDir {
 /// would block here forever -- the guard is held for the app's whole
 /// lifetime, and shadowing a binding does not drop it. That deadlock is
 /// invisible: the test simply never finishes, and every other test in the
-/// binary queues behind it. So the wait is bounded and the panic names the
-/// cause; `drop(app)` before building the next one is the fix.
-pub fn env_lock() -> MutexGuard<'static, ()> {
-    let deadline = Instant::now() + Duration::from_secs(30);
+/// binary queues behind it. So the guard records its owner and the panic
+/// fires the instant a thread asks for a lock it already holds; `drop(app)`
+/// before building the next one is the fix.
+///
+/// Waiting on ANOTHER thread is not a deadlock, and must not be treated as
+/// one. Every `TestApp` in a binary queues on this lock, so the serial time
+/// of a whole file is what the last test waits: `playtest_harness.rs` alone
+/// runs 39 seconds of drives back to back. A wall-clock deadline turned that
+/// into a failure naming whichever test happened to be last in the queue.
+pub fn env_lock() -> EnvGuard {
+    let me = thread_key();
+    // A backstop for a hang that is not this thread's own doing: long enough
+    // that no honest queue reaches it, short enough that CI still reports.
+    let deadline = Instant::now() + Duration::from_secs(600);
     loop {
         match ENV_LOCK.try_lock() {
-            Ok(guard) => return guard,
-            Err(TryLockError::Poisoned(e)) => return e.into_inner(),
+            Ok(guard) => {
+                ENV_OWNER.store(me, std::sync::atomic::Ordering::SeqCst);
+                return EnvGuard { _inner: guard };
+            }
+            Err(TryLockError::Poisoned(e)) => {
+                ENV_OWNER.store(me, std::sync::atomic::Ordering::SeqCst);
+                return EnvGuard {
+                    _inner: e.into_inner(),
+                };
+            }
             Err(TryLockError::WouldBlock) => {
                 assert!(
+                    ENV_OWNER.load(std::sync::atomic::Ordering::SeqCst) != me,
+                    "this thread already holds the test environment lock. A \
+                     TestApp holds it until it is dropped, so building a \
+                     second one in the same scope deadlocks -- shadowing the \
+                     binding does not drop the first. Call drop(app) before \
+                     building the next TestApp."
+                );
+                assert!(
                     Instant::now() < deadline,
-                    "the test environment lock was held for over 30 seconds.                      A TestApp holds it until it is dropped, so building a                      second one in the same scope deadlocks -- shadowing the                      binding does not drop the first. Call drop(app) before                      building the next TestApp."
+                    "the test environment lock was held by another thread for \
+                     over ten minutes; something in this binary is hung."
                 );
                 std::thread::sleep(Duration::from_millis(5));
             }
@@ -97,7 +148,7 @@ pub struct TestApp {
     pub app: App,
     pub data_dir: TempDir,
     capture: Rc<RefCell<CaptureSpeech>>,
-    _guard: MutexGuard<'static, ()>,
+    _guard: EnvGuard,
 }
 
 impl std::ops::Deref for TestApp {

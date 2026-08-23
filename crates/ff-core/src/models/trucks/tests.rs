@@ -118,7 +118,7 @@ fn test_heavy_hauler_upgrades_apply_on_top() {
 }
 
 #[test]
-#[ignore = "needs freight_fate::app (App, TruckShopState, UpgradeShopState)"]
+#[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs freight_fate::app (App, TruckShopState, UpgradeShopState)"]
 fn test_garage_says_upgrades_are_fleet_wide() {
     // UpgradeShopState.intro_help says "apply to every tractor";
     // TruckShopState.intro_help says "fleet upgrades apply" and its current
