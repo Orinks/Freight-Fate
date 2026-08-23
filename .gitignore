@@ -133,3 +133,9 @@ target/
 crates/bass-sys/vendor/*/bass*.dll
 crates/bass-sys/vendor/*/libbass*.so
 crates/bass-sys/vendor/*/libbass*.dylib
+# OSM readings behind the curve connector bake (tools/curve_osm_facts.py).
+# 26 MB of derived cache: one deterministic offline pass over the local
+# Geofabrik extracts, regenerated with `--all` whenever the rule is re-judged.
+# The decision it feeds IS committed -- every connector row in curves.jsonl
+# carries the connector_source that flagged it.
+src/freight_fate/data/world_data/us/gameplay/curve_osm.jsonl

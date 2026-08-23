@@ -1595,17 +1595,32 @@ def test_the_cab_is_categorised_so_quiet_is_actually_quiet():
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[1] / "src" / "freight_fate"
-    src = (root / "states").glob("driving_*.py")
-    joined = "\n".join(p.read_text(encoding="utf-8") for p in src)
-    # The exact lines from that transcript must now carry a category.
-    for marker in (
-        'f"Adaptive cruise {self.ctx.settings.speed_text(target)}."',
-        '"Engine off."',
-        'f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.{slowing}"',
+    # Read each file under its own name rather than joining the whole glob:
+    # "Engine off." is spoken in three places with three different meanings --
+    # the driving control confirmation this test is about, the facility-menu
+    # engine toggle, and the terse form of the "start the engine first"
+    # lockout, which is deliberately a ROUTE event and not a confirmation at
+    # all. Path.glob yields directory order, so a plain join found whichever
+    # of the three the filesystem happened to hand over first: it matched the
+    # right one locally and the lockout line on CI, where it failed.
+    sources = {
+        path.name: path.read_text(encoding="utf-8")
+        for path in (root / "states").glob("driving_*.py")
+    }
+    # The exact lines from that transcript must now carry a category, each
+    # checked in the file that actually speaks it.
+    for filename, marker in (
+        ("driving_events.py", 'f"Adaptive cruise {self.ctx.settings.speed_text(target)}."'),
+        ("driving_controls.py", '"Engine off."'),
+        (
+            "driving_controls.py",
+            'f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.{slowing}"',
+        ),
     ):
-        i = joined.index(marker)
-        window = joined[i : i + 260]
-        assert "SpeechCategory.CONFIRMATION" in window, marker
+        source = sources[filename]
+        i = source.index(marker)
+        window = source[i : i + 260]
+        assert "SpeechCategory.CONFIRMATION" in window, f"{filename}: {marker}"
 
 
 def test_wrapping_a_curve_call_never_flattens_its_short_form():

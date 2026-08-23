@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Trucks climb hills like trucks.** Heavy traffic used to hold its speed up
+  a mountain grade the same as it did across Kansas, so a line of trucks was a
+  wall all doing the same number with nothing to choose between them. A loaded
+  tractor now loses the hill the way a real one does -- down into the twenties
+  on a long six percent -- while a light box truck holds forty-odd up the same
+  climb. So the trucks string out on a grade, the light ones work past the
+  heavy ones, and a climb finally sounds different from the flat.
 - **Real time joins the driving mode row.** Under Settings, Gameplay,
   Difficulty and hours of service, the Driving mode row now offers Relaxed,
   Standard, and Real time. Real time runs the driving clock at the speed of a
@@ -938,6 +945,32 @@
 
 ### Fixed
 
+- **The interstate stops warning you about bends that are not on it.** A
+  curve the co-driver called out on the interstate was often not on the
+  interstate at all. It was the ramp you took to get on, the business route
+  through town, or the streets you drove before you ever reached the freeway
+  -- the map had all of that filed as highway curve, so a straight run down
+  I-25 or I-65 kept being interrupted by a bend to slow for, and cruise kept
+  easing off for corners that were really a town street behind you. The game
+  now works out from the road map which bends are on the freeway itself and
+  which are ramps, business routes or town streets, and only calls out the
+  ones on the freeway. Across the interstate network that takes a call to
+  come off the pace from one every forty-four miles to one every hundred and
+  thirty. The mountain interstates keep their driving: I-70 through Glenwood
+  Canyon, the climb over Vail Pass, the Eisenhower approach, I-5 through the
+  Siskiyous, I-40 down the Pigeon River Gorge and I-90 over Lookout Pass all
+  still call the bends they always did -- what each of them lost was the town
+  streets at either end. US-550 over Red Mountain Pass and the Salt River
+  Canyon on US-60 are untouched. Ramp and street bends have not gone anywhere
+  either: the truck still leans on them and the road bed still leads you
+  round them, they are just no longer announced as highway curves.
+
+- **A tank load is described in tank words at the dock too.** A spoiled tank
+  load called "off spec" on the road was called "damaged" when you arrived,
+  and a refused one went from "lost" to "ruined", as though something had
+  happened to the load between the highway and the gate. The receiver now
+  uses the same words the road did.
+
 - **Destination approach assistance now delivers the truck to the gate, not
   a truck length short of it.** With the assist on, the truck could come down
   to a crawl just short of the entrance and sit there, brake held, the dock
@@ -1141,6 +1174,65 @@
   re-read.
 
 ### Fixed
+- **Fewer needless slowdowns for interstate curves.** The game worked out how
+  fast a bend could be taken as though every road were flat. Real highway
+  curves are banked, and the bank is a big part of what holds a truck in a
+  curve -- ignoring it made ordinary interstate bends look sharper than they
+  are, so the truck braked for curves built to be driven at speed. Curves are
+  now read with the bank the road is actually built with, which roughly halves
+  how often an interstate asks you to slow down. Town streets are unchanged:
+  they genuinely are built flat.
+- **"Hairpin" now means a hairpin.** The cab was calling a bend a hairpin
+  whenever it advised 25 miles per hour or less, which caught a lot of road
+  that is nothing of the kind -- tight little corners taken slowly, and in the
+  worst cases bends that barely change direction at all. A hairpin is a
+  switchback, where the road turns back on itself and you have to crawl it,
+  and that is what the word means now. Of the bends previously called
+  hairpins, well under half really were; the rest are announced as sharp
+  bends, which is what they are. You will hear the word far less often, and
+  when you do it will be worth slowing for.
+- **Curve assistance slows for the whole chain of bends, not just the first
+  one.** When two bends come one after the other, the cab warns you about
+  both in a single breath -- "Curve left, a quarter mile. Advise 40. Then
+  sharp left, advise 30." Curve speed assistance was only easing to the first
+  number and letting the speed back up as soon as the first bend was behind,
+  so it carried you into the second one ten miles an hour too fast, and that
+  second bend never got a warning of its own because the first call was
+  supposed to be it. It now holds the slowest speed in the chain until the
+  last bend of it is behind you, which is the speed you were told.
+- **You can get past a box truck now.** Box trucks were being run at the same
+  governed speed as a loaded semi, which on a 65 road put them within about a
+  mile an hour of you. Pulling into the left lane to get around one never
+  finished the job: you sat level with it and it stayed exactly where it was.
+  A box truck is not a tractor-trailer, and it no longer borrows one's speed
+  limiter -- it runs slower than the heavy trucks now, the way it does on a
+  real interstate, and you go by it.
+- **Closing the window asks first, instead of taking your drive with it.**
+  Alt F4, or the window's close button, used to shut the game down on the
+  spot. Part way through a leg that quietly cost you the leg: you can only
+  save at a stop, so the drive you were on was gone and your save still
+  pointed at your last stop. Closing the window now raises the same yes or no
+  question Escape does, starting on No, and when there is a drive in progress
+  it says so before you answer. If you really do want out, pressing it a
+  second time closes the game without asking again.
+- **Billboards and roadside signs read in full on quiet.** Quiet shortens the
+  roadside colour by keeping the name and dropping the words around it, which
+  works for a river crossing or a park boundary -- the name is the whole point
+  of those. A billboard is not a name. It is what the sign actually says, and
+  the joke is usually the last line, so shortening one left you the setup
+  without the punchline: "Meteor Crater is ahead, a hole in the desert nearly a
+  mile wide" and never "It is bigger than it sounds. Much bigger." Billboards
+  and the roadside signs you pass now read in full at every setting. If you
+  find them too talkative, the billboards switch turns them off outright, which
+  was always the better control than hearing half of each.
+- **Career stats now tells you what you are driving and what earns the next
+  truck.** The screen you go to when you want to know where you stand did not
+  mention your truck at all. If the yard was holding better equipment back
+  from you, that was said when dispatch handed you a tractor and when a
+  level-up arrived without one -- both moments you had to be there for. Career
+  stats now carries the tractor you are in and the fleet it belongs to, and
+  either the reason the better iron is being kept from you and what gives it
+  back, or the level that earns the next fleet.
 - **Canceling a planned stop gives you the road back straight away.** Signal
   for an exit and the drive drops out of its usual pacing for the approach,
   so you have real time to set up the braking. Press the key again to call

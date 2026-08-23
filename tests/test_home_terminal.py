@@ -520,3 +520,84 @@ def test_escape_at_main_menu_asks_before_quitting(monkeypatch):
         assert app.running is False
     finally:
         app.shutdown()
+
+
+def test_closing_the_window_asks_before_it_takes_the_drive(monkeypatch):
+    """Darren, 2026-08-22: "I have ruined two of my routes doing this."
+
+    Alt+F4 and the window's close button both arrive as a quit event, and
+    that ended the process on the spot. Mid-leg it is silently destructive:
+    saving happens only at stops, so the drive is gone and the save still
+    points at the last stop. It now raises the same gate Escape does, and
+    says what is at stake when there is a drive to lose.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import ConfirmQuitState, MainMenuState
+
+    app = App()
+    spoken = []
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        app.running = True
+
+        app._handle_close_request()
+        assert isinstance(app.state, ConfirmQuitState)
+        assert app.running is True, "the window close must ask, not go"
+        assert "Quit Freight Fate?" in spoken[-1]
+        # Nothing to lose from the title, so nothing is claimed.
+        assert "part way through a drive" not in spoken[-1]
+
+        # It lands on No, and No puts the player back where they were.
+        assert app.state.items[app.state.index].text.startswith("No")
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, MainMenuState)
+        assert app.running is True
+    finally:
+        app.shutdown()
+
+
+def test_a_second_close_request_is_obeyed_without_argument(monkeypatch):
+    """A confirmation the player cannot escape would be the worse bug.
+
+    If speech has dropped or the dialog is somehow unreachable, pressing
+    Alt+F4 again has to close the game -- so the gate asks exactly once.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import ConfirmQuitState, MainMenuState
+
+    app = App()
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        app.running = True
+
+        app._handle_close_request()
+        assert isinstance(app.state, ConfirmQuitState)
+        app._handle_close_request()
+        assert app.running is False
+    finally:
+        app.shutdown()
+
+
+def test_the_close_gate_names_the_leg_it_would_cost(monkeypatch):
+    """Mid-drive the gate is worth reading, so it says why."""
+    from driving_feature_helpers import start_drive
+
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import ConfirmQuitState
+
+    app = App()
+    spoken = []
+    try:
+        start_drive(app)
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        app.running = True
+
+        app._handle_close_request()
+        assert isinstance(app.state, ConfirmQuitState)
+        assert app.running is True
+        assert "part way through a drive" in spoken[-1]
+        assert "only save at a stop" in spoken[-1]
+    finally:
+        app.shutdown()

@@ -1,6 +1,7 @@
 """Learn game sounds: the demo sequencer and the screen that drives it."""
 
 import pytest
+from asset_helpers import needs_audio_assets
 
 from freight_fate.sound_catalog import Cue, SoundEntry
 
@@ -147,6 +148,7 @@ def test_a_cue_with_no_playable_key_plays_and_holds_nothing():
     assert not demo.running
 
 
+@needs_audio_assets
 def test_a_one_shot_is_not_layered_over_a_copy_of_itself():
     """Enter twice on the yawn used to play two yawns a moment apart.
 
@@ -239,6 +241,7 @@ def test_arrowing_speaks_the_name_and_plays_no_cue(monkeypatch):
         app.shutdown()
 
 
+@needs_audio_assets
 def test_enter_plays_the_entrys_cue_with_its_volume_and_pan(monkeypatch):
     from speech_capture import speech_stub
 
@@ -292,6 +295,7 @@ def test_f1_speaks_the_meaning_and_the_when_note():
         app.shutdown()
 
 
+@needs_audio_assets
 def test_leaving_the_screen_releases_a_held_cue(monkeypatch):
     from speech_capture import speech_stub
 
@@ -332,6 +336,7 @@ def _held_and_other_category():
     )
 
 
+@needs_audio_assets
 def test_jump_stops_a_running_held_demo(monkeypatch):
     """Home and End go through ``jump``, a route separate from ``move``.
 
@@ -364,6 +369,7 @@ def test_jump_stops_a_running_held_demo(monkeypatch):
         app.shutdown()
 
 
+@needs_audio_assets
 def test_first_letter_jump_stops_a_running_held_demo(monkeypatch):
     """Typing a letter jumps by name, a third route independent of ``move``.
 
@@ -396,6 +402,7 @@ def test_first_letter_jump_stops_a_running_held_demo(monkeypatch):
         app.shutdown()
 
 
+@needs_audio_assets
 def test_arrow_move_stops_a_running_held_demo(monkeypatch):
     """The ordinary arrow route, checked the same way as the other two.
 
@@ -429,6 +436,7 @@ def test_arrow_move_stops_a_running_held_demo(monkeypatch):
         app.shutdown()
 
 
+@needs_audio_assets
 def test_reentering_the_screen_stops_a_running_held_demo(monkeypatch):
     """Coming back from a screen pushed over this one is its own route.
 
@@ -600,6 +608,7 @@ def test_engine_brake_stages_are_learnable_and_named_by_stage():
         assert entry.plays[0].key == "engine/jake_1600"
 
 
+@needs_audio_assets
 def test_jake_stage_demo_resolves_through_the_jake_voice_setting():
     """The screen must demonstrate whichever jake the player chose in
     Settings, through the real audio engine's key routing -- not a fake, and

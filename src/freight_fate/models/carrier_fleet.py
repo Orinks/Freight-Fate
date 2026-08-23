@@ -421,3 +421,38 @@ def withheld_promotion_text(profile) -> str:
 # over. The rest of the rank's unlock still happens, so only the equipment
 # half of the promise is corrected.
 WITHHELD_UNLOCK_TAIL = "The tractor that comes with it is staying in the yard for now."
+
+
+def next_fleet_tier(profile) -> FleetTier | None:
+    """The tier above what this driver's level has already earned, or None."""
+    level = _career_level(profile)
+    return next((tier for tier in FLEET_TIERS if tier.min_level > level), None)
+
+
+def equipment_status_lines(profile) -> list[str]:
+    """What this driver is in, and what stands between them and better iron.
+
+    The hold was spoken at the two moments it happens -- the dispatch
+    hand-over, and the level-up that arrives without a truck. Both are
+    moments, and a moment the player had to be present for is not a record:
+    Brandon, held at the regional fleet on level eleven, went to the career
+    stats screen to ask what was keeping him out of the better equipment and
+    the screen did not mention equipment at all (2026-08-22).
+
+    Two lines rather than one long one, matching how this screen already
+    splits standing across several: what you are driving, and -- only when
+    something is actually holding it back -- why, and what gives it back.
+    """
+    model = TRUCK_CATALOG.get(profile.active_truck_key())
+    truck = model.label if model is not None else "none assigned"
+    if profile.owns_equipment():
+        # Nobody assigns an owner-operator a tractor, so there is no tier to
+        # be held below and no next one to earn.
+        return [f"Truck: {truck}, your own"]
+    tier = assigned_fleet_tier(profile)
+    if equipment_held_back(profile):
+        return [f"Truck: {truck}, {tier.label}", equipment_hold_text(profile)]
+    upcoming = next_fleet_tier(profile)
+    if upcoming is None:
+        return [f"Truck: {truck}, {tier.label}, the carrier's best equipment"]
+    return [f"Truck: {truck}, {tier.label}. Level {upcoming.min_level} earns the {upcoming.label}."]

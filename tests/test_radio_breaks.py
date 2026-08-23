@@ -1,4 +1,5 @@
 import pytest
+from asset_helpers import needs_audio_assets
 
 from freight_fate import radio_content
 from freight_fate.music import MusicTrack
@@ -213,6 +214,7 @@ def test_no_host_station_chains_songs_without_break(break_driving):
     assert driving._radio_break_queue == ()
 
 
+@needs_audio_assets
 def test_station_content_tables_resolve():
     import json
     from importlib import resources

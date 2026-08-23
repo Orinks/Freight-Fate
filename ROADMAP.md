@@ -259,6 +259,24 @@ onto exit signalling.
       `pyfmt.rs:180`, `filter_next` (use `rfind`) at
       `profile_integrity_invariants.rs:642`, and `type_complexity` at
       `sim/real_weather/tests.rs:725`.
+- [ ] **The audio tests only run where the packs are.** CI checks out without
+      LFS -- the repository's LFS budget is spent, and an exhausted quota
+      refuses the 7.5 MB `sounds.pak` fetch just as firmly as the 250 MB
+      music one -- so the 45 tests that need real audio content now skip
+      there instead of failing against a 130 byte pointer. They still run in
+      full on any clone with the packs materialised. Until the budget is
+      restored or the packs move off LFS, nothing in CI actually exercises
+      the decode path; a periodic job that fetches with LFS and runs just
+      those tests would close the gap without paying per push.
+
+- [ ] **The facility engine toggle speaks uncategorised.** At the quiet
+      speech rung, switching the engine off on the road gives an earcon
+      (`driving_controls.py` passes `SpeechCategory.CONFIRMATION`), but the
+      same action in the facility menu (`driving_core._toggle_facility_engine`)
+      still speaks "Engine off." in full -- it calls `ctx.say` with no
+      category. Found while pinning the ladder test to the file that owns
+      each line; left alone because it changes what a player hears and wants
+      its own entry.
 
 - [x] **Real time driving mode (owner, 2026-08-22).** The Driving mode row
       is Relaxed, Standard, Real time: `TIME_SCALES` gains 1.0, the tuning
@@ -1479,6 +1497,343 @@ onto exit signalling.
       mule every long haul and asked what gives. The note now speaks the hold
       text for a dedicated driver and stays silent for one in good standing.
 
+      AND SOMEWHERE HE CAN GO AND ASK (2026-08-22). Brandon re-tested and
+      reported the career stats screen still silent on it, which is the same
+      gap one layer up: both the dispatch note and the withheld level-up are
+      MOMENTS, and a moment the player had to be present for is not a record.
+      That screen exists to answer "where do I stand" and did not mention
+      equipment at all. It now carries what the driver is in and which tier
+      it belongs to, the hold and what clears it when there is one, and
+      otherwise the level that earns the next tier -- so the question is
+      answerable at any time, not only when the game happens to raise it.
+
+- [x] **Curve advisories count the bank the road is built with
+      (2026-08-23).** Owner: too many interstate curves make the truck slow.
+      MEASURED: 16,038 interstate mainline curves over 86,412 miles, 3,002 of
+      them demanding a drop below 65 -- one every 28.8 miles, where a real
+      interstate asks for none.
+
+      The bake computes its advisory as `sqrt(0.30 g R)`, a FLAT road
+      (`tools/straw_curve_sample.py`, `A_LAT_G`). TxDOT Roadway Design Manual
+      4.7.3 gives the governing equation as `e + f = V^2 / 15R`, so a flat
+      reading discards e outright and understates every banked curve: a
+      1,000 ft radius reads 67 mph against a designed-and-banked 75.
+
+      `superelevation_at` derives the bank the designer had to build to hold
+      the road's own design speed, and `advisory_with_bank_mph` reprices the
+      advisory at load. Applied only at design speeds of 50 and up, which is
+      where TxDOT Table 4-3 and Iowa DOT 2B-1 both put the Method 5 / Method 2
+      line -- a town street is built to normal crown and its flat reading is
+      correct. Result: one slowdown every 44.2 interstate miles, from 28.8.
+
+      SOURCES CROSS-CHECKED, at the owner's insistence and he was right to.
+      An early WebFetch summary of TxDOT Table 4-7 was WRONG -- shifted a
+      column, giving 70 mph as 1,480 ft when the table says 1,810 -- and was
+      caught by back-solving its own friction factors (0.14 at 70 is a 50 mph
+      value). Read verbatim afterwards. The friction table already in
+      `curves.py` matches Iowa DOT Table 2B.1, which cites AASHTO Green Book
+      7th ed. Table 3-7, at every speed; and `min_radius_ft` reproduces TxDOT
+      Table 4-7 to rounding (757.6 vs 758, 1814.8 vs 1810) by independent
+      arithmetic.
+
+      6 PERCENT, NOT 8. `SUPERELEVATION_MAX` is 8 because the SCREEN wants the
+      most permissive number. Reusing it for the advisory credits every road
+      with the steepest bank any state permits, reading out a higher safe
+      speed than the road has. Both manuals name the built rate and both say
+      6 (TxDOT 4.7.3; Iowa 2B-2), so `SUPERELEVATION_BUILT` is its own
+      constant. Measured sensitivity: 4 vs 6 percent moves 30 percent of
+      advisories and 725 across the slow-down line, so this is not a rounding
+      detail.
+
+      STATE RULES CONVERGE, which is why there is no per-state table. Texas,
+      Iowa, New York and North Carolina all land on 8 as the ceiling, 6 built,
+      4 urban, because all four implement AASHTO. The axis that moves the
+      number is urban versus rural, not the state line -- and TxDOT settles
+      the case that matters: "Freeway facilities are excluded from using a
+      maximum superelevation rate of 4 percent."
+
+- [x] **A curve is on the interstate only if the road under it is
+      (2026-08-23).** The bank fix took one-every-28.8-miles to
+      one-every-44.2. What was left was not a physics problem: EVERY one of
+      the original 3,002 sat below the 60 mph minimum radius and half below
+      the 50 mph one, so none of them was real interstate mainline. They were
+      interchange vertices and city-departure kinks the dense sweep classed
+      as mainline rather than as connectors.
+
+      WHY THE SWEEP GOT IT WRONG: `connector` was decided by POSITION alone
+      -- `CONNECTOR_WINDOW_MI`, the first and last 0.75 mi of the leg. That
+      window cannot see a mid-leg interchange, and 0.75 mi does not get a
+      truck out of a town, let alone out of Denver. Everything past it was
+      mainline by default.
+
+      THE FIX IS A READING, AND IT IS IN THE BAKE.
+      `tools/curve_osm_facts.py` streams the local Geofabrik extracts and
+      records what OSM way sits under each curve's apex;
+      `tools/bake_curve_connectors.py` sets the flag from its class and
+      writes which reading did it into `connector_source`. Two readings,
+      both of them upstream's own words:
+
+      * `osm:ramp` -- the apex rides a `highway=*_link` way, which is the tag
+        OSM uses for a ramp, slip road or interchange connector.
+      * `osm:off-freeway` -- the leg is Interstate class and the apex rides
+        something that is not `highway=motorway`. Every Interstate mainline
+        mile is a controlled-access freeway by statute (23 CFR 625 adopts the
+        AASHTO Interstate design standards) and US mappers tag controlled
+        access as `motorway`, so an apex on a `trunk`, `primary` or
+        `residential` way is not on the Interstate, whatever the leg says.
+
+      SCREENING AT THE DESIGN FLOOR DOES NOT WORK, and this was tried:
+      `INTERSTATE_MIN_RADIUS_FT` raised from 300 to `min_radius_ft(50)` = 758
+      reads correctly and deletes I-70 through Glenwood Canyon, which really
+      does bend tighter than standard under design exceptions.
+      `test_glenwood_canyon_interstate_curves_survive` caught it and the
+      change was reverted. A screen sized to the design floor cannot tell an
+      exception from an artifact. The rule that shipped never sees a radius,
+      a deflection or an advisory at all -- there is no argument through
+      which the geometry could reach it -- so it cannot repeat that mistake,
+      and `test_a_freeway_curve_stays_mainline_however_hard_it_bends` pins
+      that.
+
+      SEPARATION MEASURED on Alabama and Colorado, 1,026 interstate mainline
+      rows with readings, against the one thing the rule may not see:
+
+          rule                      slow moved   fast moved   Youden J
+          link only                    23%           5%         0.17
+          link + shield ref match      72%          19%         0.52
+          link + motorway class        72%          15%         0.58  <-- ships
+
+      Shield matching loses both ways: it moves the last stretch of I-59 into
+      New Orleans, which really does ride I-10 mainline, and it MISSES the
+      business route through Glenwood Springs, which OSM tags
+      `ref=I 70 Business` and any number match reads as I-70.
+
+      HAND-CHECKED on the I-70 legs, because that is where a bad rule would
+      show first. What moved: Edwards Access Road, "I 70 Business" through
+      Edwards and Glenwood Springs, Pine Street, West 6th Street, Laurel
+      Street, Ute Avenue, South 12th Street, Blue River Parkway, and a string
+      of `motorway_link` ramps. What did not move: every mile of Glenwood
+      Canyon between them.
+
+      RESULT: one interstate slowdown every 130.7 miles, from 44.2 -- 1,954
+      demands to come off the pace down to 661, over the same 86,412 miles.
+      13,479 rows moved off mainline network-wide (connectors 8,439 ->
+      21,918), read for 99.8 percent of the 63,873 baked curves; the 130
+      with no road inside the corridor keep whatever the sweep said.
+      Mountain interstate is intact: Glenwood Canyon keeps 70 of its 71
+      curves and 20 of its 21 slow ones, Vail Pass 59 of 60, the Eisenhower
+      approach 76 of 82, Glenwood Springs to Grand Junction 54 of 60 -- and
+      what each of them lost was town street or ramp at the leg's ends, not
+      canyon. US-550 over Red Mountain Pass is untouched at 276 curves and
+      the Salt River Canyon at 143. The interstate legs that still ask for a
+      slow-down are the ones that should: I-5 through the Siskiyous, I-40
+      through the Pigeon River Gorge, I-90 over Lookout Pass, I-84 in the
+      Columbia Gorge, I-64 and I-77 in West Virginia. Nothing was deleted:
+      every row keeps its radius, deflection and advisory, and
+      `connector_source` says which reading moved it.
+
+      CONNECTORS ARE ONLY EVER ADDED -- a row the positional window flagged
+      stays flagged, because the window sees city geometry the class reading
+      can miss. Re-running the tool on its own output lands in the same
+      place: only the sweep's own verdict is preserved, never this tool's.
+
+      WHAT IT STILL KEEPS, measured rather than assumed: of the 15,752
+      interstate mainline rows that survive, 11,986 sit on a way carrying the
+      leg's own shield, 3,640 on a way carrying another route number (a
+      concurrency, or a leg that genuinely finishes on a different freeway --
+      I-59 into New Orleans rides I-10), and 126 on a `motorway` way with no
+      `ref` at all. That last group is where the rule cannot tell "a freeway"
+      from "the Interstate", and it is urban freeway spaghetti: the
+      Whitehurst Freeway in DC, the West 6th Avenue Freeway out of Denver,
+      Tampa's Crosstown Connector, the I-95 Express Toll Lanes. 37 of them
+      ask a truck to slow and the existing 300 ft interstate screen takes
+      most of those at load, leaving roughly twenty of 661. They are real
+      bends on real controlled-access road, so they are LEFT rather than
+      chased with a second rule -- but that is the residual, and this is
+      where to look if the interstate ever feels talkative in a city again.
+
+- [ ] **Some interstate legs are labelled for a road their route does not
+      ride.** Found by the connector bake above, which reads per-leg freeway
+      coverage as a by-product: 51 of 728 interstate legs spend under half
+      their route miles on a freeway at all, 10 of them under 5 percent. The
+      worst are Chico to Santa Rosa (labelled I-5, 3 percent freeway, 317
+      curves moved), Roanoke to Raleigh (I-40, 24 percent, 157), Evansville
+      to Nashville (I-24, 10 percent, 153) and Huntsville to Nashville (I-65,
+      6 percent, 122) -- that last one runs US-231 end to end, which
+      `bake_divided` already measures as undivided from another angle. The
+      cause is ORS's cost model preferring the surface route on a leg with no
+      `route_via` pin to stop it.
+
+- [ ] **`curve_artifacts.jsonl` is stale against its own screen.** Noticed
+      while checking the connector bake did not disturb it:
+      `tools/screen_curve_artifacts.py --check` already reported the shipped
+      US/state artifact table out of date at `5557f906`, BEFORE any of this
+      change -- verified by re-running the check against the previous
+      `curves.jsonl`. It is not the hairpin commit either: that one only
+      added comments to the screen and deliberately left its `_is_extreme_
+      claim` rule alone. Some other input moved under it.
+
+      Deliberately NOT regenerated here. Re-baking it re-decides which
+      US/state hairpins players hear, which is a different change from
+      classifying interstate connectors and wants its own before/after. The
+      connector bake cannot have made it worse in the direction that matters:
+      it only ever ADDS connectors, `screen_curve_artifacts` only considers
+      non-connector rows, and `_flagged_artifact_keys` is only consulted for
+      non-connector rows -- so a stale entry that is now a connector is
+      inert, never a missing screen.
+
+      Next step: run `tools/screen_curve_artifacts.py --report`, diff the
+      flagged `(leg, seq)` set against the shipped one, and find what moved
+      before writing.
+
+      The connector rule reads every curve on such a leg as off-freeway,
+      which is TRUE (they are not on I-65) but silences a genuinely curvy
+      drive rather than fixing the label. The fix is a routing pin per leg
+      and a re-bake, the same way San Francisco to Portland is pinned to I-5
+      over Siskiyou Pass, and it needs the ORS server up.
+      `tools/bake_curve_connectors.py --report` prints the ranked list.
+
+- [x] **"Hairpin" is a shape, and the sign manual says which one
+      (2026-08-23).** `severity` called anything advising 25 or less a
+      hairpin. MUTCD does not: the Hairpin Curve sign (W1-11) is for a change
+      in horizontal alignment of 135 degrees or more, and advisory speed
+      sorts curves separately and much lower down, swapping the Turn sign
+      (W1-1) for the Curve sign at 30 mph or less.
+
+      MEASURED across 33,930 baked curves, three candidate rules:
+        * old (advisory <= 25 or deflection >= 150): 159 hairpins, 0 on an
+          interstate -- but among them bends deflecting TEN degrees, called
+          hairpins purely for being taken slowly.
+        * angle alone (deflection >= 135): 99 hairpins, and 7 of them on
+          interstate mainline. One is I-49 north of Fayetteville, 811 ft
+          radius through 143 degrees at a 60 mph advisory: a real half-circle
+          of road, and a sweeping one nobody would call a hairpin.
+        * MUTCD, both halves (deflection >= 135 AND advisory <= 30): 46
+          hairpins and NONE on an interstate.
+
+      The last is what shipped, and the interstate count is the check on it
+      rather than a target it was fitted to -- interstates do not switchback,
+      and the rule works that out without being told.
+
+      The artifact screens keep the BROAD test, deliberately: their question
+      is "could a road here really do this?", where a very low advisory is an
+      extreme claim about the ground whether or not the road comes back on
+      itself. One predicate had been answering both questions;
+      `tools/screen_curve_artifacts.py` calls its own `_is_extreme_claim` now
+      so the two cannot drift into each other again.
+
+- [x] **Curve assist takes the chain's tightest advisory, not the first
+      bend's (2026-08-23).** Darren's load shifted 12 percent on NY-12 and
+      his log had the words and the machine disagreeing:
+
+        Curve left, a quarter mile. Advise 40 miles per hour. Then sharp
+        left, advise 30 miles per hour. Adaptive cruise easing to 40 miles
+        per hour for the bend.
+        ... Sharp left: too fast, drifting to the outside.
+        ... The load has shifted hard and is damaged, 12 percent.
+
+      `_pacenote_text` already reads the linked follower and speaks its
+      tighter advisory; the assist beside it read only `advisory` and set
+      `_cruise_curve_end_mi` to the LEAD bend's end. So it eased to 40,
+      released at the first bend's end, and met a 30 mph bend at 40 -- with
+      nothing left to warn, because the trip suppresses a linked follower's
+      own call so a chain speaks once. The spoken number was right the whole
+      way, which is the worst shape for a fault: nobody goes looking for a
+      bug in a cab that is saying the correct thing.
+
+      Found by reading a tester's log rather than by a report -- Darren only
+      said he "had some trouble with hairpin curves" and asked whether they
+      were supposed to be there.
+
+- [x] **CI stops spending the LFS budget it needs (2026-08-23).** Every run
+      on this branch was red at CHECKOUT, not on a test: "This repository
+      exceeded its LFS budget". CI was what spent it. The test job fetched
+      the whole LFS payload -- music.pak at 250 MB plus sounds.pak at 7.5 MB
+      -- on both matrix runners on every push, about half a gigabyte per
+      commit, and the build job again on top. Buying quota only postpones
+      that: at this push rate a 50 GB data pack lasts roughly ten days.
+
+      The test job now checks out with `lfs: false` and pulls sounds.pak
+      alone, which the suite actually reaches for, and never fatally: a quota
+      failure leaves the pack unmaterialised rather than failing the run.
+      What that costs is four music-asset assertions and the committed
+      music.pak header check, which now skip instead -- they are content-pack
+      invariants that change rarely and still run on any machine holding the
+      pack. Verified by replacing music.pak with a pointer stub locally and
+      running the full suite in exactly the state CI will be in.
+
+      A pointer is a file that EXISTS, which is why the helpers had to learn
+      to see one: an existence check alone reads an unmaterialised pack as
+      present and every asset lookup then fails against something that is not
+      a pack. `asset_helpers.pack_available` is that check.
+
+      The build job still takes the full payload, and should: it packages the
+      game and genuinely needs the audio.
+
+      EXPECT CI RED UNTIL 2026-09-01, AND DO NOT RE-DIAGNOSE IT. The budget
+      was already spent when this landed, so even the 7.5 MB sound pull fails
+      and the job runs with no audio at all -- 50 tests across 12 modules
+      that need shipped bytes (the engine ring, the horn, loop points, Learn
+      Sounds). GitHub's bandwidth allowance resets on the 1st; the pull then
+      succeeds and all 50 come back on their own with no code change. Owner
+      ruled 2026-08-23 to ride it out rather than buy quota or skip the
+      tests, so a red CI in this window means "the quota is still spent"
+      until proven otherwise -- but it also means a REAL failure in this
+      window is easy to miss, so read the job log rather than the badge.
+
+- [x] **A box truck stops borrowing a tractor-trailer's limiter
+      (2026-08-22).** `GOVERNED_CLASSES` put semis and box trucks in one
+      band, and the band's provenance is ATRI's Operational Costs survey --
+      which asks FOR-HIRE FLEETS RUNNING CLASS 8 TRACTORS. A straight truck
+      is not one, so this was a reading about one class reused for another,
+      the exact fault the provenance rules are about. The checkable numbers
+      for these are published rental and vocational governors (U-Haul states
+      55 mph for its trucks, Penske governs at 65), so
+      `GOVERNED_BOX_TRUCK_BAND_MPH` is those, and `GOVERNED_BANDS` maps each
+      class to its own rather than sharing one.
+
+      MEASURED, because the point was passability and not the number: on a 65
+      road, against a player holding the limit, a box truck was 3+ mph slower
+      0 percent of the time before (mean 64.2) and 70 percent after (mean
+      59.9). That is why Brandon moved to the left lane and stayed level with
+      one instead of getting by it.
+
+      AND THE SEMI HALF, ANSWERED BY TERRAIN RATHER THAN BY MOVING A CITED
+      NUMBER (owner: "I want to implement whatever is more realistic in
+      trucking"). The same measurement said a semi is also 0 percent passable
+      on a flat 65 road, and on the flat that is CORRECT: two governed trucks
+      a mile an hour apart is the elephant race real drivers complain about,
+      and the player's truck is not road-governed anyway (`speed_cap_mph` is
+      set only by the damage limp bands), so a driver with road left can
+      always use it.
+
+      What was missing was the hill. NPC speed had no grade term at all, so a
+      mountain leg ran like Kansas and heavy traffic stayed a wall at one
+      speed everywhere. `climb_speed_mph` is the steady state where a class's
+      wheel power equals drag plus rolling plus the climb, using the SAME
+      constants as the player's truck (`vehicle.resistance_force`) and each
+      class's real weight and power. Not a fitted table: the check is that it
+      lands where a driver would expect -- a loaded tractor at about 26 mph on
+      a sustained 6 percent, 44 on a 3 -- and on I-70 west of Denver 20 of 82
+      sampled miles now hold trucks below their limiter, with a box truck
+      climbing the steepest pitch at 42 where a semi manages 24.
+
+      NOT DONE, and deliberately: ATRI's 84.1 percent limiter figure is about
+      FLEETS, not trucks, so spawning a 16 percent ungoverned minority from it
+      would repeat the very substitution this entry is about.
+
+- [x] **Closing the window asks before it takes the drive (2026-08-22).**
+      `pygame.QUIT` -- Alt+F4 and the window close button both -- set
+      `running = False` on the spot. Mid-leg that is silently destructive:
+      saving happens only at stops, so the leg is discarded and the save
+      still points at the last stop. Darren lost two routes to a mis-hit key
+      and asked for the gate Escape already has. It now raises
+      `ConfirmQuitState`, which grew an `unsaved_drive` flag so the question
+      is worth reading rather than a keystroke to swat: quitting from the
+      title loses nothing and says nothing, quitting mid-leg says what it
+      costs in the same words the pause menu's quit already uses. The second
+      close request is obeyed without argument -- a confirmation the player
+      cannot get past would be a worse bug than the one it fixes.
+
 - [ ] **Audit every interrupting line for whether it is still TRUE when it
       comes back.** A cut line is handed back so it finishes rather than
       vanishing -- Shane asked for that, and it is what rescued the missing
@@ -2521,6 +2876,20 @@ onto exit signalling.
       Villages are untouched; they answer to the place-callouts ladder.
       Principle (2) above, in miniature: the switch is the ladder, and
       verbosity stops overriding it.
+
+      BILLBOARDS ARE NOW EXEMPT FROM THE CUT (2026-08-22). "The name and
+      the fact" is the right short form for a category whose line is a
+      LABEL wrapped in framing -- a river, a park boundary, a pass. A
+      billboard is not a label: it is the sign's own words, and the payload
+      is usually the last sentence, so the cut handed back the setup without
+      the punchline ("Meteor Crater is ahead, a hole in the desert nearly a
+      mile wide", never "It is bigger than it sounds. Much bigger."). The
+      function already spared gags under sixty characters for exactly this
+      reason; the placed billboard signs run long and were cut anyway, which
+      is what Brandon heard. Both billboard categories now keep the whole
+      line at every rung, framing included, and the dedicated billboards
+      switch is the control for a player who wants fewer of them -- it was
+      always the better one than hearing half of each.
 - [x] **Exit traffic speaks only for the exit you are taking -- landed
       2026-08-15** (owner, the same day as the chattiness note above: "when
       exits come up, the game announces traffic info for that exit. Suppress

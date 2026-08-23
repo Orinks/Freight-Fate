@@ -108,6 +108,12 @@ OUTPUT_PATH = (
 # Same definition data/curves.py's RouteCurve.severity uses for "hairpin" --
 # import-free copy so this tool has no runtime dependency on the baked data
 # module (mirrors reclassify_terrain.py's own world_source-only imports).
+# The screen's own question is "could a road here really do this?", so it
+# keeps the BROAD test: a very low advisory is an extreme claim about the
+# ground whether or not the road comes back on itself. That is deliberately
+# not the spoken hairpin test, which MUTCD settles on shape alone (see
+# data/curves.py HAIRPIN_DEFLECTION_DEG). One predicate was doing both jobs
+# and they want different answers.
 HAIRPIN_MAX_MPH = 25
 HAIRPIN_DEFLECTION_DEG = 150.0
 
@@ -161,7 +167,8 @@ def _load_geometry() -> dict[str, dict[str, Any]]:
     return geom
 
 
-def _is_hairpin_severity(row: dict[str, Any]) -> bool:
+def _is_extreme_claim(row: dict[str, Any]) -> bool:
+    """Whether this row claims geometry worth asking the ground about."""
     return row["advisory_mph"] <= HAIRPIN_MAX_MPH or row["deflection_deg"] >= HAIRPIN_DEFLECTION_DEG
 
 
@@ -197,7 +204,7 @@ def find_artifacts(data: dict[str, Any]) -> list[dict[str, Any]]:
         highway = str(leg.get("highway") or "")
         if highway.upper().startswith("I-"):
             continue  # interstate mainline has its own runtime screen
-        candidates = [r for r in rows if not r.get("connector") and _is_hairpin_severity(r)]
+        candidates = [r for r in rows if not r.get("connector") and _is_extreme_claim(r)]
         if not candidates:
             continue
 

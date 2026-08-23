@@ -143,6 +143,22 @@ def money_path(monkeypatch, tmp_path):
 
     monkeypatch.setattr(rgc, "_write_ogg", fake_write_ogg)
 
+    write_asset_calls: list[Path] = []
+
+    def fake_write_asset(sample, rate, relpath):
+        out = assets / relpath
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(b"FAKE-OGG-STUB")
+        write_asset_calls.append(out)
+
+    # The fourth shell-out, and the one this fixture used to miss: the runners
+    # reach _write_asset through `from generate_radio import _write_asset`, so
+    # it is rgc's OWN module-level name -- patching generate_radio._write_asset
+    # leaves the runners calling the real one, which encodes through ffmpeg.
+    # That made these tests quietly depend on ffmpeg being installed despite
+    # the "no ffmpeg" promise above, and they failed on a runner without it.
+    monkeypatch.setattr(rgc, "_write_asset", fake_write_asset)
+
     subscription_calls: list[str] = []
     counter = {"count": 1_000}
 
@@ -159,6 +175,7 @@ def money_path(monkeypatch, tmp_path):
         sfx_dir=sfx_dir,
         post_calls=post_calls,
         write_ogg_calls=write_ogg_calls,
+        write_asset_calls=write_asset_calls,
         subscription_calls=subscription_calls,
     )
 

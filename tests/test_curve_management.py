@@ -136,12 +136,40 @@ class TestInterstateArtifactScreen:
         assert max(r.deflection_deg for r in recs) >= 150.0
 
     def test_glenwood_canyon_interstate_curves_survive(self) -> None:
-        """Real I-70 canyon geometry sits above the floor and must stay."""
-        recs = leg_curves("glenwood_springs_co_us:grand_junction_co_us")
-        assert len(recs) >= 55
-        assert min(r.min_radius_ft for r in recs) < 500, (
-            "Glenwood Canyon's genuinely sharp bends should still be here"
-        )
+        """Real I-70 canyon geometry must stay.
+
+        This is the test that caught the design-floor screen (raising
+        INTERSTATE_MIN_RADIUS_FT to 758, tried and reverted 2026-08-23), and
+        it guards the connector bake the same way.
+
+        TWO legs, because the canyon proper is EAST of Glenwood Springs:
+        Edwards to Glenwood Springs is Glenwood Canyon itself, and Glenwood
+        Springs to Grand Junction runs De Beque Canyon out the other side of
+        town.
+
+        It counts CANYON miles rather than the leg total, which is what the
+        leg total was standing in for -- and badly: the sub-500 ft record the
+        old bar tested for was a motorway_link ramp onto the I-70 business
+        route at Grand Junction, not canyon at all. When the connector bake
+        landed the totals moved (71 -> 70 and 60 -> 54) and every curve it
+        took was a ramp or a town road: those business-route ramps, Pine
+        Street and West 6th Street out of Glenwood Springs, Ute Avenue and
+        South 12th Street into Grand Junction. Between the ends nothing moved
+        -- Glenwood Canyon holds the same 57 curves at the same 574 ft
+        minimum radius, and the same 15 that ask a truck to slow.
+        """
+        from freight_fate.data.world import get_world
+
+        miles = {f"{leg.a}:{leg.b}": leg.miles for leg in get_world().legs}
+        for key, floor in (
+            ("edwards_co_us:glenwood_springs_co_us", 55),
+            ("glenwood_springs_co_us:grand_junction_co_us", 45),
+        ):
+            canyon = [r for r in leg_curves(key) if 5.0 < r.apex_mi < miles[key] - 5.0]
+            assert len(canyon) >= floor, f"{key} kept only {len(canyon)} curves off its ends"
+            assert min(r.min_radius_ft for r in canyon) < 700, (
+                f"{key}'s genuinely sharp canyon bends should still be here"
+            )
 
     def test_us_highway_mountain_hairpins_survive(self) -> None:
         """US-40 over the Rockies keeps its real sharp curves.
@@ -155,8 +183,11 @@ class TestInterstateArtifactScreen:
 
 
 def _is_hairpin(rec) -> bool:
-    """Same test ``RouteCurve.severity`` uses, for the plain ``CurveRecord``
-    tuples ``leg_curves`` returns."""
+    """The artifact screen's question -- "could a road here really do this?"
+    -- which is broader than the spoken hairpin and deliberately so: a very
+    low advisory is an extreme claim about the ground whether or not the road
+    comes back on itself. ``RouteCurve.severity`` uses shape alone, per
+    MUTCD; see ``curves.HAIRPIN_DEFLECTION_DEG``."""
     return rec.advisory_mph <= HAIRPIN_MAX_MPH or rec.deflection_deg >= HAIRPIN_DEFLECTION_DEG
 
 
@@ -701,3 +732,318 @@ def test_the_terrain_bake_says_what_kind_of_value_it_carries():
     assert "HPMS" in source
     assert "modal" in source.lower() or "derived" in source.lower()
     assert all(leg.hpms_terrain.type in (1, 2, 3) for leg in baked)
+
+
+def test_a_hairpin_is_a_shape_not_a_speed() -> None:
+    """MUTCD gives the Hairpin Curve sign (W1-11) for a change in horizontal
+    alignment of 135 degrees or more -- a switchback, where the road comes
+    back on itself. Advisory speed does not enter into it; MUTCD sorts by
+    advisory separately and much lower, swapping the Turn sign (W1-1) for the
+    Curve sign at 30 mph or less.
+
+    The old rule said "advisory <= 25 OR deflection >= 150", and the advisory
+    half called tight little bends taken slowly hairpins -- the worst of them
+    deflecting ten degrees. That spends the word on nothing and leaves it
+    meaning less when a real switchback turns up.
+    """
+    from freight_fate.data.curves import (
+        HAIRPIN_DEFLECTION_DEG,
+        HAIRPIN_TURN_MAX_MPH,
+        RouteCurve,
+    )
+
+    def curve(advisory: int, deflection: float) -> RouteCurve:
+        return RouteCurve(
+            start_mi=1.0,
+            apex_mi=1.05,
+            end_mi=1.1,
+            direction="L",
+            advisory_mph=advisory,
+            min_radius_ft=150,
+            deflection_deg=deflection,
+        )
+
+    # MUTCD's own numbers, not rounder ones chosen nearby.
+    assert HAIRPIN_DEFLECTION_DEG == 135.0
+    assert HAIRPIN_TURN_MAX_MPH == 30
+
+    # A switchback comes back on itself AND has to be crawled...
+    assert curve(advisory=25, deflection=170.0).severity == "hairpin"
+    assert curve(advisory=30, deflection=135.0).severity == "hairpin"
+    # ...and a slow little kink is not one, however slowly it is taken.
+    assert curve(advisory=25, deflection=10.6).severity != "hairpin"
+    assert curve(advisory=20, deflection=94.0).severity != "hairpin"
+
+    # Nor is a sweeper, however far round it goes. The angle is necessary and
+    # not sufficient: MUTCD puts the hairpin sign up instead of a TURN sign,
+    # and a 60 mph bend was never getting one. This is I-49 north of
+    # Fayetteville, 811 ft radius through 143 degrees -- real road, and the
+    # reason taking the angle alone put hairpins on seven interstate curves.
+    assert curve(advisory=60, deflection=142.9).severity != "hairpin"
+
+    # Darren's Norwich corner: real, tight, and correctly no longer a
+    # switchback (NY-12, 2026-08-23).
+    norwich = curve(advisory=25, deflection=94.0)
+    assert norwich.severity == "sharp"
+
+
+def test_the_friction_table_is_aashto_table_3_7() -> None:
+    """Pinned against the published source, not against itself.
+
+    Iowa DOT Design Manual 2B-2 Table 2B.1 reproduces these and names its
+    origin: "Adapted from Table 3-7: AASHTO Greenbook, 7th edition, 2018".
+    TxDOT Table 4-7 agrees independently -- back-solve its minimum radii
+    through the manual's own e + f = V^2/15R and these are the f values that
+    fall out. Three sources, one table.
+    """
+    from freight_fate.data.curves import AASHTO_SIDE_FRICTION
+
+    published = {
+        15: 0.32,
+        20: 0.27,
+        25: 0.23,
+        30: 0.20,
+        35: 0.18,
+        40: 0.16,
+        45: 0.15,
+        50: 0.14,
+        55: 0.13,
+        60: 0.12,
+        65: 0.11,
+        70: 0.10,
+        75: 0.09,
+        80: 0.08,
+    }
+    # Every value we carry must be the published one. The table starts at 20
+    # rather than 15 because nothing in the game is designed for 15 mph, and
+    # a row nothing reads is a row nobody maintains.
+    for speed, factor in AASHTO_SIDE_FRICTION.items():
+        assert published[speed] == factor, f"{speed} mph"
+    assert set(AASHTO_SIDE_FRICTION) >= set(range(20, 85, 5))
+
+
+def test_minimum_radii_match_the_published_table() -> None:
+    """``min_radius_ft`` against TxDOT Roadway Design Manual Table 4-7
+    (Minimum Radii and Superelevation Rates, emax = 8%), e = 8.0% row.
+
+    The derivation and the table are independent -- one is arithmetic from
+    AASHTO's friction factors, the other is printed in a state design manual
+    -- so agreeing to rounding is a real check rather than a tautology.
+    """
+    from freight_fate.data.curves import min_radius_ft
+
+    published = {50: 758, 55: 960, 60: 1200, 65: 1480, 70: 1810, 75: 2210, 80: 2670}
+    for speed, table_ft in published.items():
+        derived = min_radius_ft(speed)
+        assert abs(derived - table_ft) / table_ft < 0.01, (
+            f"{speed} mph: derived {derived:.0f} ft vs published {table_ft} ft"
+        )
+
+
+def test_the_bank_is_the_rate_roads_are_built_to_not_the_rate_allowed() -> None:
+    """8 percent is the ceiling; 6 percent is what gets built.
+
+    Crediting every curve with the steepest bank any state permits would read
+    out a higher safe speed than the road has, which is the one direction an
+    error must not run. TxDOT 4.7.3 normally builds 6 and needs a District
+    Design Engineer to go to 8; Iowa DOT 2B-2 limits new construction to 6
+    and keeps 8 as the state ceiling.
+    """
+    from freight_fate.data.curves import (
+        SUPERELEVATION_BUILT,
+        SUPERELEVATION_MAX,
+        superelevation_at,
+    )
+
+    assert SUPERELEVATION_BUILT == 0.06
+    assert SUPERELEVATION_MAX == 0.08, "the SCREEN still asks the permissive question"
+
+    # Never steeper than what is built, however tight the curve.
+    for radius in (200, 500, 758, 1200):
+        assert superelevation_at(radius, 70) <= SUPERELEVATION_BUILT
+    # A gentle curve is not banked at all -- normal crown, as built.
+    assert superelevation_at(20_000, 70) == 0.0
+    # And the bank grows as the curve tightens, never the other way.
+    banks = [superelevation_at(r, 70) for r in (12_000, 6_000, 3_000, 1_500, 800)]
+    assert banks == sorted(banks)
+
+
+def test_counting_the_bank_only_ever_raises_an_advisory() -> None:
+    """The correction exists because the bake read every road as flat.
+
+    A bank can only help a truck hold a curve, so this must never hand back a
+    number lower than the flat one -- a correction meant to speed a curve up
+    must not quietly slow a different one down.
+    """
+    import math
+
+    from freight_fate.data.curves import ADVISORY_LATERAL_G, advisory_with_bank_mph
+
+    for radius in (400, 758, 1000, 1810, 5000, 20_000):
+        flat = math.sqrt(15.0 * radius * ADVISORY_LATERAL_G)
+        assert advisory_with_bank_mph(radius, 70) >= int(round(flat / 5.0) * 5) - 1
+
+    # A town street is built to normal crown, so it keeps the flat reading:
+    # TxDOT Table 4-3 and Iowa DOT 2B-1 both put the Method 2 / Method 5 line
+    # at 45 mph.
+    from freight_fate.data.curves import BANKED_DESIGN_MIN_MPH
+
+    assert BANKED_DESIGN_MIN_MPH == 50.0
+
+
+def test_the_design_floor_is_spent_where_the_ground_cannot_excuse_a_bend() -> None:
+    """The design minimum is real, and applying it flat to interstates is not.
+
+    TxDOT Table 4-7 puts a 50 mph design speed at 758 ft and 50 is the lowest
+    the Interstate system designs to, so a tighter interstate curve is below
+    every standard. Screening on that number directly deletes I-70 through
+    Glenwood Canyon, which really is tighter than standard under design
+    exceptions -- a floor sized to the design minimum cannot tell an
+    exception from an artifact (tried and reverted, 2026-08-23).
+
+    So the flat interstate screen stays deliberately loose, and the design
+    floor is spent by the terrain-gated screen instead, which only judges
+    ground with no relief to justify the bend.
+    """
+    from freight_fate.data.curves import INTERSTATE_MIN_RADIUS_FT, min_radius_ft
+
+    assert INTERSTATE_MIN_RADIUS_FT == 300
+    assert min_radius_ft(50) > INTERSTATE_MIN_RADIUS_FT, (
+        "the blunt screen must stay below the design floor, or it eats real road"
+    )
+
+
+def _connector_rule():
+    """The bake's connector classifier, imported the way the other tool
+    tests do it. It lives in ``tools/`` because it is bake-time code."""
+    import sys
+    from pathlib import Path
+
+    tools = str(Path(__file__).resolve().parents[1] / "tools")
+    sys.path.insert(0, tools)
+    try:
+        import bake_curve_connectors
+
+        return bake_curve_connectors
+    finally:
+        sys.path.remove(tools)
+
+
+class TestConnectorsAreReadNotGuessed:
+    """Interchange and departure geometry is classed by OSM, not by position.
+
+    The sweep flagged a connector only inside 0.75 mi of a leg's ends, which
+    misses every mid-leg interchange and does not get a truck out of Denver.
+    ``tools/bake_curve_connectors.py`` re-derives the flag from the road class
+    OSM records under each curve's apex.
+    """
+
+    def test_a_ramp_reads_as_a_connector_on_every_road_class(self) -> None:
+        rule = _connector_rule()
+        for klass in ("motorway_link", "trunk_link", "primary_link"):
+            for interstate in (True, False):
+                assert rule.classify({"near_m": 0.4, "near_hw": klass}, interstate) == (
+                    True,
+                    "osm:ramp",
+                )
+
+    def test_an_interstate_curve_off_the_freeway_is_not_interstate_mainline(self) -> None:
+        """Every Interstate mainline mile is a freeway, so a curve apex on a
+        surface road is not on the Interstate however the leg is labelled."""
+        rule = _connector_rule()
+        for klass in ("trunk", "primary", "secondary", "residential"):
+            assert rule.classify({"near_m": 0.4, "near_hw": klass}, True) == (
+                True,
+                "osm:off-freeway",
+            )
+            # The same ground on a US-route leg is that leg's real road.
+            assert rule.classify({"near_m": 0.4, "near_hw": klass}, False)[0] is False
+
+    def test_a_freeway_curve_stays_mainline_however_hard_it_bends(self) -> None:
+        """The guard on the whole rule: it never sees the geometry.
+
+        Raising the radius floor to the design minimum is what deleted
+        Glenwood Canyon (tried and reverted, 2026-08-23). This classifier
+        takes no radius, deflection or advisory at all -- there is no argument
+        through which a sharp curve could reach it -- so it cannot repeat that.
+        """
+        rule = _connector_rule()
+        assert rule.classify({"near_m": 0.2, "near_hw": "motorway"}, True) == (
+            False,
+            "osm:mainline",
+        )
+
+    def test_nothing_read_concludes_nothing(self) -> None:
+        """No extract, or no road in the corridor, must not read as mainline."""
+        rule = _connector_rule()
+        for fact in ({"near_m": None}, {"near_m": 400.0, "near_hw": "motorway_link"}, {}):
+            assert rule.classify(fact, True) == (False, "")
+
+    def test_the_corridor_is_a_sanity_bound_not_a_decision(self) -> None:
+        rule = _connector_rule()
+        assert rule.classify({"near_m": rule.CORRIDOR_M - 0.1, "near_hw": "motorway"}, True)[1]
+        assert (
+            rule.classify({"near_m": rule.CORRIDOR_M + 0.1, "near_hw": "motorway"}, True)[1] == ""
+        )
+
+
+def test_every_connector_row_names_the_reading_that_flagged_it() -> None:
+    """Provenance: a connector says whether it was read or positional.
+
+    ``osm:ramp`` and ``osm:off-freeway`` are readings from the OSM extract;
+    ``sweep:window`` is the bake's original positional call, kept because the
+    two are a union and the window sees city geometry the class reading can
+    miss.
+    """
+    import json
+
+    from freight_fate.data.data_resources import read_data_text
+
+    text = read_data_text("world_data/us/gameplay/curves.jsonl")
+    assert text
+    known = {"osm:ramp", "osm:off-freeway", "sweep:window"}
+    seen: set[str] = set()
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if "meta" in row or not row.get("connector"):
+            continue
+        source = row.get("connector_source")
+        assert source in known, f"{row['leg']} seq {row['seq']} carries {source!r}"
+        seen.add(source)
+    assert seen >= {"osm:ramp", "osm:off-freeway"}, (
+        f"the OSM readings should both be present in the bake, saw {sorted(seen)}"
+    )
+
+
+def test_interstate_mainline_asks_the_truck_to_slow_down_rarely() -> None:
+    """The owner's report, 2026-08-23: "interstate mainline curves make the
+    truck slow far too often."
+
+    A real interstate asks a loaded truck to drop below 65 essentially never
+    -- it is built to be driven at 70 or 75 all the way. Two fixes moved this
+    number: counting the bank the road is built with (one every 28.8 miles ->
+    44.2), and then classifying interchange and departure geometry as the
+    connectors they are rather than as mainline.
+
+    Pinned as a rate rather than a count so the map can grow. The bar is set
+    well below what shipped, because this is a floor on quality, not a target
+    anything was fitted to.
+    """
+    from freight_fate.data.curves import leg_curves
+    from freight_fate.data.world import get_world
+
+    seen: set[str] = set()
+    miles = 0.0
+    slow = 0
+    for leg in get_world().legs:
+        key = f"{leg.a}:{leg.b}"
+        if key in seen or not (leg.highway or "").upper().startswith("I-"):
+            continue
+        seen.add(key)
+        miles += leg.miles
+        slow += sum(1 for curve in leg_curves(key) if curve.advisory_mph <= 65)
+    assert slow, "a network with no interstate slowdowns at all means the data vanished"
+    every = miles / slow
+    assert every > 100.0, f"one interstate slowdown every {every:.1f} miles is too often"

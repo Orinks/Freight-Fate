@@ -365,9 +365,27 @@ _CHATTER_TAIL = " ahead"
 # fragment.
 _CHATTER_SENTENCE_END = re.compile(r"(?<![A-Z])[.!?]\s+")
 # Past this, a first sentence is prose rather than a label, and its opening
-# clause carries the name and the fact on its own: the heritage markers and
-# the placed billboard signs run to several lines of history.
+# clause carries the name and the fact on its own: the heritage markers run to
+# several lines of history.
 _CHATTER_CLAUSE_MAX = 60
+
+# Billboards are never cut. Every other chatter category is a LABEL plus
+# framing -- "Entering Hot Springs National Park" carries the same information
+# as "Hot Springs National Park", so terse loses nothing by dropping the
+# frame. A billboard is not a label. It is the sign's own words, and its
+# payload is usually the last sentence: "Meteor Crater is ahead, a hole in the
+# desert nearly a mile wide. It is bigger than it sounds. Much bigger." cut to
+# its first clause is the setup without the punchline. The function already
+# spared short gags for this reason; the placed signs run long and were cut
+# anyway (Brandon, 2026-08-22, asking for the billboards and the signs he
+# passes to read in full at quiet).
+#
+# Terse has a control for these already, and it is the right one: billboards
+# are the one chatter category with a dedicated on-off switch, so a player who
+# finds them wordy turns them off rather than hearing half of each. Both keys
+# ride ``chatter_billboards`` in ``CHATTER_CATEGORY_FIELDS``, which
+# ``test_every_billboard_category_is_spared_the_cut`` pins.
+_UNCUT_CHATTER_CATEGORIES = frozenset({"billboard", "billboard_sign"})
 
 
 def roadside_chatter(spoken: str, category: str) -> SpokenMessage:
@@ -379,11 +397,19 @@ def roadside_chatter(spoken: str, category: str) -> SpokenMessage:
     that first sentence is prose long enough to have run past the fact -- its
     opening clause alone.
 
+    Billboards are the exception and are never cut; see
+    ``_UNCUT_CHATTER_CATEGORIES`` for why a sign is not a label.
+
     Villages do not come through here. Town names answer to the place-callouts
     ladder, not to the chatter switches (see ``CHATTER_CATEGORY_FIELDS``), and
     are already the bare "Passing X".
     """
     normal = str(spoken).strip()
+    if category in _UNCUT_CHATTER_CATEGORIES:
+        # Whole, framing included: "Billboard:" is what tells a driver the
+        # line is a sign they passed rather than the co-driver talking, and
+        # a joke needs to be known as one to land.
+        return SpokenMessage(normal, None)
     terse = normal
     for lead in _CHATTER_LEAD_INS:
         if terse.startswith(lead):

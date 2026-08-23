@@ -4,7 +4,7 @@ import math
 from importlib import resources
 
 import pytest
-from asset_helpers import asset_exists
+from asset_helpers import asset_exists, needs_audio_assets
 from speech_capture import speech_stub
 
 from freight_fate.models.jobs import CARGO_CATALOG, Job
@@ -91,6 +91,7 @@ def test_regional_stations_are_streamer_safe_fiction_available_everywhere():
         assert station.call_sign[0] in {"K", "W"}
 
 
+@needs_audio_assets
 def test_regional_playlists_have_generated_music_on_disk():
     sounds = resources.files("freight_fate.assets") / "sounds" / "music"
     for playlist, tracks in STATION_PLAYLISTS.items():
@@ -99,6 +100,7 @@ def test_regional_playlists_have_generated_music_on_disk():
             assert asset_exists(sounds, track.key), track.key
 
 
+@needs_audio_assets
 def test_host_segments_have_generated_voice_clips_on_disk():
     sounds = resources.files("freight_fate.assets") / "sounds" / "music"
     assert len(ALL_HOST_SEGMENTS) == 152
@@ -561,6 +563,7 @@ def test_dead_stream_reconnects_quietly_and_never_crackles(denver_driving, monke
     assert streams == [station.stream_url]
 
 
+@needs_audio_assets
 def test_live_fringe_stream_gets_hiss_bed_and_pickets(denver_driving, monkeypatch):
     # A thinning but audible station: the reception tick caches the fringe,
     # the per-frame renderer brings in the hiss bed and fires a sharp picket

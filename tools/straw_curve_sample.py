@@ -78,6 +78,10 @@ SIGN_WOBBLE_DEG = 1.0  # |turn| under this is neutral (doesn't set a direction)
 SIGN_HYSTERESIS_DEG = 5.0  # sustained opposing turn needed to split a run (Phil's #1)
 DEFLECTION_FLOOR_DEG = 8.0  # a real curve turns at least this much (per direction)
 CONNECTOR_WINDOW_MI = 0.75  # first/last in-town stretch -> tag curves, don't drop
+# ^ a BOOTSTRAP, not the finished connector layer. Position alone cannot see a
+#   mid-leg interchange, and 0.75 mi does not get a truck out of Denver. After
+#   any sweep, re-run tools/curve_osm_facts.py and tools/bake_curve_connectors.py:
+#   those read the road class OSM records under each apex and finish the flag.
 MATCH_CORRIDOR_M = 90.0  # how near a maxspeed way must be to govern a sample point
 SPEED_GAP_MI = 4.0  # a posting-free run longer than this becomes an explicit gap
 
@@ -533,7 +537,9 @@ def main() -> None:
         cum_raw = _cumulative_m(coords)
         raw_mi = cum_raw[-1] / 1609.344
         mile_scale = (leg_miles / raw_mi) if leg_miles else 1.0  # leg-miles convention (#4)
-        print(f"    {len(coords)} raw vertices, {raw_mi:.1f} mi (leg.miles={leg_miles})", flush=True)
+        print(
+            f"    {len(coords)} raw vertices, {raw_mi:.1f} mi (leg.miles={leg_miles})", flush=True
+        )
 
         # 1. detect curves on the full-resolution raw geometry (decides keep-mask)
         curv_raw = analyse_curvature(coords, cum_raw)
@@ -563,7 +569,12 @@ def main() -> None:
         state = nodes[frm]["state"].lower()
         leg_id = f"{frm}:{to}"
         geom_by_state.setdefault(state, []).append(
-            {"leg": leg_id, "highway": highway, "miles": round(leg_miles or raw_mi, 2), "geom": geom}
+            {
+                "leg": leg_id,
+                "highway": highway,
+                "miles": round(leg_miles or raw_mi, 2),
+                "geom": geom,
+            }
         )
         for s in speeds:
             speed_rows.append(json.dumps({"leg": leg_id, **s}, sort_keys=True))

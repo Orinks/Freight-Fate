@@ -50,8 +50,13 @@ def test_route_curves_mirror_reverse_legs(world):
 
 
 def test_severity_ladder():
-    assert _curve(1.0, advisory=20).severity == "hairpin"
-    assert _curve(1.0, advisory=45, deflection=170.0).severity == "hairpin"
+    # A hairpin is a shape, not a speed: it comes back on itself (135 degrees,
+    # MUTCD's Hairpin Curve sign) AND has to be crawled (a Turn sign, 30 or
+    # less). Either alone is some other kind of bend -- see
+    # test_a_hairpin_is_a_shape_not_a_speed in test_curve_management.py.
+    assert _curve(1.0, advisory=20, deflection=170.0).severity == "hairpin"
+    assert _curve(1.0, advisory=20).severity == "sharp"
+    assert _curve(1.0, advisory=45, deflection=170.0).severity == "moderate"
     assert _curve(1.0, advisory=30).severity == "sharp"
     assert _curve(1.0, advisory=45).severity == "moderate"
     assert _curve(1.0, advisory=65).severity == "gentle"
@@ -378,5 +383,67 @@ def test_a_curve_call_carries_its_own_expiry(monkeypatch):
             driving.truck.velocity_mps = 65.0 * 0.44704
             driving.trip.position_mi = curve.end_mi + 0.05
             assert valid() is False
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_holds_the_tightest_speed_in_a_linked_chain(monkeypatch):
+    """Darren, 2026-08-23, load damaged 12 percent on NY-12.
+
+    His log has the words and the machine disagreeing:
+
+        Curve left, a quarter mile. Advise 40 miles per hour. Then sharp
+        left, advise 30 miles per hour. Adaptive cruise easing to 40 miles
+        per hour for the bend.
+        ...
+        Sharp left: too fast, drifting to the outside.
+        The load has shifted hard and is damaged, 12 percent.
+
+    The tail is the follower's ONLY call -- the trip suppresses its own so a
+    chain speaks once -- so easing to the first bend's 40 and releasing the
+    cap at the first bend's end carried the truck into a 30 mph bend at 40
+    with nothing left to warn it. The spoken line named 30 the whole way.
+    """
+    app_module = pytest.importorskip("freight_fate.app")
+    app = app_module.App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.curve_speed_assist = True
+        pos = driving.trip.position_mi
+        lead = _curve(pos + 0.3, "L", advisory=40)
+        # Close enough behind to ride the tail rather than earn its own call.
+        follower = _curve(lead.end_mi + 0.1, "L", advisory=30)
+
+        driving._cruise_mph = 60.0
+        spoken = _spoken_pacenotes(app, driving, monkeypatch, [lead, follower], 60.0)
+
+        assert spoken, "a 40 mph bend at 60 demands a call"
+        assert "Then" in spoken[0], "the follower rides the tail, so it has no call of its own"
+
+        # The cap is the chain's tightest number, not the first bend's...
+        assert driving._cruise_curve_mph == 30.0
+        # ...and it holds until the FOLLOWER is behind, not the lead.
+        assert driving._cruise_curve_end_mi >= follower.end_mi
+    finally:
+        app.shutdown()
+
+
+def test_a_lone_curve_still_holds_only_its_own_speed(monkeypatch):
+    """The chain rule must not make every bend the slowest bend nearby."""
+    app_module = pytest.importorskip("freight_fate.app")
+    app = app_module.App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.curve_speed_assist = True
+        pos = driving.trip.position_mi
+        alone = _curve(pos + 0.3, "R", advisory=40)
+        driving._cruise_mph = 60.0
+
+        _spoken_pacenotes(app, driving, monkeypatch, [alone], 60.0)
+
+        assert driving._cruise_curve_mph == 40.0
+        assert driving._cruise_curve_end_mi == max(alone.start_mi, alone.end_mi)
     finally:
         app.shutdown()

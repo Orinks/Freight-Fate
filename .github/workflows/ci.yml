@@ -30,9 +30,27 @@ jobs:
       # time with every map expansion. sysmon measured ~1.15x on the same test.
       COVERAGE_CORE: sysmon
     steps:
+      # NOT lfs: true. The repo's LFS payload is music.pak at 250 MB plus
+      # sounds.pak at 7.5 MB, and a full fetch on every push across this
+      # matrix spent about half a gigabyte of LFS bandwidth per commit --
+      # which is what exhausted the repository's LFS budget and turned every
+      # run on this branch red at checkout, before a single test ran
+      # (2026-08-23). Buying quota only postpones that: at this push rate a
+      # 50 GB data pack lasts about ten days.
       - uses: actions/checkout@v6
         with:
-          lfs: true
+          lfs: false
+
+      # Only the small pack, and never fatally. Sounds are what the suite
+      # actually reaches for; the music pack backs one content invariant
+      # (every track has a real file) that belongs to the pack rather than to
+      # the code, changes rarely, and still runs on any machine that has it.
+      # A quota failure here must not turn the whole run red either -- the
+      # asset tests skip when the pack is not materialised, which is the same
+      # thing a clean clone without LFS already does.
+      - name: Fetch the sound pack only
+        continue-on-error: true
+        run: git lfs pull --include="src/freight_fate/sounds.pak"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v8.2.0
