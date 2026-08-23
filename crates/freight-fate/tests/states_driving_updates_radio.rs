@@ -13,7 +13,7 @@ use std::rc::Rc;
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
-use ff_core::radio::{RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE};
+use ff_core::radio::{RadioPlaybackBackend, RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE};
 use ff_core::radio_content::content_duration_s;
 
 use freight_fate::app::testing::TestApp;
@@ -520,7 +520,7 @@ fn test_a_dead_playlist_reaches_the_dials_fallback() {
     let mut app = TestApp::new();
     let mut d = a_denver_drive(&mut app, 5);
     let _tape = MusicAudio::install(&mut app);
-    let station = a_playlist_station("pl-dead-refuses", &["C:/music/gone.ogg"]);
+    let station = a_playlist_station("pl-dead-refuses", &["C:/music/missing-one.ogg"]);
     let refused = d.with_radio_backend(&mut app.ctx, |_radio, backend| {
         backend.play_station(&station, 1.0)
     });
