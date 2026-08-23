@@ -33011,28 +33011,28 @@
             "start_mi": 55.1,
             "end_mi": 55.66,
             "avg_grade_pct": 1.56,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 55.66,
             "end_mi": 55.99,
             "avg_grade_pct": -0.75,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 55.99,
             "end_mi": 56.77,
             "avg_grade_pct": -1.18,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 56.77,
             "end_mi": 57.0,
             "avg_grade_pct": -4.36,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {

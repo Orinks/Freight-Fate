@@ -6641,7 +6641,7 @@
             "start_mi": 85.75,
             "end_mi": 86.39,
             "avg_grade_pct": 1.13,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {

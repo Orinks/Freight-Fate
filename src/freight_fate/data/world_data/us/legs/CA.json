@@ -60472,7 +60472,7 @@
             "start_mi": 25.65,
             "end_mi": 26.3,
             "avg_grade_pct": 2.37,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -60605,14 +60605,14 @@
             "start_mi": 40.66,
             "end_mi": 41.76,
             "avg_grade_pct": 0.53,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 41.76,
             "end_mi": 42.2,
             "avg_grade_pct": 1.0,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -61974,14 +61974,14 @@
             "start_mi": 18.48,
             "end_mi": 19.32,
             "avg_grade_pct": -0.48,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 19.32,
             "end_mi": 19.92,
             "avg_grade_pct": -2.0,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -62037,7 +62037,7 @@
             "start_mi": 27.12,
             "end_mi": 27.96,
             "avg_grade_pct": 1.82,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -62079,77 +62079,77 @@
             "start_mi": 30.0,
             "end_mi": 30.48,
             "avg_grade_pct": -1.08,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 30.48,
             "end_mi": 30.96,
             "avg_grade_pct": -5.04,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 30.96,
             "end_mi": 31.32,
             "avg_grade_pct": -2.43,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 31.32,
             "end_mi": 31.92,
             "avg_grade_pct": -4.84,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 31.92,
             "end_mi": 32.4,
             "avg_grade_pct": -2.55,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 32.4,
             "end_mi": 33.12,
             "avg_grade_pct": -4.8,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 33.12,
             "end_mi": 33.48,
             "avg_grade_pct": -2.3,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 33.48,
             "end_mi": 34.56,
             "avg_grade_pct": -5.5,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 34.56,
             "end_mi": 34.8,
             "avg_grade_pct": -0.14,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 34.8,
             "end_mi": 35.16,
             "avg_grade_pct": -4.77,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 35.16,
             "end_mi": 35.52,
             "avg_grade_pct": 2.29,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -62163,7 +62163,7 @@
             "start_mi": 35.76,
             "end_mi": 42.36,
             "avg_grade_pct": -0.78,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -62184,21 +62184,21 @@
             "start_mi": 45.24,
             "end_mi": 46.44,
             "avg_grade_pct": 0.05,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 46.44,
             "end_mi": 52.56,
             "avg_grade_pct": 1.51,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 52.56,
             "end_mi": 52.8,
             "avg_grade_pct": 0.58,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -62254,14 +62254,14 @@
             "start_mi": 58.2,
             "end_mi": 58.92,
             "avg_grade_pct": -0.15,
-            "terrain": "flat",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 58.92,
             "end_mi": 60.0,
             "avg_grade_pct": -1.92,
-            "terrain": "flat",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
@@ -147233,7 +147233,7 @@
             "start_mi": 0.0,
             "end_mi": 0.32,
             "avg_grade_pct": 2.18,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -147261,7 +147261,7 @@
             "start_mi": 2.56,
             "end_mi": 4.16,
             "avg_grade_pct": 1.0,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -147401,14 +147401,14 @@
             "start_mi": 13.76,
             "end_mi": 15.04,
             "avg_grade_pct": 1.13,
-            "terrain": "flat",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 15.04,
             "end_mi": 15.25,
             "avg_grade_pct": 5.53,
-            "terrain": "flat",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -147597,7 +147597,7 @@
             "start_mi": 35.95,
             "end_mi": 36.16,
             "avg_grade_pct": 2.2,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -147674,7 +147674,7 @@
             "start_mi": 46.4,
             "end_mi": 46.83,
             "avg_grade_pct": -3.5,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -147758,14 +147758,14 @@
             "start_mi": 55.04,
             "end_mi": 55.36,
             "avg_grade_pct": -0.79,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 55.36,
             "end_mi": 56.75,
             "avg_grade_pct": 3.69,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -147814,7 +147814,7 @@
             "start_mi": 61.23,
             "end_mi": 62.19,
             "avg_grade_pct": 2.28,
-            "terrain": "hills",
+            "terrain": "mountain",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -148157,7 +148157,7 @@
             "start_mi": 96.96,
             "end_mi": 97.28,
             "avg_grade_pct": 0.61,
-            "terrain": "mountain",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -148185,7 +148185,7 @@
             "start_mi": 102.19,
             "end_mi": 102.61,
             "avg_grade_pct": -0.9,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -148880,7 +148880,7 @@
             "start_mi": 9.41,
             "end_mi": 9.71,
             "avg_grade_pct": 1.61,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
@@ -149370,7 +149370,7 @@
             "start_mi": 73.96,
             "end_mi": 75.68,
             "avg_grade_pct": 1.43,
-            "terrain": "hills",
+            "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {

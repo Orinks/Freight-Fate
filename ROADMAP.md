@@ -1616,6 +1616,26 @@ onto exit signalling.
       `tools/curve_osm_facts.py` is deleted. Two tools answering the same
       question differently is an invitation to run the wrong one.
 
+- [x] **Terrain reclassified from the elevation archive (2026-08-23).**
+      `tools/reclassify_terrain.py` run with `--write`: one leg label firmed
+      up (Asheville-Hickory, hills -> mountain, the last piece of the Pigeon
+      River Gorge chain) and 711 grade-segment labels corrected -- 478 hills
+      to flat, 123 flat to hills, 97 mountain to hills, 13 hills to mountain.
+
+      Its acceptance harness passes: every Texas leg keeps ZERO mountain
+      segments (the Hill Country / East Texas fix), the Grapevine, the
+      Siskiyous, Monteagle and Denver-Silverthorne all stay mountain at both
+      levels, and all 96 runaway ramps still sit on mountain segments. The
+      artifact screen was re-run afterwards and moved nothing (370 -> 370).
+
+      THE 141 LEGS LABELLED MOUNTAIN THAT HPMS CALLS LEVEL ARE STILL NOT
+      TOUCHED, and that is the tool's own rule rather than an oversight: a
+      leg label only ever firms UP, never silently downgrades off a stricter
+      geometric read. The label is relief-in-context from the dense profile;
+      HPMS is a road-class survey. They measure related but different things,
+      and Glenwood Canyon is the standing proof that the two can honestly
+      disagree.
+
 - [~] **Legs labelled for a road their route does not ride: SPLIT, and half
       of it fixed (2026-08-23).** A truck router tells the two faults apart.
       Ask Valhalla for the route between the two city nodes and measure how
@@ -1654,9 +1674,26 @@ onto exit signalling.
       would be built on Valhalla: `/route` for the shape, `trace_attributes`
       for road class and speed limit, `/height` for the elevation profile.
 
-      ORDER FOR WHOEVER PICKS THIS UP: reroute BEFORE any terrain work. A new
-      polyline changes the elevation profile under the leg, so terrain done
-      first would have to be redone. Found by the connector bake above, which reads per-leg freeway
+      THE BLOCKER IS ENRICHMENT, NOT ROUTING, and it is worth naming exactly.
+      A new polyline invalidates every layer keyed to the old one. Valhalla
+      can rebuild some of it -- `/route` for the shape, `trace_attributes` for
+      road class and speed limit, `/height` for elevation. It CANNOT rebuild
+      what came from Overpass and HPMS. Measured across the 30 legs, that is:
+
+          807 landmarks        the towns you pass
+          532 interchanges     every exit called
+           81 stops            rest areas and truck stops
+          751 lane segments    and 133 AADT samples (HPMS)
+          111 checkpoints, 1 restriction
+
+      Rerouting today would give those legs the right road name and strip
+      every exit, rest area and landmark from it -- "on I-37", then silence
+      for 147 miles. That is a worse trade than a wrong label, and the sort
+      of fix that looks complete in a diff and is a regression in the truck.
+
+      So this waits on the Overpass/HPMS enrichment pipeline being available
+      again, not on a router. When it is: reroute BEFORE any terrain work, as
+      a new polyline changes the elevation profile under the leg. Found by the connector bake above, which reads per-leg freeway
       coverage as a by-product: 51 of 728 interstate legs spend under half
       their route miles on a freeway at all, 10 of them under 5 percent. The
       worst are Chico to Santa Rosa (labelled I-5, 3 percent freeway, 317

@@ -965,6 +965,15 @@
   either: the truck still leans on them and the road bed still leads you
   round them, they are just no longer announced as highway curves.
 
+- **The road tells you what kind of country it is, more honestly.** The
+  terrain called out on a run is worked out again from the real height data
+  along it: seven hundred stretches were relabelled, mostly rolling country
+  that is honestly flat and a few flat-sounding ones that are not. The run
+  from Asheville to Hickory is now called a mountain road, which anyone who
+  has pulled it will think overdue. Texas hill country still reads as hills
+  rather than mountains, the Grapevine and the Siskiyous still read as
+  mountains, and every runaway-ramp grade still counts as one.
+
 - **Five runs are named for the road you are actually on.** A handful of runs
   were filed under an interstate they never touch, and the co-driver said so
   the whole way: the run from Hickory to Charlotte was called I-40 while you

@@ -18600,14 +18600,14 @@
             "start_mi": 51.79,
             "end_mi": 52.1,
             "avg_grade_pct": 4.13,
-            "terrain": "flat",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
             "start_mi": 52.1,
             "end_mi": 52.73,
             "avg_grade_pct": 1.5,
-            "terrain": "flat",
+            "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
