@@ -1,9 +1,7 @@
 //! The hub screen while parked at a company terminal or yard
 //! (`CityMenuState`).
 
-use ff_core::models::business::{
-    carrier_name, is_owner_operator, status_label, COMPANY_DRIVER,
-};
+use ff_core::models::business::{carrier_name, is_owner_operator, status_label, COMPANY_DRIVER};
 use ff_core::models::career_objectives::career_objective;
 use ff_core::models::career_training::{
     is_company_training_profile, training_guidance, TrainingStage,
@@ -28,10 +26,10 @@ use crate::states::career_stats::{fully_rested, CareerStatsState};
 use crate::states::city::weather::speak_time_and_weather;
 use crate::states::city::{
     base_menu_enter, board_candidates, first_day_guidance_active, first_day_orientation_message,
-    home_terminal, open_freight_market, profile, profile_mut,
-    record_city_duty, terminal_objective_clause, todo_state, BobtailDestState,
-    BusinessStatusState, EndorsementCourseState, GarageState, PayDebtState, TruckShopState,
-    BACKUP_RESULT_WAIT_S, BOBTAIL_RANGE_MI, DRIVING_SCHOOL_ENABLED,
+    home_terminal, open_freight_market, profile, profile_mut, record_city_duty,
+    terminal_objective_clause, todo_state, BobtailDestState, BusinessStatusState,
+    EndorsementCourseState, GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S,
+    BOBTAIL_RANGE_MI, DRIVING_SCHOOL_ENABLED,
 };
 use crate::states::logbook::LogbookState;
 use crate::states::main_menu::{MainMenuState, SettingsState};
@@ -116,10 +114,7 @@ impl CityMenuState {
 
     fn bobtail(&mut self, ctx: &mut GameContext) {
         let mut cands = board_candidates(ctx.world, &profile(ctx).current_city);
-        cands.sort_by(|a, b| {
-            a.1.partial_cmp(&b.1)
-                .unwrap_or(std::cmp::Ordering::Equal)
-        });
+        cands.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
         let mut nearby: Vec<String> = cands
             .iter()
             .filter(|c| c.1 <= BOBTAIL_RANGE_MI)
@@ -208,11 +203,7 @@ impl CityMenuState {
             let p = profile(ctx);
             (
                 pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load),
-                pay_advance_unavailable_reason(
-                    p.money,
-                    p.pay_advance,
-                    p.pay_advance_used_for_load,
-                ),
+                pay_advance_unavailable_reason(p.money, p.pay_advance, p.pay_advance_used_for_load),
             )
         };
         if grant <= 0.0 {
@@ -248,7 +239,8 @@ impl CityMenuState {
     pub fn truck_status(&mut self, ctx: &mut GameContext) {
         let p = profile(ctx);
         let specs = p.truck_specs();
-        let truck = truck_model(&p.active_truck_key()).unwrap_or_else(|| truck_model_or_panic("rig"));
+        let truck =
+            truck_model(&p.active_truck_key()).unwrap_or_else(|| truck_model_or_panic("rig"));
         let fuel_pct = p.truck_fuel_gal() / specs.fuel_tank_gal * 100.0;
         let damage = p.truck_damage_pct();
         let condition = if damage < 5.0 {
@@ -593,9 +585,8 @@ impl Menu for CityMenuState {
         // later would describe a save the player has moved past.
         self.backup_watch = None;
         self.menu.title = Self::title_for(ctx);
-        let sequence = select_menu_music_sequence(
-            ctx.profile.as_ref().map(|p| p as &dyn MenuMusicProfile),
-        );
+        let sequence =
+            select_menu_music_sequence(ctx.profile.as_ref().map(|p| p as &dyn MenuMusicProfile));
         let refs: Vec<&str> = sequence.iter().map(String::as_str).collect();
         ctx.play_music_sequence("menu", &refs);
         ctx.audio.set_ambient(Some("poi/facility_gate"));
@@ -704,17 +695,16 @@ impl Menu for CityMenuState {
         } else {
             p.business_status.as_str()
         };
-        let mut items: Vec<MenuItem<Self>> = vec![MenuItem::new(
-            "Dispatch board",
-            |s: &mut Self, ctx| s.job_board(ctx),
-        )
-        .help(
-            "Open terminal dispatches from local freight \
+        let mut items: Vec<MenuItem<Self>> =
+            vec![
+                MenuItem::new("Dispatch board", |s: &mut Self, ctx| s.job_board(ctx)).help(
+                    "Open terminal dispatches from local freight \
              facilities, including ports, warehouses, food \
              terminals, intermodal yards, and distribution hubs. \
              New company hires get dispatch's assigned load; load \
              choice from the board opens with seniority.",
-        )];
+                ),
+            ];
         items.push(
             MenuItem::new("Truck dealer", |s: &mut Self, ctx| s.truck_dealer(ctx)).help(
                 "Browse tractors at the local dealer. Owner-operators buy \
@@ -729,12 +719,14 @@ impl Menu for CityMenuState {
         // dispatch instead (ROADMAP).
         if is_owner_operator(status) {
             items.push(
-                MenuItem::new("Bobtail to a nearby city", |s: &mut Self, ctx| s.bobtail(ctx))
-                    .help(
-                        "Drive empty to a nearby city to see its dispatch \
+                MenuItem::new("Bobtail to a nearby city", |s: &mut Self, ctx| {
+                    s.bobtail(ctx)
+                })
+                .help(
+                    "Drive empty to a nearby city to see its dispatch \
                          board. Costs fuel and hours of service; no load, no \
                          pay. Use it when local freight is thin.",
-                    ),
+                ),
             );
         }
         items.push(
@@ -749,7 +741,10 @@ impl Menu for CityMenuState {
             ),
         );
         items.push(
-            MenuItem::new("Business status", |s: &mut Self, ctx| s.business_status(ctx)).help(
+            MenuItem::new("Business status", |s: &mut Self, ctx| {
+                s.business_status(ctx)
+            })
+            .help(
                 "Review your carrier, rank, next business unlock, \
                  and owner-operator buy-in when qualified.",
             ),

@@ -11,8 +11,7 @@ use ff_core::models::business::{
 };
 use ff_core::models::career_objectives::career_objective;
 use ff_core::models::career_training::{
-    is_company_training_profile, training_guidance, training_recommendation_score,
-    TrainingStage,
+    is_company_training_profile, training_guidance, training_recommendation_score, TrainingStage,
 };
 use ff_core::models::carrier_fleet::{
     assignment_reason_text, equipment_held_back, equipment_hold_text, slip_seats,
@@ -35,15 +34,16 @@ use crate::app::{GameContext, Say, SharedState};
 use crate::impl_state_for_menu;
 use crate::states::base::{InputEvent, Key, Menu, MenuCore, MenuItem};
 use crate::states::city::{
-    base_menu_current_help, base_menu_handle_event, first_day_guidance_active,
-    first_dispatch_done, home_terminal, launch_driving, profile, profile_mut, sleeps_needed,
-    DrivingLaunch, LaunchAnnouncement, DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP,
-    PICKUP_CHECK_IN_MIN, PICKUP_LOADING_MIN,
+    base_menu_current_help, base_menu_handle_event, first_day_guidance_active, first_dispatch_done,
+    home_terminal, launch_driving, profile, profile_mut, sleeps_needed, DrivingLaunch,
+    LaunchAnnouncement, DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP, PICKUP_CHECK_IN_MIN,
+    PICKUP_LOADING_MIN,
 };
 
 /// The board's class-level `intro_help` (the browsable board; an assigned
 /// board swaps in its own on construction).
-pub const JOB_BOARD_INTRO_HELP: &str = "Each entry is one dispatch. Enter accepts the dispatch and \
+pub const JOB_BOARD_INTRO_HELP: &str =
+    "Each entry is one dispatch. Enter accepts the dispatch and \
      creates a local deadhead pickup drive from your terminal to \
      the named origin facility. Jobs name their origin and \
      destination facilities, and cargo depends on the facility \
@@ -124,7 +124,10 @@ pub fn trailer_note(p: &Profile, job: &Job) -> String {
     if compatible_with_programs(cargo_key, p.active_trailer_programs()) {
         return format!("Trailer program: {}.", required_program_text(cargo_key));
     }
-    format!("Needs {} trailer program.", required_program_text(cargo_key))
+    format!(
+        "Needs {} trailer program.",
+        required_program_text(cargo_key)
+    )
 }
 
 fn market_preview(business: &BusinessSettlement) -> String {
@@ -557,7 +560,8 @@ impl JobBoardState {
         if !recent.is_empty() {
             let world = ctx.world;
             let is_recent = |i: &usize| recent.contains(&lane_key(world, &self.jobs[*i]));
-            let mut not_recent: Vec<usize> = fresh.iter().copied().filter(|i| !is_recent(i)).collect();
+            let mut not_recent: Vec<usize> =
+                fresh.iter().copied().filter(|i| !is_recent(i)).collect();
             let recent_ones: Vec<usize> = fresh.iter().copied().filter(is_recent).collect();
             not_recent.extend(recent_ones);
             fresh = not_recent;
@@ -601,7 +605,8 @@ impl JobBoardState {
     }
 
     fn needs_hos_confirmation(&self, ctx: &GameContext, index: usize) -> bool {
-        self.job_exceeds_current_hos(ctx, &self.jobs[index]) && self.confirm_risky_job != Some(index)
+        self.job_exceeds_current_hos(ctx, &self.jobs[index])
+            && self.confirm_risky_job != Some(index)
     }
 
     /// True when hours already spent this shift force an extra 10-hour
@@ -914,33 +919,32 @@ impl Menu for JobBoardState {
                  loads now; routing is still assigned until you run \
                  your own truck. "
             };
-            let objective_text = if let Some(training_label) =
-                self.training_recommendation_label(ctx)
-            {
-                let guidance = training_guidance(p);
-                format!(
-                    "First-day objective: pick a {training_label} load. {} ",
-                    guidance.dispatch_text
-                )
-            } else if first_day_guidance_active(p) && !is_company_training_profile(p) {
-                "First-day objective: pick an unlocked load with a \
+            let objective_text =
+                if let Some(training_label) = self.training_recommendation_label(ctx) {
+                    let guidance = training_guidance(p);
+                    format!(
+                        "First-day objective: pick a {training_label} load. {} ",
+                        guidance.dispatch_text
+                    )
+                } else if first_day_guidance_active(p) && !is_company_training_profile(p) {
+                    "First-day objective: pick an unlocked load with a \
                  deadline you can protect. Keep fuel, repairs, and \
                  your cash cushion in mind. "
-                    .to_string()
-            } else {
-                let objective = career_objective(p);
-                let recommendation = if self.focused_recommendation_is_spoken(ctx) {
-                    String::new()
+                        .to_string()
                 } else {
-                    format!("Recommended dispatch: {}. ", objective.recommendation)
-                };
-                format!(
-                    "Career objective: {}. \
+                    let objective = career_objective(p);
+                    let recommendation = if self.focused_recommendation_is_spoken(ctx) {
+                        String::new()
+                    } else {
+                        format!("Recommended dispatch: {}. ", objective.recommendation)
+                    };
+                    format!(
+                        "Career objective: {}. \
                      {} \
                      {recommendation}",
-                    objective.title, objective.dispatch_text
-                )
-            };
+                        objective.title, objective.dispatch_text
+                    )
+                };
             let hos_note = self.hos_board_note(ctx);
             let market = p.market.summary();
             ctx.say(&format!(

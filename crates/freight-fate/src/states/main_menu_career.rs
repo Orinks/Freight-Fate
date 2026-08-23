@@ -125,7 +125,11 @@ impl HomeTerminalState {
         } else {
             DEFAULT_CITY.to_string()
         };
-        let default = ctx.world.cities.get(&default_city).map(|c| c.region.clone());
+        let default = ctx
+            .world
+            .cities
+            .get(&default_city)
+            .map(|c| c.region.clone());
         let mut menu = MenuCore::new("Home region").with_intro_help(
             "Pick the part of the country where your trucking career \
              begins. Use up and down arrows, Home and End, or type a \
@@ -145,7 +149,11 @@ impl HomeTerminalState {
     }
 
     fn pick_region(&mut self, ctx: &mut GameContext, region: &str) {
-        let cities = self.cities_by_region.get(region).cloned().unwrap_or_default();
+        let cities = self
+            .cities_by_region
+            .get(region)
+            .cloned()
+            .unwrap_or_default();
         ctx.push_state(HomeCityState::new(
             ctx,
             &self.driver_name,
@@ -183,9 +191,10 @@ impl Menu for HomeTerminalState {
             let noun = if count == 1 { "city" } else { "cities" };
             let r = region.clone();
             items.push(
-                MenuItem::new(format!("{name} ({count} {noun})"), move |s: &mut Self, ctx| {
-                    s.pick_region(ctx, &r)
-                })
+                MenuItem::new(
+                    format!("{name} ({count} {noun})"),
+                    move |s: &mut Self, ctx| s.pick_region(ctx, &r),
+                )
                 .help(format!(
                     "Open {name} to choose a starting city. {count} {noun} available."
                 )),

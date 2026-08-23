@@ -2,8 +2,8 @@
 //! badges (the `Achievement*State` classes of `main_menu.py`).
 
 use ff_core::achievements::{
-    achievements_in_category, categories, earned_ids, entry_text, Achievement,
-    AchievementCategory, AchievementProfile, ACHIEVEMENTS,
+    achievements_in_category, categories, earned_ids, entry_text, Achievement, AchievementCategory,
+    AchievementProfile, ACHIEVEMENTS,
 };
 use ff_core::models::profile::Profile;
 
@@ -243,9 +243,10 @@ impl Menu for AchievementCategoryState {
                 MenuItem::new(label, move |_s: &mut Self, ctx| ctx.say(&spoken)).help(help_text),
             );
         }
-        items.push(MenuItem::new("Back to the categories", |s: &mut Self, ctx| {
-            s.go_back(ctx)
-        }));
+        items.push(MenuItem::new(
+            "Back to the categories",
+            |s: &mut Self, ctx| s.go_back(ctx),
+        ));
         items
     }
 }

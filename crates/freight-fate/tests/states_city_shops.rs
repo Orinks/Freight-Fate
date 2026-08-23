@@ -59,10 +59,7 @@ fn test_business_status_menu_unlocks_owner_operator_when_qualified() {
     select::<BusinessStatusState>(&mut app, "Buy into leased-on owner-operator");
 
     assert_eq!(profile(&app).business_status, LEASED_OWNER_OPERATOR);
-    approx(
-        profile(&app).money,
-        OWNER_OPERATOR_WORKING_CAPITAL + 500.0,
-    );
+    approx(profile(&app).money, OWNER_OPERATOR_WORKING_CAPITAL + 500.0);
     assert!(profile(&app).dispatch_board_cache.is_none());
 }
 
@@ -84,10 +81,8 @@ fn test_owner_operator_buy_in_records_first_owned_tractor() {
     assert_eq!(profile(&app).business_status, LEASED_OWNER_OPERATOR);
     // The buy-in takes over the tractor dispatch had you in: at the
     // level-18 gate that is a first-pick fleet unit, not the starter rig.
-    let assigned = assigned_truck_key::<Profile, ff_core::models::carrier_fleet::NoJob>(
-        profile(&app),
-        None,
-    );
+    let assigned =
+        assigned_truck_key::<Profile, ff_core::models::carrier_fleet::NoJob>(profile(&app), None);
     assert_eq!(profile(&app).truck, assigned);
     assert_eq!(profile(&app).visible_owned_trucks(), vec![assigned]);
     assert_eq!(
@@ -118,10 +113,7 @@ fn test_business_status_menu_sets_authority_readiness_reserve() {
     select::<BusinessStatusState>(&mut app, "Commit 12,500 dollars to authority prep");
 
     assert!(has_authority_readiness(profile(&app)));
-    approx(
-        profile(&app).money,
-        AUTHORITY_READY_WORKING_CAPITAL + 500.0,
-    );
+    approx(profile(&app).money, AUTHORITY_READY_WORKING_CAPITAL + 500.0);
     assert!(profile(&app).dispatch_board_cache.is_none());
     assert!(business_status_summary(profile(&app)).contains("Authority prep reserve is set"));
     assert!(labels::<BusinessStatusState>(&app)
@@ -404,10 +396,7 @@ fn test_garage_services_brakes_and_engine() {
 
     with_state_mut::<GarageState, _>(&mut app, |g, ctx| g.service_engine(ctx));
     assert_eq!(profile(&app).engine_wear_pct(), 0.0);
-    assert_eq!(
-        profile(&app).money,
-        10_000.0 - 20.0 * 40.0 - 30.0 * 120.0
-    );
+    assert_eq!(profile(&app).money, 10_000.0 - 20.0 * 40.0 - 30.0 * 120.0);
 }
 
 #[test]
@@ -448,7 +437,11 @@ fn test_company_driver_shops_hide_owned_truck_language() {
     key(&mut app, Key::Return);
     assert_eq!(profile(&app).truck, "rig");
     approx(profile(&app).money, 200_000.0);
-    assert!(app.main_lines().last().unwrap().contains("carrier-assigned"));
+    assert!(app
+        .main_lines()
+        .last()
+        .unwrap()
+        .contains("carrier-assigned"));
 
     app.pop_state();
     app.push_state(UpgradeShopState::new());
@@ -459,7 +452,11 @@ fn test_company_driver_shops_hide_owned_truck_language() {
     key(&mut app, Key::Return);
     assert!(profile(&app).upgrades.is_empty());
     approx(profile(&app).money, 200_000.0);
-    assert!(app.main_lines().last().unwrap().contains("carrier-assigned"));
+    assert!(app
+        .main_lines()
+        .last()
+        .unwrap()
+        .contains("carrier-assigned"));
 }
 
 #[test]
@@ -657,7 +654,9 @@ fn test_truck_shop_entry_stays_plain_for_a_fallback_city() {
     app.push_state(TruckShopState::new(true));
 
     let spoken = app.main_lines();
-    assert!(spoken.iter().any(|line| line.starts_with("Trucks. You have")));
+    assert!(spoken
+        .iter()
+        .any(|line| line.starts_with("Trucks. You have")));
     assert!(!spoken.iter().any(|line| line.contains("Inside")));
 }
 
@@ -701,7 +700,8 @@ fn test_owner_operator_can_add_specialty_trailer_program() {
     }
 
     app.push_state(TrailerProgramState::new());
-    assert!(labels::<TrailerProgramState>(&app)[0].contains("Dry van: included carrier trailer program"));
+    assert!(labels::<TrailerProgramState>(&app)[0]
+        .contains("Dry van: included carrier trailer program"));
     select::<TrailerProgramState>(&mut app, "Reefer");
 
     assert!(profile(&app)
@@ -785,7 +785,8 @@ fn endorsement_courses_price_each_unearned_endorsement() {
     let rows = labels::<EndorsementCourseState>(&app);
     assert!(rows
         .iter()
-        .any(|t| t.starts_with("Refrigerated course:") && t.contains("carrier-sponsored free at level")));
+        .any(|t| t.starts_with("Refrigerated course:")
+            && t.contains("carrier-sponsored free at level")));
     let before = profile(&app).money;
     select::<EndorsementCourseState>(&mut app, "Refrigerated course:");
     assert!(profile(&app).money < before);

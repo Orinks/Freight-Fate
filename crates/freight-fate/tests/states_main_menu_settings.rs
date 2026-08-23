@@ -242,7 +242,10 @@ fn test_each_gameplay_subcategory_has_exactly_its_rows() {
         let expected = gameplay_subcategory_rows(category);
         assert_eq!(rows.len(), expected.len(), "{category}");
         for ((actual, _), prefix) in rows.iter().zip(expected) {
-            assert!(actual.starts_with(prefix), "{category}: {actual} vs {prefix}");
+            assert!(
+                actual.starts_with(prefix),
+                "{category}: {actual} vs {prefix}"
+            );
         }
         // Every non-Back screen stays short enough to hold in the ear.
         assert!(rows.len() <= 12 || category == "assistance");
@@ -363,8 +366,9 @@ fn test_settings_menu_cycles_automatic_direction_changes() {
     assert_eq!(app.ctx.settings.automatic_direction_changes, "simple");
     open_settings_category(&mut app, "Controls");
     move_to::<Cat>(&mut app, "Automatic direction changes");
-    assert!(current_help::<Cat>(&app)
-        .starts_with("Both styles change direction with a fresh press"));
+    assert!(
+        current_help::<Cat>(&app).starts_with("Both styles change direction with a fresh press")
+    );
     key(&mut app, Key::Return);
     assert_eq!(app.ctx.settings.automatic_direction_changes, "deliberate");
     assert_eq!(Settings::load().automatic_direction_changes, "deliberate");
@@ -466,7 +470,9 @@ fn test_settings_menu_volume_survives_new_app_session() {
         let audio = |app: &App| {
             let state = app.state().unwrap();
             let s = state.borrow();
-            s.as_any().downcast_ref::<Cat>().map(|c| c.title().to_string())
+            s.as_any()
+                .downcast_ref::<Cat>()
+                .map(|c| c.title().to_string())
         };
         assert_eq!(audio(&app).as_deref(), Some("Audio"));
         loop {
@@ -600,7 +606,10 @@ fn test_settings_menu_uses_category_submenus() {
     );
     select::<SettingsState>(&mut app, "Audio");
     assert!(is::<Cat>(&app));
-    assert_eq!(with_state::<Cat, _>(&app, |c, _| c.title().to_string()), "Audio");
+    assert_eq!(
+        with_state::<Cat, _>(&app, |c, _| c.title().to_string()),
+        "Audio"
+    );
     assert!(current_label::<Cat>(&app).starts_with("Master volume"));
     key(&mut app, Key::Escape);
     assert!(is::<SettingsState>(&app));
@@ -744,7 +753,10 @@ fn test_settings_saved_is_heard_and_not_cancelled_by_the_main_menu_welcome() {
     app.clear_speech();
     key(&mut app, Key::Escape);
     let calls = app.main_calls();
-    assert!(!calls.is_empty(), "nothing was spoken on the way out of Settings");
+    assert!(
+        !calls.is_empty(),
+        "nothing was spoken on the way out of Settings"
+    );
     let (text, interrupt) = calls.last().unwrap();
     assert_eq!(text, "Settings saved.");
     assert!(*interrupt);

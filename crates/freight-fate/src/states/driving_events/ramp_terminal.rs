@@ -12,7 +12,7 @@ use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
-use super::pending::{bar_solid_zone_mi, bar_tick_range_mi};
+use crate::states::driving_stops::{bar_solid_zone_mi, bar_tick_range_mi};
 
 /// What a terminal violation met: a vehicle in the conflict window, one
 /// arriving within a horn's length, or an empty crossroad.

@@ -86,7 +86,10 @@ impl BusinessStatusState {
         let (ok, reasons) = owner_operator_eligibility(profile(ctx));
         if !ok {
             ctx.audio.play("ui/error");
-            ctx.say(&format!("Owner-operator path locked. {}", reasons.join(" ")));
+            ctx.say(&format!(
+                "Owner-operator path locked. {}",
+                reasons.join(" ")
+            ));
             self.refresh(ctx, true);
             return;
         }
@@ -273,11 +276,10 @@ impl Menu for BusinessStatusState {
         } else {
             if p.business_status == INDEPENDENT_AUTHORITY {
                 items.push(
-                    MenuItem::new("Own authority active", |s: &mut Self, ctx| s.summary(ctx))
-                        .help(
-                            "Direct freight is available. Settlement includes \
+                    MenuItem::new("Own authority active", |s: &mut Self, ctx| s.summary(ctx)).help(
+                        "Direct freight is available. Settlement includes \
                              insurance, compliance, and factoring costs.",
-                        ),
+                    ),
                 );
             } else if has_authority_readiness(p) {
                 items.push(
@@ -462,11 +464,7 @@ impl UpgradeShopState {
             );
             return;
         }
-        let owned = profile(ctx)
-            .upgrades
-            .get(upgrade.key)
-            .copied()
-            .unwrap_or(0);
+        let owned = profile(ctx).upgrades.get(upgrade.key).copied().unwrap_or(0);
         if owned >= upgrade.max_tier() {
             ctx.say(&format!("{} is already fully installed.", upgrade.label));
             return;

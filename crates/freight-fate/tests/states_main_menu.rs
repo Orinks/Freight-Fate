@@ -45,9 +45,7 @@ fn test_main_menu_enter_scan_cache_does_not_leak_between_enters() {
     Profile::named_in("Road Star", "Denver").save().unwrap();
     app.push_state(MainMenuState::new());
     assert_eq!(main_menu::loadable_saves().len(), 1);
-    Profile::named_in("Coast Runner", "Chicago")
-        .save()
-        .unwrap();
+    Profile::named_in("Coast Runner", "Chicago").save().unwrap();
     // re-enter, as returning from a submenu would
     with_state_mut::<MainMenuState, _>(&mut app, |s, ctx| s.enter(ctx));
     assert_eq!(main_menu::loadable_saves().len(), 2);
@@ -57,9 +55,7 @@ fn test_main_menu_enter_scan_cache_does_not_leak_between_enters() {
 fn test_reuse_loadable_saves_scan_is_reentrant() {
     // A nested scope must not drop the cache the outer scope still owns.
     let _app = TestApp::new();
-    Profile::named_in("Nested Driver", "Denver")
-        .save()
-        .unwrap();
+    Profile::named_in("Nested Driver", "Denver").save().unwrap();
     let before = main_menu::loadable_saves_scan_count();
     main_menu::reuse_loadable_saves_scan(|| {
         main_menu::loadable_saves();
@@ -376,7 +372,10 @@ fn manage_careers_deletes_a_save_after_confirmation() {
     assert!(!path.exists());
     assert!(is::<MainMenuState>(&app));
     assert_eq!(app.ctx.stack_len(), 1);
-    assert!(app.main_lines().iter().any(|line| line == "Doomed deleted."));
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|line| line == "Doomed deleted."));
     assert!(!labels::<MainMenuState>(&app)
         .iter()
         .any(|label| label.starts_with("Continue")));

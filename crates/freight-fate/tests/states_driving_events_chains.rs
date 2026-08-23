@@ -317,7 +317,6 @@ fn test_a_blown_destination_terminal_loops_back() {
 }
 
 #[test]
-#[ignore = "needs states::driving_facility_gate"]
 fn test_the_missed_destination_exit_loops_back_a_whole_window() {
     // `tests/test_exit_recovery.py`: under time compression one mile passes
     // in a few real seconds, making the re-approach unwinnable before it was

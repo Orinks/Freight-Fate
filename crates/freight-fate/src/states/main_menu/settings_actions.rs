@@ -7,8 +7,8 @@ use ff_core::settings::{
     acc_gap_seconds, Settings, ACC_GAP_CHOICES, ACC_GAP_DEFAULT, DRIVING_ASSIST_FIELDS,
     DRIVING_ASSIST_PRESETS, LANE_KEEPING_MODES, PLACE_CALLOUT_MODES, TIME_SCALES,
 };
-use ff_core::speech_pacing::DRIVING_SPEECH_MODES;
 use ff_core::sim::season::real_clock_game_hours;
+use ff_core::speech_pacing::DRIVING_SPEECH_MODES;
 
 use super::settings::{save_settings, SettingsCategoryState};
 use super::settings_items::assist_flag;
@@ -130,12 +130,18 @@ pub(super) fn event_voice_label(s: &Settings) -> String {
 
 /// `_channel`: the effective update channel.
 pub(super) fn update_channel(s: &Settings) -> String {
-    updater::resolve_channel(&s.update_channel, updater::load_build_info(version()).as_ref())
+    updater::resolve_channel(
+        &s.update_channel,
+        updater::load_build_info(version()).as_ref(),
+    )
 }
 
 impl SettingsCategoryState {
     pub(super) fn cycle_assist_preset(&mut self, ctx: &mut GameContext, direction: i64) {
-        let presets: Vec<&str> = DRIVING_ASSIST_PRESETS.iter().map(|(name, _)| *name).collect();
+        let presets: Vec<&str> = DRIVING_ASSIST_PRESETS
+            .iter()
+            .map(|(name, _)| *name)
+            .collect();
         let current = ctx.settings.driving_assistance_preset.clone();
         let index = presets
             .iter()
@@ -151,7 +157,10 @@ impl SettingsCategoryState {
                 "Lane keeping full: the truck holds the lane, tap Left or Right to change lanes."
                     .to_string()
             } else {
-                format!("Lane keeping back to {}.", lane_keeping_label(&ctx.settings))
+                format!(
+                    "Lane keeping back to {}.",
+                    lane_keeping_label(&ctx.settings)
+                )
             };
             ctx.say_with(note, Say::queued());
         }
@@ -283,8 +292,7 @@ impl SettingsCategoryState {
         ctx.apply_volumes();
         if ctx.driving_radio_active() {
             let radio = ctx.settings.radio_volume;
-            ctx.audio
-                .set_volumes(&VolumeUpdate::default().music(radio));
+            ctx.audio.set_volumes(&VolumeUpdate::default().music(radio));
         }
     }
 

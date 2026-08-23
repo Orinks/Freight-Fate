@@ -69,11 +69,7 @@ impl Menu for LoadDriverState {
         let mut items = Vec::new();
         for (path, profile) in loadable_saves() {
             let label = career_summary(ctx, &path, &profile, true);
-            let help = format!(
-                "Load {}, {}.",
-                profile.name,
-                career_location(ctx, &profile)
-            );
+            let help = format!("Load {}, {}.", profile.name, career_location(ctx, &profile));
             items.push(
                 MenuItem::new(label, move |s: &mut Self, ctx| s.pick(ctx, &profile)).help(help),
             );
@@ -277,11 +273,7 @@ impl ConfirmCareerActionState {
             }
             CareerAction::Delete => {
                 let _ = std::fs::remove_file(&self.path);
-                if ctx
-                    .profile
-                    .as_ref()
-                    .is_some_and(|p| p.path() == self.path)
-                {
+                if ctx.profile.as_ref().is_some_and(|p| p.path() == self.path) {
                     ctx.profile = None;
                 }
                 format!("{name} deleted.")
@@ -308,9 +300,7 @@ impl Menu for ConfirmCareerActionState {
                  starting money, no active trip, and no delivery history.",
                 ctx.world.spoken_city(&self.profile.current_city, None)
             ),
-            CareerAction::Delete => {
-                "Deleting permanently removes this saved career.".to_string()
-            }
+            CareerAction::Delete => "Deleting permanently removes this saved career.".to_string(),
         };
         let text = format!(
             "Confirm {} for {}. {detail} {}",

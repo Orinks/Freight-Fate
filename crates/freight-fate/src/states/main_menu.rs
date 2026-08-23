@@ -40,8 +40,7 @@ mod settings_items;
 
 pub use achievements::{AchievementCareerState, AchievementCategoryState, AchievementsState};
 pub use careers::{
-    CareerAction, CareerActionsState, ConfirmCareerActionState, LoadDriverState,
-    ManageCareersState,
+    CareerAction, CareerActionsState, ConfirmCareerActionState, LoadDriverState, ManageCareersState,
 };
 pub use settings::{
     GameplaySettingsState, SettingsCategoryState, SettingsState, SETTINGS_LAYOUT_NOTICES,
@@ -51,7 +50,7 @@ pub use crate::states::main_menu_career::{
     region_menu_name, CareerStartState, HomeCityState, HomeTerminalState,
 };
 pub use crate::states::main_menu_help::{controls_help_page, HelpState, HELP_PAGES};
-pub use crate::states::update::{UpdateChecker, UpdateCheckState, UpdatePromptState};
+pub use crate::states::update::{UpdateCheckState, UpdateChecker, UpdatePromptState};
 
 /// A clearly-named stand-in for a screen another port task still owns.
 ///
@@ -62,8 +61,10 @@ pub use crate::states::update::{UpdateChecker, UpdateCheckState, UpdatePromptSta
 pub fn todo_state(name: &str) -> SimpleMenuState {
     SimpleMenuState::new(
         &format!("{name} (not ported yet)"),
-        vec![MenuItem::new("Back", |s: &mut SimpleMenuState, ctx| s.go_back(ctx))
-            .help("This screen is not ported yet; Escape goes back.")],
+        vec![
+            MenuItem::new("Back", |s: &mut SimpleMenuState, ctx| s.go_back(ctx))
+                .help("This screen is not ported yet; Escape goes back."),
+        ],
     )
 }
 
@@ -769,7 +770,9 @@ impl Menu for ConfirmQuitState {
 
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         vec![
-            MenuItem::new("No, stay in Freight Fate", |s: &mut Self, ctx| s.go_back(ctx)),
+            MenuItem::new("No, stay in Freight Fate", |s: &mut Self, ctx| {
+                s.go_back(ctx)
+            }),
             MenuItem::new("Yes, quit Freight Fate", |_s: &mut Self, ctx| ctx.quit()),
         ]
     }

@@ -216,7 +216,11 @@ impl Menu for LearnSoundCategoryState {
             .map(|entry| {
                 let e: SoundEntry = *entry;
                 MenuItem::new(entry.name, move |s: &mut Self, ctx| s.play_entry(ctx, &e))
-                    .help(format!("{} {}", entry.meaning, entry.when).trim().to_string())
+                    .help(
+                        format!("{} {}", entry.meaning, entry.when)
+                            .trim()
+                            .to_string(),
+                    )
                     // The demo IS the confirmation; a menu click over the top
                     // of a cue the player is trying to learn defeats the
                     // screen.

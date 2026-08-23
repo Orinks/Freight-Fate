@@ -437,12 +437,10 @@ impl SettingsCategoryState {
     /// honestly instead of naming a file that is not there.
     pub fn log_location_lines(&self) -> Vec<String> {
         let Some(path) = active_log_path() else {
-            return vec![
-                "This copy of the game is not writing a log file. Packaged \
+            return vec!["This copy of the game is not writing a log file. Packaged \
                  downloads always write one; a copy run from the source code \
                  prints to its console window instead."
-                    .to_string(),
-            ];
+                .to_string()];
         };
         let mut out = vec![
             format!("The game log is saved as {}.", path.display()),

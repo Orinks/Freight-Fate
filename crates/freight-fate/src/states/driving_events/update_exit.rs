@@ -7,7 +7,7 @@ use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
-use super::pending::assist_servo_brake;
+use crate::states::driving_stops::assist_servo_brake;
 
 impl DrivingState {
     /// Advance an armed exit or an active ramp; opens the stop menu.
@@ -328,7 +328,7 @@ impl DrivingState {
         self.ramp_arrival_grace_s = 0.0;
         self.destination_exit_taken = stop.stop_type == "delivery_destination";
         if self.destination_exit_taken {
-            self.post_gate_zone();
+            self.post_gate_zone(ctx);
         }
         // The ramp is a single lane peeling off the right side.
         self.lane.lane = 0;

@@ -52,13 +52,19 @@ pub fn is_placeholder(app: &TestApp, name: &str) -> bool {
     if !is::<SimpleMenuState>(app) {
         return false;
     }
-    with_state::<SimpleMenuState, _>(app, |s, _| s.menu.title == format!("{name} (not ported yet)"))
+    with_state::<SimpleMenuState, _>(app, |s, _| {
+        s.menu.title == format!("{name} (not ported yet)")
+    })
 }
 
 /// The rows of the active `T` menu, as spoken.
 pub fn labels<T: Menu + 'static>(app: &TestApp) -> Vec<String> {
     with_state::<T, _>(app, |t, ctx| {
-        t.menu().items.iter().map(|item| item.text(t, ctx)).collect()
+        t.menu()
+            .items
+            .iter()
+            .map(|item| item.text(t, ctx))
+            .collect()
     })
 }
 

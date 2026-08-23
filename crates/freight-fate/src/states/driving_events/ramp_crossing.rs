@@ -7,8 +7,8 @@ use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
-use super::pending::assist_servo_brake;
 use super::ramp_terminal::CrossMeeting;
+use crate::states::driving_stops::assist_servo_brake;
 
 impl DrivingState {
     /// Route-transition assistance works the pedals for the terminal.
@@ -53,7 +53,7 @@ impl DrivingState {
                 // A green (or a yellow already at the bar) is legal to roll,
                 // but not at speed: hold the crossing under the clean-roll
                 // threshold with room to spare.
-                if gap_mi <= super::pending::bar_tick_range_mi(&self.trip.truck)
+                if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck)
                     && speed > GREEN_ROLL_MPH - 5.0
                 {
                     self.trip.truck.throttle = 0.0;
@@ -72,7 +72,7 @@ impl DrivingState {
                 // crossing at roll speed and the gap verdict lands at the
                 // line. Braking to a dead stop on a clear yield is the
                 // rear-end setup the roadmap warns the LEAD car will pull.
-                if gap_mi <= super::pending::bar_tick_range_mi(&self.trip.truck)
+                if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck)
                     && speed > YIELD_ROLL_MPH - 3.0
                 {
                     self.trip.truck.throttle = 0.0;

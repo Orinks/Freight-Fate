@@ -86,7 +86,10 @@ impl UpdateChecker {
 
     /// `checker.result`.
     pub fn result(&self) -> Option<UpdateInfo> {
-        self.result.lock().unwrap_or_else(|e| e.into_inner()).clone()
+        self.result
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
     }
 
     /// `checker.error`.

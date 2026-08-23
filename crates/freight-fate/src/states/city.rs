@@ -55,8 +55,7 @@ mod terminal;
 mod weather;
 
 pub use board::{
-    describe_job, locked_reason, trailer_note, JobBoardState, JobDetailState,
-    JOB_BOARD_INTRO_HELP,
+    describe_job, locked_reason, trailer_note, JobBoardState, JobDetailState, JOB_BOARD_INTRO_HELP,
 };
 pub use extras::{BobtailDestState, PayDebtState};
 pub use terminal::CityMenuState;
@@ -521,10 +520,7 @@ pub fn assigned_reposition_for_board(
     }
     let world = ctx.world;
     let mut candidates = board_candidates(world, &p.current_city);
-    candidates.sort_by(|a, b| {
-        a.1.partial_cmp(&b.1)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
+    candidates.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
     let mut nearby: Vec<(String, f64, usize)> = candidates
         .iter()
         .filter(|c| c.1 <= BOBTAIL_RANGE_MI)

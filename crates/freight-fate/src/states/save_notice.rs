@@ -131,8 +131,10 @@ impl Menu for LegacyCareerNoticeState {
         vec![
             MenuItem::new("Start a new career", |s: &mut Self, ctx| s.new_career(ctx))
                 .help("Begin a fresh 1.9 career with a new driver name."),
-            MenuItem::new("Back to the career list", |s: &mut Self, ctx| s.go_back(ctx))
-                .help("Return to the saved careers without changing anything."),
+            MenuItem::new("Back to the career list", |s: &mut Self, ctx| {
+                s.go_back(ctx)
+            })
+            .help("Return to the saved careers without changing anything."),
         ]
     }
 }

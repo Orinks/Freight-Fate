@@ -28,7 +28,9 @@ fn app_with_offer() -> (TestApp, SharedState) {
     app.ctx.settings.online_offer_seen = false;
     // The offer replaces itself with the city menu on the way out, and that
     // screen needs a career parked somewhere to describe.
-    app.ctx.profile = Some(ff_core::models::profile::Profile::named_in("Rookie", "Chicago"));
+    app.ctx.profile = Some(ff_core::models::profile::Profile::named_in(
+        "Rookie", "Chicago",
+    ));
     app.push_state(base_state());
     let offer = OnlineOfferState::new(&mut app.ctx);
     let shared = push(&mut app, offer);

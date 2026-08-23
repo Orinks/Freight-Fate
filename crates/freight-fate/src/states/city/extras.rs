@@ -8,8 +8,7 @@ use crate::app::GameContext;
 use crate::impl_state_for_menu;
 use crate::states::base::{Menu, MenuCore, MenuItem};
 use crate::states::city::{
-    launch_driving, profile, profile_mut, DrivingLaunch, LaunchAnnouncement,
-    DRIVE_PHASE_DELIVERY,
+    launch_driving, profile, profile_mut, DrivingLaunch, LaunchAnnouncement, DRIVE_PHASE_DELIVERY,
 };
 
 /// Pick a nearby city to bobtail (drive empty) to, to shop its board.
@@ -60,7 +59,12 @@ impl BobtailDestState {
         );
         launch_driving(
             ctx,
-            DrivingLaunch::new(job, route, DRIVE_PHASE_DELIVERY, LaunchAnnouncement::Line(line)),
+            DrivingLaunch::new(
+                job,
+                route,
+                DRIVE_PHASE_DELIVERY,
+                LaunchAnnouncement::Line(line),
+            ),
         );
     }
 }

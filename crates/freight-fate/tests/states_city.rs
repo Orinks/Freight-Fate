@@ -18,8 +18,8 @@ use ff_core::models::dispatch_policy::{NEW_HIRE_DECLINE_BUDGET, SENIOR_LOAD_CHOI
 use ff_core::models::economy::{PAY_ADVANCE_ELIGIBLE_BELOW, PAY_ADVANCE_LIMIT};
 use ff_core::models::enforcement::{self, LAST_CHANCE_CARRIER_KEY};
 use ff_core::models::jobs::{
-    board_offer_count, cargo_type, job_payload, make_reposition_job, ASSIGNED_REPOSITION_PAY_FRACTION,
-    Job, JobBoard, OfferOptions,
+    board_offer_count, cargo_type, job_payload, make_reposition_job, Job, JobBoard, OfferOptions,
+    ASSIGNED_REPOSITION_PAY_FRACTION,
 };
 use ff_core::models::profile::Profile;
 use ff_core::models::solvency;
@@ -345,9 +345,8 @@ fn senior_job_board(app: &mut TestApp) {
 fn test_f1_on_dispatch_job_opens_structured_detail_view() {
     let mut app = TestApp::new();
     senior_job_board(&mut app);
-    let focused = with_state::<JobBoardState, _>(&app, |b, _| {
-        b.jobs[b.menu().index].cargo.label.to_string()
-    });
+    let focused =
+        with_state::<JobBoardState, _>(&app, |b, _| b.jobs[b.menu().index].cargo.label.to_string());
 
     key(&mut app, Key::F1);
 
@@ -538,13 +537,12 @@ fn test_a_board_naming_a_retired_pickup_is_rebuilt_from_the_current_world() {
     open_freight_market(&mut app.ctx);
     app.ctx.run_deferred();
 
-    let offered =
-        with_state::<JobBoardState, _>(&app, |b, _| {
-            b.jobs
-                .iter()
-                .map(|job| job.origin_location.clone())
-                .collect::<Vec<_>>()
-        });
+    let offered = with_state::<JobBoardState, _>(&app, |b, _| {
+        b.jobs
+            .iter()
+            .map(|job| job.origin_location.clone())
+            .collect::<Vec<_>>()
+    });
     assert!(!offered.iter().any(|name| name == GONE));
     // Rebuilt, not merely filtered: the player still gets a full board.
     let level = profile(&app).career.level();
@@ -587,7 +585,9 @@ fn test_accepting_a_retired_pickup_says_so_instead_of_crashing() {
     // The trip must not have started, the dead offer is off the board,
     // and the stale cache is forgotten so the next build is a current one.
     assert!(profile(&app).active_trip.is_none());
-    assert!(with_state::<JobBoardState, _>(&app, |b, _| b.jobs.is_empty()));
+    assert!(with_state::<JobBoardState, _>(&app, |b, _| b
+        .jobs
+        .is_empty()));
     assert!(profile(&app).dispatch_board_cache.is_none());
 }
 
@@ -629,7 +629,9 @@ fn test_accepting_stale_cached_offer_drops_it_instead_of_crashing() {
     assert!(is::<JobBoardState>(&app));
     assert!(profile(&app).active_trip.is_none());
     assert!(profile(&app).dispatch_board_cache.is_none());
-    assert!(with_state::<JobBoardState, _>(&app, |b, _| b.jobs.is_empty()));
+    assert!(with_state::<JobBoardState, _>(&app, |b, _| b
+        .jobs
+        .is_empty()));
     assert!(app
         .main_lines()
         .iter()
@@ -648,7 +650,10 @@ fn test_dispatch_board_stays_stable_when_reopened() {
     key(&mut app, Key::Return); // dispatch board
     assert!(is::<JobBoardState>(&app));
     let first_board = with_state::<JobBoardState, _>(&app, |b, _| {
-        b.jobs.iter().map(|j| j.describe_plain()).collect::<Vec<_>>()
+        b.jobs
+            .iter()
+            .map(|j| j.describe_plain())
+            .collect::<Vec<_>>()
     });
     assert!(!first_board.is_empty());
     assert!(profile(&app).dispatch_board_cache.is_some());
@@ -658,7 +663,10 @@ fn test_dispatch_board_stays_stable_when_reopened() {
     key(&mut app, Key::Return); // dispatch board again
     assert!(is::<JobBoardState>(&app));
     let second_board = with_state::<JobBoardState, _>(&app, |b, _| {
-        b.jobs.iter().map(|j| j.describe_plain()).collect::<Vec<_>>()
+        b.jobs
+            .iter()
+            .map(|j| j.describe_plain())
+            .collect::<Vec<_>>()
     });
 
     assert_eq!(second_board, first_board);
@@ -741,7 +749,11 @@ fn test_own_authority_owned_trailer_row_shows_direct_market_fit() {
 /// Walk seeded profiles/cities until the board's own deterministic roll
 /// turns up a reposition, mirroring how tests elsewhere search seeds for a
 /// property instead of hand-picking one fragile value.
-fn find_reposition(app: &mut TestApp, owner_operator: bool, trials: usize) -> Option<(Profile, Job)> {
+fn find_reposition(
+    app: &mut TestApp,
+    owner_operator: bool,
+    trials: usize,
+) -> Option<(Profile, Job)> {
     let cities: Vec<String> = app.ctx.world.cities.keys().cloned().collect();
     for i in 0..trials {
         let mut p = Profile::named_in(&format!("Seed{i}"), &cities[i % cities.len()]);
@@ -838,8 +850,14 @@ fn test_assigned_reposition_pays_reduced_rate_and_awards_mileage_xp() {
     // what the city screens own, so that is what is pinned here.
     let app = TestApp::new();
     let p = Profile::named_in("Assigned Reposition", "Denver");
-    let job = make_reposition_job(app.ctx.world, "Denver", "Cheyenne", true, Some(&p.carrier_key))
-        .expect("Denver to Cheyenne is on the network");
+    let job = make_reposition_job(
+        app.ctx.world,
+        "Denver",
+        "Cheyenne",
+        true,
+        Some(&p.carrier_key),
+    )
+    .expect("Denver to Cheyenne is on the network");
     assert!(job.bobtail && job.assigned);
     let plan = pay_plan_for_key(Some(&p.carrier_key));
     let expected_pay = ff_core::pyfmt::round_py_n(
@@ -1401,7 +1419,9 @@ fn test_company_driver_board_labels_carrier_gross() {
     key(&mut app, Key::Return);
 
     assert!(is::<JobBoardState>(&app));
-    assert!(with_state::<JobBoardState, _>(&app, |b, _| !b.jobs.is_empty()));
+    assert!(with_state::<JobBoardState, _>(&app, |b, _| !b
+        .jobs
+        .is_empty()));
     assert!(labels::<JobBoardState>(&app)[0].contains("Carrier gross"));
 }
 

@@ -111,16 +111,15 @@ pub(crate) fn speak_time_and_weather(ctx: &mut GameContext) {
             Some(t) if live_calendar_setting => t,
             _ => temperature_c(&region, season_hours),
         };
-        let mut parts = vec![adjust_for_calendar(kind, Some(guard_temp), Some(season_hours))
-            .value()
-            .to_string()];
+        let mut parts = vec![
+            adjust_for_calendar(kind, Some(guard_temp), Some(season_hours))
+                .value()
+                .to_string(),
+        ];
         match observed {
             Some(observed) => {
                 if imperial {
-                    parts.push(format!(
-                        "{} degrees",
-                        fmt_f(observed * 9.0 / 5.0 + 32.0, 0)
-                    ));
+                    parts.push(format!("{} degrees", fmt_f(observed * 9.0 / 5.0 + 32.0, 0)));
                 } else {
                     parts.push(format!("{} degrees Celsius", fmt_f(observed, 0)));
                 }

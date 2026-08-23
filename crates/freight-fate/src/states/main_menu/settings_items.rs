@@ -9,8 +9,8 @@ use ff_core::settings::Settings;
 
 use super::settings::{Adjust, SettingsCategoryState};
 use super::settings_actions::{
-    acc_gap_label, assist_preset_label, cue_loudness_label, descent_level_label,
-    event_voice_label, hos_label, lane_keeping_label, pace_label, update_channel,
+    acc_gap_label, assist_preset_label, cue_loudness_label, descent_level_label, event_voice_label,
+    hos_label, lane_keeping_label, pace_label, update_channel,
 };
 use crate::app::GameContext;
 use crate::states::base::{Label, Menu, MenuItem};
@@ -46,7 +46,10 @@ fn adjust(f: impl Fn(&mut SettingsCategoryState, &mut GameContext, i64) + 'stati
 }
 
 fn row(label: Label<SettingsCategoryState>, action: Adjust, help: &str) -> Row {
-    MenuItem::new(label, move |s: &mut SettingsCategoryState, ctx| action(s, ctx, 1)).help(help)
+    MenuItem::new(label, move |s: &mut SettingsCategoryState, ctx| {
+        action(s, ctx, 1)
+    })
+    .help(help)
 }
 
 fn back_row() -> Row {
@@ -178,7 +181,9 @@ impl SettingsCategoryState {
         let speech = &ctx.speech;
         let mut specs = vec![
             SpeechSpec {
-                label: dyn_label(|s| format!("Driving speech: {}", s.driving_speech.replace('_', " "))),
+                label: dyn_label(|s| {
+                    format!("Driving speech: {}", s.driving_speech.replace('_', " "))
+                }),
                 action: adjust(|s, ctx, d| s.cycle_driving_speech(ctx, d)),
                 help: "How much the road tells you. Standard speaks every \
                        confirmation and status update in words, a driving tip \
@@ -201,25 +206,34 @@ impl SettingsCategoryState {
                        names have their own Place callouts setting below.",
             },
             SpeechSpec {
-                label: dyn_label(|s| format!("Speak parks and forests: {}", on_off(s.chatter_parks))),
+                label: dyn_label(|s| {
+                    format!("Speak parks and forests: {}", on_off(s.chatter_parks))
+                }),
                 action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_parks")),
                 help: "Callouts when the road enters a national park, national \
                        forest, or other protected public land.",
             },
             SpeechSpec {
-                label: dyn_label(|s| format!("Speak river crossings: {}", on_off(s.chatter_rivers))),
+                label: dyn_label(|s| {
+                    format!("Speak river crossings: {}", on_off(s.chatter_rivers))
+                }),
                 action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_rivers")),
                 help: "Callouts when the road crosses a named river.",
             },
             SpeechSpec {
-                label: dyn_label(|s| format!("Speak mountain passes: {}", on_off(s.chatter_passes))),
+                label: dyn_label(|s| {
+                    format!("Speak mountain passes: {}", on_off(s.chatter_passes))
+                }),
                 action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_passes")),
                 help: "Callouts approaching a named mountain pass, plus famous \
                        highway markers like the Loneliest Road in America.",
             },
             SpeechSpec {
                 label: dyn_label(|s| {
-                    format!("Speak museums and attractions: {}", on_off(s.chatter_museums))
+                    format!(
+                        "Speak museums and attractions: {}",
+                        on_off(s.chatter_museums)
+                    )
                 }),
                 action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_museums")),
                 help: "Callouts for museums and roadside attractions near the route.",
@@ -242,7 +256,10 @@ impl SettingsCategoryState {
             },
             SpeechSpec {
                 label: dyn_label(|s| {
-                    format!("Menu position announcements: {}", on_off(s.announce_menu_position))
+                    format!(
+                        "Menu position announcements: {}",
+                        on_off(s.announce_menu_position)
+                    )
                 }),
                 action: adjust(|s, ctx, d| s.toggle_menu_position(ctx, d)),
                 help: "When on, menus say the position, like 3 of 10, after each option. \
@@ -327,7 +344,9 @@ impl SettingsCategoryState {
             "assistance" => {
                 let mut actions = vec![adjust(|s, ctx, d| s.cycle_assist_preset(ctx, d))];
                 for (field, _, _) in DRIVING_ASSIST_SPECS {
-                    actions.push(adjust(move |s, ctx, d| s.toggle_driving_assist(ctx, field, d)));
+                    actions.push(adjust(move |s, ctx, d| {
+                        s.toggle_driving_assist(ctx, field, d)
+                    }));
                 }
                 // The last row of this category was left out of the
                 // arrow-key path, so Left and Right did nothing on it
@@ -402,7 +421,11 @@ impl SettingsCategoryState {
                     dyn_label(|s| {
                         format!(
                             "Weather source: {}",
-                            if s.real_weather { "real world" } else { "simulated" }
+                            if s.real_weather {
+                                "real world"
+                            } else {
+                                "simulated"
+                            }
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_real_weather(ctx, d)),
@@ -412,7 +435,11 @@ impl SettingsCategoryState {
                     dyn_label(|s| {
                         format!(
                             "Traffic source: {}",
-                            if s.real_traffic { "real time" } else { "simulated" }
+                            if s.real_traffic {
+                                "real time"
+                            } else {
+                                "simulated"
+                            }
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_real_traffic(ctx, d)),
@@ -423,7 +450,11 @@ impl SettingsCategoryState {
                     dyn_label(|s| {
                         format!(
                             "Parking source: {}",
-                            if s.real_parking { "real time" } else { "simulated" }
+                            if s.real_parking {
+                                "real time"
+                            } else {
+                                "simulated"
+                            }
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_real_parking(ctx, d)),
@@ -464,7 +495,11 @@ impl SettingsCategoryState {
                     dyn_label(|s| {
                         format!(
                             "Transmission: {}",
-                            if s.automatic_transmission { "automatic" } else { "manual" }
+                            if s.automatic_transmission {
+                                "automatic"
+                            } else {
+                                "manual"
+                            }
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_transmission(ctx, d)),
@@ -473,7 +508,10 @@ impl SettingsCategoryState {
                 ),
                 row(
                     dyn_label(|s| {
-                        format!("Automatic direction changes: {}", s.automatic_direction_changes)
+                        format!(
+                            "Automatic direction changes: {}",
+                            s.automatic_direction_changes
+                        )
                     }),
                     adjust(|s, ctx, d| s.cycle_automatic_direction_changes(ctx, d)),
                     "Both styles change direction with a fresh press at a \
@@ -485,7 +523,11 @@ impl SettingsCategoryState {
                     dyn_label(|s| {
                         format!(
                             "Controller: {}",
-                            if s.controller_enabled { "enabled" } else { "disabled" }
+                            if s.controller_enabled {
+                                "enabled"
+                            } else {
+                                "disabled"
+                            }
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_controller(ctx, d)),
@@ -497,7 +539,11 @@ impl SettingsCategoryState {
                     dyn_label(|s| {
                         format!(
                             "Haptics: {}",
-                            if s.haptics_enabled { "enabled" } else { "disabled" }
+                            if s.haptics_enabled {
+                                "enabled"
+                            } else {
+                                "disabled"
+                            }
                         )
                     }),
                     adjust(|s, ctx, d| s.toggle_haptics(ctx, d)),

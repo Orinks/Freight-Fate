@@ -257,7 +257,10 @@ pub trait FacilityEngine: Menu {
         self.on_facility_engine_changed(ctx);
         self.refresh(ctx, true);
         let psi = self.facility_truck().air_pressure_psi();
-        ctx.say(&format!("Engine running. Air pressure {} psi.", fmt_f(psi, 0)));
+        ctx.say(&format!(
+            "Engine running. Air pressure {} psi.",
+            fmt_f(psi, 0)
+        ));
     }
 }
 
@@ -639,7 +642,9 @@ impl PickupFacilityState {
         };
         // The pickup screen is the active state while this runs, so that is
         // the handle the timer's completion reaches it through.
-        let pickup = ctx.state().expect("the pickup facility is the active state");
+        let pickup = ctx
+            .state()
+            .expect("the pickup facility is the active state");
         ctx.push_state(
             TimedMessageState::new(title, &message, status, PICKUP_LOADING_WAIT_S, move |ctx| {
                 if let Ok(mut state) = pickup.try_borrow_mut() {
@@ -996,9 +1001,10 @@ impl Menu for PickupFacilityState {
             .help("Save this pickup objective so it resumes here later."),
         );
         items.push(
-            MenuItem::new("Cancel pickup and return to terminal", |s: &mut Self, ctx| {
-                s.cancel(ctx)
-            })
+            MenuItem::new(
+                "Cancel pickup and return to terminal",
+                |s: &mut Self, ctx| s.cancel(ctx),
+            )
             .help(
                 "Give up this job before departure and return to the \
                  terminal dispatch board area.",
@@ -1035,7 +1041,11 @@ impl Menu for PickupFacilityState {
             ),
             format!(
                 "Engine: {}",
-                if self.truck.engine_on { "running" } else { "off" }
+                if self.truck.engine_on {
+                    "running"
+                } else {
+                    "off"
+                }
             ),
             format!(
                 "Air: {} psi   \
@@ -1053,7 +1063,9 @@ impl Menu for PickupFacilityState {
                 Some(mph) => ctx.settings.speed_text(mph),
                 None => "posted limit when the open road begins".to_string(),
             };
-            lines.push(format!("Speed control: paused   Open-road target: {target}"));
+            lines.push(format!(
+                "Speed control: paused   Open-road target: {target}"
+            ));
         }
         lines.push(String::new());
         for (i, item) in self.menu.items.iter().enumerate() {
@@ -1292,7 +1304,9 @@ impl Menu for RouteSelectState {
             );
         }
         let back_label = self.opts.back_label.clone();
-        items.push(MenuItem::new(back_label, |s: &mut Self, ctx| s.go_back(ctx)));
+        items.push(MenuItem::new(back_label, |s: &mut Self, ctx| {
+            s.go_back(ctx)
+        }));
         items
     }
 

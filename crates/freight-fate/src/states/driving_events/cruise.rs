@@ -9,10 +9,11 @@ use crate::app::{GameContext, Say};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
+use crate::states::driving_stops::assist_full_decel_mps2;
+
 use super::pending::{
-    assist_full_decel_mps2, KEEPER_EASE_UNDERSHOOT_MPH, KEEPER_OVERRUN_MPH, KEEPER_OVERRUN_S,
-    KEEPER_SNUB_DECEL_MPS2, KEEPER_SNUB_MAX_BRAKE, KEEPER_SNUB_MIN_BRAKE, KEEPER_SNUB_OVER_MPH,
-    KEEPER_SNUB_UNDER_MPH,
+    KEEPER_EASE_UNDERSHOOT_MPH, KEEPER_OVERRUN_MPH, KEEPER_OVERRUN_S, KEEPER_SNUB_DECEL_MPS2,
+    KEEPER_SNUB_MAX_BRAKE, KEEPER_SNUB_MIN_BRAKE, KEEPER_SNUB_OVER_MPH, KEEPER_SNUB_UNDER_MPH,
 };
 
 impl DrivingState {

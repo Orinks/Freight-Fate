@@ -9,7 +9,9 @@ mod states_city_support;
 
 use ff_core::models::business::LEASED_OWNER_OPERATOR;
 use ff_core::models::jobs::{cargo_type, Job};
-use ff_core::models::trailer_yard::{preloaded_trailer, DROP_HOOK_MIN, LIVE_LOAD_MIN, TRAILER_SWAP_MIN};
+use ff_core::models::trailer_yard::{
+    preloaded_trailer, DROP_HOOK_MIN, LIVE_LOAD_MIN, TRAILER_SWAP_MIN,
+};
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, TimedMessageState};
 use freight_fate::states::city::CityMenuState;
@@ -259,7 +261,10 @@ fn test_pickup_arrival_state_and_loaded_planning_resume() {
     push_pickup(&mut app, job.clone(), PickupOptions::default());
     key(&mut app, Key::Return); // check in
 
-    let snapshot = profile(&app).active_trip.clone().expect("a saved objective");
+    let snapshot = profile(&app)
+        .active_trip
+        .clone()
+        .expect("a saved objective");
     assert_eq!(snapshot["kind"], "pickup");
     assert_eq!(snapshot["checked_in"], true);
     assert_eq!(snapshot["loaded"], false);
@@ -302,8 +307,7 @@ fn test_pickup_save_and_departure_keep_speed_control_session() {
         },
     );
 
-    assert!(with_state::<PickupFacilityState, _>(&app, |p, _| p
-        .speed_control_armed));
+    assert!(with_state::<PickupFacilityState, _>(&app, |p, _| p.speed_control_armed));
     assert!(app.main_lines().iter().any(|line| line
         .contains("Automatic speed control is paused; open-road target 47 miles per hour")));
 
