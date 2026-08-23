@@ -89,6 +89,18 @@ are not on I-65 -- but it silences a genuinely curvy drive rather than fixing
 the label. ``--report`` prints those legs, ranked, from the per-leg freeway
 coverage in the facts file, so they can be given routing pins later.
 
+THE RESIDUAL, MEASURED
+----------------------
+Of the 15,752 interstate mainline rows that survive, 11,986 ride a way with
+the leg's own shield, 3,640 a way carrying another route number, and 126 a
+``motorway`` way with no ``ref`` at all -- which is where this rule cannot
+tell "a freeway" from "the Interstate". They are urban freeway spaghetti
+(the Whitehurst Freeway, Denver's West 6th Avenue Freeway, Tampa's Crosstown
+Connector, the I-95 Express Toll Lanes), 37 of them ask a truck to slow, and
+the 300 ft interstate screen takes most of those at load. Left alone: they
+are real bends on real controlled-access road, and a second rule to chase
+twenty records would be fitting to the residual.
+
 CONNECTORS ARE ONLY EVER ADDED
 ------------------------------
 A row the sweep already flagged stays flagged: the positional window catches

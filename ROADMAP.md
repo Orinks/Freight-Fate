@@ -1478,6 +1478,21 @@ onto exit signalling.
       can miss. Re-running the tool on its own output lands in the same
       place: only the sweep's own verdict is preserved, never this tool's.
 
+      WHAT IT STILL KEEPS, measured rather than assumed: of the 15,752
+      interstate mainline rows that survive, 11,986 sit on a way carrying the
+      leg's own shield, 3,640 on a way carrying another route number (a
+      concurrency, or a leg that genuinely finishes on a different freeway --
+      I-59 into New Orleans rides I-10), and 126 on a `motorway` way with no
+      `ref` at all. That last group is where the rule cannot tell "a freeway"
+      from "the Interstate", and it is urban freeway spaghetti: the
+      Whitehurst Freeway in DC, the West 6th Avenue Freeway out of Denver,
+      Tampa's Crosstown Connector, the I-95 Express Toll Lanes. 37 of them
+      ask a truck to slow and the existing 300 ft interstate screen takes
+      most of those at load, leaving roughly twenty of 661. They are real
+      bends on real controlled-access road, so they are LEFT rather than
+      chased with a second rule -- but that is the residual, and this is
+      where to look if the interstate ever feels talkative in a city again.
+
 - [ ] **Some interstate legs are labelled for a road their route does not
       ride.** Found by the connector bake above, which reads per-leg freeway
       coverage as a by-product: 51 of 728 interstate legs spend under half
