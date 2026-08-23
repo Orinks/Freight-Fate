@@ -136,12 +136,40 @@ class TestInterstateArtifactScreen:
         assert max(r.deflection_deg for r in recs) >= 150.0
 
     def test_glenwood_canyon_interstate_curves_survive(self) -> None:
-        """Real I-70 canyon geometry sits above the floor and must stay."""
-        recs = leg_curves("glenwood_springs_co_us:grand_junction_co_us")
-        assert len(recs) >= 55
-        assert min(r.min_radius_ft for r in recs) < 500, (
-            "Glenwood Canyon's genuinely sharp bends should still be here"
-        )
+        """Real I-70 canyon geometry must stay.
+
+        This is the test that caught the design-floor screen (raising
+        INTERSTATE_MIN_RADIUS_FT to 758, tried and reverted 2026-08-23), and
+        it guards the connector bake the same way.
+
+        TWO legs, because the canyon proper is EAST of Glenwood Springs:
+        Edwards to Glenwood Springs is Glenwood Canyon itself, and Glenwood
+        Springs to Grand Junction runs De Beque Canyon out the other side of
+        town.
+
+        It counts CANYON miles rather than the leg total, which is what the
+        leg total was standing in for -- and badly: the sub-500 ft record the
+        old bar tested for was a motorway_link ramp onto the I-70 business
+        route at Grand Junction, not canyon at all. When the connector bake
+        landed the totals moved (71 -> 70 and 60 -> 54) and every curve it
+        took was a ramp or a town road: those business-route ramps, Pine
+        Street and West 6th Street out of Glenwood Springs, Ute Avenue and
+        South 12th Street into Grand Junction. Between the ends nothing moved
+        -- Glenwood Canyon holds the same 57 curves at the same 574 ft
+        minimum radius, and the same 15 that ask a truck to slow.
+        """
+        from freight_fate.data.world import get_world
+
+        miles = {f"{leg.a}:{leg.b}": leg.miles for leg in get_world().legs}
+        for key, floor in (
+            ("edwards_co_us:glenwood_springs_co_us", 55),
+            ("glenwood_springs_co_us:grand_junction_co_us", 45),
+        ):
+            canyon = [r for r in leg_curves(key) if 5.0 < r.apex_mi < miles[key] - 5.0]
+            assert len(canyon) >= floor, f"{key} kept only {len(canyon)} curves off its ends"
+            assert min(r.min_radius_ft for r in canyon) < 700, (
+                f"{key}'s genuinely sharp canyon bends should still be here"
+            )
 
     def test_us_highway_mountain_hairpins_survive(self) -> None:
         """US-40 over the Rockies keeps its real sharp curves.
@@ -883,3 +911,139 @@ def test_the_design_floor_is_spent_where_the_ground_cannot_excuse_a_bend() -> No
     assert min_radius_ft(50) > INTERSTATE_MIN_RADIUS_FT, (
         "the blunt screen must stay below the design floor, or it eats real road"
     )
+
+
+def _connector_rule():
+    """The bake's connector classifier, imported the way the other tool
+    tests do it. It lives in ``tools/`` because it is bake-time code."""
+    import sys
+    from pathlib import Path
+
+    tools = str(Path(__file__).resolve().parents[1] / "tools")
+    sys.path.insert(0, tools)
+    try:
+        import bake_curve_connectors
+
+        return bake_curve_connectors
+    finally:
+        sys.path.remove(tools)
+
+
+class TestConnectorsAreReadNotGuessed:
+    """Interchange and departure geometry is classed by OSM, not by position.
+
+    The sweep flagged a connector only inside 0.75 mi of a leg's ends, which
+    misses every mid-leg interchange and does not get a truck out of Denver.
+    ``tools/bake_curve_connectors.py`` re-derives the flag from the road class
+    OSM records under each curve's apex.
+    """
+
+    def test_a_ramp_reads_as_a_connector_on_every_road_class(self) -> None:
+        rule = _connector_rule()
+        for klass in ("motorway_link", "trunk_link", "primary_link"):
+            for interstate in (True, False):
+                assert rule.classify({"near_m": 0.4, "near_hw": klass}, interstate) == (
+                    True,
+                    "osm:ramp",
+                )
+
+    def test_an_interstate_curve_off_the_freeway_is_not_interstate_mainline(self) -> None:
+        """Every Interstate mainline mile is a freeway, so a curve apex on a
+        surface road is not on the Interstate however the leg is labelled."""
+        rule = _connector_rule()
+        for klass in ("trunk", "primary", "secondary", "residential"):
+            assert rule.classify({"near_m": 0.4, "near_hw": klass}, True) == (
+                True,
+                "osm:off-freeway",
+            )
+            # The same ground on a US-route leg is that leg's real road.
+            assert rule.classify({"near_m": 0.4, "near_hw": klass}, False)[0] is False
+
+    def test_a_freeway_curve_stays_mainline_however_hard_it_bends(self) -> None:
+        """The guard on the whole rule: it never sees the geometry.
+
+        Raising the radius floor to the design minimum is what deleted
+        Glenwood Canyon (tried and reverted, 2026-08-23). This classifier
+        takes no radius, deflection or advisory at all -- there is no argument
+        through which a sharp curve could reach it -- so it cannot repeat that.
+        """
+        rule = _connector_rule()
+        assert rule.classify({"near_m": 0.2, "near_hw": "motorway"}, True) == (
+            False,
+            "osm:mainline",
+        )
+
+    def test_nothing_read_concludes_nothing(self) -> None:
+        """No extract, or no road in the corridor, must not read as mainline."""
+        rule = _connector_rule()
+        for fact in ({"near_m": None}, {"near_m": 400.0, "near_hw": "motorway_link"}, {}):
+            assert rule.classify(fact, True) == (False, "")
+
+    def test_the_corridor_is_a_sanity_bound_not_a_decision(self) -> None:
+        rule = _connector_rule()
+        assert rule.classify({"near_m": rule.CORRIDOR_M - 0.1, "near_hw": "motorway"}, True)[1]
+        assert (
+            rule.classify({"near_m": rule.CORRIDOR_M + 0.1, "near_hw": "motorway"}, True)[1] == ""
+        )
+
+
+def test_every_connector_row_names_the_reading_that_flagged_it() -> None:
+    """Provenance: a connector says whether it was read or positional.
+
+    ``osm:ramp`` and ``osm:off-freeway`` are readings from the OSM extract;
+    ``sweep:window`` is the bake's original positional call, kept because the
+    two are a union and the window sees city geometry the class reading can
+    miss.
+    """
+    import json
+
+    from freight_fate.data.data_resources import read_data_text
+
+    text = read_data_text("world_data/us/gameplay/curves.jsonl")
+    assert text
+    known = {"osm:ramp", "osm:off-freeway", "sweep:window"}
+    seen: set[str] = set()
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if "meta" in row or not row.get("connector"):
+            continue
+        source = row.get("connector_source")
+        assert source in known, f"{row['leg']} seq {row['seq']} carries {source!r}"
+        seen.add(source)
+    assert seen >= {"osm:ramp", "osm:off-freeway"}, (
+        f"the OSM readings should both be present in the bake, saw {sorted(seen)}"
+    )
+
+
+def test_interstate_mainline_asks_the_truck_to_slow_down_rarely() -> None:
+    """The owner's report, 2026-08-23: "interstate mainline curves make the
+    truck slow far too often."
+
+    A real interstate asks a loaded truck to drop below 65 essentially never
+    -- it is built to be driven at 70 or 75 all the way. Two fixes moved this
+    number: counting the bank the road is built with (one every 28.8 miles ->
+    44.2), and then classifying interchange and departure geometry as the
+    connectors they are rather than as mainline.
+
+    Pinned as a rate rather than a count so the map can grow. The bar is set
+    well below what shipped, because this is a floor on quality, not a target
+    anything was fitted to.
+    """
+    from freight_fate.data.curves import leg_curves
+    from freight_fate.data.world import get_world
+
+    seen: set[str] = set()
+    miles = 0.0
+    slow = 0
+    for leg in get_world().legs:
+        key = f"{leg.a}:{leg.b}"
+        if key in seen or not (leg.highway or "").upper().startswith("I-"):
+            continue
+        seen.add(key)
+        miles += leg.miles
+        slow += sum(1 for curve in leg_curves(key) if curve.advisory_mph <= 65)
+    assert slow, "a network with no interstate slowdowns at all means the data vanished"
+    every = miles / slow
+    assert every > 100.0, f"one interstate slowdown every {every:.1f} miles is too often"

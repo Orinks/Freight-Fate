@@ -1394,25 +1394,130 @@ onto exit signalling.
       the case that matters: "Freeway facilities are excluded from using a
       maximum superelevation rate of 4 percent."
 
-- [ ] **The rest of the interstate slowdowns are artifact geometry, and want
-      the bake.** The bank fix took one-every-28.8-miles to one-every-44.2.
-      What is left is not a physics problem: EVERY one of the original 3,002
-      sat below the 60 mph minimum radius and half below the 50 mph one, so
-      none of them was real interstate mainline. They are interchange
-      vertices and city-departure kinks the dense sweep classed as mainline
-      rather than as connectors.
+- [x] **A curve is on the interstate only if the road under it is
+      (2026-08-23).** The bank fix took one-every-28.8-miles to
+      one-every-44.2. What was left was not a physics problem: EVERY one of
+      the original 3,002 sat below the 60 mph minimum radius and half below
+      the 50 mph one, so none of them was real interstate mainline. They were
+      interchange vertices and city-departure kinks the dense sweep classed
+      as mainline rather than as connectors.
 
-      SCREENING THEM AT THE DESIGN FLOOR DOES NOT WORK, and this was tried:
+      WHY THE SWEEP GOT IT WRONG: `connector` was decided by POSITION alone
+      -- `CONNECTOR_WINDOW_MI`, the first and last 0.75 mi of the leg. That
+      window cannot see a mid-leg interchange, and 0.75 mi does not get a
+      truck out of a town, let alone out of Denver. Everything past it was
+      mainline by default.
+
+      THE FIX IS A READING, AND IT IS IN THE BAKE.
+      `tools/curve_osm_facts.py` streams the local Geofabrik extracts and
+      records what OSM way sits under each curve's apex;
+      `tools/bake_curve_connectors.py` sets the flag from its class and
+      writes which reading did it into `connector_source`. Two readings,
+      both of them upstream's own words:
+
+      * `osm:ramp` -- the apex rides a `highway=*_link` way, which is the tag
+        OSM uses for a ramp, slip road or interchange connector.
+      * `osm:off-freeway` -- the leg is Interstate class and the apex rides
+        something that is not `highway=motorway`. Every Interstate mainline
+        mile is a controlled-access freeway by statute (23 CFR 625 adopts the
+        AASHTO Interstate design standards) and US mappers tag controlled
+        access as `motorway`, so an apex on a `trunk`, `primary` or
+        `residential` way is not on the Interstate, whatever the leg says.
+
+      SCREENING AT THE DESIGN FLOOR DOES NOT WORK, and this was tried:
       `INTERSTATE_MIN_RADIUS_FT` raised from 300 to `min_radius_ft(50)` = 758
       reads correctly and deletes I-70 through Glenwood Canyon, which really
       does bend tighter than standard under design exceptions.
       `test_glenwood_canyon_interstate_curves_survive` caught it and the
       change was reverted. A screen sized to the design floor cannot tell an
-      exception from an artifact; only the terrain-gated screen can, and it
-      only judges level ground.
+      exception from an artifact. The rule that shipped never sees a radius,
+      a deflection or an advisory at all -- there is no argument through
+      which the geometry could reach it -- so it cannot repeat that mistake,
+      and `test_a_freeway_curve_stays_mainline_however_hard_it_bends` pins
+      that.
 
-      So the fix belongs where the misclassification happens -- connector
-      detection in the sweep -- rather than in another load-time screen.
+      SEPARATION MEASURED on Alabama and Colorado, 1,026 interstate mainline
+      rows with readings, against the one thing the rule may not see:
+
+          rule                      slow moved   fast moved   Youden J
+          link only                    23%           5%         0.17
+          link + shield ref match      72%          19%         0.52
+          link + motorway class        72%          15%         0.58  <-- ships
+
+      Shield matching loses both ways: it moves the last stretch of I-59 into
+      New Orleans, which really does ride I-10 mainline, and it MISSES the
+      business route through Glenwood Springs, which OSM tags
+      `ref=I 70 Business` and any number match reads as I-70.
+
+      HAND-CHECKED on the I-70 legs, because that is where a bad rule would
+      show first. What moved: Edwards Access Road, "I 70 Business" through
+      Edwards and Glenwood Springs, Pine Street, West 6th Street, Laurel
+      Street, Ute Avenue, South 12th Street, Blue River Parkway, and a string
+      of `motorway_link` ramps. What did not move: every mile of Glenwood
+      Canyon between them.
+
+      RESULT: one interstate slowdown every 130.7 miles, from 44.2 -- 1,954
+      demands to come off the pace down to 661, over the same 86,412 miles.
+      13,479 rows moved off mainline network-wide (connectors 8,439 ->
+      21,918), read for 99.8 percent of the 63,873 baked curves; the 130
+      with no road inside the corridor keep whatever the sweep said.
+      Mountain interstate is intact: Glenwood Canyon keeps 70 of its 71
+      curves and 20 of its 21 slow ones, Vail Pass 59 of 60, the Eisenhower
+      approach 76 of 82, Glenwood Springs to Grand Junction 54 of 60 -- and
+      what each of them lost was town street or ramp at the leg's ends, not
+      canyon. US-550 over Red Mountain Pass is untouched at 276 curves and
+      the Salt River Canyon at 143. The interstate legs that still ask for a
+      slow-down are the ones that should: I-5 through the Siskiyous, I-40
+      through the Pigeon River Gorge, I-90 over Lookout Pass, I-84 in the
+      Columbia Gorge, I-64 and I-77 in West Virginia. Nothing was deleted:
+      every row keeps its radius, deflection and advisory, and
+      `connector_source` says which reading moved it.
+
+      CONNECTORS ARE ONLY EVER ADDED -- a row the positional window flagged
+      stays flagged, because the window sees city geometry the class reading
+      can miss. Re-running the tool on its own output lands in the same
+      place: only the sweep's own verdict is preserved, never this tool's.
+
+- [ ] **Some interstate legs are labelled for a road their route does not
+      ride.** Found by the connector bake above, which reads per-leg freeway
+      coverage as a by-product: 51 of 728 interstate legs spend under half
+      their route miles on a freeway at all, 10 of them under 5 percent. The
+      worst are Chico to Santa Rosa (labelled I-5, 3 percent freeway, 317
+      curves moved), Roanoke to Raleigh (I-40, 24 percent, 157), Evansville
+      to Nashville (I-24, 10 percent, 153) and Huntsville to Nashville (I-65,
+      6 percent, 122) -- that last one runs US-231 end to end, which
+      `bake_divided` already measures as undivided from another angle. The
+      cause is ORS's cost model preferring the surface route on a leg with no
+      `route_via` pin to stop it.
+
+- [ ] **`curve_artifacts.jsonl` is stale against its own screen.** Noticed
+      while checking the connector bake did not disturb it:
+      `tools/screen_curve_artifacts.py --check` already reported the shipped
+      US/state artifact table out of date at `5557f906`, BEFORE any of this
+      change -- verified by re-running the check against the previous
+      `curves.jsonl`. It is not the hairpin commit either: that one only
+      added comments to the screen and deliberately left its `_is_extreme_
+      claim` rule alone. Some other input moved under it.
+
+      Deliberately NOT regenerated here. Re-baking it re-decides which
+      US/state hairpins players hear, which is a different change from
+      classifying interstate connectors and wants its own before/after. The
+      connector bake cannot have made it worse in the direction that matters:
+      it only ever ADDS connectors, `screen_curve_artifacts` only considers
+      non-connector rows, and `_flagged_artifact_keys` is only consulted for
+      non-connector rows -- so a stale entry that is now a connector is
+      inert, never a missing screen.
+
+      Next step: run `tools/screen_curve_artifacts.py --report`, diff the
+      flagged `(leg, seq)` set against the shipped one, and find what moved
+      before writing.
+
+      The connector rule reads every curve on such a leg as off-freeway,
+      which is TRUE (they are not on I-65) but silences a genuinely curvy
+      drive rather than fixing the label. The fix is a routing pin per leg
+      and a re-bake, the same way San Francisco to Portland is pinned to I-5
+      over Siskiyou Pass, and it needs the ORS server up.
+      `tools/bake_curve_connectors.py --report` prints the ranked list.
 
 - [x] **"Hairpin" is a shape, and the sign manual says which one
       (2026-08-23).** `severity` called anything advising 25 or less a

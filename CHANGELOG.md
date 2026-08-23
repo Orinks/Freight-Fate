@@ -945,6 +945,26 @@
 
 ### Fixed
 
+- **The interstate stops warning you about bends that are not on it.** A
+  curve the co-driver called out on the interstate was often not on the
+  interstate at all. It was the ramp you took to get on, the business route
+  through town, or the streets you drove before you ever reached the freeway
+  -- the map had all of that filed as highway curve, so a straight run down
+  I-25 or I-65 kept being interrupted by a bend to slow for, and cruise kept
+  easing off for corners that were really a town street behind you. The game
+  now works out from the road map which bends are on the freeway itself and
+  which are ramps, business routes or town streets, and only calls out the
+  ones on the freeway. Across the interstate network that takes a call to
+  come off the pace from one every forty-four miles to one every hundred and
+  thirty. The mountain interstates keep their driving: I-70 through Glenwood
+  Canyon, the climb over Vail Pass, the Eisenhower approach, I-5 through the
+  Siskiyous, I-40 down the Pigeon River Gorge and I-90 over Lookout Pass all
+  still call the bends they always did -- what each of them lost was the town
+  streets at either end. US-550 over Red Mountain Pass and the Salt River
+  Canyon on US-60 are untouched. Ramp and street bends have not gone anywhere
+  either: the truck still leans on them and the road bed still leads you
+  round them, they are just no longer announced as highway curves.
+
 - **A tank load is described in tank words at the dock too.** A spoiled tank
   load called "off spec" on the road was called "damaged" when you arrived,
   and a refused one went from "lost" to "ruined", as though something had

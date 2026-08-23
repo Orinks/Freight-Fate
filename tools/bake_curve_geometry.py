@@ -19,6 +19,18 @@ leg emits two layers:
     ``index_world.py`` only manages the files it derives from the world source, so
     these extra files are safe under ``world_data/`` and ``--check`` ignores them.
 
+CONNECTORS ARE FINISHED AFTERWARDS. The ``connector`` flag this sweep writes
+is the straw sampler's positional window (first/last ``CONNECTOR_WINDOW_MI``
+of the leg) and it is only a bootstrap: it cannot see a mid-leg interchange
+or a long city departure, so ramp and street geometry shipped as interstate
+MAINLINE. After any run of this tool, re-run::
+
+    uv run --group tooling python tools/curve_osm_facts.py --all
+    uv run python tools/bake_curve_connectors.py --write
+
+which re-derive every row's flag from the OSM road class under its apex.
+``tools/bake_curve_connectors.py --check`` fails if that has not been done.
+
 Phil's rev-2 riders, all folded in:
   1. keep-verbatim margin CURVE_PAD_M 80 -> 150 (edge-of-span curves survive the
      archive bake);

@@ -6,6 +6,13 @@ runtime mirrors records when a route traverses a leg b-to-a). Connector
 rows (interchange and ramp arcs) are excluded here: ramps carry their own
 speech and the future curve-nav layer owns them.
 
+Which rows those are is READ from OSM at bake time, not guessed at here:
+``tools/bake_curve_connectors.py`` sets ``connector`` from the road class
+under each curve's apex -- a ``highway=*_link`` way is a ramp, and an
+Interstate leg's curve that is not on ``highway=motorway`` is not on the
+Interstate. Each flagged row records which reading flagged it in
+``connector_source``.
+
 Severity bands come from the advisory speed the bake computed at 0.3 g
 lateral -- the same number a posted yellow diamond would show -- EXCEPT the
 hairpin, which is a shape rather than a speed and is decided by deflection
@@ -83,6 +90,12 @@ HAIRPIN_DEFLECTION_DEG = 135.0
 # connectors, which put 80-250 ft "hairpins" on roads that cannot bend that
 # hard. Anything under 300 ft, or turning more than a switchback's worth, is
 # a digitizing artifact.
+#
+# That misclassification is now fixed where it happened -- the bake reads the
+# road class under each apex (see the module docstring) -- so this screen has
+# far less to catch than it did. It stays as the backstop for rows no extract
+# could speak to, and because a genuine digitizing kink on real interstate
+# pavement is still possible.
 #
 # 300 is deliberately far below the DESIGN floor, and the difference is not
 # slack -- it is Glenwood Canyon. TxDOT Roadway Design Manual Table 4-7 puts
