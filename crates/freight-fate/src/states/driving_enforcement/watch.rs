@@ -1,0 +1,442 @@
+//! The watch itself: the held siren, the road sample a post reads, and the
+//! per-frame draw that turns an observation into a pull-over.
+
+use ff_core::models::enforcement::{
+    CHAIN_LAW_FINE, FOLLOWING_TOO_CLOSE_FINE, LANE_MISUSE_FINE, LIGHTS_FINE, UNSAFE_DAMAGE_FINE,
+};
+use ff_core::pyfmt::{py_str_float, round_py_n};
+use ff_core::pyrandom::PyRandom;
+use ff_core::sim::enforcement_observe::{
+    observe, Observation, RoadSample, COVER_RADIUS_MI, COVER_SPEED_TOLERANCE_MPH, TAILGATE_GAP_S,
+    WHAT_CHAINS, WHAT_DAMAGE, WHAT_FOLLOWING, WHAT_LIGHTS, WHAT_SPEEDING,
+};
+use ff_core::sim::enforcement_posts::{
+    post_seed, EnforcementPost, METHOD_PACING, PACING_WINDOW_MI,
+};
+
+use crate::app::GameContext;
+use crate::states::driving::DrivingState;
+use crate::states::driving_core::*;
+
+use super::{DEFERRED_STOP_MAX_MI, POST_MARKER_LEAD_MI};
+
+impl DrivingState {
+    // -- the siren -----------------------------------------------------------
+
+    /// Keep the cruiser audible for as long as it is behind you.
+    ///
+    /// The old build played one mono, centred, fixed-level wail and never
+    /// repeated it, and the whole pull-over update contained no audio at all.
+    /// Miss that one shot and there was no ongoing evidence of a police car
+    /// anywhere in the encounter.
+    pub fn hold_stop_siren(&mut self, ctx: &mut GameContext) {
+        // Pan is confirmation of side and nothing more -- "behind you" is in
+        // the spoken instruction, because stereo cannot carry front from back
+        // and plenty of players run a single earbud. It closes toward centre
+        // as the cruiser comes up, so the pan agrees with the level rise
+        // rather than fighting it.
+        let closing = 1.0f64.min(self.siren.elapsed_s / SIREN_RISE_S.max(1e-6));
+        self.siren.hold(ctx.audio.as_mut(), -0.5 * (1.0 - closing));
+    }
+
+    /// Every path out of a stop comes through here.
+    pub fn end_stop_audio(&mut self, ctx: &mut GameContext) {
+        self.siren.stop(ctx.audio.as_mut());
+        self.restore_radio_after_stop(ctx);
+    }
+
+    // -- the sample ----------------------------------------------------------
+
+    /// Everything a post could notice about the truck, read defensively.
+    pub fn road_sample(&mut self, post: &EnforcementPost) -> RoadSample {
+        let position = self.trip.position_mi;
+        let (limit, _) = self.trip.speed_limit_at(position);
+        // `float(getattr(effects, "visibility_mi", 10.0) or 10.0)`: a zero
+        // reading is falsy in Python and falls back to the clear-air default.
+        let visibility = self.trip.weather.effects().visibility_mi;
+        let visibility = if visibility == 0.0 { 10.0 } else { visibility };
+        let gap_s = self.trip.traffic_context().map(|c| c.gap_seconds());
+        let chain_level = self.trip.chain_law_level();
+        let night = is_night(self.trip.local_hour());
+        let pack_neighbours = self.trip.traffic_manager.pack_neighbours(
+            position,
+            self.trip.truck.speed_mph(),
+            COVER_RADIUS_MI,
+            COVER_SPEED_TOLERANCE_MPH,
+        );
+        let crest_between = self.crest_between(position, post.at_mi);
+        RoadSample {
+            position_mi: position,
+            speed_mph: self.trip.truck.speed_mph(),
+            limit_mph: limit,
+            // A parallel change is reworking damage into bands; read it
+            // defensively so neither side can break the other.
+            damage_pct: self.trip.truck.damage_pct,
+            visibility_mi: visibility,
+            night,
+            // The truck carries no running-lights switch, so the Python
+            // `getattr(truck, "lights_on", True)` always answered True.
+            lights_on: true,
+            chains_required: chain_level > 0,
+            chains_on: self.trip.truck.chains_on || chain_level == 0,
+            following_gap_s: gap_s,
+            closed_up_mi: self.closed_up_mi,
+            // Same story: nothing ever set `_left_lane_restricted` on the
+            // drive, so the defensive read was always False.
+            left_lane_restricted: false,
+            in_left_lane: self.lane.lane > 0,
+            pack_neighbours,
+            crest_between,
+            paced_mi: self.pacing_mi.get(&post.id()).copied().unwrap_or(0.0),
+            over_limit_mi: self.over_limit_mi,
+        }
+    }
+
+    /// Whether the road hides the post from an optical method.
+    ///
+    /// A crest is a grade sign change across the intervening stretch -- the
+    /// road goes up and then comes down between you and the officer, so
+    /// neither of you can see the other. A hard bend does the same thing, and
+    /// the curve bake already knows where those are.
+    pub fn crest_between(&self, position_mi: f64, post_mi: f64) -> bool {
+        let (low, high) = if position_mi <= post_mi {
+            (position_mi, post_mi)
+        } else {
+            (post_mi, position_mi)
+        };
+        if high - low < 0.05 {
+            return false;
+        }
+        let grades: Vec<f64> = [0.0, 0.25, 0.5, 0.75, 1.0]
+            .iter()
+            .map(|f| self.trip.grade_at(low + (high - low) * f))
+            .collect();
+        let max = grades.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        let min = grades.iter().copied().fold(f64::INFINITY, f64::min);
+        // The bend clause reads `getattr(curve, "radius_m", 1e9)`, and a baked
+        // RouteCurve carries `min_radius_ft` and no `radius_m` at all -- so
+        // the fallback wins on every curve and `abs(1e9) < 400.0` is never
+        // true. Reproduced as the no-op it is rather than silently promoted to
+        // a live rule that would start blocking lidar on every bend.
+        max > 0.015 && min < -0.015
+    }
+
+    // -- the watch -----------------------------------------------------------
+
+    /// One frame of the enforcement layer: cues, sampling, and the draw.
+    ///
+    /// **The pacing mismatch, and how it is solved.** Speeding used to be
+    /// judged on a six REAL second hold, but the old patrol window could last
+    /// 7.6 real seconds at standard pacing and 3.8 at the fastest -- so at the
+    /// fastest pacing a speeder could be structurally unable to be caught
+    /// inside a patrol at all. Decompressing the clock inside every post's
+    /// reach was the other option and was rejected: with a post every
+    /// thirty-odd miles it would have put a dozen miles of a five-hundred mile
+    /// run onto the real clock, which is a different game.
+    ///
+    /// Instead, observation is DISTANCE-quantised. A post reads a speed the
+    /// way a radar does -- over a stretch of road (`OBSERVE_HOLD_MI`, about
+    /// four hundred feet) -- and a stretch of road is the same stretch at
+    /// every pacing, at every frame rate, and after a reload. The real-time
+    /// hold is gone entirely along with the silent at-delivery charge it
+    /// served; there is nothing left for it to disagree with.
+    pub fn update_enforcement_watch(&mut self, ctx: &mut GameContext, dt: f64) {
+        self.service_pending_sounds(ctx, dt);
+        self.service_radio_cue_duck(ctx, dt);
+        self.siren.service(ctx.audio.as_mut(), dt);
+        let previous_mi = self.enforcement_prev_mi;
+        let position = self.trip.position_mi;
+        self.enforcement_prev_mi = position;
+        let moved = (position - previous_mi).max(0.0);
+        let (limit, _) = self.trip.speed_limit_at(position);
+        if self.trip.truck.speed_mph() <= limit + OBSERVE_LEEWAY_MPH {
+            self.over_limit_mi = 0.0;
+        } else if self.limit_drop_grace_s > 0.0 {
+            // A limit that just dropped under a loaded truck: the driver is
+            // braking and has not disregarded anything yet. Nothing accrues,
+            // so no post can read a speed out of the transition itself.
+            self.over_limit_mi = 0.0;
+        } else if self.speed_control_engaged()
+            && self.trip.truck.brake > 0.0
+            && self.trip.truck.throttle <= 0.05
+        {
+            // An automatic speed control is already braking the truck down.
+            // Nothing about that is disregard either -- and the rule has to
+            // cover every assist that brakes, not just the adaptive-cruise
+            // limit cap: the destination-exit ease used to accrue over-limit
+            // distance while the assist was doing exactly what it was asked
+            // to, which would have ticketed the most cautious drivers in the
+            // game for using the feature.
+            self.over_limit_mi = 0.0;
+        } else {
+            self.over_limit_mi += moved;
+        }
+        self.accrue_following_gap(moved);
+        self.track_pacing(moved);
+        self.update_scale_bed(ctx);
+        if self.ramp_mi.is_none() {
+            self.update_marked_unit_passes(ctx, previous_mi);
+            self.update_tableaus(ctx, previous_mi);
+        }
+        let audible: Vec<String> = self
+            .trip
+            .posts
+            .iter()
+            .filter(|post| post.staffed && position >= post.watch_start_mi() - POST_MARKER_LEAD_MI)
+            .map(|post| post.id())
+            .collect();
+        for post_id in audible {
+            self.mark_post_audible(ctx, &post_id);
+        }
+        if self.enforcement_bypassed(ctx) {
+            return;
+        }
+        if self.enforcement_busy() {
+            // Defer, never drop. The look is TAKEN here and held: the officer
+            // saw what they saw, and only the lights wait for the cab to be
+            // quiet. Recording post ids instead threw the look away, because
+            // by the time a hazard window closes the truck is miles past a
+            // one-mile radar reach and nothing is watching it any more.
+            self.hold_observation();
+            return;
+        }
+        if let Some(held) = self.take_held_observation() {
+            self.begin_observed_stop(ctx, &held);
+            return;
+        }
+        self.run_observations(ctx);
+    }
+
+    /// Whether cruise or the speed keeper currently owns the throttle.
+    pub fn speed_control_engaged(&self) -> bool {
+        self.cruise_mph.is_some() || self.speed_control_armed
+    }
+
+    /// Road covered while genuinely closed up on the vehicle ahead.
+    ///
+    /// The mirror of the over-limit accumulator above, and it exists for the
+    /// same reason: a post should read a following distance, not a frame. A
+    /// gap dips under `TAILGATE_GAP_S` whenever the lead brakes harder than
+    /// the truck comfortably can, which at a work-zone taper is every time --
+    /// and before this, that single dip was a citation.
+    ///
+    /// The assist carve-out is the same one over-limit already has, and it
+    /// matters more here: adaptive cruise targets `ACC_BASE_GAP_SECONDS`
+    /// (three seconds, well clear of the 1.2 that draws a ticket) but can only
+    /// close the gap back up at its own comfort deceleration, so while it is
+    /// braking, the gap it is recovering is its doing and not the driver's.
+    /// The driver cannot even choose the gap -- a selectable following
+    /// distance is still an open roadmap item -- so ticketing them for it
+    /// fined them for using the feature (tester Darren, I-75, 2026-08-18:
+    /// 1,200 dollars for a work-zone taper).
+    pub fn accrue_following_gap(&mut self, moved: f64) {
+        let gap_s = self.trip.traffic_context().map(|c| c.gap_seconds());
+        let Some(gap_s) = gap_s else {
+            self.closed_up_mi = 0.0;
+            return;
+        };
+        if !(0.0 < gap_s && gap_s < TAILGATE_GAP_S) {
+            self.closed_up_mi = 0.0;
+            return;
+        }
+        if self.speed_control_engaged()
+            && self.trip.truck.brake > 0.0
+            && self.trip.truck.throttle <= 0.05
+        {
+            // An assist is already recovering the gap. Not disregard.
+            self.closed_up_mi = 0.0;
+            return;
+        }
+        self.closed_up_mi += moved;
+    }
+
+    /// How much road each roving unit has held station behind the truck over.
+    ///
+    /// Road, not real seconds. The old real-time version could not be
+    /// satisfied at any compression the game offers -- the 1-mile window past
+    /// a post is 5.5 real seconds at 65 mph and 10x, against a 20-second gate
+    /// -- so a roving patrol never once clocked anybody on a highway
+    /// (measured 2026-08-16: 315 looks, zero catches over 2,000 miles).
+    pub fn track_pacing(&mut self, moved: f64) {
+        let position = self.trip.position_mi;
+        let behinds: Vec<(String, f64)> = self
+            .trip
+            .posts
+            .iter()
+            .filter(|post| post.method == METHOD_PACING && post.staffed)
+            .map(|post| (post.id(), position - post.at_mi))
+            .collect();
+        for (id, behind) in behinds {
+            if 0.0 < behind && behind <= PACING_WINDOW_MI {
+                *self.pacing_mi.entry(id).or_insert(0.0) += moved;
+            } else if behind > PACING_WINDOW_MI {
+                self.pacing_mi.remove(&id);
+            }
+        }
+    }
+
+    /// Take this mile's look and act on it.
+    pub fn run_observations(&mut self, ctx: &mut GameContext) {
+        if let Some(found) = self.observed_now() {
+            self.begin_observed_stop(ctx, &found);
+        }
+    }
+
+    /// Take the look the busy cab cannot act on yet, and keep it.
+    pub fn hold_observation(&mut self) {
+        if self.held_observation.is_some() {
+            return; // one held look at a time; the first officer has the claim
+        }
+        let Some(found) = self.observed_now() else {
+            return;
+        };
+        self.deferred_post_ids.insert(found.post.id());
+        self.held_observation = Some((found, self.trip.position_mi));
+    }
+
+    /// The held look, if the officer could still plausibly be behind you.
+    pub fn take_held_observation(&mut self) -> Option<Observation> {
+        let (found, seen_mi) = self.held_observation.take()?;
+        self.deferred_post_ids.remove(&found.post.id());
+        if self.trip.position_mi - seen_mi > DEFERRED_STOP_MAX_MI {
+            return None;
+        }
+        Some(found)
+    }
+
+    /// Ask every post watching this mile what it sees, best first.
+    ///
+    /// Returns the observation that survived its seeded roll, or `None`.
+    pub fn observed_now(&mut self) -> Option<Observation> {
+        let position = self.trip.position_mi;
+        let watching: Vec<EnforcementPost> = self
+            .trip
+            .posts_watching(position)
+            .into_iter()
+            .cloned()
+            .collect();
+        if watching.is_empty() {
+            return None;
+        }
+        let mut best: Option<Observation> = None;
+        for post in &watching {
+            let sample = self.road_sample(post);
+            if let Some(found) = observe(post, &sample) {
+                if best
+                    .as_ref()
+                    .is_none_or(|b| found.confidence > b.confidence)
+                {
+                    best = Some(found);
+                }
+            }
+        }
+        let best = best?;
+        let post_id = best.post.id();
+        // The named, seeded, POSITION-quantised draw. Never time-quantised:
+        // identical driving through identical road has to produce an identical
+        // outcome whatever the frame rate, and a reload must not re-roll
+        // whether a trooper was looking at you.
+        // `f"{what}:{round(position, 1)}"` -- a Python float renders through
+        // `str()`, so an integral mile is "10.0" and never "10". The seed
+        // string is the draw, so the rendering has to match byte for byte.
+        let violation_key = format!("{}:{}", best.what, py_str_float(round_py_n(position, 1)));
+        let roll = PyRandom::new_from_str(&post_seed(
+            Some(self.trip_seed),
+            &post_id,
+            &format!("observe:{violation_key}"),
+        ))
+        .random();
+        if roll >= best.confidence {
+            // Noticed and let go. A post does not re-decide: this is what
+            // makes "five over near a post is ignored" a state rather than a
+            // rare piece of bad luck the player can never learn from.
+            if let Some(post) = self.trip.post_mut(&post_id) {
+                post.declined = true;
+            }
+            return None;
+        }
+        Some(best)
+    }
+
+    /// Turn a confirmed observation into the pull-over that already exists.
+    pub fn begin_observed_stop(&mut self, ctx: &mut GameContext, observation: &Observation) {
+        let post_id = observation.post.id();
+        let reason = observation.post.reason();
+        self.cut_radio_for_stop(ctx);
+        self.over_limit_mi = 0.0;
+        self.closed_up_mi = 0.0;
+        if let Some(post) = self.trip.post_mut(&post_id) {
+            post.declined = true;
+        }
+        if observation.what == WHAT_SPEEDING {
+            let position = self.trip.position_mi;
+            let (limit, _) = self.trip.speed_limit_at(position);
+            self.begin_pull_over(ctx, limit);
+            return;
+        }
+        let (summary, fine, return_message) = self.observed_stop_terms(observation);
+        let lights_message = format!(
+            "Lights and siren behind you. A trooper on this {reason} saw {}. Signal with {} and \
+             brake to a stop on the shoulder.",
+            observation.what,
+            ctx.control_hint("take_exit")
+        );
+        self.begin_enforcement_pull_over(
+            ctx,
+            "observed",
+            "Roadside pull-over",
+            &summary,
+            fine,
+            hos::HOS_REPUTATION_HIT,
+            &return_message,
+            &lights_message,
+        );
+    }
+
+    pub fn observed_stop_terms(&self, observation: &Observation) -> (String, f64, String) {
+        let reason = observation.post.reason();
+        let what = observation.what.as_str();
+        if what == WHAT_DAMAGE {
+            return (
+                format!(
+                    "A trooper on this {reason} saw visible truck damage at {:.0} percent and \
+                     ordered a roadside safety inspection.",
+                    self.trip.truck.damage_pct
+                ),
+                UNSAFE_DAMAGE_FINE,
+                "Back on the highway. Repair the truck at the next safe stop.".to_string(),
+            );
+        }
+        if what == WHAT_CHAINS {
+            return (
+                format!(
+                    "A trooper on this {reason} saw you running the chain control without chains \
+                     on the drives."
+                ),
+                CHAIN_LAW_FINE,
+                "Back on the highway. Chain up before the next control.".to_string(),
+            );
+        }
+        if what == WHAT_FOLLOWING {
+            return (
+                format!(
+                    "A trooper on this {reason} watched you close right up on the vehicle ahead."
+                ),
+                FOLLOWING_TOO_CLOSE_FINE,
+                "Back on the highway. Leave yourself a gap.".to_string(),
+            );
+        }
+        if what == WHAT_LIGHTS {
+            return (
+                format!("A trooper on this {reason} saw you running dark."),
+                LIGHTS_FINE,
+                "Back on the highway. Keep your lights on after dark.".to_string(),
+            );
+        }
+        (
+            format!("A trooper on this {reason} pulled you over for {what}."),
+            LANE_MISUSE_FINE,
+            "Back on the highway. Keep right except to pass.".to_string(),
+        )
+    }
+}

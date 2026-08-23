@@ -150,7 +150,11 @@ impl Audio for DemoAudio {
 type Cat = LearnSoundCategoryState;
 
 fn played(log: &DemoLog) -> Vec<String> {
-    log.borrow().played.iter().map(|(k, _, _)| k.clone()).collect()
+    log.borrow()
+        .played
+        .iter()
+        .map(|(k, _, _)| k.clone())
+        .collect()
 }
 
 fn demo_running(app: &TestApp) -> bool {
@@ -267,7 +271,10 @@ fn test_jump_stops_a_running_held_demo() {
     with_state_mut::<Cat, _>(&mut app, |s, ctx| s.activate(ctx)); // starts the held demo
     assert!(demo_running(&app));
     with_state_mut::<Cat, _>(&mut app, |s, ctx| s.jump(ctx, 1));
-    assert!(log.borrow().released > 0, "Home/End must stop a running held demo");
+    assert!(
+        log.borrow().released > 0,
+        "Home/End must stop a running held demo"
+    );
     assert!(!demo_running(&app));
 }
 
@@ -312,7 +319,10 @@ fn test_reentering_the_screen_stops_a_running_held_demo() {
     with_state_mut::<Cat, _>(&mut app, |s, ctx| s.activate(ctx));
     assert!(demo_running(&app));
     with_state_mut::<Cat, _>(&mut app, |s, ctx| State::enter(s, ctx));
-    assert!(log.borrow().released > 0, "re-entry must stop a running held demo");
+    assert!(
+        log.borrow().released > 0,
+        "re-entry must stop a running held demo"
+    );
     assert!(!demo_running(&app));
 }
 
@@ -395,6 +405,9 @@ fn test_both_learn_sounds_screens_offer_a_back_row() {
     key(&mut app, Key::End);
     key(&mut app, Key::Return);
     assert_eq!(app.ctx.stack_len(), 0);
+    // The second half needs its own app, and TestApp holds the environment
+    // lock until it drops -- shadowing the binding would deadlock.
+    drop(app);
 
     let mut app = TestApp::new();
     app.push_state(LearnSoundsState::new());

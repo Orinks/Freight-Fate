@@ -12,7 +12,8 @@
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::{Mutex, MutexGuard};
+use std::sync::{Mutex, MutexGuard, TryLockError};
+use std::time::{Duration, Instant};
 
 use ff_core::settings::Settings;
 use ff_core::speech_pacing::EventSpeechPacer;
@@ -59,8 +60,28 @@ impl Drop for TempDir {
 
 /// Take the environment lock (poison-tolerant: a failed test must not take
 /// the rest of the file down with it).
+///
+/// A test that builds a second [`TestApp`] while the first is still alive
+/// would block here forever -- the guard is held for the app's whole
+/// lifetime, and shadowing a binding does not drop it. That deadlock is
+/// invisible: the test simply never finishes, and every other test in the
+/// binary queues behind it. So the wait is bounded and the panic names the
+/// cause; `drop(app)` before building the next one is the fix.
 pub fn env_lock() -> MutexGuard<'static, ()> {
-    ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner())
+    let deadline = Instant::now() + Duration::from_secs(30);
+    loop {
+        match ENV_LOCK.try_lock() {
+            Ok(guard) => return guard,
+            Err(TryLockError::Poisoned(e)) => return e.into_inner(),
+            Err(TryLockError::WouldBlock) => {
+                assert!(
+                    Instant::now() < deadline,
+                    "the test environment lock was held for over 30 seconds.                      A TestApp holds it until it is dropped, so building a                      second one in the same scope deadlocks -- shadowing the                      binding does not drop the first. Call drop(app) before                      building the next TestApp."
+                );
+                std::thread::sleep(Duration::from_millis(5));
+            }
+        }
+    }
 }
 
 /// The headless environment the Python conftest forced for every test.
