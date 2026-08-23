@@ -4660,18 +4660,37 @@ class DrivingEventMixin:
             if braking and descent_level in ("balanced", "interactive"):
                 self._descent_control_active = True
                 new_target = max(CRUISE_MIN_MPH, t.speed_mph)
+                previous = self._cruise_descent_mph
                 should_announce = (
-                    not self._descent_capture_active or abs(new_target - self._cruise_mph) >= 2.0
+                    not self._descent_capture_active
+                    or previous is None
+                    or abs(new_target - previous) >= 2.0
                 )
                 self._descent_capture_active = True
-                self._cruise_mph = new_target
-                # Capture pins the set speed to what the truck is doing now, so
-                # the working setpoint follows it down rather than easing back
-                # up toward a target the driver just abandoned.
+                # A CAP FOR THIS GRADE, never a rewrite of the driver's set
+                # speed -- the same correction the interactive branch below
+                # already carries, which this one was missed out of. Assigning
+                # into _cruise_mph made every brake on a downgrade permanent
+                # and cumulative: 65 becomes 55 on one hill, 49 on the next,
+                # and cruise never climbs back on the flat because 49 IS the
+                # set speed now. Brandon drove a whole run pinned at "forty
+                # nine mph or lower and losing speed" (2026-08-23).
+                #
+                # Taking the lower of any cap already standing keeps a
+                # deliberate brake from being undone by the automatic cap a
+                # frame later; the whole thing is released together when the
+                # grade ends.
+                self._cruise_descent_mph = (
+                    new_target if previous is None else min(previous, new_target)
+                )
+                # The working setpoint still follows the truck down now, so
+                # cruise does not fight the brake the driver is holding.
                 self._cruise_working_mph = new_target
                 if should_announce:
                     self.ctx.say_event(
-                        f"Descent target changed to {self.ctx.settings.speed_text(self._cruise_mph)}.",
+                        "Descent control holding "
+                        f"{self.ctx.settings.speed_text(self._cruise_descent_mph)} "
+                        "for this grade.",
                         interrupt=False,
                         category=SpeechCategory.CONFIRMATION,
                     )
@@ -4719,7 +4738,11 @@ class DrivingEventMixin:
                     # cruise down to 55 permanently -- on the flat, uphill, the
                     # rest of the run (bench trace, 2026-07-25: 62 set, 55 held
                     # ever after). The driver's number now survives the hill.
-                    self._cruise_descent_mph = DESCENT_SAFE_MAX_MPH
+                    # Never above a cap the driver's own brake already set on
+                    # this grade: capture is an instruction, not a suggestion.
+                    self._cruise_descent_mph = min(
+                        DESCENT_SAFE_MAX_MPH, self._cruise_descent_mph or DESCENT_SAFE_MAX_MPH
+                    )
                     safe_target = min(self._cruise_mph, DESCENT_SAFE_MAX_MPH)
                     if t.speed_mph > safe_target + 8.0:
                         t.brake = max(t.brake, min(0.7, (t.speed_mph - safe_target) / 25.0))

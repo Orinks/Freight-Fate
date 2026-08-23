@@ -1241,6 +1241,15 @@
   re-read.
 
 ### Fixed
+- **Braking on a hill no longer lowers your cruise speed for the rest of the
+  run.** Touching the brake on a downgrade with descent control on was being
+  taken as "this is my new cruise speed", permanently. It also stacked: 65
+  became 55 on one hill and 49 on the next, and once it was 49 there was
+  nothing to climb back to, so the truck just stayed there on the flat and up
+  the far side. Your set speed now survives the hill. The brake still caps
+  your speed for as long as that grade lasts -- the cab says "descent control
+  holding X for this grade" -- and when the road levels out you go back to the
+  speed you actually set.
 - **Fewer needless slowdowns for interstate curves.** The game worked out how
   fast a bend could be taken as though every road were flat. Real highway
   curves are banked, and the bank is a big part of what holds a truck in a

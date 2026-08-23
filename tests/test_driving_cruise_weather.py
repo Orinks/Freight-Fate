@@ -2377,10 +2377,16 @@ def test_descent_control_levels_and_brake_capture(monkeypatch, level, braking, e
         driving._update_cruise(0.1, braking, False, False)
         assert driving._descent_control_active is expected_active
         if braking and level in ("balanced", "interactive"):
-            assert driving._cruise_mph == pytest.approx(driving.truck.speed_mph)
-            assert sum("Descent target changed" in text for text in spoken) == 1
+            # The brake caps THIS GRADE and leaves the driver's set speed
+            # alone. It used to assign into _cruise_mph, which made every
+            # downhill brake permanent and cumulative (Brandon, 2026-08-23:
+            # a whole run pinned at "forty nine mph or lower"). See
+            # test_braking_on_a_grade_caps_it_without_rewriting_the_set_speed.
+            assert driving._cruise_mph == pytest.approx(60.0)
+            assert driving._cruise_descent_mph == pytest.approx(driving.truck.speed_mph, abs=0.01)
+            assert sum("Descent control holding" in text for text in spoken) == 1
             driving._update_cruise(0.1, True, False, False)
-            assert sum("Descent target changed" in text for text in spoken) == 1
+            assert sum("Descent control holding" in text for text in spoken) == 1
     finally:
         app.shutdown()
 
@@ -4019,5 +4025,88 @@ def test_the_resume_line_names_the_weather_cap(monkeypatch):
         driving._engage_cruise(70.0, transition=True)
         line = next(s for s in events if "Open road" in s)
         assert "resuming at 35 miles per hour in the snow" in line, line
+    finally:
+        app.shutdown()
+
+
+def test_braking_on_a_grade_caps_it_without_rewriting_the_set_speed():
+    """The same correction the interactive path already carries.
+
+    Brandon drove a whole run pinned at "forty nine mph or lower and losing
+    speed instead of getting back up to highway speed" (2026-08-23). Braking
+    on a downgrade assigned straight into the cruise set speed, so it was
+    permanent AND cumulative: 65 becomes 55 on one hill, 49 on the next, and
+    cruise never climbs back on the flat because 49 IS the set speed by then.
+    A ratchet that only ever turns down.
+
+    `test_interactive_descent_control_caps_the_target_without_rewriting_it`
+    pins the identical rule one branch over. This one was missed out of it.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.descent_speed_control = "balanced"
+        driving.truck.start_engine()
+        driving.truck.velocity_mps = 65.0 / 2.2369362920544
+        driving._cruise_mph = 65.0
+        driving._cruise_working_mph = 65.0
+
+        # Two hills, braking lower on the second one.
+        for slowed_to in (55.0, 49.0):
+            driving.truck.grade = -0.05
+            driving.truck.velocity_mps = slowed_to / 2.2369362920544
+            driving._update_cruise(1 / 60, True, False, False)
+            # The driver's number is untouched, and the grade carries the cap.
+            assert driving._cruise_mph == pytest.approx(65.0)
+            assert driving._cruise_descent_mph == pytest.approx(slowed_to, abs=0.01)
+
+        # Back on the level: the cap lifts and highway speed comes back.
+        driving.trip.grade_at = lambda mile: 0.0
+        driving.truck.grade = 0.0
+        for _ in range(600):
+            driving._update_cruise(1 / 60, False, False, False)
+        assert driving._cruise_descent_mph is None
+        assert driving._cruise_mph == pytest.approx(65.0)
+        assert driving._cruise_working_mph == pytest.approx(65.0)
+    finally:
+        app.shutdown()
+
+
+def test_the_automatic_grade_cap_never_undoes_the_drivers_own_brake():
+    """Capture is an instruction; the automatic ceiling must not raise it.
+
+    Both write `_cruise_descent_mph`, and on the frame after a deliberate
+    brake the interactive ceiling would otherwise hand the speed straight
+    back.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import DESCENT_SAFE_MAX_MPH
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.descent_speed_control = "interactive"
+        driving.truck.start_engine()
+        driving._cruise_mph = 65.0
+        driving._cruise_working_mph = 65.0
+
+        slowed_to = DESCENT_SAFE_MAX_MPH - 10.0
+        driving.truck.grade = -0.05
+        driving.truck.velocity_mps = slowed_to / 2.2369362920544
+        driving._update_cruise(1 / 60, True, False, False)
+        assert driving._cruise_descent_mph == pytest.approx(slowed_to, abs=0.01)
+
+        # Still on the grade, no brake: the automatic ceiling runs and must
+        # leave the lower, deliberate cap alone.
+        for _ in range(60):
+            driving._update_cruise(1 / 60, False, False, False)
+        assert driving._cruise_descent_mph <= slowed_to + 0.01
+        assert driving._cruise_mph == pytest.approx(65.0)
     finally:
         app.shutdown()

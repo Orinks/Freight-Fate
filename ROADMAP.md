@@ -1368,6 +1368,30 @@ onto exit signalling.
       otherwise the level that earns the next tier -- so the question is
       answerable at any time, not only when the game happens to raise it.
 
+- [x] **Descent brake capture stops rewriting the set speed (2026-08-23).**
+      Brandon: cruise "won't speed back up to highway speed... maintaining a
+      speed of forty nine mph or lower and losing speed". Reproduced exactly,
+      including his number.
+
+      Braking on a downgrade with descent control on balanced or interactive
+      assigned straight into `_cruise_mph`. Permanent AND cumulative: 65 to 55
+      on one hill, 49 on the next, and no recovery on the flat because 49 IS
+      the set speed by then. A ratchet that only turns down.
+
+      THIS BUG WAS ALREADY FIXED ONCE, one branch over. The interactive
+      ceiling carries a comment saying exactly this -- "a cap that lives as
+      long as the grade does, not a rewrite of the driver's set speed... one
+      3 percent dip on a 65 road knocked cruise down to 55 permanently"
+      (2026-07-25) -- and the braking-capture path beside it was missed out of
+      the correction. It now writes `_cruise_descent_mph`, released with the
+      grade like every other descent cap, and takes the lower of any cap
+      already standing so the automatic ceiling cannot undo a deliberate
+      brake a frame later.
+
+      `test_descent_control_levels_and_brake_capture` pinned the OLD contract
+      and was updated; the lesson is that a sibling branch sharing a bug needs
+      the fix and the test, not just the one that was reported.
+
 - [x] **Curve advisories count the bank the road is built with
       (2026-08-23).** Owner: too many interstate curves make the truck slow.
       MEASURED: 16,038 interstate mainline curves over 86,412 miles, 3,002 of
