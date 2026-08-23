@@ -647,16 +647,32 @@ def test_a_canyon_tagged_flat_is_not_screened_as_level_ground():
     calibrated against HPMS at a Youden's J of 0.29. The screen reads the
     real HPMS terrain class now, and HPMS calls this leg mountainous.
     """
-    from freight_fate.data.curves import _leg_is_level
+    from freight_fate.data.curves import HPMS_TERRAIN_LEVEL, _leg_is_level
     from freight_fate.data.world import get_world
 
+    world = get_world()
     canyon = next(
         leg
-        for leg in get_world().legs
+        for leg in world.legs
         if leg.a == "glenwood_springs_co_us" and leg.b == "grand_junction_co_us"
     )
-    assert str(getattr(canyon, "terrain", "")) == "flat"  # the label really is wrong
-    assert not _leg_is_level(canyon)  # HPMS is not
+    assert not _leg_is_level(canyon)  # HPMS calls it mountainous, and it is
+
+    # The canyon's own label said "flat" when this test was written, which is
+    # what made it such a good example. It has since been corrected from HPMS
+    # (tools/repair_terrain_from_hpms.py), so the demonstration moved: rather
+    # than naming one leg where the label lies, assert the PROPERTY directly --
+    # the screen's verdict follows HPMS on every leg, never the label.
+    disagreeing = 0
+    for leg in world.legs:
+        hpms = getattr(leg, "hpms_terrain", None)
+        if hpms is None or getattr(hpms, "type", None) is None:
+            assert not _leg_is_level(leg), "absence of a class must never read as level"
+            continue
+        assert _leg_is_level(leg) == (hpms.type == HPMS_TERRAIN_LEVEL)
+        if (str(getattr(leg, "terrain", "")) == "flat") != (hpms.type == HPMS_TERRAIN_LEVEL):
+            disagreeing += 1
+    assert disagreeing, "if no leg's label disagrees with HPMS any more, this test proves nothing"
 
 
 def test_the_radius_floor_matches_published_design_tables():

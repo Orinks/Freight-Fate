@@ -26369,7 +26369,7 @@
       "to": "tonopah_nv_us",
       "miles": 233,
       "highway": "US-95",
-      "terrain": "hills",
+      "terrain": "mountain",
       "corridor": {
         "tollway_detected": false,
         "route_points": [

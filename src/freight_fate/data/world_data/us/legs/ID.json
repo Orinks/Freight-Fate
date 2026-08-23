@@ -15438,14 +15438,14 @@
     {
       "from": "idaho_falls_id_us",
       "to": "pocatello_id_us",
-      "miles": 50,
+      "miles": 51.0,
       "highway": "I-15",
       "terrain": "flat",
       "corridor": {
         "checkpoints": [
           {
             "name": "Blackfoot",
-            "at_mi": 25.9,
+            "at_mi": 26.42,
             "type": "place",
             "state": "Idaho",
             "highway": "I-15",
@@ -15455,7 +15455,7 @@
           },
           {
             "name": "Fort Hall",
-            "at_mi": 37.7,
+            "at_mi": 38.45,
             "type": "place",
             "state": "Idaho",
             "highway": "I-15",
@@ -15472,22 +15472,22 @@
             "lon": -112.03448
           },
           {
-            "at_mi": 12.5,
+            "at_mi": 12.75,
             "lat": 43.34066,
             "lon": -112.23378
           },
           {
-            "at_mi": 25.0,
+            "at_mi": 25.5,
             "lat": 43.20873,
             "lon": -112.35524
           },
           {
-            "at_mi": 37.5,
+            "at_mi": 38.25,
             "lat": 43.03299,
             "lon": -112.40821
           },
           {
-            "at_mi": 50.0,
+            "at_mi": 51.0,
             "lat": 42.87129,
             "lon": -112.44554
           }
@@ -15499,22 +15499,22 @@
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 12.5,
+            "at_mi": 12.75,
             "elevation_ft": 4629.3,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 25.0,
+            "at_mi": 25.5,
             "elevation_ft": 4481.6,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 37.5,
+            "at_mi": 38.25,
             "elevation_ft": 4475.1,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           },
           {
-            "at_mi": 50.0,
+            "at_mi": 51.0,
             "elevation_ft": 4466.9,
             "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
           }
@@ -15522,238 +15522,238 @@
         "grade_segments": [
           {
             "start_mi": 0.0,
-            "end_mi": 0.4,
+            "end_mi": 0.41,
             "avg_grade_pct": 0.0,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 0.4,
-            "end_mi": 0.7,
+            "start_mi": 0.41,
+            "end_mi": 0.71,
             "avg_grade_pct": -0.9,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 0.7,
-            "end_mi": 1.0,
+            "start_mi": 0.71,
+            "end_mi": 1.02,
             "avg_grade_pct": 0.17,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 1.0,
-            "end_mi": 1.3,
+            "start_mi": 1.02,
+            "end_mi": 1.33,
             "avg_grade_pct": -0.91,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 1.3,
-            "end_mi": 2.9,
+            "start_mi": 1.33,
+            "end_mi": 2.96,
             "avg_grade_pct": 0.14,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 2.9,
-            "end_mi": 3.4,
+            "start_mi": 2.96,
+            "end_mi": 3.47,
             "avg_grade_pct": -0.87,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 3.4,
-            "end_mi": 8.1,
+            "start_mi": 3.47,
+            "end_mi": 8.26,
             "avg_grade_pct": -0.11,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 8.1,
-            "end_mi": 8.4,
+            "start_mi": 8.26,
+            "end_mi": 8.57,
             "avg_grade_pct": -0.84,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 8.4,
-            "end_mi": 10.4,
+            "start_mi": 8.57,
+            "end_mi": 10.61,
             "avg_grade_pct": 0.18,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 10.4,
-            "end_mi": 10.8,
+            "start_mi": 10.61,
+            "end_mi": 11.02,
             "avg_grade_pct": -1.56,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 10.8,
-            "end_mi": 11.2,
+            "start_mi": 11.02,
+            "end_mi": 11.42,
             "avg_grade_pct": 0.39,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 11.2,
-            "end_mi": 11.9,
+            "start_mi": 11.42,
+            "end_mi": 12.14,
             "avg_grade_pct": 1.03,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 11.9,
-            "end_mi": 14.7,
+            "start_mi": 12.14,
+            "end_mi": 14.99,
             "avg_grade_pct": 0.0,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 14.7,
-            "end_mi": 15.0,
+            "start_mi": 14.99,
+            "end_mi": 15.3,
             "avg_grade_pct": -0.82,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 15.0,
-            "end_mi": 17.7,
+            "start_mi": 15.3,
+            "end_mi": 18.05,
             "avg_grade_pct": -0.12,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 17.7,
-            "end_mi": 18.4,
+            "start_mi": 18.05,
+            "end_mi": 18.77,
             "avg_grade_pct": -0.88,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 18.4,
-            "end_mi": 25.6,
+            "start_mi": 18.77,
+            "end_mi": 26.11,
             "avg_grade_pct": -0.18,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 25.6,
-            "end_mi": 25.9,
+            "start_mi": 26.11,
+            "end_mi": 26.42,
             "avg_grade_pct": 1.14,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 25.9,
-            "end_mi": 38.7,
+            "start_mi": 26.42,
+            "end_mi": 39.47,
             "avg_grade_pct": -0.02,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 38.7,
-            "end_mi": 39.3,
+            "start_mi": 39.47,
+            "end_mi": 40.09,
             "avg_grade_pct": 1.7,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 39.3,
-            "end_mi": 39.6,
+            "start_mi": 40.09,
+            "end_mi": 40.39,
             "avg_grade_pct": 0.36,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 39.6,
-            "end_mi": 41.3,
+            "start_mi": 40.39,
+            "end_mi": 42.13,
             "avg_grade_pct": 0.52,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 41.3,
-            "end_mi": 41.6,
+            "start_mi": 42.13,
+            "end_mi": 42.43,
             "avg_grade_pct": 3.33,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 41.6,
-            "end_mi": 44.6,
+            "start_mi": 42.43,
+            "end_mi": 45.49,
             "avg_grade_pct": -0.01,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 44.6,
-            "end_mi": 45.6,
+            "start_mi": 45.49,
+            "end_mi": 46.51,
             "avg_grade_pct": 0.36,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 45.6,
-            "end_mi": 45.9,
+            "start_mi": 46.51,
+            "end_mi": 46.82,
             "avg_grade_pct": -0.4,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 45.9,
-            "end_mi": 46.2,
+            "start_mi": 46.82,
+            "end_mi": 47.12,
             "avg_grade_pct": -2.38,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 46.2,
-            "end_mi": 46.5,
+            "start_mi": 47.12,
+            "end_mi": 47.43,
             "avg_grade_pct": 3.66,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 46.5,
-            "end_mi": 46.8,
+            "start_mi": 47.43,
+            "end_mi": 47.74,
             "avg_grade_pct": -1.9,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 46.8,
-            "end_mi": 47.2,
+            "start_mi": 47.74,
+            "end_mi": 48.14,
             "avg_grade_pct": -0.07,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 47.2,
-            "end_mi": 47.5,
+            "start_mi": 48.14,
+            "end_mi": 48.45,
             "avg_grade_pct": 3.0,
             "terrain": "flat",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 47.5,
-            "end_mi": 48.6,
+            "start_mi": 48.45,
+            "end_mi": 49.57,
             "avg_grade_pct": 0.18,
             "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 48.6,
-            "end_mi": 49.4,
+            "start_mi": 49.57,
+            "end_mi": 50.39,
             "avg_grade_pct": -4.8,
             "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           },
           {
-            "start_mi": 49.4,
-            "end_mi": 50.0,
+            "start_mi": 50.39,
+            "end_mi": 51.0,
             "avg_grade_pct": -0.18,
             "terrain": "hills",
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
@@ -15792,12 +15792,12 @@
             "name": "Snake River",
             "category": "river",
             "kind": "point",
-            "at_mi": 6.9,
+            "at_mi": 7.04,
             "spoken": "Crossing the Snake River"
           },
           {
             "name": "Shelley",
-            "at_mi": 9.1,
+            "at_mi": 9.28,
             "off_mi": 2.66,
             "category": "village",
             "kind": "point",
@@ -15806,7 +15806,7 @@
           },
           {
             "name": "Basalt",
-            "at_mi": 14.2,
+            "at_mi": 14.48,
             "off_mi": 3.9,
             "category": "village",
             "kind": "point",
@@ -15815,7 +15815,7 @@
           },
           {
             "name": "Firth",
-            "at_mi": 14.7,
+            "at_mi": 14.99,
             "off_mi": 3.53,
             "category": "village",
             "kind": "point",
@@ -15824,7 +15824,7 @@
           },
           {
             "name": "Groveland",
-            "at_mi": 25.1,
+            "at_mi": 25.6,
             "off_mi": 1.16,
             "category": "village",
             "kind": "point",
@@ -15835,12 +15835,12 @@
             "name": "Bingham County Historical Museum",
             "category": "museum",
             "kind": "point",
-            "at_mi": 26.3,
+            "at_mi": 26.83,
             "spoken": "Bingham County Historical Museum ahead"
           },
           {
             "name": "Moreland",
-            "at_mi": 26.6,
+            "at_mi": 27.13,
             "off_mi": 4.22,
             "category": "village",
             "kind": "point",
@@ -15849,7 +15849,7 @@
           },
           {
             "name": "Riverside",
-            "at_mi": 27.8,
+            "at_mi": 28.36,
             "off_mi": 2.97,
             "category": "village",
             "kind": "point",
@@ -15860,12 +15860,12 @@
             "name": "Blackfoot River",
             "category": "river",
             "kind": "point",
-            "at_mi": 31.7,
+            "at_mi": 32.33,
             "spoken": "Crossing the Blackfoot River"
           },
           {
             "name": "Tyhee",
-            "at_mi": 43.9,
+            "at_mi": 44.78,
             "off_mi": 1.52,
             "category": "village",
             "kind": "point",
@@ -15874,7 +15874,7 @@
           },
           {
             "name": "Inkom",
-            "at_mi": 48.7,
+            "at_mi": 49.67,
             "off_mi": 10.34,
             "category": "village",
             "kind": "point",
@@ -15884,7 +15884,7 @@
         ],
         "interchanges": [
           {
-            "at_mi": 2.9,
+            "at_mi": 2.96,
             "exit_ref": "116",
             "name": "",
             "destinations": [
@@ -15899,7 +15899,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 5.5,
+            "at_mi": 5.61,
             "exit_ref": "113",
             "name": "",
             "destinations": [
@@ -15916,7 +15916,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 10.6,
+            "at_mi": 10.81,
             "exit_ref": "108",
             "name": "",
             "destinations": [
@@ -15929,7 +15929,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 20.9,
+            "at_mi": 21.32,
             "exit_ref": "98",
             "name": "",
             "destinations": [
@@ -15943,7 +15943,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 25.9,
+            "at_mi": 26.42,
             "exit_ref": "93",
             "name": "",
             "destinations": [
@@ -15960,7 +15960,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 29.4,
+            "at_mi": 29.99,
             "exit_ref": "89",
             "name": "",
             "destinations": [
@@ -15975,7 +15975,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 38.4,
+            "at_mi": 39.17,
             "exit_ref": "80",
             "name": "",
             "destinations": [
@@ -15989,7 +15989,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 45.7,
+            "at_mi": 46.61,
             "exit_ref": "72",
             "name": "",
             "destinations": [],
@@ -16002,7 +16002,7 @@
             "ramp_control_source": "derived from ramp_far_end=motorway: every exit-ramp chain merges onto another motorway, so nothing stops traffic at the far end. Free flow is inferred from read OSM link topology, not from a tag -- OSM does not tag the absence of a control. Geofabrik extract accessed 2026-06-23"
           },
           {
-            "at_mi": 48.6,
+            "at_mi": 49.57,
             "exit_ref": "69",
             "name": "",
             "destinations": [],
@@ -16017,19 +16017,19 @@
         ],
         "speed_limits": [
           {
-            "at_mi": 1.3,
+            "at_mi": 1.33,
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 2.9,
+            "at_mi": 2.96,
             "mph": 70,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": true
           },
           {
-            "at_mi": 45.0,
+            "at_mi": 45.9,
             "mph": 65,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
@@ -16038,34 +16038,34 @@
         "state_miles": [
           {
             "state": "Idaho",
-            "miles": 50.0
+            "miles": 51.0
           }
         ],
         "restrictions": [],
         "lane_segments": [
           {
-            "start_mi": 1.4,
-            "end_mi": 2.7,
+            "start_mi": 1.43,
+            "end_mi": 2.75,
             "lanes": 4,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 2.7,
-            "end_mi": 2.9,
+            "start_mi": 2.75,
+            "end_mi": 2.96,
             "lanes": 2,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 2.9,
-            "end_mi": 4.2,
+            "start_mi": 2.96,
+            "end_mi": 4.28,
             "lanes": 1,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 4.2,
-            "end_mi": 48.6,
+            "start_mi": 4.28,
+            "end_mi": 49.57,
             "lanes": 2,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
@@ -16073,25 +16073,25 @@
         ],
         "traffic_aadt": [
           {
-            "at_mi": 10.0,
+            "at_mi": 10.2,
             "aadt": 23000.0,
             "lanes": 2,
             "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
           },
           {
-            "at_mi": 20.0,
+            "at_mi": 20.4,
             "aadt": 22500.0,
             "lanes": 2,
             "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
           },
           {
-            "at_mi": 35.0,
+            "at_mi": 35.7,
             "aadt": 25500.0,
             "lanes": 2,
             "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
           },
           {
-            "at_mi": 50.0,
+            "at_mi": 51.0,
             "aadt": 17000.0,
             "lanes": 2,
             "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
@@ -16108,7 +16108,7 @@
         {
           "name": "Conoco",
           "type": "fuel_station",
-          "at_mi": 1.0,
+          "at_mi": 1.02,
           "source": "OpenStreetMap/Overpass development-time amenity query centered on the idaho_falls_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
@@ -16128,7 +16128,7 @@
         {
           "name": "Blackfoot Rest Area, I-15 Northbound",
           "type": "public_rest_area",
-          "at_mi": 12.5,
+          "at_mi": 12.75,
           "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
           "parking": "limited",
           "actions": [
@@ -16148,7 +16148,7 @@
         {
           "name": "Phillips 66",
           "type": "fuel_station",
-          "at_mi": 25.0,
+          "at_mi": 25.5,
           "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
@@ -16168,7 +16168,7 @@
         {
           "name": "Maverik",
           "type": "travel_center",
-          "at_mi": 49.0,
+          "at_mi": 49.98,
           "source": "OpenStreetMap/Overpass development-time amenity query centered on the pocatello_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
           "parking": "likely",
           "actions": [

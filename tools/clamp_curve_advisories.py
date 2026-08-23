@@ -91,8 +91,16 @@ def main() -> int:
         f"({100 * clamped / total:.1f}%), worst {worst}"
     )
     if args.check:
+        # Say which KIND of staleness this is. A row over the cap is a real
+        # defect; a stale content hash after some other tool rewrote the shard
+        # is bookkeeping, and reporting the first when it is the second sent
+        # one reader hunting for advisories that were not there.
+        if clamped:
+            print(f"STALE: {clamped} rows still carry an advisory above {ADVISORY_MAX_MPH}")
+            return 1
         if CURVES.read_text(encoding="utf-8") != text:
-            print(f"STALE: rows still carry an advisory above {ADVISORY_MAX_MPH}")
+            print("STALE: every advisory is within the cap, but the shard's")
+            print("data_version no longer matches its rows -- re-run with --write.")
             return 1
         print("up to date")
         return 0

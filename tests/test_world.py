@@ -488,7 +488,10 @@ def test_corridor_metadata_supports_offline_itineraries(world):
     assert {segment.terrain for segment in leg.grade_segments} == {"flat"}
     assert max(abs(segment.avg_grade_pct) for segment in leg.grade_segments) < 0.2
     assert [crossing.state for crossing in leg.state_crossings] == ["Indiana"]
-    assert leg.state_crossings[0].at_mi == 32.8
+    # 33.16, not the 32.8 this used to pin: correcting Chicago-Indianapolis
+    # from 183 to the 185 miles its baked route actually runs carried every
+    # along-route position with it (tools/repair_leg_mileage.py).
+    assert leg.state_crossings[0].at_mi == 33.16
     assert any(checkpoint.name == "Lafayette" for checkpoint in leg.checkpoints)
     assert sum(state_miles.miles for state_miles in leg.state_miles) == leg.miles
 
@@ -669,7 +672,9 @@ def test_world_rejects_out_of_range_stop_position():
 def test_route_describe_mentions_miles_and_highway(world):
     route = world.shortest_route("Chicago", "Indianapolis")
     text = route.describe()
-    assert "183" in text
+    # 185, not 183: the curated figure was short of the road the corridor was
+    # baked from, and the archive is a proven lower bound on it.
+    assert "185" in text
     assert "I-65" in text
 
 
@@ -840,3 +845,77 @@ def test_the_detour_leg_is_dispatchable(world):
     r = world.supported_route("farmington_nm_us", "salt_lake_city_ut_us")
     assert r is not None
     assert "moab_ut_us" in r.cities, r.cities
+
+
+def test_no_leg_is_shorter_than_the_straight_line_between_its_cities() -> None:
+    """A road cannot be shorter than the straight line between its endpoints.
+
+    36 legs were, because ``leg.miles`` is curated and some of the numbers
+    were simply too small -- Poplar Bluff to Jonesboro stored 55 miles for a
+    95 mile road, Altus to Wichita Falls 50 for 85.
+
+    Nothing caught it because nothing disagreed: the corridor bake rescales
+    every layer onto ``leg.miles``, so the grades ended exactly at the stored
+    figure and ``state_miles`` summed to it precisely. They were the same
+    number wearing different hats, not independent witnesses. This test is
+    the one witness that owes the data nothing.
+    """
+    import math
+
+    from freight_fate.data.world import get_world
+
+    world = get_world()
+    offenders = []
+    for leg in world.legs:
+        a = world.cities.get(leg.a)
+        b = world.cities.get(leg.b)
+        if a is None or b is None or not leg.miles:
+            continue
+        lat1, lon1, lat2, lon2 = map(math.radians, (a.lat, a.lon, b.lat, b.lon))
+        straight = (
+            3958.8
+            * 2
+            * math.asin(
+                min(
+                    1.0,
+                    math.sqrt(
+                        math.sin((lat2 - lat1) / 2) ** 2
+                        + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2
+                    ),
+                )
+            )
+        )
+        # A whole-mile figure may round up to half a mile under the true road.
+        if leg.miles < straight - 0.5:
+            offenders.append((leg.a, leg.b, leg.miles, round(straight, 1)))
+    assert not offenders, (
+        f"{len(offenders)} legs shorter than their own straight line: {offenders[:5]}"
+    )
+
+
+def test_nothing_on_a_leg_sits_past_the_end_of_it() -> None:
+    """Every corridor layer is keyed to leg-miles, so a corrected mileage has
+    to carry all of them with it.
+
+    Correcting 176 leg lengths meant rescaling 49,128 along-route positions.
+    Missing one container would have left its rows at the old scale, which on
+    a leg that grew 35 miles means a checkpoint or a limit change landing well
+    before where it belongs -- or past the end entirely.
+    """
+    from freight_fate.data.world import get_world
+
+    offenders = []
+    for leg in get_world().legs:
+        if not leg.miles:
+            continue
+        limit = leg.miles + 1.0
+        for label, values in (
+            ("speed_limits", [s.at_mi for s in leg.speed_limits or () if s is not None]),
+            ("grade end", [g.end_mi for g in leg.grade_segments or ()]),
+            ("interchanges", [x.at_mi for x in leg.interchanges or ()]),
+            ("landmarks", [m.at_mi for m in leg.landmarks or ()]),
+        ):
+            for value in values:
+                if value is not None and value > limit:
+                    offenders.append((leg.a, leg.b, label, value, leg.miles))
+    assert not offenders, f"{len(offenders)} positions past their leg end: {offenders[:5]}"
