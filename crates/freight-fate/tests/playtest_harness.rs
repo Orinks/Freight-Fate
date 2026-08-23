@@ -119,9 +119,9 @@ fn test_playtest_harness_forces_headless_environment() {
 /// late to still be true, and it decides it in REAL seconds, because that is
 /// the only kind a player's ear has. A harness that drives 500 miles in
 /// fourteen seconds of wall clock and lets the pacer read that wall clock is
-/// telling it every line on the road is minutes late: 73 ambient lines were
-/// dropped on one Indianapolis-Atlanta delivery and 26 spoken, state
-/// crossings and city passings among the casualties. So the harness owns the
+/// telling it every line on the road is minutes late: 75 ambient lines were
+/// dropped on one Indianapolis-Nashville-Atlanta delivery against 32 spoken,
+/// state crossings and city passings among them. So the harness owns the
 /// pacer's clock and pays it one frame of real time per frame it steps. This
 /// test is here so the next person to "simplify" that back to the wall clock
 /// finds out here rather than in a transcript that quietly went silent.

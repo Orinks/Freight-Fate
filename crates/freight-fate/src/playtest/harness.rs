@@ -357,12 +357,12 @@ pub struct PlaytestHarness {
     /// fourteen wall-clock seconds. On the real clock every ambient line on
     /// a long delivery therefore looks minutes late the instant it is
     /// submitted, and the pacer -- correctly, given what it was told --
-    /// dropped nearly all of them: measured on one Indianapolis-Atlanta
-    /// delivery, 73 ambient lines dropped and 26 event lines spoken, the
-    /// city passings and state crossings among the casualties. On the same
-    /// route with this clock: 3 dropped, 212 spoken. Nothing was wrong with
-    /// the road, the lines, or the pacer; the harness was lying to it about
-    /// how much time the drive had spent.
+    /// dropped nearly all of them: measured on one seeded
+    /// Indianapolis-Nashville-Atlanta delivery, 75 ambient lines dropped
+    /// against 32 spoken, the city passings and state crossings among the
+    /// casualties. The same delivery with this clock drops 5 and speaks
+    /// 106. Nothing was wrong with the road, the lines, or the pacer; the
+    /// harness was lying to it about how much time the drive had spent.
     ///
     /// So the harness gives the pacer the same real-time budget the drive it
     /// is simulating would give it: one sixtieth of a second per simulated
