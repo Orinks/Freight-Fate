@@ -46,13 +46,22 @@ uv python install
 uv sync --group dev
 
 # The release-note gate resolves its base by measuring the branch point
-# against origin/dev and origin/main. A cloud container clones only the
-# branch it starts on, so without this the gate cannot see dev, silently
-# falls back to main, and counts dev's existing bullets as missing. Not
-# fatal on its own -- a container with no network still gets a usable
-# checkout, just a noisier gate.
-git fetch --quiet origin dev main || \
-  echo "warning: could not fetch dev/main; the release-note gate may pick the wrong base." >&2
+# against origin/dev and origin/main, and a cloud container clones a single
+# branch -- so on a session started from any other branch the gate cannot
+# see one or both release lines, and silently scores the current branch
+# against whichever it does have.
+#
+# The refspecs are spelled out because a --single-branch clone configures
+# remote.origin.fetch for that branch alone: `git fetch origin main` there
+# lands in FETCH_HEAD and never creates refs/remotes/origin/main. Fetched
+# one at a time so a release line that does not exist yet costs only its
+# own warning, and non-fatal so a container without network still gets a
+# usable checkout.
+for release_line in dev main; do
+  git fetch --quiet origin \
+    "+refs/heads/${release_line}:refs/remotes/origin/${release_line}" || \
+    echo "warning: could not fetch ${release_line}; the release-note gate may pick the wrong base." >&2
+done
 
 # Both stages: ruff lint/format and the world_data sync check on commit,
 # the release-note gate on push. Every hook is language: system, so this
