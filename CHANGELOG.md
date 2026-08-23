@@ -938,6 +938,12 @@
 
 ### Fixed
 
+- **A tank load is described in tank words at the dock too.** A spoiled tank
+  load called "off spec" on the road was called "damaged" when you arrived,
+  and a refused one went from "lost" to "ruined", as though something had
+  happened to the load between the highway and the gate. The receiver now
+  uses the same words the road did.
+
 - **Destination approach assistance now delivers the truck to the gate, not
   a truck length short of it.** With the assist on, the truck could come down
   to a crawl just short of the entrance and sit there, brake held, the dock

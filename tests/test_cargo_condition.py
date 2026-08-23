@@ -432,6 +432,46 @@ def test_the_settlement_line_names_the_finding_the_cost_and_the_claim(app, monke
     assert "dollars" in noted
 
 
+def test_a_tank_load_is_settled_in_tank_words(app, monkeypatch):
+    # The road calls a spoiled tank load "off spec"; arriving to hear the same
+    # load called "damaged" reads as though something happened to it between
+    # the highway and the gate.
+    from freight_fate.states.driving_menu_states import ArrivalState
+
+    monkeypatch.setattr(app.ctx, "say", speech_stub())
+    driving = _driving(app, cargo="fuel_bulk")
+    assert driving.truck.liquid is not None, "fuel_bulk is a tank load"
+    arrival = ArrivalState.__new__(ArrivalState)
+    arrival.ctx = app.ctx
+    arrival.driving = driving
+
+    refused = arrival._cargo_settlement_line(settle_cargo(70.0, 3000.0))
+    assert "lost" in refused
+    assert "ruined" not in refused
+
+    noted = arrival._cargo_settlement_line(settle_cargo(CARGO_EXCEPTION_PCT + 1.0, 3000.0))
+    assert "off spec" in noted
+    assert "damaged" not in noted
+
+    app.ctx.settings.driving_speech = "quiet"
+    terse = arrival._cargo_settlement_line(settle_cargo(70.0, 3000.0))
+    assert "lost" in terse
+    assert "ruined" not in terse
+
+
+def test_dry_freight_keeps_the_dry_words(app, monkeypatch):
+    from freight_fate.states.driving_menu_states import ArrivalState
+
+    monkeypatch.setattr(app.ctx, "say", speech_stub())
+    driving = _driving(app)
+    assert driving.truck.liquid is None
+    arrival = ArrivalState.__new__(ArrivalState)
+    arrival.ctx = app.ctx
+    arrival.driving = driving
+
+    assert "ruined" in arrival._cargo_settlement_line(settle_cargo(70.0, 3000.0))
+
+
 def test_a_company_drivers_claim_sits_with_the_carrier(app, monkeypatch):
     from freight_fate.states.driving_menu_states import ArrivalState
 

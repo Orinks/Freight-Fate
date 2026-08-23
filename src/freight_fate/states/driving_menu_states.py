@@ -972,6 +972,11 @@ class ArrivalState(MenuState):
         has no way to see the trailer.
         """
         p = self.ctx.profile
+        # A tank load gets the tank vocabulary here too. The road already
+        # calls it "off spec"; arriving to hear the same load called
+        # "damaged" reads as though something happened to it between the
+        # highway and the gate.
+        liquid = getattr(self.driving.truck, "liquid", None) is not None
         owner_op = is_owner_operator(p.business_status)
         claim_holder = (
             "The claim is against your own authority"
@@ -986,14 +991,14 @@ class ArrivalState(MenuState):
             }[cargo.outcome]
             claim = f" Claim {cargo.claim_value:,.0f} dollars." if cargo.claim_value >= 1.0 else ""
             return (
-                f"{head} Load {cargo_condition_text(cargo.condition_pct)}, "
+                f"{head} Load {cargo_condition_text(cargo.condition_pct, liquid=liquid)}, "
                 f"{cargo.condition_pct:.0f} percent. Pay down "
                 f"{cargo.pay_loss:,.0f} dollars.{claim}"
             )
         if cargo.rejected:
             return (
                 "The receiver refused the load. It came off the trailer "
-                f"{cargo_condition_text(cargo.condition_pct)} at "
+                f"{cargo_condition_text(cargo.condition_pct, liquid=liquid)} at "
                 f"{cargo.condition_pct:.0f} percent, and a dock will not sign for "
                 f"freight in that state. You are paid nothing for the haul: "
                 f"{cargo.pay_loss:,.0f} dollars gone, and a claim of about "
@@ -1003,7 +1008,7 @@ class ArrivalState(MenuState):
         if cargo.outcome == "claim":
             return (
                 "The receiver took the load but wrote it up. It arrived "
-                f"{cargo_condition_text(cargo.condition_pct)} at "
+                f"{cargo_condition_text(cargo.condition_pct, liquid=liquid)} at "
                 f"{cargo.condition_pct:.0f} percent, which is a freight claim of "
                 f"about {cargo.claim_value:,.0f} dollars. "
                 f"{cargo.pay_loss:,.0f} dollars comes off this settlement. "
@@ -1011,7 +1016,7 @@ class ArrivalState(MenuState):
             )
         return (
             "The receiver noted an exception on the bill of lading: the load "
-            f"arrived {cargo_condition_text(cargo.condition_pct)} at "
+            f"arrived {cargo_condition_text(cargo.condition_pct, liquid=liquid)} at "
             f"{cargo.condition_pct:.0f} percent. That holds back "
             f"{cargo.pay_loss:,.0f} dollars of the haul. Brake and corner gently "
             "and the bill stays clean."
