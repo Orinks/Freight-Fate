@@ -1374,6 +1374,17 @@ onto exit signalling.
       The build job still takes the full payload, and should: it packages the
       game and genuinely needs the audio.
 
+      EXPECT CI RED UNTIL 2026-09-01, AND DO NOT RE-DIAGNOSE IT. The budget
+      was already spent when this landed, so even the 7.5 MB sound pull fails
+      and the job runs with no audio at all -- 50 tests across 12 modules
+      that need shipped bytes (the engine ring, the horn, loop points, Learn
+      Sounds). GitHub's bandwidth allowance resets on the 1st; the pull then
+      succeeds and all 50 come back on their own with no code change. Owner
+      ruled 2026-08-23 to ride it out rather than buy quota or skip the
+      tests, so a red CI in this window means "the quota is still spent"
+      until proven otherwise -- but it also means a REAL failure in this
+      window is easy to miss, so read the job log rather than the badge.
+
 - [x] **A box truck stops borrowing a tractor-trailer's limiter
       (2026-08-22).** `GOVERNED_CLASSES` put semis and box trucks in one
       band, and the band's provenance is ATRI's Operational Costs survey --
