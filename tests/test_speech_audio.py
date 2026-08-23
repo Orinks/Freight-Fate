@@ -3,7 +3,12 @@
 from dataclasses import dataclass, field
 
 import pytest
-from asset_helpers import asset_exists, loose_sound_tree_available, music_pack_available
+from asset_helpers import (
+    asset_exists,
+    loose_sound_tree_available,
+    music_pack_available,
+    needs_audio_assets,
+)
 
 from freight_fate import speech as speech_module
 from freight_fate.audio import ASSETS, AudioEngine
@@ -736,6 +741,7 @@ def test_audio_engine_headless_noops():
     audio.shutdown()
 
 
+@needs_audio_assets
 def test_all_referenced_assets_exist():
     """Every sound key used in the codebase must exist on disk.
 

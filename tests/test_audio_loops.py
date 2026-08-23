@@ -1,6 +1,7 @@
 """Unit-level checks for the reusable sustain-loop helper."""
 
 import pytest
+from asset_helpers import needs_audio_assets
 
 from freight_fate.audio import HORN_LOOP_END, HORN_LOOP_START, AudioEngine
 from freight_fate.audio_loops import SustainLoop, to_seconds
@@ -49,6 +50,7 @@ def _bass_stream():
     return a, a._impl._sfx_stream("vehicle/horn", looping=False)
 
 
+@needs_audio_assets
 def test_sustain_loop_computes_byte_positions_from_samples():
     a, stream = _bass_stream()
     try:
@@ -61,6 +63,7 @@ def test_sustain_loop_computes_byte_positions_from_samples():
         a.shutdown()
 
 
+@needs_audio_assets
 def test_sustain_loop_release_is_idempotent():
     a, stream = _bass_stream()
     try:
@@ -74,6 +77,7 @@ def test_sustain_loop_release_is_idempotent():
         a.shutdown()
 
 
+@needs_audio_assets
 def test_sustain_loop_rejects_inverted_points():
     a, stream = _bass_stream()
     try:

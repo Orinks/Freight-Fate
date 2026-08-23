@@ -4,6 +4,7 @@ import threading
 import time
 
 import pytest
+from asset_helpers import needs_audio_assets
 
 from freight_fate import audio
 from freight_fate.audio import (
@@ -166,6 +167,7 @@ def test_split_volume_settings_apply_to_silent_backend():
     assert backend.ui_volume == 0.9
 
 
+@needs_audio_assets
 def test_sound_lookup_prefers_ogg_when_available():
     # _asset_bytes answers from the pack on clean clones and from the loose
     # tree on builder machines; the extension preference holds either way.
@@ -184,6 +186,7 @@ def test_sound_lookup_prefers_ogg_when_available():
         assert found[1] == "ogg", key
 
 
+@needs_audio_assets
 def test_engine_recordings_resolve_for_the_ring_and_one_shots():
     # Looping beds may resolve to WAV (lossy edges break loop seams --
     # tools/fix_loop_seams.py); the licensed overlay's file wins where
@@ -203,15 +206,18 @@ def _shipped_duration_s(key: str) -> float:
     return info.frames / info.samplerate
 
 
+@needs_audio_assets
 def test_engine_start_recording_is_short_one_shot():
     assert _shipped_duration_s("engine/start") <= 4.25
 
 
+@needs_audio_assets
 def test_vehicle_horn_and_shift_recordings_are_short_one_shots():
     assert _shipped_duration_s("vehicle/horn") <= 1.0
     assert _shipped_duration_s("vehicle/gear_shift") <= 0.8
 
 
+@needs_audio_assets
 def test_asset_length_matches_a_real_decode_of_the_same_clip():
     """A one-shot is handed to the mixer without a handle, so the only way to
     know when it stops sounding is to measure the clip. Read from the
@@ -229,6 +235,7 @@ def test_asset_length_covers_synthesized_cues_and_shrugs_at_unknown_keys():
     assert audio.asset_length_s("nothing/at_all") == 0.0
 
 
+@needs_audio_assets
 def test_pygame_music_never_loops_catalog_tracks(monkeypatch):
     calls = []
     backend = audio._PygameBackend.__new__(audio._PygameBackend)
@@ -268,6 +275,7 @@ def _join_radio_workers(backend, timeout=5.0):
         thread.join(max(0.0, deadline - time.monotonic()))
 
 
+@needs_audio_assets
 def test_bass_music_never_loops_catalog_tracks(monkeypatch):
     class FakeStream:
         handle = 1
@@ -440,6 +448,7 @@ def test_bass_radio_stream_recreates_a_stalled_stream(monkeypatch):
     assert opened == ["https://example.test/live.mp3"]
 
 
+@needs_audio_assets
 def test_bass_engine_model_matches_available_cuts(monkeypatch):
     # With the licensed multisample cuts installed the engine comes up as the
     # crossfade ring; a clean clone (synthesized engine/idle only) falls back
@@ -493,6 +502,7 @@ def test_engine_voice_setting_switches_models_live(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_both_1600_jake_cuts_ship():
     """The future jake A/B needs both cuts in the loose tree and the pack --
     the routing has nothing to route to otherwise."""
@@ -505,6 +515,7 @@ def test_both_1600_jake_cuts_ship():
     assert asset_exists(sounds_root, audio.JAKE_CLASSIC_KEY)
 
 
+@needs_audio_assets
 def test_jake_voice_setting_routes_the_synth_key_and_applies_live(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -534,6 +545,7 @@ def test_jake_voice_setting_routes_the_synth_key_and_applies_live(monkeypatch):
         a.shutdown()
 
 
+@needs_audio_assets
 def test_the_jake_toggle_re_voices_whatever_band_is_sounding(monkeypatch):
     """This asserted the opposite -- that a band other than 1600 "must not be
     touched by the toggle" -- on the premise that only 1600 had a classic
@@ -594,6 +606,7 @@ def test_classic_voice_prefers_the_original_recording(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_bass_engine_falls_back_to_pitched_loop_without_cuts(monkeypatch):
     # A clean clone carries only the synthesized engine/idle: the ring cannot
     # form, and the legacy single pitched loop must come up instead.
@@ -634,6 +647,7 @@ def _record_sfx_keys(monkeypatch, impl):
     return keys
 
 
+@needs_audio_assets
 def test_silent_engine_start_skips_the_ignition_crank(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -651,6 +665,7 @@ def test_silent_engine_start_skips_the_ignition_crank(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_deliberate_engine_start_plays_crank_and_arms_crossfade(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -744,6 +759,7 @@ def test_engine_stop_clears_pending_fades(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_road_noise_loop_tracks_speed(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -758,6 +774,7 @@ def test_road_noise_loop_tracks_speed(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_new_context_loops_enter_mixer_at_full_gain(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -773,6 +790,7 @@ def test_new_context_loops_enter_mixer_at_full_gain(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_horn_uses_reserved_loop_slot(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -785,6 +803,7 @@ def test_horn_uses_reserved_loop_slot(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_bass_horn_sustains_then_rings_out_on_release(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -804,6 +823,7 @@ def test_bass_horn_sustains_then_rings_out_on_release(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_bass_horn_press_during_release_tail_does_not_stack(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -823,6 +843,7 @@ def test_bass_horn_press_during_release_tail_does_not_stack(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_pygame_horn_press_during_release_tail_does_not_restart(monkeypatch):
     monkeypatch.setenv("FREIGHT_FATE_AUDIO_BACKEND", "pygame")
     a = AudioEngine()
@@ -839,6 +860,7 @@ def test_pygame_horn_press_during_release_tail_does_not_restart(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_pygame_horn_sustain_phase_transitions(monkeypatch):
     monkeypatch.setenv("FREIGHT_FATE_AUDIO_BACKEND", "pygame")
     a = AudioEngine()
@@ -917,6 +939,7 @@ def test_pygame_backend_does_not_play_reverse_loop_through_mixer(monkeypatch):
     backend.reverse_stop()
 
 
+@needs_audio_assets
 def test_bass_one_shots_survive_garbage_collection(monkeypatch):
     # Channel.__del__ in sound_lib frees the BASS handle on garbage
     # collection; the backend must hold a reference until playback ends,
@@ -950,6 +973,7 @@ def test_bass_one_shots_survive_garbage_collection(monkeypatch):
         a.shutdown()
 
 
+@needs_audio_assets
 def test_bass_fading_loops_stay_alive_during_fade(monkeypatch):
     import gc
 
@@ -981,6 +1005,7 @@ def test_bass_headless_uses_no_sound_device(monkeypatch):
     a.shutdown()
 
 
+@needs_audio_assets
 def test_bass_road_noise_frequency_changes_with_speed(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
@@ -1042,6 +1067,7 @@ def test_the_classic_jake_voice_covers_every_rpm_band():
         engine.shutdown()
 
 
+@needs_audio_assets
 def test_the_jake_voice_switch_applies_on_every_band_not_just_1600(monkeypatch):
     """Owner, 2026-08-19: "either the synthesized brake plays or the recorded
     one, not both. Both is annoying."

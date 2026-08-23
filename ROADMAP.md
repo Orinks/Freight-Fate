@@ -120,6 +120,25 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **The audio tests only run where the packs are.** CI checks out without
+      LFS -- the repository's LFS budget is spent, and an exhausted quota
+      refuses the 7.5 MB `sounds.pak` fetch just as firmly as the 250 MB
+      music one -- so the 45 tests that need real audio content now skip
+      there instead of failing against a 130 byte pointer. They still run in
+      full on any clone with the packs materialised. Until the budget is
+      restored or the packs move off LFS, nothing in CI actually exercises
+      the decode path; a periodic job that fetches with LFS and runs just
+      those tests would close the gap without paying per push.
+
+- [ ] **The facility engine toggle speaks uncategorised.** At the quiet
+      speech rung, switching the engine off on the road gives an earcon
+      (`driving_controls.py` passes `SpeechCategory.CONFIRMATION`), but the
+      same action in the facility menu (`driving_core._toggle_facility_engine`)
+      still speaks "Engine off." in full -- it calls `ctx.say` with no
+      category. Found while pinning the ladder test to the file that owns
+      each line; left alone because it changes what a player hears and wants
+      its own entry.
+
 - [x] **Real time driving mode (owner, 2026-08-22).** The Driving mode row
       is Relaxed, Standard, Real time: `TIME_SCALES` gains 1.0, the tuning
       table gives it standard's pressure field for field (a clock, not a

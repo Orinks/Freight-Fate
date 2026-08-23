@@ -10,7 +10,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
-from asset_helpers import music_pack_available
+from asset_helpers import music_pack_available, needs_audio_assets
 
 from freight_fate import assets_pack, audio
 
@@ -151,6 +151,7 @@ def test_asset_bytes_reads_loose_files_without_pack():
     assert data == (SOUNDS_DIR / "ui" / f"menu_select.{ext}").read_bytes()
 
 
+@needs_audio_assets
 def test_committed_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
@@ -187,6 +188,7 @@ def test_committed_music_pack_has_freight_fate_header():
     )
 
 
+@needs_audio_assets
 def test_verify_sound_assets_passes_in_source_checkout():
     audio.verify_sound_assets()
 

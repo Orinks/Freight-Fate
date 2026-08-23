@@ -14,10 +14,12 @@ worker.
 
 from __future__ import annotations
 
+import shutil
 import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 import soundfile as sf
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +33,13 @@ RATE = 44100
 DURATION_S = 12.5
 
 
+# _write_asset encodes through ffmpeg on purpose -- that shell-out IS the fix
+# this test guards -- so there is nothing left to assert without it. Unlike the
+# runner tests, which stub the encode out, this one has to do the real write.
+@pytest.mark.skipif(
+    shutil.which("ffmpeg") is None,
+    reason="ffmpeg is not installed; _write_asset encodes Vorbis by shelling out to it",
+)
 def test_write_asset_survives_a_12_5_second_ogg_write(monkeypatch, tmp_path):
     monkeypatch.setattr(generate_radio, "ASSETS", tmp_path)
 

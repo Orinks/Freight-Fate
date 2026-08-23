@@ -7,6 +7,7 @@ import math
 import wave
 
 import numpy as np
+from asset_helpers import needs_audio_assets
 
 from freight_fate import audio, cab_filter
 
@@ -62,6 +63,7 @@ def test_seal_passes_non_pcm_through():
     assert cab_filter.seal_wav(b"OggS not a wav at all") == b"OggS not a wav at all"
 
 
+@needs_audio_assets
 def test_playback_bytes_seals_engine_bands_only():
     # The band cuts come back transformed (and cached); any other key comes
     # back byte-identical to the raw asset.

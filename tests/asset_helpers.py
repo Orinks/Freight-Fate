@@ -21,6 +21,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 # Same order the audio layer prefers: the smallest modern format first, the
 # older ones kept so a partial migration still resolves.
 AUDIO_EXTENSIONS = ("opus", "ogg", "wav")
@@ -75,6 +77,30 @@ def audio_assets_available() -> bool:
     where that assertion is about missing DATA rather than a missing sound.
     """
     return loose_sound_tree_available() or sounds_pack_available()
+
+
+# Ready-made markers for the tests that need real audio content rather than a
+# fixture they build themselves. CI checks out without LFS on purpose (see the
+# note above), so on a runner these skip and on a builder machine -- or any
+# clone with the packs materialised -- they run in full. Without them the same
+# tests fail against a 130 byte pointer, which reads as "the audio is broken"
+# when the truth is "the audio was never fetched".
+needs_audio_assets = pytest.mark.skipif(
+    not audio_assets_available(),
+    reason=(
+        "no audio assets: sounds.pak is an unmaterialised LFS pointer and the "
+        "loose sound tree is builder-local. Fetch with "
+        "`git lfs pull --include=src/freight_fate/sounds.pak` to run this."
+    ),
+)
+
+needs_music_pack = pytest.mark.skipif(
+    not music_pack_available(),
+    reason=(
+        "music.pak not materialised (250 MB; CI checks out without LFS). "
+        "Fetch with `git lfs pull --include=src/freight_fate/music.pak`."
+    ),
+)
 
 
 def _load_pack(path: Path):

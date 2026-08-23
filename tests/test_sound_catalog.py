@@ -5,6 +5,8 @@ import re
 from functools import cache
 from pathlib import Path
 
+from asset_helpers import needs_audio_assets
+
 from freight_fate import sound_catalog
 
 
@@ -51,6 +53,7 @@ def _resolves(key: str) -> bool:
     return key in _generated_keys() or asset_exists(SOUNDS_ROOT, key)
 
 
+@needs_audio_assets
 def test_every_catalogued_key_resolves_to_a_real_asset():
     for entry in sound_catalog.catalog_entries():
         for cue in entry.plays:
