@@ -137,6 +137,17 @@ jobs:
       - name: Install the pinned toolchain
         run: rustup show
 
+      - name: Fetch BASS
+        # BASS is un4seen's and proprietary, so it is not committed to this
+        # public repository (see crates/bass-sys/vendor/licenses/README.md).
+        # Without it bass-sys still builds and every audio test skips itself,
+        # which reads as a green run that proved nothing about the audio
+        # backend -- so --check fails the job rather than letting that pass.
+        run: |
+          python -m pip install --quiet uv
+          uv run python tools/fetch_bass.py
+          uv run python tools/fetch_bass.py --check
+
       - name: Cache cargo registry and target directory
         # Swatinem/rust-cache rather than a raw actions/cache on target/: it
         # keys on the lockfile plus the rustc version, and prunes the target

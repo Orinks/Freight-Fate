@@ -1,7 +1,11 @@
-//! Stage the vendored BASS shared libraries next to the build output.
+//! Stage the fetched BASS shared libraries next to the build output.
+//!
+//! BASS is un4seen's and proprietary, so it is NOT committed to this public
+//! repository: `tools/fetch_bass.py` puts it under `vendor/<os>-<arch>/`,
+//! pinned by sha256, and this script stages it from there.
 //!
 //! BASS is loaded at run time (see `src/loader.rs`), so nothing is linked
-//! here. What this script does is copy the vendored `bass.dll` and its add-on
+//! here. What this script does is copy the fetched `bass.dll` and its add-on
 //! plugins (`bassopus`, `bassflac`, `bass_aac`, `basshls`) into the Cargo
 //! target directory so `cargo run` and `cargo test` find them without the
 //! developer having to touch PATH. The plugins land beside the core library
@@ -57,10 +61,14 @@ fn main() {
         if let Some(profile_dir) = profile_dir(&out_dir) {
             let _ = fs::remove_file(profile_dir.join(file_name));
         }
+        // A developer who has not run the fetch gets a silent game and no
+        // obvious reason why, which is the worst way to learn that BASS is
+        // not in the repository. Name the command in the warning.
         println!(
-            "cargo:warning=bass-sys: {file_name} is not vendored for \
-             {target_os}-{target_arch}; the game will run without audio unless the \
-             library is installed system-wide"
+            "cargo:warning=bass-sys: {file_name} is missing for \
+             {target_os}-{target_arch}. Run `uv run python tools/fetch_bass.py` \
+             -- BASS is fetched, not committed. Until then the game runs without \
+             audio unless the library is installed system-wide."
         );
         return;
     }

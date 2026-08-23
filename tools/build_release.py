@@ -1098,7 +1098,15 @@ def verify_rust_payload(build_dir: Path) -> None:
     if sys.platform == "win32":
         for name in ("SDL2.dll", "bass.dll", "prism.dll"):
             if not (build_dir / name).exists():
-                raise RuntimeError(f"Rust payload is missing the native library {name}")
+                # BASS is fetched rather than committed, so a checkout that
+                # skipped the fetch would otherwise build a silent release and
+                # say nothing about why.
+                hint = (
+                    " Run `uv run python tools/fetch_bass.py` and build again."
+                    if name.startswith("bass")
+                    else ""
+                )
+                raise RuntimeError(f"Rust payload is missing the native library {name}.{hint}")
     elif not native_files(build_dir):
         print(
             "Warning: no native libraries staged beside the executable; the game "

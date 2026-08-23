@@ -23,7 +23,7 @@ Cargo workspace at the repo root:
 Cargo.toml                  workspace
 crates/prism-sys            raw Prism FFI (from PortkeyDrop), extended
 crates/prism                safe Prism wrapper (from PortkeyDrop)
-crates/bass-sys             raw BASS FFI via libloading; vendored DLLs
+crates/bass-sys             raw BASS FFI via libloading; DLLs fetched, not committed
 crates/ff-core              pure logic: no SDL, no BASS, no Prism, no network
 crates/freight-fate         the game: audio, speech, net, states, app; bin `freightfate`
 ```
@@ -47,7 +47,7 @@ asked for.
 | Concern | Python today | Rust | Why |
 |---|---|---|---|
 | Window, keyboard, game controller, rumble, clipboard | pygame-ce (SDL2) | `sdl2` crate, dynamic link against vendored prebuilt SDL2 (`vendor/sdl2/<os-arch>/`) | 1:1 GameController API, `SDL_VIDEODRIVER=dummy` headless (the test suite depends on it), rumble off the controller handle, UTF-8 clipboard. Building SDL from source fails on this machine (CMake 3.31 vs VS 18), prebuilt links in 2 s. |
-| Audio | sound_lib (BASS) | `bass-sys`: hand-written `libloading` bindings for the ~15 BASS entry points the game uses, plugins `bassopus`, `bassflac`, `bass_aac`, `basshls` loaded if present | Mixtime position sync (horn loop), rate/volume slides, HLS + ICY radio have no pure-Rust equivalent. Same licence position as today. |
+| Audio | sound_lib (BASS) | `bass-sys`: hand-written `libloading` bindings for the ~15 BASS entry points the game uses, plugins `bassopus`, `bassflac`, `bass_aac`, `basshls` loaded if present. BASS is un4seen's and proprietary, so it is fetched by `tools/fetch_bass.py` (sha256-pinned) rather than committed to this public repo | Mixtime position sync (horn loop), rate/volume slides, HLS + ICY radio have no pure-Rust equivalent. Same licence position as today. |
 | Speech | prismatoid | `prism` + `prism-sys`, extended with `registry_id`/`registry_name`/`registry_priority`/`id_at`, `set_pitch`, voice count/name/set, `backend_speak`, the missing feature bits; `FREIGHT_FATE_PRISM_PATH` | Game's `pick_backend` is priority-driven and uses pitch + voice selection. |
 | HTTP/TLS | urllib + certifi | `ureq` 3 (rustls) + `rustls-platform-verifier` | Platform roots (corporate proxies) plus Mozilla roots, as `net.ssl_context()` does now. |
 | Crypto | cryptography, hmac | `ed25519-dalek` (verify_strict), `hmac`+`sha2`, hand-written canonical JSON (`js_number`) | Canonical bytes pinned by `test_cloud_saves` fixture. |
