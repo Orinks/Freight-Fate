@@ -8,18 +8,17 @@
 //! # What is ignored and why
 //!
 //! The Python file drove most of its cases through `start_delivery`, which
-//! walks the real menus from the main menu to the wheel. On this branch
-//! `states::city::launch_driving` still pushes the `todo_state("Driving")`
-//! placeholder rather than the real `DrivingState`, so that walk stops at a
-//! stub. Those tests are ported in full and marked `#[ignore]` naming that
-//! dependency; the moment the city screens hand over the real drive they
-//! run as written.
+//! walks the real menus from the main menu to the wheel. That walk works:
+//! `states::city::launch_driving` builds the real `DrivingState`, and the
+//! pull-in beat at the destination gate opens the dock menu over a drive
+//! that is still live, so those cases run as written.
 //!
-//! Four more reach the destination gate, which cannot open yet: the pull-in
-//! beat `open_facility_arrival` pushes REPLACES the drive on the stack, and
-//! its completion callback then looks the drive up on that stack and does not
-//! find it, so the game sits on "Pulling into destination" forever. Those are
-//! marked `blocked:` rather than `slow:` -- they are not waiting on time.
+//! One delivery case is still parked, and its `blocked:` reason names what
+//! on: the event pacer measures "would this line start after its moment"
+//! on the wall clock, and a harness delivery covers hundreds of miles in
+//! seconds of it, so the road's ambient lines -- state lines, city
+//! passings -- are dropped as stale. The Python harness recorded above the
+//! pacer and never saw it.
 //!
 //! A handful of Python cases patched a method on the live drive
 //! (`_upcoming_exit_stop`, `trip.speed_limit_at`, `trip.grade_at`) with
@@ -512,7 +511,6 @@ fn test_keyboard_navigation_failure_is_bounded_and_descriptive() {
 /// cases in the Python file (40x pacing, the Delaware bend, the strict-xfail
 /// heavy-traffic case) are the transcript suite's, not the harness's.
 #[test]
-#[ignore = "blocked: open_facility_arrival replaces the drive off the stack, so the pull-in beat never opens the dock menu (states/driving_events/arrival.rs)"]
 fn test_realistic_speed_control_transitions_do_not_issue_speeding_fines() {
     let mut harness = PlaytestHarness::new();
     harness.app.ctx.settings.hos_mode = "realistic".to_string();
@@ -575,7 +573,6 @@ fn test_realistic_speed_control_transitions_do_not_issue_speeding_fines() {
 }
 
 #[test]
-#[ignore = "blocked: open_facility_arrival replaces the drive off the stack, so the pull-in beat never opens the dock menu (states/driving_events/arrival.rs)"]
 fn test_realistic_cruise_eases_for_destination_exit_without_speeding_fine() {
     let mut harness = PlaytestHarness::new();
     harness.app.ctx.settings.hos_mode = "realistic".to_string();
@@ -685,7 +682,6 @@ fn test_rest_stop_arrival_cue_allows_immediate_parking_brake_stop() {}
 // -- whole deliveries -------------------------------------------------------------------
 
 #[test]
-#[ignore = "blocked: open_facility_arrival replaces the drive off the stack, so the pull-in beat never opens the dock menu (states/driving_events/arrival.rs)"]
 fn test_playtest_harness_drives_a_specific_route() {
     // The Newark -> New York corridor crosses to NY at the GWB on I-95 (the
     // Holland Tunnel fix); driving it directly should complete and never
@@ -705,8 +701,20 @@ fn test_playtest_harness_drives_a_specific_route() {
     assert!(!text.contains("New Jersey into New York"), "{text}");
 }
 
+/// The mapped state line is announced, once, ahead of the city it precedes.
+///
+/// Parked, and NOT on either arrival defect: the lines are built
+/// (`trip_road_events::check_cities`, `build_navigation_cues`) and do reach
+/// `say_event`, where the pacer drops them as stale ambient. Dropping
+/// chatter that would start speaking after its moment has passed is right --
+/// but the pacer measures that moment on the wall clock, and this harness
+/// runs 534 miles of road in fourteen wall-clock seconds, so every ambient
+/// line on a long delivery looks late. The Python harness never saw this: it
+/// recorded above the pacer, and this one records at the voice by design
+/// (see the module note). The fix is a harness clock that advances with the
+/// frames, which changes what every transcript test hears.
 #[test]
-#[ignore = "blocked: open_facility_arrival replaces the drive off the stack, so the pull-in beat never opens the dock menu (states/driving_events/arrival.rs)"]
+#[ignore = "blocked: the pacer drops ambient road lines as stale because a whole delivery runs in seconds of wall clock; needs a frame-driven pacer clock in PlaytestHarness"]
 fn test_mapped_state_lines_are_authoritative_in_delivery_transcripts() {
     for (cities, state, passing_city, expected_crossings) in [
         (
@@ -780,14 +788,11 @@ fn test_mapped_state_lines_are_authoritative_in_delivery_transcripts() {
 
 // -- the menu walk to the wheel ----------------------------------------------------------
 //
-// Every case below drives `start_delivery`, which needs the city screens to
-// hand over the real drive.
-
-const NEEDS_LAUNCH: &str =
-    "needs states::city::launch_driving to push the real DrivingState (still todo_state)";
+// Every case below drives `start_delivery`, which walks the real menus from
+// the main menu to the wheel and needs the city screens to hand over the
+// real drive.
 
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_each_driving_mode_completes_a_full_spoken_delivery() {
     for (mode, time_scale) in [("relaxed", 10.0), ("standard", 20.0)] {
         let mut harness = PlaytestHarness::new();
@@ -804,7 +809,6 @@ fn test_each_driving_mode_completes_a_full_spoken_delivery() {
 }
 
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_playtest_harness_records_headless_delivery_transcript() {
     let mut harness = PlaytestHarness::new();
     harness.start_delivery(StartDelivery::named("Harness Smoke"));
@@ -819,7 +823,6 @@ fn test_playtest_harness_records_headless_delivery_transcript() {
 }
 
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_company_driver_first_delivery_transcript_builds_dispatch_trust() {
     let mut harness = PlaytestHarness::new();
     let result = harness.start_delivery(StartDelivery::named("Harness Training Arc"));
@@ -831,7 +834,6 @@ fn test_company_driver_first_delivery_transcript_builds_dispatch_trust() {
 }
 
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_new_hire_transcript_runs_assigned_load_and_route() {
     let mut harness = PlaytestHarness::new();
     let result = harness.start_delivery(StartDelivery::named("Harness New Hire"));
@@ -846,7 +848,6 @@ fn test_new_hire_transcript_runs_assigned_load_and_route() {
 }
 
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_owner_operator_transcript_keeps_load_and_route_choice() {
     let mut harness = PlaytestHarness::new();
     let result = harness.start_delivery(StartDelivery::named("Harness Owner Choice").configure(
@@ -870,7 +871,6 @@ fn test_owner_operator_transcript_keeps_load_and_route_choice() {
 }
 
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_mid_career_transcript_speaks_level_band_guidance() {
     let mut harness = PlaytestHarness::new();
     let result = harness.start_delivery(StartDelivery::named("Harness Senior Career").configure(
@@ -888,8 +888,32 @@ fn test_mid_career_transcript_speaks_level_band_guidance() {
     assert!(!text.to_lowercase().contains("probation"));
 }
 
+/// How many times a line was ANNOUNCED, ignoring the pacer's rescue of it.
+///
+/// When driving events share the main voice, an interrupting main-channel
+/// line cuts a ROUTE event line mid-sentence and the pacer hands the cut
+/// line straight back to the voice to finish. That is one delivery
+/// completing, not a second announcement -- but this harness records at the
+/// voice, one rung below where the Python harness recorded (see the module
+/// note), so it sees both halves. Collapse a verbatim re-delivery that
+/// lands within a line or two of the original.
+fn announcements_of(result: &freight_fate::playtest::PlaytestResult, needle: &str) -> usize {
+    let mut count = 0;
+    for (i, entry) in result.spoken.iter().enumerate() {
+        if !entry.text.contains(needle) {
+            continue;
+        }
+        let rescue = result.spoken[i.saturating_sub(3)..i]
+            .iter()
+            .any(|earlier| earlier.text == entry.text);
+        if !rescue {
+            count += 1;
+        }
+    }
+    count
+}
+
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_speed_control_follows_job_from_deadhead_to_loaded_trip() {
     let mut harness = PlaytestHarness::new();
     let mut setup = StartDelivery::named("Speed Control Handoff");
@@ -915,16 +939,16 @@ fn test_speed_control_follows_job_from_deadhead_to_loaded_trip() {
     let transcript = harness.transcript_text();
     assert!(transcript.contains("Automatic speed control on"));
     assert_eq!(
-        transcript
-            .matches("Automatic speed control paused for pickup")
-            .count(),
+        announcements_of(
+            &harness.result(),
+            "Automatic speed control paused for pickup"
+        ),
         1
     );
     assert!(transcript.contains("resuming"));
 }
 
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_structured_transcript_preserves_channel_interrupt_and_order() {
     let mut harness = PlaytestHarness::new();
     harness.start_delivery(StartDelivery::named("Harness Structured Speech"));
@@ -954,7 +978,6 @@ fn test_structured_transcript_preserves_channel_interrupt_and_order() {
 }
 
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_name_entry_uses_real_space_key_and_preserves_accessible_name() {
     let mut harness = PlaytestHarness::new();
     let result = harness.start_delivery(StartDelivery::named("Harness Driver"));
@@ -966,7 +989,6 @@ fn test_name_entry_uses_real_space_key_and_preserves_accessible_name() {
 }
 
 #[test]
-#[ignore = "needs states::city::launch_driving to push the real DrivingState (still todo_state)"]
 fn test_playtest_harness_delivery_properties() {
     for job_rank in 0..4usize {
         for route_rank in 0..3usize {
@@ -986,11 +1008,11 @@ fn test_playtest_harness_delivery_properties() {
 }
 
 #[test]
-#[ignore = "needs states::city::launch_driving plus the driver-tablet weather screen"]
+#[ignore = "needs the driver-tablet weather screen"]
 fn test_playtest_harness_weather_shortcut_and_tablet_share_live_source() {}
 
 #[test]
-#[ignore = "needs states::city::launch_driving plus the online journal transport seam"]
+#[ignore = "needs the online journal transport seam"]
 fn test_delivery_publication_is_queued_without_spoken_interruption() {}
 
 #[test]
@@ -998,7 +1020,7 @@ fn test_delivery_publication_is_queued_without_spoken_interruption() {}
 fn test_reusable_career_stage_presets_reach_real_dispatch() {}
 
 #[test]
-#[ignore = "needs states::city::launch_driving; the hazard pressure budget is the drive's"]
+#[ignore = "needs the drive's hazard pressure budget, which this port does not expose yet"]
 fn test_mode_transcripts_prove_hazard_warning_and_recovery_pressure() {}
 
 /// The two `SpeechProbe` cases sat in this file because they needed a live
@@ -1013,10 +1035,12 @@ fn test_app_speech_dispatch_flushes_stale_main_speech_for_urgent_events() {}
 #[ignore = "covered by tests/app_speech_ducking.rs against the same seam"]
 fn test_app_dedicated_event_voice_does_not_interrupt_main_speech() {}
 
+/// A guard on the note above: the menu walk really does reach the wheel, so
+/// no case below it may go back to being parked on the city screens.
 #[test]
-fn the_ignore_reason_names_one_dependency() {
-    // A guard on the note above: every ignored menu-walk case must name the
-    // same missing piece, so a reader is never left guessing which port
-    // unblocks them.
-    assert!(NEEDS_LAUNCH.contains("launch_driving"));
+fn the_menu_walk_reaches_the_real_drive() {
+    let mut harness = PlaytestHarness::new();
+    harness.start_delivery(StartDelivery::named("Menu Walk"));
+    assert!(harness.has_drive());
+    assert!(harness.state_is::<freight_fate::states::driving::DrivingState>());
 }

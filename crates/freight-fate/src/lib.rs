@@ -13,5 +13,5 @@ pub mod online_presence;
 pub mod playtest;
 pub mod single_instance;
 pub mod speech;
-pub mod updater;
 pub mod states;
+pub mod updater;

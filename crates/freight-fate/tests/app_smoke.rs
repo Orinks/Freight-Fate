@@ -56,7 +56,7 @@ fn the_version_is_the_crate_version_from_source() {
 // `test_garage_offers_partial_fuel_and_repairs_when_cash_is_short` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
-#[ignore = "needs the main-menu hand-off wired: states::main_menu::world_entry_state / first_state_after_career_creation still return todo_state(...)"]
+#[ignore = "unblocked, not written: the main-menu hand-off it waited on has landed; port the Python case"]
 fn test_full_game_flow_headless() {}
 
 #[test]
@@ -88,11 +88,11 @@ fn test_menu_first_letter_navigation() {
 }
 
 #[test]
-#[ignore = "needs the main-menu hand-off wired: states::main_menu::world_entry_state / first_state_after_career_creation still return todo_state(...)"]
+#[ignore = "unblocked, not written: the main-menu hand-off it waited on has landed; port the Python case"]
 fn test_garage_upgrade_and_truck_purchase_flow() {}
 
 #[test]
-#[ignore = "needs the main-menu hand-off wired: MainMenuState's Online item still pushes todo_state(\"OnlineHubState\")"]
+#[ignore = "unblocked, not written: the main-menu hand-off it waited on has landed; port the Python case"]
 fn test_discord_presence_toggle_is_accessible_and_wired() {}
 
 // `test_upgrades_are_money_gated` is live in `crates/freight-fate/tests/states_city_shops.rs`.
@@ -106,9 +106,9 @@ fn test_discord_presence_toggle_is_accessible_and_wired() {}
 // `test_upgrade_f1_help_explains_player_benefits` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
-#[ignore = "needs the main-menu hand-off wired: states::main_menu::world_entry_state / first_state_after_career_creation still return todo_state(...)"]
+#[ignore = "unblocked, not written: the main-menu hand-off it waited on has landed; port the Python case"]
 fn test_pause_and_abandon_returns_to_city() {}
 
 #[test]
-#[ignore = "needs the main-menu hand-off wired: states::main_menu::world_entry_state / first_state_after_career_creation still return todo_state(...)"]
+#[ignore = "unblocked, not written: the main-menu hand-off it waited on has landed; port the Python case"]
 fn test_abandon_prompt_no_returns_to_pause_menu() {}

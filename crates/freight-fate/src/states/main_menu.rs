@@ -59,10 +59,11 @@ pub use crate::states::update::{UpdateCheckState, UpdateChecker, UpdatePromptSta
 
 /// A clearly-named stand-in for a screen another port task still owns.
 ///
-/// Pushed wherever the Python pushed a state whose Rust module is still a
-/// stub (the city hub, the driving state, the online offer ...), so the
-/// flow around it is testable now and the lead can wire the real
-/// constructor in one place later.
+/// Nothing pushes one any more: the city hub, the online offer, the online
+/// hub, the pickup facility and the driving state are all real, so every
+/// flow through this menu lands on the screen it names. Kept for the next
+/// screen that needs a stand-in, so the flow around it stays testable
+/// before its port lands.
 pub fn todo_state(name: &str) -> SimpleMenuState {
     SimpleMenuState::new(
         &format!("{name} (not ported yet)"),

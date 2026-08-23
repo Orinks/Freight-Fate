@@ -12,14 +12,14 @@
 //! `from .city_business import ...`) so `states::city::X` resolves the way
 //! `freight_fate.states.city.X` did.
 //!
-//! # Placeholders
+//! # Handing over the wheel
 //!
-//! Screens owned by other ports (the driving state, the main menu and its
-//! settings screen, career stats, the logbook, the setback notice) are not
-//! on this branch yet. Every such hand-off goes through [`todo_state`], and
-//! the one that matters most -- dispatch handing the wheel to
-//! `DrivingState` -- goes through a single [`launch_driving`] so the lead
-//! swaps one function when the driving port lands.
+//! Dispatch, the bobtail menu and the loaded departure all reach the road
+//! through one [`launch_driving`], which builds the real `DrivingState`,
+//! restores what the departure carries onto it, snapshots the trip, speaks
+//! the departure line and pushes the drive. [`todo_state`] is what that
+//! function used to push, and is kept only for a screen no port has claimed
+//! yet; nothing in this module reaches for it now.
 
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -749,10 +749,10 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
         // onto the road: the scale house has to find the box they are
         // actually pulling.
         driving.trailer_refused = resume.trailer_refused;
-        driving.trip.truck.restore_air_brake_snapshot(
-            resume.air_brake.as_ref().unwrap_or(&Value::Null),
-            true,
-        );
+        driving
+            .trip
+            .truck
+            .restore_air_brake_snapshot(resume.air_brake.as_ref().unwrap_or(&Value::Null), true);
         if resume.engine_on {
             driving.trip.truck.start_engine();
         }

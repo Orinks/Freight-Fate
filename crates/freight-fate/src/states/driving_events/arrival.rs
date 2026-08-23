@@ -307,13 +307,13 @@ impl DrivingState {
                 "Pulling into the destination facility. Please wait.",
                 STOP_PULL_IN_WAIT_S,
                 move |ctx: &mut GameContext| {
-                    let _ = &drive;
-                    super::with_drive(ctx, |drive, ctx| {
+                    let handle = drive.clone();
+                    drive.with(ctx, |drive, ctx| {
                         drive.set_status("Parked at destination. Dock and deliver.");
                         // `FacilityArrivalState(self.ctx, self)`: the drive
                         // it covers is the one that pulled in, not whatever
                         // the stack happens to be showing now.
-                        let mut state = FacilityArrivalState::with_drive(DriveRef::active(ctx));
+                        let mut state = FacilityArrivalState::with_drive(handle);
                         state.enter_over_drive(ctx, drive);
                         replace_drive_with(ctx, state);
                     });

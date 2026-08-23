@@ -326,3 +326,389 @@ branch), `_update_chain_law`, `_begin_ramp_terminal` / `_ramp_control_for` /
    street limits) was only reached incidentally.
 5. **Nothing was built or run.** No fix was made, so no `cargo check` was
    needed; per the brief the game crate may be mid-edit by other agents.
+
+---
+
+# Pass 2 — the money screens (2026-08-22)
+
+Scope, exactly the gap §8.3 named: `states/city_business.py`,
+`states/city_garage.py`, `states/driving_menu_states.py`, plus the four models
+whose numbers those screens read out — `models/business.py`,
+`models/settlement.py`, `models/jobs.py`, `models/trailer_yard.py`.
+
+Same method and same classification as pass 1: mechanical sweeps to *find*
+candidates, every candidate then read on both sides before it is called.
+
+## 9. Spoken strings
+
+The pass-1 extractor was rebuilt with two fixes it needed for these files:
+f-string *fragments* are no longer emitted as separate candidates (they were
+drowning the signal at 50% false-miss), and Python `+` chains of literals and
+expressions are now folded into one normalised string, because
+`city_business.py` and `models/business.py` assemble almost every long line
+that way.
+
+| Python file | candidate spoken strings | no verbatim Rust match |
+|---|---|---|
+| `states/city_business.py` | 119 | 5 |
+| `states/city_garage.py` | 99 | 0 |
+| `states/driving_menu_states.py` | 247 | 2 |
+| `models/business.py` | 75 | 9 |
+| `models/settlement.py` | 5 | 0 |
+| `models/jobs.py` | 57 | 6 |
+| `models/trailer_yard.py` | 18 | 0 |
+| **total** | **620** | **22** |
+
+All 22 read side by side. **All 22 are assembly differences, not text
+differences** — the same bytes reached by a different concatenation, exactly the
+pattern pass 1 found. Detail:
+
+- `city_business.py:212,219,249,271,292` — five `"<prefix>. " + " ".join(reasons)`
+  sites vs `city_business.rs:82,90,134,164,194` `format!("<prefix>. {}", reasons.join(" "))`.
+  Identical, including the empty-reasons fallback: Python
+  `(" ".join(reasons) or "Not available yet.")` vs `city_business.rs:75-81`
+  `if joined.is_empty() { "Not available yet." } else { joined }`.
+- `driving_menu_states.py:1300` `", and {}"` vs
+  `driving_menu_states/arrival.rs:666-671` — same `", ".join(parts[:-1]) + ", and " + parts[-1]`
+  shape, and the four wear meters are pushed in the same order (tire, brake,
+  engine, road grime) with the same `>= 0.1` gate and `fmt_f(added, 1)`.
+- `driving_menu_states.py:1913` `"Continue to " + self.terminal.name` vs
+  `arrival.rs:1105` `format!("Continue to {}", self.terminal.name)`.
+- `models/business.py:277,282,298` — three more `"<prefix>: " + " ".join(reasons)`
+  sites vs `business.rs:394,401,428`.
+- `models/business.py:319,337,360` — the three long business-status paragraphs,
+  each unmatched only because Python appends the transponder / readiness /
+  next-unlock clauses with `+` while `business.rs:455,472,491` interpolate them
+  as `{transponder}`, `{readiness}`, `{lead}`. Read word for word against
+  `_business_status_summary`; identical, including which clause is conditional
+  and the trailing space before each.
+- `models/jobs.py:286,287,292,301` — `"from " + ...`, `"to " + ...`, and the
+  `describe()` line, vs `jobs.rs:248,249,272`. The one-line Rust `format!` at
+  `jobs.rs:272` is byte-identical to Python's four-part f-string plus the
+  `deadline_covers_rest` ternary plus the `Equipment:` tail.
+
+**Findings in §9: none.**
+
+## 10. Money and number rendering
+
+Every `{...:spec}` slot in the seven Python files was extracted with its
+expression, and every `fmt_grouped` / `fmt_f` / `round_py*` call site in the
+Rust counterparts was listed with its argument. The two lists were then
+reconciled per file, per expression.
+
+| Python file | `,.0f` | `.0f` | `.1f` | `.2f` | Rust `fmt_grouped` | Rust `fmt_f` |
+|---|---|---|---|---|---|---|
+| `city_business.py` | 43 | 1 | 1 | 0 | 43 | 2 |
+| `city_garage.py` | 36 | 26 | 0 | 0 | 36 | 26 |
+| `driving_menu_states.py` | 51 | 23 | 8 | 2 | 51 | 33 |
+| `models/business.py` | 13 | 3 | 0 | 0 | 13 | 3 |
+| `models/settlement.py` | 1 | 0 | 0 | 0 | 1 | 0 |
+| `models/jobs.py` | 1 | 3 | 1 | 0 | 1 | 4 |
+| `models/trailer_yard.py` | 0 | 0 | 1 | 0 | 0 | 1 |
+| **total** | **145** | **56** | **11** | **2** | **145** | **69** |
+
+Not just the counts: the *expressions* reconcile one for one as well. In
+`city_business.rs` for instance, `OWNER_OPERATOR_BUY_IN` twice,
+`AUTHORITY_ACTIVATION_COST` twice, `AUTHORITY_READY_RESERVE` twice,
+`WEIGH_STATION_TRANSPONDER_SIGNUP_FEE` twice, `price` four times,
+`model.price` three, `trailer.purchase_price` three, `trailer.lease_deposit`
+three, `cost` three and `money` nineteen — the same multiplicities as the
+Python file.
+
+**Raw-number scan.** A second sweep walked every `format!` / `write!` / `say`
+site in the Rust counterpart files, split the arguments and the inline
+captures, and flagged any that name something numeric without passing through
+a `pyfmt` / `units` / `Settings::*_text` helper. Twenty-one hits, **all
+integers or already-rendered strings**, none a finding: rank and career
+`level` (`business.rs:196,239,288,338,370,405,422,454,471,481,490`,
+`city_business.rs:1094,1102`, `jobs.rs:331`), the break/sleep stop counts and
+their plural suffixes (`jobs/deadline.rs:85`), the `String`s `owed`
+(`business.rs:440`), `pay_clause` (`arrival.rs:173`), `rate_clause`
+(`arrival.rs:527,535`), `observation_age_value()` (`apps.rs:190`, a `String`
+on both sides) and `cargo_status_clause` (`status.rs:173`).
+
+**Verdict: no raw Rust `{}` or `{:.N}` on a player-facing number anywhere in
+the seven surfaces.** Every one of the 214 specced slots routes through
+`ff_core::pyfmt`. The blunt confirmation: a grep for `{:.` and `{:,` across
+all eleven counterpart Rust files returns **nothing at all** — the port never
+asks Rust to format a number, it always asks `pyfmt`.
+
+**Findings in §10: none.**
+
+## 11. Money arithmetic
+
+Read expression by expression, with attention to where `round()` sits relative
+to a multiply.
+
+**`city_garage.py` — the shop.** `fuel_cost` = `round(fuel_price(region) * gallons, 2)`
+and `fuel_price` = `round(base * market, 2)`; `repair_cost` =
+`round(damage_pct * REPAIR_COST_PER_PCT * damage_severity_mult(damage_pct), 2)`.
+`economy.rs:141-155` has the identical nesting with `round_py_n`, including the
+inner round inside `fuel_cost`.
+
+The three wear services and the tire service share one shape that is easy to
+get wrong and is right on both sides:
+
+```python
+cost = round(wear * cost_per_pct, 2)
+if p.money < cost:
+    serviceable = p.money / cost_per_pct        # unrounded divisor
+    if serviceable < 1: ...refuse...
+    cost = round(serviceable * cost_per_pct, 2) # re-rounded AFTER the multiply
+```
+
+`city_garage.rs:744-755` (generic) and `:471-479` (tires) reproduce it exactly,
+`round_py_n` in both places, the division by the *unrounded* `cost_per_pct`,
+and the re-round after the multiply rather than before. The tire-compound swap
+`round(100 * TIRE_SERVICE_COST_PER_PCT * premium, 2)` keeps the same operand
+order at `city_garage.rs:550`, and the label variants at `:527,533` keep the
+`WINTER_TIRE_PREMIUM` factor on the same side.
+
+The one difference of shape is a Python `getattr`/`setattr` pair against a Rust
+`WearMeter::read`/`write` enum; the meter written back is `max(0.0, wear - serviceable)`
+on both sides, and the *tire* path (which reads the live field rather than the
+captured `wear`) is likewise the live field on both.
+
+**`city_business.py` — the shops.** No arithmetic beyond `p.money -= price`;
+all prices are catalog constants. Order of operations checked anyway at every
+buy: deduct, mutate, save, play sound, speak, award, refresh — the same
+sequence, and the achievement predicates (`len(p.owned_trucks) >= 3`,
+`all(...)` over `UPGRADE_CATALOG`) are evaluated at the same point relative to
+the mutation. `specs.max_torque_nm / 1000` becomes `/ 1000.0` (Python's `/` is
+already true division).
+
+**Findings in §11 so far: none.**
+
+### F2 — PLAYER-VISIBLE: the settlement line uses tank vocabulary where Python used dry-freight vocabulary
+
+`cargo_condition_text(condition_pct, *, liquid: bool = False)`
+(`src/freight_fate/models/cargo_condition.py:179`) swaps the whole vocabulary
+for a tank: `secure / shifted but sound / damaged / badly damaged / ruined`
+becomes `settled / worked / off spec / contaminated / lost`.
+
+The four settlement-line calls in `driving_menu_states.py` **omit** the keyword,
+so Python always speaks the dry-freight words, even for a tank load:
+
+```python
+# src/freight_fate/states/driving_menu_states.py:989,996,1006,1014
+    f"{head} Load {cargo_condition_text(cargo.condition_pct)}, "
+    f"{cargo_condition_text(cargo.condition_pct)} at "
+    f"{cargo_condition_text(cargo.condition_pct)} at "
+    f"arrived {cargo_condition_text(cargo.condition_pct)} at "
+```
+
+The Rust port passes the live flag:
+
+```rust
+// crates/freight-fate/src/states/driving_menu_states/arrival.rs:229,240,251,261
+                cargo_condition_text(cargo.condition_pct, liquid),
+```
+
+with `let liquid = d.trip.truck.liquid.is_some();` (`arrival.rs:304`).
+
+**What the player hears.** Deliver a damaged tank load. Python's settlement says
+"the load arrived **damaged** at 24 percent"; the Rust port says "the load
+arrived **off spec** at 24 percent". At a refused load it is "ruined" against
+"lost", and in terse mode "Load damaged, 24 percent" against "Load off spec, 24
+percent". Only liquid freight is affected, and only when the load took damage —
+but the four other places these words are spoken (`driving_damage.py:137,176`,
+`driving_liquid.py:225`) *do* pass `liquid`, so a tank driver hears the tank
+words all run and then the dry words at the dock. Python is inconsistent; the
+port quietly made it consistent.
+
+**Not fixed here.** `driving_menu_states/` is owned by another agent right now
+and the brief forbids editing it. It is also not unambiguous: the Rust reading
+is arguably the intended text and the Python line arguably the bug, so which
+way it goes is the lead's call. The one-line-per-site correction to match
+Python is `cargo_condition_text(cargo.condition_pct, false)` at
+`arrival.rs:229,240,251,261`.
+
+### §11 continued — the models
+
+**`models/business.py` — the settlement engine.** Read line by line against
+`ff-core/src/models/business.rs:505-700`. Everything matches, including the
+things a port usually gets wrong here:
+
+- `company_driver_pay`: `round(max(wage_floor, wage_share) + bonus, 2)` — the
+  round is outside the `max` and outside the `+ bonus` on both sides
+  (`business.rs:530`), and `wage_floor = plan.stop_pay + job.distance_mi * plan.min_per_mile`
+  keeps the multiply inside the add.
+- `reputation_pay_bonus`: `max(0.0, min(1.0, (rep - 50.0) / 50.0))` ==
+  `((rep - 50.0) / 50.0).clamp(0.0, 1.0)`, then one `round(_, 2)` after both
+  multiplies.
+- `owner_operator_charges` / `independent_authority_charges_for_trailers`:
+  eleven per-mile charges, each `round(miles * RATE, 2)` — never
+  `round(miles, 2) * RATE` — and the two share-of-gross charges
+  (`OWNER_SETTLEMENT_FEE_SHARE`, `AUTHORITY_FACTORING_FEE_SHARE`) round after
+  the multiply. Charge order in the vector is the same, which matters because
+  `charge_summary` reads them out in order.
+- `build_business_settlement`: `raw = gross - driver_charges - sum(charges)` is
+  computed **before** the `max(0.0, ...)` and `_uncollected` is fed the
+  *unfloored* `raw` on both sides — the one place where a misplaced floor
+  would silently forgive a debt.
+- The keyword defaults survive: Python's `deadline_business` call omits
+  `reputation=`, and `arrival.rs:342-347` builds a separate
+  `deadline_terms` with `reputation: None` rather than reusing `terms`.
+
+**`models/jobs.py`.** `payout` applies the four multipliers in the same order
+with `round` only at the end (`jobs.rs:362-376`); `_make_job` computes
+`round(max(base_pay, minimum_pay_for_level(miles, level)) * mult * direct_mult, 2)`
+with the round outside both multiplies (`jobs/board.rs:601-604`), and draws
+`weight` before `rate` from the same RNG. `minimum_pay_for_level`
+(`jobs/deadline.rs:369-394`) reproduces the taper, the flat floor and the
+long-haul override in order. The whole 18-entry `CARGO_CATALOG` was compared
+field by field — key, label, `rate_per_mile`, `weight_tons`, endorsement,
+`fragile`, `min_level`, `tank`, `baffled` — and matches, in insertion order
+(`IndexMap`).
+
+**`models/trailer_yard.py`.** The seed function is
+`int.from_bytes(sha256("|".join(str(p) for p in parts)).digest()[:6], "big")`
+and `trailer_yard.rs:158-163` builds the same six bytes into a `u64`. The
+`job.distance_mi` component of the `assigned` and `detention` seeds goes
+through `py_str_float`, which is what makes `78.0` render as `"78.0"` and not
+`"78"` — the exact trap §3 flagged, handled. `roll * roll / 100.0`,
+`seed // 7`, `seed // 13`, `1000 + seed % 8999` and the `round(_, 0)` on the
+slow-shipper extra all match, and `detention_pay` is
+`round(minutes / 60.0 * DETENTION_PER_HOUR, 2)` on both sides.
+
+**`models/settlement.py`.** Identical, including the fixed 185.0 / 45.0
+amounts, the two membership sets, and detention entering the ledger as a
+*negative* charge.
+
+**`driving_menu_states.py` — the settlement screens.** The two long money
+paragraphs were read slot by slot: the 18-slot delivery line
+(`driving_menu_states.py:1261-1277` vs `arrival.rs:604-627`) and the 9-slot
+paperwork preview (`:833-845` vs `facility_arrival.rs:293-309`). Both have
+every argument in the same position. So do the four cargo-settlement branches
+(`:987-1017` vs `arrival.rs:227-264`), where two branches say the claim value
+before the pay loss and two say it after — and the port keeps each branch's
+own order.
+
+The mutation ordering around the money is the same as well: `p.money += net_pay`
+happens before the paragraph reads `p.money`, `p.game_hours += hours` before
+the paragraph reads the local clock, and `apply_hard_cap` before
+`p.carrier_name` is spoken next to the written-off figure. `deductions_from_settlement`,
+`settle_cargo`, `preventable_damage_charge` and `debt_line` live in
+`models/solvency.py`, audited in pass 1.
+
+**Findings in §11: none.** (F2, above, is a word choice, not arithmetic.)
+
+## 12. Constants and thresholds
+
+Every module-level `NAME = <literal>` in the seven Python files was extracted
+and compared numerically against every `pub const NAME` in
+`crates/ff-core/src` and `crates/freight-fate/src`, evaluating Rust constant
+expressions where they are pure arithmetic.
+
+**Zero numeric divergences.** Four Python names have no `const` of that name,
+all of them tables rather than scalars, and each was checked in its Rust form
+instead: `CARGO_CATALOG` (an `IndexMap` in `jobs/catalog.rs`, compared entry by
+entry above), `ENDORSEMENT_LABELS` (the `endorsement_label` function),
+`FACILITY_CARGO` (derived from `FACILITY_CARGO_ROLES` on both sides) and
+`_CANDIDATES_CACHE` (a cache, not data).
+
+Spot-read for the shop thresholds specifically, since they gate spoken text:
+`TERMINAL_FUEL_MIN`, `TERMINAL_REPAIR_MIN`, `TERMINAL_TIRE_MIN`,
+`TERMINAL_BRAKE_MIN`, `TERMINAL_WASH_MIN`, `TERMINAL_CHAINS_MIN`,
+`TRUCK_WASH_COST`, `CHAIN_SET_COST`, `TIRE_SERVICE_COST_PER_PCT`,
+`WINTER_TIRE_PREMIUM`, `BRAKE_SERVICE_COST_PER_PCT`,
+`ENGINE_OVERHAUL_COST_PER_PCT`, `SETTLEMENT_LOW_FUEL_FRACTION`,
+`ROAD_GRIME_PER_MILE`, the whole `OWNER_OPERATOR_*` / `AUTHORITY_*` /
+`WEIGH_STATION_TRANSPONDER_*` family, `DETENTION_FREE_MIN`,
+`DETENTION_PER_HOUR`, `LIVE_LOAD_SLOW_EXTRA_MIN`, `DROP_HOOK_MIN`,
+`LIVE_LOAD_MIN`, `DROP_EMPTY_MIN`, `LIVE_UNLOAD_MIN`, `TRAILER_SWAP_MIN`,
+`REPUTATION_BONUS_MAX_SHARE`, `HOOKUP_FEE`, `DIRECT_FREIGHT_PAY_MULT`,
+`ASSIGNED_REPOSITION_PAY_FRACTION`, and the four by-level rate tables. All
+equal, and the comparison operators around each (`< 1`, `>= 1.0`, `>= 0.1`,
+`> 1`, `>= 100`, `>= 75.0`) match at every use site read in §10-11.
+
+**Findings in §12: none.**
+
+## 13. Findings of pass 2
+
+**Totals: PLAYER-VISIBLE 1, LATENT 0, COSMETIC 0.**
+
+- **F2** (above) — PLAYER-VISIBLE, **not fixed**: the settlement lines speak
+  tank vocabulary where Python speaks dry-freight vocabulary, because the Rust
+  port passes a `liquid` flag Python's four call sites leave at its `False`
+  default. Written up for the lead rather than fixed: the file is owned by
+  another agent this session, and which text is *right* is a design call.
+
+- **F1** (pass 1, §6) — **FIXED**. The inspection dedupe key now renders its
+  float the way Python's `str(round(x, 1))` does:
+
+  ```diff
+  --- a/crates/freight-fate/src/states/driving_events/trip_events.rs
+  +++ b/crates/freight-fate/src/states/driving_events/trip_events.rs
+  @@ -873,7 +873,7 @@ pub fn handle_inspection
+               event.text(),
+  -            ff_core::pyfmt::round_py_n(self.trip.position_mi, 1),
+  +            ff_core::pyfmt::fmt_f(self.trip.position_mi, 1),
+               self.hos_fine_count
+  ```
+
+  `fmt_f(x, 1)` rounds half-to-even at the format layer, which is exactly
+  `str(round(x, 1))` for the whole range `position_mi` can take, so mile 10.0
+  is now `"10.0"` and not `"10"`. **`cargo check -p freight-fate` could not
+  confirm the build**: the crate is currently broken by another agent's
+  in-flight edit (two `E0433` errors for missing `OnlineOfferState` and
+  `CityMenuState` imports in `states/main_menu.rs`), and neither error touches
+  this file. The change is a same-arity swap between two `Display` values.
+
+### Notes for the lead (not defects)
+
+1. **Defensive fallbacks with no Python counterpart.** Three places where the
+   port returns a value where Python would raise: `minimum_pay_for_level`
+   clamps `lvl` with `.max(1)` (`jobs/deadline.rs:370`) where Python would
+   `KeyError` below level 1; `endorsement_course_cost(key).unwrap_or(0.0)`
+   (`city_business.rs:1011,1091`) where Python indexes the dict; and
+   `Job::describe` substitutes `"Pays"` for an empty `pay_label`
+   (`jobs.rs:255-259`) where Python would speak the empty string. All three are
+   unreachable today — level is always ≥ 1, the keys always exist, and the one
+   `pay_label=` caller (`city.py:1573`) passes `pay_label()`, which never
+   returns `""`.
+2. **`f64::clamp` vs `max(0.0, min(1.0, x))` on NaN.** `reputation_pay_bonus`
+   would give `1.0` in Python and `NaN` in Rust for a NaN reputation
+   (`business.rs:510`). Reputation is never NaN; noted only because the same
+   substitution appears elsewhere in the port.
+
+## 14. Coverage, and where pass 2 stopped
+
+**Covered.** All four requested checks over all seven files: 620 spoken-string
+candidates swept and every one of the 22 non-verbatim matches read on both
+sides; all 214 numeric format slots reconciled expression by expression against
+the Rust `pyfmt` call sites, plus an independent raw-number scan over every
+`format!`/`say` site in the counterpart files; every module constant compared
+numerically; and every money expression in the seven files read with attention
+to rounding position.
+
+Full method bodies read side by side, Python then Rust: `_refuel` /
+`_partial_refuel`, `_repair` / `_partial_repair`, `_service_wear_meter`,
+`_service_tires`, `_swap_tire_compound`, `_buy_chains`, `_wash_truck`, all the
+`_label` readers in both shop files, `_buy` (upgrades), `_pick` (trucks),
+`_lease` / `_buy_trailer`, the endorsement course flow, `_business_status_summary`,
+`next_business_unlock`, the three eligibility functions, `build_business_settlement`
+and its three branches, `company_driver_pay`, `reputation_pay_bonus`, the two
+charge builders, `Job.describe`, `Job.payout`, `_make_job`,
+`minimum_pay_for_level`, the whole of `trailer_yard.py` and `settlement.py`,
+`_driver_lines`, `_paperwork`, `_status`, `_cargo_settlement_line`, `_settle`
+(all ~400 lines of it) and `_debt_settlement_lines`.
+
+**Not covered.**
+
+1. **`driving_menu_states/badges.rs`, `apps.rs`, `drive_ref.rs`** were covered
+   by the string sweep and the format-slot reconciliation but not read as whole
+   methods; they carry no money arithmetic.
+2. **Argument slots behind inline captures** — same limitation as pass 1: a
+   wrong but same-typed variable bound to the right name survives this audit.
+   All *positional* slots in these files were traced, including the 18-slot
+   delivery line.
+3. **`models/economy.py`, `models/trailers.py`, `models/cargo_condition.py`,
+   `models/career.py`** were read only where they fed a number or a word into
+   the seven target files (`fuel_price` / `fuel_cost` / `repair_cost`,
+   `trailer_program_charge_per_mile`, `cargo_condition_text`,
+   `ENDORSEMENT_LEVELS` / `ENDORSEMENT_COURSE_COSTS`). They are the obvious
+   next block.
+4. **Nothing was run.** The one fix could not be compiled because the game
+   crate is mid-edit by another agent; `ff-core` was not rebuilt because no
+   `ff-core` file was touched.

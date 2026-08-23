@@ -15,11 +15,12 @@ use ff_core::models::trailer_yard::{
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, TimedMessageState};
 use freight_fate::states::city::CityMenuState;
-use freight_fate::states::main_menu::MainMenuState;
 use freight_fate::states::city_pickup::{
     job_origin_exists, pickup_snapshot, PickupFacilityState, PickupOptions, PickupSnapshotOptions,
     RouteSelectState,
 };
+use freight_fate::states::driving::DrivingState;
+use freight_fate::states::main_menu::MainMenuState;
 use states_city_support::*;
 
 /// A dispatch out of a facility that stages loaded trailers.
@@ -385,7 +386,7 @@ fn test_owner_operator_route_menu_lists_routes_and_starts_one() {
 
     key(&mut app, Key::Home);
     key(&mut app, Key::Return);
-    assert!(is_placeholder(&app, "Driving"));
+    assert!(is::<DrivingState>(&app));
     assert!(app
         .main_lines()
         .iter()
@@ -438,39 +439,27 @@ fn test_pickup_snapshot_carries_the_resume_fields() {
 // -- what still needs the drive ----------------------------------------------------------
 
 #[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
-fn test_accepting_job_starts_drivable_pickup_leg() {}
-
-#[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
-fn test_pickup_facility_waits_for_full_stop() {}
-
-#[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
-fn test_pickup_arrival_settles_the_engine_to_idle() {}
-
-#[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
+#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
 fn test_quit_during_pickup_drive_resumes_from_the_last_stop() {}
 
 #[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
+#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
 fn test_departing_loaded_trip_keeps_idling_engine() {}
 
 #[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
+#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
 fn test_a_refused_trailer_does_not_follow_the_driver_onto_the_road() {}
 
 #[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
+#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
 fn test_an_unrefused_defect_is_what_the_inspector_finds() {}
 
 #[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
+#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
 fn test_speed_control_stays_paused_until_departure() {}
 
 #[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
+#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
 fn test_arming_by_hand_at_the_gate_still_works() {}
 
 // -- the facility engine kill switch (tests/test_facility_engine.py) ------------------
@@ -521,7 +510,9 @@ fn load_out(app: &mut TestApp) {
 fn test_pickup_facility_offers_shutdown_and_then_restart() {
     let mut app = TestApp::new();
     pickup_running(&mut app);
-    assert!(labels::<PickupFacilityState>(&app).iter().any(|l| l == SHUT_DOWN));
+    assert!(labels::<PickupFacilityState>(&app)
+        .iter()
+        .any(|l| l == SHUT_DOWN));
 
     select::<PickupFacilityState>(&mut app, SHUT_DOWN);
     assert!(!with_state::<PickupFacilityState, _>(&app, |p, _| p
@@ -558,7 +549,6 @@ fn test_the_primary_action_stays_the_first_item() {
 }
 
 #[test]
-#[ignore = "needs the resume hand-off wired: states::main_menu::world_entry_state still returns todo_state(\"PickupFacilityState\") instead of PickupFacilityState::from_snapshot"]
 fn test_engine_off_at_the_pickup_survives_save_and_quit() {
     let mut app = TestApp::new();
     pickup_running(&mut app);
@@ -646,11 +636,10 @@ fn test_departing_with_the_engine_off_names_the_start_control() {
     select::<PickupFacilityState>(&mut app, SHUT_DOWN);
     select::<PickupFacilityState>(&mut app, "Depart for destination");
 
-    // The state the departure hands to is still a placeholder
-    // (`states::city::launch_driving` pushes `todo_state("Driving")`), so the
-    // engine's state on the resumed drive is checked by the driving suite;
-    // the line the driver hears is what this case is about.
-    //
+    assert!(is::<DrivingState>(&app));
+    assert!(!with_state::<DrivingState, _>(&app, |d, _| d
+        .truck()
+        .engine_on));
     // The first-run tutorial and any achievement speak after departure, so
     // find the departure line rather than trusting the last thing said.
     let lines = app.main_lines();
@@ -661,7 +650,10 @@ fn test_departing_with_the_engine_off_names_the_start_control() {
     // Never "Departing now" over a dead engine, and the key named is the one
     // this driver's settings actually bind.
     assert!(!departure.contains("Departing now"), "{departure}");
-    assert!(departure.contains(&app.ctx.control_hint("engine")), "{departure}");
+    assert!(
+        departure.contains(&app.ctx.control_hint("engine")),
+        "{departure}"
+    );
 }
 
 #[test]
@@ -671,7 +663,9 @@ fn test_departing_with_the_engine_running_still_just_departs() {
     load_out(&mut app);
     select::<PickupFacilityState>(&mut app, "Depart for destination");
 
-    // As above: the drive itself is behind `launch_driving`'s placeholder.
+    assert!(with_state::<DrivingState, _>(&app, |d, _| d
+        .truck()
+        .engine_on));
     let lines = app.main_lines();
     let departure = lines
         .iter()
@@ -708,4 +702,164 @@ fn test_pickup_status_and_screen_report_the_engine() {
         .visible_lines()
         .iter()
         .any(|line| line.contains("Engine: off")));
+}
+
+// -- the drivable pickup leg (tests/test_pickup_loading.py, drive half) ---------------
+//
+// The Python fixtures walked the whole new-career flow to reach the deadhead;
+// here the assigned board is pushed directly and the assignment accepted,
+// which is the same hand-off (`states::city::board` -> `launch_driving`).
+
+/// `accept_pickup_drive`: take the assigned dispatch and end up on the
+/// deadhead to the shipper.
+fn accept_pickup_drive(app: &mut TestApp) {
+    career(app, "Pickup Drive", "Chicago");
+    profile_mut(app)
+        .achievements
+        .push("first_dispatch".to_string());
+    let board = freight_fate::states::city::JobBoardState::new(
+        &app.ctx,
+        vec![drop_yard_job("chicago-live-load", 92.0)],
+    );
+    app.push_state(board);
+    key(app, Key::Return); // accept assigned dispatch
+    assert!(is::<DrivingState>(app), "the deadhead starts");
+    assert_eq!(
+        with_state::<DrivingState, _>(app, |d, _| d.phase.to_string()),
+        freight_fate::states::driving_core::DRIVE_PHASE_PICKUP
+    );
+}
+
+/// `arrive_at_pickup`: put the deadhead on the shipper's doorstep at
+/// `speed_mps` and run one frame.
+fn arrive_at_pickup(app: &mut TestApp, speed_mps: f64) {
+    with_state_mut::<DrivingState, _>(app, |d, ctx| {
+        d.trip.position_mi = d.trip.total_miles();
+        d.trip.finished = true;
+        d.trip.truck.velocity_mps = speed_mps;
+        d.update_frame(ctx, 1.0 / 60.0);
+    });
+    app.ctx.run_deferred();
+    if speed_mps <= 0.45 {
+        finish_timed_state(app);
+        assert!(is::<PickupFacilityState>(app));
+    }
+}
+
+#[test]
+fn test_accepting_job_starts_drivable_pickup_leg() {
+    let mut app = TestApp::new();
+    accept_pickup_drive(&mut app);
+
+    assert!(is::<DrivingState>(&app));
+    assert!(!is::<PickupFacilityState>(&app));
+    let trip = profile(&app).active_trip.clone().expect("a saved trip");
+    assert_eq!(trip["kind"], "pickup_drive");
+    assert!(!trip["job"]["origin_facility_id"]
+        .as_str()
+        .unwrap()
+        .is_empty());
+    let (legs, miles, total, remaining) = with_state::<DrivingState, _>(&app, |d, _| {
+        (
+            d.trip.route.legs.len(),
+            d.trip.route.miles(),
+            d.trip.total_miles(),
+            d.trip.remaining_miles(),
+        )
+    });
+    let first_line = app.visible_lines()[0].clone();
+    // A chain-capable yard deadheads on its real street chain (short but
+    // multi-leg); facilities without one keep the 2-mile-plus fallback.
+    if legs >= 2 {
+        assert!(miles > 0.5);
+    } else {
+        assert!(miles > 2.0);
+    }
+    assert_eq!(total, miles);
+    assert_eq!(remaining, miles);
+    assert!(first_line.contains("Deadheading to pickup"), "{first_line}");
+    let dispatch: Vec<String> = app
+        .main_lines()
+        .into_iter()
+        .filter(|text| text.contains("Dispatch accepted from"))
+        .collect();
+    assert!(!dispatch.is_empty());
+    assert!(dispatch.last().unwrap().contains("Deadhead"));
+}
+
+#[test]
+fn test_pickup_facility_waits_for_full_stop() {
+    let mut app = TestApp::new();
+    accept_pickup_drive(&mut app);
+
+    // Python rolled in at 26.8 m/s; this facility's approach is a 15 mph
+    // street, so that speed puts an overspeed warning after the cue. Any
+    // speed above the gate's stop threshold exercises the same branch.
+    arrive_at_pickup(&mut app, 6.0);
+    assert!(is::<DrivingState>(&app));
+    let last = app.event_lines().last().cloned().unwrap_or_default();
+    assert!(last.contains("Pickup ahead"), "{last}");
+    assert!(
+        last.to_lowercase().contains("come to a complete stop"),
+        "{last}"
+    );
+
+    // Inside the creep band (DELIVERY_PARK_MPH) but not stopped. The creep
+    // cue is queued rather than spoken over the one before it, so give the
+    // event channel a few frames to reach it.
+    for _ in 0..30 {
+        with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+            d.trip.truck.velocity_mps = 1.1;
+            d.update_frame(ctx, 1.0 / 60.0);
+        });
+        app.ctx.run_deferred();
+    }
+    assert!(is::<DrivingState>(&app));
+    let events = app.event_lines();
+    assert!(
+        events.iter().any(|line| line.contains("Stop to check in")),
+        "{events:?}"
+    );
+
+    with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+        d.trip.truck.velocity_mps = 0.0;
+        d.update_frame(ctx, 1.0 / 60.0);
+    });
+    app.ctx.run_deferred();
+    assert!(
+        app.visible_lines()[0].contains("Pulling into pickup"),
+        "{:?}",
+        app.visible_lines()[0]
+    );
+}
+
+/// The pickup check-in gate must not freeze engine audio at whatever rev the
+/// truck was carrying on the approach -- same defect class as the
+/// already-fixed police-stop freeze.
+#[test]
+fn test_pickup_arrival_settles_the_engine_to_idle() {
+    let mut app = TestApp::new();
+    accept_pickup_drive(&mut app);
+    arrive_at_pickup(&mut app, 6.0);
+
+    let (rpm, idle, throttle) = with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+        d.trip.truck.velocity_mps = 0.0;
+        // revs still up from the approach
+        d.trip.truck.rpm = d.trip.truck.specs.max_rpm;
+        d.update_frame(ctx, 1.0 / 60.0);
+        (
+            d.trip.truck.rpm,
+            d.trip.truck.specs.idle_rpm,
+            d.trip.truck.throttle,
+        )
+    });
+    app.ctx.run_deferred();
+
+    assert!(
+        app.visible_lines()[0].contains("Pulling into pickup"),
+        "{:?}",
+        app.visible_lines()[0]
+    );
+    assert!((rpm - idle).abs() < 1e-6, "{rpm} vs idle {idle}");
+    assert_eq!(throttle, 0.0);
 }

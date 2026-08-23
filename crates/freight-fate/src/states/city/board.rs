@@ -243,6 +243,11 @@ impl JobBoardState {
         &self.jobs[self.assigned_queue[0]]
     }
 
+    /// `_assigned_queue`: the order dispatch will offer the board in.
+    pub fn assigned_queue(&self) -> &[usize] {
+        &self.assigned_queue
+    }
+
     fn describe(&self, ctx: &GameContext, job: &Job, index: Option<usize>) -> String {
         describe_job(ctx, self.jobs.len(), job, index)
     }

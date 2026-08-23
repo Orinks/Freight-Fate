@@ -4,9 +4,8 @@
 //! the app parts of `tests/test_career_start_options.py` and the notice
 //! screens of `tests/test_save_migration.py`.
 //!
-//! Screens owned by other port tasks (the city hub, the online offer) are
-//! still `todo_state` placeholders; where the Python flow landed on
-//! `CityMenuState`, these tests assert the placeholder for it.
+//! The city hub, the online offer and the mid-trip resume are all real
+//! here, so these tests assert the screen the Python flow landed on.
 
 mod states_main_menu_support;
 
@@ -15,6 +14,7 @@ use ff_core::models::start_options::DEFAULT_START_KEY;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::version;
 use freight_fate::states::base::{Key, State};
+use freight_fate::states::city::CityMenuState;
 use freight_fate::states::main_menu::{
     self, enter_world, CareerActionsState, CareerStartState, ConfirmCareerActionState,
     ConfirmQuitState, HomeCityState, HomeTerminalState, LoadDriverState, MainMenuState,
@@ -110,7 +110,7 @@ fn the_main_menu_welcomes_and_walks_a_new_career_to_the_home_city() {
         .iter()
         .any(|line| line.starts_with("First-day briefing")));
     assert_eq!(app.ctx.stack_len(), 2);
-    assert!(is_placeholder(&app, "CityMenuState"));
+    assert!(is::<CityMenuState>(&app));
 }
 
 #[test]
@@ -252,7 +252,7 @@ fn test_new_company_career_choice_creates_company_profile() {
 
     // The city hub is another task's screen; the placeholder stands where
     // `CityMenuState` will.
-    assert!(is_placeholder(&app, "CityMenuState"));
+    assert!(is::<CityMenuState>(&app));
     let profile = app.ctx.profile.clone().unwrap();
     assert_eq!(profile.carrier_name, "Prairie Link Regional");
     assert_eq!(profile.business_status, "company_driver");
@@ -291,7 +291,7 @@ fn test_migration_notice_shows_once_then_enters_world() {
     assert_eq!(labels::<SaveMigrationNoticeState>(&app)[0], "OK");
 
     key(&mut app, Key::Return);
-    assert!(is_placeholder(&app, "CityMenuState"));
+    assert!(is::<CityMenuState>(&app));
     assert!(!app.ctx.profile.as_ref().unwrap().migration_notice_pending);
 
     // The dismissal is saved: a fresh load goes straight into the world.
@@ -300,7 +300,7 @@ fn test_migration_notice_shows_once_then_enters_world() {
     assert!(!app.ctx.profile.as_ref().unwrap().migration_notice_pending);
     enter_world(&mut app.ctx, false);
     app.ctx.run_deferred();
-    assert!(is_placeholder(&app, "CityMenuState"));
+    assert!(is::<CityMenuState>(&app));
 }
 
 #[test]
@@ -311,7 +311,7 @@ fn test_migration_notice_escape_also_acknowledges() {
     app.ctx.run_deferred();
     assert!(is::<SaveMigrationNoticeState>(&app));
     key(&mut app, Key::Escape);
-    assert!(is_placeholder(&app, "CityMenuState"));
+    assert!(is::<CityMenuState>(&app));
     assert!(!app.ctx.profile.as_ref().unwrap().migration_notice_pending);
 }
 
@@ -336,7 +336,7 @@ fn test_modified_notice_shows_once_then_enters_world() {
         .any(|text| text.contains("marked as modified")));
 
     key(&mut app, Key::Return);
-    assert!(is_placeholder(&app, "CityMenuState"));
+    assert!(is::<CityMenuState>(&app));
     assert!(!app.ctx.profile.as_ref().unwrap().integrity_notice_pending);
     // The mark itself never clears from a dismissal.
     assert!(app.ctx.profile.as_ref().unwrap().integrity_modified);
@@ -346,7 +346,7 @@ fn test_modified_notice_shows_once_then_enters_world() {
     assert!(!app.ctx.profile.as_ref().unwrap().integrity_notice_pending);
     enter_world(&mut app.ctx, false);
     app.ctx.run_deferred();
-    assert!(is_placeholder(&app, "CityMenuState"));
+    assert!(is::<CityMenuState>(&app));
 }
 
 // -- manage careers -----------------------------------------------------------------
@@ -394,5 +394,5 @@ fn continue_latest_career_welcomes_the_driver_back() {
         .main_lines()
         .iter()
         .any(|line| line.starts_with("Welcome back, Road Star. You are parked at")));
-    assert!(is_placeholder(&app, "CityMenuState"));
+    assert!(is::<CityMenuState>(&app));
 }

@@ -22,8 +22,8 @@ use freight_fate::states::base::TimedMessageState;
 use freight_fate::states::city_pickup::PickupFacilityState;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
-use freight_fate::states::driving_menu_states::FacilityArrivalState;
 use freight_fate::states::driving_facility_gate::GATE_MISS_LOOP_MIN;
+use freight_fate::states::driving_menu_states::FacilityArrivalState;
 use freight_fate::states::driving_stops::{
     assist_full_decel_mps2, assist_servo_brake, bar_solid_zone_mi, bar_tick_range_mi,
 };

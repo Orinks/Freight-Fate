@@ -6,9 +6,8 @@
 //! `tests/test_debt_and_standing.py` and `tests/test_enforcement_record.py`,
 //! and the board cases of `tests/test_career_unlocks.py`.
 //!
-//! The driving state belongs to another port task, so every flow that ends
-//! at the wheel lands on `states::city::todo_state("Driving")` here; the
-//! tests that need the real drive stay ignored.
+//! Every flow that ends at the wheel now lands on the real `DrivingState`,
+//! through `states::city::launch_driving`.
 
 mod states_city_support;
 
@@ -31,6 +30,7 @@ use freight_fate::states::city::{
     assigned_reposition_for_board, dispatch_cache_key, open_freight_market, CityMenuState,
     JobBoardState, JobDetailState, PayDebtState, RouteSelectState, JOB_BOARD_INTRO_HELP,
 };
+use freight_fate::states::driving::DrivingState;
 use freight_fate::states::main_menu::MainMenuState;
 use serde_json::{json, Map, Value};
 use states_city_support::*;
@@ -147,7 +147,7 @@ fn test_single_candidate_assignment_offers_no_decline() {
 }
 
 #[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
+#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
 fn test_accepting_assignment_starts_pickup_drive() {}
 
 #[test]
@@ -197,7 +197,7 @@ fn test_company_departure_runs_dispatch_assigned_route() {
 
     key(&mut app, Key::Return); // depart
 
-    assert!(is_placeholder(&app, "Driving"));
+    assert!(is::<DrivingState>(&app));
     let departure = app
         .main_lines()
         .into_iter()
@@ -224,7 +224,7 @@ fn test_senior_company_departure_is_still_dispatch_routed() {
 
     key(&mut app, Key::Return); // depart
 
-    assert!(is_placeholder(&app, "Driving"));
+    assert!(is::<DrivingState>(&app));
     assert!(!stack_has::<RouteSelectState>(&app));
 }
 
@@ -483,8 +483,7 @@ fn test_job_detail_accept_command_accepts_and_escape_returns() {
 
     key(&mut app, Key::F1);
     select::<JobDetailState>(&mut app, "Accept this dispatch");
-    // The pickup drive is the driving port's; the placeholder stands in.
-    assert!(is_placeholder(&app, "Driving"));
+    assert!(is::<DrivingState>(&app));
     assert!(!stack_has::<JobDetailState>(&app));
 }
 
@@ -868,7 +867,7 @@ fn test_assigned_reposition_pays_reduced_rate_and_awards_mileage_xp() {
 }
 
 #[test]
-#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
+#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
 fn test_abandoning_assigned_reposition_costs_reputation_only() {}
 
 // -- tests/test_career_unlocks.py (board parts) ---------------------------------------
@@ -1562,4 +1561,55 @@ fn test_direct_freight_board_pays_more_and_uses_direct_label() {
     let row = labels::<JobBoardState>(&app)[0].clone();
     assert!(row.contains("Direct gross"));
     assert!(row.contains("Trailer program:"));
+}
+
+// -- tests/test_dispatch_variety.py (the dispatch-queue half) -------------------------
+//
+// Owner playtest 2026-07-15: level-1 assigned dispatch bounced the same two
+// cities forever (Winslow to Holbrook, again and again). The assignment queue
+// stable-partitions fresh candidates so an unseen lane goes first -- score
+// order still rules inside each group, and an all-recent board changes
+// nothing, so the nudge can delay a repeat but never block dispatch.
+// (`remember_lane` itself is pinned by the profile's own tests.)
+
+#[test]
+fn test_assignment_prefers_a_lane_not_recently_run() {
+    use ff_core::models::jobs::{lane_key, JobBoard, OfferOptions};
+
+    let mut app = TestApp::new();
+    career(&mut app, "Variety", "denver_co_us");
+    let world = app.ctx.world;
+    let jobs = JobBoard::seeded(world, 11).offers(
+        "denver_co_us",
+        &[] as &[&str],
+        OfferOptions {
+            count: 4,
+            level: 1,
+            ..OfferOptions::default()
+        },
+    );
+    let lanes: std::collections::BTreeSet<String> =
+        jobs.iter().map(|job| lane_key(world, job)).collect();
+    assert!(lanes.len() >= 2, "need lane variety to test");
+
+    let baseline = JobBoardState::new(&app.ctx, jobs.clone());
+    let baseline_queue = baseline.assigned_queue().to_vec();
+    let first = jobs[baseline_queue[0]].clone();
+
+    // The driver just ran the would-be assignment's lane: dispatch now leads
+    // with a different one.
+    profile_mut(&mut app).remember_lane(&lane_key(world, &first));
+    let varied = JobBoardState::new(&app.ctx, jobs.clone());
+    assert_ne!(
+        lane_key(world, &jobs[varied.assigned_queue()[0]]),
+        lane_key(world, &first)
+    );
+
+    // Every candidate recently run: order falls back to plain score order.
+    for job in &jobs {
+        let lane = lane_key(world, job);
+        profile_mut(&mut app).remember_lane(&lane);
+    }
+    let saturated = JobBoardState::new(&app.ctx, jobs);
+    assert_eq!(saturated.assigned_queue(), baseline_queue);
 }
