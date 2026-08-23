@@ -563,7 +563,10 @@ fn test_corridor_metadata_supports_offline_itineraries() {
         .map(|c| c.state.as_str())
         .collect();
     assert_eq!(crossings, vec!["Indiana"]);
-    assert_eq!(leg.state_crossings()[0].at_mi, 32.8);
+    // 33.16, not the 32.8 this used to pin: correcting Chicago-Indianapolis
+    // from 183 to the 185 miles its baked route actually runs carried every
+    // along-route position with it (tools/repair_leg_mileage.py).
+    assert_eq!(leg.state_crossings()[0].at_mi, 33.16);
     assert!(leg.checkpoints().iter().any(|c| c.name == "Lafayette"));
     let total: f64 = leg.state_miles().iter().map(|m| m.miles).sum();
     assert_eq!(total, leg.miles);
@@ -797,7 +800,9 @@ fn test_route_describe_mentions_miles_and_highway() {
     let world = world();
     let route = shortest(world, "Chicago", "Indianapolis");
     let text = route.describe("");
-    assert!(text.contains("183"), "{text}");
+    // 185, not 183: the curated figure was short of the road the corridor was
+    // baked from, and the archive is a proven lower bound on it.
+    assert!(text.contains("185"), "{text}");
     assert!(text.contains("I-65"), "{text}");
 }
 
@@ -1053,6 +1058,103 @@ fn test_the_detour_leg_is_dispatchable() {
     let world = world();
     let r = supported(world, "farmington_nm_us", "salt_lake_city_ut_us");
     assert!(r.cities.iter().any(|c| c == "moab_ut_us"), "{:?}", r.cities);
+}
+
+/// A road cannot be shorter than the straight line between its endpoints.
+///
+/// 36 legs were, because `leg.miles` is curated and some of the numbers were
+/// simply too small -- Poplar Bluff to Jonesboro stored 55 miles for a 95 mile
+/// road, Altus to Wichita Falls 50 for 85.
+///
+/// Nothing caught it because nothing disagreed: the corridor bake rescales
+/// every layer onto `leg.miles`, so the grades ended exactly at the stored
+/// figure and `state_miles` summed to it precisely. They were the same number
+/// wearing different hats, not independent witnesses. This test is the one
+/// witness that owes the data nothing.
+#[test]
+fn test_no_leg_is_shorter_than_the_straight_line_between_its_cities() {
+    let world = world();
+    let mut offenders: Vec<(&str, &str, f64, f64)> = Vec::new();
+    for leg in &world.legs {
+        let (Some(a), Some(b)) = (world.cities.get(&leg.a), world.cities.get(&leg.b)) else {
+            continue;
+        };
+        if leg.miles == 0.0 {
+            continue;
+        }
+        let (lat1, lon1, lat2, lon2) = (
+            a.lat.to_radians(),
+            a.lon.to_radians(),
+            b.lat.to_radians(),
+            b.lon.to_radians(),
+        );
+        let straight = 3958.8
+            * 2.0
+            * (((lat2 - lat1) / 2.0).sin().powi(2)
+                + lat1.cos() * lat2.cos() * ((lon2 - lon1) / 2.0).sin().powi(2))
+            .sqrt()
+            .min(1.0)
+            .asin();
+        // A whole-mile figure may round up to half a mile under the true road.
+        if leg.miles < straight - 0.5 {
+            offenders.push((&leg.a, &leg.b, leg.miles, (straight * 10.0).round() / 10.0));
+        }
+    }
+    assert!(
+        offenders.is_empty(),
+        "{} legs shorter than their own straight line: {:?}",
+        offenders.len(),
+        &offenders[..offenders.len().min(5)]
+    );
+}
+
+/// Every corridor layer is keyed to leg-miles, so a corrected mileage has to
+/// carry all of them with it.
+///
+/// Correcting 176 leg lengths meant rescaling 49,128 along-route positions.
+/// Missing one container would have left its rows at the old scale, which on a
+/// leg that grew 35 miles means a checkpoint or a limit change landing well
+/// before where it belongs -- or past the end entirely.
+#[test]
+fn test_nothing_on_a_leg_sits_past_the_end_of_it() {
+    let mut offenders: Vec<(&str, &str, &str, f64, f64)> = Vec::new();
+    for leg in &world().legs {
+        if leg.miles == 0.0 {
+            continue;
+        }
+        let limit = leg.miles + 1.0;
+        let layers: [(&str, Vec<f64>); 4] = [
+            (
+                "speed_limits",
+                leg.speed_limits().iter().map(|s| s.at_mi).collect(),
+            ),
+            (
+                "grade end",
+                leg.grade_segments().iter().map(|g| g.end_mi).collect(),
+            ),
+            (
+                "interchanges",
+                leg.interchanges().iter().map(|x| x.at_mi).collect(),
+            ),
+            (
+                "landmarks",
+                leg.landmarks().iter().map(|m| m.at_mi).collect(),
+            ),
+        ];
+        for (label, values) in layers {
+            for value in values {
+                if value > limit {
+                    offenders.push((&leg.a, &leg.b, label, value, leg.miles));
+                }
+            }
+        }
+    }
+    assert!(
+        offenders.is_empty(),
+        "{} positions past their leg end: {:?}",
+        offenders.len(),
+        &offenders[..offenders.len().min(5)]
+    );
 }
 
 #[test]

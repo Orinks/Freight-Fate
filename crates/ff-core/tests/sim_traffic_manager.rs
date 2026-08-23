@@ -591,11 +591,23 @@ fn test_traffic_scales_down_where_the_road_is_slow() {
     while position < 15.0 {
         position += 0.25;
         manager.update(1.0, position, 1.0, None, None);
+        // Judge a vehicle by the stretch it is ON, not by the point it happens
+        // to occupy. A car drawn legitimately for the 55 zone can drift a
+        // tenth of a mile past the boundary, and this test is about the DRAW.
+        // Requiring the whole neighbourhood to be slow keeps the question
+        // ("were interstate speeds drawn in a town?") and drops the bleed --
+        // which a 0.09 mile shift in the boundary is otherwise enough to trip.
         seen.extend(
             manager
                 .vehicles
                 .iter()
-                .filter(|v| manager.posted_limit_at(v.position_mi) <= slow)
+                .filter(|v| {
+                    [-0.3, 0.0, 0.3]
+                        .into_iter()
+                        .map(|offset| manager.posted_limit_at(v.position_mi + offset))
+                        .fold(f64::MIN, f64::max)
+                        <= slow
+                })
                 .map(|v| v.speed_mph),
         );
     }

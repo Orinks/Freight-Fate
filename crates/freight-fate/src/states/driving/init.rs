@@ -484,6 +484,7 @@ impl DrivingState {
             lane_keeping_takes_exit_said: false,
             curve_assist_active: false,
             curve_assist_cue_s: 0.0,
+            curve_assist_spoke: false,
             transition_assist_active: false,
             keeper_mph: None,
             keeper_throttle: 0.0,

@@ -1,6 +1,7 @@
 //! Deadline and minimum-pay model (the `plan_hos` / `required_hours` /
 //! `route_drive_hours` / `minimum_pay_for_level` half of `jobs.py`).
 
+use crate::data::curves::route_curves;
 use crate::data::world::World;
 use crate::data::world_models::{Leg, Route};
 use crate::models::jobs::{Job, LONG_HAUL_MILES};
@@ -251,8 +252,134 @@ pub fn fair_active_deadline(
     round_py_n(job.deadline_game_h.max(full_floor).max(remaining_floor), 1)
 }
 
-/// Route-aware drive-time estimate using posted limits where available.
+/// One `(start_mi, end_mi, advisory_mph)` band of route miles held to a bend's
+/// advisory speed.
+pub type CurveBand = (f64, f64, f64);
+
+/// Non-overlapping `(start_mi, end_mi, advisory)` bands over route miles.
+///
+/// The planner walks the route on posted limits, so every bend a driver has
+/// to slow for was time the plan never budgeted (measured 2026-08-16: 2.8
+/// percent of drive time on average, 5.6 percent Denver to Salt Lake City).
+/// This is the road's own answer to "how fast may a truck be here", read
+/// from the same baked curve records the pacenote layer speaks.
+///
+/// Overlapping bends -- a chained S through a canyon -- collapse to the
+/// TIGHTEST advisory across the overlap, because that is the one binding on
+/// the truck. Connector arcs are excluded: ramps are not on the through
+/// route the planner is timing.
+pub fn curve_ceilings(route: &Route) -> Vec<CurveBand> {
+    let mut bands: Vec<CurveBand> = Vec::new();
+    let mut edges: Vec<f64> = Vec::new();
+    for curve in route_curves(route, &route.cities, true) {
+        if curve.end_mi > curve.start_mi && curve.advisory_mph > 0 {
+            bands.push((curve.start_mi, curve.end_mi, curve.advisory_mph as f64));
+            edges.push(curve.start_mi);
+            edges.push(curve.end_mi);
+        }
+    }
+    if bands.is_empty() {
+        return Vec::new();
+    }
+    // `set` then `sorted` on the Python side: sort, then drop exact repeats.
+    edges.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    edges.dedup();
+    let mut out: Vec<CurveBand> = Vec::new();
+    for pair in edges.windows(2) {
+        let (lo, hi) = (pair[0], pair[1]);
+        if hi <= lo {
+            continue;
+        }
+        let mid = (lo + hi) / 2.0;
+        let advisory = bands
+            .iter()
+            .filter(|(s, e, _)| *s <= mid && mid < *e)
+            .map(|(_, _, adv)| *adv)
+            .fold(f64::INFINITY, f64::min);
+        if !advisory.is_finite() {
+            continue;
+        }
+        // Merge with the previous band when it is the same speed and touches,
+        // so a long chain of identical advisories is one span, not fifty.
+        match out.last_mut() {
+            Some(last) if last.2 == advisory && (last.1 - lo).abs() < 1e-9 => last.1 = hi,
+            _ => out.push((lo, hi, advisory)),
+        }
+    }
+    out
+}
+
+/// Hours across `[start_mi, end_mi)`, slowed inside bends to their advisory.
+pub fn segment_hours(start_mi: f64, end_mi: f64, mph: f64, ceilings: &[CurveBand]) -> f64 {
+    if end_mi <= start_mi {
+        return 0.0;
+    }
+    let floor_mph = DEADLINE_MIN_SEGMENT_MPH.max(mph);
+    if ceilings.is_empty() {
+        return (end_mi - start_mi) / floor_mph;
+    }
+    let mut hours = 0.0;
+    let mut cursor = start_mi;
+    for &(band_start, band_end, advisory) in ceilings {
+        if band_end <= cursor {
+            continue;
+        }
+        if band_start >= end_mi {
+            break;
+        }
+        if band_start > cursor {
+            hours += (band_start - cursor) / floor_mph;
+            cursor = band_start;
+        }
+        let overlap_end = band_end.min(end_mi);
+        if overlap_end > cursor {
+            hours += (overlap_end - cursor) / DEADLINE_MIN_SEGMENT_MPH.max(mph.min(advisory));
+            cursor = overlap_end;
+        }
+    }
+    if cursor < end_mi {
+        hours += (end_mi - cursor) / floor_mph;
+    }
+    hours
+}
+
+/// Route-aware drive-time estimate on posted limits AND curve advisories.
+///
+/// Each sampled segment is timed piecewise: the miles inside a bend at that
+/// bend's advisory, the rest at the planning limit. Only the bend's own
+/// recorded span is charged -- the plan does not invent a deceleration ramp
+/// on either side of it, which is the sort of unmeasured loss
+/// `DEADLINE_PLANNING_SPEED_FACTOR` is already there to carry.
 pub fn route_drive_hours(route: Option<&Route>, start_mi: f64, world: Option<&World>) -> f64 {
+    let Some(route) = route else {
+        return 0.0;
+    };
+    // Python reaches its `_curve_ceilings` call only past these two early
+    // returns; walking the route's curves for a trip already finished would be
+    // real work on the job board's hot path.
+    let route_miles = route.miles();
+    if route_miles <= start_mi.clamp(0.0, route_miles.max(0.0)) {
+        return 0.0;
+    }
+    let is_facility_approach =
+        route.cities.len() >= 2 && route.cities.first() == route.cities.last();
+    let ceilings = if is_facility_approach {
+        Vec::new()
+    } else {
+        curve_ceilings(route)
+    };
+    route_drive_hours_over(Some(route), start_mi, world, &ceilings)
+}
+
+/// `route_drive_hours` with the bend bands supplied, which is how the port
+/// reaches the "what would the plan say blind to the bends" half of the
+/// Python test that monkeypatches `_curve_ceilings`.
+pub fn route_drive_hours_over(
+    route: Option<&Route>,
+    start_mi: f64,
+    world: Option<&World>,
+    ceilings: &[CurveBand],
+) -> f64 {
     let Some(route) = route else {
         return 0.0;
     };
@@ -298,7 +425,7 @@ pub fn route_drive_hours(route: Option<&Route>, start_mi: f64, world: Option<&Wo
                 is_facility_approach,
                 world,
             );
-            hours += step / DEADLINE_MIN_SEGMENT_MPH.max(mph);
+            hours += segment_hours(global_start, global_start + step, mph, ceilings);
             offset += step;
         }
     }

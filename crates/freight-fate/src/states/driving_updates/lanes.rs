@@ -215,9 +215,20 @@ impl DrivingState {
         if curve_assisting && needs_service {
             self.trip.truck.brake = self.trip.truck.brake.max(0.35f64.min(curve.abs()));
         }
+        // ON A RAMP, THE RAMP OWNS THE SPEECH. A ramp adds 0.35 of curve
+        // weight above, so any exit taken over about 43 mph engages this
+        // assist -- and route-transition assistance is already braking for
+        // the sign or the light at the end of it and already says so. With
+        // the realistic preset both are on by default, so every hot ramp
+        // spoke twice, back to back (logged playtest of the four 1.9 assists,
+        // 2026-07-15). The braking is unchanged; only the second announcement
+        // goes, and the surviving line is the more useful one because it
+        // names WHAT it is braking for.
+        let on_ramp = self.ramp_mi.is_some();
         if curve_assisting {
-            if !self.curve_assist_active && self.curve_assist_cue_s <= 0.0 {
+            if !self.curve_assist_active && self.curve_assist_cue_s <= 0.0 && !on_ramp {
                 self.curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S;
+                self.curve_assist_spoke = true;
                 // ROUTE, not the ambient default: names an automation taking
                 // the pedals (automation-handoff sweep, 2026-08-20, the
                 // deferred 2026-08-15 audit).
@@ -228,8 +239,12 @@ impl DrivingState {
                         .category(SpeechCategory::Confirmation),
                 );
             }
-        } else if self.curve_assist_active && self.curve_assist_cue_s <= 0.0 {
+        } else if self.curve_assist_active
+            && self.curve_assist_cue_s <= 0.0
+            && self.curve_assist_spoke
+        {
             self.curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S;
+            self.curve_assist_spoke = false;
             // ROUTE, not the ambient default: names the automation handing the
             // pedals back (automation-handoff sweep, 2026-08-20, the deferred
             // 2026-08-15 audit).
@@ -239,6 +254,9 @@ impl DrivingState {
                     .priority(EventPriority::Route)
                     .category(SpeechCategory::Confirmation),
             );
+        } else if !curve_assisting {
+            // Engagement that never spoke (the ramp case) simply ends.
+            self.curve_assist_spoke = false;
         }
         self.curve_assist_active = curve_assisting;
         // Hysteresis on the ramp cap, for the same reason the curve assist has

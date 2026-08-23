@@ -10,17 +10,20 @@ mod data_support;
 
 use std::collections::{HashMap, HashSet};
 
-use data_support::{data_dir, supported, world};
+use data_support::{data_dir, shortest, supported, world};
 use ff_core::data::curves::{
     classify_connector, curve_severity, leg_curves, leg_design_speed, leg_is_level, load,
-    min_radius_ft, route_curves, screenable_legs, CurveRecord, CONNECTOR_CORRIDOR_M,
-    HAIRPIN_DEFLECTION_DEG, HAIRPIN_MAX_MPH, INTERSTATE_MAX_DEFLECTION_DEG,
-    INTERSTATE_MIN_RADIUS_FT,
+    min_radius_ft, route_curves, screenable_legs, CurveRecord, ADVISORY_MAX_MPH,
+    CONNECTOR_CORRIDOR_M, HAIRPIN_DEFLECTION_DEG, HAIRPIN_MAX_MPH, HPMS_TERRAIN_LEVEL,
+    INTERSTATE_MAX_DEFLECTION_DEG, INTERSTATE_MIN_RADIUS_FT,
 };
 use ff_core::data::data_resources::read_data_text;
 use ff_core::data::world::World;
 use ff_core::data::world_models::{
     CorridorDetail, GradeSegment, Leg, Route, RouteCheckpoint, StateMileage,
+};
+use ff_core::models::jobs::{
+    curve_ceilings, route_drive_hours, route_drive_hours_over, segment_hours,
 };
 
 fn is_interstate(leg: &Leg) -> bool {
@@ -356,37 +359,47 @@ fn test_city_departure_hairpins_are_gone_off_the_mountains() {
 }
 
 #[test]
-fn test_the_leg_end_rule_cuts_by_terrain_within_a_single_leg() {
-    // KY-80 out of Hazard carries both cases half a mile apart.
+fn test_leaving_a_mountain_town_keeps_the_road_and_drops_the_town() {
+    // Both halves of the Hazard case, re-pinned to the actual roads.
     //
-    // A 43 ft kink at mile 1.06 on hills is departure geometry and goes; a
-    // real 80 ft switchback at mile 2.48, where the road is already into the
-    // mountains, stays. Position alone would have taken both, which is why
-    // the rule asks the terrain as well.
+    // This test used to assert that "a real 80 ft switchback at mile 2.48,
+    // where the road is already into the mountains, stays". The road data says
+    // otherwise: mile 2.48 is on `KY 15 Business`, OSM class `secondary`,
+    // turning 71 and 89 degrees at an 80 ft radius -- the business loop through
+    // Hazard, which is a street corner rather than a switchback. The leg is
+    // made of `trunk` (38 sampled miles of KY-15 against 3 of residential), and
+    // the through road's own bends at miles 1.06 and 1.59 are what survive.
+    //
+    // Terrain alone could not tell those apart, because both are in the
+    // mountains. Reading the road under each bend can, which is what the
+    // connector bake now does.
     let recs = leg_curves("hazard_ky_us:london_ky_us", true);
-    let near: Vec<_> = recs
-        .iter()
-        .filter(|r| r.apex_mi < 2.5 && is_hairpin(r))
-        .collect();
+    let near: Vec<_> = recs.iter().filter(|r| r.apex_mi < 2.5).collect();
     assert!(
         !near.is_empty(),
-        "the mountain switchback at mile 2.48 must survive"
+        "KY-15's own bends leaving Hazard must survive"
     );
     assert!(
         near.iter().all(|r| r.min_radius_ft >= 50),
-        "the hills kink at mile 1.06 should be gone: {near:?}"
+        "nothing tighter than a truck's turning circle is a road: {near:?}"
     );
 }
 
 #[test]
-fn test_a_mountain_town_keeps_the_switchback_on_its_doorstep() {
-    // The leg-end rule spares mountain terrain, and has to.
+fn test_a_mountain_town_keeps_the_road_out_of_it() {
+    // US-119 leaving Charleston, re-pinned for the same reason.
     //
-    // US-119 leaves Charleston straight into the mountains, and a real
-    // switchback sits within the first mile. Deleting by position alone
-    // would have taken it.
+    // The record this test used to protect as "a real switchback within the
+    // first mile" is Thayer Street in Charleston -- OSM class `primary`, 92 ft
+    // radius, 96 degrees. US-119 itself (`trunk`, signed Corridor G) starts at
+    // mile 1.62, and those bends are the ones that stay.
     let recs = leg_curves("charleston_wv_us:pikeville_ky_us", true);
-    assert!(recs.iter().any(|r| r.apex_mi < 2.5 && is_hairpin(r)));
+    let near: Vec<_> = recs.iter().filter(|r| r.apex_mi < 3.0).collect();
+    assert!(
+        !near.is_empty(),
+        "Corridor G's own bends out of Charleston must survive"
+    );
+    assert!(near.iter().all(|r| r.min_radius_ft >= 50));
 }
 
 #[test]
@@ -669,13 +682,38 @@ fn test_a_canyon_tagged_flat_is_not_screened_as_level_ground() {
     // both failed -- the label itself, then feet of relief per mile, which
     // calibrated against HPMS at a Youden's J of 0.29. The screen reads the
     // real HPMS terrain class now, and HPMS calls this leg mountainous.
-    let canyon = world()
+    let world = world();
+    let canyon = world
         .legs
         .iter()
         .find(|leg| leg.a == "glenwood_springs_co_us" && leg.b == "grand_junction_co_us")
         .unwrap();
-    assert_eq!(canyon.terrain, "flat"); // the label really is wrong
-    assert!(!leg_is_level(canyon)); // HPMS is not
+    assert!(!leg_is_level(canyon)); // HPMS calls it mountainous, and it is
+
+    // The canyon's own label said "flat" when this test was written, which is
+    // what made it such a good example. It has since been corrected from HPMS
+    // (tools/repair_terrain_from_hpms.py), so the demonstration moved: rather
+    // than naming one leg where the label lies, assert the PROPERTY directly --
+    // the screen's verdict follows HPMS on every leg, never the label.
+    let mut disagreeing = 0;
+    for leg in &world.legs {
+        let Some(hpms) = leg.hpms_terrain() else {
+            assert!(
+                !leg_is_level(leg),
+                "absence of a class must never read as level"
+            );
+            continue;
+        };
+        let hpms_level = hpms.terrain_type == HPMS_TERRAIN_LEVEL;
+        assert_eq!(leg_is_level(leg), hpms_level);
+        if (leg.terrain == "flat") != hpms_level {
+            disagreeing += 1;
+        }
+    }
+    assert!(
+        disagreeing > 0,
+        "if no leg's label disagrees with HPMS any more, this test proves nothing"
+    );
 }
 
 #[test]
@@ -744,27 +782,42 @@ fn severity_bands_match_the_advisory_speed() {
 #[test]
 fn test_a_ramp_reads_as_a_connector_on_every_road_class() {
     for class in ["motorway_link", "trunk_link", "primary_link"] {
-        for interstate in [true, false] {
+        for made_of in [Some("motorway"), Some("trunk"), Some("primary"), None] {
             assert_eq!(
-                classify_connector(Some(0.4), Some(class), interstate),
+                classify_connector(Some(0.4), Some(class), made_of),
                 (true, "osm:ramp")
             );
         }
     }
 }
 
-/// Every Interstate mainline mile is a freeway, so a curve apex on a surface
-/// road is not on the Interstate however the leg is labelled.
+/// Every Interstate mainline mile is a freeway, so on a leg MADE of freeway a
+/// surface-road apex is not on the Interstate.
+///
+/// But the comparison is against the road the leg is made of, not against a
+/// fixed class -- otherwise a curated I-65 whose route actually runs US-231 end
+/// to end has all its real trunk bends read as off-route.
 #[test]
-fn test_an_interstate_curve_off_the_freeway_is_not_interstate_mainline() {
+fn test_a_bend_below_its_leg_s_own_road_is_not_on_the_through_route() {
     for class in ["trunk", "primary", "secondary", "residential"] {
         assert_eq!(
-            classify_connector(Some(0.4), Some(class), true),
-            (true, "osm:off-freeway")
+            classify_connector(Some(0.4), Some(class), Some("motorway")),
+            (true, "osm:off-corridor")
         );
-        // The same ground on a US-route leg is that leg's real road.
-        assert!(!classify_connector(Some(0.4), Some(class), false).0);
     }
+    // A leg made of trunk keeps its trunk bends and drops the town.
+    assert_eq!(
+        classify_connector(Some(0.4), Some("trunk"), Some("trunk")),
+        (false, "osm:mainline")
+    );
+    for class in ["primary", "secondary", "residential"] {
+        assert!(classify_connector(Some(0.4), Some(class), Some("trunk")).0);
+    }
+    // And a better road than the leg is made of is never off-route.
+    assert_eq!(
+        classify_connector(Some(0.4), Some("motorway"), Some("trunk")),
+        (false, "osm:mainline")
+    );
 }
 
 /// The guard on the whole rule: it never sees the geometry.
@@ -776,7 +829,7 @@ fn test_an_interstate_curve_off_the_freeway_is_not_interstate_mainline() {
 #[test]
 fn test_a_freeway_curve_stays_mainline_however_hard_it_bends() {
     assert_eq!(
-        classify_connector(Some(0.2), Some("motorway"), true),
+        classify_connector(Some(0.2), Some("motorway"), Some("motorway")),
         (false, "osm:mainline")
     );
 }
@@ -790,33 +843,48 @@ fn test_nothing_read_concludes_nothing() {
         (None, None),                         // no reading at all
     ];
     for (near_m, near_hw) in facts {
-        assert_eq!(classify_connector(near_m, near_hw, true), (false, ""));
+        assert_eq!(
+            classify_connector(near_m, near_hw, Some("motorway")),
+            (false, "")
+        );
     }
+    // Nor may anything be concluded when the leg's own road went unread.
+    assert_eq!(
+        classify_connector(Some(0.3), Some("residential"), None),
+        (false, "osm:mainline")
+    );
 }
 
 #[test]
 fn test_the_corridor_is_a_sanity_bound_not_a_decision() {
-    assert!(
-        !classify_connector(Some(CONNECTOR_CORRIDOR_M - 0.1), Some("motorway"), true)
-            .1
-            .is_empty()
-    );
+    assert!(!classify_connector(
+        Some(CONNECTOR_CORRIDOR_M - 0.1),
+        Some("motorway"),
+        Some("motorway")
+    )
+    .1
+    .is_empty());
     assert_eq!(
-        classify_connector(Some(CONNECTOR_CORRIDOR_M + 0.1), Some("motorway"), true).1,
+        classify_connector(
+            Some(CONNECTOR_CORRIDOR_M + 0.1),
+            Some("motorway"),
+            Some("motorway")
+        )
+        .1,
         ""
     );
 }
 
 /// Provenance: a connector says whether it was read or positional.
 ///
-/// `osm:ramp` and `osm:off-freeway` are readings from the OSM extract;
+/// `osm:ramp` and `osm:off-corridor` are readings from the OSM extract;
 /// `sweep:window` is the bake's original positional call, kept because the
 /// two are a union and the window sees city geometry the class reading can
 /// miss.
 #[test]
 fn test_every_connector_row_names_the_reading_that_flagged_it() {
     let text = read_data_text("world_data/us/gameplay/curves.jsonl").expect("curves.jsonl");
-    let known = ["osm:ramp", "osm:off-freeway", "sweep:window"];
+    let known = ["osm:ramp", "osm:off-corridor", "sweep:window"];
     let mut seen: HashSet<String> = HashSet::new();
     for line in text.lines() {
         if line.trim().is_empty() {
@@ -838,7 +906,7 @@ fn test_every_connector_row_names_the_reading_that_flagged_it() {
     let mut sorted: Vec<&String> = seen.iter().collect();
     sorted.sort();
     assert!(
-        seen.contains("osm:ramp") && seen.contains("osm:off-freeway"),
+        seen.contains("osm:ramp") && seen.contains("osm:off-corridor"),
         "the OSM readings should both be present in the bake, saw {sorted:?}"
     );
 }
@@ -881,5 +949,100 @@ fn test_interstate_mainline_asks_the_truck_to_slow_down_rarely() {
     assert!(
         every > 100.0,
         "one interstate slowdown every {every:.1} miles is too often"
+    );
+}
+
+/// The advisory is AASHTO's point-mass control solved for V, and that
+/// control's friction table is published for 20 through 80 mph.
+///
+/// Run unclamped on a gentle bend it read out 115, which is not a claim about
+/// a road -- it is arithmetic past the edge of its own table. 21,076 of 63,873
+/// rows (33 percent) were over 80 before the cap. Nothing audible moved: an
+/// advisory above the posted limit never fires a pacenote, never counts as
+/// corner overspeed and never eases cruise.
+#[test]
+fn test_no_baked_advisory_is_faster_than_the_table_it_came_from() {
+    let text = read_data_text("world_data/us/gameplay/curves.jsonl").expect("curves.jsonl");
+    let mut worst = 0i64;
+    for line in text.lines() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        let row: serde_json::Value = serde_json::from_str(line).unwrap();
+        if row.get("meta").is_some() {
+            continue;
+        }
+        worst = worst.max(row["advisory_mph"].as_i64().unwrap());
+    }
+    assert!(
+        worst <= ADVISORY_MAX_MPH,
+        "a baked row still advises {worst} mph"
+    );
+}
+
+/// `route_drive_hours` walked the route on posted limits alone, so every bend
+/// the driver has to slow for was time the plan never budgeted.
+///
+/// It now times each sampled segment piecewise: the miles inside a bend at
+/// that bend's advisory, the rest at the planning limit. Only the bend's own
+/// recorded span is charged -- no invented deceleration ramp, which is the
+/// sort of unmeasured loss DEADLINE_PLANNING_SPEED_FACTOR already carries.
+#[test]
+fn test_the_deadline_plan_slows_for_the_bends_it_will_meet() {
+    // No bends: the segment is just distance over speed.
+    assert_eq!(segment_hours(0.0, 2.0, 60.0, &[]), 2.0 / 60.0);
+
+    // A bend covering half the segment is charged at its advisory for that
+    // half only, so the segment costs more than the open road and less than
+    // the whole thing taken at the advisory.
+    let bands = [(0.0, 1.0, 30.0)];
+    let slowed = segment_hours(0.0, 2.0, 60.0, &bands);
+    assert_eq!(slowed, 1.0 / 30.0 + 1.0 / 60.0);
+    assert!(2.0 / 60.0 < slowed && slowed < 2.0 / 30.0);
+
+    // A bend the truck is already slower than costs nothing extra.
+    assert_eq!(
+        segment_hours(0.0, 2.0, 25.0, &[(0.0, 1.0, 55.0)]),
+        2.0 / 25.0
+    );
+
+    // Bands outside the segment are ignored rather than smeared into it.
+    assert_eq!(
+        segment_hours(4.0, 6.0, 60.0, &[(0.0, 1.0, 30.0)]),
+        2.0 / 60.0
+    );
+}
+
+/// The check on the piecewise timing, on real baked geometry.
+///
+/// US-550 over Red Mountain Pass is 107 miles of switchback and its bends
+/// really do cost the plan time. An interstate of similar length costs
+/// essentially nothing, which is the point of the other two fixes that landed
+/// the same day: once the bank is priced in and interchange geometry is
+/// classed as connector, interstate mainline stops asking a truck to slow.
+#[test]
+fn test_a_switchback_road_costs_the_plan_more_than_an_interstate() {
+    let world = world();
+    let route = shortest(world, "durango_co_us", "montrose_co_us");
+    let bands = curve_ceilings(&route);
+    assert!(
+        !bands.is_empty(),
+        "the Million Dollar Highway's bends should reach the planner"
+    );
+    let tightest = bands
+        .iter()
+        .map(|(_, _, advisory)| *advisory)
+        .fold(f64::INFINITY, f64::min);
+    assert!(tightest <= 25.0, "tightest advisory was {tightest}");
+
+    let aware = route_drive_hours(Some(&route), 0.0, Some(world));
+    // The Python case monkeypatches `_curve_ceilings` to return nothing; the
+    // port reaches the same "blind to the bends" reading through the explicit
+    // bands argument.
+    let blind = route_drive_hours_over(Some(&route), 0.0, Some(world), &[]);
+    assert!(
+        aware > blind,
+        "a road of switchbacks must cost the plan more than a flat read \
+         ({aware} vs {blind})"
     );
 }

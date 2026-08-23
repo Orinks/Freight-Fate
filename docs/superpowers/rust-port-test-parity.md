@@ -5,7 +5,9 @@ One row per Python test file under `tests/` (239 files at the top level;
 the test-parity re-sweep on 2026-08-23, current as of merge `44c1e296`
 (the fifteen `feat/career-1.9` commits carried into the port), and updated
 by hand since for `test_curve_management.py` and `test_lane_discrete.py`,
-both of which are now closed.
+both of which are now closed, and again for merge `7a395758` (the map-data
+correction), which moved `test_curve_management.py`, `test_driving_features.py`
+and `test_world.py`.
 
 ## Method
 
@@ -51,15 +53,16 @@ By test case, across all 239 files:
 
 | | Cases | Previous sweep |
 |---|---|---|
-| Python test functions | 4220 | 4193 |
-| live Rust namesake | 3111 | 2743 |
-| `#[ignore]`d Rust stub only | 313 | 334 |
-| no Rust namesake | 796 | 1116 |
+| Python test functions | 4227 | 4220 |
+| live Rust namesake | 3118 | 3111 |
+| `#[ignore]`d Rust stub only | 313 | 313 |
+| no Rust namesake | 796 | 796 |
 
-The Python suite grew by 27 cases in the merge. Live Rust
-coverage moved +368, ignored-only stubs -21, and
-cases with no Rust namesake at all -320. Live parity is now
-73.7 percent of the Python suite, up from 65.4 percent.
+Merge `7a395758` added 7 Python cases and all 7 were ported with it, so
+live coverage moved +7 and the unported backlog did not grow. Live parity is
+73.8 percent of the Python suite. (The `44c1e296` sweep before it took the
+suite from 4193 to 4220 cases, live coverage +368, ignored-only stubs -21 and
+cases with no Rust namesake -320, from 65.4 percent.)
 
 ## Per file
 
@@ -122,7 +125,7 @@ cases with no Rust namesake at all -320. Live parity is now
 | `tests/test_cross_traffic.py` | PARTIAL | 12 / 9 / 21 | `crates/ff-core/src/sim/cross_traffic.rs` |  |
 | `tests/test_cruise_resume_ramp.py` | PORTED | 11 / 0 / 11 | `crates/freight-fate/tests/transcript_cruise_resume_ramp.rs` | live +11, NOT PORTED -> PORTED |
 | `tests/test_cruise_steps.py` | PARTIAL | 12 / 0 / 13 | `crates/freight-fate/tests/states_driving_core.rs`, `crates/freight-fate/tests/states_driving_controls.rs` |  |
-| `tests/test_curve_management.py` | PORTED | 51 / 0 / 51 | `crates/ff-core/tests/data_curve_management.rs`, `crates/ff-core/src/data/curves.rs` | live +13, Python +13 |
+| `tests/test_curve_management.py` | PORTED | 54 / 0 / 54 | `crates/ff-core/tests/data_curve_management.rs`, `crates/ff-core/src/data/curves.rs` | live +3, Python +3 |
 | `tests/test_debt_and_standing.py` | PARTIAL | 41 / 6 / 47 | `crates/ff-core/src/models/solvency/tests.rs`, `crates/ff-core/src/models/enforcement/tests.rs`, `crates/freight-fate/tests/states_city.rs` |  |
 | `tests/test_delivery_summary_sharing.py` | PARTIAL | 7 / 0 / 10 | `crates/freight-fate/tests/states_online_states.rs`, `crates/freight-fate/tests/online_journal.rs` |  |
 | `tests/test_departure_chain.py` | NOT PORTED | 0 / 0 / 9 | -- |  |
@@ -136,7 +139,7 @@ cases with no Rust namesake at all -320. Live parity is now
 | `tests/test_driving_cruise_weather.py` | PORTED | 104 / 0 / 104 | `crates/freight-fate/tests/transcript_driving_cruise_weather_acc.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather_retarder.rs`, +3 more | live +104, NOT PORTED -> PORTED |
 | `tests/test_driving_damage_bands.py` | PARTIAL | 20 / 0 / 55 | `crates/freight-fate/tests/states_driving_road.rs`, `crates/ff-core/src/models/economy.rs`, `crates/freight-fate/tests/states_driving_core.rs` |  |
 | `tests/test_driving_exits.py` | PARTIAL | 1 / 0 / 31 | `crates/freight-fate/tests/states_driving_events_chains.rs` |  |
-| `tests/test_driving_features.py` | PARTIAL | 11 / 0 / 127 | `crates/freight-fate/tests/states_driving_updates.rs`, `crates/freight-fate/tests/states_driving_events_chains.rs`, `crates/ff-core/src/units.rs` |  |
+| `tests/test_driving_features.py` | PARTIAL | 13 / 0 / 129 | `crates/freight-fate/tests/states_driving_updates.rs`, `crates/freight-fate/tests/states_driving_events_chains.rs`, `crates/ff-core/src/units.rs` | live +2, Python +2 |
 | `tests/test_driving_manual_controls.py` | PORTED | 1 / 0 / 1 | `crates/freight-fate/tests/states_driving_controls.rs` |  |
 | `tests/test_driving_modes.py` | PARTIAL | 3 / 0 / 6 | `crates/ff-core/src/sim/driving_modes.rs`, `crates/freight-fate/tests/states_driving_controls.rs` |  |
 | `tests/test_driving_place_keys.py` | PORTED | 7 / 0 / 7 | `crates/freight-fate/tests/states_driving_turns.rs` |  |
@@ -299,7 +302,7 @@ cases with no Rust namesake at all -320. Live parity is now
 | `tests/test_village_callouts.py` | PARTIAL | 1 / 0 / 19 | `crates/ff-core/src/settings/tests.rs` |  |
 | `tests/test_weather_trip.py` | PARTIAL | 99 / 3 / 102 | `crates/ff-core/src/sim/weather/tests.rs`, `crates/ff-core/tests/sim_trip_cues.rs` |  |
 | `tests/test_weigh_station_transponder.py` | PARTIAL | 4 / 5 / 9 | `crates/ff-core/tests/sim_weigh_station_transponder.rs` |  |
-| `tests/test_world.py` | PORTED | 42 / 0 / 42 | `crates/ff-core/tests/data_world.rs` |  |
+| `tests/test_world.py` | PORTED | 44 / 0 / 44 | `crates/ff-core/tests/data_world.rs` | live +2, Python +2 |
 | `tests/test_world_grades.py` | PORTED | 13 / 0 / 13 | `crates/ff-core/src/data/grades.rs` |  |
 | `tests/test_world_overlay.py` | PORTED | 4 / 0 / 4 | `crates/ff-core/tests/data_world_overlay.rs` |  |
 | `tests/test_write_asset_ogg.py` | TOOLS-ONLY | 0 / 0 / 1 | -- |  |
@@ -479,7 +482,7 @@ PARTIAL and NOT PORTED files only; TOOLS-ONLY and HELPER files are omitted.
 - `test_the_ramp_cruise_line_says_when_the_ease_happens`
 - `test_the_exit_assist_leaves_cruise_alone_while_it_has_nothing_to_shed`
 
-### `tests/test_driving_features.py` -- 116 of 127
+### `tests/test_driving_features.py` -- 116 of 129
 
 - `test_trip_event_sounds_use_contextual_cues`
 - `test_active_drive_applies_manual_setting_and_announces_it`
@@ -1569,6 +1572,45 @@ a name in both suites, but nothing running behind it.
 - `test_overweight_load_is_always_red_lighted` -- `crates/ff-core/tests/sim_weigh_station_transponder.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- transponder verdict in DrivingState
 - `test_transponder_verdict_is_seeded_off_trip_seed_and_stop` -- `crates/ff-core/tests/sim_weigh_station_transponder.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- transponder verdict seeded off trip seed and stop
 
+
+## What merge `7a395758` changed
+
+The map-data correction merge carried three Python source changes and seven
+new or rewritten test cases. All three source changes and all seven cases are
+ported.
+
+- **`states/driving.py` + `states/driving_updates.py`** -- the doubled assist
+  line on a hot exit ramp. Ported into
+  `crates/freight-fate/src/states/driving_updates/lanes.rs`, with the new
+  `curve_assist_spoke` latch on `DrivingState`
+  (`crates/freight-fate/src/states/driving.rs`,
+  `crates/freight-fate/src/states/driving/init.rs`). Verified by
+  `test_a_hot_ramp_speaks_one_assist_line_not_two` and
+  `test_a_silent_ramp_engagement_never_leaves_a_lone_release` in
+  `crates/freight-fate/tests/states_driving_updates.rs`; both fail against the
+  pre-merge behaviour.
+- **`models/jobs.py`** -- the planner now charges bend advisories.
+  `_curve_ceilings` and `_segment_hours` are `curve_ceilings` and
+  `segment_hours` in `crates/ff-core/src/models/jobs/deadline.rs`. The Python
+  test monkeypatches `_curve_ceilings` to get a blind reading; the port takes
+  the bands as an argument instead, through `route_drive_hours_over`, which
+  `route_drive_hours` calls after computing them. Verified by
+  `test_the_deadline_plan_slows_for_the_bends_it_will_meet` and
+  `test_a_switchback_road_costs_the_plan_more_than_an_interstate` in
+  `crates/ff-core/tests/data_curve_management.rs`.
+- **`tools/bake_curve_connectors.py::classify`** -- `tools/` stays Python, but
+  the rule is mirrored in `crates/ff-core/src/data/curves.rs` because it is
+  what every shipped `connector_source` row means. `classify_connector` now
+  takes the class of road the leg is MADE of rather than an `interstate` flag,
+  and returns `osm:off-corridor` rather than `osm:off-freeway`, against the new
+  `CONNECTOR_CLASS_RANK` ladder. Without it
+  `test_every_connector_row_names_the_reading_that_flagged_it` fails on the
+  merged data.
+- Nine ff-core tests were failing against the merged data before this work --
+  the six the merge rewrote plus the three whose pinned mileages moved
+  (`test_corridor_metadata_supports_offline_itineraries`,
+  `test_route_describe_mentions_miles_and_highway`,
+  `test_trip_uses_explicit_stop_positions`). All nine pass now.
 
 ## What this re-sweep changed
 

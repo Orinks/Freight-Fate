@@ -176,26 +176,72 @@ pub const CONNECTOR_CORRIDOR_M: f64 = 25.0;
 /// threshold, a definition.
 pub const CONNECTOR_FREEWAY_CLASS: &str = "motorway";
 
-/// `(is connector, why)` for one curve, from its OSM reading alone --
+/// OSM's own functional hierarchy, most important first. This is upstream's
+/// ordering, not a weighting anybody chose: the wiki defines the tags as a
+/// descending ladder of road importance, and every US mapper applies it that
+/// way.
+///
+/// The rule compares a curve's road against the road ITS LEG IS MADE OF rather
+/// than against a fixed class, and it is the comparison that does the work. A
+/// leg made of motorway keeps only motorway bends, which is the Interstate
+/// case. A leg made of trunk -- a curated I-65 whose route actually runs
+/// US-231 end to end -- keeps its trunk bends, because those are that road's
+/// real mainline, while still dropping the primary and residential kinks where
+/// the route threads a town. Judging such a leg against `motorway` restored
+/// 2,677 rows including Brickell Avenue in downtown Miami at a 38 ft radius;
+/// judging it against its own class does not.
+///
+/// `service_other` is Valhalla's name for a service road, which OSM tags
+/// `highway=service`. It covers the alleys, driveways and yard roads a route
+/// threads at its very ends. Ranked last because a bend on one is never the
+/// through road -- and it has to be HERE rather than absent: an unranked class
+/// reads as "nothing may be concluded", which would have let service roads
+/// through as mainline on every leg.
+pub const CONNECTOR_CLASS_RANK: &[(&str, u8)] = &[
+    ("motorway", 0),
+    ("trunk", 1),
+    ("primary", 2),
+    ("secondary", 3),
+    ("tertiary", 4),
+    ("unclassified", 5),
+    ("residential", 6),
+    ("service_other", 7),
+];
+
+fn class_rank(class: &str) -> Option<u8> {
+    CONNECTOR_CLASS_RANK
+        .iter()
+        .find(|(name, _)| *name == class)
+        .map(|(_, rank)| *rank)
+}
+
+/// `(is connector, why)` for one curve, from its map-matched reading alone --
 /// `tools/bake_curve_connectors.py::classify`.
 ///
 /// The bake itself stays Python (`tools/` is out of the port's scope), but the
 /// RULE lives here, because it is what every `connector_source` in the shipped
 /// data means and the only way those rows can be re-judged without re-baking.
 ///
-/// Two readings, both of them upstream's own words:
+/// Two readings:
 ///
 /// * `osm:ramp` -- the apex rides a `highway=*_link` way, which is the tag OSM
 ///   uses for a ramp, slip road or interchange connector. True on every road
 ///   class.
-/// * `osm:off-freeway` -- the leg is Interstate class and the apex rides
-///   something that is not `highway=motorway`. A curve apex on a `trunk`,
-///   `primary` or `residential` way is not on the Interstate, whatever the leg
-///   is labelled.
+/// * `osm:off-corridor` -- the apex rides a road LESS IMPORTANT than the one
+///   its leg is made of: the town the route threads on its way in or out,
+///   rather than the through road.
+///
+/// `made_of` is the class of road the LEG is built from, read per mile from
+/// the route rather than taken from the leg's label. An Interstate leg is made
+/// of `motorway` (every Interstate mainline mile is a controlled-access
+/// freeway by statute, 23 CFR 625), so only motorway bends are its mainline. A
+/// curated I-65 leg whose route actually runs US-231 end to end is made of
+/// `trunk`, and its trunk bends are that road's real mainline.
 ///
 /// A `near_m` or `near_hw` of `None` means the apex had no road within the
 /// corridor: nothing was read, so nothing may be concluded, and the empty
-/// reason tells the bake to keep whatever the positional sweep said.
+/// reason tells the bake to keep whatever the positional sweep said. A
+/// `made_of` that was never read concludes mainline rather than moving a row.
 ///
 /// It never sees radius, deflection, advisory or severity, so it CANNOT tell a
 /// sharp curve from a gentle one and therefore cannot delete a design exception
@@ -204,7 +250,7 @@ pub const CONNECTOR_FREEWAY_CLASS: &str = "motorway";
 pub fn classify_connector(
     near_m: Option<f64>,
     near_hw: Option<&str>,
-    interstate: bool,
+    made_of: Option<&str>,
 ) -> (bool, &'static str) {
     let (Some(near_m), Some(near_hw)) = (near_m, near_hw) else {
         return (false, "");
@@ -215,8 +261,12 @@ pub fn classify_connector(
     if near_hw.ends_with("_link") {
         return (true, "osm:ramp");
     }
-    if interstate && near_hw != CONNECTOR_FREEWAY_CLASS {
-        return (true, "osm:off-freeway");
+    let (Some(corridor_rank), Some(here)) = (made_of.and_then(class_rank), class_rank(near_hw))
+    else {
+        return (false, "osm:mainline");
+    };
+    if here > corridor_rank {
+        return (true, "osm:off-corridor");
     }
     (false, "osm:mainline")
 }
@@ -329,6 +379,24 @@ pub fn min_radius_ft(design_speed_mph: f64) -> f64 {
 
 /// What the bake priced its advisory at: a comfortable lateral for a loaded
 /// truck, on a FLAT road (tools/straw_curve_sample.py, A_LAT_G).
+/// The fastest speed this whole model has anything to say about, and so the
+/// ceiling on any advisory it produces.
+///
+/// The advisory is AASHTO's point-mass control solved for V, and the friction
+/// table is the model: it is published for 20 through 80 mph and stops there,
+/// because no US road is designed above 80 (the highest posted limit in the
+/// country is the 85 on Texas SH-130). Run unclamped on a gentle bend the
+/// formula happily reads out 115 mph, which is not a number about roads at
+/// all -- it is arithmetic past the edge of its own table. 33 percent of the
+/// baked rows were above 80 and the worst read 115.
+///
+/// Nothing observable moves under a truck: an advisory above the posted limit
+/// never fires a pacenote, never counts as corner overspeed and never eases
+/// cruise, so 115 and 80 behave identically. The point is that the stored
+/// number means what it says, and a future consumer cannot read one of these
+/// as a real advisory.
+pub const ADVISORY_MAX_MPH: i64 = 80;
+
 pub const ADVISORY_LATERAL_G: f64 = 0.30;
 /// The bank a road is actually BUILT with, which is not the same question as
 /// the bank a road is ALLOWED. `SUPERELEVATION_MAX` above is 8 percent because
@@ -381,7 +449,9 @@ pub fn advisory_with_bank_mph(radius_ft: f64, design_speed_mph: f64) -> i64 {
         return 0;
     }
     let e = superelevation_at(radius_ft, design_speed_mph);
-    crate::pyfmt::round_py_int((15.0 * radius_ft * (e + ADVISORY_LATERAL_G)).sqrt() / 5.0) * 5
+    let raw =
+        crate::pyfmt::round_py_int((15.0 * radius_ft * (e + ADVISORY_LATERAL_G)).sqrt() / 5.0) * 5;
+    raw.min(ADVISORY_MAX_MPH)
 }
 
 /// Which legs the screen may judge at all. It needs to know whether a tight
@@ -503,7 +573,11 @@ fn banked_advisory(row: &CurveRow, design_mph: Option<f64>) -> i64 {
     // Only ever upward: the bake read the road flat, and a bank can only help.
     // A curve that somehow reads slower banked than flat keeps the flat number
     // rather than being quietly slowed by a correction meant to speed it up.
-    baked.max(advisory_with_bank_mph(radius, design_mph))
+    // Both sides are capped, so a gentle bend cannot be repriced past the top
+    // of the friction table the repricing is built on (ADVISORY_MAX_MPH).
+    baked
+        .max(advisory_with_bank_mph(radius, design_mph))
+        .min(ADVISORY_MAX_MPH)
 }
 
 /// A bend tighter than its own road may legally hold, on level ground.
@@ -1110,13 +1184,28 @@ mod tests {
         // A bank can only help a truck hold a curve, so this must never hand
         // back a number lower than the flat one -- a correction meant to speed a
         // curve up must not quietly slow a different one down.
+        //
+        // Inside the model's own domain, which is what `ADVISORY_MAX_MPH`
+        // marks: the friction table this is solved from is published for 20 to
+        // 80 mph and stops there, so an advisory is only a statement about a
+        // road up to 80. A 20,000 ft bend reads 300 mph unclamped, which is
+        // arithmetic rather than a road, and both the flat and the banked
+        // number are capped alike -- so the "never lower" property is checked
+        // where both are real.
         for radius in [400.0, 758.0, 1000.0, 1810.0, 5000.0, 20_000.0] {
             let flat = (15.0 * radius * ADVISORY_LATERAL_G).sqrt();
-            assert!(
-                advisory_with_bank_mph(radius, 70.0)
-                    >= crate::pyfmt::round_py_int(flat / 5.0) * 5 - 1
-            );
+            let capped = (crate::pyfmt::round_py_int(flat / 5.0) * 5).min(ADVISORY_MAX_MPH);
+            assert!(advisory_with_bank_mph(radius, 70.0) >= capped - 1);
         }
+
+        // The cap binds, and it is the top of the friction table rather than a
+        // number anybody picked: no US road is designed above 80.
+        assert_eq!(ADVISORY_MAX_MPH, 80);
+        assert_eq!(advisory_with_bank_mph(20_000.0, 70.0), ADVISORY_MAX_MPH);
+        assert!(
+            advisory_with_bank_mph(600.0, 70.0) < ADVISORY_MAX_MPH,
+            "a real bend must still read its own speed, not the cap"
+        );
 
         // A town street is built to normal crown, so it keeps the flat reading:
         // TxDOT Table 4-3 and Iowa DOT 2B-1 both put the Method 2 / Method 5

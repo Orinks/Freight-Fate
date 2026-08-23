@@ -1383,8 +1383,10 @@ fn test_trip_uses_explicit_stop_positions() {
     };
     // Hand-curated stops keep their explicit checked-in positions and parking,
     // even with additive OpenStreetMap stops now interleaved on the leg.
-    assert_eq!(by_name("Pilot Travel Center Remington").at_mi, 93.5);
-    assert_eq!(by_name("Loves Travel Stop Lafayette").at_mi, 121.3);
+    // Rescaled with the leg: Chicago-Indianapolis was 183 miles and is 185,
+    // so a curated stop keeps its PLACE on the road rather than its old number.
+    assert_eq!(by_name("Pilot Travel Center Remington").at_mi, 94.52);
+    assert_eq!(by_name("Loves Travel Stop Lafayette").at_mi, 122.63);
     assert_eq!(
         by_name("Pilot Travel Center Remington").parking,
         "confirmed"
@@ -2771,7 +2773,13 @@ fn test_gps_state_crossing_and_rest_stop_cues_deduplicate() {
     trip.position_mi = 31.5;
     assert!(gps_events(&trip.update(0.0)).is_empty());
 
-    trip.position_mi = 32.8;
+    // Read the line's position rather than pinning a number to it. Correcting
+    // Chicago-Indianapolis from 183 to the 185 miles its baked route runs moved
+    // every along-route position, and a hardcoded probe then lands somewhere
+    // else entirely -- next to an interchange, in one case, whose exit cue
+    // joined the assertion.
+    let line_mi = trip.route.legs[0].state_crossings()[0].at_mi;
+    trip.position_mi = line_mi;
     let crossing = trip.update(0.0);
     assert_eq!(
         kind_messages(&crossing, TripEventKind::StateCrossing),
@@ -2779,7 +2787,13 @@ fn test_gps_state_crossing_and_rest_stop_cues_deduplicate() {
     );
     assert!(kind_messages(&trip.update(0.0), TripEventKind::StateCrossing).is_empty());
 
-    trip.position_mi = 120.3;
+    let rest_stop_mi = trip
+        .stops
+        .iter()
+        .find(|s| s.name == "Loves Travel Stop Lafayette")
+        .expect("the curated Lafayette stop")
+        .at_mi;
+    trip.position_mi = rest_stop_mi - 1.0;
     let rest = trip.update(0.0);
     assert_eq!(gps_messages(&rest), vec!["Speed limit raised to 65."]);
 }

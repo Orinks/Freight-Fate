@@ -14,6 +14,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 
+use ff_core::data::curves::RouteCurve;
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
@@ -1450,4 +1451,105 @@ fn test_running_from_the_stop_is_a_held_choice() {
     }
     assert!(d.pull_over.is_none());
     assert_eq!(app.ctx.stack_len(), 1);
+}
+
+// -- the doubled assist line on a hot exit ramp --------------------------------------
+//
+// `tests/test_driving_features.py::test_a_hot_ramp_speaks_one_assist_line_not_two`
+// and `::test_a_silent_ramp_engagement_never_leaves_a_lone_release`.
+
+/// One mainline bend the truck is sitting in, for the case that must still
+/// speak (`SimpleNamespace(...)` on the Python side).
+fn a_bend_here(at_mi: f64) -> RouteCurve {
+    RouteCurve {
+        start_mi: at_mi,
+        apex_mi: at_mi,
+        end_mi: at_mi + 0.1,
+        direction: 'L',
+        advisory_mph: 35,
+        min_radius_ft: 1000,
+        deflection_deg: 40.0,
+        connector: false,
+    }
+}
+
+#[test]
+fn test_a_hot_ramp_speaks_one_assist_line_not_two() {
+    // On a ramp, route-transition assistance owns the speech.
+    //
+    // A ramp adds 0.35 of curve weight, so any exit taken over about 43 mph
+    // engages curve speed assistance too -- and with the realistic preset both
+    // assists are on, so every hot ramp spoke twice back to back (logged
+    // playtest of the four 1.9 assists, 2026-07-15). The braking is unchanged;
+    // the line that survives is the one that names what it is braking for.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.curve_speed_assist = true;
+    // `monkeypatch.setattr(driving.trip, "curve_at", lambda mile: None)`: no
+    // baked bend under the truck, so the assist reaches its ramp heuristic.
+    d.trip.curves = Vec::new();
+    app.clear_speech();
+
+    // On the ramp: fast enough that the ramp's own curve weight engages the
+    // curve assist through its heuristic branch.
+    d.ramp_mi = Some(d.trip.position_mi);
+    for _ in 0..30 {
+        d.trip.truck.velocity_mps = 55.0 * 0.44704;
+        d.update_lane(&mut app.ctx, 1.0 / 60.0);
+    }
+    assert!(
+        !app.event_lines()
+            .iter()
+            .any(|text| text.contains("Curve speed assistance")),
+        "the ramp's own assist speaks for a ramp; the curve cue must not double it"
+    );
+
+    // Off the ramp, the same overspeed still announces itself normally.
+    d.ramp_mi = None;
+    d.curve_assist_cue_s = 0.0;
+    d.curve_assist_active = false;
+    d.trip.curves = vec![a_bend_here(d.trip.position_mi)];
+    for _ in 0..30 {
+        d.trip.truck.velocity_mps = 55.0 * 0.44704;
+        d.update_lane(&mut app.ctx, 1.0 / 60.0);
+    }
+    assert!(
+        app.event_lines()
+            .iter()
+            .any(|text| text.contains("Curve speed assistance slowing.")),
+        "silencing the ramp case must not silence a real mainline bend"
+    );
+}
+
+#[test]
+fn test_a_silent_ramp_engagement_never_leaves_a_lone_release() {
+    // The release line is paired to the slowing line that opened it.
+    //
+    // Suppressing the ramp's engagement cue would otherwise leave "Curve speed
+    // assistance released." hanging on its own with nothing before it, which
+    // reads as a bug to anyone listening.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.curve_speed_assist = true;
+    d.trip.curves = Vec::new();
+    app.clear_speech();
+
+    d.ramp_mi = Some(d.trip.position_mi);
+    for _ in 0..30 {
+        d.trip.truck.velocity_mps = 55.0 * 0.44704;
+        d.update_lane(&mut app.ctx, 1.0 / 60.0);
+    }
+    // Slow down so the assist disengages while still on the ramp.
+    d.curve_assist_cue_s = 0.0;
+    for _ in 0..30 {
+        d.trip.truck.velocity_mps = 20.0 * 0.44704;
+        d.update_lane(&mut app.ctx, 1.0 / 60.0);
+    }
+
+    assert!(
+        !app.event_lines()
+            .iter()
+            .any(|text| text.contains("Curve speed assistance")),
+        "a run that never spoke must not announce its own release"
+    );
 }

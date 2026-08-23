@@ -23,13 +23,13 @@ mod tests;
 
 pub use board::{JobBoard, OfferOptions};
 pub use deadline::{
-    dispatch_deadline_hours, fair_active_deadline, minimum_pay_for_level, plan_hos, required_hours,
-    route_drive_hours, route_planning_limit, route_required_hours, HosPlan,
-    ACTIVE_TRIP_FAIRNESS_SLACK, DEADLINE_AVG_MPH, DEADLINE_DISPATCH_MIN_SLACK_H,
-    DEADLINE_DISPATCH_SLACK_RANGE, DEADLINE_MIN_SEGMENT_MPH, DEADLINE_PLANNING_SPEED_FACTOR,
-    DEADLINE_SAMPLE_MI, DISPATCH_FLAT_MINIMUM_BY_LEVEL, HOOKUP_FEE,
-    LONG_HAUL_MINIMUM_RATE_BY_LEVEL, SHORT_HAUL_FULL_PREMIUM_MI, SHORT_HAUL_RATE_BY_LEVEL,
-    SHORT_HAUL_TAPER_END_RATE_BY_LEVEL,
+    curve_ceilings, dispatch_deadline_hours, fair_active_deadline, minimum_pay_for_level, plan_hos,
+    required_hours, route_drive_hours, route_drive_hours_over, route_planning_limit,
+    route_required_hours, segment_hours, CurveBand, HosPlan, ACTIVE_TRIP_FAIRNESS_SLACK,
+    DEADLINE_AVG_MPH, DEADLINE_DISPATCH_MIN_SLACK_H, DEADLINE_DISPATCH_SLACK_RANGE,
+    DEADLINE_MIN_SEGMENT_MPH, DEADLINE_PLANNING_SPEED_FACTOR, DEADLINE_SAMPLE_MI,
+    DISPATCH_FLAT_MINIMUM_BY_LEVEL, HOOKUP_FEE, LONG_HAUL_MINIMUM_RATE_BY_LEVEL,
+    SHORT_HAUL_FULL_PREMIUM_MI, SHORT_HAUL_RATE_BY_LEVEL, SHORT_HAUL_TAPER_END_RATE_BY_LEVEL,
 };
 
 mod catalog;

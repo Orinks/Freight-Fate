@@ -514,6 +514,11 @@ pub struct DrivingState {
     pub lane_keeping_takes_exit_said: bool,
     pub curve_assist_active: bool,
     pub curve_assist_cue_s: f64,
+    // Whether the SLOWING cue was actually spoken for the run in progress.
+    // The release line is paired to it, so an engagement that stayed quiet
+    // (see the ramp case in driving_updates) never leaves a lone
+    // "released" hanging with nothing before it.
+    pub curve_assist_spoke: bool,
     pub transition_assist_active: bool,
     pub keeper_mph: Option<f64>,
     pub keeper_throttle: f64,
