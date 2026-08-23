@@ -18,7 +18,7 @@ use ff_core::sim::trip_models::RoadStop;
 
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::{share, GameContext, SharedState};
-use freight_fate::states::base::{InputEvent, Key, Menu, MenuItem, Mods};
+use freight_fate::states::base::{InputEvent, Key, Menu, MenuItem, Mods, State};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY;
 use freight_fate::states::driving_menu_states::DriveRef;
@@ -98,6 +98,43 @@ pub fn drive_and_ctx<R>(
         .downcast_mut::<DrivingState>()
         .expect("the shared state is a DrivingState");
     f(drive, &mut app.ctx)
+}
+
+/// A state on the stack that is not a drive.
+struct NotADrive;
+
+impl State for NotADrive {}
+
+/// A drive handle that answers nothing, holding a state that is not a drive.
+///
+/// The miss this stands in for is the nested borrow: a shipped build reaches
+/// `DriveRef::call` while something further up the stack already holds the
+/// drive, gets `None`, and the screen has to decide what to show. That exact
+/// condition cannot be watched on a bench, because it trips the
+/// `debug_assert!` in `nested_borrow` and takes the test process with it (see
+/// `test_reaching_for_a_drive_that_is_already_held_fails_loudly`, which pins
+/// that half). This produces the same `None` from the same `call`, by the
+/// other route it has, so what the screen does next can be pinned in every
+/// run.
+pub fn unreachable_drive() -> DriveRef {
+    DriveRef::of(&share(NotADrive))
+}
+
+/// What a screen shows after a rebuild that could not reach the drive.
+///
+/// `already_showing` is what the screen built while it could still read the
+/// drive -- the rows the player is looking at when the miss happens.
+pub fn rows_with_the_drive_out_of_reach<M: Menu>(
+    stranded: &mut M,
+    already_showing: Vec<MenuItem<M>>,
+    ctx: &mut GameContext,
+) -> Vec<String> {
+    stranded.menu_mut().items = already_showing;
+    let rebuilt = stranded.build_items(ctx);
+    rebuilt
+        .iter()
+        .map(|item| item.text(stranded, ctx))
+        .collect()
 }
 
 /// Whether the active state is `T`.

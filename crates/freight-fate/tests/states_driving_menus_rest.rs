@@ -723,3 +723,69 @@ fn test_hanging_chains_leaves_the_pause_menu_with_its_rows() {
         "the chain row did not turn back: {rows:?}"
     );
 }
+
+// -- a rebuild that cannot reach the drive ----------------------------------------------------
+//
+// When a rebuild misses the drive, these screens used to show nothing at all,
+// which the menu speaks as "No options available." A player who has only the
+// speech is then standing in a screen that says it has no rows and no way off
+// it, mid-drive. They keep what they were already showing instead: at worst
+// one label is an action out of date, and any keypress recovers from that.
+//
+// `unreachable_drive` explains why the miss here is not the nested borrow
+// itself.
+
+#[test]
+fn test_the_route_stop_keeps_its_rows_when_a_rebuild_misses_the_drive() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = travel_center("Pilot Travel Center", at);
+
+    let mut state = rest_stop_at(&mut app, &drive, stop.clone());
+    let showing = state.build_items(&mut app.ctx);
+    assert!(!showing.is_empty());
+
+    let mut stranded = RestStopState::with_drive(unreachable_drive(), stop, false);
+    let rows = rows_with_the_drive_out_of_reach(&mut stranded, showing, &mut app.ctx);
+    assert!(
+        rows.iter().any(|row| row == "Back to the road"),
+        "the route stop lost the row that leaves it: {rows:?}"
+    );
+}
+
+#[test]
+fn test_a_full_lot_keeps_its_rows_when_a_rebuild_misses_the_drive() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = travel_center("Prairie Plaza", at);
+
+    let mut state = ParkingFullState::with_drive(DriveRef::of(&drive), stop.clone());
+    let showing = state.build_items(&mut app.ctx);
+    assert!(!showing.is_empty());
+
+    let mut stranded = ParkingFullState::with_drive(unreachable_drive(), stop);
+    let rows = rows_with_the_drive_out_of_reach(&mut stranded, showing, &mut app.ctx);
+    assert!(
+        rows.iter().any(|row| row == "Drive on to the next stop"),
+        "the full lot lost the row that leaves it: {rows:?}"
+    );
+}
+
+#[test]
+fn test_the_pause_menu_keeps_its_rows_when_a_rebuild_misses_the_drive() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+
+    let mut state = PauseMenuState::with_drive(DriveRef::of(&drive));
+    let showing = state.build_items(&mut app.ctx);
+    assert!(!showing.is_empty());
+
+    let mut stranded = PauseMenuState::with_drive(unreachable_drive());
+    let rows = rows_with_the_drive_out_of_reach(&mut stranded, showing, &mut app.ctx);
+    assert!(
+        rows.iter().any(|row| row == "Resume driving"),
+        "the pause menu lost the row that returns to the wheel: {rows:?}"
+    );
+}

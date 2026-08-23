@@ -21,7 +21,7 @@ use crate::states::driving_core::{
     advance_rest_clock, carrier_accessorial_charges, charge_summary, charge_total, hos_mut_of,
     profile_of, FacilityEngine, DOCKING_MAX_MPH, UNLOADING_WAIT_S,
 };
-use crate::states::driving_menu_states::DriveRef;
+use crate::states::driving_menu_states::{keep_rows, DriveRef};
 
 pub struct FacilityArrivalState {
     menu: MenuCore<Self>,
@@ -367,10 +367,11 @@ impl Menu for FacilityArrivalState {
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        self.driving
+        let built = self
+            .driving
             .clone()
-            .call(self, ctx, |s, ctx, d| s.rows(ctx, d))
-            .unwrap_or_default()
+            .call(self, ctx, |s, ctx, d| s.rows(ctx, d));
+        keep_rows(built, &self.driving, &self.menu.items)
     }
 
     fn enter(&mut self, ctx: &mut GameContext) {

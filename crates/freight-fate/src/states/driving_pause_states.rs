@@ -19,7 +19,7 @@ use crate::states::driving_core::{
     CHAIN_SAFE_MPH, DRIVE_PHASE_PICKUP, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE,
     MECHANIC_WAIT_MIN,
 };
-use crate::states::driving_menu_states::{push_over_drive, DriveRef};
+use crate::states::driving_menu_states::{keep_rows, push_over_drive, DriveRef};
 use crate::states::driving_rest_states::ShoulderSleepConfirmationState;
 use crate::states::learn_sounds::LearnSoundsState;
 use crate::states::main_menu::{controls_help_page, HelpState, MainMenuState, SettingsState};

@@ -143,15 +143,23 @@ onto exit signalling.
       trailer behind them. Same fix -- the drive is handed in -- and the
       loaded and bobtail halves of that line are both pinned. The seam has its
       own two tests: no drive stays quiet, a nested borrow panics.
-- [ ] **Rust port: decide how `build_items` should degrade when the drive is
-      busy (2026-08-23).** `RestStopState`, `ParkingFullState`,
-      `PauseMenuState` and `FacilityArrivalState` all end `build_items` with
-      `unwrap_or_default()`, so a future nested borrow still hands a blind
-      player an empty menu in a shipped build -- loudly logged now, but still
-      a dead end at the wheel. Recommended: fall back to the rows the menu
-      already has (`MenuItem` is `Clone`), so the worst case is one stale
-      label rather than no way out of the screen. Worth doing as one change
-      across the four, not four times.
+- [x] **Rust port: a menu whose rebuild misses the drive keeps its rows
+      (2026-08-23).** `RestStopState`, `ParkingFullState`, `PauseMenuState`
+      and `FacilityArrivalState` all ended `build_items` with
+      `unwrap_or_default()`, so a nested borrow in a shipped build -- loudly
+      logged, but with the `debug_assert!` compiled out -- handed a player an
+      empty menu, spoken as "No options available.": a dead end at the wheel
+      with no way off the screen. All four now go through
+      `drive_ref::keep_rows`, which falls back to the rows the menu is already
+      holding (`MenuItem` is `Clone`), so the worst case is one stale label,
+      recoverable by pressing anything. It also logs the miss, including the
+      one the seam's own warning cannot see (a handle whose state is not a
+      drive); no drive at all stays quiet, since that empty is legitimate and
+      has no rows to keep. One test per screen pins that the way out survives
+      the miss. They force the miss through the non-drive handle rather than a
+      real nested borrow, because the nested borrow trips the `debug_assert!`
+      and ends the test process -- the release path is what they stand in for,
+      and the assert has its own `#[should_panic]` test.
 
 - [ ] **Rust port: release built by `tools/build_release.py --rust`**
       (2026-08-22). Stages `build/FreightFate/` -- `FreightFate.exe`, the

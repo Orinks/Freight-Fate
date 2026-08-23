@@ -518,6 +518,31 @@ fn test_copying_the_summary_reaches_the_clipboard() {
     );
 }
 
+#[test]
+fn test_the_facility_keeps_its_rows_when_a_rebuild_misses_the_drive() {
+    // A rebuild that misses the drive used to leave this screen with no rows,
+    // which the menu speaks as "No options available." -- a driver parked at
+    // the dock, told there is nothing to do and no way on. It keeps what it
+    // was already showing now; at worst one label is an action out of date.
+    // `unreachable_drive` explains why the miss here is not the nested borrow
+    // itself.
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+
+    let mut arrival = FacilityArrivalState::with_drive(drive_ref(&drive));
+    let showing = arrival.build_items(&mut app.ctx);
+    assert!(!showing.is_empty());
+
+    let mut stranded = FacilityArrivalState::with_drive(unreachable_drive());
+    let rows = rows_with_the_drive_out_of_reach(&mut stranded, showing, &mut app.ctx);
+    assert!(
+        rows.iter()
+            .any(|row| row == "Dock and deliver"
+                || row == "Drop the loaded trailer and hook an empty"),
+        "the facility lost the row that finishes the delivery: {rows:?}"
+    );
+}
+
 // -- the drive handle ----------------------------------------------------------------------
 
 #[test]
