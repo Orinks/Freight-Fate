@@ -40,7 +40,7 @@ use ff_core::sim::trip_models::{
 };
 use ff_core::sim::weather::WeatherKind;
 
-use crate::app::testing::TestApp;
+use crate::app::testing::{FakeClock, TestApp};
 use crate::app::{GameContext, SharedState};
 use crate::speech::{SpeechChannel, SpokenEntry};
 use crate::states::base::{InputEvent, Key, Menu, Mods, TimedMessageState};
@@ -343,6 +343,35 @@ pub struct PlaytestHarness {
     /// live off the capture by [`PlaytestHarness::result`].
     metrics: PlaytestResult,
     driving: Option<SharedState>,
+    /// The event pacer's clock, advanced by [`DT`] at every site here that
+    /// steps a frame. Do not "simplify" this back to the wall clock.
+    ///
+    /// The pacer budgets in REAL seconds because a player can only take in
+    /// so many words per second: a queued ambient line that would start
+    /// speaking more than `EventSpeechPacer::STALE_WAIT_S` after the
+    /// moment it described is dropped, because by then the truck is past the
+    /// thing it was about. That is right for a player, whose truck covers
+    /// half a mile in those three seconds.
+    ///
+    /// A harness that simulates frames covers 534 miles of road in about
+    /// fourteen wall-clock seconds. On the real clock every ambient line on
+    /// a long delivery therefore looks minutes late the instant it is
+    /// submitted, and the pacer -- correctly, given what it was told --
+    /// dropped all of them: 75 lines on one Indianapolis-Atlanta run,
+    /// including every state crossing and city passing. Nothing was wrong
+    /// with the road, the lines, or the pacer; the harness was lying to it
+    /// about how much time the drive had spent.
+    ///
+    /// So the harness gives the pacer the same real-time budget the drive it
+    /// is simulating would give it: one sixtieth of a second per simulated
+    /// frame. Advance it at EVERY frame-stepping site -- miss one and the
+    /// drops come back only on the paths that go through it, which is worse
+    /// than losing them everywhere.
+    ///
+    /// (The Python harness never had this problem because it recorded ABOVE
+    /// the pacer, which is exactly the seam this port moved down on purpose;
+    /// see the module note.)
+    clock: FakeClock,
 }
 
 impl Default for PlaytestHarness {
@@ -368,11 +397,40 @@ impl PlaytestHarness {
     /// itself (that would silently answer a consent prompt on the player's
     /// behalf and make the transcript misleading).
     pub fn new() -> PlaytestHarness {
+        let mut app = TestApp::new();
+        // See the `clock` field: the pacer must be on simulated time, not on
+        // the wall clock this harness outruns.
+        let clock = app.fake_pacer_clock();
         PlaytestHarness {
-            app: TestApp::new(),
+            app,
             metrics: PlaytestResult::default(),
             driving: None,
+            clock,
         }
+    }
+
+    /// One simulated frame of real time for the event pacer.
+    ///
+    /// Every frame-stepping entry point calls this exactly once per frame it
+    /// runs. Public because a test that steps `update_frame` itself (rather
+    /// than through [`PlaytestHarness::drive_frames`]) has to keep the same
+    /// books, or its own frames are the ones the pacer thinks took no time.
+    pub fn advance_frame_clock(&self) {
+        self.clock.advance(DT);
+    }
+
+    /// Advance the pacer's clock by an arbitrary number of seconds.
+    ///
+    /// For a test staging a gap the drive did not simulate -- a long wait at
+    /// a dock, a pause off the road -- so the next line is judged against
+    /// the time a player would really have spent there.
+    pub fn advance_clock(&self, seconds: f64) {
+        self.clock.advance(seconds);
+    }
+
+    /// What the event pacer currently thinks the time is.
+    pub fn clock_now(&self) -> f64 {
+        self.clock.now()
     }
 
     // -- reading the run --------------------------------------------------------------
@@ -515,6 +573,7 @@ impl PlaytestHarness {
             if remaining <= 0.0 {
                 return;
             }
+            self.advance_frame_clock();
             state.borrow_mut().update(&mut self.app.ctx, DT);
             self.app.ctx.run_deferred();
         }
@@ -645,12 +704,14 @@ impl PlaytestHarness {
             drive.trip.finished = true;
         });
         if setup.arm_speed_control_on_deadhead {
+            self.advance_frame_clock();
             self.with_drive(|drive, ctx| {
                 drive.truck_mut().velocity_mps = 26.8;
                 drive.update_frame(ctx, DT);
             });
             assert!(self.state_is::<DrivingState>());
         }
+        self.advance_frame_clock();
         self.with_drive(|drive, ctx| {
             drive.truck_mut().velocity_mps = 0.0;
             drive.update_frame(ctx, DT);
@@ -756,6 +817,7 @@ impl PlaytestHarness {
         // it just takes the time a real one would.
         let mut reached = false;
         for _ in 0..120_000 {
+            self.advance_frame_clock();
             let (mode, over_limit_mi, zone_reason, speed_mph, position_mi) =
                 self.with_drive(|drive, ctx| {
                     drive.update_frame(ctx, DT);
@@ -864,6 +926,7 @@ impl PlaytestHarness {
             // `ExitKeys` object that brakes toward the ramp's own profile.
             // Here the same rule writes the held-key set the drive reads.
             self.hold_exit_ramp_keys();
+            self.advance_frame_clock();
             let (mode, over_limit_mi, ramp_mi, announced, speed_mph) =
                 self.with_drive(|drive, ctx| {
                     let cut_out = drive.truck().specs.air_governor_cut_out_psi;
@@ -1011,6 +1074,7 @@ impl PlaytestHarness {
         }
         assert!(self.state_is::<DrivingState>());
         self.driving = self.app.state();
+        self.advance_frame_clock();
         self.with_drive(|drive, ctx| {
             drive.trip.position_mi = drive.trip.total_miles();
             drive.trip.finished = true;
@@ -1387,6 +1451,7 @@ impl PlaytestHarness {
     }
 
     fn drive_one_frame(&mut self) {
+        self.advance_frame_clock();
         let events = self.with_drive(|drive, _| {
             let (limit_mph, _reason) = drive.trip.speed_limit_at(drive.trip.position_mi);
             let target_mph = (limit_mph + 5.0).max(25.0);

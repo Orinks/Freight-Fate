@@ -20,6 +20,7 @@ use freight_fate::states::city_pickup::{
     RouteSelectState,
 };
 use freight_fate::states::driving::DrivingState;
+use freight_fate::states::driving_pause_states::PauseMenuState;
 use freight_fate::states::main_menu::MainMenuState;
 use states_city_support::*;
 
@@ -439,28 +440,182 @@ fn test_pickup_snapshot_carries_the_resume_fields() {
 // -- what still needs the drive ----------------------------------------------------------
 
 #[test]
-#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
-fn test_quit_during_pickup_drive_resumes_from_the_last_stop() {}
+fn test_quit_during_pickup_drive_resumes_from_the_last_stop() {
+    // Saving happens only at stops, so quitting mid-pickup-drive does not save
+    // the in-progress position: the leg resumes from where it was last departed.
+    let mut app = TestApp::new();
+    accept_pickup_drive(&mut app);
+    with_state_mut::<DrivingState, _>(&mut app, |d, _| d.trip.restore(1.5, 12.0));
+
+    key(&mut app, Key::Escape);
+    assert!(is::<PauseMenuState>(&app), "escape opens the pause menu");
+    let rows = labels::<PauseMenuState>(&app);
+    assert!(
+        !rows.iter().any(|row| row == "Save and quit to main menu"),
+        "{rows:?}"
+    );
+    select::<PauseMenuState>(&mut app, "Quit to main menu");
+
+    select::<MainMenuState>(&mut app, "Continue latest career");
+
+    assert!(is::<DrivingState>(&app));
+    let (phase, position) =
+        with_state::<DrivingState, _>(&app, |d, _| (d.phase.to_string(), d.trip.position_mi));
+    assert_eq!(phase, freight_fate::states::driving_core::DRIVE_PHASE_PICKUP);
+    // in-progress driving was not saved; the leg restarts from the terminal
+    assert_eq!(position, 0.0);
+}
 
 #[test]
-#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
-fn test_departing_loaded_trip_keeps_idling_engine() {}
+fn test_departing_loaded_trip_keeps_idling_engine() {
+    let mut app = TestApp::new();
+    accept_pickup_drive(&mut app);
+    with_state_mut::<DrivingState, _>(&mut app, |d, _| {
+        d.trip.truck.start_engine();
+    });
+    arrive_at_pickup(&mut app, 0.0);
+    assert!(with_state::<PickupFacilityState, _>(&app, |p, _| p
+        .truck
+        .engine_on));
+
+    key(&mut app, Key::Return); // check in
+    key(&mut app, Key::Return); // load, or drop and hook
+    finish_timed_state(&mut app);
+    assert!(with_state::<PickupFacilityState, _>(&app, |p, _| p
+        .truck
+        .engine_on));
+    select::<PickupFacilityState>(&mut app, "Depart for destination");
+
+    assert!(is::<DrivingState>(&app));
+    let (phase, engine_on) =
+        with_state::<DrivingState, _>(&app, |d, _| (d.phase.to_string(), d.trip.truck.engine_on));
+    assert_eq!(
+        phase,
+        freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY
+    );
+    assert!(engine_on);
+    assert_eq!(
+        profile(&app).active_trip.as_ref().unwrap()["engine_on"],
+        serde_json::Value::Bool(true)
+    );
+}
+
+/// Otherwise the walk-around is theatre: the scale house has to find the box
+/// actually under the truck.
+#[test]
+fn test_a_refused_trailer_does_not_follow_the_driver_onto_the_road() {
+    let mut app = TestApp::new();
+    pickup_with_trailer(&mut app, true);
+    select::<PickupFacilityState>(&mut app, "Walk around the trailer");
+    select::<PickupFacilityState>(&mut app, "Refuse this trailer");
+    // The decision survives a save.
+    assert_eq!(
+        profile(&app).active_trip.as_ref().unwrap()["trailer_refused"],
+        serde_json::Value::Bool(true)
+    );
+
+    select::<PickupFacilityState>(&mut app, "Depart for destination");
+    assert!(is::<DrivingState>(&app));
+    let refused = with_state::<DrivingState, _>(&app, |d, _| d.trailer_refused);
+    assert!(refused);
+    let defect = with_state::<DrivingState, _>(&app, |d, ctx| d.hooked_trailer_defect(ctx));
+    assert_eq!(defect, None);
+    let snapshot = with_state_mut::<DrivingState, _>(&mut app, |d, ctx| d.snapshot(ctx));
+    assert_eq!(snapshot["trailer_refused"], serde_json::Value::Bool(true));
+}
 
 #[test]
-#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
-fn test_a_refused_trailer_does_not_follow_the_driver_onto_the_road() {}
+fn test_an_unrefused_defect_is_what_the_inspector_finds() {
+    let mut app = TestApp::new();
+    let job = pickup_with_trailer(&mut app, true);
+    let expected = preloaded_trailer(&job)
+        .expect("the yard staged a trailer")
+        .defect()
+        .map(str::to_string);
+    assert!(expected.is_some(), "the fixture wanted a defective trailer");
+
+    select::<PickupFacilityState>(&mut app, "Depart for destination"); // rolled out without looking
+    assert!(is::<DrivingState>(&app));
+    let refused = with_state::<DrivingState, _>(&app, |d, _| d.trailer_refused);
+    assert!(!refused);
+    let defect = with_state::<DrivingState, _>(&app, |d, ctx| d.hooked_trailer_defect(ctx));
+    assert_eq!(defect, expected);
+}
+
+/// It said it would wait for departure, so it must not re-engage at the gate.
+#[test]
+fn test_speed_control_stays_paused_until_departure() {
+    let mut app = TestApp::new();
+    accept_pickup_drive(&mut app);
+
+    // An armed session, rolling toward the pickup gate.
+    let armed = with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+        d.trip.truck.start_engine();
+        d.trip.truck.set_air_ready(false);
+        d.engage_cruise(ctx, 30.0, false);
+        d.speed_control_armed
+    });
+    assert!(armed);
+
+    let paused = with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+        d.trip.position_mi = d.trip.total_miles();
+        d.trip.finished = true;
+        d.trip.truck.velocity_mps = 8.0; // still rolling, above the gate stop speed
+        d.update_frame(ctx, 1.0 / 60.0);
+        d.speed_control_paused_at_stop
+    });
+    app.ctx.run_deferred();
+    assert!(paused);
+    let events = app.event_lines();
+    assert!(
+        events.iter().any(|text| text.contains("paused for pickup")),
+        "{events:?}"
+    );
+
+    // Several frames of still rolling up to the gate.
+    app.clear_speech();
+    for _ in 0..30 {
+        with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+            d.update_frame(ctx, 1.0 / 60.0);
+        });
+        app.ctx.run_deferred();
+    }
+    let events = app.event_lines();
+    assert!(
+        !events.iter().any(|text| text.contains("resuming")),
+        "{events:?}"
+    );
+    let (cruise, keeper) = with_state::<DrivingState, _>(&app, |d, _| (d.cruise_mph, d.keeper_mph));
+    assert_eq!(cruise, None);
+    assert_eq!(keeper, None);
+}
 
 #[test]
-#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
-fn test_an_unrefused_defect_is_what_the_inspector_finds() {}
+fn test_arming_by_hand_at_the_gate_still_works() {
+    let mut app = TestApp::new();
+    accept_pickup_drive(&mut app);
 
-#[test]
-#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
-fn test_speed_control_stays_paused_until_departure() {}
+    let paused = with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+        d.trip.truck.start_engine();
+        d.trip.truck.set_air_ready(false);
+        d.engage_cruise(ctx, 30.0, false);
+        d.trip.position_mi = d.trip.total_miles();
+        d.trip.finished = true;
+        d.trip.truck.velocity_mps = 8.0;
+        d.update_frame(ctx, 1.0 / 60.0);
+        d.speed_control_paused_at_stop
+    });
+    app.ctx.run_deferred();
+    assert!(paused);
 
-#[test]
-#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
-fn test_arming_by_hand_at_the_gate_still_works() {}
+    // The player overrides the hold themselves.
+    let (paused, cruise) = with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+        d.engage_cruise(ctx, 20.0, false);
+        (d.speed_control_paused_at_stop, d.cruise_mph)
+    });
+    assert!(!paused);
+    assert!(cruise.is_some());
+}
 
 // -- the facility engine kill switch (tests/test_facility_engine.py) ------------------
 //

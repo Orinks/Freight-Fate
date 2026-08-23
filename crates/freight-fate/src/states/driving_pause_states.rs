@@ -590,7 +590,7 @@ impl AbandonJobConfirmationState {
 
     /// An empty reposition has no load and no contract -- there is nothing to
     /// breach. The hours still pass either way.
-    fn is_bobtail(&self) -> bool {
+    pub fn is_bobtail(&self) -> bool {
         self.driving.read(|d| d.job.bobtail).unwrap_or(false)
     }
 
@@ -598,7 +598,7 @@ impl AbandonJobConfirmationState {
     /// self-serve bobtail the driver chose from the menu. There is still no
     /// freight and no pay to lose, but walking away from an ASSIGNMENT is
     /// walking away from dispatch, not just from a drive.
-    fn is_assigned_reposition(&self) -> bool {
+    pub fn is_assigned_reposition(&self) -> bool {
         self.is_bobtail() && self.driving.read(|d| d.job.assigned).unwrap_or(false)
     }
 

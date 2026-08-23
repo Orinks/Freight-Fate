@@ -1,10 +1,51 @@
-//! The headless `--smoke` run (`tests/test_smoke.py`'s app-level flows need
-//! the city and driving states; what can run today is the boot-and-five-
-//! frames check `main --smoke` does, plus the smoke verification of the
-//! baked data).
+//! The headless `--smoke` run: `tests/test_smoke.py`'s app-level flows, from
+//! the boot-and-five-frames check `main --smoke` does through the whole
+//! new-career-to-delivery walk, plus the smoke verification of the baked
+//! data.
 
+mod states_city_support;
+
+use ff_core::models::business::LEASED_OWNER_OPERATOR;
+use ff_core::models::profile::Profile;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::{smoke_checks, version, CliOptions};
+use freight_fate::states::base::{InputEvent, Key, Menu};
+use freight_fate::states::city::{
+    CityMenuState, GarageState, JobBoardState, TruckShopState, UpgradeShopState,
+};
+use freight_fate::states::city_pickup::PickupFacilityState;
+use freight_fate::states::driving::DrivingState;
+use freight_fate::states::driving_core::{DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP};
+use freight_fate::states::driving_menu_states::{ArrivalState, FacilityArrivalState};
+use freight_fate::states::driving_pause_states::{AbandonJobConfirmationState, PauseMenuState};
+use freight_fate::states::main_menu::{
+    CareerStartState, HomeCityState, HomeTerminalState, MainMenuState, NameEntryState,
+};
+use freight_fate::updater;
+use states_city_support::*;
+
+/// `accept_pickup_drive`'s head: New career through the four defaults, which
+/// lands on the destination terminal's city hub.
+fn new_career_to_city(app: &mut TestApp) {
+    app.push_state(MainMenuState::new());
+    select::<MainMenuState>(app, "New career");
+    assert!(is::<NameEntryState>(app));
+    key(app, Key::Return); // default name
+    assert!(is::<CareerStartState>(app));
+    key(app, Key::Return); // default start
+    key(app, Key::Return); // default region
+    key(app, Key::Return); // default home terminal
+    assert!(is::<CityMenuState>(app));
+}
+
+/// ...and on through the assigned dispatch to the deadhead.
+fn new_career_to_pickup_drive(app: &mut TestApp) {
+    new_career_to_city(app);
+    key(app, Key::Return); // job board
+    assert!(with_state::<JobBoardState, _>(app, |b, _| b.assigned_mode()));
+    key(app, Key::Return); // accept assigned job
+    assert!(is::<DrivingState>(app));
+}
 
 #[test]
 fn a_headless_smoke_run_boots_five_frames_and_exits_cleanly() {
@@ -106,9 +147,65 @@ fn test_discord_presence_toggle_is_accessible_and_wired() {}
 // `test_upgrade_f1_help_explains_player_benefits` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
-#[ignore = "unblocked, not written: the main-menu hand-off it waited on has landed; port the Python case"]
-fn test_pause_and_abandon_returns_to_city() {}
+fn test_pause_and_abandon_returns_to_city() {
+    let mut app = TestApp::new();
+    new_career_to_pickup_drive(&mut app);
+    assert_eq!(
+        with_state::<DrivingState, _>(&app, |d, _| d.phase.to_string()),
+        DRIVE_PHASE_PICKUP
+    );
+    with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+        d.trip.position_mi = d.trip.total_miles();
+        d.trip.finished = true;
+        d.trip.truck.velocity_mps = 0.0;
+        d.update_frame(ctx, 1.0 / 60.0);
+    });
+    finish_timed_state(&mut app);
+    assert!(is::<PickupFacilityState>(&app));
+    key(&mut app, Key::Return); // check in at origin
+    key(&mut app, Key::Return); // load at dock, or drop and hook
+    finish_timed_state(&mut app);
+    key(&mut app, Key::Return); // depart on assigned route
+    assert!(is::<DrivingState>(&app));
+    let (phase, origin) =
+        with_state::<DrivingState, _>(&app, |d, _| (d.phase.to_string(), d.job.origin.clone()));
+    assert_eq!(phase, DRIVE_PHASE_DELIVERY);
+
+    key(&mut app, Key::Escape);
+    assert!(is::<PauseMenuState>(&app));
+    let money = profile(&app).money;
+    select::<PauseMenuState>(&mut app, "Abandon job");
+    // The abandon now needs a Yes/No confirmation that lands on No.
+    assert!(is::<AbandonJobConfirmationState>(&app));
+    assert_eq!(
+        current_label::<AbandonJobConfirmationState>(&app),
+        "No, keep driving"
+    );
+    key(&mut app, Key::Down); // arrow to Yes
+    key(&mut app, Key::Return);
+    assert!(is::<CityMenuState>(&app));
+    assert_eq!(profile(&app).money, money - 500.0);
+    assert_eq!(profile(&app).current_city, origin);
+}
 
 #[test]
-#[ignore = "unblocked, not written: the main-menu hand-off it waited on has landed; port the Python case"]
-fn test_abandon_prompt_no_returns_to_pause_menu() {}
+fn test_abandon_prompt_no_returns_to_pause_menu() {
+    let mut app = TestApp::new();
+    new_career_to_pickup_drive(&mut app);
+
+    key(&mut app, Key::Escape);
+    assert!(is::<PauseMenuState>(&app));
+    let pause = app.state().expect("the pause menu");
+    let money = profile(&app).money;
+    let active_trip = profile(&app).active_trip.clone();
+    select::<PauseMenuState>(&mut app, "Abandon job");
+    assert!(is::<AbandonJobConfirmationState>(&app));
+    // Enter on the default "No" cancels and returns to the pause menu.
+    key(&mut app, Key::Return);
+    assert!(std::rc::Rc::ptr_eq(
+        &app.state().expect("a state"),
+        &pause
+    ));
+    assert_eq!(profile(&app).money, money);
+    assert_eq!(profile(&app).active_trip, active_trip);
+}

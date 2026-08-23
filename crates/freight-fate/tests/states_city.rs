@@ -31,6 +31,9 @@ use freight_fate::states::city::{
     JobBoardState, JobDetailState, PayDebtState, RouteSelectState, JOB_BOARD_INTRO_HELP,
 };
 use freight_fate::states::driving::DrivingState;
+use freight_fate::states::driving_pause_states::{
+    AbandonJobConfirmationState, PauseMenuState, ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY,
+};
 use freight_fate::states::main_menu::MainMenuState;
 use serde_json::{json, Map, Value};
 use states_city_support::*;
@@ -147,8 +150,28 @@ fn test_single_candidate_assignment_offers_no_decline() {
 }
 
 #[test]
-#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
-fn test_accepting_assignment_starts_pickup_drive() {}
+fn test_accepting_assignment_starts_pickup_drive() {
+    let mut app = TestApp::new();
+    new_hire(&mut app, "Assigned Acceptor");
+    let jobs = JobBoard::seeded(app.ctx.world, 7).offers(
+        "Chicago",
+        &[] as &[&str],
+        OfferOptions {
+            level: 1,
+            ..OfferOptions::default()
+        },
+    );
+
+    push_board(&mut app, jobs);
+    assert!(with_state::<JobBoardState, _>(&app, |b, _| b.assigned_mode()));
+    key(&mut app, Key::Return);
+
+    assert!(is::<DrivingState>(&app));
+    assert_eq!(
+        with_state::<DrivingState, _>(&app, |d, _| d.phase.to_string()),
+        freight_fate::states::driving_core::DRIVE_PHASE_PICKUP
+    );
+}
 
 #[test]
 fn test_senior_company_driver_gets_browsable_board() {
@@ -866,9 +889,60 @@ fn test_assigned_reposition_pays_reduced_rate_and_awards_mileage_xp() {
     assert_eq!(job.pay, expected_pay);
 }
 
+/// Walking away from an ASSIGNED reposition is walking away from a dispatch
+/// assignment: reputation drops, no dollar penalty -- unlike a real load
+/// (five hundred dollars and reputation) and unlike a self-serve bobtail
+/// (nothing at all, `test_abandoning_a_bobtail_costs_nothing`).
 #[test]
-#[ignore = "unblocked, not written: the city -> drive hand-off it waited on has landed; port the Python case"]
-fn test_abandoning_assigned_reposition_costs_reputation_only() {}
+fn test_abandoning_assigned_reposition_costs_reputation_only() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named_in("Assigned Reposition Abandon", "Denver"));
+    let carrier_key = profile(&app).carrier_key.clone();
+    let job = make_reposition_job(
+        app.ctx.world,
+        "Denver",
+        "Cheyenne",
+        true,
+        Some(&carrier_key),
+    )
+    .expect("Denver to Cheyenne is on the network");
+    let route = app
+        .ctx
+        .world
+        .supported_route("Denver", "Cheyenne", None)
+        .expect("the world routes")
+        .expect("the corridor is supported");
+    let driving = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        None,
+        freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY,
+        None,
+    );
+    let money_before = profile(&app).money;
+    let reputation_before = profile(&app).career.reputation;
+
+    app.push_state(driving);
+    key(&mut app, Key::Escape);
+    assert!(is::<PauseMenuState>(&app));
+    select::<PauseMenuState>(&mut app, "Abandon job");
+    assert!(is::<AbandonJobConfirmationState>(&app));
+    assert!(with_state::<AbandonJobConfirmationState, _>(&app, |c, _| c
+        .is_bobtail()));
+    assert!(with_state::<AbandonJobConfirmationState, _>(&app, |c, _| c
+        .is_assigned_reposition()));
+
+    key(&mut app, Key::Down); // arrow to Yes
+    key(&mut app, Key::Return);
+
+    assert!(is::<CityMenuState>(&app));
+    assert_eq!(profile(&app).money, money_before); // no dollar penalty
+    assert_eq!(
+        profile(&app).career.reputation,
+        reputation_before - ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY
+    );
+}
 
 // -- tests/test_career_unlocks.py (board parts) ---------------------------------------
 

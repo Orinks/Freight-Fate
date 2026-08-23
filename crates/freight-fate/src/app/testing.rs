@@ -344,6 +344,8 @@ pub struct AudioCalls {
     /// `set_speech_duck(level)` in order.
     pub ducks: Vec<f64>,
     pub music: Vec<(String, u32)>,
+    /// `"start"` / `"stop"` for every horn call, in order.
+    pub horn: Vec<&'static str>,
 }
 
 pub type AudioLog = Rc<RefCell<AudioCalls>>;
@@ -445,8 +447,12 @@ impl Audio for RecordingAudio {
     fn set_weather_with(&mut self, _key: Option<&str>, _intensity: f64) {}
     fn set_wind(&mut self, _intensity: f64) {}
     fn set_ambient_with(&mut self, _key: Option<&str>, _volume: f64) {}
-    fn horn_start(&mut self) {}
-    fn horn_stop(&mut self) {}
+    fn horn_start(&mut self) {
+        self.log.borrow_mut().horn.push("start");
+    }
+    fn horn_stop(&mut self) {
+        self.log.borrow_mut().horn.push("stop");
+    }
     fn reverse_start(&mut self) {}
     fn reverse_stop(&mut self) {}
     fn stop_world(&mut self) {}

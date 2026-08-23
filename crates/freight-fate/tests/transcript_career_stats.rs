@@ -1,0 +1,72 @@
+//! The terminal's Career stats screen: a reviewable menu with rest status
+//! (port of `tests/test_career_stats.py`).
+
+mod states_main_menu_support;
+
+use ff_core::models::profile::Profile;
+use freight_fate::app::testing::TestApp;
+use freight_fate::states::base::{Key, Menu};
+use freight_fate::states::career_stats::CareerStatsState;
+use freight_fate::states::city::CityMenuState;
+use states_main_menu_support::*;
+
+#[test]
+fn test_career_stats_is_a_reviewable_menu_with_rest_status() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named_in("Stats", "Austin"));
+    {
+        let p = app.ctx.profile.as_mut().unwrap();
+        p.career.deliveries = 4;
+        p.career.on_time_deliveries = 3;
+        p.career.total_miles = 1234.0;
+        p.career.total_earnings = 5678.0;
+    }
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
+
+    select::<CityMenuState>(&mut app, "Career stats");
+    assert!(is::<CareerStatsState>(&app));
+    let rows = labels::<CareerStatsState>(&app);
+    assert!(rows.iter().any(|l| l.starts_with("Level 1 driver")));
+    // A level 1 driver holds nothing; the line still exists so the screen
+    // always answers "what am I cleared to haul?"
+    assert!(rows.iter().any(|l| l == "Endorsements: none yet"));
+    assert!(rows.iter().any(|l| l == "Deliveries: 4, 75 percent on time"));
+    assert!(rows.iter().any(|l| l == "Lifetime miles: 1,234"));
+    assert!(rows.iter().any(|l| l == "Lifetime earnings: 5,678 dollars"));
+    assert!(rows.iter().any(|l| l == "Rest: fully rested"));
+    assert!(rows.iter().any(|l| l.starts_with("Hours:")));
+    assert_eq!(rows.last().map(String::as_str), Some("Back"));
+
+    // Enter repeats the current line without leaving the screen.
+    key(&mut app, Key::Return);
+    assert!(is::<CareerStatsState>(&app));
+
+    // A tired driver hears fatigue instead of "fully rested".
+    {
+        let p = app.ctx.profile.as_mut().unwrap();
+        p.fatigue = 40.0;
+        p.hos.drive(120.0);
+    }
+    with_state_mut::<CareerStatsState, _>(&mut app, |s, ctx| s.refresh(ctx, true));
+    let rows = labels::<CareerStatsState>(&app);
+    assert!(rows.iter().any(|l| l == "Rest: fatigue 40 percent"));
+    assert!(!rows.iter().any(|l| l == "Rest: fully rested"));
+
+    // Endorsements are a reviewable record, not a one-time level-up
+    // announcement: a driver holding reefer and high-value hears both.
+    {
+        let p = app.ctx.profile.as_mut().unwrap();
+        p.career
+            .purchased_endorsements
+            .extend(["refrigerated".to_string(), "high_value".to_string()]);
+    }
+    with_state_mut::<CareerStatsState, _>(&mut app, |s, ctx| s.refresh(ctx, true));
+    let rows = labels::<CareerStatsState>(&app);
+    assert!(rows
+        .iter()
+        .any(|l| l == "Endorsements: high-value, refrigerated"));
+
+    key(&mut app, Key::Escape);
+    assert!(is::<CityMenuState>(&app));
+}

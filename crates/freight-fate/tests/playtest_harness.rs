@@ -714,7 +714,6 @@ fn test_playtest_harness_drives_a_specific_route() {
 /// (see the module note). The fix is a harness clock that advances with the
 /// frames, which changes what every transcript test hears.
 #[test]
-#[ignore = "blocked: the pacer drops ambient road lines as stale because a whole delivery runs in seconds of wall clock; needs a frame-driven pacer clock in PlaytestHarness"]
 fn test_mapped_state_lines_are_authoritative_in_delivery_transcripts() {
     for (cities, state, passing_city, expected_crossings) in [
         (

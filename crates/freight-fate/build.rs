@@ -10,7 +10,10 @@ fn main() {
     let root = manifest.ancestors().nth(2).unwrap().to_path_buf();
     let os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
-    let dir = root.join("vendor").join("sdl2").join(format!("{os}-{arch}"));
+    let dir = root
+        .join("vendor")
+        .join("sdl2")
+        .join(format!("{os}-{arch}"));
     println!("cargo:rerun-if-changed={}", dir.display());
     if !dir.is_dir() {
         println!("cargo:warning=freight-fate: no vendored SDL2 for {os}-{arch} under vendor/sdl2; expecting a system SDL2");
