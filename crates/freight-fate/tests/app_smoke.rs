@@ -11,8 +11,13 @@ fn a_headless_smoke_run_boots_five_frames_and_exits_cleanly() {
     let mut app = TestApp::new();
     app.run(Some(5));
     assert!(!app.running());
-    // The placeholder first screen spoke its title and row, as a menu does.
-    assert_eq!(app.main_lines()[0], "Freight Fate.");
+    // The real main menu greets the player on entry, as it does in Python.
+    let first = &app.main_lines()[0];
+    assert!(
+        first.starts_with("Welcome to Freight Fate, version "),
+        "unexpected first line: {first}"
+    );
+    assert!(first.contains("An audio trucking adventure across America."));
 }
 
 #[test]
