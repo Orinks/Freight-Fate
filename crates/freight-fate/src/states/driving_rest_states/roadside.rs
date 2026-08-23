@@ -62,25 +62,23 @@ pub trait RoadsideExit: Menu {
     }
 
     /// Said as part of the outcome: why the run stops and what happens next.
-    fn suspended_exit_text(&self, ctx: &GameContext) -> String {
+    ///
+    /// Takes the drive rather than reaching for it through [`RoadsideExit::drive`]:
+    /// the only caller is `resolve`, which runs in the constructor while the
+    /// push helper is still holding the drive, so a second borrow was always
+    /// going to fail. It did, silently, and every suspended stop on a loaded
+    /// run told the driver "There is no loaded trailer to hand back" with a
+    /// full trailer behind them.
+    fn suspended_exit_text(&self, ctx: &GameContext, d: &DrivingState) -> String {
         let profile = profile_of(ctx);
-        let load = self
-            .drive()
-            .read(|d| {
-                if d.phase == DRIVE_PHASE_DELIVERY && !d.job.bobtail {
-                    format!(
-                        "Dispatch takes the {} load back and reassigns it",
-                        d.job.cargo.label
-                    )
-                } else {
-                    "There is no loaded trailer to hand back, and the assignment is canceled"
-                        .to_string()
-                }
-            })
-            .unwrap_or_else(|| {
-                "There is no loaded trailer to hand back, and the assignment is canceled"
-                    .to_string()
-            });
+        let load = if d.phase == DRIVE_PHASE_DELIVERY && !d.job.bobtail {
+            format!(
+                "Dispatch takes the {} load back and reassigns it",
+                d.job.cargo.label
+            )
+        } else {
+            "There is no loaded trailer to hand back, and the assignment is canceled".to_string()
+        };
         let terminal = ctx
             .world
             .home_terminal(&profile.current_city)
@@ -246,7 +244,7 @@ impl TrafficStopState {
             self.outcome_text.push_str(&format!(" {ladder}"));
         }
         if self.licence_pulled(ctx) {
-            let tail = self.suspended_exit_text(ctx);
+            let tail = self.suspended_exit_text(ctx, d);
             self.outcome_text.push_str(&tail);
         }
     }
@@ -447,7 +445,7 @@ impl EnforcementStopState {
             ));
         }
         if self.licence_pulled(ctx) {
-            let tail = self.suspended_exit_text(ctx);
+            let tail = self.suspended_exit_text(ctx, d);
             self.outcome_text.push_str(&tail);
         }
     }

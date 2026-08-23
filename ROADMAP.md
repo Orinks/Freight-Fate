@@ -187,13 +187,29 @@ onto exit signalling.
       from a pack, and every Rust test that reads the shipped bytes now skips
       on a pointer with a note on the log naming it -- the two committed-pack
       header tests, the shipped-recording lookups and durations in
-      `audio_backends.rs`, the horn stream in `audio_loops.rs`,
-      `verify_sound_assets` in `audio_sound_pack.rs`, and the music-catalog
-      sweep in `audio_speech_audio.rs`. The note is not decoration: a green
-      run that quietly tested no audio at all is the failure this is guarding
-      against, and the same red window the Python side is riding out
-      (allowance resets on the 1st) hides a real failure just as well here.
-      Read the job log, not the badge.
+      `audio_backends.rs` (nineteen of them now take the recordings through
+      `bass_rig_with_recordings`, which wants BASS *and* the bytes), the horn
+      stream in `audio_loops.rs`, `verify_sound_assets` in
+      `audio_sound_pack.rs`, and the music-catalog sweeps in
+      `audio_backends.rs` and `audio_speech_audio.rs`. The note is not
+      decoration: a green run that quietly tested no audio at all is the
+      failure this guards against, and the same red window the Python side is
+      riding out (allowance resets on the 1st) hides a real failure just as
+      well here. Read the job log, not the badge.
+
+      NEVER VERIFY THIS BY MOVING OR STUBBING THE REAL PACKS. The working
+      tree holds the only copy of a 250 MB Git LFS object, and an attempt to
+      swap one out for a pointer during this work truncated music.pak to zero
+      -- recovered from the local LFS object cache, but it need not have
+      been. `FREIGHT_FATE_PACK_DIR` exists for exactly this: point it at a
+      throwaway directory holding pointer stubs and the whole lookup follows,
+      with the shipped packs never touched. That is how this was checked --
+      `cargo test -p freight-fate audio` under a pointer-stub pack directory
+      against the same run with the real packs. The predicate itself is
+      pinned in committed unit tests that build their pointer in a
+      `tempfile::TempDir` (`test_an_lfs_pointer_is_not_an_available_pack`,
+      `test_a_real_pack_and_a_missing_one_are_both_read_correctly`), so the
+      trap stays covered without any file being moved at all.
 
 - [x] **Rust port: the validator invariants export has a shipped code path
       (`ff-invariants`, 2026-08-22).** The Rust half of

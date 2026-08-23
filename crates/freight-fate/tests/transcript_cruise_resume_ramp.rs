@@ -372,7 +372,11 @@ fn test_open_road_resume_waits_for_road_speed_before_engaging_cruise() {
 /// one posted number, one stop this helper puts there -- so the ramp speed is
 /// derived from the road the way the game derives it, and the assertions read
 /// `armed_ramp_cruise_mph()` rather than a constant.
-fn armed_exit_at(ahead_mi: f64, time_scale: f64, lane_keeping: &str) -> (PlaytestHarness, RoadStop) {
+fn armed_exit_at(
+    ahead_mi: f64,
+    time_scale: f64,
+    lane_keeping: &str,
+) -> (PlaytestHarness, RoadStop) {
     // A real interstate posting, not the 200 of `open_limits`: the exit cases
     // turn on the ramp's number, which is derived from the road's, so lifting
     // the posting would lift the ramp with it and there would be nothing left

@@ -863,6 +863,58 @@ mod tests {
         false
     }
 
+    /// A Git LFS pointer, byte for byte what a checkout without LFS leaves
+    /// behind: three lines, about 130 bytes, where the object should be.
+    fn write_lfs_pointer(path: &Path, oid: &str, size: u64) {
+        std::fs::write(
+            path,
+            format!("version https://git-lfs.github.com/spec/v1\noid sha256:{oid}\nsize {size}\n"),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn test_an_lfs_pointer_is_not_an_available_pack() {
+        // The trap this guard exists for: a pointer is a file that EXISTS,
+        // so `Path::exists` alone reads an unmaterialised pack as present.
+        //
+        // Written into a temp directory, never over the shipped packs: those
+        // are Git LFS objects (music.pak is 250 MB) and the working tree
+        // holds the only copy.
+        let tmp = tempfile::tempdir().unwrap();
+        let pointer = tmp.path().join(DEFAULT_PACK_NAME);
+        write_lfs_pointer(&pointer, &"a".repeat(64), 7_781_859);
+
+        assert!(pointer.exists(), "the trap: the pointer is a file");
+        assert!(pointer.metadata().unwrap().len() < 200, "~130 bytes");
+        assert!(is_lfs_pointer(&pointer));
+        assert!(!pack_available(&pointer), "a pointer is not the pack");
+
+        // So the header tests refuse to run against it rather than asserting
+        // a byte length over 130 bytes of pointer text.
+        assert!(!committed_pack(&pointer));
+        // Opening it as a pack fails, which is what every asset lookup would
+        // have done if the guard had stayed an existence check.
+        assert!(SoundPack::open(&pointer).is_err());
+    }
+
+    #[test]
+    fn test_a_real_pack_and_a_missing_one_are_both_read_correctly() {
+        let tmp = tempfile::tempdir().unwrap();
+        let sounds = write_fixture_sounds(tmp.path());
+        let real = write_pack(&sounds, &tmp.path().join(DEFAULT_PACK_NAME), None, None).unwrap();
+        assert!(!is_lfs_pointer(&real));
+        assert!(pack_available(&real), "a real pack is available");
+        assert!(committed_pack(&real));
+
+        // Absent is not a pointer, and still not available: the two reasons
+        // stay distinguishable, which is what lets the skip note say which.
+        let missing = tmp.path().join("never_written.pak");
+        assert!(!is_lfs_pointer(&missing));
+        assert!(!pack_available(&missing));
+        assert!(!committed_pack(&missing));
+    }
+
     #[test]
     fn test_committed_pack_has_freight_fate_header() {
         let path = committed_pack_dir().join(DEFAULT_PACK_NAME);

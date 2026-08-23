@@ -76,7 +76,13 @@ pub fn bench_road_with(
                 hgv: false,
             })
             .collect(),
-        grade_segments: vec![GradeSegment::new(0.0, miles, grade_pct, "flat", "test bench")],
+        grade_segments: vec![GradeSegment::new(
+            0.0,
+            miles,
+            grade_pct,
+            "flat",
+            "test bench",
+        )],
         ..Default::default()
     };
     let leg = Leg::new(&city, &city, miles, "I 90", "flat", Vec::new()).with_detail(detail);
@@ -118,7 +124,17 @@ pub fn quiet(trip: &mut Trip) {
 
 /// `start_drive(app)`: new career, accept the assigned dispatch, depart.
 pub fn start_drive(profile_name: &str) -> PlaytestHarness {
+    start_drive_scaled(profile_name, None)
+}
+
+/// [`start_drive`] with `app.ctx.settings.time_scale` set BEFORE the drive is
+/// built, which is where the Python cases that care about it set it: the trip
+/// takes its pacing at construction, so a later assignment lasts one tick.
+pub fn start_drive_scaled(profile_name: &str, time_scale: Option<f64>) -> PlaytestHarness {
     let mut harness = PlaytestHarness::new();
+    if let Some(scale) = time_scale {
+        harness.app.ctx.settings.time_scale = scale;
+    }
     harness.start_delivery(StartDelivery::named(profile_name));
     harness.with_drive(|d, _| {
         // The origin yard may carry a turn-level street chain; these feature
@@ -244,7 +260,12 @@ pub fn facility_street_chain(drive: &mut DrivingState, time_scale: f64) {
             25.0,
         ),
     ];
-    street_chain(drive, vec![city.clone(), city.clone(), city], legs, time_scale);
+    street_chain(
+        drive,
+        vec![city.clone(), city.clone(), city],
+        legs,
+        time_scale,
+    );
 }
 
 /// `short_block_street_chain(driving, block_mi=0.08)`: a street chain whose
@@ -309,12 +330,7 @@ pub fn turn_cues(drive: &DrivingState) -> Vec<NavigationCue> {
         .collect()
 }
 
-fn street_chain(
-    drive: &mut DrivingState,
-    cities: Vec<String>,
-    legs: Vec<Leg>,
-    time_scale: f64,
-) {
+fn street_chain(drive: &mut DrivingState, cities: Vec<String>, legs: Vec<Leg>, time_scale: f64) {
     let route = Route::from_legs(cities, legs);
     let truck = drive.trip.truck.clone();
     let mut weather = WeatherSystem::new("heartland", Some(3), None, None, true);

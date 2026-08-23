@@ -13,7 +13,7 @@ use ff_core::sim::hos;
 
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Menu;
-use freight_fate::states::driving_core::FAILURE_TO_STOP_DAMAGE_PCT;
+use freight_fate::states::driving_core::{DRIVE_PHASE_DELIVERY, FAILURE_TO_STOP_DAMAGE_PCT};
 use freight_fate::states::driving_rest_states::{
     EnforcementStopState, FelonyStopState, TrafficStopState,
 };
@@ -144,6 +144,63 @@ fn test_a_pulled_licence_ends_the_run_from_the_shoulder() {
     assert_eq!(rows, vec!["Return to terminal"]);
     assert!(
         state.outcome_text().contains("You are released to"),
+        "{}",
+        state.outcome_text()
+    );
+}
+
+#[test]
+fn test_a_pulled_licence_names_the_load_dispatch_takes_back() {
+    // The stop is resolved while the drive that pushed it is still held, so
+    // the outcome has to be told from the drive it was handed rather than
+    // reaching for the drive again. It used to reach, the second borrow
+    // failed, and a loaded run was told there was no trailer to hand back.
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    {
+        let profile = app.ctx.profile.as_mut().expect("a career");
+        profile.career.reputation = 40.0;
+        profile.driving_record.lifetime_disqualified = true;
+    }
+    let state = drive_and_ctx(&drive, &mut app, |d, ctx| {
+        assert_eq!(d.phase, DRIVE_PHASE_DELIVERY, "a loaded delivery run");
+        assert!(!d.job.bobtail, "with a trailer on");
+        TrafficStopState::new(ctx, d, false, 24.0, 65.0, false, false, false)
+    });
+    let cargo = with_drive(&drive, |d| d.job.cargo.label.to_string());
+    assert!(
+        state
+            .outcome_text()
+            .contains(&format!("Dispatch takes the {cargo} load back")),
+        "{}",
+        state.outcome_text()
+    );
+    assert!(
+        !state.outcome_text().contains("no loaded trailer"),
+        "{}",
+        state.outcome_text()
+    );
+}
+
+#[test]
+fn test_a_bobtail_pulled_licence_says_there_is_no_trailer() {
+    // The other side of the same branch, so the fix cannot be "always say
+    // there is a load".
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    with_drive(&drive, |d| d.job.bobtail = true);
+    {
+        let profile = app.ctx.profile.as_mut().expect("a career");
+        profile.career.reputation = 40.0;
+        profile.driving_record.lifetime_disqualified = true;
+    }
+    let state = drive_and_ctx(&drive, &mut app, |d, ctx| {
+        TrafficStopState::new(ctx, d, false, 24.0, 65.0, false, false, false)
+    });
+    assert!(
+        state
+            .outcome_text()
+            .contains("There is no loaded trailer to hand back"),
         "{}",
         state.outcome_text()
     );

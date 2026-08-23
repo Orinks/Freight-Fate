@@ -26,7 +26,11 @@ use transcript_cruise_support::*;
 ///
 /// A zone is how `speed_limit_at` returns a reason at all, so one covering
 /// the whole road is the same road the patch described.
-fn post_zone(harness: &mut freight_fate::playtest::harness::PlaytestHarness, limit: f64, reason: &str) {
+fn post_zone(
+    harness: &mut freight_fate::playtest::harness::PlaytestHarness,
+    limit: f64,
+    reason: &str,
+) {
     let reason = reason.to_string();
     harness.with_drive(move |d, _| {
         d.trip.zones = vec![Zone::new(0.0, 1e6, limit, &reason)];
@@ -49,7 +53,9 @@ fn test_cruise_control_holds_the_set_speed() {
     });
     press(&mut harness, Key::K, None);
     assert!(approx_abs(
-        harness.read_drive(|d| d.cruise_mph).expect("cruise engaged"),
+        harness
+            .read_drive(|d| d.cruise_mph)
+            .expect("cruise engaged"),
         60.0,
         1.0
     ));
@@ -69,7 +75,9 @@ fn test_shift_k_resumes_the_braked_away_cruise_speed() {
     });
     press(&mut harness, Key::K, None);
     assert!(approx_abs(
-        harness.read_drive(|d| d.cruise_mph).expect("cruise engaged"),
+        harness
+            .read_drive(|d| d.cruise_mph)
+            .expect("cruise engaged"),
         60.0,
         1.0
     ));
@@ -81,7 +89,9 @@ fn test_shift_k_resumes_the_braked_away_cruise_speed() {
     harness.with_drive(|d, ctx| d.cancel_cruise(ctx, false));
     assert!(harness.read_drive(|d| d.cruise_mph).is_none());
     assert!(approx_abs(
-        harness.read_drive(|d| d.resume_target_mph).expect("remembered"),
+        harness
+            .read_drive(|d| d.resume_target_mph)
+            .expect("remembered"),
         set_speed,
         1.0
     ));
@@ -101,7 +111,9 @@ fn test_shift_k_resumes_the_braked_away_cruise_speed() {
     assert!(said_any(&harness, "Resuming automatic speed control"));
     frame(&mut harness, DT);
     assert!(approx_abs(
-        harness.read_drive(|d| d.cruise_mph).expect("cruise engaged"),
+        harness
+            .read_drive(|d| d.cruise_mph)
+            .expect("cruise engaged"),
         set_speed,
         1.0
     ));
@@ -230,7 +242,9 @@ fn test_cruise_set_point_adjusts_with_plus_and_minus() {
         d.truck_mut().velocity_mps = 26.8; // ~60 mph
     });
     press(&mut harness, Key::K, None);
-    let base = harness.read_drive(|d| d.cruise_mph).expect("cruise engaged");
+    let base = harness
+        .read_drive(|d| d.cruise_mph)
+        .expect("cruise engaged");
     // `engage_cruise` rounds the captured road speed (~59.95) to the whole mph
     // the player actually hears, so base lands exactly on the fives grid here
     // -- a plain tap steps a full CRUISE_STEP_MPH.
@@ -317,7 +331,9 @@ fn test_speed_keeper_holds_through_a_facility_zone() {
 
     assert!(harness.read_drive(|d| d.cruise_mph).is_none());
     assert!(approx_abs(
-        harness.read_drive(|d| d.keeper_mph).expect("keeper holding"),
+        harness
+            .read_drive(|d| d.keeper_mph)
+            .expect("keeper holding"),
         10.0,
         0.5
     ));
@@ -396,7 +412,10 @@ fn keeper_on_a_street_chain(
     harness.app.ctx.settings.time_scale = 1.0;
     let cue = harness.with_drive(|d, _| {
         facility_street_chain(d, 1.0);
-        turn_cues(d).first().cloned().expect("a corner on the chain")
+        turn_cues(d)
+            .first()
+            .cloned()
+            .expect("a corner on the chain")
     });
     press(&mut harness, Key::E, None);
     let at_mi = cue.at_mi - start_before_mi;
@@ -410,7 +429,9 @@ fn keeper_on_a_street_chain(
     });
     press(&mut harness, Key::K, None);
     assert!(approx_abs(
-        harness.read_drive(|d| d.keeper_mph).expect("keeper holding"),
+        harness
+            .read_drive(|d| d.keeper_mph)
+            .expect("keeper holding"),
         25.0,
         0.5
     ));
@@ -434,7 +455,10 @@ fn test_speed_keeper_is_under_the_turn_speed_before_the_corner() {
         .filter(|(_, mph)| *mph <= advise)
         .map(|(mile, _)| *mile)
         .collect();
-    assert!(!under.is_empty(), "the keeper never reached the corner speed");
+    assert!(
+        !under.is_empty(),
+        "the keeper never reached the corner speed"
+    );
     let first_under = under.iter().cloned().fold(f64::INFINITY, f64::min);
     assert!(cue.at_mi - first_under >= 0.01);
     assert!(harness.read_drive(|d| d.truck().speed_mph()) <= advise);
@@ -496,9 +520,9 @@ fn test_speed_keeper_makes_the_second_corner_of_a_short_block() {
 
     roll_to(&mut harness, first.at_mi, 60 * 300);
     assert!(harness.read_drive(|d| d.truck().speed_mph()) <= 20.0); // the first corner, as before
-    // The second corner is the one the old planner could not see: while there
-    // is still road to shed on, the keeper has to be aiming at ITS number
-    // rather than still holding the first corner's.
+                                                                    // The second corner is the one the old planner could not see: while there
+                                                                    // is still road to shed on, the keeper has to be aiming at ITS number
+                                                                    // rather than still holding the first corner's.
     roll_to(&mut harness, second.at_mi - 0.03, 60 * 300);
     // The label depends on which source latched first -- the corner's own
     // advise or the service way's posted 15 -- and both are the truth. The
@@ -533,9 +557,8 @@ fn test_speed_keeper_eases_for_a_lower_posted_limit_and_says_so() {
     // arrival with 10 percent less road than the physics the window prices,
     // which put the assertion on a knife edge that the drawn route's time
     // scale decided (the 1-in-4 flake).
-    let drop_mi = harness.read_drive(|d| {
-        d.trip.position_mi + d.keeper_ease_mi(15.0, d.trip.effective_time_scale())
-    });
+    let drop_mi = harness
+        .read_drive(|d| d.trip.position_mi + d.keeper_ease_mi(15.0, d.trip.effective_time_scale()));
     harness.with_drive(move |d, _| {
         d.trip.zones = vec![
             Zone::new(0.0, drop_mi, 25.0, "facility access road"),
@@ -757,10 +780,10 @@ fn test_speed_keeper_ignores_a_slower_vehicle_miles_up_the_road() {
     let stop_at_mi = harness.read_drive(|d| d.trip.position_mi) + 0.02;
     for _ in 0..(60 * 60) {
         harness.with_drive(move |d, _| {
-            d.trip
-                .set_npc_vehicles(vec![
-                    NPCVehicle::new("lead", stop_at_mi, 0.0, 0.0, 0, "slow_car").into(),
-                ]);
+            d.trip.set_npc_vehicles(vec![NPCVehicle::new(
+                "lead", stop_at_mi, 0.0, 0.0, 0, "slow_car",
+            )
+            .into()]);
         });
         frame(&mut harness, DT);
         if harness.read_drive(|d| d.truck().speed_mph()) < 1.0 {

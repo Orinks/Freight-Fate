@@ -20,6 +20,7 @@
 //! later call (a menu row, a re-entry when a submenu pops, `lines()`) runs
 //! with the drive free.
 
+use std::panic::Location;
 use std::rc::Rc;
 
 use crate::app::{share, GameContext, SharedState};
@@ -39,6 +40,34 @@ impl Clone for DriveRef {
     fn clone(&self) -> Self {
         DriveRef(self.0.as_ref().map(Rc::clone))
     }
+}
+
+/// The drive was already borrowed further up this same call stack.
+///
+/// This is never a state of the world, only ever a programming error: some
+/// caller that already holds the drive reached for it a second time instead of
+/// passing down the one it has. Answering `None` for it is what let the rest
+/// stop say "tank is full" over forty gallons of a hundred and fifty, and what
+/// emptied the pause menu after a roadside repair -- the caller cannot tell
+/// this apart from "there is no drive", so it picks a plausible default and
+/// the plausible default is a lie in a player's ear.
+///
+/// So it fails loudly where a bench or the test suite will catch it, and only
+/// warns in a shipped build, where a panic would cost the player their drive.
+#[cold]
+#[inline(never)]
+fn nested_borrow(method: &str, caller: &Location<'_>) {
+    debug_assert!(
+        false,
+        "DriveRef::{method} at {caller}: the drive is already borrowed further \
+         up this call stack. Pass the drive that outer borrow already holds \
+         down to this code instead of borrowing it again."
+    );
+    log::warn!(
+        "DriveRef::{method} at {caller}: the drive is already borrowed further \
+         up this call stack, so this answered with nothing. That is a bug: the \
+         caller should pass the borrowed drive down."
+    );
 }
 
 /// The `DrivingState` inside a state on the stack, whichever wrapper it wears.
@@ -91,22 +120,33 @@ impl DriveRef {
         }
     }
 
-    /// Run `f` on the drive. `None` when there is no drive, or it is busy.
+    /// Run `f` on the drive. `None` when there is no drive.
+    ///
+    /// A drive that is already borrowed further up the stack also answers
+    /// `None`, but noisily -- see [`nested_borrow`].
+    #[track_caller]
     pub fn read<R>(&self, f: impl FnOnce(&mut DrivingState) -> R) -> Option<R> {
         let shared = self.0.as_ref()?;
-        let mut borrowed = shared.try_borrow_mut().ok()?;
+        let Ok(mut borrowed) = shared.try_borrow_mut() else {
+            nested_borrow("read", Location::caller());
+            return None;
+        };
         let drive = as_driving(&mut *borrowed)?;
         Some(f(drive))
     }
 
     /// Run `f` on the drive with the context. Same availability rule.
+    #[track_caller]
     pub fn with<R>(
         &self,
         ctx: &mut GameContext,
         f: impl FnOnce(&mut DrivingState, &mut GameContext) -> R,
     ) -> Option<R> {
         let shared = self.0.as_ref()?;
-        let mut borrowed = shared.try_borrow_mut().ok()?;
+        let Ok(mut borrowed) = shared.try_borrow_mut() else {
+            nested_borrow("with", Location::caller());
+            return None;
+        };
         let drive = as_driving(&mut *borrowed)?;
         Some(f(drive, ctx))
     }
@@ -116,6 +156,7 @@ impl DriveRef {
     /// Takes `self` by value so the call site clones the handle first
     /// (`self.driving.clone().call(self, ctx, ...)`), which is what lets the
     /// screen be borrowed mutably at the same time.
+    #[track_caller]
     pub fn call<S, R>(
         self,
         state: &mut S,
@@ -123,7 +164,10 @@ impl DriveRef {
         f: impl FnOnce(&mut S, &mut GameContext, &mut DrivingState) -> R,
     ) -> Option<R> {
         let shared = self.0.as_ref()?;
-        let mut borrowed = shared.try_borrow_mut().ok()?;
+        let Ok(mut borrowed) = shared.try_borrow_mut() else {
+            nested_borrow("call", Location::caller());
+            return None;
+        };
         let drive = as_driving(&mut *borrowed)?;
         Some(f(state, ctx, drive))
     }
