@@ -380,3 +380,123 @@ pub fn roll_to(harness: &mut PlaytestHarness, mile: f64, limit_frames: usize) ->
     }
     trace
 }
+
+// -- the grade bench ------------------------------------------------------------
+
+/// Where every bench case parks the truck: the middle of the 400-mile leg,
+/// clear of the urban radius at either end.
+pub const START_MI: f64 = 200.0;
+
+/// `_cruising(app, set_mph)`: cruise engaged and holding on the bench road.
+pub fn cruising(
+    name: &str,
+    set_mph: f64,
+    limit_mph: f64,
+    grades: &[(f64, f64, f64)],
+) -> PlaytestHarness {
+    let mut harness = start_drive(name);
+    harness.app.ctx.settings.time_scale = 1.0;
+    harness.app.ctx.settings.automatic_transmission = true;
+    let grades = grades.to_vec();
+    harness.with_drive(move |d, _| {
+        bench_road_segments(d, &[(0.0, limit_mph)], &grades, 1.0);
+        d.trip.position_mi = START_MI;
+        assert!(
+            d.trip.engine_brake_ban_at(START_MI).is_none(),
+            "the bench road must have no engine-brake ban under the truck"
+        );
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().cargo_kg = 18_000.0;
+        d.truck_mut().start_engine();
+        d.truck_mut().set_air_ready(false);
+        d.truck_mut().velocity_mps = set_mph * MPS_PER_MPH;
+        d.truck_mut().transmission.gear = d.truck().transmission.num_gears();
+    });
+    harness.with_drive(move |d, ctx| d.engage_cruise(ctx, set_mph, false));
+    harness
+}
+
+/// The keyword arguments of `_grade_hold`.
+pub struct GradeHold {
+    pub set_mph: f64,
+    pub seconds: f64,
+    pub descent: &'static str,
+    pub advisory: Option<f64>,
+}
+
+impl Default for GradeHold {
+    fn default() -> Self {
+        GradeHold {
+            set_mph: 62.0,
+            seconds: 90.0,
+            descent: "realistic",
+            advisory: None,
+        }
+    }
+}
+
+/// `_grade_hold(app, grade, ...)`: run cruise at a set speed on a fixed grade;
+/// returns the harness, the speed trace and the retarder-stage trace.
+///
+/// Mirrors the driving loop's own order for the pieces a grade exercises:
+/// pedals decay when nothing is held, cruise runs, the retarder manager and
+/// the automatic get their turn, then the physics steps.
+pub fn grade_hold(
+    name: &str,
+    grade: f64,
+    opts: GradeHold,
+) -> (PlaytestHarness, Vec<f64>, Vec<i32>) {
+    let mut harness = cruising(
+        name,
+        opts.set_mph,
+        200.0,
+        &[(0.0, BENCH_MILES, grade * 100.0)],
+    );
+    harness.app.ctx.settings.descent_speed_control = opts.descent.to_string();
+
+    let dt = DT;
+    let mut speeds = Vec::new();
+    let mut stages = Vec::new();
+    let settle = 20 * 60;
+    let total = (opts.seconds * 60.0) as usize;
+    for step in 0..total {
+        // Settle on the flat first so the grade arrives at a steady truck.
+        let frame_grade = if step < settle { 0.0 } else { grade };
+        let advisory = opts.advisory;
+        let start_advisory = advisory.is_some() && step == settle;
+        harness.advance_clock(dt);
+        let (speed, stage) = harness.with_drive(move |d, ctx| {
+            d.truck_mut().grade = frame_grade;
+            if start_advisory {
+                // The bend's footprint outlasts the run, so the cap stays on.
+                d.cruise_curve_mph = advisory;
+                d.cruise_curve_end_mi = Some(d.trip.position_mi + 5.0);
+            }
+            let ramp = dt * 2.2;
+            let throttle = d.truck().throttle;
+            let brake = d.truck().brake;
+            d.truck_mut().throttle = 0.0f64.max(throttle - ramp * 2.0);
+            d.truck_mut().brake = 0.0f64.max(brake - ramp * 3.0);
+            d.update_cruise(ctx, dt, false, false, false);
+            d.update_auto_jake(ctx, dt);
+            if d.truck().transmission.automatic && d.truck().engine_on {
+                d.truck_mut().auto_shift();
+            }
+            d.truck_mut().update(dt);
+            (d.truck().speed_mph(), d.truck().engine_brake_stage)
+        });
+        if step >= settle {
+            speeds.push(speed);
+            stages.push(stage);
+        }
+    }
+    (harness, speeds, stages)
+}
+
+pub fn max_of(values: &[f64]) -> f64 {
+    values.iter().cloned().fold(f64::NEG_INFINITY, f64::max)
+}
+
+pub fn min_of(values: &[f64]) -> f64 {
+    values.iter().cloned().fold(f64::INFINITY, f64::min)
+}

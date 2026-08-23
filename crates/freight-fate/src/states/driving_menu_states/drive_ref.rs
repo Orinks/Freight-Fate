@@ -36,7 +36,7 @@ use std::panic::Location;
 use std::rc::Rc;
 
 use crate::app::{share, GameContext, SharedState};
-use crate::states::base::State;
+use crate::states::base::{MenuItem, State};
 use crate::states::driving::DrivingState;
 use crate::states::driving_school::SchoolDrivingState;
 
@@ -182,6 +182,56 @@ impl DriveRef {
         };
         let drive = as_driving(&mut *borrowed)?;
         Some(f(state, ctx, drive))
+    }
+}
+
+/// The rows a drive-backed menu ends up with when the rebuild could not
+/// reach the drive.
+///
+/// Every screen the drive pushes builds its rows as
+/// `driving.clone().call(self, ctx, |s, ctx, d| s.rows(ctx, d))`, and `call`
+/// answers `None` for both of the empties above. Those four screens used to
+/// finish that line with `unwrap_or_default()`, so a `None` became a menu
+/// with no rows -- which [`Menu::current_text`] speaks as "No options
+/// available." A sighted player sees an empty box and presses Escape; a
+/// player who has only the speech is told, mid-drive, that the screen they
+/// are standing in has nothing on it and no way off it.
+///
+/// So the fallback is the rows the menu is already holding. The worst case
+/// becomes one stale label, and any keypress recovers from that. The
+/// `debug_assert!` in `nested_borrow` still makes the underlying bug
+/// impossible to miss on a bench or in the suite; this is only about what a
+/// shipped build does with it, where the assert is compiled out and the
+/// player is the one holding the wheel.
+///
+/// The nested borrow is already logged by `nested_borrow`. What this logs is
+/// the miss that goes unreported otherwise -- a handle whose state is not a
+/// drive at all -- and, either way, the fact that these rows were kept
+/// rather than rebuilt, which is the part that explains a stale label in a
+/// player's log. No drive at all stays quiet: that is the legitimate empty,
+/// it has no rows to keep, and it is what a test screen without a drive
+/// under it gets.
+///
+/// [`Menu::current_text`]: crate::states::base::Menu::current_text
+#[track_caller]
+pub fn keep_rows<S>(
+    built: Option<Vec<MenuItem<S>>>,
+    drive: &DriveRef,
+    current: &[MenuItem<S>],
+) -> Vec<MenuItem<S>> {
+    match built {
+        Some(rows) => rows,
+        None if drive.is_empty() => Vec::new(),
+        None => {
+            log::warn!(
+                "{}: rebuilding this menu could not reach the drive, so it keeps \
+                 the {} row(s) it already had instead of emptying itself. The \
+                 rows may be one action out of date.",
+                Location::caller(),
+                current.len()
+            );
+            current.to_vec()
+        }
     }
 }
 

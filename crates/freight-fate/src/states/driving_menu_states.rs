@@ -32,7 +32,7 @@ mod status;
 
 pub use apps::{DriverAppScreenState, DriverAppsState};
 pub use arrival::{settlement_hours, ArrivalState};
-pub use drive_ref::{push_over_drive, replace_drive_with, DriveRef};
+pub use drive_ref::{keep_rows, push_over_drive, replace_drive_with, DriveRef};
 pub use facility_arrival::FacilityArrivalState;
 pub use status::{DrivingStatusScreenState, DrivingStatusState};
 

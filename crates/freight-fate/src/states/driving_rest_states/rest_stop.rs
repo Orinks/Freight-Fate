@@ -23,7 +23,7 @@ use crate::states::driving_core::{
     MOTEL_COST, ROAD_BRAKE_COST_PER_PCT, ROAD_BRAKE_MIN, ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_MIN,
     ROAD_TIRE_SPECIALIST_COST_PER_PCT, ROAD_TIRE_SPECIALIST_MIN,
 };
-use crate::states::driving_menu_states::DriveRef;
+use crate::states::driving_menu_states::{keep_rows, DriveRef};
 use crate::states::driving_rest_states::fuel_pump::FuelPump;
 use crate::states::driving_rest_states::loyalty::LoyaltyRewardsState;
 
@@ -1148,10 +1148,11 @@ impl Menu for RestStopState {
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        self.driving
+        let built = self
+            .driving
             .clone()
-            .call(self, ctx, |s, ctx, d| s.rows(ctx, d))
-            .unwrap_or_default()
+            .call(self, ctx, |s, ctx, d| s.rows(ctx, d));
+        keep_rows(built, &self.driving, &self.menu.items)
     }
 
     fn enter(&mut self, ctx: &mut GameContext) {

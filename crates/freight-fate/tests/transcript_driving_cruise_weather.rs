@@ -1,11 +1,20 @@
 //! Cruise control and the speed keeper (port of the first section of
 //! `tests/test_driving_cruise_weather.py`, lines 22-928).
 //!
-//! The Python file is 4,023 lines and 104 cases, over the ~1,000-line ceiling
-//! in `CLAUDE.md`, so it is split by section across
-//! `transcript_driving_cruise_weather*.rs`. Every Python test function name
-//! survives the split; this file holds the cruise-control and speed-keeper
-//! half.
+//! The Python file is 4,023 lines and 104 cases, well over the ~1,000-line
+//! ceiling in `CLAUDE.md`, so it is split by section. Every Python test
+//! function name survives the split, one file per section:
+//!
+//! | file | Python lines | section |
+//! |---|---|---|
+//! | `transcript_driving_cruise_weather.rs` | 22-928 | cruise control, the speed keeper |
+//! | `..._acc.rs` | 928-1817 | hazard cancellation, adaptive cruise |
+//! | `..._hazards.rs` | 1818-2426 | hazard reaction windows, descent control |
+//! | `..._realweather.rs` | 2427-2982 | real weather, the tablet, the overspeed alert |
+//! | `..._grades.rs` | 2983-3458 | holding a set speed on a grade, predictive cruise |
+//! | `..._retarder.rs` | 3460-4023 | the retarder, the keeper's air, the gap, the weather cap |
+//!
+//! This file holds the cruise-control and speed-keeper section.
 //!
 //! `transcript_cruise_support` documents what replaced each monkeypatch.
 

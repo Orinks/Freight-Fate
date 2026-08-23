@@ -494,10 +494,11 @@ impl Menu for PauseMenuState {
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        self.driving
+        let built = self
+            .driving
             .clone()
-            .call(self, ctx, |s, ctx, d| s.rows(ctx, d))
-            .unwrap_or_default()
+            .call(self, ctx, |s, ctx, d| s.rows(ctx, d));
+        keep_rows(built, &self.driving, &self.menu.items)
     }
 
     fn enter(&mut self, ctx: &mut GameContext) {

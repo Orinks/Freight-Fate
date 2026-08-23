@@ -13,7 +13,7 @@ use crate::states::driving_core::{
     advance_rest_clock, clock_text, hos_mut_of, poi_ambient_key, profile_mut_of, profile_of,
     shut_down_engine, MOTEL_COST,
 };
-use crate::states::driving_menu_states::DriveRef;
+use crate::states::driving_menu_states::{keep_rows, DriveRef};
 use crate::states::driving_rest_states::fuel_pump::FuelPump;
 use crate::states::driving_rest_states::shoulder::ShoulderSleepConfirmationState;
 
@@ -232,10 +232,11 @@ impl Menu for ParkingFullState {
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        self.driving
+        let built = self
+            .driving
             .clone()
-            .call(self, ctx, |s, ctx, d| s.rows(ctx, d))
-            .unwrap_or_default()
+            .call(self, ctx, |s, ctx, d| s.rows(ctx, d));
+        keep_rows(built, &self.driving, &self.menu.items)
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
