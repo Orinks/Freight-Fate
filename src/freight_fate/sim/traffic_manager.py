@@ -115,9 +115,30 @@ TRAFFIC_MIN_SPEED_MPH = 15.0
 # on the interstate at exactly the same speed, which is its own kind of wrong:
 # real traffic has trucks slowly overtaking other trucks.
 GOVERNED_TRUCK_BAND_MPH = (62.0, 68.0)
-# Which classes are governed. A service vehicle is a pickup or a van and is
-# not, whatever it is towing.
-GOVERNED_CLASSES = ("semi", "box truck")
+# A box truck is not a tractor-trailer, and drawing it from the band above was
+# reusing a reading about one class of vehicle for another. ATRI surveys
+# for-hire fleets running class 8 tractors; a straight truck is a different
+# machine on a different job, and FMCSA's limiter rulemaking reaches CMVs over
+# 26,000 pounds, which is class 7 and up rather than the class 5 and 6 units
+# most box trucks are. The checkable numbers for these are published rental
+# and vocational governors: U-Haul states a 55 mph maximum for its trucks,
+# Penske governs its rental fleet at 65. So the band is those two, which puts
+# a typical box truck BELOW a typical semi rather than level with one.
+#
+# The behaviour that motivated looking: a box truck drawn at semi speed sat
+# in the right lane pacing the player exactly, so a driver who moved left to
+# get around one never got around it -- "I'm in the left lane and have been
+# for quite a while and this box truck is still in the right lane and has not
+# cleared" (Brandon, 2026-08-22). The band is not tuned to make the pass feel
+# good; it is what the published governors say, and the pass follows from it.
+GOVERNED_BOX_TRUCK_BAND_MPH = (55.0, 65.0)
+# Which classes are governed, and out of which band. A service vehicle is a
+# pickup or a van and is not governed at all, whatever it is towing.
+GOVERNED_BANDS = {
+    "semi": GOVERNED_TRUCK_BAND_MPH,
+    "box truck": GOVERNED_BOX_TRUCK_BAND_MPH,
+}
+GOVERNED_CLASSES = tuple(GOVERNED_BANDS)
 # Used only where the route cannot answer for a mile at all (off the end of the
 # last leg); every real spawn reads the leg it lands on.
 DEFAULT_LIMIT_MPH = 65.0
@@ -711,13 +732,15 @@ class TrafficManager:
 
         A governed class never comes out above its limiter, whatever the
         posting and whatever the intent -- a "passing" semi passes by using
-        the whole of its governor, not by exceeding it.
+        the whole of its governor, not by exceeding it. Each governed class
+        draws from its OWN band: a box truck is not a class 8 tractor and
+        must not inherit the tractor's limiter.
         """
         low, high = TRAFFIC_SPEED_OFFSETS_MPH[intent]
         speed = limit_mph + rng.uniform(low, high)
-        if vehicle_class in GOVERNED_CLASSES:
-            governor = rng.uniform(*GOVERNED_TRUCK_BAND_MPH)
-            return min(speed, governor)
+        band = GOVERNED_BANDS.get(vehicle_class)
+        if band is not None:
+            return min(speed, rng.uniform(*band))
         return speed
 
     def _cell_rng(self, cell: int) -> random.Random:

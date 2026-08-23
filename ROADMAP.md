@@ -1349,6 +1349,30 @@ onto exit signalling.
       otherwise the level that earns the next tier -- so the question is
       answerable at any time, not only when the game happens to raise it.
 
+- [x] **A box truck stops borrowing a tractor-trailer's limiter
+      (2026-08-22).** `GOVERNED_CLASSES` put semis and box trucks in one
+      band, and the band's provenance is ATRI's Operational Costs survey --
+      which asks FOR-HIRE FLEETS RUNNING CLASS 8 TRACTORS. A straight truck
+      is not one, so this was a reading about one class reused for another,
+      the exact fault the provenance rules are about. The checkable numbers
+      for these are published rental and vocational governors (U-Haul states
+      55 mph for its trucks, Penske governs at 65), so
+      `GOVERNED_BOX_TRUCK_BAND_MPH` is those, and `GOVERNED_BANDS` maps each
+      class to its own rather than sharing one.
+
+      MEASURED, because the point was passability and not the number: on a 65
+      road, against a player holding the limit, a box truck was 3+ mph slower
+      0 percent of the time before (mean 64.2) and 70 percent after (mean
+      59.9). That is why Brandon moved to the left lane and stayed level with
+      one instead of getting by it.
+
+      STILL OPEN, same measurement: a SEMI is also 0 percent passable on a 65
+      road (mean 64.2 against a player at 65), which is Brandon's earlier
+      "semis you could never get past" report not fully closed. The band is
+      correctly sourced, so the honest options are a player-side answer or a
+      ruling that an elephant race is realistic and stays -- owner's call,
+      not a number to quietly move.
+
 - [x] **Closing the window asks before it takes the drive (2026-08-22).**
       `pygame.QUIT` -- Alt+F4 and the window close button both -- set
       `running = False` on the spot. Mid-leg that is silently destructive:

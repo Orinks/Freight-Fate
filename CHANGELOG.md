@@ -1147,6 +1147,13 @@
   re-read.
 
 ### Fixed
+- **You can get past a box truck now.** Box trucks were being run at the same
+  governed speed as a loaded semi, which on a 65 road put them within about a
+  mile an hour of you. Pulling into the left lane to get around one never
+  finished the job: you sat level with it and it stayed exactly where it was.
+  A box truck is not a tractor-trailer, and it no longer borrows one's speed
+  limiter -- it runs slower than the heavy trucks now, the way it does on a
+  real interstate, and you go by it.
 - **Closing the window asks first, instead of taking your drive with it.**
   Alt F4, or the window's close button, used to shut the game down on the
   spot. Part way through a leg that quietly cost you the leg: you can only

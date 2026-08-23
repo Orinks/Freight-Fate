@@ -856,3 +856,51 @@ def test_a_semi_out_there_is_governed_like_a_real_one():
     governed = [manager._intent_speed("cruising", 80.0, rng, "semi") for _ in range(200)]
     assert min(governed) >= GOVERNED_TRUCK_BAND_MPH[0]
     assert max(governed) - min(governed) > 2.0
+
+
+def test_a_box_truck_is_not_governed_like_a_tractor_trailer():
+    """Brandon, 2026-08-22: "I'm in the left lane and have been for quite a
+    while and this box truck is still in the right lane and has not cleared."
+
+    Box trucks were drawn from the semi band, which is a provenance fault as
+    much as a gameplay one: ATRI surveys for-hire fleets running class 8
+    tractors, and a straight truck is not one. On a 65 road that put the box
+    truck within about a mile an hour of a player running the limit, so the
+    overtake never finished -- the driver moved left and simply stayed level
+    with it.
+    """
+    import random
+    import statistics
+
+    from freight_fate.sim.traffic_manager import (
+        GOVERNED_BANDS,
+        GOVERNED_BOX_TRUCK_BAND_MPH,
+        GOVERNED_TRUCK_BAND_MPH,
+        TrafficManager,
+    )
+
+    assert GOVERNED_BANDS["box truck"] == GOVERNED_BOX_TRUCK_BAND_MPH
+    assert GOVERNED_BANDS["semi"] == GOVERNED_TRUCK_BAND_MPH
+    # The whole point: a box truck's limiter sits below a tractor's.
+    assert GOVERNED_BOX_TRUCK_BAND_MPH[1] < GOVERNED_TRUCK_BAND_MPH[1]
+
+    manager = TrafficManager.__new__(TrafficManager)
+    rng = random.Random(23)
+
+    # On the road the report came from, a player holding the posted limit
+    # gets past a typical box truck instead of pacing it.
+    limit = 65.0
+    speeds = [manager._intent_speed("cruising", limit, rng, "box truck") for _ in range(400)]
+    assert statistics.mean(speeds) < limit - 3.0
+    passable = sum(1 for s in speeds if s <= limit - 3.0) / len(speeds)
+    assert passable > 0.5, f"only {passable:.0%} of box trucks are passable at the limit"
+
+    # Still a band, not one number, and still a governor: never above its top.
+    assert max(speeds) <= GOVERNED_BOX_TRUCK_BAND_MPH[1]
+    assert max(speeds) - min(speeds) > 2.0
+
+    # And the semi is untouched -- its band is sourced separately and this
+    # change is not an excuse to move it.
+    semis = [manager._intent_speed("cruising", 80.0, rng, "semi") for _ in range(200)]
+    assert min(semis) >= GOVERNED_TRUCK_BAND_MPH[0]
+    assert max(semis) <= GOVERNED_TRUCK_BAND_MPH[1]
