@@ -1349,6 +1349,31 @@ onto exit signalling.
       otherwise the level that earns the next tier -- so the question is
       answerable at any time, not only when the game happens to raise it.
 
+- [x] **CI stops spending the LFS budget it needs (2026-08-23).** Every run
+      on this branch was red at CHECKOUT, not on a test: "This repository
+      exceeded its LFS budget". CI was what spent it. The test job fetched
+      the whole LFS payload -- music.pak at 250 MB plus sounds.pak at 7.5 MB
+      -- on both matrix runners on every push, about half a gigabyte per
+      commit, and the build job again on top. Buying quota only postpones
+      that: at this push rate a 50 GB data pack lasts roughly ten days.
+
+      The test job now checks out with `lfs: false` and pulls sounds.pak
+      alone, which the suite actually reaches for, and never fatally: a quota
+      failure leaves the pack unmaterialised rather than failing the run.
+      What that costs is four music-asset assertions and the committed
+      music.pak header check, which now skip instead -- they are content-pack
+      invariants that change rarely and still run on any machine holding the
+      pack. Verified by replacing music.pak with a pointer stub locally and
+      running the full suite in exactly the state CI will be in.
+
+      A pointer is a file that EXISTS, which is why the helpers had to learn
+      to see one: an existence check alone reads an unmaterialised pack as
+      present and every asset lookup then fails against something that is not
+      a pack. `asset_helpers.pack_available` is that check.
+
+      The build job still takes the full payload, and should: it packages the
+      game and genuinely needs the audio.
+
 - [x] **A box truck stops borrowing a tractor-trailer's limiter
       (2026-08-22).** `GOVERNED_CLASSES` put semis and box trucks in one
       band, and the band's provenance is ATRI's Operational Costs survey --

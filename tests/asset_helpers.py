@@ -32,13 +32,58 @@ _sounds_pack = None
 _music_pack = None
 
 
+# A Git LFS pointer is a ~130 byte text stub standing in for the real file,
+# and it EXISTS -- so an existence check alone reads an unmaterialised pack as
+# present and every asset lookup then fails against something that is not a
+# pack at all. CI checks out without LFS on purpose (see .github/workflows/
+# ci.yml: the music pack is 250 MB and fetching it per push exhausted the
+# repository's LFS budget), so this is the ordinary case there, not an error.
+_LFS_POINTER_MAGIC = b"version https://git-lfs"
+
+
+def _is_lfs_pointer(path: Path) -> bool:
+    try:
+        with path.open("rb") as handle:
+            return handle.read(len(_LFS_POINTER_MAGIC)) == _LFS_POINTER_MAGIC
+    except OSError:
+        return False
+
+
+def pack_available(path: Path) -> bool:
+    """Whether a pack is really here, rather than an LFS pointer to it."""
+    return path.exists() and not _is_lfs_pointer(path)
+
+
+def sounds_pack_available() -> bool:
+    return pack_available(_SOUNDS_PACK_PATH)
+
+
+def music_pack_available() -> bool:
+    return pack_available(_MUSIC_PACK_PATH)
+
+
+def loose_sound_tree_available() -> bool:
+    """Builder machines carry the loose tree; it is not in the repo."""
+    return (_ASSETS_ROOT / "ui").exists()
+
+
+def audio_assets_available() -> bool:
+    """Whether the real audio is reachable at all, by either route.
+
+    What a test that asserts "every catalog entry has a file" actually needs.
+    False on a clone with neither the loose tree nor a materialised pack,
+    where that assertion is about missing DATA rather than a missing sound.
+    """
+    return loose_sound_tree_available() or sounds_pack_available()
+
+
 def _load_pack(path: Path):
     import sys
 
     sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
     from freight_fate.assets_pack import SoundPack
 
-    return SoundPack(path) if path.exists() else False
+    return SoundPack(path) if pack_available(path) else False
 
 
 def _sounds_pack_instance():

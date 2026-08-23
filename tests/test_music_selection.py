@@ -2,7 +2,13 @@
 
 from pathlib import Path
 
-from asset_helpers import asset_bytes, asset_exists
+import pytest
+from asset_helpers import (
+    asset_bytes,
+    asset_exists,
+    loose_sound_tree_available,
+    music_pack_available,
+)
 
 from freight_fate.music import (
     ALL_MUSIC_TRACKS,
@@ -493,6 +499,16 @@ def test_night_haul_rotates_in_night_driving_pool(monkeypatch):
         app.shutdown()
 
 
+needs_music_pack = pytest.mark.skipif(
+    not music_pack_available() and not loose_sound_tree_available(),
+    reason=(
+        "music.pak not materialised (CI checks out without LFS: the pack is "
+        "250 MB and fetching it per push exhausted the repository's budget)"
+    ),
+)
+
+
+@needs_music_pack
 def test_all_cataloged_music_tracks_exist():
     missing = [
         track.key for track in ALL_MUSIC_TRACKS if not asset_exists(ASSETS / "music", track.key)
@@ -500,6 +516,7 @@ def test_all_cataloged_music_tracks_exist():
     assert not missing
 
 
+@needs_music_pack
 def test_jazz_pool_exists_and_ships_assets():
     from freight_fate import music
 
@@ -531,6 +548,7 @@ def test_seventh_menu_milestone_unlocks_at_level_21():
     assert music._menu_milestone_index(mid) == 5
 
 
+@needs_music_pack
 def test_all_cataloged_music_tracks_are_at_least_one_minute():
     import io
 

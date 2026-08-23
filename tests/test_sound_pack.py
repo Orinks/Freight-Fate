@@ -10,6 +10,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
+from asset_helpers import music_pack_available
 
 from freight_fate import assets_pack, audio
 
@@ -165,6 +166,14 @@ def test_committed_pack_has_freight_fate_header():
     )
 
 
+@pytest.mark.skipif(
+    not music_pack_available(),
+    reason=(
+        "music.pak not materialised (CI checks out without LFS: the pack is "
+        "250 MB and fetching it per push exhausted the repository's budget). "
+        "A pointer cannot be checked for the header it stands in for."
+    ),
+)
 def test_committed_music_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_MUSIC_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_MUSIC_PACK_PATH.read_bytes()

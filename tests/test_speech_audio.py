@@ -2,7 +2,8 @@
 
 from dataclasses import dataclass, field
 
-from asset_helpers import asset_exists
+import pytest
+from asset_helpers import asset_exists, loose_sound_tree_available, music_pack_available
 
 from freight_fate import speech as speech_module
 from freight_fate.audio import ASSETS, AudioEngine
@@ -765,6 +766,16 @@ def test_all_referenced_assets_exist():
     assert not missing, f"missing sound files: {missing}"
 
 
+needs_music_pack = pytest.mark.skipif(
+    not music_pack_available() and not loose_sound_tree_available(),
+    reason=(
+        "music.pak not materialised (CI checks out without LFS: the pack is "
+        "250 MB and fetching it per push exhausted the repository's budget)"
+    ),
+)
+
+
+@needs_music_pack
 def test_music_tracks_exist():
     from freight_fate.music import ALL_MUSIC_TRACKS
 
