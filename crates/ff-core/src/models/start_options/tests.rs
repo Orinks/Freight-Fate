@@ -60,8 +60,20 @@ fn test_company_carrier_pay_plans_have_distinct_benefits() {
     let long_floor_job = real_job(500.0, 500.0);
     let high_gross_job = real_job(300.0, 3000.0);
 
-    let northstar = company_driver_pay(&short_job, short_job.pay, true, Some(DEFAULT_START_KEY), None);
-    let training = company_driver_pay(&short_job, short_job.pay, true, Some("great_lakes_training"), None);
+    let northstar = company_driver_pay(
+        &short_job,
+        short_job.pay,
+        true,
+        Some(DEFAULT_START_KEY),
+        None,
+    );
+    let training = company_driver_pay(
+        &short_job,
+        short_job.pay,
+        true,
+        Some("great_lakes_training"),
+        None,
+    );
     assert!(training > northstar);
 
     let northstar_long = company_driver_pay(
@@ -161,8 +173,9 @@ fn test_company_carriers_have_distinct_dispatch_weighting() {
     let short = (milwaukee.clone(), miles_between(&chicago, &milwaukee), 1);
     let long = (kc_key.clone(), miles_between(&chicago, &kc_key), 1);
 
-    let northstar_short_ratio = board.destination_weight(&chicago, &short, 2, DEFAULT_START_KEY, None)
-        / board.destination_weight(&chicago, &long, 2, DEFAULT_START_KEY, None);
+    let northstar_short_ratio =
+        board.destination_weight(&chicago, &short, 2, DEFAULT_START_KEY, None)
+            / board.destination_weight(&chicago, &long, 2, DEFAULT_START_KEY, None);
     let training_short_ratio =
         board.destination_weight(&chicago, &short, 2, "great_lakes_training", None)
             / board.destination_weight(&chicago, &long, 2, "great_lakes_training", None);
@@ -190,8 +203,9 @@ fn test_company_carriers_have_distinct_dispatch_weighting() {
     }
     let same_region = same_region.expect("a same-region destination");
     let other_region = other_region.expect("an other-region destination");
-    let prairie_region_ratio = board.destination_weight(&kc_key, &same_region, 2, "prairie_link", None)
-        / board.destination_weight(&kc_key, &other_region, 2, "prairie_link", None);
+    let prairie_region_ratio =
+        board.destination_weight(&kc_key, &same_region, 2, "prairie_link", None)
+            / board.destination_weight(&kc_key, &other_region, 2, "prairie_link", None);
     let northstar_region_ratio =
         board.destination_weight(&kc_key, &same_region, 2, DEFAULT_START_KEY, None)
             / board.destination_weight(&kc_key, &other_region, 2, DEFAULT_START_KEY, None);
@@ -320,22 +334,9 @@ fn test_owner_operator_start_text_describes_a_new_truck() {
     assert!(blurb.contains("hardest"));
 }
 
-#[test]
-#[ignore = "needs freight_fate::app (App, CareerStartState)"]
-fn test_new_career_start_menu_lists_company_and_owner_operator() {
-    // CareerStartState lists Northstar Freight Lines, Great Lakes Training
-    // Transport and an "Owner-operator start" item; its intro help names
-    // "assigned carrier equipment" and "higher risk".
-    unimplemented!("needs the app shell")
-}
+// `test_new_career_start_menu_lists_company_and_owner_operator` is live in `crates/freight-fate/tests/states_main_menu.rs`.
 
-#[test]
-#[ignore = "needs freight_fate::app (App, CareerStartState, HomeCityState, CityMenuState)"]
-fn test_new_company_career_choice_creates_company_profile() {
-    // Choosing Prairie Link Regional creates a company-driver profile whose
-    // first-day briefing names the carrier and "same-region lanes".
-    unimplemented!("needs the app shell")
-}
+// `test_new_company_career_choice_creates_company_profile` is live in `crates/freight-fate/tests/states_main_menu.rs`.
 
 #[test]
 #[ignore = "needs freight_fate::app (App, TruckShopState, UpgradeShopState)"]

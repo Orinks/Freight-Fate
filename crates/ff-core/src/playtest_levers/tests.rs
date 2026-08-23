@@ -147,13 +147,9 @@ fn test_forced_dest_alone_still_sandboxes_a_parked_career() {
     assert!(notes.iter().any(|n| n.to_lowercase().contains("sandbox")));
 }
 
-#[test]
-#[ignore = "needs app shell (App.shutdown honours ctx.playtest_sandbox)"]
-fn test_quit_save_honors_the_playtest_sandbox() {}
+// `test_quit_save_honors_the_playtest_sandbox` is live in `crates/freight-fate/tests/app_playtest_levers.rs`.
 
-#[test]
-#[ignore = "needs app shell (GameContext.save_profile)"]
-fn test_save_profile_honors_the_playtest_sandbox() {}
+// `test_save_profile_honors_the_playtest_sandbox` is live in `crates/freight-fate/tests/app_playtest_levers.rs`.
 
 #[test]
 fn test_force_city_refuses_mid_load() {

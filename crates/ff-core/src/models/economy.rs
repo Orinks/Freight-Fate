@@ -219,19 +219,9 @@ mod tests {
         );
     }
 
-    #[test]
-    #[ignore = "needs states::city (CityMenuState) and the app shell"]
-    fn test_terminal_pay_advance_option_only_appears_when_available() {
-        // Body in Python: the terminal menu shows "Request pay advance" only
-        // while cash is below PAY_ADVANCE_ELIGIBLE_BELOW, not after one has
-        // been taken for this load, and not at the outstanding limit.
-    }
+    // `test_terminal_pay_advance_option_only_appears_when_available` is live in `crates/freight-fate/tests/states_city.rs`.
 
-    #[test]
-    #[ignore = "needs states::driving (RestStopState) and the app shell"]
-    fn test_rest_stop_pay_advance_option_only_appears_when_available() {
-        // Same rules as the terminal, on the rest stop menu.
-    }
+    // `test_rest_stop_pay_advance_option_only_appears_when_available` is live in `crates/freight-fate/tests/states_driving_menus_rest.rs`.
 
     // -- tests/test_driving_damage_bands.py ---------------------------------
 

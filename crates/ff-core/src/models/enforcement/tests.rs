@@ -19,6 +19,14 @@ fn profile() -> FakeProfile {
     FakeProfile::new()
 }
 
+/// `_profile()` in `tests/test_debt_and_standing.py`: the real save object,
+/// for the cases that read the career off it.
+fn real_profile() -> crate::models::profile::Profile {
+    let mut p = crate::models::profile::Profile::named("Dale");
+    p.current_city = "Buffalo".to_string();
+    p
+}
+
 // --- money ------------------------------------------------------------------
 
 #[test]
@@ -299,11 +307,23 @@ fn test_dispatch_trust_slides_the_whole_way_down() {
     assert_eq!(steps[steps.len() - 1], 1);
 }
 
+/// A senior driver past the load-choice level goes back to assigned loads at
+/// reputation 18 and loses every refusal at 10.
 #[test]
-#[ignore = "needs models::dispatch_policy and models::profile"]
 fn test_losing_trust_takes_back_the_right_to_pick_your_own_loads() {
-    // A senior driver past the load-choice level goes back to assigned loads
-    // at reputation 18 and loses every refusal at 10.
+    use crate::models::dispatch_policy::{dispatch_policy, SENIOR_LOAD_CHOICE_LEVEL};
+    use crate::models::profile::Profile;
+
+    let mut p = Profile::named("Senior");
+    p.career.xp = 200_000.0; // comfortably past the load-choice level
+    assert!(p.career.level() >= SENIOR_LOAD_CHOICE_LEVEL);
+    assert!(!dispatch_policy(&p).assigns_load);
+    p.career.reputation = 18.0;
+    // back to taking what dispatch gives
+    assert!(dispatch_policy(&p).assigns_load);
+    p.career.reputation = 10.0;
+    // and no refusals left at all
+    assert_eq!(dispatch_policy(&p).decline_budget, 0);
 }
 
 #[test]
@@ -587,31 +607,132 @@ fn a_low_reputation_company_driver_is_due_for_termination() {
 }
 
 #[test]
-#[ignore = "needs models::carrier_fleet"]
-fn test_the_yard_hands_over_the_lower_of_level_and_standing() {}
+fn test_the_yard_hands_over_the_lower_of_level_and_standing() {
+    use crate::models::carrier_fleet::{assigned_fleet_tier, eligible_fleet_tier, FLEET_TIERS};
+    use crate::models::enforcement::standing_band;
+    use crate::models::profile::Profile;
+    use std::collections::BTreeMap;
 
-#[test]
-#[ignore = "needs models::carrier_fleet"]
-fn test_a_held_back_truck_names_the_earned_tier_the_cause_and_the_way_out() {}
+    let mut p = real_profile();
+    p.career.xp = 387_000.0; // top of the ladder: eligible for the best iron
+    assert_eq!(eligible_fleet_tier(&p).key, "first_pick");
 
+    // Each band caps the assignment further down, and never above eligibility.
+    let mut seen: BTreeMap<&str, &str> = BTreeMap::new();
+    for (reputation, expected) in [
+        (100.0, "first_pick"),
+        (30.0, "long_haul"),     // guarded
+        (20.0, "regional"),      // poor
+        (10.0, "yard_standard"), // last chance
+    ] {
+        p.career.reputation = reputation;
+        seen.insert(standing_band(&p), assigned_fleet_tier(&p).key);
+        assert_eq!(assigned_fleet_tier(&p).key, expected);
+    }
+    assert_eq!(seen.len(), 4); // all four bands exercised
+
+    // A junior driver is never given *more* than their level earns by standing.
+    let mut junior = Profile::named("Dale");
+    junior.current_city = "Buffalo".to_string();
+    junior.career.xp = 0.0;
+    junior.career.reputation = 100.0;
+    assert_eq!(assigned_fleet_tier(&junior).key, FLEET_TIERS[0].key);
+}
+
+/// The most frequent moment in the change, and the easiest to read as a bug.
 #[test]
-#[ignore = "needs models::career (STANDING_XP_RATE)"]
-fn test_experience_slows_by_band_and_never_reaches_zero() {
-    // STANDING_XP_RATE is keyed by exactly TRUST_FULL / GUARDED / POOR /
-    // LAST_CHANCE, descends, stays above 0.5, and is 1.0 for a clean driver.
+fn test_a_held_back_truck_names_the_earned_tier_the_cause_and_the_way_out() {
+    use crate::models::carrier_fleet::equipment_hold_text;
+
+    let mut p = real_profile();
+    p.career.xp = 387_000.0;
+    p.money = -5_000.0;
+    let verbose = equipment_hold_text(&p, false);
+    let terse = equipment_hold_text(&p, true);
+    for text in [&verbose, &terse] {
+        // what the level earns
+        assert!(text.contains("first pick of the yard"), "{text}");
+        // the cause, in money
+        assert!(text.contains("5,000 dollars"), "{text}");
+    }
+    // and exactly what gives it back
+    assert!(verbose.contains("Clear it"));
+    assert!(terse.len() < verbose.len());
 }
 
 #[test]
-#[ignore = "needs models::career (Career.record_delivery)"]
-fn test_a_slowed_career_still_levels_up() {}
+fn test_experience_slows_by_band_and_never_reaches_zero() {
+    use crate::models::career::{standing_xp_rate, STANDING_XP_RATE};
+    use std::collections::BTreeSet;
+
+    let bands = [TRUST_FULL, TRUST_GUARDED, TRUST_POOR, TRUST_LAST_CHANCE];
+    // The bands the code keys on are exactly the bands enforcement defines.
+    let keyed: BTreeSet<&str> = STANDING_XP_RATE.iter().map(|(band, _)| *band).collect();
+    assert_eq!(keyed, bands.iter().copied().collect::<BTreeSet<&str>>());
+    let rates: Vec<f64> = bands.iter().map(|band| standing_xp_rate(band)).collect();
+    assert_eq!(rates[0], 1.0); // a clean driver's arc does not move
+    let mut descending = rates.clone();
+    descending.sort_by(|a, b| b.partial_cmp(a).unwrap());
+    assert_eq!(rates, descending);
+    assert!(rates.iter().all(|rate| *rate > 0.0 && *rate <= 1.0));
+    // a driver digging out still makes real progress
+    assert!(rates[rates.len() - 1] >= 0.5);
+}
 
 #[test]
-#[ignore = "needs models::career (xp_rate_clause)"]
-fn test_the_slowdown_is_said_in_words_and_never_as_a_number() {}
+fn test_a_slowed_career_still_levels_up() {
+    use crate::models::career::{standing_xp_rate, Career};
+
+    let mut slowed = Career::default();
+    let rate = standing_xp_rate("last chance");
+    for _ in 0..30 {
+        slowed.record_delivery(500.0, 800.0, true, 0.0, 1.0, rate);
+    }
+    assert!(slowed.level() > 1);
+}
 
 #[test]
-#[ignore = "needs models::career and profile_integrity_invariants"]
-fn test_slowed_experience_stays_under_the_exported_cloud_ceiling() {}
+fn test_the_slowdown_is_said_in_words_and_never_as_a_number() {
+    use crate::models::career::{xp_rate_clause, xp_rate_settlement_clause};
+
+    assert_eq!(xp_rate_clause("full"), "");
+    assert_eq!(xp_rate_settlement_clause("full"), "");
+    for band in ["guarded", "poor", "last chance"] {
+        let sentence = xp_rate_clause(band);
+        let clause = xp_rate_settlement_clause(band);
+        assert!(sentence.contains(band) && sentence.contains("more slowly"));
+        assert!(clause.contains(band) && clause.contains("slower rate"));
+        for text in [&sentence, &clause] {
+            let scrubbed = text.replace("experience", "e");
+            for banned in ["percent", "multiplier", "penalty", "x", "0."] {
+                assert!(!scrubbed.contains(banned), "{banned:?} in {text:?}");
+            }
+        }
+    }
+}
+
+#[test]
+fn test_slowed_experience_stays_under_the_exported_cloud_ceiling() {
+    use crate::models::career::{
+        standing_xp_rate, Career, DELIVERY_COMPLETION_XP, XP_CLEAN_BONUS, XP_PER_MILE_ON_TIME,
+        XP_SPECIALTY_MULT, XP_STREAK_MAX_BONUS,
+    };
+
+    // The two exported ceiling terms, from the same arithmetic the export
+    // uses (`profile_integrity_invariants`); building the whole export here
+    // would need the world data tree this module never touches.
+    let best_case = (1.0 + XP_STREAK_MAX_BONUS) * (1.0 + XP_CLEAN_BONUS);
+    let xp_per_mile_max = XP_PER_MILE_ON_TIME * XP_SPECIALTY_MULT * best_case;
+    let xp_flat_per_delivery = DELIVERY_COMPLETION_XP * XP_SPECIALTY_MULT * best_case;
+
+    let mut career = Career::default();
+    for _ in 0..25 {
+        career.record_delivery(700.0, 0.0, true, 0.0, 1.5, standing_xp_rate("guarded"));
+    }
+    let ceiling =
+        career.deliveries as f64 * xp_flat_per_delivery + career.total_miles * xp_per_mile_max;
+    assert!(career.xp <= ceiling);
+}
 
 // --- the road, the stops, the board: app-shell cases ------------------------
 
@@ -667,9 +788,7 @@ fn test_terse_speech_still_hears_every_consequence() {}
 #[ignore = "needs states::driving (_microsleep_drift_off_road) and the app shell"]
 fn test_repeat_fatigue_events_speak_the_real_count() {}
 
-#[test]
-#[ignore = "needs states::city (CityMenuState) and the app shell"]
-fn test_a_clean_driver_hears_and_pays_nothing_new() {}
+// `test_a_clean_driver_hears_and_pays_nothing_new` is live in `crates/freight-fate/tests/states_city.rs`.
 
 #[test]
 #[ignore = "needs states::driving (_update_pursuit_optin) and the app shell"]
@@ -720,21 +839,13 @@ fn test_a_fine_a_load_cannot_cover_stays_owed_and_is_said_so() {
     assert!(settled.uncollected_charges < 2_000.0);
 }
 
-#[test]
-#[ignore = "needs states::city (JobBoardState) and the app shell"]
-fn test_the_board_says_the_suspension_before_it_lists_anything() {}
+// `test_the_board_says_the_suspension_before_it_lists_anything` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs states::city (JobBoardState) and the app shell"]
-fn test_taking_a_job_while_suspended_is_refused_with_the_clear_date() {}
+// `test_taking_a_job_while_suspended_is_refused_with_the_clear_date` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs states::city (CityMenuState) and the app shell"]
-fn test_waiting_out_the_suspension_gives_the_licence_back() {}
+// `test_waiting_out_the_suspension_gives_the_licence_back` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs states::city (CityMenuState) and the app shell"]
-fn test_a_floor_reputation_company_driver_loses_the_carrier() {}
+// `test_a_floor_reputation_company_driver_loses_the_carrier` is live in `crates/freight-fate/tests/states_city.rs`.
 
 #[test]
 #[ignore = "needs states::driving_rest_states (EnforcementStopState) and the app shell"]

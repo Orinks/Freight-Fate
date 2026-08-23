@@ -149,23 +149,11 @@ fn test_pre_marker_1_9_save_loads_and_is_stamped() {
     });
 }
 
-#[test]
-#[ignore = "the app-shell half lives in freight-fate/tests/states_main_menu.rs (ff-core cannot depend on the game crate)"]
-fn test_legacy_career_stays_listed_and_opens_the_notice() {}
+// `test_legacy_career_stays_listed_and_opens_the_notice` is live in `crates/freight-fate/tests/states_main_menu.rs`.
 
-#[test]
-#[ignore = "the app-shell half lives in freight-fate/tests/states_main_menu.rs (ff-core cannot depend on the game crate)"]
-fn test_notice_start_new_career_opens_name_entry() {}
+// `test_notice_start_new_career_opens_name_entry` is live in `crates/freight-fate/tests/states_main_menu.rs`.
 
-#[test]
-#[ignore = "the app-shell half lives in freight-fate/tests/states_main_menu.rs; the gate half below still runs"]
-fn test_new_career_will_not_overwrite_a_same_named_legacy_save() {
-    // The gate half: the same-named 1.8 save reads as legacy and stays intact.
-    with_data_dir(|_| {
-        let path = write_1_8_save("Old Timer");
-        assert!(is_pre_1_9_save_file(&path));
-    });
-}
+// `test_new_career_will_not_overwrite_a_same_named_legacy_save` is live in `crates/freight-fate/tests/states_main_menu.rs`.
 
 // -- tests/test_version.py ---------------------------------------------------------
 

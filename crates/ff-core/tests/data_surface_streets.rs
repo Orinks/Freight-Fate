@@ -97,7 +97,10 @@ fn test_navigation_cues_speak_the_baked_maneuvers() {
     for pair in geometry.segments.windows(2) {
         let (prev, segment) = (&pair[0], &pair[1]);
         if segment.road != prev.road {
-            assert!(spoken.contains(segment.cue.trim_end_matches('.')), "{spoken}");
+            assert!(
+                spoken.contains(segment.cue.trim_end_matches('.')),
+                "{spoken}"
+            );
         }
     }
     assert!(spoken.contains(geometry.segments[0].cue.trim_end_matches('.')));
@@ -148,7 +151,10 @@ fn test_the_access_road_posts_one_limit_and_the_gate() {
         }
         mile += step;
     }
-    assert_eq!(seen, vec![street_zones[0].limit_mph, FACILITY_GATE_LIMIT_MPH]);
+    assert_eq!(
+        seen,
+        vec![street_zones[0].limit_mph, FACILITY_GATE_LIMIT_MPH]
+    );
 }
 
 #[test]

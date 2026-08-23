@@ -65,7 +65,10 @@ fn local_turn_messages(events: &[ff_core::sim::trip_models::TripEvent]) -> Vec<S
         .iter()
         .filter(|e| {
             e.kind == TripEventKind::GpsCue
-                && e.data.cue.as_ref().is_some_and(|cue| cue.kind == "local_turn")
+                && e.data
+                    .cue
+                    .as_ref()
+                    .is_some_and(|cue| cue.kind == "local_turn")
         })
         .map(|e| e.text().to_string())
         .collect()
@@ -88,7 +91,7 @@ fn test_departure_tick_speaks_only_the_first_street_maneuver() {
 fn test_next_street_maneuver_waits_for_the_previous_junction() {
     let mut trip = street_trip();
     trip.update(1.0 / 60.0); // announces the start cue only
-    // Still short of the first boundary: the turn stays quiet.
+                             // Still short of the first boundary: the turn stays quiet.
     trip.position_mi = 0.04;
     assert!(local_turn_messages(&trip.update(1.0 / 60.0)).is_empty());
     // Past it: the left turn becomes the nearest maneuver and speaks.

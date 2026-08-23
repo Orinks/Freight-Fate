@@ -11,49 +11,29 @@ fn test_open_scale_notice_teaches_the_exit_key_then_the_rest_key() {}
 #[ignore = "needs app shell (open scale notice priority)"]
 fn test_open_scale_notice_carries_route_priority() {}
 
-#[test]
-#[ignore = "needs app shell (states::driving_enforcement::SCALE_NOTICE_SAMPLE and ramp_arrival_grace_seconds)"]
-fn test_scale_notice_lookahead_sample_covers_the_real_sentence() {}
+// `test_scale_notice_lookahead_sample_covers_the_real_sentence` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (half-mile reminder)"]
-fn test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed() {}
+// `test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (half-mile reminder)"]
-fn test_reminder_speaks_the_road_actually_left() {}
+// `test_reminder_speaks_the_road_actually_left` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (half-mile reminder)"]
-fn test_reminder_stays_quiet_once_the_scale_exit_is_armed() {}
+// `test_reminder_stays_quiet_once_the_scale_exit_is_armed` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (half-mile reminder)"]
-fn test_reminder_stays_quiet_below_the_bypass_speed() {}
+// `test_reminder_stays_quiet_below_the_bypass_speed` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (rest key at the scale)"]
-fn test_rest_key_at_speed_defers_to_the_open_scale() {}
+// `test_rest_key_at_speed_defers_to_the_open_scale` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
 #[ignore = "needs app shell (rest key at the scale)"]
 fn test_rest_key_defer_notice_carries_route_priority() {}
 
-#[test]
-#[ignore = "needs app shell (rest key at the scale)"]
-fn test_rest_key_plans_normally_when_the_scale_is_closed() {}
+// `test_rest_key_plans_normally_when_the_scale_is_closed` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (rest key at the scale)"]
-fn test_rest_key_plans_normally_when_the_scale_is_behind() {}
+// `test_rest_key_plans_normally_when_the_scale_is_behind` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (rest key at the scale)"]
-fn test_rest_key_police_stop_guard_still_outranks_the_scale() {}
+// `test_rest_key_police_stop_guard_still_outranks_the_scale` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (rest key at the scale)"]
-fn test_rest_key_ignores_the_scale_in_a_casual_hos_mode() {}
+// `test_rest_key_ignores_the_scale_in_a_casual_hos_mode` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
 #[ignore = "needs app shell (exit key at the scale)"]

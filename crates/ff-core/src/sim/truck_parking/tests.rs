@@ -545,22 +545,70 @@ fn a_failed_fetch_enters_retry_cooldown() {
 // the capacity-aware overnight crunch (sim::hos), the road-stop
 // spoken text (sim::trip_models), and the Jason's Law survey matcher
 // in tools/curate_route_pois.py (a Python tool, which stays Python).
-// They are listed here by name so the suite diff stays greppable.
+// They are kept here by name so the suite diff stays greppable.
+
+fn stop_raw(spaces: Option<i64>) -> serde_json::Value {
+    let mut raw = serde_json::json!({
+        "name": "Kenosha Safety Rest Area",
+        "type": "public_rest_area",
+        "at_mi": 30.0,
+        "parking": "confirmed",
+        "source": "WisDOT rest-area page",
+    });
+    if let Some(spaces) = spaces {
+        raw["parking_spaces"] = serde_json::json!(spaces);
+    }
+    raw
+}
 #[test]
-#[ignore = "needs data::world_parsing (_parse_stop)"]
-fn test_parse_stop_reads_parking_spaces() {}
+fn test_parse_stop_reads_parking_spaces() {
+    use crate::data::world_parsing::parse_stop;
+
+    let stop = parse_stop(&stop_raw(Some(45)), 60.0, "a", "b").expect("parses");
+    assert_eq!(stop.parking_spaces, 45);
+}
 
 #[test]
-#[ignore = "needs data::world_parsing (_parse_stop)"]
-fn test_parse_stop_defaults_parking_spaces_to_zero() {}
+fn test_parse_stop_defaults_parking_spaces_to_zero() {
+    use crate::data::world_parsing::parse_stop;
+
+    let stop = parse_stop(&stop_raw(None), 60.0, "a", "b").expect("parses");
+    assert_eq!(stop.parking_spaces, 0);
+}
 
 #[test]
-#[ignore = "needs data::world_parsing (_parse_stop)"]
-fn test_parse_stop_rejects_implausible_parking_spaces() {}
+fn test_parse_stop_rejects_implausible_parking_spaces() {
+    use crate::data::world_parsing::parse_stop;
+
+    for spaces in [5000, -3] {
+        let err = parse_stop(&stop_raw(Some(spaces)), 60.0, "a", "b")
+            .expect_err("implausible space counts are refused");
+        assert!(
+            err.to_string().contains("implausible"),
+            "unexpected message: {err}"
+        );
+    }
+}
 
 #[test]
-#[ignore = "needs data::world_models (Stop.parking_label)"]
-fn test_stop_parking_label_speaks_capacity_when_surveyed() {}
+fn test_stop_parking_label_speaks_capacity_when_surveyed() {
+    use crate::data::world_models::Stop;
+
+    let stop = Stop {
+        name: "Rest Area".to_string(),
+        at_mi: 10.0,
+        stop_type: "public_rest_area".to_string(),
+        parking: "confirmed".to_string(),
+        parking_spaces: 45,
+        ..Stop::default()
+    };
+    assert_eq!(stop.parking_label(), "confirmed truck parking, 45 spaces");
+    let unsurveyed = Stop {
+        parking_spaces: 0,
+        ..stop
+    };
+    assert_eq!(unsurveyed.parking_label(), "confirmed truck parking");
+}
 
 #[test]
 fn test_road_stop_parking_text_speaks_capacity_when_surveyed() {
@@ -577,29 +625,131 @@ fn test_road_stop_parking_text_speaks_capacity_when_surveyed() {
 }
 
 #[test]
-#[ignore = "needs sim::hos (parking_full_probability)"]
-fn test_parking_crunch_unchanged_when_capacity_unknown() {}
+fn test_parking_crunch_unchanged_when_capacity_unknown() {
+    use crate::sim::hos::parking_full_probability;
+
+    // Python's default argument is `spaces=0`; the Rust port spells it out.
+    assert_eq!(
+        parking_full_probability(23.0, 0),
+        parking_full_probability(23.0, 0)
+    );
+}
 
 #[test]
-#[ignore = "needs sim::hos (parking_full_probability)"]
-fn test_small_lots_fill_earlier_and_big_lots_later() {}
+fn test_small_lots_fill_earlier_and_big_lots_later() {
+    use crate::sim::hos::parking_full_probability;
+
+    let base = parking_full_probability(23.0, 0);
+    assert!(base > 0.0);
+    assert!(parking_full_probability(23.0, 8) > base);
+    assert!(parking_full_probability(23.0, 150) < base);
+    assert!(parking_full_probability(23.0, 60) < base);
+}
 
 #[test]
-#[ignore = "needs sim::hos (parking_full_probability)"]
-fn test_capacity_never_creates_daytime_crunch() {}
+fn test_capacity_never_creates_daytime_crunch() {
+    use crate::sim::hos::parking_full_probability;
+
+    assert_eq!(parking_full_probability(12.0, 5), 0.0);
+}
 
 #[test]
-#[ignore = "needs data::world_parsing (_parse_restrictions)"]
-fn test_parse_restrictions_orders_and_validates() {}
+fn test_parse_restrictions_orders_and_validates() {
+    use crate::data::world_parsing::parse_restrictions;
+
+    let raw = vec![
+        serde_json::json!({"at_mi": 40.0, "kind": "weight_limit", "tons": 30.0}),
+        serde_json::json!({"at_mi": 12.0, "kind": "low_clearance", "feet": 13.5}),
+    ];
+    let parsed = parse_restrictions(&raw, 60.0, "a", "b").expect("parses");
+    let kinds: Vec<&str> = parsed.iter().map(|r| r.kind.as_str()).collect();
+    assert_eq!(kinds, ["low_clearance", "weight_limit"]);
+}
 
 #[test]
-#[ignore = "needs data::world_parsing (_parse_restrictions)"]
-fn test_parse_restriction_rejects_unknown_kind_and_bad_values() {}
+fn test_parse_restriction_rejects_unknown_kind_and_bad_values() {
+    use crate::data::world_parsing::parse_restrictions;
+
+    let cases = [
+        (
+            serde_json::json!({"at_mi": 5.0, "kind": "toll"}),
+            "unknown kind",
+        ),
+        (
+            serde_json::json!({"at_mi": 5.0, "kind": "low_clearance", "feet": 3.0}),
+            "implausible clearance",
+        ),
+        (
+            serde_json::json!({"at_mi": 5.0, "kind": "weight_limit", "tons": 90.0}),
+            "implausible weight",
+        ),
+    ];
+    for (raw, needle) in cases {
+        let err = parse_restrictions(std::slice::from_ref(&raw), 60.0, "a", "b")
+            .expect_err("a bad restriction is refused");
+        assert!(
+            err.to_string().contains(needle),
+            "expected {needle:?} in {err}"
+        );
+    }
+}
+
+/// Owner report 2026-08-13: "Posted restriction in 13 miles: low clearance
+/// ahead: posted 13 feet 6 inches" read as word salad -- "posted" twice,
+/// "ahead" fighting the distance, and no word on whether it matters. The cue
+/// text now names the thing, quotes the sign, and answers the only question a
+/// driver has: routing already avoided anything impassable.
+#[test]
+fn test_restriction_spoken_text_is_player_language() {
+    use crate::data::world_models::RouteRestriction;
+
+    let clearance = RouteRestriction {
+        at_mi: 12.0,
+        kind: "low_clearance".to_string(),
+        feet: 13.5,
+        ..RouteRestriction::default()
+    };
+    assert_eq!(
+        clearance.spoken_ahead(),
+        "a low bridge, signed 13 feet 6 inches. Your route clears it"
+    );
+    assert_eq!(
+        clearance.spoken_near(),
+        "Low bridge, signed 13 feet 6 inches."
+    );
+    let whole = RouteRestriction {
+        feet: 14.0,
+        ..clearance
+    };
+    assert_eq!(whole.value_text(), "14 feet");
+    let weight = RouteRestriction {
+        at_mi: 40.0,
+        kind: "weight_limit".to_string(),
+        tons: 30.0,
+        ..RouteRestriction::default()
+    };
+    assert_eq!(
+        weight.spoken_ahead(),
+        "a weight limit, signed 30 tons. Your route clears it"
+    );
+    assert_eq!(weight.spoken_near(), "Weight limit, signed 30 tons.");
+    let fractional = RouteRestriction {
+        tons: 27.5,
+        ..weight
+    };
+    assert_eq!(fractional.value_text(), "27.5 tons");
+}
 
 #[test]
-#[ignore = "needs data::world_models (RouteRestriction spoken text)"]
-fn test_restriction_spoken_text_is_player_language() {}
+fn test_restriction_rounding_never_speaks_twelve_inches() {
+    use crate::data::world_models::RouteRestriction;
 
-#[test]
-#[ignore = "needs data::world_models (RouteRestriction.value_text)"]
-fn test_restriction_rounding_never_speaks_twelve_inches() {}
+    // 13.999 ft rounds to inches == 12 and must carry into the next foot.
+    let restriction = RouteRestriction {
+        at_mi: 1.0,
+        kind: "low_clearance".to_string(),
+        feet: 13.999,
+        ..RouteRestriction::default()
+    };
+    assert_eq!(restriction.value_text(), "14 feet");
+}

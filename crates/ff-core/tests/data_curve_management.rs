@@ -492,7 +492,9 @@ fn test_curve_at_inside() {
         return;
     };
     let mid = (cr.start_mi + cr.end_mi) / 2.0;
-    let found = trip.curve_at(mid).expect("the curve containing its midpoint");
+    let found = trip
+        .curve_at(mid)
+        .expect("the curve containing its midpoint");
     assert_eq!(found.start_mi, cr.start_mi);
 }
 

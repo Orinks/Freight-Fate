@@ -815,3 +815,34 @@ fn buffs_calendar_and_lanes_behave_like_the_dataclass() {
         assert_eq!(*heard.lock().unwrap(), vec!["Heard", "Boom"]);
     });
 }
+
+// -- tests/test_dispatch_variety.py (the profile half) ---------------------------
+//
+// Owner playtest 2026-07-15: level-1 assigned dispatch bounced the same two
+// cities forever (Winslow to Holbrook, again and again). The profile now
+// remembers the last few delivered from:to lanes; the queue half of that file
+// lives with the dispatch board.
+
+#[test]
+fn test_remember_lane_dedupes_and_caps() {
+    let mut p = Profile::named("Variety");
+    for i in 0..10 {
+        p.remember_lane(&format!("a_{i}:b_{i}"));
+    }
+    assert_eq!(p.recent_lanes.len(), RECENT_LANES_KEPT);
+    assert_eq!(p.recent_lanes[0], "a_9:b_9");
+
+    // re-running a lane moves it up, not in twice
+    p.remember_lane("a_9:b_9");
+    assert_eq!(p.recent_lanes.iter().filter(|l| *l == "a_9:b_9").count(), 1);
+    p.remember_lane(""); // never records an empty lane
+    assert!(!p.recent_lanes.iter().any(|l| l.is_empty()));
+}
+
+#[test]
+fn test_recent_lanes_survive_a_save_round_trip() {
+    let mut p = Profile::named_in("Variety", "denver_co_us");
+    p.remember_lane("denver_co_us:silverthorne_co_us");
+    let restored = Profile::from_dict(&p.to_dict());
+    assert_eq!(restored.recent_lanes, ["denver_co_us:silverthorne_co_us"]);
+}

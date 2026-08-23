@@ -173,8 +173,7 @@ mod tests {
     ) -> PathBuf {
         let p = Profile::named("Legacy");
         let packed_path = p.save().unwrap();
-        let (mut data, _) =
-            decode_save_bytes(&std::fs::read(&packed_path).unwrap()).unwrap();
+        let (mut data, _) = decode_save_bytes(&std::fs::read(&packed_path).unwrap()).unwrap();
         std::fs::remove_file(&packed_path).unwrap();
         for key in [
             "truck_conditions",
@@ -203,11 +202,7 @@ mod tests {
             data.insert("_signature".into(), json!(signature));
         }
         let path = packed_path.with_extension("json");
-        std::fs::write(
-            &path,
-            serde_json::to_string(&Value::Object(data)).unwrap(),
-        )
-        .unwrap();
+        std::fs::write(&path, serde_json::to_string(&Value::Object(data)).unwrap()).unwrap();
         path
     }
 
@@ -306,8 +301,7 @@ mod tests {
     #[test]
     fn test_migration_clamps_impossible_legacy_values() {
         with_data_dir(|_| {
-            let path =
-                write_flat_condition_save("rig", &["rig"], 9_000.0, 250.0, -5.0, 60.0, true);
+            let path = write_flat_condition_save("rig", &["rig"], 9_000.0, 250.0, -5.0, 60.0, true);
             let loaded = Profile::load(&path).unwrap();
             let rig = &loaded.truck_conditions["rig"];
             assert_eq!(rig["fuel_gal"], TruckSpecs::default().fuel_tank_gal);
@@ -316,21 +310,13 @@ mod tests {
         });
     }
 
-    #[test]
-    #[ignore = "needs states::save_notice and the app shell"]
-    fn test_migration_notice_shows_once_then_enters_world() {}
+    // `test_migration_notice_shows_once_then_enters_world` is live in `crates/freight-fate/tests/states_main_menu.rs`.
 
-    #[test]
-    #[ignore = "needs states::save_notice and the app shell"]
-    fn test_migration_notice_escape_also_acknowledges() {}
+    // `test_migration_notice_escape_also_acknowledges` is live in `crates/freight-fate/tests/states_main_menu.rs`.
 
-    #[test]
-    #[ignore = "needs states::save_notice and the app shell"]
-    fn test_modified_notice_shows_once_then_enters_world() {}
+    // `test_modified_notice_shows_once_then_enters_world` is live in `crates/freight-fate/tests/states_main_menu.rs`.
 
-    #[test]
-    #[ignore = "needs states::city (TruckShopState) and the app shell"]
-    fn test_bought_truck_starts_fresh_and_each_keeps_its_own_condition() {}
+    // `test_bought_truck_starts_fresh_and_each_keeps_its_own_condition` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
     #[test]
     fn test_invariants_flag_bad_per_truck_records() {

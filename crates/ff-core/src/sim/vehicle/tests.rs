@@ -1589,13 +1589,10 @@ fn test_coasting_into_a_bar_without_braking_is_still_the_drivers_fault() {
     assert!(!truck.pushed_through_by_surge());
 }
 
-#[test]
-#[ignore = "needs models::cargo_condition and models::jobs CARGO_CATALOG"]
-fn test_liquid_freight_is_hard_to_ruin_because_liquid_does_not_break() {}
-
-#[test]
-#[ignore = "needs models::cargo_condition"]
-fn test_a_tank_load_is_described_in_words_that_fit_a_tank() {}
+// `test_liquid_freight_is_hard_to_ruin_because_liquid_does_not_break` and
+// `test_a_tank_load_is_described_in_words_that_fit_a_tank` are the
+// cargo-condition half of `tests/test_tanker_surge.py`; they live with the
+// code they cover, in `models::cargo_condition`.
 
 #[test]
 fn test_tank_freight_is_gated_to_the_back_half_of_the_career() {
@@ -1629,52 +1626,37 @@ fn test_liquid_food_is_the_harder_one_and_pays_for_it() {
 }
 
 #[test]
-#[ignore = "needs models::career"]
-fn test_the_tank_endorsement_unlocks_in_the_back_half() {}
+fn test_the_tank_endorsement_unlocks_in_the_back_half() {
+    use crate::models::career::{endorsement_level, Career};
+    assert!(endorsement_level("tank").unwrap() >= 16);
+    let mut career = Career::default();
+    career.xp = 0.0;
+    assert!(!career.endorsements().contains("tank"));
+    career.xp = 1_000_000.0;
+    assert!(career.endorsements().contains("tank"));
+}
 
-#[test]
-#[ignore = "needs states::driving_liquid LiquidLoadMixin and audio CH_SURGE"]
-fn test_the_cue_layer_is_completely_silent_for_other_freight() {}
+// `test_the_cue_layer_is_completely_silent_for_other_freight` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_liquid LiquidLoadMixin and audio CH_SURGE"]
-fn test_the_wash_is_silent_on_steady_cruise_and_alive_once_the_load_runs() {}
+// `test_the_wash_is_silent_on_steady_cruise_and_alive_once_the_load_runs` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_liquid LiquidLoadMixin and audio CH_SURGE"]
-fn test_the_hit_fires_when_the_wave_arrives_and_is_the_loudest_thing_here() {}
+// `test_the_hit_fires_when_the_wave_arrives_and_is_the_loudest_thing_here` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_liquid LiquidLoadMixin and audio CH_SURGE"]
-fn test_the_lateral_hit_has_its_own_voice() {}
+// `test_the_lateral_hit_has_its_own_voice` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_liquid LiquidLoadMixin"]
-fn test_the_load_running_and_the_load_settling_are_both_spoken() {}
+// `test_the_load_running_and_the_load_settling_are_both_spoken` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_liquid LiquidLoadMixin and audio CH_SURGE"]
-fn test_the_bed_is_dropped_on_the_way_out() {}
+// `test_the_bed_is_dropped_on_the_way_out` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_liquid LiquidLoadMixin"]
-fn test_the_status_screen_can_be_asked_what_the_tank_will_do() {}
+// `test_the_status_screen_can_be_asked_what_the_tank_will_do` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_stops bar_tick_range_mi and states::driving_core constants"]
-fn test_the_stop_bar_tick_range_is_unchanged_for_ordinary_freight() {}
+// `test_the_stop_bar_tick_range_is_unchanged_for_ordinary_freight` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_stops bar_tick_range_mi"]
-fn test_the_stop_bar_tick_starts_earlier_when_the_truck_needs_more_road() {}
+// `test_the_stop_bar_tick_starts_earlier_when_the_truck_needs_more_road` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_stops bar_solid_zone_mi and states::driving_core constants"]
-fn test_the_held_tone_comes_in_early_when_sixty_feet_is_not_enough() {}
+// `test_the_held_tone_comes_in_early_when_sixty_feet_is_not_enough` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
-#[test]
-#[ignore = "needs states::driving_stops assist_full_decel_mps2 and states::driving_core constants"]
-fn test_the_stopping_assist_can_only_ever_press_harder_than_it_used_to() {}
+// `test_the_stopping_assist_can_only_ever_press_harder_than_it_used_to` is live in `crates/freight-fate/tests/states_driving_facility.rs`.
 
 #[test]
 fn test_stopping_distance_answers_with_grade_grip_and_fade() {
@@ -1712,4 +1694,45 @@ fn test_a_truck_that_cannot_out_brake_its_grade_still_returns_a_finite_number() 
     runaway.brake_temp_c = 800.0;
     assert!(runaway.stopping_distance_m(None, 0.0, true).is_finite());
     assert!(runaway.stopping_distance_m(None, 0.0, true) > 0.0);
+}
+
+/// Real trucks run the horn off the brake air (Brandon, 2026-08-20) -- and
+/// FMVSS 121 pressure protection means the horn can never take the brakes
+/// down with it: below the valve's threshold the horn goes silent and the
+/// draw stops (realism audit, 2026-08-20; the first version let you honk to a
+/// spring-brake lockout, which a compliant tractor cannot do).
+///
+/// From `tests/test_trip_cues.py`; it lives here because the air-drain step
+/// is crate-private.
+#[test]
+fn test_the_horn_drains_the_air_tanks_to_the_protection_valve() {
+    let mut t = TruckState::default();
+    let before = t.primary_air_psi;
+    t.horn_on = true;
+    for _ in 0..(60 * 60) {
+        // a full minute of leaning on it
+        t.consume_brake_air(1.0 / 60.0);
+    }
+    let drained = before - t.primary_air_psi;
+    assert!(
+        (5.0..=10.0).contains(&drained),
+        "a minute of horn drained {drained:.2} psi"
+    );
+    t.horn_on = false;
+    let mid = t.primary_air_psi;
+    for _ in 0..60 {
+        t.consume_brake_air(1.0 / 60.0);
+    }
+    assert_eq!(t.primary_air_psi, mid, "released horn must not draw");
+    // Honk forever: the valve floors the drain at its threshold.
+    t.horn_on = true;
+    for _ in 0..(60 * 60 * 30) {
+        t.consume_brake_air(1.0 / 60.0);
+    }
+    assert!(
+        t.air_pressure_psi() >= TruckState::HORN_PROTECTION_PSI - 1.0,
+        "the horn drained past the protection valve: {:.1}",
+        t.air_pressure_psi()
+    );
+    assert!(!t.horn_available(), "below threshold the horn must be dead");
 }

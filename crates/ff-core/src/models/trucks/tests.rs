@@ -203,8 +203,7 @@ fn test_profile_persists_truck_and_upgrades() {
 #[test]
 fn test_old_save_without_truck_fields_loads_with_defaults() {
     use crate::models::profile::{
-        decode_save_bytes, tests::with_data_dir, Profile, SIGNATURE_FIELD,
-        SIGNATURE_VERSION_FIELD,
+        decode_save_bytes, tests::with_data_dir, Profile, SIGNATURE_FIELD, SIGNATURE_VERSION_FIELD,
     };
     with_data_dir(|_| {
         let p = Profile::named("Legacy");

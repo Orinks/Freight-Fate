@@ -263,7 +263,7 @@ impl TruckState {
         self.air_pressure_psi() > Self::HORN_PROTECTION_PSI
     }
 
-    fn consume_brake_air(&mut self, dt: f64) {
+    pub(crate) fn consume_brake_air(&mut self, dt: f64) {
         if self.horn_on && self.horn_available() {
             let draw = Self::HORN_AIR_PSI_PER_S * dt;
             self.primary_air_psi -= draw;

@@ -6,15 +6,23 @@
 //! unaffected.
 //!
 //! The Python module reads every figure straight off the models package
-//! (`ACHIEVEMENTS`, `Career`, `Profile`, `TRUCK_CATALOG`, ...). Those are
-//! ported in parallel with this file, so the model-side figures arrive
-//! through [`CatalogInputs`] -- the lead wires `CatalogInputs::current()`
-//! to the live catalogs once they exist -- while the city labels are read
-//! from the world data under the `data_root` the caller passes.
+//! (`ACHIEVEMENTS`, `Career`, `Profile`, `TRUCK_CATALOG`, ...). The Rust
+//! rendering takes those figures as a [`CatalogInputs`] argument so the
+//! module itself stays free of the model layer; [`CatalogInputs::current`]
+//! is the one that reads the real shipped catalogs, and it is what the
+//! `ff-invariants` binary writes the file from. City labels are read from
+//! the world data under the `data_root` the caller passes
+//! ([`world_data_root`] resolves the shipped one).
+//!
+//! Anything that renders this file for the server must go through
+//! `current()`: a hand-assembled `CatalogInputs` is a fixture, and a
+//! fixture shipped to the validator is a validator that convicts honest
+//! players (or acquits edited careers) the moment it disagrees with the
+//! game.
 
 use std::collections::BTreeMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde_json::{Map, Value};
 
@@ -92,6 +100,111 @@ pub struct CatalogInputs {
     pub trucks: Vec<(String, String, f64)>,
     /// `UPGRADE_CATALOG`: key and per-tier prices, in catalog order.
     pub upgrade_prices: Vec<(String, Vec<f64>)>,
+}
+
+impl CatalogInputs {
+    /// The figures the shipped game actually awards, read off the live
+    /// catalogs -- the Rust equivalent of the module-level imports at the top
+    /// of `profile_integrity_invariants.py`.
+    ///
+    /// This is the only assembly the exporter may use. Every field below
+    /// names the Python constant it stands in for, so a balance pass that
+    /// moves a constant moves the export with it and the validator on
+    /// orinks.net never falls behind the build players are running.
+    pub fn current() -> Self {
+        use crate::achievements::ACHIEVEMENTS;
+        use crate::models::career::{
+            Career, DELIVERY_COMPLETION_XP, ENDORSEMENT_LABELS_SPOKEN, ENDORSEMENT_LEVELS,
+            LEVEL_XP, XP_CLEAN_BONUS, XP_PER_MILE_ON_TIME, XP_SPECIALTY_MULT, XP_STREAK_MAX_BONUS,
+        };
+        use crate::models::carrier_fleet::FLEET_TIERS;
+        use crate::models::economy::PAY_ADVANCE_LIMIT;
+        use crate::models::market::MARKET_CARGO_KEYS;
+        use crate::models::profile::{
+            fresh_condition, PROFILE_FIELDS, SAVE_VERSION, STARTING_MONEY,
+        };
+        use crate::models::start_options::all_start_options;
+        use crate::models::trucks::{TRUCK_CATALOG, UPGRADE_CATALOG};
+
+        // `sorted(Career.__dataclass_fields__)`. The Rust dataclass is the
+        // serde shape of the same struct -- serialising the default is what
+        // guarantees the exported list is the key set a save actually
+        // carries, rather than a second list that can drift from it.
+        let career_json =
+            serde_json::to_value(Career::default()).expect("Career serialises to a JSON object");
+        let career_fields: Vec<String> = career_json
+            .as_object()
+            .expect("Career serialises to a JSON object")
+            .keys()
+            .cloned()
+            .collect();
+
+        let endorsements: Vec<EndorsementRow> = ENDORSEMENT_LEVELS
+            .iter()
+            .map(|(key, level)| EndorsementRow {
+                key: (*key).to_string(),
+                level: *level,
+                label: ENDORSEMENT_LABELS_SPOKEN
+                    .iter()
+                    .find(|(labelled, _)| labelled == key)
+                    .map(|(_, label)| (*label).to_string())
+                    // Python would KeyError here; an endorsement with no
+                    // spoken label is a catalog bug, not an export shape.
+                    .unwrap_or_else(|| panic!("endorsement {key} has no spoken label")),
+            })
+            .collect();
+
+        CatalogInputs {
+            achievement_ids: ACHIEVEMENTS
+                .iter()
+                .map(|badge| badge.id.to_string())
+                .collect(),
+            starting_money: STARTING_MONEY,
+            starting_money_max: all_start_options()
+                .iter()
+                .map(|option| option.starting_money)
+                .fold(f64::NEG_INFINITY, f64::max),
+            pay_advance_limit: PAY_ADVANCE_LIMIT,
+            xp_per_mile_on_time: XP_PER_MILE_ON_TIME,
+            xp_specialty_mult: XP_SPECIALTY_MULT,
+            xp_streak_max_bonus: XP_STREAK_MAX_BONUS,
+            xp_clean_bonus: XP_CLEAN_BONUS,
+            delivery_completion_xp: DELIVERY_COMPLETION_XP,
+            level_xp: LEVEL_XP.iter().map(|xp| *xp as i64).collect(),
+            market_cargo_keys: MARKET_CARGO_KEYS
+                .iter()
+                .map(|key| key.to_string())
+                .collect(),
+            profile_fields: PROFILE_FIELDS
+                .iter()
+                .map(|field| field.to_string())
+                .collect(),
+            career_fields,
+            endorsements,
+            fleet_tiers: FLEET_TIERS
+                .iter()
+                .map(|tier| FleetTierRow {
+                    min_level: tier.min_level,
+                    label: tier.label.to_string(),
+                })
+                .collect(),
+            // `sorted(_fresh_condition())` -- the keys off a record the game
+            // really writes, not a second list beside it. The Python comment
+            // on `truck_condition_fields` below is the whole reason: the
+            // export once came off a dataclass that had stopped matching the
+            // record, and told the server five legitimate keys were unknown.
+            truck_condition_fields: fresh_condition(0.0).keys().cloned().collect(),
+            source_save_version: SAVE_VERSION,
+            trucks: TRUCK_CATALOG
+                .iter()
+                .map(|(key, truck)| (key.to_string(), truck.label.to_string(), truck.price))
+                .collect(),
+            upgrade_prices: UPGRADE_CATALOG
+                .iter()
+                .map(|upgrade| (upgrade.key.to_string(), upgrade.prices.to_vec()))
+                .collect(),
+        }
+    }
 }
 
 /// Every share bonus in `record_delivery` taken at once, at its best.
@@ -371,15 +484,32 @@ pub fn rendered_invariants(data_root: &Path, inputs: &CatalogInputs) -> Result<S
     Ok(out)
 }
 
+/// The `world_data` tree the shipped export reads its city labels from.
+///
+/// Python resolves this as `Path(__file__).parent / "data" / "world_data"`;
+/// here it hangs off the same [`data_root`](crate::data::data_resources::data_root)
+/// every other data reader uses, so `FREIGHT_FATE_DATA_ROOT` points the
+/// exporter at a checkout the same way it points the game at one.
+pub fn world_data_root() -> PathBuf {
+    crate::data::data_resources::data_root().join("world_data")
+}
+
+/// `invariant_data()` with no arguments: the shipped catalogs, the shipped
+/// world data. This is the production path.
+pub fn current_invariant_data() -> Result<Value, String> {
+    invariant_data(&world_data_root(), &CatalogInputs::current())
+}
+
+/// `rendered_invariants()` with no arguments: the exact bytes
+/// `tools/export_profile_integrity_invariants.py` writes, and the exact bytes
+/// the orinks.net validator is built from.
+pub fn current_rendered_invariants() -> Result<String, String> {
+    rendered_invariants(&world_data_root(), &CatalogInputs::current())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::PathBuf;
-
-    /// The repo's `src/freight_fate/data/world_data` tree.
-    fn world_data_root() -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/freight_fate/data/world_data")
-    }
 
     /// A snapshot of the model constants as of 2026-08-22 (the Python
     /// `invariant_data()` output), standing in until the models land.
@@ -450,33 +580,81 @@ mod tests {
 
     #[test]
     fn test_integrity_invariants_include_public_projection_labels() {
-        let data = invariant_data(&world_data_root(), &inputs()).unwrap();
+        let data = current_invariant_data().unwrap();
         assert!(data["sourceSaveVersion"].as_i64().unwrap() >= 1);
         assert_eq!(data["cityLabels"]["new_york_ny_us"], "New York, New York");
         assert_eq!(data["truckLabels"]["rig"], "standard rig");
         assert_eq!(data["levelXp"][0], 0);
-        assert!(rendered_invariants(&world_data_root(), &inputs())
-            .unwrap()
-            .ends_with('\n'));
+        assert!(current_rendered_invariants().unwrap().ends_with('\n'));
     }
 
+    /// The exported ceiling must sit at or above what record_delivery awards.
+    ///
+    /// The server rejects a cloud backup whose XP exceeds
+    /// `deliveries * xpFlatPerDelivery + total_miles * xpPerMileMax`. If a
+    /// balance pass raises the game's rates past the exported figures, that
+    /// check starts convicting the drivers who played best -- which is exactly
+    /// how a hardcoded 1.2 per mile came to sit below the on-time rate. Drive
+    /// a spread of careers through the real award path and hold the line.
     #[test]
-    #[ignore = "needs models::career (Career.record_delivery and the XP constants)"]
-    fn test_exported_xp_ceiling_bounds_every_honest_career() {}
+    fn test_exported_xp_ceiling_bounds_every_honest_career() {
+        use crate::models::career::{Career, XP_PREMIUM_MULT, XP_SPECIALTY_MULT};
+        use crate::pyrandom::PyRandom;
+
+        let data = current_invariant_data().unwrap();
+        let per_mile = data["xpPerMileMax"].as_f64().unwrap();
+        let flat = data["xpFlatPerDelivery"].as_f64().unwrap();
+        let mut rng = PyRandom::new_from_i64(7);
+
+        for _ in 0..2_000 {
+            let mut career = Career::default();
+            let deliveries = rng.randint(1, 40);
+            for _ in 0..deliveries {
+                let miles = rng.uniform(1.0, 900.0);
+                let on_time = rng.random() < 0.9;
+                let damage_pct = *rng.choice(&[0.0, 0.5, 30.0]);
+                let cargo_class_mult = *rng.choice(&[1.0, XP_PREMIUM_MULT, XP_SPECIALTY_MULT]);
+                career.record_delivery(miles, 0.0, on_time, damage_pct, cargo_class_mult, 1.0);
+            }
+            let ceiling = career.deliveries as f64 * flat + career.total_miles * per_mile;
+            assert!(
+                career.xp <= ceiling,
+                "{} XP over {} miles in {} deliveries breaches the exported ceiling {ceiling}",
+                career.xp,
+                career.total_miles,
+                career.deliveries
+            );
+        }
+    }
 
     /// The money rule's floor is this figure; a new profile must equal it.
     #[test]
     fn test_exported_starting_money_matches_a_fresh_career() {
-        let data = invariant_data(&world_data_root(), &inputs()).unwrap();
+        let data = current_invariant_data().unwrap();
         assert_eq!(
             data["startingMoney"].as_f64().unwrap(),
             crate::models::profile::Profile::new().money
         );
     }
 
+    /// The server's money ceiling credits the richest career start.
+    ///
+    /// The owner-operator option opens with more cash than the company-driver
+    /// default; a ceiling built on the default rejected every honest
+    /// owner-operator backup as impossible_money until earnings outgrew the gap.
     #[test]
-    #[ignore = "needs models::start_options (all_start_options)"]
-    fn test_exported_starting_money_max_covers_every_start_option() {}
+    fn test_exported_starting_money_max_covers_every_start_option() {
+        use crate::models::start_options::all_start_options;
+
+        let data = current_invariant_data().unwrap();
+        let exported = data["startingMoneyMax"].as_f64().unwrap();
+        let mut richest = f64::MIN;
+        for option in all_start_options() {
+            assert!(option.starting_money <= exported, "{}", option.key);
+            richest = richest.max(option.starting_money);
+        }
+        assert_eq!(exported, richest);
+    }
 
     /// The export must describe the record the game actually writes.
     ///
@@ -491,12 +669,7 @@ mod tests {
         profile.provision_truck_condition("rig", None);
         let mut written: Vec<String> = profile.truck_conditions["rig"].keys().cloned().collect();
         written.sort();
-        let mut inputs = inputs();
-        inputs.truck_condition_fields = crate::models::profile::CONDITION_FIELDS
-            .iter()
-            .map(|s| s.to_string())
-            .collect();
-        let data = invariant_data(&world_data_root(), &inputs).unwrap();
+        let data = current_invariant_data().unwrap();
         let exported: Vec<String> = data["truckConditionFields"]
             .as_array()
             .unwrap()
@@ -511,7 +684,7 @@ mod tests {
         // The 1.9 cutover regen must teach the server allow-list `created_line`.
         // Every 1.9 upload carries the marker, so a validator built from an
         // export without it would reject every honest backup on the schema check.
-        let data = invariant_data(&world_data_root(), &inputs()).unwrap();
+        let data = current_invariant_data().unwrap();
         let fields = data["profileFields"].as_array().unwrap();
         assert!(fields.contains(&Value::from("created_line")));
         // The local-only signature keys never ride the export.
@@ -521,7 +694,7 @@ mod tests {
 
     #[test]
     fn test_exported_public_profile_fields_ride_the_allow_lists() {
-        let data = invariant_data(&world_data_root(), &inputs()).unwrap();
+        let data = current_invariant_data().unwrap();
         assert!(data["profileFields"]
             .as_array()
             .unwrap()
@@ -532,19 +705,80 @@ mod tests {
             .contains(&Value::from("purchased_endorsements")));
     }
 
+    /// The site derives each driver's endorsements from this table.
+    ///
+    /// Hold it to the real unlock path: a career levelled to each exported
+    /// threshold must hold exactly the endorsements the export promises at
+    /// that level, or the public profile starts crediting training the carrier
+    /// never sponsored (or hiding training it did).
     #[test]
-    #[ignore = "needs models::career (Career.level / Career.endorsements)"]
-    fn test_exported_endorsements_match_what_the_career_actually_unlocks() {}
+    fn test_exported_endorsements_match_what_the_career_actually_unlocks() {
+        use crate::models::career::{Career, LEVEL_XP};
+        use std::collections::BTreeSet;
 
+        let data = current_invariant_data().unwrap();
+        let endorsements = data["endorsements"].as_object().unwrap();
+        for level in 1..=LEVEL_XP.len() as i64 {
+            let career = Career {
+                xp: LEVEL_XP[level as usize - 1],
+                ..Career::default()
+            };
+            assert_eq!(career.level(), level);
+            let expected: BTreeSet<&str> = endorsements
+                .iter()
+                .filter(|(_, entry)| level >= entry["level"].as_i64().unwrap())
+                .map(|(key, _)| key.as_str())
+                .collect();
+            let held: BTreeSet<&str> = career.endorsements().into_iter().collect();
+            assert_eq!(held, expected, "level {level}");
+        }
+
+        // A self-paid course unlocks ahead of the sponsored level, which is
+        // why purchased_endorsements has to reach the server at all.
+        let early = Career {
+            xp: 0.0,
+            purchased_endorsements: vec!["heavy_haul".to_string()],
+            ..Career::default()
+        };
+        assert!(early.endorsements().contains("heavy_haul"));
+    }
+
+    /// The site names a company driver's fleet tier from these bands.
     #[test]
-    #[ignore = "needs models::carrier_fleet (fleet_tier_for_level)"]
-    fn test_exported_fleet_tiers_match_the_carrier_fleet_bands() {}
+    fn test_exported_fleet_tiers_match_the_carrier_fleet_bands() {
+        use crate::models::carrier_fleet::fleet_tier_for_level;
+
+        let data = current_invariant_data().unwrap();
+        let tiers = data["fleetTiers"].as_array().unwrap();
+        // every level maps to a band
+        assert_eq!(tiers[0]["minLevel"].as_i64().unwrap(), 1);
+        let min_levels: Vec<i64> = tiers
+            .iter()
+            .map(|t| t["minLevel"].as_i64().unwrap())
+            .collect();
+        let mut sorted = min_levels.clone();
+        sorted.sort_unstable();
+        assert_eq!(min_levels, sorted);
+        for level in 1..31 {
+            let expected = fleet_tier_for_level(level).label;
+            let banded = tiers
+                .iter()
+                .rfind(|t| level >= t["minLevel"].as_i64().unwrap())
+                .unwrap()["label"]
+                .as_str()
+                .unwrap();
+            assert_eq!(banded, expected, "level {level}");
+        }
+    }
 
     #[test]
     fn the_xp_ceiling_terms_follow_the_python_arithmetic() {
         // Python invariant_data() on 2026-08-22: xpPerMileMax 4.002,
-        // xpFlatPerDelivery 250.12499999999997.
-        let data = invariant_data(&world_data_root(), &inputs()).unwrap();
+        // xpFlatPerDelivery 250.12499999999997. Against the live catalogs,
+        // not the fixture: the point is that Rust's float arithmetic lands on
+        // Python's exact repr, and a fixture that copies the same constants
+        // would pass without ever asking the game.
+        let data = current_invariant_data().unwrap();
         assert_eq!(data["xpPerMileMax"], 4.002);
         assert_eq!(data["xpFlatPerDelivery"], 250.12499999999997);
         assert_eq!(data["startingMoney"], 5000);

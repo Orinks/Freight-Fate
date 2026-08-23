@@ -1120,6 +1120,36 @@ fn test_an_unreadable_setting_falls_to_the_bed() {
     assert!(from_json(json!({"lane_guide_tone": true})).lane_guide_tone);
 }
 
+// -- tests/test_profile_sharing_sync.py (the consent-version gate) ---------------
+
+/// Only the current consent version may keep sharing switched on: an older
+/// grant is stale, and a newer one is a file this build has never asked for.
+#[test]
+fn test_only_current_profile_sharing_consent_can_remain_on() {
+    with_data_dir(|data| {
+        for (version, expected) in [
+            (None, false),
+            (Some(0), false),
+            (Some(1), false),
+            (Some(2), false),
+            (Some(3), true),
+            (Some(4), false),
+        ] {
+            let mut raw = serde_json::json!({"online_presence": true});
+            if let Some(version) = version {
+                raw["profile_sharing_consent_version"] = serde_json::json!(version);
+            }
+            std::fs::create_dir_all(data).unwrap();
+            std::fs::write(data.join("settings.json"), raw.to_string()).unwrap();
+            assert_eq!(
+                Settings::load().online_presence,
+                expected,
+                "consent version {version:?}"
+            );
+        }
+    });
+}
+
 // -- tests/test_updater.py -------------------------------------------------------
 
 #[test]
@@ -1158,35 +1188,10 @@ fn test_radio_persists_enabled_station_and_volume() {
 
 // -- App()-bound --------------------------------------------------------------------
 
-/// Python: the settings menu cycles the row, and `Settings.load()` sees the
-/// change after every keypress. The menu is the app shell's.
-#[test]
-#[ignore = "needs app shell"]
-fn test_settings_menu_saves_each_change() {
-    unimplemented!("needs app shell: SettingsCategoryState");
-}
+// `test_settings_menu_saves_each_change` is live in `crates/freight-fate/tests/states_main_menu_settings.rs`.
 
-/// Python: the Gameplay submenu speaks every layout notice newer than the
-/// saved settings_version once, then `settings_layout_notice_from` is -1
-/// on disk.
-#[test]
-#[ignore = "needs app shell"]
-fn test_gameplay_reorg_notice_fires_once_for_a_pre_reorg_settings_file() {
-    unimplemented!("needs app shell: GameplaySettingsState");
-}
+// `test_gameplay_reorg_notice_fires_once_for_a_pre_reorg_settings_file` is live in `crates/freight-fate/tests/states_main_menu_settings.rs`.
 
-/// Python: the Driving mode row explains the retired pacing, spending
-/// `pace_retired_notice_left` one visit at a time.
-#[test]
-#[ignore = "needs app shell"]
-fn test_the_driving_mode_row_explains_the_retired_pacing() {
-    unimplemented!("needs app shell: SettingsCategoryState");
-}
+// `test_the_driving_mode_row_explains_the_retired_pacing` is live in `crates/freight-fate/tests/states_main_menu_settings.rs`.
 
-/// Python: the Lane keeping row speaks its rename notice three times, then
-/// stops; an unreadable value is announced rather than taken in silence.
-#[test]
-#[ignore = "needs app shell"]
-fn test_lane_keeping_row_explains_its_rename_to_returning_players() {
-    unimplemented!("needs app shell: SettingsCategoryState");
-}
+// `test_lane_keeping_row_explains_its_rename_to_returning_players` is live in `crates/freight-fate/tests/states_main_menu_settings.rs`.

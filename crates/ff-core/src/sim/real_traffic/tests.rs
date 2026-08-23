@@ -408,7 +408,12 @@ fn test_trip_announces_nearby_real_incident() {
     // on the first simulation tick.
     let provider = Arc::new(RealTrafficProvider::offline());
     let mut incident = located(
-        event("inc-1", "high", "Jackknifed truck on I-71 southbound", "Franklin"),
+        event(
+            "inc-1",
+            "high",
+            "Jackknifed truck on I-71 southbound",
+            "Franklin",
+        ),
         39.95,
         -83.0,
     );
@@ -422,7 +427,9 @@ fn test_trip_announces_nearby_real_incident() {
     assert!(messages
         .iter()
         .any(|m| m.contains("Live road report") && m.contains("Jackknifed truck")));
-    assert!(messages.iter().any(|m| m.contains("2 right lanes affected")));
+    assert!(messages
+        .iter()
+        .any(|m| m.contains("2 right lanes affected")));
 
     // A later check must not repeat the same incident.
     trip.next_real_traffic_check_mi = 0.0;
@@ -465,7 +472,12 @@ fn test_trip_skips_incident_beyond_radius() {
     seed_ohio_cache(
         &provider,
         vec![located(
-            event("inc-2", "high", "Bridge closure near Cincinnati", "Hamilton"),
+            event(
+                "inc-2",
+                "high",
+                "Bridge closure near Cincinnati",
+                "Hamilton",
+            ),
             39.11,
             -84.50,
         )],

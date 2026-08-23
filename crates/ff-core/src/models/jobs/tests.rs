@@ -904,37 +904,19 @@ fn test_assigned_dispatch_hands_out_the_forced_load_first() {}
 
 // -- tests/test_dispatch_job_detail.py ------------------------------------------
 
-#[test]
-#[ignore = "needs app shell (JobDetailState)"]
-fn test_f1_on_dispatch_job_opens_structured_detail_view() {
-    // The board the detail view opens on: a level-5 Buffalo deal at seed 7.
-    let jobs = offers(7, "Buffalo", ALL, 5);
-    assert!(!jobs.is_empty());
-}
+// `test_f1_on_dispatch_job_opens_structured_detail_view` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (JobBoardState Tab)"]
-fn test_tab_repeats_only_the_market_watch() {}
+// `test_tab_repeats_only_the_market_watch` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (JobDetailState)"]
-fn test_job_detail_lines_are_reviewable_before_accepting() {}
+// `test_job_detail_lines_are_reviewable_before_accepting` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (JobDetailState)"]
-fn test_job_detail_exposes_review_instructions() {}
+// `test_job_detail_exposes_review_instructions` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (JobBoardState._locked_reason)"]
-fn test_locked_job_detail_does_not_sound_accept_available() {}
+// `test_locked_job_detail_does_not_sound_accept_available` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (JobBoardState)"]
-fn test_f1_on_back_item_does_not_crash() {}
+// `test_f1_on_back_item_does_not_crash` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (JobDetailState accept)"]
-fn test_job_detail_accept_command_accepts_and_escape_returns() {}
+// `test_job_detail_accept_command_accepts_and_escape_returns` is live in `crates/freight-fate/tests/states_city.rs`.
 
 // -- payload round trip -----------------------------------------------------------
 

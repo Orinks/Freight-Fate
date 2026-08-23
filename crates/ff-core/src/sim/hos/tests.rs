@@ -958,8 +958,13 @@ fn test_profile_persists_duty_log() {
     use crate::models::profile::{tests::with_data_dir, Profile};
     with_data_dir(|_| {
         let mut p = Profile::named("Log Driver");
-        p.duty_log
-            .record("on_duty_not_driving", 6.0, 6.25, "Chicago terminal", "pre-trip");
+        p.duty_log.record(
+            "on_duty_not_driving",
+            6.0,
+            6.25,
+            "Chicago terminal",
+            "pre-trip",
+        );
         let loaded = Profile::load(&p.save().unwrap()).unwrap();
         assert_eq!(loaded.duty_log.segments.len(), 1);
         assert_eq!(loaded.duty_log.segments[0].location, "Chicago terminal");
@@ -1058,7 +1063,10 @@ fn test_night_produces_sparser_traffic() {
     use crate::sim::weather::test_support::new_system;
     use std::sync::Arc;
 
-    let cached = get_world().route_options("Atlanta", "Dallas", 3, false).unwrap()[0].clone();
+    let cached = get_world()
+        .route_options("Atlanta", "Dallas", 3, false)
+        .unwrap()[0]
+        .clone();
     let mut detail = cached.legs[0].corridor().clone();
     detail.traffic_volumes = vec![
         TrafficVolumeSample {

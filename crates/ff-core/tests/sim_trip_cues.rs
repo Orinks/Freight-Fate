@@ -574,9 +574,9 @@ fn test_the_welcome_sign_is_deterministic_and_authored() {
     assert_eq!(welcome_sign("Atlantis", &mut PyRandom::new_from_i64(1)), "");
 }
 
-#[test]
-#[ignore = "needs sim::vehicle (the air-drain step is a private hook in the Rust port)"]
-fn test_the_horn_drains_the_air_tanks_to_the_protection_valve() {}
+// `test_the_horn_drains_the_air_tanks_to_the_protection_valve` lives in
+// `sim::vehicle`'s own tests: the air-drain step is crate-private, which an
+// integration test cannot reach.
 
 #[test]
 fn test_brake_lights_name_the_cause_when_the_road_knows_it() {

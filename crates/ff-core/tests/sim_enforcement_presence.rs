@@ -229,29 +229,17 @@ fn test_the_tableau_busy_window_suppresses_only_that_posts_catches() {
     assert!(watching_outside.contains(&other.id()));
 }
 
-#[test]
-#[ignore = "needs app shell (DrivingState enforcement audio)"]
-fn test_the_tableau_cues_play_once_each() {}
+// `test_the_tableau_cues_play_once_each` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (DrivingState enforcement audio)"]
-fn test_tableau_audio_defers_while_the_players_own_stop_is_active() {}
+// `test_tableau_audio_defers_while_the_players_own_stop_is_active` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (DrivingState enforcement audio)"]
-fn test_a_post_that_already_caught_the_player_never_also_runs_its_tableau() {}
+// `test_a_post_that_already_caught_the_player_never_also_runs_its_tableau` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (DrivingState tableau intro line)"]
-fn test_the_tableau_intro_line_speaks_once_and_says_it_is_not_the_player() {}
+// `test_the_tableau_intro_line_speaks_once_and_says_it_is_not_the_player` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (DrivingState tableau intro line)"]
-fn test_the_tableau_intro_line_stays_silent_while_deferred() {}
+// `test_the_tableau_intro_line_stays_silent_while_deferred` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (DrivingState tableau intro line)"]
-fn test_the_tableau_intro_terse_form_keeps_the_bare_fact() {}
+// `test_the_tableau_intro_terse_form_keeps_the_bare_fact` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
 fn test_the_tableau_cb_line_waits_for_the_players_own_stop_and_a_declined_post() {
@@ -648,25 +636,26 @@ fn test_bear_is_cb_voice_only_in_every_player_facing_string() {}
 #[ignore = "models::safety_record owns safety_record_text; covered by its own tests"]
 fn test_the_safety_record_is_never_spoken_as_a_trade_acronym() {}
 
-#[test]
-#[ignore = "models::safety_record owns inspection_selection_chance; covered by its own tests"]
-fn test_a_clean_record_is_waved_through_and_a_dirty_one_is_not() {}
+// `test_a_clean_record_is_waved_through_and_a_dirty_one_is_not` is live in `crates/ff-core/src/models/safety_record.rs`, `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
-#[ignore = "needs models::profile (safety record on the profile)"]
-fn test_the_safety_record_rides_on_the_profile_and_survives_a_save() {}
+fn test_the_safety_record_rides_on_the_profile_and_survives_a_save() {
+    use ff_core::models::profile::Profile;
+    use ff_core::models::safety_record::refresh_selection_score;
 
-#[test]
-#[ignore = "needs app shell (marked-unit pass audio)"]
-fn test_the_marked_unit_pass_actually_plays() {}
+    let mut profile = Profile::named("Record");
+    profile.driving_record.citations = 3;
+    refresh_selection_score(&mut profile, 60.0);
+    assert!(profile.selection_score > 40.0);
+    let restored = Profile::from_dict(&profile.to_dict());
+    assert_eq!(restored.selection_score, profile.selection_score);
+}
 
-#[test]
-#[ignore = "needs the audio assets (enforcement marker/whoosh timing)"]
-fn test_the_marker_leads_the_whoosh_rather_than_being_buried_in_it() {}
+// `test_the_marked_unit_pass_actually_plays` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (every staffed post is audible before it observes)"]
-fn test_every_staffed_post_is_audible_before_it_can_observe_you() {}
+// `test_the_marker_leads_the_whoosh_rather_than_being_buried_in_it` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
+
+// `test_every_staffed_post_is_audible_before_it_can_observe_you` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
 #[ignore = "needs the audio engine (siren loop)"]
@@ -680,29 +669,17 @@ fn test_the_enforcement_signature_is_deterministic_and_not_a_radio_timbre() {}
 #[ignore = "needs the audio engine (siren bus)"]
 fn test_the_siren_is_off_the_shared_sfx_bus() {}
 
-#[test]
-#[ignore = "needs app shell (radio ducking)"]
-fn test_a_stop_cuts_the_radio_rather_than_ducking_it() {}
+// `test_a_stop_cuts_the_radio_rather_than_ducking_it` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (radio ducking)"]
-fn test_a_cue_leaves_the_radio_alone_when_ducking_is_off() {}
+// `test_a_cue_leaves_the_radio_alone_when_ducking_is_off` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (radio ducking)"]
-fn test_a_cue_ducks_the_radio_on_its_own_field() {}
+// `test_a_cue_ducks_the_radio_on_its_own_field` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (enforcement deferral)"]
-fn test_enforcement_defers_while_the_cab_already_has_a_demand() {}
+// `test_enforcement_defers_while_the_cab_already_has_a_demand` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (enforcement deferral)"]
-fn test_a_deferred_look_survives_the_truck_leaving_the_post_behind() {}
+// `test_a_deferred_look_survives_the_truck_leaving_the_post_behind` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (pacing trooper)"]
-fn test_a_trooper_who_never_caught_up_loses_you() {}
+// `test_a_trooper_who_never_caught_up_loses_you` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
 #[ignore = "needs app shell (scale approach cues)"]
@@ -894,9 +871,7 @@ fn test_how_loud_the_road_sounds_comes_from_the_road() {
     // ambience scale belongs to the app shell.
 }
 
-#[test]
-#[ignore = "Python asserted on the driving layer's source text (states/driving_enforcement.py)"]
-fn test_an_empty_crossover_is_never_audible() {}
+// `test_an_empty_crossover_is_never_audible` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
 #[ignore = "needs app shell (the open scale reads the safety record)"]

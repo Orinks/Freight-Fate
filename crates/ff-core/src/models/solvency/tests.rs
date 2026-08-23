@@ -319,12 +319,7 @@ fn test_no_advance_while_a_balance_is_already_being_collected() {
     assert!(reason.contains("three quarters")); // and what they do still get
 }
 
-#[test]
-#[ignore = "needs states::city (CityMenuState) and the app shell"]
-fn test_the_terminal_stops_offering_an_advance_under_collection() {
-    // The terminal's pay-advance item disappears once fines_owed is being
-    // collected.
-}
+// `test_the_terminal_stops_offering_an_advance_under_collection` is live in `crates/freight-fate/tests/states_city.rs`.
 
 // --- the two big moments are reviewable, not one-shot ----------------------
 
@@ -357,12 +352,7 @@ fn test_the_notice_survives_a_save_and_reload() {
     assert_eq!(again.record().setback_notice_kind, "");
 }
 
-#[test]
-#[ignore = "needs states::city and the app shell"]
-fn test_a_setback_only_ever_fires_at_the_terminal() {
-    // Walking into the terminal fires the notice ahead of everything else;
-    // nothing on the driving side takes the seat.
-}
+// `test_a_setback_only_ever_fires_at_the_terminal` is live in `crates/freight-fate/tests/states_city.rs`.
 
 // --- a level-up must not promise a truck the yard is withholding -----------
 
@@ -370,9 +360,23 @@ fn test_a_setback_only_ever_fires_at_the_terminal() {
 #[ignore = "needs models::carrier_fleet and states::driving_menu_states"]
 fn test_a_level_up_does_not_promise_iron_the_yard_is_holding_back() {}
 
+/// No fuel, no reset wear, no wash: nothing changed hands.
 #[test]
-#[ignore = "needs models::carrier_fleet (withheld_promotion_text)"]
-fn test_a_withheld_promotion_does_not_hand_over_a_freshly_serviced_truck() {}
+fn test_a_withheld_promotion_does_not_hand_over_a_freshly_serviced_truck() {
+    use crate::models::carrier_fleet::withheld_promotion_text;
+    use crate::models::profile::Profile;
+
+    let mut p = Profile::named("Dale");
+    p.current_city = "Buffalo".to_string();
+    p.career.xp = 152_000.0;
+    p.money = -5_000.0;
+    let text = withheld_promotion_text(&p);
+    assert!(text.contains("exactly as it stands"), "{text}");
+    assert!(
+        !text.contains("fueled") && !text.contains("washed"),
+        "{text}"
+    );
+}
 
 // --- out-of-pocket payoff helpers -------------------------------------------
 
@@ -489,21 +493,13 @@ fn test_debt_lines_point_at_out_of_pocket_payoff_when_hard_capped() {
 
 // --- the terminal menu item and PayDebtState --------------------------------
 
-#[test]
-#[ignore = "needs states::city (CityMenuState) and the app shell"]
-fn test_the_terminal_only_offers_payoff_when_something_is_owed() {}
+// `test_the_terminal_only_offers_payoff_when_something_is_owed` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs states::city (PayDebtState) and the app shell"]
-fn test_paying_it_all_off_clears_the_balance_and_says_so() {}
+// `test_paying_it_all_off_clears_the_balance_and_says_so` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs states::city (PayDebtState) and the app shell"]
-fn test_paying_it_all_off_speaks_the_clear_confirmation_last() {}
+// `test_paying_it_all_off_speaks_the_clear_confirmation_last` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs states::city (PayDebtState) and the app shell"]
-fn test_paying_half_leaves_the_rest_owed_and_says_the_remainder() {}
+// `test_paying_half_leaves_the_rest_owed_and_says_the_remainder` is live in `crates/freight-fate/tests/states_city.rs`.
 
 // --- the same payoff item at truck stops -------------------------------------
 

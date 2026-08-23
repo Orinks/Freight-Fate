@@ -403,10 +403,16 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs data::world (every world city resolves to a CONUS zone)"]
     fn test_every_world_city_resolves_to_a_conus_zone() {
-        // TODO(port): for every world city, zone_for(lat, lon, state) is one
-        // of EASTERN/CENTRAL/MOUNTAIN/PACIFIC.
+        let world = crate::data::world::World::load().expect("the shipped world loads");
+        for (key, city) in world.cities.iter() {
+            let zone = zone_for(city.lat, city.lon, &city.state);
+            assert!(
+                [EASTERN, CENTRAL, MOUNTAIN, PACIFIC].contains(&zone),
+                "{key} in {} landed outside the CONUS zones",
+                city.state
+            );
+        }
     }
 
     struct Place {
@@ -694,8 +700,8 @@ mod tests {
     fn test_boundary_zigzag_is_not_a_crossing() {
         // A road that pokes over the line and comes back within the dwell
         // window must not move the clock at all.
-        let leg = Leg::new("A", "B", 60.0, "I-40", "hills", Vec::new()).with_detail(
-            CorridorDetail {
+        let leg =
+            Leg::new("A", "B", 60.0, "I-40", "hills", Vec::new()).with_detail(CorridorDetail {
                 state_miles: vec![StateMileage::new("Tennessee", 60.0)],
                 route_points: vec![
                     rp(0.0, 35.96, -83.92),
@@ -704,8 +710,7 @@ mod tests {
                     rp(60.0, 35.96, -84.50),
                 ],
                 ..Default::default()
-            },
-        );
+            });
         let trip = trip(ab(leg), 12.0);
         assert!(trip.timezone_crossings.is_empty());
         assert_eq!(trip.destination_timezone(), EASTERN);
@@ -717,7 +722,10 @@ mod tests {
     fn test_deadline_reads_in_the_destination_zone() {
         let trip = trip(ab(tennessee_leg()), 12.0);
         assert_eq!(trip.deadline_clock_text(10.0, None), "9 PM Central Time");
-        assert_eq!(trip.deadline_clock_text(20.0, None), "7 AM Central Time tomorrow");
+        assert_eq!(
+            trip.deadline_clock_text(20.0, None),
+            "7 AM Central Time tomorrow"
+        );
     }
 
     #[test]

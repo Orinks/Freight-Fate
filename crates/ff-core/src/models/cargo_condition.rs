@@ -235,6 +235,10 @@ mod tests {
     //! screen, snapshot and settlement lines to the driving states.
 
     use super::*;
+    use crate::sim::vehicle::{
+        TruckState, CARGO_ADVISORY_LAT_G, CARGO_CORNER_LAT_G, CARGO_HARD_BRAKE_G,
+        EMERGENCY_BRAKE_MULT,
+    };
 
     struct FakeCargo {
         key: &'static str,
@@ -371,55 +375,174 @@ mod tests {
         assert_eq!(settled.condition_pct, 90.0);
     }
 
-    // -- meter, cues, status, snapshot, settlement lines ---------------------
+    // -- the meter (TruckState._update_cargo) --------------------------------
+
+    const MPS_PER_MPH: f64 = 1.0 / 2.23694;
+
+    /// A bend's radius, in feet, for a given lateral pull at a given speed --
+    /// the inverse of what the model computes, so a test can ask for "0.1 g
+    /// over the threshold" without hand-solving the geometry each time.
+    fn radius_for(mph: f64, lateral_g: f64) -> f64 {
+        let mps = mph * MPS_PER_MPH;
+        mps * mps / (lateral_g * 9.81) / 0.3048
+    }
+
+    fn loaded(mph: f64) -> TruckState {
+        TruckState {
+            trailer_attached: true,
+            cargo_kg: 12_000.0,
+            velocity_mps: mph * MPS_PER_MPH,
+            ..TruckState::default()
+        }
+    }
 
     #[test]
-    #[ignore = "needs sim::vehicle (TruckState._update_cargo)"]
-    fn test_gentle_driving_never_touches_the_load() {}
+    fn test_gentle_driving_never_touches_the_load() {
+        let mut t = loaded(60.0);
+        for _ in 0..600 {
+            t.update_cargo(1.0 / 60.0, CARGO_HARD_BRAKE_G - 0.05);
+        }
+        assert_eq!(t.cargo_damage_pct, 0.0);
+    }
 
     #[test]
-    #[ignore = "needs sim::vehicle (TruckState._update_cargo)"]
-    fn test_hard_braking_shifts_the_load() {}
+    fn test_hard_braking_shifts_the_load() {
+        let mut t = loaded(60.0);
+        for _ in 0..120 {
+            t.update_cargo(1.0 / 60.0, CARGO_HARD_BRAKE_G + 0.3);
+        }
+        assert!(t.cargo_damage_pct > 0.0);
+    }
+
+    /// Securement is rated past what the brakes can produce (49 CFR 393.102).
+    ///
+    /// A stop at everything the service brakes have -- which is what a
+    /// startled driver makes several times a run -- used to put general
+    /// freight over the exception line on its own, and fragile freight into
+    /// claim territory.
+    #[test]
+    fn test_a_full_service_stop_does_not_hurt_a_secured_load() {
+        let mut t = loaded(65.0);
+        let peak = t.specs.max_brake_decel_g;
+        assert!(peak < CARGO_HARD_BRAKE_G); // the premise: brakes cannot reach it
+        for _ in 0..600 {
+            t.update_cargo(1.0 / 60.0, peak);
+        }
+        assert_eq!(t.cargo_damage_pct, 0.0);
+    }
+
+    /// Full service plus the spring brakes is past what securement holds.
+    #[test]
+    fn test_an_emergency_application_does_reach_the_freight() {
+        let mut t = loaded(65.0);
+        let emergency_g = t.specs.max_brake_decel_g * EMERGENCY_BRAKE_MULT;
+        assert!(emergency_g > CARGO_HARD_BRAKE_G);
+        for _ in 0..300 {
+            t.update_cargo(1.0 / 60.0, emergency_g);
+        }
+        assert!(t.cargo_damage_pct > 0.0);
+    }
+
+    /// The break harness found a hairpin at 45 over doing nothing at all.
+    #[test]
+    fn test_a_bend_taken_well_over_its_advisory_costs_the_freight() {
+        let mut t = loaded(75.0);
+        t.corner_radius_ft = radius_for(30.0, CARGO_CORNER_LAT_G); // a 30 mph bend
+        for _ in 0..120 {
+            t.update_cargo(1.0 / 60.0, 0.0);
+        }
+        assert!(t.cargo_damage_pct > 0.0);
+    }
 
     #[test]
-    #[ignore = "needs sim::vehicle (TruckState._update_cargo)"]
-    fn test_a_full_service_stop_does_not_hurt_a_secured_load() {}
+    fn test_a_bend_taken_at_its_advisory_is_free() {
+        let mut t = loaded(45.0);
+        // A bend signed for 45: the shipped advisories sit below the threshold.
+        t.corner_radius_ft = radius_for(45.0, CARGO_ADVISORY_LAT_G);
+        for _ in 0..600 {
+            t.update_cargo(1.0 / 60.0, 0.0);
+        }
+        assert_eq!(t.cargo_damage_pct, 0.0);
+    }
+
+    /// The realism bug the playtest bench caught: the ranking was inverted.
+    ///
+    /// A hairpin and a sweeper taken the same mph over their advisories are
+    /// not the same manoeuvre -- the hairpin throws the load half again as
+    /// hard -- but the old model read raw mph over the sign and charged the
+    /// hairpin less.
+    #[test]
+    fn test_the_tighter_bend_costs_more_at_the_same_margin_over_its_sign() {
+        let mut costs = Vec::new();
+        for advisory in [30.0_f64, 55.0] {
+            let mut t = loaded(advisory + 15.0);
+            t.corner_radius_ft = radius_for(advisory, CARGO_ADVISORY_LAT_G);
+            for _ in 0..120 {
+                t.update_cargo(1.0 / 60.0, 0.0);
+            }
+            costs.push(t.cargo_damage_pct);
+        }
+        let (hairpin, sweeper) = (costs[0], costs[1]);
+        assert!(hairpin > sweeper && sweeper > 0.0);
+    }
+
+    /// A gap in the map must not read as a straight road.
+    #[test]
+    fn test_a_bend_without_a_baked_radius_falls_back_on_its_advisory() {
+        let mut t = loaded(60.0);
+        t.corner_radius_ft = 0.0;
+        t.corner_advisory_mph = 30.0;
+        assert!(t.corner_lateral_g() > CARGO_CORNER_LAT_G);
+        for _ in 0..120 {
+            t.update_cargo(1.0 / 60.0, 0.0);
+        }
+        assert!(t.cargo_damage_pct > 0.0);
+    }
 
     #[test]
-    #[ignore = "needs sim::vehicle (TruckState._update_cargo)"]
-    fn test_an_emergency_application_does_reach_the_freight() {}
+    fn test_a_straight_road_pulls_nothing_sideways() {
+        let t = loaded(70.0);
+        assert_eq!(t.corner_lateral_g(), 0.0);
+    }
 
     #[test]
-    #[ignore = "needs sim::vehicle (TruckState._update_cargo)"]
-    fn test_a_bend_taken_well_over_its_advisory_costs_the_freight() {}
+    fn test_fragile_freight_degrades_faster_than_general() {
+        let mut rates = Vec::new();
+        for (key, fragile) in [("general", false), ("electronics", true)] {
+            let mut t = loaded(50.0);
+            t.cargo_fragility = cargo_fragility_for(key, fragile);
+            t.corner_radius_ft = radius_for(30.0, CARGO_ADVISORY_LAT_G);
+            for _ in 0..120 {
+                t.update_cargo(1.0 / 60.0, 0.0);
+            }
+            rates.push(t.cargo_damage_pct);
+        }
+        assert!(rates[1] > rates[0] * 2.0);
+    }
 
     #[test]
-    #[ignore = "needs sim::vehicle (TruckState._update_cargo)"]
-    fn test_a_bend_taken_at_its_advisory_is_free() {}
+    fn test_an_empty_trailer_has_nothing_to_damage() {
+        let mut t = TruckState {
+            cargo_kg: 0.0,
+            velocity_mps: 60.0 * MPS_PER_MPH,
+            corner_radius_ft: radius_for(25.0, CARGO_ADVISORY_LAT_G),
+            ..TruckState::default()
+        };
+        for _ in 0..120 {
+            t.update_cargo(1.0 / 60.0, 1.0);
+        }
+        assert_eq!(t.cargo_damage_pct, 0.0);
+        assert_eq!(t.add_cargo_damage(50.0), 0.0);
+    }
 
     #[test]
-    #[ignore = "needs sim::vehicle (TruckState._update_cargo)"]
-    fn test_the_tighter_bend_costs_more_at_the_same_margin_over_its_sign() {}
+    fn test_a_collision_goes_through_the_freight_too() {
+        let mut t = loaded(50.0);
+        t.apply_collision(0.7, true);
+        assert!(t.cargo_damage_pct > 0.0);
+    }
 
-    #[test]
-    #[ignore = "needs sim::vehicle (TruckState.corner_lateral_g)"]
-    fn test_a_bend_without_a_baked_radius_falls_back_on_its_advisory() {}
-
-    #[test]
-    #[ignore = "needs sim::vehicle (TruckState.corner_lateral_g)"]
-    fn test_a_straight_road_pulls_nothing_sideways() {}
-
-    #[test]
-    #[ignore = "needs sim::vehicle and models::jobs (CARGO_CATALOG)"]
-    fn test_fragile_freight_degrades_faster_than_general() {}
-
-    #[test]
-    #[ignore = "needs sim::vehicle (TruckState.add_cargo_damage)"]
-    fn test_an_empty_trailer_has_nothing_to_damage() {}
-
-    #[test]
-    #[ignore = "needs sim::vehicle (TruckState.apply_collision)"]
-    fn test_a_collision_goes_through_the_freight_too() {}
+    // -- cues, status, snapshot, settlement lines -----------------------------
 
     #[test]
     #[ignore = "needs states::driving (_update_cargo_condition) and the app shell"]

@@ -102,42 +102,13 @@ fn test_owner_operator_objective_emphasizes_working_capital() {
     assert!(objective.dispatch_text.contains("take-home"));
 }
 
-#[test]
-#[ignore = "needs freight_fate::app (App, CityMenuState)"]
-fn test_terminal_career_plan_is_keyboard_reachable_and_spoken() {
-    // On entering CityMenuState: something spoken contains "Career objective:",
-    // a "Career plan" item exists; DOWN then RETURN speaks a line starting
-    // "First dispatch." containing "short standard load".
-    unimplemented!("needs the app shell")
-}
+// `test_terminal_career_plan_is_keyboard_reachable_and_spoken` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs freight_fate::app (App, CityMenuState)"]
-fn test_terminal_career_plan_speaks_senior_company_level_guidance() {
-    // Level 10, 20 deliveries, reputation 86: the Career plan item speaks a
-    // line starting "Run like a senior company driver." with "premium lanes",
-    // "premium freight" and "Senior company status is about consistency".
-    unimplemented!("needs the app shell")
-}
+// `test_terminal_career_plan_speaks_senior_company_level_guidance` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs freight_fate::app (App, JobBoardState)"]
-fn test_dispatch_board_speaks_objective_and_marks_recommended_job() {
-    // Senior company driver on a two-job board: the entry announcement names
-    // "Career objective: Run like a senior company driver", "pick your own
-    // loads", "routing is still assigned", and the shorter job is marked
-    // "Recommended dispatch, senior company lane: Job 2 of 2:".
-    unimplemented!("needs the app shell")
-}
+// `test_dispatch_board_speaks_objective_and_marks_recommended_job` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs freight_fate::app (App, JobBoardState)"]
-fn test_dispatch_board_speaks_authority_level_recommendation() {
-    // Independent authority at level 25: the board entry names "Career
-    // objective: Grow a freight business", "direct freight" and "direct
-    // freight with margin".
-    unimplemented!("needs the app shell")
-}
+// `test_dispatch_board_speaks_authority_level_recommendation` is live in `crates/freight-fate/tests/states_city.rs`.
 
 #[test]
 fn test_late_company_driver_plan_points_to_owner_operator_prep() {
@@ -158,40 +129,13 @@ fn test_late_company_driver_plan_points_to_owner_operator_prep() {
     );
 }
 
-#[test]
-#[ignore = "needs freight_fate::app (App, CityMenuState)"]
-fn test_first_day_terminal_entry_speaks_training_arc_without_tutorial_language() {
-    // A fresh profile's city-menu entry names "First-day objective" and
-    // "trainer-recommended" and never "probation".
-    unimplemented!("needs the app shell")
-}
+// `test_first_day_terminal_entry_speaks_training_arc_without_tutorial_language` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs freight_fate::app (App, CityMenuState)"]
-fn test_out_of_sync_company_terminal_entry_uses_first_week_guidance() {
-    // One delivery, no first_dispatch badge: the entry says "Career
-    // objective:" (not "First-day objective"), "steady service, not
-    // perfection", "good first-week run", "trainer notes still close by";
-    // the menu lists "Career plan" and not "First-day briefing".
-    unimplemented!("needs the app shell")
-}
+// `test_out_of_sync_company_terminal_entry_uses_first_week_guidance` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs freight_fate::app (App, JobBoardState)"]
-fn test_dispatch_board_recommendation_label_is_spoken_and_visible() {
-    // Senior company driver, two jobs where the first is recommended: the
-    // entry announcement and item 0 start "Recommended dispatch, senior
-    // company lane: Job 1 of 2:" and the label is never doubled.
-    unimplemented!("needs the app shell")
-}
+// `test_dispatch_board_recommendation_label_is_spoken_and_visible` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs freight_fate::app (App, CityMenuState)"]
-fn test_owner_operator_first_day_terminal_keeps_cash_cushion_guidance() {
-    // Leased owner-operator on day one: "First-day objective" with "cash
-    // cushion" and never "trainer-recommended".
-    unimplemented!("needs the app shell")
-}
+// `test_owner_operator_first_day_terminal_keeps_cash_cushion_guidance` is live in `crates/freight-fate/tests/states_city.rs`.
 
 #[test]
 #[ignore = "needs freight_fate::app (App, CityMenuState, JobBoardState)"]
@@ -202,14 +146,7 @@ fn test_out_of_sync_owner_operator_uses_career_guidance() {
     unimplemented!("needs the app shell")
 }
 
-#[test]
-#[ignore = "needs freight_fate::app (App, JobBoardState)"]
-fn test_owner_operator_first_day_dispatch_board_keeps_business_cost_guidance() {
-    // Owner-operator day-one board: "owner-operator gross revenue", "cash
-    // cushion", no "trainer-recommended", item 0 starts "Job 1 of 2:" and no
-    // item starts "Recommended dispatch, trainer-recommended:".
-    unimplemented!("needs the app shell")
-}
+// `test_owner_operator_first_day_dispatch_board_keeps_business_cost_guidance` is live in `crates/freight-fate/tests/states_city.rs`.
 
 // --- the owner-operator and authority branches the Python suite reaches
 // --- only through the app shell -----------------------------------------------

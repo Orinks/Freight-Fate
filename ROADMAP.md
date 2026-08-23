@@ -147,6 +147,24 @@ onto exit signalling.
       runner has nothing to link against and nothing to load. Vendor each
       platform's libraries before adding its runner.
 
+- [x] **Rust port: the validator invariants export has a shipped code path
+      (`ff-invariants`, 2026-08-22).** The Rust half of
+      `tools/export_profile_integrity_invariants.py`, argument for argument
+      (`<output>`, `--check`): `CatalogInputs::current()` assembles the
+      export from the live catalogs -- achievements, the XP and level
+      curves, start options, truck and upgrade prices, the profile and
+      career field lists, the endorsement and fleet-tier tables, and the
+      condition record `fresh_condition()` actually writes -- and the binary
+      renders it. Before this, nothing in the tree built a `CatalogInputs`
+      from the shipped catalogs at all; the only caller was a test fixture,
+      so four of the ported tests were measuring the fixture rather than the
+      game. The two exporters now produce byte-identical JSON, pinned
+      against a committed copy of the Python output in
+      `crates/ff-core/tests/profile_integrity_export.rs`. Left to do: wire
+      the export (or its `--check`) into `tools/build_release.py --rust` and
+      the Rust CI job, so a balance pass that moves a curve cannot ship
+      before orinks.net has the new file.
+
 - [ ] **Clean the workspace for the new gates.** Both fail on `ff-core`
       alone today, before `freight-fate` is even reached.
       `cargo fmt --all` fixes 74 hunks across 11 files (weather, timezones,

@@ -344,13 +344,58 @@ fn test_old_nws_observation_timestamp_is_never_treated_as_live() {
     assert_eq!(p.get("route-cell"), None);
 }
 
+/// One dropped request at a route-cell boundary must never simulate.
+///
+/// The truck crosses into a fresh 20-mile cell, that cell's first fetch
+/// fails, and the previous cell's live conditions are seconds old: the
+/// weather holds them as last-known and retries -- it does not flip to
+/// simulated fallback while NWS is fine (owner ruling, 2026-08-08).
 #[test]
-#[ignore = "needs sim::weather (WeatherSystem holds last-known conditions)"]
-fn test_new_cell_fetch_failure_holds_last_known_not_fallback() {}
+fn test_new_cell_fetch_failure_holds_last_known_not_fallback() {
+    use crate::sim::weather::WeatherSystem;
+
+    let boom = Arc::new(StdMutex::new(false));
+    let armed = Arc::clone(&boom);
+    let provider = sync_provider(Arc::new(move |_, _| {
+        if *armed.lock().unwrap() {
+            return Err("transient".to_string());
+        }
+        Ok(obs("Heavy Rain", 5.0, Some(12.0), Some(1.0)).observed_at(2_000_000.0))
+    }))
+    .with_clock(fixed(0.0))
+    .with_wall_clock(fixed(2_000_000.0));
+
+    let mut weather =
+        WeatherSystem::new("great_lakes", Some(1), Some(Box::new(provider)), None, true);
+    weather.set_city("cell-0", 40.0, -80.0);
+    weather.update(0.0);
+    assert_eq!(weather.source_status(), "live");
+    assert_eq!(weather.current, WeatherKind::HeavyRain);
+
+    *boom.lock().unwrap() = true;
+    weather.set_city("cell-1", 41.0, -81.0);
+    weather.update(0.0);
+    assert_eq!(weather.source_status(), "last_known");
+    assert_eq!(weather.current, WeatherKind::HeavyRain); // held, not resimulated
+                                                         // And it stays held on later ticks rather than drifting to fallback.
+    weather.update(1.0);
+    assert_eq!(weather.source_status(), "last_known");
+    assert_eq!(weather.current, WeatherKind::HeavyRain);
+}
 
 #[test]
-#[ignore = "needs sim::weather (WeatherSystem fallback)"]
-fn test_cold_session_with_failing_provider_still_reaches_fallback() {}
+fn test_cold_session_with_failing_provider_still_reaches_fallback() {
+    use crate::sim::weather::WeatherSystem;
+
+    let provider = sync_provider(Arc::new(|_, _| Err("offline".to_string())))
+        .with_clock(fixed(0.0))
+        .with_wall_clock(fixed(2_000_000.0));
+    let mut weather =
+        WeatherSystem::new("great_lakes", Some(1), Some(Box::new(provider)), None, true);
+    weather.set_city("cell-0", 40.0, -80.0);
+    weather.update(0.0);
+    assert_eq!(weather.source_status(), "fallback");
+}
 
 #[test]
 fn test_expired_observation_retries_then_recovers_to_live_weather() {
@@ -580,42 +625,231 @@ fn test_provider_temperature_none_when_station_omits_it() {
 }
 
 #[test]
-#[ignore = "needs sim::weather (WeatherSystem.describe)"]
-fn test_weather_system_reports_real_observed_temperature() {}
+fn test_weather_system_reports_real_observed_temperature() {
+    use crate::sim::weather::WeatherSystem;
+
+    // A live provider with a real reading: the system reports the station's
+    // temperature, not the seasonal climate model.
+    let provider = sync_provider(Arc::new(|_, _| {
+        Ok(obs("Clear", 0.0, Some(2.0), Some(10.0))) // 2 C real
+    }));
+    let mut ws = WeatherSystem::new("great_lakes", Some(1), Some(Box::new(provider)), None, true);
+    ws.set_city("Chicago", 41.88, -87.63);
+    ws.update(1.0);
+    assert!(ws.live);
+    assert_eq!(ws.temperature_c(), Some(2.0));
+    // 2 C -> 35.6 F -> "36"
+    assert!(ws.describe(true, false).contains("36 degrees"));
+}
 
 #[test]
-#[ignore = "needs sim::weather (WeatherSystem.report_lead / source_conditions)"]
-fn test_live_report_omits_modeled_temperature_when_observation_has_none() {}
+fn test_live_report_omits_modeled_temperature_when_observation_has_none() {
+    use crate::sim::weather::{WeatherProvider, WeatherSystem};
+
+    struct ConditionsOnly;
+    impl WeatherProvider for ConditionsOnly {
+        fn request(&mut self, _city: &str, _lat: f64, _lon: f64) {}
+        fn get(&mut self, _city: &str) -> Option<WeatherKind> {
+            Some(WeatherKind::HeavyRain)
+        }
+    }
+
+    let mut ws = WeatherSystem::new(
+        "desert_southwest",
+        Some(1),
+        Some(Box::new(ConditionsOnly)),
+        None,
+        true,
+    );
+    ws.set_city("route-cell", 33.45, -112.07);
+    ws.update(1.0);
+
+    assert_eq!(ws.source_status(), "live");
+    // The seasonal model remains available to mechanics.
+    assert!(ws.temperature_c().is_some());
+    assert!(!ws.report_lead(true).contains("degrees"));
+    assert!(!ws.source_conditions(true).contains("degrees"));
+    assert!(!ws.source_conditions(true).contains("visibility"));
+    assert!(!ws.source_conditions(true).contains("slick roads"));
+}
 
 // -- weather system integration ------------------------------------------------
 
 #[test]
-#[ignore = "needs sim::weather (WeatherSystem)"]
-fn test_weather_system_applies_live_conditions() {}
+fn test_weather_system_applies_live_conditions() {
+    use crate::sim::weather::WeatherSystem;
+
+    let provider = sync_provider(Arc::new(|_, _| {
+        Ok(obs("Heavy Rain", 5.0, Some(18.0), Some(1.5)))
+    }));
+    let mut ws = WeatherSystem::new(
+        "desert_southwest",
+        Some(1),
+        Some(Box::new(provider)),
+        None,
+        true,
+    );
+    ws.set_city("Phoenix", 33.45, -112.07);
+    let changed = ws.update(1.0);
+    assert!(ws.live);
+    assert_eq!(ws.current, WeatherKind::HeavyRain);
+    assert_eq!(changed, Some(WeatherKind::HeavyRain));
+    // Stable live data: no further changes, simulation stays paused.
+    for _ in 0..100 {
+        assert_eq!(ws.update(30.0), None);
+    }
+    assert_eq!(ws.current, WeatherKind::HeavyRain);
+}
 
 #[test]
-#[ignore = "needs sim::weather (WeatherSystem)"]
-fn test_late_observation_for_previous_route_cell_cannot_replace_current_cell() {}
+fn test_late_observation_for_previous_route_cell_cannot_replace_current_cell() {
+    use crate::sim::weather::{WeatherProvider, WeatherSystem};
+
+    type CellConditions = Arc<StdMutex<Vec<(&'static str, Option<WeatherKind>)>>>;
+    struct LocationProvider {
+        data: CellConditions,
+    }
+    impl WeatherProvider for LocationProvider {
+        fn request(&mut self, _city: &str, _lat: f64, _lon: f64) {}
+        fn get(&mut self, city: &str) -> Option<WeatherKind> {
+            self.data
+                .lock()
+                .unwrap()
+                .iter()
+                .find(|(k, _)| *k == city)
+                .and_then(|(_, v)| *v)
+        }
+    }
+
+    let data = Arc::new(StdMutex::new(vec![
+        ("cell-a", None),
+        ("cell-b", Some(WeatherKind::Rain)),
+    ]));
+    let mut ws = WeatherSystem::new(
+        "great_lakes",
+        Some(1),
+        Some(Box::new(LocationProvider {
+            data: Arc::clone(&data),
+        })),
+        None,
+        true,
+    );
+    ws.set_city("cell-a", 41.0, -87.0);
+    ws.update(0.0);
+    ws.set_city("cell-b", 40.0, -86.0);
+    ws.update(0.0);
+    assert_eq!(ws.current, WeatherKind::Rain);
+
+    data.lock().unwrap()[0].1 = Some(WeatherKind::HeavyRain);
+    ws.update(0.0);
+    assert_eq!(ws.city.as_deref(), Some("cell-b"));
+    assert_eq!(ws.current, WeatherKind::Rain);
+}
+
+/// The calendar toggle must not restart the simulated transition timer.
+///
+/// Live weather may change when the provider's observation or target city
+/// changes, but it must not wander from rain to heavy rain or fog on its own.
+#[test]
+fn test_live_conditions_do_not_evolve_simulated_weather_with_independent_calendar() {
+    use crate::sim::weather::WeatherSystem;
+
+    let provider = sync_provider(Arc::new(|_, _| Ok(obs("Rain", 5.0, Some(18.0), Some(5.0)))));
+    let mut ws = WeatherSystem::new(
+        "great_lakes",
+        Some(2),
+        Some(Box::new(provider)),
+        Some(100.0),
+        false,
+    );
+    ws.set_city("Chicago", 41.88, -87.63);
+    ws.update(1.0);
+    assert!(ws.live);
+    // With the career calendar independent of the live feed, precipitation is
+    // reconciled to the career season: live rain in a freezing Great Lakes
+    // window lands as freezing rain. What matters here is that it settles once
+    // and then holds -- it must not wander on its own.
+    assert_eq!(ws.current, WeatherKind::Ice);
+    assert_eq!(
+        ws.source_conditions(true),
+        "observation rain, 64 degrees; treated as freezing rain for driving"
+    );
+    assert!(ws.report_lead(true).starts_with(
+        "Live weather: observation rain, 64 degrees; treated as freezing rain for driving"
+    ));
+
+    for _ in 0..200 {
+        assert_eq!(ws.update(30.0), None);
+    }
+    assert_eq!(ws.current, WeatherKind::Ice);
+}
+
+/// With a provider attached, weather starts clear and holds -- no simulated
+/// warm-up -- until live data (or a confirmed offline state) arrives.
+#[test]
+fn test_weather_system_holds_clear_while_live_data_pending() {
+    use crate::sim::weather::{WeatherProvider, WeatherSystem};
+
+    struct Pending;
+    impl WeatherProvider for Pending {
+        fn request(&mut self, _city: &str, _lat: f64, _lon: f64) {}
+        fn get(&mut self, _city: &str) -> Option<WeatherKind> {
+            None
+        }
+        fn unavailable(&mut self, _city: &str) -> bool {
+            false // still fetching, not offline
+        }
+    }
+
+    let mut ws = WeatherSystem::new(
+        "pacific_northwest",
+        Some(1),
+        Some(Box::new(Pending)),
+        None,
+        true,
+    );
+    ws.set_city("Seattle", 47.61, -122.33);
+    assert_eq!(ws.current, WeatherKind::Clear);
+    for _ in 0..200 {
+        // no simulated transitions while pending
+        assert_eq!(ws.update(30.0), None);
+    }
+    assert_eq!(ws.current, WeatherKind::Clear);
+    assert!(!ws.live);
+}
 
 #[test]
-#[ignore = "needs sim::weather (WeatherSystem)"]
-fn test_live_conditions_do_not_evolve_simulated_weather_with_independent_calendar() {}
+fn test_weather_system_falls_back_when_offline() {
+    use crate::sim::weather::WeatherSystem;
+
+    let provider = sync_provider(Arc::new(|_, _| Err("offline".to_string())));
+    let mut ws = WeatherSystem::new("great_lakes", Some(2), Some(Box::new(provider)), None, true);
+    ws.set_city("Chicago", 41.88, -87.63);
+    let changes: Vec<Option<WeatherKind>> = (0..200).map(|_| ws.update(15.0)).collect();
+    assert!(!ws.live);
+    // simulated weather still evolves
+    assert!(changes.iter().any(|c| c.is_some()));
+}
 
 #[test]
-#[ignore = "needs sim::weather (WeatherSystem)"]
-fn test_weather_system_holds_clear_while_live_data_pending() {}
+fn test_weather_system_without_provider_unchanged() {
+    use crate::sim::weather::WeatherSystem;
+
+    let mut ws = WeatherSystem::new("great_lakes", Some(3), None, None, true);
+    ws.update(1.0);
+    assert!(!ws.live);
+}
 
 #[test]
-#[ignore = "needs sim::weather (WeatherSystem)"]
-fn test_weather_system_falls_back_when_offline() {}
-
-#[test]
-#[ignore = "needs sim::weather (WeatherSystem)"]
-fn test_weather_system_without_provider_unchanged() {}
-
-#[test]
-#[ignore = "needs data::world (the world fixture)"]
-fn test_world_cities_have_coordinates() {}
+fn test_world_cities_have_coordinates() {
+    let world = crate::data::world::World::load().expect("the shipped world loads");
+    for city in world.cities.values() {
+        assert!(city.lat != 0.0, "{} missing latitude", city.name);
+        assert!(city.lon != 0.0, "{} missing longitude", city.name);
+        assert!(city.lat > 24.0 && city.lat < 50.0);
+        assert!(city.lon > -125.0 && city.lon < -66.0);
+    }
+}
 
 // -- the station walk (monkeypatched _get_json in Python; a table transport here)
 

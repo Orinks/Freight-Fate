@@ -131,21 +131,15 @@ fn test_cb_radio_post_warning_only_fires_once() {
 
 // --- driving-side: catching the speeder (app shell) -------------------------
 
-#[test]
-#[ignore = "needs app shell (DrivingState pull-over)"]
-fn test_speeding_past_a_staffed_post_starts_a_pull_over() {}
+// `test_speeding_past_a_staffed_post_starts_a_pull_over` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
 #[ignore = "needs app shell (DrivingState pull-over)"]
 fn test_metric_pull_over_announcement_uses_metric_units() {}
 
-#[test]
-#[ignore = "needs app shell (DrivingState pull-over)"]
-fn test_speeding_with_no_post_watching_costs_nothing() {}
+// `test_speeding_with_no_post_watching_costs_nothing` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
-#[test]
-#[ignore = "needs app shell (DrivingState pull-over)"]
-fn test_debug_off_mode_never_pulls_you_over() {}
+// `test_debug_off_mode_never_pulls_you_over` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.
 
 #[test]
 #[ignore = "needs app shell (DrivingState pull-over)"]

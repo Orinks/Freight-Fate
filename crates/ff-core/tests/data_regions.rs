@@ -50,11 +50,29 @@ fn test_reno_is_great_basin_not_rockies() {
     assert_eq!(world.cities["boise_id_us"].region, "great_basin");
 }
 
+/// The REGION_MARKET_TAGS and REGION_LABELS halves are checked inline in
+/// `regions.rs`; these two tables belong to other modules.
 #[test]
-#[ignore = "needs sim::weather::REGION_WEIGHTS and models::economy::REGION_FUEL_PRICE"]
 fn test_every_region_covered_in_flavor_tables() {
-    // The REGION_MARKET_TAGS and REGION_LABELS halves are live in regions.rs;
-    // the weather-weight and fuel-price tables belong to other modules.
+    use ff_core::models::economy::REGION_FUEL_PRICE;
+    use ff_core::sim::weather::REGION_WEIGHTS;
+
+    let missing: Vec<&&str> = REGIONS
+        .iter()
+        .filter(|r| !REGION_WEIGHTS.iter().any(|(key, _)| key == *r))
+        .collect();
+    assert!(
+        missing.is_empty(),
+        "REGION_WEIGHTS is missing regions: {missing:?}"
+    );
+    let missing: Vec<&&str> = REGIONS
+        .iter()
+        .filter(|r| !REGION_FUEL_PRICE.iter().any(|(key, _)| key == *r))
+        .collect();
+    assert!(
+        missing.is_empty(),
+        "REGION_FUEL_PRICE is missing regions: {missing:?}"
+    );
 }
 
 #[test]

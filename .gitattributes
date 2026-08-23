@@ -7,3 +7,8 @@ tools/appimage/*.desktop text eol=lf
 # sound-only change does not drag the much larger music payload with it.
 src/freight_fate/sounds.pak filter=lfs diff=lfs merge=lfs -text
 src/freight_fate/music.pak filter=lfs diff=lfs merge=lfs -text
+
+# The cloud-validator invariants export is pinned byte for byte against the
+# Rust exporter's output, which is LF on every platform. A CRLF checkout
+# would make the fixture disagree with the file it is pinning.
+crates/ff-core/tests/profile_integrity_invariants.json text eol=lf

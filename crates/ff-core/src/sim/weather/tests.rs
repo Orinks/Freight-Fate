@@ -677,18 +677,30 @@ fn test_normal_route_cell_refresh_is_silent_and_failures_hold_last_known() {
 
     let shared = Arc::new(Mutex::new(Shared::default()));
     let route = first_route("chicago_il_us", "indianapolis_in_us");
-    let weather = with_provider("great_lakes", 1, Box::new(MovingProvider(Arc::clone(&shared))));
+    let weather = with_provider(
+        "great_lakes",
+        1,
+        Box::new(MovingProvider(Arc::clone(&shared))),
+    );
     let mut trip = trip_on(route, weather, seeded(2));
 
     trip.position_mi = 0.0;
     let first_key = trip.weather_location().unwrap().0;
-    shared.lock().unwrap().data.insert(first_key, WeatherKind::Clear);
+    shared
+        .lock()
+        .unwrap()
+        .data
+        .insert(first_key, WeatherKind::Clear);
     trip.update(0.0);
 
     trip.position_mi = 20.0;
     let second_key = trip.weather_location().unwrap().0;
     assert!(kind_messages(&trip.update(0.0), TripEventKind::WeatherChange).is_empty());
-    shared.lock().unwrap().data.insert(second_key, WeatherKind::Clear);
+    shared
+        .lock()
+        .unwrap()
+        .data
+        .insert(second_key, WeatherKind::Clear);
     assert!(kind_messages(&trip.update(0.0), TripEventKind::WeatherChange).is_empty());
 
     trip.position_mi = 40.0;
@@ -737,12 +749,20 @@ fn test_live_change_omits_modeled_temperature_and_does_not_hide_later_stale_stat
 
     let shared = Arc::new(Mutex::new(Shared::default()));
     let route = first_route("chicago_il_us", "indianapolis_in_us");
-    let weather = with_provider("great_lakes", 1, Box::new(MovingProvider(Arc::clone(&shared))));
+    let weather = with_provider(
+        "great_lakes",
+        1,
+        Box::new(MovingProvider(Arc::clone(&shared))),
+    );
     let mut trip = trip_on(route, weather, seeded(2));
 
     trip.position_mi = 0.0;
     let first_key = trip.weather_location().unwrap().0;
-    shared.lock().unwrap().data.insert(first_key, WeatherKind::Clear);
+    shared
+        .lock()
+        .unwrap()
+        .data
+        .insert(first_key, WeatherKind::Clear);
     trip.update(0.0);
 
     trip.position_mi = 20.0;
@@ -754,14 +774,22 @@ fn test_live_change_omits_modeled_temperature_and_does_not_hide_later_stale_stat
         .insert(second_key.clone(), WeatherKind::HeavyRain);
     let changed = kind_messages(&trip.update(0.0), TripEventKind::WeatherChange);
     assert_eq!(changed.len(), 1, "{changed:?}");
-    assert!(changed[0].starts_with("Live weather changing: heavy rain"), "{}", changed[0]);
+    assert!(
+        changed[0].starts_with("Live weather changing: heavy rain"),
+        "{}",
+        changed[0]
+    );
     assert!(!changed[0].contains("degrees"));
 
     shared.lock().unwrap().stale_keys.insert(second_key.clone());
     shared.lock().unwrap().failed_keys.insert(second_key);
     let delayed = kind_messages(&trip.update(0.0), TripEventKind::WeatherChange);
     assert_eq!(delayed.len(), 1, "{delayed:?}");
-    assert!(delayed[0].starts_with("The observation is 12 minutes old"), "{}", delayed[0]);
+    assert!(
+        delayed[0].starts_with("The observation is 12 minutes old"),
+        "{}",
+        delayed[0]
+    );
     assert!(delayed[0].contains("Last-known conditions remain in use"));
     assert!(!delayed[0].to_lowercase().contains("updat"));
 }
@@ -787,7 +815,11 @@ fn test_freshly_fetched_old_observation_change_stays_live_and_announces_age() {
 
     let changes = kind_messages(&trip.update(0.0), TripEventKind::WeatherChange);
     assert_eq!(changes.len(), 1, "{changes:?}");
-    assert!(changes[0].starts_with("Live weather changing: heavy rain"), "{}", changes[0]);
+    assert!(
+        changes[0].starts_with("Live weather changing: heavy rain"),
+        "{}",
+        changes[0]
+    );
     assert!(changes[0].contains("The observation is 12 minutes old"));
     assert!(!changes[0].to_lowercase().contains("updat"));
 }
@@ -810,8 +842,16 @@ fn test_relaxed_hazard_scale_lowers_hazard_risk() {
 
 #[test]
 fn test_corridor_busyness_scales_hazard_check_frequency() {
-    let mut dense = trip_on(route_of(&["New York", "Boston"]), system("northeast", 1), seeded(1));
-    let mut sparse = trip_on(route_of(&["Las Vegas", "Reno"]), system("great_basin", 1), seeded(1));
+    let mut dense = trip_on(
+        route_of(&["New York", "Boston"]),
+        system("northeast", 1),
+        seeded(1),
+    );
+    let mut sparse = trip_on(
+        route_of(&["Las Vegas", "Reno"]),
+        system("great_basin", 1),
+        seeded(1),
+    );
     dense.position_mi = 25.0;
     sparse.position_mi = sparse.total_miles() / 2.0;
     assert!(
@@ -826,8 +866,16 @@ fn test_hazard_check_interval_shortens_on_busy_corridors() {
     // both trips re-seed their stream identically so the one draw matches.
     use crate::pyrandom::PyRandom;
 
-    let mut dense = trip_on(route_of(&["New York", "Boston"]), system("northeast", 1), seeded(1));
-    let mut sparse = trip_on(route_of(&["Las Vegas", "Reno"]), system("great_basin", 1), seeded(1));
+    let mut dense = trip_on(
+        route_of(&["New York", "Boston"]),
+        system("northeast", 1),
+        seeded(1),
+    );
+    let mut sparse = trip_on(
+        route_of(&["Las Vegas", "Reno"]),
+        system("great_basin", 1),
+        seeded(1),
+    );
     dense.position_mi = 25.0;
     sparse.position_mi = sparse.total_miles() / 2.0;
     dense.rng = PyRandom::new_from_i64(40);
@@ -845,7 +893,10 @@ fn test_relaxed_mode_thins_traffic_density() {
     let leg = normal.route.legs[0].clone();
     let expected = normal.leg_traffic_density(&leg, 0.0, false) * RELAXED_HAZARD_SCALE;
     assert!((relaxed.leg_traffic_density(&leg, 0.0, false) - expected).abs() < 1e-9);
-    assert!(relaxed.leg_traffic_density(&leg, 0.0, false) < normal.leg_traffic_density(&leg, 0.0, false));
+    assert!(
+        relaxed.leg_traffic_density(&leg, 0.0, false)
+            < normal.leg_traffic_density(&leg, 0.0, false)
+    );
 }
 
 #[test]
@@ -876,7 +927,11 @@ fn test_relaxed_mode_reduces_merge_exit_pressure() {
 /// `make_trip(world, start, end, seed=2, **kwargs)`: a quiet run with an
 /// automatic, running truck and the rolling traffic bubble off. The
 /// truck lives on the trip (`trip.truck`).
-fn make_trip_on(start: &str, end: &str, opts: crate::sim::trip::TripOptions) -> crate::sim::trip::Trip {
+fn make_trip_on(
+    start: &str,
+    end: &str,
+    opts: crate::sim::trip::TripOptions,
+) -> crate::sim::trip::Trip {
     use crate::data::world::get_world;
     use crate::sim::trip::{Trip, TripOptions};
     use crate::sim::vehicle::TruckState;
@@ -930,13 +985,18 @@ fn first_route(start: &str, end: &str) -> crate::data::world_models::Route {
 }
 
 /// GPS-cue events, excluding additive interchange/exit cues.
-fn gps_events(events: &[crate::sim::trip_models::TripEvent]) -> Vec<crate::sim::trip_models::TripEvent> {
+fn gps_events(
+    events: &[crate::sim::trip_models::TripEvent],
+) -> Vec<crate::sim::trip_models::TripEvent> {
     use crate::sim::trip_models::TripEventKind;
     events
         .iter()
         .filter(|e| {
             e.kind == TripEventKind::GpsCue
-                && e.data.cue.as_ref().is_none_or(|cue| cue.kind != "interchange")
+                && e.data
+                    .cue
+                    .as_ref()
+                    .is_none_or(|cue| cue.kind != "interchange")
         })
         .cloned()
         .collect()
@@ -1017,7 +1077,11 @@ fn closure_part(zone: &crate::sim::trip_models::Zone) -> String {
     match zone.closed_lane {
         None => "All lanes stay open through the work; hold your lane. ".to_string(),
         Some(lane) => {
-            let (shut, keep) = if lane == 0 { ("right", "left") } else { ("left", "right") };
+            let (shut, keep) = if lane == 0 {
+                ("right", "left")
+            } else {
+                ("left", "right")
+            };
             format!("The {shut} lane is closed; merge {keep} at the taper. ")
         }
     }
@@ -1083,7 +1147,10 @@ fn test_corridor_speed_limit_by_highway_and_region() {
     assert_eq!(corridor_speed_limit("US-30", "heartland"), 65.0);
     assert_eq!(corridor_speed_limit("SR-99", "california"), 60.0);
     // An unknown region on an Interstate falls back to the base limit.
-    assert_eq!(corridor_speed_limit("I-5", "atlantis"), BASE_SPEED_LIMIT_MPH);
+    assert_eq!(
+        corridor_speed_limit("I-5", "atlantis"),
+        BASE_SPEED_LIMIT_MPH
+    );
 }
 
 #[test]
@@ -1091,7 +1158,7 @@ fn test_speed_limit_varies_by_corridor_and_drops_in_cities() {
     use crate::sim::trip_models::URBAN_LIMIT_MPH;
 
     let mut trip = make_trip(2, 1.0); // Chicago -> Indianapolis, an Interstate corridor
-    // Near the origin city the limit drops to the urban value.
+                                      // Near the origin city the limit drops to the urban value.
     let (near_city, reason) = trip.speed_limit_at(1.0);
     assert!(reason.is_none());
     assert_eq!(near_city, URBAN_LIMIT_MPH);
@@ -1146,7 +1213,9 @@ fn test_speed_limit_cue_names_direction_and_city() {
     trip.check_speed_limit();
     let lowered: Vec<String> = trip.events.iter().map(|e| e.text().to_string()).collect();
     assert!(
-        lowered.iter().any(|m| m.contains("reduced to") && m.contains("approaching")),
+        lowered
+            .iter()
+            .any(|m| m.contains("reduced to") && m.contains("approaching")),
         "{lowered:?}"
     );
 
@@ -1174,16 +1243,25 @@ fn test_speed_limit_drop_behind_a_city_says_leaving() {
     trip.check_speed_limit();
     let lowered: Vec<String> = trip.events.iter().map(|e| e.text().to_string()).collect();
     assert!(
-        lowered.iter().any(|m| m.contains("reduced to") && m.contains("leaving")),
+        lowered
+            .iter()
+            .any(|m| m.contains("reduced to") && m.contains("leaving")),
         "{lowered:?}"
     );
     assert!(lowered.iter().all(|m| !m.contains("approaching")));
 }
 
 #[test]
-#[ignore = "needs sim::vehicle (TruckState)"]
 fn test_weather_drag_multiplier_increases_resistance() {
-    // TODO(port): port once the Rust sim::vehicle (TruckState) is available.
+    use crate::sim::vehicle::TruckState;
+
+    let mut truck = TruckState {
+        velocity_mps: 25.0,
+        ..TruckState::default()
+    };
+    let base = truck.resistance_force();
+    truck.drag_mult = 1.25; // a strong headwind / storm
+    assert!(truck.resistance_force() > base);
 }
 
 #[test]
@@ -1220,7 +1298,11 @@ fn test_too_fast_for_conditions_risks_traction_loss() {
             break;
         }
     }
-    assert!(hits.iter().any(|m| m.contains("too fast for the conditions")), "{hits:?}");
+    assert!(
+        hits.iter()
+            .any(|m| m.contains("too fast for the conditions")),
+        "{hits:?}"
+    );
 
     // At a safe speed for the snow, no traction-loss incident fires.
     let mut trip2 = make_trip(7, 1.0);
@@ -1238,7 +1320,9 @@ fn test_too_fast_for_conditions_risks_traction_loss() {
             }
         }
     }
-    assert!(!safe_hits.iter().any(|m| m.contains("too fast for the conditions")));
+    assert!(!safe_hits
+        .iter()
+        .any(|m| m.contains("too fast for the conditions")));
 }
 
 #[test]
@@ -1301,11 +1385,17 @@ fn test_trip_uses_explicit_stop_positions() {
     // even with additive OpenStreetMap stops now interleaved on the leg.
     assert_eq!(by_name("Pilot Travel Center Remington").at_mi, 93.5);
     assert_eq!(by_name("Loves Travel Stop Lafayette").at_mi, 121.3);
-    assert_eq!(by_name("Pilot Travel Center Remington").parking, "confirmed");
+    assert_eq!(
+        by_name("Pilot Travel Center Remington").parking,
+        "confirmed"
+    );
     assert_eq!(by_name("Loves Travel Stop Lafayette").parking, "confirmed");
     // No stop sits at the naive route midpoint, and every stop declares a
     // concrete, non-unknown parking value.
-    assert!(trip.stops.iter().all(|s| s.at_mi != trip.route.miles() / 2.0));
+    assert!(trip
+        .stops
+        .iter()
+        .all(|s| s.at_mi != trip.route.miles() / 2.0));
     assert!(trip.stops.iter().all(|s| s.parking != "unknown"));
 }
 
@@ -1318,7 +1408,11 @@ fn test_trip_uses_only_curated_pois_at_runtime() {
     assert!(route.raw_stop_details().iter().all(|s| s.curated()));
     assert!(!route.stop_details().is_empty());
     assert!(!trip.stops.is_empty());
-    let curated: HashSet<&str> = route.stop_details().iter().map(|s| s.name.as_str()).collect();
+    let curated: HashSet<&str> = route
+        .stop_details()
+        .iter()
+        .map(|s| s.name.as_str())
+        .collect();
     assert!(trip.stops.iter().all(|s| curated.contains(s.name.as_str())));
 }
 
@@ -1350,7 +1444,10 @@ fn test_trip_places_reverse_route_stops_from_travel_direction() {
 #[test]
 fn test_zone_speed_limits_apply() {
     let mut trip = make_trip_on("Atlanta", "Dallas", seeded(2));
-    assert!(!trip.zones.is_empty(), "long route should have at least one zone");
+    assert!(
+        !trip.zones.is_empty(),
+        "long route should have at least one zone"
+    );
     // Congestion zones follow the clock; test against an always-on zone.
     let zone = trip
         .zones
@@ -1396,7 +1493,10 @@ fn test_the_last_three_miles_are_not_a_thirty_five_wall() {
         .find(|z| z.reason == "destination approach")
         .expect("the approach zone");
     assert_eq!(approach.limit_mph, RAMP_MAX_MPH);
-    assert!(approach.limit_mph >= RAMP_MAX_MPH, "the exit must stay enterable");
+    assert!(
+        approach.limit_mph >= RAMP_MAX_MPH,
+        "the exit must stay enterable"
+    );
 }
 
 #[test]
@@ -1467,7 +1567,11 @@ fn test_the_facility_gate_zone_is_unchanged() {
         .find(|z| z.reason == "facility gate")
         .expect("the gate zone");
     assert_eq!(gate.limit_mph, FACILITY_GATE_LIMIT_MPH);
-    assert!(approx_abs(gate.start_mi, trip.total_miles() - FACILITY_GATE_ZONE_MI, 1e-6));
+    assert!(approx_abs(
+        gate.start_mi,
+        trip.total_miles() - FACILITY_GATE_ZONE_MI,
+        1e-6
+    ));
     assert!(approx_abs(gate.end_mi, trip.total_miles(), 1e-6));
 }
 
@@ -1531,11 +1635,20 @@ fn test_driving_through_a_city_lists_its_stops_once() {
                 .count()
         })
         .sum();
-    assert!(stops.len() < per_leg, "route no longer exercises shared-city stops");
+    assert!(
+        stops.len() < per_leg,
+        "route no longer exercises shared-city stops"
+    );
     for pair in stops.windows(2) {
         let (a, b) = (&pair[0], &pair[1]);
         if b.at_mi - a.at_mi <= SHARED_CITY_STOP_MERGE_MI {
-            assert_ne!(a.name, b.name, "{} listed twice {:.2} mi apart", a.name, b.at_mi - a.at_mi);
+            assert_ne!(
+                a.name,
+                b.name,
+                "{} listed twice {:.2} mi apart",
+                a.name,
+                b.at_mi - a.at_mi
+            );
         }
     }
 }
@@ -1643,7 +1756,10 @@ fn test_a_plan_survives_passing_a_stop_that_shares_its_name() {
     trip.position_mi = earlier.at_mi + 1.0;
     trip.events = Vec::new();
     trip.check_stops();
-    assert!(!trip.events.iter().any(|e| e.text().contains("planned stop")));
+    assert!(!trip
+        .events
+        .iter()
+        .any(|e| e.text().contains("planned stop")));
     assert_eq!(trip.planned_stop_key, Some(target.key()));
 
     // Past the planned stop itself, it cancels as before.
@@ -1676,7 +1792,10 @@ fn test_every_stop_announces_even_when_names_repeat() {
         .stops
         .iter()
         .any(|s| trip.stops.iter().filter(|o| o.name == s.name).count() > 1);
-    assert!(repeated, "route no longer exercises repeated stop names; pick another");
+    assert!(
+        repeated,
+        "route no longer exercises repeated stop names; pick another"
+    );
 
     let mut announced: HashSet<String> = HashSet::new();
     let mut stops = trip.stops.clone();
@@ -1712,7 +1831,9 @@ fn test_facility_gate_warns_before_final_low_speed_zone() {
     events.extend(trip.update(0.0));
     let warnings = kind_messages(&events, TripEventKind::GpsCue);
     assert!(
-        warnings.iter().any(|w| w == "In 2 miles, facility gate ahead. Speed limit 15."),
+        warnings
+            .iter()
+            .any(|w| w == "In 2 miles, facility gate ahead. Speed limit 15."),
         "{warnings:?}"
     );
 }
@@ -1816,11 +1937,18 @@ fn test_construction_zone_has_staged_merge_taper() {
         .find(|z| z.reason == "construction merge" && z.end_mi == zone.start_mi)
         .cloned()
         .expect("the taper");
-    assert!(approx_abs(taper.start_mi, zone.start_mi - CONSTRUCTION_TAPER_MI, 1e-6));
+    assert!(approx_abs(
+        taper.start_mi,
+        zone.start_mi - CONSTRUCTION_TAPER_MI,
+        1e-6
+    ));
     assert_eq!(taper.limit_mph, CONSTRUCTION_TAPER_LIMIT_MPH);
     assert_eq!(
         trip.speed_limit_at((taper.start_mi + taper.end_mi) / 2.0),
-        (CONSTRUCTION_TAPER_LIMIT_MPH, Some("construction merge".to_string()))
+        (
+            CONSTRUCTION_TAPER_LIMIT_MPH,
+            Some("construction merge".to_string())
+        )
     );
     assert_eq!(
         trip.speed_limit_at((zone.start_mi + zone.end_mi) / 2.0),
@@ -1971,7 +2099,8 @@ fn test_traffic_varies_by_seed_but_route_grade_does_not() {
     let trip_a = make_trip(1, 1.0);
     let trip_b = make_trip(8, 1.0);
     let miles = [10.0, 80.0, 150.0];
-    let grades = |t: &crate::sim::trip::Trip| miles.iter().map(|m| t.grade_at(*m)).collect::<Vec<_>>();
+    let grades =
+        |t: &crate::sim::trip::Trip| miles.iter().map(|m| t.grade_at(*m)).collect::<Vec<_>>();
     assert_eq!(grades(&trip_a), grades(&trip_b));
     let traffic = |t: &crate::sim::trip::Trip| {
         t.npc_vehicles()
@@ -2065,7 +2194,14 @@ fn test_npc_vehicles_property_tracks_traffic_manager() {
     use crate::sim::trip_models::NPCVehicle;
 
     let mut trip = make_trip(2, 1.0);
-    let vehicle = TrafficVehicle::from(NPCVehicle::new("npc:compat", 5.0, 55.0, 55.0, 0, "steady_truck"));
+    let vehicle = TrafficVehicle::from(NPCVehicle::new(
+        "npc:compat",
+        5.0,
+        55.0,
+        55.0,
+        0,
+        "steady_truck",
+    ));
     trip.set_npc_vehicles(vec![vehicle.clone()]);
     assert_eq!(trip.traffic_manager.vehicles, vec![vehicle.clone()]);
     assert_eq!(trip.npc_vehicles(), &[vehicle]);
@@ -2186,7 +2322,9 @@ fn test_merge_traffic_pressures_drop_the_speed_advisory() {
 
 #[test]
 fn test_traffic_pressure_gps_cue_deduplicates() {
-    use crate::sim::trip_models::{traffic_pressure_key, TripEventKind, TRAFFIC_PRESSURE_LOOKAHEAD_MI};
+    use crate::sim::trip_models::{
+        traffic_pressure_key, TripEventKind, TRAFFIC_PRESSURE_LOOKAHEAD_MI,
+    };
 
     let mut trip = make_trip(2, 1.0);
     // Only one pressure cue fires per update, so pick an exit pressure with
@@ -2246,7 +2384,10 @@ fn test_npc_traffic_cue_and_status_are_reviewable() {
         .iter()
         .filter(|e| {
             e.kind == TripEventKind::GpsCue
-                && e.data.npc_vehicle.as_ref().is_some_and(|v| v.key == "npc:merge")
+                && e.data
+                    .npc_vehicle
+                    .as_ref()
+                    .is_some_and(|v| v.key == "npc:merge")
         })
         .collect();
     assert_eq!(npc_cues.len(), 1);
@@ -2281,10 +2422,17 @@ fn test_metric_toggle_updates_npc_traffic_cue_units() {
         .iter()
         .find(|e| {
             e.kind == TripEventKind::GpsCue
-                && e.data.npc_vehicle.as_ref().is_some_and(|v| v.key == "npc:metric-merge")
+                && e.data
+                    .npc_vehicle
+                    .as_ref()
+                    .is_some_and(|v| v.key == "npc:metric-merge")
         })
         .expect("the merge cue");
-    assert!(npc_cue.text().contains("1.3 kilometers ahead"), "{}", npc_cue.text());
+    assert!(
+        npc_cue.text().contains("1.3 kilometers ahead"),
+        "{}",
+        npc_cue.text()
+    );
     assert!(!npc_cue.text().contains("miles"));
 }
 
@@ -2312,10 +2460,17 @@ fn test_metric_toggle_updates_npc_traffic_cue_speed_units() {
         .iter()
         .find(|e| {
             e.kind == TripEventKind::GpsCue
-                && e.data.npc_vehicle.as_ref().is_some_and(|v| v.key == "npc:metric-brake")
+                && e.data
+                    .npc_vehicle
+                    .as_ref()
+                    .is_some_and(|v| v.key == "npc:metric-brake")
         })
         .expect("the brake-lights cue");
-    assert!(npc_cue.text().contains("68 kilometers per hour"), "{}", npc_cue.text());
+    assert!(
+        npc_cue.text().contains("68 kilometers per hour"),
+        "{}",
+        npc_cue.text()
+    );
     assert!(!npc_cue.text().contains("miles"));
 }
 
@@ -2335,7 +2490,9 @@ fn test_npc_traffic_status_includes_speed_units() {
         0,
         "steady_truck",
     ))];
-    assert!(trip.npc_traffic_status().contains("moving 68 miles per hour"));
+    assert!(trip
+        .npc_traffic_status()
+        .contains("moving 68 miles per hour"));
 }
 
 #[test]
@@ -2380,10 +2537,18 @@ fn test_clock_compression_ramps_with_road_speed() {
     );
 
     trip.truck.velocity_mps = 0.0; // parked: near real-time pacing
-    assert!(approx_abs(trip.effective_time_scale(), LOW_SPEED_TIME_SCALE, 1e-9));
+    assert!(approx_abs(
+        trip.effective_time_scale(),
+        LOW_SPEED_TIME_SCALE,
+        1e-9
+    ));
     let before = trip.game_minutes;
     trip.update(1.0);
-    assert!(approx_abs(trip.game_minutes - before, LOW_SPEED_TIME_SCALE / 60.0, 1e-9));
+    assert!(approx_abs(
+        trip.game_minutes - before,
+        LOW_SPEED_TIME_SCALE / 60.0,
+        1e-9
+    ));
 
     trip.truck.velocity_mps = 25.0 / 2.23694; // 25 mph: mid-ramp
     let mid = trip.effective_time_scale();
@@ -2414,10 +2579,18 @@ fn test_parking_brake_waiting_runs_at_double_pacing() {
 
     trip.truck.velocity_mps = 0.0;
     trip.truck.parking_brake = true; // auto-set (trip start): not waiting
-    assert!(approx_abs(trip.effective_time_scale(), LOW_SPEED_TIME_SCALE, 1e-9));
+    assert!(approx_abs(
+        trip.effective_time_scale(),
+        LOW_SPEED_TIME_SCALE,
+        1e-9
+    ));
 
     trip.waiting = true; // the player's own brake press arms it
-    assert!(approx_abs(trip.effective_time_scale(), 20.0 * PARKED_TIME_SCALE_MULT, 1e-9));
+    assert!(approx_abs(
+        trip.effective_time_scale(),
+        20.0 * PARKED_TIME_SCALE_MULT,
+        1e-9
+    ));
     let before = trip.game_minutes;
     trip.update(1.0);
     assert!(approx_abs(
@@ -2434,7 +2607,11 @@ fn test_parking_brake_waiting_runs_at_double_pacing() {
     trip.truck.parking_brake = false; // any release path disarms on the next frame
     trip.update(1.0);
     assert!(!trip.waiting);
-    assert!(approx_abs(trip.effective_time_scale(), LOW_SPEED_TIME_SCALE, 1e-9));
+    assert!(approx_abs(
+        trip.effective_time_scale(),
+        LOW_SPEED_TIME_SCALE,
+        1e-9
+    ));
 }
 
 #[test]
@@ -2465,7 +2642,10 @@ fn test_every_region_has_clear_day_hazards() {
             "rockfall",
             "tumbleweed",
         ] {
-            assert!(!text.contains(word), "{word:?} should not occur on a clear day");
+            assert!(
+                !text.contains(word),
+                "{word:?} should not occur on a clear day"
+            );
         }
     }
 }
@@ -2483,7 +2663,9 @@ fn test_weather_and_terrain_gate_hazards() {
     // Snow hazards only appear when it is snowing.
     let clear = texts("great_lakes", WeatherKind::Clear, "flat");
     let snowy = texts("great_lakes", WeatherKind::Snow, "flat");
-    assert!(!clear.iter().any(|t| t.contains("snow") || t.contains("ice")));
+    assert!(!clear
+        .iter()
+        .any(|t| t.contains("snow") || t.contains("ice")));
     assert!(snowy.iter().any(|t| t.contains("snow")));
 
     // Rockfall is a mountain-terrain hazard, not a flatland one.
@@ -2603,9 +2785,20 @@ fn test_gps_state_crossing_and_rest_stop_cues_deduplicate() {
 }
 
 #[test]
-#[ignore = "needs data::world_models (Stop) and sim::trip_models (RoadStop)"]
 fn test_likely_parking_is_not_announced_as_truck_parking() {
-    // TODO(port): port once the Rust data::world_models (Stop) and sim::trip_models (RoadStop) is available.
+    use crate::data::world_models::Stop;
+    use crate::sim::trip_models::RoadStop;
+
+    let stop = Stop {
+        name: "Fuel".to_string(),
+        at_mi: 1.0,
+        parking: "likely".to_string(),
+        ..Stop::default()
+    };
+    assert_eq!(stop.parking_label(), "");
+    let mut road_stop = RoadStop::new("Fuel", 1.0, "travel_center");
+    road_stop.parking = "likely".to_string();
+    assert_eq!(road_stop.parking_text(), "");
 }
 
 #[test]
@@ -2652,13 +2845,17 @@ fn test_route_context_describes_near_traffic_without_zero_distance() {
     use crate::sim::trip_models::NavigationCue;
 
     let mut trip = make_trip(2, 1.0);
-    trip.navigation_cues = vec![
-        NavigationCue::new("traffic:test", "traffic", 10.1, "traffic queue ahead", "")
-            .with_speed(Some(45.0)),
-    ];
+    trip.navigation_cues =
+        vec![
+            NavigationCue::new("traffic:test", "traffic", 10.1, "traffic queue ahead", "")
+                .with_speed(Some(45.0)),
+        ];
     trip.position_mi = 10.0;
     let context = trip.next_navigation_context(true);
-    assert_eq!(context, "Traffic just ahead: traffic queue ahead at 45 miles per hour.");
+    assert_eq!(
+        context,
+        "Traffic just ahead: traffic queue ahead at 45 miles per hour."
+    );
     assert!(!context.contains('0'));
 }
 
@@ -2770,9 +2967,12 @@ fn test_city_events_do_not_repeat_mapped_state_crossings() {
         vec!["Passing Cleveland, Ohio. Continuing on I-76 toward Pittsburgh."]
     );
     let state_events = kind_messages(&events, TripEventKind::StateCrossing);
-    assert!(state_events
-        .iter()
-        .any(|m| m.starts_with("Crossing into Ohio near ")), "{state_events:?}");
+    assert!(
+        state_events
+            .iter()
+            .any(|m| m.starts_with("Crossing into Ohio near ")),
+        "{state_events:?}"
+    );
 }
 
 #[test]
@@ -2830,29 +3030,36 @@ fn test_same_city_highway_dispatch_is_not_a_facility_approach() {
     // facility approach never does -- that geometry is the discriminator.
     let highway_loop = Route::from_legs(
         vec!["fernley_nv_us".to_string(), "fernley_nv_us".to_string()],
-        vec![
-            Leg::new("fernley_nv_us", "fernley_nv_us", 17.0, "I-80", "flat", Vec::new()).with_detail(
-                CorridorDetail {
-                    route_points: vec![
-                        RoutePoint {
-                            at_mi: 0.0,
-                            lat: 39.6,
-                            lon: -119.3,
-                        },
-                        RoutePoint {
-                            at_mi: 17.0,
-                            lat: 39.5,
-                            lon: -119.1,
-                        },
-                    ],
-                    ..Default::default()
+        vec![Leg::new(
+            "fernley_nv_us",
+            "fernley_nv_us",
+            17.0,
+            "I-80",
+            "flat",
+            Vec::new(),
+        )
+        .with_detail(CorridorDetail {
+            route_points: vec![
+                RoutePoint {
+                    at_mi: 0.0,
+                    lat: 39.6,
+                    lon: -119.3,
                 },
-            ),
-        ],
+                RoutePoint {
+                    at_mi: 17.0,
+                    lat: 39.5,
+                    lon: -119.1,
+                },
+            ],
+            ..Default::default()
+        })],
     );
     let trip = trip_for(highway_loop);
     assert!(!trip.is_facility_approach_route());
-    assert!(!trip.zones.iter().any(|z| z.reason == "facility access road"));
+    assert!(!trip
+        .zones
+        .iter()
+        .any(|z| z.reason == "facility access road"));
 
     let street_chain = Route::from_legs(
         vec!["fernley_nv_us".to_string(), "fernley_nv_us".to_string()],
@@ -2878,11 +3085,18 @@ fn test_trip_requests_first_cell_weather_at_construction() {
 
     let requests = Arc::new(Mutex::new(Vec::new()));
     let route = first_route("chicago_il_us", "indianapolis_in_us");
-    let weather = with_provider("great_lakes", 1, Box::new(RecordingProvider(Arc::clone(&requests))));
+    let weather = with_provider(
+        "great_lakes",
+        1,
+        Box::new(RecordingProvider(Arc::clone(&requests))),
+    );
     let _trip = trip_on(route, weather, seeded(2));
 
     let requests = requests.lock().unwrap();
-    assert!(!requests.is_empty(), "trip construction should start the first weather fetch");
+    assert!(
+        !requests.is_empty(),
+        "trip construction should start the first weather fetch"
+    );
     let (key, lat, lon) = &requests[0];
     assert!(key.starts_with("route:chicago_il_us:"), "{key}");
     assert!(*lat != 0.0 || *lon != 0.0);
@@ -2927,7 +3141,10 @@ fn test_weather_is_asked_again_at_a_state_line() {
     trip.position_mi = at_mi + 0.25;
     let (key_after, lat_after, _) = trip.weather_location().unwrap();
 
-    assert_ne!(key_before, key_after, "the weather key survived a state crossing");
+    assert_ne!(
+        key_before, key_after,
+        "the weather key survived a state crossing"
+    );
     assert!(key_before.contains(&before) && key_after.contains(&after));
     // And the coordinate moved with us rather than staying at the cell start.
     assert_ne!(lat_before, lat_after);
@@ -2937,5 +3154,8 @@ fn test_weather_is_asked_again_at_a_state_line() {
     let (steady_a, _, _) = trip.weather_location().unwrap();
     trip.position_mi = at_mi + 1.5;
     let (steady_b, _, _) = trip.weather_location().unwrap();
-    assert_eq!(steady_a, steady_b, "the key now churns within a single state");
+    assert_eq!(
+        steady_a, steady_b,
+        "the key now churns within a single state"
+    );
 }

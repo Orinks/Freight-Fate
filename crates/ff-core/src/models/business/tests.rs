@@ -142,37 +142,21 @@ fn test_business_path_reports_starter_company_rank_and_next_unlock() {
     assert!(unlock.contains("Reach level 18"));
 }
 
-#[test]
-#[ignore = "needs app shell (BusinessStatusState menu)"]
-fn test_business_status_menu_unlocks_owner_operator_when_qualified() {}
+// `test_business_status_menu_unlocks_owner_operator_when_qualified` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (garage state)"]
-fn test_company_driver_garage_service_is_carrier_billed() {}
+// `test_company_driver_garage_service_is_carrier_billed` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (garage state)"]
-fn test_garage_sells_the_traction_equipment_ladder() {}
+// `test_garage_sells_the_traction_equipment_ladder` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (garage state)"]
-fn test_company_driver_gets_carrier_chains_but_carrier_rubber() {}
+// `test_company_driver_gets_carrier_chains_but_carrier_rubber` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (truck status state)"]
-fn test_company_driver_truck_status_says_assigned_not_owned() {}
+// `test_company_driver_truck_status_says_assigned_not_owned` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (city shops)"]
-fn test_company_driver_shops_hide_owned_truck_language() {}
+// `test_company_driver_shops_hide_owned_truck_language` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (BusinessStatusState buy-in)"]
-fn test_owner_operator_buy_in_records_first_owned_tractor() {}
+// `test_owner_operator_buy_in_records_first_owned_tractor` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (truck dealer / garage)"]
-fn test_owner_operator_can_buy_switch_and_upgrade_owned_equipment() {}
+// `test_owner_operator_can_buy_switch_and_upgrade_owned_equipment` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
 fn test_trailer_catalog_matches_current_cargo_classes() {
@@ -190,33 +174,19 @@ fn test_trailer_catalog_matches_current_cargo_classes() {
     assert!(reefer.owned_per_mile_reserve < reefer.per_mile_reserve);
 }
 
-#[test]
-#[ignore = "needs app shell (trailer program menu)"]
-fn test_owner_operator_can_add_specialty_trailer_program() {}
+// `test_owner_operator_can_add_specialty_trailer_program` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (trailer purchase menu)"]
-fn test_own_authority_can_buy_owned_trailer() {}
+// `test_own_authority_can_buy_owned_trailer` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (trailer purchase menu)"]
-fn test_leased_on_owner_operator_does_not_see_trailer_purchase() {}
+// `test_leased_on_owner_operator_does_not_see_trailer_purchase` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (JobBoardState)"]
-fn test_owner_operator_job_board_labels_missing_trailer_program() {}
+// `test_owner_operator_job_board_labels_missing_trailer_program` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (JobBoardState)"]
-fn test_owner_operator_job_board_accepts_matching_trailer_program() {}
+// `test_owner_operator_job_board_accepts_matching_trailer_program` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (JobBoardState)"]
-fn test_own_authority_job_board_labels_owned_trailer_and_program_charge() {}
+// `test_own_authority_job_board_labels_owned_trailer_and_program_charge` is live in `crates/freight-fate/tests/states_city.rs`.
 
-#[test]
-#[ignore = "needs app shell (trailer program menu)"]
-fn test_company_driver_trailer_program_menu_stays_carrier_provided() {}
+// `test_company_driver_trailer_program_menu_stays_carrier_provided` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
 fn test_owner_operator_settlement_uses_specialty_trailer_program_charge() {
@@ -274,9 +244,7 @@ fn test_authority_readiness_requires_endgame_owner_operator() {
     assert!(next_business_unlock(&p).contains("authority prep reserve"));
 }
 
-#[test]
-#[ignore = "needs app shell (BusinessStatusState)"]
-fn test_business_status_menu_sets_authority_readiness_reserve() {}
+// `test_business_status_menu_sets_authority_readiness_reserve` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
 fn test_authority_activation_requires_prep_and_specialty_program() {
@@ -310,9 +278,7 @@ fn test_authority_activation_requires_prep_and_specialty_program() {
     assert!(reasons.is_empty());
 }
 
-#[test]
-#[ignore = "needs app shell (BusinessStatusState)"]
-fn test_business_status_menu_activates_own_authority() {}
+// `test_business_status_menu_activates_own_authority` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
 fn test_independent_authority_settlement_adds_business_overhead() {
@@ -328,11 +294,7 @@ fn test_independent_authority_settlement_adds_business_overhead() {
     assert!(direct.business_charge_total() > leased.business_charge_total());
 }
 
-#[test]
-#[ignore = "needs app shell (JobBoardState)"]
-fn test_company_driver_board_labels_carrier_gross() {
-    assert_eq!(pay_label(COMPANY_DRIVER), "Carrier gross");
-}
+// `test_company_driver_board_labels_carrier_gross` is live in `crates/freight-fate/tests/states_city.rs`.
 
 #[test]
 fn test_late_company_driver_still_uses_company_settlement_until_buy_in() {
@@ -353,25 +315,11 @@ fn test_late_company_driver_still_uses_company_settlement_until_buy_in() {
     assert!(settlement.business_charges.is_empty());
 }
 
-#[test]
-#[ignore = "needs app shell (BusinessStatusState transponder row)"]
-fn test_transponder_shows_as_locked_when_the_fee_is_out_of_reach() {
-    // The eligibility half: an owner-operator short of the fee is told so.
-    let mut p = Profile::named("Transponder");
-    p.business_status = LEASED_OWNER_OPERATOR.to_string();
-    p.money = WEIGH_STATION_TRANSPONDER_SIGNUP_FEE - 1.0;
-    let (ok, reasons) = weigh_station_transponder_eligibility(&p);
-    assert!(!ok);
-    assert!(reasons[0].contains("180 dollars"));
-}
+// `test_transponder_shows_as_locked_when_the_fee_is_out_of_reach` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (BusinessStatusState transponder row)"]
-fn test_the_locked_transponder_row_says_what_it_is_waiting_on() {}
+// `test_the_locked_transponder_row_says_what_it_is_waiting_on` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
-#[test]
-#[ignore = "needs app shell (BusinessStatusState transponder row)"]
-fn test_the_subscribe_row_returns_once_the_fee_is_affordable() {}
+// `test_the_subscribe_row_returns_once_the_fee_is_affordable` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 // -- the transponder gate, pure ---------------------------------------------------
 
@@ -483,13 +431,9 @@ fn test_repaid_advance_still_counts_as_lifetime_earnings() {}
 
 // -- tests/test_settlement_readout_leaner.py ------------------------------------
 
-#[test]
-#[ignore = "needs app shell (ArrivalState summary_lines)"]
-fn test_clean_run_drops_the_zero_information_rows() {}
+// `test_clean_run_drops_the_zero_information_rows` is live in `crates/freight-fate/tests/states_driving_menus.rs`.
 
-#[test]
-#[ignore = "needs app shell (ArrivalState summary_lines)"]
-fn test_damage_and_low_fuel_still_speak_when_they_matter() {}
+// `test_damage_and_low_fuel_still_speak_when_they_matter` is live in `crates/freight-fate/tests/states_driving_menus.rs`.
 
 // -- the pay arithmetic, pinned --------------------------------------------------
 
