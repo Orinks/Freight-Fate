@@ -1366,12 +1366,29 @@ onto exit signalling.
       59.9). That is why Brandon moved to the left lane and stayed level with
       one instead of getting by it.
 
-      STILL OPEN, same measurement: a SEMI is also 0 percent passable on a 65
-      road (mean 64.2 against a player at 65), which is Brandon's earlier
-      "semis you could never get past" report not fully closed. The band is
-      correctly sourced, so the honest options are a player-side answer or a
-      ruling that an elephant race is realistic and stays -- owner's call,
-      not a number to quietly move.
+      AND THE SEMI HALF, ANSWERED BY TERRAIN RATHER THAN BY MOVING A CITED
+      NUMBER (owner: "I want to implement whatever is more realistic in
+      trucking"). The same measurement said a semi is also 0 percent passable
+      on a flat 65 road, and on the flat that is CORRECT: two governed trucks
+      a mile an hour apart is the elephant race real drivers complain about,
+      and the player's truck is not road-governed anyway (`speed_cap_mph` is
+      set only by the damage limp bands), so a driver with road left can
+      always use it.
+
+      What was missing was the hill. NPC speed had no grade term at all, so a
+      mountain leg ran like Kansas and heavy traffic stayed a wall at one
+      speed everywhere. `climb_speed_mph` is the steady state where a class's
+      wheel power equals drag plus rolling plus the climb, using the SAME
+      constants as the player's truck (`vehicle.resistance_force`) and each
+      class's real weight and power. Not a fitted table: the check is that it
+      lands where a driver would expect -- a loaded tractor at about 26 mph on
+      a sustained 6 percent, 44 on a 3 -- and on I-70 west of Denver 20 of 82
+      sampled miles now hold trucks below their limiter, with a box truck
+      climbing the steepest pitch at 42 where a semi manages 24.
+
+      NOT DONE, and deliberately: ATRI's 84.1 percent limiter figure is about
+      FLEETS, not trucks, so spawning a 16 percent ungoverned minority from it
+      would repeat the very substitution this entry is about.
 
 - [x] **Closing the window asks before it takes the drive (2026-08-22).**
       `pygame.QUIT` -- Alt+F4 and the window close button both -- set

@@ -7,6 +7,7 @@ import logging
 import math
 import random
 from dataclasses import dataclass
+from functools import lru_cache
 
 from ..data.world import Leg, Route
 from ..speech_text import brake_lights_cue, merging_traffic_cue, slow_lead_cue
@@ -21,6 +22,8 @@ from .trip_models import (
     hourly_volume_fraction,
     leg_aadt_at,
 )
+from .vehicle import AIR_DENSITY, MPS_TO_MPH
+from .vehicle import G as GRAVITY_MPS2
 
 log = logging.getLogger(__name__)
 
@@ -139,6 +142,78 @@ GOVERNED_BANDS = {
     "box truck": GOVERNED_BOX_TRUCK_BAND_MPH,
 }
 GOVERNED_CLASSES = tuple(GOVERNED_BANDS)
+
+# What actually separates trucks on a real interstate is the hills. A limiter
+# is a ceiling, and on the flat every governed truck sits on its ceiling, so
+# nothing overtakes anything -- the elephant race drivers complain about, and
+# what Brandon met. On a grade the ceiling stops mattering: a loaded tractor
+# has a fixed amount of power to spend on lifting 80,000 pounds, and its speed
+# falls to whatever that buys. Trucks then string out by weight and power, and
+# the light ones climb past the heavy ones. Modelling the limiter without
+# modelling the hill leaves the road permanently flat-feeling even in the
+# mountains, which is the realism gap under the complaint rather than the
+# band being a few miles per hour off.
+#
+# Derived, not tabulated: the balance point where a truck's wheel power equals
+# what drag, rolling resistance and the grade are taking from it, using the
+# SAME physics and the same constants as the player's own truck
+# (``vehicle.resistance_force`` -- air density, Cd times frontal area, and a
+# 0.0065 rolling coefficient). Weight and power are the class's real numbers:
+# 80,000 lb at 450 hp for a loaded class 8, 26,000 lb at 300 hp for a class 6
+# straight truck, both through 85 percent driveline efficiency.
+#
+# It lands where the road says it should -- a loaded semi at about 26 mph on a
+# sustained 6 percent, in the 25-to-35 band a driver would expect, and 44 on a
+# 3 percent -- which is the check on the model rather than a target it was
+# fitted to.
+CLIMB_MODEL = {
+    # class: (gross kg, wheel kilowatts)
+    "semi": (36_287.0, 450 * 0.7457 * 0.85),
+    "box truck": (11_793.0, 300 * 0.7457 * 0.85),
+}
+# The player truck's own aero and rolling numbers (``TruckSpecs`` defaults).
+CLIMB_DRAG_CD = 0.65
+CLIMB_FRONTAL_AREA_M2 = 10.0
+CLIMB_ROLLING = 0.0065
+# Below this the hill is not what is holding the truck back -- the limiter is.
+CLIMB_MIN_GRADE_PCT = 0.5
+
+
+@lru_cache(maxsize=512)
+def climb_speed_mph(vehicle_class: str, grade_pct: float) -> float:
+    """Steady climbing speed for a heavy class on a sustained grade.
+
+    The speed at which the class's wheel power exactly covers drag, rolling
+    resistance and the climb. Downgrades and the flat return a number well
+    above any limiter, so the caller's ``min`` leaves the governor in charge
+    and only a real hill ever binds.
+    """
+    model = CLIMB_MODEL.get(vehicle_class)
+    if model is None or grade_pct < CLIMB_MIN_GRADE_PCT:
+        return float("inf")
+    mass_kg, power_w = model[0], model[1] * 1000.0
+    grade = grade_pct / 100.0
+
+    def power_needed_at(v: float) -> float:
+        """Watts to hold ``v`` metres per second against drag, rolling and
+        the climb -- the same three terms as ``vehicle.resistance_force``."""
+        force = (
+            0.5 * AIR_DENSITY * CLIMB_DRAG_CD * CLIMB_FRONTAL_AREA_M2 * v * v
+            + mass_kg * GRAVITY_MPS2 * CLIMB_ROLLING
+            + mass_kg * GRAVITY_MPS2 * math.sin(math.atan(grade))
+        )
+        return force * v
+
+    low, high = 0.5, 45.0  # m/s; bisection, monotonic in v
+    for _ in range(60):
+        mid = (low + high) / 2.0
+        if power_needed_at(mid) > power_w:
+            high = mid
+        else:
+            low = mid
+    return low * MPS_TO_MPH
+
+
 # Used only where the route cannot answer for a mile at all (off the end of the
 # last leg); every real spawn reads the leg it lands on.
 DEFAULT_LIMIT_MPH = 65.0
@@ -717,6 +792,27 @@ class TrafficManager:
             return baked
         return corridor_speed_limit(leg.highway, "")
 
+    def _grade_pct_at(self, mile: float) -> float:
+        """Signed grade at a route mile, positive uphill in the direction of
+        travel. Mirrors ``Trip.grade_at``: a leg driven from b to a reads its
+        baked segments from the far end and climbs what the other way
+        descends. Zero where the bake has nothing to say, so an unsurveyed
+        stretch simply leaves the limiter in charge."""
+        found: tuple[Leg, float, bool] | None = None
+        for index, (start, leg) in enumerate(zip(self.leg_starts, self.route.legs, strict=False)):
+            if mile + 1e-9 < start:
+                break
+            offset = max(0.0, min(leg.miles, mile - start))
+            forward = self.route.cities[index] == leg.a
+            found = (leg, offset if forward else leg.miles - offset, forward)
+        if found is None:
+            return 0.0
+        leg, sample_offset, forward = found
+        for segment in getattr(leg, "grade_segments", ()) or ():
+            if segment.start_mi <= sample_offset <= segment.end_mi:
+                return segment.avg_grade_pct if forward else -segment.avg_grade_pct
+        return 0.0
+
     def _floor_speed(self, limit_mph: float) -> float:
         """The slowest a moving vehicle gets here from speed draws alone."""
         return max(TRAFFIC_MIN_SPEED_MPH, limit_mph * TRAFFIC_MIN_SPEED_SHARE)
@@ -897,7 +993,20 @@ class TrafficManager:
                 )
                 if vehicle.target_speed_mph < cruise:
                     vehicle.target_speed_mph = min(cruise, vehicle.target_speed_mph + 4.0 * dt)
-            delta = vehicle.target_speed_mph - vehicle.speed_mph
+            # The hill has the last word. A limiter is a ceiling the truck
+            # sits on when the road lets it; a climb takes the choice away,
+            # and this is what strings heavy traffic out into something a
+            # driver can pass instead of a wall all doing the same speed.
+            # getattr for the reason the exit mile below already gives: the
+            # harness and the trip's own NPCVehicle share this runtime surface
+            # without carrying the dataclass, so they have no class to read.
+            # An unknown class is not climb-modelled, which is what a car is.
+            climb = climb_speed_mph(
+                getattr(vehicle, "vehicle_class", ""),
+                self._grade_pct_at(vehicle.position_mi),
+            )
+            target = min(vehicle.target_speed_mph, climb)
+            delta = target - vehicle.speed_mph
             vehicle.speed_mph += max(-6.0 * dt, min(4.0 * dt, delta))
             vehicle.position_mi += max(0.0, vehicle.speed_mph) * game_hours
             # getattr, for the reason lead_vehicle already gives: the harness

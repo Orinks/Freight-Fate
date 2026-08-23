@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Trucks climb hills like trucks.** Heavy traffic used to hold its speed up
+  a mountain grade the same as it did across Kansas, so a line of trucks was a
+  wall all doing the same number with nothing to choose between them. A loaded
+  tractor now loses the hill the way a real one does -- down into the twenties
+  on a long six percent -- while a light box truck holds forty-odd up the same
+  climb. So the trucks string out on a grade, the light ones work past the
+  heavy ones, and a climb finally sounds different from the flat.
 - **Real time joins the driving mode row.** Under Settings, Gameplay,
   Difficulty and hours of service, the Driving mode row now offers Relaxed,
   Standard, and Real time. Real time runs the driving clock at the speed of a

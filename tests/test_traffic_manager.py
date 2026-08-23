@@ -904,3 +904,68 @@ def test_a_box_truck_is_not_governed_like_a_tractor_trailer():
     semis = [manager._intent_speed("cruising", 80.0, rng, "semi") for _ in range(200)]
     assert min(semis) >= GOVERNED_TRUCK_BAND_MPH[0]
     assert max(semis) <= GOVERNED_TRUCK_BAND_MPH[1]
+
+
+def test_heavy_trucks_lose_the_hill_and_string_out_on_it():
+    """What actually lets a driver past a truck is the terrain.
+
+    A limiter is a ceiling, so on the flat every governed truck sits on its
+    ceiling and nothing overtakes anything -- the elephant race, and what
+    Brandon met behind a box truck. On a climb the ceiling stops deciding: a
+    loaded tractor has a fixed amount of power to spend lifting 80,000
+    pounds, so it falls to whatever that buys and the lighter trucks climb
+    past it. Modelled from the same physics as the player's own truck rather
+    than a fitted table, and checked against what a driver would expect to
+    see on a mountain grade.
+    """
+    from freight_fate.sim.traffic_manager import CLIMB_MIN_GRADE_PCT, climb_speed_mph
+
+    # Flat and downhill: the hill has nothing to say, the limiter rules.
+    assert climb_speed_mph("semi", 0.0) == float("inf")
+    assert climb_speed_mph("semi", -6.0) == float("inf")
+    assert climb_speed_mph("semi", CLIMB_MIN_GRADE_PCT - 0.1) == float("inf")
+    # A car is not modelled here at all; it climbs as it likes.
+    assert climb_speed_mph("car", 6.0) == float("inf")
+
+    # The number a driver would recognise: a loaded semi on a sustained six
+    # percent crawls in the twenties-to-thirties, not at highway speed.
+    six = climb_speed_mph("semi", 6.0)
+    assert 20.0 < six < 35.0, six
+
+    # Steeper is always slower, and never negative or absurd.
+    by_grade = [climb_speed_mph("semi", g) for g in (1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0)]
+    assert by_grade == sorted(by_grade, reverse=True)
+    assert all(5.0 < speed < 80.0 for speed in by_grade)
+
+    # And weight is what separates them: the light straight truck climbs the
+    # same hill faster than the loaded tractor, which is the overtake.
+    for grade in (2.0, 4.0, 6.0):
+        assert climb_speed_mph("box truck", grade) > climb_speed_mph("semi", grade) + 5.0
+
+
+def test_npc_trucks_actually_slow_down_on_a_real_climb(world):
+    """The model reaches the road: a mountain leg really does hold trucks
+    below their limiter, and a flat one really does not."""
+    from freight_fate.sim import Trip, TruckState, WeatherSystem
+    from freight_fate.sim.traffic_manager import GOVERNED_TRUCK_BAND_MPH
+
+    route = world.supported_route("Denver", "Grand Junction")
+    if route is None:  # pragma: no cover - route data is pinned elsewhere
+        import pytest
+
+        pytest.skip("no Denver to Grand Junction route in this world")
+    trip = Trip(route, TruckState(), WeatherSystem("rockies", seed=3), seed=3)
+    manager = trip.traffic_manager
+
+    grades = [manager._grade_pct_at(mile) for mile in range(0, int(trip.total_miles), 3)]
+    climbing = [g for g in grades if g >= 1.0]
+    assert climbing, "I-70 west of Denver has to climb somewhere"
+    # Signed: the same road read the other way descends.
+    assert any(g <= -1.0 for g in grades)
+
+    from freight_fate.sim.traffic_manager import climb_speed_mph
+
+    steepest = max(climbing)
+    assert climb_speed_mph("semi", steepest) < GOVERNED_TRUCK_BAND_MPH[0], (
+        "a truck on the steepest part of this route must be held below its limiter"
+    )
