@@ -14,6 +14,7 @@ use crate::states::base::TimedMessageState;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_menu_states::{replace_drive_with, DriveRef, FacilityArrivalState};
+use crate::states::driving_updates::live;
 
 impl DrivingState {
     /// `_handle_out_of_fuel()`.
@@ -145,9 +146,13 @@ impl DrivingState {
                 // the destination exit; the rule is the same every time.
                 //
                 // Rust: the live `_arrival_menu_open` read cannot ride a
-                // 'static closure, so the rescue is left ungated here (see
-                // the task report's deviations).
-                let mut opts = SayEvent::new();
+                // 'static closure, so it goes through `live` like the scale
+                // reminder's mile does. The flag is stamped where it moves as
+                // well as per frame, because the drive stops ticking the
+                // moment the dock menu takes over -- which is exactly the
+                // moment this gate has to notice.
+                self.refresh_live_facts();
+                let mut opts = SayEvent::new().valid(|| !live::arrival_menu_open());
                 opts.category = Some(SpeechCategory::Navigation);
                 ctx.say_event_with(
                     "Destination approach stopped and holding. Press Enter, or controller A, to \
@@ -277,6 +282,9 @@ impl DrivingState {
             return;
         }
         self.arrival_menu_open = true;
+        // The frame loop stops here, so the gate on "press Enter to continue"
+        // would keep reading the last tick's answer without this.
+        live::set_arrival_menu_open(true);
         self.cancel_cruise(ctx, false);
         self.trip.truck.brake = 1.0;
         self.trip.truck.set_parking_brake();

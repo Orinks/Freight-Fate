@@ -18,6 +18,28 @@ use ff_core::speech_text::SpokenMessage;
 
 use crate::app::GameContext;
 use crate::states::driving::DrivingState;
+use crate::states::driving_updates::live;
+
+/// The live half of a rescued curve call's validity gate.
+///
+/// Python handed `say_event` the predicate itself and re-ran it when the
+/// rescue fired. A `'static` validity closure cannot borrow the drive, so the
+/// bend's own two numbers ride the gate and the readings come from `live` --
+/// the same mechanism the scale reminder uses. Copy, because the curve
+/// callout submits the same gate from more than one branch.
+#[derive(Clone, Copy, Debug)]
+pub struct CurveStillTrue {
+    start_mi: f64,
+    floor_mph: f64,
+}
+
+impl CurveStillTrue {
+    /// The bend still ahead, and the truck still carrying more speed than it
+    /// advises.
+    pub fn holds(&self) -> bool {
+        live::position_mi() < self.start_mi && live::speed_mph() > self.floor_mph
+    }
+}
 
 /// A following curve starting within this gap after the called one gets a
 /// "then left/right" tail instead of its own later call.
@@ -120,16 +142,17 @@ impl DrivingState {
     /// ungated exactly as before.
     ///
     /// Rust: Python returned the predicate itself, re-evaluated when the
-    /// rescue fired. A `'static` validity closure cannot borrow the live
-    /// trip here, so the answer is taken at submission time -- the same
-    /// deviation `driving_events::trip_events` already records at its call
-    /// site.
-    pub fn curve_call_still_true(&self, curve: Option<&RouteCurve>) -> Option<bool> {
+    /// rescue fired, so this returns [`CurveStillTrue`] -- the bend's numbers
+    /// plus a live reading -- rather than an answer taken at submission time.
+    /// A snapshot was always true, because a curve call is only made when the
+    /// bend is ahead and the truck is fast, so the gate never refused
+    /// anything.
+    pub fn curve_call_still_true(&self, curve: Option<&RouteCurve>) -> Option<CurveStillTrue> {
         let curve = curve?;
-        Some(
-            curve.start_mi - self.trip.position_mi > 0.0
-                && self.trip.truck.speed_mph() > curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH,
-        )
+        Some(CurveStillTrue {
+            start_mi: curve.start_mi,
+            floor_mph: curve.advisory_mph as f64 + PACENOTE_MARGIN_MPH,
+        })
     }
 
     /// `_pacenote_linked(curve)`: the next curve when it follows within a

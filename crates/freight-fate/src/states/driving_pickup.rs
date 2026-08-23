@@ -13,6 +13,7 @@ use crate::states::city_pickup::{
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_menu_states::DriveRef;
+use crate::states::driving_updates::live;
 
 impl DrivingState {
     /// `_handle_pickup_gate()`.
@@ -96,6 +97,9 @@ impl DrivingState {
             return;
         }
         self.arrival_menu_open = true;
+        // Same as the dock gate: the frame loop stops here, so the flag the
+        // validity gates read has to be stamped where it moves.
+        live::set_arrival_menu_open(true);
         let speed_control_paused = self.pause_speed_control(ctx, false);
         self.trip.truck.brake = 1.0;
         self.trip.truck.set_parking_brake();

@@ -7,7 +7,7 @@ use ff_core::models::trailer_yard::pickup_plan;
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::driving_modes::tuning_for_time_scale;
 use ff_core::sim::trip_models::{TripEvent, TripEventKind};
-use ff_core::speech_pacing::{monotonic_seconds, EventPriority, SpeechCategory};
+use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::speech_text::{
     cruise_curve_dropped, cruise_curve_easing, roadside_chatter, stop_callout, SpokenMessage,
     StopCalloutParts,
@@ -16,6 +16,7 @@ use ff_core::speech_text::{
 use crate::app::{GameContext, Say, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+use crate::states::driving_updates::live;
 
 use super::ambient::Ambient;
 use super::event_category_for_kind;
@@ -295,11 +296,15 @@ impl DrivingState {
         // rescued line has to still be TRUE (Shane, 2026-08-21, on the
         // retread debris call).
         //
-        // Rust: `valid` outlives the borrow of `self`, so the live read of
-        // `_hazard_deadline` becomes the deadline projected forward onto the
-        // real-time clock the pacer already runs on.
-        let live_until = monotonic_seconds() + self.hazard_deadline.unwrap_or(0.0);
-        let mut opts = SayEvent::new().valid(move || monotonic_seconds() < live_until);
+        // Rust: `valid` outlives the borrow of `self`, so it reads the drive
+        // through `live`, exactly as the scale reminder does. It used to
+        // project the deadline forward onto the wall clock instead, which
+        // answers "still live" for a hazard the driver has already dodged
+        // (and for the whole of any run the wall clock outpaces) -- the
+        // question Python asks is whether a hazard is armed at all, not how
+        // much of its window is nominally left.
+        self.refresh_live_facts();
+        let mut opts = SayEvent::new().valid(live::hazard_active);
         opts.category = Self::event_category(event);
         ctx.say_event_with(message, opts);
     }
@@ -380,10 +385,11 @@ impl DrivingState {
         // past the bend, or already slowed for it, and the words are a
         // lie by the time they are spoken (Shane P, 2026-08-21).
         //
-        // Rust: the predicate is a live read of the trip, which cannot be
-        // captured in a 'static closure, so its answer is taken at
-        // submission time (see the task report's deviations).
+        // Rust: the predicate is a live read of the trip, which a 'static
+        // closure cannot borrow, so the bend's numbers ride the gate and the
+        // readings come from `live`.
         let curve_valid = self.curve_call_still_true(curve.as_ref());
+        self.refresh_live_facts();
         // A curve call sounds like any other announcement until it has
         // a signature: a short cue panned to the curve's side marks
         // "road shape ahead", never a steering command -- the owner
@@ -403,7 +409,7 @@ impl DrivingState {
             let mut opts = SayEvent::new().interrupt(interrupt);
             opts.category = category;
             if let Some(valid) = curve_valid {
-                opts = opts.valid(move || valid);
+                opts = opts.valid(move || valid.holds());
             }
             ctx.say_event_with(text, opts);
         };

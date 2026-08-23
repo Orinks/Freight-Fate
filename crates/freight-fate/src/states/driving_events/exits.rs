@@ -10,6 +10,7 @@ use crate::app::{GameContext, SayEvent};
 use crate::states::base::Key;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+use crate::states::driving_updates::live;
 
 impl DrivingState {
     /// `_take_exit()`: the take-exit control.
@@ -231,9 +232,15 @@ impl DrivingState {
             // was missed because the report only ever named the scale.
             //
             // Rust: the predicate reads the live trip, which a 'static closure
-            // cannot borrow, so the exit's own mile becomes the deadline the
-            // pacer's real-time clock is measured against instead.
-            let mut opts = SayEvent::queued().priority(EventPriority::Route);
+            // cannot borrow, so it goes through `live` exactly as the scale
+            // reminder does. The port had written the deviation note and then
+            // left the gate off entirely, so the confirmation could be handed
+            // back after the gore with nothing to refuse it.
+            let exit_mi = stop.at_mi;
+            self.refresh_live_facts();
+            let mut opts = SayEvent::queued()
+                .priority(EventPriority::Route)
+                .valid(move || live::position_mi() < exit_mi);
             opts.category = Some(SpeechCategory::Navigation);
             ctx.say_event_with(message, opts);
         } else {

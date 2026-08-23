@@ -136,6 +136,13 @@ pub fn hazard_ignored_to_100_damage() -> Outcome {
     // the automatic roadside rescue then patches it down to
     // BREAKDOWN_REPAIR_DAMAGE_PCT, long after the line was honest.
     let mut spoken_vs_actual: Vec<(f64, f64)> = Vec::new();
+    // And whether "Brake!" ever came back AFTER the truck hit the thing. The
+    // warning is a ROUTE-and-up line, so the collision's own interrupt offers
+    // it the rescue slot; its validity gate is what has to refuse, because by
+    // then there is no hazard left to answer. Counted per pass, after the
+    // warning for that pass has already been spoken, so anything the crash
+    // step adds is a replay.
+    let mut replays_after_impact = 0;
     for _ in 0..16 {
         if rig.drive.truck().damage_pct >= 100.0 {
             break;
@@ -149,12 +156,14 @@ pub fn hazard_ignored_to_100_damage() -> Outcome {
         rig.app.ctx.run_deferred();
         let before = collisions;
         let seen_lines = rig.lines_with("Total damage").len();
+        let warnings_before = rig.lines_with("Debris on the road ahead").len();
         rig.step(
             1200,
             DT,
             Some(&move |rig: &Rig| rig.said("Collision!") > before),
         );
         collisions = rig.said("Collision!");
+        replays_after_impact += rig.lines_with("Debris on the road ahead").len() - warnings_before;
         if collisions == before {
             break;
         }
@@ -183,6 +192,13 @@ pub fn hazard_ignored_to_100_damage() -> Outcome {
     }
     if collisions == 0 {
         findings.push("ignored hazards never produced a collision".to_string());
+    }
+    if replays_after_impact > 0 {
+        findings.push(format!(
+            "{replays_after_impact} hazard warnings were spoken again after the truck had \
+             already hit the hazard, telling the driver to brake for something that had \
+             already happened"
+        ));
     }
     let damage = rig.drive.truck().damage_pct;
     if damage > 100.0 {

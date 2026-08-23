@@ -1036,8 +1036,11 @@ fn test_a_curve_call_carries_its_own_expiry() {
     // can name a corner the truck is already through, or tell a driver who has
     // just braked to brake. Every curve call now hands the rescue a test.
     //
-    // Rust: the predicate cannot ride a 'static closure, so the test is the
-    // `curve_call_still_true` answer read at each of the three moments.
+    // Rust: the predicate cannot ride a 'static closure, so the gate carries
+    // the bend's own numbers and reads the truck through `live`. It is built
+    // ONCE here, where the call is made, and asked at all three moments --
+    // which is the point of the shape: an answer taken at the call is true by
+    // construction, and a gate that cannot move never refuses anything.
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     app.ctx.settings.curve_speed_assist = true;
@@ -1048,19 +1051,25 @@ fn test_a_curve_call_carries_its_own_expiry() {
         d.trip.position_mi = pos;
         d.trip.truck.velocity_mps = 65.0 * 0.44704;
         d.cruise_mph = cruise_mph;
-        assert_eq!(d.curve_call_still_true(Some(&curve)), Some(true));
+        let gate = d
+            .curve_call_still_true(Some(&curve))
+            .expect("a curve to gate");
+        d.refresh_live_facts();
+        assert!(gate.holds());
 
         // Braked for the bend: the rescue has nothing left to say.
         d.trip.truck.velocity_mps = 35.0 * 0.44704;
-        assert_eq!(d.curve_call_still_true(Some(&curve)), Some(false));
+        d.refresh_live_facts();
+        assert!(!gate.holds());
 
         // Or through it at speed, which is the miserable one to hear.
         d.trip.truck.velocity_mps = 65.0 * 0.44704;
         d.trip.position_mi = curve.end_mi + 0.05;
-        assert_eq!(d.curve_call_still_true(Some(&curve)), Some(false));
+        d.refresh_live_facts();
+        assert!(!gate.holds());
     }
     // No curve at all leaves the rescue ungated, exactly as before.
-    assert_eq!(d.curve_call_still_true(None), None);
+    assert!(d.curve_call_still_true(None).is_none());
 }
 
 #[test]

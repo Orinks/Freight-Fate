@@ -150,14 +150,38 @@ onto exit signalling.
       already used; `scale_bypass_to_the_end` is the regression gate.
       `short_hop_streak_xp_farming` carries over as the one `KNOWN_OPEN`
       entry, same finding and same reason as the Python list.
-- [ ] **Rust port: audit the other `valid` gates that became wall-clock
-      estimates.** The scale reminder was one of two: `handle_trip_event`'s
-      hazard call still projects `hazard_deadline` onto `monotonic_seconds()`
-      rather than reading the live deadline, which is the same substitution
-      and drifts the same way under time compression or a frame-rate change.
-      The battery does not catch it because no scenario cuts a hazard call and
-      then asks whether the rescue was still true. `live` already carries four
-      facts; a fifth is cheap.
+- [x] **Rust port: every `valid` gate asks the drive again, not the clock
+      (2026-08-23).** All twelve were read against the Python line they came
+      from. Four were wrong and are fixed; the hazard call was the one the
+      last entry named, and the audit turned up three more of the same shape.
+      A spoken line only comes back after an interruption cut it off, and its
+      gate is what stops the words returning once the moment has passed --
+      so a gate that cannot move is a gate that never refuses.
+      * The hazard warning ("Change lanes or brake!") projected its deadline
+        onto the wall clock. Python asks whether a hazard is armed at all, so
+        it now reads that: dodged or hit, the warning stays down.
+      * The curve call took its answer once, when the call was made -- where
+        it is true by construction, because a bend is only called while it is
+        ahead and the truck is fast. It now reads the truck's mile and speed
+        when the rescue fires, so "Sharp left" cannot come back after the
+        bend.
+      * The destination exit confirmation and the dock hold prompt had no gate
+        at all, only a comment saying why they could not have one. "Move right
+        for the exit lane" could return past the gore, and "Press Enter to
+        continue" could ask again for a press already made -- the two Shane
+        reported alongside the scale reminder.
+      `live` carries seven facts now (speed, hazard armed, dock menu open are
+      the new three), refreshed per frame and at the two places the frame loop
+      stops: a hazard clearing mid-frame, and the dock menu taking over.
+      Regression gate: seven tests in
+      `crates/freight-fate/tests/states_driving_valid_gates.rs` -- one per fix
+      for the line that must NOT come back, and one each for the still-true
+      case that must. `hazard_ignored_to_100_damage` in the battery now also
+      counts warnings spoken after impact.
+      The six remaining gates were checked and are faithful: the overspeed
+      line, the pull-over demand and its failure-to-stop escalation, the
+      collision damage total, the scale's red light, and the green light that
+      is deliberately never rescued.
 - [x] **Rust port: a failed `DriveRef` borrow is loud now (2026-08-23).**
       `with` / `read` / `call` used to answer `None` for two unrelated
       reasons -- there is no drive, and the drive is already borrowed further

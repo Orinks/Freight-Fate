@@ -233,6 +233,9 @@ pub mod live {
         static PULL_OVER_ACTIVE: Cell<bool> = const { Cell::new(false) };
         static DAMAGE_PCT: Cell<f64> = const { Cell::new(0.0) };
         static POSITION_MI: Cell<f64> = const { Cell::new(0.0) };
+        static SPEED_MPH: Cell<f64> = const { Cell::new(0.0) };
+        static HAZARD_ACTIVE: Cell<bool> = const { Cell::new(false) };
+        static ARRIVAL_MENU_OPEN: Cell<bool> = const { Cell::new(false) };
     }
 
     pub fn set_overspeed_active(value: bool) {
@@ -265,6 +268,34 @@ pub mod live {
 
     pub fn position_mi() -> f64 {
         POSITION_MI.with(|cell| cell.get())
+    }
+
+    pub fn set_speed_mph(value: f64) {
+        SPEED_MPH.with(|cell| cell.set(value));
+    }
+
+    pub fn speed_mph() -> f64 {
+        SPEED_MPH.with(|cell| cell.get())
+    }
+
+    /// Whether a hazard is still live -- the mirror of `_hazard_deadline is
+    /// not None`, which is what Python's hazard rescue gate reads.
+    pub fn set_hazard_active(value: bool) {
+        HAZARD_ACTIVE.with(|cell| cell.set(value));
+    }
+
+    pub fn hazard_active() -> bool {
+        HAZARD_ACTIVE.with(|cell| cell.get())
+    }
+
+    /// Whether the dock menu is up. The drive stops ticking while it is, so
+    /// this one is stamped where the flag itself moves, not only per frame.
+    pub fn set_arrival_menu_open(value: bool) {
+        ARRIVAL_MENU_OPEN.with(|cell| cell.set(value));
+    }
+
+    pub fn arrival_menu_open() -> bool {
+        ARRIVAL_MENU_OPEN.with(|cell| cell.get())
     }
 }
 

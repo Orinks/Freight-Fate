@@ -435,6 +435,13 @@ impl DrivingState {
     /// swerve, or an earlier hazard outrun before a new one armed.
     pub fn finish_hazard_clear(&mut self, ctx: &mut GameContext, message_text: &str) {
         self.hazard_deadline = None;
+        // Everything below here can offer the hazard call its rescue -- the
+        // clear line's own flush, or any urgent line that lands before the
+        // next tick. That gate asks whether a hazard is still armed, so the
+        // reading has to move with the deadline rather than wait for the next
+        // frame: judged on last tick's answer it replays "Change lanes or
+        // brake!" for a hazard that has just been dodged.
+        self.refresh_live_facts();
         self.release_hazard_brake();
         self.hazard_slow_hint_said = false;
         ctx.audio.play_with("events/hazard_clear", 0.75, 0.0);
@@ -581,6 +588,7 @@ impl DrivingState {
         }
         if self.hazard_deadline.unwrap_or(0.0) <= 0.0 {
             self.hazard_deadline = None;
+            self.refresh_live_facts(); // same reason as `finish_hazard_clear`
             self.release_hazard_brake();
             ctx.audio.play("vehicle/collision");
             let mut severity = 1.0f64.min(self.trip.truck.speed_mph() / 70.0);

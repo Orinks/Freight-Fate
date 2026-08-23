@@ -53,7 +53,8 @@ impl DrivingState {
         // The refreshed call checks the bend before speaking; the rescue
         // path speaks it again later, so it has to check too.
         if let Some(valid) = self.curve_call_still_true(Some(&curve)) {
-            opts = opts.valid(move || valid);
+            self.refresh_live_facts();
+            opts = opts.valid(move || valid.holds());
         }
         ctx.say_event_with(text, opts);
     }
@@ -568,10 +569,16 @@ impl DrivingState {
 
     /// Mirror the readings a `say_event(valid=...)` gate needs (see
     /// [`crate::states::driving_updates::live`]).
-    pub(crate) fn refresh_live_facts(&self) {
+    ///
+    /// Public because a test that moves the truck by hand has to stand in for
+    /// the frame that would otherwise have carried the reading across.
+    pub fn refresh_live_facts(&self) {
         live::set_overspeed_active(self.overspeed_active);
         live::set_pull_over_active(self.trip.pull_over_active);
         live::set_damage_pct(self.trip.truck.damage_pct);
         live::set_position_mi(self.trip.position_mi);
+        live::set_speed_mph(self.trip.truck.speed_mph());
+        live::set_hazard_active(self.hazard_deadline.is_some());
+        live::set_arrival_menu_open(self.arrival_menu_open);
     }
 }
