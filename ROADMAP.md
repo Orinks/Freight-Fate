@@ -1349,6 +1349,29 @@ onto exit signalling.
       otherwise the level that earns the next tier -- so the question is
       answerable at any time, not only when the game happens to raise it.
 
+- [x] **Curve assist takes the chain's tightest advisory, not the first
+      bend's (2026-08-23).** Darren's load shifted 12 percent on NY-12 and
+      his log had the words and the machine disagreeing:
+
+        Curve left, a quarter mile. Advise 40 miles per hour. Then sharp
+        left, advise 30 miles per hour. Adaptive cruise easing to 40 miles
+        per hour for the bend.
+        ... Sharp left: too fast, drifting to the outside.
+        ... The load has shifted hard and is damaged, 12 percent.
+
+      `_pacenote_text` already reads the linked follower and speaks its
+      tighter advisory; the assist beside it read only `advisory` and set
+      `_cruise_curve_end_mi` to the LEAD bend's end. So it eased to 40,
+      released at the first bend's end, and met a 30 mph bend at 40 -- with
+      nothing left to warn, because the trip suppresses a linked follower's
+      own call so a chain speaks once. The spoken number was right the whole
+      way, which is the worst shape for a fault: nobody goes looking for a
+      bug in a cab that is saying the correct thing.
+
+      Found by reading a tester's log rather than by a report -- Darren only
+      said he "had some trouble with hairpin curves" and asked whether they
+      were supposed to be there.
+
 - [x] **CI stops spending the LFS budget it needs (2026-08-23).** Every run
       on this branch was red at CHECKOUT, not on a test: "This repository
       exceeded its LFS budget". CI was what spent it. The test job fetched

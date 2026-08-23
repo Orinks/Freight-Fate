@@ -1154,6 +1154,15 @@
   re-read.
 
 ### Fixed
+- **Curve assistance slows for the whole chain of bends, not just the first
+  one.** When two bends come one after the other, the cab warns you about
+  both in a single breath -- "Curve left, a quarter mile. Advise 40. Then
+  sharp left, advise 30." Curve speed assistance was only easing to the first
+  number and letting the speed back up as soon as the first bend was behind,
+  so it carried you into the second one ten miles an hour too fast, and that
+  second bend never got a warning of its own because the first call was
+  supposed to be it. It now holds the slowest speed in the chain until the
+  last bend of it is behind you, which is the speed you were told.
 - **You can get past a box truck now.** Box trucks were being run at the same
   governed speed as a loaded semi, which on a 65 road put them within about a
   mile an hour of you. Pulling into the left lane to get around one never

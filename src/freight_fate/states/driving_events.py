@@ -547,8 +547,24 @@ class DrivingEventMixin:
                     and advisory >= CRUISE_MIN_MPH
                 )
                 if assisted:
-                    self._cruise_curve_mph = float(advisory)
-                    self._cruise_curve_end_mi = max(curve.start_mi, curve.end_mi)
+                    # The CHAIN's number, not just this bend's. A call that
+                    # carries a linked follower ("then sharp left, advise 30")
+                    # is the follower's only warning -- the trip suppresses
+                    # its own call so the pair is one sentence -- so easing to
+                    # the first bend's 40 and releasing at the first bend's
+                    # end took the truck into the follower ten miles an hour
+                    # too fast, with nothing left to warn it. Darren's load
+                    # shifted 12 percent on exactly that pair on NY-12
+                    # (2026-08-23), and the spoken line had named 30 the whole
+                    # time: the words were right and the assist was not.
+                    linked = self._pacenote_linked(curve)
+                    hold_mph = float(advisory)
+                    hold_to_mi = max(curve.start_mi, curve.end_mi)
+                    if linked is not None:
+                        hold_mph = min(hold_mph, float(linked.advisory_mph))
+                        hold_to_mi = max(hold_to_mi, linked.start_mi, linked.end_mi)
+                    self._cruise_curve_mph = hold_mph
+                    self._cruise_curve_end_mi = hold_to_mi
                     # Terse speaks the pacenote alone: its advisory number is
                     # the number cruise is easing to, and the deceleration
                     # itself is audible (R4's curve-composite row).
