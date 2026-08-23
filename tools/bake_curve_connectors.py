@@ -21,8 +21,9 @@ miles, on a road system that asks for none.
 
 THE DISCRIMINATOR IS READ, NOT DERIVED
 --------------------------------------
-``tools/curve_osm_facts.py`` reads what OSM way each curve's apex rides, and
-what class of road the leg itself is made of, mile by mile. Two readings:
+``tools/curve_valhalla_facts.py`` map-matches each leg's archived polyline
+through Valhalla and records what edge every curve's apex rides, plus what
+class of road the leg itself is made of, mile by mile. Two readings:
 
   ``osm:ramp``          the apex rides a ``highway=*_link`` way, which is the
                         tag OSM uses for a ramp, slip road or interchange
@@ -106,9 +107,25 @@ Nothing is deleted. Every row keeps its radius, deflection and advisory; only
 ``connector`` moves, and ``connector_source`` records which reading moved it,
 so the rule can be re-judged from the shipped data without re-baking.
 
-The facts file itself is NOT committed -- 26 MB of derived cache, regenerated
-by one offline pass over the local extracts. The decision it feeds is what
-ships, row by row, in ``connector_source``.
+The facts file itself is NOT committed -- derived cache, regenerated in about
+forty minutes by ``tools/curve_valhalla_facts.py``. The decision it feeds is
+what ships, row by row, in ``connector_source``.
+
+THE ORDER MATTERS, AND NOTHING ENFORCES IT
+------------------------------------------
+These four passes form a chain, each reading the output of the last. Run them
+in this order after any change to the curve data::
+
+    uv run python tools/curve_valhalla_facts.py --all      # what road is it on
+    uv run python tools/bake_curve_connectors.py --write   # mainline or connector
+    uv run python tools/clamp_curve_advisories.py --write  # cap the advisory
+    uv run python tools/screen_curve_artifacts.py          # drop impossible geometry
+
+Skipping the last has now stranded ``curve_artifacts.jsonl`` twice in a single
+session. It names rows by ``(leg, seq)`` and only considers non-connector rows,
+so the moment ``connector`` moves it can silently stop covering a row it used
+to screen -- which is how a 44 ft radius turning 182 degrees survived as
+mainline on US-30 out of Columbus. A stale screen does not announce itself.
 
 Usage
 -----
@@ -175,6 +192,13 @@ CLASS_RANK = {
     "tertiary": 4,
     "unclassified": 5,
     "residential": 6,
+    # Valhalla's name for a service road, which OSM tags highway=service. It
+    # covers the alleys, driveways and yard roads a route threads at its very
+    # ends. Ranked last because a bend on one is never the through road -- and
+    # it has to be HERE rather than absent: an unranked class reads as
+    # "nothing may be concluded", which would have let service roads through
+    # as mainline on every leg.
+    "service_other": 7,
 }
 
 SOURCE_NOTE = (

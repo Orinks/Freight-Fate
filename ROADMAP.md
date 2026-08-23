@@ -1577,6 +1577,45 @@ onto exit signalling.
       corrected leg still reads a touch short. A real router would settle it
       exactly -- see the Valhalla bullet below.
 
+- [x] **Curve road classes come from a map matcher, not from nearest-way
+      (2026-08-23).** `curve_osm_facts.py` streamed 14 GB of Geofabrik
+      extracts and took the nearest way segment to each curve's apex. That is
+      the wrong instrument: at an interchange the ramp and the mainline it
+      leaves are metres apart, and one point cannot know which the truck is
+      on. Two 90-minute passes to get an answer that was wrong at exactly the
+      places it mattered.
+
+      Valhalla's `trace_attributes` snaps the WHOLE polyline at once, so the
+      answer has to be a connected path, and it separates two things OSM
+      conflates into `highway=*_link`: `road_class` (the road's importance)
+      and `use` (whether the edge is a ramp or turn channel). A ramp off a
+      trunk is now a ramp CARRYING trunk class.
+
+      NO TILESET NEEDED, which was the surprise. FOSSGIS runs a public,
+      planet-wide Valhalla that answers `trace_attributes`; a local US build
+      was started, would have taken 6-12 hours and ~120 GB, and was abandoned
+      once the public service matched 400 of 400 points through Glenwood
+      Canyon in 0.7 seconds. The whole network now matches in about forty
+      minutes, throttled to be a good citizen. `--local` still points at a
+      self-hosted build if one is ever wanted.
+
+      THE BUG THE 2 PERCENT GUARD CAUGHT: Valhalla caps a trace by PATH
+      DISTANCE (200 km), not by point count. Chunking by points let a leg with
+      1 km vertex spacing blow the limit in 257 points and come back ENTIRELY
+      unmatched -- 24 percent of Colorado, five legs at 100 percent. Chunking
+      by distance took that to 0.2 percent. Without the guard this would have
+      shipped as a quietly blind dataset.
+
+      RESULT: 1,290 legs matched, 99.7 percent of 63,873 curves read. One
+      interstate slowdown every 105.7 miles. Every control held or improved,
+      and two improved because the matcher RECOVERED real bends the
+      nearest-way pass had wrongly dropped: US-550 274 -> 276 curves, US-40
+      362 -> 368. Glenwood Canyon, Vail Pass, the Eisenhower approach and the
+      Salt River Canyon are unchanged to the curve.
+
+      `tools/curve_osm_facts.py` is deleted. Two tools answering the same
+      question differently is an invitation to run the wrong one.
+
 - [ ] **Some interstate legs are labelled for a road their route does not
       ride.** Found by the connector bake above, which reads per-leg freeway
       coverage as a by-product: 51 of 728 interstate legs spend under half

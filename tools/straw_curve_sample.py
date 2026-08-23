@@ -81,7 +81,7 @@ ADVISORY_MAX_MPH = 80  # top of the AASHTO friction table; see _advisory_mph
 CONNECTOR_WINDOW_MI = 0.75  # first/last in-town stretch -> tag curves, don't drop
 # ^ a BOOTSTRAP, not the finished connector layer. Position alone cannot see a
 #   mid-leg interchange, and 0.75 mi does not get a truck out of Denver. After
-#   any sweep, re-run tools/curve_osm_facts.py and tools/bake_curve_connectors.py:
+#   any sweep, re-run tools/curve_valhalla_facts.py and bake_curve_connectors.py:
 #   those read the road class OSM records under each apex and finish the flag.
 MATCH_CORRIDOR_M = 90.0  # how near a maxspeed way must be to govern a sample point
 SPEED_GAP_MI = 4.0  # a posting-free run longer than this becomes an explicit gap

@@ -1,8 +1,8 @@
 """What road does each baked curve sit on? Ask a map matcher.
 
-This replaces ``tools/curve_osm_facts.py``, which answered the same question
-by streaming 14 GB of Geofabrik extracts and taking the nearest way segment to
-each curve's apex. Nearest-distance is the wrong tool: at an interchange the
+This replaces the old ``curve_osm_facts.py`` (deleted), which answered the
+same question by streaming 14 GB of Geofabrik extracts and taking the nearest
+way segment to each curve's apex. Nearest-distance is the wrong tool: at an interchange the
 ramp and the mainline it leaves are metres apart, and a point has no way to
 know which one the truck is on.
 
@@ -57,6 +57,7 @@ import argparse
 import json
 import math
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -75,16 +76,27 @@ scs.CURVE_PAD_M = 150.0
 ROOT = Path(__file__).resolve().parent.parent
 CURVES = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "gameplay" / "curves.jsonl"
 
-VALHALLA_URL = "http://localhost:8002/trace_attributes"
+# FOSSGIS runs a public, planet-wide Valhalla. It answers trace_attributes,
+# which means the whole tileset build is optional: a 400-point chunk of I-70
+# through Glenwood Canyon matched 400 of 400 in 0.7 seconds against it.
+# Default to the public one and let --url point at a local build instead.
+PUBLIC_URL = "https://valhalla1.openstreetmap.de/trace_attributes"
+LOCAL_URL = "http://localhost:8002/trace_attributes"
+USER_AGENT = "Freight-Fate map-matching (https://github.com/Orinks/Freight-Fate)"
 COSTING = "truck"  # the vehicle actually being routed, so its restrictions apply
 
 # What ``edge.use`` calls interchange geometry.
 RAMP_USES = frozenset({"ramp", "turn_channel"})
 
-# Valhalla caps a single trace; long legs are matched in overlapping chunks so
-# the matcher still sees context either side of every cut.
-MAX_SHAPE_POINTS = 1000
-CHUNK_OVERLAP = 20
+# Valhalla caps a trace by PATH DISTANCE, not by point count: the public
+# instance refuses anything over 200 km with error 154. Chunking by points
+# misses that entirely -- a leg with 1 km vertex spacing blows the limit in
+# 257 points, and the whole leg then comes back unmatched. So chunks are cut
+# by distance, at three quarters of the limit because the matched path can run
+# slightly longer than the shape it was given.
+MAX_CHUNK_M = 150_000.0
+MAX_SHAPE_POINTS = 1000  # a second bound, for dense city geometry
+CHUNK_OVERLAP_M = 1_000.0  # context either side of a cut, so no edge is guessed at
 
 # One mile between the route samples that say what a leg is MADE of.
 COVERAGE_STEP_M = 1609.344
@@ -100,20 +112,36 @@ def load_curve_rows() -> dict[str, list[dict]]:
     return out
 
 
-def _post(body: dict) -> dict | None:
-    request = urllib.request.Request(
-        VALHALLA_URL,
-        data=json.dumps(body).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=300) as response:
-            return json.loads(response.read())
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError):
-        return None
+def _post(url: str, body: dict, delay: float, attempts: int = 4) -> dict | None:
+    """One trace, with backoff. Returns None once the retries are spent.
+
+    The public instance is a free community service, so this throttles between
+    calls and backs off rather than hammering it. A 400 is the matcher saying
+    it could not snap the shape and is not worth retrying; anything else is
+    treated as transient.
+    """
+    payload = json.dumps(body).encode("utf-8")
+    for attempt in range(attempts):
+        request = urllib.request.Request(
+            url,
+            data=payload,
+            headers={"Content-Type": "application/json", "User-Agent": USER_AGENT},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=300) as response:
+                if delay:
+                    time.sleep(delay)
+                return json.loads(response.read())
+        except urllib.error.HTTPError as exc:
+            if exc.code == 400:
+                return None  # unsnappable shape, not a transient failure
+            time.sleep(delay + 2.0 * (attempt + 1))
+        except (urllib.error.URLError, TimeoutError, OSError):
+            time.sleep(delay + 2.0 * (attempt + 1))
+    return None
 
 
-def match_leg(coords: list[list[float]]) -> dict[int, dict]:
+def match_leg(coords: list[list[float]], url: str, delay: float) -> dict[int, dict]:
     """``vertex index -> matched edge`` for one leg's polyline.
 
     Chunked with overlap so a cut never robs the matcher of the context it
@@ -121,13 +149,21 @@ def match_leg(coords: list[list[float]]) -> dict[int, dict]:
     not place is simply absent, and the caller records that as no reading.
     """
     out: dict[int, dict] = {}
+    cum = scs._cumulative_m(coords)
     start = 0
     while start < len(coords):
-        stop = min(len(coords), start + MAX_SHAPE_POINTS)
+        stop = start + 1
+        while (
+            stop < len(coords)
+            and cum[stop] - cum[start] < MAX_CHUNK_M
+            and stop - start < MAX_SHAPE_POINTS
+        ):
+            stop += 1
         chunk = coords[start:stop]
         if len(chunk) < 2:
             break
         result = _post(
+            url,
             {
                 "shape": [{"lat": lat, "lon": lon} for lon, lat in chunk],
                 "costing": COSTING,
@@ -145,7 +181,8 @@ def match_leg(coords: list[list[float]]) -> dict[int, dict]:
                     ],
                     "action": "include",
                 },
-            }
+            },
+            delay,
         )
         if result:
             edges = result.get("edges") or []
@@ -158,7 +195,10 @@ def match_leg(coords: list[list[float]]) -> dict[int, dict]:
                 out[start + offset] = edges[index]
         if stop >= len(coords):
             break
-        start = stop - CHUNK_OVERLAP
+        back = stop - 1
+        while back > start + 1 and cum[stop - 1] - cum[back] < CHUNK_OVERLAP_M:
+            back -= 1
+        start = back
     return out
 
 
@@ -193,15 +233,29 @@ def main() -> int:
     group.add_argument("--all", action="store_true")
     group.add_argument("--state", help="comma-separated from-state codes")
     ap.add_argument("--out", help=f"facts file to write (default {FACTS})")
+    ap.add_argument("--url", default=PUBLIC_URL, help=f"matcher endpoint (default {PUBLIC_URL})")
+    ap.add_argument("--local", action="store_true", help=f"shorthand for --url {LOCAL_URL}")
+    ap.add_argument(
+        "--delay",
+        type=float,
+        default=None,
+        help="seconds between calls; defaults to 0.4 against the public service, 0 locally",
+    )
     args = ap.parse_args()
+    url = LOCAL_URL if args.local else args.url
+    delay = args.delay if args.delay is not None else (0.0 if url == LOCAL_URL else 0.4)
 
-    if _post({"shape": [], "costing": COSTING}) is None:
-        probe = urllib.request.Request("http://localhost:8002/status")
-        try:
-            urllib.request.urlopen(probe, timeout=10)
-        except Exception:
-            print("Valhalla is not answering on localhost:8002 -- see this module's docstring.")
-            return 1
+    status = url.rsplit("/", 1)[0] + "/status"
+    try:
+        probe = urllib.request.Request(status, headers={"User-Agent": USER_AGENT})
+        actions = json.loads(urllib.request.urlopen(probe, timeout=20).read())
+    except Exception as exc:
+        print(f"{status} is not answering ({exc}) -- see this module's docstring.")
+        return 1
+    if "trace_attributes" not in (actions.get("available_actions") or []):
+        print(f"{status} does not offer trace_attributes.")
+        return 1
+    print(f"matching against {url} (delay {delay}s between calls)")
 
     out_path = Path(args.out) if args.out else FACTS
     wanted = None if args.all else {s.strip().lower() for s in args.state.split(",")}
@@ -233,7 +287,7 @@ def main() -> int:
         if len(detected) != len(rows):
             skipped += 1
             continue
-        matched = match_leg(coords)
+        matched = match_leg(coords, url, delay)
         for curve, row in zip(detected, rows, strict=False):
             fact = facts_for(leg_id, row["seq"], matched.get(curve["_apex"]))
             unread += fact.get("near_m") is None
