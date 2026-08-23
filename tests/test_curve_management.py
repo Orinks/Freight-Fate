@@ -757,3 +757,129 @@ def test_a_hairpin_is_a_shape_not_a_speed() -> None:
     # switchback (NY-12, 2026-08-23).
     norwich = curve(advisory=25, deflection=94.0)
     assert norwich.severity == "sharp"
+
+
+def test_the_friction_table_is_aashto_table_3_7() -> None:
+    """Pinned against the published source, not against itself.
+
+    Iowa DOT Design Manual 2B-2 Table 2B.1 reproduces these and names its
+    origin: "Adapted from Table 3-7: AASHTO Greenbook, 7th edition, 2018".
+    TxDOT Table 4-7 agrees independently -- back-solve its minimum radii
+    through the manual's own e + f = V^2/15R and these are the f values that
+    fall out. Three sources, one table.
+    """
+    from freight_fate.data.curves import AASHTO_SIDE_FRICTION
+
+    published = {
+        15: 0.32,
+        20: 0.27,
+        25: 0.23,
+        30: 0.20,
+        35: 0.18,
+        40: 0.16,
+        45: 0.15,
+        50: 0.14,
+        55: 0.13,
+        60: 0.12,
+        65: 0.11,
+        70: 0.10,
+        75: 0.09,
+        80: 0.08,
+    }
+    # Every value we carry must be the published one. The table starts at 20
+    # rather than 15 because nothing in the game is designed for 15 mph, and
+    # a row nothing reads is a row nobody maintains.
+    for speed, factor in AASHTO_SIDE_FRICTION.items():
+        assert published[speed] == factor, f"{speed} mph"
+    assert set(AASHTO_SIDE_FRICTION) >= set(range(20, 85, 5))
+
+
+def test_minimum_radii_match_the_published_table() -> None:
+    """``min_radius_ft`` against TxDOT Roadway Design Manual Table 4-7
+    (Minimum Radii and Superelevation Rates, emax = 8%), e = 8.0% row.
+
+    The derivation and the table are independent -- one is arithmetic from
+    AASHTO's friction factors, the other is printed in a state design manual
+    -- so agreeing to rounding is a real check rather than a tautology.
+    """
+    from freight_fate.data.curves import min_radius_ft
+
+    published = {50: 758, 55: 960, 60: 1200, 65: 1480, 70: 1810, 75: 2210, 80: 2670}
+    for speed, table_ft in published.items():
+        derived = min_radius_ft(speed)
+        assert abs(derived - table_ft) / table_ft < 0.01, (
+            f"{speed} mph: derived {derived:.0f} ft vs published {table_ft} ft"
+        )
+
+
+def test_the_bank_is_the_rate_roads_are_built_to_not_the_rate_allowed() -> None:
+    """8 percent is the ceiling; 6 percent is what gets built.
+
+    Crediting every curve with the steepest bank any state permits would read
+    out a higher safe speed than the road has, which is the one direction an
+    error must not run. TxDOT 4.7.3 normally builds 6 and needs a District
+    Design Engineer to go to 8; Iowa DOT 2B-2 limits new construction to 6
+    and keeps 8 as the state ceiling.
+    """
+    from freight_fate.data.curves import (
+        SUPERELEVATION_BUILT,
+        SUPERELEVATION_MAX,
+        superelevation_at,
+    )
+
+    assert SUPERELEVATION_BUILT == 0.06
+    assert SUPERELEVATION_MAX == 0.08, "the SCREEN still asks the permissive question"
+
+    # Never steeper than what is built, however tight the curve.
+    for radius in (200, 500, 758, 1200):
+        assert superelevation_at(radius, 70) <= SUPERELEVATION_BUILT
+    # A gentle curve is not banked at all -- normal crown, as built.
+    assert superelevation_at(20_000, 70) == 0.0
+    # And the bank grows as the curve tightens, never the other way.
+    banks = [superelevation_at(r, 70) for r in (12_000, 6_000, 3_000, 1_500, 800)]
+    assert banks == sorted(banks)
+
+
+def test_counting_the_bank_only_ever_raises_an_advisory() -> None:
+    """The correction exists because the bake read every road as flat.
+
+    A bank can only help a truck hold a curve, so this must never hand back a
+    number lower than the flat one -- a correction meant to speed a curve up
+    must not quietly slow a different one down.
+    """
+    import math
+
+    from freight_fate.data.curves import ADVISORY_LATERAL_G, advisory_with_bank_mph
+
+    for radius in (400, 758, 1000, 1810, 5000, 20_000):
+        flat = math.sqrt(15.0 * radius * ADVISORY_LATERAL_G)
+        assert advisory_with_bank_mph(radius, 70) >= int(round(flat / 5.0) * 5) - 1
+
+    # A town street is built to normal crown, so it keeps the flat reading:
+    # TxDOT Table 4-3 and Iowa DOT 2B-1 both put the Method 2 / Method 5 line
+    # at 45 mph.
+    from freight_fate.data.curves import BANKED_DESIGN_MIN_MPH
+
+    assert BANKED_DESIGN_MIN_MPH == 50.0
+
+
+def test_the_design_floor_is_spent_where_the_ground_cannot_excuse_a_bend() -> None:
+    """The design minimum is real, and applying it flat to interstates is not.
+
+    TxDOT Table 4-7 puts a 50 mph design speed at 758 ft and 50 is the lowest
+    the Interstate system designs to, so a tighter interstate curve is below
+    every standard. Screening on that number directly deletes I-70 through
+    Glenwood Canyon, which really is tighter than standard under design
+    exceptions -- a floor sized to the design minimum cannot tell an
+    exception from an artifact (tried and reverted, 2026-08-23).
+
+    So the flat interstate screen stays deliberately loose, and the design
+    floor is spent by the terrain-gated screen instead, which only judges
+    ground with no relief to justify the bend.
+    """
+    from freight_fate.data.curves import INTERSTATE_MIN_RADIUS_FT, min_radius_ft
+
+    assert INTERSTATE_MIN_RADIUS_FT == 300
+    assert min_radius_ft(50) > INTERSTATE_MIN_RADIUS_FT, (
+        "the blunt screen must stay below the design floor, or it eats real road"
+    )

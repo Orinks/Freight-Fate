@@ -1154,6 +1154,14 @@
   re-read.
 
 ### Fixed
+- **Fewer needless slowdowns for interstate curves.** The game worked out how
+  fast a bend could be taken as though every road were flat. Real highway
+  curves are banked, and the bank is a big part of what holds a truck in a
+  curve -- ignoring it made ordinary interstate bends look sharper than they
+  are, so the truck braked for curves built to be driven at speed. Curves are
+  now read with the bank the road is actually built with, which roughly halves
+  how often an interstate asks you to slow down. Town streets are unchanged:
+  they genuinely are built flat.
 - **"Hairpin" now means a hairpin.** The cab was calling a bend a hairpin
   whenever it advised 25 miles per hour or less, which caught a lot of road
   that is nothing of the kind -- tight little corners taken slowly, and in the

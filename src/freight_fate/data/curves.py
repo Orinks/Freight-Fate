@@ -81,15 +81,30 @@ HAIRPIN_DEFLECTION_DEG = 135.0
 # Interstate mainline geometry screen. The dense sweep baked some city
 # departure geometry and interchange vertices as mainline rather than as
 # connectors, which put 80-250 ft "hairpins" on roads that cannot bend that
-# hard: an interstate is designed for 50 mph even in mountainous terrain, so
-# its tightest real mainline curve is roughly 500-600 ft of radius (the
-# notorious urban exceptions, posted 35, sit right about there). Anything
-# under 300 ft, or turning more than a switchback's worth, is a digitizing
-# artifact. Only the interstate class is screened -- US and state routes
-# really do switch back (US-550 over Red Mountain Pass, US-40 in the
-# Rockies) and their sharp records are kept exactly as baked.
+# hard. Anything under 300 ft, or turning more than a switchback's worth, is
+# a digitizing artifact.
+#
+# 300 is deliberately far below the DESIGN floor, and the difference is not
+# slack -- it is Glenwood Canyon. TxDOT Roadway Design Manual Table 4-7 puts
+# the minimum radius for a 50 mph design speed at 758 ft, and 50 mph is the
+# lowest the Interstate system designs to; raising this constant to 758
+# accordingly reads well and deletes real road, because I-70 through the
+# canyon really does bend tighter than standard under design exceptions
+# (tried and reverted, 2026-08-23 -- test_glenwood_canyon_interstate_curves
+# _survive is what caught it). A screen sized to the design floor cannot
+# tell a design exception from an artifact.
+#
+# The design floor IS applied, by the fourth screen below, and only where the
+# ground cannot justify a tight bend: `_screenable_legs` gives every LEVEL
+# leg a floor of `min_radius_ft(its own design speed)`. That is the same
+# number, spent where it is safe to spend.
+#
+# Only the interstate class is screened here -- US and state routes really do
+# switch back (US-550 over Red Mountain Pass, US-40 in the Rockies) and their
+# sharp records are kept exactly as baked.
 INTERSTATE_MIN_RADIUS_FT = 300
 INTERSTATE_MAX_DEFLECTION_DEG = 150.0
+
 
 # Geometry self-consistency screen, applied to mainline of every class.
 #
@@ -213,6 +228,65 @@ def min_radius_ft(design_speed_mph: float) -> float:
     return (v * v) / (15.0 * (SUPERELEVATION_MAX + AASHTO_SIDE_FRICTION[v]))
 
 
+# What the bake priced its advisory at: a comfortable lateral for a loaded
+# truck, on a FLAT road (tools/straw_curve_sample.py, A_LAT_G).
+ADVISORY_LATERAL_G = 0.30
+# The bank a road is actually BUILT with, which is not the same question as
+# the bank a road is ALLOWED. SUPERELEVATION_MAX above is 8 percent because
+# the screen asks "is this curve under every standard anywhere" and wants the
+# most permissive number. Crediting a curve with the full 8 would assume the
+# steepest bank any state permits on every road in the country, and reading
+# more bank than a road has reads out a higher safe speed than it has -- an
+# error in the one direction that matters.
+#
+# Both manuals name the built rate and both say 6: TxDOT 4.7.3, "The
+# Department normally uses a maximum superelevation rate of 6 percent",
+# 8 only "where higher superelevation rates or sharper curves are desired"
+# and only with a District Design Engineer's sign-off. Iowa DOT 2B-2, "For
+# new construction, the superelevation rate is limited to 6%", reserving 8
+# as the state ceiling.
+SUPERELEVATION_BUILT = 0.06
+
+
+def superelevation_at(radius_ft: float, design_speed_mph: float) -> float:
+    """The bank a designer had to build to hold the design speed here.
+
+    Zero where friction alone carries it -- a gentle curve gets normal crown
+    -- and never above ``SUPERELEVATION_BUILT``, the rate roads are built to
+    rather than the steeper one they are permitted.
+
+    DERIVED, not surveyed: nothing in the bake records a real cross-slope, so
+    this is the bank the governing equation demands, e = V^2/15R - f. AASHTO
+    Method 5, which TxDOT Tables 4-6 and 4-7 are computed with, lays MORE
+    bank than this on gentle curves and the same at the minimum radius -- so
+    this reads low where it barely matters and true where it does, and every
+    error runs toward caution.
+    """
+    if radius_ft <= 0.0 or design_speed_mph <= 0.0:
+        return 0.0
+    speeds = sorted(AASHTO_SIDE_FRICTION)
+    v = min(speeds, key=lambda s: abs(s - design_speed_mph))
+    needed = design_speed_mph**2 / (15.0 * radius_ft) - AASHTO_SIDE_FRICTION[v]
+    return max(0.0, min(SUPERELEVATION_BUILT, needed))
+
+
+def advisory_with_bank_mph(radius_ft: float, design_speed_mph: float) -> int:
+    """The advisory the bake would have given had it known about the bank.
+
+    The bake reads every curve as flat -- ``sqrt(0.30 g R)`` -- which throws
+    away the e in the manual's own e + f = V^2/15R and understates every
+    banked curve. On a 1,000 ft radius that is 67 mph read as safe against a
+    designed-and-banked 75, and it is why trucks braked for interstate curves
+    built to be taken at speed.
+
+    Rounded to 5 like the bake's own, so the two are directly comparable.
+    """
+    if radius_ft <= 0.0:
+        return 0
+    e = superelevation_at(radius_ft, design_speed_mph)
+    return int(round(math.sqrt(15.0 * radius_ft * (e + ADVISORY_LATERAL_G)) / 5.0) * 5)
+
+
 # Which legs the screen may judge at all. It needs to know whether a tight
 # bend is the road or an artifact, and that is a question about terrain.
 #
@@ -278,6 +352,46 @@ def _screenable_legs() -> dict[str, float]:
         out[f"{leg.a}:{leg.b}"] = floor
         out[f"{leg.b}:{leg.a}"] = floor
     return out
+
+
+# Below this the road is built to normal crown and the flat reading is the
+# right one. TxDOT Table 4-3 splits exactly here: low-speed facilities (45 and
+# below) distribute superelevation by AASHTO Method 2, which "only introduces
+# superelevation after the maximum side friction has been used" and in
+# practice leaves town streets unbanked; 50 and above use Method 5 and are
+# banked as a matter of course.
+BANKED_DESIGN_MIN_MPH = 50.0
+
+
+def _leg_design_speeds() -> dict[str, float]:
+    """``"a:b"`` -> the speed the leg is built for, for EVERY leg.
+
+    ``_screenable_legs`` answers the same question but only for level ground,
+    because that screen has no business judging a mountain road. The bank
+    applies everywhere, so it needs its own pass.
+    """
+    from .world import get_world
+
+    out: dict[str, float] = {}
+    for leg in get_world().legs:
+        design = _leg_design_speed(leg)
+        out[f"{leg.a}:{leg.b}"] = design
+        out[f"{leg.b}:{leg.a}"] = design
+    return out
+
+
+def _banked_advisory(row: dict, design_mph: float | None) -> int:
+    """The row's advisory, corrected for the bank its road must carry."""
+    baked = row["advisory_mph"]
+    if design_mph is None or design_mph < BANKED_DESIGN_MIN_MPH:
+        return baked
+    radius = row.get("min_radius_ft") or 0.0
+    if radius <= 0.0:
+        return baked
+    # Only ever upward: the bake read the road flat, and a bank can only help.
+    # A curve that somehow reads slower banked than flat keeps the flat number
+    # rather than being quietly slowed by a correction meant to speed it up.
+    return max(baked, advisory_with_bank_mph(radius, design_mph))
 
 
 def _is_flat_ground_artifact(row: dict, floor: float) -> bool:
@@ -401,6 +515,7 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
         interstate_legs = _interstate_leg_keys()
         flagged_artifacts = _flagged_artifact_keys()
         screenable = _screenable_legs()
+        design_speeds = _leg_design_speeds()
         for line in text.splitlines():
             if line.strip():
                 row = json.loads(line)
@@ -435,7 +550,7 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
                         apex_mi=row["apex_mi"],
                         end_mi=row["end_mi"],
                         direction=row["direction"],
-                        advisory_mph=row["advisory_mph"],
+                        advisory_mph=_banked_advisory(row, design_speeds.get(row["leg"])),
                         min_radius_ft=row["min_radius_ft"],
                         deflection_deg=row["deflection_deg"],
                         connector=connector,

@@ -1349,6 +1349,71 @@ onto exit signalling.
       otherwise the level that earns the next tier -- so the question is
       answerable at any time, not only when the game happens to raise it.
 
+- [x] **Curve advisories count the bank the road is built with
+      (2026-08-23).** Owner: too many interstate curves make the truck slow.
+      MEASURED: 16,038 interstate mainline curves over 86,412 miles, 3,002 of
+      them demanding a drop below 65 -- one every 28.8 miles, where a real
+      interstate asks for none.
+
+      The bake computes its advisory as `sqrt(0.30 g R)`, a FLAT road
+      (`tools/straw_curve_sample.py`, `A_LAT_G`). TxDOT Roadway Design Manual
+      4.7.3 gives the governing equation as `e + f = V^2 / 15R`, so a flat
+      reading discards e outright and understates every banked curve: a
+      1,000 ft radius reads 67 mph against a designed-and-banked 75.
+
+      `superelevation_at` derives the bank the designer had to build to hold
+      the road's own design speed, and `advisory_with_bank_mph` reprices the
+      advisory at load. Applied only at design speeds of 50 and up, which is
+      where TxDOT Table 4-3 and Iowa DOT 2B-1 both put the Method 5 / Method 2
+      line -- a town street is built to normal crown and its flat reading is
+      correct. Result: one slowdown every 44.2 interstate miles, from 28.8.
+
+      SOURCES CROSS-CHECKED, at the owner's insistence and he was right to.
+      An early WebFetch summary of TxDOT Table 4-7 was WRONG -- shifted a
+      column, giving 70 mph as 1,480 ft when the table says 1,810 -- and was
+      caught by back-solving its own friction factors (0.14 at 70 is a 50 mph
+      value). Read verbatim afterwards. The friction table already in
+      `curves.py` matches Iowa DOT Table 2B.1, which cites AASHTO Green Book
+      7th ed. Table 3-7, at every speed; and `min_radius_ft` reproduces TxDOT
+      Table 4-7 to rounding (757.6 vs 758, 1814.8 vs 1810) by independent
+      arithmetic.
+
+      6 PERCENT, NOT 8. `SUPERELEVATION_MAX` is 8 because the SCREEN wants the
+      most permissive number. Reusing it for the advisory credits every road
+      with the steepest bank any state permits, reading out a higher safe
+      speed than the road has. Both manuals name the built rate and both say
+      6 (TxDOT 4.7.3; Iowa 2B-2), so `SUPERELEVATION_BUILT` is its own
+      constant. Measured sensitivity: 4 vs 6 percent moves 30 percent of
+      advisories and 725 across the slow-down line, so this is not a rounding
+      detail.
+
+      STATE RULES CONVERGE, which is why there is no per-state table. Texas,
+      Iowa, New York and North Carolina all land on 8 as the ceiling, 6 built,
+      4 urban, because all four implement AASHTO. The axis that moves the
+      number is urban versus rural, not the state line -- and TxDOT settles
+      the case that matters: "Freeway facilities are excluded from using a
+      maximum superelevation rate of 4 percent."
+
+- [ ] **The rest of the interstate slowdowns are artifact geometry, and want
+      the bake.** The bank fix took one-every-28.8-miles to one-every-44.2.
+      What is left is not a physics problem: EVERY one of the original 3,002
+      sat below the 60 mph minimum radius and half below the 50 mph one, so
+      none of them was real interstate mainline. They are interchange
+      vertices and city-departure kinks the dense sweep classed as mainline
+      rather than as connectors.
+
+      SCREENING THEM AT THE DESIGN FLOOR DOES NOT WORK, and this was tried:
+      `INTERSTATE_MIN_RADIUS_FT` raised from 300 to `min_radius_ft(50)` = 758
+      reads correctly and deletes I-70 through Glenwood Canyon, which really
+      does bend tighter than standard under design exceptions.
+      `test_glenwood_canyon_interstate_curves_survive` caught it and the
+      change was reverted. A screen sized to the design floor cannot tell an
+      exception from an artifact; only the terrain-gated screen can, and it
+      only judges level ground.
+
+      So the fix belongs where the misclassification happens -- connector
+      detection in the sweep -- rather than in another load-time screen.
+
 - [x] **"Hairpin" is a shape, and the sign manual says which one
       (2026-08-23).** `severity` called anything advising 25 or less a
       hairpin. MUTCD does not: the Hairpin Curve sign (W1-11) is for a change
