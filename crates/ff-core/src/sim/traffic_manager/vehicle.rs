@@ -140,12 +140,24 @@ pub struct TrafficSituation {
 /// phantom waves are real, and an invented crash would be worse than silence
 /// (Brandon, 2026-08-20).
 pub fn braking_cause_line(reason: &str) -> &'static str {
-    match reason {
-        "construction" | "construction merge" => "Road work is the cause.",
-        "heavy traffic" => "Traffic is backing up ahead.",
-        _ => "",
-    }
+    BRAKING_CAUSE_LINES
+        .iter()
+        .find(|(key, _)| *key == reason)
+        .map(|(_, line)| *line)
+        .unwrap_or("")
 }
+
+/// The table [`braking_cause_line`] reads, as the Python `BRAKING_CAUSE_LINES`
+/// dict is. A table rather than `match` arms so the KEYS can be enumerated:
+/// the adversarial battery checks both directions against the real Zone
+/// reasons -- a generated reason with no line here loses its explanation
+/// silently, and a key here that no zone ever stamps is dead vocabulary that
+/// looks like coverage. Neither direction is checkable against arms.
+pub static BRAKING_CAUSE_LINES: &[(&str, &str)] = &[
+    ("construction", "Road work is the cause."),
+    ("construction merge", "Road work is the cause."),
+    ("heavy traffic", "Traffic is backing up ahead."),
+];
 
 /// A (start, end, reason, pace) span where traffic has a reason to be on the
 /// brakes, handed over by the trip. The Python tuples came in two-, three-

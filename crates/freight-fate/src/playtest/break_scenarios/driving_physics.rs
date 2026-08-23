@@ -1,13 +1,20 @@
-//! Driving/physics abuse: floor it, reverse it, dynamite it (port of
-//! `tools/playtest_break_scenarios/driving_physics.py`).
+//! Driving/physics abuse: floor it, reverse it, coast it, dynamite it (port
+//! of `tools/playtest_break_scenarios/driving_physics.py`).
 //!
 //! Every scenario here puts the truck in a position no sane driver would
 //! choose and checks whether the physics, the ledgers, and the spoken cues
 //! stay honest about the consequences.
 
-use crate::playtest::breaker::{fabricated_curve, outcome, Outcome, Rig, RigOptions, DT};
+use crate::playtest::breaker::{
+    fabricated_curve, force_grade, outcome, Outcome, Rig, RigOptions, DT,
+};
 use crate::states::base::Key;
 use crate::states::driving_core::{hos_of, FLAT_SPOT_WEAR_PCT_PER_MPH};
+
+use super::text::spoken_damage_percent;
+
+use ff_core::sim::transmission::{NEUTRAL, REVERSE};
+use ff_core::sim::vehicle::RUNAWAY_SPEED_MPH;
 
 /// Flooring it must produce a real pull-over or nothing at all.
 ///
@@ -221,4 +228,189 @@ pub fn dynamite_parking_brake_at_60() -> Outcome {
     let note =
         format!("flat-spotted {delta:.1}% tread, stopped, no fast-forward, lockout cue spoken");
     outcome("dynamite_parking_brake_at_60", &rig, findings, &note)
+}
+
+/// Manual box: grab reverse at 60 mph; a real driveline would grenade.
+pub fn slam_reverse_at_speed() -> Outcome {
+    let mut rig = Rig::new(RigOptions {
+        automatic: false,
+        ..RigOptions::default()
+    });
+    let mut findings: Vec<String> = Vec::new();
+    rig.drive.trip.position_mi = 12.0;
+    rig.prepare(60.0, Some(10));
+    rig.hold(Key::LShift); // clutch in
+    rig.run_frames(8);
+    // Through TruckState, which is the path the gear keys take
+    // (states/driving_controls). Calling Transmission::request_gear directly
+    // reaches past the road-speed guard that lives one layer up, and reported
+    // a bug no player can reach for the harness's first run.
+    let damage_before = rig.drive.truck().damage_pct;
+    let result = rig.drive.truck_mut().request_gear(REVERSE);
+    rig.release(Key::LShift);
+    if result.ok {
+        findings.push(
+            "reverse engaged at 60 mph forward with only the clutch pressed: no speed guard, \
+             no grind, no driveline damage model"
+                .to_string(),
+        );
+    } else if rig.drive.truck().damage_pct <= damage_before {
+        findings.push(
+            "reverse at 60 mph was refused but cost the driveline nothing: a real box would \
+             be short some teeth for the attempt"
+                .to_string(),
+        );
+    }
+    rig.run_frames(900);
+    if rig.drive.truck().transmission.in_reverse() && rig.drive.truck().velocity_mps > 1.0 {
+        findings.push(format!(
+            "rolling forward at {:.0} mph in reverse gear; over-rev wear is the only \
+             consequence (engine wear {:.1}%)",
+            rig.drive.truck().speed_mph(),
+            rig.drive.truck().engine_wear_pct
+        ));
+    }
+    let redline = rig.said("Redline") + rig.said("taking damage");
+    if redline > 0 && rig.drive.truck().damage_pct == 0.0 {
+        findings.push(format!(
+            "redline warning says 'taking damage, now {:.0} percent' but over-rev only raises \
+             engine WEAR -- the spoken damage number never moves",
+            rig.drive.truck().damage_pct
+        ));
+    }
+    outcome(
+        "slam_reverse_at_speed",
+        &rig,
+        findings,
+        "reverse at speed was refused or punished",
+    )
+}
+
+/// Slam neutral on a 6% descent and ride it; how fast does it get, and does
+/// anything object?
+///
+/// Python patched `Trip.grade_at` with a constant-slope lambda; here the slope
+/// is BAKED onto the leg the rig already drives (see
+/// [`force_grade`][crate::playtest::breaker::force_grade]), which is stricter
+/// -- the whole road answers minus six percent rather than one method.
+pub fn neutral_coast_mountain() -> Outcome {
+    let mut rig = Rig::new(RigOptions {
+        automatic: false,
+        ..RigOptions::default()
+    });
+    let mut findings: Vec<String> = Vec::new();
+    rig.drive.trip.position_mi = 12.0;
+    rig.drive.trip.curves.clear();
+    force_grade(&mut rig.drive.trip, -0.06);
+    rig.prepare(55.0, Some(10));
+    let result = rig.drive.truck_mut().transmission.request_gear(NEUTRAL); // neutral needs no clutch
+    if !result.ok {
+        findings.push(format!(
+            "could not select neutral while rolling: {}",
+            result.message
+        ));
+    }
+    // Reaching three figures in neutral down a long grade is not the bug --
+    // that IS a runaway, and the sim is right to allow it. What would be a bug
+    // is a truck that survives one. So check for the consequence rather than
+    // asserting its absence.
+    let mut max_mph = 0.0f64;
+    let damage_before = rig.drive.truck().damage_pct;
+    for _ in 0..5400 {
+        rig.advance_clock(DT);
+        rig.drive.update_frame(&mut rig.app.ctx, DT);
+        rig.app.ctx.run_deferred();
+        max_mph = max_mph.max(rig.drive.truck().speed_mph());
+        rig.check_invariants();
+        if rig.drive.trip.position_mi >= rig.drive.trip.total_miles() - 8.0 {
+            break;
+        }
+    }
+    let runaway = max_mph > RUNAWAY_SPEED_MPH;
+    let took_damage = rig.drive.truck().damage_pct > damage_before
+        || !rig.lines_with("Out of service").is_empty()
+        || !rig.lines_with("Limp mode").is_empty();
+    if runaway && !took_damage {
+        findings.push(format!(
+            "neutral coast reached {max_mph:.0} mph, past the {RUNAWAY_SPEED_MPH:.0} mph runaway \
+             threshold, and the truck took no damage at all: tires past their rated speed and \
+             an unloaded driveline cost nothing"
+        ));
+    }
+    let strike_count = rig.said("Speeding strike");
+    // Try to stop it on the service brakes alone from whatever speed remains.
+    rig.hold(Key::Down);
+    let stopped = rig.step(
+        2700,
+        DT,
+        Some(&|rig: &Rig| rig.drive.truck().speed_mph() < 5.0),
+    );
+    if rig.drive.truck().speed_mph() >= 5.0 {
+        findings.push(format!(
+            "service brakes could not stop the neutral runaway ({:.0} mph after {:.0}s of full \
+             brake, drums {:.0}C)",
+            rig.drive.truck().speed_mph(),
+            stopped as f64 * DT,
+            rig.drive.truck().brake_temp_c
+        ));
+    }
+    let note = format!("peaked {max_mph:.0} mph, {strike_count} strikes, brakes recovered it");
+    outcome("neutral_coast_mountain", &rig, findings, &note)
+}
+
+/// Force a road-driven over-rev; the warning quotes a damage number that must
+/// be honest.
+pub fn redline_damage_readout() -> Outcome {
+    let mut rig = Rig::new(RigOptions {
+        automatic: false,
+        ..RigOptions::default()
+    });
+    let mut findings: Vec<String> = Vec::new();
+    rig.drive.trip.position_mi = 12.0;
+    rig.drive.trip.curves.clear();
+    force_grade(&mut rig.drive.trip, -0.10);
+    rig.prepare(50.0, None);
+    // Pick the tallest gear that is already past damaging revs at this speed.
+    let max_rpm = rig.drive.truck().specs.max_rpm;
+    let gear = (1..=10)
+        .rev()
+        .find(|g| rig.drive.truck().coupled_rpm(Some(*g)) > max_rpm * 1.06)
+        .unwrap_or(3);
+    rig.drive.truck_mut().transmission.gear = gear;
+    let wear_before = rig.drive.truck().engine_wear_pct;
+    rig.step(
+        600,
+        DT,
+        Some(&|rig: &Rig| rig.said("Redline") + rig.said("redline") > 0),
+    );
+    let mut redline_lines = rig.lines_with("redline");
+    redline_lines.extend(rig.lines_with("Redline"));
+    if redline_lines.is_empty() {
+        findings.push("sustained over-rev never drew a spoken redline warning".to_string());
+        return outcome("redline_damage_readout", &rig, findings, "");
+    }
+    let spoken_damage = spoken_damage_percent(&redline_lines[0]);
+    let wear_gained = rig.drive.truck().engine_wear_pct - wear_before;
+    let damage_pct = rig.drive.truck().damage_pct;
+    if let Some(spoken) = spoken_damage {
+        if (spoken - damage_pct).abs() > 1.0 {
+            findings.push(format!(
+                "redline warning spoke {spoken:.0}% damage but damage is {damage_pct:.0}%"
+            ));
+        }
+    }
+    if wear_gained > 0.1 && damage_pct == 0.0 && redline_lines[0].to_lowercase().contains("damage")
+    {
+        findings.push(format!(
+            "redline warning says the engine is taking damage, now 0 percent, while the harm \
+             actually lands on engine WEAR (+{wear_gained:.1}%) -- the spoken number will read 0 \
+             forever, telling a blind player the abuse is free"
+        ));
+    }
+    outcome(
+        "redline_damage_readout",
+        &rig,
+        findings,
+        "redline warning quotes a number that tracks the real harm",
+    )
 }

@@ -120,6 +120,44 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Rust port: the adversarial battery is ported, all 45 scenarios
+      (2026-08-23).** `tools/playtest_break.py` and its ten scenario families
+      are now `crates/freight-fate/src/playtest/break_scenarios/`, run by
+      `freightfate --break-battery` and gated by
+      `crates/freight-fate/tests/adversarial.rs` -- one `#[test]` per
+      scenario, named exactly as the scenario is, `#[ignore]`d for the same
+      reason pytest deselects them. Rust has no xfail, so the strict-xfail
+      contract is written out: a new ODD fails, a `KNOWN_OPEN` ODD passes with
+      its reason printed, and a `KNOWN_OPEN` scenario that comes back CLEAN
+      FAILS and says to delete its entry. Two extra guards the Python could
+      not have (its parameters came from the live registry): every
+      `KNOWN_OPEN` name must be a real scenario, and every registered scenario
+      must have a test node.
+      The monkeypatches became roads rather than seams. `trip.grade_at =
+      lambda: g` is `breaker::force_grade`, which bakes one `GradeSegment` per
+      leg of the route the rig is already driving, so `neutral_coast_mountain`
+      really does run away down a real 6 percent (109 mph) with the corridor's
+      own cities, zones and exits intact. A screen the drive pushes gets its
+      `DriveRef` from `Rig::with_drive_on_stack`, and the private `_method()`
+      calls Python made go through the menu row that calls them.
+      One finding, fixed: the half-mile scale reminder ("Weigh station in half
+      a mile. Signal for the scale exit.") was replayed after the truck had
+      already been charged for blowing the scale. The port had replaced the
+      rescue's validity check -- Python's live `trip.position_mi < scale_mi`
+      -- with a wall-clock estimate of when the truck would reach the gore,
+      which answers "still ahead" for anyone who speeds up. Now on
+      `live::position_mi()`, the same mechanism the red-light line beside it
+      already used; `scale_bypass_to_the_end` is the regression gate.
+      `short_hop_streak_xp_farming` carries over as the one `KNOWN_OPEN`
+      entry, same finding and same reason as the Python list.
+- [ ] **Rust port: audit the other `valid` gates that became wall-clock
+      estimates.** The scale reminder was one of two: `handle_trip_event`'s
+      hazard call still projects `hazard_deadline` onto `monotonic_seconds()`
+      rather than reading the live deadline, which is the same substitution
+      and drifts the same way under time compression or a frame-rate change.
+      The battery does not catch it because no scenario cuts a hazard call and
+      then asks whether the rescue was still true. `live` already carries four
+      facts; a fifth is cheap.
 - [x] **Rust port: a failed `DriveRef` borrow is loud now (2026-08-23).**
       `with` / `read` / `call` used to answer `None` for two unrelated
       reasons -- there is no drive, and the drive is already borrowed further

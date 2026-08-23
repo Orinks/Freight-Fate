@@ -8,11 +8,12 @@ use ff_core::models::safety_record::{
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::enforcement_posts::{post_seed, KIND_FIXED_SCALE};
 use ff_core::sim::trip_models::{RoadStop, ENFORCEMENT_WARNING_MAX_MI, SCALE_WARNING_REAL_S};
-use ff_core::speech_pacing::{monotonic_seconds, SpeechCategory};
+use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+use crate::states::driving_updates::live;
 
 use super::{SCALE_NOTICE_SAMPLE, WEIGH_STATION_REMINDER_MI};
 
@@ -117,23 +118,25 @@ impl DrivingState {
         // failure-to-stop warnings replayed "Signal for the scale exit" when
         // there was no exit left to take (21 August build note).
         //
-        // Rust: `valid` outlives the borrow of `self`, so the live read of
-        // `trip.position_mi < scale_mi` becomes the road still to run
-        // projected forward onto the real-time clock the pacer runs on --
-        // the same substitution the hazard call's rescue gate uses.
-        let speed = self.trip.truck.speed_mph().max(1.0);
-        let live_until =
-            monotonic_seconds() + ahead / speed * 3600.0 / self.trip.effective_time_scale();
+        // Rust: `valid` outlives the borrow of `self`, so it reads the drive
+        // through `live`, exactly as the red-light line beside it does. It
+        // used to project the road left onto the wall clock instead, which
+        // answered "still ahead" for a truck that had sped up past the gore
+        // (and for the whole of any run the wall clock outpaces) -- the
+        // adversarial battery heard the reminder replayed after the bypass
+        // charge had already been written.
+        let scale_mi = stop.at_mi;
         let text = format!(
             "Weigh station in {}. Signal for the scale exit.",
             ctx.settings.short_distance_text(ahead)
         );
+        self.refresh_live_facts();
         ctx.say_event_with(
             text,
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Navigation)
-                .valid(move || monotonic_seconds() < live_until),
+                .valid(move || live::position_mi() < scale_mi),
         );
     }
 

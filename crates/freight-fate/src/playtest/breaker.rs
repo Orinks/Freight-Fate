@@ -26,14 +26,21 @@
 //! they are the app's own [`HeldKeys`][crate::app::HeldKeys], which is the
 //! same thing the real loop fills in.
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use crate::app::testing::{FakeClock, TestApp};
+use crate::app::SharedState;
 use crate::states::base::{InputEvent, Key, Mods};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::DRIVE_PHASE_DELIVERY;
+use crate::states::driving_menu_states::DriveRef;
 
 use ff_core::data::curves::RouteCurve;
+use ff_core::data::world_models::{GradeSegment, Leg, Route};
 use ff_core::models::jobs::{cargo_type, Job};
 use ff_core::models::profile::Profile;
+use ff_core::sim::trip::Trip;
 use ff_core::sim::weather::WeatherKind;
 
 use super::harness::key_event;
@@ -131,6 +138,27 @@ pub fn outcome(name: &str, rig: &Rig, mut findings: Vec<String>, clean_note: &st
     }
 }
 
+/// [`outcome`] for a scenario with no rig at all -- a pure model probe, the
+/// Python `_outcome(name, None, findings, note)`.
+pub fn outcome_of(name: &str, findings: Vec<String>, clean_note: &str) -> Outcome {
+    let verdict = if findings.is_empty() {
+        Verdict::Clean
+    } else {
+        Verdict::Odd
+    };
+    let note = findings
+        .first()
+        .cloned()
+        .unwrap_or_else(|| clean_note.to_string());
+    Outcome {
+        name: name.to_string(),
+        verdict,
+        note,
+        findings,
+        transcript: Vec::new(),
+    }
+}
+
 /// A hand-built bend, for scenarios that need one at a known mile.
 pub fn fabricated_curve(start_mi: f64, advisory: i64, direction: char) -> RouteCurve {
     RouteCurve {
@@ -143,6 +171,65 @@ pub fn fabricated_curve(start_mi: f64, advisory: i64, direction: char) -> RouteC
         deflection_deg: 130.0,
         connector: false,
     }
+}
+
+/// Bake a constant grade over every leg of `trip`'s route.
+///
+/// Python's scenarios wrote `trip.grade_at = lambda mile: -0.06`. Rust has no
+/// seam for an inherent method, so this builds the road that ANSWERS that
+/// way: one `GradeSegment` spanning each leg, which is the record
+/// [`Trip::grade_at`] reads before it falls back to the terrain default. Same
+/// technique as `bench_road` in the transcript tests, but applied to the leg
+/// the rig is already driving rather than to a synthetic one, so the real
+/// route's cities, zones, stops and exits all survive -- several scenarios
+/// (the jake ordinance at Buffalo mile 2, the ramp handback) are about those.
+///
+/// Two details the transcript agents' note calls out and this has to honour:
+///
+/// * `grade_at` NEGATES the segment for a leg driven b-to-a, so the segment
+///   is signed by direction and every mile reads back exactly `grade_pct`.
+/// * the baked range is CLOSED at both ends where the lambda was total. One
+///   segment per leg covering `[0, miles]` leaves no gap to fall through, so
+///   no boundary nudge is needed here.
+///
+/// `terrain` is copied off the leg, so `Trip::terrain_at` answers what it
+/// always did: the scenario is changing the slope, not the country.
+pub fn force_grade(trip: &mut Trip, grade_pct: f64) {
+    let cities = trip.route.cities.clone();
+    let mut legs: Vec<Leg> = Vec::with_capacity(trip.route.legs.len());
+    for (index, leg) in trip.route.legs.iter().enumerate() {
+        let forward = cities.get(index).is_some_and(|city| *city == leg.a);
+        let signed = if forward {
+            grade_pct * 100.0
+        } else {
+            -grade_pct * 100.0
+        };
+        let mut detail = leg.corridor().clone();
+        detail.grade_segments = vec![GradeSegment::new(
+            0.0,
+            leg.miles.max(0.0),
+            signed,
+            &leg.terrain,
+            "breaker rig",
+        )];
+        let mut rebuilt = Leg::new(
+            &leg.a,
+            &leg.b,
+            leg.miles,
+            &leg.highway,
+            &leg.terrain,
+            leg.stops.clone(),
+        );
+        rebuilt.id = leg.id;
+        rebuilt.truck_advisory = leg.truck_advisory.clone();
+        rebuilt.lanes = leg.lanes;
+        rebuilt.local_cue = leg.local_cue.clone();
+        rebuilt.local_speed_mph = leg.local_speed_mph;
+        rebuilt.divided = leg.divided;
+        rebuilt.meta_complete = leg.meta_complete;
+        legs.push(rebuilt.with_detail(detail));
+    }
+    trip.route = Route::from_legs(cities, legs);
 }
 
 /// The keyword arguments of the Python `Rig.__init__`.
@@ -171,9 +258,39 @@ impl Default for RigOptions {
 /// Mirrors the test idiom: a real headless app, a fresh profile, a supported
 /// route, and direct `update_frame` frames with speech captured and the
 /// held-key set faked.
+/// The rig's drive, in a slot it can be lifted out of and put back.
+///
+/// Field access (`rig.drive.trip`) and method calls go through `Deref`, so
+/// every scenario reads the way the Python did. The slot exists for the
+/// screens a drive PUSHES -- the rest stop, the arrival settlement, the
+/// abandon confirmation -- which take a `DriveRef` onto a state that has to
+/// BE on the stack, and which then pop themselves (and sometimes the drive)
+/// back off it. [`Rig::with_drive_on_stack`] moves the drive into a shared
+/// cell for the duration and moves it back out afterwards; it is empty only
+/// inside that call.
+pub struct DriveSlot(Option<DrivingState>);
+
+impl std::ops::Deref for DriveSlot {
+    type Target = DrivingState;
+
+    fn deref(&self) -> &DrivingState {
+        self.0
+            .as_ref()
+            .expect("the rig's drive is on the stack right now")
+    }
+}
+
+impl std::ops::DerefMut for DriveSlot {
+    fn deref_mut(&mut self) -> &mut DrivingState {
+        self.0
+            .as_mut()
+            .expect("the rig's drive is on the stack right now")
+    }
+}
+
 pub struct Rig {
     pub app: TestApp,
-    pub drive: DrivingState,
+    pub drive: DriveSlot,
     last_game_minutes: f64,
     pub problems: Vec<String>,
     problem_keys: std::collections::HashSet<String>,
@@ -254,7 +371,7 @@ impl Rig {
         drive.weather_mut().current = WeatherKind::Clear;
         Rig {
             app,
-            drive,
+            drive: DriveSlot(Some(drive)),
             last_game_minutes: 0.0,
             problems: Vec::new(),
             problem_keys: std::collections::HashSet::new(),
@@ -351,6 +468,104 @@ impl Rig {
     /// `step(frames)` at the battery's default step, no early exit.
     pub fn run_frames(&mut self, frames: usize) -> usize {
         self.step(frames, DT, None)
+    }
+
+    // -- screens the drive pushes ----------------------------------------------------
+
+    /// Put the drive on the app's state stack for the duration of `f`.
+    ///
+    /// The Python rig could hand `self.d` straight to `ctx.push_state` and to
+    /// a screen's constructor, because a Python object is already a shared
+    /// reference. Here the drive is owned by the rig, so this moves it into a
+    /// shared cell, pushes that (entering it, as `ctx.push_state(d)` did),
+    /// runs `f` with a [`DriveRef`] onto the same object, and moves it back.
+    ///
+    /// A screen that pops the drive off the stack itself -- the abandon
+    /// confirmation replaces it with the city menu -- is fine: what comes
+    /// back is still the same drive, because the rig held the only other
+    /// handle on it. Anything still on the stack above the drive is popped
+    /// here, so the next scenario step starts from a clean stack.
+    pub fn with_drive_on_stack<R>(&mut self, f: impl FnOnce(&mut Rig, DriveRef) -> R) -> R {
+        let drive = self
+            .drive
+            .0
+            .take()
+            .expect("the drive is already on the stack");
+        let host = Rc::new(RefCell::new(drive));
+        let shared: SharedState = host.clone();
+        self.app.ctx.push_shared(Rc::clone(&shared));
+        self.app.ctx.run_deferred();
+        let handle = DriveRef::of(&shared);
+        let out = f(self, handle);
+        self.app.ctx.run_deferred();
+        // Unwind whatever is still above (or is) the drive, without entering
+        // anything on the way out: the rig owns the stack again from here.
+        while self.app.ctx.state().is_some() {
+            let top_is_drive = self
+                .app
+                .ctx
+                .state()
+                .is_some_and(|state| Rc::ptr_eq(&state, &shared));
+            self.app.ctx.pop_state_with(false, false);
+            if top_is_drive {
+                break;
+            }
+        }
+        self.app.ctx.run_deferred();
+        drop(shared);
+        let drive = Rc::try_unwrap(host)
+            .unwrap_or_else(|_| panic!("something kept a handle on the rig's drive"))
+            .into_inner();
+        self.drive.0 = Some(drive);
+        out
+    }
+
+    // -- menus -----------------------------------------------------------------------
+
+    /// Press a key at whatever screen is on top (not at the wheel).
+    pub fn key_screen(&mut self, key: Key) {
+        let event = key_event(key, None);
+        self.app.dispatch_to_state(&event);
+        self.app.ctx.run_deferred();
+    }
+
+    /// Every option on the current screen.
+    pub fn menu_labels(&self) -> Vec<String> {
+        match self.app.ctx.state() {
+            Some(state) => super::menu::menu_labels_of(&*state.borrow(), &self.app.ctx),
+            None => Vec::new(),
+        }
+    }
+
+    fn focused_label(&self) -> Option<String> {
+        let state = self.app.ctx.state()?;
+        let borrowed = state.borrow();
+        let (labels, index) = super::menu::menu_rows(&*borrowed, &self.app.ctx)?;
+        labels.get(index).cloned()
+    }
+
+    /// Arrow down to the first row whose label CONTAINS `needle`, and press it.
+    ///
+    /// Contains rather than equals because the rows this battery reaches
+    /// quote live numbers ("Motel room: sleep 10 hours for 95 dollars").
+    /// Returns false when no such row exists, which several scenarios read as
+    /// a finding rather than a crash.
+    pub fn select_menu_containing(&mut self, needle: &str) -> bool {
+        let labels = self.menu_labels();
+        if !labels.iter().any(|row| row.contains(needle)) {
+            return false;
+        }
+        for _ in 0..=labels.len() {
+            if self
+                .focused_label()
+                .is_some_and(|label| label.contains(needle))
+            {
+                self.key_screen(Key::Return);
+                return true;
+            }
+            self.key_screen(Key::Down);
+        }
+        false
     }
 
     // -- invariants ----------------------------------------------------------------

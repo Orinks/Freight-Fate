@@ -26,7 +26,9 @@ use crate::sim::weather::{effects, WeatherEffects, WeatherKind};
 use crate::speech_text::{brake_lights_cue, merging_traffic_cue, slow_lead_cue};
 
 mod vehicle;
-pub use vehicle::{braking_cause_line, BrakingZone, TrafficSituation, TrafficVehicle};
+pub use vehicle::{
+    braking_cause_line, BrakingZone, TrafficSituation, TrafficVehicle, BRAKING_CAUSE_LINES,
+};
 
 // -- the rolling bubble ---------------------------------------------------------
 pub const SPAWN_CELL_MI: f64 = 0.4;
