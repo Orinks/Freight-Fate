@@ -51,10 +51,11 @@ fn prepare(app: &mut TestApp, terse: bool) {
 /// A truck rolling at `speed_mph` with the brake off (the Python
 /// `SimpleNamespace(speed_mph=..., parking_brake=...)`).
 fn truck_at(speed_mph: f64, parking_brake: bool) -> TruckState {
-    let mut truck = TruckState::default();
-    truck.velocity_mps = speed_mph * MPS_PER_MPH;
-    truck.parking_brake = parking_brake;
-    truck
+    TruckState {
+        velocity_mps: speed_mph * MPS_PER_MPH,
+        parking_brake,
+        ..Default::default()
+    }
 }
 
 /// `_walk_through(ctx)`: engine, brake, rolling -- the whole walkthrough.
