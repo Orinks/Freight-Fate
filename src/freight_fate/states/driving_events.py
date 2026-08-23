@@ -2985,8 +2985,17 @@ class DrivingEventMixin:
                 volume=0.8,
             )
             if self._terse_speech():
+                # The limit clause is CONDITIONAL, like every other one built
+                # from this text. `_approach_limit_text` deliberately returns
+                # nothing when it cannot trust the number -- better no clause
+                # than a wrong one -- and interpolating that gave quiet
+                # drivers a sentence with a hole in it: "Light at ramp end,
+                # green. Limit ." (Shane P, 2026-08-23). The stop, yield and
+                # roundabout branches below always guarded it; this one did
+                # not.
+                limit_clause = f" Limit {limit_text}." if limit_text else ""
                 self.ctx.say_event(
-                    f"Light at ramp end, {phase}. Limit {limit_text}.",
+                    f"Light at ramp end, {phase}.{limit_clause}",
                     interrupt=False,
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,

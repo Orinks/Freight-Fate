@@ -1241,6 +1241,12 @@
   re-read.
 
 ### Fixed
+- **No more "Limit." with nothing after it at a ramp end.** On quiet speech,
+  the traffic-light call at the end of a ramp read "Light at ramp end, green.
+  Limit ." -- a sentence with a hole where the number should be. The game
+  leaves the limit out on purpose when it cannot vouch for it, because a wrong
+  number is worse than none; it was just still saying the word "limit" first.
+  Now it says the limit when it has one and stops cleanly when it does not.
 - **Braking on a hill no longer lowers your cruise speed for the rest of the
   run.** Touching the brake on a downgrade with descent control on was being
   taken as "this is my new cruise speed", permanently. It also stacked: 65

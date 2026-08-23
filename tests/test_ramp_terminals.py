@@ -1529,3 +1529,47 @@ def test_canceling_the_plan_gives_the_road_back(monkeypatch):
         assert d.trip.exit_approach_mi is None
     finally:
         app.shutdown()
+
+
+@pytest.mark.parametrize("control", ["signal", "stop", "yield", "roundabout"])
+def test_a_ramp_terminal_call_never_speaks_a_limit_it_does_not_have(monkeypatch, control):
+    """Shane P, 2026-08-23: "Light at ramp end, green. Limit ."
+
+    `_approach_limit_text` returns nothing on purpose when it cannot trust
+    the number -- a probe that reads the mainline through a gap once told the
+    owner "Stop sign at ramp end. Limit 70" at two exits running, and better
+    no clause than a wrong one. Interpolating that emptiness gave quiet
+    drivers a sentence with a hole in it. The stop, yield and roundabout
+    branches guarded it; the signal branch did not.
+
+    Parametrised across all four controls because the fault was one branch of
+    four missing what its siblings had, which is not a thing to fix singly.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say_event", speech_stub(spoken, terse=True))
+        monkeypatch.setattr(d.ctx.audio, "play", lambda *a, **k: None)
+        app.ctx.settings.driving_speech = "quiet"
+        d._ramp_control = control
+        monkeypatch.setattr(d, "_approach_limit_text", lambda: "")
+
+        d._announce_ramp_terminal()
+
+        assert spoken, f"{control} says nothing at all"
+        line = spoken[-1]
+        assert "Limit" not in line, f"{control} promised a limit it does not have: {line!r}"
+        assert ". ." not in line and not line.endswith(", ."), f"{control}: {line!r}"
+        assert "  " not in line, f"{control} left a gap where the number was: {line!r}"
+
+        # And with a real number it still says it.
+        spoken.clear()
+        monkeypatch.setattr(d, "_approach_limit_text", lambda: "45 miles per hour")
+        d._ramp_light_announced = False
+        d._announce_ramp_terminal()
+        assert "45 miles per hour" in spoken[-1], f"{control}: {spoken[-1]!r}"
+    finally:
+        app.shutdown()
