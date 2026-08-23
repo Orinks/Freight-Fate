@@ -157,6 +157,70 @@ pub const ZIGZAG_MAX_RADIUS_FT: i64 = 400;
 /// are real.
 pub const ZIGZAG_ARC_MAX: f64 = 0.5;
 
+/// How near a way must be to count as the road under a curve apex, in metres.
+///
+/// DERIVED, from the archive's own precision rather than from taste. The
+/// archival polyline is quantized at 1e-5 degrees (~1.1 m) and curve spans
+/// are kept at eps=0, so an apex sits essentially on the way ORS routed it
+/// along -- MEASURED over Alabama and Colorado, the nearest road of any kind
+/// is within 0.6 m of the apex for 99 percent of curves, and beyond 25 m for
+/// 4 of 1,245. So this is a sanity bound on "was anything read at all", not a
+/// decision: the verdict comes from which way is nearest, and where a ramp and
+/// the mainline it leaves are both in range they are a median 11 m apart,
+/// twenty times the positioning error.
+pub const CONNECTOR_CORRIDOR_M: f64 = 25.0;
+
+/// What OSM calls a controlled-access freeway. An Interstate mainline mile is
+/// one by statute (23 CFR 625 adopts the AASHTO Interstate design standards),
+/// so this is the class an Interstate leg's mainline curves must ride -- not a
+/// threshold, a definition.
+pub const CONNECTOR_FREEWAY_CLASS: &str = "motorway";
+
+/// `(is connector, why)` for one curve, from its OSM reading alone --
+/// `tools/bake_curve_connectors.py::classify`.
+///
+/// The bake itself stays Python (`tools/` is out of the port's scope), but the
+/// RULE lives here, because it is what every `connector_source` in the shipped
+/// data means and the only way those rows can be re-judged without re-baking.
+///
+/// Two readings, both of them upstream's own words:
+///
+/// * `osm:ramp` -- the apex rides a `highway=*_link` way, which is the tag OSM
+///   uses for a ramp, slip road or interchange connector. True on every road
+///   class.
+/// * `osm:off-freeway` -- the leg is Interstate class and the apex rides
+///   something that is not `highway=motorway`. A curve apex on a `trunk`,
+///   `primary` or `residential` way is not on the Interstate, whatever the leg
+///   is labelled.
+///
+/// A `near_m` or `near_hw` of `None` means the apex had no road within the
+/// corridor: nothing was read, so nothing may be concluded, and the empty
+/// reason tells the bake to keep whatever the positional sweep said.
+///
+/// It never sees radius, deflection, advisory or severity, so it CANNOT tell a
+/// sharp curve from a gentle one and therefore cannot delete a design exception
+/// -- see `INTERSTATE_MIN_RADIUS_FT` for what happened the one time a screen
+/// here was allowed to look at the geometry.
+pub fn classify_connector(
+    near_m: Option<f64>,
+    near_hw: Option<&str>,
+    interstate: bool,
+) -> (bool, &'static str) {
+    let (Some(near_m), Some(near_hw)) = (near_m, near_hw) else {
+        return (false, "");
+    };
+    if near_m > CONNECTOR_CORRIDOR_M {
+        return (false, "");
+    }
+    if near_hw.ends_with("_link") {
+        return (true, "osm:ramp");
+    }
+    if interstate && near_hw != CONNECTOR_FREEWAY_CLASS {
+        return (true, "osm:off-freeway");
+    }
+    (false, "osm:mainline")
+}
+
 /// One baked curve in bake direction, miles from leg city a.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CurveRecord {

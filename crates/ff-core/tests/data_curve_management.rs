@@ -12,9 +12,10 @@ use std::collections::{HashMap, HashSet};
 
 use data_support::{data_dir, supported, world};
 use ff_core::data::curves::{
-    curve_severity, leg_curves, leg_design_speed, leg_is_level, load, min_radius_ft, route_curves,
-    screenable_legs, CurveRecord, HAIRPIN_DEFLECTION_DEG, HAIRPIN_MAX_MPH,
-    INTERSTATE_MAX_DEFLECTION_DEG, INTERSTATE_MIN_RADIUS_FT,
+    classify_connector, curve_severity, leg_curves, leg_design_speed, leg_is_level, load,
+    min_radius_ft, route_curves, screenable_legs, CurveRecord, CONNECTOR_CORRIDOR_M,
+    HAIRPIN_DEFLECTION_DEG, HAIRPIN_MAX_MPH, INTERSTATE_MAX_DEFLECTION_DEG,
+    INTERSTATE_MIN_RADIUS_FT,
 };
 use ff_core::data::data_resources::read_data_text;
 use ff_core::data::world::World;
@@ -730,6 +731,80 @@ fn severity_bands_match_the_advisory_speed() {
     assert_eq!(curve_severity(35, 30.0), "sharp");
     assert_eq!(curve_severity(50, 30.0), "moderate");
     assert_eq!(curve_severity(55, 30.0), "gentle");
+}
+
+// -- TestConnectorsAreReadNotGuessed -----------------------------------------
+//
+// Interchange and departure geometry is classed by OSM, not by position. The
+// sweep flagged a connector only inside 0.75 mi of a leg's ends, which misses
+// every mid-leg interchange and does not get a truck out of Denver.
+// `classify_connector` (`tools/bake_curve_connectors.py`) re-derives the flag
+// from the road class OSM records under each curve's apex.
+
+#[test]
+fn test_a_ramp_reads_as_a_connector_on_every_road_class() {
+    for class in ["motorway_link", "trunk_link", "primary_link"] {
+        for interstate in [true, false] {
+            assert_eq!(
+                classify_connector(Some(0.4), Some(class), interstate),
+                (true, "osm:ramp")
+            );
+        }
+    }
+}
+
+/// Every Interstate mainline mile is a freeway, so a curve apex on a surface
+/// road is not on the Interstate however the leg is labelled.
+#[test]
+fn test_an_interstate_curve_off_the_freeway_is_not_interstate_mainline() {
+    for class in ["trunk", "primary", "secondary", "residential"] {
+        assert_eq!(
+            classify_connector(Some(0.4), Some(class), true),
+            (true, "osm:off-freeway")
+        );
+        // The same ground on a US-route leg is that leg's real road.
+        assert!(!classify_connector(Some(0.4), Some(class), false).0);
+    }
+}
+
+/// The guard on the whole rule: it never sees the geometry.
+///
+/// Raising the radius floor to the design minimum is what deleted Glenwood
+/// Canyon (tried and reverted, 2026-08-23). This classifier takes no radius,
+/// deflection or advisory at all -- there is no argument through which a sharp
+/// curve could reach it -- so it cannot repeat that.
+#[test]
+fn test_a_freeway_curve_stays_mainline_however_hard_it_bends() {
+    assert_eq!(
+        classify_connector(Some(0.2), Some("motorway"), true),
+        (false, "osm:mainline")
+    );
+}
+
+/// No extract, or no road in the corridor, must not read as mainline.
+#[test]
+fn test_nothing_read_concludes_nothing() {
+    let facts: [(Option<f64>, Option<&str>); 3] = [
+        (None, None),                         // near_m recorded as null
+        (Some(400.0), Some("motorway_link")), // a road, but far outside
+        (None, None),                         // no reading at all
+    ];
+    for (near_m, near_hw) in facts {
+        assert_eq!(classify_connector(near_m, near_hw, true), (false, ""));
+    }
+}
+
+#[test]
+fn test_the_corridor_is_a_sanity_bound_not_a_decision() {
+    assert!(
+        !classify_connector(Some(CONNECTOR_CORRIDOR_M - 0.1), Some("motorway"), true)
+            .1
+            .is_empty()
+    );
+    assert_eq!(
+        classify_connector(Some(CONNECTOR_CORRIDOR_M + 0.1), Some("motorway"), true).1,
+        ""
+    );
 }
 
 /// Provenance: a connector says whether it was read or positional.
