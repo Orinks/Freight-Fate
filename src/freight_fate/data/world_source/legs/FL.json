@@ -1261,7 +1261,7 @@
     {
       "from": "cape_coral_fl_us",
       "to": "lakeland_fl_us",
-      "highway": "I-75",
+      "highway": "US-17",
       "miles": 118,
       "stops": [
         {
@@ -51691,7 +51691,7 @@
     {
       "from": "west_palm_beach_fl_us",
       "to": "cape_coral_fl_us",
-      "highway": "I-75",
+      "highway": "SR-80",
       "miles": 138,
       "stops": [
         {

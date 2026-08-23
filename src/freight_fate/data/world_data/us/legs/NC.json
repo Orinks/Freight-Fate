@@ -40577,7 +40577,7 @@
       "from": "hickory_nc_us",
       "to": "charlotte_nc_us",
       "miles": 60,
-      "highway": "I-40",
+      "highway": "NC-16",
       "terrain": "flat",
       "corridor": {
         "tollway_detected": false,

@@ -4,7 +4,7 @@
       "from": "ashland_ky_us",
       "to": "huntington_wv_us",
       "miles": 15.0,
-      "highway": "I-64",
+      "highway": "US-52",
       "terrain": "hills",
       "corridor": {
         "tollway_detected": false,

@@ -965,6 +965,16 @@
   either: the truck still leans on them and the road bed still leads you
   round them, they are just no longer announced as highway curves.
 
+- **Five runs are named for the road you are actually on.** A handful of runs
+  were filed under an interstate they never touch, and the co-driver said so
+  the whole way: the run from Hickory to Charlotte was called I-40 while you
+  drove NC-16, and the one from West Palm Beach to Cape Coral was called I-75
+  while you crossed the state on SR-80. Ashland to Huntington, Cape Coral to
+  Lakeland and Tyler to Longview were the same. They now carry the road under
+  the wheels. Five more runs are still misnamed and were left alone on
+  purpose -- they wander across four or five roads with no one of them the
+  main road, and picking the biggest would only be wrong more quietly.
+
 - **Some runs were paying you for less road than you drive.** A hundred and
   seventy-six legs carried a distance shorter than the road actually runs --
   the haul from Poplar Bluff to Jonesboro was booked at fifty-five miles and

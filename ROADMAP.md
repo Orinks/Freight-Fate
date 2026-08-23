@@ -1616,8 +1616,47 @@ onto exit signalling.
       `tools/curve_osm_facts.py` is deleted. Two tools answering the same
       question differently is an invitation to run the wrong one.
 
-- [ ] **Some interstate legs are labelled for a road their route does not
-      ride.** Found by the connector bake above, which reads per-leg freeway
+- [~] **Legs labelled for a road their route does not ride: SPLIT, and half
+      of it fixed (2026-08-23).** A truck router tells the two faults apart.
+      Ask Valhalla for the route between the two city nodes and measure how
+      much of ITS mileage rides the labelled interstate. The distribution has
+      a 14-point hole in it, so the split is read rather than chosen:
+
+          0 0 0 0 0 0 0 2 2 4  |  18 18 24 25 25 30 ... 93 98 98
+
+      TEN BELOW THE GAP -- the interstate does not serve that pair, and the
+      LABEL is the fault. Tampa to Miami is Florida's Turnpike; I-75 runs up
+      the west coast. `tools/repair_leg_labels.py` renamed the five with a
+      clear majority road: Ashland-Huntington to US-52 (54%), Cape Coral-
+      Lakeland to US-17 (55%), Hickory-Charlotte to NC-16 (78%), Tyler-
+      Longview to US-271 (60%), West Palm Beach-Cape Coral to SR-80 (65%).
+
+      FIVE LEFT ALONE, deliberately: Burlington-Albany's best road is VT-22 at
+      32 percent, Tampa-Miami's is SR-70 at 35. A route threading four roads
+      has no honest single name, and a 30 percent plurality would be wrong
+      more quietly rather than less.
+
+      A METHOD BUG CAUGHT ITSELF: the first share calculation reported a leg
+      riding US-31 for 114 percent of its miles, because a concurrency credits
+      every shield it names and "US 31" and "US 31 BUS" scored the same mile
+      twice. Counting each mile once changed a real answer -- Cape Girardeau
+      to Paducah fell from a false IL-3 61 percent to an honest US-60 45, and
+      moved OUT of the rename set.
+
+      THIRTY ABOVE THE GAP still open, and they are the bigger half: the
+      interstate IS the road and the BAKED route is wrong. Corpus Christi to
+      San Antonio is 98 percent I-37 by any sane routing, Norfolk to Richmond
+      93 percent I-64, Morgantown to Pittsburgh 87 percent I-79. Relabelling
+      those would enshrine a bad route. They want REROUTING, which means
+      replacing the baked polyline and re-deriving every layer keyed to it --
+      curves, grades, speed limits, mileage -- and that is a corridor re-bake,
+      not a data edit. ORS and Overpass are gone from this machine, so it
+      would be built on Valhalla: `/route` for the shape, `trace_attributes`
+      for road class and speed limit, `/height` for the elevation profile.
+
+      ORDER FOR WHOEVER PICKS THIS UP: reroute BEFORE any terrain work. A new
+      polyline changes the elevation profile under the leg, so terrain done
+      first would have to be redone. Found by the connector bake above, which reads per-leg freeway
       coverage as a by-product: 51 of 728 interstate legs spend under half
       their route miles on a freeway at all, 10 of them under 5 percent. The
       worst are Chico to Santa Rosa (labelled I-5, 3 percent freeway, 317
