@@ -512,6 +512,32 @@ fn test_a_playlist_entry_that_will_not_open_is_skipped_not_pruned() {
 }
 
 #[test]
+fn test_a_dead_playlist_reaches_the_dials_fallback() {
+    // `RadioState.play` only marks a station unplayable and speaks the
+    // handover when the backend REFUSES. Python raised RadioPlaybackError
+    // straight through `play_station`; a Rust wrapper that swallowed it left
+    // the player parked on a silent station with nothing said about it.
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 5);
+    let _tape = MusicAudio::install(&mut app);
+    let station = a_playlist_station("pl-dead-refuses", &["C:/music/gone.ogg"]);
+    let refused = d.with_radio_backend(&mut app.ctx, |_radio, backend| {
+        backend.play_station(&station, 1.0)
+    });
+    assert!(
+        refused.is_err(),
+        "a playlist with nothing playable must refuse so the dial can fall back"
+    );
+
+    // A playlist that does open is still accepted.
+    let good = a_playlist_station("pl-good", &["C:/music/good.ogg"]);
+    let played = d.with_radio_backend(&mut app.ctx, |_radio, backend| {
+        backend.play_station(&good, 1.0)
+    });
+    assert!(played.is_ok());
+}
+
+#[test]
 fn test_a_playlist_with_nothing_playable_says_so_once() {
     let mut app = TestApp::new();
     let mut d = a_denver_drive(&mut app, 5);

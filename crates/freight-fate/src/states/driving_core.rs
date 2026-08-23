@@ -675,9 +675,14 @@ impl RadioPlaybackBackend for DrivingRadioBackend<'_> {
         self.driving.radio_signal_factor = signal_volume_factor(&reception);
         if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE {
             self.driving.apply_radio_volume(self.ctx);
-            self.driving
-                .start_playlist_station(self.ctx, station, 900, false);
-            return Ok(());
+            // A playlist with nothing playable in it must reach the dial's
+            // fallback, exactly as the Python raised through here: the
+            // station comes off the dial after its second refusal and the
+            // handover is spoken. Swallowing the error left the player on a
+            // silent station with nothing said about it.
+            return self
+                .driving
+                .start_playlist_station_checked(self.ctx, station, 900, false);
         }
         if station.real_stream {
             if station.stream_url.is_empty() {
