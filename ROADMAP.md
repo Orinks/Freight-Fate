@@ -120,27 +120,38 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
-- [ ] **Rust port: decide what `DriveRef::with` / `read` / `call` should do
-      when the borrow fails (2026-08-23).** All three answer `None` when the
-      drive is already borrowed, and every caller turns that into a
-      plausible-looking default -- which is how two screens came to state
-      something false about the truck. The rest stop's fuel row read
-      "Fuel: tank is full" at any tank level, because `build_items` holds the
-      drive and `fuel_label` reached for it again; and calling a roadside
-      mechanic or chaining up from the pause menu emptied the pause menu,
-      because those actions rebuilt the rows from inside the same borrow and
-      the rebuild came back with nothing. Both are fixed by passing the
-      already-borrowed drive in (`fuel_label(ctx, d)`, the shape `tire_label`
-      always had) and by rebuilding after the borrow is back, and both are
-      pinned by tests. What is not fixed is the trap: a failed borrow is a
-      programming error, not a state of the world, and today it is silent.
-      Proposal, for the owner to rule on: `debug_assert!` on the failed
-      `try_borrow_mut` inside all three, plus a logged warning in release, so
-      the next one shows up on a bench instead of in a player's ear. The
-      remaining `unwrap_or_default()` fallbacks on `build_items`
-      (`RestStopState`, `ParkingFullState`, `PauseMenuState`,
-      `FacilityArrivalState`) each still degrade to an empty menu if a new
-      caller nests a borrow.
+- [x] **Rust port: a failed `DriveRef` borrow is loud now (2026-08-23).**
+      `with` / `read` / `call` used to answer `None` for two unrelated
+      reasons -- there is no drive, and the drive is already borrowed further
+      up the same call stack -- and callers could not tell them apart, so each
+      one guessed a plausible default. Two of those guesses reached players:
+      the rest stop's fuel row read "Fuel: tank is full" at any tank level,
+      because `build_items` held the drive and `fuel_label` reached for it
+      again; and calling a roadside mechanic or chaining up from the pause menu
+      emptied the pause menu, because those actions rebuilt the rows from
+      inside the same borrow. Both were fixed by passing the already-borrowed
+      drive in (`fuel_label(ctx, d)`, the shape `tire_label` always had) and by
+      rebuilding after the borrow is back.
+      The seam itself is fixed now: no drive is still a quiet `None`, but an
+      already-borrowed drive trips a `debug_assert!` naming the method and,
+      through `#[track_caller]`, the exact call site, and logs a warning in a
+      shipped build rather than panicking under a player. Turning it on found a
+      third one of the same family immediately: a roadside stop that pulls the
+      licence is resolved inside the constructor, while the push helper still
+      holds the drive, so `suspended_exit_text` reached for it again and told
+      every loaded run "There is no loaded trailer to hand back" with a full
+      trailer behind them. Same fix -- the drive is handed in -- and the
+      loaded and bobtail halves of that line are both pinned. The seam has its
+      own two tests: no drive stays quiet, a nested borrow panics.
+- [ ] **Rust port: decide how `build_items` should degrade when the drive is
+      busy (2026-08-23).** `RestStopState`, `ParkingFullState`,
+      `PauseMenuState` and `FacilityArrivalState` all end `build_items` with
+      `unwrap_or_default()`, so a future nested borrow still hands a blind
+      player an empty menu in a shipped build -- loudly logged now, but still
+      a dead end at the wheel. Recommended: fall back to the rows the menu
+      already has (`MenuItem` is `Clone`), so the worst case is one stale
+      label rather than no way out of the screen. Worth doing as one change
+      across the four, not four times.
 
 - [ ] **Rust port: release built by `tools/build_release.py --rust`**
       (2026-08-22). Stages `build/FreightFate/` -- `FreightFate.exe`, the

@@ -21,7 +21,7 @@ use freight_fate::states::base::{Key, Menu};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY;
 use freight_fate::states::driving_menu_states::{
-    ArrivalState, DriverAppScreenState, DriverAppsState, DrivingStatusScreenState,
+    ArrivalState, DriveRef, DriverAppScreenState, DriverAppsState, DrivingStatusScreenState,
     DrivingStatusState, FacilityArrivalState,
 };
 use freight_fate::states::driving_radio_app::RadioAppState;
@@ -516,6 +516,35 @@ fn test_copying_the_summary_reaches_the_clipboard() {
         copied.starts_with("Freight Fate: Delivery complete."),
         "{copied}"
     );
+}
+
+// -- the drive handle ----------------------------------------------------------------------
+
+#[test]
+fn test_a_screen_without_a_drive_answers_nothing_quietly() {
+    // The legitimate empty: a screen built without a drive, which is what a
+    // test that never pushes one gets. It answers nothing, and says nothing
+    // about it.
+    let handle = DriveRef::empty();
+    assert!(handle.is_empty());
+    assert!(handle.read(|d| d.trip.position_mi).is_none());
+}
+
+#[test]
+#[cfg(debug_assertions)]
+#[should_panic(expected = "already borrowed")]
+fn test_reaching_for_a_drive_that_is_already_held_fails_loudly() {
+    // The other empty, which is never a state of the world: something further
+    // up the stack already holds the drive, and this code reached for it again
+    // instead of being handed the one that is already open. That used to
+    // answer nothing, indistinguishable from having no drive at all, and every
+    // caller turned it into a plausible default -- a full tank, an empty menu,
+    // a trailer that was not there. It fails on a bench now.
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    let handle = drive_ref(&drive);
+    let _held = drive.borrow_mut();
+    let _ = handle.read(|d| d.trip.position_mi);
 }
 
 // -- not portable without the harness ------------------------------------------------------

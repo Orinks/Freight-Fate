@@ -1,5 +1,5 @@
-//! Hazard reaction windows, descent control, real weather and the overspeed
-//! alert (port of `tests/test_driving_cruise_weather.py`, lines 1818-2982).
+//! Hazard reaction windows and descent control (port of
+//! `tests/test_driving_cruise_weather.py`, lines 1818-2426).
 //!
 //! Third of the split; see `transcript_driving_cruise_weather.rs` for why the
 //! Python file is split and `transcript_cruise_support` for what replaced each
@@ -7,17 +7,12 @@
 
 mod transcript_cruise_support;
 
-use std::cell::RefCell;
-use std::rc::Rc;
-
-use ff_core::sim::enforcement_observe::OBSERVE_LEEWAY_MPH;
 use ff_core::sim::trip_models::{TripEvent, TripEventData, TripEventKind};
-use ff_core::sim::weather::{WeatherKind, WeatherProvider};
+use ff_core::sim::weather::WeatherKind;
 use freight_fate::playtest::harness::PlaytestHarness;
 use freight_fate::states::base::Key;
 use freight_fate::states::driving_core::{
-    ACC_LIMIT_OFFSET_MPH, HAZARD_CREEP_MPH, HAZARD_MIN_REACTION_S, HAZARD_SAFE_MPH,
-    LANE_TAP_CHANGE_S, MPH_PER_MPS, OVERSPEED_WARN_MPH,
+    HAZARD_CREEP_MPH, HAZARD_MIN_REACTION_S, HAZARD_SAFE_MPH, LANE_TAP_CHANGE_S, MPH_PER_MPS,
 };
 
 use transcript_cruise_support::*;
@@ -74,11 +69,18 @@ fn test_hazard_deadline_covers_braking_time_from_current_speed() {
         0.01
     ));
     assert!(approx_abs(
-        harness.read_drive(|d| d.hazard_deadline).expect("a deadline"),
+        harness
+            .read_drive(|d| d.hazard_deadline)
+            .expect("a deadline"),
         harness.read_drive(|d| d.aeb_engage_s(HAZARD_SAFE_MPH)) + 3.0,
         0.01
     ));
-    assert!(harness.read_drive(|d| d.hazard_deadline).expect("a deadline") > brake_s + 3.0);
+    assert!(
+        harness
+            .read_drive(|d| d.hazard_deadline)
+            .expect("a deadline")
+            > brake_s + 3.0
+    );
 }
 
 #[test]
@@ -103,7 +105,10 @@ fn test_automatic_emergency_braking_engages_once_and_cancels_cruise() {
     assert!(!harness.read_drive(|d| d.truck().emergency_brake));
     assert!(harness.read_drive(|d| d.cruise_mph).is_none());
     let said = spoken(&harness);
-    assert_eq!(said.iter().filter(|s| *s == "Automatic braking.").count(), 1);
+    assert_eq!(
+        said.iter().filter(|s| *s == "Automatic braking.").count(),
+        1
+    );
     assert!(!said.iter().any(|s| s == "Emergency braking engaged."));
 }
 
@@ -168,12 +173,16 @@ fn test_fixed_object_hazard_deadline_budgets_the_longer_stop() {
         hazard("Change lanes or brake! Debris on the road.", 3.0, true),
     );
     assert!(approx_abs(
-        harness.read_drive(|d| d.hazard_deadline).expect("a deadline"),
+        harness
+            .read_drive(|d| d.hazard_deadline)
+            .expect("a deadline"),
         harness.read_drive(|d| d.aeb_engage_s(HAZARD_CREEP_MPH)) + 3.0 + LANE_TAP_CHANGE_S,
         0.01
     ));
     assert!(
-        harness.read_drive(|d| d.hazard_deadline).expect("a deadline")
+        harness
+            .read_drive(|d| d.hazard_deadline)
+            .expect("a deadline")
             > harness.read_drive(|d| d.brake_budget_s(HAZARD_SAFE_MPH)) + 3.0
     );
 }
@@ -221,7 +230,15 @@ fn test_the_driver_always_gets_a_real_window_before_the_assist_takes_over() {
     for (label, mph, grade, brake_temp_c, wear_pct, grip, fatigue) in [
         ("fresh at highway speed", 65.0, 0.0, 20.0, 0.0, 1.0, 0.0),
         ("drowsy", 65.0, 0.0, 20.0, 0.0, 1.0, 80.0),
-        ("down a five percent grade", 65.0, -0.05, 20.0, 0.0, 1.0, 0.0),
+        (
+            "down a five percent grade",
+            65.0,
+            -0.05,
+            20.0,
+            0.0,
+            1.0,
+            0.0,
+        ),
         ("on cooked brakes", 65.0, 0.0, 500.0, 0.0, 1.0, 0.0),
         ("on worn brakes in the wet", 65.0, 0.0, 20.0, 60.0, 0.6, 0.0),
     ] {
@@ -268,7 +285,10 @@ fn test_a_dodgeable_hazard_leaves_time_to_finish_the_lane_change_it_asks_for() {
     let window = harness.read_drive(|d| {
         d.hazard_deadline.expect("a deadline") - d.aeb_engage_s(d.hazard_target_mph(None))
     });
-    assert!(window >= HAZARD_MIN_REACTION_S + LANE_TAP_CHANGE_S, "{window}");
+    assert!(
+        window >= HAZARD_MIN_REACTION_S + LANE_TAP_CHANGE_S,
+        "{window}"
+    );
 }
 
 #[test]
@@ -429,7 +449,10 @@ fn test_a_routine_assisted_stop_costs_one_brake_application() {
     });
     let damage_before = harness.read_drive(|d| d.truck().damage_pct);
     let psi_before = harness.read_drive(|d| d.truck().primary_air_psi);
-    raise_hazard(&mut harness, hazard("Brake now! Stopped traffic ahead.", 3.0, false));
+    raise_hazard(
+        &mut harness,
+        hazard("Brake now! Stopped traffic ahead.", 3.0, false),
+    );
 
     // Units of pedal RISE the air system charged for, the measure the fanning
     // assists were caught with (bench trace, 2026-08-11).
@@ -638,234 +661,4 @@ fn test_service_brakes_beat_a_highway_hazard_after_human_reaction() {
         harness.read_drive(|d| d.truck().damage_pct),
         damage_before
     )); // avoided, not collided
-}
-
-// -- real weather ---------------------------------------------------------------
-
-/// `_FakeWeatherProvider`: returns `kind` for any city; `None` models data not
-/// yet fetched.
-struct FakeWeatherProvider {
-    kind: Option<WeatherKind>,
-}
-
-impl WeatherProvider for FakeWeatherProvider {
-    fn request(&mut self, _city: &str, _lat: f64, _lon: f64) {}
-    fn get(&mut self, _city: &str) -> Option<WeatherKind> {
-        self.kind
-    }
-}
-
-/// Install a fake provider on the live drive.
-///
-/// Python patched `ctx.real_weather_provider` before the drive was built, so
-/// `DrivingState` picked the fake up through the same wiring the real provider
-/// uses. `GameContext::real_weather_provider` hands back a concrete
-/// `RealWeatherProvider`, so there is no fake to hand it here; instead the
-/// wiring is ASSERTED (the setting really did give the trip a provider) and
-/// then the provider is swapped for the fake.
-fn install_provider(harness: &mut PlaytestHarness, provider: Box<dyn WeatherProvider>) {
-    harness.with_drive(move |d, _| {
-        assert!(
-            d.weather().provider.is_some(),
-            "real_weather was on, so the drive must have wired a live provider"
-        );
-        d.weather_mut().provider = Some(provider);
-        d.weather_mut().live = false;
-        d.weather_mut().current = WeatherKind::Clear;
-    });
-}
-
-/// A delivery on a corridor long enough to cross several weather cells, with
-/// real weather on before the drive is built (that is what wires a provider
-/// into the trip's `WeatherSystem`).
-fn a_live_weather_drive(name: &str) -> PlaytestHarness {
-    use freight_fate::playtest::harness::RouteSetup;
-
-    let mut harness = PlaytestHarness::new();
-    harness.app.ctx.settings.real_weather = true;
-    harness.start_route(
-        "Chicago",
-        "Indianapolis",
-        RouteSetup::seeded(0).named(name),
-    );
-    harness.with_drive(|d, _| {
-        d.departure_checked = true;
-        d.truck_mut().set_air_ready(false);
-    });
-    harness
-}
-
-#[test]
-fn test_real_weather_starts_clear_with_no_simulated_warmup() {
-    // Regression: with real weather enabled, a drive starts neutral (clear)
-    // and holds until live data arrives, instead of showing a provisional
-    // simulated condition. So no momentary simulated rain can unlock an
-    // achievement.
-    let mut harness = a_live_weather_drive("Live Warmup");
-    install_provider(&mut harness, Box::new(FakeWeatherProvider { kind: None }));
-    assert_eq!(
-        harness.read_drive(|d| d.weather().current),
-        WeatherKind::Clear
-    );
-    assert!(!harness.read_drive(|d| d.weather().live));
-
-    // While the fetch is still pending, weather holds clear -- no simulated
-    // transitions, so no weather achievement fires.
-    frames(&mut harness, 10, DT);
-    assert_eq!(
-        harness.read_drive(|d| d.weather().current),
-        WeatherKind::Clear
-    );
-    assert!(!harness
-        .app
-        .ctx
-        .profile
-        .as_ref()
-        .expect("a career")
-        .achievements
-        .iter()
-        .any(|a| a == "rain_driver"));
-}
-
-#[test]
-fn test_live_weather_calendar_off_does_not_announce_simulated_forecast_while_loading() {
-    // V must not invent a forecast while the selected live source is loading.
-    //
-    // The calendar toggle changes seasonal plausibility, not the weather
-    // source.
-    let mut harness = a_live_weather_drive("Calendar Off");
-    harness.app.ctx.settings.live_weather_controls_calendar = false;
-    install_provider(&mut harness, Box::new(FakeWeatherProvider { kind: None }));
-    harness.clear_speech();
-    harness.with_drive(|d, ctx| d.speak_weather(ctx));
-    let said = last(&harness);
-    assert!(
-        said.contains("Live weather is loading for your current route position"),
-        "{said}"
-    );
-    assert!(!said.contains("Ahead:"), "{said}");
-}
-
-#[test]
-fn test_real_weather_applies_and_awards_live_condition() {
-    // Once live conditions arrive, they take over from clear and award their
-    // achievement -- e.g. genuine live rain unlocks the rain achievement.
-    let mut harness = a_live_weather_drive("Live Rain");
-    install_provider(
-        &mut harness,
-        Box::new(FakeWeatherProvider {
-            kind: Some(WeatherKind::Rain),
-        }),
-    );
-    frames(&mut harness, 5, DT);
-    assert!(harness.read_drive(|d| d.weather().live));
-    assert_eq!(
-        harness.read_drive(|d| d.weather().current),
-        WeatherKind::Rain
-    );
-    assert!(harness
-        .app
-        .ctx
-        .profile
-        .as_ref()
-        .expect("a career")
-        .achievements
-        .iter()
-        .any(|a| a == "rain_driver"));
-}
-
-/// The recording provider `test_v_reports_live_weather_...` needs: a distinct
-/// condition per route cell, and the keys it was asked for.
-#[derive(Default)]
-struct SpatialLog {
-    requests: Vec<(String, f64, f64)>,
-    conditions: Vec<(String, WeatherKind)>,
-}
-
-struct SpatialProvider(Rc<RefCell<SpatialLog>>);
-
-impl WeatherProvider for SpatialProvider {
-    fn request(&mut self, city: &str, lat: f64, lon: f64) {
-        let mut log = self.0.borrow_mut();
-        if log.conditions.iter().any(|(k, _)| k == city) {
-            return;
-        }
-        let kinds = [WeatherKind::Clear, WeatherKind::Rain, WeatherKind::HeavyRain];
-        let kind = kinds[log.conditions.len().min(2)];
-        log.conditions.push((city.to_string(), kind));
-        log.requests.push((city.to_string(), lat, lon));
-    }
-    fn get(&mut self, city: &str) -> Option<WeatherKind> {
-        self.0
-            .borrow()
-            .conditions
-            .iter()
-            .find(|(k, _)| k == city)
-            .map(|(_, kind)| *kind)
-    }
-    fn stale(&mut self, _city: &str) -> bool {
-        false
-    }
-    fn unavailable(&mut self, _city: &str) -> bool {
-        false
-    }
-}
-
-#[test]
-fn test_v_reports_live_weather_from_multiple_current_route_positions() {
-    // Real V-key reports follow stable route cells instead of the destination.
-    let mut harness = a_live_weather_drive("Spatial V");
-    let log = Rc::new(RefCell::new(SpatialLog::default()));
-    install_provider(&mut harness, Box::new(SpatialProvider(Rc::clone(&log))));
-    // Python rebuilt the trip on the Chicago-Indianapolis corridor so the
-    // route crosses several weather cells. The bench road is one leg between
-    // one city and itself, so keep the drive's real dispatched route here and
-    // just walk it; what the case is about is that the CELL follows the truck.
-    let total = harness.read_drive(|d| d.trip.total_miles());
-    assert!(
-        total >= 80.0,
-        "this case needs a route long enough to cross three weather cells"
-    );
-    log.borrow_mut().requests.clear();
-    log.borrow_mut().conditions.clear();
-    harness.with_drive(|d, _| {
-        d.weather_mut().live = false;
-        d.weather_mut().live_raw = None;
-        d.weather_mut().live_city = None;
-        d.weather_mut().live_kind = None;
-    });
-
-    for (position, condition) in [(0.0, "clear"), (40.0, "rain"), (80.0, "heavy rain")] {
-        harness.with_drive(move |d, _| {
-            d.trip.position_mi = position;
-            d.trip.update(0.0);
-        });
-        press(&mut harness, Key::V, Some('v'));
-        let said = last(&harness);
-        assert!(
-            said.starts_with(&format!("Live weather: {condition}")),
-            "at {position}: {said}"
-        );
-    }
-    let keys: std::collections::HashSet<String> = log
-        .borrow()
-        .requests
-        .iter()
-        .map(|(key, _, _)| key.clone())
-        .collect();
-    assert_eq!(keys.len(), 3, "{keys:?}");
-    let destination = harness.read_drive(|d| d.trip.route.cities.last().cloned().unwrap_or_default());
-    let city = harness
-        .app
-        .ctx
-        .world
-        .cities
-        .get(&destination)
-        .expect("the destination city");
-    let first = log.borrow().requests[0].clone();
-    assert!(
-        (first.1, first.2) != (city.lat, city.lon),
-        "the first cell was the destination, not the truck"
-    );
-    assert!(harness.state_is::<freight_fate::states::driving::DrivingState>());
 }

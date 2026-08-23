@@ -64,8 +64,24 @@ pub fn bench_road_with(
     grade_pct: f64,
     time_scale: f64,
 ) {
+    bench_road_segments(drive, limits, &[(0.0, BENCH_MILES, grade_pct)], time_scale);
+}
+
+/// How long the bench leg is. Long enough that its middle is clear of both
+/// city ends, which is what makes `engine_brake_ban_at` answer None there --
+/// the Python file monkeypatched that away.
+pub const BENCH_MILES: f64 = 400.0;
+
+/// [`bench_road_with`] over a road whose GRADE changes: `(start_mi, end_mi,
+/// percent)` segments, which is the record `grade_at` reads.
+pub fn bench_road_segments(
+    drive: &mut DrivingState,
+    limits: &[(f64, f64)],
+    grades: &[(f64, f64, f64)],
+    time_scale: f64,
+) {
     let city = drive.trip.route.cities[0].clone();
-    let miles = 400.0;
+    let miles = BENCH_MILES;
     let detail = CorridorDetail {
         speed_limits: limits
             .iter()
@@ -76,13 +92,12 @@ pub fn bench_road_with(
                 hgv: false,
             })
             .collect(),
-        grade_segments: vec![GradeSegment::new(
-            0.0,
-            miles,
-            grade_pct,
-            "flat",
-            "test bench",
-        )],
+        grade_segments: grades
+            .iter()
+            .map(|(start_mi, end_mi, pct)| {
+                GradeSegment::new(*start_mi, *end_mi, *pct, "flat", "test bench")
+            })
+            .collect(),
         ..Default::default()
     };
     let leg = Leg::new(&city, &city, miles, "I 90", "flat", Vec::new()).with_detail(detail);

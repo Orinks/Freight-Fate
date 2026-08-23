@@ -19,6 +19,18 @@
 //! announcement still happens at the point Python's `enter()` ran. Every
 //! later call (a menu row, a re-entry when a submenu pops, `lines()`) runs
 //! with the drive free.
+//!
+//! # The two empties
+//!
+//! `with` / `read` / `call` answer `None` for two unrelated reasons, and the
+//! difference matters enough that they behave differently. **No drive** is
+//! legitimate and quiet: a test drove the screen without pushing a drive under
+//! it. **Already borrowed** is never a state of the world -- it means code
+//! that already holds the drive reached for it again instead of passing down
+//! the one it has -- so it trips a `debug_assert!` naming the call site, and
+//! logs a warning in a shipped build. See `nested_borrow` for why: a caller
+//! that cannot tell the two apart guesses a default, and a guess said aloud is
+//! a lie to a player who has nothing else to go on.
 
 use std::panic::Location;
 use std::rc::Rc;
@@ -123,7 +135,7 @@ impl DriveRef {
     /// Run `f` on the drive. `None` when there is no drive.
     ///
     /// A drive that is already borrowed further up the stack also answers
-    /// `None`, but noisily -- see [`nested_borrow`].
+    /// `None`, but noisily -- see `nested_borrow`.
     #[track_caller]
     pub fn read<R>(&self, f: impl FnOnce(&mut DrivingState) -> R) -> Option<R> {
         let shared = self.0.as_ref()?;
