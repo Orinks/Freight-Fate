@@ -560,7 +560,7 @@ impl CityMenuState {
         ctx.push_state(SettingsState::new());
     }
 
-    fn to_main_menu(&mut self, ctx: &mut GameContext) {
+    fn quit_to_main_menu(&mut self, ctx: &mut GameContext) {
         ctx.save_profile();
         ctx.say("Progress saved.");
         MainMenuState::arm_update_check(&ctx.settings);
@@ -806,8 +806,10 @@ impl Menu for CityMenuState {
             ),
         );
         items.push(
-            MenuItem::new("Quit to main menu", |s: &mut Self, ctx| s.to_main_menu(ctx))
-                .help("Save your career and return to the title menu."),
+            MenuItem::new("Quit to main menu", |s: &mut Self, ctx| {
+                s.quit_to_main_menu(ctx)
+            })
+            .help("Save your career and return to the title menu."),
         );
         if Self::show_first_day_briefing(ctx) {
             items.insert(
@@ -904,7 +906,7 @@ impl Menu for CityMenuState {
 
     fn go_back(&mut self, ctx: &mut GameContext) {
         ctx.audio.play("ui/menu_back");
-        self.to_main_menu(ctx);
+        self.quit_to_main_menu(ctx);
     }
 }
 

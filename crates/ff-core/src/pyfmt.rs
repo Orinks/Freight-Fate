@@ -177,7 +177,7 @@ fn group_thousands(digits: &str) -> String {
     let bytes = digits.as_bytes();
     let mut out = String::with_capacity(digits.len() + digits.len() / 3);
     for (index, &d) in bytes.iter().enumerate() {
-        if index > 0 && (bytes.len() - index) % 3 == 0 {
+        if index > 0 && (bytes.len() - index).is_multiple_of(3) {
             out.push(',');
         }
         out.push(d as char);

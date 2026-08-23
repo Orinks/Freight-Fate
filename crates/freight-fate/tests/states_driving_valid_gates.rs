@@ -179,7 +179,7 @@ fn a_curve_event(curve: &RouteCurve, ahead_mi: f64) -> TripEvent {
         kind: TripEventKind::Curve,
         message: SpokenMessage::new("Sharp left, a quarter mile. Advise 35."),
         data: TripEventData {
-            curve: Some(curve.clone()),
+            curve: Some(*curve),
             advisory_mph: Some(curve.advisory_mph as f64),
             ahead_mi: Some(ahead_mi),
             ..TripEventData::default()

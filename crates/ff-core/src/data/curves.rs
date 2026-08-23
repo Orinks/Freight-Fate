@@ -432,6 +432,10 @@ pub fn superelevation_at(radius_ft: f64, design_speed_mph: f64) -> f64 {
     }
     let (_, friction) = nearest_friction(design_speed_mph);
     let needed = design_speed_mph * design_speed_mph / (15.0 * radius_ft) - friction;
+    // Deliberately not `clamp`: this mirrors Python's
+    // `max(0.0, min(SUPERELEVATION_BUILT, needed))` exactly, and `clamp`
+    // panics on a NaN input where the pair quietly returns a number.
+    #[allow(clippy::manual_clamp)]
     needed.min(SUPERELEVATION_BUILT).max(0.0)
 }
 

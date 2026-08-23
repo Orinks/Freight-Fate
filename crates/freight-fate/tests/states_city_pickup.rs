@@ -162,7 +162,10 @@ fn test_drop_and_hook_gets_the_truck_out_in_a_fraction_of_the_time() {
     let plan = with_state::<PickupFacilityState, _>(&app, |p, ctx| p.pickup_plan(ctx));
     assert!(plan.is_drop_hook());
     assert_eq!(plan.minutes, DROP_HOOK_MIN);
-    assert!(DROP_HOOK_MIN < LIVE_LOAD_MIN);
+    assert!(
+        plan.minutes < LIVE_LOAD_MIN,
+        "a preloaded trailer must leave sooner than a live load"
+    );
     // Check-in already says there is no dock coming.
     let said = app.main_lines().last().cloned().unwrap();
     assert!(said.contains("drop yard"));

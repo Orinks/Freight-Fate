@@ -255,7 +255,7 @@ fn test_leaving_the_screen_releases_a_held_cue() {
     };
     app.push_state(LearnSoundCategoryState::new(held));
     with_state_mut::<Cat, _>(&mut app, |s, ctx| s.activate(ctx));
-    with_state_mut::<Cat, _>(&mut app, |s, ctx| State::exit(s, ctx));
+    with_state_mut::<Cat, _>(&mut app, State::exit);
     assert!(
         log.borrow().released > 0,
         "a held cue must not survive the screen closing"
@@ -318,7 +318,7 @@ fn test_reentering_the_screen_stops_a_running_held_demo() {
     app.push_state(LearnSoundCategoryState::new(held_and_other_category()));
     with_state_mut::<Cat, _>(&mut app, |s, ctx| s.activate(ctx));
     assert!(demo_running(&app));
-    with_state_mut::<Cat, _>(&mut app, |s, ctx| State::enter(s, ctx));
+    with_state_mut::<Cat, _>(&mut app, State::enter);
     assert!(
         log.borrow().released > 0,
         "re-entry must stop a running held demo"

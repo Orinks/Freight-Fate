@@ -151,9 +151,14 @@ impl LearnSoundCategoryState {
     /// nothing on a clean build. Playing nothing at all would teach the
     /// player that the real cue is silent, so the screen says so instead.
     pub fn play_entry(&mut self, ctx: &mut GameContext, entry: &SoundEntry) {
-        let mut audio = DemoAudioBridge::new(ctx.audio.as_mut());
-        if !self.demo.can_play(&audio, entry) {
-            drop(audio);
+        // The bridge borrows `ctx.audio`, so the question is asked and the
+        // borrow released inside its own scope -- `ctx.say` below needs the
+        // context back.
+        let playable = {
+            let audio = DemoAudioBridge::new(ctx.audio.as_mut());
+            self.demo.can_play(&audio, entry)
+        };
+        if !playable {
             ctx.say(&format!(
                 "{} is not available in this copy of the game, \
                  so there is nothing to play. F1 still says what it means.",
@@ -161,6 +166,7 @@ impl LearnSoundCategoryState {
             ));
             return;
         }
+        let mut audio = DemoAudioBridge::new(ctx.audio.as_mut());
         self.demo.start(&mut audio, entry);
     }
 

@@ -72,7 +72,11 @@ fn baked_world() -> World {
 }
 
 /// The leg between two cities, whichever way round the shard stores it.
-fn leg_between(world: &World, a: &str, b: &str) -> std::sync::Arc<ff_core::data::world_models::Leg> {
+fn leg_between(
+    world: &World,
+    a: &str,
+    b: &str,
+) -> std::sync::Arc<ff_core::data::world_models::Leg> {
     world
         .neighbors(a)
         .iter()
@@ -123,7 +127,10 @@ fn no_bend_is_advised_above_the_ceiling() {
     for (leg_key, rows) in curves::load() {
         for row in rows {
             records += 1;
-            if worst.as_ref().is_none_or(|(_, mph)| row.advisory_mph > *mph) {
+            if worst
+                .as_ref()
+                .is_none_or(|(_, mph)| row.advisory_mph > *mph)
+            {
                 worst = Some((leg_key.clone(), row.advisory_mph));
             }
         }

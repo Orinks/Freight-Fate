@@ -679,7 +679,7 @@ fn test_driving_assistance_preset_keyboard_path_and_custom_transition() {
         .position(|(line, _)| line == "Driving assistance preset: Custom.")
         .unwrap();
     assert!(state_line < note);
-    assert_eq!(calls[note].1, false);
+    assert!(!calls[note].1);
     app.clear_speech();
     key(&mut app, Key::Down);
     key(&mut app, Key::Return);
@@ -846,7 +846,7 @@ fn test_gameplay_reorg_notice_fires_once_for_a_pre_reorg_settings_file() {
     assert_eq!(Settings::load().settings_layout_notice_from, -1);
 
     app.clear_speech();
-    with_state_mut::<GameplaySettingsState, _>(&mut app, |s, ctx| State::enter(s, ctx));
+    with_state_mut::<GameplaySettingsState, _>(&mut app, State::enter);
     assert!(!app
         .main_lines()
         .iter()
