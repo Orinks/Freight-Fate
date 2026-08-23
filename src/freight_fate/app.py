@@ -1071,6 +1071,33 @@ class App:
         if should_enter:
             state.enter()
 
+    def _handle_close_request(self) -> None:
+        """Alt+F4 and the window's close button ask, they do not just go.
+
+        Closing the window used to end the process on the spot. Mid-drive
+        that is destructive and silent: saving happens only at stops, so the
+        leg being driven is gone and the save still points at the last stop.
+        Darren lost two routes to a mis-hit Alt+F4 and asked for the same
+        gate Escape already puts in front of quitting (2026-08-22).
+
+        The second close request is obeyed without further argument. A
+        confirmation the player cannot get past would be a worse bug than
+        the one it fixes -- if speech has dropped, or the dialog is somehow
+        unreachable, Alt+F4 twice always closes the game.
+        """
+        from .states.main_menu import ConfirmQuitState
+
+        if isinstance(self.state, ConfirmQuitState):
+            self.running = False
+            return
+        self.push_state(ConfirmQuitState(self.ctx, unsaved_drive=self._drive_in_progress()))
+
+    def _drive_in_progress(self) -> bool:
+        """Whether a leg is being driven right now, saved nowhere."""
+        from .states.driving import DrivingState
+
+        return any(isinstance(state, DrivingState) for state in self.states)
+
     def _take_top(self, should_exit: bool = True) -> None:
         """Lift the top state off the stack, without deciding what follows.
 
@@ -1166,7 +1193,7 @@ class App:
                         # re-check speech the moment the player comes back.
                         self.speech.request_refresh()
                     if event.type == pygame.QUIT:
-                        self.running = False
+                        self._handle_close_request()
                     elif event.type in _CONTROLLER_EVENTS:
                         self._dispatch_controller(event)
                     elif self.state is not None:

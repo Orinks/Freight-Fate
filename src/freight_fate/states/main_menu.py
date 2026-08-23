@@ -491,13 +491,37 @@ class MainMenuState(MenuState):
 
 
 class ConfirmQuitState(MenuState):
-    """One spoken yes/no gate before Escape at the main menu exits the game."""
+    """One spoken yes/no gate in front of quitting the game.
+
+    Escape at the main menu raises it, and so does the window's close button
+    or Alt+F4 from anywhere -- that close used to end the process on the spot,
+    which cost Darren two routes to a mis-hit key (2026-08-22).
+
+    ``unsaved_drive`` is what makes the gate worth reading rather than a
+    keystroke to swat away: quitting from the title loses nothing, quitting
+    mid-leg loses the leg, and only the second one needs saying.
+    """
 
     title = "Quit Freight Fate?"
     open_sound_key = "ui/error"
 
+    def __init__(self, ctx, *, unsaved_drive: bool = False) -> None:
+        super().__init__(ctx)
+        self.unsaved_drive = unsaved_drive
+
+    def _question(self) -> str:
+        if not self.unsaved_drive:
+            return "Quit Freight Fate?"
+        # The same bargain the pause menu's quit already explains, in the
+        # same words: you can only save at a stop.
+        return (
+            "Quit Freight Fate? You are part way through a drive. You can "
+            "only save at a stop, so this drive will resume from your last "
+            "stop, not from here."
+        )
+
     def announce_entry(self) -> None:
-        self.ctx.say(f"Quit Freight Fate? {self.current_text()}", review=False)
+        self.ctx.say(f"{self._question()} {self.current_text()}", review=False)
 
     def build_items(self) -> list[MenuItem]:
         return [

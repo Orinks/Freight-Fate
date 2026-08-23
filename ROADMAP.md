@@ -1349,6 +1349,19 @@ onto exit signalling.
       otherwise the level that earns the next tier -- so the question is
       answerable at any time, not only when the game happens to raise it.
 
+- [x] **Closing the window asks before it takes the drive (2026-08-22).**
+      `pygame.QUIT` -- Alt+F4 and the window close button both -- set
+      `running = False` on the spot. Mid-leg that is silently destructive:
+      saving happens only at stops, so the leg is discarded and the save
+      still points at the last stop. Darren lost two routes to a mis-hit key
+      and asked for the gate Escape already has. It now raises
+      `ConfirmQuitState`, which grew an `unsaved_drive` flag so the question
+      is worth reading rather than a keystroke to swat: quitting from the
+      title loses nothing and says nothing, quitting mid-leg says what it
+      costs in the same words the pause menu's quit already uses. The second
+      close request is obeyed without argument -- a confirmation the player
+      cannot get past would be a worse bug than the one it fixes.
+
 - [ ] **Audit every interrupting line for whether it is still TRUE when it
       comes back.** A cut line is handed back so it finishes rather than
       vanishing -- Shane asked for that, and it is what rescued the missing

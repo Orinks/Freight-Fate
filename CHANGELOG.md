@@ -1141,6 +1141,14 @@
   re-read.
 
 ### Fixed
+- **Closing the window asks first, instead of taking your drive with it.**
+  Alt F4, or the window's close button, used to shut the game down on the
+  spot. Part way through a leg that quietly cost you the leg: you can only
+  save at a stop, so the drive you were on was gone and your save still
+  pointed at your last stop. Closing the window now raises the same yes or no
+  question Escape does, starting on No, and when there is a drive in progress
+  it says so before you answer. If you really do want out, pressing it a
+  second time closes the game without asking again.
 - **Billboards and roadside signs read in full on quiet.** Quiet shortens the
   roadside colour by keeping the name and dropping the words around it, which
   works for a river crossing or a park boundary -- the name is the whole point
