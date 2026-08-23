@@ -1550,6 +1550,33 @@ onto exit signalling.
       any of this work. Lower than the 130.7 the label-gated rule reported,
       and that number was flattered by silencing real road.
 
+- [x] **Leg mileages that fell short of their own road are corrected
+      (2026-08-23).** 176 legs stored a distance below the length of the
+      route they were baked from; 36 were below the STRAIGHT LINE between
+      their two city nodes, which no road can be. Total 13,337 -> 14,948 mi.
+
+      Nothing caught it because nothing disagreed: the corridor bake rescales
+      every layer onto `leg.miles`, so grades ended exactly at the stored
+      figure and `state_miles` summed to it. Same number, different hats. The
+      straight-line check is now a test, because it is the one witness that
+      owes the data nothing.
+
+      The corrected value is the geometry archive's length, and it is a
+      PROVEN lower bound: the archive is a Douglas-Peucker subset, and
+      dropping a vertex replaces a path with its chord, which is never
+      longer. So a leg below it is short of a floor. Legs above it are left
+      alone. The half mile of slack is integer rounding, not a threshold --
+      the shortfall distribution has no gap to cut at.
+
+      `tools/repair_leg_mileage.py` carried 49,128 along-route positions
+      across 15 field types and four shards, and REFUSES to run on a
+      mileage-looking field it does not know. `landmarks[].off_mi` is
+      excluded on purpose: it is distance OFF the road.
+
+      KNOWN AND ACCEPTED: the archive understates by about 0.1 percent, so a
+      corrected leg still reads a touch short. A real router would settle it
+      exactly -- see the Valhalla bullet below.
+
 - [ ] **Some interstate legs are labelled for a road their route does not
       ride.** Found by the connector bake above, which reads per-leg freeway
       coverage as a by-product: 51 of 728 interstate legs spend under half

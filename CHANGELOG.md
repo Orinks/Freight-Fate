@@ -965,6 +965,26 @@
   either: the truck still leans on them and the road bed still leads you
   round them, they are just no longer announced as highway curves.
 
+- **Some runs were paying you for less road than you drive.** A hundred and
+  seventy-six legs carried a distance shorter than the road actually runs --
+  the haul from Poplar Bluff to Jonesboro was booked at fifty-five miles and
+  is ninety-five; Altus to Wichita Falls said fifty and is eighty-five. You
+  were driving the full distance and being paid, timed and fuelled for the
+  short one. Thirty-six of them were impossible on the face of it: the
+  distance stored was less than the straight line between the two towns, and
+  no road is shorter than that. Every one of those legs now carries the
+  distance it really covers, and the mileposts along it -- the stops, the
+  state lines, the limit changes, the grades -- move with it so they still
+  land where they belong. Expect those runs to pay more and to be given more
+  time, because they were always longer than the book said.
+
+- **The Pigeon River Gorge is called a mountain road again.** Twenty-three
+  stretches were filed as flat or rolling when the federal highway survey
+  calls them mountainous -- I-40 between Asheville and Knoxville among them,
+  and I-70 through Glenwood Canyon. The route briefing described them as
+  rolling hills right up to the first six percent grade. They now say what
+  they are.
+
 - **Bends are judged against the road you are actually on.** Some routes are
   named for an interstate they never really join -- the run from Huntsville to
   Nashville is filed under I-65 but drives US-231 the whole way. The game had
