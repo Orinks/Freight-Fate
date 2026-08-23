@@ -122,11 +122,42 @@ onto exit signalling.
 
 - [ ] **Rust port: release built by `tools/build_release.py --rust`**
       (2026-08-22). Stages `build/FreightFate/` -- `FreightFate.exe`, the
-      vendored SDL2/BASS/Prism libraries, `freight_fate/data/` on disk, both
-      packs, `build_info.json`, the docs -- and archives it like the Python
-      build; refuses LFS pointer packs. CI job still to add; the macOS
-      `.app` bundle and the binary's `--smoke` are not wired yet, so the
-      staged-build smoke is opt-in.
+      vendored SDL2/BASS/Prism libraries, `freight_fate/data/world.ffdata`
+      (the baked container, shipped instead of the JSON tree), both packs,
+      `build_info.json`, the docs -- and archives it like the Python build;
+      refuses LFS pointer packs, and refuses a payload carrying both the
+      container and the JSON it replaced. Measured on the
+      `nightly-rustport` build (2026-08-22): the bake takes the shipped data
+      from 141,937,342 bytes of JSON to a 7,312,812-byte container, which is
+      128 MiB off the staged folder but only 2.8 MiB off the download,
+      because the zip was already deflating that JSON to 10.3 MB. `--smoke`
+      is wired and the staged build boots and exits 0 on it -- and it is a
+      real check: with the container moved aside the same run panics on
+      "the shipped world data loads" rather than passing. Left to do: the
+      macOS `.app` bundle.
+
+- [x] **Rust port: CI (`.github/workflows/rust.yml`, 2026-08-22).**
+      `cargo fmt --all --check` on Linux, then `cargo clippy --all-targets
+      --locked -D warnings`, `cargo test -p ff-core` and
+      `cargo test -p freight-fate` on Windows, with the same headless trio
+      the Python jobs use and Git LFS on -- two committed-pack tests assert
+      the real packs' byte length and hash, and an LFS pointer is a file
+      that exists, so their "not present, skip" guard never fires. Windows
+      only: SDL2 and BASS are vendored for windows-x86_64 alone, so a Linux
+      runner has nothing to link against and nothing to load. Vendor each
+      platform's libraries before adding its runner.
+
+- [ ] **Clean the workspace for the new gates.** Both fail on `ff-core`
+      alone today, before `freight-fate` is even reached.
+      `cargo fmt --all` fixes 74 hunks across 11 files (weather, timezones,
+      hos and real_traffic tests, save_migration, start_options, trucks,
+      and three `tests/data_*.rs`) that are pure line-wrapping drift.
+      `cargo clippy -p ff-core --all-targets -- -D warnings` then reports
+      six: `field_reassign_with_default` at `cargo_condition.rs:391` and
+      `:524` and `sim/weather/tests.rs:1187`, `manual_is_multiple_of` at
+      `pyfmt.rs:180`, `filter_next` (use `rfind`) at
+      `profile_integrity_invariants.rs:642`, and `type_complexity` at
+      `sim/real_weather/tests.rs:725`.
 
 - [x] **Real time driving mode (owner, 2026-08-22).** The Driving mode row
       is Relaxed, Standard, Real time: `TIME_SCALES` gains 1.0, the tuning

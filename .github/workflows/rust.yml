@@ -1,0 +1,184 @@
+# Rust port CI.
+#
+# Builds and tests the Cargo workspace (`crates/*`). The Python suite has its
+# own workflow (`ci.yml`) and is untouched by this one; both run side by side
+# for as long as the port keeps the Python package as its reference
+# implementation.
+#
+# Why this is its own workflow rather than another job in ci.yml: ci.yml's
+# jobs share a Python/uv setup and a coverage upload that mean nothing here,
+# and its `build` job gates on `test`, which would make a Rust failure block
+# the Python wheel. Keeping them apart also keeps the Rust matrix free to be
+# Windows-only (see below) without teaching ci.yml's matrix about exceptions.
+#
+# Trigger note: `build.yml` fires only on `schedule`, `v*.*.*` tags and
+# `workflow_dispatch` -- it never sees an ordinary push -- so nothing there
+# will ever run these checks. Anything that must run on a push needs its own
+# push trigger, which is what this file has, mirroring ci.yml's branch list
+# plus the port branch.
+
+name: Rust
+
+permissions:
+  contents: read
+
+on:
+  push:
+    # Same long-lived branches ci.yml watches, plus the port branch: like
+    # feat/career-1.9, feat/rust-port takes direct pushes instead of PRs, so
+    # without its own entry the port's own CI would never run on the port.
+    branches: [main, dev, feat/career-1.9, feat/rust-port]
+    # Spelled out twice rather than shared through a YAML anchor: the Actions
+    # workflow parser does not resolve anchors and aliases.
+    paths:
+      - "crates/**"
+      - "vendor/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - ".github/workflows/rust.yml"
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - "crates/**"
+      - "vendor/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - ".github/workflows/rust.yml"
+  workflow_dispatch:
+
+# The path filter above keeps a 30-plus-minute Windows build off pushes that
+# only touch Python, docs or world data. It has one cost worth knowing before
+# anyone wires it into branch protection: a *required* check that is path
+# filtered stays "expected -- waiting for status" forever on a PR that skips
+# it. Make it required only after dropping `paths:`.
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    # Formatting needs no native library and no build, so it runs on the cheap
+    # Linux runner and fails in under a minute instead of thirty.
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install the pinned toolchain
+        # rust-toolchain.toml names the channel and the rustfmt/clippy
+        # components; `rustup show` is what materialises it before the first
+        # cargo call, so a missing component fails here with a clear message
+        # rather than mid-lint.
+        run: rustup show
+
+      - name: cargo fmt --check
+        run: cargo fmt --all --check
+
+  test:
+    # Windows only, deliberately.
+    #
+    # The workspace links SDL2 dynamically against the prebuilt libsdl-org
+    # release under `vendor/sdl2/<os>-<arch>/`, and loads BASS and Prism at
+    # run time out of `crates/bass-sys/vendor/<os>-<arch>/` and
+    # `crates/prism-sys/vendor/<os>-<arch>/`. Today the tree carries:
+    #
+    #   vendor/sdl2/            windows-x86_64 only
+    #   crates/bass-sys/vendor/ windows-x86_64 only
+    #   crates/prism-sys/vendor/windows-x86_64, macos-x86_64, macos-aarch64
+    #
+    # So an ubuntu-latest job would have no vendored SDL2 to link against --
+    # `crates/freight-fate/build.rs` would print its "expecting a system SDL2"
+    # warning and the link would then fail on the runner -- and no BASS at
+    # all. Installing `libsdl2-dev` there would get it to link, but it would
+    # be testing a configuration nobody ships and nobody has ever run, and the
+    # audio and speech loaders would silently fall back to their null
+    # backends. Windows is the primary target and the only fully vendored one,
+    # so this matrix is honest about the gap instead of papering over it:
+    # Linux and macOS are NOT covered by this workflow. Add each platform's
+    # vendored libraries first, then add the runner here.
+    name: Test (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      # The same headless trio the Python jobs use: no speech synthesiser, no
+      # window, no audio device on a hosted runner.
+      FREIGHT_FATE_NO_SPEECH: "1"
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      # Keep cargo's own diagnostics legible in the Actions log viewer.
+      CARGO_TERM_COLOR: always
+      # Backtraces cost nothing here and turn a bare "assertion failed" in a
+      # 40-minute run into something diagnosable without a re-run.
+      RUST_BACKTRACE: "1"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # sounds.pak and music.pak are Git LFS (see .gitattributes), and the
+          # tests DO need the real files. `assets_pack`'s
+          # test_committed_pack_has_freight_fate_header and
+          # test_committed_music_pack_has_freight_fate_header assert the exact
+          # byte length and, for sounds.pak, the sha256. Both guard with "if
+          # the file does not exist, skip" -- and an LFS *pointer* is a file
+          # that exists, so without `lfs: true` the guard never fires and the
+          # length assertion fails against the ~130-byte pointer text.
+          # FREIGHT_FATE_IGNORE_SOUND_PACK=1 does not help: it only switches
+          # off the default `open_default()` loader, while these two tests read
+          # the paths directly. So the packs are fetched, at roughly 270 MB
+          # (261 MB of that music.pak) per run. If LFS bandwidth ever becomes
+          # the constraint, the honest fix is to teach those two tests to
+          # recognise a pointer file and skip -- not to disable the packs here
+          # and leave the assertions failing.
+          lfs: true
+
+      - name: Install the pinned toolchain
+        run: rustup show
+
+      - name: Cache cargo registry and target directory
+        # Swatinem/rust-cache rather than a raw actions/cache on target/: it
+        # keys on the lockfile plus the rustc version, and prunes the target
+        # directory to the dependency artefacts before saving. An unpruned
+        # target/ for this workspace is several GB -- well past the 10 GB
+        # repository cache budget after a couple of branches.
+        uses: Swatinem/rust-cache@v2
+        with:
+          # One cache line per workspace member set; the job builds them all.
+          shared-key: rust-windows
+
+      - name: cargo clippy
+        # Workspace-wide and every target, so test and bench code is linted
+        # too; warnings are errors, as the port plan requires. This is also
+        # the first cargo invocation that runs the build scripts, so the
+        # vendored libraries are staged by the time the next step looks.
+        #
+        # `--locked` on the first cargo call: Cargo.lock is committed, so a
+        # dependency bump that was not locked in should fail here loudly
+        # rather than silently resolve to something no developer has run.
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Show the staged native libraries
+        # The build scripts (crates/bass-sys/build.rs, crates/prism-sys/
+        # build.rs, crates/freight-fate/build.rs) copy the vendored DLLs out
+        # of the committed vendor directories into target/<profile>/. Verified
+        # on a clean target directory in this repo: one cargo invocation with
+        # nothing else done by hand leaves SDL2.dll, bass.dll, bass_aac.dll,
+        # bassflac.dll, basshls.dll, bassopus.dll and prism.dll beside the
+        # binary. The test executables themselves live in
+        # target/<profile>/deps/, and `cargo test` prepends both that
+        # directory and target/<profile> to PATH before running one, which is
+        # how they resolve SDL2.dll; run such a binary by hand without that
+        # PATH and it dies with "SDL2.dll: cannot open shared object file".
+        # This listing exists so that if a vendor directory ever goes missing,
+        # the log names the library that did not get staged instead of leaving
+        # a link or load error two steps later to be decoded.
+        shell: bash
+        run: ls -l target/debug/*.dll
+
+      - name: cargo test -p ff-core
+        run: cargo test -p ff-core
+
+      - name: cargo test -p freight-fate
+        run: cargo test -p freight-fate
