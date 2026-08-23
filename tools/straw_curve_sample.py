@@ -77,6 +77,7 @@ POINT_BUDGET = 600  # tangent-only vertex cap (curves set their own floor)
 SIGN_WOBBLE_DEG = 1.0  # |turn| under this is neutral (doesn't set a direction)
 SIGN_HYSTERESIS_DEG = 5.0  # sustained opposing turn needed to split a run (Phil's #1)
 DEFLECTION_FLOOR_DEG = 8.0  # a real curve turns at least this much (per direction)
+ADVISORY_MAX_MPH = 80  # top of the AASHTO friction table; see _advisory_mph
 CONNECTOR_WINDOW_MI = 0.75  # first/last in-town stretch -> tag curves, don't drop
 # ^ a BOOTSTRAP, not the finished connector layer. Position alone cannot see a
 #   mid-leg interchange, and 0.75 mi does not get a truck out of Denver. After
@@ -160,9 +161,17 @@ def _window_radius_ft(cum_m: list[float], turn: list[float], i: int) -> float:
 
 
 def _advisory_mph(radius_ft: float) -> float:
+    """Advisory speed at the apex, capped at the top of the friction table.
+
+    The point-mass control this solves is published for 20 through 80 mph and
+    stops there, because no US road is designed above 80. Left unclamped it
+    reads out 115 on a gentle bend, which is arithmetic past the edge of its
+    own table rather than a statement about a road. ADVISORY_MAX_MPH is an
+    import-free copy of ``data/curves.py``'s constant of the same name -- this
+    tool deliberately has no runtime dependency on the baked-data module."""
     r_m = radius_ft / FT_PER_M
     v = math.sqrt(A_LAT_G * 9.80665 * r_m)  # m/s
-    return int(round(v * MPS_TO_MPH / 5.0) * 5)
+    return min(int(round(v * MPS_TO_MPH / 5.0) * 5), ADVISORY_MAX_MPH)
 
 
 # --- curvature analysis + switchback-aware curve detection ------------------

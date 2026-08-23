@@ -550,6 +550,11 @@ class DrivingState(
         self._lane_keeping_takes_exit_said = False
         self._curve_assist_active = False
         self._curve_assist_cue_s = 0.0
+        # Whether the SLOWING cue was actually spoken for the run in progress.
+        # The release line is paired to it, so an engagement that stayed quiet
+        # (see the ramp case in driving_updates) never leaves a lone
+        # "released" hanging with nothing before it.
+        self._curve_assist_spoke = False
         self._transition_assist_active = False
         self._keeper_mph: float | None = None
         self._keeper_throttle = 0.0

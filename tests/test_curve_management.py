@@ -874,14 +874,34 @@ def test_counting_the_bank_only_ever_raises_an_advisory() -> None:
     A bank can only help a truck hold a curve, so this must never hand back a
     number lower than the flat one -- a correction meant to speed a curve up
     must not quietly slow a different one down.
+
+    Inside the model's own domain, which is what ``ADVISORY_MAX_MPH`` marks:
+    the friction table this is solved from is published for 20 to 80 mph and
+    stops there, so an advisory is only a statement about a road up to 80. A
+    20,000 ft bend reads 300 mph unclamped, which is arithmetic rather than a
+    road, and both the flat and the banked number are capped alike -- so the
+    "never lower" property is checked where both are real.
     """
     import math
 
-    from freight_fate.data.curves import ADVISORY_LATERAL_G, advisory_with_bank_mph
+    from freight_fate.data.curves import (
+        ADVISORY_LATERAL_G,
+        ADVISORY_MAX_MPH,
+        advisory_with_bank_mph,
+    )
 
     for radius in (400, 758, 1000, 1810, 5000, 20_000):
         flat = math.sqrt(15.0 * radius * ADVISORY_LATERAL_G)
-        assert advisory_with_bank_mph(radius, 70) >= int(round(flat / 5.0) * 5) - 1
+        capped = min(int(round(flat / 5.0) * 5), ADVISORY_MAX_MPH)
+        assert advisory_with_bank_mph(radius, 70) >= capped - 1
+
+    # The cap binds, and it is the top of the friction table rather than a
+    # number anybody picked: no US road is designed above 80.
+    assert ADVISORY_MAX_MPH == 80
+    assert advisory_with_bank_mph(20_000, 70) == ADVISORY_MAX_MPH
+    assert advisory_with_bank_mph(600, 70) < ADVISORY_MAX_MPH, (
+        "a real bend must still read its own speed, not the cap"
+    )
 
     # A town street is built to normal crown, so it keeps the flat reading:
     # TxDOT Table 4-3 and Iowa DOT 2B-1 both put the Method 2 / Method 5 line
@@ -1047,3 +1067,89 @@ def test_interstate_mainline_asks_the_truck_to_slow_down_rarely() -> None:
     assert slow, "a network with no interstate slowdowns at all means the data vanished"
     every = miles / slow
     assert every > 100.0, f"one interstate slowdown every {every:.1f} miles is too often"
+
+
+def test_no_baked_advisory_is_faster_than_the_table_it_came_from() -> None:
+    """The advisory is AASHTO's point-mass control solved for V, and that
+    control's friction table is published for 20 through 80 mph.
+
+    Run unclamped on a gentle bend it read out 115, which is not a claim
+    about a road -- it is arithmetic past the edge of its own table. 21,076
+    of 63,873 rows (33 percent) were over 80 before the cap. Nothing audible
+    moved: an advisory above the posted limit never fires a pacenote, never
+    counts as corner overspeed and never eases cruise.
+    """
+    import json
+
+    from freight_fate.data.curves import ADVISORY_MAX_MPH
+    from freight_fate.data.data_resources import read_data_text
+
+    text = read_data_text("world_data/us/gameplay/curves.jsonl")
+    assert text
+    worst = 0
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if "meta" in row:
+            continue
+        worst = max(worst, int(row["advisory_mph"]))
+    assert worst <= ADVISORY_MAX_MPH, f"a baked row still advises {worst} mph"
+
+
+def test_the_deadline_plan_slows_for_the_bends_it_will_meet() -> None:
+    """``route_drive_hours`` walked the route on posted limits alone, so every
+    bend the driver has to slow for was time the plan never budgeted.
+
+    It now times each sampled segment piecewise: the miles inside a bend at
+    that bend's advisory, the rest at the planning limit. Only the bend's own
+    recorded span is charged -- no invented deceleration ramp, which is the
+    sort of unmeasured loss DEADLINE_PLANNING_SPEED_FACTOR already carries.
+    """
+    from freight_fate.models.jobs import _segment_hours
+
+    # No bends: the segment is just distance over speed.
+    assert _segment_hours(0.0, 2.0, 60.0, []) == 2.0 / 60.0
+
+    # A bend covering half the segment is charged at its advisory for that
+    # half only, so the segment costs more than the open road and less than
+    # the whole thing taken at the advisory.
+    bands = [(0.0, 1.0, 30.0)]
+    slowed = _segment_hours(0.0, 2.0, 60.0, bands)
+    assert slowed == 1.0 / 30.0 + 1.0 / 60.0
+    assert 2.0 / 60.0 < slowed < 2.0 / 30.0
+
+    # A bend the truck is already slower than costs nothing extra.
+    assert _segment_hours(0.0, 2.0, 25.0, [(0.0, 1.0, 55.0)]) == 2.0 / 25.0
+
+    # Bands outside the segment are ignored rather than smeared into it.
+    assert _segment_hours(4.0, 6.0, 60.0, [(0.0, 1.0, 30.0)]) == 2.0 / 60.0
+
+
+def test_a_switchback_road_costs_the_plan_more_than_an_interstate() -> None:
+    """The check on the piecewise timing, on real baked geometry.
+
+    US-550 over Red Mountain Pass is 107 miles of switchback and its bends
+    really do cost the plan time. An interstate of similar length costs
+    essentially nothing, which is the point of the other two fixes that
+    landed the same day: once the bank is priced in and interchange geometry
+    is classed as connector, interstate mainline stops asking a truck to slow.
+    """
+    from freight_fate.data.world import get_world
+    from freight_fate.models import jobs
+
+    world = get_world()
+    route = world.shortest_route("durango_co_us", "montrose_co_us")
+    assert route is not None
+    bands = jobs._curve_ceilings(route)
+    assert bands, "the Million Dollar Highway's bends should reach the planner"
+    assert min(advisory for _, _, advisory in bands) <= 25
+
+    aware = jobs.route_drive_hours(route, world=world)
+    original = jobs._curve_ceilings
+    try:
+        jobs._curve_ceilings = lambda _route: []
+        blind = jobs.route_drive_hours(route, world=world)
+    finally:
+        jobs._curve_ceilings = original
+    assert aware > blind, "a road of switchbacks must cost the plan more than a flat read"

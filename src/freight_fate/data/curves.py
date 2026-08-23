@@ -226,6 +226,24 @@ AASHTO_SIDE_FRICTION = {
     75: 0.09,
     80: 0.08,
 }
+# The fastest speed this whole model has anything to say about, and so the
+# ceiling on any advisory it produces.
+#
+# The advisory is AASHTO's point-mass control solved for V, and the friction
+# table below is the model: it is published for 20 through 80 mph and stops
+# there, because no US road is designed above 80 (the highest posted limit in
+# the country is the 85 on Texas SH-130). Run unclamped on a gentle bend the
+# formula happily reads out 115 mph, which is not a number about roads at all
+# -- it is arithmetic past the edge of its own table. 33 percent of the baked
+# rows were above 80 and the worst read 115.
+#
+# Nothing observable moved when this landed: an advisory above the posted
+# limit never fires a pacenote, never counts as corner overspeed, and never
+# eases cruise, so 115 and 80 behave identically under a truck. The point is
+# that the stored number now means what it says, and a future consumer cannot
+# read one of these as a real advisory.
+ADVISORY_MAX_MPH = 80
+
 # 8 percent is the most permissive superelevation any state builds to, so a
 # curve under this floor is under EVERY standard, not merely under a strict
 # one. Snow states cap at 6 percent and could justify a stricter screen; the
@@ -297,7 +315,8 @@ def advisory_with_bank_mph(radius_ft: float, design_speed_mph: float) -> int:
     if radius_ft <= 0.0:
         return 0
     e = superelevation_at(radius_ft, design_speed_mph)
-    return int(round(math.sqrt(15.0 * radius_ft * (e + ADVISORY_LATERAL_G)) / 5.0) * 5)
+    raw = int(round(math.sqrt(15.0 * radius_ft * (e + ADVISORY_LATERAL_G)) / 5.0) * 5)
+    return min(raw, ADVISORY_MAX_MPH)
 
 
 # Which legs the screen may judge at all. It needs to know whether a tight
@@ -404,7 +423,9 @@ def _banked_advisory(row: dict, design_mph: float | None) -> int:
     # Only ever upward: the bake read the road flat, and a bank can only help.
     # A curve that somehow reads slower banked than flat keeps the flat number
     # rather than being quietly slowed by a correction meant to speed it up.
-    return max(baked, advisory_with_bank_mph(radius, design_mph))
+    # Both sides are capped, so a gentle bend cannot be repriced past the top
+    # of the friction table the repricing is built on (ADVISORY_MAX_MPH).
+    return min(max(baked, advisory_with_bank_mph(radius, design_mph)), ADVISORY_MAX_MPH)
 
 
 def _is_flat_ground_artifact(row: dict, floor: float) -> bool:

@@ -965,6 +965,23 @@
   either: the truck still leans on them and the road bed still leads you
   round them, they are just no longer announced as highway curves.
 
+- **A hot exit ramp tells you once, not twice.** Taking an exit fast enough
+  to need help used to get two announcements a beat apart -- the curve
+  assistance saying it was slowing, then the route-transition assistance
+  saying it was braking for the sign or the light. Both were doing real work,
+  but only one of them told you anything you did not already know. The ramp
+  now speaks once, and the line that survives is the one that names what it
+  is braking for. Nothing about the braking itself changed.
+
+- **The delivery clock now counts the bends you have to slow for.** Time
+  planning walked the route on posted limits alone, so a road of switchbacks
+  was budgeted as though you could hold the limit round every one of them.
+  It now charges the miles inside a bend at that bend's own advisory speed.
+  On the interstate this changes nothing -- there is nothing there to slow
+  for any more -- but a mountain run like US-550 over Red Mountain Pass or
+  the Salt River Canyon on US-60 is given the two or three percent more
+  driving time it genuinely takes.
+
 - **A tank load is described in tank words at the dock too.** A spoiled tank
   load called "off spec" on the road was called "damaged" when you arrived,
   and a refused one went from "lost" to "ruined", as though something had

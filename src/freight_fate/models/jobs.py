@@ -775,12 +775,63 @@ def fair_active_deadline(
     return round(max(job.deadline_game_h, full_floor, remaining_floor), 1)
 
 
+def _curve_ceilings(route: Route) -> list[tuple[float, float, float]]:
+    """Non-overlapping ``(start_mi, end_mi, advisory)`` bands over route miles.
+
+    The planner walks the route on posted limits, so every bend a driver has
+    to slow for was time the plan never budgeted (measured 2026-08-16: 2.8
+    percent of drive time on average, 5.6 percent Denver to Salt Lake City).
+    This is the road's own answer to "how fast may a truck be here", read
+    from the same baked curve records the pacenote layer speaks.
+
+    Overlapping bends -- a chained S through a canyon -- collapse to the
+    TIGHTEST advisory across the overlap, because that is the one binding on
+    the truck. Connector arcs are excluded: ramps are not on the through
+    route the planner is timing.
+    """
+    from ..data.curves import route_curves  # heavy module, and only needed here
+
+    bands: list[tuple[float, float, float]] = []
+    edges: set[float] = set()
+    for curve in route_curves(route, list(route.cities)):
+        if curve.end_mi > curve.start_mi and curve.advisory_mph > 0:
+            bands.append((curve.start_mi, curve.end_mi, float(curve.advisory_mph)))
+            edges.add(curve.start_mi)
+            edges.add(curve.end_mi)
+    if not bands:
+        return []
+    cuts = sorted(edges)
+    out: list[tuple[float, float, float]] = []
+    for lo, hi in zip(cuts, cuts[1:], strict=False):
+        if hi <= lo:
+            continue
+        mid = (lo + hi) / 2.0
+        covering = [adv for s, e, adv in bands if s <= mid < e]
+        if not covering:
+            continue
+        advisory = min(covering)
+        # Merge with the previous band when it is the same speed and touches,
+        # so a long chain of identical advisories is one span, not fifty.
+        if out and out[-1][2] == advisory and abs(out[-1][1] - lo) < 1e-9:
+            out[-1] = (out[-1][0], hi, advisory)
+        else:
+            out.append((lo, hi, advisory))
+    return out
+
+
 def route_drive_hours(
     route: Route | None,
     start_mi: float = 0.0,
     world: World | None = None,
 ) -> float:
-    """Route-aware drive-time estimate using posted limits where available."""
+    """Route-aware drive-time estimate on posted limits AND curve advisories.
+
+    Each sampled segment is timed piecewise: the miles inside a bend at that
+    bend's advisory, the rest at the planning limit. Only the bend's own
+    recorded span is charged -- the plan does not invent a deceleration ramp
+    on either side of it, which is the sort of unmeasured loss
+    ``DEADLINE_PLANNING_SPEED_FACTOR`` is already there to carry.
+    """
 
     if route is None:
         return 0.0
@@ -795,6 +846,7 @@ def route_drive_hours(
         acc += leg.miles
     city_mileposts = leg_starts + [route.miles]
     is_facility_approach = len(route.cities) >= 2 and route.cities[0] == route.cities[-1]
+    ceilings = [] if is_facility_approach else _curve_ceilings(route)
     for index, (leg_start, leg) in enumerate(zip(leg_starts, route.legs, strict=True)):
         leg_end = leg_start + leg.miles
         segment_start = max(start_mi, leg_start)
@@ -818,8 +870,36 @@ def route_drive_hours(
                 is_facility_approach,
                 world,
             )
-            hours += step / max(DEADLINE_MIN_SEGMENT_MPH, mph)
+            hours += _segment_hours(global_start, global_start + step, mph, ceilings)
             offset += step
+    return hours
+
+
+def _segment_hours(
+    start_mi: float, end_mi: float, mph: float, ceilings: list[tuple[float, float, float]]
+) -> float:
+    """Hours across ``[start_mi, end_mi)``, slowed inside bends to their advisory."""
+    if end_mi <= start_mi:
+        return 0.0
+    floor_mph = max(DEADLINE_MIN_SEGMENT_MPH, mph)
+    if not ceilings:
+        return (end_mi - start_mi) / floor_mph
+    hours = 0.0
+    cursor = start_mi
+    for band_start, band_end, advisory in ceilings:
+        if band_end <= cursor:
+            continue
+        if band_start >= end_mi:
+            break
+        if band_start > cursor:
+            hours += (band_start - cursor) / floor_mph
+            cursor = band_start
+        overlap_end = min(band_end, end_mi)
+        if overlap_end > cursor:
+            hours += (overlap_end - cursor) / max(DEADLINE_MIN_SEGMENT_MPH, min(mph, advisory))
+            cursor = overlap_end
+    if cursor < end_mi:
+        hours += (end_mi - cursor) / floor_mph
     return hours
 
 

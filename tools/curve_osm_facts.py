@@ -354,6 +354,10 @@ def main() -> int:
     on_shield: dict[str, int] = {}
     on_motorway: dict[str, int] = {}
     total: dict[str, int] = {}
+    # Which road each leg ACTUALLY rides, mile by mile. A leg whose label does
+    # not appear here is mislabeled, and this says what it should have said.
+    ridden: dict[str, dict[str, int]] = {}
+    ridden_class: dict[str, dict[str, int]] = {}
     for n, sample in enumerate(samples, 1):
         lid = sample["leg"]
         total[lid] = total.get(lid, 0) + 1
@@ -363,6 +367,20 @@ def main() -> int:
                 on_motorway[lid] = on_motorway.get(lid, 0) + 1
             if scs._ref_matches_shield(meta[1], sample["shield"]):
                 on_shield[lid] = on_shield.get(lid, 0) + 1
+            # A concurrency ("I 70;US 6") credits every shield it carries --
+            # the truck really is on both roads for that mile.
+            for ref in str(meta[1]).split(";"):
+                ref = ref.strip()
+                if ref:
+                    tally = ridden.setdefault(lid, {})
+                    tally[ref] = tally.get(ref, 0) + 1
+            # And the CLASS of road, mile by mile. This is what lets a bend be
+            # judged against the road its leg is actually made of rather than
+            # against the road its label claims -- a leg labelled I-65 whose
+            # route rides US-231 end to end is made of trunk, and a trunk bend
+            # on it is mainline, not a ramp.
+            klasses = ridden_class.setdefault(lid, {})
+            klasses[meta[0]] = klasses.get(meta[0], 0) + 1
         if n % 20000 == 0:
             print(f"  coverage {n}/{len(samples)}", flush=True)
 
@@ -373,6 +391,10 @@ def main() -> int:
                 "coverage_samples": total[lid],
                 "coverage_on_shield": on_shield.get(lid, 0),
                 "coverage_on_motorway": on_motorway.get(lid, 0),
+                "ridden_refs": dict(sorted(ridden.get(lid, {}).items(), key=lambda kv: -kv[1])[:8]),
+                "ridden_classes": dict(
+                    sorted(ridden_class.get(lid, {}).items(), key=lambda kv: -kv[1])
+                ),
             },
             sort_keys=True,
         )
