@@ -965,6 +965,17 @@
   either: the truck still leans on them and the road bed still leads you
   round them, they are just no longer announced as highway curves.
 
+- **Bends are judged against the road you are actually on.** Some routes are
+  named for an interstate they never really join -- the run from Huntsville to
+  Nashville is filed under I-65 but drives US-231 the whole way. The game had
+  been measuring those bends against a freeway that was not there and staying
+  quiet through all of them, so a genuinely twisty road went uncalled. It now
+  reads what kind of road each leg is actually built from and calls the bends
+  that belong to it, while still leaving out the town streets a route threads
+  on its way in and out. You will hear the corners on roads like US-231 again;
+  you will not hear the square in the middle of a small town called as a
+  highway curve.
+
 - **A hot exit ramp tells you once, not twice.** Taking an exit fast enough
   to need help used to get two announcements a beat apart -- the curve
   assistance saying it was slowing, then the route-transition assistance

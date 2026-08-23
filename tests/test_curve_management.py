@@ -263,30 +263,41 @@ class TestUSRouteArtifactScreen:
             near_departure = [r for r in recs if r.apex_mi < 2.5 and _is_hairpin(r)]
             assert not near_departure, f"{leg_key}: departure artifact survived: {near_departure}"
 
-    def test_the_leg_end_rule_cuts_by_terrain_within_a_single_leg(self) -> None:
-        """KY-80 out of Hazard carries both cases half a mile apart.
+    def test_leaving_a_mountain_town_keeps_the_road_and_drops_the_town(self) -> None:
+        """Both halves of the Hazard case, re-pinned to the actual roads.
 
-        A 43 ft kink at mile 1.06 on hills is departure geometry and goes; a
-        real 80 ft switchback at mile 2.48, where the road is already into the
-        mountains, stays. Position alone would have taken both, which is why
-        the rule asks the terrain as well.
+        This test used to assert that "a real 80 ft switchback at mile 2.48,
+        where the road is already into the mountains, stays". The road data
+        says otherwise: mile 2.48 is on ``KY 15 Business``, OSM class
+        ``secondary``, turning 71 and 89 degrees at an 80 ft radius -- the
+        business loop through Hazard, which is a street corner rather than a
+        switchback. The leg is made of ``trunk`` (38 sampled miles of KY-15
+        against 3 of residential), and the through road's own bends at miles
+        1.06 and 1.59 are what survive.
+
+        Terrain alone could not tell those apart, because both are in the
+        mountains. Reading the road under each bend can, which is what the
+        connector bake now does.
         """
         recs = leg_curves("hazard_ky_us:london_ky_us")
-        near = [r for r in recs if r.apex_mi < 2.5 and _is_hairpin(r)]
-        assert near, "the mountain switchback at mile 2.48 must survive"
+        near = [r for r in recs if r.apex_mi < 2.5]
+        assert near, "KY-15's own bends leaving Hazard must survive"
         assert all(r.min_radius_ft >= 50 for r in near), (
-            f"the hills kink at mile 1.06 should be gone: {near}"
+            f"nothing tighter than a truck's turning circle is a road: {near}"
         )
 
-    def test_a_mountain_town_keeps_the_switchback_on_its_doorstep(self) -> None:
-        """The leg-end rule spares mountain terrain, and has to.
+    def test_a_mountain_town_keeps_the_road_out_of_it(self) -> None:
+        """US-119 leaving Charleston, re-pinned for the same reason.
 
-        US-119 leaves Charleston straight into the mountains, and a real
-        switchback sits within the first mile. Deleting by position alone
-        would have taken it.
+        The record this test used to protect as "a real switchback within the
+        first mile" is Thayer Street in Charleston -- OSM class ``primary``,
+        92 ft radius, 96 degrees. US-119 itself (``trunk``, signed Corridor G)
+        starts at mile 1.62, and those bends are the ones that stay.
         """
         recs = leg_curves("charleston_wv_us:pikeville_ky_us")
-        assert [r for r in recs if r.apex_mi < 2.5 and _is_hairpin(r)]
+        near = [r for r in recs if r.apex_mi < 3.0]
+        assert near, "Corridor G's own bends out of Charleston must survive"
+        assert all(r.min_radius_ft >= 50 for r in near)
 
     def test_no_surviving_curve_is_tighter_than_a_road_can_bend(self) -> None:
         """A radius floor for every class, the sibling of the interstate 300 ft.
@@ -961,23 +972,38 @@ class TestConnectorsAreReadNotGuessed:
     def test_a_ramp_reads_as_a_connector_on_every_road_class(self) -> None:
         rule = _connector_rule()
         for klass in ("motorway_link", "trunk_link", "primary_link"):
-            for interstate in (True, False):
-                assert rule.classify({"near_m": 0.4, "near_hw": klass}, interstate) == (
+            for made_of in ("motorway", "trunk", "primary", None):
+                assert rule.classify({"near_m": 0.4, "near_hw": klass}, made_of) == (
                     True,
                     "osm:ramp",
                 )
 
-    def test_an_interstate_curve_off_the_freeway_is_not_interstate_mainline(self) -> None:
-        """Every Interstate mainline mile is a freeway, so a curve apex on a
-        surface road is not on the Interstate however the leg is labelled."""
+    def test_a_bend_below_its_leg_s_own_road_is_not_on_the_through_route(self) -> None:
+        """Every Interstate mainline mile is a freeway, so on a leg MADE of
+        freeway a surface-road apex is not on the Interstate.
+
+        But the comparison is against the road the leg is made of, not against
+        a fixed class -- otherwise a curated I-65 whose route actually runs
+        US-231 end to end has all its real trunk bends read as off-route.
+        """
         rule = _connector_rule()
         for klass in ("trunk", "primary", "secondary", "residential"):
-            assert rule.classify({"near_m": 0.4, "near_hw": klass}, True) == (
+            assert rule.classify({"near_m": 0.4, "near_hw": klass}, "motorway") == (
                 True,
-                "osm:off-freeway",
+                "osm:off-corridor",
             )
-            # The same ground on a US-route leg is that leg's real road.
-            assert rule.classify({"near_m": 0.4, "near_hw": klass}, False)[0] is False
+        # A leg made of trunk keeps its trunk bends and drops the town.
+        assert rule.classify({"near_m": 0.4, "near_hw": "trunk"}, "trunk") == (
+            False,
+            "osm:mainline",
+        )
+        for klass in ("primary", "secondary", "residential"):
+            assert rule.classify({"near_m": 0.4, "near_hw": klass}, "trunk")[0] is True
+        # And a better road than the leg is made of is never off-route.
+        assert rule.classify({"near_m": 0.4, "near_hw": "motorway"}, "trunk") == (
+            False,
+            "osm:mainline",
+        )
 
     def test_a_freeway_curve_stays_mainline_however_hard_it_bends(self) -> None:
         """The guard on the whole rule: it never sees the geometry.
@@ -988,7 +1014,7 @@ class TestConnectorsAreReadNotGuessed:
         through which a sharp curve could reach it -- so it cannot repeat that.
         """
         rule = _connector_rule()
-        assert rule.classify({"near_m": 0.2, "near_hw": "motorway"}, True) == (
+        assert rule.classify({"near_m": 0.2, "near_hw": "motorway"}, "motorway") == (
             False,
             "osm:mainline",
         )
@@ -997,20 +1023,28 @@ class TestConnectorsAreReadNotGuessed:
         """No extract, or no road in the corridor, must not read as mainline."""
         rule = _connector_rule()
         for fact in ({"near_m": None}, {"near_m": 400.0, "near_hw": "motorway_link"}, {}):
-            assert rule.classify(fact, True) == (False, "")
+            assert rule.classify(fact, "motorway") == (False, "")
+        # Nor may anything be concluded when the leg's own road went unread.
+        assert rule.classify({"near_m": 0.3, "near_hw": "residential"}, None) == (
+            False,
+            "osm:mainline",
+        )
 
     def test_the_corridor_is_a_sanity_bound_not_a_decision(self) -> None:
         rule = _connector_rule()
-        assert rule.classify({"near_m": rule.CORRIDOR_M - 0.1, "near_hw": "motorway"}, True)[1]
+        assert rule.classify({"near_m": rule.CORRIDOR_M - 0.1, "near_hw": "motorway"}, "motorway")[
+            1
+        ]
         assert (
-            rule.classify({"near_m": rule.CORRIDOR_M + 0.1, "near_hw": "motorway"}, True)[1] == ""
+            rule.classify({"near_m": rule.CORRIDOR_M + 0.1, "near_hw": "motorway"}, "motorway")[1]
+            == ""
         )
 
 
 def test_every_connector_row_names_the_reading_that_flagged_it() -> None:
     """Provenance: a connector says whether it was read or positional.
 
-    ``osm:ramp`` and ``osm:off-freeway`` are readings from the OSM extract;
+    ``osm:ramp`` and ``osm:off-corridor`` are readings from the OSM extract;
     ``sweep:window`` is the bake's original positional call, kept because the
     two are a union and the window sees city geometry the class reading can
     miss.
@@ -1021,7 +1055,7 @@ def test_every_connector_row_names_the_reading_that_flagged_it() -> None:
 
     text = read_data_text("world_data/us/gameplay/curves.jsonl")
     assert text
-    known = {"osm:ramp", "osm:off-freeway", "sweep:window"}
+    known = {"osm:ramp", "osm:off-corridor", "sweep:window"}
     seen: set[str] = set()
     for line in text.splitlines():
         if not line.strip():
@@ -1032,7 +1066,7 @@ def test_every_connector_row_names_the_reading_that_flagged_it() -> None:
         source = row.get("connector_source")
         assert source in known, f"{row['leg']} seq {row['seq']} carries {source!r}"
         seen.add(source)
-    assert seen >= {"osm:ramp", "osm:off-freeway"}, (
+    assert seen >= {"osm:ramp", "osm:off-corridor"}, (
         f"the OSM readings should both be present in the bake, saw {sorted(seen)}"
     )
 

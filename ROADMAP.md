@@ -1512,6 +1512,44 @@ onto exit signalling.
       chased with a second rule -- but that is the residual, and this is
       where to look if the interstate ever feels talkative in a city again.
 
+- [x] **A bend is judged against the road its leg is MADE of (2026-08-23).**
+      The connector rule keyed off the leg's LABEL -- "this leg says I-65, so
+      anything not `motorway` is off the freeway". On 36 legs the label is
+      wrong and the rule silenced 2,677 real bends, US-231's among them.
+
+      Turning the rule off for those legs was tried and is worse: it restores
+      the real trunk bends together with Brickell Avenue in downtown Miami at
+      a 38 ft radius. A coverage percentage was tried too and is forbidden --
+      the freeway-coverage histogram is NOT bimodal (52 interstate legs sit
+      between 40 and 60 percent), so any cut would have been chosen to look
+      right.
+
+      `corridor_class` reads what the leg is made of instead, as an argmax
+      over its per-mile road classes -- no number to tune -- and a bend is
+      off-corridor when it rides a road LESS important than that. A leg made
+      of motorway keeps only motorway bends (the Interstate case, unchanged
+      for 692 of 728). A leg made of trunk keeps its trunk bends and drops
+      the town it threads.
+
+      HAND-CHECKED, and it separates what terrain could not: US-550 loses
+      Town Plaza and Greene Street in Silverton and keeps all 274 of its
+      switchbacks; US-40 loses Denver's 14th Avenue Parkway and Salt Lake's
+      Main Street; Huntsville to Nashville loses Southside Square and keeps
+      92 US-231 bends. Of 18,340 off-corridor rows, 1,183 sit on HPMS
+      mountainous legs and 42 of those turn like a switchback -- every one a
+      named town street, North Pack Square in Asheville among them, looping
+      260 to 368 degrees. None is a road switchback.
+
+      TWO TESTS WERE PINNED TO THE WRONG RECORDS and are re-pinned. The
+      "mountain switchback at mile 2.48" out of Hazard is `KY 15 Business`,
+      an 80 ft street corner turning 71 degrees; the "real switchback within
+      the first mile" of US-119 out of Charleston is Thayer Street. Both
+      legs' actual through roads survive.
+
+      RESULT: one interstate slowdown every 107.1 miles, against 44.2 before
+      any of this work. Lower than the 130.7 the label-gated rule reported,
+      and that number was flattered by silencing real road.
+
 - [ ] **Some interstate legs are labelled for a road their route does not
       ride.** Found by the connector bake above, which reads per-leg freeway
       coverage as a by-product: 51 of 728 interstate legs spend under half
