@@ -68,7 +68,10 @@ fn test_x11_write_uses_the_type_x11_accepts() {
     let mut app = TestApp::new();
     let token = format!("ffd_{}", "a".repeat(64));
     assert!(app.ctx.write_clipboard_text(&token));
-    assert_eq!(app.ctx.clipboard.get_text().as_deref(), Some(token.as_str()));
+    assert_eq!(
+        app.ctx.clipboard.get_text().as_deref(),
+        Some(token.as_str())
+    );
 }
 
 #[test]

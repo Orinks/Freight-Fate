@@ -55,7 +55,12 @@ fn test_city_services_fallback_when_no_source_data() {
 #[test]
 fn test_city_service_data_covers_every_supported_city() {
     let raw_markers = [
-        "osm_id", "amenity=", "highway=", "operator=", "node/", "way/",
+        "osm_id",
+        "amenity=",
+        "highway=",
+        "operator=",
+        "node/",
+        "way/",
     ];
     let world: &World = get_world();
 
@@ -113,7 +118,11 @@ fn test_city_service_snapshot_drops_to_terminal() {
     app.ctx.run_deferred();
 
     let state = app.state().expect("a state on the stack");
-    assert!(state.borrow().as_any().downcast_ref::<CityMenuState>().is_some());
+    assert!(state
+        .borrow()
+        .as_any()
+        .downcast_ref::<CityMenuState>()
+        .is_some());
     let profile = app.ctx.profile.as_ref().unwrap();
     assert!(profile.active_trip.is_none());
     assert_eq!(profile.money, 4_321.0);

@@ -181,7 +181,6 @@ fn test_the_gate_is_tutorial_done_itself_not_verbosity_history() {
     assert!(veteran.tutorial.is_none());
 
     app.ctx.profile.as_mut().unwrap().tutorial_done = false;
-    let first_timer =
-        DrivingState::new(&mut app.ctx, job, route, None, DRIVE_PHASE_DELIVERY, None);
+    let first_timer = DrivingState::new(&mut app.ctx, job, route, None, DRIVE_PHASE_DELIVERY, None);
     assert!(first_timer.tutorial.is_some());
 }

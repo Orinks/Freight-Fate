@@ -58,8 +58,15 @@ fn test_facility_approach_data_covers_full_facility_set() {
         }
     }
     assert!(resolved.is_subset(&facilities));
-    assert!(missing.is_empty(), "{:?}", &missing[..missing.len().min(10)]);
-    assert_eq!(resolved.len() as u64, coverage["facilities"].as_u64().unwrap());
+    assert!(
+        missing.is_empty(),
+        "{:?}",
+        &missing[..missing.len().min(10)]
+    );
+    assert_eq!(
+        resolved.len() as u64,
+        coverage["facilities"].as_u64().unwrap()
+    );
 }
 
 #[test]
@@ -98,25 +105,46 @@ fn test_facility_approach_records_are_clean_and_honest() {
             !RAW_MARKERS.iter().any(|marker| spoken.contains(marker)),
             "{facility_id}: {spoken}"
         );
-        assert!(!record["gate_hint"].as_bool().unwrap_or(false), "{facility_id}");
-        assert!(!record["yard_hint"].as_bool().unwrap_or(false), "{facility_id}");
-        assert!(!record["dock_hint"].as_bool().unwrap_or(false), "{facility_id}");
+        assert!(
+            !record["gate_hint"].as_bool().unwrap_or(false),
+            "{facility_id}"
+        );
+        assert!(
+            !record["yard_hint"].as_bool().unwrap_or(false),
+            "{facility_id}"
+        );
+        assert!(
+            !record["dock_hint"].as_bool().unwrap_or(false),
+            "{facility_id}"
+        );
 
         if record["turn_level"].as_bool().unwrap_or(false) {
-            assert!(record["road_snapped"].as_bool().unwrap_or(false), "{facility_id}");
+            assert!(
+                record["road_snapped"].as_bool().unwrap_or(false),
+                "{facility_id}"
+            );
             assert!(
                 record["nearest_road_context"].as_bool().unwrap_or(false),
                 "{facility_id}"
             );
-            assert_eq!(record["source_type"], "osm_local_road_graph", "{facility_id}");
-            assert!(!record["fallback"].as_bool().unwrap_or(true), "{facility_id}");
+            assert_eq!(
+                record["source_type"], "osm_local_road_graph",
+                "{facility_id}"
+            );
+            assert!(
+                !record["fallback"].as_bool().unwrap_or(true),
+                "{facility_id}"
+            );
             assert!(
                 record["total_miles"].as_f64().unwrap_or(0.0) > 0.0,
                 "{facility_id}"
             );
             assert!(!segments.is_empty(), "{facility_id}");
         } else {
-            assert!(record["fallback"].as_bool().unwrap_or(false), "{facility_id}");
+            assert!(
+                record["fallback"].as_bool().unwrap_or(false),
+                "{facility_id}"
+            );
             assert!(
                 !record["fallback_reason"].as_str().unwrap_or("").is_empty(),
                 "{facility_id}"

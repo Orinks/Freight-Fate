@@ -1736,3 +1736,51 @@ fn test_the_horn_drains_the_air_tanks_to_the_protection_valve() {
     );
     assert!(!t.horn_available(), "below threshold the horn must be dead");
 }
+
+// -- the truck half of `tests/test_buffs.py` ----------------------------------
+
+#[test]
+fn test_tire_buff_slows_tread_wear() {
+    let mut plain = TruckState::default();
+    let mut buffed = TruckState::default();
+    buffed.tire_wear_buff_mult = 0.5;
+    for t in [&mut plain, &mut buffed] {
+        t.velocity_mps = 25.0;
+        t.update_wear(60.0);
+    }
+    assert!(plain.tire_wear_pct > 0.0);
+    assert!(approx(buffed.tire_wear_pct, plain.tire_wear_pct * 0.5));
+}
+
+#[test]
+fn test_engine_buff_slows_duty_wear_but_not_over_rev_abuse() {
+    let mut plain = TruckState::default();
+    let mut buffed = TruckState::default();
+    buffed.engine_wear_buff_mult = 0.5;
+    for t in [&mut plain, &mut buffed] {
+        t.start_engine();
+        t.throttle = 0.6;
+        t.rpm = 1_500.0;
+        t.update_wear(600.0);
+    }
+    assert!(plain.engine_wear_pct > 0.0);
+    assert!(approx(buffed.engine_wear_pct, plain.engine_wear_pct * 0.5));
+
+    // over-revving charges full price no matter the buff
+    let mut plain_abuse = TruckState::default();
+    let mut buffed_abuse = TruckState::default();
+    buffed_abuse.engine_wear_buff_mult = 0.5;
+    for t in [&mut plain_abuse, &mut buffed_abuse] {
+        t.start_engine();
+        t.throttle = 0.0;
+        // a downgrade driving the engine past the governor
+        t.rpm = t.specs.max_rpm * 1.1;
+        t.update_wear(1.0);
+    }
+    assert!(plain_abuse.engine_wear_pct >= 0.8); // the abuse term alone
+    assert!(approx_abs(
+        buffed_abuse.engine_wear_pct,
+        plain_abuse.engine_wear_pct,
+        1e-3
+    ));
+}

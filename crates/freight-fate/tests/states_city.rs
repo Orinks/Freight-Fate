@@ -928,10 +928,14 @@ fn test_abandoning_assigned_reposition_costs_reputation_only() {
     assert!(is::<PauseMenuState>(&app));
     select::<PauseMenuState>(&mut app, "Abandon job");
     assert!(is::<AbandonJobConfirmationState>(&app));
-    assert!(with_state::<AbandonJobConfirmationState, _>(&app, |c, _| c
-        .is_bobtail()));
-    assert!(with_state::<AbandonJobConfirmationState, _>(&app, |c, _| c
-        .is_assigned_reposition()));
+    assert!(with_state::<AbandonJobConfirmationState, _>(
+        &app,
+        |c, _| c.is_bobtail()
+    ));
+    assert!(with_state::<AbandonJobConfirmationState, _>(
+        &app,
+        |c, _| c.is_assigned_reposition()
+    ));
 
     key(&mut app, Key::Down); // arrow to Yes
     key(&mut app, Key::Return);

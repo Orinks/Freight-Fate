@@ -129,6 +129,7 @@ pub fn reverse_down_the_route() -> Outcome {
     let mut max_reverse_mph = 0.0f64;
     let mut backed_mi = 0.0;
     for _ in 0..7200 {
+        rig.advance_clock(DT);
         rig.drive.update_frame(&mut rig.app.ctx, DT);
         rig.app.ctx.run_deferred();
         max_reverse_mph = max_reverse_mph.max(rig.drive.truck().speed_mph());

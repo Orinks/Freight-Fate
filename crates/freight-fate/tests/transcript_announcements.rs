@@ -46,12 +46,7 @@ use freight_fate::states::driving_core::{AMBIENT_EVENT_SPACING_S, DRIVE_PHASE_DE
 
 /// Advance the ambient queue and the pacer's clock together, so simulated
 /// seconds and the staleness projection agree (see the module note).
-fn advance_ambient(
-    app: &mut TestApp,
-    d: &mut DrivingState,
-    clock: &FakeClock,
-    seconds: f64,
-) {
+fn advance_ambient(app: &mut TestApp, d: &mut DrivingState, clock: &FakeClock, seconds: f64) {
     clock.advance(seconds);
     d.update_ambient_events(&mut app.ctx, seconds);
 }
@@ -136,7 +131,11 @@ fn test_only_the_hazard_call_stays_critical() {
     let d = a_drive(&mut app);
     let zone = Zone::new(5.0, 8.0, 45.0, "construction");
 
-    let hazard = event(TripEventKind::Hazard, "Brake now!", TripEventData::default());
+    let hazard = event(
+        TripEventKind::Hazard,
+        "Brake now!",
+        TripEventData::default(),
+    );
     assert!(DrivingState::is_critical_event(&hazard));
     assert_eq!(d.event_priority(&hazard), EventPriority::Critical);
 
@@ -170,8 +169,16 @@ fn test_only_the_hazard_call_stays_critical() {
 
     let ambient = [
         cb_chatter("CB radio: patrol ahead", 14.0, 4.0),
-        event(TripEventKind::WeatherChange, "rain", TripEventData::default()),
-        event(TripEventKind::GpsCue, "exit ahead", TripEventData::default()),
+        event(
+            TripEventKind::WeatherChange,
+            "rain",
+            TripEventData::default(),
+        ),
+        event(
+            TripEventKind::GpsCue,
+            "exit ahead",
+            TripEventData::default(),
+        ),
     ];
     for e in &ambient {
         assert!(!DrivingState::is_critical_event(e), "{:?}", e.kind);
@@ -297,17 +304,11 @@ fn test_curve_callout_setting_controls_the_single_automatic_announcement() {
     d.handle_trip_event(&mut app.ctx, &e);
     // Curve calls interrupt: queued behind chatter they arrived with the
     // bend seconds away (owner's AZ-260 log, 2026-07-19).
-    assert_eq!(
-        app.event_calls(),
-        vec![(e.message.normal.clone(), true)]
-    );
+    assert_eq!(app.event_calls(), vec![(e.message.normal.clone(), true)]);
 
     app.ctx.settings.curve_callouts = false;
     d.handle_trip_event(&mut app.ctx, &e);
-    assert_eq!(
-        app.event_calls(),
-        vec![(e.message.normal.clone(), true)]
-    );
+    assert_eq!(app.event_calls(), vec![(e.message.normal.clone(), true)]);
 }
 
 // -- ambient chatter and the spacing slot ---------------------------------------------
@@ -424,8 +425,7 @@ fn test_stop_notice_yields_to_recent_route_speech() {
     app.clear_speech();
 
     let merge = "Merge onto I-90 East toward South Bend; 66 miles.";
-    let plaza =
-        "service plaza: Petro Stopping Centers in 1 mile. Press X to signal for the exit.";
+    let plaza = "service plaza: Petro Stopping Centers in 1 mile. Press X to signal for the exit.";
     d.handle_trip_event(
         &mut app.ctx,
         &event(TripEventKind::GpsCue, merge, TripEventData::default()),
@@ -592,8 +592,7 @@ fn test_departure_merge_cue_is_emitted_before_the_stop_notice() {
     assert!(kinds.contains(&"merge"), "{kinds:?}");
     assert!(kinds.contains(&"stop_ahead"), "{kinds:?}");
     assert!(
-        kinds.iter().position(|k| *k == "merge")
-            < kinds.iter().position(|k| *k == "stop_ahead"),
+        kinds.iter().position(|k| *k == "merge") < kinds.iter().position(|k| *k == "stop_ahead"),
         "{kinds:?}"
     );
 }

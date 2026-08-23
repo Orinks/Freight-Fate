@@ -34,8 +34,16 @@ fn test_left_and_right_control_stop_speech_in_menus() {
     let mut app = TestApp::new();
     let mut m = menu(&mut app);
     app.clear_speech();
-    Menu::handle_event(&mut m, &mut app.ctx, &freight_fate::states::base::InputEvent::key(Key::LCtrl));
-    Menu::handle_event(&mut m, &mut app.ctx, &freight_fate::states::base::InputEvent::key(Key::RCtrl));
+    Menu::handle_event(
+        &mut m,
+        &mut app.ctx,
+        &freight_fate::states::base::InputEvent::key(Key::LCtrl),
+    );
+    Menu::handle_event(
+        &mut m,
+        &mut app.ctx,
+        &freight_fate::states::base::InputEvent::key(Key::RCtrl),
+    );
     assert_eq!(app.speech().stop_main_calls(), 2);
     assert_eq!(app.speech().stop_event_calls(), 2);
 }

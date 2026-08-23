@@ -31,7 +31,9 @@ fn test_career_stats_is_a_reviewable_menu_with_rest_status() {
     // A level 1 driver holds nothing; the line still exists so the screen
     // always answers "what am I cleared to haul?"
     assert!(rows.iter().any(|l| l == "Endorsements: none yet"));
-    assert!(rows.iter().any(|l| l == "Deliveries: 4, 75 percent on time"));
+    assert!(rows
+        .iter()
+        .any(|l| l == "Deliveries: 4, 75 percent on time"));
     assert!(rows.iter().any(|l| l == "Lifetime miles: 1,234"));
     assert!(rows.iter().any(|l| l == "Lifetime earnings: 5,678 dollars"));
     assert!(rows.iter().any(|l| l == "Rest: fully rested"));

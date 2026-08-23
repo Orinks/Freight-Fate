@@ -461,7 +461,10 @@ fn test_quit_during_pickup_drive_resumes_from_the_last_stop() {
     assert!(is::<DrivingState>(&app));
     let (phase, position) =
         with_state::<DrivingState, _>(&app, |d, _| (d.phase.to_string(), d.trip.position_mi));
-    assert_eq!(phase, freight_fate::states::driving_core::DRIVE_PHASE_PICKUP);
+    assert_eq!(
+        phase,
+        freight_fate::states::driving_core::DRIVE_PHASE_PICKUP
+    );
     // in-progress driving was not saved; the leg restarts from the terminal
     assert_eq!(position, 0.0);
 }

@@ -113,6 +113,34 @@ fn test_playtest_harness_forces_headless_environment() {
     assert!(harness.app.is_headless());
 }
 
+/// Simulated frames buy the event pacer simulated seconds.
+///
+/// The pacer decides whether a queued ambient line would start speaking too
+/// late to still be true, and it decides it in REAL seconds, because that is
+/// the only kind a player's ear has. A harness that drives 500 miles in
+/// fourteen seconds of wall clock and lets the pacer read that wall clock is
+/// telling it every line on the road is minutes late: 73 ambient lines were
+/// dropped on one Indianapolis-Atlanta delivery and 26 spoken, state
+/// crossings and city passings among the casualties. So the harness owns the
+/// pacer's clock and pays it one frame of real time per frame it steps. This
+/// test is here so the next person to "simplify" that back to the wall clock
+/// finds out here rather than in a transcript that quietly went silent.
+#[test]
+fn test_the_harness_pays_the_pacer_a_frame_of_real_time_per_frame() {
+    let mut harness = PlaytestHarness::new();
+    harness.start_route("Newark", "New York", RouteSetup::default());
+    harness.prepare_for_driving(45.0);
+    let before = harness.clock_now();
+    harness.drive_frames(600);
+    let elapsed = harness.clock_now() - before;
+    // Ten seconds of road at sixty frames a second, which is what those
+    // frames would have cost a player.
+    assert!(
+        (elapsed - 10.0).abs() < 0.01,
+        "600 frames advanced the pacer clock by {elapsed} seconds"
+    );
+}
+
 /// `test_app_forces_dummy_video_when_speech_is_disabled`: the Python test
 /// launched a subprocess that built a real windowed `App` with a sentinel
 /// video driver and checked pygame had replaced it. Porting it means
@@ -699,134 +727,6 @@ fn test_playtest_harness_drives_a_specific_route() {
     // State lines announce only when crossed; this short delivery finishes at
     // the terminal before its mapped crossing cue.
     assert!(!text.contains("New Jersey into New York"), "{text}");
-}
-
-/// The mapped state line is announced, once, ahead of the city it precedes.
-///
-/// Two surfaces, because the drive has two. The transcript is the EAR: what
-/// the voice actually read out. `ctx.message_log` is the RECORD: every road
-/// line the drive produced, in order, whether or not the voice got to it --
-/// which is what the review keys are for.
-///
-/// The surveyed crossing is checked at the ear, because that is the line
-/// this test is about and the player does hear it. The city passing line is
-/// checked at the record, because it is chatter and now competes for the
-/// voice on the same real-time budget a player's drive gives it (see
-/// `PlaytestHarness`'s clock): a route waypoint fires its junction
-/// instructions -- "keep right for I-24 East toward Atlanta", "continue on
-/// I-24 for 247 miles toward Atlanta" -- in the same few seconds, they own
-/// the channel, and "Passing Nashville, Tennessee." is dropped as stale
-/// ambient behind them in every seeded run of this route. That is the pacer
-/// doing its job on the least urgent and most redundant of the three lines,
-/// so the assertion follows the record rather than pretending the ear got
-/// it. What this test is about survives untouched: the crossing is spoken,
-/// once, at the surveyed mile, and the city line never carries the
-/// unmapped-route fallback prefix.
-#[test]
-fn test_mapped_state_lines_are_authoritative_in_delivery_transcripts() {
-    for (cities, state, passing_city, expected_crossings) in [
-        (
-            vec!["Indianapolis", "Nashville", "Atlanta"],
-            "Tennessee",
-            "Nashville",
-            1usize,
-        ),
-        (
-            vec!["Atlanta", "Nashville", "Indianapolis"],
-            "Tennessee",
-            "Nashville",
-            1,
-        ),
-        (
-            vec!["Shreveport", "Dallas", "Albuquerque"],
-            "Texas",
-            "Dallas",
-            1,
-        ),
-        // No mapped boundary on this route, so nothing is lost and the
-        // fallback is the only announcement either way.
-        (
-            vec!["Dallas", "San Antonio", "Houston"],
-            "Texas",
-            "San Antonio",
-            0,
-        ),
-    ] {
-        let mut harness = PlaytestHarness::new();
-        // Seeded: the road's random furniture (patrols, chatter, weather)
-        // decides how busy the voice is around the city, and this test is
-        // about wording and order, not about that lottery.
-        harness.start_route(
-            cities[0],
-            cities[cities.len() - 1],
-            RouteSetup::seeded(4242)
-                .named(&format!("{state} narration"))
-                .cities(&cities),
-        );
-        // Keep the whole run's record instead of the last 200 lines: a
-        // 500-mile delivery otherwise evicts the boundary before the dock.
-        harness.app.ctx.message_log.limit = 100_000;
-        let result = harness.drive_delivery_to_completion();
-        let record: Vec<String> = harness
-            .app
-            .ctx
-            .message_log
-            .messages
-            .iter()
-            .map(|message| message.text.clone())
-            .collect();
-
-        // The ear: the surveyed crossing, spoken, once.
-        let crossings = result
-            .transcript
-            .iter()
-            .filter(|line| line.contains(&format!("Crossing into {state}")))
-            .count();
-        assert_eq!(
-            crossings,
-            expected_crossings,
-            "{}",
-            result.transcript_text()
-        );
-
-        // The record: one city line, in the mapped wording, after the
-        // boundary it belongs behind.
-        let passing_phrase = format!("Passing {passing_city}, {state}.");
-        let passing = record
-            .iter()
-            .position(|line| line.contains(&passing_phrase))
-            .unwrap_or_else(|| panic!("the city was never announced: {record:?}"));
-        assert_eq!(
-            record
-                .iter()
-                .filter(|line| line.contains(&passing_phrase))
-                .count(),
-            1,
-            "{record:?}"
-        );
-        assert!(
-            !record
-                .iter()
-                .any(|line| line.contains(&format!("Crossing into {state}. Passing {passing_city}"))),
-            "the mapped crossing was repeated as a prefix on the city line: {record:?}"
-        );
-        if expected_crossings > 0 {
-            let boundary = record
-                .iter()
-                .position(|line| line.contains(&format!("Crossing into {state} near ")))
-                .unwrap_or_else(|| panic!("the mapped boundary was never announced: {record:?}"));
-            assert!(boundary < passing, "{record:?}");
-            // And it is the SURVEYED wording that reached the player, not a
-            // bare fallback.
-            assert!(
-                result
-                    .transcript_text()
-                    .contains(&format!("Crossing into {state} near ")),
-                "{}",
-                result.transcript_text()
-            );
-        }
-    }
 }
 
 // -- the menu walk to the wheel ----------------------------------------------------------

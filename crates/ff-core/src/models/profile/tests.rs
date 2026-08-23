@@ -846,3 +846,45 @@ fn test_recent_lanes_survive_a_save_round_trip() {
     let restored = Profile::from_dict(&p.to_dict());
     assert_eq!(restored.recent_lanes, ["denver_co_us:silverthorne_co_us"]);
 }
+
+// -- the profile half of `tests/test_buffs.py` --------------------------------
+
+#[test]
+fn test_fatigue_buff_rate_active_then_expires() {
+    let mut p = Profile::named("Rate");
+    p.add_timed_buff(json!({
+        "id": "energy_drink",
+        "label": "Energy drink",
+        "group": "fatigue",
+        "rate": 0.85,
+        "expires_h": 12.0,
+        "worn_off": "The energy drink has worn off.",
+    }));
+    assert!((p.fatigue_buff_rate(11.0) - 0.85).abs() < 1e-9);
+    let expired = p.expire_buffs(12.5);
+    let ids: Vec<&str> = expired
+        .iter()
+        .map(|entry| entry["id"].as_str().unwrap_or(""))
+        .collect();
+    assert_eq!(ids, ["energy_drink"]);
+    assert!(p.active_buffs.is_empty());
+    assert_eq!(p.fatigue_buff_rate(12.5), 1.0);
+}
+
+#[test]
+fn test_active_buffs_round_trip_through_a_saved_profile() {
+    with_data_dir(|_| {
+        let mut p = Profile::named("Buff Save");
+        p.add_timed_buff(json!({
+            "id": "diner_meal",
+            "label": "Diner meal",
+            "group": "fatigue",
+            "rate": 0.75,
+            "expires_h": 40.0,
+            "worn_off": "That meal has worn off.",
+        }));
+        let path = p.save().expect("the profile saves");
+        let loaded = Profile::load(&path).expect("the profile reloads");
+        assert_eq!(loaded.active_buffs, p.active_buffs);
+    });
+}

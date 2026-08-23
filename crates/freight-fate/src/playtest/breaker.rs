@@ -26,7 +26,7 @@
 //! they are the app's own [`HeldKeys`][crate::app::HeldKeys], which is the
 //! same thing the real loop fills in.
 
-use crate::app::testing::TestApp;
+use crate::app::testing::{FakeClock, TestApp};
 use crate::states::base::{InputEvent, Key, Mods};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::DRIVE_PHASE_DELIVERY;
@@ -177,11 +177,26 @@ pub struct Rig {
     last_game_minutes: f64,
     pub problems: Vec<String>,
     problem_keys: std::collections::HashSet<String>,
+    /// The event pacer's clock, advanced by the frame step in [`Rig::step`].
+    ///
+    /// Same reason [`super::harness::PlaytestHarness`] has one, and the long
+    /// note there is the explanation: the pacer drops a queued ambient line
+    /// that would start speaking seconds after the moment it described, and
+    /// it measures those seconds in REAL time because that is the only time
+    /// a player's ear has. A rig that runs a scenario's whole stretch of
+    /// road in a second of wall clock tells the pacer every ambient line is
+    /// minutes late, and the battery then reads a silence no player would
+    /// ever hear as the game's behaviour. Frames here are worth [`DT`]
+    /// seconds; the clock says so.
+    clock: FakeClock,
 }
 
 impl Rig {
     pub fn new(opts: RigOptions) -> Rig {
         let mut app = TestApp::new();
+        // See the `clock` field: simulated time, not the wall clock this rig
+        // outruns by three orders of magnitude.
+        let clock = app.fake_pacer_clock();
         app.ctx.settings.automatic_transmission = opts.automatic;
         // No station machinery, no network.
         app.ctx.settings.radio_enabled = false;
@@ -243,6 +258,7 @@ impl Rig {
             last_game_minutes: 0.0,
             problems: Vec::new(),
             problem_keys: std::collections::HashSet::new(),
+            clock,
         }
     }
 
@@ -304,10 +320,20 @@ impl Rig {
         self.app.ctx.input.release(key, Mods::NONE);
     }
 
+    /// Hand the event pacer `seconds` of simulated real time.
+    ///
+    /// [`Rig::step`] does this for the frames it runs; a scenario that
+    /// drives `update_frame` itself has to keep the same books, or the
+    /// pacer thinks those frames took no time (see the `clock` field).
+    pub fn advance_clock(&self, seconds: f64) {
+        self.clock.advance(seconds);
+    }
+
     /// Run full `update_frame` frames; returns frames actually run. `until`
     /// stops early the first time it answers true.
     pub fn step(&mut self, frames: usize, dt: f64, until: Option<&dyn Fn(&Rig) -> bool>) -> usize {
         for i in 0..frames {
+            self.clock.advance(dt);
             self.drive.update_frame(&mut self.app.ctx, dt);
             self.app.ctx.run_deferred();
             if i % 10 == 0 {

@@ -97,8 +97,211 @@ fn the_version_is_the_crate_version_from_source() {
 // `test_garage_offers_partial_fuel_and_repairs_when_cash_is_short` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
-#[ignore = "unblocked, not written: the main-menu hand-off it waited on has landed; port the Python case"]
-fn test_full_game_flow_headless() {}
+fn test_full_game_flow_headless() {
+    let mut app = TestApp::new();
+    app.push_state(MainMenuState::new());
+    assert!(is::<MainMenuState>(&app));
+    assert_eq!(app.visible_lines()[0], "Freight Fate");
+    let welcome = format!(
+        "Welcome to Freight Fate, version {}.",
+        updater::spoken_version(version())
+    );
+    assert!(app.main_lines().iter().any(|line| line.contains(&welcome)));
+
+    // navigate to "New career" and select it
+    select::<MainMenuState>(&mut app, "New career");
+    assert!(is::<NameEntryState>(&app));
+
+    for ch in "Smoke".chars() {
+        app.dispatch_to_state(&InputEvent::typed(ch));
+    }
+    key(&mut app, Key::Return);
+    assert!(is::<CareerStartState>(&app));
+    key(&mut app, Key::Return); // default start: Northstar
+    assert!(is::<HomeTerminalState>(&app));
+    key(&mut app, Key::Return); // default region: Great Lakes
+    assert!(is::<HomeCityState>(&app));
+    key(&mut app, Key::Return); // default city: Chicago
+    assert!(is::<CityMenuState>(&app));
+    assert_eq!(profile(&app).name, "Smoke");
+    assert_eq!(profile(&app).current_city, "chicago_il_us");
+
+    // Open dispatch board and accept the assigned job: a new hire runs
+    // dispatch's load, and the trainer recommendation keeps it short enough
+    // for the bounded smoke run.
+    key(&mut app, Key::Return);
+    assert!(is::<JobBoardState>(&app));
+    assert!(with_state::<JobBoardState, _>(&app, |b, _| !b
+        .jobs
+        .is_empty()));
+    assert!(with_state::<JobBoardState, _>(&app, |b, _| b.assigned_mode()));
+    assert!(labels::<JobBoardState>(&app)[0].starts_with("Accept assigned dispatch:"));
+    key(&mut app, Key::Return);
+    assert!(is::<DrivingState>(&app));
+    assert_eq!(
+        with_state::<DrivingState, _>(&app, |d, _| d.phase.to_string()),
+        DRIVE_PHASE_PICKUP
+    );
+    with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
+        d.trip.position_mi = d.trip.total_miles();
+        d.trip.finished = true;
+        d.trip.truck.velocity_mps = 0.0;
+        d.update_frame(ctx, 1.0 / 60.0);
+    });
+    finish_timed_state(&mut app);
+    assert!(is::<PickupFacilityState>(&app));
+    key(&mut app, Key::Return); // check in at origin
+                                // Either way of getting the freight aboard is a valid full flow: a
+                                // dock if this shipper loads live, the drop yard if it stages
+                                // trailers (tests/test_trailer_yard.py pins which shippers do which).
+    let row = current_label::<PickupFacilityState>(&app);
+    assert!(
+        row == "Load cargo at dock" || row == "Drop and hook in the yard",
+        "{row}"
+    );
+    key(&mut app, Key::Return); // load, or drop and hook
+    finish_timed_state(&mut app);
+    assert!(
+        current_label::<PickupFacilityState>(&app).contains("Depart for destination"),
+        "{}",
+        current_label::<PickupFacilityState>(&app)
+    );
+    key(&mut app, Key::Return);
+
+    // A new company hire runs dispatch's routing: no route menu appears.
+    assert!(is::<DrivingState>(&app));
+    assert_eq!(
+        with_state::<DrivingState, _>(&app, |d, _| d.phase.to_string()),
+        DRIVE_PHASE_DELIVERY
+    );
+    let departure = app
+        .main_lines()
+        .into_iter()
+        .rev()
+        .find(|text| text.contains("Dispatch routed you to"))
+        .expect("a departure line");
+    assert!(departure.contains("Loaded trip is"), "{departure}");
+    // This flow never started the engine, and the departure line says so
+    // rather than claiming a departure the truck cannot make -- it names the
+    // very key the drive below presses next.
+    assert!(!departure.contains("Departing now"), "{departure}");
+    assert!(departure.contains("The engine is off."), "{departure}");
+    assert!(!departure.contains("Legal HOS plan"), "{departure}");
+    assert!(!departure.contains("Fuel-capable stops"), "{departure}");
+    assert!(!departure.contains("Parking notes"), "{departure}");
+
+    // start the engine and drive the whole trip with simulated input
+    key(&mut app, Key::E);
+    let drive = app.state().expect("the delivery drive");
+    let d = || {
+        std::cell::RefMut::map(drive.borrow_mut(), |s| {
+            s.as_any_mut()
+                .downcast_mut::<DrivingState>()
+                .expect("the drive")
+        })
+    };
+    assert!(d().trip.truck.engine_on);
+    {
+        let mut drive = d();
+        drive.trip.truck.transmission.automatic = true;
+        drive.trip.truck.set_air_ready(false);
+        drive.trip.hazard_check_mi = 1e9;
+        drive.trip.inspection_check_mi = 1e9;
+        drive.trip.set_npc_vehicles(Vec::new());
+    }
+
+    // The dispatch board's shortest unlocked job varies run to run, so a flat
+    // frame budget flaked when the only short job was still long enough to
+    // outlast it. Size the ceiling to this trip's distance with a
+    // conservative crawl-speed floor; the loop still breaks the moment the
+    // trip finishes, so normal runs cost the same.
+    let crawl_mph = 15.0;
+    let total_miles = d().trip.total_miles();
+    let max_frames = (total_miles / crawl_mph * 3600.0 * 60.0) as usize + 60 * 60;
+    let mut arrived = false;
+    for _ in 0..max_frames {
+        let mut drive = d();
+        let ctx = &mut app.ctx;
+        let at = drive.trip.position_mi;
+        let limit_mph = drive.trip.speed_limit_at(at).0;
+        let target_mph = 25.0f64.max(limit_mph + 5.0);
+        if drive.trip.truck.speed_mph() > target_mph {
+            drive.trip.truck.throttle = 0.0;
+            drive.trip.truck.brake = 0.5;
+        } else {
+            drive.trip.truck.throttle = 0.8;
+            drive.trip.truck.brake = 0.0;
+        }
+        // trip.update reapplies physics every frame that can randomly slow a
+        // long headless drive below the budget: simulated weather can turn to
+        // ice and cap traction to a crawl, terrain grade drags on long climbs,
+        // fuel burns at time_scale (20x) so the tank can empty mid-route and
+        // cut the engine, and this controller's bang-bang braking against a
+        // target near the truck's governed speed bleeds the air reservoirs
+        // until the spring brakes latch. This is a flow smoke test -- that
+        // physics is covered by test_weather_trip, test_vehicle, and the
+        // air-brake tests -- so pin full traction, flat ground, a full tank,
+        // and charged air for a deterministic drive, matching the
+        // hazard/inspection/traffic neutralisation above.
+        drive.trip.truck.grip = 1.0;
+        drive.trip.truck.grade = 0.0;
+        drive.trip.truck.fuel_gal = drive.trip.truck.specs.fuel_tank_gal;
+        let charged = drive.trip.truck.specs.air_governor_cut_out_psi;
+        drive.trip.truck.set_air_pressure_psi(charged);
+        drive.trip.truck.parking_brake = false;
+        drive.trip.truck.auto_shift();
+        drive.trip.truck.update(1.0 / 60.0);
+        for event in drive.trip.update(1.0 / 60.0) {
+            drive.handle_trip_event(ctx, &event);
+        }
+        drive.update_hazard(ctx, 1.0 / 60.0);
+        // always brake through hazards so the smoke run never crashes
+        if drive.hazard_deadline.is_some() {
+            drive.trip.truck.velocity_mps = 5.0;
+        }
+        if drive.trip.finished {
+            drive.trip.truck.velocity_mps = 0.0;
+            drive.handle_arrival_gate(ctx);
+            drop(drive);
+            app.ctx.run_deferred();
+            finish_timed_state(&mut app);
+            arrived = true;
+            break;
+        }
+    }
+    // never hit trip.finished -- a real stall, not just a tight cap
+    assert!(
+        arrived,
+        "delivery never finished in {max_frames} frames: {:.1}/{:.1} mi",
+        d().trip.position_mi,
+        total_miles
+    );
+    let destination = d().job.destination.clone();
+
+    assert!(is::<FacilityArrivalState>(&app));
+    key(&mut app, Key::Return);
+    finish_timed_state(&mut app);
+    assert!(is::<ArrivalState>(&app));
+    assert_eq!(profile(&app).career.deliveries, 1);
+    assert!(profile(&app).career.total_earnings > 0.0);
+    assert_eq!(profile(&app).current_city, destination);
+
+    // continue back to the destination terminal hub
+    select::<ArrivalState>(&mut app, "Continue to");
+    assert!(is::<CityMenuState>(&app));
+    let terminal = app
+        .ctx
+        .world
+        .home_terminal(&destination)
+        .expect("the destination has a terminal");
+    assert_eq!(
+        with_state::<CityMenuState, _>(&app, |s, _| s.menu().title.clone()),
+        terminal.name
+    );
+
+    // render a frame of every reachable lines() output
+    app.render();
+}
 
 #[test]
 fn test_menu_first_letter_navigation() {
@@ -224,7 +427,10 @@ fn test_discord_presence_toggle_is_accessible_and_wired() {
     key(&mut app, Key::Return); // activate to toggle
     assert_ne!(app.ctx.settings.discord_presence, before);
     let label = current_label::<OnlineHubState>(&app);
-    assert!(label.ends_with(if before { "off" } else { "on" }), "{label}");
+    assert!(
+        label.ends_with(if before { "off" } else { "on" }),
+        "{label}"
+    );
     let said = app.main_lines();
     assert!(
         said.last()
@@ -304,10 +510,7 @@ fn test_abandon_prompt_no_returns_to_pause_menu() {
     assert!(is::<AbandonJobConfirmationState>(&app));
     // Enter on the default "No" cancels and returns to the pause menu.
     key(&mut app, Key::Return);
-    assert!(std::rc::Rc::ptr_eq(
-        &app.state().expect("a state"),
-        &pause
-    ));
+    assert!(std::rc::Rc::ptr_eq(&app.state().expect("a state"), &pause));
     assert_eq!(profile(&app).money, money);
     assert_eq!(profile(&app).active_trip, active_trip);
 }
