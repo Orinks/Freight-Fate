@@ -178,7 +178,14 @@ impl Trip {
     }
 
     pub fn toll_expense(&self) -> f64 {
-        self.toll_charges.iter().map(|charge| charge.amount).sum()
+        // Fold from 0.0 rather than `sum()`: Rust's `Sum for f64` starts at
+        // -0.0, so an empty list yields negative zero and `fmt_grouped`
+        // renders it "-0" -- a screen reader then says "minus zero
+        // dollars". Python's `sum([])` is a plain 0.
+        self.toll_charges
+            .iter()
+            .map(|charge| charge.amount)
+            .fold(0.0, |total, amount| total + amount)
     }
 
     pub fn check_cities(&mut self) {

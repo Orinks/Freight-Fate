@@ -429,7 +429,12 @@ impl Route {
     }
 
     pub fn miles(&self) -> f64 {
-        self.legs.iter().map(|leg| leg.miles).sum()
+        // Fold from 0.0: Rust's `Sum for f64` starts at -0.0, so an empty
+        // route would report negative zero miles.
+        self.legs
+            .iter()
+            .map(|leg| leg.miles)
+            .fold(0.0, |total, miles| total + miles)
     }
 
     pub fn highways(&self) -> Vec<String> {
@@ -488,7 +493,12 @@ impl Route {
     }
 
     pub fn estimated_tolls(&self) -> f64 {
-        self.toll_events().iter().map(|event| event.amount).sum()
+        // Fold from 0.0: see `miles` above -- an empty toll list must be 0,
+        // not -0, or the spoken estimate says "minus zero dollars".
+        self.toll_events()
+            .iter()
+            .map(|event| event.amount)
+            .fold(0.0, |total, amount| total + amount)
     }
 
     pub fn checkpoints(&self) -> Vec<&RouteCheckpoint> {

@@ -89,7 +89,14 @@ pub fn carrier_accessorial_charges<P: TrailerOwner + ?Sized>(
 }
 
 pub fn charge_total(charges: &[SettlementCharge]) -> f64 {
-    charges.iter().map(|charge| charge.amount).sum()
+    // Fold from 0.0 rather than `sum()`: Rust's `Sum for f64` starts at
+    // -0.0, so an empty list yields negative zero and `fmt_grouped` renders
+    // it "-0" -- a screen reader then says "minus zero dollars". Python's
+    // `sum([])` is a plain 0.
+    charges
+        .iter()
+        .map(|charge| charge.amount)
+        .fold(0.0, |total, amount| total + amount)
 }
 
 pub fn charge_summary(charges: &[SettlementCharge]) -> String {
@@ -154,5 +161,24 @@ mod tests {
             Some(&CompanyDriver)
         )
         .is_empty());
+    }
+}
+
+#[cfg(test)]
+mod negative_zero_tests {
+    use super::*;
+    use crate::pyfmt::fmt_grouped;
+
+    #[test]
+    fn charge_total_of_nothing_is_positive_zero() {
+        // Rust's `Sum for f64` folds from -0.0, so an empty charge list used to
+        // render as "-0" and a screen reader said "minus zero dollars" at the
+        // end of every toll-free run. Python's `sum([])` is a plain 0.
+        let total = charge_total(&[]);
+        assert!(
+            !total.is_sign_negative(),
+            "an empty settlement must not be -0"
+        );
+        assert_eq!(fmt_grouped(total, 0), "0");
     }
 }
