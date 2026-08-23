@@ -44,3 +44,17 @@ fi
 
 uv python install
 uv sync --group dev
+
+# The release-note gate resolves its base by measuring the branch point
+# against origin/dev and origin/main. A cloud container clones only the
+# branch it starts on, so without this the gate cannot see dev, silently
+# falls back to main, and counts dev's existing bullets as missing. Not
+# fatal on its own -- a container with no network still gets a usable
+# checkout, just a noisier gate.
+git fetch --quiet origin dev main || \
+  echo "warning: could not fetch dev/main; the release-note gate may pick the wrong base." >&2
+
+# Both stages: ruff lint/format and the world_data sync check on commit,
+# the release-note gate on push. Every hook is language: system, so this
+# only writes .git/hooks -- there are no per-hook environments to build.
+uv run pre-commit install --hook-type pre-commit --hook-type pre-push
