@@ -25,7 +25,7 @@ of the leg) and it is only a bootstrap: it cannot see a mid-leg interchange
 or a long city departure, so ramp and street geometry shipped as interstate
 MAINLINE. After any run of this tool, re-run::
 
-    uv run --group tooling python tools/curve_osm_facts.py --all
+    uv run python tools/curve_valhalla_facts.py --all
     uv run python tools/bake_curve_connectors.py --write
 
 which re-derive every row's flag from the OSM road class under its apex.

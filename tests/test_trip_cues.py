@@ -138,7 +138,13 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     near = trip.update(0.0)
     assert not _gps_events(near)
 
-    trip.position_mi = 32.8
+    # Read the line's position rather than pinning a number to it. Correcting
+    # Chicago-Indianapolis from 183 to the 185 miles its baked route runs moved
+    # every along-route position, and a hardcoded probe then lands somewhere
+    # else entirely -- next to an interchange, in one case, whose exit cue
+    # joined the assertion.
+    line_mi = trip.route.legs[0].state_crossings[0].at_mi
+    trip.position_mi = line_mi
     crossing = trip.update(0.0)
     assert [event.message for event in crossing if event.kind == TripEventKind.STATE_CROSSING] == [
         "Crossing into Indiana near the I-65 state line south of Hammond."
@@ -148,7 +154,8 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
 
     # Road stops keep their single actionable announcement from _check_stops
     # at five miles; the extra one-mile reminder is gone for the same reason.
-    trip.position_mi = 120.3
+    rest_stop = next(s for s in trip.stops if s.name == "Loves Travel Stop Lafayette")
+    trip.position_mi = rest_stop.at_mi - 1.0
     rest = trip.update(0.0)
     # The dense maxspeed sweep gives this I-65 leg a real 65 mph zone at mile
     # 120; arriving from the 55 zone at the crossing announces that raise. The

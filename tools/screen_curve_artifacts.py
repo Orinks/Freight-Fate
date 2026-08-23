@@ -63,6 +63,23 @@ records are named in ``curve_artifacts.jsonl`` by ``(leg, seq)`` and
 ``data/curves.py`` skips them on load, exactly like the interstate screen
 skips its records in memory rather than rewriting the archive.
 
+THE ORDER MATTERS, AND NOTHING ENFORCES IT
+------------------------------------------
+These four passes form a chain, each reading the output of the last. Run them
+in this order after any change to the curve data::
+
+    uv run python tools/curve_valhalla_facts.py --all      # what road is it on
+    uv run python tools/bake_curve_connectors.py --write   # mainline or connector
+    uv run python tools/clamp_curve_advisories.py --write  # cap the advisory
+    uv run python tools/screen_curve_artifacts.py          # drop impossible geometry
+
+Skipping the last one has now stranded ``curve_artifacts.jsonl`` twice in a
+single session. It names rows by ``(leg, seq)`` and only considers non-connector
+rows, so the moment ``connector`` moves it can silently stop covering a row it
+used to screen -- which is how a 44 ft radius turning 182 degrees survived as
+mainline on US-30 out of Columbus. A stale screen does not announce itself; it
+just quietly stops catching things.
+
 Usage
 -----
     uv run python tools/screen_curve_artifacts.py             # write + report

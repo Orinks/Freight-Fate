@@ -12289,7 +12289,7 @@
       "to": "winchester_va_us",
       "miles": 62,
       "highway": "US-50",
-      "terrain": "hills",
+      "terrain": "mountain",
       "corridor": {
         "checkpoints": [
           {

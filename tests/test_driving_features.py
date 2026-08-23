@@ -5166,3 +5166,103 @@ def test_the_speed_readout_says_what_the_keeper_is_holding_not_just_what_is_set(
         assert "for the corner" not in said[-1]
     finally:
         app.shutdown()
+
+
+def test_a_hot_ramp_speaks_one_assist_line_not_two(monkeypatch):
+    """On a ramp, route-transition assistance owns the speech.
+
+    A ramp adds 0.35 of curve weight, so any exit taken over about 43 mph
+    engages curve speed assistance too -- and with the realistic preset both
+    assists are on, so every hot ramp spoke twice back to back (logged
+    playtest of the four 1.9 assists, 2026-07-15). The braking is unchanged;
+    the line that survives is the one that names what it is braking for.
+    """
+    from collections import defaultdict
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.curve_speed_assist = True
+        monkeypatch.setattr(driving.trip, "curve_at", lambda mile: None)
+        keys = defaultdict(bool)
+        mps = 0.44704
+
+        # On the ramp: fast enough that the ramp's own curve weight engages
+        # the curve assist through its heuristic branch.
+        driving._ramp_mi = driving.trip.position_mi
+        for _ in range(30):
+            driving.truck.velocity_mps = 55.0 * mps
+            driving._update_lane(keys, 1 / 60)
+        assert not [text for text in events if "Curve speed assistance" in text], (
+            "the ramp's own assist speaks for a ramp; the curve cue must not double it"
+        )
+
+        # Off the ramp, the same overspeed still announces itself normally.
+        driving._ramp_mi = None
+        driving._curve_assist_cue_s = 0.0
+        driving._curve_assist_active = False
+        fake_curve = SimpleNamespace(
+            advisory_mph=35.0,
+            connector=False,
+            direction="L",
+            min_radius_ft=1000.0,
+            deflection_deg=40.0,
+            severity="sharp",
+            start_mi=driving.trip.position_mi,
+            end_mi=driving.trip.position_mi + 0.1,
+            apex_mi=driving.trip.position_mi,
+            at_mi=driving.trip.position_mi,
+        )
+        monkeypatch.setattr(driving.trip, "curve_at", lambda mile: fake_curve)
+        for _ in range(30):
+            driving.truck.velocity_mps = 55.0 * mps
+            driving._update_lane(keys, 1 / 60)
+        assert [text for text in events if "Curve speed assistance slowing." in text], (
+            "silencing the ramp case must not silence a real mainline bend"
+        )
+    finally:
+        app.shutdown()
+
+
+def test_a_silent_ramp_engagement_never_leaves_a_lone_release(monkeypatch):
+    """The release line is paired to the slowing line that opened it.
+
+    Suppressing the ramp's engagement cue would otherwise leave "Curve speed
+    assistance released." hanging on its own with nothing before it, which
+    reads as a bug to anyone listening.
+    """
+    from collections import defaultdict
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.curve_speed_assist = True
+        monkeypatch.setattr(driving.trip, "curve_at", lambda mile: None)
+        keys = defaultdict(bool)
+        mps = 0.44704
+
+        driving._ramp_mi = driving.trip.position_mi
+        for _ in range(30):
+            driving.truck.velocity_mps = 55.0 * mps
+            driving._update_lane(keys, 1 / 60)
+        # Slow down so the assist disengages while still on the ramp.
+        driving._curve_assist_cue_s = 0.0
+        for _ in range(30):
+            driving.truck.velocity_mps = 20.0 * mps
+            driving._update_lane(keys, 1 / 60)
+
+        assert not [text for text in events if "Curve speed assistance" in text], (
+            "a run that never spoke must not announce its own release"
+        )
+    finally:
+        app.shutdown()

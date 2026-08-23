@@ -1713,8 +1713,188 @@ onto exit signalling.
       chased with a second rule -- but that is the residual, and this is
       where to look if the interstate ever feels talkative in a city again.
 
-- [ ] **Some interstate legs are labelled for a road their route does not
-      ride.** Found by the connector bake above, which reads per-leg freeway
+- [x] **A bend is judged against the road its leg is MADE of (2026-08-23).**
+      The connector rule keyed off the leg's LABEL -- "this leg says I-65, so
+      anything not `motorway` is off the freeway". On 36 legs the label is
+      wrong and the rule silenced 2,677 real bends, US-231's among them.
+
+      Turning the rule off for those legs was tried and is worse: it restores
+      the real trunk bends together with Brickell Avenue in downtown Miami at
+      a 38 ft radius. A coverage percentage was tried too and is forbidden --
+      the freeway-coverage histogram is NOT bimodal (52 interstate legs sit
+      between 40 and 60 percent), so any cut would have been chosen to look
+      right.
+
+      `corridor_class` reads what the leg is made of instead, as an argmax
+      over its per-mile road classes -- no number to tune -- and a bend is
+      off-corridor when it rides a road LESS important than that. A leg made
+      of motorway keeps only motorway bends (the Interstate case, unchanged
+      for 692 of 728). A leg made of trunk keeps its trunk bends and drops
+      the town it threads.
+
+      HAND-CHECKED, and it separates what terrain could not: US-550 loses
+      Town Plaza and Greene Street in Silverton and keeps all 274 of its
+      switchbacks; US-40 loses Denver's 14th Avenue Parkway and Salt Lake's
+      Main Street; Huntsville to Nashville loses Southside Square and keeps
+      92 US-231 bends. Of 18,340 off-corridor rows, 1,183 sit on HPMS
+      mountainous legs and 42 of those turn like a switchback -- every one a
+      named town street, North Pack Square in Asheville among them, looping
+      260 to 368 degrees. None is a road switchback.
+
+      TWO TESTS WERE PINNED TO THE WRONG RECORDS and are re-pinned. The
+      "mountain switchback at mile 2.48" out of Hazard is `KY 15 Business`,
+      an 80 ft street corner turning 71 degrees; the "real switchback within
+      the first mile" of US-119 out of Charleston is Thayer Street. Both
+      legs' actual through roads survive.
+
+      RESULT: one interstate slowdown every 107.1 miles, against 44.2 before
+      any of this work. Lower than the 130.7 the label-gated rule reported,
+      and that number was flattered by silencing real road.
+
+- [x] **Leg mileages that fell short of their own road are corrected
+      (2026-08-23).** 176 legs stored a distance below the length of the
+      route they were baked from; 36 were below the STRAIGHT LINE between
+      their two city nodes, which no road can be. Total 13,337 -> 14,948 mi.
+
+      Nothing caught it because nothing disagreed: the corridor bake rescales
+      every layer onto `leg.miles`, so grades ended exactly at the stored
+      figure and `state_miles` summed to it. Same number, different hats. The
+      straight-line check is now a test, because it is the one witness that
+      owes the data nothing.
+
+      The corrected value is the geometry archive's length, and it is a
+      PROVEN lower bound: the archive is a Douglas-Peucker subset, and
+      dropping a vertex replaces a path with its chord, which is never
+      longer. So a leg below it is short of a floor. Legs above it are left
+      alone. The half mile of slack is integer rounding, not a threshold --
+      the shortfall distribution has no gap to cut at.
+
+      `tools/repair_leg_mileage.py` carried 49,128 along-route positions
+      across 15 field types and four shards, and REFUSES to run on a
+      mileage-looking field it does not know. `landmarks[].off_mi` is
+      excluded on purpose: it is distance OFF the road.
+
+      KNOWN AND ACCEPTED: the archive understates by about 0.1 percent, so a
+      corrected leg still reads a touch short. A real router would settle it
+      exactly -- see the Valhalla bullet below.
+
+- [x] **Curve road classes come from a map matcher, not from nearest-way
+      (2026-08-23).** `curve_osm_facts.py` streamed 14 GB of Geofabrik
+      extracts and took the nearest way segment to each curve's apex. That is
+      the wrong instrument: at an interchange the ramp and the mainline it
+      leaves are metres apart, and one point cannot know which the truck is
+      on. Two 90-minute passes to get an answer that was wrong at exactly the
+      places it mattered.
+
+      Valhalla's `trace_attributes` snaps the WHOLE polyline at once, so the
+      answer has to be a connected path, and it separates two things OSM
+      conflates into `highway=*_link`: `road_class` (the road's importance)
+      and `use` (whether the edge is a ramp or turn channel). A ramp off a
+      trunk is now a ramp CARRYING trunk class.
+
+      NO TILESET NEEDED, which was the surprise. FOSSGIS runs a public,
+      planet-wide Valhalla that answers `trace_attributes`; a local US build
+      was started, would have taken 6-12 hours and ~120 GB, and was abandoned
+      once the public service matched 400 of 400 points through Glenwood
+      Canyon in 0.7 seconds. The whole network now matches in about forty
+      minutes, throttled to be a good citizen. `--local` still points at a
+      self-hosted build if one is ever wanted.
+
+      THE BUG THE 2 PERCENT GUARD CAUGHT: Valhalla caps a trace by PATH
+      DISTANCE (200 km), not by point count. Chunking by points let a leg with
+      1 km vertex spacing blow the limit in 257 points and come back ENTIRELY
+      unmatched -- 24 percent of Colorado, five legs at 100 percent. Chunking
+      by distance took that to 0.2 percent. Without the guard this would have
+      shipped as a quietly blind dataset.
+
+      RESULT: 1,290 legs matched, 99.7 percent of 63,873 curves read. One
+      interstate slowdown every 105.7 miles. Every control held or improved,
+      and two improved because the matcher RECOVERED real bends the
+      nearest-way pass had wrongly dropped: US-550 274 -> 276 curves, US-40
+      362 -> 368. Glenwood Canyon, Vail Pass, the Eisenhower approach and the
+      Salt River Canyon are unchanged to the curve.
+
+      `tools/curve_osm_facts.py` is deleted. Two tools answering the same
+      question differently is an invitation to run the wrong one.
+
+- [x] **Terrain reclassified from the elevation archive (2026-08-23).**
+      `tools/reclassify_terrain.py` run with `--write`: one leg label firmed
+      up (Asheville-Hickory, hills -> mountain, the last piece of the Pigeon
+      River Gorge chain) and 711 grade-segment labels corrected -- 478 hills
+      to flat, 123 flat to hills, 97 mountain to hills, 13 hills to mountain.
+
+      Its acceptance harness passes: every Texas leg keeps ZERO mountain
+      segments (the Hill Country / East Texas fix), the Grapevine, the
+      Siskiyous, Monteagle and Denver-Silverthorne all stay mountain at both
+      levels, and all 96 runaway ramps still sit on mountain segments. The
+      artifact screen was re-run afterwards and moved nothing (370 -> 370).
+
+      THE 141 LEGS LABELLED MOUNTAIN THAT HPMS CALLS LEVEL ARE STILL NOT
+      TOUCHED, and that is the tool's own rule rather than an oversight: a
+      leg label only ever firms UP, never silently downgrades off a stricter
+      geometric read. The label is relief-in-context from the dense profile;
+      HPMS is a road-class survey. They measure related but different things,
+      and Glenwood Canyon is the standing proof that the two can honestly
+      disagree.
+
+- [~] **Legs labelled for a road their route does not ride: SPLIT, and half
+      of it fixed (2026-08-23).** A truck router tells the two faults apart.
+      Ask Valhalla for the route between the two city nodes and measure how
+      much of ITS mileage rides the labelled interstate. The distribution has
+      a 14-point hole in it, so the split is read rather than chosen:
+
+          0 0 0 0 0 0 0 2 2 4  |  18 18 24 25 25 30 ... 93 98 98
+
+      TEN BELOW THE GAP -- the interstate does not serve that pair, and the
+      LABEL is the fault. Tampa to Miami is Florida's Turnpike; I-75 runs up
+      the west coast. `tools/repair_leg_labels.py` renamed the five with a
+      clear majority road: Ashland-Huntington to US-52 (54%), Cape Coral-
+      Lakeland to US-17 (55%), Hickory-Charlotte to NC-16 (78%), Tyler-
+      Longview to US-271 (60%), West Palm Beach-Cape Coral to SR-80 (65%).
+
+      FIVE LEFT ALONE, deliberately: Burlington-Albany's best road is VT-22 at
+      32 percent, Tampa-Miami's is SR-70 at 35. A route threading four roads
+      has no honest single name, and a 30 percent plurality would be wrong
+      more quietly rather than less.
+
+      A METHOD BUG CAUGHT ITSELF: the first share calculation reported a leg
+      riding US-31 for 114 percent of its miles, because a concurrency credits
+      every shield it names and "US 31" and "US 31 BUS" scored the same mile
+      twice. Counting each mile once changed a real answer -- Cape Girardeau
+      to Paducah fell from a false IL-3 61 percent to an honest US-60 45, and
+      moved OUT of the rename set.
+
+      THIRTY ABOVE THE GAP still open, and they are the bigger half: the
+      interstate IS the road and the BAKED route is wrong. Corpus Christi to
+      San Antonio is 98 percent I-37 by any sane routing, Norfolk to Richmond
+      93 percent I-64, Morgantown to Pittsburgh 87 percent I-79. Relabelling
+      those would enshrine a bad route. They want REROUTING, which means
+      replacing the baked polyline and re-deriving every layer keyed to it --
+      curves, grades, speed limits, mileage -- and that is a corridor re-bake,
+      not a data edit. ORS and Overpass are gone from this machine, so it
+      would be built on Valhalla: `/route` for the shape, `trace_attributes`
+      for road class and speed limit, `/height` for the elevation profile.
+
+      THE BLOCKER IS ENRICHMENT, NOT ROUTING, and it is worth naming exactly.
+      A new polyline invalidates every layer keyed to the old one. Valhalla
+      can rebuild some of it -- `/route` for the shape, `trace_attributes` for
+      road class and speed limit, `/height` for elevation. It CANNOT rebuild
+      what came from Overpass and HPMS. Measured across the 30 legs, that is:
+
+          807 landmarks        the towns you pass
+          532 interchanges     every exit called
+           81 stops            rest areas and truck stops
+          751 lane segments    and 133 AADT samples (HPMS)
+          111 checkpoints, 1 restriction
+
+      Rerouting today would give those legs the right road name and strip
+      every exit, rest area and landmark from it -- "on I-37", then silence
+      for 147 miles. That is a worse trade than a wrong label, and the sort
+      of fix that looks complete in a diff and is a regression in the truck.
+
+      So this waits on the Overpass/HPMS enrichment pipeline being available
+      again, not on a router. When it is: reroute BEFORE any terrain work, as
+      a new polyline changes the elevation profile under the leg. Found by the connector bake above, which reads per-leg freeway
       coverage as a by-product: 51 of 728 interstate legs spend under half
       their route miles on a freeway at all, 10 of them under 5 percent. The
       worst are Chico to Santa Rosa (labelled I-5, 3 percent freeway, 317
@@ -1725,35 +1905,18 @@ onto exit signalling.
       cause is ORS's cost model preferring the surface route on a leg with no
       `route_via` pin to stop it.
 
-- [ ] **`curve_artifacts.jsonl` is stale against its own screen.** Noticed
-      while checking the connector bake did not disturb it:
-      `tools/screen_curve_artifacts.py --check` already reported the shipped
-      US/state artifact table out of date at `5557f906`, BEFORE any of this
-      change -- verified by re-running the check against the previous
-      `curves.jsonl`. It is not the hairpin commit either: that one only
-      added comments to the screen and deliberately left its `_is_extreme_
-      claim` rule alone. Some other input moved under it.
+- [x] **`curve_artifacts.jsonl` re-baked against its own screen
+      (2026-08-23).** The shipped US/state artifact table had drifted from
+      the rule that screens with it. Re-baked: 1,079 flagged rows down to
+      771.
 
-      Deliberately NOT regenerated here. Re-baking it re-decides which
-      US/state hairpins players hear, which is a different change from
-      classifying interstate connectors and wants its own before/after. The
-      connector bake cannot have made it worse in the direction that matters:
-      it only ever ADDS connectors, `screen_curve_artifacts` only considers
-      non-connector rows, and `_flagged_artifact_keys` is only consulted for
-      non-connector rows -- so a stale entry that is now a connector is
-      inert, never a missing screen.
-
-      Next step: run `tools/screen_curve_artifacts.py --report`, diff the
-      flagged `(leg, seq)` set against the shipped one, and find what moved
-      before writing.
-
-      The connector rule reads every curve on such a leg as off-freeway,
-      which is TRUE (they are not on I-65) but silences a genuinely curvy
-      drive rather than fixing the label. The fix is a routing pin per leg
-      and a re-bake, the same way San Francisco to Portland is pinned to I-5
-      over Siskiyou Pass, and it needs the ORS server up.
-      `tools/bake_curve_connectors.py --report` prints the ranked list.
-
+      WHAT MOVED, checked row by row rather than assumed: all 309 that
+      stopped being flagged are now CONNECTORS, so they were already silent
+      and stay silent -- nothing returns to the player, which was the risk
+      worth checking before re-baking. One row is newly screened, a 161 ft
+      "hairpin" at mile 50.4 of Elberton to Augusta that no through highway
+      bends to. So the table now matches its screen at a cost of exactly one
+      curve, in the right direction.
 - [x] **"Hairpin" is a shape, and the sign manual says which one
       (2026-08-23).** `severity` called anything advising 25 or less a
       hairpin. MUTCD does not: the Hairpin Curve sign (W1-11) is for a change
@@ -2832,15 +2995,31 @@ onto exit signalling.
       signature, and what caught this one). Drops 1,190 of 51,231 surviving
       mainline rows, 2.3%. Connectors exempt, matching the screens above.
 
-- [ ] **Advisory speeds above 80 mph in the baked curve data.** 298 of 804
-      curves on four sampled mountain routes carry an advisory over 80,
-      including 85 -- no US advisory plaque reads that. Harmless today only
-      because an advisory above the posted limit never fires a pacenote, so
-      nothing is spoken and nothing is wrong on the road; it is the bake's
-      0.3 g formula running unclamped on gentle curves. Worth clamping at
-      the bake so the data means what it says, and so a future consumer
-      cannot read one as a real number.
+- [x] **Advisories are capped at the top of the table they come from
+      (2026-08-23).** MEASURED on the full bake, not the four-route sample:
+      21,076 of 63,873 rows (33 percent) advised over 80 and the worst read
+      115, on radii from 1,517 to 2,999 ft.
 
+      The advisory is AASHTO's point-mass control solved for V, and that
+      control's friction table is published for 20 through 80 mph and stops
+      there, because no US road is designed above 80 -- the highest posted
+      limit in the country is the 85 on Texas SH-130. So 115 was never a
+      claim about a road; it was arithmetic past the edge of its own table.
+      `ADVISORY_MAX_MPH` is that edge, in `data/curves.py` (load-time
+      repricing for superelevation cannot climb back over it), in
+      `tools/straw_curve_sample.py` (a fresh sweep is born clamped) and in
+      `tools/clamp_curve_advisories.py` for the rows already on disk.
+
+      CLAMPED RATHER THAN RECOMPUTED, deliberately. The advisory is a pure
+      function of radius so re-deriving the column looked tempting and is
+      wrong: the bake computes it from the UNROUNDED apex radius and stores
+      the radius rounded, so recomputing from the stored integer moves 95
+      correct rows that sit on a 5 mph boundary. Clamping touches only rows
+      over the cap, which is also what makes the pass idempotent.
+
+      Nothing audible moved, as predicted: an advisory above the posted limit
+      never fires a pacenote, never counts as corner overspeed and never eases
+      cruise.
 - [x] **The coaching rung is removed (2026-08-17).** Measured on two
       scenarios after the dispositions went in: byte-identical transcripts
       against standard, 6 and 8 lines each. The rung's two cells only bite
@@ -5139,39 +5318,32 @@ for 1.8" framing predates the release split):
       ontology row); and wrong-way driving (`WrongWayMixin`). All three want
       a `WHAT_` reason, a fine in `models/enforcement`, and a visual-method
       post to see them.
-- [ ] **The deadline planner is blind to curves (measured 2026-08-16, owner
-      question).** `route_drive_hours` walks the route on posted limits
-      alone -- there are zero references to curves anywhere in
-      `models/jobs.py` -- so every bend the driver actually has to slow for
-      is time the plan never budgeted. Measured across eight routes, the
-      advisories cost 2.8 percent of drive time on average: 0.5 percent on
-      flat corridors (Chicago-Indianapolis, Buffalo-Rochester,
-      Phoenix-Flagstaff), 3.3 to 3.4 on Atlanta-Nashville and
-      Seattle-Portland, and 5.6 on Denver-Salt Lake City, whose worst bend is
-      signed 20.
-      NOT URGENT, and deliberately not done before the 2026-08-17 build:
-      `DEADLINE_PLANNING_SPEED_FACTOR = 0.88` already discounts the plan by
-      12 percent, which covers even the mountain case. The reason to fix it
-      anyway is that the cover is luck rather than design -- the bends
-      already eat half that margin in the mountains, and every further round
-      of curve enrichment erodes it with no signal, until one day a corridor
-      goes undeliverable and nothing in the code will say why. Making the
-      planner cap each sampled segment at the curve advisory is small and
-      contained, but it moves every deadline in the game, so it wants its
-      own change and a full gate.
-      CHECKED AT THE SAME TIME AND SOUND, so nobody re-investigates it: the
-      hours-of-service model does NOT conflate the duty window with the
-      driving limit. `driving_min` and `duty_min` are separate, `drive()`
-      advances both, `on_duty`/`off_duty` advance only the window, short
-      breaks do not extend it, the 30-minute break lands after 8 hours of
-      driving, and split sleeper berth is implemented. It only FEELS
-      conflated because of where the arithmetic lands: simulated shifts end
-      at 12.6 h duty for drop-and-hook and 13.2 h for a live load against an
-      11-hour driving limit, so an ordinary day is bound by driving and never
-      meets the window -- while a slow shipper (14.7 h) or a breakdown
-      (14.1 h) does hit it. That is the same shape the window has in real
-      life, so it is tuning to leave alone.
+- [x] **The deadline planner counts the bends (2026-08-23).**
+      `route_drive_hours` walked the route on posted limits alone, so every
+      bend the driver has to slow for was time the plan never budgeted.
+      It now times each sampled segment piecewise: the miles inside a bend at
+      that bend's own advisory, the rest at the planning limit. Overlapping
+      bends collapse to the tightest advisory across the overlap, which is
+      the one binding on the truck. Only the bend's recorded span is charged
+      -- no invented deceleration ramp on either side, which is the sort of
+      unmeasured loss `DEADLINE_PLANNING_SPEED_FACTOR` is already there to
+      carry.
 
+      THE COST HAS COLLAPSED SINCE IT WAS MEASURED, and that is the
+      interesting part. The August figure was 2.8 percent of drive time on
+      average and 5.6 percent Denver to Salt Lake City. Re-measured after the
+      bank fix and the connector bake: Denver to Salt Lake City now costs
+      0.05 percent, and Chicago-Indianapolis, Seattle-Portland,
+      Atlanta-Nashville and Dallas-Houston all round to zero. The bends the
+      planner was missing on the interstate were mostly the phantom ones --
+      ramp and street geometry read as mainline, priced flat. Where the bends
+      are real the planner now pays for them: US-550 over Red Mountain Pass
+      1.9 percent, the Salt River Canyon on US-60 2.7 percent.
+
+      So this lands as insurance rather than as a rescue, which was the
+      stated reason to do it: the margin no longer erodes silently as curve
+      enrichment continues, because the planner reads the same records the
+      pacenote layer speaks.
 - [x] **Highway exits take a real setup.** X signals the announced exit,
       the GPS asks for the right-side exit lane, checks ramp speed at the
       gore, and explains missed exits; destination ramps follow the same
@@ -6751,7 +6923,30 @@ From a batch of player reports:
   enforcement: getting pulled over and on-the-spot fines.
 
 - [x] **Driving assistance presets and descent control.** Shipped for the current snapshot: Realistic, Balanced, All assists, and Custom coordinate optional lane, emergency-braking, stop-and-go, and interactive descent support without changing inherent adaptive-cruise behavior or simulation settings. Automatic exits, destination stops, yard entry, and docking remain deferred to Career 1.9 or later. On the 1.9 line, lane drift itself lives in the Driving assistance category but stays preset-independent like the speed keeper: presets tune warnings and support, never whether the lane task runs, so fresh careers keep the centered-lane accessible default.
-- [ ] **De-duplicate assist chatter on fast ramps.** A 2026-07-15 logged playtest of the four 1.9 assists showed curve speed assistance and route-transition assistance both firing on the same too-fast exit ramp (the ramp adds curve weight, and both brake and announce back-to-back). With the realistic preset both are on by default, so every hot ramp speaks two assist lines; the ramp case should speak one. Same playtest confirmed the destination approach assist deliberately does not cover the ramp-end stop sign -- players can still roll it with the assist on, which may deserve a clearer spoken hint. (The assist does now stop at the arrival point itself, 2026-08-20; the sign at the end of an ordinary ramp is still the terminal assist's job.)
+- [x] **A hot ramp speaks one assist line, not two (2026-08-23).** The
+      2026-07-15 logged playtest of the four 1.9 assists had curve speed
+      assistance and route-transition assistance both firing on the same
+      too-fast exit ramp. Cause found: a ramp adds 0.35 of curve weight in
+      `driving_updates`, so the curve assist's heuristic branch engages on
+      any exit over about 43 mph -- while route-transition assistance is
+      already braking for the sign or the light and already says so. With the
+      realistic preset both are on, so every hot ramp spoke twice.
+
+      The ramp now owns the speech: the curve cue is suppressed while
+      `_ramp_mi` is set, and the line that survives is the more useful one
+      because it names WHAT it is braking for. Braking is untouched -- both
+      assists still do their work. The release line is paired to the slowing
+      line that opened it (`_curve_assist_spoke`), so a suppressed engagement
+      cannot leave a lone "Curve speed assistance released." hanging with
+      nothing before it, which is the obvious way this fix goes wrong and is
+      pinned by its own test.
+
+      STILL OPEN from the same playtest, and a different thing: the
+      destination approach assist deliberately does not cover the ramp-end
+      stop sign, so players can roll it with the assist on. That may deserve
+      a clearer spoken hint. (The assist does stop at the arrival point
+      itself, 2026-08-20; the sign at the end of an ordinary ramp is the
+      terminal assist's job.)
 - [x] **Speed keeper for low-speed zones.** Shipped: K starts a job-scoped speed-control session that uses the speed keeper on facility roads, in gate queues, work zones, and congestion -- where adaptive cruise is deliberately unavailable -- then automatically hands off to adaptive cruise on the open road, so players who cannot keep the accelerator held (or whose fingers tire) are not locked out of those stretches. It pauses through the planned pickup, persists through pickup saves, and resumes once the loaded truck is rolling. It restores the chosen cruise target across zones, follows queued traffic, and eases to ramp speed when the destination exit is announced before releasing control on the ramp. It fully disarms on other braking or hazards so it cannot restart unexpectedly. Preset-independent and on by default, toggleable in Settings, Gameplay.
 - [ ] **Driving assistance presets and descent control.** Built and then withdrawn from the 1.8 nightly line after playtesting (the underlying assists need the 1.9 driving arc around them); the work lives on feat/career-1.9 and ships with 1.9. Release-merge note: the withdrawal was a git revert of merge 9b406fe (plus 9f2dbff and b971684) on dev, so merging feat/career-1.9 back will NOT re-apply this content on its own -- the release merge must first revert the revert commit on dev, then merge.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,

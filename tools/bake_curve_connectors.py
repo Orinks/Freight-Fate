@@ -21,55 +21,51 @@ miles, on a road system that asks for none.
 
 THE DISCRIMINATOR IS READ, NOT DERIVED
 --------------------------------------
-``tools/curve_osm_facts.py`` reads what OSM way each curve's apex rides, from
-the local Geofabrik extracts. Two readings, both of them upstream's own words:
+``tools/curve_valhalla_facts.py`` map-matches each leg's archived polyline
+through Valhalla and records what edge every curve's apex rides, plus what
+class of road the leg itself is made of, mile by mile. Two readings:
 
-  ``osm:ramp``         the apex rides a ``highway=*_link`` way, which is the
-                       tag OSM uses for a ramp, slip road or interchange
-                       connector. True on every road class.
-  ``osm:off-freeway``  the leg is Interstate class and the apex rides
-                       something that is not ``highway=motorway``. Every
-                       Interstate mainline mile is a controlled-access
-                       freeway by statute (23 CFR 625 adopts the AASHTO
-                       Interstate design standards), and US mappers tag
-                       controlled-access freeway as ``motorway``. So a curve
-                       apex on a ``trunk``, ``primary`` or ``residential``
-                       way is not on the Interstate, whatever the leg is
-                       labelled.
+  ``osm:ramp``          the apex rides a ``highway=*_link`` way, which is the
+                        tag OSM uses for a ramp, slip road or interchange
+                        connector. True on every road class.
+  ``osm:off-corridor``  the apex rides a road LESS IMPORTANT than the one its
+                        leg is made of -- the town the route threads on its
+                        way in or out, rather than the through road.
+
+The comparison is what matters, and it is against the leg's own road rather
+than a fixed class. An Interstate leg is made of ``motorway`` (every
+Interstate mainline mile is a controlled-access freeway by statute, 23 CFR
+625, and US mappers tag controlled access as ``motorway``), so only motorway
+bends are its mainline. A curated I-65 leg whose route actually runs US-231
+end to end is made of ``trunk``, and its trunk bends are that road's real
+mainline.
+
+WHY NOT JUST "IS IT MOTORWAY". Tried, and it fails in both directions. Gated
+on the LABEL it silenced 2,677 real bends on 36 legs whose route never rides
+the interstate they are named for. Turned off wholesale for those legs it
+restored the real US-231 bends together with Brickell Avenue in downtown
+Miami at a 38 ft radius. Comparing against the leg's own class does neither.
+
+WHY NOT A COVERAGE PERCENTAGE. Also tried. The obvious gate is "apply the
+rule only to legs that ride a freeway for more than half their miles", and
+the histogram forbids it: the distribution is not bimodal, 52 interstate legs
+sit between 40 and 60 percent, so any cut would sit in a crowd and would have
+been chosen to look right. ``corridor_class`` is an argmax instead -- whichever
+class the route spends most of its miles on -- so there is no number to tune.
 
 Neither reading looks at radius, deflection, advisory or severity, so this
-CANNOT tell a sharp curve from a gentle one and therefore cannot delete a
-design exception. I-70 through Glenwood Canyon is ``highway=motorway`` and
-reads exactly like I-70 across Kansas.
+cannot tell a sharp curve from a gentle one and cannot delete a design
+exception. I-70 through Glenwood Canyon is ``highway=motorway`` and reads
+exactly like I-70 across Kansas.
 
-HOW WELL IT SEPARATES
----------------------
-Calibrated on Alabama and Colorado (1,026 interstate mainline rows with
-readings) against the thing the rule is not allowed to see -- the advisory
-speed. Curves demanding a drop below 65 are the ones under suspicion; curves
-above it are the ones a real interstate is made of:
-
-    rule                       slow moved   fast moved   Youden J
-    link only                     23%           5%         0.17
-    link + shield ref match       72%          19%         0.52
-    link + motorway class         72%          15%         0.58   <-- shipped
-
-Network-wide that is one interstate slowdown every 130.7 miles, from 44.2:
-1,954 demands to come off the pace down to 661 over the same 86,412 miles,
-with 13,479 rows moved off mainline and a reading for 99.8 percent of the
-63,873 baked curves. The 130 with no road inside the corridor keep whatever
-the sweep said.
-
-The shipped rule moves nearly three quarters of the suspect curves and one
-gentle curve in seven, and the gentle ones it moves are genuinely ramps and
-streets. Shield matching was tried and is strictly worse in both directions:
-it moves the last stretch of I-59 into New Orleans, which really does ride
-I-10 mainline, and it MISSES the business route through Glenwood Springs,
-which OSM tags ``ref=I 70 Business`` and any number match reads as I-70.
-Hand-checked on the I-70 legs, what the shipped rule moves is Edwards Access
-Road, "I 70 Business", Pine Street, West 6th Street, Ute Avenue and a string
-of ``motorway_link`` ramps -- and it leaves every mile of Glenwood Canyon
-between them exactly as baked.
+MOUNTAIN GEOMETRY, CHECKED THE WAY THE ARTIFACT SCREEN CHECKS ITSELF. Of the
+18,340 rows moved off-corridor, 1,183 are on HPMS mountainous legs, and 42 of
+those turn like a switchback (135 degrees or more at an advisory of 30 or
+less). Every one of the 42 is a named town street -- North Pack Square in
+Asheville, Frederick Street in Cumberland, North Bartow Street, town squares
+looping 260 to 368 degrees. Not one is a road switchback. Terrain alone
+cannot separate a mountain town square from a mountain switchback; the road
+under the bend can.
 
 WHY NOT A RADIUS FLOOR
 ----------------------
@@ -111,9 +107,25 @@ Nothing is deleted. Every row keeps its radius, deflection and advisory; only
 ``connector`` moves, and ``connector_source`` records which reading moved it,
 so the rule can be re-judged from the shipped data without re-baking.
 
-The facts file itself is NOT committed -- 26 MB of derived cache, regenerated
-by one offline pass over the local extracts. The decision it feeds is what
-ships, row by row, in ``connector_source``.
+The facts file itself is NOT committed -- derived cache, regenerated in about
+forty minutes by ``tools/curve_valhalla_facts.py``. The decision it feeds is
+what ships, row by row, in ``connector_source``.
+
+THE ORDER MATTERS, AND NOTHING ENFORCES IT
+------------------------------------------
+These four passes form a chain, each reading the output of the last. Run them
+in this order after any change to the curve data::
+
+    uv run python tools/curve_valhalla_facts.py --all      # what road is it on
+    uv run python tools/bake_curve_connectors.py --write   # mainline or connector
+    uv run python tools/clamp_curve_advisories.py --write  # cap the advisory
+    uv run python tools/screen_curve_artifacts.py          # drop impossible geometry
+
+Skipping the last has now stranded ``curve_artifacts.jsonl`` twice in a single
+session. It names rows by ``(leg, seq)`` and only considers non-connector rows,
+so the moment ``connector`` moves it can silently stop covering a row it used
+to screen -- which is how a 44 ft radius turning 182 degrees survived as
+mainline on US-30 out of Columbus. A stale screen does not announce itself.
 
 Usage
 -----
@@ -158,6 +170,37 @@ CORRIDOR_M = 25.0
 # must ride -- not a threshold, a definition.
 FREEWAY_CLASS = "motorway"
 
+# OSM's own functional hierarchy, most important first. This is upstream's
+# ordering, not a weighting anybody chose: the wiki defines the tags as a
+# descending ladder of road importance, and every US mapper applies it that
+# way.
+#
+# The rule compares a curve's road against the road ITS LEG IS MADE OF rather
+# than against a fixed class, and it is the comparison that does the work. A
+# leg made of motorway keeps only motorway bends, which is the Interstate
+# case. A leg made of trunk -- a curated I-65 whose route actually runs
+# US-231 end to end -- keeps its trunk bends, because those are that road's
+# real mainline, while still dropping the primary and residential kinks where
+# the route threads a town. Judging such a leg against `motorway` restored
+# 2,677 rows including Brickell Avenue in downtown Miami at a 38 ft radius;
+# judging it against its own class does not.
+CLASS_RANK = {
+    "motorway": 0,
+    "trunk": 1,
+    "primary": 2,
+    "secondary": 3,
+    "tertiary": 4,
+    "unclassified": 5,
+    "residential": 6,
+    # Valhalla's name for a service road, which OSM tags highway=service. It
+    # covers the alleys, driveways and yard roads a route threads at its very
+    # ends. Ranked last because a bend on one is never the through road -- and
+    # it has to be HERE rather than absent: an unranked class reads as
+    # "nothing may be concluded", which would have let service roads through
+    # as mainline on every leg.
+    "service_other": 7,
+}
+
 SOURCE_NOTE = (
     "READ: OSM highway class of the nearest way to each curve apex "
     "(Geofabrik PBF, offline; ODbL, (c) OpenStreetMap contributors)"
@@ -187,11 +230,36 @@ def freeway_coverage(coverage: dict[str, dict], leg: str) -> float | None:
     return row.get("coverage_on_motorway", 0) / row["coverage_samples"]
 
 
-def classify(fact: dict, interstate: bool) -> tuple[bool, str]:
+def corridor_class(coverage: dict[str, dict], leg: str) -> str | None:
+    """The class of road this leg is actually MADE of, mile by mile.
+
+    Read, and an argmax rather than a cut: whichever class the route spends
+    most of its miles on is what the leg is. No percentage is chosen, so
+    there is no threshold to tune and no band for a leg to sit awkwardly
+    inside -- which matters, because the coverage histogram turned out NOT to
+    be bimodal (52 interstate legs sit between 40 and 60 percent freeway), so
+    any percentage cut would have been picked to look right.
+
+    ``None`` when nothing was read, and the caller falls back to the label.
+    """
+    row = coverage.get(leg)
+    classes = (row or {}).get("ridden_classes") or {}
+    if not classes:
+        return None
+    return max(classes.items(), key=lambda kv: (kv[1], kv[0]))[0]
+
+
+def classify(fact: dict, made_of: str | None) -> tuple[bool, str]:
     """``(is connector, why)`` for one curve, from its OSM reading alone.
 
-    ``None`` for the reason means the apex had no road within the corridor --
-    nothing was read, so nothing may be concluded.
+    ``made_of`` is the class of road the LEG is built from, read per mile
+    from the route rather than taken from the leg's label (see
+    ``corridor_class``). A bend on a road less important than that is not on
+    the through route -- it is the town the route threads on its way in or
+    out -- and a bend on the same class, or a better one, is mainline.
+
+    An empty reason means nothing could be read: no road within the corridor,
+    or no class recorded for the leg. Nothing may be concluded from that.
     """
     near_m = fact.get("near_m")
     near_hw = fact.get("near_hw")
@@ -199,8 +267,12 @@ def classify(fact: dict, interstate: bool) -> tuple[bool, str]:
         return False, ""
     if near_hw.endswith("_link"):
         return True, "osm:ramp"
-    if interstate and near_hw != FREEWAY_CLASS:
-        return True, "osm:off-freeway"
+    corridor_rank = CLASS_RANK.get(made_of or "")
+    here = CLASS_RANK.get(near_hw)
+    if corridor_rank is None or here is None:
+        return False, "osm:mainline"
+    if here > corridor_rank:
+        return True, "osm:off-corridor"
     return False, "osm:mainline"
 
 
@@ -214,9 +286,9 @@ def reclassify(facts_path: Path) -> dict:
     meta_line = next((line for line in lines if line.startswith('{"meta"')), None)
     rows = [json.loads(line) for line in lines if line.strip() and not line.startswith('{"meta"')]
 
-    counts = {"osm:ramp": 0, "osm:off-freeway": 0, "osm:mainline": 0, "sweep:window": 0}
+    counts = {"osm:ramp": 0, "osm:off-corridor": 0, "osm:mainline": 0, "sweep:window": 0}
     unread = unflagged = 0
-    moved = {"osm:ramp": 0, "osm:off-freeway": 0}
+    moved = {"osm:ramp": 0, "osm:off-corridor": 0}
     moved_by_leg: dict[str, int] = {}
     for row in rows:
         leg = row["leg"]
@@ -231,7 +303,12 @@ def reclassify(facts_path: Path) -> dict:
         fact = facts.get((leg, row["seq"]))
         is_conn, why = (False, "")
         if fact is not None:
-            is_conn, why = classify(fact, highway.get(leg, "").upper().startswith("I-"))
+            made_of = corridor_class(coverage, leg)
+            if made_of is None:
+                # Nothing read about this leg's road: fall back to the label,
+                # which is what the rule used before it could read the road.
+                made_of = FREEWAY_CLASS if highway.get(leg, "").upper().startswith("I-") else None
+            is_conn, why = classify(fact, made_of)
         if not why:
             # Nothing was read here -- no extract, or no road within the
             # corridor. Keep exactly what the sweep said; absence of a reading
@@ -293,7 +370,7 @@ def main() -> int:
     counts, total = result["counts"], result["rows"]
     conn = total - counts["osm:mainline"]
     print(f"{total} curve rows | {conn} connector, {counts['osm:mainline']} mainline")
-    for why in ("osm:ramp", "osm:off-freeway", "sweep:window"):
+    for why in ("osm:ramp", "osm:off-corridor", "sweep:window"):
         print(f"  {why:18s} {counts[why]:6d}")
     read = total - result["unread"]
     print(
@@ -302,7 +379,7 @@ def main() -> int:
     )
     print(
         f"connector by a reading rather than by the sweep's window: "
-        f"{result['moved']['osm:ramp']} ramp, {result['moved']['osm:off-freeway']} off-freeway"
+        f"{result['moved']['osm:ramp']} ramp, {result['moved']['osm:off-corridor']} off-corridor"
         + (f"; {result['unflagged']} re-read as mainline" if result["unflagged"] else "")
     )
 

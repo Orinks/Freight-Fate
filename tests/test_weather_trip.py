@@ -745,8 +745,10 @@ def test_trip_uses_explicit_stop_positions(world):
     by_name = {stop.name: stop for stop in trip.stops}
     # Hand-curated stops keep their explicit checked-in positions and parking,
     # even with additive OpenStreetMap stops now interleaved on the leg.
-    assert by_name["Pilot Travel Center Remington"].at_mi == 93.5
-    assert by_name["Loves Travel Stop Lafayette"].at_mi == 121.3
+    # Rescaled with the leg: Chicago-Indianapolis was 183 miles and is 185,
+    # so a curated stop keeps its PLACE on the road rather than its old number.
+    assert by_name["Pilot Travel Center Remington"].at_mi == 94.52
+    assert by_name["Loves Travel Stop Lafayette"].at_mi == 122.63
     assert by_name["Pilot Travel Center Remington"].parking == "confirmed"
     assert by_name["Loves Travel Stop Lafayette"].parking == "confirmed"
     # No stop sits at the naive route midpoint, and every stop (curated or
@@ -1704,13 +1706,20 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     near = trip.update(0.0)
     assert not _gps_events(near)
 
-    trip.position_mi = 32.8
+    # Read the line's position rather than pinning a number to it. Correcting
+    # Chicago-Indianapolis from 183 to the 185 miles its baked route runs moved
+    # every along-route position, and a hardcoded probe then lands somewhere
+    # else entirely -- next to an interchange, in one case, whose exit cue
+    # joined the assertion.
+    line_mi = trip.route.legs[0].state_crossings[0].at_mi
+    trip.position_mi = line_mi
     crossing = trip.update(0.0)
     assert [event.message for event in crossing if event.kind == TripEventKind.STATE_CROSSING] == [
         "Crossing into Indiana near the I-65 state line south of Hammond."
     ]
 
-    trip.position_mi = 120.3
+    rest_stop = next(s for s in trip.stops if s.name == "Loves Travel Stop Lafayette")
+    trip.position_mi = rest_stop.at_mi - 1.0
     rest = trip.update(0.0)
     # The dense maxspeed sweep gives this I-65 leg a real 65 mph zone at mile
     # 120; jumping here from the 55 zone at the crossing announces that raise.

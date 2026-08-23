@@ -1193,9 +1193,20 @@ class DrivingUpdateMixin:
         self._curve_assist_cue_s = max(0.0, self._curve_assist_cue_s - dt)
         if curve_assisting and needs_service:
             self.truck.brake = max(self.truck.brake, min(0.35, abs(curve)))
+        # ON A RAMP, THE RAMP OWNS THE SPEECH. A ramp adds 0.35 of curve
+        # weight above, so any exit taken over about 43 mph engages this
+        # assist -- and route-transition assistance is already braking for
+        # the sign or the light at the end of it and already says so. With
+        # the realistic preset both are on by default, so every hot ramp
+        # spoke twice, back to back (logged playtest of the four 1.9 assists,
+        # 2026-07-15). The braking is unchanged; only the second announcement
+        # goes, and the surviving line is the more useful one because it
+        # names WHAT it is braking for.
+        on_ramp = self._ramp_mi is not None
         if curve_assisting:
-            if not self._curve_assist_active and self._curve_assist_cue_s <= 0.0:
+            if not self._curve_assist_active and self._curve_assist_cue_s <= 0.0 and not on_ramp:
                 self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
+                self._curve_assist_spoke = True
                 # ROUTE, not the ambient default: names an automation taking
                 # the pedals (automation-handoff sweep, 2026-08-20, the
                 # deferred 2026-08-15 audit).
@@ -1205,8 +1216,13 @@ class DrivingUpdateMixin:
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.CONFIRMATION,
                 )
-        elif self._curve_assist_active and self._curve_assist_cue_s <= 0.0:
+        elif (
+            self._curve_assist_active
+            and self._curve_assist_cue_s <= 0.0
+            and self._curve_assist_spoke
+        ):
             self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
+            self._curve_assist_spoke = False
             # ROUTE, not the ambient default: names the automation handing the
             # pedals back (automation-handoff sweep, 2026-08-20, the deferred
             # 2026-08-15 audit).
@@ -1216,6 +1232,9 @@ class DrivingUpdateMixin:
                 priority=EventPriority.ROUTE,
                 category=SpeechCategory.CONFIRMATION,
             )
+        elif not curve_assisting:
+            # Engagement that never spoke (the ramp case) simply ends.
+            self._curve_assist_spoke = False
         self._curve_assist_active = curve_assisting
         # Hysteresis on the ramp cap, for the same reason the curve assist has
         # it: decided both ways on the one threshold, a truck riding the ramp

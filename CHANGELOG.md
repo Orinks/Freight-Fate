@@ -965,6 +965,73 @@
   either: the truck still leans on them and the road bed still leads you
   round them, they are just no longer announced as highway curves.
 
+- **The road tells you what kind of country it is, more honestly.** The
+  terrain called out on a run is worked out again from the real height data
+  along it: seven hundred stretches were relabelled, mostly rolling country
+  that is honestly flat and a few flat-sounding ones that are not. The run
+  from Asheville to Hickory is now called a mountain road, which anyone who
+  has pulled it will think overdue. Texas hill country still reads as hills
+  rather than mountains, the Grapevine and the Siskiyous still read as
+  mountains, and every runaway-ramp grade still counts as one.
+
+- **Five runs are named for the road you are actually on.** A handful of runs
+  were filed under an interstate they never touch, and the co-driver said so
+  the whole way: the run from Hickory to Charlotte was called I-40 while you
+  drove NC-16, and the one from West Palm Beach to Cape Coral was called I-75
+  while you crossed the state on SR-80. Ashland to Huntington, Cape Coral to
+  Lakeland and Tyler to Longview were the same. They now carry the road under
+  the wheels. Five more runs are still misnamed and were left alone on
+  purpose -- they wander across four or five roads with no one of them the
+  main road, and picking the biggest would only be wrong more quietly.
+
+- **Some runs were paying you for less road than you drive.** A hundred and
+  seventy-six legs carried a distance shorter than the road actually runs --
+  the haul from Poplar Bluff to Jonesboro was booked at fifty-five miles and
+  is ninety-five; Altus to Wichita Falls said fifty and is eighty-five. You
+  were driving the full distance and being paid, timed and fuelled for the
+  short one. Thirty-six of them were impossible on the face of it: the
+  distance stored was less than the straight line between the two towns, and
+  no road is shorter than that. Every one of those legs now carries the
+  distance it really covers, and the mileposts along it -- the stops, the
+  state lines, the limit changes, the grades -- move with it so they still
+  land where they belong. Expect those runs to pay more and to be given more
+  time, because they were always longer than the book said.
+
+- **The Pigeon River Gorge is called a mountain road again.** Twenty-three
+  stretches were filed as flat or rolling when the federal highway survey
+  calls them mountainous -- I-40 between Asheville and Knoxville among them,
+  and I-70 through Glenwood Canyon. The route briefing described them as
+  rolling hills right up to the first six percent grade. They now say what
+  they are.
+
+- **Bends are judged against the road you are actually on.** Some routes are
+  named for an interstate they never really join -- the run from Huntsville to
+  Nashville is filed under I-65 but drives US-231 the whole way. The game had
+  been measuring those bends against a freeway that was not there and staying
+  quiet through all of them, so a genuinely twisty road went uncalled. It now
+  reads what kind of road each leg is actually built from and calls the bends
+  that belong to it, while still leaving out the town streets a route threads
+  on its way in and out. You will hear the corners on roads like US-231 again;
+  you will not hear the square in the middle of a small town called as a
+  highway curve.
+
+- **A hot exit ramp tells you once, not twice.** Taking an exit fast enough
+  to need help used to get two announcements a beat apart -- the curve
+  assistance saying it was slowing, then the route-transition assistance
+  saying it was braking for the sign or the light. Both were doing real work,
+  but only one of them told you anything you did not already know. The ramp
+  now speaks once, and the line that survives is the one that names what it
+  is braking for. Nothing about the braking itself changed.
+
+- **The delivery clock now counts the bends you have to slow for.** Time
+  planning walked the route on posted limits alone, so a road of switchbacks
+  was budgeted as though you could hold the limit round every one of them.
+  It now charges the miles inside a bend at that bend's own advisory speed.
+  On the interstate this changes nothing -- there is nothing there to slow
+  for any more -- but a mountain run like US-550 over Red Mountain Pass or
+  the Salt River Canyon on US-60 is given the two or three percent more
+  driving time it genuinely takes.
+
 - **A tank load is described in tank words at the dock too.** A spoiled tank
   load called "off spec" on the road was called "damaged" when you arrived,
   and a refused one went from "lost" to "ruined", as though something had

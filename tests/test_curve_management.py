@@ -263,30 +263,41 @@ class TestUSRouteArtifactScreen:
             near_departure = [r for r in recs if r.apex_mi < 2.5 and _is_hairpin(r)]
             assert not near_departure, f"{leg_key}: departure artifact survived: {near_departure}"
 
-    def test_the_leg_end_rule_cuts_by_terrain_within_a_single_leg(self) -> None:
-        """KY-80 out of Hazard carries both cases half a mile apart.
+    def test_leaving_a_mountain_town_keeps_the_road_and_drops_the_town(self) -> None:
+        """Both halves of the Hazard case, re-pinned to the actual roads.
 
-        A 43 ft kink at mile 1.06 on hills is departure geometry and goes; a
-        real 80 ft switchback at mile 2.48, where the road is already into the
-        mountains, stays. Position alone would have taken both, which is why
-        the rule asks the terrain as well.
+        This test used to assert that "a real 80 ft switchback at mile 2.48,
+        where the road is already into the mountains, stays". The road data
+        says otherwise: mile 2.48 is on ``KY 15 Business``, OSM class
+        ``secondary``, turning 71 and 89 degrees at an 80 ft radius -- the
+        business loop through Hazard, which is a street corner rather than a
+        switchback. The leg is made of ``trunk`` (38 sampled miles of KY-15
+        against 3 of residential), and the through road's own bends at miles
+        1.06 and 1.59 are what survive.
+
+        Terrain alone could not tell those apart, because both are in the
+        mountains. Reading the road under each bend can, which is what the
+        connector bake now does.
         """
         recs = leg_curves("hazard_ky_us:london_ky_us")
-        near = [r for r in recs if r.apex_mi < 2.5 and _is_hairpin(r)]
-        assert near, "the mountain switchback at mile 2.48 must survive"
+        near = [r for r in recs if r.apex_mi < 2.5]
+        assert near, "KY-15's own bends leaving Hazard must survive"
         assert all(r.min_radius_ft >= 50 for r in near), (
-            f"the hills kink at mile 1.06 should be gone: {near}"
+            f"nothing tighter than a truck's turning circle is a road: {near}"
         )
 
-    def test_a_mountain_town_keeps_the_switchback_on_its_doorstep(self) -> None:
-        """The leg-end rule spares mountain terrain, and has to.
+    def test_a_mountain_town_keeps_the_road_out_of_it(self) -> None:
+        """US-119 leaving Charleston, re-pinned for the same reason.
 
-        US-119 leaves Charleston straight into the mountains, and a real
-        switchback sits within the first mile. Deleting by position alone
-        would have taken it.
+        The record this test used to protect as "a real switchback within the
+        first mile" is Thayer Street in Charleston -- OSM class ``primary``,
+        92 ft radius, 96 degrees. US-119 itself (``trunk``, signed Corridor G)
+        starts at mile 1.62, and those bends are the ones that stay.
         """
         recs = leg_curves("charleston_wv_us:pikeville_ky_us")
-        assert [r for r in recs if r.apex_mi < 2.5 and _is_hairpin(r)]
+        near = [r for r in recs if r.apex_mi < 3.0]
+        assert near, "Corridor G's own bends out of Charleston must survive"
+        assert all(r.min_radius_ft >= 50 for r in near)
 
     def test_no_surviving_curve_is_tighter_than_a_road_can_bend(self) -> None:
         """A radius floor for every class, the sibling of the interstate 300 ft.
@@ -636,16 +647,32 @@ def test_a_canyon_tagged_flat_is_not_screened_as_level_ground():
     calibrated against HPMS at a Youden's J of 0.29. The screen reads the
     real HPMS terrain class now, and HPMS calls this leg mountainous.
     """
-    from freight_fate.data.curves import _leg_is_level
+    from freight_fate.data.curves import HPMS_TERRAIN_LEVEL, _leg_is_level
     from freight_fate.data.world import get_world
 
+    world = get_world()
     canyon = next(
         leg
-        for leg in get_world().legs
+        for leg in world.legs
         if leg.a == "glenwood_springs_co_us" and leg.b == "grand_junction_co_us"
     )
-    assert str(getattr(canyon, "terrain", "")) == "flat"  # the label really is wrong
-    assert not _leg_is_level(canyon)  # HPMS is not
+    assert not _leg_is_level(canyon)  # HPMS calls it mountainous, and it is
+
+    # The canyon's own label said "flat" when this test was written, which is
+    # what made it such a good example. It has since been corrected from HPMS
+    # (tools/repair_terrain_from_hpms.py), so the demonstration moved: rather
+    # than naming one leg where the label lies, assert the PROPERTY directly --
+    # the screen's verdict follows HPMS on every leg, never the label.
+    disagreeing = 0
+    for leg in world.legs:
+        hpms = getattr(leg, "hpms_terrain", None)
+        if hpms is None or getattr(hpms, "type", None) is None:
+            assert not _leg_is_level(leg), "absence of a class must never read as level"
+            continue
+        assert _leg_is_level(leg) == (hpms.type == HPMS_TERRAIN_LEVEL)
+        if (str(getattr(leg, "terrain", "")) == "flat") != (hpms.type == HPMS_TERRAIN_LEVEL):
+            disagreeing += 1
+    assert disagreeing, "if no leg's label disagrees with HPMS any more, this test proves nothing"
 
 
 def test_the_radius_floor_matches_published_design_tables():
@@ -874,14 +901,34 @@ def test_counting_the_bank_only_ever_raises_an_advisory() -> None:
     A bank can only help a truck hold a curve, so this must never hand back a
     number lower than the flat one -- a correction meant to speed a curve up
     must not quietly slow a different one down.
+
+    Inside the model's own domain, which is what ``ADVISORY_MAX_MPH`` marks:
+    the friction table this is solved from is published for 20 to 80 mph and
+    stops there, so an advisory is only a statement about a road up to 80. A
+    20,000 ft bend reads 300 mph unclamped, which is arithmetic rather than a
+    road, and both the flat and the banked number are capped alike -- so the
+    "never lower" property is checked where both are real.
     """
     import math
 
-    from freight_fate.data.curves import ADVISORY_LATERAL_G, advisory_with_bank_mph
+    from freight_fate.data.curves import (
+        ADVISORY_LATERAL_G,
+        ADVISORY_MAX_MPH,
+        advisory_with_bank_mph,
+    )
 
     for radius in (400, 758, 1000, 1810, 5000, 20_000):
         flat = math.sqrt(15.0 * radius * ADVISORY_LATERAL_G)
-        assert advisory_with_bank_mph(radius, 70) >= int(round(flat / 5.0) * 5) - 1
+        capped = min(int(round(flat / 5.0) * 5), ADVISORY_MAX_MPH)
+        assert advisory_with_bank_mph(radius, 70) >= capped - 1
+
+    # The cap binds, and it is the top of the friction table rather than a
+    # number anybody picked: no US road is designed above 80.
+    assert ADVISORY_MAX_MPH == 80
+    assert advisory_with_bank_mph(20_000, 70) == ADVISORY_MAX_MPH
+    assert advisory_with_bank_mph(600, 70) < ADVISORY_MAX_MPH, (
+        "a real bend must still read its own speed, not the cap"
+    )
 
     # A town street is built to normal crown, so it keeps the flat reading:
     # TxDOT Table 4-3 and Iowa DOT 2B-1 both put the Method 2 / Method 5 line
@@ -941,23 +988,38 @@ class TestConnectorsAreReadNotGuessed:
     def test_a_ramp_reads_as_a_connector_on_every_road_class(self) -> None:
         rule = _connector_rule()
         for klass in ("motorway_link", "trunk_link", "primary_link"):
-            for interstate in (True, False):
-                assert rule.classify({"near_m": 0.4, "near_hw": klass}, interstate) == (
+            for made_of in ("motorway", "trunk", "primary", None):
+                assert rule.classify({"near_m": 0.4, "near_hw": klass}, made_of) == (
                     True,
                     "osm:ramp",
                 )
 
-    def test_an_interstate_curve_off_the_freeway_is_not_interstate_mainline(self) -> None:
-        """Every Interstate mainline mile is a freeway, so a curve apex on a
-        surface road is not on the Interstate however the leg is labelled."""
+    def test_a_bend_below_its_leg_s_own_road_is_not_on_the_through_route(self) -> None:
+        """Every Interstate mainline mile is a freeway, so on a leg MADE of
+        freeway a surface-road apex is not on the Interstate.
+
+        But the comparison is against the road the leg is made of, not against
+        a fixed class -- otherwise a curated I-65 whose route actually runs
+        US-231 end to end has all its real trunk bends read as off-route.
+        """
         rule = _connector_rule()
         for klass in ("trunk", "primary", "secondary", "residential"):
-            assert rule.classify({"near_m": 0.4, "near_hw": klass}, True) == (
+            assert rule.classify({"near_m": 0.4, "near_hw": klass}, "motorway") == (
                 True,
-                "osm:off-freeway",
+                "osm:off-corridor",
             )
-            # The same ground on a US-route leg is that leg's real road.
-            assert rule.classify({"near_m": 0.4, "near_hw": klass}, False)[0] is False
+        # A leg made of trunk keeps its trunk bends and drops the town.
+        assert rule.classify({"near_m": 0.4, "near_hw": "trunk"}, "trunk") == (
+            False,
+            "osm:mainline",
+        )
+        for klass in ("primary", "secondary", "residential"):
+            assert rule.classify({"near_m": 0.4, "near_hw": klass}, "trunk")[0] is True
+        # And a better road than the leg is made of is never off-route.
+        assert rule.classify({"near_m": 0.4, "near_hw": "motorway"}, "trunk") == (
+            False,
+            "osm:mainline",
+        )
 
     def test_a_freeway_curve_stays_mainline_however_hard_it_bends(self) -> None:
         """The guard on the whole rule: it never sees the geometry.
@@ -968,7 +1030,7 @@ class TestConnectorsAreReadNotGuessed:
         through which a sharp curve could reach it -- so it cannot repeat that.
         """
         rule = _connector_rule()
-        assert rule.classify({"near_m": 0.2, "near_hw": "motorway"}, True) == (
+        assert rule.classify({"near_m": 0.2, "near_hw": "motorway"}, "motorway") == (
             False,
             "osm:mainline",
         )
@@ -977,20 +1039,28 @@ class TestConnectorsAreReadNotGuessed:
         """No extract, or no road in the corridor, must not read as mainline."""
         rule = _connector_rule()
         for fact in ({"near_m": None}, {"near_m": 400.0, "near_hw": "motorway_link"}, {}):
-            assert rule.classify(fact, True) == (False, "")
+            assert rule.classify(fact, "motorway") == (False, "")
+        # Nor may anything be concluded when the leg's own road went unread.
+        assert rule.classify({"near_m": 0.3, "near_hw": "residential"}, None) == (
+            False,
+            "osm:mainline",
+        )
 
     def test_the_corridor_is_a_sanity_bound_not_a_decision(self) -> None:
         rule = _connector_rule()
-        assert rule.classify({"near_m": rule.CORRIDOR_M - 0.1, "near_hw": "motorway"}, True)[1]
+        assert rule.classify({"near_m": rule.CORRIDOR_M - 0.1, "near_hw": "motorway"}, "motorway")[
+            1
+        ]
         assert (
-            rule.classify({"near_m": rule.CORRIDOR_M + 0.1, "near_hw": "motorway"}, True)[1] == ""
+            rule.classify({"near_m": rule.CORRIDOR_M + 0.1, "near_hw": "motorway"}, "motorway")[1]
+            == ""
         )
 
 
 def test_every_connector_row_names_the_reading_that_flagged_it() -> None:
     """Provenance: a connector says whether it was read or positional.
 
-    ``osm:ramp`` and ``osm:off-freeway`` are readings from the OSM extract;
+    ``osm:ramp`` and ``osm:off-corridor`` are readings from the OSM extract;
     ``sweep:window`` is the bake's original positional call, kept because the
     two are a union and the window sees city geometry the class reading can
     miss.
@@ -1001,7 +1071,7 @@ def test_every_connector_row_names_the_reading_that_flagged_it() -> None:
 
     text = read_data_text("world_data/us/gameplay/curves.jsonl")
     assert text
-    known = {"osm:ramp", "osm:off-freeway", "sweep:window"}
+    known = {"osm:ramp", "osm:off-corridor", "sweep:window"}
     seen: set[str] = set()
     for line in text.splitlines():
         if not line.strip():
@@ -1012,7 +1082,7 @@ def test_every_connector_row_names_the_reading_that_flagged_it() -> None:
         source = row.get("connector_source")
         assert source in known, f"{row['leg']} seq {row['seq']} carries {source!r}"
         seen.add(source)
-    assert seen >= {"osm:ramp", "osm:off-freeway"}, (
+    assert seen >= {"osm:ramp", "osm:off-corridor"}, (
         f"the OSM readings should both be present in the bake, saw {sorted(seen)}"
     )
 
@@ -1047,3 +1117,89 @@ def test_interstate_mainline_asks_the_truck_to_slow_down_rarely() -> None:
     assert slow, "a network with no interstate slowdowns at all means the data vanished"
     every = miles / slow
     assert every > 100.0, f"one interstate slowdown every {every:.1f} miles is too often"
+
+
+def test_no_baked_advisory_is_faster_than_the_table_it_came_from() -> None:
+    """The advisory is AASHTO's point-mass control solved for V, and that
+    control's friction table is published for 20 through 80 mph.
+
+    Run unclamped on a gentle bend it read out 115, which is not a claim
+    about a road -- it is arithmetic past the edge of its own table. 21,076
+    of 63,873 rows (33 percent) were over 80 before the cap. Nothing audible
+    moved: an advisory above the posted limit never fires a pacenote, never
+    counts as corner overspeed and never eases cruise.
+    """
+    import json
+
+    from freight_fate.data.curves import ADVISORY_MAX_MPH
+    from freight_fate.data.data_resources import read_data_text
+
+    text = read_data_text("world_data/us/gameplay/curves.jsonl")
+    assert text
+    worst = 0
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if "meta" in row:
+            continue
+        worst = max(worst, int(row["advisory_mph"]))
+    assert worst <= ADVISORY_MAX_MPH, f"a baked row still advises {worst} mph"
+
+
+def test_the_deadline_plan_slows_for_the_bends_it_will_meet() -> None:
+    """``route_drive_hours`` walked the route on posted limits alone, so every
+    bend the driver has to slow for was time the plan never budgeted.
+
+    It now times each sampled segment piecewise: the miles inside a bend at
+    that bend's advisory, the rest at the planning limit. Only the bend's own
+    recorded span is charged -- no invented deceleration ramp, which is the
+    sort of unmeasured loss DEADLINE_PLANNING_SPEED_FACTOR already carries.
+    """
+    from freight_fate.models.jobs import _segment_hours
+
+    # No bends: the segment is just distance over speed.
+    assert _segment_hours(0.0, 2.0, 60.0, []) == 2.0 / 60.0
+
+    # A bend covering half the segment is charged at its advisory for that
+    # half only, so the segment costs more than the open road and less than
+    # the whole thing taken at the advisory.
+    bands = [(0.0, 1.0, 30.0)]
+    slowed = _segment_hours(0.0, 2.0, 60.0, bands)
+    assert slowed == 1.0 / 30.0 + 1.0 / 60.0
+    assert 2.0 / 60.0 < slowed < 2.0 / 30.0
+
+    # A bend the truck is already slower than costs nothing extra.
+    assert _segment_hours(0.0, 2.0, 25.0, [(0.0, 1.0, 55.0)]) == 2.0 / 25.0
+
+    # Bands outside the segment are ignored rather than smeared into it.
+    assert _segment_hours(4.0, 6.0, 60.0, [(0.0, 1.0, 30.0)]) == 2.0 / 60.0
+
+
+def test_a_switchback_road_costs_the_plan_more_than_an_interstate() -> None:
+    """The check on the piecewise timing, on real baked geometry.
+
+    US-550 over Red Mountain Pass is 107 miles of switchback and its bends
+    really do cost the plan time. An interstate of similar length costs
+    essentially nothing, which is the point of the other two fixes that
+    landed the same day: once the bank is priced in and interchange geometry
+    is classed as connector, interstate mainline stops asking a truck to slow.
+    """
+    from freight_fate.data.world import get_world
+    from freight_fate.models import jobs
+
+    world = get_world()
+    route = world.shortest_route("durango_co_us", "montrose_co_us")
+    assert route is not None
+    bands = jobs._curve_ceilings(route)
+    assert bands, "the Million Dollar Highway's bends should reach the planner"
+    assert min(advisory for _, _, advisory in bands) <= 25
+
+    aware = jobs.route_drive_hours(route, world=world)
+    original = jobs._curve_ceilings
+    try:
+        jobs._curve_ceilings = lambda _route: []
+        blind = jobs.route_drive_hours(route, world=world)
+    finally:
+        jobs._curve_ceilings = original
+    assert aware > blind, "a road of switchbacks must cost the plan more than a flat read"
