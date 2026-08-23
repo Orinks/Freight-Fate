@@ -85,6 +85,28 @@ LOCAL_URL = "http://localhost:8002/trace_attributes"
 USER_AGENT = "Freight-Fate map-matching (https://github.com/Orinks/Freight-Fate)"
 COSTING = "truck"  # the vehicle actually being routed, so its restrictions apply
 
+# What the truck actually is. Valhalla's truck costing defaults to 21.77
+# tonnes -- about 48,000 lb -- which is not a loaded US semi, and a weight
+# limit it would clear at that figure it would not clear at 80,000. Measured
+# on Newark to Hunts Point, truck costing already routes very differently from
+# car (61.7 miles over the George Washington Bridge against 23 straight
+# through the truck-banned tunnels), so the profile is doing real work; these
+# numbers make it do it for the right vehicle.
+#
+# 80,000 lb gross and 13 ft 6 in are the federal maxima on the Interstate
+# system (23 CFR 658.17 for weight, and the height every state signs to);
+# 53 ft is the standard trailer, 8 ft 6 in the standard width, and 34,000 lb
+# is the tandem-axle limit that goes with the 80,000.
+TRUCK_OPTIONS = {
+    "height": 4.11,  # metres, 13 ft 6 in
+    "width": 2.59,  # 8 ft 6 in
+    "length": 21.64,  # 71 ft tractor plus 53 ft trailer
+    "weight": 36.29,  # tonnes, 80,000 lb
+    "axle_load": 15.42,  # tonnes, 34,000 lb tandem
+    "hazmat": False,
+}
+
+
 # What ``edge.use`` calls interchange geometry.
 RAMP_USES = frozenset({"ramp", "turn_channel"})
 
@@ -167,6 +189,7 @@ def match_leg(coords: list[list[float]], url: str, delay: float) -> dict[int, di
             {
                 "shape": [{"lat": lat, "lon": lon} for lon, lat in chunk],
                 "costing": COSTING,
+                "costing_options": {COSTING: TRUCK_OPTIONS},
                 "shape_match": "map_snap",
                 "filters": {
                     "attributes": [
