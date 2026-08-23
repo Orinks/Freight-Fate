@@ -12,7 +12,7 @@ use crate::states::city_pickup::{
 };
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
-use crate::states::driving_events::with_drive;
+use crate::states::driving_menu_states::DriveRef;
 
 impl DrivingState {
     /// `_handle_pickup_gate()`.
@@ -140,6 +140,11 @@ impl DrivingState {
         // to the check-in menu, so the arrival is something the driver hears
         // happen instead of a menu appearing under them.
         let facility = self.pickup_facility_text(ctx);
+        // The drive's own handle, taken while it is still the active state:
+        // the replace below takes it OFF the stack, so a callback that looks
+        // it up there later finds nothing and the check-in menu never opens.
+        // Python's closure kept `self` alive across the same replace.
+        let drive = DriveRef::active(ctx);
         ctx.replace_state(
             TimedMessageState::new(
                 "Pulling into pickup",
@@ -148,8 +153,8 @@ impl DrivingState {
                 ),
                 "Pulling into the pickup facility. Please wait.",
                 STOP_PULL_IN_WAIT_S,
-                |ctx: &mut GameContext| {
-                    with_drive(ctx, |drive, ctx| {
+                move |ctx: &mut GameContext| {
+                    drive.with(ctx, |drive, ctx| {
                         drive.set_status("Parked at pickup. Check in and load.");
                         // `driving=self`: the arriving drive hands over the
                         // truck it was driving, plus its speed control session.

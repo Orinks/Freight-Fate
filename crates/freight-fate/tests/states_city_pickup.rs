@@ -15,6 +15,7 @@ use ff_core::models::trailer_yard::{
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, TimedMessageState};
 use freight_fate::states::city::CityMenuState;
+use freight_fate::states::main_menu::MainMenuState;
 use freight_fate::states::city_pickup::{
     job_origin_exists, pickup_snapshot, PickupFacilityState, PickupOptions, PickupSnapshotOptions,
     RouteSelectState,
@@ -437,37 +438,274 @@ fn test_pickup_snapshot_carries_the_resume_fields() {
 // -- what still needs the drive ----------------------------------------------------------
 
 #[test]
-#[ignore = "needs states::driving (the deadhead that reaches the shipper)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_accepting_job_starts_drivable_pickup_leg() {}
 
 #[test]
-#[ignore = "needs states::driving (the approach and its stop gate)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_pickup_facility_waits_for_full_stop() {}
 
 #[test]
-#[ignore = "needs states::driving (engine settling on arrival)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_pickup_arrival_settles_the_engine_to_idle() {}
 
 #[test]
-#[ignore = "needs states::driving (PauseMenuState)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_quit_during_pickup_drive_resumes_from_the_last_stop() {}
 
 #[test]
-#[ignore = "needs states::driving (the loaded drive that keeps the idle)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_departing_loaded_trip_keeps_idling_engine() {}
 
 #[test]
-#[ignore = "needs states::driving (the trailer the scale house finds)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_a_refused_trailer_does_not_follow_the_driver_onto_the_road() {}
 
 #[test]
-#[ignore = "needs states::driving (the inspector's write-up)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_an_unrefused_defect_is_what_the_inspector_finds() {}
 
 #[test]
-#[ignore = "needs states::driving (speed control at the gate)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_speed_control_stays_paused_until_departure() {}
 
 #[test]
-#[ignore = "needs states::driving (speed control at the gate)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_arming_by_hand_at_the_gate_still_works() {}
+
+// -- the facility engine kill switch (tests/test_facility_engine.py) ------------------
+//
+// Shutting the engine down while parked at a pickup facility. The kill switch
+// has always existed on the road, but a facility arrival takes the truck over
+// at half a mile an hour and hands straight to a menu, so the one moment a
+// driver actually reaches for it -- sitting at the shipper waiting to be
+// loaded -- was the one moment the game did not offer it. Idling through that
+// wait now costs fuel, which is what makes the switch worth reaching for.
+//
+// The Python fixtures drove the deadhead in with the engine running; here the
+// pickup is built with `engine_on`, which is what that arrival hands over.
+// The destination-facility half of the file lives with the arrival menus.
+
+const SHUT_DOWN: &str = "Shut down the engine";
+const START: &str = "Start the engine";
+
+/// Reach the pickup facility with the engine idling, as a drive-in does.
+fn pickup_running(app: &mut TestApp) -> Job {
+    let mut job = drop_yard_job("chicago-live-load", 92.0);
+    job.origin_type = "mine_quarry".to_string(); // a shipper that loads at a dock
+    career(app, "Facility Engine", "Chicago");
+    push_pickup(
+        app,
+        job.clone(),
+        PickupOptions {
+            engine_on: true,
+            ..PickupOptions::default()
+        },
+    );
+    assert!(with_state::<PickupFacilityState, _>(app, |p, _| p
+        .truck
+        .engine_on));
+    job
+}
+
+/// Check in and get the freight on. `pickup_running` pins a dock shipper, so
+/// the second primary row is the dock rather than a drop-and-hook yard.
+fn load_out(app: &mut TestApp) {
+    select::<PickupFacilityState>(app, "Check in at shipping office");
+    select::<PickupFacilityState>(app, "Load cargo at dock");
+    finish_timed_state(app);
+    assert!(with_state::<PickupFacilityState, _>(app, |p, _| p.loaded));
+}
+
+#[test]
+fn test_pickup_facility_offers_shutdown_and_then_restart() {
+    let mut app = TestApp::new();
+    pickup_running(&mut app);
+    assert!(labels::<PickupFacilityState>(&app).iter().any(|l| l == SHUT_DOWN));
+
+    select::<PickupFacilityState>(&mut app, SHUT_DOWN);
+    assert!(!with_state::<PickupFacilityState, _>(&app, |p, _| p
+        .truck
+        .engine_on));
+    assert!(app.main_lines().last().unwrap().contains("Engine off."));
+
+    // One row that changes face, not two: a screen reader user arrows past a
+    // single engine line either way.
+    let rows = labels::<PickupFacilityState>(&app);
+    assert!(!rows.iter().any(|l| l == SHUT_DOWN), "{rows:?}");
+    assert!(rows.iter().any(|l| l == START), "{rows:?}");
+
+    select::<PickupFacilityState>(&mut app, START);
+    assert!(with_state::<PickupFacilityState, _>(&app, |p, _| p
+        .truck
+        .engine_on));
+    assert!(app.main_lines().last().unwrap().contains("Engine running."));
+    assert!(labels::<PickupFacilityState>(&app)
+        .iter()
+        .any(|l| l == SHUT_DOWN));
+}
+
+#[test]
+fn test_the_primary_action_stays_the_first_item() {
+    let mut app = TestApp::new();
+    pickup_running(&mut app);
+    // Enter on arrival must still check in. The engine row sits with the
+    // other truck actions, never in front of the flow the facility is for.
+    let first = labels::<PickupFacilityState>(&app)[0].clone();
+    assert_eq!(first, "Check in at shipping office");
+    select::<PickupFacilityState>(&mut app, SHUT_DOWN);
+    assert_eq!(labels::<PickupFacilityState>(&app)[0], first);
+}
+
+#[test]
+#[ignore = "needs the resume hand-off wired: states::main_menu::world_entry_state still returns todo_state(\"PickupFacilityState\") instead of PickupFacilityState::from_snapshot"]
+fn test_engine_off_at_the_pickup_survives_save_and_quit() {
+    let mut app = TestApp::new();
+    pickup_running(&mut app);
+    select::<PickupFacilityState>(&mut app, SHUT_DOWN);
+    assert_eq!(
+        profile(&app).active_trip.as_ref().unwrap()["engine_on"],
+        serde_json::Value::Bool(false)
+    );
+
+    select::<PickupFacilityState>(&mut app, "Save and quit to main menu");
+    select::<MainMenuState>(&mut app, "Continue latest career");
+
+    assert!(is::<PickupFacilityState>(&app));
+    assert!(!with_state::<PickupFacilityState, _>(&app, |p, _| p
+        .truck
+        .engine_on));
+    assert!(labels::<PickupFacilityState>(&app)
+        .iter()
+        .any(|l| l == START));
+}
+
+#[test]
+fn test_loading_still_works_with_the_engine_shut_down() {
+    let mut app = TestApp::new();
+    pickup_running(&mut app);
+    select::<PickupFacilityState>(&mut app, SHUT_DOWN);
+    load_out(&mut app);
+    assert!(!with_state::<PickupFacilityState, _>(&app, |p, _| p
+        .truck
+        .engine_on));
+}
+
+/// Jake's point: an hour on the dock has to cost something, or the switch is
+/// decoration.
+#[test]
+fn test_idling_through_the_load_burns_fuel_and_shutting_down_does_not() {
+    let mut idled = TestApp::new();
+    pickup_running(&mut idled);
+    let before = with_state::<PickupFacilityState, _>(&idled, |p, _| p.truck.fuel_gal);
+    load_out(&mut idled);
+    let burned_idling =
+        before - with_state::<PickupFacilityState, _>(&idled, |p, _| p.truck.fuel_gal);
+    // A TestApp holds the environment lock until it is dropped.
+    drop(idled);
+
+    let mut shut = TestApp::new();
+    pickup_running(&mut shut);
+    let before = with_state::<PickupFacilityState, _>(&shut, |p, _| p.truck.fuel_gal);
+    select::<PickupFacilityState>(&mut shut, SHUT_DOWN);
+    load_out(&mut shut);
+    let burned_shut_down =
+        before - with_state::<PickupFacilityState, _>(&shut, |p, _| p.truck.fuel_gal);
+
+    // Check-in plus loading is over an hour of engine time at roughly
+    // 0.8 gallons an hour.
+    assert!(burned_idling > 0.3, "{burned_idling}");
+    assert_eq!(burned_shut_down, 0.0);
+}
+
+#[test]
+fn test_the_load_report_names_the_fuel_burned_idling() {
+    let mut app = TestApp::new();
+    pickup_running(&mut app);
+    load_out(&mut app);
+    let loaded_line = app.main_lines().last().unwrap().to_lowercase();
+    assert!(loaded_line.contains("idling"), "{loaded_line}");
+    assert!(loaded_line.contains("gallon"), "{loaded_line}");
+}
+
+#[test]
+fn test_a_shut_down_load_says_nothing_about_fuel() {
+    let mut app = TestApp::new();
+    pickup_running(&mut app);
+    select::<PickupFacilityState>(&mut app, SHUT_DOWN);
+    load_out(&mut app);
+    let loaded_line = app.main_lines().last().unwrap().to_lowercase();
+    assert!(!loaded_line.contains("idling"), "{loaded_line}");
+}
+
+#[test]
+fn test_departing_with_the_engine_off_names_the_start_control() {
+    let mut app = TestApp::new();
+    pickup_running(&mut app);
+    load_out(&mut app);
+    select::<PickupFacilityState>(&mut app, SHUT_DOWN);
+    select::<PickupFacilityState>(&mut app, "Depart for destination");
+
+    // The state the departure hands to is still a placeholder
+    // (`states::city::launch_driving` pushes `todo_state("Driving")`), so the
+    // engine's state on the resumed drive is checked by the driving suite;
+    // the line the driver hears is what this case is about.
+    //
+    // The first-run tutorial and any achievement speak after departure, so
+    // find the departure line rather than trusting the last thing said.
+    let lines = app.main_lines();
+    let departure = lines
+        .iter()
+        .find(|line| line.contains("Loaded trip is"))
+        .expect("the departure line");
+    // Never "Departing now" over a dead engine, and the key named is the one
+    // this driver's settings actually bind.
+    assert!(!departure.contains("Departing now"), "{departure}");
+    assert!(departure.contains(&app.ctx.control_hint("engine")), "{departure}");
+}
+
+#[test]
+fn test_departing_with_the_engine_running_still_just_departs() {
+    let mut app = TestApp::new();
+    pickup_running(&mut app);
+    load_out(&mut app);
+    select::<PickupFacilityState>(&mut app, "Depart for destination");
+
+    // As above: the drive itself is behind `launch_driving`'s placeholder.
+    let lines = app.main_lines();
+    let departure = lines
+        .iter()
+        .find(|line| line.contains("Loaded trip is"))
+        .expect("the departure line");
+    assert!(departure.contains("Departing now"), "{departure}");
+}
+
+#[test]
+fn test_pickup_status_and_screen_report_the_engine() {
+    let mut app = TestApp::new();
+    pickup_running(&mut app);
+    select::<PickupFacilityState>(&mut app, "Pickup status");
+    assert!(app
+        .main_lines()
+        .last()
+        .unwrap()
+        .to_lowercase()
+        .contains("engine running"));
+    assert!(app
+        .visible_lines()
+        .iter()
+        .any(|line| line.contains("Engine: running")));
+
+    select::<PickupFacilityState>(&mut app, SHUT_DOWN);
+    select::<PickupFacilityState>(&mut app, "Pickup status");
+    assert!(app
+        .main_lines()
+        .last()
+        .unwrap()
+        .to_lowercase()
+        .contains("engine off"));
+    assert!(app
+        .visible_lines()
+        .iter()
+        .any(|line| line.contains("Engine: off")));
+}

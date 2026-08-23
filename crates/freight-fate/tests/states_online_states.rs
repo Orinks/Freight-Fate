@@ -142,9 +142,8 @@ fn test_cancel_returns_without_changing_profile_sharing() {
     assert!(!std::rc::Rc::ptr_eq(&app.state().unwrap(), &state));
 }
 
-#[test]
-#[ignore = "belongs to ff_core::settings (Settings::load's consent-version gate); ported with the settings tests"]
-fn test_only_current_profile_sharing_consent_can_remain_on() {}
+// `test_only_current_profile_sharing_consent_can_remain_on` is live in
+// `crates/ff-core/src/settings/tests.rs`: the gate is Settings::load's.
 
 // -- the Mastodon rows on the Online menu (test_delivery_summary_sharing.py) -----
 

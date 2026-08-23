@@ -53,12 +53,10 @@ fn the_version_is_the_crate_version_from_source() {
     assert_eq!(version(), env!("CARGO_PKG_VERSION"));
 }
 
-#[test]
-#[ignore = "needs states::city (garage)"]
-fn test_garage_offers_partial_fuel_and_repairs_when_cash_is_short() {}
+// `test_garage_offers_partial_fuel_and_repairs_when_cash_is_short` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
-#[ignore = "needs states::driving (the career-to-delivery flow; the main-menu half is states_main_menu.rs)"]
+#[ignore = "needs the main-menu hand-off wired: states::main_menu::world_entry_state / first_state_after_career_creation still return todo_state(...)"]
 fn test_full_game_flow_headless() {}
 
 #[test]
@@ -90,37 +88,27 @@ fn test_menu_first_letter_navigation() {
 }
 
 #[test]
-#[ignore = "needs states::city"]
+#[ignore = "needs the main-menu hand-off wired: states::main_menu::world_entry_state / first_state_after_career_creation still return todo_state(...)"]
 fn test_garage_upgrade_and_truck_purchase_flow() {}
 
 #[test]
-#[ignore = "needs states::online_hub (the Discord row lives on the Online menu)"]
+#[ignore = "needs the main-menu hand-off wired: MainMenuState's Online item still pushes todo_state(\"OnlineHubState\")"]
 fn test_discord_presence_toggle_is_accessible_and_wired() {}
 
-#[test]
-#[ignore = "needs states::city"]
-fn test_upgrades_are_money_gated() {}
+// `test_upgrades_are_money_gated` is live in `crates/freight-fate/tests/states_city_shops.rs`.
+
+// `test_garage_services_tires_and_wash` is live in `crates/freight-fate/tests/states_city_shops.rs`.
+
+// `test_garage_services_brakes_and_engine` is live in `crates/freight-fate/tests/states_city_shops.rs`.
+
+// `test_garage_partial_brake_service_when_broke` is live in `crates/freight-fate/tests/states_city_shops.rs`.
+
+// `test_upgrade_f1_help_explains_player_benefits` is live in `crates/freight-fate/tests/states_city_shops.rs`.
 
 #[test]
-#[ignore = "needs states::city"]
-fn test_garage_services_tires_and_wash() {}
-
-#[test]
-#[ignore = "needs states::city"]
-fn test_garage_services_brakes_and_engine() {}
-
-#[test]
-#[ignore = "needs states::city"]
-fn test_garage_partial_brake_service_when_broke() {}
-
-#[test]
-#[ignore = "needs states::city"]
-fn test_upgrade_f1_help_explains_player_benefits() {}
-
-#[test]
-#[ignore = "needs states::driving"]
+#[ignore = "needs the main-menu hand-off wired: states::main_menu::world_entry_state / first_state_after_career_creation still return todo_state(...)"]
 fn test_pause_and_abandon_returns_to_city() {}
 
 #[test]
-#[ignore = "needs states::driving"]
+#[ignore = "needs the main-menu hand-off wired: states::main_menu::world_entry_state / first_state_after_career_creation still return todo_state(...)"]
 fn test_abandon_prompt_no_returns_to_pause_menu() {}

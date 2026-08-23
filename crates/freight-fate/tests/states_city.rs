@@ -147,7 +147,7 @@ fn test_single_candidate_assignment_offers_no_decline() {
 }
 
 #[test]
-#[ignore = "needs states::driving (the pickup drive the accept hands off to)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_accepting_assignment_starts_pickup_drive() {}
 
 #[test]
@@ -868,7 +868,7 @@ fn test_assigned_reposition_pays_reduced_rate_and_awards_mileage_xp() {
 }
 
 #[test]
-#[ignore = "needs states::driving (AbandonJobConfirmationState)"]
+#[ignore = "needs the city -> drive hand-off wired: states::city::launch_driving still pushes todo_state(\"Driving\") instead of DrivingState"]
 fn test_abandoning_assigned_reposition_costs_reputation_only() {}
 
 // -- tests/test_career_unlocks.py (board parts) ---------------------------------------

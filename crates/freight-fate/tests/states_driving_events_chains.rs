@@ -206,7 +206,6 @@ fn test_a_departure_chain_and_a_surface_chain_never_run_together() {
 // -- cases that wait on another driving mixin -----------------------------------------
 
 #[test]
-#[ignore = "needs states::driving_updates"]
 fn test_exit_missed_when_too_fast() {
     // `tests/test_driving_exits.py`: the gore refuses a truck carrying more
     // than road speed, and the exit is settled either way.
@@ -230,7 +229,12 @@ fn test_exit_missed_when_too_fast() {
     );
     let stop: RoadStop = d.trip.stops[0].clone();
     d.trip.position_mi = stop.at_mi - 1.0;
-    d.trip.truck.velocity_mps = 29.0; // ~65 mph: way too fast for the ramp
+    // Python used a flat 29 m/s (~65 mph) on the corridor a default new career
+    // starts on. The gore's acceptance is corridor-aware (posted limit plus
+    // the enforcement leeway), and this corridor is a fast one, so the speed
+    // is taken from the gate itself: comfortably over whatever it will accept.
+    let too_fast_mph = d.gore_acceptance_mph(Some(&stop)) + 10.0;
+    d.trip.truck.velocity_mps = too_fast_mph / 2.2369362920544;
     d.toggle_exit_signal(&mut app.ctx);
     assert_eq!(d.exit_stop.as_ref().map(|s| s.key()), Some(stop.key()));
     d.exit_lane_alignment = 1.0;
@@ -243,7 +247,6 @@ fn test_exit_missed_when_too_fast() {
 }
 
 #[test]
-#[ignore = "needs states::driving_updates"]
 fn test_taking_the_exit_puts_the_truck_on_the_ramp() {
     let mut app = TestApp::new();
     let world = get_world();
@@ -277,7 +280,6 @@ fn test_taking_the_exit_puts_the_truck_on_the_ramp() {
 }
 
 #[test]
-#[ignore = "needs states::driving_updates"]
 fn test_a_blown_destination_terminal_loops_back() {
     // `tests/test_destination_terminal_miss.py`: the terminal used to be the
     // one blown stop with no consequence at all (owner playtest, Buffalo to

@@ -11,7 +11,7 @@ use ff_core::settings::{lane_keeping_to_legacy, Settings};
 use crate::app::{active_log_path, GameContext, Say};
 use crate::impl_state_for_menu;
 use crate::states::base::{InputEvent, Key, Menu, MenuCore, MenuItem};
-use crate::states::main_menu::todo_state;
+use crate::states::online_hub::OnlineHubState;
 
 /// Top-level settings: a category picker that opens per-category submenus.
 ///
@@ -54,8 +54,8 @@ impl SettingsState {
     }
 
     fn open_online_hub(&mut self, ctx: &mut GameContext) {
-        // TODO(lead): wire `states::online_hub::OnlineHubState::new(ctx)`.
-        ctx.push_state(todo_state("OnlineHubState"));
+        let hub = OnlineHubState::new(ctx);
+        ctx.push_state(hub);
     }
 }
 

@@ -52,12 +52,20 @@ use ff_core::speech_pacing::SpeechCategory;
 use crate::app::GameContext;
 use crate::states::driving::DrivingState;
 
-/// Reach the drive again from a callback that only gets the context.
+/// Reach the drive again from a callback that only gets the context, when
+/// the drive is still ON the stack under the wait screen.
 ///
 /// Python's `TimedMessageState(on_complete=...)` closures captured `self`;
-/// a Rust `'static` callback cannot, so it finds the drive on the state stack
-/// instead. The drive is never the state being dispatched when one of these
-/// runs (the wait screen is), so the borrow always succeeds.
+/// a Rust `'static` callback cannot, so this finds the drive on the state
+/// stack instead. The drive is never the state being dispatched when one of
+/// these runs (the wait screen is), so the borrow always succeeds.
+///
+/// **Only for a wait screen that was PUSHED over the drive.** A wait screen
+/// that `replace_state`d the drive has taken it off the stack, and this
+/// search then finds nothing -- which is how the dock and check-in menus
+/// came to never open. Those sites capture
+/// [`crate::states::driving_menu_states::DriveRef::active`] before the
+/// replace and use the handle, exactly as Python's closure kept `self`.
 pub fn with_drive<R>(
     ctx: &mut GameContext,
     f: impl FnOnce(&mut DrivingState, &mut GameContext) -> R,

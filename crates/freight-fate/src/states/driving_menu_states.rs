@@ -95,16 +95,18 @@ impl DrivingState {
     /// `ctx.push_state(DrivingStatusState(ctx, self))`: Tab, and the pad's
     /// modifier plus Start.
     pub fn push_driving_status(&mut self, ctx: &mut GameContext) {
-        let mut state = DrivingStatusState::new(ctx);
-        state.enter_over_drive(ctx, self);
-        push_over_drive(ctx, state);
+        // Nothing this screen's entry reads lives on the drive, so it can
+        // go through the ordinary push even from inside the drive's handler.
+        let state = DrivingStatusState::new(ctx);
+        ctx.push_state(state);
     }
 
     /// `ctx.replace_state(ArrivalState(ctx, self))`.
     pub fn replace_with_arrival_state(&mut self, ctx: &mut GameContext) {
-        let mut state = ArrivalState::new(ctx, self);
-        state.enter_over_drive(ctx);
-        replace_drive_with(ctx, state);
+        // The settlement read everything it needs out of the drive in
+        // `new`, so its own entry needs nothing more.
+        let state = ArrivalState::new(ctx, self);
+        ctx.replace_state(state);
     }
 
     /// `ctx.replace_state(FacilityArrivalState(ctx, self))`.

@@ -541,9 +541,7 @@ fn test_write_apply_script_macos_swaps_whole_bundle() {
 
 // -- settings -----------------------------------------------------------------
 
-#[test]
-#[ignore = "needs the settings port: update_channel / skipped_update defaults and validation"]
-fn test_settings_default_and_validation() {}
+// `test_settings_default_and_validation` is live in `crates/ff-core/src/settings/tests.rs`.
 
 #[test]
 fn test_build_info_none_when_not_frozen() {
@@ -625,7 +623,7 @@ fn test_startup_update_prompt_respects_skipped_version() {
 }
 
 #[test]
-#[ignore = "needs states::city (CityMenuState._to_main_menu); MainMenuState::arm_update_check is ported"]
+#[ignore = "needs a seam for updater::is_frozen(): arm_update_check reads the real install layout, and a test binary is never a packaged build"]
 fn test_terminal_exit_arms_fresh_packaged_update_check() {}
 
 #[test]
@@ -645,11 +643,11 @@ fn test_terminal_exit_does_not_check_for_updates_from_source() {
 }
 
 #[test]
-#[ignore = "needs states::city_pickup (PickupFacilityState exit); MainMenuState::arm_update_check is ported"]
+#[ignore = "needs a seam for updater::is_frozen(): arm_update_check reads the real install layout, and a test binary is never a packaged build"]
 fn test_pickup_facility_exit_arms_fresh_packaged_update_check() {}
 
 #[test]
-#[ignore = "needs states::driving (PauseMenuState._quit_to_menu); MainMenuState::arm_update_check is ported"]
+#[ignore = "needs a seam for updater::is_frozen(): arm_update_check reads the real install layout, and a test binary is never a packaged build"]
 fn test_drive_exit_does_not_arm_fresh_update_check() {}
 
 #[test]

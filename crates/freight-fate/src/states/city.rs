@@ -48,6 +48,7 @@ use ff_core::pyrandom::PyRandom;
 
 use crate::app::{GameContext, Say};
 use crate::states::base::{InputEvent, Key, Menu, MenuItem, SimpleMenuState};
+use crate::states::driving::DrivingState;
 
 mod board;
 mod extras;
@@ -629,10 +630,9 @@ pub fn todo_state(name: &str) -> SimpleMenuState {
     )
 }
 
-// TODO(lead): DRIVE_PHASE_* belong in states::driving_core; replace these
-// with the real constants when that port lands.
-pub const DRIVE_PHASE_PICKUP: &str = "pickup";
-pub const DRIVE_PHASE_DELIVERY: &str = "delivery";
+// The real constants, re-exported so the city screens' existing imports
+// still resolve. They live with the drive that reads them.
+pub use crate::states::driving_core::{DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP};
 
 /// What a loaded departure carries onto the road (`start_loaded_drive`):
 /// the air-brake snapshot, the engine state, the speed-control session and
@@ -728,24 +728,55 @@ pub fn loaded_departure_line(
 /// Python, at every call site: build the `DrivingState`, restore what
 /// `resume` carries onto it, `profile.active_trip = driving.snapshot()`,
 /// `save_profile()`, speak the announcement with `interrupt=True`, push the
-/// state. Until the driving port lands this saves, speaks, and pushes a
-/// placeholder; the caller has already cleared `dispatch_board_cache`
-/// where the Python did.
-// TODO(lead): swap the body for `DrivingState::new(ctx, launch.job,
-// launch.route, launch.phase, launch.trip_seed, launch.start_hour)` plus the
-// resume/snapshot/say/push sequence above; nothing else in the city screens
-// needs to change.
+/// state. The caller has already cleared `dispatch_board_cache` where the
+/// Python did.
 pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
+    let DrivingLaunch {
+        job,
+        route,
+        trip_seed,
+        phase,
+        start_hour,
+        resume,
+        announcement,
+    } = launch;
+    // The line needs the route, and the drive takes it by value, so build
+    // what the summary reads before handing the route over.
+    let route_for_line = route.clone();
+    let mut driving = DrivingState::new(ctx, job, route, trip_seed, phase, start_hour);
+    if let Some(resume) = &resume {
+        // A trailer the driver refused at the shipper must not follow them
+        // onto the road: the scale house has to find the box they are
+        // actually pulling.
+        driving.trailer_refused = resume.trailer_refused;
+        driving.trip.truck.restore_air_brake_snapshot(
+            resume.air_brake.as_ref().unwrap_or(&Value::Null),
+            true,
+        );
+        if resume.engine_on {
+            driving.trip.truck.start_engine();
+        }
+        driving.restore_speed_control_session(
+            ctx,
+            resume.speed_control_armed,
+            resume.speed_control_target_mph,
+        );
+    }
+    let snapshot = driving.snapshot(ctx);
+    profile_mut(ctx).active_trip = Some(snapshot);
     ctx.save_profile();
-    let line = match launch.announcement {
+    let line = match announcement {
         LaunchAnnouncement::Line(line) => line,
         LaunchAnnouncement::LoadedDeparture { lead } => {
-            let engine_on = launch.resume.as_ref().is_some_and(|r| r.engine_on);
-            loaded_departure_line(ctx, &lead, &launch.route, engine_on, "")
+            let engine_on = resume.as_ref().is_some_and(|r| r.engine_on);
+            let next_context = driving
+                .trip
+                .next_navigation_context(ctx.settings.imperial_units);
+            loaded_departure_line(ctx, &lead, &route_for_line, engine_on, &next_context)
         }
     };
     ctx.say(&line);
-    ctx.push_state(todo_state("Driving"));
+    ctx.push_state(driving);
 }
 
 // -- menu plumbing --------------------------------------------------------------------

@@ -18,8 +18,11 @@ use ff_core::sim::vehicle::TruckState;
 
 use freight_fate::app::testing::{FakeClock, TestApp};
 use freight_fate::audio::{Audio, AudioError, SustainLoopSpec, VolumeUpdate, CH_SURGE};
+use freight_fate::states::base::TimedMessageState;
+use freight_fate::states::city_pickup::PickupFacilityState;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
+use freight_fate::states::driving_menu_states::FacilityArrivalState;
 use freight_fate::states::driving_facility_gate::GATE_MISS_LOOP_MIN;
 use freight_fate::states::driving_stops::{
     assist_full_decel_mps2, assist_servo_brake, bar_solid_zone_mi, bar_tick_range_mi,
@@ -54,6 +57,39 @@ fn a_drive(app: &mut TestApp) -> DrivingState {
         route,
         Some(0),
         DRIVE_PHASE_DELIVERY,
+        Some(12.0),
+    );
+    drive.trip.set_npc_vehicles(Vec::new());
+    drive
+}
+
+/// The same run as [`a_drive`], still deadheading to the shipper.
+fn a_pickup_drive(app: &mut TestApp) -> DrivingState {
+    let world = get_world();
+    let mut profile = Profile::named_in("Gates", "Buffalo");
+    profile.tutorial_done = true;
+    app.ctx.profile = Some(profile);
+    let route = world
+        .supported_route("Buffalo", "Rochester", None)
+        .expect("the world routes")
+        .expect("Buffalo to Rochester has a route");
+    let mut job = Job::new(
+        &CARGO_CATALOG["general"],
+        12.0,
+        "Buffalo",
+        "company yard",
+        "Rochester",
+        route.miles(),
+        1000.0,
+        12.0,
+    );
+    job.destination_location = "Rochester freight market".to_string();
+    let mut drive = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        Some(0),
+        DRIVE_PHASE_PICKUP,
         Some(12.0),
     );
     drive.trip.set_npc_vehicles(Vec::new());
@@ -1123,4 +1159,111 @@ fn test_the_servo_rises_at_once_and_releases_only_past_the_band() {
     assert!(assist_servo_brake(harder, real_fall, &truck) < harder);
     // And it never asks for more pedal than there is.
     assert_eq!(assist_servo_brake(0.0, 99.0, &truck), 1.0);
+}
+
+// -- the pull-in beat hands the dock menu the drive it belongs to ----------------------
+
+/// Step the state on top of the stack until its countdown ends
+/// (`PlaytestHarness::finish_timed_state`, without the harness).
+fn finish_timed_state(app: &mut TestApp) {
+    for _ in 0..10_000 {
+        let Some(state) = app.ctx.state() else { return };
+        let remaining = state
+            .borrow()
+            .as_any()
+            .downcast_ref::<TimedMessageState>()
+            .map(|timed| timed.remaining)
+            .unwrap_or(0.0);
+        if remaining <= 0.0 {
+            return;
+        }
+        state.borrow_mut().update(&mut app.ctx, 1.0 / 60.0);
+        app.ctx.run_deferred();
+    }
+    panic!("the pull-in beat never counted down");
+}
+
+/// The dock menu opens after the pull-in wait, and the drive is still alive.
+///
+/// The wait screen REPLACES the drive on the stack, so its completion has to
+/// carry a handle to the drive rather than go looking for one: when it
+/// looked, it found nothing and the game sat on "Pulling into destination"
+/// with no menu, forever.
+#[test]
+fn test_pull_in_beat_opens_the_dock_menu_over_the_live_drive() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app);
+    at_gate(&mut drive, 0.3, false);
+    app.push_state(drive);
+    let shared = app.state().expect("the drive is the active state");
+    app.clear_speech();
+
+    {
+        let mut borrowed = shared.borrow_mut();
+        let d = borrowed
+            .as_any_mut()
+            .downcast_mut::<DrivingState>()
+            .expect("the pushed state is the drive");
+        d.handle_arrival_gate(&mut app.ctx);
+        assert!(d.arrival_menu_open);
+    }
+    app.ctx.run_deferred();
+    // The wait screen took the drive's place, exactly as Python's did.
+    assert_eq!(app.ctx.stack_len(), 1);
+
+    finish_timed_state(&mut app);
+
+    let top = app.state().expect("a state is on the stack");
+    assert!(
+        top.borrow().as_any().is::<FacilityArrivalState>(),
+        "the pull-in beat did not open the dock menu; the screen still says {:?}",
+        app.visible_lines()
+    );
+    // The drive it covers is the one that pulled in, still live off the stack.
+    let mut borrowed = shared.borrow_mut();
+    let d = borrowed
+        .as_any_mut()
+        .downcast_mut::<DrivingState>()
+        .expect("the drive outlived the wait screen");
+    assert_eq!(d.status_text, "Parked at destination. Dock and deliver.");
+}
+
+/// The same hand-off on the pickup side: the check-in menu opens.
+#[test]
+fn test_pull_in_beat_opens_the_check_in_menu_over_the_live_drive() {
+    let mut app = TestApp::new();
+    let mut drive = a_pickup_drive(&mut app);
+    drive.trip.position_mi = drive.trip.total_miles();
+    drive.trip.finished = true;
+    drive.trip.truck.engine_on = true;
+    drive.trip.truck.velocity_mps = 0.0;
+    app.push_state(drive);
+    let shared = app.state().expect("the drive is the active state");
+    app.clear_speech();
+
+    {
+        let mut borrowed = shared.borrow_mut();
+        let d = borrowed
+            .as_any_mut()
+            .downcast_mut::<DrivingState>()
+            .expect("the pushed state is the drive");
+        d.handle_pickup_gate(&mut app.ctx);
+    }
+    app.ctx.run_deferred();
+    assert_eq!(app.ctx.stack_len(), 1);
+
+    finish_timed_state(&mut app);
+
+    let top = app.state().expect("a state is on the stack");
+    assert!(
+        top.borrow().as_any().is::<PickupFacilityState>(),
+        "the pull-in beat did not open the check-in menu; the screen still says {:?}",
+        app.visible_lines()
+    );
+    let mut borrowed = shared.borrow_mut();
+    let d = borrowed
+        .as_any_mut()
+        .downcast_mut::<DrivingState>()
+        .expect("the drive outlived the wait screen");
+    assert_eq!(d.status_text, "Parked at pickup. Check in and load.");
 }

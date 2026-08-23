@@ -441,9 +441,7 @@ fn test_a_key_the_player_pressed_is_never_silenced_by_the_rung() {
     app.shutdown();
 }
 
-#[test]
-#[ignore = "needs states::driving (the cruise dial)"]
-fn test_the_cruise_dial_answers_with_the_number_alone_at_quiet() {}
+// `test_the_cruise_dial_answers_with_the_number_alone_at_quiet` is live in `crates/ff-core/src/settings/tests.rs`.
 
 #[test]
 fn test_standard_says_a_coaching_tip_once_per_leg() {

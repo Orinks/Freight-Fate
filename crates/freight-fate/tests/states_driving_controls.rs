@@ -1365,13 +1365,7 @@ fn test_rolling_t_without_sleep_stop_gives_recovery_guidance() {}
 #[ignore = "needs states::driving_rest_states (the rest-stop menus)"]
 fn test_t_during_police_stop_names_the_trooper_action() {}
 
-#[test]
-#[ignore = "needs the short-block street-chain helper (states::driving_turns tests)"]
-fn test_the_planner_sees_past_the_corner_it_is_already_easing_for() {
-    // On a 420-foot block, `_keeper_speed_ahead` must report (20.0, "turn")
-    // for the first corner and then (15.0, "turn") for the service way behind
-    // it -- a held target is a floor, never a lid.
-}
+// `test_the_planner_sees_past_the_corner_it_is_already_easing_for` is live in `crates/freight-fate/tests/states_driving_turns.rs`.
 
 #[test]
 #[ignore = "needs states::driving_menu_states (the Tab status screens)"]

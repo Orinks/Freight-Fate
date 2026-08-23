@@ -11,33 +11,7 @@
 //! that keeps a drive coherent (a neutral answer, a no-op) and log once per
 //! process.
 
-use std::sync::Once;
-
-use crate::app::GameContext;
-use crate::states::driving::DrivingState;
-
-macro_rules! pending_once {
-    ($name:literal) => {{
-        static ONCE: Once = Once::new();
-        ONCE.call_once(|| log::warn!("driving_controls: {} is a pending stub", $name));
-    }};
-}
-
-// -- provided by driving_pause_states.rs / driving_menu_states.rs ------------------------
-//
-// The two screens the control surface pushes. Each becomes
-// `ctx.push_state(X::new(ctx, self))` once its module lands; the stub does
-// nothing so a drive keeps running headlessly.
-impl DrivingState {
-    /// `ctx.push_state(PauseMenuState(ctx, self))`: Escape, Start, and the
-    /// controller-disconnect pause.
-    pub fn push_pause_menu(&mut self, _ctx: &mut GameContext) {
-        pending_once!("push_pause_menu");
-    }
-
-    /// `ctx.push_state(DrivingStatusState(ctx, self))`: Tab, and the pad's
-    /// modifier plus Start.
-    pub fn push_driving_status(&mut self, _ctx: &mut GameContext) {
-        pending_once!("push_driving_status");
-    }
-}
+// Nothing is pending any more: the one block that stood here -- the pause
+// menu and the driving status screen -- has been deleted by the modules that
+// took it over, `states/driving_pause_states.rs` and
+// `states/driving_menu_states.rs`.

@@ -24,7 +24,12 @@ use crate::app::{share, version, GameContext, Say, SharedState};
 use crate::discord_presence::PresenceState;
 use crate::online_presence::IdentityStore;
 use crate::states::base::{Menu, MenuCore, MenuItem, SimpleMenuState};
+use crate::states::city::CityMenuState;
+use crate::states::city_pickup::PickupFacilityState;
+use crate::states::driving::DrivingState;
 use crate::states::learn_sounds::LearnSoundsState;
+use crate::states::online_hub::OnlineHubState;
+use crate::states::online_offer::OnlineOfferState;
 use crate::states::save_notice::{
     DrivingRecordNoticeState, SaveMigrationNoticeState, SaveModifiedNoticeState,
 };
@@ -235,14 +240,11 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
 /// The city menu, or the one-time orinks.net offer ahead of it.
 pub fn first_state_after_career_creation(ctx: &GameContext) -> SharedState {
     if should_offer_online(ctx) {
-        // TODO(lead): wire `states::online_offer::OnlineOfferState::new(ctx)`.
-        return share(todo_state("OnlineOfferState"));
+        return share(OnlineOfferState::default());
     }
     // The welcome is spoken just before this state is pushed, so its entry
     // announcement queues behind it rather than cutting it off.
-    // TODO(lead): wire `states::city::CityMenuState::new(ctx, true)`
-    // (`queue_entry_announcement=True`).
-    share(todo_state("CityMenuState"))
+    share(CityMenuState::new(ctx, true))
 }
 
 /// Resume a saved mid-trip delivery if there is one, else the terminal hub.
@@ -284,26 +286,30 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
             ctx.say(
                 "Local service drives were retired in this update; you are parked at the terminal.",
             );
-            // TODO(lead): wire `states::city::CityMenuState::new(ctx, true)`.
-            return share(todo_state("CityMenuState"));
+            return share(CityMenuState::new(ctx, true));
         }
-        if kind == "pickup" {
-            // TODO(lead): wire `states::city_pickup::PickupFacilityState::from_snapshot(ctx, snapshot)`;
-            // `None` (an unreadable snapshot) must clear `active_trip` and fall
-            // through to the city menu.
-            return share(todo_state("PickupFacilityState"));
+        let snapshot = ctx
+            .profile
+            .as_ref()
+            .and_then(|p| p.active_trip.clone())
+            .unwrap_or(serde_json::Value::Null);
+        let resumed: Option<SharedState> = if kind == "pickup" {
+            PickupFacilityState::from_snapshot(ctx, &snapshot).map(share)
+        } else {
+            DrivingState::from_snapshot(ctx, &snapshot).map(share)
+        };
+        if let Some(state) = resumed {
+            return state;
         }
-        // TODO(lead): wire `states::driving::DrivingState::from_snapshot(ctx, snapshot)`;
-        // `None` (an unreadable snapshot) must clear `active_trip` and fall
-        // through to the city menu.
-        return share(todo_state("DrivingState"));
+        // An unreadable snapshot: clear it rather than retry it on every load.
+        if let Some(p) = ctx.profile.as_mut() {
+            p.active_trip = None;
+        }
     }
     // The welcome that names this driver (from Continue or Choose career) is
     // spoken just before this state is chosen, so its entry announcement
     // queues behind that line instead of cutting it off.
-    // TODO(lead): wire `states::city::CityMenuState::new(ctx, queue_entry_announcement)`.
-    let _ = queue_entry_announcement;
-    share(todo_state("CityMenuState"))
+    share(CityMenuState::new(ctx, queue_entry_announcement))
 }
 
 // -- career summaries ---------------------------------------------------------------
@@ -682,8 +688,8 @@ impl Menu for MainMenuState {
         );
         items.push(
             MenuItem::new("Online", |_s: &mut Self, ctx| {
-                // TODO(lead): wire `states::online_hub::OnlineHubState::new(ctx)`.
-                ctx.push_state(todo_state("OnlineHubState"))
+                let hub = OnlineHubState::new(ctx);
+                ctx.push_state(hub)
             })
             .help(
                 "The public drivers board, your orinks.net account, \

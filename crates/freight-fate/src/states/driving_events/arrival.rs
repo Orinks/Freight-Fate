@@ -13,8 +13,7 @@ use crate::discord_presence::{driving_presence, PresenceState};
 use crate::states::base::TimedMessageState;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
-
-use super::with_drive;
+use crate::states::driving_menu_states::{replace_drive_with, DriveRef, FacilityArrivalState};
 
 impl DrivingState {
     /// `_handle_out_of_fuel()`.
@@ -292,16 +291,31 @@ impl DrivingState {
         self.set_status("Pulling into destination. Dock menu opening.");
 
         let facility = self.destination_facility_text(ctx);
+        // Python's `complete()` closed over `self`, so the drive stayed
+        // reachable even though `replace_state` had just taken it off the
+        // stack. A 'static callback cannot close over `&mut self`, so take
+        // the drive's own handle NOW, while it is still the active state,
+        // and carry that into the callback. Looking the drive up on the
+        // stack from inside the callback cannot work: the replace below is
+        // exactly what removed it, so the dock menu never opened and the
+        // game sat on "Pulling into destination" forever.
+        let drive = DriveRef::active(ctx);
         ctx.replace_state(
             TimedMessageState::new(
                 "Pulling into destination",
                 &format!("Pulling into {facility}. Brakes set; dock menu opening in a moment."),
                 "Pulling into the destination facility. Please wait.",
                 STOP_PULL_IN_WAIT_S,
-                |ctx: &mut GameContext| {
-                    with_drive(ctx, |drive, ctx| {
+                move |ctx: &mut GameContext| {
+                    let _ = &drive;
+                    super::with_drive(ctx, |drive, ctx| {
                         drive.set_status("Parked at destination. Dock and deliver.");
-                        drive.replace_with_facility_arrival_state(ctx);
+                        // `FacilityArrivalState(self.ctx, self)`: the drive
+                        // it covers is the one that pulled in, not whatever
+                        // the stack happens to be showing now.
+                        let mut state = FacilityArrivalState::with_drive(DriveRef::active(ctx));
+                        state.enter_over_drive(ctx, drive);
+                        replace_drive_with(ctx, state);
                     });
                 },
             )

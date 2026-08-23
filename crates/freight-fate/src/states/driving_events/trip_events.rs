@@ -873,7 +873,7 @@ impl DrivingState {
             format!(
                 "{}:{}:{}",
                 event.text(),
-                ff_core::pyfmt::round_py_n(self.trip.position_mi, 1),
+                ff_core::pyfmt::fmt_f(self.trip.position_mi, 1),
                 self.hos_fine_count
             )
         });
