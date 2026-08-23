@@ -451,3 +451,39 @@ fn test_fleet_tier_boundaries_are_named_in_the_ladder() {
             .contains("tractor"));
     }
 }
+
+/// Brandon, 2026-08-22: "it still does not tell me whats holding me back
+/// from driving the next level truck".
+///
+/// The hold was already explained -- at the dispatch hand-over, and at the
+/// level-up that arrived without a truck. Both are moments. A driver who
+/// wants to know where they stand goes to the career stats screen and asks,
+/// and that screen did not mention equipment at all, so the answer only ever
+/// reached a player who happened to be listening when it went by.
+#[test]
+fn test_the_stats_screen_answers_what_is_holding_the_next_truck_back() {
+    // Held back: what he is in, then why, then what gives it back.
+    let mut held = fleet_driver(11);
+    held.career.reputation = 0.0;
+    let lines = equipment_status_lines(&held);
+    assert_eq!(lines.len(), 2);
+    assert!(lines[0].starts_with("Truck: "));
+    assert!(lines[1].contains(eligible_fleet_tier(&held).label));
+    assert!(lines[1].contains("comes back to you"));
+
+    // In good standing there is nothing to explain, so the screen says what
+    // the next tier costs instead of nagging about a hold that is not there.
+    let fine = fleet_driver(11);
+    let lines = equipment_status_lines(&fine);
+    assert_eq!(lines.len(), 1);
+    let upcoming = next_fleet_tier(&fine).expect("level 11 has a tier still to earn");
+    assert!(lines[0].contains(&format!(
+        "Level {} earns the {}.",
+        upcoming.min_level, upcoming.label
+    )));
+
+    // And at the top of the ladder there is no next tier to name.
+    let top = fleet_driver(20);
+    assert!(next_fleet_tier(&top).is_none());
+    assert!(equipment_status_lines(&top)[0].contains("the carrier's best equipment"));
+}

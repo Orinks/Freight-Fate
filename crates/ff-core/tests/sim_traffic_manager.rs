@@ -7,10 +7,13 @@ use std::collections::HashSet;
 use ff_core::data::world_models::Route;
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::traffic_manager::{
-    BrakingZone, TrafficManager, TrafficVehicle, GOVERNED_CLASSES, GOVERNED_TRUCK_BAND_MPH,
+    climb_speed_mph, governed_band, BrakingZone, TrafficManager, TrafficVehicle,
+    CLIMB_MIN_GRADE_PCT, GOVERNED_BOX_TRUCK_BAND_MPH, GOVERNED_CLASSES, GOVERNED_TRUCK_BAND_MPH,
     MERGE_FREE_START_MI, MERGE_WINDOW_MI, NO_SPAWN_AHEAD_MI, NO_SPAWN_BEHIND_MI, SPAWN_CELL_MI,
 };
+use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::{hourly_volume_fraction, DIRECTIONAL_SPLIT};
+use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::{effects, WeatherKind};
 use sim_support::*;
 
@@ -819,4 +822,144 @@ fn test_a_semi_out_there_is_governed_like_a_real_one() {
     let hi = governed.iter().cloned().fold(f64::MIN, f64::max);
     assert!(lo >= GOVERNED_TRUCK_BAND_MPH.0);
     assert!(hi - lo > 2.0);
+}
+
+#[test]
+fn test_a_box_truck_is_not_governed_like_a_tractor_trailer() {
+    // Brandon, 2026-08-22: "I'm in the left lane and have been for quite a
+    // while and this box truck is still in the right lane and has not
+    // cleared."
+    //
+    // Box trucks were drawn from the semi band, which is a provenance fault
+    // as much as a gameplay one: ATRI surveys for-hire fleets running class 8
+    // tractors, and a straight truck is not one. On a 65 road that put the box
+    // truck within about a mile an hour of a player running the limit, so the
+    // overtake never finished -- the driver moved left and simply stayed level
+    // with it.
+    assert_eq!(
+        governed_band("box truck"),
+        Some(GOVERNED_BOX_TRUCK_BAND_MPH)
+    );
+    assert_eq!(governed_band("semi"), Some(GOVERNED_TRUCK_BAND_MPH));
+    // The whole point: a box truck's limiter sits below a tractor's.
+    assert!(GOVERNED_BOX_TRUCK_BAND_MPH.1 < GOVERNED_TRUCK_BAND_MPH.1);
+
+    let mut rng = PyRandom::new_from_i64(23);
+
+    // On the road the report came from, a player holding the posted limit
+    // gets past a typical box truck instead of pacing it.
+    let limit = 65.0;
+    let speeds: Vec<f64> = (0..400)
+        .map(|_| TrafficManager::intent_speed("cruising", limit, &mut rng, "box truck"))
+        .collect();
+    let mean = speeds.iter().sum::<f64>() / speeds.len() as f64;
+    assert!(mean < limit - 3.0, "mean {mean}");
+    let passable =
+        speeds.iter().filter(|s| **s <= limit - 3.0).count() as f64 / speeds.len() as f64;
+    assert!(
+        passable > 0.5,
+        "only {:.0}% of box trucks are passable at the limit",
+        passable * 100.0
+    );
+
+    // Still a band, not one number, and still a governor: never above its top.
+    let hi = speeds.iter().cloned().fold(f64::MIN, f64::max);
+    let lo = speeds.iter().cloned().fold(f64::MAX, f64::min);
+    assert!(hi <= GOVERNED_BOX_TRUCK_BAND_MPH.1);
+    assert!(hi - lo > 2.0);
+
+    // And the semi is untouched -- its band is sourced separately and this
+    // change is not an excuse to move it.
+    let semis: Vec<f64> = (0..200)
+        .map(|_| TrafficManager::intent_speed("cruising", 80.0, &mut rng, "semi"))
+        .collect();
+    assert!(semis.iter().cloned().fold(f64::MAX, f64::min) >= GOVERNED_TRUCK_BAND_MPH.0);
+    assert!(semis.iter().cloned().fold(f64::MIN, f64::max) <= GOVERNED_TRUCK_BAND_MPH.1);
+}
+
+#[test]
+fn test_heavy_trucks_lose_the_hill_and_string_out_on_it() {
+    // What actually lets a driver past a truck is the terrain.
+    //
+    // A limiter is a ceiling, so on the flat every governed truck sits on its
+    // ceiling and nothing overtakes anything -- the elephant race, and what
+    // Brandon met behind a box truck. On a climb the ceiling stops deciding: a
+    // loaded tractor has a fixed amount of power to spend lifting 80,000
+    // pounds, so it falls to whatever that buys and the lighter trucks climb
+    // past it. Modelled from the same physics as the player's own truck rather
+    // than a fitted table, and checked against what a driver would expect to
+    // see on a mountain grade.
+
+    // Flat and downhill: the hill has nothing to say, the limiter rules.
+    assert_eq!(climb_speed_mph("semi", 0.0), f64::INFINITY);
+    assert_eq!(climb_speed_mph("semi", -6.0), f64::INFINITY);
+    assert_eq!(
+        climb_speed_mph("semi", CLIMB_MIN_GRADE_PCT - 0.1),
+        f64::INFINITY
+    );
+    // A car is not modelled here at all; it climbs as it likes.
+    assert_eq!(climb_speed_mph("car", 6.0), f64::INFINITY);
+
+    // The number a driver would recognise: a loaded semi on a sustained six
+    // percent crawls in the twenties-to-thirties, not at highway speed.
+    let six = climb_speed_mph("semi", 6.0);
+    assert!(20.0 < six && six < 35.0, "{six}");
+
+    // Steeper is always slower, and never negative or absurd.
+    let by_grade: Vec<f64> = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+        .into_iter()
+        .map(|g| climb_speed_mph("semi", g))
+        .collect();
+    let mut descending = by_grade.clone();
+    descending.sort_by(|a, b| b.partial_cmp(a).unwrap());
+    assert_eq!(by_grade, descending);
+    assert!(by_grade.iter().all(|speed| 5.0 < *speed && *speed < 80.0));
+
+    // And weight is what separates them: the light straight truck climbs the
+    // same hill faster than the loaded tractor, which is the overtake.
+    for grade in [2.0, 4.0, 6.0] {
+        assert!(climb_speed_mph("box truck", grade) > climb_speed_mph("semi", grade) + 5.0);
+    }
+}
+
+#[test]
+fn test_npc_trucks_actually_slow_down_on_a_real_climb() {
+    // The model reaches the road: a mountain leg really does hold trucks
+    // below their limiter, and a flat one really does not.
+    let Some(route) = world()
+        .supported_route("Denver", "Grand Junction", None)
+        .expect("route lookup")
+    else {
+        // Python skips here; route data is pinned elsewhere.
+        return;
+    };
+    let trip = Trip::new(
+        route,
+        TruckState::default(),
+        weather("rockies", 3),
+        TripOptions {
+            seed: Some(3),
+            world: Some(world()),
+            ..Default::default()
+        },
+    );
+    let manager = &trip.traffic_manager;
+
+    let grades: Vec<f64> = (0..trip.total_miles() as i64)
+        .step_by(3)
+        .map(|mile| manager.grade_pct_at(mile as f64))
+        .collect();
+    let climbing: Vec<f64> = grades.iter().copied().filter(|g| *g >= 1.0).collect();
+    assert!(
+        !climbing.is_empty(),
+        "I-70 west of Denver has to climb somewhere"
+    );
+    // Signed: the same road read the other way descends.
+    assert!(grades.iter().any(|g| *g <= -1.0));
+
+    let steepest = climbing.iter().cloned().fold(f64::MIN, f64::max);
+    assert!(
+        climb_speed_mph("semi", steepest) < GOVERNED_TRUCK_BAND_MPH.0,
+        "a truck on the steepest part of this route must be held below its limiter"
+    );
 }

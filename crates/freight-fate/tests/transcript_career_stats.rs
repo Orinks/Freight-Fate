@@ -31,6 +31,15 @@ fn test_career_stats_is_a_reviewable_menu_with_rest_status() {
     // A level 1 driver holds nothing; the line still exists so the screen
     // always answers "what am I cleared to haul?"
     assert!(rows.iter().any(|l| l == "Endorsements: none yet"));
+    // Brandon, 2026-08-22: the hold spoke at the dispatch hand-over and at a
+    // level-up that brought no truck, and nowhere the player could go and
+    // ASK. A driver in good standing hears what earns the next fleet instead
+    // of a hold that is not there (`equipment_status_lines`).
+    assert!(
+        rows.iter()
+            .any(|l| l.starts_with("Truck: ") && l.contains("Level 4 earns the regional fleet.")),
+        "{rows:?}"
+    );
     assert!(rows
         .iter()
         .any(|l| l == "Deliveries: 4, 75 percent on time"));

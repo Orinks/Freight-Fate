@@ -748,8 +748,13 @@ fn test_route_curves_mirror_reverse_legs() {
 
 #[test]
 fn test_severity_ladder() {
-    assert_eq!(curve_severity(20, 60.0), "hairpin");
-    assert_eq!(curve_severity(45, 170.0), "hairpin");
+    // A hairpin is a shape, not a speed: it comes back on itself (135 degrees,
+    // MUTCD's Hairpin Curve sign) AND has to be crawled (a Turn sign, 30 or
+    // less). Either alone is some other kind of bend -- see
+    // test_a_hairpin_is_a_shape_not_a_speed in ff-core's curves module.
+    assert_eq!(curve_severity(20, 170.0), "hairpin");
+    assert_eq!(curve_severity(20, 60.0), "sharp");
+    assert_eq!(curve_severity(45, 170.0), "moderate");
     assert_eq!(curve_severity(30, 60.0), "sharp");
     assert_eq!(curve_severity(45, 60.0), "moderate");
     assert_eq!(curve_severity(65, 60.0), "gentle");
@@ -1051,6 +1056,65 @@ fn test_a_curve_call_carries_its_own_expiry() {
     }
     // No curve at all leaves the rescue ungated, exactly as before.
     assert_eq!(d.curve_call_still_true(None), None);
+}
+
+#[test]
+fn test_curve_assist_holds_the_tightest_speed_in_a_linked_chain() {
+    // Darren, 2026-08-23, load damaged 12 percent on NY-12.
+    //
+    // His log has the words and the machine disagreeing:
+    //
+    //     Curve left, a quarter mile. Advise 40 miles per hour. Then sharp
+    //     left, advise 30 miles per hour. Adaptive cruise easing to 40 miles
+    //     per hour for the bend.
+    //     ...
+    //     Sharp left: too fast, drifting to the outside.
+    //     The load has shifted hard and is damaged, 12 percent.
+    //
+    // The tail is the follower's ONLY call -- the trip suppresses its own so a
+    // chain speaks once -- so easing to the first bend's 40 and releasing the
+    // cap at the first bend's end carried the truck into a 30 mph bend at 40
+    // with nothing left to warn it. The spoken line named 30 the whole way.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.curve_speed_assist = true;
+    let pos = d.trip.position_mi;
+    let lead = a_curve(pos + 0.3, 'L', 40, 307, 60.0);
+    // Close enough behind to ride the tail rather than earn its own call.
+    let follower = a_curve(lead.end_mi + 0.1, 'L', 30, 307, 60.0);
+
+    d.cruise_mph = Some(60.0);
+    let spoken = spoken_pacenotes(&mut app, &mut d, vec![lead, follower], 60.0);
+
+    assert!(!spoken.is_empty(), "a 40 mph bend at 60 demands a call");
+    assert!(
+        spoken[0].contains("Then"),
+        "the follower rides the tail, so it has no call of its own"
+    );
+
+    // The cap is the chain's tightest number, not the first bend's...
+    assert_eq!(d.cruise_curve_mph, Some(30.0));
+    // ...and it holds until the FOLLOWER is behind, not the lead.
+    assert!(d.cruise_curve_end_mi.expect("a cap was set") >= follower.end_mi);
+}
+
+#[test]
+fn test_a_lone_curve_still_holds_only_its_own_speed() {
+    // The chain rule must not make every bend the slowest bend nearby.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.curve_speed_assist = true;
+    let pos = d.trip.position_mi;
+    let alone = a_curve(pos + 0.3, 'R', 40, 307, 60.0);
+    d.cruise_mph = Some(60.0);
+
+    spoken_pacenotes(&mut app, &mut d, vec![alone], 60.0);
+
+    assert_eq!(d.cruise_curve_mph, Some(40.0));
+    assert_eq!(
+        d.cruise_curve_end_mi,
+        Some(alone.start_mi.max(alone.end_mi))
+    );
 }
 
 // -- the place keys (tests/test_driving_place_keys.py) --------------------------------

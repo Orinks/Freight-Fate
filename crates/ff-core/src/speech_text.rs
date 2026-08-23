@@ -493,9 +493,27 @@ const CHATTER_LEAD_INS: [&str; 9] = [
 // And the one that trails instead of leads ("Cullman County Museum ahead").
 const CHATTER_TAIL: &str = " ahead";
 // Past this, a first sentence is prose rather than a label, and its opening
-// clause carries the name and the fact on its own: the heritage markers and
-// the placed billboard signs run to several lines of history.
+// clause carries the name and the fact on its own: the heritage markers run to
+// several lines of history.
 const CHATTER_CLAUSE_MAX: usize = 60;
+
+// Billboards are never cut. Every other chatter category is a LABEL plus
+// framing -- "Entering Hot Springs National Park" carries the same information
+// as "Hot Springs National Park", so terse loses nothing by dropping the
+// frame. A billboard is not a label. It is the sign's own words, and its
+// payload is usually the last sentence: "Meteor Crater is ahead, a hole in the
+// desert nearly a mile wide. It is bigger than it sounds. Much bigger." cut to
+// its first clause is the setup without the punchline. The function already
+// spared short gags for this reason; the placed signs run long and were cut
+// anyway (Brandon, 2026-08-22, asking for the billboards and the signs he
+// passes to read in full at quiet).
+//
+// Terse has a control for these already, and it is the right one: billboards
+// are the one chatter category with a dedicated on-off switch, so a player who
+// finds them wordy turns them off rather than hearing half of each. Both keys
+// ride `chatter_billboards` in `CHATTER_CATEGORY_FIELDS`, which
+// `test_every_billboard_category_is_spared_the_cut` pins.
+pub const UNCUT_CHATTER_CATEGORIES: [&str; 2] = ["billboard", "billboard_sign"];
 
 /// The first sentence of `text`: everything before the first `[.!?]\s+`
 /// that does not follow a capital letter (the Python
@@ -528,14 +546,20 @@ fn first_sentence(text: &str) -> &str {
 /// where that first sentence is prose long enough to have run past the fact
 /// -- its opening clause alone.
 ///
+/// Billboards are the exception and are never cut; see
+/// `UNCUT_CHATTER_CATEGORIES` for why a sign is not a label.
+///
 /// Villages do not come through here. Town names answer to the
 /// place-callouts ladder, not to the chatter switches (see
 /// `CHATTER_CATEGORY_FIELDS`), and are already the bare "Passing X".
-///
-/// `category` is carried for call-site symmetry with the Python and is not
-/// consulted.
-pub fn roadside_chatter(spoken: &str, _category: &str) -> SpokenMessage {
+pub fn roadside_chatter(spoken: &str, category: &str) -> SpokenMessage {
     let normal = spoken.trim().to_string();
+    if UNCUT_CHATTER_CATEGORIES.contains(&category) {
+        // Whole, framing included: "Billboard:" is what tells a driver the
+        // line is a sign they passed rather than the co-driver talking, and
+        // a joke needs to be known as one to land.
+        return SpokenMessage::new(normal);
+    }
     let mut terse: &str = &normal;
     for lead in CHATTER_LEAD_INS {
         if let Some(rest) = terse.strip_prefix(lead) {
@@ -1007,8 +1031,9 @@ mod tests {
                  where every Army helicopter pilot learns to fly.",
                 "Ozark beside Fort Novosel.",
             ),
-            // A billboard is its gag, with the framing dropped -- and a
-            // two-beat gag keeps its punchline.
+            // The lead-in stripping itself, on a billboard-shaped line. Real
+            // billboards come through under their own category and are never
+            // cut at all -- see `test_a_billboard_is_never_cut_down`.
             ("Billboard: Free ice water.", "Free ice water."),
             ("Billboard: Eat here. Get gas.", "Eat here. Get gas."),
         ];
@@ -1035,6 +1060,59 @@ mod tests {
             long.render(true),
             "a long stretch of road with nothing whatsoever to say about it at all here."
         );
+    }
+
+    /// Brandon, 2026-08-22: the billboards and the signs you pass should read
+    /// in full at quiet.
+    ///
+    /// Every other chatter category is a label wrapped in framing, so terse
+    /// drops the framing and loses nothing. A billboard is the sign's own
+    /// words, and the payload is usually the last sentence -- cutting it to
+    /// the opening clause leaves the setup without the punchline. Both
+    /// billboard categories keep the whole line, framing included, at every
+    /// rung.
+    #[test]
+    fn test_a_billboard_is_never_cut_down() {
+        let signs = [
+            "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile \
+             wide that was punched out by a rock from space. It is bigger than it \
+             sounds. Much bigger.",
+            "Billboard: Idaho panhandle country. Colby Acuff and the Western White \
+             Pines both grew up here.",
+        ];
+        for category in UNCUT_CHATTER_CATEGORIES {
+            for spoken in signs {
+                let message = roadside_chatter(spoken, category);
+                assert_eq!(message.normal, spoken);
+                assert_eq!(
+                    message.render(true),
+                    spoken,
+                    "{category} lost its punchline"
+                );
+            }
+        }
+
+        // A label still shortens, so this spares the gags without undoing terse.
+        let label = roadside_chatter("Entering Hot Springs National Park.", "national_park");
+        assert_eq!(label.render(true), "Hot Springs National Park.");
+    }
+
+    /// The spared set and the switch must name the same categories.
+    ///
+    /// A new billboard bake category that rode the billboards switch but
+    /// missed the spared set would be silently cut back down, which is the
+    /// bug this fixed arriving again under a different key.
+    #[test]
+    fn test_every_billboard_category_is_spared_the_cut() {
+        let mut on_the_switch: Vec<&str> = crate::settings::CHATTER_CATEGORY_FIELDS
+            .iter()
+            .filter(|(_, field)| *field == "chatter_billboards")
+            .map(|(category, _)| *category)
+            .collect();
+        on_the_switch.sort_unstable();
+        let mut spared = UNCUT_CHATTER_CATEGORIES.to_vec();
+        spared.sort_unstable();
+        assert_eq!(on_the_switch, spared);
     }
 
     // -- from the ladder file --------------------------------------------------

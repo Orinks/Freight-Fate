@@ -2,6 +2,7 @@
 //! (port of `freight_fate/states/career_stats.py`).
 
 use ff_core::models::career::xp_to_next_level;
+use ff_core::models::carrier_fleet::equipment_status_lines;
 use ff_core::models::enforcement;
 use ff_core::models::jobs::endorsement_label;
 use ff_core::models::profile::Profile;
@@ -83,8 +84,13 @@ impl CareerStatsState {
             enforcement::dispatch_trust_line(p),
             enforcement::career_menu_status(p),
             enforcement::standing_text(p),
-            format!("Balance: {} dollars", fmt_grouped(p.money, 0)),
         ];
+        // What the driver is actually in, and what stands between them and
+        // the next tier. The hold was spoken at the dispatch hand-over and at
+        // the level-up that brought no truck, and nowhere a player could go
+        // and ASK -- which is what this screen is for (Brandon, 2026-08-22).
+        lines.extend(equipment_status_lines(p));
+        lines.push(format!("Balance: {} dollars", fmt_grouped(p.money, 0)));
         if !owed.is_empty() {
             lines.push(owed);
         }

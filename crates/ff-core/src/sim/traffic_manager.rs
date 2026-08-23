@@ -21,6 +21,7 @@ use crate::sim::trip_models::{
     corridor_speed_limit, hourly_volume_fraction, leg_aadt_at, leg_speed_limit_at, TrafficContext,
     DIRECTIONAL_SPLIT, RUSH_HOUR_WINDOWS, TRAFFIC_LOOKAHEAD_MI,
 };
+use crate::sim::vehicle::{AIR_DENSITY, G as GRAVITY_MPS2, MPS_TO_MPH};
 use crate::sim::weather::{effects, WeatherEffects, WeatherKind};
 use crate::speech_text::{brake_lights_cue, merging_traffic_cue, slow_lead_cue};
 
@@ -71,7 +72,116 @@ pub const TRAFFIC_MIN_SPEED_MPH: f64 = 15.0;
 /// fleets run limiters, most commonly at 65). 65 is the MODE, not the only
 /// setting, so each truck carries its own governor drawn from a band.
 pub const GOVERNED_TRUCK_BAND_MPH: (f64, f64) = (62.0, 68.0);
+/// A box truck is not a tractor-trailer, and drawing it from the band above was
+/// reusing a reading about one class of vehicle for another. ATRI surveys
+/// for-hire fleets running class 8 tractors; a straight truck is a different
+/// machine on a different job, and FMCSA's limiter rulemaking reaches CMVs over
+/// 26,000 pounds, which is class 7 and up rather than the class 5 and 6 units
+/// most box trucks are. The checkable numbers for these are published rental
+/// and vocational governors: U-Haul states a 55 mph maximum for its trucks,
+/// Penske governs its rental fleet at 65. So the band is those two, which puts
+/// a typical box truck BELOW a typical semi rather than level with one.
+///
+/// The behaviour that motivated looking: a box truck drawn at semi speed sat
+/// in the right lane pacing the player exactly, so a driver who moved left to
+/// get around one never got around it -- "I'm in the left lane and have been
+/// for quite a while and this box truck is still in the right lane and has not
+/// cleared" (Brandon, 2026-08-22). The band is not tuned to make the pass feel
+/// good; it is what the published governors say, and the pass follows from it.
+pub const GOVERNED_BOX_TRUCK_BAND_MPH: (f64, f64) = (55.0, 65.0);
+/// Which classes are governed, and out of which band. A service vehicle is a
+/// pickup or a van and is not governed at all, whatever it is towing.
+pub const GOVERNED_BANDS: [(&str, (f64, f64)); 2] = [
+    ("semi", GOVERNED_TRUCK_BAND_MPH),
+    ("box truck", GOVERNED_BOX_TRUCK_BAND_MPH),
+];
+/// `tuple(GOVERNED_BANDS)`: the governed classes in the mapping's own order.
 pub const GOVERNED_CLASSES: [&str; 2] = ["semi", "box truck"];
+
+/// `GOVERNED_BANDS.get(vehicle_class)`.
+pub fn governed_band(vehicle_class: &str) -> Option<(f64, f64)> {
+    GOVERNED_BANDS
+        .iter()
+        .find(|(class, _)| *class == vehicle_class)
+        .map(|(_, band)| *band)
+}
+
+// What actually separates trucks on a real interstate is the hills. A limiter
+// is a ceiling, and on the flat every governed truck sits on its ceiling, so
+// nothing overtakes anything -- the elephant race drivers complain about, and
+// what Brandon met. On a grade the ceiling stops mattering: a loaded tractor
+// has a fixed amount of power to spend on lifting 80,000 pounds, and its speed
+// falls to whatever that buys. Trucks then string out by weight and power, and
+// the light ones climb past the heavy ones. Modelling the limiter without
+// modelling the hill leaves the road permanently flat-feeling even in the
+// mountains, which is the realism gap under the complaint rather than the
+// band being a few miles per hour off.
+//
+// Derived, not tabulated: the balance point where a truck's wheel power equals
+// what drag, rolling resistance and the grade are taking from it, using the
+// SAME physics and the same constants as the player's own truck
+// (`vehicle::resistance_force` -- air density, Cd times frontal area, and a
+// 0.0065 rolling coefficient). Weight and power are the class's real numbers:
+// 80,000 lb at 450 hp for a loaded class 8, 26,000 lb at 300 hp for a class 6
+// straight truck, both through 85 percent driveline efficiency.
+//
+// It lands where the road says it should -- a loaded semi at about 26 mph on a
+// sustained 6 percent, in the 25-to-35 band a driver would expect, and 44 on a
+// 3 percent -- which is the check on the model rather than a target it was
+// fitted to.
+pub const CLIMB_MODEL: [(&str, (f64, f64)); 2] = [
+    // class: (gross kg, wheel kilowatts)
+    ("semi", (36_287.0, 450.0 * 0.7457 * 0.85)),
+    ("box truck", (11_793.0, 300.0 * 0.7457 * 0.85)),
+];
+/// The player truck's own aero and rolling numbers (`TruckSpecs` defaults).
+pub const CLIMB_DRAG_CD: f64 = 0.65;
+pub const CLIMB_FRONTAL_AREA_M2: f64 = 10.0;
+pub const CLIMB_ROLLING: f64 = 0.0065;
+/// Below this the hill is not what is holding the truck back -- the limiter is.
+pub const CLIMB_MIN_GRADE_PCT: f64 = 0.5;
+
+/// Steady climbing speed for a heavy class on a sustained grade.
+///
+/// The speed at which the class's wheel power exactly covers drag, rolling
+/// resistance and the climb. Downgrades and the flat return a number well
+/// above any limiter, so the caller's `min` leaves the governor in charge
+/// and only a real hill ever binds.
+///
+/// (Python memoises this with `lru_cache`; the bisection is sixty float
+/// iterations, so the Rust side simply recomputes it.)
+pub fn climb_speed_mph(vehicle_class: &str, grade_pct: f64) -> f64 {
+    let model = CLIMB_MODEL
+        .iter()
+        .find(|(class, _)| *class == vehicle_class)
+        .map(|(_, model)| *model);
+    let Some((mass_kg, power_kw)) = model.filter(|_| grade_pct >= CLIMB_MIN_GRADE_PCT) else {
+        return f64::INFINITY;
+    };
+    let power_w = power_kw * 1000.0;
+    let grade = grade_pct / 100.0;
+
+    // Watts to hold `v` metres per second against drag, rolling and the
+    // climb -- the same three terms as `vehicle::resistance_force`.
+    let power_needed_at = |v: f64| -> f64 {
+        let force = 0.5 * AIR_DENSITY * CLIMB_DRAG_CD * CLIMB_FRONTAL_AREA_M2 * v * v
+            + mass_kg * GRAVITY_MPS2 * CLIMB_ROLLING
+            + mass_kg * GRAVITY_MPS2 * grade.atan().sin();
+        force * v
+    };
+
+    let (mut low, mut high) = (0.5, 45.0); // m/s; bisection, monotonic in v
+    for _ in 0..60 {
+        let mid = (low + high) / 2.0;
+        if power_needed_at(mid) > power_w {
+            high = mid;
+        } else {
+            low = mid;
+        }
+    }
+    low * MPS_TO_MPH
+}
+
 /// Used only where the route cannot answer for a mile at all.
 pub const DEFAULT_LIMIT_MPH: f64 = 65.0;
 
@@ -590,13 +700,57 @@ impl TrafficManager {
         corridor_speed_limit(&leg.highway, "")
     }
 
+    /// Signed grade at a route mile, positive uphill in the direction of
+    /// travel. Mirrors `Trip::grade_at`: a leg driven from b to a reads its
+    /// baked segments from the far end and climbs what the other way
+    /// descends. Zero where the bake has nothing to say, so an unsurveyed
+    /// stretch simply leaves the limiter in charge.
+    pub fn grade_pct_at(&self, mile: f64) -> f64 {
+        let mut found: Option<(&Leg, f64, bool)> = None;
+        for (index, (start, leg)) in self
+            .leg_starts
+            .iter()
+            .zip(self.route.legs.iter())
+            .enumerate()
+        {
+            if mile + 1e-9 < *start {
+                break;
+            }
+            let offset = (mile - start).clamp(0.0, leg.miles.max(0.0));
+            let forward = self.route.cities.get(index).is_some_and(|c| *c == leg.a);
+            found = Some((
+                leg,
+                if forward { offset } else { leg.miles - offset },
+                forward,
+            ));
+        }
+        let Some((leg, sample_offset, forward)) = found else {
+            return 0.0;
+        };
+        for segment in leg.grade_segments() {
+            if segment.start_mi <= sample_offset && sample_offset <= segment.end_mi {
+                return if forward {
+                    segment.avg_grade_pct
+                } else {
+                    -segment.avg_grade_pct
+                };
+            }
+        }
+        0.0
+    }
+
     /// The slowest a moving vehicle gets here from speed draws alone.
     pub fn floor_speed(&self, limit_mph: f64) -> f64 {
         TRAFFIC_MIN_SPEED_MPH.max(limit_mph * TRAFFIC_MIN_SPEED_SHARE)
     }
 
-    /// A speed for this intent on a road posted at `limit_mph`. A governed
-    /// class never comes out above its limiter, whatever the intent.
+    /// A speed for this intent on a road posted at `limit_mph`.
+    ///
+    /// A governed class never comes out above its limiter, whatever the
+    /// posting and whatever the intent -- a "passing" semi passes by using
+    /// the whole of its governor, not by exceeding it. Each governed class
+    /// draws from its OWN band: a box truck is not a class 8 tractor and
+    /// must not inherit the tractor's limiter.
     pub fn intent_speed(
         intent: &str,
         limit_mph: f64,
@@ -605,9 +759,8 @@ impl TrafficManager {
     ) -> f64 {
         let (low, high) = traffic_speed_offsets_mph(intent);
         let speed = limit_mph + rng.uniform(low, high);
-        if GOVERNED_CLASSES.contains(&vehicle_class) {
-            let governor = rng.uniform(GOVERNED_TRUCK_BAND_MPH.0, GOVERNED_TRUCK_BAND_MPH.1);
-            return speed.min(governor);
+        if let Some(band) = governed_band(vehicle_class) {
+            return speed.min(rng.uniform(band.0, band.1));
         }
         speed
     }
@@ -761,7 +914,23 @@ impl TrafficManager {
                     vehicle.target_speed_mph = cruise.min(vehicle.target_speed_mph + 4.0 * dt);
                 }
             }
-            let delta = vehicle.target_speed_mph - vehicle.speed_mph;
+            // The hill has the last word. A limiter is a ceiling the truck
+            // sits on when the road lets it; a climb takes the choice away,
+            // and this is what strings heavy traffic out into something a
+            // driver can pass instead of a wall all doing the same speed.
+            // Python reads the class through `getattr(..., "")` for the
+            // reason the exit mile below already gives: the harness and the
+            // trip's own NPCVehicle share this runtime surface without
+            // carrying the dataclass. Here they arrive through
+            // `From<NPCVehicle>` carrying the class `"vehicle"`, which is
+            // just as unmodelled -- and an unknown class is not
+            // climb-modelled, which is what a car is.
+            let climb = climb_speed_mph(
+                &vehicle.vehicle_class,
+                self.grade_pct_at(vehicle.position_mi),
+            );
+            let target = vehicle.target_speed_mph.min(climb);
+            let delta = target - vehicle.speed_mph;
             vehicle.speed_mph += (-6.0 * dt).max((4.0 * dt).min(delta));
             vehicle.position_mi += vehicle.speed_mph.max(0.0) * game_hours;
             if vehicle

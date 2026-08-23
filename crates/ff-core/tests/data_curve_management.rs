@@ -26,8 +26,11 @@ fn is_interstate(leg: &Leg) -> bool {
     leg.highway.to_uppercase().starts_with("I-")
 }
 
-/// Same test `RouteCurve::severity` uses, for the plain `CurveRecord`
-/// rows `leg_curves` returns.
+/// The artifact screen's question -- "could a road here really do this?" --
+/// which is broader than the spoken hairpin and deliberately so: a very low
+/// advisory is an extreme claim about the ground whether or not the road comes
+/// back on itself. `RouteCurve::severity` uses shape alone, per MUTCD; see
+/// `curves::HAIRPIN_DEFLECTION_DEG`.
 fn is_hairpin(rec: &CurveRecord) -> bool {
     rec.advisory_mph <= HAIRPIN_MAX_MPH || rec.deflection_deg >= HAIRPIN_DEFLECTION_DEG
 }
@@ -203,13 +206,51 @@ fn test_million_dollar_highway_switchbacks_survive() {
 
 #[test]
 fn test_glenwood_canyon_interstate_curves_survive() {
-    // Real I-70 canyon geometry sits above the floor and must stay.
-    let recs = leg_curves("glenwood_springs_co_us:grand_junction_co_us", true);
-    assert!(recs.len() >= 55);
-    assert!(
-        recs.iter().map(|r| r.min_radius_ft).min().unwrap() < 500,
-        "Glenwood Canyon's genuinely sharp bends should still be here"
-    );
+    // Real I-70 canyon geometry must stay.
+    //
+    // This is the test that caught the design-floor screen (raising
+    // INTERSTATE_MIN_RADIUS_FT to 758, tried and reverted 2026-08-23), and it
+    // guards the connector bake the same way.
+    //
+    // TWO legs, because the canyon proper is EAST of Glenwood Springs: Edwards
+    // to Glenwood Springs is Glenwood Canyon itself, and Glenwood Springs to
+    // Grand Junction runs De Beque Canyon out the other side of town.
+    //
+    // It counts CANYON miles rather than the leg total, which is what the leg
+    // total was standing in for -- and badly: the sub-500 ft record the old bar
+    // tested for was a motorway_link ramp onto the I-70 business route at Grand
+    // Junction, not canyon at all. When the connector bake landed the totals
+    // moved (71 -> 70 and 60 -> 54) and every curve it took was a ramp or a
+    // town road: those business-route ramps, Pine Street and West 6th Street
+    // out of Glenwood Springs, Ute Avenue and South 12th Street into Grand
+    // Junction. Between the ends nothing moved -- Glenwood Canyon holds the
+    // same 57 curves at the same 574 ft minimum radius, and the same 15 that
+    // ask a truck to slow.
+    let world = world();
+    let miles: HashMap<String, f64> = world
+        .legs
+        .iter()
+        .map(|leg| (format!("{}:{}", leg.a, leg.b), leg.miles))
+        .collect();
+    for (key, floor) in [
+        ("edwards_co_us:glenwood_springs_co_us", 55),
+        ("glenwood_springs_co_us:grand_junction_co_us", 45),
+    ] {
+        let leg_miles = miles[key];
+        let canyon: Vec<_> = leg_curves(key, true)
+            .into_iter()
+            .filter(|r| r.apex_mi > 5.0 && r.apex_mi < leg_miles - 5.0)
+            .collect();
+        assert!(
+            canyon.len() >= floor,
+            "{key} kept only {} curves off its ends",
+            canyon.len()
+        );
+        assert!(
+            canyon.iter().map(|r| r.min_radius_ft).min().unwrap() < 700,
+            "{key}'s genuinely sharp canyon bends should still be here"
+        );
+    }
 }
 
 #[test]
@@ -681,9 +722,89 @@ fn test_the_terrain_bake_says_what_kind_of_value_it_carries() {
 
 #[test]
 fn severity_bands_match_the_advisory_speed() {
-    assert_eq!(curve_severity(25, 30.0), "hairpin");
-    assert_eq!(curve_severity(45, 160.0), "hairpin");
+    // The hairpin needs both halves now (MUTCD: 135 degrees AND a Turn sign's
+    // 30 mph or less); the three speed bands below it are unchanged.
+    assert_eq!(curve_severity(25, 160.0), "hairpin");
+    assert_eq!(curve_severity(25, 30.0), "sharp");
+    assert_eq!(curve_severity(45, 160.0), "moderate");
     assert_eq!(curve_severity(35, 30.0), "sharp");
     assert_eq!(curve_severity(50, 30.0), "moderate");
     assert_eq!(curve_severity(55, 30.0), "gentle");
+}
+
+/// Provenance: a connector says whether it was read or positional.
+///
+/// `osm:ramp` and `osm:off-freeway` are readings from the OSM extract;
+/// `sweep:window` is the bake's original positional call, kept because the
+/// two are a union and the window sees city geometry the class reading can
+/// miss.
+#[test]
+fn test_every_connector_row_names_the_reading_that_flagged_it() {
+    let text = read_data_text("world_data/us/gameplay/curves.jsonl").expect("curves.jsonl");
+    let known = ["osm:ramp", "osm:off-freeway", "sweep:window"];
+    let mut seen: HashSet<String> = HashSet::new();
+    for line in text.lines() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        let row: serde_json::Value = serde_json::from_str(line).unwrap();
+        if row.get("meta").is_some() || !row["connector"].as_bool().unwrap_or(false) {
+            continue;
+        }
+        let source = row.get("connector_source").and_then(|v| v.as_str());
+        assert!(
+            source.is_some_and(|s| known.contains(&s)),
+            "{} seq {} carries {source:?}",
+            row["leg"],
+            row["seq"]
+        );
+        seen.insert(source.unwrap().to_string());
+    }
+    let mut sorted: Vec<&String> = seen.iter().collect();
+    sorted.sort();
+    assert!(
+        seen.contains("osm:ramp") && seen.contains("osm:off-freeway"),
+        "the OSM readings should both be present in the bake, saw {sorted:?}"
+    );
+}
+
+/// The owner's report, 2026-08-23: "interstate mainline curves make the truck
+/// slow far too often."
+///
+/// A real interstate asks a loaded truck to drop below 65 essentially never --
+/// it is built to be driven at 70 or 75 all the way. Two fixes moved this
+/// number: counting the bank the road is built with (one every 28.8 miles ->
+/// 44.2), and then classifying interchange and departure geometry as the
+/// connectors they are rather than as mainline.
+///
+/// Pinned as a rate rather than a count so the map can grow. The bar is set
+/// well below what shipped, because this is a floor on quality, not a target
+/// anything was fitted to.
+#[test]
+fn test_interstate_mainline_asks_the_truck_to_slow_down_rarely() {
+    let world = world();
+    let mut seen: HashSet<String> = HashSet::new();
+    let mut miles = 0.0;
+    let mut slow = 0usize;
+    for leg in &world.legs {
+        let key = format!("{}:{}", leg.a, leg.b);
+        if seen.contains(&key) || !is_interstate(leg) {
+            continue;
+        }
+        seen.insert(key.clone());
+        miles += leg.miles;
+        slow += leg_curves(&key, true)
+            .iter()
+            .filter(|curve| curve.advisory_mph <= 65)
+            .count();
+    }
+    assert!(
+        slow > 0,
+        "a network with no interstate slowdowns at all means the data vanished"
+    );
+    let every = miles / slow as f64;
+    assert!(
+        every > 100.0,
+        "one interstate slowdown every {every:.1} miles is too often"
+    );
 }

@@ -28,6 +28,8 @@ use crate::online_journal::JournalOutbox;
 use crate::online_presence::{IdentityStore, OnlinePresence, OnlinePresenceOptions};
 use crate::speech::{NullSpeech, Speech, SpeechSink};
 use crate::states::base::{InputEvent, State};
+use crate::states::driving::DrivingState;
+use crate::states::main_menu::ConfirmQuitState;
 
 pub mod context;
 pub mod logging;
@@ -377,6 +379,39 @@ impl App {
         self.ctx.run_deferred();
     }
 
+    /// Alt+F4 and the window's close button ask, they do not just go.
+    ///
+    /// Closing the window used to end the process on the spot. Mid-drive that
+    /// is destructive and silent: saving happens only at stops, so the leg
+    /// being driven is gone and the save still points at the last stop.
+    /// Darren lost two routes to a mis-hit Alt+F4 and asked for the same gate
+    /// Escape already puts in front of quitting (2026-08-22).
+    ///
+    /// The second close request is obeyed without further argument. A
+    /// confirmation the player cannot get past would be a worse bug than the
+    /// one it fixes -- if speech has dropped, or the dialog is somehow
+    /// unreachable, Alt+F4 twice always closes the game.
+    pub fn handle_close_request(&mut self) {
+        let already_asking = self
+            .ctx
+            .state()
+            .is_some_and(|state| state.borrow().as_any().is::<ConfirmQuitState>());
+        if already_asking {
+            self.ctx.running = false;
+            return;
+        }
+        let unsaved = self.drive_in_progress();
+        self.push_state(ConfirmQuitState::with_unsaved_drive(unsaved));
+    }
+
+    /// Whether a leg is being driven right now, saved nowhere.
+    pub fn drive_in_progress(&self) -> bool {
+        self.ctx
+            .states()
+            .iter()
+            .any(|state| state.borrow().as_any().is::<DrivingState>())
+    }
+
     /// One event through the loop's switch: focus, quit, controller, state.
     pub fn handle_event(&mut self, event: &InputEvent) {
         match event {
@@ -385,7 +420,7 @@ impl App {
                 // re-check speech the moment the player comes back.
                 self.ctx.speech.request_refresh();
             }
-            InputEvent::Quit => self.ctx.running = false,
+            InputEvent::Quit => self.handle_close_request(),
             InputEvent::KeyDown { key, mods, .. } => {
                 self.ctx.input.press(*key, *mods);
                 self.dispatch_to_state(event);

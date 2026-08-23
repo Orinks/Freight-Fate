@@ -132,6 +132,52 @@ fn escape_at_the_main_menu_asks_before_quitting() {
     assert!(!app.running());
 }
 
+/// Darren, 2026-08-22: "I have ruined two of my routes doing this."
+///
+/// Alt+F4 and the window's close button both arrive as a quit event, and that
+/// ended the process on the spot. Mid-leg it is silently destructive: saving
+/// happens only at stops, so the drive is gone and the save still points at
+/// the last stop. It now raises the same gate Escape does, and says what is
+/// at stake when there is a drive to lose. The mid-drive half lives in
+/// `states_city.rs`, where a real `DrivingState` is at hand.
+#[test]
+fn test_closing_the_window_asks_before_it_takes_the_drive() {
+    let mut app = TestApp::new();
+    app.push_state(MainMenuState::new());
+    app.clear_speech();
+    app.set_running(true);
+
+    app.handle_close_request();
+    assert!(is::<ConfirmQuitState>(&app));
+    assert!(app.running(), "the window close must ask, not go");
+    let said = app.main_lines().last().cloned().expect("the gate speaks");
+    assert!(said.contains("Quit Freight Fate?"));
+    // Nothing to lose from the title, so nothing is claimed.
+    assert!(!said.contains("part way through a drive"));
+
+    // It lands on No, and No puts the player back where they were.
+    assert!(current_label::<ConfirmQuitState>(&app).starts_with("No"));
+    key(&mut app, Key::Return);
+    assert!(is::<MainMenuState>(&app));
+    assert!(app.running());
+}
+
+/// A confirmation the player cannot escape would be the worse bug.
+///
+/// If speech has dropped or the dialog is somehow unreachable, pressing
+/// Alt+F4 again has to close the game -- so the gate asks exactly once.
+#[test]
+fn test_a_second_close_request_is_obeyed_without_argument() {
+    let mut app = TestApp::new();
+    app.push_state(MainMenuState::new());
+    app.set_running(true);
+
+    app.handle_close_request();
+    assert!(is::<ConfirmQuitState>(&app));
+    app.handle_close_request();
+    assert!(!app.running());
+}
+
 // -- tests/test_legacy_career_gate.py (the career menus) ----------------------------
 
 #[test]

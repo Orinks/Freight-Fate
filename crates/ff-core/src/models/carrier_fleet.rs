@@ -34,7 +34,7 @@ use crate::models::enforcement::{
 };
 use crate::models::solvency::{debt_owed, money_text};
 use crate::models::trucks::{
-    truck_model_or_panic, TruckModel, CAB_DAY, CAB_SLEEPER, SPEC_HEAVY, SPEC_LIGHT,
+    truck_model, truck_model_or_panic, TruckModel, CAB_DAY, CAB_SLEEPER, SPEC_HEAVY, SPEC_LIGHT,
 };
 
 #[cfg(test)]
@@ -545,6 +545,54 @@ pub fn withheld_promotion_text<P: CareerProfile + ?Sized>(profile: &P) -> String
 /// equipment half of the promise is corrected.
 pub const WITHHELD_UNLOCK_TAIL: &str =
     "The tractor that comes with it is staying in the yard for now.";
+
+/// The tier above what this driver's level has already earned, or `None`.
+pub fn next_fleet_tier<P: CareerProfile + ?Sized>(profile: &P) -> Option<&'static FleetTier> {
+    let level = career_level(profile);
+    FLEET_TIERS.iter().find(|tier| tier.min_level > level)
+}
+
+/// What this driver is in, and what stands between them and better iron.
+///
+/// The hold was spoken at the two moments it happens -- the dispatch
+/// hand-over, and the level-up that arrives without a truck. Both are
+/// moments, and a moment the player had to be present for is not a record:
+/// Brandon, held at the regional fleet on level eleven, went to the career
+/// stats screen to ask what was keeping him out of the better equipment and
+/// the screen did not mention equipment at all (2026-08-22).
+///
+/// Two lines rather than one long one, matching how this screen already
+/// splits standing across several: what you are driving, and -- only when
+/// something is actually holding it back -- why, and what gives it back.
+pub fn equipment_status_lines<P: CareerProfile + ?Sized>(profile: &P) -> Vec<String> {
+    let key = profile.active_truck_key();
+    let truck = match truck_model(&key) {
+        Some(model) => model.label,
+        None => "none assigned",
+    };
+    if is_owner_operator(StandingProfile::business_status(profile)) {
+        // Nobody assigns an owner-operator a tractor, so there is no tier to
+        // be held below and no next one to earn.
+        return vec![format!("Truck: {truck}, your own")];
+    }
+    let tier = assigned_fleet_tier(profile);
+    if equipment_held_back(profile) {
+        return vec![
+            format!("Truck: {truck}, {}", tier.label),
+            equipment_hold_text(profile, false),
+        ];
+    }
+    match next_fleet_tier(profile) {
+        None => vec![format!(
+            "Truck: {truck}, {}, the carrier's best equipment",
+            tier.label
+        )],
+        Some(upcoming) => vec![format!(
+            "Truck: {truck}, {}. Level {} earns the {}.",
+            tier.label, upcoming.min_level, upcoming.label
+        )],
+    }
+}
 
 /// The `job=None` case of [`assigned_truck_key`] / [`assignment_reason_text`]
 /// spelled as a type: `assigned_truck_key::<_, NoJob>(profile, None)`.

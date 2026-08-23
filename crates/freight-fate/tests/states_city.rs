@@ -34,7 +34,7 @@ use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_pause_states::{
     AbandonJobConfirmationState, PauseMenuState, ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY,
 };
-use freight_fate::states::main_menu::MainMenuState;
+use freight_fate::states::main_menu::{ConfirmQuitState, MainMenuState};
 use serde_json::{json, Map, Value};
 use states_city_support::*;
 
@@ -1459,6 +1459,51 @@ fn test_escape_at_terminal_leaves_for_main_menu_without_lecturing() {
     key(&mut app, Key::Escape);
 
     assert!(is::<MainMenuState>(&app));
+}
+
+/// Mid-drive the close gate is worth reading, so it says why.
+///
+/// The title-screen half of `test_closing_the_window_asks_before_it_takes_the
+/// _drive` lives in `states_main_menu.rs`; this is the case that needs a real
+/// `DrivingState` on the stack for `App::drive_in_progress` to find.
+#[test]
+fn test_the_close_gate_names_the_leg_it_would_cost() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named_in("Close Mid Drive", "Denver"));
+    let carrier_key = profile(&app).carrier_key.clone();
+    let job = make_reposition_job(
+        app.ctx.world,
+        "Denver",
+        "Cheyenne",
+        true,
+        Some(&carrier_key),
+    )
+    .expect("Denver to Cheyenne is on the network");
+    let route = app
+        .ctx
+        .world
+        .supported_route("Denver", "Cheyenne", None)
+        .expect("the world routes")
+        .expect("the corridor is supported");
+    let driving = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        None,
+        freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY,
+        None,
+    );
+    app.push_state(driving);
+    app.clear_speech();
+    app.set_running(true);
+
+    app.handle_close_request();
+
+    assert!(is::<ConfirmQuitState>(&app));
+    assert!(app.running());
+    let said = app.main_lines().last().cloned().expect("the gate speaks");
+    assert!(said.contains("part way through a drive"), "{said}");
+    assert!(said.contains("only save at a stop"), "{said}");
 }
 
 // -- tests/test_business_arc.py (the terminal's truck status) -------------------------

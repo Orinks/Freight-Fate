@@ -39,6 +39,26 @@ fn main() {
 }
 
 fn run(args: &[String]) -> i32 {
+    if has(args, "--help") || has(args, "-h") || has(args, "/?") {
+        print!("{USAGE}");
+        return 0;
+    }
+    // An unrecognised switch used to fall through to `CliOptions::parse`, which
+    // ignores what it does not know -- so `--help` LAUNCHED THE GAME. Someone
+    // asking what the flags are gets a window and a main menu instead of an
+    // answer, and on a machine already running a copy the single-instance
+    // guard then refuses it for reasons that look unrelated. Say what is
+    // wrong, print the usage, and exit non-zero.
+    if let Some(unknown) = args.iter().find(|a| {
+        a.starts_with('-')
+            && !KNOWN_SWITCHES
+                .iter()
+                .any(|k| *k == a.as_str() || a.starts_with(&format!("{k}=")))
+    }) {
+        eprintln!("freightfate: unrecognised switch {unknown}\n");
+        eprint!("{USAGE}");
+        return 2;
+    }
     if args.iter().any(|a| a == "--list-break-scenarios") {
         return list_break_scenarios();
     }
@@ -60,6 +80,84 @@ fn run(args: &[String]) -> i32 {
     }
     app::main_with(CliOptions::parse(args.iter().cloned()))
 }
+
+/// Every switch the binary answers to, for the unrecognised-switch check.
+/// A new switch must be added here or it will be refused -- deliberately: a
+/// silent fall-through is what made `--help` launch the game.
+const KNOWN_SWITCHES: &[&str] = &[
+    "--assists",
+    "--at",
+    "--break-battery",
+    "--break-scenario",
+    "--cargo",
+    "--cargo-type",
+    "--controller-diagnostics",
+    "--cruise",
+    "--curve-assist",
+    "--descent",
+    "--dir",
+    "--find",
+    "--from",
+    "--headless",
+    "--help",
+    "--hour",
+    "--lane-keeping",
+    "--launch",
+    "--lead",
+    "--level",
+    "--list-break-scenarios",
+    "--log",
+    "--max-advisory",
+    "--max-miles",
+    "--min-drop",
+    "--min-pct",
+    "--min-run",
+    "--no-careers",
+    "--no-cruise",
+    "--no-sandbox",
+    "--pick",
+    "--planned-stop-assist",
+    "--playtest-road",
+    "--playtest-sandbox",
+    "--predictive-cruise",
+    "--print",
+    "--reset",
+    "--routes",
+    "--sample",
+    "--scan",
+    "--seed",
+    "--smoke",
+    "--speed",
+    "--to",
+    "--transcript",
+    "--transmission",
+    "--trip-seed",
+    "--verbosity",
+    "--weather",
+];
+
+/// What `--help` prints. Kept in step with the module docs above.
+const USAGE: &str = "freightfate -- Freight Fate
+
+  freightfate                       play
+  freightfate --smoke               boot, render five frames, exit (CI check)
+  freightfate --headless            no window, no speech
+  freightfate --controller-diagnostics
+                                    log controller events, both layers
+
+Drive tools:
+  --playtest-road --find FEATURE    start already rolling at a road feature
+                                    (downgrade, upgrade, zone, limit-drop,
+                                    stop, scale, curve, interchange, toll,
+                                    chain-law); --from/--to/--seed/--scan and
+                                    the assist switches refine the search
+  --playtest-sandbox [--launch]     a data directory that cannot reach the
+                                    owner's account; --dir/--reset/--print
+  --list-break-scenarios            name every adversarial scenario
+  --break-scenario NAME             run one, --transcript to hear it
+  --break-battery                   run them all and print the verdicts
+  --log PATH                        session log for the watcher
+";
 
 // -- flag helpers ----------------------------------------------------------------------
 

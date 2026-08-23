@@ -742,16 +742,42 @@ impl Menu for MainMenuState {
 
 impl_state_for_menu!(MainMenuState);
 
-/// One spoken yes/no gate before Escape at the main menu exits the game.
+/// One spoken yes/no gate in front of quitting the game.
+///
+/// Escape at the main menu raises it, and so does the window's close button
+/// or Alt+F4 from anywhere -- that close used to end the process on the spot,
+/// which cost Darren two routes to a mis-hit key (2026-08-22).
+///
+/// `unsaved_drive` is what makes the gate worth reading rather than a
+/// keystroke to swat away: quitting from the title loses nothing, quitting
+/// mid-leg loses the leg, and only the second one needs saying.
 pub struct ConfirmQuitState {
     menu: MenuCore<Self>,
+    unsaved_drive: bool,
 }
 
 impl ConfirmQuitState {
     pub fn new() -> Self {
+        Self::with_unsaved_drive(false)
+    }
+
+    /// `ConfirmQuitState(ctx, unsaved_drive=...)`.
+    pub fn with_unsaved_drive(unsaved_drive: bool) -> Self {
         Self {
             menu: MenuCore::new("Quit Freight Fate?").with_open_sound(Some("ui/error")),
+            unsaved_drive,
         }
+    }
+
+    fn question(&self) -> &'static str {
+        if !self.unsaved_drive {
+            return "Quit Freight Fate?";
+        }
+        // The same bargain the pause menu's quit already explains, in the
+        // same words: you can only save at a stop.
+        "Quit Freight Fate? You are part way through a drive. You can \
+         only save at a stop, so this drive will resume from your last \
+         stop, not from here."
     }
 }
 
@@ -771,7 +797,7 @@ impl Menu for ConfirmQuitState {
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
-        let text = format!("Quit Freight Fate? {}", self.current_text(ctx));
+        let text = format!("{} {}", self.question(), self.current_text(ctx));
         ctx.say_with(text, Say::new().review(false));
     }
 

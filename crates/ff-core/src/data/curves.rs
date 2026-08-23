@@ -7,9 +7,17 @@
 //! rows (interchange and ramp arcs) are excluded here: ramps carry their own
 //! speech and the future curve-nav layer owns them.
 //!
+//! Which rows those are is READ from OSM at bake time, not guessed at here:
+//! `tools/bake_curve_connectors.py` sets `connector` from the road class
+//! under each curve's apex -- a `highway=*_link` way is a ramp, and an
+//! Interstate leg's curve that is not on `highway=motorway` is not on the
+//! Interstate. Each flagged row records which reading flagged it in
+//! `connector_source`.
+//!
 //! Severity bands come from the advisory speed the bake computed at 0.3 g
-//! lateral -- the same number a posted yellow diamond would show -- with
-//! deflection promoting true switchbacks to hairpins regardless of radius.
+//! lateral -- the same number a posted yellow diamond would show -- EXCEPT the
+//! hairpin, which is a shape rather than a speed and is decided by deflection
+//! alone (see `HAIRPIN_DEFLECTION_DEG`).
 //!
 //! Interstate mainline records are screened for sweep artifacts on the way in
 //! (see `INTERSTATE_MIN_RADIUS_FT`); the raw bake keeps every row.
@@ -41,21 +49,73 @@ use super::data_resources::{baked, read_data_text};
 use super::world::{get_world, World};
 use super::world_models::{Leg, Route};
 
+/// The advisory at or below which a curve is an EXTREME CLAIM about the road,
+/// used by the artifact screens to ask "could a road here really do this?".
+/// Deliberately not the spoken hairpin test -- see `HAIRPIN_DEFLECTION_DEG`.
 pub const HAIRPIN_MAX_MPH: i64 = 25;
 pub const SHARP_MAX_MPH: i64 = 35;
 pub const MODERATE_MAX_MPH: i64 = 50;
-pub const HAIRPIN_DEFLECTION_DEG: f64 = 150.0;
+/// What actually makes a hairpin, from the sign that names one. MUTCD gives
+/// the Hairpin Curve sign (W1-11) for a change in horizontal alignment of 135
+/// degrees or more -- a switchback, where the road comes back on itself. The
+/// advisory speed does not enter into it: MUTCD sorts curves by advisory
+/// separately and much lower down, using the Turn sign (W1-1) instead of the
+/// Curve sign at 30 mph or less.
+///
+/// This used to read "advisory <= 25 OR deflection >= 150", and the advisory
+/// half was doing real damage. Across 33,930 baked curves it labelled 159
+/// hairpins where only 99 turn 135 degrees or more; the other 60 were tight
+/// little bends taken slowly, and the worst of them deflect TEN degrees. A
+/// driver was being told "hairpin left" for a road that barely bends, which
+/// spends the word on nothing and leaves it meaning less when a real
+/// switchback arrives. Darren asked whether a 94-degree corner through
+/// Norwich on NY-12 was "supposed to be there" (2026-08-23); the corner was,
+/// the word was not.
+///
+/// The angle is necessary and NOT sufficient, which the data made plain. MUTCD
+/// says the hairpin sign goes up INSTEAD OF A TURN OR CURVE SIGN, and it is
+/// the Turn sign (advisory 30 or less) that a switchback would otherwise
+/// carry. Taking the angle alone put 7 hairpins on interstate mainline --
+/// among them a 143-degree bend on I-49 north of Fayetteville with an 811 ft
+/// radius and a 60 mph advisory. That is a real half-circle of road and a
+/// sweeping one; no driver calls it a hairpin, because you do not slow for it.
+///
+/// Both together give 46 hairpins in 33,930 curves and NONE on an interstate,
+/// which is the check on the rule rather than a target it was fitted to:
+/// interstates do not switchback, and the rule works that out on its own.
+pub const HAIRPIN_TURN_MAX_MPH: i64 = 30;
+pub const HAIRPIN_DEFLECTION_DEG: f64 = 135.0;
 
 /// Interstate mainline geometry screen. The dense sweep baked some city
 /// departure geometry and interchange vertices as mainline rather than as
 /// connectors, which put 80-250 ft "hairpins" on roads that cannot bend that
-/// hard: an interstate is designed for 50 mph even in mountainous terrain, so
-/// its tightest real mainline curve is roughly 500-600 ft of radius (the
-/// notorious urban exceptions, posted 35, sit right about there). Anything
-/// under 300 ft, or turning more than a switchback's worth, is a digitizing
-/// artifact. Only the interstate class is screened -- US and state routes
-/// really do switch back (US-550 over Red Mountain Pass, US-40 in the
-/// Rockies) and their sharp records are kept exactly as baked.
+/// hard. Anything under 300 ft, or turning more than a switchback's worth, is
+/// a digitizing artifact.
+///
+/// That misclassification is now fixed where it happened -- the bake reads the
+/// road class under each apex (see the module docstring) -- so this screen has
+/// far less to catch than it did. It stays as the backstop for rows no extract
+/// could speak to, and because a genuine digitizing kink on real interstate
+/// pavement is still possible.
+///
+/// 300 is deliberately far below the DESIGN floor, and the difference is not
+/// slack -- it is Glenwood Canyon. TxDOT Roadway Design Manual Table 4-7 puts
+/// the minimum radius for a 50 mph design speed at 758 ft, and 50 mph is the
+/// lowest the Interstate system designs to; raising this constant to 758
+/// accordingly reads well and deletes real road, because I-70 through the
+/// canyon really does bend tighter than standard under design exceptions
+/// (tried and reverted, 2026-08-23 -- `test_glenwood_canyon_interstate_curves_survive`
+/// is what caught it). A screen sized to the design floor cannot tell a design
+/// exception from an artifact.
+///
+/// The design floor IS applied, by the fourth screen below, and only where the
+/// ground cannot justify a tight bend: `screenable_legs` gives every LEVEL leg
+/// a floor of `min_radius_ft(its own design speed)`. That is the same number,
+/// spent where it is safe to spend.
+///
+/// Only the interstate class is screened here -- US and state routes really do
+/// switch back (US-550 over Red Mountain Pass, US-40 in the Rockies) and their
+/// sharp records are kept exactly as baked.
 pub const INTERSTATE_MIN_RADIUS_FT: i64 = 300;
 pub const INTERSTATE_MAX_DEFLECTION_DEG: f64 = 150.0;
 
@@ -134,7 +194,7 @@ impl RouteCurve {
 /// The severity band for an advisory speed and deflection (shared by the
 /// route curve and tests over plain records).
 pub fn curve_severity(advisory_mph: i64, deflection_deg: f64) -> &'static str {
-    if advisory_mph <= HAIRPIN_MAX_MPH || deflection_deg >= HAIRPIN_DEFLECTION_DEG {
+    if deflection_deg >= HAIRPIN_DEFLECTION_DEG && advisory_mph <= HAIRPIN_TURN_MAX_MPH {
         "hairpin"
     } else if advisory_mph <= SHARP_MAX_MPH {
         "sharp"
@@ -176,9 +236,11 @@ pub const AASHTO_SIDE_FRICTION: &[(i64, f64)] = &[
 /// rather than a screen for the unusual.
 pub const SUPERELEVATION_MAX: f64 = 0.08;
 
-/// Tightest radius a road of this design speed may legally bend to.
-pub fn min_radius_ft(design_speed_mph: f64) -> f64 {
-    // Python's `min(speeds, key=...)` keeps the first of equally-near speeds.
+/// The table row nearest a design speed: `(speed, side friction)`.
+///
+/// Python's `min(speeds, key=lambda s: abs(s - design))` over the sorted keys,
+/// which keeps the FIRST of two equally-near speeds.
+fn nearest_friction(design_speed_mph: f64) -> (f64, f64) {
     let (v, friction) = AASHTO_SIDE_FRICTION
         .iter()
         .copied()
@@ -192,8 +254,70 @@ pub fn min_radius_ft(design_speed_mph: f64) -> f64 {
             _ => Some((s, f)),
         })
         .expect("the friction table is not empty");
-    let v = v as f64;
+    (v as f64, friction)
+}
+
+/// Tightest radius a road of this design speed may legally bend to.
+pub fn min_radius_ft(design_speed_mph: f64) -> f64 {
+    let (v, friction) = nearest_friction(design_speed_mph);
     (v * v) / (15.0 * (SUPERELEVATION_MAX + friction))
+}
+
+/// What the bake priced its advisory at: a comfortable lateral for a loaded
+/// truck, on a FLAT road (tools/straw_curve_sample.py, A_LAT_G).
+pub const ADVISORY_LATERAL_G: f64 = 0.30;
+/// The bank a road is actually BUILT with, which is not the same question as
+/// the bank a road is ALLOWED. `SUPERELEVATION_MAX` above is 8 percent because
+/// the screen asks "is this curve under every standard anywhere" and wants the
+/// most permissive number. Crediting a curve with the full 8 would assume the
+/// steepest bank any state permits on every road in the country, and reading
+/// more bank than a road has reads out a higher safe speed than it has -- an
+/// error in the one direction that matters.
+///
+/// Both manuals name the built rate and both say 6: TxDOT 4.7.3, "The
+/// Department normally uses a maximum superelevation rate of 6 percent",
+/// 8 only "where higher superelevation rates or sharper curves are desired"
+/// and only with a District Design Engineer's sign-off. Iowa DOT 2B-2, "For
+/// new construction, the superelevation rate is limited to 6%", reserving 8
+/// as the state ceiling.
+pub const SUPERELEVATION_BUILT: f64 = 0.06;
+
+/// The bank a designer had to build to hold the design speed here.
+///
+/// Zero where friction alone carries it -- a gentle curve gets normal crown
+/// -- and never above `SUPERELEVATION_BUILT`, the rate roads are built to
+/// rather than the steeper one they are permitted.
+///
+/// DERIVED, not surveyed: nothing in the bake records a real cross-slope, so
+/// this is the bank the governing equation demands, e = V^2/15R - f. AASHTO
+/// Method 5, which TxDOT Tables 4-6 and 4-7 are computed with, lays MORE
+/// bank than this on gentle curves and the same at the minimum radius -- so
+/// this reads low where it barely matters and true where it does, and every
+/// error runs toward caution.
+pub fn superelevation_at(radius_ft: f64, design_speed_mph: f64) -> f64 {
+    if radius_ft <= 0.0 || design_speed_mph <= 0.0 {
+        return 0.0;
+    }
+    let (_, friction) = nearest_friction(design_speed_mph);
+    let needed = design_speed_mph * design_speed_mph / (15.0 * radius_ft) - friction;
+    needed.min(SUPERELEVATION_BUILT).max(0.0)
+}
+
+/// The advisory the bake would have given had it known about the bank.
+///
+/// The bake reads every curve as flat -- `sqrt(0.30 g R)` -- which throws
+/// away the e in the manual's own e + f = V^2/15R and understates every
+/// banked curve. On a 1,000 ft radius that is 67 mph read as safe against a
+/// designed-and-banked 75, and it is why trucks braked for interstate curves
+/// built to be taken at speed.
+///
+/// Rounded to 5 like the bake's own, so the two are directly comparable.
+pub fn advisory_with_bank_mph(radius_ft: f64, design_speed_mph: f64) -> i64 {
+    if radius_ft <= 0.0 {
+        return 0;
+    }
+    let e = superelevation_at(radius_ft, design_speed_mph);
+    crate::pyfmt::round_py_int((15.0 * radius_ft * (e + ADVISORY_LATERAL_G)).sqrt() / 5.0) * 5
 }
 
 /// Which legs the screen may judge at all. It needs to know whether a tight
@@ -274,6 +398,48 @@ pub fn screenable_legs_of(world: &World) -> HashMap<String, f64> {
         out.insert(format!("{}:{}", leg.b, leg.a), floor);
     }
     out
+}
+
+/// Below this the road is built to normal crown and the flat reading is the
+/// right one. TxDOT Table 4-3 splits exactly here: low-speed facilities (45 and
+/// below) distribute superelevation by AASHTO Method 2, which "only introduces
+/// superelevation after the maximum side friction has been used" and in
+/// practice leaves town streets unbanked; 50 and above use Method 5 and are
+/// banked as a matter of course.
+pub const BANKED_DESIGN_MIN_MPH: f64 = 50.0;
+
+/// `"a:b"` -> the speed the leg is built for, for EVERY leg.
+///
+/// [`screenable_legs_of`] answers the same question but only for level ground,
+/// because that screen has no business judging a mountain road. The bank
+/// applies everywhere, so it needs its own pass.
+pub fn leg_design_speeds_of(world: &World) -> HashMap<String, f64> {
+    let mut out = HashMap::new();
+    for leg in &world.legs {
+        let design = leg_design_speed(leg);
+        out.insert(format!("{}:{}", leg.a, leg.b), design);
+        out.insert(format!("{}:{}", leg.b, leg.a), design);
+    }
+    out
+}
+
+/// The row's advisory, corrected for the bank its road must carry.
+fn banked_advisory(row: &CurveRow, design_mph: Option<f64>) -> i64 {
+    let baked = row.advisory_mph;
+    let Some(design_mph) = design_mph else {
+        return baked;
+    };
+    if design_mph < BANKED_DESIGN_MIN_MPH {
+        return baked;
+    }
+    let radius = row.min_radius_ft as f64;
+    if radius <= 0.0 {
+        return baked;
+    }
+    // Only ever upward: the bake read the road flat, and a bank can only help.
+    // A curve that somehow reads slower banked than flat keeps the flat number
+    // rather than being quietly slowed by a correction meant to speed it up.
+    baked.max(advisory_with_bank_mph(radius, design_mph))
 }
 
 /// A bend tighter than its own road may legally hold, on level ground.
@@ -465,6 +631,7 @@ pub fn build_from_sources(
             let interstate_legs = interstate_leg_keys(world);
             let flagged_artifacts = flagged_artifact_keys_from(artifacts_jsonl);
             let screenable = screenable_legs_of(world);
+            let design_speeds = leg_design_speeds_of(world);
             for line in text.lines() {
                 if line.trim().is_empty() || is_meta_line(line) {
                     continue;
@@ -501,6 +668,7 @@ pub fn build_from_sources(
                 // Connector arcs (interchange ramps) stay in the data with
                 // their flag: curve physics wants them, spoken layers skip
                 // them -- ramps carry their own speech.
+                let advisory_mph = banked_advisory(&row, design_speeds.get(&row.leg).copied());
                 by_leg
                     .entry(row.leg.clone())
                     .or_default()
@@ -509,7 +677,7 @@ pub fn build_from_sources(
                         apex_mi: row.apex_mi,
                         end_mi: row.end_mi,
                         direction: row.direction.chars().next().unwrap_or('L'),
-                        advisory_mph: row.advisory_mph,
+                        advisory_mph,
                         min_radius_ft: row.min_radius_ft,
                         deflection_deg: row.deflection_deg,
                         connector,
@@ -722,6 +890,195 @@ mod tests {
         // And it really is a floor that rises with speed.
         assert!(min_radius_ft(50.0) < min_radius_ft(60.0));
         assert!(min_radius_ft(60.0) < min_radius_ft(70.0));
+    }
+
+    #[test]
+    fn test_a_hairpin_is_a_shape_not_a_speed() {
+        // MUTCD gives the Hairpin Curve sign (W1-11) for a change in horizontal
+        // alignment of 135 degrees or more -- a switchback, where the road comes
+        // back on itself. Advisory speed does not enter into it; MUTCD sorts by
+        // advisory separately and much lower, swapping the Turn sign (W1-1) for
+        // the Curve sign at 30 mph or less.
+        //
+        // The old rule said "advisory <= 25 OR deflection >= 150", and the
+        // advisory half called tight little bends taken slowly hairpins -- the
+        // worst of them deflecting ten degrees. That spends the word on nothing
+        // and leaves it meaning less when a real switchback turns up.
+        let curve = |advisory: i64, deflection: f64| RouteCurve {
+            start_mi: 1.0,
+            apex_mi: 1.05,
+            end_mi: 1.1,
+            direction: 'L',
+            advisory_mph: advisory,
+            min_radius_ft: 150,
+            deflection_deg: deflection,
+            connector: false,
+        };
+
+        // MUTCD's own numbers, not rounder ones chosen nearby.
+        assert_eq!(HAIRPIN_DEFLECTION_DEG, 135.0);
+        assert_eq!(HAIRPIN_TURN_MAX_MPH, 30);
+
+        // A switchback comes back on itself AND has to be crawled...
+        assert_eq!(curve(25, 170.0).severity(), "hairpin");
+        assert_eq!(curve(30, 135.0).severity(), "hairpin");
+        // ...and a slow little kink is not one, however slowly it is taken.
+        assert_ne!(curve(25, 10.6).severity(), "hairpin");
+        assert_ne!(curve(20, 94.0).severity(), "hairpin");
+
+        // Nor is a sweeper, however far round it goes. The angle is necessary
+        // and not sufficient: MUTCD puts the hairpin sign up instead of a TURN
+        // sign, and a 60 mph bend was never getting one. This is I-49 north of
+        // Fayetteville, 811 ft radius through 143 degrees -- real road, and the
+        // reason taking the angle alone put hairpins on seven interstate curves.
+        assert_ne!(curve(60, 142.9).severity(), "hairpin");
+
+        // Darren's Norwich corner: real, tight, and correctly no longer a
+        // switchback (NY-12, 2026-08-23).
+        assert_eq!(curve(25, 94.0).severity(), "sharp");
+    }
+
+    #[test]
+    fn test_the_friction_table_is_aashto_table_3_7() {
+        // Pinned against the published source, not against itself.
+        //
+        // Iowa DOT Design Manual 2B-2 Table 2B.1 reproduces these and names its
+        // origin: "Adapted from Table 3-7: AASHTO Greenbook, 7th edition, 2018".
+        // TxDOT Table 4-7 agrees independently -- back-solve its minimum radii
+        // through the manual's own e + f = V^2/15R and these are the f values
+        // that fall out. Three sources, one table.
+        let published: &[(i64, f64)] = &[
+            (15, 0.32),
+            (20, 0.27),
+            (25, 0.23),
+            (30, 0.20),
+            (35, 0.18),
+            (40, 0.16),
+            (45, 0.15),
+            (50, 0.14),
+            (55, 0.13),
+            (60, 0.12),
+            (65, 0.11),
+            (70, 0.10),
+            (75, 0.09),
+            (80, 0.08),
+        ];
+        // Every value we carry must be the published one. The table starts at 20
+        // rather than 15 because nothing in the game is designed for 15 mph, and
+        // a row nothing reads is a row nobody maintains.
+        for (speed, factor) in AASHTO_SIDE_FRICTION {
+            let want = published
+                .iter()
+                .find(|(s, _)| s == speed)
+                .unwrap_or_else(|| panic!("{speed} mph is not in the published table"))
+                .1;
+            assert_eq!(want, *factor, "{speed} mph");
+        }
+        for speed in (20..85).step_by(5) {
+            assert!(
+                AASHTO_SIDE_FRICTION.iter().any(|(s, _)| *s == speed),
+                "{speed} mph is missing from the table"
+            );
+        }
+    }
+
+    #[test]
+    fn test_minimum_radii_match_the_published_table() {
+        // `min_radius_ft` against TxDOT Roadway Design Manual Table 4-7
+        // (Minimum Radii and Superelevation Rates, emax = 8%), e = 8.0% row.
+        //
+        // The derivation and the table are independent -- one is arithmetic from
+        // AASHTO's friction factors, the other is printed in a state design
+        // manual -- so agreeing to rounding is a real check rather than a
+        // tautology.
+        for (speed, table_ft) in [
+            (50.0, 758.0),
+            (55.0, 960.0),
+            (60.0, 1200.0),
+            (65.0, 1480.0),
+            (70.0, 1810.0),
+            (75.0, 2210.0),
+            (80.0, 2670.0),
+        ] {
+            let derived = min_radius_ft(speed);
+            assert!(
+                (derived - table_ft).abs() / table_ft < 0.01,
+                "{speed} mph: derived {derived:.0} ft vs published {table_ft} ft"
+            );
+        }
+    }
+
+    #[test]
+    fn test_the_bank_is_the_rate_roads_are_built_to_not_the_rate_allowed() {
+        // 8 percent is the ceiling; 6 percent is what gets built.
+        //
+        // Crediting every curve with the steepest bank any state permits would
+        // read out a higher safe speed than the road has, which is the one
+        // direction an error must not run. TxDOT 4.7.3 normally builds 6 and
+        // needs a District Design Engineer to go to 8; Iowa DOT 2B-2 limits new
+        // construction to 6 and keeps 8 as the state ceiling.
+        assert_eq!(SUPERELEVATION_BUILT, 0.06);
+        assert_eq!(
+            SUPERELEVATION_MAX, 0.08,
+            "the SCREEN still asks the permissive question"
+        );
+
+        // Never steeper than what is built, however tight the curve.
+        for radius in [200.0, 500.0, 758.0, 1200.0] {
+            assert!(superelevation_at(radius, 70.0) <= SUPERELEVATION_BUILT);
+        }
+        // A gentle curve is not banked at all -- normal crown, as built.
+        assert_eq!(superelevation_at(20_000.0, 70.0), 0.0);
+        // And the bank grows as the curve tightens, never the other way.
+        let banks: Vec<f64> = [12_000.0, 6_000.0, 3_000.0, 1_500.0, 800.0]
+            .into_iter()
+            .map(|r| superelevation_at(r, 70.0))
+            .collect();
+        let mut sorted = banks.clone();
+        sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        assert_eq!(banks, sorted);
+    }
+
+    #[test]
+    fn test_counting_the_bank_only_ever_raises_an_advisory() {
+        // The correction exists because the bake read every road as flat.
+        //
+        // A bank can only help a truck hold a curve, so this must never hand
+        // back a number lower than the flat one -- a correction meant to speed a
+        // curve up must not quietly slow a different one down.
+        for radius in [400.0, 758.0, 1000.0, 1810.0, 5000.0, 20_000.0] {
+            let flat = (15.0 * radius * ADVISORY_LATERAL_G).sqrt();
+            assert!(
+                advisory_with_bank_mph(radius, 70.0)
+                    >= crate::pyfmt::round_py_int(flat / 5.0) * 5 - 1
+            );
+        }
+
+        // A town street is built to normal crown, so it keeps the flat reading:
+        // TxDOT Table 4-3 and Iowa DOT 2B-1 both put the Method 2 / Method 5
+        // line at 45 mph.
+        assert_eq!(BANKED_DESIGN_MIN_MPH, 50.0);
+    }
+
+    #[test]
+    fn test_the_design_floor_is_spent_where_the_ground_cannot_excuse_a_bend() {
+        // The design minimum is real, and applying it flat to interstates is not.
+        //
+        // TxDOT Table 4-7 puts a 50 mph design speed at 758 ft and 50 is the
+        // lowest the Interstate system designs to, so a tighter interstate curve
+        // is below every standard. Screening on that number directly deletes
+        // I-70 through Glenwood Canyon, which really is tighter than standard
+        // under design exceptions -- a floor sized to the design minimum cannot
+        // tell an exception from an artifact (tried and reverted, 2026-08-23).
+        //
+        // So the flat interstate screen stays deliberately loose, and the design
+        // floor is spent by the terrain-gated screen instead, which only judges
+        // ground with no relief to justify the bend.
+        assert_eq!(INTERSTATE_MIN_RADIUS_FT, 300);
+        assert!(
+            min_radius_ft(50.0) > INTERSTATE_MIN_RADIUS_FT as f64,
+            "the blunt screen must stay below the design floor, or it eats real road"
+        );
     }
 
     #[test]

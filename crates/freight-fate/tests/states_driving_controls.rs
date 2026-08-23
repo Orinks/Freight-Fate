@@ -1381,3 +1381,69 @@ fn test_the_radio_dial_keys_tune_jump_and_change_volume() {
     // Page Up / `;` tunes down, Page Down / `'` tunes up, Ctrl jumps a whole
     // category, Shift moves the radio volume in ten percent steps.
 }
+
+// -- tests/test_driving_speech_ladder.py (the cab lines) -------------------------------
+
+/// Owner playtest, 2026-08-17: "quiet still feels busy".
+///
+/// The Python half of this is a source scan of `states/driving_*.py` for the
+/// three transcript lines, checking each carries `SpeechCategory.CONFIRMATION`
+/// -- and the scan had to learn to read each file under its own name, because
+/// "Engine off." is spoken in three places with three meanings and an
+/// unsorted glob graded whichever the filesystem handed over first (CI,
+/// 2026-08-23). The port asserts the same thing where it is decidable: the
+/// cab confirmations go to an earcon at quiet, and the air-brake lockout that
+/// speaks the same words is a ROUTE event and keeps its voice.
+#[test]
+fn test_the_cab_is_categorised_so_quiet_is_actually_quiet() {
+    let mut app = TestApp::new();
+    app.ctx.settings.driving_speech = "quiet".to_string();
+    let mut d = a_drive(&mut app);
+    // The ladder only applies past the walkthrough.
+    app.ctx.profile.as_mut().unwrap().tutorial_done = true;
+    d.trip.truck.start_engine();
+    d.trip.truck.set_air_ready(true);
+    d.toggle_parking_brake(&mut app.ctx); // the drive starts with it set
+    app.clear_speech();
+
+    // "Parking brake set. Air pressure ... psi." -- a confirmation.
+    d.toggle_parking_brake(&mut app.ctx);
+    assert!(app.main_lines().is_empty(), "{:?}", app.main_lines());
+
+    // "Engine off." from the E key -- also a confirmation.
+    d.toggle_engine(&mut app.ctx);
+    assert!(!d.trip.truck.engine_on);
+    assert!(app.main_lines().is_empty(), "{:?}", app.main_lines());
+
+    // The other "Engine off." is not this one. The air-brake lockout speaks
+    // the same two words at quiet as the terse form of "why the truck will
+    // not roll", and it is a ROUTE event on the event channel rather than a
+    // confirmation -- which is what the Python scan kept mis-grading. Pinned
+    // where it is spoken, by
+    // `states_driving_updates::test_the_air_brake_lockout_says_why_the_truck_will_not_roll`.
+    assert!(app.event_lines().is_empty(), "{:?}", app.event_lines());
+}
+
+/// Standard hears the confirmations in full: quiet is what silences them, not
+/// the category itself.
+#[test]
+fn test_the_cab_confirmations_still_speak_at_standard() {
+    let mut app = TestApp::new();
+    app.ctx.settings.driving_speech = "standard".to_string();
+    let mut d = a_drive(&mut app);
+    app.ctx.profile.as_mut().unwrap().tutorial_done = true;
+    d.trip.truck.start_engine();
+    d.trip.truck.set_air_ready(true);
+    d.toggle_parking_brake(&mut app.ctx); // the drive starts with it set
+    app.clear_speech();
+
+    d.toggle_parking_brake(&mut app.ctx);
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|line| line.starts_with("Parking brake set. Air pressure")));
+
+    app.clear_speech();
+    d.toggle_engine(&mut app.ctx);
+    assert_eq!(app.main_lines(), vec!["Engine off.".to_string()]);
+}

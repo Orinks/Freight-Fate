@@ -419,8 +419,25 @@ impl DrivingState {
                 ctx.settings.curve_speed_assist && curve.is_some() && advisory >= CRUISE_MIN_MPH;
             if assisted {
                 let curve = curve.as_ref().expect("checked above");
-                self.cruise_curve_mph = Some(advisory);
-                self.cruise_curve_end_mi = Some(curve.start_mi.max(curve.end_mi));
+                // The CHAIN's number, not just this bend's. A call that
+                // carries a linked follower ("then sharp left, advise 30")
+                // is the follower's only warning -- the trip suppresses
+                // its own call so the pair is one sentence -- so easing to
+                // the first bend's 40 and releasing at the first bend's
+                // end took the truck into the follower ten miles an hour
+                // too fast, with nothing left to warn it. Darren's load
+                // shifted 12 percent on exactly that pair on NY-12
+                // (2026-08-23), and the spoken line had named 30 the whole
+                // time: the words were right and the assist was not.
+                let linked = self.pacenote_linked(curve);
+                let mut hold_mph = advisory;
+                let mut hold_to_mi = curve.start_mi.max(curve.end_mi);
+                if let Some(linked) = linked {
+                    hold_mph = hold_mph.min(linked.advisory_mph as f64);
+                    hold_to_mi = hold_to_mi.max(linked.start_mi).max(linked.end_mi);
+                }
+                self.cruise_curve_mph = Some(hold_mph);
+                self.cruise_curve_end_mi = Some(hold_to_mi);
                 // Terse speaks the pacenote alone: its advisory number is
                 // the number cruise is easing to, and the deceleration
                 // itself is audible (R4's curve-composite row).
