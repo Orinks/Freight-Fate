@@ -61,4 +61,14 @@ lto = "thin"
 strip = true
 
 [profile.dev]
-opt-level = 1
+# opt-level 0 compiles noticeably faster and the game is not CPU-bound in a
+# debug run; the one place that wanted optimisation was the world load, and
+# the baked container solved that instead.
+opt-level = 0
+
+[profile.test]
+# Debug info is the bulk of what the linker writes, and ~127 test binaries
+# each carry a copy: turning it off was worth minutes per cold build and a
+# few gigabytes on disk. A backtrace still names the failing test; only
+# line numbers inside dependencies are lost.
+debug = 0

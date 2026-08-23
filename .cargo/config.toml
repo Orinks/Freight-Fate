@@ -10,3 +10,12 @@
 # environment beats this file.
 [build]
 jobs = 12
+
+# Link with rust-lld instead of MSVC's link.exe.
+#
+# This workspace builds ~127 test binaries, each linking the whole dependency
+# graph (SDL2, rustls/ring, rustfft, zstd, icu). Linking, not compiling, is
+# the dominant cost, and lld is several times faster at it. rust-lld ships
+# with the toolchain, so there is nothing to install.
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld.exe"
