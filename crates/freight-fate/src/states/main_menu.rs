@@ -1,1 +1,836 @@
-//! Port of `freight_fate/states/main_menu.py` — not yet ported.
+//! Main menu, profile selection, name entry, settings, and help screens
+//! (port of `freight_fate/states/main_menu.py`).
+//!
+//! The Python module was one file; here the settings screens, the career
+//! management screens and the achievements browser live in submodules and
+//! are re-exported from this one, so `states::main_menu::X` still names
+//! every screen the Python `main_menu` did (including the ones it imported
+//! from `main_menu_help`, `main_menu_career` and `update`).
+
+use std::cell::{Cell, RefCell};
+use std::path::{Path, PathBuf};
+use std::sync::Mutex;
+
+use chrono::{DateTime, Datelike, Local, Timelike};
+use ff_core::models::business::status_label;
+use ff_core::models::jobs::facility_text;
+use ff_core::models::profile::{data_dir, LegacyCareerError, LoadError, Profile};
+use ff_core::models::start_options::option_for_profile;
+use ff_core::music::{select_menu_music_sequence, MenuMusicProfile};
+use ff_core::playtest_levers::apply_continue_levers;
+use ff_core::pyfmt::fmt_grouped;
+
+use crate::app::{share, version, GameContext, Say, SharedState};
+use crate::discord_presence::PresenceState;
+use crate::online_presence::IdentityStore;
+use crate::states::base::{Menu, MenuCore, MenuItem, SimpleMenuState};
+use crate::states::learn_sounds::LearnSoundsState;
+use crate::states::save_notice::{
+    DrivingRecordNoticeState, SaveMigrationNoticeState, SaveModifiedNoticeState,
+};
+use crate::states::text_entry::{TextEntry, TextEntryCore};
+use crate::updater;
+use crate::{impl_state_for_menu, impl_state_for_text_entry};
+
+mod achievements;
+mod careers;
+mod settings;
+mod settings_actions;
+mod settings_items;
+
+pub use achievements::{AchievementCareerState, AchievementCategoryState, AchievementsState};
+pub use careers::{
+    CareerAction, CareerActionsState, ConfirmCareerActionState, LoadDriverState,
+    ManageCareersState,
+};
+pub use settings::{
+    GameplaySettingsState, SettingsCategoryState, SettingsState, SETTINGS_LAYOUT_NOTICES,
+};
+
+pub use crate::states::main_menu_career::{
+    region_menu_name, CareerStartState, HomeCityState, HomeTerminalState,
+};
+pub use crate::states::main_menu_help::{controls_help_page, HelpState, HELP_PAGES};
+pub use crate::states::update::{UpdateChecker, UpdateCheckState, UpdatePromptState};
+
+/// A clearly-named stand-in for a screen another port task still owns.
+///
+/// Pushed wherever the Python pushed a state whose Rust module is still a
+/// stub (the city hub, the driving state, the online offer ...), so the
+/// flow around it is testable now and the lead can wire the real
+/// constructor in one place later.
+pub fn todo_state(name: &str) -> SimpleMenuState {
+    SimpleMenuState::new(
+        &format!("{name} (not ported yet)"),
+        vec![MenuItem::new("Back", |s: &mut SimpleMenuState, ctx| s.go_back(ctx))
+            .help("This screen is not ported yet; Escape goes back.")],
+    )
+}
+
+// -- the save scan -----------------------------------------------------------------
+
+thread_local! {
+    static LAST_INVALID_SAVES: RefCell<Vec<PathBuf>> = const { RefCell::new(Vec::new()) };
+    // Careers the load gate refused because they were created before the 1.9
+    // line. They must stay visible in the career list with a spoken label -- a
+    // missing career reads as data loss to a blind player -- so loadable_saves
+    // collects them here for the menus to show alongside the loadable ones.
+    static LEGACY_SAVES: RefCell<Vec<LegacyCareerError>> = const { RefCell::new(Vec::new()) };
+    // Reused within a single reuse_loadable_saves_scan() block (see below) so a
+    // state that asks several times in one pass -- MainMenuState.enter() calls
+    // loadable_saves() three times: build_items, announce_entry's legacy-save
+    // check, and its own profile lookup -- pays for one save-directory scan
+    // instead of three. Outside such a block every call still rescans, so a
+    // state that lists saves after creating or deleting one never sees stale
+    // results.
+    static LOADABLE_SAVES_CACHE: RefCell<Option<Vec<(PathBuf, Profile)>>> =
+        const { RefCell::new(None) };
+    static LOADABLE_SAVES_CACHE_ACTIVE: Cell<bool> = const { Cell::new(false) };
+    // How many real save-directory scans have run on this thread (the seam
+    // the Python tests reached by counting `Profile.list_saves` calls).
+    static SCAN_COUNT: Cell<usize> = const { Cell::new(0) };
+}
+
+/// Coalesce every [`loadable_saves`] call made inside `f`.
+///
+/// Reentrant: a nested call is a no-op, so this can wrap a method that also
+/// wraps itself (or calls another wrapped method) without the inner scope
+/// prematurely dropping the cache the outer scope is still relying on.
+pub fn reuse_loadable_saves_scan<R>(f: impl FnOnce() -> R) -> R {
+    let already_active = LOADABLE_SAVES_CACHE_ACTIVE.with(|a| a.replace(true));
+    if !already_active {
+        LOADABLE_SAVES_CACHE.with(|c| *c.borrow_mut() = None);
+    }
+    let result = f();
+    if !already_active {
+        LOADABLE_SAVES_CACHE_ACTIVE.with(|a| a.set(false));
+        LOADABLE_SAVES_CACHE.with(|c| *c.borrow_mut() = None);
+    }
+    result
+}
+
+/// Return readable saves in newest-first order.
+///
+/// Inside a [`reuse_loadable_saves_scan`] block, the first real scan's
+/// result (and the [`last_invalid_saves`] / [`legacy_saves`] it populates)
+/// is reused for the rest of the block instead of rescanning the save
+/// directory again.
+pub fn loadable_saves() -> Vec<(PathBuf, Profile)> {
+    let active = LOADABLE_SAVES_CACHE_ACTIVE.with(|a| a.get());
+    if active {
+        if let Some(cached) = LOADABLE_SAVES_CACHE.with(|c| c.borrow().clone()) {
+            return cached;
+        }
+    }
+    SCAN_COUNT.with(|n| n.set(n.get() + 1));
+    let mut invalid = Vec::new();
+    let mut legacy = Vec::new();
+    let mut saves = Vec::new();
+    for path in Profile::list_saves() {
+        match Profile::load(&path) {
+            Ok(profile) => {
+                // Loading may have converted a legacy file in place; report
+                // the path the career actually lives at now.
+                saves.push((profile.path(), profile));
+            }
+            Err(LoadError::LegacyCareer(err)) => legacy.push(err),
+            Err(LoadError::Integrity(_)) => invalid.push(path),
+            Err(LoadError::Io(_)) => continue,
+        }
+    }
+    LAST_INVALID_SAVES.with(|v| *v.borrow_mut() = invalid);
+    LEGACY_SAVES.with(|v| *v.borrow_mut() = legacy);
+    if active {
+        LOADABLE_SAVES_CACHE.with(|c| *c.borrow_mut() = Some(saves.clone()));
+    }
+    saves
+}
+
+/// Saves the last scan could not read (moved aside).
+pub fn last_invalid_saves() -> Vec<PathBuf> {
+    LAST_INVALID_SAVES.with(|v| v.borrow().clone())
+}
+
+/// Careers the last scan refused as pre-1.9.
+pub fn legacy_saves() -> Vec<LegacyCareerError> {
+    LEGACY_SAVES.with(|v| v.borrow().clone())
+}
+
+/// How many real save-directory scans have run on this thread.
+pub fn loadable_saves_scan_count() -> usize {
+    SCAN_COUNT.with(|n| n.get())
+}
+
+// -- entering the world ---------------------------------------------------------------
+
+/// The next one-time save notice the player has not heard yet, if any.
+pub fn pending_notice_state(ctx: &GameContext) -> Option<SharedState> {
+    let profile = ctx.profile.as_ref()?;
+    if profile.migration_notice_pending {
+        return Some(share(SaveMigrationNoticeState::new()));
+    }
+    if profile.integrity_notice_pending {
+        return Some(share(SaveModifiedNoticeState::new()));
+    }
+    if profile.driving_record.notice_pending {
+        return Some(share(DrivingRecordNoticeState::new()));
+    }
+    None
+}
+
+/// Whether a first-run player should hear the orinks.net offer at all.
+// TODO(lead): belongs in `states::online_offer` (`should_offer_online`);
+// reproduced here until that module lands.
+pub fn should_offer_online(ctx: &GameContext) -> bool {
+    if ctx.settings.online_offer_seen {
+        return false;
+    }
+    IdentityStore::platform(&data_dir()).load().is_none()
+}
+
+/// The first-day welcome spoken at career creation.
+// TODO(lead): belongs in `states::city` (`first_day_orientation_message`);
+// reproduced here, word for word, until that module lands.
+pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String {
+    let Some(p) = ctx.profile.as_ref() else {
+        return String::new();
+    };
+    let terminal = ctx
+        .world
+        .home_terminal(&p.current_city)
+        .map(|t| t.spoken_name())
+        .unwrap_or_default();
+    let option = option_for_profile(p);
+    let location = format!("{terminal} in the {} service area", p.current_city);
+    if option.is_owner_operator() {
+        return format!(
+            "{prefix}First-day briefing: you are leased to {} \
+             and parked at {location}. You own a brand-new truck with a full \
+             tank, have {} dollars of working capital, and \
+             fuel, repairs, truck wear, trailer programs, and business \
+             reserves come out of \
+             your cash. Your first objective is to open the dispatch board, \
+             choose an unlocked load with a deadline you can protect, and get \
+             to the shipper without burning your cushion.",
+            option.carrier_name,
+            fmt_grouped(p.money, 0)
+        );
+    }
+    format!(
+        "{prefix}First-day briefing: welcome aboard {}. \
+         Your assigned company tractor is parked at {location}; the carrier \
+         covers normal fuel, repairs, insurance, and trailer support. Your \
+         starter dispatch style is {}. As a new \
+         hire, dispatch assigns your load and your route; you earn load \
+         choice with seniority, and refusing an assignment goes on your \
+         service record. Your first objective is to open the dispatch \
+         board, accept the assigned load, deadhead to the shipper, and \
+         deliver cleanly to start building your record with dispatch.",
+        option.carrier_name,
+        option.dispatch.summary()
+    )
+}
+
+/// The city menu, or the one-time orinks.net offer ahead of it.
+pub fn first_state_after_career_creation(ctx: &GameContext) -> SharedState {
+    if should_offer_online(ctx) {
+        // TODO(lead): wire `states::online_offer::OnlineOfferState::new(ctx)`.
+        return share(todo_state("OnlineOfferState"));
+    }
+    // The welcome is spoken just before this state is pushed, so its entry
+    // announcement queues behind it rather than cutting it off.
+    // TODO(lead): wire `states::city::CityMenuState::new(ctx, true)`
+    // (`queue_entry_announcement=True`).
+    share(todo_state("CityMenuState"))
+}
+
+/// Resume a saved mid-trip delivery if there is one, else the terminal hub.
+///
+/// `queue_entry_announcement` reaches the city menu only -- see
+/// [`world_entry_state`]. A resumed drive already queues its own entry lines
+/// (`DrivingState.enter` always speaks with `interrupt=False`), and a
+/// pending save notice is a separate, unrelated screen, so neither needs the
+/// flag threaded through.
+pub fn enter_world(ctx: &mut GameContext, queue_entry_announcement: bool) {
+    let state = pending_notice_state(ctx)
+        .unwrap_or_else(|| world_entry_state(ctx, queue_entry_announcement));
+    ctx.push_shared(state);
+}
+
+/// Build the first playable state for the current profile.
+pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) -> SharedState {
+    let trip_kind = ctx
+        .profile
+        .as_ref()
+        .and_then(|p| p.active_trip.as_ref())
+        .map(|trip| {
+            trip.get("kind")
+                .and_then(|k| k.as_str())
+                .unwrap_or("")
+                .to_string()
+        });
+    if let Some(kind) = trip_kind {
+        // A save from before local city-service drives were retired can still
+        // carry one mid-trip. There is no route or phase left to resume it
+        // with, so it drops the driver at the terminal instead of failing to
+        // load -- this branch reads only that old snapshot shape and stays
+        // even after every other city-service-drive code path is gone.
+        if kind == "city_service_drive" {
+            if let Some(p) = ctx.profile.as_mut() {
+                p.active_trip = None;
+            }
+            ctx.save_profile();
+            ctx.say(
+                "Local service drives were retired in this update; you are parked at the terminal.",
+            );
+            // TODO(lead): wire `states::city::CityMenuState::new(ctx, true)`.
+            return share(todo_state("CityMenuState"));
+        }
+        if kind == "pickup" {
+            // TODO(lead): wire `states::city_pickup::PickupFacilityState::from_snapshot(ctx, snapshot)`;
+            // `None` (an unreadable snapshot) must clear `active_trip` and fall
+            // through to the city menu.
+            return share(todo_state("PickupFacilityState"));
+        }
+        // TODO(lead): wire `states::driving::DrivingState::from_snapshot(ctx, snapshot)`;
+        // `None` (an unreadable snapshot) must clear `active_trip` and fall
+        // through to the city menu.
+        return share(todo_state("DrivingState"));
+    }
+    // The welcome that names this driver (from Continue or Choose career) is
+    // spoken just before this state is chosen, so its entry announcement
+    // queues behind that line instead of cutting it off.
+    // TODO(lead): wire `states::city::CityMenuState::new(ctx, queue_entry_announcement)`.
+    let _ = queue_entry_announcement;
+    share(todo_state("CityMenuState"))
+}
+
+// -- career summaries ---------------------------------------------------------------
+
+fn trip_str(job: &serde_json::Value, key: &str) -> String {
+    job.get(key)
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string()
+}
+
+/// Where the career stands, for the career list (`_career_location`).
+pub fn career_location(ctx: &GameContext, profile: &Profile) -> String {
+    let empty = serde_json::Value::Object(Default::default());
+    let trip = profile.active_trip.as_ref().unwrap_or(&empty);
+    let job = trip.get("job").cloned().unwrap_or(empty.clone());
+    let kind = trip.get("kind").and_then(|k| k.as_str()).unwrap_or("");
+    let destination = job
+        .get("destination")
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.is_empty())
+        .map(str::to_string);
+    let or_default = |key: &str, default: &str| {
+        let value = trip_str(&job, key);
+        if value.is_empty() {
+            default.to_string()
+        } else {
+            value
+        }
+    };
+    // Spoken fields exist in post-slug payloads; legacy payloads fall back to
+    // origin/destination, which there hold the old speakable display name.
+    if kind == "pickup_drive" {
+        let mut origin = trip_str(&job, "origin_spoken");
+        if origin.is_empty() {
+            origin = trip_str(&job, "origin");
+        }
+        if origin.is_empty() {
+            origin = profile.current_city.clone();
+        }
+        let facility = facility_text(
+            &or_default("origin_type", "metro_market"),
+            &trip_str(&job, "origin_location"),
+            &origin,
+            &trip_str(&job, "origin_locality"),
+        );
+        return format!("driving to pickup at {facility}");
+    }
+    if let Some(destination) = destination {
+        let mut spoken = trip_str(&job, "destination_spoken");
+        if spoken.is_empty() {
+            spoken = destination;
+        }
+        let facility = facility_text(
+            &or_default("destination_type", "metro_market"),
+            &trip_str(&job, "destination_location"),
+            &spoken,
+            &trip_str(&job, "destination_locality"),
+        );
+        if kind == "pickup" {
+            let loaded = if trip
+                .get("loaded")
+                .is_some_and(|v| v.as_bool().unwrap_or(false))
+            {
+                "loaded for"
+            } else {
+                "picking up for"
+            };
+            return format!("{loaded} {facility}");
+        }
+        return format!("on the road to {facility}");
+    }
+    match ctx.world.home_terminal(&profile.current_city) {
+        Ok(terminal) => format!(
+            "at {} in {}",
+            terminal.name,
+            ctx.world.spoken_city(&profile.current_city, None)
+        ),
+        Err(_) => format!("in {}", profile.current_city),
+    }
+}
+
+/// `Mon D, YYYY at H:MM AM` for a save file's modification time.
+pub fn saved_label(path: &Path) -> String {
+    let modified = std::fs::metadata(path)
+        .and_then(|m| m.modified())
+        .unwrap_or(std::time::SystemTime::UNIX_EPOCH);
+    let stamp: DateTime<Local> = modified.into();
+    let hour = match stamp.hour() % 12 {
+        0 => 12,
+        h => h,
+    };
+    let am_pm = if stamp.hour() < 12 { "AM" } else { "PM" };
+    format!(
+        "{} {}, {} at {hour}:{:02} {am_pm}",
+        stamp.format("%b"),
+        stamp.day(),
+        stamp.year(),
+        stamp.minute()
+    )
+}
+
+/// One career's spoken summary line (`_career_summary`).
+pub fn career_summary(
+    ctx: &GameContext,
+    path: &Path,
+    profile: &Profile,
+    include_saved: bool,
+) -> String {
+    let mut parts = vec![
+        format!("{}: level {}", profile.name, profile.career.level()),
+        format!(
+            "{} {}",
+            profile.carrier_name,
+            status_label(&profile.business_status)
+        ),
+        format!("{} dollars", fmt_grouped(profile.money, 0)),
+        career_location(ctx, profile),
+        format!("{} deliveries", profile.career.deliveries),
+    ];
+    if include_saved {
+        parts.push(format!("last saved {}", saved_label(path)));
+    }
+    parts.join(", ")
+}
+
+// -- the main menu ----------------------------------------------------------------------
+
+// one startup update check per game session, shared across instances
+static UPDATE_CHECK: Mutex<(Option<UpdateChecker>, bool)> = Mutex::new((None, false));
+
+pub struct MainMenuState {
+    menu: MenuCore<Self>,
+}
+
+impl MainMenuState {
+    pub fn new() -> Self {
+        Self {
+            menu: MenuCore::new("Freight Fate"),
+        }
+    }
+
+    /// Start a fresh silent check for the next main-menu update cycle.
+    pub fn arm_update_check(settings: &ff_core::settings::Settings) {
+        if !updater::is_frozen() {
+            return;
+        }
+        let mut guard = UPDATE_CHECK.lock().unwrap_or_else(|e| e.into_inner());
+        *guard = (Some(UpdateChecker::new(settings)), false);
+    }
+
+    /// Test seam for the class-level checker: install (or clear) the
+    /// session's checker and the prompted flag.
+    pub fn install_update_check(checker: Option<UpdateChecker>, prompted: bool) {
+        let mut guard = UPDATE_CHECK.lock().unwrap_or_else(|e| e.into_inner());
+        *guard = (checker, prompted);
+    }
+
+    /// Whether a session checker is armed, and whether it has prompted.
+    pub fn update_check_status() -> (bool, bool) {
+        let guard = UPDATE_CHECK.lock().unwrap_or_else(|e| e.into_inner());
+        (guard.0.is_some(), guard.1)
+    }
+
+    fn continue_latest(&mut self, ctx: &mut GameContext) {
+        let saves = loadable_saves();
+        let Some((_, latest)) = saves.into_iter().next() else {
+            ctx.say("No saved careers found.");
+            self.refresh(ctx, true);
+            return;
+        };
+        ctx.profile = Some(latest);
+        let lever_notes = apply_continue_levers(ctx);
+        let p = ctx.profile.as_ref().expect("just loaded");
+        let welcome = if p.active_trip.is_some() {
+            format!("Welcome back, {}.", p.name)
+        } else {
+            let terminal_name = ctx
+                .world
+                .home_terminal(&p.current_city)
+                .map(|t| t.name)
+                .unwrap_or_default();
+            format!(
+                "Welcome back, {}. You are parked at {terminal_name} in {} with {} dollars.",
+                p.name,
+                ctx.world.spoken_city(&p.current_city, None),
+                fmt_grouped(p.money, 0)
+            )
+        };
+        ctx.say(&welcome);
+        // This welcome is spoken first; a resumed drive already queues its own
+        // lines, and only the plain city-menu hand-off needs telling not to
+        // cut it off (see world_entry_state).
+        enter_world(ctx, true);
+        for note in lever_notes {
+            ctx.say_with(note, Say::queued());
+        }
+    }
+
+    fn report_issue(&mut self, ctx: &mut GameContext) {
+        let url = format!(
+            "https://github.com/{}/issues/new?template=bug_report.yml",
+            updater::REPO
+        );
+        let opened = webbrowser::open(&url).is_ok();
+        if !opened {
+            ctx.say(&format!(
+                "Could not open a web browser. You can report problems at github.com/{}/issues.",
+                updater::REPO
+            ));
+            return;
+        }
+        ctx.say(
+            "Opening the bug report page in your web browser. \
+             Please attach your game log to the report: it is the file game.log \
+             inside the logs folder, next to the game itself. If you restarted \
+             the game after the problem happened, attach game.prev.log instead. \
+             That is the log from the previous run.",
+        );
+    }
+}
+
+impl Default for MainMenuState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Menu for MainMenuState {
+    fn menu(&self) -> &MenuCore<Self> {
+        &self.menu
+    }
+
+    fn menu_mut(&mut self) -> &mut MenuCore<Self> {
+        &mut self.menu
+    }
+
+    fn enter(&mut self, ctx: &mut GameContext) {
+        let sequence = reuse_loadable_saves_scan(|| {
+            // The base `Menu::enter`: rebuild the rows, play the open sound,
+            // announce.
+            self.refresh(ctx, true);
+            if let Some(key) = self.menu.open_sound_key.clone() {
+                ctx.audio.play(&key);
+            }
+            self.announce_entry(ctx);
+            let newest;
+            let profile: Option<&Profile> = match ctx.profile.as_ref() {
+                Some(p) => Some(p),
+                None => {
+                    newest = loadable_saves().into_iter().next().map(|(_, p)| p);
+                    newest.as_ref()
+                }
+            };
+            select_menu_music_sequence(profile.map(|p| p as &dyn MenuMusicProfile))
+        });
+        let refs: Vec<&str> = sequence.iter().map(String::as_str).collect();
+        ctx.play_music_sequence("menu", &refs);
+        let armed = UPDATE_CHECK
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .0
+            .is_some();
+        if !armed {
+            Self::arm_update_check(&ctx.settings);
+        }
+    }
+
+    fn update(&mut self, ctx: &mut GameContext, dt: f64) {
+        ctx.update_music_rotation(dt);
+        let info = {
+            let mut guard = UPDATE_CHECK.lock().unwrap_or_else(|e| e.into_inner());
+            let (checker, prompted) = &mut *guard;
+            let Some(checker) = checker else {
+                return;
+            };
+            if *prompted || !checker.is_done() {
+                return;
+            }
+            *prompted = true;
+            checker.result()
+        };
+        if let Some(info) = info {
+            if info.tag != ctx.settings.skipped_update {
+                ctx.push_state(UpdatePromptState::new(info));
+            }
+        }
+    }
+
+    fn announce_entry(&mut self, ctx: &mut GameContext) {
+        let mut warning = String::new();
+        let invalid = last_invalid_saves();
+        if !invalid.is_empty() {
+            let count = invalid.len();
+            warning = if count == 1 {
+                format!("{count} saved career could not be read and was moved aside. ")
+            } else {
+                format!("{count} saved careers could not be read and were moved aside. ")
+            };
+        }
+        if ctx.settings.lane_keeping_unreadable {
+            // Falling back to full lane keeping is the right answer and a
+            // silent one is not: it deletes the destination-exit decision
+            // outright, and nothing later in the drive would explain why.
+            ctx.settings.lane_keeping_unreadable = false;
+            warning.push_str(
+                "Your lane keeping setting could not be read, so it is set to \
+                 full: the truck holds the lane and takes your exits. Change it \
+                 in Settings, Gameplay, Driving assistance. ",
+            );
+        }
+        if loadable_saves().is_empty() && !legacy_saves().is_empty() {
+            // Every saved career predates 1.9, so there is no Continue item
+            // where the player expects one. Say where the careers went before
+            // that silence reads as data loss; once a 1.9 career exists, the
+            // labels in Choose career carry the explanation instead.
+            warning.push_str(
+                "Your saved careers are from an earlier version of Freight \
+                 Fate; they are listed under Choose career. ",
+            );
+        }
+        let text = format!(
+            "Welcome to Freight Fate, version {}. An audio trucking adventure across America. {warning}",
+            updater::spoken_version(version())
+        );
+        ctx.say(text.trim_end());
+        let current = self.current_text(ctx);
+        ctx.say_with(current, Say::queued().review(false));
+    }
+
+    fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
+        let mut items: Vec<MenuItem<Self>> = Vec::new();
+        let saves = loadable_saves();
+        if let Some((latest_path, latest_profile)) = saves.first() {
+            items.push(
+                MenuItem::new(
+                    format!(
+                        "Continue latest career: {}",
+                        career_summary(ctx, latest_path, latest_profile, false)
+                    ),
+                    |s: &mut Self, ctx| s.continue_latest(ctx),
+                )
+                .help(format!("Load the newest save for {}.", latest_profile.name)),
+            );
+        }
+        if !saves.is_empty() || !legacy_saves().is_empty() {
+            // Careers from earlier versions cannot continue, but they still
+            // belong on the list: even with nothing loadable, Choose career is
+            // where a player finds them and hears what happened.
+            items.push(
+                MenuItem::new("Choose career", |_s: &mut Self, ctx| {
+                    ctx.push_state(LoadDriverState::new())
+                })
+                .help("Choose any saved career instead of only the newest one."),
+            );
+        }
+        if !saves.is_empty() {
+            items.push(
+                MenuItem::new("Manage careers", |_s: &mut Self, ctx| {
+                    ctx.push_state(ManageCareersState::new())
+                })
+                .help("Reset or delete saved careers."),
+            );
+        }
+        items.push(
+            MenuItem::new("New career", |_s: &mut Self, ctx| {
+                ctx.push_state(NameEntryState::new())
+            })
+            .help("Start a fresh trucking career."),
+        );
+        items.push(
+            MenuItem::new("Achievements", |_s: &mut Self, ctx| {
+                ctx.push_state(AchievementCareerState::new())
+            })
+            .help("Review earned and locked achievements for a saved career."),
+        );
+        items.push(
+            MenuItem::new("Online", |_s: &mut Self, ctx| {
+                // TODO(lead): wire `states::online_hub::OnlineHubState::new(ctx)`.
+                ctx.push_state(todo_state("OnlineHubState"))
+            })
+            .help(
+                "The public drivers board, your orinks.net account, \
+                 cloud backup and restore, and sharing choices like \
+                 Mastodon and Discord, all in one place.",
+            ),
+        );
+        items.push(
+            MenuItem::new("How to play", |_s: &mut Self, ctx| {
+                ctx.push_state(HelpState::new())
+            })
+            .help("Learn the controls and the goal of the game."),
+        );
+        items.push(
+            MenuItem::new("Learn game sounds", |_s: &mut Self, ctx| {
+                ctx.push_state(LearnSoundsState::new())
+            })
+            .help(
+                "Play any sound the road uses and hear what it means, \
+                 before you meet it at speed.",
+            ),
+        );
+        items.push(
+            MenuItem::new("Settings", |_s: &mut Self, ctx| {
+                ctx.push_state(SettingsState::new())
+            })
+            .help(
+                "Units, transmission mode, volumes, weather, voices, \
+                 update channel, and trip pacing.",
+            ),
+        );
+        items.push(
+            MenuItem::new("Report a problem", |s: &mut Self, ctx| s.report_issue(ctx))
+                .help("Open the Freight Fate bug report page on GitHub in your web browser."),
+        );
+        items.push(MenuItem::new("Quit", |_s: &mut Self, ctx| ctx.quit()).help("Exit the game."));
+        items
+    }
+
+    fn go_back(&mut self, ctx: &mut GameContext) {
+        ctx.audio.play("ui/menu_back");
+        ctx.push_state(ConfirmQuitState::new());
+    }
+
+    fn presence(&self, _ctx: &GameContext) -> Option<PresenceState> {
+        Some(PresenceState::activity("In the main menu"))
+    }
+}
+
+impl_state_for_menu!(MainMenuState);
+
+/// One spoken yes/no gate before Escape at the main menu exits the game.
+pub struct ConfirmQuitState {
+    menu: MenuCore<Self>,
+}
+
+impl ConfirmQuitState {
+    pub fn new() -> Self {
+        Self {
+            menu: MenuCore::new("Quit Freight Fate?").with_open_sound(Some("ui/error")),
+        }
+    }
+}
+
+impl Default for ConfirmQuitState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Menu for ConfirmQuitState {
+    fn menu(&self) -> &MenuCore<Self> {
+        &self.menu
+    }
+
+    fn menu_mut(&mut self) -> &mut MenuCore<Self> {
+        &mut self.menu
+    }
+
+    fn announce_entry(&mut self, ctx: &mut GameContext) {
+        let text = format!("Quit Freight Fate? {}", self.current_text(ctx));
+        ctx.say_with(text, Say::new().review(false));
+    }
+
+    fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
+        vec![
+            MenuItem::new("No, stay in Freight Fate", |s: &mut Self, ctx| s.go_back(ctx)),
+            MenuItem::new("Yes, quit Freight Fate", |_s: &mut Self, ctx| ctx.quit()),
+        ]
+    }
+}
+
+impl_state_for_menu!(ConfirmQuitState);
+
+/// New-career driver name entry on the shared accessible text field.
+pub struct NameEntryState {
+    entry: TextEntryCore,
+}
+
+impl NameEntryState {
+    pub fn new() -> Self {
+        Self {
+            entry: TextEntryCore::new("New career", "Driver name"),
+        }
+    }
+
+    /// The typed name.
+    pub fn name(&self) -> String {
+        self.entry.text()
+    }
+
+    pub fn cursor(&self) -> usize {
+        self.entry.cursor
+    }
+}
+
+impl Default for NameEntryState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl TextEntry for NameEntryState {
+    fn entry(&self) -> &TextEntryCore {
+        &self.entry
+    }
+
+    fn entry_mut(&mut self) -> &mut TextEntryCore {
+        &mut self.entry
+    }
+
+    fn enter(&mut self, ctx: &mut GameContext) {
+        ctx.say(
+            "New career. Type your driver name, then press Enter. \
+             Left and right arrows review the letters you have typed, \
+             Home and End jump to the start or end. Press Escape to cancel.",
+        );
+    }
+
+    fn confirm(&mut self, ctx: &mut GameContext) {
+        let typed = self.entry.text();
+        let name = match typed.trim() {
+            "" => "Driver".to_string(),
+            trimmed => trimmed.to_string(),
+        };
+        ctx.audio.play("ui/menu_select");
+        ctx.push_state(CareerStartState::new(&name));
+    }
+}
+
+impl_state_for_text_entry!(NameEntryState);

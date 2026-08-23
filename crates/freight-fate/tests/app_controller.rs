@@ -347,8 +347,42 @@ fn test_disabling_tears_down_subsystem() {
 // -- menus -------------------------------------------------------------------
 
 #[test]
-#[ignore = "needs states::main_menu (SettingsCategoryState)"]
-fn test_menu_dpad_moves_and_adjusts() {}
+fn test_menu_dpad_moves_and_adjusts() {
+    use freight_fate::states::base::Menu;
+    use freight_fate::states::main_menu::SettingsCategoryState;
+
+    let mut app = TestApp::new();
+    force_controller(&mut app);
+    app.push_state(SettingsCategoryState::new("controls"));
+    let index = |app: &TestApp| -> usize {
+        let state = app.state().unwrap();
+        let state = state.borrow();
+        state
+            .as_any()
+            .downcast_ref::<SettingsCategoryState>()
+            .unwrap()
+            .menu()
+            .index
+    };
+    let start_index = index(&app);
+    app.dispatch_controller(&button(ControllerButton::DPadDown, 0));
+    assert_eq!(index(&app), start_index + 1);
+    // Move to the Units item and adjust it with D-pad right.
+    {
+        let state = app.state().unwrap();
+        let mut state = state.borrow_mut();
+        state
+            .as_any_mut()
+            .downcast_mut::<SettingsCategoryState>()
+            .unwrap()
+            .menu_mut()
+            .index = 0;
+    }
+    let before = app.ctx.settings.imperial_units;
+    app.dispatch_controller(&button(ControllerButton::DPadRight, 0));
+    assert_ne!(app.ctx.settings.imperial_units, before);
+    app.shutdown();
+}
 
 #[test]
 fn test_setting_toggle_gates_controller() {

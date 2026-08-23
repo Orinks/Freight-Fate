@@ -53,19 +53,43 @@ fn the_version_is_the_crate_version_from_source() {
 fn test_garage_offers_partial_fuel_and_repairs_when_cash_is_short() {}
 
 #[test]
-#[ignore = "needs states::main_menu and states::driving"]
+#[ignore = "needs states::driving (the career-to-delivery flow; the main-menu half is states_main_menu.rs)"]
 fn test_full_game_flow_headless() {}
 
 #[test]
-#[ignore = "needs states::main_menu"]
-fn test_menu_first_letter_navigation() {}
+fn test_menu_first_letter_navigation() {
+    use freight_fate::states::base::{InputEvent, Key, Menu};
+    use freight_fate::states::main_menu::MainMenuState;
+
+    let mut app = TestApp::new();
+    app.push_state(MainMenuState::new());
+    let read = |app: &TestApp| -> (usize, usize, String) {
+        let state = app.state().unwrap();
+        let state = state.borrow();
+        let menu = state.as_any().downcast_ref::<MainMenuState>().unwrap();
+        let core = menu.menu();
+        (
+            core.index,
+            core.items.len(),
+            core.items[core.index].text(menu, &app.ctx),
+        )
+    };
+    app.dispatch_to_state(&InputEvent::typed('s'));
+    assert!(read(&app).2.to_lowercase().starts_with('s'));
+    app.dispatch_to_state(&InputEvent::key(Key::End));
+    let (index, len, _) = read(&app);
+    assert_eq!(index, len - 1);
+    app.dispatch_to_state(&InputEvent::key(Key::Home));
+    assert_eq!(read(&app).0, 0);
+    app.shutdown();
+}
 
 #[test]
 #[ignore = "needs states::city"]
 fn test_garage_upgrade_and_truck_purchase_flow() {}
 
 #[test]
-#[ignore = "needs states::main_menu"]
+#[ignore = "needs states::online_hub (the Discord row lives on the Online menu)"]
 fn test_discord_presence_toggle_is_accessible_and_wired() {}
 
 #[test]

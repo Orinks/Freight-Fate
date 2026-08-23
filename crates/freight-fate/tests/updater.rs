@@ -570,31 +570,86 @@ fn test_install_root_is_executable_dir() {
 // -- update states (app shell) ------------------------------------------------
 
 #[test]
-#[ignore = "needs app shell: UpdateCheckState"]
-fn test_manual_update_check_explains_source_builds() {}
+fn test_manual_update_check_explains_source_builds() {
+    use freight_fate::app::testing::TestApp;
+    use freight_fate::states::update::UpdateCheckState;
+
+    // The test binary is never a packaged build, so `is_frozen()` is false
+    // the way the Python test's monkeypatch made it.
+    assert!(!updater::is_frozen());
+    let mut app = TestApp::new();
+    app.push_state(UpdateCheckState::new());
+    let message = {
+        let state = app.state().unwrap();
+        let state = state.borrow();
+        let check = state.as_any().downcast_ref::<UpdateCheckState>().unwrap();
+        assert!(check.checker.is_none());
+        check.message.clone()
+    };
+    assert!(message.contains("This copy runs from source; update it with git."));
+    assert_eq!(
+        app.main_lines(),
+        vec![format!("{message} Press Escape to go back.")]
+    );
+    app.shutdown();
+}
 
 #[test]
 #[ignore = "needs app shell: packaged logging"]
 fn test_packaged_logging_writes_info_to_game_log() {}
 
 #[test]
-#[ignore = "needs app shell: the startup update prompt"]
-fn test_startup_update_prompt_respects_skipped_version() {}
+fn test_startup_update_prompt_respects_skipped_version() {
+    use freight_fate::app::testing::TestApp;
+    use freight_fate::states::main_menu::MainMenuState;
+    use freight_fate::states::update::UpdateChecker;
+
+    let info = updater::UpdateInfo {
+        tag: "v1.6.1".to_string(),
+        title: "Freight Fate version 1.6.1".to_string(),
+        notes: Vec::new(),
+        asset_name: "FreightFate-1.6.1-windows-portable.zip".to_string(),
+        asset_url: "https://example.test/FreightFate.zip".to_string(),
+        asset_size: 1,
+    };
+    let mut app = TestApp::new();
+    app.ctx.settings.skipped_update = "v1.6.1".to_string();
+    app.push_state(MainMenuState::new());
+    let depth = app.ctx.stack_len();
+    MainMenuState::install_update_check(Some(UpdateChecker::finished(Some(info), None)), false);
+    app.tick(0.0);
+    MainMenuState::install_update_check(None, false);
+    // The skipped version raises no prompt.
+    assert_eq!(app.ctx.stack_len(), depth);
+    app.shutdown();
+}
 
 #[test]
-#[ignore = "needs app shell: terminal exit arms the update check"]
+#[ignore = "needs states::city (CityMenuState._to_main_menu); MainMenuState::arm_update_check is ported"]
 fn test_terminal_exit_arms_fresh_packaged_update_check() {}
 
 #[test]
-#[ignore = "needs app shell: terminal exit from source"]
-fn test_terminal_exit_does_not_check_for_updates_from_source() {}
+fn test_terminal_exit_does_not_check_for_updates_from_source() {
+    use freight_fate::app::testing::TestApp;
+    use freight_fate::states::main_menu::MainMenuState;
+
+    // From source there is nothing to update to, so arming is a no-op and
+    // the session keeps whatever checker it already had (here: none).
+    let app = TestApp::new();
+    assert!(!updater::is_frozen());
+    MainMenuState::install_update_check(None, true);
+    MainMenuState::arm_update_check(&app.ctx.settings);
+    assert_eq!(MainMenuState::update_check_status(), (false, true));
+    MainMenuState::install_update_check(None, false);
+    drop(app);
+}
 
 #[test]
-#[ignore = "needs app shell: pickup facility exit"]
+#[ignore = "needs states::city_pickup (PickupFacilityState exit); MainMenuState::arm_update_check is ported"]
 fn test_pickup_facility_exit_arms_fresh_packaged_update_check() {}
 
 #[test]
-#[ignore = "needs app shell: drive exit"]
+#[ignore = "needs states::driving (PauseMenuState._quit_to_menu); MainMenuState::arm_update_check is ported"]
 fn test_drive_exit_does_not_arm_fresh_update_check() {}
 
 #[test]

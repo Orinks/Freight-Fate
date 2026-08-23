@@ -32,7 +32,18 @@ use freight_fate::cloud_saves::{
 };
 use freight_fate::net::testing::{ClosureTransport, FakeTransport, ManualClock};
 use freight_fate::net::{NetError, SharedTransport, Transport};
-use freight_fate::online_presence::{base_url, OnlineIdentity};
+use freight_fate::online_presence::{base_url, IdentityStore, MemoryStore, OnlineIdentity};
+
+// -- the app-shell rig for the menu tests further down ----------------------------
+use freight_fate::app::testing::TestApp;
+use freight_fate::app::{share, GameContext, SharedState};
+use freight_fate::states::base::{InputEvent, Key, Menu, State};
+use freight_fate::states::cloud_save_states::{
+    CloudBackupConsentState, CloudBackupState, CloudSlotState, ConfirmDeleteCloudState,
+    CLOUD_DISCLOSURE, LEGACY_BACKUP_NOTICE,
+};
+use freight_fate::states::online_hub::OnlineHubState;
+use freight_fate::states::online_states::set_identity_store_override;
 
 const TEST_KEY_ID: &str = "test-key";
 const TEST_PUBLIC_KEY_HEX: &str =
@@ -934,13 +945,150 @@ fn test_upload_rejects_oversized_content() {
 
 // -- settings menu (app shell) ----------------------------------------------------
 
-#[test]
-#[ignore = "needs app shell: the Online settings category and its spoken disclosure"]
-fn test_cloud_toggle_requires_the_account_setup_first() {}
+/// `IDENTITY.save()`: the test identity in a memory-backed identity store the
+/// menus read through `OnlineIdentity.load()`. Cleared on drop.
+struct SavedIdentity;
+
+impl Drop for SavedIdentity {
+    fn drop(&mut self) {
+        set_identity_store_override(None);
+    }
+}
+
+fn save_identity(app: &TestApp) -> SavedIdentity {
+    let store = IdentityStore::new(
+        &app.data_dir.path().join("identity"),
+        Some(MemoryStore::new()),
+    );
+    store.save(&identity()).unwrap();
+    set_identity_store_override(Some(Arc::new(store)));
+    // The app's services were built before the identity existed; the setup
+    // flow is what would have handed it to them.
+    app.ctx.services.cloud.set_identity(Some(identity()));
+    SavedIdentity
+}
+
+/// `app.cloud = make_service(...)`: a cloud service over `transport`, driven
+/// inline, carrying the test identity.
+fn install_cloud(app: &mut TestApp, transport: SharedTransport, enabled: bool) -> CloudSaves {
+    let service = CloudSaves::new(CloudSavesOptions {
+        enabled,
+        identity: Some(identity()),
+        transport,
+        threaded: false,
+        data_dir: ff_core::models::profile::data_dir(),
+        ..CloudSavesOptions::default()
+    });
+    app.ctx.services.cloud = service.clone();
+    service
+}
+
+fn push<S: State + 'static>(app: &mut TestApp, state: S) -> SharedState {
+    let shared = share(state);
+    app.push_shared(shared.clone());
+    shared
+}
+
+fn with_state<T: State + 'static, R>(shared: &SharedState, f: impl FnOnce(&mut T) -> R) -> R {
+    let mut state = shared.borrow_mut();
+    f(state.as_any_mut().downcast_mut::<T>().expect("state type"))
+}
+
+fn menu_labels<T: Menu + State>(shared: &SharedState, ctx: &GameContext) -> Vec<String> {
+    let state = shared.borrow();
+    let typed = state.as_any().downcast_ref::<T>().expect("state type");
+    typed
+        .menu()
+        .items
+        .iter()
+        .map(|item| item.text(typed, ctx))
+        .collect()
+}
+
+fn current_label<T: Menu + State>(shared: &SharedState, ctx: &GameContext) -> String {
+    let state = shared.borrow();
+    let typed = state.as_any().downcast_ref::<T>().expect("state type");
+    let core = typed.menu();
+    core.items[core.index].text(typed, ctx)
+}
+
+fn press(app: &mut TestApp, key: Key) {
+    app.dispatch_to_state(&InputEvent::key(key));
+}
+
+fn move_to<T: Menu + State>(app: &mut TestApp, shared: &SharedState, prefix: &str) {
+    for _ in 0..32 {
+        if current_label::<T>(shared, &app.ctx).starts_with(prefix) {
+            return;
+        }
+        press(app, Key::Down);
+    }
+    panic!("no row starting with {prefix:?}");
+}
+
+/// `open_online_settings`: the Online hub (pushed directly here; the Settings
+/// picker that points at it belongs to the main-menu port).
+fn open_online_settings(app: &mut TestApp) -> SharedState {
+    let hub = OnlineHubState::new(&mut app.ctx);
+    push(app, hub)
+}
 
 #[test]
-#[ignore = "needs app shell: the consent prompt when the toggle turns on"]
-fn test_cloud_toggle_speaks_the_disclosure_when_turned_on() {}
+fn test_cloud_toggle_requires_the_account_setup_first() {
+    let mut app = TestApp::new();
+    let cat = open_online_settings(&mut app);
+    move_to::<OnlineHubState>(&mut app, &cat, "Back up saves");
+    assert_eq!(
+        current_label::<OnlineHubState>(&cat, &app.ctx),
+        "Back up saves to your orinks.net account: not set up"
+    );
+
+    press(&mut app, Key::Return);
+    assert!(!app.ctx.settings.cloud_saves);
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|t| t.contains("same orinks.net sign-in")));
+}
+
+#[test]
+fn test_cloud_toggle_speaks_the_disclosure_when_turned_on() {
+    let mut app = TestApp::new();
+    let _identity = save_identity(&app);
+    let cat = open_online_settings(&mut app);
+    move_to::<OnlineHubState>(&mut app, &cat, "Back up saves");
+    assert_eq!(
+        current_label::<OnlineHubState>(&cat, &app.ctx),
+        "Back up saves to your orinks.net account: off"
+    );
+
+    press(&mut app, Key::Return);
+    let consent = app.state().unwrap();
+    assert_eq!(
+        with_state::<CloudBackupConsentState, _>(&consent, |s| s.menu.title.clone()),
+        "Turn Cloud backup on?"
+    );
+    assert_eq!(
+        menu_labels::<CloudBackupConsentState>(&consent, &app.ctx)[0],
+        "No, keep Cloud backup off"
+    );
+    assert!(!app.ctx.settings.cloud_saves);
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|t| t.contains(CLOUD_DISCLOSURE)));
+
+    press(&mut app, Key::Down);
+    press(&mut app, Key::Return);
+    assert!(app.ctx.settings.cloud_saves);
+    assert!(app.ctx.services.cloud.enabled());
+    assert!(ff_core::settings::Settings::load().cloud_saves);
+
+    app.clear_speech();
+    press(&mut app, Key::Return);
+    assert!(!app.ctx.settings.cloud_saves);
+    assert!(!app.ctx.services.cloud.enabled());
+}
 
 // -- retired credentials (issue 64) ----------------------------------------------
 
@@ -1288,16 +1436,182 @@ fn test_sync_state_persists_across_instances() {
 }
 
 #[test]
-#[ignore = "needs app shell: CloudSlotState's delete confirmation menu"]
-fn test_delete_menu_flow_confirms_then_forgets_the_slot() {}
+fn test_delete_menu_flow_confirms_then_forgets_the_slot() {
+    let mut app = TestApp::new();
+    let _identity = save_identity(&app);
+    // The delete goes through the cloud service's transport; this one says yes.
+    let deleter = FakeTransport::replying(json!({"ok": true}));
+    let service = install_cloud(&mut app, deleter.clone(), true);
+    service.sync_state().record_synced("Road Star", 3, "hash");
+    let entry = json!({
+        "saveName": "Road Star",
+        "revision": 3,
+        "createdAt": 1_700_000_000_000i64,
+        "summary": "Rig Hauler, level 9",
+    });
+    let mut slot = CloudSlotState::new(&mut app.ctx, "Road Star", vec![entry], None, None);
+    slot.threaded = false;
+    let slot = push(&mut app, slot);
+    move_to::<CloudSlotState>(&mut app, &slot, "Delete");
+    press(&mut app, Key::Return);
+
+    let confirm = app.state().unwrap();
+    assert_eq!(
+        with_state::<ConfirmDeleteCloudState, _>(&confirm, |s| s.menu.title.clone()),
+        "Delete the cloud backups?"
+    );
+    // Safe default still first; the wording changed on 2026-08-15 so a cancel
+    // can never be mistaken for the action it declines (see
+    // test_no_cancel_row_is_named_after_a_real_action).
+    assert_eq!(
+        menu_labels::<ConfirmDeleteCloudState>(&confirm, &app.ctx)[0],
+        "No, cancel and change nothing"
+    );
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|t| t.contains("cannot be brought back")));
+
+    press(&mut app, Key::Down);
+    press(&mut app, Key::Return);
+    with_state::<CloudSlotState, _>(&slot, |s| State::update(s, &mut app.ctx, 0.0));
+
+    let deleted = deleter.requests();
+    assert_eq!(deleted.len(), 1);
+    assert_eq!(deleted[0].method.as_deref(), Some("DELETE"));
+    assert!(deleted[0].url.contains("saveName=Road%20Star"));
+    assert!(service.sync_state().slots().is_empty());
+    assert!(with_state::<CloudSlotState, _>(&slot, |s| s
+        .revisions
+        .is_empty()));
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|t| t.contains("removed from your orinks.net account")));
+    // The slot menu no longer offers a delete for backups that are gone.
+    assert!(!menu_labels::<CloudSlotState>(&slot, &app.ctx)
+        .iter()
+        .any(|t| t.starts_with("Delete")));
+}
+
+/// Jessie's report, 2026-08-14: the server refused an upload with
+/// invalid_achievement, but the game blamed the connection. The "Keep this
+/// computer's save and back it up" retry must now speak the real family --
+/// network, auth, or a server rejection -- not one line for all three.
+/// Shane's report, same day: for a server rejection specifically, it must also
+/// name the career and split the story by reason code, the same as the
+/// background auto-backup queue does.
+#[test]
+fn test_keep_mine_retry_speaks_the_real_cause() {
+    let cases: [(&str, NetError, &[&str]); 5] = [
+        (
+            "network",
+            NetError::other("OSError", "no route to host"),
+            &["check your connection"],
+        ),
+        (
+            "http_401",
+            auth_error(401, None),
+            &["no longer accepts this computer's sign-in"],
+        ),
+        (
+            // Arithmetic cross-check refusal: named career, flagged for review,
+            // and the owner-required appeal sentence (a real career was
+            // false-flagged by this exact wording on 2026-08-14).
+            "impossible_money",
+            rejected_error("impossible_money"),
+            &["road star", "flagged it for review", "tester document"],
+        ),
+        (
+            // Schema/version refusal: named career, blames a build mismatch,
+            // never "flagged".
+            "invalid_schema",
+            rejected_error("invalid_schema"),
+            &["road star", "build mismatch", "not something you did"],
+        ),
+        (
+            // A rejected code with no specific family: named career, the
+            // generic wording, still not "check your connection".
+            "invalid_achievement",
+            rejected_error("invalid_achievement"),
+            &["road star", "backup not accepted"],
+        ),
+    ];
+    for (reason, error, expected_fragments) in cases {
+        let mut app = TestApp::new();
+        let _identity = save_identity(&app);
+        ff_core::models::profile::Profile::named("Road Star")
+            .save()
+            .unwrap();
+        install_cloud(&mut app, FakeTransport::failing(error), true);
+
+        let mut slot = CloudSlotState::new(&mut app.ctx, "Road Star", Vec::new(), None, None);
+        slot.threaded = false;
+        let slot = push(&mut app, slot);
+        app.clear_speech();
+        with_state::<CloudSlotState, _>(&slot, |s| {
+            s.start_keep_mine(&mut app.ctx);
+            State::update(s, &mut app.ctx, 0.0);
+        });
+
+        let spoken = app.main_lines();
+        let joined = spoken.join(" ").to_lowercase();
+        for fragment in expected_fragments {
+            assert!(joined.contains(fragment), "{reason}: {spoken:?}");
+        }
+        // The message never claims a network problem for a server rejection,
+        // and never claims a server rejection for an actual network problem.
+        if !["network", "http_401"].contains(&reason) {
+            assert!(!spoken.iter().any(|t| {
+                let lower = t.to_lowercase();
+                lower.contains("check your connection") && !lower.contains("backup not accepted")
+            }));
+            // The raw reason code is logged for review; it is never spoken.
+            assert!(!joined.contains(reason), "{reason}: {spoken:?}");
+        }
+    }
+}
 
 #[test]
-#[ignore = "needs app shell: CloudSlotState's keep-mine retry speaks the classified cause"]
-fn test_keep_mine_retry_speaks_the_real_cause() {}
+fn test_backup_menu_says_off_and_offers_the_opt_in() {
+    let mut app = TestApp::new();
+    let _identity = save_identity(&app);
+    install_cloud(
+        &mut app,
+        FakeTransport::replying(json!({"saves": [], "publicSaveName": null})),
+        false,
+    );
+    let mut state = CloudBackupState::new(&mut app.ctx);
+    state.threaded = false;
+    let state = push(&mut app, state);
+    assert!(with_state::<CloudBackupState, _>(&state, |s| s.fetched()));
+    with_state::<CloudBackupState, _>(&state, |s| State::update(s, &mut app.ctx, 0.0));
 
-#[test]
-#[ignore = "needs app shell: CloudBackupState's opt-in row"]
-fn test_backup_menu_says_off_and_offers_the_opt_in() {}
+    assert!(menu_labels::<CloudBackupState>(&state, &app.ctx)
+        .iter()
+        .any(|t| t.starts_with("Status: Cloud backup is off")));
+    move_to::<CloudBackupState>(&mut app, &state, "Turn Cloud backup on");
+    press(&mut app, Key::Return);
+
+    let consent = app.state().unwrap();
+    assert_eq!(
+        with_state::<CloudBackupConsentState, _>(&consent, |s| s.menu.title.clone()),
+        "Turn Cloud backup on?"
+    );
+    press(&mut app, Key::Down);
+    press(&mut app, Key::Return);
+
+    assert!(app.ctx.settings.cloud_saves);
+    assert!(app.ctx.services.cloud.enabled());
+    // Back on the rebuilt backup menu: the opt-in is gone and the status line
+    // reports readiness instead of off.
+    assert!(std::rc::Rc::ptr_eq(&app.state().unwrap(), &state));
+    assert!(with_state::<CloudBackupState, _>(&state, |s| s.fetched()));
+    with_state::<CloudBackupState, _>(&state, |s| State::update(s, &mut app.ctx, 0.0));
+    let texts = menu_labels::<CloudBackupState>(&state, &app.ctx);
+    assert!(!texts.iter().any(|t| t == "Turn Cloud backup on"));
+    assert!(texts.iter().any(|t| t == "Status: Cloud backup is ready."));
+}
 
 // -- the 1.9 cutover gate (careers from the 1.8 line do not restore here) --------
 
@@ -1345,8 +1659,38 @@ fn test_current_line_backup_without_marker_still_restores() {
 }
 
 #[test]
-#[ignore = "needs app shell: CloudSlotState labels and refuses a legacy snapshot"]
-fn test_legacy_snapshot_is_labeled_and_refused_before_the_confirm_step() {}
+fn test_legacy_snapshot_is_labeled_and_refused_before_the_confirm_step() {
+    let mut app = TestApp::new();
+    let _identity = save_identity(&app);
+    let entry = json!({
+        "saveName": "Old Timer",
+        "revision": 3,
+        "saveVersion": 5,
+        "createdAt": 1_700_000_000_000i64,
+        "summary": "Old Timer, level 50",
+    });
+    let slot = CloudSlotState::new(&mut app.ctx, "Old Timer", vec![entry], None, None);
+    let slot = push(&mut app, slot);
+    let restore_items: Vec<String> = menu_labels::<CloudSlotState>(&slot, &app.ctx)
+        .into_iter()
+        .filter(|t| t.starts_with("Restore"))
+        .collect();
+    assert!(restore_items
+        .iter()
+        .any(|t| t.contains("from an earlier version of Freight Fate")));
+
+    move_to::<CloudSlotState>(&mut app, &slot, "Restore");
+    press(&mut app, Key::Return);
+
+    // No confirmation screen opened, nothing was downloaded or deleted; the
+    // refusal is spoken kindly and the menu stays put.
+    assert!(std::rc::Rc::ptr_eq(&app.state().unwrap(), &slot));
+    let spoken = app.main_lines();
+    assert!(spoken.iter().any(|t| t.contains(LEGACY_BACKUP_NOTICE)));
+    assert!(spoken
+        .iter()
+        .any(|t| t.contains("stays safe in your orinks.net account")));
+}
 
 // -- the manual backup attempt (Shane's report, 2026-08-14: hitting Save gave ----
 // -- no sign a backup ran, so a silent one was indistinguishable from none) ------
@@ -1911,9 +2255,29 @@ fn test_take_announcements_drains_the_queue() {
     assert!(service.take_announcements().is_empty());
 }
 
+/// The worker thread never speaks; the app's main loop drains
+/// take_announcements and delivers on the normal announcement channel -- the
+/// same polled pattern as the controller-disconnect notice.
 #[test]
-#[ignore = "needs app shell: App.run drains take_announcements onto the speech channel"]
-fn test_app_loop_speaks_queued_background_refusals() {}
+fn test_app_loop_speaks_queued_background_refusals() {
+    let mut app = TestApp::new();
+    let clock = ManualClock::new();
+    let transport = FakeTransport::failing(rejected_error("impossible_money"));
+    let service = make_service(&transport, &clock);
+    app.ctx.services.cloud = service.clone();
+    service.queue_backup("Road Star", profile("Road Star", 5000.0));
+    drain(&service, &clock);
+    app.clear_speech();
+
+    app.run(Some(3)); // run() shuts the app down on its way out
+
+    let refusals = app
+        .main_lines()
+        .into_iter()
+        .filter(|t| t.starts_with("Road Star: backup not accepted."))
+        .count();
+    assert_eq!(refusals, 1);
+}
 
 // -- the Save game item at the terminal speaks the backup result ------------------
 

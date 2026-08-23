@@ -1,0 +1,250 @@
+//! The plumbing the online menus share: the worker-thread mailbox, the
+//! browser opener, the orinks.net transport the menus call outside the
+//! long-lived services, and the identity store behind `OnlineIdentity.load()`
+//! / `.save()`. Each has a test seam where the Python tests monkeypatched a
+//! module attribute (`webbrowser.open`, `online_presence.set_profile_sharing`,
+//! `OnlineIdentity.load`, `threading.Thread`).
+//!
+//! The clipboard ladder (`pygame.scrap`, `pbcopy`, a hidden Tk root, the
+//! read-back verify) collapses to `GameContext::write_clipboard_text`: the
+//! SDL clipboard is one UTF-8 call on every platform, and a headless run has
+//! an in-memory clipboard, so nothing here needs a fallback of its own.
+
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+use ff_core::models::profile::data_dir;
+
+use crate::app::GameContext;
+use crate::net::SharedTransport;
+use crate::online_presence::{default_transport, IdentityStore, OnlineIdentity};
+use crate::states::base::{InputEvent, Key, Menu};
+
+// -- the worker mailbox ---------------------------------------------------------------
+
+/// A one-slot mailbox a worker thread posts into and `update(dt)` drains
+/// (the Python `self._outcome` attribute, written from the thread and read
+/// on the game loop).
+pub struct Mailbox<T>(Arc<Mutex<Option<T>>>);
+
+impl<T> Clone for Mailbox<T> {
+    fn clone(&self) -> Self {
+        Mailbox(Arc::clone(&self.0))
+    }
+}
+
+impl<T> Default for Mailbox<T> {
+    fn default() -> Self {
+        Mailbox(Arc::new(Mutex::new(None)))
+    }
+}
+
+impl<T> Mailbox<T> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Leave `value` for the next `take`, replacing anything unread.
+    pub fn post(&self, value: T) {
+        *self.0.lock().unwrap_or_else(|e| e.into_inner()) = Some(value);
+    }
+
+    /// `outcome, self._outcome = self._outcome, None`.
+    pub fn take(&self) -> Option<T> {
+        self.0.lock().unwrap_or_else(|e| e.into_inner()).take()
+    }
+
+    /// Whether something is waiting to be taken.
+    pub fn is_posted(&self) -> bool {
+        self.0.lock().unwrap_or_else(|e| e.into_inner()).is_some()
+    }
+}
+
+/// Run `job` on a named daemon thread, or inline when `threaded` is false
+/// (the tests' `ImmediateThread`): the job then posts to its mailbox before
+/// this returns, and the next `update` drains it exactly as it would a
+/// thread's answer. Returns the handle of a spawned thread.
+pub fn run_worker(
+    threaded: bool,
+    name: &str,
+    job: impl FnOnce() + Send + 'static,
+) -> Option<thread::JoinHandle<()>> {
+    if !threaded {
+        job();
+        return None;
+    }
+    thread::Builder::new()
+        .name(name.to_string())
+        .spawn(job)
+        .ok()
+}
+
+// -- the browser -----------------------------------------------------------------------
+
+type OpenUrl = Arc<dyn Fn(&str) -> bool + Send + Sync>;
+
+static OPEN_URL_OVERRIDE: Mutex<Option<OpenUrl>> = Mutex::new(None);
+
+/// `webbrowser.open(url)`: true when a browser was asked to open the page.
+///
+/// False is the Python "raised" case, the one moment the game knows for
+/// certain that opening failed. Like `webbrowser.open`, a true answer does
+/// not prove a window appeared -- a remote or streamed session is the normal
+/// case where nothing happens -- which is why every caller keeps a spoken or
+/// clipboard fallback armed either way.
+pub fn open_url(url: &str) -> bool {
+    let override_fn = OPEN_URL_OVERRIDE
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone();
+    match override_fn {
+        Some(f) => f(url),
+        None => webbrowser::open(url).is_ok(),
+    }
+}
+
+/// Replace `open_url` for tests (`monkeypatch.setattr(webbrowser, "open", ...)`);
+/// `None` restores the real browser.
+pub fn set_open_url_override(f: Option<OpenUrl>) {
+    *OPEN_URL_OVERRIDE.lock().unwrap_or_else(|e| e.into_inner()) = f;
+}
+
+// -- the orinks.net transport -------------------------------------------------------
+
+static TRANSPORT_OVERRIDE: Mutex<Option<SharedTransport>> = Mutex::new(None);
+
+/// The transport behind the one-shot orinks.net calls these menus make
+/// (`set_profile_sharing`, `fetch_board`, `fetch_mastodon_status`,
+/// `start_activation`, `poll_activation`): the real network unless a test
+/// installed a fake.
+pub fn online_transport() -> SharedTransport {
+    TRANSPORT_OVERRIDE
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone()
+        .unwrap_or_else(default_transport)
+}
+
+/// Replace [`online_transport`] for tests; `None` restores the real network.
+pub fn set_online_transport_override(transport: Option<SharedTransport>) {
+    *TRANSPORT_OVERRIDE.lock().unwrap_or_else(|e| e.into_inner()) = transport;
+}
+
+// -- the identity store -------------------------------------------------------------------
+
+static IDENTITY_STORE: Mutex<Option<(PathBuf, Arc<IdentityStore>)>> = Mutex::new(None);
+static IDENTITY_STORE_OVERRIDE: Mutex<Option<Arc<IdentityStore>>> = Mutex::new(None);
+
+/// The store `OnlineIdentity.load()` and `.save()` read and write: the
+/// platform keyring over the data directory, built once per data directory
+/// and kept for the life of the process. The Python token cache was a class
+/// attribute, so a process-lifetime store is what keeps the Online hub's
+/// per-frame labels from costing a secret-store round trip each.
+pub fn identity_store() -> Arc<IdentityStore> {
+    if let Some(store) = IDENTITY_STORE_OVERRIDE
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone()
+    {
+        return store;
+    }
+    let dir = data_dir();
+    let mut cached = IDENTITY_STORE.lock().unwrap_or_else(|e| e.into_inner());
+    match cached.as_ref() {
+        Some((cached_dir, store)) if *cached_dir == dir => Arc::clone(store),
+        _ => {
+            let store = Arc::new(IdentityStore::platform(&dir));
+            *cached = Some((dir, Arc::clone(&store)));
+            store
+        }
+    }
+}
+
+/// Replace [`identity_store`] for tests (`monkeypatch.setattr(OnlineIdentity,
+/// "load", ...)`): a store over a memory secret store stands in for the
+/// platform one. `None` restores the platform store.
+pub fn set_identity_store_override(store: Option<Arc<IdentityStore>>) {
+    *IDENTITY_STORE_OVERRIDE
+        .lock()
+        .unwrap_or_else(|e| e.into_inner()) = store;
+}
+
+/// `OnlineIdentity.load()`.
+pub fn load_identity() -> Option<OnlineIdentity> {
+    identity_store().load()
+}
+
+/// `identity.save()`.
+pub fn save_identity(identity: &OnlineIdentity) -> std::io::Result<()> {
+    identity_store().save(identity)
+}
+
+// -- time ------------------------------------------------------------------------------------
+
+/// `time.time()`.
+pub fn wall_time() -> f64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs_f64())
+        .unwrap_or(0.0)
+}
+
+// -- the Menu defaults a screen overrides around ------------------------------------------
+//
+// A Rust trait method has no `super()`: a screen that overrides `enter`,
+// `go_back` or `handle_event` to add one step cannot then call the provided
+// body. These are that body, copied from `states::base::menu`, so the
+// screens here add their step and delegate.
+// TODO(lead): belongs in states::base::menu as `Menu::default_enter` /
+// `default_go_back` / `default_handle_event` every overriding screen can reach.
+
+/// The provided `Menu::enter`: build the rows, clamp the cursor, play the
+/// open sound, announce.
+pub fn menu_default_enter<M: Menu>(menu: &mut M, ctx: &mut GameContext) {
+    let items = menu.build_items(ctx);
+    let core = menu.menu_mut();
+    core.items = items;
+    core.index = core.index.min(core.items.len().saturating_sub(1));
+    if let Some(key) = menu.menu().open_sound_key.clone() {
+        ctx.audio.play(&key);
+    }
+    menu.announce_entry(ctx);
+}
+
+/// The provided `Menu::go_back`: the back sound, then pop.
+pub fn menu_default_go_back<M: Menu>(_menu: &mut M, ctx: &mut GameContext) {
+    ctx.audio.play("ui/menu_back");
+    ctx.pop_state();
+}
+
+/// The provided `Menu::handle_event`: arrows, Home/End, Enter, Escape, F1,
+/// the Control stop, first-letter jump.
+pub fn menu_default_handle_event<M: Menu>(menu: &mut M, ctx: &mut GameContext, event: &InputEvent) {
+    let Some((key, _mods, text)) = event.key_down() else {
+        return;
+    };
+    match key {
+        Key::Down => menu.move_by(ctx, 1),
+        Key::Up => menu.move_by(ctx, -1),
+        Key::Home => menu.jump(ctx, 0),
+        Key::End => {
+            let last = menu.menu().items.len().saturating_sub(1);
+            menu.jump(ctx, last);
+        }
+        Key::Return | Key::Space | Key::KpEnter => menu.activate(ctx),
+        Key::Escape => menu.go_back(ctx),
+        Key::F1 => {
+            let help = menu.current_help(ctx);
+            ctx.say(&help);
+        }
+        Key::LCtrl | Key::RCtrl => ctx.stop_speech(),
+        _ => {
+            if let Some(ch) = text.filter(|ch| ch.is_alphanumeric()) {
+                let lower: String = ch.to_lowercase().collect();
+                menu.first_letter_jump(ctx, &lower);
+            }
+        }
+    }
+}

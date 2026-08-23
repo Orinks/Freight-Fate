@@ -150,15 +150,15 @@ fn test_pre_marker_1_9_save_loads_and_is_stamped() {
 }
 
 #[test]
-#[ignore = "needs app shell (MainMenuState / LoadDriverState / LegacyCareerNoticeState)"]
+#[ignore = "the app-shell half lives in freight-fate/tests/states_main_menu.rs (ff-core cannot depend on the game crate)"]
 fn test_legacy_career_stays_listed_and_opens_the_notice() {}
 
 #[test]
-#[ignore = "needs app shell (LegacyCareerNoticeState -> NameEntryState)"]
+#[ignore = "the app-shell half lives in freight-fate/tests/states_main_menu.rs (ff-core cannot depend on the game crate)"]
 fn test_notice_start_new_career_opens_name_entry() {}
 
 #[test]
-#[ignore = "needs app shell (HomeCityState)"]
+#[ignore = "the app-shell half lives in freight-fate/tests/states_main_menu.rs; the gate half below still runs"]
 fn test_new_career_will_not_overwrite_a_same_named_legacy_save() {
     // The gate half: the same-named 1.8 save reads as legacy and stays intact.
     with_data_dir(|_| {

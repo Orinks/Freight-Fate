@@ -10,20 +10,39 @@
 //! end, and character echo -- including a "cap" marker so a capital letter
 //! is distinguishable by ear from a lowercase one.
 //!
-//! The Python tests reached the field through the main menu's New career
-//! row (`NameEntryState`); until `states::main_menu` is ported the field is
-//! pushed directly as a `TextEntryState` labelled the same way.
+//! The field is reached the way the Python tests reached it: through the
+//! main menu's New career row, which pushes `NameEntryState`.
 
 use freight_fate::app::testing::TestApp;
-use freight_fate::states::base::{InputEvent, Key};
-use freight_fate::states::text_entry::TextEntryState;
+use freight_fate::states::base::{InputEvent, Key, Menu};
+use freight_fate::states::main_menu::{MainMenuState, NameEntryState};
 
 fn key_event(key: Key) -> InputEvent {
     InputEvent::key(key)
 }
 
 fn open_name_entry(app: &mut TestApp) {
-    app.push_state(TextEntryState::new("New career", "Driver name", |_, _| {}));
+    app.push_state(MainMenuState::new());
+    loop {
+        let on_new_career = {
+            let state = app.state().unwrap();
+            let state = state.borrow();
+            let menu = state.as_any().downcast_ref::<MainMenuState>().unwrap();
+            let core = menu.menu();
+            core.items[core.index].text(menu, &app.ctx) == "New career"
+        };
+        if on_new_career {
+            break;
+        }
+        app.dispatch_to_state(&key_event(Key::Down));
+    }
+    app.dispatch_to_state(&key_event(Key::Return));
+    assert!(app
+        .state()
+        .unwrap()
+        .borrow()
+        .as_any()
+        .is::<NameEntryState>());
     app.clear_speech();
 }
 
@@ -38,7 +57,7 @@ fn name(app: &TestApp) -> String {
     let state = state.borrow();
     state
         .as_any()
-        .downcast_ref::<TextEntryState>()
+        .downcast_ref::<NameEntryState>()
         .unwrap()
         .name()
 }
@@ -48,7 +67,7 @@ fn cursor(app: &TestApp) -> usize {
     let state = state.borrow();
     state
         .as_any()
-        .downcast_ref::<TextEntryState>()
+        .downcast_ref::<NameEntryState>()
         .unwrap()
         .cursor()
 }

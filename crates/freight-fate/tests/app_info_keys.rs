@@ -3,12 +3,13 @@
 //! suites diff by name, and come alive with `states::driving`.
 
 use freight_fate::states::base::State;
-use freight_fate::states::text_entry::TextEntryState;
+use freight_fate::states::main_menu::NameEntryState;
 
 #[test]
 fn test_name_entry_keeps_its_commas() {
-    // `NameEntryState` is a `TextEntryState`, which captures typed text.
-    let field = TextEntryState::new("New career", "Driver name", |_, _| {});
+    // A driver name may well contain a comma, so the field declines the
+    // global message-review keys.
+    let field = NameEntryState::new();
     assert!(field.captures_text_input());
 }
 

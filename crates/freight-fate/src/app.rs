@@ -27,7 +27,7 @@ use crate::discord_presence::{DiscordPresence, DiscordPresenceOptions};
 use crate::online_journal::JournalOutbox;
 use crate::online_presence::{IdentityStore, OnlinePresence, OnlinePresenceOptions};
 use crate::speech::{NullSpeech, Speech, SpeechSink};
-use crate::states::base::{InputEvent, MenuItem, SimpleMenuState, State};
+use crate::states::base::{InputEvent, State};
 
 pub mod context;
 pub mod logging;
@@ -106,11 +106,7 @@ impl FrameClock {
 pub type InitialState = Box<dyn FnOnce(&mut GameContext) -> SharedState>;
 
 fn placeholder_main_menu(_ctx: &mut GameContext) -> SharedState {
-    share(SimpleMenuState::new(
-        "Freight Fate",
-        vec![MenuItem::new("Quit", |_, ctx: &mut GameContext| ctx.quit())
-            .help("The main menu arrives with the states port.")],
-    ))
+    share(crate::states::main_menu::MainMenuState::new())
 }
 
 pub struct App {
