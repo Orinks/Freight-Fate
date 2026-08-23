@@ -155,8 +155,11 @@ class TestInterstateArtifactScreen:
 
 
 def _is_hairpin(rec) -> bool:
-    """Same test ``RouteCurve.severity`` uses, for the plain ``CurveRecord``
-    tuples ``leg_curves`` returns."""
+    """The artifact screen's question -- "could a road here really do this?"
+    -- which is broader than the spoken hairpin and deliberately so: a very
+    low advisory is an extreme claim about the ground whether or not the road
+    comes back on itself. ``RouteCurve.severity`` uses shape alone, per
+    MUTCD; see ``curves.HAIRPIN_DEFLECTION_DEG``."""
     return rec.advisory_mph <= HAIRPIN_MAX_MPH or rec.deflection_deg >= HAIRPIN_DEFLECTION_DEG
 
 
@@ -701,3 +704,56 @@ def test_the_terrain_bake_says_what_kind_of_value_it_carries():
     assert "HPMS" in source
     assert "modal" in source.lower() or "derived" in source.lower()
     assert all(leg.hpms_terrain.type in (1, 2, 3) for leg in baked)
+
+
+def test_a_hairpin_is_a_shape_not_a_speed() -> None:
+    """MUTCD gives the Hairpin Curve sign (W1-11) for a change in horizontal
+    alignment of 135 degrees or more -- a switchback, where the road comes
+    back on itself. Advisory speed does not enter into it; MUTCD sorts by
+    advisory separately and much lower, swapping the Turn sign (W1-1) for the
+    Curve sign at 30 mph or less.
+
+    The old rule said "advisory <= 25 OR deflection >= 150", and the advisory
+    half called tight little bends taken slowly hairpins -- the worst of them
+    deflecting ten degrees. That spends the word on nothing and leaves it
+    meaning less when a real switchback turns up.
+    """
+    from freight_fate.data.curves import (
+        HAIRPIN_DEFLECTION_DEG,
+        HAIRPIN_TURN_MAX_MPH,
+        RouteCurve,
+    )
+
+    def curve(advisory: int, deflection: float) -> RouteCurve:
+        return RouteCurve(
+            start_mi=1.0,
+            apex_mi=1.05,
+            end_mi=1.1,
+            direction="L",
+            advisory_mph=advisory,
+            min_radius_ft=150,
+            deflection_deg=deflection,
+        )
+
+    # MUTCD's own numbers, not rounder ones chosen nearby.
+    assert HAIRPIN_DEFLECTION_DEG == 135.0
+    assert HAIRPIN_TURN_MAX_MPH == 30
+
+    # A switchback comes back on itself AND has to be crawled...
+    assert curve(advisory=25, deflection=170.0).severity == "hairpin"
+    assert curve(advisory=30, deflection=135.0).severity == "hairpin"
+    # ...and a slow little kink is not one, however slowly it is taken.
+    assert curve(advisory=25, deflection=10.6).severity != "hairpin"
+    assert curve(advisory=20, deflection=94.0).severity != "hairpin"
+
+    # Nor is a sweeper, however far round it goes. The angle is necessary and
+    # not sufficient: MUTCD puts the hairpin sign up instead of a TURN sign,
+    # and a 60 mph bend was never getting one. This is I-49 north of
+    # Fayetteville, 811 ft radius through 143 degrees -- real road, and the
+    # reason taking the angle alone put hairpins on seven interstate curves.
+    assert curve(advisory=60, deflection=142.9).severity != "hairpin"
+
+    # Darren's Norwich corner: real, tight, and correctly no longer a
+    # switchback (NY-12, 2026-08-23).
+    norwich = curve(advisory=25, deflection=94.0)
+    assert norwich.severity == "sharp"

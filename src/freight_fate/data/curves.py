@@ -7,8 +7,9 @@ rows (interchange and ramp arcs) are excluded here: ramps carry their own
 speech and the future curve-nav layer owns them.
 
 Severity bands come from the advisory speed the bake computed at 0.3 g
-lateral -- the same number a posted yellow diamond would show -- with
-deflection promoting true switchbacks to hairpins regardless of radius.
+lateral -- the same number a posted yellow diamond would show -- EXCEPT the
+hairpin, which is a shape rather than a speed and is decided by deflection
+alone (see ``HAIRPIN_DEFLECTION_DEG``).
 
 Interstate mainline records are screened for sweep artifacts on the way in
 (see ``INTERSTATE_MIN_RADIUS_FT``); the raw bake keeps every row.
@@ -40,10 +41,42 @@ from dataclasses import dataclass
 
 from .data_resources import read_data_text
 
+# The advisory at or below which a curve is an EXTREME CLAIM about the road,
+# used by the artifact screens to ask "could a road here really do this?".
+# Deliberately not the spoken hairpin test -- see HAIRPIN_DEFLECTION_DEG.
 HAIRPIN_MAX_MPH = 25
 SHARP_MAX_MPH = 35
 MODERATE_MAX_MPH = 50
-HAIRPIN_DEFLECTION_DEG = 150.0
+# What actually makes a hairpin, from the sign that names one. MUTCD gives
+# the Hairpin Curve sign (W1-11) for a change in horizontal alignment of 135
+# degrees or more -- a switchback, where the road comes back on itself. The
+# advisory speed does not enter into it: MUTCD sorts curves by advisory
+# separately and much lower down, using the Turn sign (W1-1) instead of the
+# Curve sign at 30 mph or less.
+#
+# This used to read "advisory <= 25 OR deflection >= 150", and the advisory
+# half was doing real damage. Across 33,930 baked curves it labelled 159
+# hairpins where only 99 turn 135 degrees or more; the other 60 were tight
+# little bends taken slowly, and the worst of them deflect TEN degrees. A
+# driver was being told "hairpin left" for a road that barely bends, which
+# spends the word on nothing and leaves it meaning less when a real
+# switchback arrives. Darren asked whether a 94-degree corner through
+# Norwich on NY-12 was "supposed to be there" (2026-08-23); the corner was,
+# the word was not.
+#
+# The angle is necessary and NOT sufficient, which the data made plain. MUTCD
+# says the hairpin sign goes up INSTEAD OF A TURN OR CURVE SIGN, and it is
+# the Turn sign (advisory 30 or less) that a switchback would otherwise
+# carry. Taking the angle alone put 7 hairpins on interstate mainline --
+# among them a 143-degree bend on I-49 north of Fayetteville with an 811 ft
+# radius and a 60 mph advisory. That is a real half-circle of road and a
+# sweeping one; no driver calls it a hairpin, because you do not slow for it.
+#
+# Both together give 46 hairpins in 33,930 curves and NONE on an interstate,
+# which is the check on the rule rather than a target it was fitted to:
+# interstates do not switchback, and the rule works that out on its own.
+HAIRPIN_TURN_MAX_MPH = 30
+HAIRPIN_DEFLECTION_DEG = 135.0
 
 # Interstate mainline geometry screen. The dense sweep baked some city
 # departure geometry and interchange vertices as mainline rather than as
@@ -126,7 +159,10 @@ class RouteCurve:
 
     @property
     def severity(self) -> str:
-        if self.advisory_mph <= HAIRPIN_MAX_MPH or self.deflection_deg >= HAIRPIN_DEFLECTION_DEG:
+        if (
+            self.deflection_deg >= HAIRPIN_DEFLECTION_DEG
+            and self.advisory_mph <= HAIRPIN_TURN_MAX_MPH
+        ):
             return "hairpin"
         if self.advisory_mph <= SHARP_MAX_MPH:
             return "sharp"

@@ -1154,6 +1154,15 @@
   re-read.
 
 ### Fixed
+- **"Hairpin" now means a hairpin.** The cab was calling a bend a hairpin
+  whenever it advised 25 miles per hour or less, which caught a lot of road
+  that is nothing of the kind -- tight little corners taken slowly, and in the
+  worst cases bends that barely change direction at all. A hairpin is a
+  switchback, where the road turns back on itself and you have to crawl it,
+  and that is what the word means now. Of the bends previously called
+  hairpins, well under half really were; the rest are announced as sharp
+  bends, which is what they are. You will hear the word far less often, and
+  when you do it will be worth slowing for.
 - **Curve assistance slows for the whole chain of bends, not just the first
   one.** When two bends come one after the other, the cab warns you about
   both in a single breath -- "Curve left, a quarter mile. Advise 40. Then

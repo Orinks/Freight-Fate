@@ -1349,6 +1349,35 @@ onto exit signalling.
       otherwise the level that earns the next tier -- so the question is
       answerable at any time, not only when the game happens to raise it.
 
+- [x] **"Hairpin" is a shape, and the sign manual says which one
+      (2026-08-23).** `severity` called anything advising 25 or less a
+      hairpin. MUTCD does not: the Hairpin Curve sign (W1-11) is for a change
+      in horizontal alignment of 135 degrees or more, and advisory speed
+      sorts curves separately and much lower down, swapping the Turn sign
+      (W1-1) for the Curve sign at 30 mph or less.
+
+      MEASURED across 33,930 baked curves, three candidate rules:
+        * old (advisory <= 25 or deflection >= 150): 159 hairpins, 0 on an
+          interstate -- but among them bends deflecting TEN degrees, called
+          hairpins purely for being taken slowly.
+        * angle alone (deflection >= 135): 99 hairpins, and 7 of them on
+          interstate mainline. One is I-49 north of Fayetteville, 811 ft
+          radius through 143 degrees at a 60 mph advisory: a real half-circle
+          of road, and a sweeping one nobody would call a hairpin.
+        * MUTCD, both halves (deflection >= 135 AND advisory <= 30): 46
+          hairpins and NONE on an interstate.
+
+      The last is what shipped, and the interstate count is the check on it
+      rather than a target it was fitted to -- interstates do not switchback,
+      and the rule works that out without being told.
+
+      The artifact screens keep the BROAD test, deliberately: their question
+      is "could a road here really do this?", where a very low advisory is an
+      extreme claim about the ground whether or not the road comes back on
+      itself. One predicate had been answering both questions;
+      `tools/screen_curve_artifacts.py` calls its own `_is_extreme_claim` now
+      so the two cannot drift into each other again.
+
 - [x] **Curve assist takes the chain's tightest advisory, not the first
       bend's (2026-08-23).** Darren's load shifted 12 percent on NY-12 and
       his log had the words and the machine disagreeing:

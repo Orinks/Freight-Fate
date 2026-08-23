@@ -170,6 +170,14 @@ that changes a fatigue, engine or tire accrual rate for a time or for a trip.
 Curves are the exception to "no mechanical effect": a `RouteCurve` carries an
 advisory speed, and hairpins, sharp and moderate bands have real limits.
 
+**Hairpin** is reserved for a switchback and is spoken about nothing else.
+The sharp, moderate and gentle bands come from the advisory speed, but a
+hairpin is a SHAPE: the road turns back on itself (135 degrees or more,
+MUTCD's Hairpin Curve sign W1-11) and has to be crawled (a Turn sign, 30 mph
+or less). A tight corner taken slowly is a **sharp** bend, however slowly.
+Spending "hairpin" on ordinary tight corners is what it used to do, and it
+left the word meaning nothing when a real switchback arrived (2026-08-23).
+
 ### Online
 
 | Concept | Class | Module |

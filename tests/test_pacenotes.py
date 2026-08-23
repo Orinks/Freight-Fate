@@ -50,8 +50,13 @@ def test_route_curves_mirror_reverse_legs(world):
 
 
 def test_severity_ladder():
-    assert _curve(1.0, advisory=20).severity == "hairpin"
-    assert _curve(1.0, advisory=45, deflection=170.0).severity == "hairpin"
+    # A hairpin is a shape, not a speed: it comes back on itself (135 degrees,
+    # MUTCD's Hairpin Curve sign) AND has to be crawled (a Turn sign, 30 or
+    # less). Either alone is some other kind of bend -- see
+    # test_a_hairpin_is_a_shape_not_a_speed in test_curve_management.py.
+    assert _curve(1.0, advisory=20, deflection=170.0).severity == "hairpin"
+    assert _curve(1.0, advisory=20).severity == "sharp"
+    assert _curve(1.0, advisory=45, deflection=170.0).severity == "moderate"
     assert _curve(1.0, advisory=30).severity == "sharp"
     assert _curve(1.0, advisory=45).severity == "moderate"
     assert _curve(1.0, advisory=65).severity == "gentle"
