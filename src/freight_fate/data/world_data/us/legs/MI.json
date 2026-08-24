@@ -56530,1190 +56530,36 @@
       "terrain": "flat",
       "corridor": {
         "tollway_detected": true,
-        "route_points": [
-          {
-            "at_mi": 0.0,
-            "lat": 46.49504,
-            "lon": -84.34551
-          },
-          {
-            "at_mi": 26.7,
-            "lat": 46.15983,
-            "lon": -84.56141
-          },
-          {
-            "at_mi": 53.3,
-            "lat": 45.83693,
-            "lon": -84.72491
-          },
-          {
-            "at_mi": 80.0,
-            "lat": 45.47439,
-            "lon": -84.78108
-          },
-          {
-            "at_mi": 106.7,
-            "lat": 45.33869,
-            "lon": -85.20655
-          },
-          {
-            "at_mi": 133.3,
-            "lat": 45.01969,
-            "lon": -85.35265
-          },
-          {
-            "at_mi": 160.0,
-            "lat": 44.76308,
-            "lon": -85.6206
-          }
-        ],
-        "elevation_samples": [
-          {
-            "at_mi": 0.0,
-            "elevation_ft": 607.0,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          },
-          {
-            "at_mi": 26.7,
-            "elevation_ft": 659.4,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          },
-          {
-            "at_mi": 53.3,
-            "elevation_ft": 574.1,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          },
-          {
-            "at_mi": 80.0,
-            "elevation_ft": 675.9,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          },
-          {
-            "at_mi": 106.7,
-            "elevation_ft": 659.4,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          },
-          {
-            "at_mi": 133.3,
-            "elevation_ft": 728.3,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          },
-          {
-            "at_mi": 160.0,
-            "elevation_ft": 596.1,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          }
-        ],
-        "grade_segments": [
-          {
-            "start_mi": 0.0,
-            "end_mi": 0.3,
-            "avg_grade_pct": 0.22,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 0.3,
-            "end_mi": 0.6,
-            "avg_grade_pct": 2.42,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 0.6,
-            "end_mi": 0.9,
-            "avg_grade_pct": 4.1,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 0.9,
-            "end_mi": 1.2,
-            "avg_grade_pct": -0.99,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 1.2,
-            "end_mi": 1.4,
-            "avg_grade_pct": -3.81,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 1.4,
-            "end_mi": 2.2,
-            "avg_grade_pct": -0.08,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 2.2,
-            "end_mi": 2.5,
-            "avg_grade_pct": 3.4,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 2.5,
-            "end_mi": 2.7,
-            "avg_grade_pct": 0.6,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 2.7,
-            "end_mi": 3.0,
-            "avg_grade_pct": -1.12,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 3.0,
-            "end_mi": 3.5,
-            "avg_grade_pct": 0.51,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 3.5,
-            "end_mi": 3.8,
-            "avg_grade_pct": 1.85,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 3.8,
-            "end_mi": 4.7,
-            "avg_grade_pct": 0.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 4.7,
-            "end_mi": 5.0,
-            "avg_grade_pct": -1.32,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 5.0,
-            "end_mi": 18.2,
-            "avg_grade_pct": 0.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 18.2,
-            "end_mi": 18.5,
-            "avg_grade_pct": 1.05,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 18.5,
-            "end_mi": 19.2,
-            "avg_grade_pct": -0.3,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 19.2,
-            "end_mi": 19.5,
-            "avg_grade_pct": -0.92,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 19.5,
-            "end_mi": 27.6,
-            "avg_grade_pct": -0.23,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 27.6,
-            "end_mi": 27.9,
-            "avg_grade_pct": 1.24,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 27.9,
-            "end_mi": 30.6,
-            "avg_grade_pct": 0.18,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 30.6,
-            "end_mi": 31.6,
-            "avg_grade_pct": 0.18,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 31.6,
-            "end_mi": 31.9,
-            "avg_grade_pct": 0.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 31.9,
-            "end_mi": 33.0,
-            "avg_grade_pct": 0.66,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 33.0,
-            "end_mi": 36.4,
-            "avg_grade_pct": -0.36,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 36.4,
-            "end_mi": 36.8,
-            "avg_grade_pct": 1.05,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 36.8,
-            "end_mi": 39.8,
-            "avg_grade_pct": -0.07,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 39.8,
-            "end_mi": 40.2,
-            "avg_grade_pct": 0.98,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 40.2,
-            "end_mi": 42.1,
-            "avg_grade_pct": 0.35,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 42.1,
-            "end_mi": 42.4,
-            "avg_grade_pct": -1.08,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 42.4,
-            "end_mi": 48.2,
-            "avg_grade_pct": -0.07,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 48.2,
-            "end_mi": 48.6,
-            "avg_grade_pct": 0.98,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 48.6,
-            "end_mi": 49.7,
-            "avg_grade_pct": 0.09,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 49.7,
-            "end_mi": 49.9,
-            "avg_grade_pct": 1.74,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 49.9,
-            "end_mi": 50.7,
-            "avg_grade_pct": -1.85,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 50.7,
-            "end_mi": 51.0,
-            "avg_grade_pct": 1.08,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 51.0,
-            "end_mi": 51.2,
-            "avg_grade_pct": 3.7,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 51.2,
-            "end_mi": 52.5,
-            "avg_grade_pct": 0.2,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 52.5,
-            "end_mi": 52.7,
-            "avg_grade_pct": -6.19,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 52.7,
-            "end_mi": 53.0,
-            "avg_grade_pct": -0.95,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 53.0,
-            "end_mi": 58.4,
-            "avg_grade_pct": 0.1,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 58.4,
-            "end_mi": 59.6,
-            "avg_grade_pct": 1.27,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 59.6,
-            "end_mi": 60.7,
-            "avg_grade_pct": 0.31,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 60.7,
-            "end_mi": 61.0,
-            "avg_grade_pct": 1.11,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 61.0,
-            "end_mi": 65.8,
-            "avg_grade_pct": -0.12,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 65.8,
-            "end_mi": 66.2,
-            "avg_grade_pct": 1.41,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 66.2,
-            "end_mi": 66.9,
-            "avg_grade_pct": 0.39,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 66.9,
-            "end_mi": 67.1,
-            "avg_grade_pct": 2.1,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 67.1,
-            "end_mi": 67.6,
-            "avg_grade_pct": -0.2,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 67.6,
-            "end_mi": 67.9,
-            "avg_grade_pct": -1.55,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 67.9,
-            "end_mi": 69.8,
-            "avg_grade_pct": -0.08,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 69.8,
-            "end_mi": 70.0,
-            "avg_grade_pct": 0.98,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 70.0,
-            "end_mi": 72.4,
-            "avg_grade_pct": -0.16,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 72.4,
-            "end_mi": 72.8,
-            "avg_grade_pct": -1.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 72.8,
-            "end_mi": 75.2,
-            "avg_grade_pct": -0.18,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 75.2,
-            "end_mi": 75.8,
-            "avg_grade_pct": -0.05,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 75.8,
-            "end_mi": 77.5,
-            "avg_grade_pct": 0.02,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 77.5,
-            "end_mi": 77.8,
-            "avg_grade_pct": -1.23,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 77.8,
-            "end_mi": 80.9,
-            "avg_grade_pct": -0.08,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 80.9,
-            "end_mi": 81.4,
-            "avg_grade_pct": -1.04,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 81.4,
-            "end_mi": 81.7,
-            "avg_grade_pct": 0.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 81.7,
-            "end_mi": 81.9,
-            "avg_grade_pct": -0.96,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 81.9,
-            "end_mi": 82.2,
-            "avg_grade_pct": 0.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 82.2,
-            "end_mi": 82.4,
-            "avg_grade_pct": -1.16,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 82.4,
-            "end_mi": 83.4,
-            "avg_grade_pct": -0.22,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 83.4,
-            "end_mi": 83.6,
-            "avg_grade_pct": 1.23,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 83.6,
-            "end_mi": 85.0,
-            "avg_grade_pct": -0.08,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 85.0,
-            "end_mi": 85.6,
-            "avg_grade_pct": -0.12,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 85.6,
-            "end_mi": 87.6,
-            "avg_grade_pct": -0.07,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 87.6,
-            "end_mi": 87.9,
-            "avg_grade_pct": 3.12,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 87.9,
-            "end_mi": 88.1,
-            "avg_grade_pct": -1.81,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 88.1,
-            "end_mi": 88.7,
-            "avg_grade_pct": 0.46,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 88.7,
-            "end_mi": 89.0,
-            "avg_grade_pct": 1.14,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 89.0,
-            "end_mi": 89.6,
-            "avg_grade_pct": 0.32,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 89.6,
-            "end_mi": 90.5,
-            "avg_grade_pct": -1.31,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 90.5,
-            "end_mi": 91.0,
-            "avg_grade_pct": -0.46,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 91.0,
-            "end_mi": 91.3,
-            "avg_grade_pct": 0.89,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 91.3,
-            "end_mi": 91.5,
-            "avg_grade_pct": 0.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 91.5,
-            "end_mi": 92.4,
-            "avg_grade_pct": 0.52,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 92.4,
-            "end_mi": 92.6,
-            "avg_grade_pct": 0.47,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 92.6,
-            "end_mi": 93.7,
-            "avg_grade_pct": 0.41,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 93.7,
-            "end_mi": 94.3,
-            "avg_grade_pct": -0.08,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 94.3,
-            "end_mi": 94.6,
-            "avg_grade_pct": 1.97,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 94.6,
-            "end_mi": 95.0,
-            "avg_grade_pct": -0.15,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 95.0,
-            "end_mi": 95.6,
-            "avg_grade_pct": -0.01,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 95.6,
-            "end_mi": 95.8,
-            "avg_grade_pct": -0.2,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 95.8,
-            "end_mi": 96.7,
-            "avg_grade_pct": -0.38,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 96.7,
-            "end_mi": 97.4,
-            "avg_grade_pct": -0.6,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 97.4,
-            "end_mi": 98.2,
-            "avg_grade_pct": 0.19,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 98.2,
-            "end_mi": 100.5,
-            "avg_grade_pct": -0.1,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 100.5,
-            "end_mi": 100.8,
-            "avg_grade_pct": 1.28,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 100.8,
-            "end_mi": 101.0,
-            "avg_grade_pct": 3.21,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 101.0,
-            "end_mi": 101.9,
-            "avg_grade_pct": -2.38,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 101.9,
-            "end_mi": 104.7,
-            "avg_grade_pct": -0.28,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 104.7,
-            "end_mi": 105.6,
-            "avg_grade_pct": 1.82,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 105.6,
-            "end_mi": 106.8,
-            "avg_grade_pct": -0.31,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 106.8,
-            "end_mi": 107.1,
-            "avg_grade_pct": -0.86,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 107.1,
-            "end_mi": 107.4,
-            "avg_grade_pct": -0.68,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 107.4,
-            "end_mi": 107.9,
-            "avg_grade_pct": -0.81,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 107.9,
-            "end_mi": 108.2,
-            "avg_grade_pct": -0.28,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 108.2,
-            "end_mi": 108.5,
-            "avg_grade_pct": 1.04,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 108.5,
-            "end_mi": 109.0,
-            "avg_grade_pct": 0.46,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 109.0,
-            "end_mi": 109.2,
-            "avg_grade_pct": -0.94,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 109.2,
-            "end_mi": 109.5,
-            "avg_grade_pct": -0.18,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 109.5,
-            "end_mi": 109.8,
-            "avg_grade_pct": -3.31,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 109.8,
-            "end_mi": 110.3,
-            "avg_grade_pct": 2.21,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 110.3,
-            "end_mi": 111.5,
-            "avg_grade_pct": 0.17,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 111.5,
-            "end_mi": 111.8,
-            "avg_grade_pct": 1.91,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 111.8,
-            "end_mi": 113.7,
-            "avg_grade_pct": -0.16,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 113.7,
-            "end_mi": 114.0,
-            "avg_grade_pct": 1.01,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 114.0,
-            "end_mi": 115.3,
-            "avg_grade_pct": -0.1,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 115.3,
-            "end_mi": 115.9,
-            "avg_grade_pct": 0.5,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 115.9,
-            "end_mi": 116.1,
-            "avg_grade_pct": 4.82,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 116.1,
-            "end_mi": 118.1,
-            "avg_grade_pct": -0.18,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 118.1,
-            "end_mi": 118.4,
-            "avg_grade_pct": -1.01,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 118.4,
-            "end_mi": 118.9,
-            "avg_grade_pct": 0.61,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 118.9,
-            "end_mi": 119.2,
-            "avg_grade_pct": 1.14,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 119.2,
-            "end_mi": 120.1,
-            "avg_grade_pct": -0.05,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 120.1,
-            "end_mi": 120.8,
-            "avg_grade_pct": 2.3,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 120.8,
-            "end_mi": 122.1,
-            "avg_grade_pct": -0.09,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 122.1,
-            "end_mi": 123.1,
-            "avg_grade_pct": -0.44,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 123.1,
-            "end_mi": 123.7,
-            "avg_grade_pct": -0.1,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 123.7,
-            "end_mi": 126.1,
-            "avg_grade_pct": -1.69,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 126.1,
-            "end_mi": 126.6,
-            "avg_grade_pct": 0.25,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 126.6,
-            "end_mi": 126.9,
-            "avg_grade_pct": -2.12,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 126.9,
-            "end_mi": 127.1,
-            "avg_grade_pct": 0.05,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 127.1,
-            "end_mi": 127.6,
-            "avg_grade_pct": 1.4,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 127.6,
-            "end_mi": 130.9,
-            "avg_grade_pct": -0.08,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 130.9,
-            "end_mi": 131.4,
-            "avg_grade_pct": 1.04,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 131.4,
-            "end_mi": 132.8,
-            "avg_grade_pct": 0.2,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 132.8,
-            "end_mi": 133.4,
-            "avg_grade_pct": 1.37,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 133.4,
-            "end_mi": 136.0,
-            "avg_grade_pct": -0.06,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 136.0,
-            "end_mi": 136.5,
-            "avg_grade_pct": -0.32,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 136.5,
-            "end_mi": 136.8,
-            "avg_grade_pct": 0.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 136.8,
-            "end_mi": 137.1,
-            "avg_grade_pct": -3.07,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 137.1,
-            "end_mi": 137.4,
-            "avg_grade_pct": -1.66,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 137.4,
-            "end_mi": 138.9,
-            "avg_grade_pct": -0.42,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 138.9,
-            "end_mi": 139.2,
-            "avg_grade_pct": 1.48,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 139.2,
-            "end_mi": 141.7,
-            "avg_grade_pct": -0.09,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 141.7,
-            "end_mi": 142.1,
-            "avg_grade_pct": -1.51,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 142.1,
-            "end_mi": 142.9,
-            "avg_grade_pct": 0.29,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 142.9,
-            "end_mi": 143.5,
-            "avg_grade_pct": 1.45,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 143.5,
-            "end_mi": 145.4,
-            "avg_grade_pct": -0.17,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 145.4,
-            "end_mi": 145.7,
-            "avg_grade_pct": -1.82,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 145.7,
-            "end_mi": 148.0,
-            "avg_grade_pct": 0.18,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 148.0,
-            "end_mi": 150.3,
-            "avg_grade_pct": 0.82,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 150.3,
-            "end_mi": 151.4,
-            "avg_grade_pct": -0.13,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 151.4,
-            "end_mi": 152.3,
-            "avg_grade_pct": -2.42,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 152.3,
-            "end_mi": 153.1,
-            "avg_grade_pct": -0.13,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 153.1,
-            "end_mi": 153.7,
-            "avg_grade_pct": 0.07,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 153.7,
-            "end_mi": 155.6,
-            "avg_grade_pct": 0.02,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 155.6,
-            "end_mi": 155.9,
-            "avg_grade_pct": 0.87,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 155.9,
-            "end_mi": 158.4,
-            "avg_grade_pct": 0.15,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 158.4,
-            "end_mi": 158.7,
-            "avg_grade_pct": -1.3,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 158.7,
-            "end_mi": 160.0,
-            "avg_grade_pct": 0.07,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          }
-        ],
         "checkpoints": [
           {
             "name": "Saint Ignace",
-            "at_mi": 51.6,
+            "at_mi": 50.2,
             "type": "place",
             "state": "Michigan",
             "highway": "I-75",
             "lat": 45.8661,
             "lon": -84.7275,
-            "source": "Real town on I-75 between sault_ste_marie_mi_us and traverse_city_mi_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.33 mi off-route at closest approach)."
+            "source": "Real town on I-75 between sault_ste_marie_mi_us and traverse_city_mi_us; position matched to the nearest point on the leg's checked-in route geometry (0.33 mi off-route at closest approach)."
           },
           {
             "name": "Pellston",
-            "at_mi": 74.6,
+            "at_mi": 73.6,
             "type": "place",
             "state": "Michigan",
             "highway": "US-31",
             "lat": 45.5528,
             "lon": -84.7854,
-            "source": "Real town on US-31 between sault_ste_marie_mi_us and traverse_city_mi_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.06 mi off-route at closest approach)."
+            "source": "Real town on I-75 between sault_ste_marie_mi_us and traverse_city_mi_us; position matched to the nearest point on the leg's checked-in route geometry (0.05 mi off-route at closest approach)."
           },
           {
             "name": "Bay Harbor",
-            "at_mi": 99.2,
+            "at_mi": 100.1,
             "type": "place",
             "state": "Michigan",
             "highway": "US-31",
             "lat": 45.3641,
             "lon": -85.0821,
-            "source": "Real town on US-31 between sault_ste_marie_mi_us and traverse_city_mi_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.46 mi off-route at closest approach)."
+            "source": "Real town on I-75 between sault_ste_marie_mi_us and traverse_city_mi_us; position matched to the nearest point on the leg's checked-in route geometry (1.22 mi off-route at closest approach)."
           },
           {
             "name": "Elk Rapids",
@@ -57723,19 +56569,103 @@
             "highway": "US-31",
             "lat": 44.8956,
             "lon": -85.4165,
-            "source": "Real town on US-31 between sault_ste_marie_mi_us and traverse_city_mi_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.31 mi off-route at closest approach)."
-          }
-        ],
-        "state_miles": [
-          {
-            "state": "Michigan",
-            "miles": 160.0
+            "source": "Real town on I-75 between sault_ste_marie_mi_us and traverse_city_mi_us; position matched to the nearest point on the leg's checked-in route geometry (0.42 mi off-route at closest approach)."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
+        "hpms_terrain": {
+          "type": 1,
+          "name": "level",
+          "sections": 800,
+          "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+        },
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 46.49504,
+            "lon": -84.34551
+          },
+          {
+            "at_mi": 25.16,
+            "lat": 46.19254,
+            "lon": -84.56142
+          },
+          {
+            "at_mi": 50.16,
+            "lat": 45.88088,
+            "lon": -84.74132
+          },
+          {
+            "at_mi": 75.24,
+            "lat": 45.54014,
+            "lon": -84.78304
+          },
+          {
+            "at_mi": 100.29,
+            "lat": 45.3596,
+            "lon": -85.10519
+          },
+          {
+            "at_mi": 125.4,
+            "lat": 45.12514,
+            "lon": -85.34983
+          },
+          {
+            "at_mi": 150.51,
+            "lat": 44.7926,
+            "lon": -85.48698
+          },
+          {
+            "at_mi": 159.5,
+            "lat": 44.76308,
+            "lon": -85.6206
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 616.8,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "at_mi": 25.29,
+            "elevation_ft": 672.6,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "at_mi": 50.58,
+            "elevation_ft": 705.4,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "at_mi": 75.76,
+            "elevation_ft": 689.0,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "at_mi": 100.86,
+            "elevation_ft": 669.3,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "at_mi": 126.13,
+            "elevation_ft": 629.9,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "at_mi": 151.23,
+            "elevation_ft": 715.2,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "at_mi": 160.0,
+            "elevation_ft": 597.1,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          }
+        ],
         "interchanges": [
           {
-            "at_mi": 1.5,
+            "at_mi": 1.6,
             "exit_ref": "394",
             "name": "",
             "destinations": [
@@ -57746,10 +56676,12 @@
             "highway": "I-75",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_control": "stop",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 3.6,
+            "at_mi": 3.7,
             "exit_ref": "392",
             "name": "",
             "destinations": [
@@ -57816,19 +56748,20 @@
             ],
             "via": "M 48",
             "highway": "I-75",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 37.0,
             "exit_ref": "359",
             "name": "",
-            "destinations": [
-              "De Tour Village",
-              "Drummond Island"
-            ],
-            "via": "M 134",
+            "destinations": [],
+            "via": "",
             "highway": "I-75",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 44.3,
@@ -57841,7 +56774,11 @@
             ],
             "via": "M 123",
             "highway": "I-75",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 48.2,
@@ -57853,7 +56790,11 @@
             ],
             "via": "I 75 Business",
             "highway": "I-75",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
             "at_mi": 52.1,
@@ -57867,6 +56808,8 @@
             "via": "I 75 South",
             "highway": "I-75",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
@@ -57902,75 +56845,76 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           }
         ],
+        "restrictions": [],
         "landmarks": [
           {
             "name": "Brimley",
-            "at_mi": 9.7,
+            "at_mi": 9.6,
             "off_mi": 7.8,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 154192250, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 154192250, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Brimley"
           },
           {
             "name": "Dafter",
-            "at_mi": 11.4,
+            "at_mi": 11.1,
             "off_mi": 0.39,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 154305286, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 154305286, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Dafter"
           },
           {
             "name": "Munuscong River",
             "category": "river",
             "kind": "point",
-            "at_mi": 14.3,
+            "at_mi": 13.2,
             "spoken": "Crossing the Munuscong River"
           },
           {
             "name": "Kincheloe",
-            "at_mi": 17.9,
+            "at_mi": 17.8,
             "off_mi": 2.11,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 6777967202, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 6777967202, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Kincheloe"
           },
           {
             "name": "Rudyard",
-            "at_mi": 22.7,
+            "at_mi": 22.5,
             "off_mi": 1.86,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153927822, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153927822, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Rudyard"
           },
           {
             "name": "Moran",
-            "at_mi": 43.7,
+            "at_mi": 43.5,
             "off_mi": 4.2,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 154044444, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 154044444, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Moran"
           },
           {
             "name": "Mackinac Island",
-            "at_mi": 52.9,
+            "at_mi": 52.8,
             "off_mi": 4.99,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 154343044, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 154343044, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Mackinac Island"
           },
           {
             "name": "Mackinaw City",
-            "at_mi": 57.3,
+            "at_mi": 57.2,
             "off_mi": 0.24,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153963876, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153963876, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Mackinaw City"
           },
           {
@@ -57979,74 +56923,67 @@
             "off_mi": 1.05,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153859335, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153859335, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Carp Lake"
           },
           {
             "name": "Bliss",
-            "at_mi": 65.0,
+            "at_mi": 64.9,
             "off_mi": 4.93,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153839531, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153839531, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Bliss"
           },
           {
-            "name": "Maple River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 69.4,
-            "spoken": "Crossing the Maple River"
-          },
-          {
-            "name": "East Branch Maple River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 69.4,
-            "spoken": "Crossing the East Branch Maple River"
-          },
-          {
             "name": "Alanson",
-            "at_mi": 81.7,
+            "at_mi": 82.2,
             "off_mi": 0.0,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 154137697, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "source": "OpenStreetMap place=village node 154137697, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Alanson"
           },
           {
+            "name": "West Branch Maple River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 90.9,
+            "spoken": "Crossing the West Branch Maple River"
+          },
+          {
             "name": "Harbor Springs",
-            "at_mi": 92.0,
+            "at_mi": 91.9,
             "off_mi": 4.11,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=town node 154334525, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=town node 154334525, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Harbor Springs"
           },
           {
             "name": "Petoskey",
-            "at_mi": 93.1,
+            "at_mi": 93.0,
             "off_mi": 0.19,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=town node 154120658, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=town node 154120658, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Petoskey"
           },
           {
+            "name": "Blackbird Museum",
+            "category": "museum",
+            "kind": "point",
+            "at_mi": 93.7,
+            "spoken": "Blackbird Museum ahead"
+          },
+          {
             "name": "Walloon Lake",
-            "at_mi": 93.9,
+            "at_mi": 93.8,
             "off_mi": 7.41,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153957592, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153957592, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Walloon Lake"
-          },
-          {
-            "name": "Little Traverse Historical Society and History Museum",
-            "category": "museum",
-            "kind": "point",
-            "at_mi": 95.0,
-            "spoken": "Little Traverse Historical Society and History Museum ahead"
           },
           {
             "name": "Charlevoix",
@@ -58054,7 +56991,7 @@
             "off_mi": 0.02,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=town node 153799277, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=town node 153799277, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Charlevoix"
           },
           {
@@ -58063,16 +57000,16 @@
             "off_mi": 1.55,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153440827, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153440827, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Norwood"
           },
           {
             "name": "Ellsworth",
-            "at_mi": 122.7,
+            "at_mi": 122.8,
             "off_mi": 4.84,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 183724601, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 183724601, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Ellsworth"
           },
           {
@@ -58081,7 +57018,7 @@
             "off_mi": 0.01,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153375284, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153375284, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Torch Lake"
           },
           {
@@ -58090,7 +57027,7 @@
             "off_mi": 4.32,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 183659471, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 183659471, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Central Lake"
           },
           {
@@ -58099,7 +57036,7 @@
             "off_mi": 7.05,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 183723734, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 183723734, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Bellaire"
           },
           {
@@ -58108,7 +57045,7 @@
             "off_mi": 4.98,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153586367, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153586367, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Old Mission"
           },
           {
@@ -58117,7 +57054,7 @@
             "off_mi": 4.49,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 11584759320, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 11584759320, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Peninsula Township"
           },
           {
@@ -58126,15 +57063,8 @@
             "off_mi": 7.3,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153653686, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153653686, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Rapid City"
-          },
-          {
-            "name": "Boardman River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 147.6,
-            "spoken": "Crossing the Boardman River"
           },
           {
             "name": "Williamsburg",
@@ -58142,16 +57072,16 @@
             "off_mi": 4.27,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153442192, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153442192, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Williamsburg"
           },
           {
             "name": "Acme Township",
-            "at_mi": 150.7,
+            "at_mi": 150.6,
             "off_mi": 1.24,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 11584759309, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 11584759309, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Acme Township"
           },
           {
@@ -58160,16 +57090,16 @@
             "off_mi": 5.44,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 11584759314, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 11584759314, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Whitewater Township"
           },
           {
             "name": "Acme",
             "at_mi": 152.6,
-            "off_mi": 0.01,
+            "off_mi": 0.02,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153649838, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153649838, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Acme"
           },
           {
@@ -58178,8 +57108,15 @@
             "off_mi": 2.74,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 11584679842, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 11584679842, projected onto the leg's checked-in route geometry",
             "spoken": "Passing East Bay Charter Township"
+          },
+          {
+            "name": "Boardman River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 156.1,
+            "spoken": "Crossing the Boardman River"
           },
           {
             "name": "Elmwood Charter Township",
@@ -58187,7 +57124,7 @@
             "off_mi": 4.33,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 11584679844, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 11584679844, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Elmwood Charter Township"
           },
           {
@@ -58196,7 +57133,7 @@
             "off_mi": 6.94,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 11584679843, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 11584679843, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Long Lake Charter Township"
           },
           {
@@ -58205,13 +57142,721 @@
             "off_mi": 7.8,
             "category": "village",
             "kind": "point",
-            "source": "OpenStreetMap place=village node 153446053, projected onto the leg's OpenRouteService driving-hgv route",
+            "source": "OpenStreetMap place=village node 153446053, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Grawn"
+          }
+        ],
+        "traffic_aadt": [
+          {
+            "at_mi": 0.0,
+            "aadt": 7000.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 5.0,
+            "aadt": 6000.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 15.0,
+            "aadt": 5500.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 20.0,
+            "aadt": 4000.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 25.0,
+            "aadt": 3500.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 40.0,
+            "aadt": 4500.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 45.0,
+            "aadt": 5500.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 50.0,
+            "aadt": 6000.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 55.0,
+            "aadt": 12000.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 0.6,
+            "avg_grade_pct": 0.37,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 0.6,
+            "end_mi": 0.8,
+            "avg_grade_pct": 6.05,
+            "terrain": "mountain",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 0.8,
+            "end_mi": 1.1,
+            "avg_grade_pct": -0.95,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 1.1,
+            "end_mi": 1.4,
+            "avg_grade_pct": -3.72,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 1.4,
+            "end_mi": 2.0,
+            "avg_grade_pct": 0.11,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 2.0,
+            "end_mi": 2.3,
+            "avg_grade_pct": 1.83,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 2.3,
+            "end_mi": 3.2,
+            "avg_grade_pct": 0.61,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 3.2,
+            "end_mi": 3.5,
+            "avg_grade_pct": 1.83,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 3.5,
+            "end_mi": 5.4,
+            "avg_grade_pct": -0.3,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 5.4,
+            "end_mi": 5.7,
+            "avg_grade_pct": -1.83,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 5.7,
+            "end_mi": 11.2,
+            "avg_grade_pct": -0.06,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 11.2,
+            "end_mi": 11.8,
+            "avg_grade_pct": 0.21,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 11.8,
+            "end_mi": 17.3,
+            "avg_grade_pct": 0.24,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 17.3,
+            "end_mi": 17.6,
+            "avg_grade_pct": 2.83,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 17.6,
+            "end_mi": 17.9,
+            "avg_grade_pct": -0.61,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 17.9,
+            "end_mi": 18.2,
+            "avg_grade_pct": -2.43,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 18.2,
+            "end_mi": 28.1,
+            "avg_grade_pct": -0.12,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 28.1,
+            "end_mi": 28.7,
+            "avg_grade_pct": -0.11,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 28.7,
+            "end_mi": 29.6,
+            "avg_grade_pct": 0.07,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 29.6,
+            "end_mi": 29.9,
+            "avg_grade_pct": 2.23,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 29.9,
+            "end_mi": 32.0,
+            "avg_grade_pct": -0.03,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 32.0,
+            "end_mi": 32.3,
+            "avg_grade_pct": 1.82,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 32.3,
+            "end_mi": 33.9,
+            "avg_grade_pct": -0.12,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 33.9,
+            "end_mi": 34.5,
+            "avg_grade_pct": -1.93,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 34.5,
+            "end_mi": 40.6,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 40.6,
+            "end_mi": 40.9,
+            "avg_grade_pct": -2.22,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 40.9,
+            "end_mi": 46.7,
+            "avg_grade_pct": -0.07,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 46.7,
+            "end_mi": 47.0,
+            "avg_grade_pct": 2.13,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 47.0,
+            "end_mi": 48.2,
+            "avg_grade_pct": -0.12,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 48.2,
+            "end_mi": 49.3,
+            "avg_grade_pct": 0.64,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 49.3,
+            "end_mi": 49.6,
+            "avg_grade_pct": -0.39,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 49.6,
+            "end_mi": 50.2,
+            "avg_grade_pct": 2.07,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 50.2,
+            "end_mi": 50.9,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 50.9,
+            "end_mi": 51.5,
+            "avg_grade_pct": -3.16,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 51.5,
+            "end_mi": 57.8,
+            "avg_grade_pct": 0.15,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 57.8,
+            "end_mi": 58.2,
+            "avg_grade_pct": 2.08,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 58.2,
+            "end_mi": 66.6,
+            "avg_grade_pct": 0.21,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 66.6,
+            "end_mi": 66.8,
+            "avg_grade_pct": -1.64,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 66.8,
+            "end_mi": 80.4,
+            "avg_grade_pct": -0.16,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 80.4,
+            "end_mi": 80.7,
+            "avg_grade_pct": -2.0,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 80.7,
+            "end_mi": 86.9,
+            "avg_grade_pct": -0.04,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 86.9,
+            "end_mi": 87.2,
+            "avg_grade_pct": 1.6,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 87.2,
+            "end_mi": 89.4,
+            "avg_grade_pct": 0.46,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 89.4,
+            "end_mi": 89.6,
+            "avg_grade_pct": -4.22,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 89.6,
+            "end_mi": 92.0,
+            "avg_grade_pct": 0.18,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 92.0,
+            "end_mi": 92.2,
+            "avg_grade_pct": -2.14,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 92.2,
+            "end_mi": 92.5,
+            "avg_grade_pct": -0.49,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 92.5,
+            "end_mi": 93.0,
+            "avg_grade_pct": 2.11,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 93.0,
+            "end_mi": 96.7,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 96.7,
+            "end_mi": 97.0,
+            "avg_grade_pct": 1.83,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 97.0,
+            "end_mi": 100.6,
+            "avg_grade_pct": 0.04,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 100.6,
+            "end_mi": 101.1,
+            "avg_grade_pct": -2.89,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 101.1,
+            "end_mi": 104.4,
+            "avg_grade_pct": -0.13,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 104.4,
+            "end_mi": 104.6,
+            "avg_grade_pct": 2.27,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 104.6,
+            "end_mi": 109.5,
+            "avg_grade_pct": -0.09,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 109.5,
+            "end_mi": 109.8,
+            "avg_grade_pct": 1.72,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 109.8,
+            "end_mi": 115.2,
+            "avg_grade_pct": 0.15,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 115.2,
+            "end_mi": 115.7,
+            "avg_grade_pct": 3.3,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 115.7,
+            "end_mi": 120.0,
+            "avg_grade_pct": 0.08,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 120.0,
+            "end_mi": 120.3,
+            "avg_grade_pct": 3.03,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 120.3,
+            "end_mi": 120.6,
+            "avg_grade_pct": -1.21,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 120.6,
+            "end_mi": 120.9,
+            "avg_grade_pct": -2.42,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 120.9,
+            "end_mi": 121.2,
+            "avg_grade_pct": 0.4,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 121.2,
+            "end_mi": 121.8,
+            "avg_grade_pct": 2.12,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 121.8,
+            "end_mi": 122.7,
+            "avg_grade_pct": -1.01,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 122.7,
+            "end_mi": 123.0,
+            "avg_grade_pct": 2.22,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 123.0,
+            "end_mi": 123.4,
+            "avg_grade_pct": -0.61,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 123.4,
+            "end_mi": 124.6,
+            "avg_grade_pct": -1.52,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 124.6,
+            "end_mi": 125.2,
+            "avg_grade_pct": 0.3,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 125.2,
+            "end_mi": 125.5,
+            "avg_grade_pct": -5.25,
+            "terrain": "mountain",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 125.5,
+            "end_mi": 130.4,
+            "avg_grade_pct": -0.13,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 130.4,
+            "end_mi": 130.8,
+            "avg_grade_pct": 2.48,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 130.8,
+            "end_mi": 132.2,
+            "avg_grade_pct": 0.12,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 132.2,
+            "end_mi": 132.5,
+            "avg_grade_pct": 1.59,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 132.5,
+            "end_mi": 135.7,
+            "avg_grade_pct": 0.08,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 135.7,
+            "end_mi": 136.0,
+            "avg_grade_pct": -1.81,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 136.0,
+            "end_mi": 136.3,
+            "avg_grade_pct": 0.8,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 136.3,
+            "end_mi": 136.6,
+            "avg_grade_pct": -3.21,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 136.6,
+            "end_mi": 142.8,
+            "avg_grade_pct": -0.16,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 142.8,
+            "end_mi": 143.1,
+            "avg_grade_pct": 2.87,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 143.1,
+            "end_mi": 146.6,
+            "avg_grade_pct": -0.06,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 146.6,
+            "end_mi": 146.9,
+            "avg_grade_pct": 1.85,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 146.9,
+            "end_mi": 147.2,
+            "avg_grade_pct": 0.58,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 147.2,
+            "end_mi": 147.9,
+            "avg_grade_pct": -1.94,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 147.9,
+            "end_mi": 148.2,
+            "avg_grade_pct": 0.19,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 148.2,
+            "end_mi": 149.1,
+            "avg_grade_pct": 1.32,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 149.1,
+            "end_mi": 149.7,
+            "avg_grade_pct": -1.0,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 149.7,
+            "end_mi": 150.0,
+            "avg_grade_pct": 4.34,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 150.0,
+            "end_mi": 151.2,
+            "avg_grade_pct": -0.05,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 151.2,
+            "end_mi": 152.1,
+            "avg_grade_pct": -2.33,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 152.1,
+            "end_mi": 159.8,
+            "avg_grade_pct": -0.08,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 159.8,
+            "end_mi": 160.0,
+            "avg_grade_pct": 1.51,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Michigan",
+            "miles": 160.0
           }
         ],
         "speed_limits": [
           {
-            "at_mi": 1.9,
+            "at_mi": 2.0,
             "mph": 65,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": true
@@ -58223,77 +57868,71 @@
             "hgv": false
           },
           {
-            "at_mi": 57.7,
-            "mph": 60,
-            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
-            "hgv": false
-          },
-          {
-            "at_mi": 58.4,
+            "at_mi": 57.6,
             "mph": 65,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": true
           },
           {
-            "at_mi": 61.3,
+            "at_mi": 61.2,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 81.9,
+            "at_mi": 82.0,
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 83.1,
+            "at_mi": 82.9,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 84.8,
+            "at_mi": 84.7,
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 87.6,
+            "at_mi": 87.7,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 90.2,
+            "at_mi": 90.1,
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 90.7,
+            "at_mi": 90.6,
             "mph": null
           },
           {
-            "at_mi": 95.0,
+            "at_mi": 94.9,
             "mph": 50,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 95.3,
+            "at_mi": 95.2,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 109.0,
+            "at_mi": 108.9,
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 111.5,
+            "at_mi": 111.7,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
@@ -58311,19 +57950,19 @@
             "hgv": false
           },
           {
-            "at_mi": 126.9,
+            "at_mi": 126.8,
             "mph": 50,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 127.6,
+            "at_mi": 127.4,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 129.4,
+            "at_mi": 129.3,
             "mph": 50,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
@@ -58335,19 +57974,19 @@
             "hgv": false
           },
           {
-            "at_mi": 142.1,
+            "at_mi": 142.3,
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 143.5,
+            "at_mi": 143.4,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 151.8,
+            "at_mi": 151.7,
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
@@ -58359,29 +57998,34 @@
             "hgv": false
           },
           {
-            "at_mi": 154.8,
+            "at_mi": 154.6,
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           }
         ],
-        "restrictions": [],
         "lane_segments": [
           {
-            "start_mi": 0.3,
-            "end_mi": 0.6,
+            "start_mi": 1.5,
+            "end_mi": 1.8,
             "lanes": 2,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 1.5,
-            "end_mi": 41.4,
-            "lanes": 1,
+            "start_mi": 1.8,
+            "end_mi": 46.7,
+            "lanes": 2,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 41.4,
+            "start_mi": 47.0,
+            "end_mi": 48.0,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 48.0,
             "end_mi": 51.4,
             "lanes": 2,
             "oneway": true,
@@ -58389,13 +58033,13 @@
           },
           {
             "start_mi": 51.4,
-            "end_mi": 57.1,
-            "lanes": 5,
+            "end_mi": 51.7,
+            "lanes": 4,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 57.1,
+            "start_mi": 51.7,
             "end_mi": 59.7,
             "lanes": 2,
             "oneway": true,
@@ -58403,57 +58047,83 @@
           },
           {
             "start_mi": 59.7,
-            "end_mi": 63.5,
+            "end_mi": 62.7,
             "lanes": 1,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 63.5,
-            "end_mi": 89.9,
+            "start_mi": 62.7,
+            "end_mi": 89.6,
             "lanes": 2,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 90.5,
-            "end_mi": 92.6,
+            "start_mi": 89.6,
+            "end_mi": 89.9,
             "lanes": 3,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 92.6,
-            "end_mi": 93.7,
+            "start_mi": 90.1,
+            "end_mi": 90.4,
             "lanes": 4,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 93.7,
-            "end_mi": 95.1,
+            "start_mi": 90.4,
+            "end_mi": 92.5,
+            "lanes": 3,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 92.5,
+            "end_mi": 93.6,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 93.6,
+            "end_mi": 94.3,
             "lanes": 5,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 95.1,
-            "end_mi": 151.8,
+            "start_mi": 94.3,
+            "end_mi": 146.4,
             "lanes": 2,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 151.8,
-            "end_mi": 152.5,
+            "start_mi": 146.6,
+            "end_mi": 148.2,
+            "lanes": 4,
+            "lanes_forward": 2,
+            "lanes_backward": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 148.2,
+            "end_mi": 151.9,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 151.9,
+            "end_mi": 152.4,
             "lanes": 4,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 152.5,
-            "end_mi": 154.1,
+            "start_mi": 152.4,
+            "end_mi": 153.5,
             "lanes": 5,
             "lanes_forward": 2,
             "lanes_backward": 2,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 154.1,
+            "start_mi": 153.5,
             "end_mi": 154.4,
             "lanes": 2,
             "oneway": true,
@@ -58468,79 +58138,44 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 156.3,
-            "end_mi": 157.1,
-            "lanes": 5,
-            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
-          },
-          {
-            "start_mi": 157.1,
-            "end_mi": 158.0,
+            "start_mi": 156.5,
+            "end_mi": 157.9,
             "lanes": 5,
             "lanes_forward": 2,
             "lanes_backward": 2,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 158.0,
-            "end_mi": 158.7,
-            "lanes": 4,
+            "start_mi": 158.2,
+            "end_mi": 158.6,
+            "lanes": 5,
+            "lanes_forward": 2,
+            "lanes_backward": 3,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 158.7,
+            "start_mi": 158.6,
             "end_mi": 159.4,
             "lanes": 4,
             "lanes_forward": 2,
             "lanes_backward": 2,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 159.4,
+            "end_mi": 160.0,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
-        ],
-        "traffic_aadt": [
-          {
-            "at_mi": 5.0,
-            "aadt": 6000.0,
-            "lanes": 2,
-            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-          },
-          {
-            "at_mi": 15.0,
-            "aadt": 5500.0,
-            "lanes": 2,
-            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-          },
-          {
-            "at_mi": 25.0,
-            "aadt": 3500.0,
-            "lanes": 2,
-            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-          },
-          {
-            "at_mi": 50.0,
-            "aadt": 12000.0,
-            "lanes": 2,
-            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-          },
-          {
-            "at_mi": 60.0,
-            "aadt": 10500.0,
-            "lanes": 2,
-            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-          }
-        ],
-        "hpms_terrain": {
-          "type": 1,
-          "name": "level",
-          "sections": 800,
-          "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        ]
       },
       "stops": [
         {
           "name": "Sault Sainte Marie Welcome Center",
           "type": "public_rest_area",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the sault_ste_marie_mi_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the sault_ste_marie_mi_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
           "parking": "limited",
           "actions": [
             "park",
@@ -58560,7 +58195,7 @@
           "name": "Sault Sainte Marie Rest Area",
           "type": "public_rest_area",
           "at_mi": 5.5,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
           "parking": "limited",
           "actions": [
             "park",
@@ -58580,7 +58215,7 @@
           "name": "Holiday St. Ignace",
           "type": "fuel_station",
           "at_mi": 50.0,
-          "source": "Holiday, 924 US-2 W, St. Ignace, MI -- 24-hour diesel just north of the Mackinac Bridge on the I-75 corridor; accessed 2026-07-03: https://www.gasbuddy.com/station/25809 Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
+          "source": "Holiday, 924 US-2 W, St. Ignace, MI -- 24-hour diesel just north of the Mackinac Bridge on the I-75 corridor; accessed 2026-07-03: https://www.gasbuddy.com/station/25809 Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy. Mile carried across proportionally when the leg was rerouted.",
           "actions": [
             "park",
             "save",
@@ -58602,7 +58237,7 @@
           "name": "Fick & Sons Travel Center Grayling",
           "type": "travel_center",
           "at_mi": 145.0,
-          "source": "Fick & Sons Travel Center, I-75 Exit 251, Grayling, MI -- convenience store, hot food (Arby's), hotel rooms, showers and laundry for drivers; accessed 2026-07-03: https://fickandsons.com/travel-center/",
+          "source": "Fick & Sons Travel Center, I-75 Exit 251, Grayling, MI -- convenience store, hot food (Arby's), hotel rooms, showers and laundry for drivers; accessed 2026-07-03: https://fickandsons.com/travel-center/ Mile carried across proportionally when the leg was rerouted.",
           "actions": [
             "park",
             "save",
@@ -58625,7 +58260,8 @@
         }
       ],
       "divided": false,
-      "lanes": 2
+      "lanes": 2,
+      "rerouted": true
     },
     {
       "from": "traverse_city_mi_us",

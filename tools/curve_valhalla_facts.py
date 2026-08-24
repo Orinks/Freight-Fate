@@ -339,10 +339,13 @@ def main() -> int:
                     "leg": leg_id,
                     "coverage_samples": samples,
                     "coverage_on_motorway": classes.get("motorway", 0),
+                    # Class AND number: matching on the digits alone credits
+                    # US 95 to a leg named I-95 and reports it faithful to a
+                    # road it never touches.
                     "coverage_on_shield": sum(
                         count
                         for ref, count in refs.items()
-                        if scs._ref_matches_shield(ref, scs._shield_numbers(leg.get("highway", "")))
+                        if scs.matches_shield(ref, str(leg.get("highway", "")))
                     ),
                     "ridden_refs": dict(sorted(refs.items(), key=lambda kv: -kv[1])[:8]),
                     "ridden_classes": dict(sorted(classes.items(), key=lambda kv: -kv[1])),

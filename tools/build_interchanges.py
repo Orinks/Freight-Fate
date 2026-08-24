@@ -43,6 +43,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import leg_geometry as lg
+from build_interchanges_base import select_only
 from world_source import WORLD_SOURCE_PATH, load_world, save_world
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -799,6 +801,12 @@ def discover_leg(
     if shield_rx is None:
         return []
     if geom is None:
+        # The archived polyline is the road this leg drives; ask OSRM only for
+        # a leg that has none. A live OSRM answer is a CAR route over today's
+        # OSM, which on a rerouted leg agrees with neither the archive nor the
+        # truck.
+        geom = lg.corridor_geometry(leg)
+    if geom is None:
         route_points = list(leg.get("corridor", {}).get("route_points", ()))
         geom = _osrm_geometry(route_points, rate_limit)
     if not geom:
@@ -972,7 +980,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Write discovered interchanges back into the world source.",
     )
     parser.add_argument(
-        "--only", default="", help="Limit to one leg, e.g. 'New York->Philadelphia'."
+        "--only",
+        default="",
+        help="Legs to rebuild, as SLUG pairs -- "
+        "'corpus_christi_tx_us->san_antonio_tx_us', semicolons between several. "
+        "Spoken city names do not match anything.",
     )
     parser.add_argument("--max-legs", type=int, default=0)
     parser.add_argument("--rate-limit", type=float, default=1.0)
@@ -1057,10 +1069,7 @@ def main(argv: list[str] | None = None) -> int:
         return run_maxspeed(data, args)
     legs = data["legs"]
     if args.only:
-        a, _, b = args.only.partition("->")
-        legs = [leg for leg in legs if leg["from"] == a.strip() and leg["to"] == b.strip()]
-        if not legs:
-            raise SystemExit(f"No leg {args.only!r}")
+        legs = select_only(legs, args.only)
 
     eligible = 0
     index_legs: list[dict[str, Any]] = []

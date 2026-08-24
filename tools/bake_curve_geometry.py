@@ -55,6 +55,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import json
 import math
 import os
@@ -67,6 +68,8 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import leg_geometry as lg  # noqa: E402
+import overpass_corridor as oc  # noqa: E402
 import straw_curve_sample as scs  # noqa: E402  (the ratified primitives)
 from enrich_routes_ors import fetch_ors_hgv_route, parse_ors_route  # noqa: E402
 from enrich_routes_pois import MAXSPEED_SOURCE, _maxspeed_from_tags  # noqa: E402
@@ -84,10 +87,6 @@ GEOM_DIR = WORLD_DATA / "us" / "geometry"
 GAMEPLAY_DIR = WORLD_DATA / "us" / "gameplay"
 ESCAPE_CACHE = ROOT / "src" / "freight_fate" / "data" / "escape_ramps.json"
 
-OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
-# The public Overpass endpoints answer 406 to an unidentified client, so a
-# small batch can run against them when the self-hosted server is not up.
-USER_AGENT = "Freight-Fate curve-geometry bake (https://github.com/Orinks/Freight-Fate)"
 SCHEMA_VERSION = 1
 SOURCE_NOTE = (
     "OpenRouteService driving-hgv (self-hosted) + OSM via Overpass "
@@ -96,33 +95,34 @@ SOURCE_NOTE = (
 RAMP_SOURCE = "OpenStreetMap highway=escape ways (Overpass), development-time."
 RAMP_MATCH_M = 160.0  # an escape way farther than this from the route isn't on it
 RAMP_DEDUP_MI = 0.3  # same-side ramps closer than this are one physical ramp
-FLUSH_EVERY = 25  # write the world source + shards every N legs so progress is durable
+# Write the world source and shards every N legs so progress is durable. Ten
+# rather than twenty-five because a 24-leg re-bake flushed exactly once, at
+# the end, and so lost every leg when the twenty-first was spoiled by a
+# dropped connection.
+FLUSH_EVERY = 10
 
 
 # --- combined per-leg Overpass query (maxspeed + escape ramps, rider 2) -----
-def _overpass(query: str) -> dict[str, Any]:
-    data = urllib.parse.urlencode({"data": query}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        return json.loads(resp.read().decode("utf-8"))
-
-
 def query_leg_ways(coords: list[list[float]]) -> list[dict]:
-    """One bbox query for the leg's maxspeed-tagged ways.
+    """The leg's maxspeed-tagged ways, asked for a corridor at a time.
+
+    One box around the whole leg is most of a state, and the public Overpass
+    answers that with a 504 rather than tens of thousands of ways. Boxes strung
+    along the route return the same answer -- a way only governs a sample
+    point within 90 metres of it -- in requests the service will actually
+    serve. See ``tools/overpass_corridor.py``.
 
     (Runaway ramps come from the offline escape-ramp cache, not Overpass: the
     self-hosted extract is filtered and carries no highway=escape ways -- see
     ``tools/harvest_escape_ramps.py``.)"""
-    lons = [c[0] for c in coords]
-    lats = [c[1] for c in coords]
-    pad = 0.02
-    box = f"{min(lats) - pad},{min(lons) - pad},{max(lats) + pad},{max(lons) + pad}"
-    query = f"""
-    [out:json][timeout:120];
-    way["highway"~"motorway|trunk|primary|secondary|tertiary"]["maxspeed"]({box});
-    out geom tags;
-    """
-    return _overpass(query).get("elements", [])
+    return oc.corridor_elements(
+        coords,
+        lambda box: (
+            "[out:json][timeout:180];"
+            f'way["highway"~"motorway|trunk|primary|secondary|tertiary"]["maxspeed"]({box});'
+            "out geom tags;"
+        ),
+    )
 
 
 # --- maxspeed step function (confirmed for the world source; gap-aware for shard) --
@@ -347,16 +347,40 @@ def select_legs(world: dict, args: argparse.Namespace) -> list[dict]:
 
 
 # --- driver -----------------------------------------------------------------
+def route_from_archive(leg: dict) -> dict[str, Any]:
+    """The leg's own archived polyline, in the shape an ORS answer has.
+
+    A rerouted leg's road is already checked in -- reroute_leg.py wrote it
+    from Valhalla's truck route, with elevation read at every vertex -- and
+    re-asking a router would either fetch the OLD route from cache or need a
+    service this machine does not have. So the archive IS the route source
+    here, and the rest of the bake is unchanged: same curvature analysis, same
+    Overpass maxspeed sweep, same round-trip check.
+    """
+    polyline = lg.archived_polyline(lg.leg_id_of(leg), lg.state_code_of(leg))
+    if polyline is None:
+        raise RuntimeError(f"no archived geometry for {lg.leg_id_of(leg)}")
+    coords, elevations = polyline
+    return {"coordinates": coords, "elevations_ft": elevations}
+
+
 def process_leg(
-    leg: dict, cities: dict, api_key: str, escape_cache: list[dict]
+    leg: dict,
+    cities: dict,
+    api_key: str,
+    escape_cache: list[dict],
+    from_archive: bool = False,
 ) -> dict[str, Any] | None:
     frm, to = leg["from"], leg["to"]
     highway = leg.get("highway", "")
     leg_miles = float(leg.get("miles", 0)) or None
-    start = {"lat": cities[frm]["lat"], "lon": cities[frm]["lon"]}
-    end = {"lat": cities[to]["lat"], "lon": cities[to]["lon"]}
-    via = tuple(leg.get("route_via", []) or ())
-    parsed = parse_ors_route(fetch_ors_hgv_route(start, end, api_key, via=via))
+    if from_archive:
+        parsed = route_from_archive(leg)
+    else:
+        start = {"lat": cities[frm]["lat"], "lon": cities[frm]["lon"]}
+        end = {"lat": cities[to]["lat"], "lon": cities[to]["lon"]}
+        via = tuple(leg.get("route_via", []) or ())
+        parsed = parse_ors_route(fetch_ors_hgv_route(start, end, api_key, via=via))
     coords = parsed["coordinates"]
     elev = parsed["elevations_ft"]
     cum_raw = scs._cumulative_m(coords)
@@ -447,6 +471,13 @@ def main() -> int:
     g.add_argument("--region", help="all legs touching a region (e.g. rockies)")
     g.add_argument("--all", action="store_true", help="every leg in the network")
     ap.add_argument("--limit", type=int, help="cap leg count (with --all, for smoke tests)")
+    ap.add_argument(
+        "--from-archive",
+        action="store_true",
+        help="take the route from world_data/us/geometry instead of routing it "
+        "afresh -- what a rerouted leg needs, since its road is already "
+        "checked in and no router on this machine would return it.",
+    )
     args = ap.parse_args()
 
     world = load_world()
@@ -470,13 +501,19 @@ def main() -> int:
     for n, leg in enumerate(legs, 1):
         key = (leg["from"], leg["to"])
         try:
-            r = process_leg(leg, cities, api_key, escape_cache)
+            r = process_leg(leg, cities, api_key, escape_cache, args.from_archive)
         except (
             urllib.error.URLError,
             urllib.error.HTTPError,
             RuntimeError,
             KeyError,
             OSError,
+            # Everything the network can do to a response body. The point of
+            # this handler is that a leg the network spoiled is skipped and
+            # reported, not that the sweep dies holding hours of finished work
+            # it has not flushed yet.
+            http.client.HTTPException,
+            ValueError,
         ) as exc:
             failed += 1
             print(f"  [{n}/{len(legs)}] {key[0]}:{key[1]} FAILED: {exc}", flush=True)
@@ -501,7 +538,10 @@ def main() -> int:
         ramps_by_leg[lid] = [{"leg": lid, **rp} for rp in r["ramps"]]
         speed_by_leg[lid] = [{"leg": lid, **s} for s in r["speed_full"]]
         done += 1
-        if n % 10 == 0 or n == len(legs):
+        # Every leg on a small selection. The every-tenth cadence was written
+        # for the 1,291-leg sweep; on a two-dozen-leg re-bake it means the
+        # better part of an hour with nothing on stdout, which reads as hung.
+        if n % 10 == 0 or n == len(legs) or len(legs) <= 40:
             print(
                 f"  [{n}/{len(legs)}] {lid}: {r['kept']}/{r['raw_vertices']} verts, "
                 f"{len(r['curves'])} curves, {len(r['ramps'])} ramps, "

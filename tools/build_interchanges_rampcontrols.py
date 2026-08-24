@@ -25,6 +25,7 @@ from build_interchanges_maxspeed import (
     _interpolated_geometry,
     _leg_states,
     _pbf_for_states,
+    leg_corridor_geometry,
 )
 
 # The terminal control sits at the far end of the ramp -- routinely 300m to
@@ -285,10 +286,7 @@ def bake_ramp_controls_for_leg(
     interchanges = list(leg.get("corridor", {}).get("interchanges", ()))
     if not interchanges:
         return 0
-    route_points = list(leg.get("corridor", {}).get("route_points", ()))
-    geom = _osrm_geometry(route_points, rate_limit, cached_only=True) or _interpolated_geometry(
-        route_points
-    )
+    geom = leg_corridor_geometry(leg, rate_limit)
     if not geom:
         return 0
     leg_miles = float(leg["miles"])
@@ -407,10 +405,7 @@ def bake_ramp_controls_for_leg(
 def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
     legs = data["legs"]
     if args.only:
-        a, _, b = args.only.partition("->")
-        legs = [leg for leg in legs if leg["from"] == a.strip() and leg["to"] == b.strip()]
-        if not legs:
-            raise SystemExit(f"No leg {args.only!r}")
+        legs = select_only(legs, args.only)
 
     target_legs: list[dict[str, Any]] = []
     for leg in legs:

@@ -169,6 +169,27 @@ def _cue_direction(text: str) -> str:
     return ""
 
 
+def _drop_work_zones_near(zones: list[Zone], spans: list[tuple[float, float]]) -> list[Zone]:
+    """Simulated work zones clear of ``spans``, by the open-road rule.
+
+    A construction zone and the merge taper ahead of it are one thing on the
+    road, so both go or neither does. Anything that is not a simulated work
+    zone is passed through untouched.
+    """
+    kept: list[Zone] = []
+    for zone in zones:
+        if zone.reason not in ("construction", "construction merge"):
+            kept.append(zone)
+            continue
+        clashes = any(
+            zone.start_mi < end + ZONE_MIN_GAP_MI and zone.end_mi > start - ZONE_MIN_GAP_MI
+            for start, end in spans
+        )
+        if not clashes:
+            kept.append(zone)
+    return kept
+
+
 class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
     """One delivery run along a chosen route."""
 
@@ -1440,21 +1461,19 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             real_spans = [
                 (z.start_mi, z.end_mi) for z in real_construction if z.reason == "construction"
             ]
-            filtered: list[Zone] = []
-            for z in zones:
-                if z.reason not in ("construction", "construction merge"):
-                    filtered.append(z)
-                    continue
-                overlaps = any(
-                    z.start_mi < r_end + ZONE_MIN_GAP_MI and z.end_mi > r_start - ZONE_MIN_GAP_MI
-                    for r_start, r_end in real_spans
-                )
-                if not overlaps:
-                    filtered.append(z)
-            zones = filtered
+            zones = _drop_work_zones_near(zones, real_spans)
             zones.extend(real_construction)
-        # Congestion zones are always added regardless of construction data.
-        zones.extend(self._place_congestion_zones())
+        # Congestion zones are always added regardless of construction data,
+        # and they OUTRANK a simulated work zone the same way a real one does.
+        # Congestion is read from HPMS volume against capacity; a simulated
+        # work zone is a dice roll, and the roll knows nothing about where the
+        # congestion landed. Left unreconciled it drops roadworks inside a
+        # jam, which is the chaining ZONE_MIN_GAP_MI exists to prevent -- and
+        # to the driver it is one slow stretch with contradictory reasons.
+        congestion = self._place_congestion_zones()
+        if congestion:
+            zones = _drop_work_zones_near(zones, [(z.start_mi, z.end_mi) for z in congestion])
+        zones.extend(congestion)
         zones.extend(self._facility_speed_zones())
         zones.sort(key=lambda z: z.start_mi)
         return zones

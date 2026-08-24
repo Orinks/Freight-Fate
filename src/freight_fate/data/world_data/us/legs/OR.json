@@ -306,181 +306,32 @@
     {
       "from": "albany_or_us",
       "to": "eugene_or_us",
-      "miles": 44,
+      "miles": 45,
       "highway": "I-5",
       "terrain": "hills",
       "corridor": {
         "checkpoints": [],
-        "landmarks": [
-          {
-            "name": "Adair Village",
-            "at_mi": 0.2,
-            "off_mi": 6.02,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150969376, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Adair Village"
-          },
-          {
-            "name": "Jefferson",
-            "at_mi": 2.6,
-            "off_mi": 6.98,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150978451, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Jefferson"
-          },
-          {
-            "name": "Scio",
-            "at_mi": 2.8,
-            "off_mi": 11.77,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150976147, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Scio"
-          },
-          {
-            "name": "Tangent",
-            "at_mi": 8.6,
-            "off_mi": 2.33,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150960134, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Tangent"
-          },
-          {
-            "name": "Lebanon",
-            "at_mi": 9.1,
-            "off_mi": 7.62,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=town node 150943172, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Lebanon"
-          },
-          {
-            "name": "Waterloo",
-            "at_mi": 12.0,
-            "off_mi": 11.65,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150951285, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Waterloo"
-          },
-          {
-            "name": "Sodaville",
-            "at_mi": 12.7,
-            "off_mi": 9.47,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150958615, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Sodaville"
-          },
-          {
-            "name": "Brownsville",
-            "at_mi": 18.9,
-            "off_mi": 3.79,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150943523, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Brownsville"
-          },
-          {
-            "name": "Halsey",
-            "at_mi": 19.8,
-            "off_mi": 2.4,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150938822, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Halsey"
-          },
-          {
-            "name": "Monroe",
-            "at_mi": 24.3,
-            "off_mi": 11.68,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150938718, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Monroe"
-          },
-          {
-            "name": "Harrisburg",
-            "at_mi": 27.0,
-            "off_mi": 5.42,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150937899, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Harrisburg"
-          },
-          {
-            "name": "Junction City",
-            "at_mi": 30.8,
-            "off_mi": 7.12,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=town node 150935703, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Junction City"
-          },
-          {
-            "name": "Coburg",
-            "at_mi": 36.2,
-            "off_mi": 0.69,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150942365, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Coburg"
-          },
-          {
-            "name": "Marcola",
-            "at_mi": 36.2,
-            "off_mi": 9.78,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150967524, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Marcola"
-          },
-          {
-            "name": "Alvadore",
-            "at_mi": 43.6,
-            "off_mi": 9.94,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 3953108810, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Alvadore"
-          },
-          {
-            "name": "Creswell",
-            "at_mi": 43.9,
-            "off_mi": 9.7,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 150939624, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Creswell"
-          }
-        ],
         "tollway_detected": false,
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
+        "hpms_terrain": {
+          "type": 1,
+          "name": "level",
+          "sections": 800,
+          "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+        },
         "route_points": [
           {
             "at_mi": 0.0,
             "lat": 44.63652,
-            "lon": -123.10591
+            "lon": -123.1059
           },
           {
-            "at_mi": 11.0,
-            "lat": 44.4739,
-            "lon": -123.06176
+            "at_mi": 25.01,
+            "lat": 44.30724,
+            "lon": -123.06122
           },
           {
-            "at_mi": 22.0,
-            "lat": 44.32438,
-            "lon": -123.06123
-          },
-          {
-            "at_mi": 33.0,
-            "lat": 44.17404,
-            "lon": -123.06077
-          },
-          {
-            "at_mi": 44.0,
+            "at_mi": 44.69,
             "lat": 44.05207,
             "lon": -123.08674
           }
@@ -488,114 +339,39 @@
         "elevation_samples": [
           {
             "at_mi": 0.0,
-            "elevation_ft": 214.9,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+            "elevation_ft": 213.3,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
           },
           {
-            "at_mi": 11.0,
-            "elevation_ft": 262.5,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+            "at_mi": 25.16,
+            "elevation_ft": 318.2,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
           },
           {
-            "at_mi": 22.0,
-            "elevation_ft": 305.1,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          },
-          {
-            "at_mi": 33.0,
-            "elevation_ft": 382.2,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          },
-          {
-            "at_mi": 44.0,
-            "elevation_ft": 436.7,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
-          }
-        ],
-        "grade_segments": [
-          {
-            "start_mi": 0.0,
-            "end_mi": 30.0,
-            "avg_grade_pct": 0.1,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 30.0,
-            "end_mi": 30.3,
-            "avg_grade_pct": 0.87,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 30.3,
-            "end_mi": 41.6,
-            "avg_grade_pct": 0.16,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 41.6,
-            "end_mi": 41.9,
-            "avg_grade_pct": -1.25,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 41.9,
-            "end_mi": 44.0,
-            "avg_grade_pct": 0.16,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          }
-        ],
-        "state_miles": [
-          {
-            "state": "Oregon",
-            "miles": 44.0
-          }
-        ],
-        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "speed_limits": [
-          {
-            "at_mi": 3.0,
-            "mph": 60,
-            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
-            "hgv": true
-          },
-          {
-            "at_mi": 39.8,
-            "mph": 55,
-            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
-            "hgv": true
-          },
-          {
-            "at_mi": 41.9,
-            "mph": 55,
-            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
-            "hgv": false
+            "at_mi": 45.0,
+            "elevation_ft": 429.8,
+            "source": "Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
           }
         ],
         "interchanges": [
           {
-            "at_mi": 2.6,
-            "exit_ref": "234A",
+            "at_mi": 2.8,
+            "exit_ref": "233",
             "name": "",
             "destinations": [
-              "Fair-Expo",
-              "Knox Butte",
-              "Albany"
+              "Lebanon",
+              "Sweet Home"
             ],
-            "via": "OR 99E",
+            "via": "US 20",
             "highway": "I-5",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
-            "ramp_control": "stop",
+            "ramp_control": "signal",
             "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 8.0,
+            "at_mi": 7.6,
             "exit_ref": "228",
             "name": "",
             "destinations": [
@@ -611,7 +387,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 19.2,
+            "at_mi": 19.5,
             "exit_ref": "216",
             "name": "",
             "destinations": [
@@ -627,7 +403,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 26.6,
+            "at_mi": 27.1,
             "exit_ref": "209",
             "name": "",
             "destinations": [
@@ -643,7 +419,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 29.4,
+            "at_mi": 29.8,
             "exit_ref": "",
             "name": "",
             "destinations": [
@@ -656,7 +432,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 36.5,
+            "at_mi": 36.8,
             "exit_ref": "199",
             "name": "",
             "destinations": [
@@ -669,7 +445,7 @@
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           },
           {
-            "at_mi": 39.9,
+            "at_mi": 40.5,
             "exit_ref": "195B",
             "name": "",
             "destinations": [
@@ -681,12 +457,316 @@
             "highway": "I-5",
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_control": "signal",
-            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node on a motorway_link way at this exit, read from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 43.3,
+            "exit_ref": "2",
+            "name": "",
+            "destinations": [
+              "Downtown",
+              "Coburg Road",
+              "University of Oregon"
+            ],
+            "via": "",
+            "highway": "I-5",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "signal",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_far_end": "surface",
             "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           }
         ],
         "restrictions": [],
+        "landmarks": [
+          {
+            "name": "Adair Village",
+            "at_mi": 0.2,
+            "off_mi": 6.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150969376, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Adair Village"
+          },
+          {
+            "name": "Jefferson",
+            "at_mi": 2.6,
+            "off_mi": 6.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150978451, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Jefferson"
+          },
+          {
+            "name": "Scio",
+            "at_mi": 2.8,
+            "off_mi": 11.77,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150976147, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Scio"
+          },
+          {
+            "name": "Tangent",
+            "at_mi": 8.7,
+            "off_mi": 2.33,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150960134, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Tangent"
+          },
+          {
+            "name": "Lebanon",
+            "at_mi": 9.3,
+            "off_mi": 7.62,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150943172, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Lebanon"
+          },
+          {
+            "name": "Waterloo",
+            "at_mi": 12.2,
+            "off_mi": 11.65,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150951285, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Waterloo"
+          },
+          {
+            "name": "Calapooia River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 12.7,
+            "spoken": "Crossing the Calapooia River"
+          },
+          {
+            "name": "Sodaville",
+            "at_mi": 12.9,
+            "off_mi": 9.47,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150958615, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Sodaville"
+          },
+          {
+            "name": "Brownsville",
+            "at_mi": 19.2,
+            "off_mi": 3.79,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150943523, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Brownsville"
+          },
+          {
+            "name": "Halsey",
+            "at_mi": 20.1,
+            "off_mi": 2.4,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150938822, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Halsey"
+          },
+          {
+            "name": "Monroe",
+            "at_mi": 24.7,
+            "off_mi": 11.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150938718, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Monroe"
+          },
+          {
+            "name": "Harrisburg",
+            "at_mi": 27.1,
+            "off_mi": 5.38,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150937899, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Harrisburg"
+          },
+          {
+            "name": "Junction City",
+            "at_mi": 31.3,
+            "off_mi": 7.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150935703, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Junction City"
+          },
+          {
+            "name": "Willamette River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.2,
+            "spoken": "Crossing the Willamette River"
+          },
+          {
+            "name": "McKenzie River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.2,
+            "spoken": "Crossing the McKenzie River"
+          },
+          {
+            "name": "Coburg",
+            "at_mi": 36.8,
+            "off_mi": 0.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150942365, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Coburg"
+          },
+          {
+            "name": "Marcola",
+            "at_mi": 36.8,
+            "off_mi": 9.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150967524, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Marcola"
+          },
+          {
+            "name": "Alvadore",
+            "at_mi": 44.3,
+            "off_mi": 9.94,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 3953108810, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Alvadore"
+          },
+          {
+            "name": "Creswell",
+            "at_mi": 44.7,
+            "off_mi": 9.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150939624, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Creswell"
+          },
+          {
+            "name": "Coryell Pass",
+            "category": "mountain_pass",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Approaching Coryell Pass"
+          }
+        ],
+        "traffic_aadt": [
+          {
+            "at_mi": 0.0,
+            "aadt": 46500.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 10.0,
+            "aadt": 37500.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 25.0,
+            "aadt": 36000.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 40.0,
+            "aadt": 41000.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 0.6,
+            "avg_grade_pct": 0.1,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 0.6,
+            "end_mi": 0.8,
+            "avg_grade_pct": 1.62,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 0.8,
+            "end_mi": 24.3,
+            "avg_grade_pct": 0.06,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 24.3,
+            "end_mi": 24.6,
+            "avg_grade_pct": 1.65,
+            "terrain": "hills",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          },
+          {
+            "start_mi": 24.6,
+            "end_mi": 45.0,
+            "avg_grade_pct": 0.08,
+            "terrain": "flat",
+            "source": "Derived: rise over run between elevation samples 0.25 mi apart. Read from Valhalla /height (its own DEM tileset over OpenStreetMap) at 0.1 mi spacing along the leg's checked-in route geometry."
+          }
+        ],
+        "state_miles": [
+          {
+            "state": "Oregon",
+            "miles": 45.0
+          }
+        ],
+        "speed_limits": [
+          {
+            "at_mi": 3.0,
+            "mph": 60,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": true
+          },
+          {
+            "at_mi": 26.9,
+            "mph": 45,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 27.2,
+            "mph": 60,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": true
+          },
+          {
+            "at_mi": 36.8,
+            "mph": 45,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 37.1,
+            "mph": 60,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": true
+          },
+          {
+            "at_mi": 40.4,
+            "mph": 55,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": true
+          },
+          {
+            "at_mi": 42.6,
+            "mph": 55,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          }
+        ],
         "lane_segments": [
           {
             "start_mi": 0.0,
@@ -710,79 +790,47 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 1.7,
-            "end_mi": 2.0,
-            "lanes": 3,
-            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
-          },
-          {
-            "start_mi": 2.0,
+            "start_mi": 1.9,
             "end_mi": 2.5,
             "lanes": 4,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 33.9,
-            "end_mi": 41.5,
+            "start_mi": 26.9,
+            "end_mi": 42.1,
             "lanes": 2,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 41.8,
-            "end_mi": 42.9,
+            "start_mi": 42.3,
+            "end_mi": 43.6,
             "lanes": 2,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 42.9,
-            "end_mi": 43.2,
+            "start_mi": 43.6,
+            "end_mi": 43.9,
             "lanes": 1,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 43.2,
-            "end_mi": 44.0,
+            "start_mi": 43.9,
+            "end_mi": 45.0,
             "lanes": 2,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
-        ],
-        "traffic_aadt": [
-          {
-            "at_mi": 10.0,
-            "aadt": 37500.0,
-            "lanes": 2,
-            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-          },
-          {
-            "at_mi": 20.0,
-            "aadt": 36000.0,
-            "lanes": 2,
-            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-          },
-          {
-            "at_mi": 40.0,
-            "aadt": 49500.0,
-            "lanes": 2,
-            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-          }
-        ],
-        "hpms_terrain": {
-          "type": 1,
-          "name": "level",
-          "sections": 591,
-          "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        ]
       },
       "stops": [
         {
           "name": "TA Travel Center",
           "type": "service_plaza",
-          "at_mi": 33.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "at_mi": 33.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted.",
           "parking": "likely",
           "actions": [
             "park",
@@ -803,7 +851,8 @@
         }
       ],
       "divided": true,
-      "lanes": 2
+      "lanes": 2,
+      "rerouted": true
     },
     {
       "from": "astoria_or_us",
@@ -31948,7 +31997,7 @@
       "from": "pendleton_or_us",
       "to": "tri_cities_wa_us",
       "miles": 66,
-      "highway": "I-84",
+      "highway": "US-395",
       "terrain": "hills",
       "corridor": {
         "tollway_detected": false,

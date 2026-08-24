@@ -6552,7 +6552,7 @@
     {
       "from": "allentown_pa_us",
       "to": "new_york_ny_us",
-      "highway": "I-95",
+      "highway": "I-78",
       "miles": 110,
       "stops": [
         {

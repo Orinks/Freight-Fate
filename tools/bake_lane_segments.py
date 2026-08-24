@@ -42,9 +42,9 @@ tests, per the brief.
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import math
-import os
 import sys
 import urllib.error
 import urllib.parse
@@ -54,12 +54,12 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import overpass_corridor as oc
 import straw_curve_sample as scs  # noqa: E402  (the ratified matcher primitives)
 from world_source import load_world, save_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 GEOM_DIR = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "geometry"
-OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
 
 SOURCE_NOTE = (
     "OpenStreetMap lanes tags on the corridor highway ways (Overpass), "
@@ -112,25 +112,21 @@ def lanes_from_tags(tags: dict[str, Any]) -> dict[str, Any] | None:
 
 
 # --- Overpass: one bbox query per leg, matched locally ----------------------
-def _overpass(query: str) -> dict[str, Any]:
-    data = urllib.parse.urlencode({"data": query}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data)
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        return json.loads(resp.read().decode("utf-8"))
-
-
 def query_leg_lane_ways(coords: list[list[float]]) -> list[dict]:
-    """One bbox query for the leg's lanes-tagged ways (mirror of Job 2's query)."""
-    lons = [c[0] for c in coords]
-    lats = [c[1] for c in coords]
-    pad = 0.02
-    box = f"{min(lats) - pad},{min(lons) - pad},{max(lats) + pad},{max(lons) + pad}"
-    query = f"""
-    [out:json][timeout:120];
-    way["highway"~"{HIGHWAY_FILTER}"]["lanes"]({box});
-    out geom tags;
+    """The leg's lanes-tagged ways, asked for a corridor at a time.
+
+    Mirror of the maxspeed sweep, and for the same reason: one box around a
+    150-mile leg is a "too busy" from the public service, and everything
+    outside the 90-metre match corridor was never going to be used.
     """
-    return _overpass(query).get("elements", [])
+    return oc.corridor_elements(
+        coords,
+        lambda box: (
+            "[out:json][timeout:180];"
+            f'way["highway"~"{HIGHWAY_FILTER}"]["lanes"]({box});'
+            "out geom tags;"
+        ),
+    )
 
 
 # --- geometry archive: decode per-leg coords --------------------------------
@@ -238,7 +234,8 @@ def build_lane_segments(
         if length <= 0:
             continue
         at_ic = any(
-            abs(s["start_mi"] - m) <= INTERCHANGE_TOL_MI or abs(s["end_mi"] - m) <= INTERCHANGE_TOL_MI
+            abs(s["start_mi"] - m) <= INTERCHANGE_TOL_MI
+            or abs(s["end_mi"] - m) <= INTERCHANGE_TOL_MI
             for m in interchange_mi
         )
         if length < MIN_SEG_MI and not at_ic:
@@ -324,7 +321,13 @@ def main() -> int:
 
         try:
             ways = query_leg_lane_ways(coords)
-        except (urllib.error.URLError, urllib.error.HTTPError, OSError) as exc:
+        except (
+            urllib.error.URLError,
+            urllib.error.HTTPError,
+            OSError,
+            http.client.HTTPException,
+            ValueError,
+        ) as exc:
             failed += 1
             print(f"  [{n}/{len(legs)}] {lid} OVERPASS FAILED: {exc}", flush=True)
             continue
@@ -359,8 +362,13 @@ def main() -> int:
             empty += 1
 
         report.append(
-            {"leg": lid, "state": state, "segments": len(segs),
-             "covered_mi": covered_mi, "total_mi": total_mi}
+            {
+                "leg": lid,
+                "state": state,
+                "segments": len(segs),
+                "covered_mi": covered_mi,
+                "total_mi": total_mi,
+            }
         )
         if n % 10 == 0 or n == len(legs):
             pct = 100.0 * covered_mi / total_mi if total_mi else 0.0
@@ -377,7 +385,9 @@ def main() -> int:
         save_world(world)
         print("saved world source", flush=True)
 
-    print(f"\nDONE: {done} legs with lanes, {empty} no-coverage, {failed} skipped/failed", flush=True)
+    print(
+        f"\nDONE: {done} legs with lanes, {empty} no-coverage, {failed} skipped/failed", flush=True
+    )
     print(f"total segments: {total_segs}", flush=True)
     print("coverage by state (covered / total route-mi):", flush=True)
     net_cov = net_tot = 0.0
@@ -393,9 +403,13 @@ def main() -> int:
     if args.json_out:
         Path(args.json_out).write_text(
             json.dumps(
-                {"legs": report, "network_covered_mi": round(net_cov, 1),
-                 "network_total_mi": round(net_tot, 1), "network_pct": round(net_pct, 2),
-                 "total_segments": total_segs},
+                {
+                    "legs": report,
+                    "network_covered_mi": round(net_cov, 1),
+                    "network_total_mi": round(net_tot, 1),
+                    "network_pct": round(net_pct, 2),
+                    "total_segments": total_segs,
+                },
                 indent=2,
             ),
             encoding="utf-8",

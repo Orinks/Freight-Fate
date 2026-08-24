@@ -19,13 +19,17 @@ and measure how much of ITS mileage rides the labelled interstate:
     Tampa to Miami is Florida's Turnpike; I-75 goes up the west coast. The
     label is the fault, and this tool fixes it.
 
-MEASURED across the 40 suspect legs, the split is not a judgement call -- the
-distribution has a 14-point hole in it::
+WHERE THE LINE IS, AND WHY IT MOVED. The first run of this read the line off
+the data: the distribution across 40 suspect legs had a 14-point hole in it
+(0 0 0 0 0 0 0 2 2 4 | 18 18 24 25 25 30 ... 93 98 98), ten legs below and
+thirty above. That hole has since CLOSED -- re-measured with a loaded-semi
+routing profile the distribution runs continuously from 0 to 96 -- so the
+line is no longer a gap but ``reroute_leg.MIN_ON_LABEL``, the same share
+below which that tool refuses to reroute. One threshold, two tools, and no
+leg can fall between them.
 
-    0 0 0 0 0 0 0 2 2 4  |  18 18 24 25 25 30 ... 93 98 98
-
-Ten legs below the gap, thirty above, nothing inside it. Only the ten are
-touched here.
+The split itself comes from ``tools/probe_leg_labels.py``, which is what
+``--split`` wants.
 
 THE NEW NAME IS READ, NOT CHOSEN
 --------------------------------
@@ -48,14 +52,15 @@ interstate geometry screen by ``highway`` starting with "I-", so a leg that
 stops being an interstate moves from that screen to the US/state one, and
 ``curve_artifacts.jsonl`` has to be re-baked to cover it::
 
-    uv run python tools/repair_leg_labels.py --write
+    uv run python tools/repair_leg_labels.py --split <file> --write
     uv run python tools/index_world.py
     uv run python tools/screen_curve_artifacts.py
 
 Usage
 -----
-    uv run python tools/repair_leg_labels.py --report
-    uv run python tools/repair_leg_labels.py --write
+    uv run python tools/probe_leg_labels.py --out .route-cache/label-split.json
+    uv run python tools/repair_leg_labels.py --split .route-cache/label-split.json --report
+    uv run python tools/repair_leg_labels.py --split .route-cache/label-split.json --write
 """
 
 from __future__ import annotations
@@ -69,6 +74,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import reroute_leg as rr  # noqa: E402
 from bake_curve_connectors import FACTS, load_facts  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
@@ -130,7 +136,7 @@ def main() -> int:
 
     rename, leave = [], []
     for row in split:
-        if row["on_label_frac"] > 0.04:
+        if row["on_label_frac"] >= rr.MIN_ON_LABEL:
             continue  # the interstate IS the road here; this wants rerouting
         leg = by_id.get(row["leg"])
         if leg is None:

@@ -370,7 +370,14 @@ CONGESTION_HEAVY_RATIO = 0.9  # dense, clearly slowed traffic
 CONGESTION_JAM_RATIO = 1.05  # demand over capacity: stop and go
 CONGESTION_SAMPLE_MI = 1.0  # stride when scanning a route for jam-prone stretches
 CONGESTION_MIN_ZONE_MI = 1.0  # ignore blips shorter than this
-CONGESTION_JOIN_GAP_MI = 2.0  # merge prone stretches separated by less
+# Merge prone stretches separated by less. DERIVED from ZONE_MIN_GAP_MI
+# rather than chosen: two busy stretches closer than the guaranteed open road
+# between zones cannot both stand, and the invariant is the one that speaks
+# for the driver -- "back up to speed" for four miles and then "slow again" is
+# the chaining that rule exists to prevent. At 2.0 the two numbers disagreed,
+# and any gap landing between them satisfied neither. Latent until a rebuilt
+# HPMS profile on Chicago to St Louis produced a five-mile one.
+CONGESTION_JOIN_GAP_MI = ZONE_MIN_GAP_MI
 
 # Hourly share of daily traffic (indexed by clock hour). Sums to ~1.0.
 # Shape follows FHWA/state-DOT urban hourly distributions: weekday twin

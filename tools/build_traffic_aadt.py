@@ -36,6 +36,7 @@ if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
 import build_interchanges as bi  # noqa: E402
+import leg_geometry as lg  # noqa: E402
 from world_source import WORLD_SOURCE_PATH, load_world, save_world  # noqa: E402
 
 HPMS_QUERY_URL = (
@@ -94,6 +95,16 @@ def _leg_f_system_where(highway: str) -> str:
 
 
 def _leg_geometry(leg: dict[str, Any]) -> list[tuple[float, float, float]] | None:
+    """The corridor HPMS sections are snapped to.
+
+    The archived polyline first: sections snap within 250 m, and a chord
+    between 25-mile route points misses that corridor wherever the real road
+    bends -- which is also how a rerouted leg would come back with the volume
+    of the road it no longer drives.
+    """
+    archived = lg.corridor_geometry(leg)
+    if archived:
+        return archived
     route_points = list(leg.get("corridor", {}).get("route_points", ()))
     return bi._osrm_geometry(route_points, 0.0, cached_only=True) or bi._interpolated_geometry(
         route_points
@@ -295,7 +306,12 @@ def bake_leg(leg: dict[str, Any], rate_limit: float) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Bake HPMS AADT profiles into the world source.")
     parser.add_argument("--write", action="store_true", help="Write back into the world source.")
-    parser.add_argument("--only", default="", help="Limit to one leg, e.g. 'A->B'.")
+    parser.add_argument(
+        "--only",
+        default="",
+        help="Legs to rebake, as SLUG pairs -- "
+        "'corpus_christi_tx_us->san_antonio_tx_us', semicolons between several.",
+    )
     parser.add_argument("--max-legs", type=int, default=0)
     parser.add_argument("--rate-limit", type=float, default=0.2)
     parser.add_argument(
@@ -306,10 +322,7 @@ def main(argv: list[str] | None = None) -> int:
     data = load_world()
     legs = data["legs"]
     if args.only:
-        a, _, b = args.only.partition("->")
-        legs = [leg for leg in legs if leg["from"] == a.strip() and leg["to"] == b.strip()]
-        if not legs:
-            raise SystemExit(f"No leg {args.only!r}")
+        legs = bi.select_only(legs, args.only)
 
     targets = []
     for leg in legs:

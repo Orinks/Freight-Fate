@@ -1,6 +1,7 @@
 # ruff: noqa: F401,F403,F405,F821,I001
 from __future__ import annotations
 
+import leg_geometry as lg
 from build_interchanges_base import *
 
 
@@ -22,7 +23,7 @@ MAXSPEED_INDEX_CACHE_VERSION = 1
 OSM_REGION_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 MAXSPEED_SOURCE = (
     "OpenStreetMap maxspeed tags on the corridor highway ways, read from a local "
-    f"Geofabrik extract and snapped to checked-in OSRM route geometry, accessed "
+    f"Geofabrik extract and snapped to the checked-in route geometry archive, accessed "
     f"{ACCESSED_DATE}; maxspeed:hgv preferred where tagged. "
     "https://www.openstreetmap.org/"
 )
@@ -438,17 +439,35 @@ def _interpolated_geometry(
     return out
 
 
+def leg_corridor_geometry(
+    leg: dict[str, Any],
+    rate_limit: float,
+) -> list[tuple[float, float, float]] | None:
+    """The dense corridor polyline a builder should match features against.
+
+    The archived polyline first: it IS the road the leg drives, at full curve
+    fidelity, and it is the only source that stays right after a reroute. A
+    cached OSRM response is keyed to the route that was baked, so on a
+    rerouted leg it is either a miss or -- worse -- a confident description of
+    the old road. Interpolating between 25-mile route points is the last
+    resort: it cuts every corner, and a feature the chord swings away from is
+    simply not found.
+    """
+    archived = lg.corridor_geometry(leg)
+    if archived:
+        return archived
+    route_points = list(leg.get("corridor", {}).get("route_points", ()))
+    return _osrm_geometry(route_points, rate_limit, cached_only=True) or _interpolated_geometry(
+        route_points
+    )
+
+
 def bake_maxspeed_for_leg(
     leg: dict[str, Any],
     grid: MaxspeedGrid,
     rate_limit: float,
 ) -> list[dict[str, Any]]:
-    route_points = list(leg.get("corridor", {}).get("route_points", ()))
-    # Prefer cached dense OSRM geometry; never fetch live (a hung socket would
-    # stall the whole batch). Fall back to local interpolation of route points.
-    geom = _osrm_geometry(route_points, rate_limit, cached_only=True) or _interpolated_geometry(
-        route_points
-    )
+    geom = leg_corridor_geometry(leg, rate_limit)
     if not geom:
         return []
     return assemble_maxspeed(grid, geom, float(leg["miles"]), str(leg.get("highway", "")))
@@ -457,10 +476,7 @@ def bake_maxspeed_for_leg(
 def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:
     legs = data["legs"]
     if args.only:
-        a, _, b = args.only.partition("->")
-        legs = [leg for leg in legs if leg["from"] == a.strip() and leg["to"] == b.strip()]
-        if not legs:
-            raise SystemExit(f"No leg {args.only!r}")
+        legs = select_only(legs, args.only)
 
     target_legs: list[dict[str, Any]] = []
     for leg in legs:

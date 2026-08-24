@@ -854,7 +854,7 @@
       "from": "dover_de_us",
       "to": "wilmington_de_us",
       "miles": 51,
-      "highway": "I-95",
+      "highway": "DE-1",
       "terrain": "flat",
       "corridor": {
         "tollway_detected": true,
