@@ -1285,6 +1285,36 @@
   re-read.
 
 ### Fixed
+- **Brake lights ahead no longer make you stop dead.** A slow vehicle in your
+  lane was treated the same as a tyre carcass: the warning only counted as
+  answered once you were down to a crawl, and with automatic braking on the
+  truck did that for you whether you wanted it or not. On a long interstate
+  run it could happen every couple of minutes, and since a loaded truck takes
+  over a minute to get back to seventy, you never did -- which felt like
+  cruise control giving up. A vehicle ahead now clears once you are down to
+  ITS speed, which is what you would do anyway. Debris, animals and traffic
+  that has actually stopped still ask for everything they always did.
+- **The upcoming readout stops saying "in 0 miles".** U rounded every
+  distance to a whole mile, so anything closer than half a mile came out as
+  zero, and on a slow crawl into a yard it would sit on the same number for
+  minutes while you closed on the thing. It reads a decimal now -- "facility
+  gate in 0.4 miles" -- so the number moves as you do, which is most of what
+  the key is for.
+- **No more "Limit." with nothing after it at a ramp end.** On quiet speech,
+  the traffic-light call at the end of a ramp read "Light at ramp end, green.
+  Limit ." -- a sentence with a hole where the number should be. The game
+  leaves the limit out on purpose when it cannot vouch for it, because a wrong
+  number is worse than none; it was just still saying the word "limit" first.
+  Now it says the limit when it has one and stops cleanly when it does not.
+- **Braking on a hill no longer lowers your cruise speed for the rest of the
+  run.** Touching the brake on a downgrade with descent control on was being
+  taken as "this is my new cruise speed", permanently. It also stacked: 65
+  became 55 on one hill and 49 on the next, and once it was 49 there was
+  nothing to climb back to, so the truck just stayed there on the flat and up
+  the far side. Your set speed now survives the hill. The brake still caps
+  your speed for as long as that grade lasts -- the cab says "descent control
+  holding X for this grade" -- and when the road levels out you go back to the
+  speed you actually set.
 - **Fewer needless slowdowns for interstate curves.** The game worked out how
   fast a bend could be taken as though every road were flat. Real highway
   curves are banked, and the bank is a big part of what holds a truck in a

@@ -1529,3 +1529,118 @@ def test_canceling_the_plan_gives_the_road_back(monkeypatch):
         assert d.trip.exit_approach_mi is None
     finally:
         app.shutdown()
+
+
+@pytest.mark.parametrize("control", ["signal", "stop", "yield", "roundabout"])
+def test_a_ramp_terminal_call_never_speaks_a_limit_it_does_not_have(monkeypatch, control):
+    """Shane P, 2026-08-23: "Light at ramp end, green. Limit ."
+
+    `_approach_limit_text` returns nothing on purpose when it cannot trust
+    the number -- a probe that reads the mainline through a gap once told the
+    owner "Stop sign at ramp end. Limit 70" at two exits running, and better
+    no clause than a wrong one. Interpolating that emptiness gave quiet
+    drivers a sentence with a hole in it. The stop, yield and roundabout
+    branches guarded it; the signal branch did not.
+
+    Parametrised across all four controls because the fault was one branch of
+    four missing what its siblings had, which is not a thing to fix singly.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say_event", speech_stub(spoken, terse=True))
+        monkeypatch.setattr(d.ctx.audio, "play", lambda *a, **k: None)
+        app.ctx.settings.driving_speech = "quiet"
+        d._ramp_control = control
+        monkeypatch.setattr(d, "_approach_limit_text", lambda: "")
+
+        d._announce_ramp_terminal()
+
+        assert spoken, f"{control} says nothing at all"
+        line = spoken[-1]
+        assert "Limit" not in line, f"{control} promised a limit it does not have: {line!r}"
+        assert ". ." not in line and not line.endswith(", ."), f"{control}: {line!r}"
+        assert "  " not in line, f"{control} left a gap where the number was: {line!r}"
+
+        # And with a real number it still says it.
+        spoken.clear()
+        monkeypatch.setattr(d, "_approach_limit_text", lambda: "45 miles per hour")
+        d._ramp_light_announced = False
+        d._announce_ramp_terminal()
+        assert "45 miles per hour" in spoken[-1], f"{control}: {spoken[-1]!r}"
+    finally:
+        app.shutdown()
+
+
+def test_the_upcoming_readout_never_says_zero_miles(monkeypatch):
+    """Shane P, 2026-08-23: "Coming up: facility gate in 0 miles."
+
+    U is pressed most on the crawl into a facility, which is exactly where
+    whole-mile rounding falls apart: everything under half a mile reads as
+    zero, and before that it sat on "2 miles" for three minutes while he
+    closed on the gate. `distance_text`'s own docstring says the precise form
+    exists "where whole numbers would read as zero or lie by half a mile".
+    The bend clause always asked for it; the zone and stop clauses did not.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say", speech_stub(spoken))
+        app.ctx.settings.imperial_units = True
+        stop = _FakeStop(at_mi=d.trip.position_mi + 0.4)
+        stop.spoken_name = "Jackson Company Yard"
+        d.trip.upcoming_stop = lambda within_mi: stop
+        d.trip.ramp_control_at = lambda mi: ""
+
+        d._speak_upcoming()
+
+        assert spoken, "U said nothing at all"
+        line = spoken[-1]
+        assert "0 miles" not in line, line
+        assert "0.4 miles" in line, line
+    finally:
+        app.shutdown()
+
+
+def test_the_upcoming_readout_moves_as_the_truck_closes(monkeypatch):
+    """Two presses a few hundred feet apart must not read the same.
+
+    The complaint under "the U key didn't keep up" was that the number sat
+    still: at whole-mile rounding a truck doing 20 mph holds one figure for
+    minutes at a time, which reads as a readout that has stopped working.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say", speech_stub(spoken))
+        app.ctx.settings.imperial_units = True
+        d.trip.ramp_control_at = lambda mi: ""
+        start = d.trip.position_mi
+        gate = start + 2.4
+
+        def _gate_stop(within_mi):
+            stop = _FakeStop(at_mi=gate)
+            stop.spoken_name = "Jackson Company Yard"
+            return stop
+
+        d.trip.upcoming_stop = _gate_stop
+
+        d._speak_upcoming()
+        first = spoken[-1]
+        d.trip.position_mi = start + 0.5  # half a mile further on
+        d._speak_upcoming()
+        second = spoken[-1]
+
+        assert first != second, f"the readout did not move: {first!r}"
+        assert "2.4 miles" in first and "1.9 miles" in second, (first, second)
+    finally:
+        app.shutdown()

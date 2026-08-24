@@ -629,6 +629,10 @@ class DrivingState(
         self._lane_before_narrow: int | None = None
         self._merge_taper_warned: str | None = None
         self._hazard_dodgeable = False
+        # The speed of the VEHICLE this hazard is about, when it is a vehicle.
+        # None for debris, animals and anything else that is not going
+        # anywhere. See _hazard_target_mph.
+        self._hazard_lead_mph: float | None = None
         self._hazard_lane = 0
         self._left_lane_s = 0.0
         self._keep_right_nags = 0

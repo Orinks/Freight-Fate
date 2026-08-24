@@ -112,6 +112,25 @@ class PendingAmbient:
     render: Callable[[], str | None] | None = None
 
 
+def _hazard_lead_speed(event) -> float | None:
+    """How fast the vehicle this hazard is about is going, or None.
+
+    A traffic hazard carries the lead's own context; debris, an animal or a
+    stopped truck carries nothing, and None is what says "this thing is not
+    going anywhere". Read defensively: the harness and the trip's own
+    NPCVehicle share this surface without carrying the dataclass.
+    """
+    context = event.data.get("traffic")
+    lead = getattr(context, "lead", None)
+    speed = getattr(lead, "speed_mph", None)
+    if speed is None:
+        return None
+    try:
+        return max(0.0, float(speed))
+    except (TypeError, ValueError):
+        return None
+
+
 class DrivingEventMixin:
     def _log_ambient_event(self, message: str) -> None:
         """Log an ambient line the moment it queues, not when it is spoken.
@@ -368,6 +387,7 @@ class DrivingEventMixin:
                 self._hazard_names = [name]
                 self._horn_scare_tried = False
                 self._hazard_dodgeable = dodgeable
+                self._hazard_lead_mph = _hazard_lead_speed(event)
                 self._hazard_deadline = new_deadline
                 self._hazard_lane = self.lane.lane
                 self._release_hazard_brake()
@@ -380,6 +400,7 @@ class DrivingEventMixin:
                 self._hazard_names = [name]
                 self._horn_scare_tried = False
                 self._hazard_dodgeable = dodgeable
+                self._hazard_lead_mph = _hazard_lead_speed(event)
                 self._hazard_deadline = new_deadline
                 self._hazard_lane = self.lane.lane
                 self._release_hazard_brake()
@@ -390,6 +411,14 @@ class DrivingEventMixin:
                 # wording; the shorter deadline is the one still governing
                 # how much time is actually left.
                 self._hazard_names.append(name)
+                # Folding a second hazard in: the slower demand wins, and a
+                # thing that is not moving has no lead speed at all, so it
+                # takes the group back to the near-stop rule.
+                folded = _hazard_lead_speed(event)
+                if folded is None or self._hazard_lead_mph is None:
+                    self._hazard_lead_mph = None
+                else:
+                    self._hazard_lead_mph = min(self._hazard_lead_mph, folded)
                 self._hazard_dodgeable = self._hazard_dodgeable and dodgeable
                 self._hazard_deadline = min(self._hazard_deadline, new_deadline)
             # _hazard_lane is stamped by the two FRESH branches above and by
@@ -2985,8 +3014,17 @@ class DrivingEventMixin:
                 volume=0.8,
             )
             if self._terse_speech():
+                # The limit clause is CONDITIONAL, like every other one built
+                # from this text. `_approach_limit_text` deliberately returns
+                # nothing when it cannot trust the number -- better no clause
+                # than a wrong one -- and interpolating that gave quiet
+                # drivers a sentence with a hole in it: "Light at ramp end,
+                # green. Limit ." (Shane P, 2026-08-23). The stop, yield and
+                # roundabout branches below always guarded it; this one did
+                # not.
+                limit_clause = f" Limit {limit_text}." if limit_text else ""
                 self.ctx.say_event(
-                    f"Light at ramp end, {phase}. Limit {limit_text}.",
+                    f"Light at ramp end, {phase}.{limit_clause}",
                     interrupt=False,
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,
@@ -4660,18 +4698,37 @@ class DrivingEventMixin:
             if braking and descent_level in ("balanced", "interactive"):
                 self._descent_control_active = True
                 new_target = max(CRUISE_MIN_MPH, t.speed_mph)
+                previous = self._cruise_descent_mph
                 should_announce = (
-                    not self._descent_capture_active or abs(new_target - self._cruise_mph) >= 2.0
+                    not self._descent_capture_active
+                    or previous is None
+                    or abs(new_target - previous) >= 2.0
                 )
                 self._descent_capture_active = True
-                self._cruise_mph = new_target
-                # Capture pins the set speed to what the truck is doing now, so
-                # the working setpoint follows it down rather than easing back
-                # up toward a target the driver just abandoned.
+                # A CAP FOR THIS GRADE, never a rewrite of the driver's set
+                # speed -- the same correction the interactive branch below
+                # already carries, which this one was missed out of. Assigning
+                # into _cruise_mph made every brake on a downgrade permanent
+                # and cumulative: 65 becomes 55 on one hill, 49 on the next,
+                # and cruise never climbs back on the flat because 49 IS the
+                # set speed now. Brandon drove a whole run pinned at "forty
+                # nine mph or lower and losing speed" (2026-08-23).
+                #
+                # Taking the lower of any cap already standing keeps a
+                # deliberate brake from being undone by the automatic cap a
+                # frame later; the whole thing is released together when the
+                # grade ends.
+                self._cruise_descent_mph = (
+                    new_target if previous is None else min(previous, new_target)
+                )
+                # The working setpoint still follows the truck down now, so
+                # cruise does not fight the brake the driver is holding.
                 self._cruise_working_mph = new_target
                 if should_announce:
                     self.ctx.say_event(
-                        f"Descent target changed to {self.ctx.settings.speed_text(self._cruise_mph)}.",
+                        "Descent control holding "
+                        f"{self.ctx.settings.speed_text(self._cruise_descent_mph)} "
+                        "for this grade.",
                         interrupt=False,
                         category=SpeechCategory.CONFIRMATION,
                     )
@@ -4719,7 +4776,11 @@ class DrivingEventMixin:
                     # cruise down to 55 permanently -- on the flat, uphill, the
                     # rest of the run (bench trace, 2026-07-25: 62 set, 55 held
                     # ever after). The driver's number now survives the hill.
-                    self._cruise_descent_mph = DESCENT_SAFE_MAX_MPH
+                    # Never above a cap the driver's own brake already set on
+                    # this grade: capture is an instruction, not a suggestion.
+                    self._cruise_descent_mph = min(
+                        DESCENT_SAFE_MAX_MPH, self._cruise_descent_mph or DESCENT_SAFE_MAX_MPH
+                    )
                     safe_target = min(self._cruise_mph, DESCENT_SAFE_MAX_MPH)
                     if t.speed_mph > safe_target + 8.0:
                         t.brake = max(t.brake, min(0.7, (t.speed_mph - safe_target) / 25.0))

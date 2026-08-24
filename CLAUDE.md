@@ -192,6 +192,38 @@ a time: `SingleInstanceGuard` refuses a second window. Log paths are
 `logs/playtest.log` for playtest_road and `logs/playtest-manual.log` for the
 sandbox launcher.
 
+**Triage by what it costs the driver, not by whether it sounds like a
+bug.** Rule set 2026-08-23, after a "does the horn line read in quiet?"
+question took a three-mode bench and a catalog check to answer "yes, by
+design" while a real adaptive-cruise fault sat unread.
+
+Order of work:
+  1. It costs the drive -- the truck ignores an instruction, progress or
+     cargo is lost, or a spoken line is untrue in a way that causes the
+     mistake. Drop everything.
+  2. It makes the drive harder -- information missing, wrong, cut off, or
+     buried. Fix in turn.
+  3. Preference, polish, or working as intended. Answer, do not
+     investigate at length, and batch them.
+
+TIER 3 IS ANSWERED FROM WHAT IS ALREADY WRITTEN DOWN. If the design is
+recorded -- a docstring, the sound catalog, ontology.md -- quote it and
+move on. Needing a bench to find out whether behaviour is intended means
+the intent is not written anywhere, and THAT is the finding: record it,
+then answer. What must never happen is asserting "by design" without
+either evidence or a source, which is how a real bug gets closed.
+
+WHAT THIS RULE MUST NOT DO is filter on how a report sounds. "Not sure if
+those curves are supposed to be there" was a chain of bends that damaged
+a load; "the U key didn't keep up" was a readout frozen three minutes at
+a time. Both read as tier 3 and were tier 1 and 2. Judge the cost after
+looking, not the wording before.
+
+ASK FOR THE LOG EARLY on anything about speed, traffic or the assists.
+Two wrong diagnoses of Brandon's cruise report came from reading code;
+his log settled it in minutes. A report of that kind with no log is
+worth one cheap check and then a request, not an investigation.
+
 **Everything written in the living document is for a player.** No file names,
 function names, constants, commit hashes, or internal vocabulary ("zone
 builder", "the runtime", "provenance", "regression"), and no counts only a

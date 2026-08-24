@@ -3179,10 +3179,27 @@ class DrivingUpdateMixin:
         moving-hazard safe speed: it takes nearly a stop, then easing around.
         Defaults to the currently pending hazard's own flag; see
         ``_hazard_deadline_for`` for why a caller would pass one explicitly.
+
+        A VEHICLE IS NOT A FIXED OBJECT. Brake lights ahead are emitted
+        dodgeable too -- you can steer around them -- and that put a moving
+        truck under the same near-stop rule as a tyre carcass. With automatic
+        braking the truck obeys without the driver choosing it, so Brandon was
+        dragged from 70 to nearly stopped sixteen times in ninety minutes on
+        an open 75 interstate, each costing more than a minute to climb back:
+        "cruise control still drops speed dramatically... and never comes back
+        up" (2026-08-23). Matching the vehicle ahead is what a driver actually
+        does, and it clears the hazard honestly -- you are no longer closing
+        on it. Never below the creep floor, so a lead that has itself stopped
+        still asks for a stop.
         """
         if dodgeable is None:
             dodgeable = self._hazard_dodgeable
-        return HAZARD_CREEP_MPH if dodgeable else HAZARD_SAFE_MPH
+        if not dodgeable:
+            return HAZARD_SAFE_MPH
+        lead_mph = self._hazard_lead_mph
+        if lead_mph is None:
+            return HAZARD_CREEP_MPH
+        return max(HAZARD_CREEP_MPH, lead_mph)
 
     # -- grades ---------------------------------------------------------------------
 
@@ -3369,6 +3386,10 @@ class DrivingUpdateMixin:
         """Common tail of every way a pending hazard can resolve: brake,
         swerve, or an earlier hazard outrun before a new one armed."""
         self._hazard_deadline = None
+        # The lead belonged to the hazard that just ended; a fresh one must
+        # not inherit it, or a tyre carcass would clear at the speed of a
+        # truck that is long gone.
+        self._hazard_lead_mph = None
         self._release_hazard_brake()
         self._hazard_slow_hint_said = False
         self.ctx.audio.play("events/hazard_clear", volume=0.75)

@@ -1687,6 +1687,56 @@ onto exit signalling.
       otherwise the level that earns the next tier -- so the question is
       answerable at any time, not only when the game happens to raise it.
 
+- [x] **A vehicle hazard clears at the vehicle's speed (2026-08-23).**
+      Brandon: cruise "drops speed dramatically to say something like 40 mph
+      or 39 mph and never comes back up". Two wrong diagnoses before his log
+      arrived -- the descent ratchet (his set speed was 70 in all 135
+      readouts, so it never fired) and a braking-NPC deadlock (benched at
+      posted 75 with no zone: no difference, change reverted unshipped).
+
+      HIS LOG, I-70 East in Kansas, level road, limit 75, cruise set 70:
+      sixteen "Change lanes or brake! Brake lights right ahead" in ninety
+      minutes, a median 112 seconds apart, each resolving only at
+      `HAZARD_CREEP_MPH` -- a near stop -- and each followed by "Resuming
+      automatic speed control at 70". A loaded truck needs over a minute to
+      climb 40 to 70, so he lived at 37 to 40 and cruise looked broken.
+
+      `dodgeable` was doing two jobs: "you can steer around this" and "this
+      is not moving, so nearly stop". Both true of a tyre carcass, only the
+      first true of a truck doing 55. `_hazard_target_mph` now takes the
+      lead's own speed when the hazard is a vehicle, floored at the creep
+      speed so stopped traffic still asks for a stop, and folding a fixed
+      obstacle in takes the group back to the near stop.
+
+      THE FREQUENCY IS UNTOUCHED and may still want looking at: 13 hazards
+      an hour is a lot of interstate drama. It stopped mattering once each
+      one cost a lift rather than a stop, so it is recorded rather than
+      tuned.
+
+- [x] **Descent brake capture stops rewriting the set speed (2026-08-23).**
+      Brandon: cruise "won't speed back up to highway speed... maintaining a
+      speed of forty nine mph or lower and losing speed". Reproduced exactly,
+      including his number.
+
+      Braking on a downgrade with descent control on balanced or interactive
+      assigned straight into `_cruise_mph`. Permanent AND cumulative: 65 to 55
+      on one hill, 49 on the next, and no recovery on the flat because 49 IS
+      the set speed by then. A ratchet that only turns down.
+
+      THIS BUG WAS ALREADY FIXED ONCE, one branch over. The interactive
+      ceiling carries a comment saying exactly this -- "a cap that lives as
+      long as the grade does, not a rewrite of the driver's set speed... one
+      3 percent dip on a 65 road knocked cruise down to 55 permanently"
+      (2026-07-25) -- and the braking-capture path beside it was missed out of
+      the correction. It now writes `_cruise_descent_mph`, released with the
+      grade like every other descent cap, and takes the lower of any cap
+      already standing so the automatic ceiling cannot undo a deliberate
+      brake a frame later.
+
+      `test_descent_control_levels_and_brake_capture` pinned the OLD contract
+      and was updated; the lesson is that a sibling branch sharing a bug needs
+      the fix and the test, not just the one that was reported.
+
 - [x] **Curve advisories count the bank the road is built with
       (2026-08-23).** Owner: too many interstate curves make the truck slow.
       MEASURED: 16,038 interstate mainline curves over 86,412 miles, 3,002 of

@@ -2377,10 +2377,16 @@ def test_descent_control_levels_and_brake_capture(monkeypatch, level, braking, e
         driving._update_cruise(0.1, braking, False, False)
         assert driving._descent_control_active is expected_active
         if braking and level in ("balanced", "interactive"):
-            assert driving._cruise_mph == pytest.approx(driving.truck.speed_mph)
-            assert sum("Descent target changed" in text for text in spoken) == 1
+            # The brake caps THIS GRADE and leaves the driver's set speed
+            # alone. It used to assign into _cruise_mph, which made every
+            # downhill brake permanent and cumulative (Brandon, 2026-08-23:
+            # a whole run pinned at "forty nine mph or lower"). See
+            # test_braking_on_a_grade_caps_it_without_rewriting_the_set_speed.
+            assert driving._cruise_mph == pytest.approx(60.0)
+            assert driving._cruise_descent_mph == pytest.approx(driving.truck.speed_mph, abs=0.01)
+            assert sum("Descent control holding" in text for text in spoken) == 1
             driving._update_cruise(0.1, True, False, False)
-            assert sum("Descent target changed" in text for text in spoken) == 1
+            assert sum("Descent control holding" in text for text in spoken) == 1
     finally:
         app.shutdown()
 
@@ -4019,5 +4025,200 @@ def test_the_resume_line_names_the_weather_cap(monkeypatch):
         driving._engage_cruise(70.0, transition=True)
         line = next(s for s in events if "Open road" in s)
         assert "resuming at 35 miles per hour in the snow" in line, line
+    finally:
+        app.shutdown()
+
+
+def test_braking_on_a_grade_caps_it_without_rewriting_the_set_speed():
+    """The same correction the interactive path already carries.
+
+    Brandon drove a whole run pinned at "forty nine mph or lower and losing
+    speed instead of getting back up to highway speed" (2026-08-23). Braking
+    on a downgrade assigned straight into the cruise set speed, so it was
+    permanent AND cumulative: 65 becomes 55 on one hill, 49 on the next, and
+    cruise never climbs back on the flat because 49 IS the set speed by then.
+    A ratchet that only ever turns down.
+
+    `test_interactive_descent_control_caps_the_target_without_rewriting_it`
+    pins the identical rule one branch over. This one was missed out of it.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.descent_speed_control = "balanced"
+        driving.truck.start_engine()
+        driving.truck.velocity_mps = 65.0 / 2.2369362920544
+        driving._cruise_mph = 65.0
+        driving._cruise_working_mph = 65.0
+
+        # Two hills, braking lower on the second one.
+        for slowed_to in (55.0, 49.0):
+            driving.truck.grade = -0.05
+            driving.truck.velocity_mps = slowed_to / 2.2369362920544
+            driving._update_cruise(1 / 60, True, False, False)
+            # The driver's number is untouched, and the grade carries the cap.
+            assert driving._cruise_mph == pytest.approx(65.0)
+            assert driving._cruise_descent_mph == pytest.approx(slowed_to, abs=0.01)
+
+        # Back on the level: the cap lifts and highway speed comes back.
+        driving.trip.grade_at = lambda mile: 0.0
+        driving.truck.grade = 0.0
+        for _ in range(600):
+            driving._update_cruise(1 / 60, False, False, False)
+        assert driving._cruise_descent_mph is None
+        assert driving._cruise_mph == pytest.approx(65.0)
+        assert driving._cruise_working_mph == pytest.approx(65.0)
+    finally:
+        app.shutdown()
+
+
+def test_the_automatic_grade_cap_never_undoes_the_drivers_own_brake():
+    """Capture is an instruction; the automatic ceiling must not raise it.
+
+    Both write `_cruise_descent_mph`, and on the frame after a deliberate
+    brake the interactive ceiling would otherwise hand the speed straight
+    back.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import DESCENT_SAFE_MAX_MPH
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.descent_speed_control = "interactive"
+        driving.truck.start_engine()
+        driving._cruise_mph = 65.0
+        driving._cruise_working_mph = 65.0
+
+        slowed_to = DESCENT_SAFE_MAX_MPH - 10.0
+        driving.truck.grade = -0.05
+        driving.truck.velocity_mps = slowed_to / 2.2369362920544
+        driving._update_cruise(1 / 60, True, False, False)
+        assert driving._cruise_descent_mph == pytest.approx(slowed_to, abs=0.01)
+
+        # Still on the grade, no brake: the automatic ceiling runs and must
+        # leave the lower, deliberate cap alone.
+        for _ in range(60):
+            driving._update_cruise(1 / 60, False, False, False)
+        assert driving._cruise_descent_mph <= slowed_to + 0.01
+        assert driving._cruise_mph == pytest.approx(65.0)
+    finally:
+        app.shutdown()
+
+
+def test_a_vehicle_hazard_clears_at_the_vehicles_speed_not_a_near_stop():
+    """Brandon, 2026-08-23: cruise "drops speed dramatically... and never
+    comes back up to highway speed".
+
+    His log is sixteen brake-light hazards in ninety minutes on I-70 in
+    Kansas -- level road, limit 75, cruise set 70 -- each one demanding he go
+    nearly to a stop, and with automatic braking the truck obeyed without him
+    choosing it. A loaded truck needs over a minute to climb back, and they
+    arrived a median of 112 seconds apart, so he lived at 37 to 40.
+
+    The cause was `dodgeable` doing two jobs: "you can steer around this" and
+    "this is not moving, so nearly stop". True together for a tyre carcass,
+    false for a truck doing 55. A vehicle hazard now clears at the vehicle's
+    own speed, which is what a driver actually does and is honestly clear --
+    you are no longer closing on it.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_CREEP_MPH, HAZARD_SAFE_MPH
+
+    class _Lead:
+        def __init__(self, mph):
+            self.speed_mph = mph
+
+    class _Context:
+        def __init__(self, mph):
+            self.lead = _Lead(mph)
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        def arm(**data):
+            driving._hazard_deadline = None
+            driving._hazard_lead_mph = None
+            driving._handle_trip_event(
+                TripEvent(TripEventKind.HAZARD, "Brake!", {"deadline_s": 3.0, **data})
+            )
+            return driving._hazard_target_mph()
+
+        # A moving vehicle: match it, do not stop for it.
+        assert arm(dodgeable=True, name="the brake lights", traffic=_Context(55.0)) == 55.0
+        assert arm(dodgeable=True, name="the slow truck", traffic=_Context(30.0)) == 30.0
+
+        # Everything that is not a moving vehicle is exactly as it was.
+        assert arm(dodgeable=True, name="retread debris") == HAZARD_CREEP_MPH
+        assert arm(dodgeable=False, name="the deer") == HAZARD_SAFE_MPH
+        # A lead that has itself stopped still asks for a stop: the creep
+        # speed is a floor, not a starting point.
+        assert arm(dodgeable=True, name="stopped traffic", traffic=_Context(0.0)) == (
+            HAZARD_CREEP_MPH
+        )
+    finally:
+        app.shutdown()
+
+
+def test_folding_a_fixed_obstacle_into_a_vehicle_hazard_takes_the_near_stop_back():
+    """Two hazards at once take the harsher demand.
+
+    A truck ahead and a tyre carcass under it is not "match the truck": the
+    carcass is not going anywhere, and the group has to be crawled.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_CREEP_MPH
+
+    class _Lead:
+        def __init__(self, mph):
+            self.speed_mph = mph
+
+    class _Context:
+        def __init__(self, mph):
+            self.lead = _Lead(mph)
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 70.0 / 2.2369362920544
+
+        driving._hazard_deadline = None
+        driving._hazard_lead_mph = None
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake!",
+                {
+                    "deadline_s": 3.0,
+                    "dodgeable": True,
+                    "name": "the brake lights",
+                    "traffic": _Context(55.0),
+                },
+            )
+        )
+        assert driving._hazard_target_mph() == 55.0
+
+        # Debris folds in while the first is still live.
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake now!",
+                {"deadline_s": 2.0, "dodgeable": True, "name": "retread debris"},
+            )
+        )
+        assert driving._hazard_target_mph() == HAZARD_CREEP_MPH
     finally:
         app.shutdown()
