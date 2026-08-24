@@ -1,0 +1,1040 @@
+{
+  "name": "Fixture Driver",
+  "money": 5642.84,
+  "current_city": "philadelphia_pa_us",
+  "created_line": "1.9",
+  "migration_notice_pending": false,
+  "integrity_modified": false,
+  "integrity_notice_pending": false,
+  "hos_key_notice_left": 1,
+  "game_hours": 15.747000454405587,
+  "calendar_offset_days": 0,
+  "tutorial_done": true,
+  "truck": "rig",
+  "owned_trucks": [],
+  "truck_conditions": {
+    "rig": {
+      "tire_wear_pct": 1.00482947495538,
+      "brake_wear_pct": 1.0862762756489799,
+      "engine_wear_pct": 0.38771891630711364,
+      "damage_pct": 0.0,
+      "grime_pct": 0.532,
+      "fuel_gal": 139.95615978721762,
+      "tire_type": "all_season",
+      "chains_owned": false,
+      "chain_wear_pct": 0.0
+    }
+  },
+  "upgrades": {},
+  "active_trip": null,
+  "dispatch_board_cache": null,
+  "fatigue": 25.49609033947063,
+  "active_buffs": [],
+  "pay_advance": 0.0,
+  "fines_owed": 0.0,
+  "pay_advance_used_for_load": false,
+  "business_status": "company_driver",
+  "carrier_name": "Northstar Freight Lines",
+  "carrier_key": "northstar",
+  "start_mode": "company_driver",
+  "authority_readiness": false,
+  "trailer_programs": [],
+  "owned_trailers": [],
+  "career": {
+    "xp": 772.0070000000001,
+    "reputation": 54.0,
+    "deliveries": 3,
+    "on_time_deliveries": 3,
+    "total_miles": 133.0,
+    "total_earnings": 642.84,
+    "dispatch_declines_used": 0,
+    "on_time_streak": 3,
+    "purchased_endorsements": []
+  },
+  "driving_record": {
+    "serious_violations": [],
+    "major_offenses": [],
+    "citations": 0,
+    "fines_paid": 0.0,
+    "fatigue_events": 0,
+    "trust_band_heard": "full",
+    "debt_rung_heard": 0,
+    "repossessions": 0,
+    "setback_notice_kind": "",
+    "setback_notice_lines": [],
+    "suspended_until_h": 0.0,
+    "suspension_reason": "",
+    "lifetime_disqualified": false,
+    "carrier_terminations": 0,
+    "notice_pending": false
+  },
+  "selection_score": 30.0,
+  "out_of_service_events": 0,
+  "market": {
+    "seed": 608195075,
+    "day": 0,
+    "multipliers": {
+      "general": 1.009,
+      "retail": 0.906,
+      "parcel": 0.983,
+      "container": 1.052,
+      "bulk": 0.944,
+      "grain": 0.931,
+      "farm_inputs": 1.048,
+      "construction": 1.061,
+      "lumber_paper": 0.935,
+      "automotive": 0.971,
+      "machinery": 1.068,
+      "steel": 1.077,
+      "food": 1.026,
+      "refrigerated": 0.915,
+      "chemicals": 1.129,
+      "electronics": 1.079
+    }
+  },
+  "hos": {
+    "driving_min": 221.7051333866611,
+    "duty_min": 585.446366220797,
+    "since_break_min": 83.05402031629463,
+    "status": "on_duty_not_driving",
+    "non_driving_min": 25.271991245614746,
+    "off_duty_min": 0.0,
+    "warned": [],
+    "history": [
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3424995541296,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3435662207963,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3446995541296,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.345832887463,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3469662207963,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3480995541296,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3492328874629,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3502995541296,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3513662207963,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3524995541296,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3535662207963,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3546995541296,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.355832887463,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3569662207963,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.358032887463,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3591662207963,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.360232887463,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3612995541297,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3623662207964,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3634995541297,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0012,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3645662207964,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3657662207964,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3668328874631,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3678995541298,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3689662207966,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3700995541299,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3711662207966,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3722995541299,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3733662207966,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3744328874633,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3755662207966,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3766995541299,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3778328874632,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3789662207965,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3800328874632,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3811662207966,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3822995541299,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3834328874632,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3844995541299,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3856328874632,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3867662207965,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3878328874632,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3888995541299,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3900328874632,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3911662207965,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3922328874633,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.39329955413,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3944328874633,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3955662207966,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3966995541299,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3977662207966,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0012,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.3988328874633,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4000328874633,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.40109955413,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0012,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4021662207967,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4033662207968,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4044328874635,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4054995541302,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4066328874635,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4076995541302,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4088328874635,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4099662207968,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4110328874635,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4121662207968,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4132995541302,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4144328874635,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4154995541302,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4165662207969,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4176995541302,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4187662207969,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4198328874636,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4209662207969,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4220328874636,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4230995541303,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.424166220797,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4252995541303,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.426366220797,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4274995541303,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4286328874637,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.429766220797,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4308995541303,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4320328874636,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4330995541303,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.434166220797,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4352328874637,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.436366220797,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4374995541303,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.438566220797,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4396328874637,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0010666666666666667,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4407662207971,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4418328874638,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4429662207971,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4440995541304,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 0.0011333333333333334,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.4452328874637,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 5.0,
+        "drive_before": 221.7051333866611,
+        "duty_before": 560.446366220797,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "minutes": 20.0,
+        "drive_before": 221.7051333866611,
+        "duty_before": 565.446366220797,
+        "since_break_before": 83.05402031629463,
+        "source": "normal"
+      }
+    ],
+    "split_rest_history": [],
+    "split_credit_key": null
+  },
+  "duty_log": {
+    "segments": [
+      {
+        "status": "on_duty_not_driving",
+        "start_hour": 6.165700377603232,
+        "end_hour": 6.415700377603232,
+        "location": "company yard Atlantic City Company Yard in Atlantic City, New Jersey",
+        "note": "shipper check-in"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "start_hour": 6.415700377603232,
+        "end_hour": 8.504342838785945,
+        "location": "company yard Atlantic City Company Yard in Atlantic City, New Jersey",
+        "note": "dropping and hooking"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "start_hour": 8.504342838785945,
+        "end_hour": 8.754342838785945,
+        "location": "dry warehouse Vineland Dry Warehouse in Vineland, New Jersey",
+        "note": "shipper check-in"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "start_hour": 8.754342838785945,
+        "end_hour": 9.171009505452611,
+        "location": "dry warehouse Vineland Dry Warehouse in Vineland, New Jersey",
+        "note": "dropping and hooking"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "start_hour": 9.171009505452611,
+        "end_hour": 13.031658268459568,
+        "location": "dry warehouse Vineland Dry Warehouse in Vineland, New Jersey",
+        "note": "trailer swap"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "start_hour": 13.031658268459568,
+        "end_hour": 13.281658268459568,
+        "location": "company yard Atlantic City Company Yard in Atlantic City, New Jersey",
+        "note": "shipper check-in"
+      },
+      {
+        "status": "on_duty_not_driving",
+        "start_hour": 13.281658268459568,
+        "end_hour": 13.698324935126234,
+        "location": "company yard Atlantic City Company Yard in Atlantic City, New Jersey",
+        "note": "dropping and hooking"
+      }
+    ]
+  },
+  "loyalty": {
+    "total_points": 0.0,
+    "total_gallons_fueled": 0.0,
+    "shower_credits": 0,
+    "brand_points": {},
+    "fueling_history": []
+  },
+  "achievements": [
+    "first_dispatch",
+    "traffic_slowing",
+    "air_ready",
+    "first_pickup",
+    "first_drop_hook",
+    "first_delivery_drop",
+    "first_delivery",
+    "first_on_time",
+    "speed_limit_saint",
+    "jersey_delivery",
+    "hooked_a_bad_one",
+    "refused_the_trailer",
+    "hazard_avoided",
+    "clean_delivery",
+    "return_trip",
+    "route_refuel",
+    "garage_repair",
+    "radio_fringe_catch",
+    "radio_dial_wanderer",
+    "state_crossing"
+  ],
+  "achievement_stats": {
+    "weather_seen": [
+      "CLOUDY",
+      "CLEAR"
+    ],
+    "radio_stations_heard": [
+      "route_playlist",
+      "ff-night-line",
+      "ff-safety-satellite",
+      "rb-6427af32-731e-41fc-9797-8b4b2a2be922",
+      "whyy-wilmington",
+      "rb-ba75a461-47e6-4aae-b23e-e82c0b331879",
+      "wlfr-pomona",
+      "rb-a22814e4-5cf5-4197-ad6f-6341025d6cf7",
+      "wrti-philadelphia",
+      "wtmd-baltimore",
+      "wwfm-trenton",
+      "wxpn-philadelphia",
+      "afn-tokyo",
+      "abc-triple-j",
+      "wsol-atlanta",
+      "wnah-nashville",
+      "whwy-nashville",
+      "rb-web-9617a958-0601-11e8-ae97-52543be04c81",
+      "wgrx-chicago",
+      "wdlt-memphis",
+      "wbyu-new-orleans",
+      "ksnd-seattle",
+      "krwl-dallas",
+      "krdg-denver",
+      "kpln-kansas-city",
+      "kchm-los-angeles",
+      "kdrt-phoenix",
+      "kbsk-billings",
+      "rb-web-00d324b6-809c-4137-aa10-0d8cecf8ae71",
+      "rb-web-71af5013-dc61-423c-b9f8-bb7ed5467305",
+      "rte-2fm",
+      "rb-web-6eff3484-4ab4-4d36-bf27-9172c5aac15c",
+      "rb-web-348dfc58-ce8c-413b-b264-0384f816344b",
+      "rb-web-313046e3-b203-4b9d-bc3e-393da7d97126",
+      "rb-web-64bb1467-2585-4454-a96f-34cfbc864d41",
+      "rb-web-d28420a4-eccf-47a2-ace1-088c7e7cb7e0"
+    ],
+    "cargo_claims": 1,
+    "regions_visited": [
+      "northeast"
+    ],
+    "perfect_streak": 2,
+    "cities_delivered": [
+      "vineland_nj_us",
+      "atlantic_city_nj_us",
+      "philadelphia_pa_us"
+    ],
+    "states_delivered": [
+      "New Jersey",
+      "Pennsylvania"
+    ],
+    "last_route": [
+      "atlantic_city_nj_us",
+      "philadelphia_pa_us"
+    ],
+    "home_city": "atlantic_city_nj_us",
+    "seasons_delivered": [
+      "spring"
+    ],
+    "ticket_free_deliveries": 3,
+    "tractors_driven": [
+      "rig"
+    ],
+    "fleet_tiers_driven": [
+      "yard_standard"
+    ]
+  },
+  "radio_favorites": [],
+  "recent_lanes": [
+    "atlantic_city_nj_us:philadelphia_pa_us",
+    "vineland_nj_us:atlantic_city_nj_us",
+    "atlantic_city_nj_us:vineland_nj_us"
+  ],
+  "version": 11,
+  "_signature_version": 3,
+  "_signature": "803e6c0c1938119e7b2a4d99017ecd2c814b8aedaaa36ddf7d68a750313b8530"
+}

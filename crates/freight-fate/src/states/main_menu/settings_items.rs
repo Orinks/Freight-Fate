@@ -1,0 +1,772 @@
+//! The rows of every settings category, and the Left/Right action table
+//! that mirrors them (`SettingsCategoryState.build_items`, `_adjust`,
+//! `_speech_control_specs`, `_driving_assist_specs` in `main_menu.py`).
+
+use std::rc::Rc;
+
+use ff_core::pyfmt::round_py_int;
+use ff_core::settings::Settings;
+
+use super::settings::{Adjust, SettingsCategoryState};
+use super::settings_actions::{
+    acc_gap_label, assist_preset_label, cue_loudness_label, descent_level_label, event_voice_label,
+    hos_label, lane_keeping_label, pace_label, update_channel,
+};
+use crate::app::GameContext;
+use crate::states::base::{Label, Menu, MenuItem};
+use crate::states::update::UpdateCheckState;
+
+type Row = MenuItem<SettingsCategoryState>;
+
+/// One Speech-category control: a label, the Left/Right action, its help.
+pub(super) struct SpeechSpec {
+    pub label: Label<SettingsCategoryState>,
+    pub action: Adjust,
+    pub help: &'static str,
+}
+
+fn on_off(flag: bool) -> &'static str {
+    if flag {
+        "on"
+    } else {
+        "off"
+    }
+}
+
+fn pct(level: f64) -> i64 {
+    round_py_int(level * 100.0)
+}
+
+fn dyn_label(f: impl Fn(&Settings) -> String + 'static) -> Label<SettingsCategoryState> {
+    Label::dynamic(move |_s, ctx| f(&ctx.settings))
+}
+
+fn adjust(f: impl Fn(&mut SettingsCategoryState, &mut GameContext, i64) + 'static) -> Adjust {
+    Rc::new(f)
+}
+
+fn row(label: Label<SettingsCategoryState>, action: Adjust, help: &str) -> Row {
+    MenuItem::new(label, move |s: &mut SettingsCategoryState, ctx| {
+        action(s, ctx, 1)
+    })
+    .help(help)
+}
+
+fn back_row() -> Row {
+    MenuItem::new("Back", |s: &mut SettingsCategoryState, ctx| s.go_back(ctx))
+}
+
+/// `(field, label, help)` for each driving assist row.
+pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 14] = [
+    (
+        "automatic_emergency_braking",
+        "Automatic emergency braking",
+        "After a spoken hazard warning, the truck brakes automatically if you have not slowed enough.",
+    ),
+    (
+        "lane_departure_warning",
+        "Lane-departure warning",
+        "Speaks and sounds a warning when the truck drifts toward a lane edge.",
+    ),
+    (
+        "stop_and_go_assist",
+        "Stop-and-go assistance",
+        "Adaptive cruise can slow behind modeled traffic and resume while it remains safe.",
+    ),
+    // Nothing in the driving code reads this yet, and the row used to
+    // promise steering help that never arrived. It stays as the slot
+    // the help will land in, and says plainly that it is not doing
+    // anything today -- a blind driver cannot see that the wheel is
+    // unchanged, so the row has to tell them.
+    (
+        "lane_centering_assist",
+        "Lane centering assistance",
+        "Reserved for steering help toward the lane center, which the truck does not do yet: leaving this on or off makes no difference to how it steers today. Lane keeping is the row that decides how much of the lane work is yours, and Lane-departure warning is the one that speaks when you drift.",
+    ),
+    (
+        "descent_speed_control",
+        "Descent speed control",
+        "Manages engine braking on descents. Balanced and Interactive capture a lower target when you brake. All assists also selects safe targets and uses stronger intervention.",
+    ),
+    (
+        "exit_speed_assist",
+        "Exit speed assistance",
+        "Slows for an already-selected exit; you still confirm and take it.",
+    ),
+    (
+        "destination_approach_assist",
+        "Destination approach assistance",
+        "Slows and stops at the selected facility arrival point; it never enters the yard or docks.",
+    ),
+    (
+        "selected_stop_assist",
+        "Planned rest-stop stopping assistance",
+        "After T plans a sleep-capable route stop and X signals for its exit, this assistance stops at the entrance so the rest-stop menu can open. You still set the exit lane. It never chooses, signals, takes, or cancels an exit. Presets never change it.",
+    ),
+    (
+        "curve_speed_assist",
+        "Curve speed assistance",
+        "Reduces speed workload for mapped curves; you still steer. It slows for the bend itself on the service brakes and never the engine brake; on a real downgrade it does raise the jake, because that is the grade's work and not the bend's.",
+    ),
+    (
+        "route_transition_assist",
+        "Route-transition assistance",
+        "Helps manage speed and lane workload at confirmed route transitions.",
+    ),
+    // The speed keeper is an input-accessibility aid, not a driving
+    // assist -- it lives in Gameplay, Controls, and there is exactly one
+    // row for it. It used to appear here too, a second live control for
+    // the one setting, which is a real hazard in a spoken list.
+    (
+        "pedal_latch",
+        "Latching pedals",
+        "Tap the accelerator or brake, then press again and hold for half a second: a click and a spoken confirmation latch the pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly. Assists first, the default, lets cruise, the speed keeper, and curve assist manage speed over a latched throttle. Latch first treats the latch as a manual override those assists stand down for, the original behavior. Off turns latching pedals plain. Presets never change this.",
+    ),
+    (
+        "predictive_cruise",
+        "Predictive cruise",
+        "Cruise reads the road a mile and a half ahead: it banks a little speed before a climb so the truck carries it up the hill, gives up the last few miles an hour at a crest instead of fighting for them, and stops adding speed it would only have to brake away before a descent. It says what it is doing the first time on each hill. Presets never change this.",
+    ),
+    (
+        "curve_callouts",
+        "Curve callouts",
+        "A co-driver reads the road: bends that demand slowing are called before they arrive, like Sharp left, half a mile, advise 35. Bends you are already slow enough for stay silent. The U readout lists the next few either way. Presets never change this.",
+    ),
+    // The speed keeper holds a speed for you, so it belongs with the
+    // rest of the driving help rather than in Controls, where it sat
+    // among the keyboard, controller and units rows. Like the other
+    // input-accessibility aids above it, presets never touch it.
+    (
+        "speed_keeper",
+        "Speed keeper",
+        "In low-speed zones where adaptive cruise is unavailable, such as facility roads, gates, and construction zones, pressing K holds your current speed so the accelerator does not need to stay held, then switches back to adaptive cruise on open roads. The keeper eases off early for the next turn or the next lower limit. Braking cancels the whole session. Presets never change this.",
+    ),
+];
+
+/// `getattr(s, field)` for the boolean assist rows.
+pub(super) fn assist_flag(s: &Settings, field: &str) -> bool {
+    match field {
+        "automatic_emergency_braking" => s.automatic_emergency_braking,
+        "lane_departure_warning" => s.lane_departure_warning,
+        "stop_and_go_assist" => s.stop_and_go_assist,
+        "lane_centering_assist" => s.lane_centering_assist,
+        "exit_speed_assist" => s.exit_speed_assist,
+        "destination_approach_assist" => s.destination_approach_assist,
+        "selected_stop_assist" => s.selected_stop_assist,
+        "curve_speed_assist" => s.curve_speed_assist,
+        "route_transition_assist" => s.route_transition_assist,
+        "predictive_cruise" => s.predictive_cruise,
+        "curve_callouts" => s.curve_callouts,
+        "speed_keeper" => s.speed_keeper,
+        _ => false,
+    }
+}
+
+fn assist_value_text(s: &Settings, field: &str) -> String {
+    match field {
+        "descent_speed_control" => descent_level_label(s),
+        "pedal_latch" => s.pedal_latch.clone(),
+        _ => on_off(assist_flag(s, field)).to_string(),
+    }
+}
+
+impl SettingsCategoryState {
+    /// Speech-category controls as (label, action, help) triples.
+    ///
+    /// Built dynamically so the menu and the left/right adjust handler stay
+    /// in sync, and so rate, pitch, volume, and voice only appear when the
+    /// active voices actually support them (a running screen reader does
+    /// not).
+    pub(super) fn speech_control_specs(&self, ctx: &GameContext) -> Vec<SpeechSpec> {
+        let speech = &ctx.speech;
+        let mut specs = vec![
+            SpeechSpec {
+                label: dyn_label(|s| {
+                    format!("Driving speech: {}", s.driving_speech.replace('_', " "))
+                }),
+                action: adjust(|s, ctx, d| s.cycle_driving_speech(ctx, d)),
+                help: "How much the road tells you. Standard speaks every \
+                       confirmation and status update in words, a driving tip \
+                       once per leg, and a status readout when it changes; quiet \
+                       cuts confirmations and status to short sounds; and urgent \
+                       only also turns the heads-up about a bend or a town coming \
+                       up into a short sound, keeping the safety calls, what \
+                       things cost, and the turn itself. Billboards, place \
+                       names and landmarks are not part of this -- they have \
+                       their own switches below.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| format!("Roadside chatter: {}", s.chatter_summary())),
+                action: adjust(|s, ctx, d| s.set_all_chatter(ctx, d)),
+                help: "The ambient color spoken between navigation cues: parks, \
+                       rivers, mountain passes, museums, and billboards. Right \
+                       arrow turns everything on, Left arrow turns everything \
+                       off, and the switches below fine-tune each kind. Safety \
+                       and navigation announcements are never affected, and town \
+                       names have their own Place callouts setting below.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| {
+                    format!("Speak parks and forests: {}", on_off(s.chatter_parks))
+                }),
+                action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_parks")),
+                help: "Callouts when the road enters a national park, national \
+                       forest, or other protected public land.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| {
+                    format!("Speak river crossings: {}", on_off(s.chatter_rivers))
+                }),
+                action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_rivers")),
+                help: "Callouts when the road crosses a named river.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| {
+                    format!("Speak mountain passes: {}", on_off(s.chatter_passes))
+                }),
+                action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_passes")),
+                help: "Callouts approaching a named mountain pass, plus famous \
+                       highway markers like the Loneliest Road in America.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| {
+                    format!(
+                        "Speak museums and attractions: {}",
+                        on_off(s.chatter_museums)
+                    )
+                }),
+                action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_museums")),
+                help: "Callouts for museums and roadside attractions near the route.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| format!("Speak billboards: {}", on_off(s.chatter_billboards))),
+                action: adjust(|s, ctx, _d| s.toggle_chatter(ctx, "chatter_billboards")),
+                help: "Occasional roadside billboards, read as you pass them. \
+                       Expect attorney ads and questionable tourist traps.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| format!("Place callouts: {}", s.place_callouts)),
+                action: adjust(|s, ctx, d| s.cycle_place_callouts(ctx, d)),
+                help: "How much the co-driver says about places along the road. \
+                       Sparse speaks only the town names that explain a speed \
+                       limit change, like Entering Strawberry right before its 35. \
+                       All adds the towns the route passes. Off silences place \
+                       names entirely; speed limit announcements themselves are \
+                       never affected.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| {
+                    format!(
+                        "Menu position announcements: {}",
+                        on_off(s.announce_menu_position)
+                    )
+                }),
+                action: adjust(|s, ctx, d| s.toggle_menu_position(ctx, d)),
+                help: "When on, menus say the position, like 3 of 10, after each option. \
+                       Turn off to hear only the option.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| format!("Driving event voice: {}", event_voice_label(s))),
+                action: adjust(|s, ctx, d| s.cycle_event_voice(ctx, d)),
+                help: "Speaks road events through the main voice or a separate SAPI or \
+                       OneCore voice, so a screen reader cannot cut them off. The rate, \
+                       pitch, volume, and voice rows below appear in this category only \
+                       when the voice speaking to you supports them; with a screen \
+                       reader running, those four are set in the screen reader itself.",
+            },
+        ];
+        if speech.supports_rate() {
+            specs.push(SpeechSpec {
+                label: dyn_label(|s| format!("Speech rate: {} percent", pct(s.speech_rate))),
+                action: adjust(|s, ctx, d| s.adjust_speech(ctx, "speech_rate", 0.1 * d as f64)),
+                help: "How fast the game's voice speaks, where the voice allows it.",
+            });
+        }
+        if speech.supports_pitch() {
+            specs.push(SpeechSpec {
+                label: dyn_label(|s| format!("Speech pitch: {} percent", pct(s.speech_pitch))),
+                action: adjust(|s, ctx, d| s.adjust_speech(ctx, "speech_pitch", 0.1 * d as f64)),
+                help: "How high or low the game's voice sounds.",
+            });
+        }
+        if speech.supports_volume() {
+            specs.push(SpeechSpec {
+                label: dyn_label(|s| format!("Speech volume: {} percent", pct(s.speech_volume))),
+                action: adjust(|s, ctx, d| s.adjust_speech(ctx, "speech_volume", 0.1 * d as f64)),
+                help: "Loudness of the game's voice, separate from sound volume.",
+            });
+        }
+        if !speech.voice_names().is_empty() {
+            specs.push(SpeechSpec {
+                label: dyn_label(|s| {
+                    let voice = if s.speech_voice.is_empty() {
+                        "default"
+                    } else {
+                        s.speech_voice.as_str()
+                    };
+                    format!("Speech voice: {voice}")
+                }),
+                action: adjust(|s, ctx, d| s.cycle_voice(ctx, d)),
+                help: "Which installed voice the game speaks with.",
+            });
+        }
+        // Weather, traffic, and parking sources, and the live-weather calendar,
+        // used to live here. They are world simulation, not speech, so they
+        // moved to Gameplay, World and traffic.
+        specs
+    }
+
+    /// The Left/Right action for each row, in row order (`_adjust`'s table).
+    pub(super) fn adjust_actions(&self, ctx: &GameContext) -> Vec<Adjust> {
+        match self.category.as_str() {
+            "speech" => self
+                .speech_control_specs(ctx)
+                .into_iter()
+                .map(|spec| spec.action)
+                .collect(),
+            "difficulty" => vec![
+                adjust(|s, ctx, d| s.cycle_pace(ctx, d)),
+                adjust(|s, ctx, d| s.cycle_hos(ctx, d)),
+            ],
+            "world" => vec![
+                adjust(|s, ctx, d| s.toggle_real_weather(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_real_traffic(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_real_parking(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_live_weather_calendar(ctx, d)),
+            ],
+            "controls" => vec![
+                adjust(|s, ctx, d| s.toggle_units(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_transmission(ctx, d)),
+                adjust(|s, ctx, d| s.cycle_automatic_direction_changes(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_controller(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_haptics(ctx, d)),
+            ],
+            "assistance" => {
+                let mut actions = vec![adjust(|s, ctx, d| s.cycle_assist_preset(ctx, d))];
+                for (field, _, _) in DRIVING_ASSIST_SPECS {
+                    actions.push(adjust(move |s, ctx, d| {
+                        s.toggle_driving_assist(ctx, field, d)
+                    }));
+                }
+                // The last row of this category was left out of the
+                // arrow-key path, so Left and Right did nothing on it
+                // while every other row answered. Every row added here
+                // after Lane keeping must be appended below it, in the
+                // same order build_items appends them.
+                actions.push(adjust(|s, ctx, d| s.cycle_lane_keeping(ctx, d)));
+                actions.push(adjust(|s, ctx, d| s.cycle_acc_gap(ctx, d)));
+                actions
+            }
+            "audio" => vec![
+                adjust(|s, ctx, d| s.volume(ctx, "master_volume", 0.1 * d as f64)),
+                adjust(|s, ctx, d| s.volume(ctx, "sfx_volume", 0.1 * d as f64)),
+                adjust(|s, ctx, d| s.cycle_cue_loudness(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_lane_guide_tone(ctx, d)),
+                adjust(|s, ctx, d| s.volume(ctx, "weather_volume", 0.1 * d as f64)),
+                adjust(|s, ctx, d| s.volume(ctx, "engine_volume", 0.1 * d as f64)),
+                adjust(|s, ctx, d| s.toggle_engine_voice(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_jake_voice(ctx, d)),
+                adjust(|s, ctx, d| s.volume(ctx, "music_volume", 0.1 * d as f64)),
+                adjust(|s, ctx, d| s.volume(ctx, "radio_volume", 0.1 * d as f64)),
+                adjust(|s, ctx, d| s.toggle_radio_streamer_safe(ctx, d)),
+                adjust(|s, ctx, d| s.toggle_duck_for_speech(ctx, d)),
+                adjust(|s, ctx, d| s.volume(ctx, "ui_volume", 0.1 * d as f64)),
+            ],
+            "updates" => vec![adjust(|s, ctx, d| s.toggle_update_channel(ctx, d))],
+            // Reading the log's location is an action, not a value to
+            // step through, so left/right does nothing on that row.
+            "reports" => vec![adjust(|_s, _ctx, _d| {})],
+            _ => Vec::new(),
+        }
+    }
+
+    /// `build_items` for this category.
+    pub(super) fn category_items(&self, ctx: &GameContext) -> Vec<Row> {
+        match self.category.as_str() {
+            "assistance" => self.assistance_items(),
+            "difficulty" => vec![
+                row(
+                    dyn_label(|s| format!("Driving mode: {}", pace_label(s))),
+                    adjust(|s, ctx, d| s.cycle_pace(ctx, d)),
+                    "Driving mode controls pacing and pressure. Relaxed \
+                     gives wider hazard response windows, gentler \
+                     collision damage and fatigue, calmer speech, and the most \
+                     time to respond. Standard keeps balanced pressure and moves \
+                     the clock twice as fast, so a driving day takes half as long \
+                     and decisions arrive sooner. Real time keeps Standard's \
+                     pressure and runs the driving clock at the speed of a real \
+                     clock, so a mile takes as long as it really would. With the \
+                     weather source set to real world it is the most true to \
+                     life the game gets. You can change it mid-drive from the \
+                     pause menu.",
+                ),
+                row(
+                    dyn_label(|s| format!("Hours of service: {}", hos_label(s))),
+                    adjust(|s, ctx, d| s.cycle_hos(ctx, d)),
+                    "Realistic enforces full hours rules and normal \
+                     road hazards. Relaxed eases the hours limits and \
+                     makes road hazards rare, so you can focus on \
+                     driver responsibility: hours, fueling, and repairs.",
+                ),
+                // The overspeed warning no longer has a row. It armed at the
+                // same 5-over pace predictive cruise itself holds, so it
+                // chimed at drivers for a speed the truck picked, and the
+                // setting existed to switch that off. It now arms above
+                // cruise's pace and below the enforcement leeway, which
+                // leaves nothing worth turning off.
+                back_row(),
+            ],
+            "world" => vec![
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Weather source: {}",
+                            if s.real_weather {
+                                "real world"
+                            } else {
+                                "simulated"
+                            }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_real_weather(ctx, d)),
+                    "Real world uses live city conditions when available.",
+                ),
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Traffic source: {}",
+                            if s.real_traffic {
+                                "real time"
+                            } else {
+                                "simulated"
+                            }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_real_traffic(ctx, d)),
+                    "Real time uses live traffic incidents from state 511 \
+                     APIs when available.",
+                ),
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Parking source: {}",
+                            if s.real_parking {
+                                "real time"
+                            } else {
+                                "simulated"
+                            }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_real_parking(ctx, d)),
+                    "Real time uses live truck parking availability from \
+                     TPIMS APIs when available.",
+                ),
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Live weather controls calendar: {}",
+                            on_off(s.live_weather_controls_calendar)
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_live_weather_calendar(ctx, d)),
+                    "When on, live weather uses today's real date and \
+                     season. When off, the career date advances at midnight and \
+                     seasons pass while weather conditions still come from the \
+                     real world.",
+                ),
+                back_row(),
+            ],
+            "controls" => vec![
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Units: {}",
+                            if s.imperial_units {
+                                "imperial, miles"
+                            } else {
+                                "metric, kilometers"
+                            }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_units(ctx, d)),
+                    "Switch distance and speed readouts between miles and kilometers.",
+                ),
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Transmission: {}",
+                            if s.automatic_transmission {
+                                "automatic"
+                            } else {
+                                "manual"
+                            }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_transmission(ctx, d)),
+                    "Automatic shifts for you. Manual uses the clutch \
+                     with W and Q to shift up and down.",
+                ),
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Automatic direction changes: {}",
+                            s.automatic_direction_changes
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.cycle_automatic_direction_changes(ctx, d)),
+                    "Both styles change direction with a fresh press at a \
+                     standstill; a brake held through a stop just holds the \
+                     truck. Deliberate requires the release-and-press gesture \
+                     everywhere. This only affects automatic transmission.",
+                ),
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Controller: {}",
+                            if s.controller_enabled {
+                                "enabled"
+                            } else {
+                                "disabled"
+                            }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_controller(ctx, d)),
+                    "Accept game-controller input alongside the keyboard. \
+                     The keyboard always stays active. The first connected \
+                     controller is used automatically.",
+                ),
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Haptics: {}",
+                            if s.haptics_enabled {
+                                "enabled"
+                            } else {
+                                "disabled"
+                            }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_haptics(ctx, d)),
+                    "Rumble feedback on the controller for hazards, hard \
+                     braking, the rumble strip, and road seams. Has no effect \
+                     without a controller connected.",
+                ),
+                // The speed keeper moved to Driving assistance: it holds a speed
+                // for you, which is what every other row on that screen does.
+                // Controls is the keyboard, the controller, and the units the
+                // numbers arrive in.
+                back_row(),
+            ],
+            "audio" => self.audio_items(),
+            "speech" => {
+                let mut items: Vec<Row> = self
+                    .speech_control_specs(ctx)
+                    .into_iter()
+                    .map(|spec| row(spec.label, spec.action, spec.help))
+                    .collect();
+                items.push(back_row());
+                items
+            }
+            "reports" => vec![
+                MenuItem::new(
+                    "Where the game log is saved",
+                    |s: &mut SettingsCategoryState, ctx| s.say_log_location(ctx),
+                )
+                .help(
+                    "The game keeps a log of the session, including \
+                     everything it said out loud. Sending it with a bug \
+                     report shows exactly what you heard.",
+                ),
+                back_row(),
+            ],
+            _ => vec![
+                row(
+                    dyn_label(|s| {
+                        format!(
+                            "Update channel: {}",
+                            if update_channel(s) == "dev" {
+                                "developer snapshots"
+                            } else {
+                                "stable releases"
+                            }
+                        )
+                    }),
+                    adjust(|s, ctx, d| s.toggle_update_channel(ctx, d)),
+                    "Choose stable releases or developer snapshots.",
+                ),
+                MenuItem::new(
+                    "Check for updates",
+                    |_s: &mut SettingsCategoryState, ctx| ctx.push_state(UpdateCheckState::new()),
+                )
+                .help("Look for a new version of the game right now."),
+                back_row(),
+            ],
+        }
+    }
+
+    fn assistance_items(&self) -> Vec<Row> {
+        let mut items = vec![row(
+            dyn_label(|s| format!("Driving assistance preset: {}", assist_preset_label(s))),
+            adjust(|s, ctx, d| s.cycle_assist_preset(ctx, d)),
+            "Realistic provides modern truck safety support. Balanced adds partial lane keeping, a firmer hand on descents, and stopping at your destination. All assists enables every available driving assist and sets lane keeping to full, so the truck holds the lane, a tap changes lanes, and your destination exit is taken for you. Changing an individual assist makes this Custom. You still choose routes, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
+        )];
+        for (field, label, help_text) in DRIVING_ASSIST_SPECS {
+            items.push(row(
+                dyn_label(move |s| format!("{label}: {}", assist_value_text(s, field))),
+                adjust(move |s, ctx, d| s.toggle_driving_assist(ctx, field, d)),
+                help_text,
+            ));
+        }
+        items.push(row(
+            dyn_label(|s| format!("Lane keeping: {}", lane_keeping_label(s))),
+            adjust(|s, ctx, d| s.cycle_lane_keeping(ctx, d)),
+            "Formerly Lane drift. How much of the lane-holding \
+             work the truck does. Full holds the lane for you, turns \
+             Left and Right into tap lane changes, and takes your \
+             exits, including the destination exit, without a signal. \
+             Partial drifts gently with generous steering help; off \
+             drifts like a real wheel and every exit needs its signal \
+             and its exit lane. On partial or off the road sound \
+             leans toward where the wheel should go -- follow it into \
+             a bend and back to lane center -- and the road edge \
+             answers with real textures: a stutter clipping the \
+             rumble strip, a buzz fully on it, gravel off the \
+             pavement. Realistic sets this to off, Balanced to \
+             partial, All assists to full.",
+        ));
+        items.push(row(
+            dyn_label(|s| format!("Following gap: {}", acc_gap_label(s))),
+            adjust(|s, ctx, d| s.cycle_acc_gap(ctx, d)),
+            "How much room adaptive cruise leaves to the vehicle \
+             ahead when it is following traffic. Close is two and a \
+             half seconds, normal three, far three and a half. Bad \
+             weather still opens the gap further whichever you pick, \
+             so close never means close on ice. All three leave you \
+             well clear of a following-too-close citation. This is \
+             your preference rather than a difficulty, so the \
+             assistance preset above does not change it.",
+        ));
+        // Lane and edge cue volume moved to Audio, next to the Gameplay
+        // cues volume it scales. It is a volume, and a second volume
+        // control hiding in the assists list is how it came to be a row
+        // nobody could explain.
+        items.push(back_row());
+        items
+    }
+
+    fn audio_items(&self) -> Vec<Row> {
+        vec![
+            row(
+                dyn_label(|s| format!("Master volume: {} percent", pct(s.master_volume))),
+                adjust(|s, ctx, d| s.volume(ctx, "master_volume", 0.1 * d as f64)),
+                "Overall game volume.",
+            ),
+            row(
+                dyn_label(|s| format!("Gameplay cues volume: {} percent", pct(s.sfx_volume))),
+                adjust(|s, ctx, d| s.volume(ctx, "sfx_volume", 0.1 * d as f64)),
+                "Horn, alerts, road, facility, and gameplay cue sounds.",
+            ),
+            row(
+                dyn_label(|s| format!("Lane and edge cue volume: {}", cue_loudness_label(s))),
+                adjust(|s, ctx, d| s.cycle_cue_loudness(ctx, d)),
+                "How loud the road cues are when you leave your line, \
+                 next to everything else: the rumble-strip and shoulder \
+                 textures, the lane locator you turn on with I while \
+                 driving, and the warning bars before a hairpin. It rides \
+                 on the Gameplay cues volume above rather than replacing \
+                 it, so this row moves those cues alone. Quieter keeps \
+                 them under the engine, standard matches it, and louder \
+                 cuts through for drivers who want no doubt about which \
+                 edge they are on.",
+            ),
+            row(
+                dyn_label(|s| {
+                    format!(
+                        "Lane guide sound: {}",
+                        if s.lane_guide_tone { "tone" } else { "road noise" }
+                    )
+                }),
+                adjust(|s, ctx, d| s.toggle_lane_guide_tone(ctx, d)),
+                "What leans toward the side you are drifting to. \
+                 Road noise is the road you are already hearing, which \
+                 moves toward the side you need to steer and goes quiet \
+                 when you are straight -- nothing is added to the cab. \
+                 Tone plays a soft note instead, for the same length of \
+                 time and panned the same way. It is there because on \
+                 some setups the road is too quiet under the engine to \
+                 tell which side it went to. Road noise is the default \
+                 and the one most drivers should stay on: a note held in \
+                 your ear is tiring over a long haul and can crowd out \
+                 the rest of what the cab is telling you.",
+            ),
+            row(
+                dyn_label(|s| format!("Weather sounds volume: {} percent", pct(s.weather_volume))),
+                adjust(|s, ctx, d| s.volume(ctx, "weather_volume", 0.1 * d as f64)),
+                "Rain, wind, thunder, snow, and fog sounds.",
+            ),
+            row(
+                dyn_label(|s| format!("Engine sounds volume: {} percent", pct(s.engine_volume))),
+                adjust(|s, ctx, d| s.volume(ctx, "engine_volume", 0.1 * d as f64)),
+                "Engine start, shutdown, and running engine sounds.",
+            ),
+            row(
+                dyn_label(|s| format!("Engine voice: {}", s.engine_voice)),
+                adjust(|s, ctx, d| s.toggle_engine_voice(ctx, d)),
+                "Real plays the engine recorded from a working truck cab, \
+                 following the rpm through its range. Classic keeps the \
+                 original engine sound. Changes apply immediately, even \
+                 while driving.",
+            ),
+            row(
+                dyn_label(|s| {
+                    format!(
+                        "Engine brake voice: {}",
+                        if s.jake_voice == "real" { "recorded" } else { "classic" }
+                    )
+                }),
+                adjust(|s, ctx, d| s.toggle_jake_voice(ctx, d)),
+                "Recorded is the real engine brake growl the road plays \
+                 today -- drivers call it the jake. Classic is the \
+                 synthesized growl from earlier versions. Changes apply \
+                 immediately, even while driving.",
+            ),
+            row(
+                dyn_label(|s| format!("Music volume: {} percent", pct(s.music_volume))),
+                adjust(|s, ctx, d| s.volume(ctx, "music_volume", 0.1 * d as f64)),
+                "Menu and facility background music volume.",
+            ),
+            row(
+                dyn_label(|s| format!("In-cab radio volume: {} percent", pct(s.radio_volume))),
+                adjust(|s, ctx, d| s.volume(ctx, "radio_volume", 0.1 * d as f64)),
+                "Music volume while driving. Kept lower by default so speech, engine, and safety cues stay clear.",
+            ),
+            row(
+                dyn_label(|s| {
+                    format!("Radio streamer-safe mode: {}", on_off(s.radio_streamer_safe))
+                }),
+                adjust(|s, ctx, d| s.toggle_radio_streamer_safe(ctx, d)),
+                "Off plays the full dial, including real public streams and \
+                 personal playlists. Turn it on while streaming or recording to \
+                 keep the radio on built-in safe stations only.",
+            ),
+            row(
+                dyn_label(|s| {
+                    format!(
+                        "Game sounds step back for speech: {}",
+                        on_off(s.duck_audio_for_speech)
+                    )
+                }),
+                adjust(|s, ctx, d| s.toggle_duck_for_speech(ctx, d)),
+                "While the road voice speaks, the engine, weather, and \
+                 radio drop to half volume, then come back. Warnings stay \
+                 easy to hear in a loud cab without the voice getting louder.",
+            ),
+            row(
+                dyn_label(|s| format!("Menu and UI sounds volume: {} percent", pct(s.ui_volume))),
+                adjust(|s, ctx, d| s.volume(ctx, "ui_volume", 0.1 * d as f64)),
+                "Menu movement, selection, warning, and cash sounds.",
+            ),
+            back_row(),
+        ]
+    }
+}

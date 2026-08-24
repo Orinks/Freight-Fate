@@ -1,0 +1,21 @@
+# Leave the machine usable while a build runs.
+#
+# Cargo defaults to one job per logical core, and this workspace's test
+# profile links ~127 binaries. On a 28-core machine that took 23 cores and
+# made the desktop unusable -- with several agents building at once it was
+# worse. Twelve keeps builds fast and leaves better than half the machine
+# for whoever is sitting at it.
+#
+# Override for a one-off with `CARGO_BUILD_JOBS=28 cargo ...`; the
+# environment beats this file.
+[build]
+jobs = 12
+
+# Link with rust-lld instead of MSVC's link.exe.
+#
+# This workspace builds ~127 test binaries, each linking the whole dependency
+# graph (SDL2, rustls/ring, rustfft, zstd, icu). Linking, not compiling, is
+# the dominant cost, and lld is several times faster at it. rust-lld ships
+# with the toolchain, so there is nothing to install.
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld.exe"

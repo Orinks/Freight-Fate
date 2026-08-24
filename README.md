@@ -172,6 +172,18 @@ check, and archives it as `dist/FreightFate-<version>-windows-portable.zip`
 - `--tag <label>` — override the version label in the archive name, as the
   nightly workflow does.
 
+The Rust port packages with the same tool: `uv run python
+tools/build_release.py --rust` runs `cargo build --release -p freight-fate`
+(add `--cargo-target-dir <dir>` to pick the Cargo target directory), then
+stages `build/FreightFate/` in the layout the in-game updater already
+expects -- `FreightFate.exe` (renamed from cargo's `freightfate.exe`), the
+vendored SDL2, BASS and Prism libraries beside it, the runtime data tree
+under `freight_fate/data/`, the sound and music packs, `build_info.json`
+and the player docs -- and archives it under `dist/` exactly like the
+Python build. The packs come from Git LFS, so a checkout that only has the
+pointers is refused with a `git lfs pull` hint. The headless smoke of the
+staged binary is opt-in (`--smoke`) until the Rust binary wires `--smoke`.
+
 On Windows the build compiles with Visual Studio's C++ toolchain when
 one is installed. Without it, Nuitka downloads a MinGW64 GCC toolchain
 on first build, and the script caps compile parallelism to one job per

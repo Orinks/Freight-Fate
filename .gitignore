@@ -123,6 +123,16 @@ tools/.radio_voices.json
 # careers, no driver identity, never for commit.
 saves-playtest/
 
+# Rust
+target/
+
+# BASS is un4seen's, and proprietary. The game may ship it (non-commercial
+# use is free) but this public repo must not host it: fetch it with
+# `uv run python tools/fetch_bass.py` before building. SDL2 (zlib) and
+# Prism (MPL-2.0) stay vendored -- their licences are unambiguous.
+crates/bass-sys/vendor/*/bass*.dll
+crates/bass-sys/vendor/*/libbass*.so
+crates/bass-sys/vendor/*/libbass*.dylib
 # OSM readings behind the curve connector bake (tools/curve_osm_facts.py).
 # 26 MB of derived cache: one deterministic offline pass over the local
 # Geofabrik extracts, regenerated with `--all` whenever the rule is re-judged.

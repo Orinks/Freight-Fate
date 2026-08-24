@@ -1,0 +1,25 @@
+//! Career, economy and profile models (port of `freight_fate/models/`).
+pub mod business;
+pub mod business_constants;
+pub mod career;
+pub mod career_ladder;
+pub mod career_level_guidance;
+pub mod career_objectives;
+pub mod career_training;
+pub mod cargo_condition;
+pub mod carrier_fleet;
+pub mod dispatch_policy;
+pub mod economy;
+pub mod enforcement;
+pub mod jobs;
+pub mod loyalty;
+pub mod market;
+pub mod profile;
+pub mod safety_record;
+pub mod save_migration;
+pub mod settlement;
+pub mod solvency;
+pub mod start_options;
+pub mod trailer_yard;
+pub mod trailers;
+pub mod trucks;

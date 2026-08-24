@@ -1,0 +1,264 @@
+//! Missing the facility gate: too fast past the entrance means a loop-back
+//! (port of `freight_fate/states/driving_facility_gate.py`, the
+//! `FacilityGateMixin`).
+//!
+//! The destination facility's gate ends the drive, and the trip model clamps the
+//! odometer there -- which used to be an invisible treadmill: cross the gate at
+//! highway speed and the miles simply stopped while the truck barreled on, no
+//! overshoot, no consequence. A truck that crosses the gate above the gate
+//! zone's own posted limit (`FACILITY_GATE_LIMIT_MPH`, the 15 the last half
+//! mile is signed at) has missed the entrance.
+//!
+//! The miss is the third instance of an existing pattern -- the blown ramp stop
+//! and the missed destination exit both loop back -- and reuses its idioms: a
+//! scripted reposition through the next safe turnaround, game time charged, and
+//! the gate ahead again. The spoken cue is the only signage, so a pre-gate speed
+//! warning with an explicit target speed always precedes the first possible
+//! miss, and a real-time reaction window (`ramp_arrival_grace_seconds`, the
+//! same rule the ramp uses) must expire before one latches -- under time
+//! compression a distance alone is unbeatable. HOS, the clock, and fuel keep
+//! running through every loop; the lost time is the consequence, never a fine.
+
+use ff_core::sim::trip_models::{
+    FACILITY_ACCESS_TAIL_MI, FACILITY_GATE_LIMIT_MPH, FACILITY_GATE_ZONE_MI,
+};
+use ff_core::speech_pacing::{EventPriority, SpeechCategory};
+
+use crate::app::{GameContext, SayEvent};
+use crate::states::driving::DrivingState;
+use crate::states::driving_core::*;
+
+/// Game minutes one loop through the safe turnaround costs -- the same charge
+/// as the missed-destination-exit loop, which is the same maneuver a road up.
+pub const GATE_MISS_LOOP_MIN: f64 = 20.0;
+/// The pre-gate warning window, scaled for real reaction time like the exit
+/// window (`EXIT_WARNING_REAL_S` of hearing-and-braking time at the current
+/// pace), bounded by the road it lives on: never less than the signed gate
+/// zone, never more than the facility access-road tail.
+pub const GATE_WARNING_MIN_MI: f64 = FACILITY_GATE_ZONE_MI;
+pub const GATE_WARNING_MAX_MI: f64 = FACILITY_ACCESS_TAIL_MI;
+
+impl DrivingState {
+    /// `_post_gate_zone()`: put the gate's 15 back on the map, now that the
+    /// exit is behind.
+    ///
+    /// The arrival zones are stripped at trip start so nothing posts a silent
+    /// low limit under a spoken 65 on the final freeway miles. That left the
+    /// pre-gate warning naming a speed that was posted nowhere: it said "slow
+    /// to 15" while the last half mile still read the corridor's 55, so every
+    /// assist held 55 straight through the entrance and into the loop-back
+    /// (owner playtest, 2026-08-21). Once the destination exit is taken the
+    /// road under the truck IS the facility's own, so the 15 the warning names
+    /// is the number in force -- and a facility with a street chain never
+    /// reaches here, because its chain builds a gate zone of its own.
+    pub fn post_gate_zone(&mut self, ctx: &GameContext) {
+        if self
+            .trip
+            .zones
+            .iter()
+            .any(|zone| zone.reason == "facility gate")
+        {
+            return;
+        }
+        if self.surface_chain_route(ctx).is_some() {
+            // This facility's own streets are about to become the trip, and
+            // that chain builds its own gate zone at the end of itself. Posting
+            // one here as well would announce the same gate twice: once off the
+            // ramp on the highway trip, once again on the streets.
+            return;
+        }
+        let zone = self.trip.facility_gate_zone();
+        self.trip.zones.push(zone);
+        self.trip
+            .zones
+            .sort_by(|a, b| a.start_mi.total_cmp(&b.start_mi));
+    }
+
+    /// `_gate_warning_window_mi()`: how far out the pre-gate speed warning
+    /// fires, and how far back a miss repositions -- a full spoken window, so
+    /// the retry is winnable.
+    pub fn gate_warning_window_mi(&self) -> f64 {
+        let speed = self.trip.truck.speed_mph().max(FACILITY_GATE_LIMIT_MPH);
+        let miles = EXIT_WARNING_REAL_S * speed * self.trip.effective_time_scale() / 3600.0;
+        GATE_WARNING_MIN_MI.max(miles.min(GATE_WARNING_MAX_MI))
+    }
+
+    /// `_gate_miss_grace_seconds(message)`: real reaction seconds after
+    /// `message`, the ramp-arrival rule.
+    pub fn gate_miss_grace_seconds(&self, ctx: &GameContext, message: &str) -> f64 {
+        let speech_rate = if ctx.settings.sapi_events && ctx.speech.event_supports_rate() {
+            ctx.settings.speech_rate
+        } else {
+            0.0
+        };
+        ramp_arrival_grace_seconds(message, speech_rate)
+    }
+
+    /// `_check_gate_approach_warning(dt)`: warn about gate speed while braking
+    /// can still make the entrance.
+    ///
+    /// Without this the first "slow down" fired AT the gate, so under the
+    /// miss rule the first cue would have been the failure. Runs every
+    /// drive tick; it also keeps the reaction window's clock, which must
+    /// tick whether or not the trip has finished.
+    pub fn check_gate_approach_warning(&mut self, ctx: &mut GameContext, dt: f64) {
+        if self.gate_grace_s > 0.0 {
+            self.gate_grace_s = 0.0f64.max(self.gate_grace_s - dt);
+        }
+        if self.phase != DRIVE_PHASE_DELIVERY
+            || !self.destination_exit_taken
+            || self.ramp_mi.is_some()
+            || self.trip.finished
+            || self.gate_speed_warned
+            || self.trip.truck.speed_mph() <= FACILITY_GATE_LIMIT_MPH
+        {
+            return;
+        }
+        let remaining = self.trip.total_miles() - self.trip.position_mi;
+        if remaining > self.gate_warning_window_mi() {
+            return;
+        }
+        self.gate_speed_warned = true;
+        let target = ctx.settings.speed_text(FACILITY_GATE_LIMIT_MPH);
+        let distance = ctx.settings.distance_text(remaining, true);
+        let message = if self.terse_speech(ctx) {
+            format!("Gate in {distance}. Slow to {target}.")
+        } else {
+            format!("Facility gate in {distance}. Slow to {target} to make the entrance.")
+        };
+        self.gate_grace_s = self.gate_miss_grace_seconds(ctx, &message);
+        ctx.audio.play("ui/warning");
+        // Never dropped: this line starts the gate miss clock, so losing it
+        // costs the driver the gate itself.
+        ctx.say_event_with(
+            message,
+            SayEvent::queued()
+                .priority(EventPriority::Route)
+                .category(SpeechCategory::Navigation),
+        );
+    }
+
+    /// `_seed_gate_grace_at_gate(message)`: open the reaction window at the
+    /// gate itself when no pre-gate warning was heard -- a resumed save can
+    /// arrive here cold. The miss clock starts with the gate's own stop line,
+    /// never on first contact.
+    pub fn seed_gate_grace_at_gate(&mut self, ctx: &GameContext, message: &str) {
+        if self.gate_speed_warned || self.trip.truck.speed_mph() <= FACILITY_GATE_LIMIT_MPH {
+            return;
+        }
+        self.gate_speed_warned = true;
+        self.gate_grace_s = self.gate_miss_grace_seconds(ctx, message);
+    }
+
+    /// `_gate_miss_pending()`: rolling past the gate has become a miss --
+    /// warned, window expired, still above the gate zone's posted limit, and
+    /// no assist or emergency owns the speed. The destination approach assist
+    /// is checked by the caller (its branch brakes the truck itself and
+    /// returns first), so the game's own braking curve can never trigger a
+    /// miss.
+    pub fn gate_miss_pending(&self) -> bool {
+        self.trip.truck.speed_mph() > FACILITY_GATE_LIMIT_MPH
+            && self.gate_speed_warned
+            && self.gate_grace_s <= 0.0
+            && self.hazard_deadline.is_none()
+            && self.pull_over.is_none()
+            && !self.arrival_menu_open
+    }
+
+    /// `_charge_scripted_loop(minutes)`: HOS, fatigue, and idle fuel for a
+    /// scripted loop-back -- the spoken "the clock is still running" line must
+    /// be literally true.
+    ///
+    /// The scripted reposition never passes through the per-frame loop that
+    /// would otherwise apply these (`_update_hours_and_fatigue`,
+    /// `TruckState::update_fuel`), so it charges the same rate math directly
+    /// against the loop's fixed minutes instead of duplicating the constants
+    /// those apply. Shared by the missed facility gate and the missed
+    /// destination exit, whose loops are the same maneuver.
+    pub fn charge_scripted_loop(&mut self, ctx: &mut GameContext, minutes: f64) {
+        // Self-serve bobtail is personal conveyance, off duty. A carrier-
+        // ASSIGNED reposition is on-duty driving, same as any other move.
+        if self.job.bobtail && !self.job.assigned {
+            hos_mut_of(ctx).off_duty(minutes);
+        } else {
+            // The loop is a real, if slow, drive through the next safe
+            // turnaround -- on-duty driving time, not a parked wait.
+            hos_mut_of(ctx).drive(minutes);
+        }
+        let fatigue_mult = tuning_for_time_scale(self.trip.time_scale).fatigue_rate;
+        let night = is_night(self.trip.local_hour());
+        let now_h = self.absolute_game_hour(ctx, None);
+        {
+            let p = profile_mut_of(ctx);
+            p.fatigue = 100.0f64.min(
+                p.fatigue
+                    + hos::fatigue_rate_per_min(night)
+                        * minutes
+                        * fatigue_mult
+                        * p.fatigue_buff_rate(now_h),
+            );
+        }
+        self.trip
+            .truck
+            .burn_idle_fuel_over_game_time(minutes * 60.0);
+    }
+
+    /// `_handle_missed_facility_gate()`: the scripted loop-back through the
+    /// next safe turnaround.
+    pub fn handle_missed_facility_gate(&mut self, ctx: &mut GameContext) {
+        self.trip.finished = false;
+        self.gate_miss_count += 1;
+        self.trip.game_minutes += GATE_MISS_LOOP_MIN;
+        self.charge_scripted_loop(ctx, GATE_MISS_LOOP_MIN);
+        // Drop back a full warning window, not a fixed distance: under time
+        // compression a fixed stretch passes before it can be heard, making
+        // the re-approach unwinnable (the missed-exit loop's lesson).
+        self.trip.position_mi = 0.0f64.max(self.trip.total_miles() - self.gate_warning_window_mi());
+        // The say-once latches must never swallow the reposition -- when the
+        // missed-exit loop let them, a second miss stranded the trip pinned
+        // at route end. The next approach warns and speaks fresh, and the
+        // "still at the gate" reminder is unreachable until the trip ends
+        // at the gate again.
+        self.arrival_stop_said = false;
+        self.arrival_full_stop_said = false;
+        self.gate_reminder_s = 0.0;
+        self.gate_speed_warned = false;
+        self.gate_grace_s = 0.0;
+        self.cancel_cruise(ctx, false);
+        let target = ctx.settings.speed_text(FACILITY_GATE_LIMIT_MPH);
+        let mut message = if self.terse_speech(ctx) {
+            format!(
+                "Missed the gate: too fast. Safe turnaround. Gate ahead again; slow to {target}."
+            )
+        } else {
+            format!(
+                "You carried past the gate at {}, too fast to make the entrance. You continue to \
+                 the next safe turnaround and loop back onto the approach. The gate is ahead \
+                 again; slow to {target} this time. The clock is still running.",
+                self.destination_facility_text(ctx)
+            )
+        };
+        if self.gate_miss_count >= 2 {
+            // The identical core line keeps the flow predictable by ear; a
+            // repeat miss earns help, not scolding.
+            message += &format!(
+                " Brake with {} well before the gate.",
+                ctx.control_hint("brake")
+            );
+            if !ctx.settings.destination_approach_assist {
+                message +=
+                    " Destination approach assist in Settings, Gameplay, can stop the truck for \
+                     you.";
+            }
+        }
+        ctx.audio.play("ui/warning");
+        self.set_status("Missed the facility gate. Use the next safe turnaround.");
+        // The mandatory destination gate, not an optional stop: names the
+        // loop-back maneuver that still delivers the load, so it must survive
+        // quiet/urgent_only as words, not an earcon blip.
+        ctx.say_event_with(
+            message,
+            SayEvent::new().category(SpeechCategory::Navigation),
+        );
+    }
+}

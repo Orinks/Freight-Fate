@@ -945,6 +945,37 @@
 
 ### Fixed
 
+- **The game stops doing pointless work sixty times a second while you drive.**
+  Every moment at the wheel, it was rebuilding the entire list of radio
+  stations from scratch just to work out which station to name on the drivers
+  board -- hundreds of stations, sixty times every second, thrown away again
+  each time. It now simply reads the station it is already tuned to. A moment
+  of driving costs the computer about forty times less than it did, which
+  matters most on a slower machine: the drive keeps up, speech stays prompt,
+  and nothing you hear has changed.
+
+- **Quitting the game no longer stalls for two silent seconds.** With Discord
+  running, closing Freight Fate could sit there for a couple of seconds before
+  the window went, saying nothing, and it happened most often when you had just
+  started the game and quit again. The game was waiting for Discord to answer a
+  question it no longer needed answered. It now waits only when there is
+  actually a Discord status to take down, so the game closes straight away.
+  Nothing about what Discord shows while you play has changed, and the status
+  is still cleared when you quit. Turning Discord status off in Settings,
+  Online, used to be able to freeze the game the same way; that is gone too.
+
+- **The speed keys now tell you the speed cruise is really holding.** Adaptive
+  cruise slows itself for plenty of things -- a ramp you have signalled for, a
+  bend, a lower posted number, a work zone, weather, the truck in front. It
+  said so when it eased, but if you then pressed the speed key or opened the
+  status screen, both answered with the number on the dial instead. Coming
+  down a ramp at forty-four you would hear "adaptive cruise resuming at
+  thirty-three for the ramp" and, a second later, "adaptive cruise set at
+  eighty". Now both read out what the truck is actually being held to and name
+  why -- "adaptive cruise holding thirty-three for the ramp, set eighty" --
+  and go back to the plain "set at" line the moment nothing is holding it
+  down.
+
 - **A turn or exit instruction cut off by the next one can no longer vanish
   unspoken.** When the road had two things to tell you at once, the second
   line took the place of the first before the voice had said a word of it,
@@ -959,6 +990,26 @@
   true: the weigh station announcement that named four miles is dropped
   rather than read back to you once the scale is half a mile away, so it
   can no longer contradict the reminder you just heard.
+- **No black terminal window beside the game any more.** Starting Freight
+  Fate opened a second, empty window along with it, which took the focus and
+  sat there in the way for the whole session -- one more thing to skip past
+  every time you tabbed between windows, and one more thing your screen
+  reader had to describe. The game now starts as the single window it should
+  always have been.
+
+- **Your own career stops being called a copy from another computer.** A
+  career made and driven in the game, sitting untouched in its own saves
+  folder, could be greeted on loading with "this save was changed outside the
+  game, or copied from another computer, so it is now marked as modified".
+  Nothing had been changed and nothing had been copied. The game seals a save
+  with a fingerprint taken from every number in it, and it was reading a few
+  of the longest of those numbers back a hair differently from the way it had
+  written them, so the seal on an honest career failed to match. It now reads
+  every number back exactly as written, so a save the game made is a save the
+  game trusts. The mark stays on a career once it is set, and it follows you
+  into a shared profile, so if one of yours was marked this way: back it up
+  online and then restore it, and the mark is lifted.
+
 - **The same jam is not waiting in the same place every single run.** Where
   traffic backs up is still the stretch that really carries the traffic --
   that does not move, because in life it does not either. What changed is
@@ -1010,6 +1061,7 @@
   put back on the interstate they are named for. What is left is the real
   thing: I-5 over the Siskiyous, the Pigeon River Gorge, Lookout Pass, the
   climb to the Eisenhower. Those still ask you to slow, because they should.
+
 
 - **The interstate stops warning you about bends that are not on it.** A
   curve the co-driver called out on the interstate was often not on the

@@ -668,7 +668,11 @@ snapping outward to the next multiple of 5 miles per hour the way a real cruise
 stalk does -- from 32, plus gives 35, then 40. Hold Control with either key to
 move the target by exactly 1 mile per hour instead, for setting a precise number.
 The keypad Plus and Minus keys work too. Press Space to hear the active mode and
-target along with speed, gear, RPM, and air-brake state. The truck accelerates up
+target along with speed, gear, RPM, and air-brake state. Whenever cruise is
+holding the truck below that target -- for a ramp you have signalled for, a
+bend, a lower posted number, a zone, the grade, the weather, or the vehicle
+ahead -- Space and the status screen give the speed it is really holding and
+why, with the target after it. The truck accelerates up
 to a higher set speed on its own. Cruise looks ahead
 for sharp posted-limit drops so it can begin slowing before the lower-limit
 stretch. It will not hold more than 5 miles per hour over the posted limit, so

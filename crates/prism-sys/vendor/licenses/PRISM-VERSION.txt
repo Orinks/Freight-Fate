@@ -1,0 +1,2 @@
+Prism as distributed in prismatoid 0.17.3 (PyPI).
+Licensed MPL-2.0. See LICENSE and NOTICE beside this file.

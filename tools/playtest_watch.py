@@ -60,7 +60,10 @@ POLL_S = 1.0
 # A python log line: "2026-08-20 19:44:01,123 LEVEL logger: message".
 LINE_RE = re.compile(
     r"^(?P<time>\d{4}-\d\d-\d\d \d\d:\d\d:\d\d),\d+ "
-    r"(?P<level>[A-Z]+) (?P<logger>[\w.]+): (?P<message>.*)$"
+    # The Rust build logs under module paths (`freight_fate::cloud_saves`),
+    # the Python one under dotted names. Accept both or every Rust line is
+    # read as a traceback body -- which silently killed the network alarm.
+    r"(?P<level>[A-Z]+) (?P<logger>[\w.:]+): (?P<message>.*)$"
 )
 
 TRANSCRIPT_LOGGER = "freight_fate.transcript"
@@ -263,7 +266,9 @@ class Watcher:
         self._in_crash = False
 
         level = match["level"]
-        logger = match["logger"]
+        # Normalise the Rust module path to the dotted name the rest of this
+        # file (and NETWORK_LOGGERS) is written against.
+        logger = match["logger"].replace("::", ".")
         message = match["message"]
 
         if logger == TRANSCRIPT_LOGGER:

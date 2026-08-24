@@ -120,6 +120,460 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Rust port: drive-time frame cost is measured, and one bug found by
+      measuring it (2026-08-24).** `crates/freight-fate/tests/it/frame_time.rs`
+      drives a seeded, weather-pinned I-70 run out of Denver through the whole
+      per-frame path the shipped loop runs (`App::tick` plus the line build)
+      and reports mean/median/p95/p99/max, the split between the sim step, the
+      rest of the tick and the line build, and what the expensive frames were
+      doing. In release the driven frame is **~54 us mean, ~91 us p99** against
+      a 16 667 us budget at 60 fps -- 0.3% of the frame, 0 frames over budget
+      in 35 618. Before the fix below it was **2 150 us mean**, 13% of the
+      budget. Two gates hold it: an absolute one derived from the 60 Hz budget,
+      and a machine-independent ratio one asserting a presence string never
+      out-costs the simulation.
+- [x] **Rust port: the drivers-board line stops cloning the whole radio
+      (2026-08-24).** `online_presence_state` resolved the tuned station on
+      `self.radio.clone()` -- 757 stations and their identity map, deep-copied
+      every frame, 97% of the entire driven frame.
+      `RadioState::tuned_station` is the read-only resolve it wanted;
+      `current_station` keeps the write-back. Pinned by
+      `test_tuned_station_reads_the_dial_without_moving_it`.
+- [ ] **Rust port: the frame bench's driver cannot finish a mountain route.**
+      `DriveRig::steer` is a throttle and a brake, so on the descent off the
+      Divide it works the service brakes down to the low-air warning and the
+      spring brakes park the truck at mile 63.5 of 246 -- correct air-system
+      behaviour, a bad driver. Teaching it the retarder (or driving it through
+      the speed keeper) would take the bench across leg changes and an
+      arrival, which are the frames it currently never measures.
+- [ ] **Rust port: `App::tick` builds both presence strings every frame.**
+      They are handed to services that throttle to seconds, and to services
+      that are not running at all unless the player opted in. Cheap now that
+      the clone is gone (2.2 us of 54), so left alone deliberately -- but it
+      is per-frame work with a per-second consumer, and the first place to
+      look if the ratio gate ever starts creeping.
+
+- [x] **Rust port: the adversarial battery is ported, all 45 scenarios
+      (2026-08-23).** `tools/playtest_break.py` and its ten scenario families
+      are now `crates/freight-fate/src/playtest/break_scenarios/`, run by
+      `freightfate --break-battery` and gated by
+      `crates/freight-fate/tests/adversarial.rs` -- one `#[test]` per
+      scenario, named exactly as the scenario is, `#[ignore]`d for the same
+      reason pytest deselects them. Rust has no xfail, so the strict-xfail
+      contract is written out: a new ODD fails, a `KNOWN_OPEN` ODD passes with
+      its reason printed, and a `KNOWN_OPEN` scenario that comes back CLEAN
+      FAILS and says to delete its entry. Two extra guards the Python could
+      not have (its parameters came from the live registry): every
+      `KNOWN_OPEN` name must be a real scenario, and every registered scenario
+      must have a test node.
+      The monkeypatches became roads rather than seams. `trip.grade_at =
+      lambda: g` is `breaker::force_grade`, which bakes one `GradeSegment` per
+      leg of the route the rig is already driving, so `neutral_coast_mountain`
+      really does run away down a real 6 percent (109 mph) with the corridor's
+      own cities, zones and exits intact. A screen the drive pushes gets its
+      `DriveRef` from `Rig::with_drive_on_stack`, and the private `_method()`
+      calls Python made go through the menu row that calls them.
+      One finding, fixed: the half-mile scale reminder ("Weigh station in half
+      a mile. Signal for the scale exit.") was replayed after the truck had
+      already been charged for blowing the scale. The port had replaced the
+      rescue's validity check -- Python's live `trip.position_mi < scale_mi`
+      -- with a wall-clock estimate of when the truck would reach the gore,
+      which answers "still ahead" for anyone who speeds up. Now on
+      `live::position_mi()`, the same mechanism the red-light line beside it
+      already used; `scale_bypass_to_the_end` is the regression gate.
+      `short_hop_streak_xp_farming` carries over as the one `KNOWN_OPEN`
+      entry, same finding and same reason as the Python list.
+- [x] **Rust port: every `valid` gate asks the drive again, not the clock
+      (2026-08-23).** All twelve were read against the Python line they came
+      from. Four were wrong and are fixed; the hazard call was the one the
+      last entry named, and the audit turned up three more of the same shape.
+      A spoken line only comes back after an interruption cut it off, and its
+      gate is what stops the words returning once the moment has passed --
+      so a gate that cannot move is a gate that never refuses.
+      * The hazard warning ("Change lanes or brake!") projected its deadline
+        onto the wall clock. Python asks whether a hazard is armed at all, so
+        it now reads that: dodged or hit, the warning stays down.
+      * The curve call took its answer once, when the call was made -- where
+        it is true by construction, because a bend is only called while it is
+        ahead and the truck is fast. It now reads the truck's mile and speed
+        when the rescue fires, so "Sharp left" cannot come back after the
+        bend.
+      * The destination exit confirmation and the dock hold prompt had no gate
+        at all, only a comment saying why they could not have one. "Move right
+        for the exit lane" could return past the gore, and "Press Enter to
+        continue" could ask again for a press already made -- the two Shane
+        reported alongside the scale reminder.
+      `live` carries seven facts now (speed, hazard armed, dock menu open are
+      the new three), refreshed per frame and at the two places the frame loop
+      stops: a hazard clearing mid-frame, and the dock menu taking over.
+      Regression gate: seven tests in
+      `crates/freight-fate/tests/states_driving_valid_gates.rs` -- one per fix
+      for the line that must NOT come back, and one each for the still-true
+      case that must. `hazard_ignored_to_100_damage` in the battery now also
+      counts warnings spoken after impact.
+      The six remaining gates were checked and are faithful: the overspeed
+      line, the pull-over demand and its failure-to-stop escalation, the
+      collision damage total, the scale's red light, and the green light that
+      is deliberately never rescued.
+- [x] **Rust port: the open scale notice stops naming a distance it no longer
+      has (2026-08-24).** The thirteenth gate, carried over from the Python
+      fix that the widened flush rescue exposed. "Open weigh station ahead in
+      2.0 miles: ..." had no `valid` at all, so once it became rescuable it
+      could be handed back AFTER the half-mile reminder and tell the driver
+      the scale was two miles off. Its guard is the line's own words rather
+      than a chosen tolerance: it stays true only while the road left still
+      speaks as the phrase already spoken, which in Rust means capturing the
+      spoken phrase and the unit setting and asking
+      `settings::short_distance_text_for` against `live::position_mi()` --
+      the settings method's own body, split out so a `'static` gate can reach
+      it. Regression gate:
+      `test_the_scale_notice_expires_once_the_distance_it_names_is_wrong` in
+      `crates/freight-fate/tests/states_driving_enforcement.rs`, verified
+      against the unguarded code.
+
+      The Rust battery does NOT reproduce this one. `scale_bypass_to_the_end`
+      comes back CLEAN here before and after: the run's rescues land on other
+      lines (the route brief, the bypass call, the failure-to-stop warning),
+      never on the notice, so the Python battery's three "Signal for the scale
+      exit" never appears. The bug was real and live all the same, which the
+      regression test shows directly.
+- [x] **Rust port: the fair-deadline floor is one-time again (2026-08-24).**
+      The fourteenth defect the port has turned up, and a live exploit. A
+      mid-trip save written before the deadline model existed gets a one-time
+      floor on the delivery deadline when it resumes. Python applied it by
+      mutating the very dictionary the career held, so the new deadline and
+      its marker landed in the save as a side effect; the Rust `from_snapshot`
+      reads a borrowed snapshot -- deliberately, because the pause menu and
+      the tests hand it detached copies that must not touch the career -- and
+      so left the save untouched. The floor was therefore not one-time at all:
+      quit before the next stop save, continue, and it recomputed from the
+      hours used by then, handing out fresh deadline on every resume. The
+      write-back now belongs to the one caller that owns the profile, the
+      resume path in `states/main_menu.rs`, and it saves rather than waiting
+      for the next save point, so a session that ends without one cannot
+      re-apply the floor at the next launch. Regression gate:
+      `test_old_active_trip_gets_deadline_floor_and_model_marker` in
+      `crates/freight-fate/tests/states_driving_trip_resume.rs`, which was
+      written complete and left failing when the defect was found.
+- [x] **Rust port: the trooper and enforcement-record cases run (2026-08-24).**
+      56 `#[ignore]`d wrong-crate stubs deleted from `ff-core`, where they
+      could never run, and rewritten against the real screens: 34 in
+      `crates/freight-fate/tests/states_driving_troopers.rs` (the pull-over,
+      the roadside ticket, the scale bypass, the unsafe-equipment stop, the
+      construction-zone doubling, the compliance tracker and running from a
+      stop) and 22 in
+      `crates/freight-fate/tests/states_driving_enforcement_record.rs` (the
+      serious-violation ladder, the major offense, the fatigue events, the
+      pursuit opt-in and the two save-reload exploits). Where Python patched a
+      rule, the Rust arranges the real one: the clean-stop leniency case
+      searches the actual position-quantised waiver draw for a mile where this
+      trip really does roll the wanted side, and panics if none exists rather
+      than passing on the wrong one. Neither file found a further defect.
+- [ ] **Four more distance-bearing ROUTE lines can be rescued with no guard,
+      in BOTH trees.** The audit the scale notice prompted. Each names a
+      distance, each queues at ROUTE with `interrupt=False`, and each has a
+      later line about the same object that a hand-back would now contradict.
+      None is a port divergence -- Python has no gate on any of them either --
+      so they want fixing on the Python side and carrying over:
+      * `maybe_warn_jake_zone_ahead` -- "No engine brake zone in 3 miles,
+        coming into Rochester. Switch the engine brake off before the zone."
+        The worst of the four: handed back after the zone starts it offers
+        three miles of grace while the fine is already accruing.
+      * the exit-lane prep call -- "Exit lane in 1.2 miles. Signal is on;
+        steer right for the exit lane and slow to 40." Followed by "Exit lane
+        set", which a hand-back would undo.
+      * the facility-gate speed warning -- "Facility gate in 0.8 miles. Slow
+        to 15." This one starts the gate-miss clock, so it must never be
+        dropped; the distance going stale is the separate half.
+      * `scale_outranks_rest_planning` -- "Weigh station first: Ontario Scale,
+        2.0 miles ahead." The same object as the notice just fixed, so it can
+        join the very contradiction chain that fix ended.
+- [x] **Rust port: a Python-written save verifies here (2026-08-23).**
+      A career created and played entirely in the Python 1.9 game loaded in
+      the Rust build as "changed outside the game, or copied from another
+      computer": the port set `integrity_modified` -- sticky, and carried into
+      profile sharing -- and re-signed the file. Python agreed that save was
+      validly signed with that install's key; the port's `is_signature_valid`
+      did not, on the same bytes.
+      The divergence is the READING of the numbers, not the rendering.
+      `serde_json`'s default parser takes a fast path that converts the
+      significand to f64 before scaling by a power of ten, so a literal past
+      fifteen significant digits can land one ulp from what `float()` returns
+      for the same text. Six numbers out of the 441 in that 23 kB save moved,
+      every one by exactly one ulp: `duty_log` segment 3's `end_hour` and
+      segment 4's `start_hour` (both `9.171009505452611` -> `...613`),
+      `game_hours`, `hos.non_driving_min`, and the rig's `brake_wear_pct`
+      and `engine_wear_pct`. The signature is an HMAC over exactly those
+      numbers rendered back to text, so six ulps three bytes apart is a
+      different signature and an honest career reads as edited.
+      Fixed by turning on serde_json's `float_roundtrip` feature
+      workspace-wide, which makes the parser correctly rounded as `float()`
+      is. The Rust canonical payload for that save is now byte-identical to
+      Python's, all 23,489 of them.
+      Pinned against bytes no Rust code produced: `tests/python_signed_save.json`
+      is a real career with the driver's name replaced, re-signed by the
+      shipped Python `_signature_for` (`tests/gen_python_signed_save.py`), and
+      `models::profile::tests_python_fixture` verifies it, loads it through the
+      gate, and guards the feature flag itself. All four of its tests fail
+      against the pre-fix build. Every earlier signing test signed with Rust
+      and verified with Rust, which is why none of them saw this: the port
+      agreed with itself perfectly.
+      Note for anyone re-testing on a career that already loaded once in a
+      Rust build -- it will now pass, because that build re-signed the file in
+      the port's own reading. Judge the fix against a save Python wrote and
+      Rust has never touched.
+      Not done: nothing clears `integrity_modified` once it is set on a save
+      on disk, and the load gate cannot tell a false mark from a real one, so
+      it must not try. The supported absolution is the existing cloud round
+      trip -- back the career up, restore it, and the server grants
+      `clearIntegrityFlag` on a signed revision that passed the full gate.
+- [x] **Rust port: a failed `DriveRef` borrow is loud now (2026-08-23).**
+      `with` / `read` / `call` used to answer `None` for two unrelated
+      reasons -- there is no drive, and the drive is already borrowed further
+      up the same call stack -- and callers could not tell them apart, so each
+      one guessed a plausible default. Two of those guesses reached players:
+      the rest stop's fuel row read "Fuel: tank is full" at any tank level,
+      because `build_items` held the drive and `fuel_label` reached for it
+      again; and calling a roadside mechanic or chaining up from the pause menu
+      emptied the pause menu, because those actions rebuilt the rows from
+      inside the same borrow. Both were fixed by passing the already-borrowed
+      drive in (`fuel_label(ctx, d)`, the shape `tire_label` always had) and by
+      rebuilding after the borrow is back.
+      The seam itself is fixed now: no drive is still a quiet `None`, but an
+      already-borrowed drive trips a `debug_assert!` naming the method and,
+      through `#[track_caller]`, the exact call site, and logs a warning in a
+      shipped build rather than panicking under a player. Turning it on found a
+      third one of the same family immediately: a roadside stop that pulls the
+      licence is resolved inside the constructor, while the push helper still
+      holds the drive, so `suspended_exit_text` reached for it again and told
+      every loaded run "There is no loaded trailer to hand back" with a full
+      trailer behind them. Same fix -- the drive is handed in -- and the
+      loaded and bobtail halves of that line are both pinned. The seam has its
+      own two tests: no drive stays quiet, a nested borrow panics.
+- [x] **Rust port: a menu whose rebuild misses the drive keeps its rows
+      (2026-08-23).** `RestStopState`, `ParkingFullState`, `PauseMenuState`
+      and `FacilityArrivalState` all ended `build_items` with
+      `unwrap_or_default()`, so a nested borrow in a shipped build -- loudly
+      logged, but with the `debug_assert!` compiled out -- handed a player an
+      empty menu, spoken as "No options available.": a dead end at the wheel
+      with no way off the screen. All four now go through
+      `drive_ref::keep_rows`, which falls back to the rows the menu is already
+      holding (`MenuItem` is `Clone`), so the worst case is one stale label,
+      recoverable by pressing anything. It also logs the miss, including the
+      one the seam's own warning cannot see (a handle whose state is not a
+      drive); no drive at all stays quiet, since that empty is legitimate and
+      has no rows to keep. One test per screen pins that the way out survives
+      the miss. They force the miss through the non-drive handle rather than a
+      real nested borrow, because the nested borrow trips the `debug_assert!`
+      and ends the test process -- the release path is what they stand in for,
+      and the assert has its own `#[should_panic]` test.
+
+- [ ] **Rust port: release built by `tools/build_release.py --rust`**
+      (2026-08-22). Stages `build/FreightFate/` -- `FreightFate.exe`, the
+      vendored SDL2/BASS/Prism libraries, `freight_fate/data/world.ffdata`
+      (the baked container, shipped instead of the JSON tree), both packs,
+      `build_info.json`, the docs -- and archives it like the Python build;
+      refuses LFS pointer packs, and refuses a payload carrying both the
+      container and the JSON it replaced. Measured on the
+      `nightly-rustport` build (2026-08-22): the bake takes the shipped data
+      from 141,937,342 bytes of JSON to a 7,312,812-byte container, which is
+      128 MiB off the staged folder but only 2.8 MiB off the download,
+      because the zip was already deflating that JSON to 10.3 MB. `--smoke`
+      is wired and the staged build boots and exits 0 on it -- and it is a
+      real check: with the container moved aside the same run panics on
+      "the shipped world data loads" rather than passing. Left to do: the
+      macOS `.app` bundle.
+
+- [x] **Rust port: a launch takes the same time every time, and the session
+      log says where it goes (2026-08-24).** Three runs of the packaged
+      `--smoke` check spanned 1128-2972 ms on identical input; 25 runs put the
+      median at 2668 ms with a floor of 676 ms. All of the spread was in the
+      quit, not the boot: `DiscordPresence::shutdown` joined its worker with an
+      unconditional two-second timeout, and the worker was parked in
+      `discord-rich-presence`'s handshake -- a blocking pipe read with no
+      timeout, which Discord stops answering for a while when a game is
+      launched several times in quick succession. The join could not finish and
+      simply charged the player two silent seconds at quit; the same join is on
+      the Settings, Online toggle, so turning Discord status off froze the game
+      the same way. `Inner::wait_for_worker` now waits only when the worker
+      holds a live client to hand back, and a handshake that lands after the
+      stop flag is torn down instead of re-showing a presence the player has
+      already quit. 30 runs after: median 690 ms, min 656, max 922 on a
+      quiet machine; median 774, max 1525 with another build running
+      alongside, and that spread is the whole boot moving together rather
+      than any one phase -- `quit: rich presence` reads 0 ms even on the
+      1525.
+      `app::boot_timing` marks every seam of the launch and the quit into
+      `logs/game.log` as `phase:` lines, which is how the two seconds were
+      found and how the next stall will be. Warm packaged phase table: SDL
+      window 293 ms, `--smoke` data checks 171 ms, controller subsystem 89 ms,
+      the quit-time profile save 68 ms, BASS and its four plugins 17 ms, first
+      frame 14 ms, everything else at or under 3 ms. Not addressed: the SDL
+      window and the controller subsystem are 380 ms of the 660, both genuinely
+      needed before the first frame.
+
+- [x] **Rust port: a test run can no longer open a real web browser
+      (2026-08-24).** The driver setup page opened in the owner's browser
+      while the suite was running. Opening a page went through one seam whose
+      DEFAULT was the real browser: a test that installed no stand-in got a
+      live page, and Report a problem did not even go through the seam -- it
+      called the browser library directly. The seam is also per thread, so a
+      page opened from a worker thread was never covered by a stand-in
+      installed on the test's own thread. Reversed: reaching a browser is now
+      a capability `main()` grants and nothing else does, so a test process
+      cannot have it; an unseamed open records the address and fails the test
+      by name. Report a problem goes through the same door. Proved by
+      `tests/it/browser_guard.rs`, including from a spawned thread, and
+      verified failing first against a build with the old default. The game
+      is unchanged: the verification page and the bug-report form still open.
+
+- [ ] **Rust port: three more outside-world seams still default to the real
+      thing.** Same shape as the browser was, found while fixing it. The
+      orinks.net transport (`online_transport`), the driver-identity store
+      (`identity_store`) and the thread's save directory are all per-thread
+      overrides whose default is the live network, the platform keyring and
+      the player's real save folder. Nothing in the suite reaches any of
+      them today -- measured, by refusing every one and re-running: zero
+      keyring calls, and the only live HTTP is below -- but each is one
+      forgotten stand-in or one spawned worker away from doing so, and a
+      spawned worker gets the REAL save folder because the pin is per
+      thread. The services every test app builds carry the live transport by
+      default and are only held back by having no driver identity to send.
+
+- [ ] **Rust port: the test suite calls api.weather.gov for real.** Eleven
+      requests in one run of the integration suite, from the live-weather
+      worker threads on the Chicago, Gary and Indianapolis routes. Refusing
+      them changes a driving test's spoken result
+      (`test_destination_exit_response_queues_behind_intervening_safety_cue`),
+      so at least one case is quietly reading the actual weather over
+      Chicago. Give the weather provider a stand-in in the test rig.
+
+- [x] **Rust port: the update check reaches api.github.com during boot
+      (2026-08-24, by design, recorded because nothing said so).** Measured,
+      not read: with the DNS cache cleared, one packaged `--smoke` run leaves
+      exactly one new entry, `api.github.com`, and a TCP connection to
+      140.82.113.6:443 is open for the rest of the run. `MainMenuState::enter`
+      arms `UpdateChecker::new`, which is a detached thread, so it never
+      delays the first frame (measured at 3 ms after the menu is built) and
+      never delays the quit. It fires in `--smoke` and in a
+      `--playtest-sandbox` session too, because both boot into the main menu
+      and both are frozen builds. The sandbox isolates the driver identity,
+      so no orinks.net traffic happens; GitHub is the one host a sandboxed
+      session still touches, and `tools/playtest_watch.py` will report it.
+      Decide whether a sandboxed session should skip the update check.
+
+- [x] **Rust port: the packaged game opens no console window (2026-08-23).**
+      The port had no `windows_subsystem` attribute anywhere, so the binary
+      linked into the console subsystem and Windows gave every launch a
+      terminal beside the game -- measured live on the `nightly-rustport`
+      tester build, whose running process owned a real console window. The
+      Python build never did this (`--windows-console-mode=disable`).
+      `crates/freight-fate/src/main.rs` now carries
+      `#![cfg_attr(windows, windows_subsystem = "windows")]`, and the drive
+      tools get their output back from `AttachConsole(ATTACH_PARENT_PROCESS)`
+      at the top of `main`, taken only when the command line carries at least
+      one argument, so a player's launch is attached to nothing at all.
+      Two measured traps are handled: a GUI-subsystem process starts with NO
+      standard handles on every shell tested (so an un-attached tool run
+      prints into the void), and `AttachConsole` OVERWRITES the standard
+      handles that `cmd.exe` gave a redirected child, which sent
+      `freightfate --break-battery > out.txt` to the terminal and left the
+      file empty until the attach began restoring them. Verified in the
+      packaged build: `--help`, `--list-break-scenarios`, `--smoke` and a
+      redirected `--break-scenario ... --transcript` all print and exit 0
+      from a terminal, from `cmd.exe` redirection, from a pipe and from
+      `subprocess.run`; a no-argument launch has no console and no `conhost`
+      child. Pinned by `crates/freight-fate/tests/windows_subsystem.rs`,
+      which reads the `Subsystem` field out of the built binary's PE header.
+      Known gap, in PowerShell only: `FreightFate.exe ... > out.txt` writes
+      an empty file, because PowerShell does not wait for a GUI-subsystem
+      process and closes the pipe under it. `| Set-Content out.txt`,
+      `cmd /c`, a bash shell and `Start-Process -Wait` all work. Left to do
+      only if that bites: a second console-subsystem binary in the workspace
+      for the drive tools.
+
+- [x] **Rust port: CI (`.github/workflows/rust.yml`, 2026-08-22).**
+      `cargo fmt --all --check` on Linux, then `cargo clippy --all-targets
+      --locked -D warnings`, `cargo test -p ff-core` and
+      `cargo test -p freight-fate` on Windows, with the same headless trio
+      the Python jobs use. Windows only: SDL2 and BASS are vendored for
+      windows-x86_64 alone, so a Linux runner has nothing to link against and
+      nothing to load. Vendor each platform's libraries before adding its
+      runner.
+
+      **The Rust job follows the same LFS rule as the Python one, and must
+      keep following it (2026-08-23).** It first checked out with `lfs: true`,
+      taking roughly 270 MB per push, 261 MB of that music.pak. Both runs on
+      the port branch then died at CHECKOUT with "This repository exceeded its
+      LFS budget" and the test job never ran a test. The two workflows share
+      one budget, so half a fix is no fix: this job now checks out with
+      `lfs: false` and pulls sounds.pak alone (7.5 MB, what the suite actually
+      reaches for), non-fatally, exactly as `ci.yml` does. DO NOT PUT
+      `lfs: true` BACK.
+
+      The original argument for fetching everything was that
+      `test_committed_pack_has_freight_fate_header` and
+      `test_committed_music_pack_has_freight_fate_header` guard with "if the
+      file does not exist, skip", and a pointer is a file that EXISTS -- so
+      the guard never fired and the byte-length assertion ran against 130
+      bytes of pointer text. That is fixed rather than worked around:
+      `ff_core::assets_pack::pack_available` / `is_lfs_pointer` tell a pointer
+      from a pack, and every Rust test that reads the shipped bytes now skips
+      on a pointer with a note on the log naming it -- the two committed-pack
+      header tests, the shipped-recording lookups and durations in
+      `audio_backends.rs` (nineteen of them now take the recordings through
+      `bass_rig_with_recordings`, which wants BASS *and* the bytes), the horn
+      stream in `audio_loops.rs`, `verify_sound_assets` in
+      `audio_sound_pack.rs`, and the music-catalog sweeps in
+      `audio_backends.rs` and `audio_speech_audio.rs`. The note is not
+      decoration: a green run that quietly tested no audio at all is the
+      failure this guards against, and the same red window the Python side is
+      riding out (allowance resets on the 1st) hides a real failure just as
+      well here. Read the job log, not the badge.
+
+      NEVER VERIFY THIS BY MOVING OR STUBBING THE REAL PACKS. The working
+      tree holds the only copy of a 250 MB Git LFS object, and an attempt to
+      swap one out for a pointer during this work truncated music.pak to zero
+      -- recovered from the local LFS object cache, but it need not have
+      been. `FREIGHT_FATE_PACK_DIR` exists for exactly this: point it at a
+      throwaway directory holding pointer stubs and the whole lookup follows,
+      with the shipped packs never touched. That is how this was checked --
+      `cargo test -p freight-fate audio` under a pointer-stub pack directory
+      against the same run with the real packs. The predicate itself is
+      pinned in committed unit tests that build their pointer in a
+      `tempfile::TempDir` (`test_an_lfs_pointer_is_not_an_available_pack`,
+      `test_a_real_pack_and_a_missing_one_are_both_read_correctly`), so the
+      trap stays covered without any file being moved at all.
+
+- [x] **Rust port: the validator invariants export has a shipped code path
+      (`ff-invariants`, 2026-08-22).** The Rust half of
+      `tools/export_profile_integrity_invariants.py`, argument for argument
+      (`<output>`, `--check`): `CatalogInputs::current()` assembles the
+      export from the live catalogs -- achievements, the XP and level
+      curves, start options, truck and upgrade prices, the profile and
+      career field lists, the endorsement and fleet-tier tables, and the
+      condition record `fresh_condition()` actually writes -- and the binary
+      renders it. Before this, nothing in the tree built a `CatalogInputs`
+      from the shipped catalogs at all; the only caller was a test fixture,
+      so four of the ported tests were measuring the fixture rather than the
+      game. The two exporters now produce byte-identical JSON, pinned
+      against a committed copy of the Python output in
+      `crates/ff-core/tests/profile_integrity_export.rs`. Left to do: wire
+      the export (or its `--check`) into `tools/build_release.py --rust` and
+      the Rust CI job, so a balance pass that moves a curve cannot ship
+      before orinks.net has the new file.
+
+- [ ] **Clean the workspace for the new gates.** Both fail on `ff-core`
+      alone today, before `freight-fate` is even reached.
+      `cargo fmt --all` fixes 74 hunks across 11 files (weather, timezones,
+      hos and real_traffic tests, save_migration, start_options, trucks,
+      and three `tests/data_*.rs`) that are pure line-wrapping drift.
+      `cargo clippy -p ff-core --all-targets -- -D warnings` then reports
+      six: `field_reassign_with_default` at `cargo_condition.rs:391` and
+      `:524` and `sim/weather/tests.rs:1187`, `manual_is_multiple_of` at
+      `pyfmt.rs:180`, `filter_next` (use `rfind`) at
+      `profile_integrity_invariants.rs:642`, and `type_complexity` at
+      `sim/real_weather/tests.rs:725`.
 - [ ] **The audio tests only run where the packs are.** CI checks out without
       LFS -- the repository's LFS budget is spent, and an exhausted quota
       refuses the 7.5 MB `sounds.pak` fetch just as firmly as the 250 MB

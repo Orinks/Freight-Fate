@@ -1,0 +1,1113 @@
+//! Drop into a chosen piece of road, set up the way you want to test it
+//! (port of `tools/playtest_road.py`).
+//!
+//! Walking the menus to a specific hill, work zone, or limit drop takes
+//! minutes and lands you somewhere slightly different every time. This
+//! starts the real game -- real window, real speech, real input, your real
+//! settings -- already rolling at a road feature you named, with the truck
+//! and cruise in the state you asked for. Every spoken line goes to a
+//! transcript, so the session can be read afterwards.
+//!
+//! # Shape of the port
+//!
+//! The Python tool subclassed `MainMenuState` so that `App.run()`'s own
+//! `MainMenuState(ctx)` handed back the staged drive the first time and the
+//! real menu after -- a shim, because `run()` picked its first screen
+//! itself. The Rust `App` takes that screen as
+//! [`App::set_initial_state`][crate::app::App::set_initial_state], so the
+//! drive is simply the state the loop starts on and there is nothing to
+//! monkeypatch. Quitting to the main menu reaches the REAL menu, with its
+//! working Exit, exactly as the subclass arranged.
+//!
+//! The search itself is read-only and runs against the world data alone --
+//! no `App`, and so no window. Booting the game to run a search is what
+//! opened and closed a real window on every `--scan`.
+
+use ff_core::data::world::{get_world, World};
+use ff_core::models::career::LEVEL_XP;
+use ff_core::models::career_ladder::MAX_CAREER_LEVEL;
+use ff_core::models::jobs::{cargo_type, Job};
+use ff_core::models::profile::Profile;
+use ff_core::pyrandom::PyRandom;
+use ff_core::sim::enforcement_posts::KIND_FIXED_SCALE;
+use ff_core::sim::trip::{Trip, TripOptions};
+use ff_core::sim::vehicle::TruckState;
+use ff_core::sim::weather::{WeatherKind, WeatherSystem};
+
+use crate::app::GameContext;
+use crate::states::driving::DrivingState;
+use crate::states::driving_core::DRIVE_PHASE_DELIVERY;
+
+use super::MPH_PER_MPS;
+
+/// Route sets swept when the caller does not name a pair. Hand-picked and
+/// small: a feature search is only useful if it finishes while you wait.
+pub const MOUNTAIN_ROUTES: [(&str, &str); 5] = [
+    ("Denver", "Grand Junction"),
+    ("Albuquerque", "Denver"),
+    ("Sacramento", "Reno"),
+    ("Phoenix", "Flagstaff"),
+    ("Seattle", "Spokane"),
+];
+pub const ROLLING_ROUTES: [(&str, &str); 3] = [
+    ("Knoxville", "Asheville"),
+    ("Buffalo", "New York"),
+    ("Charlotte", "Knoxville"),
+];
+pub const FLAT_ROUTES: [(&str, &str); 2] = [("Chicago", "Indianapolis"), ("Dallas", "Houston")];
+
+/// `--routes random` is not a list: it is drawn from the whole map at run
+/// time. The named sets are ten hand-picked corridors and half of them are
+/// mountain, so playtest after playtest ran the same roads and kept landing
+/// on engine-brake country whatever the session was actually testing (owner,
+/// 2026-08-15). The draw prints its seed, so a road worth revisiting can be
+/// drawn again -- the work zones on it are a per-trip roll and will not
+/// repeat.
+pub const RANDOM_ROUTES: &str = "random";
+/// Long hauls make a feature search crawl and put the interesting mile hours
+/// from the start. Past this the draw takes another pair instead.
+pub const RANDOM_MAX_MILES: f64 = 600.0;
+/// How many pairs a random draw offers the search.
+pub const RANDOM_SAMPLE: usize = 6;
+
+pub const FEATURES: [&str; 10] = [
+    "downgrade",
+    "upgrade",
+    "zone",
+    "limit-drop",
+    "stop",
+    "scale",
+    "curve",
+    "interchange",
+    "toll",
+    "chain-law",
+];
+const SCAN_STEP_MI: f64 = 0.1;
+/// How far before the feature the SEARCH looks back to report a posted
+/// limit. Only a reporting distance; the drive's own lead is computed below.
+const DEFAULT_LEAD_MI: f64 = 1.8;
+
+/// How much REAL time the driver gets before the feature arrives.
+///
+/// The lead used to be 1.8 miles flat, and miles are not what a person
+/// experiences: the trip compresses distance as well as clock, so at 65 mph
+/// with the compression wound up, 1.8 miles is about five seconds. The window
+/// had not even taken focus before an open weigh station came and went (owner,
+/// 2026-08-21). Twenty-five seconds is long enough to find the window, hear
+/// the truck, and still be waiting when the callout lands.
+const LEAD_REAL_SECONDS: f64 = 25.0;
+
+/// How many per-trip rolls to try before giving up on finding an OPEN scale.
+/// Whether a station is open is a seeded draw over its own key, so a route
+/// with one scale on it is roughly a coin flip per seed.
+const SCALE_SEED_TRIES: usize = 24;
+
+/// What waits at a ramp's far end, ranked by how much there is to hear. A
+/// signal or a stop puts the cross bubble in front of you -- real traffic on
+/// the road the ramp lands on, a gap to wait for, a green that is the sound
+/// of that stream dying. A free merge onto another freeway has none of that,
+/// so a search for "somewhere to test the ramp end" should not offer it
+/// first.
+fn ramp_control_rank(control: &str) -> f64 {
+    match control {
+        "signal" => 4.0,
+        "stop" => 3.0,
+        "yield" => 2.0,
+        "none" => 1.0,
+        _ => 0.0,
+    }
+}
+
+/// One found road feature, with what is needed to describe or drive it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Hit {
+    pub origin: String,
+    pub destination: String,
+    /// Where the feature starts.
+    pub at_mi: f64,
+    pub total_mi: f64,
+    /// Percent for grades, mph for limits and zones, else 0.
+    pub magnitude: f64,
+    pub run_mi: f64,
+    pub limit_mph: f64,
+    pub label: String,
+    /// The per-trip roll this was found under.
+    pub trip_seed: Option<i64>,
+}
+
+impl Hit {
+    pub fn describe(&self) -> String {
+        let run = if self.run_mi >= 0.1 {
+            format!(", running {:.1} mi", self.run_mi)
+        } else {
+            String::new()
+        };
+        format!(
+            "{} -> {}  mile {:6.1} of {:.0}  {}{run}  (posted {:.0})",
+            self.origin, self.destination, self.at_mi, self.total_mi, self.label, self.limit_mph
+        )
+    }
+}
+
+/// The options `tools/playtest_road.py` took on the command line.
+pub struct RoadOptions {
+    pub origin: Option<String>,
+    pub destination: Option<String>,
+    pub routes: String,
+    pub seed: Option<i64>,
+    pub sample: usize,
+    pub max_miles: f64,
+    pub feature: String,
+    pub at: Option<f64>,
+    pub pick: usize,
+    pub trip_seed: Option<i64>,
+    pub scan: bool,
+    pub min_pct: f64,
+    pub min_run: f64,
+    pub min_drop: f64,
+    pub max_advisory: f64,
+    pub lead: Option<f64>,
+    pub cruise: f64,
+    pub speed: f64,
+    pub cargo: f64,
+    pub cargo_type: String,
+    pub level: Option<i64>,
+    pub descent: Option<String>,
+    pub assists: Option<String>,
+    pub planned_stop_assist: Option<bool>,
+    pub predictive_cruise: Option<bool>,
+    pub lane_keeping: Option<String>,
+    pub curve_assist: Option<bool>,
+    pub transmission: Option<String>,
+    pub verbosity: Option<String>,
+    pub weather: Option<String>,
+    pub hour: Option<f64>,
+    pub log: Option<String>,
+    pub sandbox: bool,
+}
+
+impl Default for RoadOptions {
+    fn default() -> Self {
+        RoadOptions {
+            origin: None,
+            destination: None,
+            routes: "mountain".to_string(),
+            seed: None,
+            sample: RANDOM_SAMPLE,
+            max_miles: RANDOM_MAX_MILES,
+            feature: "downgrade".to_string(),
+            at: None,
+            pick: 0,
+            trip_seed: None,
+            scan: false,
+            min_pct: 3.0,
+            min_run: 1.0,
+            min_drop: 10.0,
+            max_advisory: 45.0,
+            lead: None,
+            cruise: 0.0,
+            speed: 62.0,
+            cargo: 20.0,
+            cargo_type: "general".to_string(),
+            level: None,
+            descent: None,
+            assists: None,
+            planned_stop_assist: None,
+            predictive_cruise: None,
+            lane_keeping: None,
+            curve_assist: None,
+            transmission: None,
+            verbosity: None,
+            weather: None,
+            hour: None,
+            log: None,
+            sandbox: true,
+        }
+    }
+}
+
+/// The route pairs a run searches, given its options.
+pub fn route_pairs(world: &'static World, opts: &RoadOptions) -> Vec<(String, String)> {
+    if let (Some(origin), Some(destination)) = (&opts.origin, &opts.destination) {
+        return vec![(origin.clone(), destination.clone())];
+    }
+    if opts.routes == RANDOM_ROUTES {
+        let seed = opts
+            .seed
+            .unwrap_or_else(|| PyRandom::new_unseeded().randrange(1_000_000));
+        return random_pairs(world, opts.sample, opts.max_miles, seed);
+    }
+    let named: &[(&str, &str)] = match opts.routes.as_str() {
+        "rolling" => &ROLLING_ROUTES,
+        "flat" => &FLAT_ROUTES,
+        "all" => return all_named_pairs(),
+        _ => &MOUNTAIN_ROUTES,
+    };
+    named
+        .iter()
+        .map(|(a, b)| (a.to_string(), b.to_string()))
+        .collect()
+}
+
+fn all_named_pairs() -> Vec<(String, String)> {
+    MOUNTAIN_ROUTES
+        .iter()
+        .chain(ROLLING_ROUTES.iter())
+        .chain(FLAT_ROUTES.iter())
+        .map(|(a, b)| (a.to_string(), b.to_string()))
+        .collect()
+}
+
+/// Supported city pairs drawn from the whole map, shortest first.
+///
+/// Named the way the hand-picked sets are and the way a player would say
+/// them, so the banner, the scan lines and a rerun all read as roads rather
+/// than as database keys. A name is only used when it resolves back to the
+/// same city; anything ambiguous keeps its key. Shortest first, so the
+/// search reaches a feature quickly and the drive starts near it rather than
+/// hours up the road.
+pub fn random_pairs(
+    world: &'static World,
+    count: usize,
+    max_miles: f64,
+    seed: i64,
+) -> Vec<(String, String)> {
+    let mut rng = PyRandom::new_from_i64(seed);
+    let names = world.city_names();
+    let mut found: Vec<(f64, String, String)> = Vec::new();
+    let mut seen: std::collections::HashSet<(String, String)> = std::collections::HashSet::new();
+    // Bounded: a draw must never hunt forever for its last pair on a map
+    // where most random pairs are longer than the limit.
+    for _ in 0..count * 400 {
+        if found.len() >= count {
+            break;
+        }
+        let picked = rng.sample(&names, 2);
+        let (a, b) = (picked[0].clone(), picked[1].clone());
+        let key = if a < b {
+            (a.clone(), b.clone())
+        } else {
+            (b.clone(), a.clone())
+        };
+        if !seen.insert(key) {
+            continue;
+        }
+        let Ok(Some(route)) = world.supported_route(&a, &b, None) else {
+            continue;
+        };
+        if route.miles() > max_miles {
+            continue;
+        }
+        found.push((route.miles(), speakable(world, &a), speakable(world, &b)));
+    }
+    found.sort_by(|x, y| x.0.total_cmp(&y.0).then(x.1.cmp(&y.1)));
+    found.into_iter().map(|(_, a, b)| (a, b)).collect()
+}
+
+/// The city's spoken name where that still names this city, else the key.
+///
+/// Two cities share a bare name often enough (Jackson, Portland) that a
+/// blind swap would silently point a rerun at the wrong road.
+fn speakable(world: &World, key: &str) -> String {
+    let spoken = world.spoken_city(key, None);
+    if world.resolve_city_key(&spoken) == key {
+        spoken
+    } else {
+        key.to_string()
+    }
+}
+
+/// The trip the search reads -- built on the SAME seed the drive will use.
+///
+/// Everything drawn per trip rather than baked into the map hangs off this
+/// seed: work zones, patrol posts, and whether a given weigh station is open
+/// today. Searching on one seed and then driving on another is how a scan
+/// could promise an open scale and hand over a dark one (found 2026-08-20,
+/// benching the weigh-in-motion bypass).
+pub fn build_trip(
+    world: &'static World,
+    origin: &str,
+    destination: &str,
+    seed: Option<i64>,
+) -> Option<Trip> {
+    let route = world.supported_route(origin, destination, None).ok()??;
+    Some(Trip::new(
+        route,
+        TruckState::default(),
+        WeatherSystem::new("", seed, None, None, false),
+        TripOptions {
+            seed,
+            ..Default::default()
+        },
+    ))
+}
+
+/// Every matching feature across the given routes, best first.
+pub fn find_feature(
+    world: &'static World,
+    pairs: &[(String, String)],
+    feature: &str,
+    opts: &RoadOptions,
+    seed: Option<i64>,
+) -> Vec<Hit> {
+    let mut hits: Vec<Hit> = Vec::new();
+    for (origin, destination) in pairs {
+        // An unroutable pair must not kill the sweep.
+        let Some(mut trip) = build_trip(world, origin, destination, seed) else {
+            continue;
+        };
+        match feature {
+            "downgrade" | "upgrade" => {
+                let sign = if feature == "downgrade" { -1.0 } else { 1.0 };
+                hits.extend(grade_hits(
+                    &mut trip,
+                    origin,
+                    destination,
+                    sign,
+                    opts.min_pct,
+                    opts.min_run,
+                ));
+            }
+            "zone" => hits.extend(zone_hits(&mut trip, origin, destination)),
+            "limit-drop" => hits.extend(limit_drop_hits(
+                &mut trip,
+                origin,
+                destination,
+                opts.min_drop,
+            )),
+            "stop" => hits.extend(stop_hits(&mut trip, origin, destination)),
+            "scale" => hits.extend(scale_hits(&mut trip, origin, destination)),
+            "curve" => hits.extend(curve_hits(
+                &mut trip,
+                origin,
+                destination,
+                opts.max_advisory,
+            )),
+            "interchange" => hits.extend(interchange_hits(&mut trip, origin, destination)),
+            "toll" => hits.extend(toll_hits(&mut trip, origin, destination)),
+            "chain-law" => hits.extend(chain_law_hits(&mut trip, origin, destination)),
+            _ => {}
+        }
+    }
+    for hit in &mut hits {
+        hit.trip_seed = seed;
+    }
+    if feature == "downgrade" || feature == "upgrade" {
+        hits.sort_by(|a, b| {
+            b.run_mi
+                .total_cmp(&a.run_mi)
+                .then(b.magnitude.total_cmp(&a.magnitude))
+        });
+    } else {
+        hits.sort_by(|a, b| {
+            b.magnitude
+                .total_cmp(&a.magnitude)
+                .then(a.at_mi.total_cmp(&b.at_mi))
+        });
+    }
+    hits
+}
+
+/// `find_feature` on a pinned seed, re-rolled when the find is empty.
+///
+/// An open weigh station is the case this exists for: it is silent when
+/// closed, by design, so a playtest sent to a dark one learns nothing and
+/// cannot tell that from the feature being broken. Re-rolling the trip is
+/// the same thing a player does by starting another run.
+pub fn find_feature_seeded(
+    world: &'static World,
+    pairs: &[(String, String)],
+    feature: &str,
+    opts: &RoadOptions,
+) -> Vec<Hit> {
+    if opts.trip_seed.is_some() {
+        return find_feature(world, pairs, feature, opts, opts.trip_seed);
+    }
+    let tries = if feature == "scale" {
+        SCALE_SEED_TRIES
+    } else {
+        1
+    };
+    let mut rng = PyRandom::new_unseeded();
+    for attempt in 0..tries {
+        let seed = rng.randrange(1 << 31);
+        let mut hits = find_feature(world, pairs, feature, opts, Some(seed));
+        if feature == "scale" {
+            hits.retain(|hit| hit.label.starts_with("OPEN"));
+        }
+        if !hits.is_empty() {
+            if attempt > 0 {
+                println!("  (took {} trip rolls to find one open)", attempt + 1);
+            }
+            return hits;
+        }
+    }
+    Vec::new()
+}
+
+/// Sustained grades in the requested direction.
+fn grade_hits(
+    trip: &mut Trip,
+    origin: &str,
+    destination: &str,
+    sign: f64,
+    min_pct: f64,
+    min_run: f64,
+) -> Vec<Hit> {
+    let total = trip.total_miles();
+    let mut hits = Vec::new();
+    let (mut mi, mut start, mut run) = (0.0f64, None::<f64>, 0.0f64);
+    while mi < total {
+        let pct = trip.grade_at(mi) * 100.0 * sign;
+        if pct >= min_pct {
+            if start.is_none() {
+                start = Some(mi);
+            }
+            run += SCAN_STEP_MI;
+        } else {
+            if let Some(at) = start {
+                if run >= min_run {
+                    let mut probe = at;
+                    let mut worst = 0.0f64;
+                    while probe < at + run {
+                        worst = worst.max(trip.grade_at(probe) * 100.0 * sign);
+                        probe += SCAN_STEP_MI;
+                    }
+                    let (limit, _) = trip.speed_limit_at((at - DEFAULT_LEAD_MI).max(0.0));
+                    let word = if sign < 0.0 { "downgrade" } else { "upgrade" };
+                    hits.push(Hit {
+                        origin: origin.to_string(),
+                        destination: destination.to_string(),
+                        at_mi: at,
+                        total_mi: total,
+                        magnitude: worst,
+                        run_mi: run,
+                        limit_mph: limit,
+                        label: format!("{worst:.1}% {word}"),
+                        trip_seed: None,
+                    });
+                }
+            }
+            start = None;
+            run = 0.0;
+        }
+        mi += SCAN_STEP_MI;
+    }
+    hits
+}
+
+fn zone_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
+    let total = trip.total_miles();
+    let zones = trip.zones.clone();
+    zones
+        .iter()
+        .map(|zone| {
+            let (limit, _) = trip.speed_limit_at((zone.start_mi - DEFAULT_LEAD_MI).max(0.0));
+            Hit {
+                origin: origin.to_string(),
+                destination: destination.to_string(),
+                at_mi: zone.start_mi,
+                total_mi: total,
+                magnitude: zone.limit_mph,
+                run_mi: (zone.end_mi - zone.start_mi).max(0.0),
+                limit_mph: limit,
+                label: format!("{} zone, {:.0} mph", zone.reason, zone.limit_mph),
+                trip_seed: None,
+            }
+        })
+        .collect()
+}
+
+/// Places the posted limit falls by at least `min_drop` mph.
+fn limit_drop_hits(trip: &mut Trip, origin: &str, destination: &str, min_drop: f64) -> Vec<Hit> {
+    let total = trip.total_miles();
+    let mut hits = Vec::new();
+    let mut mi = SCAN_STEP_MI;
+    let (mut previous, _) = trip.speed_limit_at(0.0);
+    while mi < total {
+        let (limit, _) = trip.speed_limit_at(mi);
+        if previous - limit >= min_drop {
+            hits.push(Hit {
+                origin: origin.to_string(),
+                destination: destination.to_string(),
+                at_mi: mi,
+                total_mi: total,
+                magnitude: previous - limit,
+                run_mi: 0.0,
+                limit_mph: previous,
+                label: format!("limit drops {previous:.0} to {limit:.0}"),
+                trip_seed: None,
+            });
+        }
+        previous = limit;
+        mi += SCAN_STEP_MI;
+    }
+    hits
+}
+
+fn stop_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
+    let total = trip.total_miles();
+    let stops = trip.stops.clone();
+    stops
+        .iter()
+        .map(|stop| {
+            let (limit, _) = trip.speed_limit_at((stop.at_mi - DEFAULT_LEAD_MI).max(0.0));
+            Hit {
+                origin: origin.to_string(),
+                destination: destination.to_string(),
+                at_mi: stop.at_mi,
+                total_mi: total,
+                magnitude: 0.0,
+                run_mi: 0.0,
+                limit_mph: limit,
+                label: format!("{}: {}", stop.stop_type, stop.name),
+                trip_seed: None,
+            }
+        })
+        .collect()
+}
+
+/// Weigh stations, the OPEN ones first.
+///
+/// A closed scale is silent by design -- its guards stay inert so that
+/// hearing nothing means "dark", not "missed it". Landing at one is a
+/// playtest that proves nothing, so openness is read here (the same seeded
+/// draw the drive itself reads, off the trip's posts) and reported rather
+/// than discovered at fifty-five miles an hour.
+fn scale_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
+    let total = trip.total_miles();
+    let open_anchors: std::collections::HashSet<String> = trip
+        .posts
+        .iter()
+        .filter(|post| post.kind == KIND_FIXED_SCALE)
+        .map(|post| post.anchor.clone())
+        .collect();
+    let stops = trip.stops.clone();
+    stops
+        .iter()
+        .filter(|stop| stop.stop_type == "weigh_station")
+        .map(|stop| {
+            let (limit, _) = trip.speed_limit_at((stop.at_mi - DEFAULT_LEAD_MI).max(0.0));
+            let is_open = open_anchors.contains(&stop.name);
+            Hit {
+                origin: origin.to_string(),
+                destination: destination.to_string(),
+                at_mi: stop.at_mi,
+                total_mi: total,
+                // Magnitude is what the sort ranks on, and an open scale is
+                // the only kind worth driving to.
+                magnitude: if is_open { 1.0 } else { 0.0 },
+                run_mi: 0.0,
+                limit_mph: limit,
+                label: format!(
+                    "{} scale: {}",
+                    if is_open { "OPEN" } else { "closed" },
+                    stop.name
+                ),
+                trip_seed: None,
+            }
+        })
+        .collect()
+}
+
+/// Baked curves, tightest advisory first -- the pacenote's own source.
+///
+/// Connector curves (ramps) are skipped: the interesting case is a mainline
+/// bend taken at speed, not the geometry of an exit you are already braking
+/// for.
+fn curve_hits(trip: &mut Trip, origin: &str, destination: &str, max_advisory: f64) -> Vec<Hit> {
+    let total = trip.total_miles();
+    let curves = trip.curves.clone();
+    let mut hits = Vec::new();
+    for curve in &curves {
+        if curve.connector {
+            continue;
+        }
+        let advisory = curve.advisory_mph as f64;
+        if advisory <= 0.0 || advisory > max_advisory {
+            continue;
+        }
+        let at = curve.start_mi;
+        let (limit, _) = trip.speed_limit_at((at - DEFAULT_LEAD_MI).max(0.0));
+        let side = if curve.direction == 'R' {
+            "right"
+        } else {
+            "left"
+        };
+        hits.push(Hit {
+            origin: origin.to_string(),
+            destination: destination.to_string(),
+            at_mi: at,
+            total_mi: total,
+            // Rank by how much speed the bend actually asks you to give up.
+            magnitude: (limit - advisory).max(0.0),
+            run_mi: (curve.end_mi - at).max(0.0),
+            limit_mph: limit,
+            label: format!(
+                "{side} curve, advisory {advisory:.0} ({} ft radius)",
+                curve.min_radius_ft
+            ),
+            trip_seed: None,
+        });
+    }
+    hits
+}
+
+/// Real signed exits, for testing the exit callout and ramp handling.
+///
+/// The label carries what the map says is at the END of the ramp, because
+/// that is the half a playtest usually means: the terminal control and the
+/// road class it lands on decide whether there is anything to listen to.
+fn interchange_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
+    let total = trip.total_miles();
+    let mut staged: Vec<(f64, String)> = Vec::new();
+    let mut offset = 0.0;
+    for (i, leg) in trip.route.legs.iter().enumerate() {
+        let forward = trip.route.cities[i] == leg.a;
+        for ic in leg.interchanges() {
+            let at_leg = if forward {
+                ic.at_mi
+            } else {
+                leg.miles - ic.at_mi
+            };
+            let at = offset + at_leg;
+            if !(0.0..total).contains(&at) {
+                continue;
+            }
+            let label = if !ic.name.is_empty() {
+                ic.name.clone()
+            } else {
+                ic.destinations.first().cloned().unwrap_or_default()
+            };
+            let control = if ic.ramp_control.is_empty() {
+                "unmapped"
+            } else {
+                &ic.ramp_control
+            };
+            let far_end = if ic.ramp_far_end.is_empty() {
+                "unmapped"
+            } else {
+                &ic.ramp_far_end
+            };
+            let exit_ref = if ic.exit_ref.is_empty() {
+                "?"
+            } else {
+                &ic.exit_ref
+            };
+            staged.push((
+                at,
+                format!("exit {exit_ref} {label} [{control} -> {far_end}]")
+                    .trim()
+                    .to_string(),
+            ));
+            // The rank is the control's, computed here while it is in hand.
+            let rank = ramp_control_rank(control);
+            staged.last_mut().unwrap().0 = at;
+            let _ = rank;
+        }
+        offset += leg.miles;
+    }
+    // Second pass so `speed_limit_at` (which needs `&mut trip`) is not held
+    // across the immutable route borrow above.
+    staged
+        .into_iter()
+        .map(|(at, label)| {
+            let (limit, _) = trip.speed_limit_at((at - DEFAULT_LEAD_MI).max(0.0));
+            let control = label
+                .split('[')
+                .nth(1)
+                .and_then(|tail| tail.split(" ->").next())
+                .unwrap_or("");
+            Hit {
+                origin: origin.to_string(),
+                destination: destination.to_string(),
+                at_mi: at,
+                total_mi: total,
+                magnitude: ramp_control_rank(control),
+                run_mi: 0.0,
+                limit_mph: limit,
+                label,
+                trip_seed: None,
+            }
+        })
+        .collect()
+}
+
+fn toll_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
+    let total = trip.total_miles();
+    let mut staged: Vec<(f64, f64, String)> = Vec::new();
+    let mut offset = 0.0;
+    for (i, leg) in trip.route.legs.iter().enumerate() {
+        let forward = trip.route.cities[i] == leg.a;
+        for toll in leg.toll_events() {
+            let at_leg = if forward {
+                toll.at_mi
+            } else {
+                leg.miles - toll.at_mi
+            };
+            let at = offset + at_leg;
+            if !(0.0..total).contains(&at) {
+                continue;
+            }
+            // Ticket-system entries carry no amount of their own -- the charge
+            // settles at the exit -- so say that rather than printing $0.00.
+            let price = if toll.amount != 0.0 {
+                format!("${:.2}", toll.amount)
+            } else if !toll.method.is_empty() {
+                toll.method.clone()
+            } else {
+                "no charge here".to_string()
+            };
+            staged.push((
+                at,
+                toll.amount,
+                format!("toll {}: {price}", toll.name).trim().to_string(),
+            ));
+        }
+        offset += leg.miles;
+    }
+    staged
+        .into_iter()
+        .map(|(at, amount, label)| {
+            let (limit, _) = trip.speed_limit_at((at - DEFAULT_LEAD_MI).max(0.0));
+            Hit {
+                origin: origin.to_string(),
+                destination: destination.to_string(),
+                at_mi: at,
+                total_mi: total,
+                magnitude: amount,
+                run_mi: 0.0,
+                limit_mph: limit,
+                label,
+                trip_seed: None,
+            }
+        })
+        .collect()
+}
+
+/// Chain-law areas. Whether the law is *up* depends on live weather, so pair
+/// this with a forced winter weather to make the pass actually demand chains.
+fn chain_law_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
+    let total = trip.total_miles();
+    let areas = trip.chain_law_areas.clone();
+    areas
+        .iter()
+        .map(|(start_mi, end_mi)| {
+            let (limit, _) = trip.speed_limit_at((start_mi - DEFAULT_LEAD_MI).max(0.0));
+            Hit {
+                origin: origin.to_string(),
+                destination: destination.to_string(),
+                at_mi: *start_mi,
+                total_mi: total,
+                magnitude: end_mi - start_mi,
+                run_mi: end_mi - start_mi,
+                limit_mph: limit,
+                label: "chain-law area (needs winter weather to be active)".to_string(),
+                trip_seed: None,
+            }
+        })
+        .collect()
+}
+
+/// Miles that take `seconds` of REAL time at this speed.
+///
+/// The trip's effective time scale compresses distance, so a lead written in
+/// miles shrinks to nothing at speed -- which is how a playtest launched at
+/// an open scale arrived before its own window did.
+///
+/// The CONFIGURED scale, not the effective one: effective ramps from 4x at a
+/// standstill toward the full setting around 50 mph, so reading it while the
+/// truck is still parked reports 4x and hands back a lead that shrinks to
+/// nothing the moment the drive is actually up to speed.
+fn lead_for_seconds(trip: &Trip, speed_mph: f64, seconds: f64) -> f64 {
+    let scale = trip.time_scale.max(1.0);
+    (speed_mph * scale * seconds / 3600.0).max(0.5)
+}
+
+/// A `DrivingState` already rolling at the feature, set up as asked.
+pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (DrivingState, f64) {
+    // Settings first: DrivingState reads the gearbox and the assist choices
+    // in its constructor, so an override applied afterwards would not take.
+    {
+        let s = &mut ctx.settings;
+        if let Some(preset) = &opts.assists {
+            s.apply_driving_assistance_preset(preset);
+        }
+        if let Some(descent) = &opts.descent {
+            s.descent_speed_control = descent.clone();
+        }
+        if let Some(on) = opts.predictive_cruise {
+            s.predictive_cruise = on;
+        }
+        if let Some(mode) = &opts.lane_keeping {
+            s.lane_keeping = mode.clone();
+        }
+        // Off by default and outside every preset, so a rest-stop drive that
+        // wants to hear the entrance stop has to ask for it here -- the
+        // sandbox copies the player's real settings on every launch and must
+        // never leak a playtest flag back into them.
+        if let Some(on) = opts.planned_stop_assist {
+            s.selected_stop_assist = on;
+        }
+        if let Some(on) = opts.curve_assist {
+            s.curve_speed_assist = on;
+        }
+        if let Some(kind) = &opts.transmission {
+            s.automatic_transmission = kind == "automatic";
+        }
+        if let Some(rung) = &opts.verbosity {
+            s.driving_speech = rung.clone();
+        }
+    }
+
+    // The canonical key, not the display name the route sets are written in:
+    // a career's current_city is a slug ("dallas_tx_us"), and cloud backup
+    // refuses anything else as an unknown city. Left as the display name,
+    // every playtest quietly threw a rejected upload at the server and told
+    // the driver its backup was not accepted (2026-08-15).
+    let origin_key = ctx.world.resolve_city_key(&hit.origin);
+    let destination_key = ctx.world.resolve_city_key(&hit.destination);
+    let mut profile = Profile::named_in("Playtest", &origin_key);
+    if let Some(level) = opts.level {
+        // A bench career starts at level one, which silently switches off
+        // every level-gated behaviour a playtest might be here for -- the
+        // weigh-in-motion transponder a company driver is issued at four
+        // above all, whose absence looks exactly like the feature not
+        // working. Set the XP, not the level: the level is derived.
+        let level = level.clamp(1, MAX_CAREER_LEVEL) as usize;
+        profile.career.xp = LEVEL_XP[level - 1];
+    }
+    // A bench career is not somebody's first drive. Without this the profile
+    // defaults to tutorial_done=false, first-run teaching outranks the rung
+    // by design, and the driving speech ladder is switched OFF for the whole
+    // run -- so a quiet rung reported "quiet" and changed nothing, and every
+    // rung sounded identical (owner, 2026-08-17).
+    profile.tutorial_done = true;
+    ctx.profile = Some(profile);
+
+    let route = ctx
+        .world
+        .supported_route(&hit.origin, &hit.destination, None)
+        .ok()
+        .flatten()
+        .expect("the hit's own route still routes");
+    // The job's endpoints are keys for the same reason. Delivering runs
+    // `profile.current_city = job.destination`, so a job built from the route
+    // sets' display names puts the label straight back after the first drop.
+    // The spoken fields keep the display names, so nothing reads a slug
+    // aloud.
+    let cargo = cargo_type(&opts.cargo_type)
+        .unwrap_or_else(|| panic!("{:?} is not in the cargo catalog", opts.cargo_type));
+    let mut job = Job::new(
+        cargo,
+        opts.cargo,
+        &origin_key,
+        "company yard",
+        &destination_key,
+        route.miles(),
+        2500.0,
+        14.0,
+    );
+    job.destination_location = format!("{} freight market", hit.destination);
+    job.origin_spoken = ctx.world.spoken_city(&origin_key, None);
+    job.destination_spoken = ctx.world.spoken_city(&destination_key, None);
+
+    let mut driving = DrivingState::new(
+        ctx,
+        job,
+        route,
+        // The seed the feature was FOUND under. Without it DrivingState draws
+        // its own, and the drive gets a different set of work zones, patrol
+        // posts and open scales than the search just promised.
+        hit.trip_seed,
+        DRIVE_PHASE_DELIVERY,
+        Some(opts.hour.unwrap_or(9.0)),
+    );
+
+    let lead_mi = opts
+        .lead
+        .unwrap_or_else(|| lead_for_seconds(&driving.trip, opts.speed, LEAD_REAL_SECONDS));
+    let total = driving.trip.total_miles();
+    let start_mi = (hit.at_mi - lead_mi).clamp(0.0, (total - 1.0).max(0.0));
+    driving.trip.position_mi = start_mi;
+    if let Some(name) = &opts.weather {
+        if let Some(kind) = weather_kind(name) {
+            driving.weather_mut().current = kind;
+        }
+    }
+    let grade = driving.trip.grade_at(start_mi);
+    let gears = driving.truck().transmission.num_gears();
+    driving.truck_mut().start_engine();
+    driving.truck_mut().set_air_ready(false);
+    driving.truck_mut().velocity_mps = opts.speed / MPH_PER_MPS;
+    driving.truck_mut().transmission.gear = gears;
+    driving.truck_mut().grade = grade;
+    if opts.cruise > 0.0 {
+        // Engage the way K does, so the session is armed exactly as a
+        // player's would be rather than a hand-set field the rest of the
+        // state does not know about.
+        driving.engage_cruise(ctx, opts.cruise, false);
+    }
+    (driving, start_mi)
+}
+
+/// `WeatherKind[args.weather.upper()]`: the member name, forgiving about
+/// hyphens and spaces so `--weather "heavy rain"` lands on `HEAVY_RAIN`.
+fn weather_kind(name: &str) -> Option<WeatherKind> {
+    let wanted = name.trim().to_ascii_uppercase().replace(['-', ' '], "_");
+    WeatherKind::ALL
+        .into_iter()
+        .find(|kind| kind.name() == wanted)
+}
+
+/// The setup banner the tool printed before handing over the wheel.
+pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadOptions) {
+    let world = ctx.world;
+    let Some(mut trip) = build_trip(world, &hit.origin, &hit.destination, hit.trip_seed) else {
+        return;
+    };
+    let total = trip.total_miles();
+    let (limit, reason) = trip.speed_limit_at(start_mi);
+    let s = &ctx.settings;
+    println!("\n=== playtest: {} -> {} ===", hit.origin, hit.destination);
+    println!(
+        "  target            : {} at mile {:.1}",
+        hit.label, hit.at_mi
+    );
+    println!(
+        "  trip seed         : {:?}  (--trip-seed to drive this exact run again)",
+        hit.trip_seed
+    );
+    println!("  starting at mile  : {start_mi:.1} of {total:.0}");
+    println!(
+        "  posted limit here : {limit:.0} mph{}",
+        reason.map(|r| format!(" ({r})")).unwrap_or_default()
+    );
+    println!(
+        "  rolling at        : {:.0} mph, {:.0} t aboard",
+        opts.speed, opts.cargo
+    );
+    println!(
+        "  cruise            : {}",
+        if opts.cruise > 0.0 {
+            format!("set {:.0} mph", opts.cruise)
+        } else {
+            "off".to_string()
+        }
+    );
+    println!("  your real settings:");
+    println!(
+        "    transmission    : {}",
+        if s.automatic_transmission {
+            "automatic"
+        } else {
+            "manual"
+        }
+    );
+    println!("    driving speech  : {}", s.driving_speech);
+    println!(
+        "    units           : {}",
+        if s.imperial_units {
+            "miles"
+        } else {
+            "kilometers"
+        }
+    );
+    println!(
+        "    speed keeper    : {}",
+        if s.speed_keeper { "on" } else { "off" }
+    );
+    println!("    descent control : {}", s.descent_speed_control);
+    println!(
+        "    predictive cruise: {}",
+        if s.predictive_cruise { "on" } else { "off" }
+    );
+    println!("    assists preset  : {}", s.driving_assistance_preset);
+    println!("    time scale      : {}", s.time_scale);
+    println!("  grade ahead       :");
+    for ahead in [0.0, 1.0, 2.0, 3.0, 5.0, 8.0] {
+        let at = start_mi + ahead;
+        if at < total {
+            println!(
+                "    +{ahead:4.1} mi      {:+5.1}%",
+                trip.grade_at(at) * 100.0
+            );
+        }
+    }
+}
+
+/// Everything the launcher needs after the search: the chosen spot, or a
+/// reason nothing was chosen.
+pub enum RoadPlan {
+    /// Drive this.
+    Drive(Hit),
+    /// The search printed its results and there is nothing to drive.
+    Done(i32),
+}
+
+/// Pick the spot, against the world data alone -- no `App`, no window.
+pub fn plan(opts: &RoadOptions) -> RoadPlan {
+    let world = get_world();
+    let pairs = route_pairs(world, opts);
+    if pairs.is_empty() {
+        println!(
+            "No supported route under {:.0} miles came up; raise --max-miles.",
+            opts.max_miles
+        );
+        return RoadPlan::Done(1);
+    }
+    if let Some(at) = opts.at {
+        let (origin, destination) = pairs[0].clone();
+        let seed = opts
+            .trip_seed
+            .unwrap_or_else(|| PyRandom::new_unseeded().randrange(1 << 31));
+        let Some(mut trip) = build_trip(world, &origin, &destination, Some(seed)) else {
+            println!("No supported route {origin} -> {destination}.");
+            return RoadPlan::Done(1);
+        };
+        let total = trip.total_miles();
+        let (limit, _) = trip.speed_limit_at(at);
+        return RoadPlan::Drive(Hit {
+            origin,
+            destination,
+            at_mi: at,
+            total_mi: total,
+            magnitude: 0.0,
+            run_mi: 0.0,
+            limit_mph: limit,
+            label: "chosen mile".to_string(),
+            trip_seed: Some(seed),
+        });
+    }
+    println!(
+        "Searching {} route(s) for a {}...",
+        pairs.len(),
+        opts.feature
+    );
+    let hits = find_feature_seeded(world, &pairs, &opts.feature, opts);
+    if hits.is_empty() {
+        let hint = match opts.feature.as_str() {
+            "downgrade" | "upgrade" => "Loosen --min-pct / --min-run",
+            "limit-drop" => "Loosen --min-drop",
+            "curve" => "Raise --max-advisory",
+            "toll" => "Tolled corridors are mostly eastern turnpikes",
+            _ => "Try another route",
+        };
+        println!("Nothing matched. {hint}, or try --routes all.");
+        return RoadPlan::Done(1);
+    }
+    if opts.scan {
+        println!("\n{} found:\n", hits.len());
+        for (i, found) in hits.iter().take(25).enumerate() {
+            println!("  [{i:2}] {}", found.describe());
+        }
+        println!("\nDrive one with --pick N (keeping the same --find/--routes).");
+        // Read-only: the game never started, so no window ever opened.
+        return RoadPlan::Done(0);
+    }
+    if opts.pick >= hits.len() {
+        println!("--pick {} out of range; {} found.", opts.pick, hits.len());
+        return RoadPlan::Done(1);
+    }
+    RoadPlan::Drive(hits[opts.pick].clone())
+}
