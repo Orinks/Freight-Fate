@@ -1,0 +1,362 @@
+[
+ {
+  "leg": "ashland_ky_us:huntington_wv_us",
+  "highway": "I-64",
+  "baked_mi": 15.0,
+  "router_mi": 15.2,
+  "on_label_frac": 0.0,
+  "verdict": "relabel",
+  "top_roads": "US 52 11mi, Chesapeake Bypass 2mi, SR 7 1mi"
+ },
+ {
+  "leg": "athens_ga_us:columbia_sc_us",
+  "highway": "I-20",
+  "baked_mi": 163,
+  "router_mi": 165.1,
+  "on_label_frac": 0.565,
+  "verdict": "reroute",
+  "top_roads": "I 20 93mi, US 78 40mi, GA 17 22mi"
+ },
+ {
+  "leg": "aurora_il_us:peoria_il_us",
+  "highway": "I-80",
+  "baked_mi": 122.0,
+  "router_mi": 126.2,
+  "on_label_frac": 0.253,
+  "verdict": "reroute",
+  "top_roads": "IL 29 45mi, I 80 32mi, IL 71 24mi"
+ },
+ {
+  "leg": "beaumont_tx_us:houston_tx_us",
+  "highway": "I-10",
+  "baked_mi": 86,
+  "router_mi": 88.1,
+  "on_label_frac": 0.975,
+  "verdict": "reroute",
+  "top_roads": "I 10 West 86mi, I 45 South 1mi, McKinney Street 0mi"
+ },
+ {
+  "leg": "buffalo_ny_us:new_york_ny_us",
+  "highway": "I-90",
+  "baked_mi": 439.0,
+  "router_mi": 417.9,
+  "on_label_frac": 0.327,
+  "verdict": "reroute",
+  "top_roads": "I 90 East 137mi, NY 17 East 130mi, I-81 69mi"
+ },
+ {
+  "leg": "burlington_vt_us:albany_ny_us",
+  "highway": "I-87",
+  "baked_mi": 158,
+  "router_mi": 158.1,
+  "on_label_frac": 0.0,
+  "verdict": "relabel",
+  "top_roads": "US 7 118mi, VT 279 30mi, I 787 South 8mi"
+ },
+ {
+  "leg": "cape_coral_fl_us:lakeland_fl_us",
+  "highway": "I-75",
+  "baked_mi": 118,
+  "router_mi": 118.4,
+  "on_label_frac": 0.025,
+  "verdict": "relabel",
+  "top_roads": "US 17 72mi, CR 884 23mi, US 98 12mi"
+ },
+ {
+  "leg": "cape_girardeau_mo_us:paducah_ky_us",
+  "highway": "I-57",
+  "baked_mi": 73,
+  "router_mi": 73.2,
+  "on_label_frac": 0.0,
+  "verdict": "relabel",
+  "top_roads": "US 60 33mi, Illinois Route 3 18mi, IL 3 11mi"
+ },
+ {
+  "leg": "charlotte_nc_us:savannah_ga_us",
+  "highway": "I-77",
+  "baked_mi": 239,
+  "router_mi": 252.9,
+  "on_label_frac": 0.391,
+  "verdict": "reroute",
+  "top_roads": "I 77 South 99mi, I 95 South 81mi, I 26 East 53mi"
+ },
+ {
+  "leg": "charlottesville_va_us:harrisonburg_va_us",
+  "highway": "I-64",
+  "baked_mi": 55,
+  "router_mi": 61.9,
+  "on_label_frac": 0.552,
+  "verdict": "reroute",
+  "top_roads": "I 64 West 34mi, I 81 North 24mi, South Main Street 1mi"
+ },
+ {
+  "leg": "chico_ca_us:redding_ca_us",
+  "highway": "I-5",
+  "baked_mi": 74,
+  "router_mi": 73.5,
+  "on_label_frac": 0.397,
+  "verdict": "reroute",
+  "top_roads": "CA 99 40mi, I 5 North 29mi, CA 44 2mi"
+ },
+ {
+  "leg": "chico_ca_us:santa_rosa_ca_us",
+  "highway": "I-5",
+  "baked_mi": 153,
+  "router_mi": 177.4,
+  "on_label_frac": 0.018,
+  "verdict": "relabel",
+  "top_roads": "CA 99 78mi, I 80 West 47mi, US 101 North 16mi"
+ },
+ {
+  "leg": "corpus_christi_tx_us:san_antonio_tx_us",
+  "highway": "I-37",
+  "baked_mi": 147,
+  "router_mi": 143.6,
+  "on_label_frac": 0.979,
+  "verdict": "reroute",
+  "top_roads": "I 37 North 140mi, East C\u00e9sar E. Ch\u00e1vez Boulevard 1mi, I-37 Frontage Road 0mi"
+ },
+ {
+  "leg": "evansville_in_us:nashville_tn_us",
+  "highway": "I-24",
+  "baked_mi": 162,
+  "router_mi": 157.3,
+  "on_label_frac": 0.386,
+  "verdict": "reroute",
+  "top_roads": "I 24 East 61mi, I 69 45mi, I 169 28mi"
+ },
+ {
+  "leg": "gainesville_fl_us:jacksonville_fl_us",
+  "highway": "I-10",
+  "baked_mi": 72.0,
+  "router_mi": 72.0,
+  "on_label_frac": 0.246,
+  "verdict": "relabel",
+  "top_roads": "US 301 Alternate 28mi, I 10 East 18mi, SR 24A 14mi"
+ },
+ {
+  "leg": "hickory_nc_us:charlotte_nc_us",
+  "highway": "I-40",
+  "baked_mi": 60,
+  "router_mi": 59.0,
+  "on_label_frac": 0.0,
+  "verdict": "relabel",
+  "top_roads": "US 321 34mi, I 85 North 19mi, NC 16 3mi"
+ },
+ {
+  "leg": "huntsville_al_us:nashville_tn_us",
+  "highway": "I-65",
+  "baked_mi": 115,
+  "router_mi": 115.3,
+  "on_label_frac": 0.713,
+  "verdict": "reroute",
+  "top_roads": "I 65 North 81mi, AL 53 20mi, I 565 West 5mi"
+ },
+ {
+  "leg": "killeen_tx_us:austin_tx_us",
+  "highway": "I-35",
+  "baked_mi": 67,
+  "router_mi": 67.5,
+  "on_label_frac": 0.456,
+  "verdict": "reroute",
+  "top_roads": "TX 195 34mi, I 35 South 31mi, North Interstate 35 1mi"
+ },
+ {
+  "leg": "knoxville_tn_us:atlanta_ga_us",
+  "highway": "I-75",
+  "baked_mi": 191,
+  "router_mi": 227.3,
+  "on_label_frac": 0.793,
+  "verdict": "reroute",
+  "top_roads": "I 75 South 180mi, I 40 West 20mi, I 285 South 15mi"
+ },
+ {
+  "leg": "longview_tx_us:shreveport_la_us",
+  "highway": "I-20",
+  "baked_mi": 63,
+  "router_mi": 67.7,
+  "on_label_frac": 0.704,
+  "verdict": "reroute",
+  "top_roads": "I 20 East 48mi, I 220 East 8mi, West Marshall Avenue 4mi"
+ },
+ {
+  "leg": "midland_tx_us:odessa_tx_us",
+  "highway": "I-20",
+  "baked_mi": 20.0,
+  "router_mi": 22.6,
+  "on_label_frac": 0.849,
+  "verdict": "reroute",
+  "top_roads": "I 20 West 19mi, TX 349 Bus 2mi, South Grant Avenue 1mi"
+ },
+ {
+  "leg": "morgantown_wv_us:pittsburgh_pa_us",
+  "highway": "I-79",
+  "baked_mi": 71,
+  "router_mi": 75.2,
+  "on_label_frac": 0.873,
+  "verdict": "reroute",
+  "top_roads": "I 79 North 66mi, I 376 East 7mi, US 19 2mi"
+ },
+ {
+  "leg": "newark_nj_us:trenton_nj_us",
+  "highway": "I-95",
+  "baked_mi": 50,
+  "router_mi": 58.0,
+  "on_label_frac": 0.695,
+  "verdict": "reroute",
+  "top_roads": "I 95 40mi, I 195 West 8mi, NJ 21 4mi"
+ },
+ {
+  "leg": "newport_ri_us:new_haven_ct_us",
+  "highway": "I-95",
+  "baked_mi": 104,
+  "router_mi": 99.4,
+  "on_label_frac": 0.712,
+  "verdict": "reroute",
+  "top_roads": "I 95 South 71mi, RI 138 21mi, US 1 3mi"
+ },
+ {
+  "leg": "norfolk_va_us:richmond_va_us",
+  "highway": "I-64",
+  "baked_mi": 98,
+  "router_mi": 93.1,
+  "on_label_frac": 0.934,
+  "verdict": "reroute",
+  "top_roads": "I 64 West 87mi, VA 168 4mi, Tidewater Drive 1mi"
+ },
+ {
+  "leg": "orange_tx_us:sulphur_la_us",
+  "highway": "I-10",
+  "baked_mi": 26,
+  "router_mi": 26.5,
+  "on_label_frac": 0.843,
+  "verdict": "reroute",
+  "top_roads": "I 10 East 11mi, I 10 11mi, Simmons Drive 2mi"
+ },
+ {
+  "leg": "paducah_ky_us:evansville_in_us",
+  "highway": "I-69",
+  "baked_mi": 114,
+  "router_mi": 128.9,
+  "on_label_frac": 0.654,
+  "verdict": "reroute",
+  "top_roads": "I 69 84mi, I 24 East 25mi, US 41 10mi"
+ },
+ {
+  "leg": "raleigh_nc_us:charlotte_nc_us",
+  "highway": "I-85",
+  "baked_mi": 146,
+  "router_mi": 170.9,
+  "on_label_frac": 0.466,
+  "verdict": "reroute",
+  "top_roads": "I 85 South 80mi, I 40 West 80mi, US 29 5mi"
+ },
+ {
+  "leg": "riverside_ca_us:lancaster_ca_us",
+  "highway": "I-215",
+  "baked_mi": 85,
+  "router_mi": 86.0,
+  "on_label_frac": 0.0,
+  "verdict": "relabel",
+  "top_roads": "CA 138 42mi, Barstow Freeway 16mi, CA 91 East 14mi"
+ },
+ {
+  "leg": "roanoke_va_us:raleigh_nc_us",
+  "highway": "I-40",
+  "baked_mi": 164,
+  "router_mi": 176.5,
+  "on_label_frac": 0.353,
+  "verdict": "reroute",
+  "top_roads": "US 220 88mi, I 40 East 62mi, I 840 East 14mi"
+ },
+ {
+  "leg": "rochester_ny_us:new_york_ny_us",
+  "highway": "I-90",
+  "baked_mi": 377.0,
+  "router_mi": 352.4,
+  "on_label_frac": 0.175,
+  "verdict": "relabel",
+  "top_roads": "NY 17 East 130mi, I-81 69mi, I 90 East 62mi"
+ },
+ {
+  "leg": "salinas_ca_us:stockton_ca_us",
+  "highway": "I-5",
+  "baked_mi": 131,
+  "router_mi": 130.8,
+  "on_label_frac": 0.492,
+  "verdict": "reroute",
+  "top_roads": "I 5 North 64mi, CA 156 38mi, US 101 North 16mi"
+ },
+ {
+  "leg": "sault_ste_marie_mi_us:traverse_city_mi_us",
+  "highway": "I-75",
+  "baked_mi": 160,
+  "router_mi": 159.7,
+  "on_label_frac": 0.369,
+  "verdict": "reroute",
+  "top_roads": "US 31 99mi, I 75 South 58mi, West Easterday Avenue 1mi"
+ },
+ {
+  "leg": "sioux_falls_sd_us:minneapolis_mn_us",
+  "highway": "I-90",
+  "baked_mi": 236,
+  "router_mi": 237.9,
+  "on_label_frac": 0.239,
+  "verdict": "relabel",
+  "top_roads": "MN 60 154mi, I 90 East 57mi, US 169 North 14mi"
+ },
+ {
+  "leg": "tampa_fl_us:miami_fl_us",
+  "highway": "I-75",
+  "baked_mi": 265,
+  "router_mi": 295.5,
+  "on_label_frac": 0.0,
+  "verdict": "relabel",
+  "top_roads": "Florida's Turnpike 207mi, I 4 East 61mi, SR 417 Toll 13mi"
+ },
+ {
+  "leg": "twin_falls_id_us:elko_nv_us",
+  "highway": "I-80",
+  "baked_mi": 166,
+  "router_mi": 166.5,
+  "on_label_frac": 0.3,
+  "verdict": "reroute",
+  "top_roads": "US 93 110mi, I 80 48mi, US 30 5mi"
+ },
+ {
+  "leg": "tyler_tx_us:longview_tx_us",
+  "highway": "I-20",
+  "baked_mi": 38,
+  "router_mi": 36.7,
+  "on_label_frac": 0.0,
+  "verdict": "relabel",
+  "top_roads": "TX 31 36mi, West Marshall Avenue 1mi, North Broadway Avenue 0mi"
+ },
+ {
+  "leg": "west_palm_beach_fl_us:cape_coral_fl_us",
+  "highway": "I-75",
+  "baked_mi": 138,
+  "router_mi": 138.5,
+  "on_label_frac": 0.035,
+  "verdict": "relabel",
+  "top_roads": "SR 80 49mi, US 98 40mi, US 27 24mi"
+ },
+ {
+  "leg": "wheatland_wy_us:lusk_wy_us",
+  "highway": "I-25",
+  "baked_mi": 89,
+  "router_mi": 89.4,
+  "on_label_frac": 0.528,
+  "verdict": "reroute",
+  "top_roads": "I 25 North 45mi, US 18 42mi, I 25 Business 2mi"
+ },
+ {
+  "leg": "woodburn_or_us:salem_or_us",
+  "highway": "I-5",
+  "baked_mi": 19,
+  "router_mi": 18.6,
+  "on_label_frac": 0.175,
+  "verdict": "relabel",
+  "top_roads": "OR 99E 8mi, OR 99E Bus 5mi, I 5 South 3mi"
+ }
+]
