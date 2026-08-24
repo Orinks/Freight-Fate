@@ -12,7 +12,26 @@ fixes), which moved `test_driving_cruise_weather.py` and
 `test_ramp_terminals.py`, and for merge `af96db01` (the pacer fix and two
 assist fixes), which moved `test_announcements.py`,
 `test_enforcement_presence.py`, `test_event_speech_pacer.py` and
-`test_scale_check_in_guidance.py`.
+`test_scale_check_in_guidance.py`. Updated again on 2026-08-24 for the
+wrong-crate pass that closed `test_hos.py` and all but one case of
+`test_trip_resume.py`: 50 `#[ignore]`d stubs deleted, 49 of those cases now
+running for real in `crates/freight-fate/tests/`. Updated once more the same
+day for the trooper and enforcement-record pass, which closed
+`test_troopers.py`, `test_enforcement_record.py` and the last
+`test_trip_resume.py` case: 56 more stubs deleted, and the PORT BUG behind
+that case fixed, so all 57 now run. Updated again the same day for the
+ramp-and-exit pass, which closed `test_ramp_terminals.py` and
+`test_driving_exits.py`: 68 cases written from nothing into the new
+`crates/freight-fate/tests/it/states_driving_ramps.rs` and
+`states_driving_exits.rs`, none of them ignored.
+
+Note the tree move that landed the same day: the integration tests of both
+crates now live in `crates/<crate>/tests/it/` and are compiled as ONE binary,
+included by the `mod` lines in `tests/it/main.rs`. Cargo does not discover
+files in that directory, so a new test file that is not listed there is never
+compiled and never run -- which looks exactly like a passing suite. The Rust
+locations in the table below are given without the `it/` segment where they
+predate the move; the file names are unchanged.
 
 ## Method
 
@@ -21,11 +40,26 @@ same name across `crates/*/src/**` and `crates/*/tests/**`. The port
 convention keeps the names identical, so an exact name match is the parity
 signal.
 
-A Rust namesake counts as **live** only if it is not `#[ignore]`d. Many
+A Rust namesake counts as **live** only if its file is REGISTERED and it is
+not `#[ignore]`d. Registration is new and is the same trap in a new shape: the
+integration tests are one binary now, and a file in `tests/it/` that has no
+`mod` line in `tests/it/main.rs` is never compiled and never run, while the
+sweep above still finds its `fn test_*` and counts it. A file lost its `mod`
+lines twice on 2026-08-24 while several agents edited `main.rs` at once, and
+the only visible symptom was a filter matching zero tests. Check the count in
+the run output by name, never a green run.
+
+A Rust namesake counts as live only if it is not `#[ignore]`d. Many
 ported files carry `#[ignore]`d empty stubs that name a case and its blocker;
 those are counted separately, because a stub is a placeholder, not coverage.
 Counting them as coverage would inflate parity by hundreds of cases, which
 is the illusion this audit exists to prevent.
+
+A case with a real body that is `#[ignore]`d because the PORT is wrong is
+counted the same way: not live. The reason string has to name the defect
+(`PORT BUG:` plus the evidence), so the difference between "nobody wrote it"
+and "it is written and the port fails it" is readable without running
+anything -- but neither is coverage, because neither runs.
 
 The sweep reads `fn test_*` out of the source, so a stub written by a
 `macro_rules!` (which emits `fn $name`) is invisible to it. One such block hid
@@ -47,8 +81,8 @@ Classes:
 
 | Class | Files | Previous sweep |
 |---|---|---|
-| PORTED | 98 | 76 |
-| PARTIAL | 100 | 103 |
+| PORTED | 112 | 76 |
+| PARTIAL | 86 | 103 |
 | TOOLS-ONLY | 27 | 27 |
 | NOT PORTED | 6 | 25 |
 | HELPER | 8 | 8 |
@@ -59,14 +93,23 @@ By test case, across all 239 files:
 | | Cases | Previous sweep |
 |---|---|---|
 | Python test functions | 4239 | 4234 |
-| live Rust namesake | 3130 | 3125 |
-| `#[ignore]`d Rust stub only | 313 | 313 |
-| no Rust namesake | 796 | 796 |
+| live Rust namesake | 3379 | 3125 |
+| `#[ignore]`d Rust stub only | 132 | 313 |
+| no Rust namesake | 728 | 796 |
 
 Merge `af96db01` added 5 Python cases and all 5 were ported with it, so
 live coverage moved +5 and the unported backlog did not grow again. (Merges
-`ffa34a16` and `7a395758` before it did the same with 7 each.) Live parity is
-73.8 percent of the Python suite. (The `44c1e296` sweep before it took the
+`ffa34a16` and `7a395758` before it did the same with 7 each.) The
+wrong-crate pass on 2026-08-24 moved 49 more cases from stub to live without
+touching the Python total, and the trooper and enforcement-record pass later
+the same day moved 57 more. The unblocked-stub pass on the same day moved
+another 75: the 63 stubs whose reason said only "not written yet", and the
+achievements block that could never have run where it sat -- `ff-core` does
+not depend on the game crate, so those eighteen cases moved bodily to
+`crates/freight-fate/tests/app_achievements.rs`. The ramp-and-exit pass on the
+same day moved another 68, all of them cases that had no Rust namesake at all
+rather than stubs, so the unported backlog fell for the first time since the
+sweep began. Live parity is 79.7 percent of the Python suite. (The `44c1e296` sweep before it took the
 suite from 4193 to 4220 cases, live coverage +368, ignored-only stubs -21 and
 cases with no Rust namesake -320, from 65.4 percent.)
 
@@ -82,8 +125,8 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/manual_playtest_radio.py` | HELPER | 0 / 0 / 4 | -- |  |
 | `tests/playtest_harness.py` | HELPER | 0 / 0 / 0 | -- |  |
 | `tests/speech_capture.py` | HELPER | 0 / 0 / 0 | -- |  |
-| `tests/test_achievement_flavor_relocated.py` | PARTIAL | 1 / 1 / 2 | `crates/ff-core/src/achievements/tests.rs` |  |
-| `tests/test_achievements.py` | PARTIAL | 11 / 17 / 29 | `crates/ff-core/src/achievements/tests.rs` |  |
+| `tests/test_achievement_flavor_relocated.py` | PORTED | 2 / 0 / 2 | `crates/freight-fate/tests/app_achievements.rs`, `crates/ff-core/src/achievements/tests.rs` | live +1, PARTIAL -> PORTED |
+| `tests/test_achievements.py` | PARTIAL | 28 / 0 / 29 | `crates/freight-fate/tests/app_achievements.rs`, `crates/ff-core/src/achievements/tests.rs` | live +17 |
 | `tests/test_amenities.py` | PORTED | 11 / 0 / 11 | `crates/ff-core/src/data/amenities.rs`, `crates/freight-fate/tests/states_driving_core.rs` |  |
 | `tests/test_announcements.py` | PORTED | 15 / 0 / 15 | `crates/freight-fate/tests/transcript_announcements.rs` | live +1 (`af96db01`) |
 | `tests/test_assigned_reposition.py` | PORTED | 5 / 0 / 5 | `crates/freight-fate/tests/states_city.rs` | live +1, PARTIAL -> PORTED |
@@ -123,10 +166,10 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_city_keys.py` | PORTED | 11 / 0 / 11 | `crates/ff-core/tests/data_city_keys.rs` |  |
 | `tests/test_city_services.py` | PORTED | 4 / 0 / 4 | `crates/freight-fate/tests/transcript_city_services.rs` | live +4, NOT PORTED -> PORTED |
 | `tests/test_cloud_public_career.py` | PORTED | 7 / 0 / 7 | `crates/freight-fate/tests/states_cloud_save_states.rs` |  |
-| `tests/test_cloud_saves.py` | PARTIAL | 91 / 11 / 102 | `crates/freight-fate/tests/cloud_saves.rs`, `crates/ff-core/src/cloud_save_integrity.rs`, `crates/freight-fate/tests/online_presence.rs` |  |
+| `tests/test_cloud_saves.py` | PARTIAL | 100 / 2 / 102 | `crates/freight-fate/tests/cloud_saves.rs`, `crates/ff-core/src/cloud_save_integrity.rs`, `crates/freight-fate/tests/online_presence.rs` | live +9 |
 | `tests/test_congestion.py` | PARTIAL | 12 / 1 / 13 | `crates/ff-core/tests/sim_congestion.rs`, `crates/ff-core/src/sim/season.rs` |  |
-| `tests/test_controller.py` | PARTIAL | 23 / 8 / 31 | `crates/freight-fate/tests/app_controller.rs` |  |
-| `tests/test_controls_reference.py` | PARTIAL | 3 / 2 / 5 | `crates/freight-fate/tests/app_controls_reference.rs` |  |
+| `tests/test_controller.py` | PARTIAL | 30 / 1 / 31 | `crates/freight-fate/tests/app_controller.rs` | live +7 |
+| `tests/test_controls_reference.py` | PORTED | 5 / 0 / 5 | `crates/freight-fate/tests/app_controls_reference.rs` | live +2, PARTIAL -> PORTED |
 | `tests/test_corridor_places.py` | TOOLS-ONLY | 0 / 0 / 6 | -- |  |
 | `tests/test_cross_traffic.py` | PARTIAL | 12 / 9 / 21 | `crates/ff-core/src/sim/cross_traffic.rs` |  |
 | `tests/test_cruise_resume_ramp.py` | PORTED | 11 / 0 / 11 | `crates/freight-fate/tests/transcript_cruise_resume_ramp.rs` | live +11, NOT PORTED -> PORTED |
@@ -144,7 +187,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_divided_data.py` | PORTED | 3 / 0 / 3 | `crates/ff-core/tests/data_lane_data.rs` |  |
 | `tests/test_driving_cruise_weather.py` | PORTED | 108 / 0 / 108 | `crates/freight-fate/tests/transcript_driving_cruise_weather_acc.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather_retarder.rs`, +3 more | live +4, Python +4 |
 | `tests/test_driving_damage_bands.py` | PARTIAL | 20 / 0 / 55 | `crates/freight-fate/tests/states_driving_road.rs`, `crates/ff-core/src/models/economy.rs`, `crates/freight-fate/tests/states_driving_core.rs` |  |
-| `tests/test_driving_exits.py` | PARTIAL | 1 / 0 / 31 | `crates/freight-fate/tests/states_driving_events_chains.rs` |  |
+| `tests/test_driving_exits.py` | PORTED | 31 / 0 / 31 | `crates/freight-fate/tests/it/states_driving_exits.rs`, `crates/freight-fate/tests/states_driving_events_chains.rs` | live +30, PARTIAL -> PORTED |
 | `tests/test_driving_features.py` | PARTIAL | 13 / 0 / 129 | `crates/freight-fate/tests/states_driving_updates.rs`, `crates/freight-fate/tests/states_driving_events_chains.rs`, `crates/ff-core/src/units.rs` | live +2, Python +2 |
 | `tests/test_driving_manual_controls.py` | PORTED | 1 / 0 / 1 | `crates/freight-fate/tests/states_driving_controls.rs` |  |
 | `tests/test_driving_modes.py` | PARTIAL | 3 / 0 / 6 | `crates/ff-core/src/sim/driving_modes.rs`, `crates/freight-fate/tests/states_driving_controls.rs` |  |
@@ -152,20 +195,20 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_driving_school.py` | PORTED | 3 / 0 / 3 | `crates/freight-fate/tests/states_driving_menus_tablet.rs` |  |
 | `tests/test_driving_speech_ladder.py` | PARTIAL | 46 / 0 / 80 | `crates/freight-fate/tests/app_driving_speech_ladder.rs`, `crates/ff-core/src/settings/tests.rs`, `crates/ff-core/src/speech_pacing.rs`, +2 more |  |
 | `tests/test_enforcement_presence.py` | PARTIAL | 64 / 14 / 78 | `crates/ff-core/tests/sim_enforcement_presence.rs`, `crates/freight-fate/tests/states_driving_enforcement.rs`, `crates/ff-core/src/models/safety_record.rs`, +1 more |  |
-| `tests/test_enforcement_record.py` | PARTIAL | 34 / 22 / 56 | `crates/ff-core/src/models/enforcement/tests.rs`, `crates/freight-fate/tests/states_city.rs` |  |
+| `tests/test_enforcement_record.py` | PORTED | 56 / 0 / 56 | `crates/ff-core/src/models/enforcement/tests.rs`, `crates/freight-fate/tests/states_driving_enforcement_record.rs`, `crates/freight-fate/tests/states_city.rs` | live +22, PARTIAL -> PORTED |
 | `tests/test_engine_audio.py` | PORTED | 10 / 0 / 10 | `crates/ff-core/src/engine_audio.rs` |  |
 | `tests/test_engine_brake_zones.py` | PARTIAL | 15 / 1 / 19 | `crates/freight-fate/tests/states_driving_road.rs` |  |
 | `tests/test_event_speech_pacer.py` | PARTIAL | 51 / 0 / 75 | `crates/ff-core/src/speech_pacing.rs`, `crates/freight-fate/tests/app_event_speech_pacer.rs` |  |
 | `tests/test_exit_recovery.py` | NOT PORTED | 0 / 0 / 5 | -- |  |
 | `tests/test_facility_approaches.py` | PARTIAL | 6 / 0 / 7 | `crates/ff-core/tests/data_facility_approaches.rs`, `crates/ff-core/tests/sim_facility_approaches.rs`, `crates/freight-fate/tests/states_driving_facility_approaches.rs` | live +6, NOT PORTED -> PARTIAL |
 | `tests/test_facility_endpoints.py` | PARTIAL | 4 / 2 / 6 | `crates/ff-core/tests/data_facility_endpoints.rs` |  |
-| `tests/test_facility_engine.py` | PARTIAL | 11 / 1 / 12 | `crates/freight-fate/tests/states_city_pickup.rs`, `crates/freight-fate/tests/states_driving_menus.rs` |  |
+| `tests/test_facility_engine.py` | PORTED | 12 / 0 / 12 | `crates/freight-fate/tests/states_city_pickup.rs`, `crates/freight-fate/tests/states_driving_menus.rs` | live +1, PARTIAL -> PORTED |
 | `tests/test_facility_naming.py` | PARTIAL | 2 / 0 / 4 | `crates/ff-core/src/speech_text.rs` |  |
 | `tests/test_facility_overshoot.py` | PARTIAL | 19 / 4 / 23 | `crates/freight-fate/tests/states_driving_facility.rs` |  |
 | `tests/test_home_terminal.py` | PARTIAL | 4 / 0 / 19 | `crates/freight-fate/tests/states_city.rs`, `crates/freight-fate/tests/states_main_menu.rs` | live +3, Python +3 |
-| `tests/test_hos.py` | PARTIAL | 85 / 29 / 114 | `crates/ff-core/src/sim/hos/tests.rs` |  |
+| `tests/test_hos.py` | PORTED | 114 / 0 / 114 | `crates/ff-core/src/sim/hos/tests.rs`, `crates/freight-fate/tests/states_driving_hos.rs`, `crates/freight-fate/tests/states_city_hos.rs` | live +29, PARTIAL -> PORTED |
 | `tests/test_index_world.py` | TOOLS-ONLY | 0 / 0 / 4 | -- |  |
-| `tests/test_info_keys.py` | PARTIAL | 29 / 21 / 50 | `crates/freight-fate/tests/states_driving_controls.rs`, `crates/freight-fate/tests/app_info_keys.rs` | live +1 |
+| `tests/test_info_keys.py` | PARTIAL | 41 / 9 / 50 | `crates/freight-fate/tests/states_driving_controls.rs`, `crates/freight-fate/tests/app_info_keys.rs` | live +1; live +12 |
 | `tests/test_instruction_retirement.py` | PARTIAL | 1 / 0 / 7 | `crates/ff-core/src/speech_text.rs` |  |
 | `tests/test_interchanges.py` | PORTED | 33 / 0 / 33 | `crates/ff-core/tests/data_interchanges.rs`, `crates/ff-core/tests/sim_interchanges.rs` | live +33, NOT PORTED -> PORTED |
 | `tests/test_job_progression.py` | PARTIAL | 26 / 3 / 29 | `crates/ff-core/src/models/jobs/tests.rs` |  |
@@ -178,14 +221,14 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_lane_pan.py` | PARTIAL | 1 / 0 / 12 | `crates/ff-core/src/sim/lane_guidance.rs` |  |
 | `tests/test_lane_position_cue.py` | PORTED | 12 / 0 / 12 | `crates/freight-fate/tests/states_driving_updates.rs` |  |
 | `tests/test_lane_return_gap.py` | PARTIAL | 20 / 0 / 24 | `crates/freight-fate/tests/states_driving_road.rs` |  |
-| `tests/test_learn_sounds_state.py` | PARTIAL | 26 / 3 / 30 | `crates/freight-fate/tests/states_learn_sounds.rs`, `crates/ff-core/src/sound_catalog/demo.rs` |  |
+| `tests/test_learn_sounds_state.py` | PARTIAL | 28 / 1 / 30 | `crates/freight-fate/tests/states_learn_sounds.rs`, `crates/ff-core/src/sound_catalog/demo.rs` | live +2 |
 | `tests/test_legacy_career_gate.py` | PORTED | 8 / 0 / 8 | `crates/ff-core/src/models/profile/tests_gate.rs`, `crates/freight-fate/tests/states_main_menu.rs` |  |
 | `tests/test_limit_lookahead.py` | PARTIAL | 18 / 1 / 19 | `crates/ff-core/tests/sim_limit_lookahead.rs`, `crates/ff-core/src/sim/trip.rs` |  |
 | `tests/test_local_approaches.py` | PARTIAL | 3 / 3 / 6 | `crates/ff-core/tests/data_local_approaches.rs` |  |
 | `tests/test_local_geometry.py` | PARTIAL | 4 / 1 / 5 | `crates/ff-core/tests/data_local_geometry.rs` |  |
 | `tests/test_loyalty.py` | PORTED | 22 / 0 / 22 | `crates/ff-core/src/models/loyalty.rs` |  |
 | `tests/test_loyalty_integration.py` | PORTED | 5 / 0 / 5 | `crates/ff-core/src/models/profile/tests.rs` |  |
-| `tests/test_main_channel_pacing.py` | PARTIAL | 7 / 2 / 9 | `crates/freight-fate/tests/app_main_channel_pacing.rs` |  |
+| `tests/test_main_channel_pacing.py` | PORTED | 9 / 0 / 9 | `crates/freight-fate/tests/app_main_channel_pacing.rs` | live +2, PARTIAL -> PORTED |
 | `tests/test_main_menu_save_scan.py` | PORTED | 3 / 0 / 3 | `crates/freight-fate/tests/states_main_menu.rs` |  |
 | `tests/test_manual_html.py` | TOOLS-ONLY | 0 / 0 / 5 | -- |  |
 | `tests/test_map_inventory.py` | TOOLS-ONLY | 0 / 0 / 1 | -- |  |
@@ -195,7 +238,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_menu_readout.py` | PORTED | 3 / 0 / 3 | `crates/freight-fate/tests/transcript_menu_readout.rs` | live +3, NOT PORTED -> PORTED |
 | `tests/test_menu_stop_speech.py` | PORTED | 4 / 0 / 4 | `crates/freight-fate/tests/transcript_menu_stop_speech.rs` | live +4, NOT PORTED -> PORTED |
 | `tests/test_message_log.py` | PORTED | 14 / 0 / 14 | `crates/ff-core/src/message_log.rs` |  |
-| `tests/test_message_review.py` | PARTIAL | 7 / 4 / 11 | `crates/freight-fate/tests/app_message_review.rs` |  |
+| `tests/test_message_review.py` | PORTED | 11 / 0 / 11 | `crates/freight-fate/tests/app_message_review.rs` | live +4, PARTIAL -> PORTED |
 | `tests/test_metric_readouts.py` | PARTIAL | 6 / 0 / 10 | `crates/ff-core/src/units.rs`, `crates/ff-core/src/settings/tests.rs` |  |
 | `tests/test_metric_units.py` | PARTIAL | 1 / 0 / 5 | `crates/ff-core/src/settings/tests.rs` |  |
 | `tests/test_microsleep.py` | PORTED | 7 / 0 / 7 | `crates/freight-fate/tests/states_driving_updates.rs` |  |
@@ -207,9 +250,9 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_off_pavement_transitions.py` | PORTED | 1 / 0 / 1 | `crates/freight-fate/tests/states_driving_updates.rs` |  |
 | `tests/test_online_activation.py` | PORTED | 23 / 0 / 23 | `crates/freight-fate/tests/online_activation.rs` |  |
 | `tests/test_online_clipboard.py` | PORTED | 11 / 0 / 11 | `crates/freight-fate/tests/transcript_online_clipboard.rs` | live +11, NOT PORTED -> PORTED |
-| `tests/test_online_hub.py` | PARTIAL | 9 / 1 / 10 | `crates/freight-fate/tests/states_online_hub.rs` |  |
+| `tests/test_online_hub.py` | PORTED | 10 / 0 / 10 | `crates/freight-fate/tests/states_online_hub.rs` | live +1, PARTIAL -> PORTED |
 | `tests/test_online_journal.py` | PORTED | 9 / 0 / 9 | `crates/freight-fate/tests/online_journal.rs` |  |
-| `tests/test_online_offer.py` | PARTIAL | 9 / 4 / 13 | `crates/freight-fate/tests/states_online_offer.rs` |  |
+| `tests/test_online_offer.py` | PORTED | 13 / 0 / 13 | `crates/freight-fate/tests/states_online_offer.rs` | live +4, PARTIAL -> PORTED |
 | `tests/test_online_presence.py` | PARTIAL | 36 / 3 / 39 | `crates/freight-fate/tests/online_presence.rs`, `crates/freight-fate/tests/cloud_saves.rs`, `crates/freight-fate/tests/discord_presence.rs` |  |
 | `tests/test_online_setup.py` | PORTED | 35 / 0 / 35 | `crates/freight-fate/tests/states_online_setup.rs` |  |
 | `tests/test_ors_pipeline.py` | TOOLS-ONLY | 0 / 0 / 15 | -- |  |
@@ -217,7 +260,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_pacenotes.py` | PARTIAL | 18 / 0 / 19 | `crates/freight-fate/tests/states_driving_turns.rs` | live +2, Python +2 |
 | `tests/test_pay_advance.py` | PORTED | 7 / 0 / 7 | `crates/ff-core/src/models/economy.rs`, `crates/freight-fate/tests/states_city.rs`, `crates/freight-fate/tests/states_driving_menus_rest.rs` |  |
 | `tests/test_pedal_latch.py` | PARTIAL | 8 / 0 / 14 | `crates/ff-core/src/sim/pedal_latch.rs`, `crates/ff-core/src/settings/tests.rs` |  |
-| `tests/test_pedal_latch_assists.py` | PARTIAL | 5 / 10 / 15 | `crates/freight-fate/tests/states_driving_controls.rs` |  |
+| `tests/test_pedal_latch_assists.py` | PORTED | 15 / 0 / 15 | `crates/freight-fate/tests/states_driving_controls.rs` | live +10, PARTIAL -> PORTED |
 | `tests/test_per_truck_condition.py` | PORTED | 10 / 0 / 10 | `crates/ff-core/src/models/profile/tests.rs` |  |
 | `tests/test_physics_bench.py` | PORTED | 16 / 0 / 16 | `crates/ff-core/src/sim/vehicle/physics_bench_tests.rs` |  |
 | `tests/test_pick_nodes.py` | TOOLS-ONLY | 0 / 0 / 6 | -- |  |
@@ -245,7 +288,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_radio_regional.py` | PARTIAL | 15 / 0 / 26 | `crates/ff-core/src/radio/tests.rs`, `crates/ff-core/src/music.rs` |  |
 | `tests/test_radio_streaming.py` | NOT PORTED | 0 / 0 / 4 | -- |  |
 | `tests/test_ramp_controls.py` | PARTIAL | 2 / 0 / 20 | `crates/freight-fate/tests/states_driving_core.rs` |  |
-| `tests/test_ramp_terminals.py` | PARTIAL | 14 / 0 / 52 | `crates/freight-fate/tests/states_driving_events.rs` | live +3, Python +3 |
+| `tests/test_ramp_terminals.py` | PORTED | 52 / 0 / 52 | `crates/freight-fate/tests/it/states_driving_ramps.rs`, `crates/freight-fate/tests/states_driving_events.rs` | live +38, PARTIAL -> PORTED |
 | `tests/test_real_construction_zones.py` | PARTIAL | 85 / 0 / 86 | `crates/ff-core/src/sim/real_traffic_parsers/tests.rs`, `crates/ff-core/tests/sim_real_construction_zones.rs`, `crates/ff-core/src/sim/real_traffic/tests.rs`, +1 more |  |
 | `tests/test_real_traffic.py` | PORTED | 23 / 0 / 23 | `crates/ff-core/src/sim/real_traffic/tests.rs`, `crates/ff-core/src/sim/truck_parking/tests.rs`, `crates/ff-core/src/sim/real_traffic_parsers/tests.rs` |  |
 | `tests/test_real_weather.py` | PORTED | 39 / 0 / 39 | `crates/ff-core/src/sim/real_weather/tests.rs`, `crates/ff-core/src/sim/weather/tests.rs` |  |
@@ -293,15 +336,15 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_transmission.py` | PORTED | 20 / 0 / 20 | `crates/ff-core/src/sim/transmission.rs` |  |
 | `tests/test_trip_cues.py` | PARTIAL | 22 / 4 / 26 | `crates/ff-core/tests/sim_trip_cues.rs`, `crates/ff-core/src/sim/weather/tests.rs`, `crates/ff-core/src/sim/vehicle/tests.rs` |  |
 | `tests/test_trip_properties.py` | PORTED | 3 / 0 / 3 | `crates/ff-core/tests/sim_trip_properties.rs` |  |
-| `tests/test_trip_resume.py` | PARTIAL | 1 / 21 / 22 | `crates/ff-core/tests/sim_trip_resume.rs` |  |
-| `tests/test_troopers.py` | PARTIAL | 10 / 34 / 44 | `crates/ff-core/tests/sim_troopers.rs`, `crates/freight-fate/tests/states_driving_enforcement.rs`, `crates/ff-core/tests/sim_enforcement_presence.rs` |  |
+| `tests/test_trip_resume.py` | PORTED | 22 / 0 / 22 | `crates/ff-core/tests/sim_trip_resume.rs`, `crates/freight-fate/tests/states_driving_trip_resume.rs` | live +21; the PORT BUG the last case found is fixed |
+| `tests/test_troopers.py` | PORTED | 44 / 0 / 44 | `crates/ff-core/tests/sim_troopers.rs`, `crates/freight-fate/tests/states_driving_troopers.rs`, `crates/freight-fate/tests/states_driving_enforcement.rs`, +1 more | live +34, PARTIAL -> PORTED |
 | `tests/test_truck_dealer_menu.py` | PORTED | 5 / 0 / 5 | `crates/freight-fate/tests/states_city_shops.rs` |  |
 | `tests/test_truck_parking.py` | PORTED | 30 / 0 / 30 | `crates/ff-core/src/sim/truck_parking/tests.rs`, `crates/ff-core/src/sim/real_traffic/tests.rs` |  |
 | `tests/test_truck_parking_capacity.py` | PARTIAL | 12 / 0 / 16 | `crates/ff-core/src/sim/truck_parking/tests.rs`, `crates/ff-core/src/sim/hos/tests.rs` |  |
 | `tests/test_trucks.py` | PARTIAL | 19 / 1 / 20 | `crates/ff-core/src/models/trucks/tests.rs` |  |
 | `tests/test_turn_commitment.py` | PORTED | 27 / 0 / 27 | `crates/freight-fate/tests/states_driving_turns.rs` |  |
 | `tests/test_tutorial_verbosity.py` | PORTED | 5 / 0 / 5 | `crates/freight-fate/tests/transcript_tutorial_verbosity.rs` | live +5, NOT PORTED -> PORTED |
-| `tests/test_updater.py` | PARTIAL | 48 / 8 / 74 | `crates/freight-fate/tests/updater.rs`, `crates/ff-core/src/settings/tests.rs` |  |
+| `tests/test_updater.py` | PARTIAL | 51 / 5 / 74 | `crates/freight-fate/tests/updater.rs`, `crates/ff-core/src/settings/tests.rs` | live +3 |
 | `tests/test_vehicle.py` | PARTIAL | 80 / 0 / 81 | `crates/ff-core/src/sim/vehicle/tests.rs` |  |
 | `tests/test_vehicle_access.py` | PORTED | 15 / 0 / 15 | `crates/ff-core/tests/sim_vehicle_access.rs`, `crates/freight-fate/tests/states_driving_vehicle_access.rs` | live +15, NOT PORTED -> PORTED |
 | `tests/test_version.py` | PORTED | 5 / 0 / 5 | `crates/ff-core/src/models/profile/tests_gate.rs` |  |
@@ -454,39 +497,6 @@ PARTIAL and NOT PORTED files only; TOOLS-ONLY and HELPER files are omitted.
 - `test_a_clean_run_is_charged_nothing`
 - `test_hazard_damage_alone_is_not_ruled_preventable`
 - `test_the_settlement_grade_round_trips_through_a_snapshot`
-
-### `tests/test_driving_exits.py` -- 30 of 31
-
-- `test_can_back_up_to_a_missed_rest_stop_with_t_menu`
-- `test_x_signals_for_upcoming_route_exit_without_taking_it`
-- `test_x_near_the_exit_keeps_the_signal_until_a_second_press`
-- `test_right_taps_with_drift_on_earn_the_hold_hint_once`
-- `test_missed_destination_exit_reroutes_every_time`
-- `test_x_without_route_exit_reports_no_signal_target`
-- `test_canceled_exit_signal_does_not_prompt_lane_prep`
-- `test_canceled_destination_exit_signal_stays_on_highway`
-- `test_destination_exit_auto_arms_and_takes_ramp_with_valid_setup`
-- `test_full_lane_keeping_says_it_is_taking_the_destination_exit`
-- `test_destination_exit_auto_grant_follows_full_lane_keeping`
-- `test_destination_exit_no_longer_requires_x_to_take_ramp`
-- `test_manual_lane_keeping_requires_signal_for_destination_exit`
-- `test_relaxed_lane_drift_infers_destination_exit_intent`
-- `test_exit_requires_right_lane_alignment`
-- `test_exit_traffic_pressure_changes_missed_lane_recovery`
-- `test_exit_traffic_stays_quiet_for_an_exit_you_are_not_taking`
-- `test_exit_traffic_still_speaks_once_you_signal_for_that_exit`
-- `test_merging_and_construction_pressures_still_speak_unsignalled`
-- `test_exit_lane_can_be_set_with_keyboard_steering`
-- `test_lane_drift_off_sets_exit_lane_when_signaling`
-- `test_exit_speed_assist_slows_with_full_lane_keeping`
-- `test_exit_lane_stays_set_after_keyboard_release`
-- `test_exit_missed_after_gore_window`
-- `test_destination_exit_scan_stays_on_the_final_approach`
-- `test_the_exit_speed_assist_runs_when_lane_keeping_takes_the_exit`
-- `test_a_fresh_cruise_session_inherits_an_armed_exit_s_ramp_cap`
-- `test_the_destination_approach_assist_actually_brings_the_truck_to_a_stop`
-- `test_the_ramp_cruise_line_says_when_the_ease_happens`
-- `test_the_exit_assist_leaves_cruise_alone_while_it_has_nothing_to_shed`
 
 ### `tests/test_driving_features.py` -- 116 of 129
 
@@ -925,47 +935,6 @@ PARTIAL and NOT PORTED files only; TOOLS-ONLY and HELPER files are omitted.
 - `test_a_roundabout_terminal_reads_as_yieldish`
 - `test_a_scale_ramp_flows_to_the_scale_not_a_dice_roll`
 
-### `tests/test_ramp_terminals.py` -- 38 of 52
-
-- `test_baked_interchange_control_beats_the_heuristic`
-- `test_transition_assist_off_leaves_the_pedals_alone`
-- `test_stop_sign_full_stop_clears`
-- `test_blowing_the_stop_sign_clips_cross_traffic`
-- `test_light_cycle_alternates`
-- `test_crossing_on_yellow_is_legal`
-- `test_stopped_short_of_the_light_gets_creep_guidance`
-- `test_yellow_and_green_wording_track_distance_to_the_bar`
-- `test_every_light_change_is_spoken_on_the_approach`
-- `test_interchange_parser_accepts_and_validates_ramp_control`
-- `test_ramp_control_is_knowable_before_the_ramp`
-- `test_signal_on_names_the_ramp_ending`
-- `test_upcoming_readout_names_the_ramp_ending`
-- `test_controlled_ramp_pins_the_clock_to_real_time`
-- `test_update_exit_maintains_the_controlled_ramp_flag`
-- `test_stop_bar_query_names_light_and_distance`
-- `test_rolling_countdown_speaks_each_milestone_once`
-- `test_stop_sign_bar_has_position`
-- `test_bar_ticks_speed_up_as_the_bar_closes`
-- `test_the_bar_tone_ends_when_the_bar_is_behind_the_truck`
-- `test_a_held_alert_tone_stops_when_nobody_is_holding_it`
-- `test_hairpin_approach_pins_the_clock_to_real_time`
-- `test_route_transition_assistance_stops_at_the_sign_on_the_air_it_has`
-- `test_route_transition_assistance_does_not_chatter_at_the_ramp_cap`
-- `test_ramp_terminal_hands_adaptive_cruise_back_after_the_stop_bar`
-- `test_ramp_terminal_hands_the_speed_keeper_back_after_the_stop_bar`
-- `test_speed_control_stays_off_on_the_creep_to_the_stop_bar`
-- `test_an_arrival_pause_still_waits_for_departure`
-- `test_the_destination_ramp_still_holds_speed_control_to_the_gate`
-- `test_a_green_ramp_light_rolled_through_still_hands_speed_control_back`
-- `test_a_weigh_station_ramp_hands_speed_control_back_after_check_in`
-- `test_a_manual_takeover_on_the_ramp_is_never_undone`
-- `test_a_stalled_or_backing_truck_at_the_bar_never_resumes`
-- `test_reloading_mid_ramp_never_leaves_speed_control_stuck`
-- `test_the_ramp_coaching_outranks_chatter`
-- `test_being_stranded_short_of_the_bar_is_never_dropped_as_chatter`
-- `test_the_stranded_prompts_ask_for_route_priority`
-- `test_canceling_the_plan_gives_the_road_back`
-
 ### `tests/test_real_construction_zones.py` -- 1 of 86
 
 - `test_zero_distance`
@@ -1127,30 +1096,6 @@ PARTIAL and NOT PORTED files only; TOOLS-ONLY and HELPER files are omitted.
 The stub's reason string is quoted. These are the sweep's remaining backlog:
 a name in both suites, but nothing running behind it.
 
-### `tests/test_achievement_flavor_relocated.py` -- 1
-
-- `test_award_speaks_the_short_line_and_logs_the_flavor` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-
-### `tests/test_achievements.py` -- 17
-
-- `test_return_trip_badge_needs_the_reverse_of_the_last_route` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_award_achievement_persists_and_deduplicates_notification` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_event_achievement_speaks_through_screen_reader` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_main_menu_achievement_path_is_keyboard_accessible` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_category_with_nothing_earned_still_reads_naturally` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_delivery_settlement_awards_only_first_delivery_on_a_first_run` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_rookie_chain_achievements_clear_their_delivery_floors` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_pickup_completion_awards_the_merged_first_day_badge` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_eastbound_badge_fires_only_on_an_eastbound_delivery` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_suppressed_award_collects_without_chime_or_speech` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_state_crossing_keeps_gameplay_prompt_before_achievement` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_the_number_that_means_nothing_takes_a_whole_mile` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_eighty_eight_miles_an_hour_is_noticed` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_a_jake_only_descent_is_ruined_by_one_touch_of_the_brake` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_cooking_the_drums_is_its_own_badge` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_the_radio_badges_follow_the_signal` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-- `test_a_new_station_restarts_the_three_state_tally` -- `crates/ff-core/src/achievements/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- not written there yet
-
 ### `tests/test_career_objectives.py` -- 1
 
 - `test_out_of_sync_owner_operator_uses_career_guidance` -- `crates/ff-core/src/models/career_objectives/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs freight_fate::app (App, CityMenuState, JobBoardState)
@@ -1176,39 +1121,18 @@ a name in both suites, but nothing running behind it.
 - `test_terse_settlement_line_keeps_every_number` -- `crates/ff-core/src/models/cargo_condition.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_menu_states (ArrivalState) and the app shell
 - `test_a_load_ruined_in_one_hit_warns_once_at_the_state_it_is_in` -- `crates/ff-core/src/models/cargo_condition.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_cargo_condition) and the app shell
 
-### `tests/test_cloud_saves.py` -- 11
+### `tests/test_cloud_saves.py` -- 2
 
 - `test_start_logs_the_sync_state_for_each_slot` -- `crates/freight-fate/tests/cloud_saves.rs`: log capture: the startup sync-state dump goes through `log::info!`; its wording is covered by reading the code path (CloudSaves::start)
 - `test_start_with_no_sync_state_says_so` -- `crates/freight-fate/tests/cloud_saves.rs`: log capture: see test_start_logs_the_sync_state_for_each_slot
-- `test_every_profile_save_queues_a_backup` -- `crates/freight-fate/tests/cloud_saves.rs`: unblocked: models::profile is ported; the save-listener case is not written yet
-- `test_a_failing_listener_never_breaks_the_local_save` -- `crates/freight-fate/tests/cloud_saves.rs`: unblocked: models::profile is ported; the failing-listener case is not written yet
-- `test_terminal_save_speaks_the_accepted_backup` -- `crates/freight-fate/tests/cloud_saves.rs`: unblocked: CityMenuState::save exists (states/city/terminal.rs); the case is not written yet
-- `test_terminal_save_says_when_the_latest_save_is_already_backed_up` -- `crates/freight-fate/tests/cloud_saves.rs`: unblocked: CityMenuState::save exists (states/city/terminal.rs); the case is not written yet
-- `test_terminal_save_speaks_a_rejection_with_the_career_named` -- `crates/freight-fate/tests/cloud_saves.rs`: unblocked: CityMenuState::save exists (states/city/terminal.rs); the case is not written yet
-- `test_terminal_save_with_cloud_off_mentions_it_only_when_an_account_exists` -- `crates/freight-fate/tests/cloud_saves.rs`: unblocked: CityMenuState::save exists (states/city/terminal.rs); the case is not written yet
-- `test_terminal_save_hands_a_silent_attempt_back_to_the_background` -- `crates/freight-fate/tests/cloud_saves.rs`: unblocked: CityMenuState::save and the backup watch exist; the case is not written yet
-- `test_sandbox_save_never_reaches_the_cloud` -- `crates/freight-fate/tests/cloud_saves.rs`: unblocked: CityMenuState::save exists; the sandbox-guard case is not written yet
-- `test_leaving_the_terminal_drops_the_pending_backup_announcement` -- `crates/freight-fate/tests/cloud_saves.rs`: unblocked: CityMenuState exists; the exit case is not written yet
 
 ### `tests/test_congestion.py` -- 1
 
 - `test_traffic_volume_parser_orders_and_validates` -- `crates/ff-core/tests/sim_congestion.rs`: data::world_parsing owns _parse_traffic_volumes; covered by the data tests
 
-### `tests/test_controller.py` -- 8
+### `tests/test_controller.py` -- 1
 
-- `test_duplicate_button_down_does_not_double_toggle` -- `crates/freight-fate/tests/app_controller.rs`: unblocked: states::driving exists; the case is simply not written yet
-- `test_analog_trigger_drives_throttle` -- `crates/freight-fate/tests/app_controller.rs`: unblocked: states::driving exists; the case is simply not written yet
-- `test_held_partial_trigger_does_not_machinegun_brake_sound` -- `crates/freight-fate/tests/app_controller.rs`: unblocked: states::driving exists; the case is simply not written yet
-- `test_controller_info_buttons_speak` -- `crates/freight-fate/tests/app_controller.rs`: unblocked: states::driving exists; the case is simply not written yet
-- `test_controller_speed_control_handoff_status_adjustment_and_brake` -- `crates/freight-fate/tests/app_controller.rs`: unblocked: states::driving exists; the case is simply not written yet
-- `test_paused_speed_control_can_be_canceled_by_keyboard_or_controller` -- `crates/freight-fate/tests/app_controller.rs`: unblocked: states::driving exists; the case is simply not written yet
-- `test_controller_disconnect_pauses_driving` -- `crates/freight-fate/tests/app_controller.rs`: unblocked: states::driving exists; the case is simply not written yet
 - `test_event_pump_error_is_survived` -- `crates/freight-fate/tests/app_controller.rs`: needs an SDL event pump to fail; the headless app has none (the shell's poll guard is exercised by the windowed build)
-
-### `tests/test_controls_reference.py` -- 2
-
-- `test_pause_menu_offers_controls_and_help` -- `crates/freight-fate/tests/app_controls_reference.rs`: unblocked: both modules exist; the case is not written yet
-- `test_pause_menu_emergency_shoulder_sleep_sits_between_mechanic_and_settings` -- `crates/freight-fate/tests/app_controls_reference.rs`: unblocked: both modules exist; the case is not written yet
 
 ### `tests/test_cross_traffic.py` -- 9
 
@@ -1248,31 +1172,6 @@ a name in both suites, but nothing running behind it.
 - `test_an_open_scale_reads_the_safety_record_aloud` -- `crates/ff-core/tests/sim_enforcement_presence.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- the open scale reads the safety record
 - `test_the_hold_matches_the_one_speeding_has_always_had` -- `crates/ff-core/tests/sim_enforcement_presence.rs`: Python asserted on the module source text (inspect.getsource); the hold is pinned by the two tests above
 
-### `tests/test_enforcement_record.py` -- 22
-
-- `test_the_lifetime_line_states_the_facts_and_the_way_forward` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_rest_states (_major_offense_text)
-- `test_running_from_the_stop_writes_a_major_offense_on_the_career` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (FelonyStopState) and the app shell
-- `test_a_second_pursuit_ends_this_career_driving_for_good` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (FelonyStopState) and the app shell
-- `test_a_stop_that_suspends_the_cdl_does_not_send_you_back_out_driving` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell
-- `test_an_ordinary_ticket_still_pulls_back_onto_the_highway` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell
-- `test_the_suspended_stop_says_the_run_is_over_and_why` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell
-- `test_an_enforcement_stop_that_suspends_also_ends_the_run` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (EnforcementStopState) and the app shell
-- `test_a_serious_speeding_ticket_moves_the_ladder_and_says_so` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell
-- `test_a_mild_speeding_ticket_is_money_only` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (TrafficStopState) and the app shell
-- `test_speeding_nobody_saw_never_touches_the_licence` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_enforcement_watch) and the app shell
-- `test_debug_hours_mode_freezes_the_ladder` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (FelonyStopState) and the app shell
-- `test_running_off_the_road_asleep_costs_reputation_and_is_spoken` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_microsleep_drift_off_road) and the app shell
-- `test_terse_speech_still_hears_every_consequence` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_microsleep_drift_off_road) and the app shell
-- `test_repeat_fatigue_events_speak_the_real_count` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_microsleep_drift_off_road) and the app shell
-- `test_holding_the_run_key_states_the_cost_before_it_counts` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_pursuit_optin) and the app shell
-- `test_holding_the_run_key_through_the_warning_lands_the_full_offense` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_pursuit_optin) and the app shell
-- `test_the_second_pursuit_takes_twice_as_long_to_choose` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_update_pursuit_optin) and the app shell
-- `test_reloading_mid_stop_does_not_cancel_the_stop` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (snapshot) and the app shell
-- `test_a_paid_stop_is_not_charged_again_on_the_next_resume` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (EnforcementStopState) and the app shell
-- `test_toggling_the_jake_cannot_farm_warnings_forever` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_engine_brake and the app shell
-- `test_the_fatigue_out_of_service_actually_holds_the_truck` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving (_microsleep_drift_off_road) and the app shell
-- `test_a_settled_stop_is_read_back_as_history_not_as_a_fresh_charge` -- `crates/ff-core/src/models/enforcement/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_rest_states (EnforcementStopState) and the app shell
-
 ### `tests/test_engine_brake_zones.py` -- 1
 
 - `test_descent_grade_is_exempt` -- `crates/freight-fate/tests/states_driving_road.rs`: needs a Trip grade seam: Python monkeypatched trip.grade_at
@@ -1282,10 +1181,6 @@ a name in both suites, but nothing running behind it.
 - `test_build_tool_classifies_tiny_osm_fixture` -- `crates/ff-core/tests/data_facility_endpoints.rs`: tools/build_facility_endpoints.py stays Python (needs osmium)
 - `test_build_tool_marks_missing_extracts_as_fallback` -- `crates/ff-core/tests/data_facility_endpoints.rs`: tools/build_facility_endpoints.py stays Python (needs osmium)
 
-### `tests/test_facility_engine.py` -- 1
-
-- `test_unloading_burns_fuel_only_while_the_engine_runs` -- `crates/freight-fate/tests/states_driving_menus.rs`: unblocked: PlaytestHarness exists; the pickup-to-delivery case is not written yet
-
 ### `tests/test_facility_overshoot.py` -- 4
 
 - `test_the_approach_assist_stops_the_truck_on_a_facility_street_chain` -- `crates/freight-fate/tests/states_driving_facility.rs`: deferred: a hands-off end-to-end drive over baked chain data
@@ -1293,52 +1188,8 @@ a name in both suites, but nothing running behind it.
 - `test_the_approach_assist_delivers_the_truck_to_the_dock` -- `crates/freight-fate/tests/states_driving_facility.rs`: deferred: a hands-off end-to-end drive over baked chain data
 - `test_the_approach_assist_delivers_the_truck_to_a_street_chain_gate_uphill` -- `crates/freight-fate/tests/states_driving_facility.rs`: deferred: a hands-off end-to-end drive over baked chain data
 
-### `tests/test_hos.py` -- 29
+### `tests/test_info_keys.py` -- 9
 
-- `test_hos_violation_speech_interrupts_but_threshold_warning_does_not` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState._update_hours_and_fatigue + say_event
-- `test_severe_fatigue_drift_warning_is_urgent` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- severe fatigue drift warning
-- `test_fatigued_driver_gets_a_shorter_hazard_window` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- hazard deadline scaling
-- `test_rest_stop_menu_break_and_sleep` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState menu
-- `test_food_and_coffee_break_boosts_alertness_without_resetting_break_rule` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState food and coffee break
-- `test_sleep_capable_stop_offers_sleeper_split_choices` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState.build_items
-- `test_split_sleeper_rest_action_advances_clock_and_speaks_status` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState sleeper split action
-- `test_sleeping_shuts_down_a_running_engine` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- engine shutdown on sleep
-- `test_full_parking_offers_drive_on_and_shoulder` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- ParkingFullState and shoulder sleep
-- `test_emergency_shoulder_sleep_pause_menu_constraints` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- pause menu emergency shoulder sleep
-- `test_t_opens_roadside_sleep_confirmation_at_safe_stop` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- T key roadside sleep confirmation at 0.0 and 0.5 mph
-- `test_t_plans_rest_instead_of_opening_roadside_sleep_while_moving` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- T while rolling plans a rest stop; 0.5001, 1.0, 3.0 mph
-- `test_parking_brake_settles_walking_pace_before_pause` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- parking brake at walking pace
-- `test_shoulder_sleep_revalidates_stop_and_unwinds_without_stale_pause_speech` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- shoulder sleep revalidation
-- `test_controller_rest_binding_opens_roadside_sleep_confirmation` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- controller rest binding
-- `test_hos_off_still_allows_fatigue_emergency_shoulder_sleep` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- fatigue shoulder sleep with HOS off
-- `test_break_only_stop_always_offers_emergency_lot_sleep` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- RestStopState lot sleep items
-- `test_parking_never_full_during_the_day` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- rest stop during the day
-- `test_city_sleep_resets_hours_and_advances_the_clock` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- CityMenuState sleep
-- `test_city_sleep_when_already_rested_needs_a_second_enter` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- CityMenuState rested-sleep confirmation
-- `test_dispatch_warns_before_accepting_job_that_exceeds_current_hos` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- JobBoardState hours warning
-- `test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- JobBoardState board-wide hours warning
-- `test_dispatch_does_not_warn_after_hours_reset` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- JobBoardState after a reset
-- `test_snapshot_roundtrip_preserves_hos_fatigue_and_fines` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState snapshot round trip
-- `test_pre_1_5_snapshot_resumes_with_fresh_clock` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- pre-1.5 snapshot resume
-- `test_inspection_fines_escalate_and_hit_reputation` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- inspection fines and reputation
-- `test_serious_hos_inspection_orders_out_of_service_reset` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- out-of-service traffic stop
-- `test_hos_clock_runs_on_game_time` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- HOS clock on compressed game time
-- `test_players_own_parking_brake_press_arms_waiting` -- `crates/ff-core/src/sim/hos/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- parking brake arms waiting
-
-### `tests/test_info_keys.py` -- 21
-
-- `test_upcoming_key_does_not_repeat_the_next_exit_key` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_location exists; the case is not written yet
-- `test_route_key_reports_progress_then_road_state_and_destination` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_counts_down_to_a_planned_stop_instead_of_the_destination` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_falls_back_to_the_destination_once_the_plan_is_behind` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_reports_reverse_route_direction` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_uses_metric_distances` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_answers_with_the_gate_on_the_facility_approach` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_answers_with_the_gate_when_the_route_has_ended` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_never_says_zero_miles_closing_on_the_gate` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_names_the_street_under_the_wheels` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_counts_down_to_the_on_ramp_leaving_the_origin_gate` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
-- `test_route_key_answers_the_pickup_drive_as_city_streets` -- `crates/freight-fate/tests/app_info_keys.rs`: unblocked: states::driving exists; the R-key readout case is not written yet
 - `test_grade_key_reads_the_slope_and_whether_the_truck_holds_it` -- `crates/freight-fate/tests/states_driving_controls.rs`: needs a Trip seam for the monkeypatched trip.grade_at
 - `test_grade_key_names_the_next_steep_grade_ahead` -- `crates/freight-fate/tests/states_driving_controls.rs`: needs a Trip seam for the monkeypatched trip.grade_at
 - `test_grade_key_says_when_nothing_steep_is_coming` -- `crates/freight-fate/tests/states_driving_controls.rs`: needs a Trip seam for the monkeypatched trip.grade_at
@@ -1355,10 +1206,8 @@ a name in both suites, but nothing running behind it.
 - `test_bobtail_settlement_collects_fines_carried_over` -- `crates/ff-core/src/models/jobs/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- ArrivalState settlement
 - `test_bobtail_personal_conveyance_records_off_duty_hos_time` -- `crates/ff-core/src/models/jobs/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState._update_hours_and_fatigue
 
-### `tests/test_learn_sounds_state.py` -- 3
+### `tests/test_learn_sounds_state.py` -- 1
 
-- `test_the_enforcement_marker_plays_on_a_cold_open` -- `crates/freight-fate/tests/states_learn_sounds.rs`: unblocked: states::driving_siren exists; the case is not written yet
-- `test_the_pause_menu_offers_learn_game_sounds` -- `crates/freight-fate/tests/states_learn_sounds.rs`: unblocked: states::driving_pause_states::PauseMenuState exists; the case is not written yet
 - `test_jake_stage_demo_resolves_through_the_jake_voice_setting` -- `crates/freight-fate/tests/states_learn_sounds.rs`: needs a BASS-backed engine to inspect the alert loop's key
 
 ### `tests/test_limit_lookahead.py` -- 1
@@ -1375,53 +1224,17 @@ a name in both suites, but nothing running behind it.
 
 - `test_build_tool_routes_tiny_osm_fixture` -- `crates/ff-core/tests/data_local_geometry.rs`: tools/build_local_geometry.py stays Python
 
-### `tests/test_main_channel_pacing.py` -- 2
-
-- `test_the_driving_state_declares_main_channel_pacing` -- `crates/freight-fate/tests/app_main_channel_pacing.rs`: unblocked: states::driving exists; the case is not written yet
-- `test_pressing_an_info_key_at_the_wheel_cuts_the_line_in_progress` -- `crates/freight-fate/tests/app_main_channel_pacing.rs`: unblocked: states::driving exists; the case is simply not written yet
-
 ### `tests/test_maxspeed.py` -- 3
 
 - `test_parse_osm_maxspeed` -- `crates/ff-core/tests/sim_maxspeed.rs`: tools/enrich_routes.py stays Python (parse_osm_maxspeed)
 - `test_parse_osm_maxspeed_default_kmh_for_non_us_data` -- `crates/ff-core/tests/sim_maxspeed.rs`: tools/enrich_routes.py stays Python (parse_osm_maxspeed)
 - `test_parse_osm_maxspeed_clamps_to_truck_range` -- `crates/ff-core/tests/sim_maxspeed.rs`: tools/enrich_routes.py stays Python (parse_osm_maxspeed)
 
-### `tests/test_message_review.py` -- 4
-
-- `test_hazard_warning_and_outcome_replay_on_a_comma_and_period` -- `crates/freight-fate/tests/app_message_review.rs`: unblocked: states::driving exists; the case is simply not written yet
-- `test_collision_outcome_replays_on_a_and_message_review` -- `crates/freight-fate/tests/app_message_review.rs`: unblocked: states::driving exists; the case is simply not written yet
-- `test_pausing_mid_run_leaves_no_trace_in_the_history` -- `crates/freight-fate/tests/app_message_review.rs`: unblocked: states::driving exists; the case is simply not written yet
-- `test_a_replay_stops_the_event_voice` -- `crates/freight-fate/tests/app_message_review.rs`: unblocked: states::driving exists; the case is simply not written yet
-
-### `tests/test_online_hub.py` -- 1
-
-- `test_main_menu_online_item_opens_the_hub` -- `crates/freight-fate/tests/states_online_hub.rs`: unblocked: MainMenuState's Online item exists; the case is not written yet
-
-### `tests/test_online_offer.py` -- 4
-
-- `test_creating_a_first_career_reaches_the_offer` -- `crates/freight-fate/tests/states_online_offer.rs`: unblocked: main_menu::first_state_after_career_creation exists; the case is not written yet
-- `test_creating_a_later_career_goes_straight_to_the_city_menu` -- `crates/freight-fate/tests/states_online_offer.rs`: unblocked: main_menu::first_state_after_career_creation exists; the case is not written yet
-- `test_the_welcome_is_heard_in_full_and_then_the_offer` -- `crates/freight-fate/tests/states_online_offer.rs`: unblocked: states::main_menu exists; the New career flow case is not written yet
-- `test_saying_no_is_heard_before_the_city_menu_announcement` -- `crates/freight-fate/tests/states_online_offer.rs`: unblocked: both modules exist; the New career flow case is not written yet
-
 ### `tests/test_online_presence.py` -- 3
 
 - `test_the_secret_store_report_fails_when_the_backends_are_not_packaged` -- `crates/freight-fate/tests/online_presence.rs`: keyring entry-point metadata is a Python packaging concern; the Rust build links its backends in
 - `test_the_secret_store_report_fails_without_keyring_at_all` -- `crates/freight-fate/tests/online_presence.rs`: keyring is a compile-time dependency of the Rust build; it cannot be absent
 - `test_the_release_build_asks_for_keyrings_backends_and_metadata` -- `crates/freight-fate/tests/online_presence.rs`: tools/build_release.py stays Python; its Nuitka flags are tested there
-
-### `tests/test_pedal_latch_assists.py` -- 10
-
-- `test_cruise_holds_its_speed_under_a_latched_throttle` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
-- `test_a_hand_held_key_still_stands_the_assists_down` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
-- `test_the_latch_ramps_back_in_when_the_authority_releases` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
-- `test_keeper_holds_a_zone_speed_under_a_latched_throttle` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
-- `test_releasing_the_latch_leaves_cruise_holding` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
-- `test_curve_assist_drains_a_latched_throttle` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
-- `test_latch_first_mode_keeps_the_old_override_meaning` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
-- `test_curve_assist_jake_arrives_once_the_latched_throttle_drains` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
-- `test_the_brake_key_hard_releases_the_latch_and_cancels_cruise` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
-- `test_a_hand_held_key_stands_the_keeper_down` -- `crates/freight-fate/tests/states_driving_controls.rs`: unblocked: states::driving_updates exists; the frame-loop case is not written yet
 
 ### `tests/test_playtest_harness.py` -- 9
 
@@ -1488,81 +1301,17 @@ a name in both suites, but nothing running behind it.
 - `test_the_status_browse_says_how_much_to_the_next_level` -- `crates/ff-core/tests/sim_trip_cues.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- driving status browse
 - `test_abandoning_a_bobtail_costs_nothing` -- `crates/ff-core/tests/sim_trip_cues.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- AbandonJobConfirmationState
 
-### `tests/test_trip_resume.py` -- 21
-
-- `test_active_drive_snapshot_restores_idling_engine` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState.snapshot / from_snapshot
-- `test_active_drive_snapshot_restores_paused_speed_control_session` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState.snapshot / from_snapshot
-- `test_resumed_drive_reports_old_fresh_observation_as_live` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState.from_snapshot with a live weather provider
-- `test_quit_mid_drive_restores_checkpoint_hos_and_fatigue` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- quit to menu, HOS checkpoint
-- `test_quit_mid_drive_resumes_from_the_last_stop` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- quit to menu, continue
-- `test_resumed_trip_does_not_replay_passed_announcements` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- resumed DrivingState first idle frame
-- `test_delivery_clears_the_saved_trip` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- delivery clears the saved trip
-- `test_abandoning_clears_the_saved_trip` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- abandon job
-- `test_abandoning_keeps_the_hours_spent_driving` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- abandon job keeps the hours
-- `test_trip_pacing_change_applies_to_the_active_trip` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- pause menu pacing change
-- `test_weather_source_change_applies_to_the_active_trip` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- weather source change
-- `test_live_weather_calendar_change_applies_to_active_trip` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- live weather calendar change
-- `test_arrival_summary_calls_out_on_time_delivery_bonus` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- arrival summary
-- `test_snapshot_survives_profile_roundtrip` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs app shell and models::profile (snapshot roundtrip)
-- `test_snapshot_roundtrip_preserves_air_brake_state` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- snapshot air brake state
-- `test_corrupt_snapshot_falls_back_to_city` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- corrupt snapshot fallback
-- `test_old_map_snapshot_still_resumes` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- old map snapshot
-- `test_old_active_trip_gets_deadline_floor_and_model_marker` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- old active trip deadline floor
-- `test_current_active_trip_keeps_its_deadline_across_resumes` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- active trip deadline across resumes
-- `test_resumed_drive_advances_the_calendar_by_the_time_already_driven` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- resumed drive advances the calendar
-- `test_bare_city_job_snapshot_gets_facility_fallback` -- `crates/ff-core/tests/sim_trip_resume.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- bare city job snapshot
-
-### `tests/test_troopers.py` -- 34
-
-- `test_metric_pull_over_announcement_uses_metric_units` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_stopping_issues_an_immediate_ticket` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_stopping_drops_engine_audio_to_idle` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_metric_traffic_stop_outcome_uses_metric_units` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_first_marginal_stop_is_a_warning` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_accelerating_away_ends_in_a_forced_stop_not_a_felony` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_a_compliant_driver_is_never_charged_with_running` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_failure_to_stop_gives_staged_warnings` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_failure_to_stop_warning_acknowledges_signal` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_felony_stop_cancels_loaded_run_and_returns_to_terminal` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_felony_stop_does_not_claim_load_loss_for_empty_run` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_debug_off_mode_clears_active_pull_over_without_felony` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- DrivingState pull-over
-- `test_weigh_station_blow_past_starts_enforcement_stop` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- weigh station bypass; seed 1 lands under the 85 percent catch chance
-- `test_weigh_station_bypass_is_not_certain_and_stays_silent_when_missed` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- weigh station bypass; seed 1 lands under the 85 percent catch chance
-- `test_closed_scale_never_charges_a_bypass` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- weigh station bypass
-- `test_weigh_station_warning_is_spoken_before_bypass` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- weigh station bypass
-- `test_debug_off_mode_bypasses_scale_blow_past` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- weigh station bypass
-- `test_scale_bypass_does_not_overwrite_active_pull_over` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- weigh station bypass
-- `test_unsafe_damage_in_patrol_starts_safety_stop` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- safety stop
-- `test_unsafe_damage_needs_active_enforcement` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- safety stop
-- `test_the_merge_taper_counts_as_being_in_the_construction_zone` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- construction zone fines
-- `test_roadwork_hides_behind_a_jam_and_still_doubles_the_fine` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- construction zone fines
-- `test_a_scale_bypass_in_roadwork_costs_double_and_says_so` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- construction zone fines
-- `test_a_repeat_scale_bypass_in_roadwork_compounds_rather_than_adds` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- construction zone fines
-- `test_a_speeding_ticket_in_roadwork_doubles_and_the_line_says_the_charge` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- construction zone fines
-- `test_leaving_the_zone_before_stopping_does_not_undo_the_doubling` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- construction zone fines
-- `test_a_non_speeding_stop_escalates_with_priors` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- non-speeding stop escalation
-- `test_f1_help_names_non_speed_enforcement_pullovers` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- F1 help
-- `test_braking_to_a_stop_reaches_the_roadside_stop` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- roadside stop
-- `test_clean_stop_can_waive_a_ticket_to_a_warning` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- clean-stop leniency: named, position-quantised seed
-- `test_failing_to_signal_takes_a_one_time_deduction` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- pull-over compliance
-- `test_continuous_coasting_slowly_drains_compliance` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- pull-over compliance
-- `test_out_of_service_stop_shuts_down_the_engine` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- out-of-service stop
-- `test_ticket_counters_survive_snapshot` -- `crates/ff-core/tests/sim_troopers.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- snapshot
-
 ### `tests/test_trucks.py` -- 1
 
 - `test_garage_says_upgrades_are_fleet_wide` -- `crates/ff-core/src/models/trucks/tests.rs`: wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs freight_fate::app (App, TruckShopState, UpgradeShopState)
 
-### `tests/test_updater.py` -- 8
+### `tests/test_updater.py` -- 5
 
 - `test_build_info_stamp_bakes_the_real_package_version` -- `crates/freight-fate/tests/updater.rs`: tools/build_release.py stays Python
 - `test_is_frozen_detects_nuitka` -- `crates/freight-fate/tests/updater.rs`: Nuitka's __compiled__ marker has no Rust equivalent; is_frozen reads the install layout instead (see test_nuitka_standalone_folder_counts_as_packaged_build)
-- `test_packaged_logging_writes_info_to_game_log` -- `crates/freight-fate/tests/updater.rs`: unblocked: the app shell exists; the packaged-logging case is not written yet
 - `test_terminal_exit_arms_fresh_packaged_update_check` -- `crates/freight-fate/tests/updater.rs`: needs a seam for updater::is_frozen(): arm_update_check reads the real install layout, and a test binary is never a packaged build
 - `test_pickup_facility_exit_arms_fresh_packaged_update_check` -- `crates/freight-fate/tests/updater.rs`: needs a seam for updater::is_frozen(): arm_update_check reads the real install layout, and a test binary is never a packaged build
 - `test_drive_exit_does_not_arm_fresh_update_check` -- `crates/freight-fate/tests/updater.rs`: needs a seam for updater::is_frozen(): arm_update_check reads the real install layout, and a test binary is never a packaged build
-- `test_remind_later_help_describes_terminal_exit_check` -- `crates/freight-fate/tests/updater.rs`: unblocked: the app shell exists; the remind-later help case is not written yet
-- `test_download_state_parks_update_when_not_auto_appliable` -- `crates/freight-fate/tests/updater.rs`: unblocked: UpdateDownloadState exists (states/update.rs); the case is not written yet
 
 ### `tests/test_weather_trip.py` -- 3
 
@@ -1783,36 +1532,74 @@ against `curves::classify_connector`) and `test_lane_discrete.py` (all 44, in
 the new `crates/freight-fate/tests/states_driving_lanes.rs`). Both files are
 PORTED and neither turned up a defect in the port.
 
-1. **`tests/test_troopers.py` -- 34 stubs**, all in
-   `crates/ff-core/tests/sim_troopers.rs` and all wrong-crate. `DrivingState`
-   pull-over (12), construction-zone fines (6), weigh-station bypass (4) and
-   the rest. `states::driving_enforcement` and `TrafficStopState` exist.
-2. **`tests/test_hos.py` -- 29 stubs** in `crates/ff-core/src/sim/hos/tests.rs`,
-   wrong-crate: `RestStopState`, `ParkingFullState`, `CityMenuState` sleep and
-   `JobBoardState` hours warnings, all of which exist.
-3. **`tests/test_enforcement_record.py` -- 22 stubs** and
-   **`tests/test_trip_resume.py` -- 21 stubs**, both wrong-crate against
-   `DrivingState` snapshot/restore and the enforcement states.
-4. **`tests/test_achievements.py` -- 17 stubs** in
-   `crates/ff-core/src/achievements/tests.rs`, wrong-crate: award speech, the
-   settlement award path, and the main-menu achievements screen.
-5. **The 63 "unblocked: ... not written yet" stubs** scattered through
-   `app_info_keys.rs` (the eleven R-key readouts), `states_driving_controls.rs`,
-   `cloud_saves.rs`, `updater.rs`, `states_online_offer.rs` and
-   `app_controller.rs` -- one or two cases each outside the R-key block, so
-   each is cheap on its own and none of them needs anything built first.
+1. DONE (2026-08-24): **`tests/test_troopers.py`** and
+   **`tests/test_enforcement_record.py`**. All 34 trooper cases run in
+   `crates/freight-fate/tests/states_driving_troopers.rs` -- the pull-over,
+   the roadside ticket, the scale bypass, the unsafe-equipment stop, the
+   construction-zone doubling, the compliance tracker and running from a stop
+   -- and all 22 record cases in
+   `crates/freight-fate/tests/states_driving_enforcement_record.rs`. Neither
+   turned up a defect in the port.
+2. DONE (2026-08-24): **`tests/test_hos.py`** and **`tests/test_trip_resume.py`**.
+   All 29 hos cases now run in `crates/freight-fate/tests/states_driving_hos.rs`
+   and `crates/freight-fate/tests/states_city_hos.rs`, and all 21 resume cases
+   in `crates/freight-fate/tests/states_driving_trip_resume.rs`. The
+   twenty-first found a real defect -- the one-time fair-deadline floor was
+   never written back to the save, so every resume re-applied it -- fixed the
+   same day by `persist_deadline_migration` at the resume call site in
+   `states/main_menu.rs`, which is the one caller that owns the profile.
+3. DONE (2026-08-24): **`tests/test_achievements.py`**. The eighteen
+   wrong-crate cases -- award speech, the settlement award path, the badge
+   trackers at the wheel and the main-menu achievements screens -- now run in
+   the new `crates/freight-fate/tests/app_achievements.rs`, and the stubs are
+   gone from `crates/ff-core/src/achievements/tests.rs`. `ff-core` does not
+   depend on the game crate, so they could never have run where they sat.
+4. DONE (2026-08-24): **the 63 "unblocked: ... not written yet" stubs**, all
+   of them, across fourteen files. The eleven R-key readouts moved from
+   `app_info_keys.rs` into `states_driving_controls.rs`, where the drive
+   helper already empties the road and pins the weather; the ten pedal-latch
+   frame-loop cases, the seven controller cases, the nine cloud-save cases,
+   the four offer cases, the three updater cases and the rest all run live.
+   One found a real defect: `LearnSoundCategoryState::enter` never registered
+   the enforcement signature, so the Enforcement marker opened from the main
+   menu would have demonstrated silence (fixed in `states/learn_sounds.rs`).
+5. DONE (2026-08-24): **`tests/test_ramp_terminals.py`** (38) and
+   **`tests/test_driving_exits.py`** (30). Both files are closed, in
+   `crates/freight-fate/tests/it/states_driving_ramps.rs` and
+   `states_driving_exits.rs`. Neither turned up a defect in the port; what
+   they did turn up is a harness trap worth knowing before the next
+   speech-counting port. The capture sits BELOW the event pacer, and the
+   pacer measures staleness and repeats on the wall clock -- so a bench that
+   steps a drive without any real time passing tells the pacer the voice is
+   still mid-sentence. Two queued ROUTE lines in one instant make the second
+   purge the channel and the first is handed back and spoken AGAIN (a
+   milestone counted twice); three AMBIENT lines in one instant make the
+   third one dropped as stale (a cue counted zero times). Five cases across
+   the two files hit one or the other. The fix in both directions is to move
+   the clock -- `TestApp::fake_pacer_clock` or `PlaytestHarness::advance_clock`
+   -- past both the stale budget and the 2.5-second repeat window between
+   calls, which is also what keeps the counts honest: past the repeat window
+   a line spoken twice by a broken latch is still counted twice.
 6. **`tests/test_driving_features.py` -- 116 missing.** The largest gap by
    count, but it is a grab-bag rather than one seam, so it is cheapest read as
    several smaller passes rather than one file. Same shape:
-   `tests/test_ramp_terminals.py` (38), `tests/test_driving_damage_bands.py`
-   (35), `tests/test_driving_speech_ladder.py` (34) and
-   `tests/test_driving_exits.py` (30).
+   `tests/test_driving_damage_bands.py` (35) and
+   `tests/test_driving_speech_ladder.py` (34).
 
 Genuinely blocked, and not cheap: the eight `trip.grade_at` cases in
 `states_driving_controls.rs` and the two `_upcoming_exit_stop` cases in
 `playtest_harness.rs` want a seam Rust has no equivalent for (Python patched
 an instance method on a live object); the four `states_driving_facility.rs`
 approach-assist cases want a hands-off end-to-end drive over baked chain data.
+
+The ramp-and-exit pass shows what the `trip.grade_at` shape costs when it is
+paid rather than deferred: every Python patch of a live trip method was
+replaced by building the road that ANSWERS that way -- a real `Interchange`
+carrying the ramp control, a real `Zone` for the reason `speed_limit_at`
+returns, a `bench_road` leg for a posted limit and a flat grade, and a search
+of the real corridor for a mile that is genuinely open road (panicking if
+none is). That is stricter than the patch was, because the whole road agrees
+rather than one call site.
 
 ## Adversarial battery
 

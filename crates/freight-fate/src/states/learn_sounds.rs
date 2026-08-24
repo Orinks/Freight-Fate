@@ -21,6 +21,7 @@ use crate::app::{GameContext, Say};
 use crate::audio::{asset_length_s, Audio};
 use crate::impl_state_for_menu;
 use crate::states::base::{Menu, MenuCore, MenuItem};
+use crate::states::driving_core::siren::register_enforcement_sounds;
 
 /// The audio facade as the demo sequencer drives it.
 // TODO(lead): belongs in `audio` (an `impl DemoAudio for dyn Audio`, or a
@@ -200,8 +201,7 @@ impl Menu for LearnSoundCategoryState {
     /// freezes the demo's clock, and coming back re-announces the title while
     /// a held cue would otherwise pick its hold straight back up.
     fn enter(&mut self, ctx: &mut GameContext) {
-        // TODO(lead): `states::driving_siren::register_enforcement_sounds()`
-        // belongs here too, once that module lands.
+        register_enforcement_sounds();
         register_ladder_earcons();
         register_lane_guide_tone();
         self.stop_demo(ctx);

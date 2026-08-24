@@ -293,6 +293,18 @@ impl GameContext {
         self.real_weather.as_deref()
     }
 
+    /// Install the session's live-weather provider directly.
+    ///
+    /// The lazy constructor above always builds the shipped NWS provider over
+    /// a real HTTP transport, which a test can neither reach nor let run. This
+    /// is the seam Python had by assigning `ctx.real_weather_provider`: a
+    /// provider built on a stub fetch, so the city screens can be asked what
+    /// they say about a route whose cells are part answered, part failed and
+    /// part still loading.
+    pub fn set_real_weather_provider(&mut self, provider: Arc<RealWeatherProvider>) {
+        self.real_weather = Some(provider);
+    }
+
     /// Start fetching a city's live weather before any drive needs it.
     ///
     /// The provider caches observations per station, so a trip leaving this

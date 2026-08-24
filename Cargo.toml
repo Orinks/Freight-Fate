@@ -79,3 +79,15 @@ opt-level = 0
 # few gigabytes on disk. A backtrace still names the failing test; only
 # line numbers inside dependencies are lost.
 debug = 0
+# The dev profile reasons that the GAME is not CPU-bound in a debug run,
+# which is true and does not carry over here: the suite drives whole
+# simulated trips, and at opt-level 0 one playtest binary took 105 seconds
+# and ff-core alone took 100. Tests are compiled once and run over and over,
+# so the trade runs the other way from the game build.
+opt-level = 2
+
+[profile.dev.package."*"]
+# Dependencies are compiled once and never edited, so optimising them costs
+# nothing in iteration time and speeds every test that parses, hashes or
+# decompresses.
+opt-level = 2

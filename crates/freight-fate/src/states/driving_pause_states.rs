@@ -465,7 +465,7 @@ impl PauseMenuState {
     }
 }
 
-fn mechanic_label(d: &DrivingState) -> String {
+pub fn mechanic_label(d: &DrivingState) -> String {
     let damage = d.trip.truck.damage_pct;
     if damage <= FIELD_REPAIR_DAMAGE_PCT {
         return "Call a roadside mechanic: not needed yet".to_string();
