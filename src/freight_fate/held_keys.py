@@ -13,27 +13,33 @@ poll never catches: menus react to the press event and work, driving polls
 and does nothing until the player passes one key through with JAWS Key+3.
 Holding the key does not help by itself, but the keyboard's auto-repeat
 still runs underneath; every repeat goes through the same hook and arrives
-as another press-and-release pair, at the operating system's repeat delay
-and rate.
+as another press-and-release pair. Measured on the owner's JAWS machine
+(2026-08-24): the first repeat lands at the Windows repeat delay (512 ms),
+and the rest at about 250 ms apart -- not the 33 ms Windows rate, because
+JAWS's script takes that long per key and the repeats queue behind it.
 
-This tracker turns that train back into a hold. Every press starts a pulse
-sized to the operating system's repeat timing: long enough to reach the
-first auto-repeat after a fresh press, and just past one repeat interval
-once repeats are arriving. A release that lands in the same frame as its
-press (or the next one) is synthetic -- nobody taps a key inside one frame
--- and leaves the pulse alone; a release any later is the player's finger
-and ends it. The driving loop reads a key as held when SDL says so OR a
-pulse is alive, so the physical-keyboard path is exactly what it always was
-and the re-injected path reads as a hold that lapses about one repeat
-interval after the finger lifts.
+This tracker turns that train back into a hold. Every press starts a pulse:
+a fresh press gets one long enough to reach the first auto-repeat (the
+operating system's delay plus grace); a repeat gets one just past the
+spacing the repeats are actually arriving at, which the tracker learns from
+the pairs themselves (second repeat onward, synthetic pairs only) and keeps
+for the rest of the session. Until it has learned that spacing, repeats get
+the fresh pulse too, so the very first hold never stutters. A release that
+lands in the same frame as its press (or the next one) is synthetic --
+nobody taps a key inside one frame -- and leaves the pulse alone; a release
+any later is the player's finger and ends it. The driving loop reads a key
+as held when SDL says so OR a pulse is alive, so the physical-keyboard path
+is exactly what it always was and the re-injected path reads as a hold
+that lapses one learned spacing plus grace after the last pair.
 
 Two honest limits. A screen reader that re-injects keys never shows the game
 how long a tap lasted, so under JAWS a tap reads as a hold for the repeat
-delay (half a second at the Windows default) and a gesture built on tap
-length cannot be seen. And the game cannot tell whether such a screen
-reader is running, so the pulse logic is always on; on the physical path it
-only ever adds a hold when a whole press-and-release arrives inside one
-short frame, which a finger cannot do.
+delay (half a second at the Windows default), letting go reads about a
+third of a second late, and a gesture built on tap length cannot be seen.
+And the game cannot tell whether such a screen reader is running, so the
+pulse logic is always on; on the physical path it only ever adds a hold
+when a whole press-and-release arrives inside one short frame, which a
+finger cannot do.
 """
 
 from __future__ import annotations
@@ -52,11 +58,11 @@ log = logging.getLogger(__name__)
 DEFAULT_REPEAT_DELAY_MS = 500
 DEFAULT_REPEAT_INTERVAL_MS = 33
 
-# Grace on top of the operating system's timing. The fresh-press pulse has
-# to outlast the repeat delay plus the screen reader's script latency and a
-# frame of batching; the per-repeat pulse has to outlast one interval plus
-# a frame, and it is how long after the finger lifts the key still reads
-# held, so it stays short.
+# Grace on top of the measured timing. The fresh-press pulse has to outlast
+# the repeat delay plus the screen reader's script latency and a frame of
+# batching; the per-repeat pulse has to outlast one spacing plus jitter
+# (about 30 ms measured) and a frame, and it is how long after the finger
+# lifts the key still reads held, so it stays short.
 FRESH_GRACE_MS = 150
 REPEAT_GRACE_MS = 100
 
@@ -74,6 +80,11 @@ SYNTHETIC_FRAME_MAX_MS = 40
 # system's first auto-repeat (which never fires early), so it is a new tap of
 # the same key and earns a fresh full pulse.
 REPEAT_EARLY_TOLERANCE_MS = 60
+
+# The learned repeat spacing is the largest of this many recent spacings, so
+# one slow script run widens the window at once and a run of quick ones
+# narrows it again only once it has aged out.
+LEARNED_SPACINGS = 8
 
 _SPI_GETKEYBOARDDELAY = 0x0016
 _SPI_GETKEYBOARDSPEED = 0x000A
@@ -139,7 +150,8 @@ class HeldKeys:
     ``begin_frame`` once per frame with the frame's tick time, ``note`` for
     every event, ``snapshot`` whenever a state wants to poll. ``clear``
     forgets the pulses (the app calls it when the state stack changes, so a
-    screen never inherits the last screen's held keys).
+    screen never inherits the last screen's held keys); what the tracker
+    has learned about the repeat spacing survives it.
     """
 
     def __init__(
@@ -157,7 +169,10 @@ class HeldKeys:
         self._frame_span_ms = 0
         self._pulse_until: dict[int, int] = {}
         self._train_start: dict[int, int] = {}
+        self._train_repeats: dict[int, int] = {}
         self._pressed_at: dict[int, int] = {}
+        self._last_pair_synthetic: dict[int, bool] = {}
+        self._spacings: list[int] = []
 
     # -- timing -------------------------------------------------------------------
 
@@ -170,14 +185,26 @@ class HeldKeys:
         return self._interval_ms
 
     @property
+    def learned_spacing_ms(self) -> int | None:
+        """The spacing re-injected repeats are actually arriving at, once seen."""
+        return max(self._spacings) if self._spacings else None
+
+    @property
     def fresh_pulse_ms(self) -> int:
         """How long a lone press reads held: to the first auto-repeat, plus grace."""
         return self._delay_ms + FRESH_GRACE_MS
 
     @property
     def repeat_pulse_ms(self) -> int:
-        """How long each repeat extends the hold: one interval, plus grace."""
-        return self._interval_ms + REPEAT_GRACE_MS
+        """How long each repeat extends the hold: one spacing, plus grace.
+
+        The spacing is the learned one when there is one (never shorter than
+        the operating system's own rate); before anything is learned it is
+        the fresh pulse, so the first hold of a session cannot stutter."""
+        learned = self.learned_spacing_ms
+        if learned is None:
+            return self.fresh_pulse_ms
+        return max(self._interval_ms, learned) + REPEAT_GRACE_MS
 
     def refresh_repeat_timing(self) -> None:
         """Re-read the operating system's repeat timing (on window focus, so a
@@ -205,6 +232,7 @@ class HeldKeys:
     def clear(self) -> None:
         self._pulse_until.clear()
         self._train_start.clear()
+        self._train_repeats.clear()
 
     def _press(self, key: int) -> None:
         now = self._now
@@ -216,12 +244,27 @@ class HeldKeys:
             and now - start >= self._delay_ms - REPEAT_EARLY_TOLERANCE_MS
         )
         if repeating:
+            repeats = self._train_repeats.get(key, 0) + 1
+            self._train_repeats[key] = repeats
+            # The first repeat sits at the delay, not the rate; from the
+            # second on, the gap to the previous pair is the real spacing --
+            # but only synthetic pairs teach it, a finger's rhythm never does.
+            previous = self._pressed_at.get(key)
+            if (
+                repeats >= 2
+                and previous is not None
+                and self._last_pair_synthetic.get(key, False)
+                and now - previous < self._delay_ms - REPEAT_EARLY_TOLERANCE_MS
+            ):
+                self._learn_spacing(now - previous)
             window = self.repeat_pulse_ms
         else:
             window = self.fresh_pulse_ms
             self._train_start[key] = now
+            self._train_repeats[key] = 0
         self._pulse_until[key] = max(until, now + window)
         self._pressed_at[key] = now
+        self._last_pair_synthetic[key] = False
 
     def _release(self, key: int) -> None:
         pressed_at = self._pressed_at.get(key)
@@ -231,9 +274,15 @@ class HeldKeys:
             and self._frame_span_ms <= SYNTHETIC_FRAME_MAX_MS
         )
         if synthetic:
+            self._last_pair_synthetic[key] = True
             return
         self._pulse_until.pop(key, None)
         self._train_start.pop(key, None)
+        self._train_repeats.pop(key, None)
+
+    def _learn_spacing(self, spacing_ms: int) -> None:
+        self._spacings.append(int(spacing_ms))
+        del self._spacings[:-LEARNED_SPACINGS]
 
     # -- reading --------------------------------------------------------------------
 
@@ -244,6 +293,7 @@ class HeldKeys:
         for key in dead:
             self._pulse_until.pop(key, None)
             self._train_start.pop(key, None)
+            self._train_repeats.pop(key, None)
         return frozenset(self._pulse_until)
 
     def snapshot(self, pressed: Mapping[int, bool] | None = None) -> HeldSnapshot:

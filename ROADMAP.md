@@ -7110,15 +7110,19 @@ From a batch of player reports:
   key, and re-sends it as an instant press-and-release pair, once per
   keyboard auto-repeat; driving polls `pygame.key.get_pressed()` and
   never saw a hold (menus react to the press event, so they worked).
-  `held_keys.py` turns the pair train back into a hold sized to the
-  Windows repeat delay and rate, OR'd with SDL's own state so the
-  physical-keyboard path is byte-for-byte what it was. `tools/key_probe.py`
-  logs what any screen reader actually delivers.
+  `held_keys.py` turns the pair train back into a hold, OR'd with SDL's
+  own state so the physical-keyboard path is byte-for-byte what it was.
+  Measured with `tools/key_probe.py` on Norm's JAWS machine the same day:
+  first repeat at the Windows delay (512 ms), then pairs every ~250 ms
+  (242-272) -- JAWS's script, not the 33 ms Windows rate -- so the
+  tracker learns the spacing from the pairs themselves and sizes the
+  hold to it; release reads ~370 ms late under JAWS, the price of a
+  four-a-second poll.
 - [ ] Under a key-re-sending screen reader a tap cannot be told from a
   hold until the first auto-repeat, so tap-length gestures (1.9's
   double-tap-and-hold pedal latch) are invisible through JAWS; a gesture
-  counted in press events would see them. Run the probe on a JAWS
-  machine and tighten the grace constants to the measured pair timing.
+  counted in press events would see them. Second JAWS machine's probe
+  log would confirm the ~250 ms spacing is JAWS-typical, not Norm's box.
 - [x] **Map screen read raw data keys for the route -- FIXED 2026-07-21
   (NVDA player report).** Its first line joined the world's city slugs, so an
   east-coast run opened with "new underscore york underscore n y underscore u

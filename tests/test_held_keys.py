@@ -1,10 +1,12 @@
 """The held-key tracker: driving must read a held arrow under JAWS.
 
 JAWS swallows the physical arrow key and re-sends it to the game as an
-instant press-and-release pair, once per keyboard auto-repeat. A poll of
-``pygame.key.get_pressed()`` never sees it held. The tracker turns the
-train of pairs back into one hold, without changing what the physical
-keyboard path (no screen reader, NVDA) reads.
+instant press-and-release pair: one at the press, one at the Windows repeat
+delay, then one per repeat at whatever spacing its script manages (about
+250 ms on the owner's machine, measured 2026-08-24, not the 33 ms Windows
+rate). A poll of ``pygame.key.get_pressed()`` never sees it held. The
+tracker turns the train of pairs back into one hold, without changing what
+the physical keyboard path (no screen reader, NVDA) reads.
 """
 
 import pygame
@@ -22,6 +24,9 @@ from freight_fate.held_keys import (
 FRAME_MS = 16  # 60 frames per second, as the game runs
 DELAY_MS = 500  # the Windows default auto-repeat delay
 INTERVAL_MS = 33  # ...and rate (about 30 per second)
+# The owner's JAWS log, 2026-08-24: first repeat at 512 ms, then these.
+JAWS_FIRST_REPEAT_MS = 512
+JAWS_SPACINGS_MS = [263, 245, 269, 271, 242, 251, 270, 250, 244, 271, 249, 242, 254, 250]
 
 
 class NoKeys:
@@ -64,21 +69,38 @@ class Sim:
     def held(self, key, pressed=None):
         return self.tracker.snapshot(pressed if pressed is not None else NoKeys())[key]
 
-    def jaws_hold(self, key, seconds):
-        """What JAWS delivers for a key held ``seconds``: a pair now, then a
-        pair per auto-repeat after the delay. Returns the frames it read held."""
-        start = self.now
-        end = start + int(seconds * 1000)
-        next_pair = start
-        held_frames = []
+    def pair_times(self, start, seconds, first_repeat=DELAY_MS, spacings=(INTERVAL_MS,)):
+        """When a screen reader re-sends pairs for a key held ``seconds``."""
+        times = [start, start + first_repeat]
+        i = 0
+        while times[-1] < start + int(seconds * 1000):
+            times.append(times[-1] + spacings[i % len(spacings)])
+            i += 1
+        return [t for t in times if t < start + int(seconds * 1000)]
+
+    def screen_reader_hold(self, key, seconds, first_repeat=DELAY_MS, spacings=(INTERVAL_MS,)):
+        """Deliver the pairs for a hold, frame by frame; return each frame's
+        held reading from the first pair on."""
+        pairs = self.pair_times(self.now, seconds, first_repeat, spacings)
+        end = self.now + int(seconds * 1000)
+        readings = []
         while self.now < end:
             events = ()
-            if self.now >= next_pair:
+            if pairs and self.now >= pairs[0]:
                 events = (down(key), up(key))
-                next_pair = (start + DELAY_MS) if next_pair == start else next_pair + INTERVAL_MS
+                pairs.pop(0)
             self.frame(*events)
-            held_frames.append(self.held(key))
-        return held_frames
+            readings.append(self.held(key))
+        return readings
+
+    def frames_until_released(self, key, limit_ms=2000):
+        start = self.now
+        while self.held(key):
+            self.frame()
+            assert self.now - start <= limit_ms, (
+                f"still held {self.now - start} ms after the pairs stopped"
+            )
+        return self.now - start
 
 
 def test_physical_hold_still_reads_straight_from_sdl():
@@ -101,20 +123,55 @@ def test_a_re_injected_pair_reads_held_until_the_first_repeat_would_come():
     assert not sim.held(pygame.K_UP)
 
 
-def test_a_repeat_train_is_one_continuous_hold_that_lapses_quickly():
+def test_the_owners_jaws_train_is_one_continuous_hold_from_the_first_pair():
+    """Replays the measured log: no learned spacing yet, 250 ms repeats."""
     sim = Sim()
-    frames = sim.jaws_hold(pygame.K_UP, 2.0)
-    assert all(frames), f"the hold broke at frame {frames.index(False)} of {len(frames)}"
-    released_at = sim.now
-    while sim.held(pygame.K_UP):
-        sim.frame()
-        assert sim.now - released_at <= INTERVAL_MS + REPEAT_GRACE_MS + 2 * FRAME_MS
+    readings = sim.screen_reader_hold(pygame.K_UP, 4.0, JAWS_FIRST_REPEAT_MS, JAWS_SPACINGS_MS)
+    assert all(readings), f"the hold broke at frame {readings.index(False)} of {len(readings)}"
+    # Letting go reads late by one spacing plus grace: the price of a
+    # screen reader that only re-sends the key four times a second.
+    lag = sim.frames_until_released(pygame.K_UP)
+    assert lag <= max(JAWS_SPACINGS_MS) + REPEAT_GRACE_MS + 2 * FRAME_MS
+    # The fake clock delivers pairs on frame boundaries, so the learned
+    # spacing can sit one frame off the nominal value.
+    assert abs(sim.tracker.learned_spacing_ms - max(JAWS_SPACINGS_MS)) <= FRAME_MS
+    # The next hold, on another key, starts with the spacing already known.
+    readings = sim.screen_reader_hold(pygame.K_DOWN, 3.0, JAWS_FIRST_REPEAT_MS, JAWS_SPACINGS_MS)
+    assert all(readings)
+    assert (
+        sim.frames_until_released(pygame.K_DOWN)
+        <= max(JAWS_SPACINGS_MS) + REPEAT_GRACE_MS + 2 * FRAME_MS
+    )
+
+
+def test_a_fast_repeat_train_lapses_quickly_once_its_spacing_is_learned():
+    sim = Sim()
+    readings = sim.screen_reader_hold(pygame.K_UP, 2.0)
+    assert all(readings), f"the hold broke at frame {readings.index(False)} of {len(readings)}"
+    assert abs(sim.tracker.learned_spacing_ms - INTERVAL_MS) <= FRAME_MS
+    assert sim.frames_until_released(pygame.K_UP) <= INTERVAL_MS + REPEAT_GRACE_MS + 3 * FRAME_MS
     # Once a hold has lapsed, a fresh press earns the full fresh pulse again.
     sim.frame(down(pygame.K_UP), up(pygame.K_UP))
     pressed_at = sim.now
     while sim.now < pressed_at + DELAY_MS:
         sim.frame()
         assert sim.held(pygame.K_UP)
+
+
+def test_a_fingers_rhythm_never_teaches_the_repeat_spacing():
+    # Real taps (release in a later frame) at a steady 200 ms: physical
+    # keyboards never produce repeat pairs, so nothing is learned from them.
+    sim = Sim()
+    for _ in range(6):
+        sim.frame(down(pygame.K_DOWN))
+        for _ in range(3):
+            sim.frame()
+        sim.frame(up(pygame.K_DOWN))
+        assert not sim.held(pygame.K_DOWN)
+        for _ in range(8):
+            sim.frame()
+    assert sim.tracker.learned_spacing_ms is None
+    assert sim.tracker.repeat_pulse_ms == sim.tracker.fresh_pulse_ms
 
 
 def test_the_finger_lifting_ends_the_hold_at_once():
@@ -158,14 +215,16 @@ def test_each_key_keeps_its_own_hold():
     assert sim.held(pygame.K_LEFT)
 
 
-def test_clear_and_focus_loss_drop_every_pulse():
+def test_clear_and_focus_loss_drop_every_pulse_but_keep_the_learning():
     sim = Sim()
-    sim.frame(down(pygame.K_UP), up(pygame.K_UP))
+    sim.screen_reader_hold(pygame.K_UP, 1.5, JAWS_FIRST_REPEAT_MS, JAWS_SPACINGS_MS)
+    assert sim.tracker.learned_spacing_ms is not None
     sim.tracker.clear()
     assert not sim.held(pygame.K_UP)
     sim.frame(down(pygame.K_UP), up(pygame.K_UP))
     sim.frame(pygame.event.Event(pygame.WINDOWFOCUSLOST))
     assert not sim.held(pygame.K_UP)
+    assert sim.tracker.learned_spacing_ms is not None
 
 
 def test_windows_repeat_settings_decode_to_the_documented_timing():
@@ -178,7 +237,7 @@ def test_windows_repeat_settings_decode_to_the_documented_timing():
     assert repeat_interval_ms(-5) == 400
     tracker = HeldKeys(repeat_delay_ms=1000, repeat_interval_ms=400)
     assert tracker.fresh_pulse_ms == 1000 + FRESH_GRACE_MS
-    assert tracker.repeat_pulse_ms == 400 + REPEAT_GRACE_MS
+    assert tracker.repeat_pulse_ms == tracker.fresh_pulse_ms  # nothing learned yet
 
 
 def test_a_new_screen_never_inherits_the_last_screens_hold():
@@ -201,8 +260,10 @@ def test_a_new_screen_never_inherits_the_last_screens_hold():
         app.shutdown()
 
 
-def test_driving_reads_a_jaws_held_accelerator_as_throttle(monkeypatch):
-    """End to end: the pairs JAWS delivers for a held Up arrow drive the truck."""
+def test_driving_reads_a_jaws_held_accelerator_as_steady_throttle(monkeypatch):
+    """End to end, at the measured JAWS cadence: the pairs for a held Up
+    arrow drive the truck, the throttle never stutters, and it comes off
+    within a second of the pairs stopping."""
     from freight_fate.app import App
 
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
@@ -215,19 +276,24 @@ def test_driving_reads_a_jaws_held_accelerator_as_throttle(monkeypatch):
         truck = driving.truck
         assert truck.throttle == 0.0
         sim = Sim(app.held_keys)
-        # A hold of two seconds, frame by frame through the real update.
-        start = sim.now
-        next_pair = start
-        while sim.now < start + 2000:
+        pairs = sim.pair_times(sim.now, 4.0, JAWS_FIRST_REPEAT_MS, JAWS_SPACINGS_MS)
+        end = sim.now + 4000
+        lowest_after_full = 1.0
+        reached_full = False
+        while sim.now < end:
             events = ()
-            if sim.now >= next_pair:
+            if pairs and sim.now >= pairs[0]:
                 events = (down(pygame.K_UP), up(pygame.K_UP))
-                next_pair = (start + DELAY_MS) if next_pair == start else next_pair + INTERVAL_MS
+                pairs.pop(0)
             sim.frame(*events)
             driving.update(FRAME_MS / 1000)
-        assert truck.throttle > 0.9
-        # The finger lifts: the pairs stop, and the throttle comes off within
-        # a few frames instead of lingering.
+            if truck.throttle > 0.95:
+                reached_full = True
+            elif reached_full:
+                lowest_after_full = min(lowest_after_full, truck.throttle)
+        assert reached_full
+        assert lowest_after_full >= 0.9, f"throttle stuttered down to {lowest_after_full:.2f}"
+        # The finger lifts: the pairs stop, and the throttle comes off.
         for _ in range(60):
             sim.frame()
             driving.update(FRAME_MS / 1000)
