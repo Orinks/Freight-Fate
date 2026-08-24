@@ -676,8 +676,12 @@ fn test_pre_1_5_snapshot_resumes_with_fresh_clock() {
 }
 
 #[test]
-#[ignore = "PORT BUG: the one-time fair-deadline floor is never written back to             the save. Python's `from_snapshot` mutated the very dict             `profile.active_trip` held, so the migrated deadline and the             `deadline_model` marker landed in the save as a side effect. Rust's             `DrivingState::from_snapshot` takes `&Value` (main_menu.rs clones             `p.active_trip` before calling it), so the resumed DRIVE gets the             floor -- that half of this case passes -- but the saved snapshot             still reads `deadline_game_h: 3.0` with no `deadline_model`. The             floor is therefore not one-time: quit before the next stop save and             continue, and it is recomputed from the hours used by then, handing             out more deadline every resume. That is exactly the exploit             `test_current_active_trip_keeps_its_deadline_across_resumes` exists             to prevent. Evidence: `active_trip` after `enter_world` reads             {\"job\":{\"deadline_game_h\":3.0,...}} while the drive carries 8.3.             Fixing it means deciding WHERE the migrated snapshot is persisted             (write-back inside `from_snapshot` would be wrong for the detached             snapshots the tests and the pause menu hand it), which is a resume             path design call, not a one-line correction. Delete this attribute             with the fix."]
 fn test_old_active_trip_gets_deadline_floor_and_model_marker() {
+    // Both halves matter. The resumed DRIVE getting the floor is the
+    // migration; the SAVE getting it back is what makes the migration
+    // one-time. `from_snapshot` reads a `&Value` and cannot write the marker
+    // itself, so the resume call site in `main_menu.rs` persists it -- see
+    // `persist_deadline_migration` there.
     let mut app = TestApp::new();
     let route_cities = ["San Antonio", "Dallas"];
     let original_deadline = 3.0;

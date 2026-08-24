@@ -397,6 +397,11 @@ pub struct AudioCalls {
     pub music: Vec<(String, u32)>,
     /// `"start"` / `"stop"` for every horn call, in order.
     pub horn: Vec<&'static str>,
+    /// `set_engine_rpm(rpm, throttle)` in order. What the engine loop was
+    /// told to sound like, which is not the same as what the truck model
+    /// holds: a stop that settles the truck to idle without telling the audio
+    /// leaves the loop roaring at highway revs.
+    pub engine_rpm: Vec<(f64, f64)>,
 }
 
 pub type AudioLog = Rc<RefCell<AudioCalls>>;
@@ -493,7 +498,9 @@ impl Audio for RecordingAudio {
     fn engine_start_with(&mut self, _play_start_sound: bool) {}
     fn engine_stop_with(&mut self, _shutdown_sound: bool) {}
     fn update(&mut self, _dt: f64) {}
-    fn set_engine_rpm_with(&mut self, _rpm: f64, _throttle: f64) {}
+    fn set_engine_rpm_with(&mut self, rpm: f64, throttle: f64) {
+        self.log.borrow_mut().engine_rpm.push((rpm, throttle));
+    }
     fn set_road_noise(&mut self, _speed_mps: f64) {}
     fn set_weather_with(&mut self, _key: Option<&str>, _intensity: f64) {}
     fn set_wind(&mut self, _intensity: f64) {}

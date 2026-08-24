@@ -204,6 +204,38 @@ onto exit signalling.
       never on the notice, so the Python battery's three "Signal for the scale
       exit" never appears. The bug was real and live all the same, which the
       regression test shows directly.
+- [x] **Rust port: the fair-deadline floor is one-time again (2026-08-24).**
+      The fourteenth defect the port has turned up, and a live exploit. A
+      mid-trip save written before the deadline model existed gets a one-time
+      floor on the delivery deadline when it resumes. Python applied it by
+      mutating the very dictionary the career held, so the new deadline and
+      its marker landed in the save as a side effect; the Rust `from_snapshot`
+      reads a borrowed snapshot -- deliberately, because the pause menu and
+      the tests hand it detached copies that must not touch the career -- and
+      so left the save untouched. The floor was therefore not one-time at all:
+      quit before the next stop save, continue, and it recomputed from the
+      hours used by then, handing out fresh deadline on every resume. The
+      write-back now belongs to the one caller that owns the profile, the
+      resume path in `states/main_menu.rs`, and it saves rather than waiting
+      for the next save point, so a session that ends without one cannot
+      re-apply the floor at the next launch. Regression gate:
+      `test_old_active_trip_gets_deadline_floor_and_model_marker` in
+      `crates/freight-fate/tests/states_driving_trip_resume.rs`, which was
+      written complete and left failing when the defect was found.
+- [x] **Rust port: the trooper and enforcement-record cases run (2026-08-24).**
+      56 `#[ignore]`d wrong-crate stubs deleted from `ff-core`, where they
+      could never run, and rewritten against the real screens: 34 in
+      `crates/freight-fate/tests/states_driving_troopers.rs` (the pull-over,
+      the roadside ticket, the scale bypass, the unsafe-equipment stop, the
+      construction-zone doubling, the compliance tracker and running from a
+      stop) and 22 in
+      `crates/freight-fate/tests/states_driving_enforcement_record.rs` (the
+      serious-violation ladder, the major offense, the fatigue events, the
+      pursuit opt-in and the two save-reload exploits). Where Python patched a
+      rule, the Rust arranges the real one: the clean-stop leniency case
+      searches the actual position-quantised waiver draw for a mile where this
+      trip really does roll the wanted side, and panics if none exists rather
+      than passing on the wrong one. Neither file found a further defect.
 - [ ] **Four more distance-bearing ROUTE lines can be rescued with no guard,
       in BOTH trees.** The audit the scale notice prompted. Each names a
       distance, each queues at ROUTE with `interrupt=False`, and each has a

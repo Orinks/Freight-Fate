@@ -26,7 +26,7 @@ use crate::online_presence::IdentityStore;
 use crate::states::base::{Menu, MenuCore, MenuItem, SimpleMenuState};
 use crate::states::city::CityMenuState;
 use crate::states::city_pickup::PickupFacilityState;
-use crate::states::driving::DrivingState;
+use crate::states::driving::{DrivingState, ACTIVE_TRIP_DEADLINE_MODEL};
 use crate::states::learn_sounds::LearnSoundsState;
 use crate::states::online_hub::OnlineHubState;
 use crate::states::online_offer::OnlineOfferState;
@@ -297,7 +297,18 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
         let resumed: Option<SharedState> = if kind == "pickup" {
             PickupFacilityState::from_snapshot(ctx, &snapshot).map(share)
         } else {
-            DrivingState::from_snapshot(ctx, &snapshot).map(share)
+            DrivingState::from_snapshot(ctx, &snapshot)
+                .map(share)
+                .inspect(|state| {
+                    let deadline = state
+                        .borrow()
+                        .as_any()
+                        .downcast_ref::<DrivingState>()
+                        .map(|drive| drive.job.deadline_game_h);
+                    if let Some(deadline) = deadline {
+                        persist_deadline_migration(ctx, deadline);
+                    }
+                })
         };
         if let Some(state) = resumed {
             return state;
@@ -311,6 +322,61 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
     // spoken just before this state is chosen, so its entry announcement
     // queues behind that line instead of cutting it off.
     share(CityMenuState::new(ctx, queue_entry_announcement))
+}
+
+/// Write the one-time fair-deadline floor back into the saved active trip.
+///
+/// `DrivingState::from_snapshot` applies the floor to a snapshot written
+/// before the deadline model existed, but it reads a `&Value` and so cannot
+/// record that it did. That signature is deliberate: the pause menu and the
+/// snapshot round-trip tests hand it detached snapshots which must not reach
+/// into the career at all. Python got the write-back for free because its
+/// `from_snapshot` mutated the very dict `profile.active_trip` held, which is
+/// the same coupling in a form nobody could opt out of.
+///
+/// So the persistence belongs to the one caller that owns the profile: this
+/// one. Without it the floor is not one-time at all -- quit before the next
+/// stop save, continue, and it is recomputed from the hours used by then,
+/// handing out fresh deadline on every resume. That is the exploit
+/// `test_current_active_trip_keeps_its_deadline_across_resumes` exists to
+/// prevent.
+///
+/// The profile is saved here rather than left to the next save point, which
+/// is where Python left it: a session that ends without one would re-apply
+/// the floor on the next launch, which is the same exploit through a slower
+/// door.
+fn persist_deadline_migration(ctx: &mut GameContext, deadline_game_h: f64) {
+    let migrated = ctx
+        .profile
+        .as_mut()
+        .and_then(|p| p.active_trip.as_mut())
+        .and_then(serde_json::Value::as_object_mut)
+        .is_some_and(|trip| {
+            let model = trip
+                .get("deadline_model")
+                .and_then(serde_json::Value::as_i64)
+                .unwrap_or(0);
+            if model >= ACTIVE_TRIP_DEADLINE_MODEL {
+                return false;
+            }
+            if let Some(job) = trip
+                .get_mut("job")
+                .and_then(serde_json::Value::as_object_mut)
+            {
+                job.insert(
+                    "deadline_game_h".to_string(),
+                    serde_json::json!(deadline_game_h),
+                );
+            }
+            trip.insert(
+                "deadline_model".to_string(),
+                serde_json::json!(ACTIVE_TRIP_DEADLINE_MODEL),
+            );
+            true
+        });
+    if migrated {
+        ctx.save_profile();
+    }
 }
 
 // -- career summaries ---------------------------------------------------------------
