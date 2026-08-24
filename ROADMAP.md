@@ -7104,6 +7104,24 @@ milestone below (speeding consequences especially).
 
 From a batch of player reports:
 
+- [x] **Driving keys did nothing under JAWS without JAWS Key+3 -- FIXED
+  2026-08-24 (player report relayed by Norm, 1.8.8).** JAWS binds the
+  arrows to its own scripts in every application, swallows the physical
+  key, and re-sends it as an instant press-and-release pair; the driving
+  frame polls `ctx.input.is_pressed` and never saw a hold (menus react to
+  the press event, so they worked). Measured with `tools/key_probe.py` on
+  Norm's JAWS machine: first repeat at the Windows delay (512 ms), then
+  pairs every ~250 ms (242-272), JAWS's script latency rather than the
+  33 ms Windows rate. `app::held_keys` turns the pair train back into a
+  hold, learning the spacing from the pairs and reading SDL's own key state
+  OR'd with it, so the physical-keyboard path is unchanged and the harness
+  (which feeds keys without a frame clock) keeps plain semantics. Same fix
+  in Python on `dev` (PR #167) and the `main` hotfix branch.
+- [ ] Under a key-re-sending screen reader a tap cannot be told from a
+  hold until the first auto-repeat, so the double-tap-and-hold pedal latch
+  is invisible through JAWS; a gesture counted in press events would see
+  it. A second JAWS machine's probe log would confirm the ~250 ms spacing
+  is JAWS-typical rather than one box.
 - [x] **Map screen read raw data keys for the route -- FIXED 2026-07-21
   (NVDA player report).** Its first line joined the world's city slugs, so an
   east-coast run opened with "new underscore york underscore n y underscore u

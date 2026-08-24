@@ -19,6 +19,7 @@ mod app_controller;
 mod app_controls_reference;
 mod app_driving_speech_ladder;
 mod app_event_speech_pacer;
+mod app_held_keys;
 mod app_info_keys;
 mod app_main_channel_pacing;
 mod app_message_review;

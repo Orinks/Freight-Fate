@@ -33,14 +33,16 @@ use crate::states::main_menu::ConfirmQuitState;
 
 pub mod boot_timing;
 pub mod context;
+pub mod held_keys;
 pub mod logging;
 pub mod sdl_shell;
 pub mod speech_delivery;
 pub mod testing;
 
 pub use context::{
-    share, Clipboard, ContextParts, GameContext, HeldKeys, MemoryClipboard, Services, SharedState,
+    share, Clipboard, ContextParts, GameContext, MemoryClipboard, Services, SharedState,
 };
+pub use held_keys::HeldKeys;
 pub use logging::{active_log_path, configure_logging};
 pub use speech_delivery::{IntoSpoken, Say, SayEvent, Spoken, TRANSCRIPT_TARGET};
 
@@ -429,6 +431,10 @@ impl App {
                 // Switching screen readers happens outside the game;
                 // re-check speech the moment the player comes back.
                 self.ctx.speech.request_refresh();
+                // So do keyboard settings; and nothing held before the
+                // player left is held now.
+                self.ctx.input.refresh_repeat_timing();
+                self.ctx.input.clear_pulses();
             }
             InputEvent::Quit => self.handle_close_request(),
             InputEvent::KeyDown { key, mods, .. } => {
@@ -546,6 +552,10 @@ impl App {
             },
             None => Vec::new(),
         };
+        // Clock the held-key tracker before this frame's events: a screen
+        // reader's re-injected press-and-release pairs are told apart from a
+        // finger by which frame they land in (see `app::held_keys`).
+        self.ctx.input.begin_frame(dt);
         for event in &events {
             self.handle_event(event);
         }
