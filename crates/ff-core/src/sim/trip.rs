@@ -253,6 +253,9 @@ pub struct Trip {
     pub rng: PyRandom,
     pub insp_rng: PyRandom,
     pub cond_rng: PyRandom,
+    /// The day-to-day traffic scatter, on a stream of its own so that adding
+    /// it does not move where the work zones land for a given seed.
+    pub traffic_rng: PyRandom,
     pub events: Vec<TripEvent>,
     pub leg_starts: Vec<f64>,
     pub city_mileposts: Vec<f64>,
@@ -409,6 +412,7 @@ impl Trip {
             rng: make_rng(None),
             insp_rng: make_rng(Some(0x5EED)),
             cond_rng: make_rng(Some(0xC0FFEE)),
+            traffic_rng: make_rng(Some(0x7A4FF1C)),
             events: Vec::new(),
             leg_starts,
             city_mileposts,

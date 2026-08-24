@@ -427,7 +427,9 @@ impl Trip {
         let Some(aadt) = zone.aadt else {
             return true;
         };
-        match self.congestion_limit_now(aadt, zone.lanes, zone.start_mi) {
+        // Today's volume, not the annual mean: the same draw the zone formed
+        // under, so a run stays consistent with itself.
+        match self.congestion_limit_now(aadt * zone.day_factor, zone.lanes, zone.start_mi) {
             None => false,
             Some(limit) => {
                 zone.limit_mph = limit;
@@ -442,6 +444,7 @@ impl Trip {
             return true;
         };
         let (lanes, start_mi) = (self.zones[index].lanes, self.zones[index].start_mi);
+        let aadt = aadt * self.zones[index].day_factor;
         match self.congestion_limit_now(aadt, lanes, start_mi) {
             None => false,
             Some(limit) => {

@@ -30,7 +30,21 @@ gap in the audit: its 116 cases written from nothing across thirteen new
 ignored, and one small production seam added for them --
 `GameContext::set_real_weather_provider`, so a city screen can be asked what
 it says about a route whose live weather is part answered, part failed and
-part still loading.
+part still loading. Updated a final time the same day for the
+damage-band and speech-ladder pass, which closed the last two files on the
+backlog list: 69 more cases written from nothing across three new files, none
+ignored, and one production seam added -- `playtest::breaker::tweak_rigs`, the
+hook the whole-drive proof of the speech ladder needs to force a rung on the
+rigs the adversarial battery builds. Updated once more the same day for merge
+`da5d2c1f`, which carried `c0af99c6` ("a jam is not waiting in the same place
+every single run") into the port: no Python test came with that commit, so
+`test_congestion.py`'s counts are unchanged and the eight new cases are
+Rust-only, appended to `crates/ff-core/tests/it/sim_congestion.rs`. One of
+them, `test_jam_layouts_match_cpython_seed_for_seed`, pins twenty seeds of jam
+layout, day factor and roadworks span taken from `uv run python` on the same
+baked profile -- the day-to-day volume draw is a new `random.Random(seed ^
+0x7A4FF1C).gauss(1.0, 0.10)` stream, and a jam that lands somewhere else in
+Rust than in Python is the same class of divergence as a wrong advisory speed.
 
 Note the tree move that landed the same day: the integration tests of both
 crates now live in `crates/<crate>/tests/it/` and are compiled as ONE binary,
@@ -88,8 +102,8 @@ Classes:
 
 | Class | Files | Previous sweep |
 |---|---|---|
-| PORTED | 113 | 76 |
-| PARTIAL | 85 | 103 |
+| PORTED | 115 | 76 |
+| PARTIAL | 83 | 103 |
 | TOOLS-ONLY | 27 | 27 |
 | NOT PORTED | 6 | 25 |
 | HELPER | 8 | 8 |
@@ -100,9 +114,9 @@ By test case, across all 239 files:
 | | Cases | Previous sweep |
 |---|---|---|
 | Python test functions | 4239 | 4234 |
-| live Rust namesake | 3492 | 3125 |
+| live Rust namesake | 3561 | 3125 |
 | `#[ignore]`d Rust stub only | 132 | 313 |
-| no Rust namesake | 615 | 796 |
+| no Rust namesake | 546 | 796 |
 
 Merge `af96db01` added 5 Python cases and all 5 were ported with it, so
 live coverage moved +5 and the unported backlog did not grow again. (Merges
@@ -120,7 +134,17 @@ sweep began. The `test_driving_features.py` pass on the same day closed the
 largest single gap in the audit: 113 more cases with no Rust namesake at all,
 written across thirteen new files and one in `states_city_*`, taking that
 file from 13 of 129 to PORTED (the other three of its 116 came with the
-ramp-and-exit pass). Live parity is 82.4 percent of the Python suite. (The `44c1e296` sweep before it took the
+ramp-and-exit pass). The damage-band and speech-ladder pass, last on that
+day's backlog list, closed the final two: 69 more cases with no Rust namesake
+at all -- 35 from `test_driving_damage_bands.py` across a new
+`states_driving_damage.rs` and a new
+`ff-core/src/sim/vehicle/damage_band_tests.rs`, and 34 from
+`test_driving_speech_ladder.py` in a new
+`states_driving_speech_ladder.rs` -- none of them ignored, and one small
+production seam added for the last of them: `playtest::breaker::tweak_rigs`,
+so a test can force a driving-speech rung on every rig the adversarial battery
+builds (Python monkeypatched `Rig.__init__`; the Rust registry is a table of
+argument-less `fn`s). Live parity is 84.0 percent of the Python suite. (The `44c1e296` sweep before it took the
 suite from 4193 to 4220 cases, live coverage +368, ignored-only stubs -21 and
 cases with no Rust namesake -320, from 65.4 percent.)
 
@@ -178,7 +202,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_city_services.py` | PORTED | 4 / 0 / 4 | `crates/freight-fate/tests/transcript_city_services.rs` | live +4, NOT PORTED -> PORTED |
 | `tests/test_cloud_public_career.py` | PORTED | 7 / 0 / 7 | `crates/freight-fate/tests/states_cloud_save_states.rs` |  |
 | `tests/test_cloud_saves.py` | PARTIAL | 100 / 2 / 102 | `crates/freight-fate/tests/cloud_saves.rs`, `crates/ff-core/src/cloud_save_integrity.rs`, `crates/freight-fate/tests/online_presence.rs` | live +9 |
-| `tests/test_congestion.py` | PARTIAL | 12 / 1 / 13 | `crates/ff-core/tests/sim_congestion.rs`, `crates/ff-core/src/sim/season.rs` |  |
+| `tests/test_congestion.py` | PARTIAL | 12 / 1 / 13 | `crates/ff-core/tests/it/sim_congestion.rs`, `crates/ff-core/src/sim/season.rs` | live +8 (`c0af99c6`) |
 | `tests/test_controller.py` | PARTIAL | 30 / 1 / 31 | `crates/freight-fate/tests/app_controller.rs` | live +7 |
 | `tests/test_controls_reference.py` | PORTED | 5 / 0 / 5 | `crates/freight-fate/tests/app_controls_reference.rs` | live +2, PARTIAL -> PORTED |
 | `tests/test_corridor_places.py` | TOOLS-ONLY | 0 / 0 / 6 | -- |  |
@@ -197,14 +221,14 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_dispatch_variety.py` | PORTED | 3 / 0 / 3 | `crates/ff-core/src/models/profile/tests.rs`, `crates/freight-fate/tests/states_city.rs` |  |
 | `tests/test_divided_data.py` | PORTED | 3 / 0 / 3 | `crates/ff-core/tests/data_lane_data.rs` |  |
 | `tests/test_driving_cruise_weather.py` | PORTED | 108 / 0 / 108 | `crates/freight-fate/tests/transcript_driving_cruise_weather_acc.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather_retarder.rs`, +3 more | live +4, Python +4 |
-| `tests/test_driving_damage_bands.py` | PARTIAL | 20 / 0 / 55 | `crates/freight-fate/tests/states_driving_road.rs`, `crates/ff-core/src/models/economy.rs`, `crates/freight-fate/tests/states_driving_core.rs` |  |
+| `tests/test_driving_damage_bands.py` | PORTED | 55 / 0 / 55 | `crates/freight-fate/tests/it/states_driving_damage.rs`, `crates/ff-core/src/sim/vehicle/damage_band_tests.rs`, `crates/freight-fate/tests/it/states_driving_road.rs`, +2 more | live +35, PARTIAL -> PORTED |
 | `tests/test_driving_exits.py` | PORTED | 31 / 0 / 31 | `crates/freight-fate/tests/it/states_driving_exits.rs`, `crates/freight-fate/tests/states_driving_events_chains.rs` | live +30, PARTIAL -> PORTED |
 | `tests/test_driving_features.py` | PORTED | 129 / 0 / 129 | `crates/freight-fate/tests/it/states_driving_destination_exit.rs`, `crates/freight-fate/tests/it/states_driving_direction.rs`, `crates/freight-fate/tests/it/states_driving_retarder.rs`, +13 more | live +116, PARTIAL -> PORTED |
 | `tests/test_driving_manual_controls.py` | PORTED | 1 / 0 / 1 | `crates/freight-fate/tests/states_driving_controls.rs` |  |
 | `tests/test_driving_modes.py` | PARTIAL | 3 / 0 / 6 | `crates/ff-core/src/sim/driving_modes.rs`, `crates/freight-fate/tests/states_driving_controls.rs` |  |
 | `tests/test_driving_place_keys.py` | PORTED | 7 / 0 / 7 | `crates/freight-fate/tests/states_driving_turns.rs` |  |
 | `tests/test_driving_school.py` | PORTED | 3 / 0 / 3 | `crates/freight-fate/tests/states_driving_menus_tablet.rs` |  |
-| `tests/test_driving_speech_ladder.py` | PARTIAL | 46 / 0 / 80 | `crates/freight-fate/tests/app_driving_speech_ladder.rs`, `crates/ff-core/src/settings/tests.rs`, `crates/ff-core/src/speech_pacing.rs`, +2 more |  |
+| `tests/test_driving_speech_ladder.py` | PORTED | 80 / 0 / 80 | `crates/freight-fate/tests/it/states_driving_speech_ladder.rs`, `crates/freight-fate/tests/it/app_driving_speech_ladder.rs`, `crates/ff-core/src/speech_pacing.rs`, +3 more | live +34, PARTIAL -> PORTED |
 | `tests/test_enforcement_presence.py` | PARTIAL | 64 / 14 / 78 | `crates/ff-core/tests/sim_enforcement_presence.rs`, `crates/freight-fate/tests/states_driving_enforcement.rs`, `crates/ff-core/src/models/safety_record.rs`, +1 more |  |
 | `tests/test_enforcement_record.py` | PORTED | 56 / 0 / 56 | `crates/ff-core/src/models/enforcement/tests.rs`, `crates/freight-fate/tests/states_driving_enforcement_record.rs`, `crates/freight-fate/tests/states_city.rs` | live +22, PARTIAL -> PORTED |
 | `tests/test_engine_audio.py` | PORTED | 10 / 0 / 10 | `crates/ff-core/src/engine_audio.rs` |  |
@@ -471,43 +495,25 @@ PARTIAL and NOT PORTED files only; TOOLS-ONLY and HELPER files are omitted.
 
 - `test_how_to_play_documents_earned_dispatch_freedom`
 
-### `tests/test_driving_damage_bands.py` -- 35 of 55
+### `tests/test_driving_damage_bands.py` -- closed
 
-- `test_damage_below_the_first_band_changes_nothing`
-- `test_reduced_power_band_derates_torque_and_costs_fuel`
-- `test_damage_bands_ladder_up_to_the_wall`
-- `test_the_wall_sits_below_a_full_meter`
-- `test_derate_reaches_the_engine_torque_the_truck_actually_makes`
-- `test_derated_engine_burns_more_fuel_for_the_same_work`
-- `test_speed_cap_cuts_fuel_like_a_road_speed_governor`
-- `test_out_of_service_leaves_the_engine_alone`
-- `test_roadside_repair_leaves_the_truck_stopped_and_restartable`
-- `test_a_runaway_destroys_the_truck_instead_of_just_chiming`
-- `test_below_the_runaway_threshold_nothing_accrues`
-- `test_reverse_at_speed_is_refused_and_costs_the_driveline`
-- `test_reverse_still_engages_at_a_standstill`
-- `test_terse_last_call_still_names_the_wall`
-- `test_terse_repair_keeps_the_fact_without_the_flourish`
-- `test_limp_cap_never_engages_during_a_pull_over`
-- `test_cruise_says_once_that_limp_mode_owns_the_target`
-- `test_a_wrecked_truck_cannot_hold_highway_speed`
-- `test_below_the_wall_the_truck_still_drives`
-- `test_the_wall_states_the_fact_the_cost_and_the_way_out`
-- `test_terse_wall_message_keeps_all_three`
-- `test_owner_operator_pays_the_whole_bill_and_the_hours`
-- `test_owner_operator_keeps_their_own_tractor`
-- `test_truck_status_line_carries_the_band_with_the_number`
-- `test_redline_speaks_the_meter_that_is_actually_moving`
-- `test_redline_still_names_an_active_damage_band`
-- `test_delivery_summary_names_the_band_with_the_damage`
-- `test_snapshot_without_band_keys_resumes_from_the_damage`
-- `test_the_creep_window_round_trips_so_a_reload_is_not_a_reset`
-- `test_preventable_damage_is_counted_apart_from_the_rest`
-- `test_collisions_and_runaways_count_as_preventable`
-- `test_the_settlement_charge_scales_with_the_band_the_run_reached`
-- `test_a_clean_run_is_charged_nothing`
-- `test_hazard_damage_alone_is_not_ruled_preventable`
-- `test_the_settlement_grade_round_trips_through_a_snapshot`
+All 55 were written on 2026-08-24 and all 55 run. The file splits cleanly in
+two, so it went to two homes: the 15 cases that build a bare `TruckState` --
+the band ladder, the torque derate, the thirstier engine, the road-speed
+governor, the runaway, the reverse guard, the preventable share -- are
+`crates/ff-core/src/sim/vehicle/damage_band_tests.rs`, because four of them
+step `update_wear` / `update_fuel` directly and those are `pub(crate)`; the 20
+that need a real drive are the new
+`crates/freight-fate/tests/it/states_driving_damage.rs`. The 20 that already
+ran stay where they were (`states_driving_road.rs`,
+`ff-core/src/models/economy.rs`, `states_driving_core.rs`).
+
+Two Python seams were arranged for real rather than faked.
+`monkeypatch.setattr(type(t), "over_revving", property(...))` became a gear
+the road speed genuinely cannot carry -- third at 60 mph -- asserted at the
+use site so a gearbox re-ratio cannot leave the two redline cases silently
+testing nothing. And `monkeypatch.setattr(d, "_terse_speech", ...)` became
+`settings.driving_speech`, which is where the Rust reading comes from.
 
 ### `tests/test_driving_features.py` -- closed
 
@@ -568,42 +574,51 @@ than weakening the assertion.
 - `test_pause_settings_mode_change_updates_active_trip_pressure`
 - `test_hos_warning_waits_until_active_hazard_is_resolved`
 
-### `tests/test_driving_speech_ladder.py` -- 34 of 80
+### `tests/test_driving_speech_ladder.py` -- closed
 
-- `test_the_hazard_call_is_safety`
-- `test_a_planned_stop_is_navigation`
-- `test_the_lead_announcement_yields_before_the_turn_itself`
-- `test_weather_colour_is_status_not_navigation`
-- `test_billboards_and_landmarks_bypass_the_ladder_entirely`
-- `test_the_load_damage_coaching_tail_is_silent_at_urgent_only`
-- `test_the_same_tail_speaks_on_the_coaching_rung`
-- `test_no_driving_say_event_call_site_is_left_untagged`
-- `test_weather_change_is_silent_at_urgent_only_through_the_real_path`
-- `test_the_out_of_service_wall_speaks_at_urgent_only`
-- `test_a_reduced_power_band_still_stays_quiet_at_urgent_only`
-- `test_drifting_off_the_pavement_speaks_at_urgent_only`
-- `test_back_on_the_pavement_still_stays_quiet_at_urgent_only`
-- `test_spring_brakes_setting_speaks_at_urgent_only`
-- `test_the_rolling_low_air_warning_speaks_at_urgent_only`
-- `test_the_parked_low_air_warning_stays_quiet_at_urgent_only`
-- `test_the_air_brake_lockout_speaks_once_while_the_reason_is_unchanged`
-- `test_the_air_brake_lockout_speaks_again_when_the_reason_changes`
-- `test_the_air_brake_lockout_recurs_once_it_clears_and_comes_back`
-- `test_cargo_condition_speaks_at_urgent_only_as_money`
-- `test_the_carrier_grounding_speaks_at_urgent_only_as_money`
-- `test_an_engine_stall_speaks_at_urgent_only_as_safety`
-- `test_a_tire_chain_release_speaks_at_urgent_only_as_money`
-- `test_missed_destination_exit_speaks_at_urgent_only`
-- `test_missed_facility_gate_speaks_at_urgent_only`
-- `test_drove_past_the_destination_terminal_speaks_at_urgent_only`
-- `test_missed_turn_speaks_at_urgent_only`
-- `test_every_earcon_category_is_learnable`
-- `test_a_drive_gets_quieter_as_the_rung_tightens`
-- `test_every_trip_event_kind_is_classified`
-- `test_traffic_advisories_have_a_terse_half`
-- `test_a_queued_stop_notice_speaks_the_distance_it_delivers_at`
-- `test_the_stop_bar_countdown_shrinks_on_the_quieter_rungs`
-- `test_the_quiet_stop_bar_call_is_the_distance_and_nothing_else`
+All 80 were written by 2026-08-24 and all 80 run. The 34 that needed a real
+`DrivingState` are the new
+`crates/freight-fate/tests/it/states_driving_speech_ladder.rs`; the table and
+`GameContext` gate cases stay in `ff_core::speech_pacing`,
+`ff_core::settings::tests` and `app_driving_speech_ladder.rs`.
+
+Three things were paid for rather than deferred.
+
+`test_no_driving_say_event_call_site_is_left_untagged`: Python walked the AST
+for a `category=` keyword at the call site. Rust has no keyword arguments and the category rides a
+`SayEvent` builder that is as often bound a few lines above the call as
+written inline, so the Rust check masks every string literal, char literal and
+comment to spaces (a real raw string lives in `driving_core/constants.rs`),
+balances the call's parentheses over what is left, and follows a bare `opts` /
+`opts()` argument back to its `let` or its `opts.category =` inside the
+enclosing function. Verified by deleting one real `.category(...)` and
+watching it report that line, so it is not a sweep that always passes.
+
+`test_an_engine_stall_speaks_at_urgent_only_as_safety` replaced Python's
+monkeypatched `TruckState.update` with the stall the game actually models: a
+manual box launched in sixth with the clutch out, driven in real frames until
+the engine dies, with a panic if that stops stalling.
+
+`test_a_drive_gets_quieter_as_the_rung_tightens` runs the real breaker
+scenario at all three rungs. Python patched `Rig.__init__` to force the rung
+and mark the walkthrough done; the battery's scenarios take no arguments, so
+that seam is now explicit -- `playtest::breaker::tweak_rigs`, a thread-local
+tweak applied at the end of `Rig::new` and uninstalled with its guard. Both
+overrides matter: the rig never sets `driving_speech`, and its fresh `Profile`
+leaves `tutorial_done` false, which makes the entire ladder gate a no-op and
+every rung sound identical.
+
+`test_every_trip_event_kind_is_classified` iterated the enum in Python, which
+Rust cannot do. The list of kinds is written out and guarded by an exhaustive
+`match` beside it: add a variant and the file stops compiling, so the list
+cannot silently fall behind the enum -- which is the only thing that case is
+for.
+
+Two counts had to be read off `ctx.message_log` rather than the voice, and
+both are noted at the use site: the Rust capture sits BELOW the pacer, so a
+ROUTE line that flushes a stale backlog hands the line it cut back to finish
+behind it, and the same words legitimately reach the ear twice. The review log
+records one entry per submission.
 
 ### `tests/test_engine_brake_zones.py` -- 3 of 19
 
@@ -1527,9 +1542,10 @@ PORTED and neither turned up a defect in the port.
    a line spoken twice by a broken latch is still counted twice.
 6. **`tests/test_driving_features.py` -- closed on 2026-08-24.** It was the
    largest gap by count, and being a grab-bag rather than one seam it went to
-   fourteen homes by subject; see its own section above. The same shape is
-   still open in `tests/test_driving_damage_bands.py` (35) and
-   `tests/test_driving_speech_ladder.py` (34).
+   fourteen homes by subject; see its own section above.
+7. **`tests/test_driving_damage_bands.py` and
+   `tests/test_driving_speech_ladder.py` -- closed on 2026-08-24**, the last
+   two entries on this list. See their own sections above.
 
 Genuinely blocked, and not cheap: the eight `trip.grade_at` cases in
 `states_driving_controls.rs` and the two `_upcoming_exit_stop` cases in

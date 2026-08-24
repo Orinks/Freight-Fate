@@ -10,6 +10,7 @@ use crate::data::world_constants::{
 };
 use crate::data::world_models::{Leg, SpeedLimitSample, TollEvent};
 use crate::pyfmt::fmt_f;
+use crate::pyrandom::PyRandom;
 use crate::sim::enforcement_posts::EnforcementPost;
 use crate::sim::real_traffic_parsers::TrafficEvent;
 use crate::sim::timezones::TimeZone;
@@ -312,7 +313,15 @@ pub const CONGESTION_HEAVY_RATIO: f64 = 0.9;
 pub const CONGESTION_JAM_RATIO: f64 = 1.05;
 pub const CONGESTION_SAMPLE_MI: f64 = 1.0;
 pub const CONGESTION_MIN_ZONE_MI: f64 = 1.0;
-pub const CONGESTION_JOIN_GAP_MI: f64 = 2.0;
+/// Merge prone stretches separated by less. DERIVED from `ZONE_MIN_GAP_MI`
+/// rather than chosen: two busy stretches closer than the guaranteed open
+/// road between zones cannot both stand, and the invariant is the one that
+/// speaks for the driver -- "back up to speed" for four miles and then "slow
+/// again" is the chaining that rule exists to prevent. At 2.0 the two numbers
+/// disagreed, and any gap landing between them satisfied neither. Latent
+/// until a rebuilt HPMS profile on Chicago to St Louis produced a five-mile
+/// one.
+pub const CONGESTION_JOIN_GAP_MI: f64 = ZONE_MIN_GAP_MI;
 
 /// Hourly share of daily traffic (indexed by clock hour). Sums to ~1.0.
 pub const HOURLY_SHARE_WEEKDAY: [f64; 24] = [
@@ -345,6 +354,30 @@ pub fn hourly_volume_fraction(hour: f64, weekend: bool) -> f64 {
     // Python `int(hour) % 24`: truncation, then a non-negative modulus.
     let idx = (hour.trunc() as i64).rem_euclid(24) as usize;
     table[idx]
+}
+
+// AADT is an ANNUAL AVERAGE daily traffic, and no single day is the average.
+// The FHWA Traffic Monitoring Guide's whole apparatus of day-of-week and
+// monthly adjustment factors exists because of that spread; day-of-week is
+// already modelled here (weekday against weekend tables), so what is left is
+// the residual day-to-day scatter around the mean for a given kind of day.
+// Ten percent is the conservative end of the published range for a continuous
+// count station on a major route.
+//
+// This is what stops a busy stretch being a wall in the same place every run.
+// It is not a "chance of traffic" dial: an oversaturated stretch still backs
+// up every day, because its ratio is far enough over the line that no ordinary
+// day clears it, while a marginal one -- the midday shoulder of a commuter
+// corridor -- falls under on a quiet day and flows. The variety comes out of
+// the same volume model rather than being sprinkled on top of it.
+pub const DAILY_VOLUME_CV: f64 = 0.10;
+pub const DAILY_VOLUME_MIN: f64 = 0.75;
+pub const DAILY_VOLUME_MAX: f64 = 1.30;
+
+/// Today's traffic against the annual mean, for one stretch of road.
+pub fn daily_volume_factor(rng: &mut PyRandom) -> f64 {
+    // Python: `max(MIN, min(MAX, rng.gauss(1.0, CV)))`.
+    DAILY_VOLUME_MIN.max(DAILY_VOLUME_MAX.min(rng.gauss(1.0, DAILY_VOLUME_CV)))
 }
 
 /// Peak-direction volume-to-capacity ratio for an hour of the day.
@@ -613,6 +646,11 @@ pub struct TimezoneCrossing {
 /// on construction. Congestion zones carry `aadt` and per-direction `lanes`:
 /// whether they are active and how slow they run follow the clock, and
 /// `limit_mph` on those is the current effective traffic speed.
+///
+/// `day_factor` is that stretch's traffic today against its annual mean (see
+/// [`daily_volume_factor`]). One draw per zone per trip, used both when the
+/// zone forms and whenever it is asked whether it applies, so a run is
+/// consistent with itself.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Zone {
     pub start_mi: f64,
@@ -623,6 +661,7 @@ pub struct Zone {
     pub aadt: Option<f64>,
     pub lanes: i64,
     pub closed_side: Option<String>,
+    pub day_factor: f64,
 }
 
 impl Zone {
@@ -636,6 +675,7 @@ impl Zone {
             aadt: None,
             lanes: 2,
             closed_side: None,
+            day_factor: 1.0,
         }
     }
 
@@ -669,6 +709,12 @@ impl Zone {
     pub fn with_congestion(mut self, aadt: Option<f64>, lanes: i64) -> Self {
         self.aadt = aadt;
         self.lanes = lanes;
+        self
+    }
+
+    /// Python's `day_factor=` keyword on a congestion zone.
+    pub fn with_day_factor(mut self, day_factor: f64) -> Self {
+        self.day_factor = day_factor;
         self
     }
 }

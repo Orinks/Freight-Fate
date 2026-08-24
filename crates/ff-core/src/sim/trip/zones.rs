@@ -9,14 +9,38 @@ use crate::speech_text::SpokenMessage;
 
 use super::Trip;
 
+/// Keep only the simulated work zones clear of `spans`, by the open-road rule.
+///
+/// A construction zone and the merge taper ahead of it are one thing on the
+/// road, so both go or neither does. Anything that is not a simulated work
+/// zone is passed through untouched.
+fn drop_work_zones_near(zones: &mut Vec<Zone>, spans: &[(f64, f64)]) {
+    zones.retain(|zone| {
+        if zone.reason != "construction" && zone.reason != "construction merge" {
+            return true;
+        }
+        !spans.iter().any(|(start, end)| {
+            zone.start_mi < end + ZONE_MIN_GAP_MI && zone.end_mi > start - ZONE_MIN_GAP_MI
+        })
+    });
+}
+
 impl Trip {
     pub fn place_zones(&mut self) -> Vec<Zone> {
         let mut zones: Vec<Zone> = Vec::new();
         let total = self.route.miles();
         let n = 0.max((total / 150.0) as i64);
+        // Congestion is worked out FIRST and its footprint claimed before any
+        // work zone is drawn, so the draw moves somewhere else instead of
+        // being thrown away afterwards. Deleting it cost a route its only
+        // roadworks on one run in ten -- and roadworks are the part of a slow
+        // zone that is supposed to differ between runs, so deleting them is
+        // exactly the wrong thing to spend.
+        let congestion = self.place_congestion_zones();
         // Spans already claimed by placed zones, so independent draws cannot
         // nest one zone inside another or butt two together.
-        let mut spans: Vec<(f64, f64)> = Vec::new();
+        let mut spans: Vec<(f64, f64)> =
+            congestion.iter().map(|z| (z.start_mi, z.end_mi)).collect();
         for _ in 0..n {
             let mut placed: Option<(f64, f64)> = None;
             for _attempt in 0..8 {
@@ -69,18 +93,11 @@ impl Trip {
                 .filter(|z| z.reason == "construction")
                 .map(|z| (z.start_mi, z.end_mi))
                 .collect();
-            zones.retain(|z| {
-                if z.reason != "construction" && z.reason != "construction merge" {
-                    return true;
-                }
-                !real_spans.iter().any(|(r_start, r_end)| {
-                    z.start_mi < r_end + ZONE_MIN_GAP_MI && z.end_mi > r_start - ZONE_MIN_GAP_MI
-                })
-            });
+            drop_work_zones_near(&mut zones, &real_spans);
             zones.extend(real_construction);
         }
-        // Congestion zones are always added regardless of construction data.
-        zones.extend(self.place_congestion_zones());
+        // Already claimed above, so nothing drawn here can be sitting in one.
+        zones.extend(congestion);
         zones.extend(self.facility_speed_zones());
         zones.sort_by(|a, b| {
             a.start_mi
@@ -113,7 +130,7 @@ impl Trip {
 
     /// Stretches where peak-hour demand approaches capacity. The zones are
     /// fixed in space; whether each is *active* follows the clock.
-    pub fn place_congestion_zones(&self) -> Vec<Zone> {
+    pub fn place_congestion_zones(&mut self) -> Vec<Zone> {
         let total = self.route.miles();
         if self.is_facility_approach_route() || total < 10.0 {
             return Vec::new();
@@ -122,6 +139,10 @@ impl Trip {
             .iter()
             .cloned()
             .fold(f64::MIN, f64::max);
+        // One draw for this stretch of road on this trip. Taken from a stream
+        // of its own so that adding it does not shift where the work zones
+        // land for a given seed -- those come off `self.rng`.
+        let day = daily_volume_factor(&mut self.traffic_rng);
         let mut prone: Vec<Zone> = Vec::new();
         let mut run_start: Option<f64> = None;
         let mut run_samples: Vec<(f64, i64)> = Vec::new();
@@ -138,7 +159,8 @@ impl Trip {
                     prone.push(
                         // 50.0 is a placeholder; refreshed from the clock when active
                         Zone::new(start, end_mile, 50.0, "heavy traffic")
-                            .with_congestion(Some(aadts[aadts.len() / 2]), lanes),
+                            .with_congestion(Some(aadts[aadts.len() / 2]), lanes)
+                            .with_day_factor(day),
                     );
                 }
             }
@@ -149,8 +171,8 @@ impl Trip {
         let mut mile = 0.0;
         while mile <= total {
             let (aadt, lanes) = self.route_aadt_at(mile);
-            let peak_ratio =
-                aadt * peak_share * DIRECTIONAL_SPLIT / (lanes.max(1) as f64 * LANE_CAPACITY_VPH);
+            let peak_ratio = aadt * day * peak_share * DIRECTIONAL_SPLIT
+                / (lanes.max(1) as f64 * LANE_CAPACITY_VPH);
             if peak_ratio >= CONGESTION_MIN_RATIO {
                 if run_start.is_none() {
                     run_start = Some(mile);
@@ -177,7 +199,8 @@ impl Trip {
                         .with_congestion(
                             Some(prev_aadt.max(zone.aadt.unwrap_or(0.0))),
                             prev.lanes.min(zone.lanes),
-                        );
+                        )
+                        .with_day_factor(day);
                     *merged.last_mut().expect("just checked") = joined;
                     continue;
                 }
