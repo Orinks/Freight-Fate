@@ -18,7 +18,7 @@ use freight_fate::net::testing::{ClosureTransport, FakeTransport};
 use freight_fate::net::{Event, NetError, SharedTransport};
 use freight_fate::online_activation::{spell_code, Activation, PollResult};
 use freight_fate::online_presence::{IdentityStore, MemoryStore};
-use freight_fate::states::base::{Menu, State};
+use freight_fate::states::base::{InputEvent, Menu, State};
 use freight_fate::states::online_states::{
     load_identity, poll_loop, set_identity_store_override, Mailbox, OnlineSetupState, PollSchedule,
     SetupOutcome, SetupPhase, PROFILE_SHARING_CONSENT_VERSION,
@@ -391,6 +391,31 @@ fn test_pending_poll_keeps_waiting_and_speaks_nothing_new() {
     poll_loop(&an_activation(), &stop, &outcome, &transport, &schedule);
     assert_eq!(calls.load(Ordering::SeqCst), 2);
     assert!(outcome.take().is_none());
+}
+
+/// The whole point of this screen's focus handler is the browser round
+/// trip, so the event has to arrive the way the app loop delivers it --
+/// through `App::handle_event`, not poked at the state. The port's `match`
+/// on the event kind used to swallow focus before any screen saw it, and
+/// coming back from the browser was met with silence.
+#[test]
+fn test_coming_back_from_the_browser_re_orients_the_player() {
+    let (mut app, state) = setup_app(false);
+    setup(&mut app, &state, |s, _| {
+        s.activation = Some(an_activation());
+        s.phase = SetupPhase::Waiting;
+    });
+    app.clear_speech();
+
+    app.handle_event(&InputEvent::WindowFocusGained);
+
+    let lines = app.main_lines();
+    assert!(
+        lines
+            .iter()
+            .any(|line| line.starts_with("Back in Freight Fate.")),
+        "{lines:#?}"
+    );
 }
 
 #[test]

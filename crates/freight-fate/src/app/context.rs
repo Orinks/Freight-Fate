@@ -47,8 +47,9 @@ use crate::net::UreqTransport;
 use crate::online_journal::{queue_achievement, JournalOutbox};
 use crate::online_presence::{OnlineIdentity, OnlinePresence};
 use crate::speech::{apply_speech_settings, SpeechSink};
-use crate::states::base::{Key, Mods, State};
+use crate::states::base::State;
 
+use super::held_keys::HeldKeys;
 use super::Say;
 
 /// A state on the stack.
@@ -81,39 +82,6 @@ impl Clipboard for MemoryClipboard {
     fn set_text(&mut self, text: &str) -> bool {
         self.text = Some(text.to_string());
         true
-    }
-}
-
-/// `pygame.key.get_pressed()` / `get_mods()`: the keys currently held, as
-/// the app tracks them from the key events it dispatched.
-#[derive(Debug, Default)]
-pub struct HeldKeys {
-    held: HashSet<Key>,
-    mods: Mods,
-}
-
-impl HeldKeys {
-    pub fn is_pressed(&self, key: Key) -> bool {
-        self.held.contains(&key)
-    }
-
-    pub fn mods(&self) -> Mods {
-        self.mods
-    }
-
-    pub fn press(&mut self, key: Key, mods: Mods) {
-        self.held.insert(key);
-        self.mods = mods;
-    }
-
-    pub fn release(&mut self, key: Key, mods: Mods) {
-        self.held.remove(&key);
-        self.mods = mods;
-    }
-
-    pub fn clear(&mut self) {
-        self.held.clear();
-        self.mods = Mods::NONE;
     }
 }
 
@@ -432,6 +400,9 @@ impl GameContext {
             .try_borrow()
             .map(|s| s.paces_main_speech())
             .unwrap_or(false);
+        // A new screen never inherits the last one's held keys -- above all
+        // a pulse a screen reader's re-injected press train left running.
+        self.input.clear_pulses();
         self.stack.push(StackEntry {
             state: Rc::clone(&shared),
             paces_main_speech,
@@ -447,6 +418,7 @@ impl GameContext {
     /// the last state; the rebuilding methods below empty it on their way to
     /// a new state, so they use this instead of `pop_state`.
     fn take_top(&mut self, should_exit: bool) {
+        self.input.clear_pulses();
         if let Some(entry) = self.stack.pop() {
             if should_exit {
                 self.exit_now_or_later(&entry.state);

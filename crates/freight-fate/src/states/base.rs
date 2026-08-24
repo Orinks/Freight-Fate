@@ -284,6 +284,10 @@ pub enum InputEvent {
         instance_id: u32,
     },
     WindowFocusGained,
+    /// SDL releases every key when the window loses focus; the app drops
+    /// what it thinks is held with them, so alt-tabbing away mid-drive can
+    /// never leave a pedal down.
+    WindowFocusLost,
     Quit,
 }
 

@@ -175,6 +175,10 @@ pub fn translate_events(raw: Vec<Event>) -> Vec<InputEvent> {
                 win_event: WindowEvent::FocusGained,
                 ..
             } => out.push(InputEvent::WindowFocusGained),
+            Event::Window {
+                win_event: WindowEvent::FocusLost,
+                ..
+            } => out.push(InputEvent::WindowFocusLost),
             Event::Quit { .. } => out.push(InputEvent::Quit),
             _ => {}
         }

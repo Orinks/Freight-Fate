@@ -33,14 +33,16 @@ use crate::states::main_menu::ConfirmQuitState;
 
 pub mod boot_timing;
 pub mod context;
+pub mod held_keys;
 pub mod logging;
 pub mod sdl_shell;
 pub mod speech_delivery;
 pub mod testing;
 
 pub use context::{
-    share, Clipboard, ContextParts, GameContext, HeldKeys, MemoryClipboard, Services, SharedState,
+    share, Clipboard, ContextParts, GameContext, MemoryClipboard, Services, SharedState,
 };
+pub use held_keys::HeldKeys;
 pub use logging::{active_log_path, configure_logging};
 pub use speech_delivery::{IntoSpoken, Say, SayEvent, Spoken, TRANSCRIPT_TARGET};
 
@@ -116,6 +118,9 @@ pub struct App {
     pub ctx: GameContext,
     shell: Option<SdlShell>,
     clock: FrameClock,
+    /// `pygame.time.get_ticks()`'s zero: the held-key tracker times a screen
+    /// reader's re-injected press train against it (see `app::held_keys`).
+    started: Instant,
     initial_state: Option<InitialState>,
 }
 
@@ -261,6 +266,7 @@ impl App {
             ctx,
             shell,
             clock: FrameClock::new(true),
+            started: Instant::now(),
             initial_state: None,
         }
     }
@@ -272,6 +278,11 @@ impl App {
 
     pub fn is_headless(&self) -> bool {
         self.shell.is_none()
+    }
+
+    /// `pygame.time.get_ticks()`: milliseconds since the app was built.
+    fn ticks_ms(&self) -> u32 {
+        self.started.elapsed().as_millis() as u32
     }
 
     // -- state stack (forwarders; the stack lives on the context) ----------------------
@@ -427,8 +438,22 @@ impl App {
         match event {
             InputEvent::WindowFocusGained => {
                 // Switching screen readers happens outside the game;
-                // re-check speech the moment the player comes back.
+                // re-check speech the moment the player comes back. The
+                // keyboard's repeat timing is re-read for the same reason:
+                // a player who changed it gets it without a restart.
                 self.ctx.speech.request_refresh();
+                self.ctx.input.refresh_repeat_timing();
+                // ...and then the screen gets it too. Python tests focus
+                // with its own `if`, not the `elif` chain, so the event
+                // carries on to the state; a `match` arm here quietly ate
+                // it, and with it the two screens that wait for the player
+                // to come back from a browser (online setup, the Mastodon
+                // link) -- both sat silent on return.
+                self.dispatch_to_state(event);
+            }
+            InputEvent::WindowFocusLost => {
+                self.ctx.input.clear();
+                self.dispatch_to_state(event);
             }
             InputEvent::Quit => self.handle_close_request(),
             InputEvent::KeyDown { key, mods, .. } => {
@@ -529,6 +554,10 @@ impl App {
 
     /// One whole frame: pump events, tick, render. `dt` is the frame time.
     pub fn frame(&mut self, dt: f64) {
+        // Before the events, so a press and its release are timed against
+        // this frame: a pair inside one frame is a screen reader's, not a
+        // finger's, and reads as a hold rather than nothing at all.
+        self.ctx.input.begin_frame(self.ticks_ms());
         let events = match self.shell.as_mut() {
             Some(shell) => match shell.poll() {
                 Some(events) => events,
