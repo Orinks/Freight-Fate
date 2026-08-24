@@ -67,6 +67,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import leg_geometry  # noqa: E402
 import straw_curve_sample as scs  # noqa: E402  (the ratified primitives)
 from enrich_routes_ors import fetch_ors_hgv_route, parse_ors_route  # noqa: E402
 from enrich_routes_pois import MAXSPEED_SOURCE, _maxspeed_from_tags  # noqa: E402
@@ -93,6 +94,10 @@ SOURCE_NOTE = (
     "OpenRouteService driving-hgv (self-hosted) + OSM via Overpass "
     "(ODbL, (c) OpenStreetMap contributors)"
 )
+ARCHIVE_SOURCE_NOTE = (
+    "the leg's checked-in route geometry archive + OSM via Overpass "
+    "(ODbL, (c) OpenStreetMap contributors)"
+)
 RAMP_SOURCE = "OpenStreetMap highway=escape ways (Overpass), development-time."
 RAMP_MATCH_M = 160.0  # an escape way farther than this from the route isn't on it
 RAMP_DEDUP_MI = 0.3  # same-side ramps closer than this are one physical ramp
@@ -101,28 +106,62 @@ FLUSH_EVERY = 25  # write the world source + shards every N legs so progress is 
 
 # --- combined per-leg Overpass query (maxspeed + escape ramps, rider 2) -----
 def _overpass(query: str) -> dict[str, Any]:
-    data = urllib.parse.urlencode({"data": query}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    """One Overpass query, through the shared cached/mirrored client.
+
+    ``OVERPASS_URL`` still leads where the self-hosted server is up -- it turns
+    a network-wide sweep from hours into minutes -- but a bake of a handful of
+    legs runs perfectly well off the public mirrors, and this way it does not
+    simply die on a machine without the local server.
+    """
+    import build_interchanges as bi
+
+    payload = bi._cached_post(query, rate_limit=1.0)
+    if payload is None:
+        raise RuntimeError("no Overpass mirror answered")
+    return payload
+
+
+# How much corridor one bbox query covers. A single box around a whole leg is
+# fine against a self-hosted server and hopeless against a public one: Buffalo
+# to New York spans five degrees of longitude, and its bounding box asks for
+# every maxspeed-tagged way in the north-east, most of them nowhere near the
+# road. Chunking follows the route instead of enclosing it.
+WAY_QUERY_SPAN_MI = 60.0
 
 
 def query_leg_ways(coords: list[list[float]]) -> list[dict]:
-    """One bbox query for the leg's maxspeed-tagged ways.
+    """The leg's maxspeed-tagged ways, one bbox query per stretch of corridor.
 
     (Runaway ramps come from the offline escape-ramp cache, not Overpass: the
     self-hosted extract is filtered and carries no highway=escape ways -- see
     ``tools/harvest_escape_ramps.py``.)"""
-    lons = [c[0] for c in coords]
-    lats = [c[1] for c in coords]
+    cum = scs._cumulative_m(coords)
+    span_m = WAY_QUERY_SPAN_MI * 1609.344
+    spans: list[list[list[float]]] = []
+    start = 0
+    while start < len(coords) - 1:
+        stop = start + 1
+        while stop < len(coords) and cum[stop] - cum[start] < span_m:
+            stop += 1
+        spans.append(coords[start : min(stop + 1, len(coords))])
+        start = stop - 1 if stop > start + 1 else stop
+    if not spans:
+        spans = [coords]
+
+    found: dict[int, dict] = {}
     pad = 0.02
-    box = f"{min(lats) - pad},{min(lons) - pad},{max(lats) + pad},{max(lons) + pad}"
-    query = f"""
-    [out:json][timeout:120];
-    way["highway"~"motorway|trunk|primary|secondary|tertiary"]["maxspeed"]({box});
-    out geom tags;
-    """
-    return _overpass(query).get("elements", [])
+    for span in spans:
+        lons = [c[0] for c in span]
+        lats = [c[1] for c in span]
+        box = f"{min(lats) - pad},{min(lons) - pad},{max(lats) + pad},{max(lons) + pad}"
+        query = f"""
+        [out:json][timeout:120];
+        way["highway"~"motorway|trunk|primary|secondary|tertiary"]["maxspeed"]({box});
+        out geom tags;
+        """
+        for element in _overpass(query).get("elements", []):
+            found[element["id"]] = element
+    return list(found.values())
 
 
 # --- maxspeed step function (confirmed for the world source; gap-aware for shard) --
@@ -348,15 +387,23 @@ def select_legs(world: dict, args: argparse.Namespace) -> list[dict]:
 
 # --- driver -----------------------------------------------------------------
 def process_leg(
-    leg: dict, cities: dict, api_key: str, escape_cache: list[dict]
+    leg: dict, cities: dict, api_key: str, escape_cache: list[dict], from_archive: bool = False
 ) -> dict[str, Any] | None:
     frm, to = leg["from"], leg["to"]
     highway = leg.get("highway", "")
     leg_miles = float(leg.get("miles", 0)) or None
-    start = {"lat": cities[frm]["lat"], "lon": cities[frm]["lon"]}
-    end = {"lat": cities[to]["lat"], "lon": cities[to]["lon"]}
-    via = tuple(leg.get("route_via", []) or ())
-    parsed = parse_ors_route(fetch_ors_hgv_route(start, end, api_key, via=via))
+    # A rerouted leg's road is the one in the archive, not the one ORS would
+    # hand back: ORS still routes it the old way, which is the whole reason it
+    # was rerouted. Its curves, its runaway ramps and its posted limits all
+    # have to be re-read off the road the truck now drives.
+    parsed = leg_geometry.archived_route(f"{frm}:{to}") if from_archive else None
+    if parsed is None:
+        if from_archive:
+            raise RuntimeError("no archived route geometry for this leg")
+        start = {"lat": cities[frm]["lat"], "lon": cities[frm]["lon"]}
+        end = {"lat": cities[to]["lat"], "lon": cities[to]["lon"]}
+        via = tuple(leg.get("route_via", []) or ())
+        parsed = parse_ors_route(fetch_ors_hgv_route(start, end, api_key, via=via))
     coords = parsed["coordinates"]
     elev = parsed["elevations_ft"]
     cum_raw = scs._cumulative_m(coords)
@@ -370,9 +417,21 @@ def process_leg(
     cum_dec = scs._cumulative_m(coords_dec)
     curv_dec = scs.analyse_curvature(coords_dec, cum_dec)
 
+    # Both of these WALK the polyline looking for something beside the road --
+    # a posted limit every quarter mile, an escape ramp within 160 m -- so
+    # they need the road at that resolution. A live ORS route already has it;
+    # the archive has thinned its straight runs, and a stride sampler walking
+    # those vertices reads a 143-mile leg seven times. Densifying restores the
+    # stride without touching the curve analysis above, which must stay on the
+    # archived vertices to keep giving the answers every other leg's curves
+    # were derived from.
+    # Densifying only inserts points along existing segments, so the line is
+    # the same length and ``mile_scale`` still holds.
+    sample_coords = leg_geometry.densify(coords) if from_archive else coords
+    sample_cum = scs._cumulative_m(sample_coords) if from_archive else cum_raw
     maxspeed_ways = query_leg_ways(coords)
-    speed_full = bake_speed_limits(highway, coords, cum_raw, mile_scale, maxspeed_ways)
-    ramps = harvest_ramps(escape_cache, coords, cum_raw, mile_scale)
+    speed_full = bake_speed_limits(highway, sample_coords, sample_cum, mile_scale, maxspeed_ways)
+    ramps = harvest_ramps(escape_cache, sample_coords, sample_cum, mile_scale)
 
     conn_hi = (leg_miles or raw_mi) - scs.CONNECTOR_WINDOW_MI
     gameplay_curves = []
@@ -416,6 +475,7 @@ def process_leg(
     world_profile = _tmp["legs"][0].get("corridor", {}).get("speed_limits", [])
     return {
         "leg_id": f"{frm}:{to}",
+        "route_source": ARCHIVE_SOURCE_NOTE if from_archive else SOURCE_NOTE,
         "state": str(cities[frm]["state"]).lower(),
         "highway": highway,
         "miles": round(leg_miles or raw_mi, 2),
@@ -447,6 +507,13 @@ def main() -> int:
     g.add_argument("--region", help="all legs touching a region (e.g. rockies)")
     g.add_argument("--all", action="store_true", help="every leg in the network")
     ap.add_argument("--limit", type=int, help="cap leg count (with --all, for smoke tests)")
+    ap.add_argument(
+        "--from-archive",
+        action="store_true",
+        help="read each leg's polyline from the checked-in geometry archive "
+        "instead of fetching a fresh ORS route. What a rerouted leg needs: "
+        "ORS would hand back the road it was moved off.",
+    )
     args = ap.parse_args()
 
     world = load_world()
@@ -470,7 +537,7 @@ def main() -> int:
     for n, leg in enumerate(legs, 1):
         key = (leg["from"], leg["to"])
         try:
-            r = process_leg(leg, cities, api_key, escape_cache)
+            r = process_leg(leg, cities, api_key, escape_cache, from_archive=args.from_archive)
         except (
             urllib.error.URLError,
             urllib.error.HTTPError,

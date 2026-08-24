@@ -21,7 +21,8 @@ never gone; it simply had never been pointed at a new route.
 
 So the chain is::
 
-    reroute_leg.py --leg a:b --write          # new shape, mileage, curves
+    reroute_leg.py --leg a:b --write          # new shape, mileage, curves, grades
+    reenrich_leg.py --leg a:b --write         # every layer keyed to the road
     build_interchanges.py --pbf <extract> --only "A->B" --force --write \\
         --maxspeed --restrictions --ramp-controls
     curve_valhalla_facts.py --all             # re-read the road under each bend
@@ -40,18 +41,19 @@ the trial established:
           of its matched miles against 0 before
   works   build_interchanges.py --pbf rebuilt 35 interchanges, against 10 on
           the old US-181 route; --restrictions gave 12
-  thin    --maxspeed produced 2 speed_limit rows against the old 24. It
-          samples off route_points, which are 25 miles apart. Dense limits
-          should come from the matcher instead -- curve_valhalla_facts.py
-          already reads edge.speed_limit and throws it away
-  MISSING grade_segments, landmarks, checkpoints, state_miles,
-          state_crossings, traffic_aadt, lane_segments
-
-A leg without grade_segments has no grade simulation at all, which is why
-the trial was reverted rather than committed. The remaining builders are
-bake_landmarks.py, bake_villages.py, bake_lane_segments.py,
-build_traffic_aadt.py and enrich_routes_states.py; enrich_routes.py is NOT
-the entry point for this -- its --only flag only governs geometry refresh.
+  thin    --maxspeed produced 2 speed_limit rows against the old 24, because
+          every corridor bake located the leg by interpolating straight
+          chords between route points 25 miles apart. FIXED: they now read
+          the checked-in dense geometry archive instead (tools/leg_geometry.py)
+  FIXED   grade_segments. This tool is holding the full-precision /height
+          reading, so it writes the whole quarter-mile profile itself rather
+          than leaving the leg with no grade simulation at all -- which is why
+          the trial was reverted rather than committed
+  later   landmarks, checkpoints, state_miles, state_crossings, traffic_aadt,
+          lane_segments, and the OSM layers, all of which need an index or a
+          network this tool has no business fetching. Run
+          ``tools/reenrich_leg.py`` after this; enrich_routes.py is NOT the
+          entry point -- its --only flag only governs geometry refresh.
 
 TWO TRAPS ALREADY PAID FOR
 --------------------------
@@ -88,6 +90,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
@@ -98,6 +101,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import straw_curve_sample as scs  # noqa: E402
+from reclassify_terrain import build_grade_segments  # noqa: E402  (the shared grade rule)
+from terrain_rules import RANK, leg_terrain  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -130,16 +135,27 @@ TRUCK_OPTIONS = {
 
 DELAY_S = 0.4  # a free community service; do not hammer it
 
+GRADE_SOURCE = (
+    "Read: Valhalla /height elevation along the leg's own truck route, sampled at "
+    "every route vertex and binned at a quarter mile; terrain derived from the "
+    "shared relief-in-context rule (tools/reclassify_terrain.py)."
+)
+
 # How often to drop a route point and an elevation sample along the new road.
 # The downstream builders find a leg by its route_points bbox, so these are
 # WRITTEN rather than merely dropped -- clearing them and stopping there left
 # build_interchanges with no geometry to filter against, and it dutifully
 # retained 0 of 59,924 ramp nodes.
 SAMPLE_MI = 25.0
+# ...but never fewer than this many points, however short the leg. At a flat
+# 25 miles a 23-mile leg got two -- its endpoints -- where the ORS bake it
+# replaced never gave any leg fewer than five.
+MIN_ROUTE_POINTS = 5
 
 # Layers keyed to the old polyline. After a reroute they describe a road the
 # truck no longer drives, so they are dropped rather than carried over.
-# route_points and elevation_samples are dropped here and rebuilt below.
+# route_points, elevation_samples and grade_segments are dropped here and
+# rebuilt below from the new road; the rest wait on the enrichment pass.
 STALE_AFTER_REROUTE = (
     "route_points",
     "elevation_samples",
@@ -250,14 +266,32 @@ def rides_its_label(shape: list[list[float]], highway: str) -> tuple[float, str]
     named for, so this checks that it did. A reroute that lands somewhere else
     is not an improvement, it is a different wrong answer, and the tool
     refuses rather than writing it.
+
+    MEASURED IN MILES, and it has to be. Counting matched POINTS instead --
+    which this did, and which read low on every leg it judged -- weights each
+    vertex equally, and vertices are not spread evenly along a road: the
+    simplifier keeps every bend and thins the straights, so a town street and
+    a hundred miles of tangent interstate carry comparable numbers of them.
+    Woodburn to Salem read 3 percent on I-5 by point count and named a city
+    street as its dominant road; the leg is a straight 19-mile run down the
+    freeway with two town approaches. Each matched point is therefore weighted
+    by the length of road it stands for.
     """
     import collections
     import re
 
     shields = set(re.findall(r"\d+", highway))
     cum = scs._cumulative_m(shape)
+
+    def span_m(i: int) -> float:
+        """How much road one vertex stands for: half the gap either side."""
+        before = cum[i] - cum[i - 1] if i > 0 else 0.0
+        after = cum[i + 1] - cum[i] if i + 1 < len(shape) else 0.0
+        return (before + after) / 2.0
+
     tally: collections.Counter[str] = collections.Counter()
-    on_label = matched = 0
+    on_label = matched = 0.0
+    seen: set[int] = set()  # chunks overlap; a vertex counts once
     start = 0
     while start < len(shape):
         stop = start + 1
@@ -281,22 +315,29 @@ def rides_its_label(shape: list[list[float]], highway: str) -> tuple[float, str]
         )
         if result:
             edges = result.get("edges") or []
-            for point in result.get("matched_points") or []:
+            # trace_attributes returns one matched point per input vertex, in
+            # order, so the offset into the chunk is the offset into the shape.
+            for offset, point in enumerate(result.get("matched_points") or []):
+                vertex = start + offset
+                if vertex >= len(shape) or vertex in seen:
+                    continue
                 index = point.get("edge_index")
                 if index is None or index >= len(edges):
                     continue
                 names = edges[index].get("names") or []
                 if str(edges[index].get("use")) in ("ramp", "turn_channel"):
                     continue
-                matched += 1
+                seen.add(vertex)
+                miles = span_m(vertex)
+                matched += miles
                 if names:
-                    tally[str(names[0])] += 1
+                    tally[str(names[0])] += miles
                 if any(
                     set(re.findall(r"\d+", str(n))) & shields
                     and str(n).strip().upper().startswith("I")
                     for n in names
                 ):
-                    on_label += 1
+                    on_label += miles
         if stop >= len(shape):
             break
         back = stop - 1
@@ -314,25 +355,45 @@ def rides_its_label(shape: list[list[float]], highway: str) -> tuple[float, str]
 MIN_ON_LABEL = 0.25
 
 
+def restamp_data_version(meta_line: str, records: list[str]) -> str:
+    """The shard's meta line with its content hash re-derived from the records.
+
+    A shard carries a ``data_version`` hashed over its own records, and the
+    whole point of it is to notice when the file stops saying what it claims
+    to. Rewriting a record and leaving the hash alone breaks exactly that, and
+    it had already happened: all fifty checked-in geometry shards carried a
+    hash that did not match their own contents -- records byte-identical to
+    what the hash was supposedly taken over, hash different. Anything trusting
+    it to spot drift would have been misled by it.
+    """
+    meta = json.loads(meta_line)
+    if "meta" not in meta:
+        return meta_line
+    payload = "\n".join(records).encode("utf-8")
+    meta["meta"]["data_version"] = "sha256:" + hashlib.sha256(payload).hexdigest()[:12]
+    return json.dumps(meta, sort_keys=True)
+
+
 def write_geometry(state_code: str, leg_id: str, record: dict) -> None:
     """Replace one leg's record in its state geometry shard."""
     path = GEOM_DIR / f"{state_code}.jsonl"
     lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
-    out, replaced = [], False
+    meta_line, records, replaced = "", [], False
     for line in lines:
         if not line.strip():
             continue
         if line.startswith('{"meta"'):
-            out.append(line)
+            meta_line = line
             continue
         existing = json.loads(line)
         if existing.get("leg") == leg_id:
-            out.append(json.dumps(record, sort_keys=True))
+            records.append(json.dumps(record, sort_keys=True))
             replaced = True
         else:
-            out.append(line)
+            records.append(line)
     if not replaced:
-        out.append(json.dumps(record, sort_keys=True))
+        records.append(json.dumps(record, sort_keys=True))
+    out = ([restamp_data_version(meta_line, records)] if meta_line else []) + records
     path.write_text("\n".join(out) + "\n", encoding="utf-8")
 
 
@@ -351,6 +412,17 @@ def main() -> int:
     ap.add_argument("--leg", help="leg id, e.g. corpus_christi_tx_us:san_antonio_tx_us")
     ap.add_argument("--write", action="store_true", help="apply the reroute")
     ap.add_argument("--check", action="store_true", help="list legs awaiting re-enrichment")
+    ap.add_argument(
+        "--min-share",
+        type=float,
+        default=MIN_ON_LABEL,
+        help="accept a reroute that rides the leg's own shield for at least this "
+        "share of its matched miles. Lower it only for a leg whose share was "
+        "measured and judged beforehand -- a long leg can be genuinely, "
+        "correctly labelled for the interstate it spends its middle on while "
+        "spending most of its miles on the roads either side of it "
+        f"(default {MIN_ON_LABEL}).",
+    )
     args = ap.parse_args()
 
     world = load_world()
@@ -389,27 +461,59 @@ def main() -> int:
         return 1
     print(f"  elevation read at all {len(elevations)} vertices")
 
-    curves = scs.analyse_curvature(shape, cum)["curves"]
-    print(f"  {len(curves)} curves on the new route")
+    curvature = scs.analyse_curvature(shape, cum)
+    print(f"  {len(curvature['curves'])} curves on the new route")
+
+    profile = [(cum[i] / 1609.344, elevations[i]) for i in range(len(shape))]
+    grades = build_grade_segments(profile, miles, GRADE_SOURCE)
+    steepest = max((abs(g["avg_grade_pct"]) for g in grades), default=0.0)
+    # The leg's own label follows the rank-merge rule the terrain sweep set: a
+    # rerouted leg that now really crosses a pass firms up, but a curated
+    # hills/mountain label is never quietly demoted off a new geometric read.
+    spans = {"mountain": 0.0, "hills": 0.0}
+    for segment in grades:
+        span = float(segment["end_mi"]) - float(segment["start_mi"])
+        if segment["terrain"] in spans:
+            spans[segment["terrain"]] += span
+    derived_terrain = leg_terrain(spans["mountain"], spans["hills"], miles)
+    old_terrain = str(leg.get("terrain") or "flat")
+    new_terrain = derived_terrain if RANK[derived_terrain] > RANK[old_terrain] else old_terrain
+    print(
+        f"  {len(grades)} grade segments, steepest {steepest:.2f}% "
+        f"(new road reads {derived_terrain}; leg stays {new_terrain})"
+    )
 
     share, dominant = rides_its_label(shape, str(leg.get("highway", "")))
     print(
         f"  the new route rides {leg.get('highway')} for {100 * share:.0f}% of its"
         f" matched miles (dominant road: {dominant})"
     )
-    if share < MIN_ON_LABEL:
+    if share < args.min_share:
         print()
         print(
             f"  REFUSING: a reroute is meant to put this leg back on "
-            f"{leg.get('highway')}, and this route does not. Investigate the leg."
+            f"{leg.get('highway')}, and this route does not. Investigate the leg, "
+            f"or pass --min-share below {100 * share:.0f}% if this share was judged."
         )
         return 1
+    if share < MIN_ON_LABEL:
+        print(
+            f"  (accepted under the usual {100 * MIN_ON_LABEL:.0f}% bar on an "
+            f"explicit --min-share {args.min_share})"
+        )
 
     if not args.write:
         print("\n(dry run; pass --write)")
         return 0
 
-    encoded = scs.encode_geometry(shape, elevations, list(range(len(shape))))
+    # Archive the SIMPLIFIED polyline, the same way the curve bake does, so a
+    # rerouted leg's record is the same kind of object as every other leg's:
+    # bends kept verbatim, straight runs thinned to the shared point budget.
+    # The grade profile above was taken from the full reading first, so no
+    # fidelity is lost where it is felt.
+    idx = scs.adaptive_simplify(shape, curvature["curving"], cum, scs.POINT_BUDGET)
+    print(f"  archived at {len(idx)} of {len(shape)} vertices (curves kept verbatim)")
+    encoded = scs.encode_geometry(shape, elevations, idx)
     write_geometry(
         str(cities[leg["from"]]["state"]).lower(),
         args.leg,
@@ -421,6 +525,7 @@ def main() -> int:
         },
     )
     leg["miles"] = round(miles)
+    leg["terrain"] = new_terrain
     leg["rerouted"] = True
     corridor = leg.get("corridor") or {}
     dropped = {k: len(corridor.get(k) or []) for k in STALE_AFTER_REROUTE if corridor.get(k)}
@@ -435,9 +540,10 @@ def main() -> int:
     )
     points, elevation = [], []
     last = -1e9
+    stride = max(0.5, min(SAMPLE_MI, miles / (MIN_ROUTE_POINTS - 1)))
     for i, (lon, lat) in enumerate(shape):
         at_mi = cum[i] / 1609.344
-        if at_mi - last < SAMPLE_MI and i not in (0, len(shape) - 1):
+        if at_mi - last < stride and i not in (0, len(shape) - 1):
             continue
         last = at_mi
         points.append({"at_mi": round(at_mi, 2), "lat": round(lat, 5), "lon": round(lon, 5)})
@@ -450,6 +556,11 @@ def main() -> int:
         )
     corridor["route_points"] = points
     corridor["elevation_samples"] = elevation
+    # Grades are the one layer a driver feels immediately, and the one this
+    # tool can settle on its own: it is holding the full-precision /height
+    # reading, so it writes the whole profile rather than leaving the leg with
+    # no grade simulation until the enrichment pass runs.
+    corridor["grade_segments"] = grades
     leg["corridor"] = corridor
     save_world(world)
     print(f"\n  wrote the new route; dropped {sum(dropped.values())} stale rows: {dropped}")

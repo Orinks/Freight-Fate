@@ -3,10 +3,25 @@ from __future__ import annotations
 
 from build_interchanges_base import *
 
+import leg_geometry
+
 
 MAXSPEED_HIGHWAY_CLASSES = ("motorway", "trunk", "primary", "secondary")
 MAXSPEED_CORRIDOR_M = 250.0  # a maxspeed way must snap this close to a leg
-MAXSPEED_SAMPLE_STRIDE_MI = 5.0  # profile resolution along the leg
+# Profile resolution along the leg. The sampler takes the highest limit
+# within +/- one stride of each milepost, so it can only resolve a posted zone
+# longer than TWO strides -- at the old 5 miles, a 75 mph mainline swallowed
+# every town zone on the leg and Corpus Christi to San Antonio collapsed to a
+# single "75" row across 144 miles, city streets at both ends included.
+#
+# The bar is the shortest zone that can legitimately be posted. State speed
+# zoning procedures set a minimum zone length of about half a mile (TxDOT's
+# Procedures for Establishing Speed Zones puts the floor at 0.2 mi and asks
+# for 0.5); a quarter-mile stride resolves that with room to spare, and there
+# is nothing shorter for it to miss. It only became affordable when the bake
+# started reading the dense geometry archive -- against chords 25 miles apart
+# there was nothing finer to sample.
+MAXSPEED_SAMPLE_STRIDE_MI = 0.25
 # The maxspeed index spans every route in the country, so snapping all of it to
 # each leg is quadratic. A coarse lat/lon grid buckets way points (~5.5km cells)
 # so a leg only snaps ways in the cells its geometry passes through. Way points
@@ -20,12 +35,25 @@ MaxspeedPoint = tuple[float, float, float, bool, str]
 MaxspeedGrid = dict[tuple[int, int], list[MaxspeedPoint]]
 MAXSPEED_INDEX_CACHE_VERSION = 1
 OSM_REGION_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
-MAXSPEED_SOURCE = (
-    "OpenStreetMap maxspeed tags on the corridor highway ways, read from a local "
-    f"Geofabrik extract and snapped to checked-in OSRM route geometry, accessed "
-    f"{ACCESSED_DATE}; maxspeed:hgv preferred where tagged. "
-    "https://www.openstreetmap.org/"
-)
+# Which polyline a corridor bake snapped its ways to. Named in the source
+# line rather than assumed, because the three differ in how faithfully they
+# follow the road and a thin layer is otherwise indistinguishable from a road
+# that genuinely has nothing on it.
+ARCHIVE_GEOMETRY_NOTE = "the leg's checked-in dense route geometry archive"
+OSRM_GEOMETRY_NOTE = "checked-in OSRM route geometry"
+INTERPOLATED_GEOMETRY_NOTE = "straight-line interpolation of the leg's checked-in route points"
+
+
+def maxspeed_source(geometry_note: str = ARCHIVE_GEOMETRY_NOTE) -> str:
+    return (
+        "OpenStreetMap maxspeed tags on the corridor highway ways, read from a local "
+        f"Geofabrik extract and snapped to {geometry_note}, accessed "
+        f"{ACCESSED_DATE}; maxspeed:hgv preferred where tagged. "
+        "https://www.openstreetmap.org/"
+    )
+
+
+MAXSPEED_SOURCE = maxspeed_source(OSRM_GEOMETRY_NOTE)
 
 
 @dataclass(frozen=True, slots=True)
@@ -330,6 +358,7 @@ def assemble_maxspeed(
     geom: list[tuple[float, float, float]],
     leg_miles: float,
     highway: str,
+    geometry_note: str = OSRM_GEOMETRY_NOTE,
 ) -> list[dict[str, Any]]:
     """Build a step-function speed profile for a leg from snapped maxspeed ways.
 
@@ -404,9 +433,10 @@ def assemble_maxspeed(
             smoothed[i] = smoothed[i - 1]
 
     profile: list[dict[str, Any]] = []
+    source = maxspeed_source(geometry_note)
     for (at_mi, _, _), (mph, hgv) in zip(picked, smoothed, strict=True):
         if not (profile and profile[-1]["mph"] == mph and profile[-1]["hgv"] == hgv):
-            profile.append({"at_mi": at_mi, "mph": mph, "source": MAXSPEED_SOURCE, "hgv": hgv})
+            profile.append({"at_mi": at_mi, "mph": mph, "source": source, "hgv": hgv})
     return profile
 
 
@@ -438,20 +468,40 @@ def _interpolated_geometry(
     return out
 
 
+def corridor_geometry(
+    leg: dict[str, Any],
+    rate_limit: float,
+) -> tuple[list[tuple[float, float, float]] | None, str]:
+    """``(dense [(lat, lon, at_mi), ...], what it was built from)`` for a leg.
+
+    The checked-in geometry archive first: it is the leg's real road at curve
+    resolution, it needs no network, and 1,290 of 1,291 legs have one. Only
+    then the old chain -- cached OSRM through the route points (never a live
+    request; a hung socket would stall the whole batch), and finally straight
+    chords between points 25 miles apart, which is what silently starved this
+    layer on a rerouted leg.
+    """
+    geom = leg_geometry.dense_geometry(f"{leg['from']}:{leg['to']}", float(leg["miles"]))
+    if geom:
+        return geom, ARCHIVE_GEOMETRY_NOTE
+    route_points = list(leg.get("corridor", {}).get("route_points", ()))
+    geom = _osrm_geometry(route_points, rate_limit, cached_only=True)
+    if geom:
+        return geom, OSRM_GEOMETRY_NOTE
+    return _interpolated_geometry(route_points), INTERPOLATED_GEOMETRY_NOTE
+
+
 def bake_maxspeed_for_leg(
     leg: dict[str, Any],
     grid: MaxspeedGrid,
     rate_limit: float,
 ) -> list[dict[str, Any]]:
-    route_points = list(leg.get("corridor", {}).get("route_points", ()))
-    # Prefer cached dense OSRM geometry; never fetch live (a hung socket would
-    # stall the whole batch). Fall back to local interpolation of route points.
-    geom = _osrm_geometry(route_points, rate_limit, cached_only=True) or _interpolated_geometry(
-        route_points
-    )
+    geom, note = corridor_geometry(leg, rate_limit)
     if not geom:
         return []
-    return assemble_maxspeed(grid, geom, float(leg["miles"]), str(leg.get("highway", "")))
+    return assemble_maxspeed(
+        grid, geom, float(leg["miles"]), str(leg.get("highway", "")), geometry_note=note
+    )
 
 
 def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:

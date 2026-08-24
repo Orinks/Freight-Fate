@@ -73,19 +73,21 @@ from world_source import load_world, save_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 GEOMETRY_DIR = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "geometry"
-RAMPS_PATH = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "gameplay" / "ramps.jsonl"
+RAMPS_PATH = (
+    ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "gameplay" / "ramps.jsonl"
+)
 
 M_TO_FT = 3.280839895
 
 # The verdict thresholds live in ``terrain_rules`` (shared with the enrichment
 # pipeline so the two paths never drift). These are only how THIS tool measures
 # the dense archived elevation profile before asking terrain_rules for a verdict.
-WINDOW_MI = 5.0          # +/- relief window around a point (mountain-relief context)
-LOCAL_STEEP_MI = 1.5     # +/- window for local steepness (the steepest held mile near here)
-MEDIAN_MI = 0.6          # elevation median-filter window (kills bridge spikes)
-SUSTAIN_MI = 1.0         # a grade must hold this far to count as "sustained"
-PITCH_MI = 0.5           # a "pitch" is a run this long
-PITCH_PCT = 3.0          # ...steeper than this
+WINDOW_MI = 5.0  # +/- relief window around a point (mountain-relief context)
+LOCAL_STEEP_MI = 1.5  # +/- window for local steepness (the steepest held mile near here)
+MEDIAN_MI = 0.6  # elevation median-filter window (kills bridge spikes)
+SUSTAIN_MI = 1.0  # a grade must hold this far to count as "sustained"
+PITCH_MI = 0.5  # a "pitch" is a run this long
+PITCH_PCT = 3.0  # ...steeper than this
 
 
 # --------------------------------------------------------------------------- #
@@ -107,7 +109,7 @@ def decode_profile(geom: dict[str, Any], leg_miles: float) -> list[tuple[float, 
     lat0/lon0 and dlat/dlon quantized at 10**q, delta elevations in meters.
     """
     q = geom["q"]
-    scale = 10 ** q
+    scale = 10**q
     lat = geom["lat0"] / scale
     lon = geom["lon0"] / scale
     elev_m = float(geom["ele0_m"])
@@ -129,7 +131,9 @@ def decode_profile(geom: dict[str, Any], leg_miles: float) -> list[tuple[float, 
     return [(mi * k, em * M_TO_FT) for (mi, _lat, em) in raw]
 
 
-def median_filter(profile: list[tuple[float, float]], window_mi: float) -> list[tuple[float, float]]:
+def median_filter(
+    profile: list[tuple[float, float]], window_mi: float
+) -> list[tuple[float, float]]:
     """Median-filter the elevation column over a +/- window_mi/2 window.
 
     Removes single-point river-bluff/overpass spikes the census caught
@@ -158,7 +162,9 @@ def median_filter(profile: list[tuple[float, float]], window_mi: float) -> list[
 # --------------------------------------------------------------------------- #
 # Window measurements
 # --------------------------------------------------------------------------- #
-def _window(profile: list[tuple[float, float]], lo_mi: float, hi_mi: float) -> list[tuple[float, float]]:
+def _window(
+    profile: list[tuple[float, float]], lo_mi: float, hi_mi: float
+) -> list[tuple[float, float]]:
     return [p for p in profile if lo_mi <= p[0] <= hi_mi]
 
 
@@ -245,12 +251,16 @@ def classify_point(profile: list[tuple[float, float]], center: float) -> str:
     window relief under it, or a big relief carrying repeated pitches. Hills is
     a gentler grade or moderate relief. Everything else is flat.
     """
-    steep = max_sustained_grade(_window(profile, center - LOCAL_STEEP_MI, center + LOCAL_STEEP_MI), SUSTAIN_MI)
+    steep = max_sustained_grade(
+        _window(profile, center - LOCAL_STEEP_MI, center + LOCAL_STEEP_MI), SUSTAIN_MI
+    )
     win = _window(profile, center - WINDOW_MI, center + WINDOW_MI)
     return terrain_for(steep, window_relief_ft(win), count_pitches(win, PITCH_MI, PITCH_PCT))
 
 
-def bin_profile(profile: list[tuple[float, float]], leg_miles: float, step: float = 0.25) -> list[tuple[float, str]]:
+def bin_profile(
+    profile: list[tuple[float, float]], leg_miles: float, step: float = 0.25
+) -> list[tuple[float, str]]:
     """Classify the leg in fixed ``step``-mile bins; returns [(center_mi, kind)]."""
     if leg_miles <= 0 or len(profile) < 2:
         return []
@@ -270,10 +280,111 @@ def dominant(kinds: list[str]) -> str:
     return max(counts, key=lambda k: (counts[k], RANK[k]))
 
 
-def leg_terrain_from_bins(bins: list[tuple[float, str]], leg_miles: float, step: float = 0.25) -> str:
+def leg_terrain_from_bins(
+    bins: list[tuple[float, str]], leg_miles: float, step: float = 0.25
+) -> str:
     mtn_mi = sum(step for _, k in bins if k == "mountain")
     hill_mi = sum(step for _, k in bins if k == "hills")
     return leg_terrain(mtn_mi, hill_mi, leg_miles)
+
+
+# --------------------------------------------------------------------------- #
+# Building grade segments from scratch (a rerouted leg has none)
+# --------------------------------------------------------------------------- #
+# The bin width the enrichment pipeline already grades at
+# (``enrich_routes_ors.GRADE_BIN_MI``). Quarter of a mile is short enough to
+# keep a real roller and long enough that a lone elevation sample cannot
+# invent one.
+GRADE_BIN_MI = 0.25
+
+# The parser refuses anything outside +/-15%, which would be a hard world-load
+# failure rather than a screened record, so a bake never emits closer than a
+# point inside it. ``freight_fate.data.grades`` does the real class/terrain
+# screening at load.
+GRADE_ABS_CEILING_PCT = 14.0
+_CLAMP_NOTE = (
+    " Slope clamped at bake from {raw:+.2f} percent -- derived, not read: "
+    "outside the parser's realistic band."
+)
+
+
+def build_grade_segments(
+    profile: list[tuple[float, float]],
+    leg_miles: float,
+    source: str,
+    ramp_miles: list[float] | tuple[float, ...] = (),
+    step: float = GRADE_BIN_MI,
+) -> list[dict[str, Any]]:
+    """A leg's whole grade profile from a dense elevation reading.
+
+    ``reclassify`` relabels segments that already exist. A rerouted leg has
+    none at all -- and a leg with no ``grade_segments`` has no grade
+    simulation, because ``Trip.grade_at`` reads the segment covering the mile
+    and otherwise falls through to a synthesized terrain average.
+
+    Two measurements, deliberately taken off different profiles:
+
+    * **grade** is the net rise over each ``step``-mile bin of the RAW
+      profile. That is the number the engine feels, and smoothing it would
+      flatten exactly the short rollers a driver hears the truck answer.
+    * **terrain** is :func:`classify_point` on the median-filtered profile --
+      the same relief-in-context rule every other segment in the world now
+      carries, so a rebuilt leg reads the same as its neighbours and a
+      following ``reclassify`` pass finds nothing to change.
+
+    Adjacent bins are merged only where BOTH the stored grade and the terrain
+    are identical, so the merge is lossless and there is no threshold here to
+    tune. A runaway ramp forces its bin to mountain, as in :func:`reclassify`.
+    """
+    if leg_miles <= 0 or len(profile) < 2:
+        return []
+    filtered = median_filter(profile, MEDIAN_MI)
+    bins: list[tuple[float, float, float, str]] = []  # start, end, grade, terrain
+    at = 0.0
+    while at < leg_miles - 1e-9:
+        end = min(leg_miles, at + step)
+        run = end - at
+        if run < step / 2 and bins:
+            # A final sliver rounds away to a zero-width segment the parser
+            # rejects; grow the previous bin to the leg end instead.
+            start_prev, _, grade_prev, kind_prev = bins[-1]
+            bins[-1] = (start_prev, leg_miles, grade_prev, kind_prev)
+            break
+        grade = (elev_at(profile, end) - elev_at(profile, at)) / (run * 5280.0) * 100.0
+        centre = (at + end) / 2.0
+        kind = classify_point(filtered, centre)
+        if any(abs(centre - ramp) <= 0.5 for ramp in ramp_miles):
+            kind = "mountain"
+        bins.append((at, end, grade, kind))
+        at = end
+    if not bins:
+        return []
+
+    segments: list[dict[str, Any]] = []
+    for start, end, grade, kind in bins:
+        stored = round(max(-GRADE_ABS_CEILING_PCT, min(GRADE_ABS_CEILING_PCT, grade)), 2)
+        note = source
+        if abs(grade) > GRADE_ABS_CEILING_PCT:
+            note = source + _CLAMP_NOTE.format(raw=grade)
+        if (
+            segments
+            and segments[-1]["avg_grade_pct"] == stored
+            and segments[-1]["terrain"] == kind
+            and segments[-1]["source"] == note
+        ):
+            segments[-1]["end_mi"] = round(end, 2)
+            continue
+        segments.append(
+            {
+                "start_mi": round(start, 2),
+                "end_mi": round(end, 2),
+                "avg_grade_pct": stored,
+                "terrain": kind,
+                "source": note,
+            }
+        )
+    segments[-1]["end_mi"] = round(leg_miles, 2)
+    return segments
 
 
 # --------------------------------------------------------------------------- #
@@ -349,8 +460,10 @@ def reclassify(
 
         for seg in segs:
             span = [k for c, k in bins if seg["start_mi"] <= c <= seg["end_mi"]]
-            new_kind = dominant(span) if span else classify_point(
-                profile, (seg["start_mi"] + seg["end_mi"]) / 2.0
+            new_kind = (
+                dominant(span)
+                if span
+                else classify_point(profile, (seg["start_mi"] + seg["end_mi"]) / 2.0)
             )
             if new_kind != "mountain" and any(
                 seg["start_mi"] <= at <= seg["end_mi"] for at in leg_ramps
@@ -435,7 +548,9 @@ def print_report(report: dict[str, Any], state_filter: str | None) -> None:
 
     print("\n=== leg changes (detail) ===")
     for c in sorted(legc, key=lambda x: (x["state"], x["leg"])):
-        print(f"  {c['state']:3s} {c['old']:8s} -> {c['new']:8s}  {c['leg']}  {c.get('highway')}  {c['miles']:.0f}mi")
+        print(
+            f"  {c['state']:3s} {c['old']:8s} -> {c['new']:8s}  {c['leg']}  {c.get('highway')}  {c['miles']:.0f}mi"
+        )
 
     print("\n=== SEGMENT-LEVEL terrain changes (direction counts) ===")
     sdir = Counter((c["old"], c["new"]) for c in report["segments"])
@@ -455,9 +570,9 @@ ACCEPTANCE_ZERO_MTN = [
     "tyler_tx_us:texarkana_ar_us",
 ]
 ACCEPTANCE_KEEP_MTN = [
-    "denver_co_us:silverthorne_co_us",   # I-70 Denver-Silverthorne
+    "denver_co_us:silverthorne_co_us",  # I-70 Denver-Silverthorne
     "bakersfield_ca_us:los_angeles_ca_us",  # Grapevine (was flat)
-    "yreka_ca_us:medford_or_us",         # Siskiyou
+    "yreka_ca_us:medford_or_us",  # Siskiyou
     "chattanooga_tn_us:nashville_tn_us",  # Monteagle (was flat)
 ]
 
@@ -514,8 +629,12 @@ def run_acceptance(data: dict[str, Any], ramps: list[dict[str, Any]]) -> bool:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--write", action="store_true", help="save changes via world_source (default: dry-run)")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument(
+        "--write", action="store_true", help="save changes via world_source (default: dry-run)"
+    )
     ap.add_argument("--state", help="restrict the printed report to one state code")
     ap.add_argument("--acceptance", action="store_true", help="run the acceptance harness")
     ap.add_argument("--json-out", type=Path, help="write the full change report as JSON here")

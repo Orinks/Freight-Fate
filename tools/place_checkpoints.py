@@ -32,6 +32,7 @@ if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
 import enrich_routes as er  # noqa: E402  (needs sys.path above)
+import leg_geometry  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
 # A candidate further off the route than this is probably the wrong town, a
@@ -39,6 +40,22 @@ from world_source import load_world, save_world  # noqa: E402
 # inventing a checkpoint the driver never actually passes.
 MAX_OFF_ROUTE_MI = 2.0
 PLACEHOLDER_MARKER = "corridor between"
+
+# How close two checkpoints may sit when they were discovered rather than
+# hand-picked. Not a taste call: measured against the 2,103 gaps between the
+# real place checkpoints already curated across the network, whose 1st
+# percentile is 8.9 miles -- so in the whole world today, essentially no two
+# checkpoints are closer than this. A discovery pass that packed them tighter
+# would be talking over the curated corridors, not matching them.
+MIN_DISCOVERED_GAP_MI = 8.9
+
+# Which polyline a discovered checkpoint was positioned against.
+ARCHIVE_ROUTE_NOTE = "the leg's checked-in route geometry"
+ORS_ROUTE_NOTE = "the real ORS driving-hgv route geometry"
+
+# A discovered candidate's precedence when two crowd each other out: the
+# bigger settlement is the one a driver orients by.
+PLACE_RANK = {"city": 3, "town": 2, "village": 1}
 
 
 def position_on_route(
@@ -98,6 +115,137 @@ def merge_checkpoints(
     return merged
 
 
+def leg_route(
+    data: dict[str, Any],
+    leg: dict[str, Any],
+    cache_dir: Path,
+    rate_limit: float,
+    api_key: str | None,
+) -> tuple[list[list[float]], float, str]:
+    """``(polyline as [[lon, lat], ...], its own miles, what it is)``.
+
+    The checked-in archive first. Re-asking ORS returns the route the leg was
+    ORIGINALLY baked from, which on a rerouted leg is a different road, and a
+    checkpoint positioned against it lands nowhere in particular.
+    """
+    shape = leg_geometry.archived_shape(f"{leg['from']}:{leg['to']}")
+    if shape is not None:
+        # DENSIFIED, because ``position_on_route`` measures to the nearest
+        # VERTEX. The archive thins straight runs, so a town sitting halfway
+        # along one reads as tens of miles off-route and is rejected as the
+        # wrong town -- silently, and worst exactly where a leg is straightest.
+        # At a tenth of a mile apart, nearest-vertex is segment projection.
+        shape = leg_geometry.densify(shape)
+        miles = sum(
+            er._haversine_miles(a[1], a[0], b[1], b[0])
+            for a, b in zip(shape, shape[1:], strict=False)
+        )
+        return shape, miles, ARCHIVE_ROUTE_NOTE
+    if api_key is None:
+        raise SystemExit(
+            f"{leg['from']}:{leg['to']} has no archived route geometry, so this "
+            f"needs the {er.ORS_API_KEY_ENV} environment variable."
+        )
+    parsed = er._cached_ors_route(data, leg, cache_dir, rate_limit, api_key)
+    return parsed["coordinates"], float(parsed["miles"]), ORS_ROUTE_NOTE
+
+
+def discover_candidates(
+    data: dict[str, Any],
+    leg: dict[str, Any],
+    coordinates: list[list[float]],
+    route_miles: float,
+    max_off_route_mi: float,
+    min_gap_mi: float,
+) -> list[dict[str, Any]]:
+    """Real towns along this leg's route, from the baked OSM place index.
+
+    The same index ``bake_villages`` reads, and the same speakability and
+    city-dedupe rules, so a name that is refused as a village cue is not
+    quietly admitted as a checkpoint. What differs is the gate: a checkpoint
+    is a place the road actually runs through, so only the tight
+    ``max_off_route_mi`` catchment survives, and survivors are thinned to the
+    network's own working spacing (:data:`MIN_DISCOVERED_GAP_MI`) with the
+    bigger settlement winning a crowd.
+    """
+    import bake_villages as bv
+
+    leg_miles = float(leg["miles"])
+    route = [(lat, lon) for lon, lat in coordinates]
+    anchors = bv.city_anchors(data)
+    index = bv.grid_index(bv.load_places())
+    taken = {bv._norm(c.get("name")) for c in (leg.get("corridor") or {}).get("checkpoints", ())}
+    for slug in (leg["from"], leg["to"]):
+        taken.add(bv._norm(data["cities"][slug].get("spoken_city") or slug))
+
+    found: list[dict[str, Any]] = []
+    for place in bv.nearby_places(index, route, max_off_route_mi):
+        name = bv.clean_landmark_name(place["name"])
+        if not name or not bv.speakable(name) or bv._norm(name) in taken:
+            continue
+        at_mi, off_mi = position_on_route(
+            coordinates, route_miles, leg_miles, float(place["lat"]), float(place["lon"])
+        )
+        if off_mi > max_off_route_mi:
+            continue
+        # A place sitting on a dispatchable city IS that city; the route
+        # already speaks it as an endpoint.
+        if any(
+            bv.hav(place["lat"], place["lon"], lat, lon)
+            <= (bv.CITY_NAME_DEDUPE_MI if bv._norm(city) == bv._norm(name) else bv.CITY_DEDUPE_MI)
+            for lat, lon, city in anchors
+        ):
+            continue
+        found.append(
+            {
+                "name": name,
+                "lat": float(place["lat"]),
+                "lon": float(place["lon"]),
+                "at_mi": at_mi,
+                "off_mi": off_mi,
+                "state": str(place.get("state") or ""),
+                "type": "place",
+                "highway": "",
+                "rank": (PLACE_RANK.get(str(place.get("place")), 0), -off_mi),
+            }
+        )
+
+    # Thin to the network's spacing, best-first, so a crowded metro fringe
+    # cannot bury the one town that actually orients the driver.
+    kept: list[dict[str, Any]] = []
+    for cand in sorted(found, key=lambda c: c["rank"], reverse=True):
+        if all(abs(cand["at_mi"] - other["at_mi"]) >= min_gap_mi for other in kept):
+            kept.append(cand)
+    kept.sort(key=lambda c: c["at_mi"])
+    for cand in kept:
+        cand.pop("rank", None)
+    return kept
+
+
+def state_at_mile(data: dict[str, Any], leg: dict[str, Any], at_mi: float) -> str:
+    """The spoken state name at a mile along the leg.
+
+    A discovered place carries a state tag only where OSM happens to have one,
+    which in the US is rarely, so the leg's own baked state sequence answers
+    instead -- it is the same fact, measured rather than tagged.
+    """
+    corridor = leg.get("corridor") or {}
+    state = ""
+    for crossing in sorted(corridor.get("state_crossings") or (), key=lambda c: float(c["at_mi"])):
+        if float(crossing["at_mi"]) <= at_mi:
+            state = str(crossing["state"])
+        else:
+            if not state:
+                state = str(crossing.get("from_state") or "")
+            break
+    if state:
+        return state
+    miles = corridor.get("state_miles") or ()
+    if len(miles) == 1:
+        return str(miles[0]["state"])
+    return er.spoken_state(data, data["cities"][leg["to"]]["state"])
+
+
 def _parse_candidate(raw: str) -> dict[str, Any]:
     parts = [p.strip() for p in raw.split("|")]
     if len(parts) not in (4, 5, 6):
@@ -129,9 +277,28 @@ def main(argv: list[str] | None = None) -> int:
         "--candidate",
         action="append",
         default=[],
-        required=True,
         help="Repeatable: 'Name|lat|lon|State[|type]'. State may be a 2-letter "
         "code (resolved to the full spoken name) or the full name.",
+    )
+    parser.add_argument(
+        "--from-places",
+        action="store_true",
+        help="Discover candidates from the baked OSM place index along this "
+        "leg's route instead of typing them out. What a rerouted leg needs: "
+        "its old checkpoints described a road it no longer drives.",
+    )
+    parser.add_argument(
+        "--min-gap-mi",
+        type=float,
+        default=MIN_DISCOVERED_GAP_MI,
+        help="Minimum spacing between DISCOVERED checkpoints (default is the "
+        "network's own 1st-percentile gap between curated ones).",
+    )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Drop the leg's existing checkpoints first, rather than merging. "
+        "For a rerouted leg, where the old ones are on the wrong road.",
     )
     parser.add_argument(
         "--max-off-route-mi",
@@ -144,12 +311,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--rate-limit", type=float, default=1.0)
     args = parser.parse_args(argv)
 
+    if not args.candidate and not args.from_places:
+        parser.error("pass --candidate at least once, or --from-places")
+    # Only a leg with no archived polyline still needs ORS, so a missing key
+    # is reported by leg_route at the point it actually blocks something.
     api_key = er.ors_api_key()
-    if api_key is None:
-        raise SystemExit(
-            f"Needs the {er.ORS_API_KEY_ENV} environment variable and the "
-            "tooling group (uv run --group tooling ...)."
-        )
     data = load_world()
     from_city, _, to_city = args.leg.partition(":")
     leg = next(
@@ -168,13 +334,28 @@ def main(argv: list[str] | None = None) -> int:
         hint = " (the reverse direction exists -- at_mi is measured from 'from')" if reverse else ""
         raise SystemExit(f"No leg {args.leg!r} in the world source{hint}")
 
-    parsed = er._cached_ors_route(data, leg, Path(args.cache_dir), args.rate_limit, api_key)
+    coordinates, route_miles, route_note = leg_route(
+        data, leg, Path(args.cache_dir), args.rate_limit, api_key
+    )
     leg_miles = float(leg["miles"])
+    candidates = [_parse_candidate(raw) for raw in args.candidate]
+    if args.replace:
+        # Before discovery, not after: the discovery pass skips any name the
+        # leg already carries, so leaving the old list in place made a second
+        # run find nothing and report "0 real places along the route".
+        leg.setdefault("corridor", {}).pop("checkpoints", None)
+    if args.from_places:
+        discovered = discover_candidates(
+            data, leg, coordinates, route_miles, args.max_off_route_mi, args.min_gap_mi
+        )
+        for cand in discovered:
+            cand["state"] = cand["state"] or state_at_mile(data, leg, cand["at_mi"])
+        candidates += discovered
+        print(f"{len(discovered)} real places found along the route")
     accepted: list[dict[str, Any]] = []
-    for raw in args.candidate:
-        cand = _parse_candidate(raw)
+    for cand in candidates:
         at_mi, off_mi = position_on_route(
-            parsed["coordinates"], float(parsed["miles"]), leg_miles, cand["lat"], cand["lon"]
+            coordinates, route_miles, leg_miles, cand["lat"], cand["lon"]
         )
         if off_mi > args.max_off_route_mi:
             print(
@@ -198,9 +379,8 @@ def main(argv: list[str] | None = None) -> int:
                 "lon": round(cand["lon"], 5),
                 "source": (
                     f"Real town on {highway} between {leg['from']} and "
-                    f"{leg['to']}; position matched to the nearest point on the "
-                    f"real ORS driving-hgv route geometry ({off_mi} mi off-route "
-                    "at closest approach)."
+                    f"{leg['to']}; position matched to the nearest point on "
+                    f"{route_note} ({off_mi} mi off-route at closest approach)."
                 ),
             }
         )
@@ -210,7 +390,8 @@ def main(argv: list[str] | None = None) -> int:
         print("Nothing accepted; the world source is unchanged.")
         return 1
     corridor = leg.setdefault("corridor", {})
-    merged = merge_checkpoints(list(corridor.get("checkpoints", [])), accepted)
+    existing = [] if args.replace else list(corridor.get("checkpoints", []))
+    merged = merge_checkpoints(existing, accepted)
     corridor["checkpoints"] = merged
     print(f"\nLeg {leg['from']} -> {leg['to']} checkpoints ({len(merged)}):")
     for checkpoint in merged:

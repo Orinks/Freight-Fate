@@ -31580,6 +31580,13 @@
       ],
       "corridor": {
         "tollway_detected": false,
+        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
+        "hpms_terrain": {
+          "type": 1,
+          "name": "level",
+          "sections": 800,
+          "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+        },
         "route_points": [
           {
             "at_mi": 0.0,
@@ -31587,19 +31594,19 @@
             "lon": -104.95325
           },
           {
-            "at_mi": 22.2,
-            "lat": 42.35987,
-            "lon": -105.04582
+            "at_mi": 22.58,
+            "lat": 42.36401,
+            "lon": -105.04614
           },
           {
-            "at_mi": 44.5,
-            "lat": 42.63704,
-            "lon": -105.16531
+            "at_mi": 45.7,
+            "lat": 42.64225,
+            "lon": -105.18477
           },
           {
-            "at_mi": 66.8,
-            "lat": 42.76015,
-            "lon": -104.85697
+            "at_mi": 68.87,
+            "lat": 42.75648,
+            "lon": -104.82021
           },
           {
             "at_mi": 89.0,
@@ -31610,849 +31617,2358 @@
         "elevation_samples": [
           {
             "at_mi": 0.0,
-            "elevation_ft": 4758.9,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+            "elevation_ft": 4757.2,
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, taken at development time and archived to the nearest metre (replaces the OpenRouteService route this leg was first baked from)."
           },
           {
-            "at_mi": 22.2,
-            "elevation_ft": 4954.1,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+            "at_mi": 22.58,
+            "elevation_ft": 5000.0,
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, taken at development time and archived to the nearest metre (replaces the OpenRouteService route this leg was first baked from)."
           },
           {
-            "at_mi": 44.5,
-            "elevation_ft": 4760.5,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+            "at_mi": 45.7,
+            "elevation_ft": 4701.4,
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, taken at development time and archived to the nearest metre (replaces the OpenRouteService route this leg was first baked from)."
           },
           {
-            "at_mi": 66.8,
-            "elevation_ft": 5171.9,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+            "at_mi": 68.87,
+            "elevation_ft": 5239.5,
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, taken at development time and archived to the nearest metre (replaces the OpenRouteService route this leg was first baked from)."
           },
           {
             "at_mi": 89.0,
-            "elevation_ft": 5029.5,
-            "source": "OpenRouteService driving-hgv route elevation over OpenStreetMap (SRTM/elevation), sampled at development time."
+            "elevation_ft": 5016.4,
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, taken at development time and archived to the nearest metre (replaces the OpenRouteService route this leg was first baked from)."
           }
         ],
         "grade_segments": [
           {
             "start_mi": 0.0,
-            "end_mi": 1.4,
-            "avg_grade_pct": -0.8,
+            "end_mi": 0.25,
+            "avg_grade_pct": -1.74,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 1.4,
-            "end_mi": 3.2,
-            "avg_grade_pct": -0.07,
+            "start_mi": 0.25,
+            "end_mi": 0.5,
+            "avg_grade_pct": -1.4,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 3.2,
-            "end_mi": 3.6,
-            "avg_grade_pct": -1.33,
+            "start_mi": 0.5,
+            "end_mi": 0.75,
+            "avg_grade_pct": -0.9,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 3.6,
-            "end_mi": 3.8,
-            "avg_grade_pct": -0.35,
+            "start_mi": 0.75,
+            "end_mi": 1.0,
+            "avg_grade_pct": -0.39,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 3.8,
-            "end_mi": 4.8,
-            "avg_grade_pct": -2.45,
+            "start_mi": 1.0,
+            "end_mi": 1.25,
+            "avg_grade_pct": 1.38,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 4.8,
-            "end_mi": 5.2,
-            "avg_grade_pct": -0.25,
+            "start_mi": 1.25,
+            "end_mi": 1.5,
+            "avg_grade_pct": -1.42,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 1.5,
+            "end_mi": 1.75,
+            "avg_grade_pct": 0.25,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 1.75,
+            "end_mi": 2.0,
+            "avg_grade_pct": 0.5,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 2.0,
+            "end_mi": 2.25,
+            "avg_grade_pct": -0.5,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 2.25,
+            "end_mi": 2.5,
+            "avg_grade_pct": -0.46,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 2.5,
+            "end_mi": 2.75,
+            "avg_grade_pct": 0.05,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 2.75,
+            "end_mi": 3.0,
+            "avg_grade_pct": 0.16,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 3.0,
+            "end_mi": 3.25,
+            "avg_grade_pct": -0.64,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 3.25,
+            "end_mi": 3.5,
+            "avg_grade_pct": -1.53,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 5.2,
+            "start_mi": 3.5,
+            "end_mi": 3.75,
+            "avg_grade_pct": -0.82,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 3.75,
+            "end_mi": 4.0,
+            "avg_grade_pct": -0.72,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 4.0,
+            "end_mi": 4.5,
+            "avg_grade_pct": -2.81,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 4.5,
+            "end_mi": 4.75,
+            "avg_grade_pct": -3.15,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 4.75,
+            "end_mi": 5.0,
+            "avg_grade_pct": -1.2,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 5.0,
+            "end_mi": 5.25,
+            "avg_grade_pct": 1.13,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 5.25,
             "end_mi": 5.5,
-            "avg_grade_pct": 3.52,
+            "avg_grade_pct": 3.77,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 5.5,
-            "end_mi": 6.1,
-            "avg_grade_pct": 2.53,
+            "end_mi": 5.75,
+            "avg_grade_pct": 1.72,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 6.1,
-            "end_mi": 6.6,
-            "avg_grade_pct": 0.38,
+            "start_mi": 5.75,
+            "end_mi": 6.0,
+            "avg_grade_pct": 2.98,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 6.6,
-            "end_mi": 7.9,
-            "avg_grade_pct": -2.07,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 6.0,
+            "end_mi": 6.25,
+            "avg_grade_pct": 1.2,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 7.9,
-            "end_mi": 8.1,
-            "avg_grade_pct": 0.23,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 6.25,
+            "end_mi": 6.5,
+            "avg_grade_pct": 0.63,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 8.1,
-            "end_mi": 9.4,
-            "avg_grade_pct": 1.59,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 6.5,
+            "end_mi": 6.75,
+            "avg_grade_pct": -0.64,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 9.4,
-            "end_mi": 10.3,
-            "avg_grade_pct": 0.52,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 6.75,
+            "end_mi": 7.0,
+            "avg_grade_pct": -1.12,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 10.3,
-            "end_mi": 11.7,
-            "avg_grade_pct": 1.47,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 7.0,
+            "end_mi": 7.25,
+            "avg_grade_pct": -2.58,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 11.7,
-            "end_mi": 12.2,
-            "avg_grade_pct": 0.38,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 7.25,
+            "end_mi": 7.5,
+            "avg_grade_pct": -2.74,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 12.2,
-            "end_mi": 13.2,
-            "avg_grade_pct": 1.81,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 7.5,
+            "end_mi": 7.75,
+            "avg_grade_pct": -2.24,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 13.2,
+            "start_mi": 7.75,
+            "end_mi": 8.0,
+            "avg_grade_pct": -1.0,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 8.0,
+            "end_mi": 8.25,
+            "avg_grade_pct": 0.31,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 8.25,
+            "end_mi": 8.5,
+            "avg_grade_pct": 2.67,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 8.5,
+            "end_mi": 9.25,
+            "avg_grade_pct": 1.2,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 9.25,
+            "end_mi": 9.5,
+            "avg_grade_pct": 0.81,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 9.5,
+            "end_mi": 9.75,
+            "avg_grade_pct": 1.31,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 9.75,
+            "end_mi": 10.0,
+            "avg_grade_pct": 0.98,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 10.0,
+            "end_mi": 10.25,
+            "avg_grade_pct": 0.39,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 10.25,
+            "end_mi": 10.5,
+            "avg_grade_pct": 1.44,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 10.5,
+            "end_mi": 10.75,
+            "avg_grade_pct": 2.13,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 10.75,
+            "end_mi": 11.0,
+            "avg_grade_pct": 1.89,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 11.0,
+            "end_mi": 11.25,
+            "avg_grade_pct": 1.35,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 11.25,
+            "end_mi": 11.5,
+            "avg_grade_pct": 2.1,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 11.5,
+            "end_mi": 11.75,
+            "avg_grade_pct": -0.46,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 11.75,
+            "end_mi": 12.0,
+            "avg_grade_pct": 0.15,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 12.0,
+            "end_mi": 12.25,
+            "avg_grade_pct": 0.94,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 12.25,
+            "end_mi": 12.5,
+            "avg_grade_pct": 1.78,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 12.5,
+            "end_mi": 12.75,
+            "avg_grade_pct": 2.37,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 12.75,
+            "end_mi": 13.0,
+            "avg_grade_pct": 1.87,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 13.0,
+            "end_mi": 13.25,
+            "avg_grade_pct": 0.84,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 13.25,
             "end_mi": 13.5,
-            "avg_grade_pct": 3.21,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "avg_grade_pct": 3.29,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 13.5,
-            "end_mi": 13.8,
-            "avg_grade_pct": 0.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "end_mi": 13.75,
+            "avg_grade_pct": 0.59,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 13.8,
-            "end_mi": 14.1,
-            "avg_grade_pct": 0.97,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 13.75,
+            "end_mi": 14.0,
+            "avg_grade_pct": 0.84,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 14.1,
+            "start_mi": 14.0,
+            "end_mi": 14.25,
+            "avg_grade_pct": 0.11,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 14.25,
+            "end_mi": 14.5,
+            "avg_grade_pct": 0.09,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 14.5,
             "end_mi": 15.0,
-            "avg_grade_pct": 0.34,
+            "avg_grade_pct": -0.09,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 15.0,
-            "end_mi": 15.6,
-            "avg_grade_pct": -1.8,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "end_mi": 15.25,
+            "avg_grade_pct": -0.93,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 15.6,
-            "end_mi": 15.9,
-            "avg_grade_pct": -0.47,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 15.25,
+            "end_mi": 15.5,
+            "avg_grade_pct": -2.33,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 15.9,
+            "start_mi": 15.5,
+            "end_mi": 15.75,
+            "avg_grade_pct": -1.07,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 15.75,
+            "end_mi": 16.0,
+            "avg_grade_pct": -1.4,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 16.0,
+            "end_mi": 16.25,
+            "avg_grade_pct": 1.49,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 16.25,
             "end_mi": 16.5,
-            "avg_grade_pct": -1.82,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "avg_grade_pct": -4.7,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 16.5,
-            "end_mi": 16.8,
-            "avg_grade_pct": 0.0,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "end_mi": 16.75,
+            "avg_grade_pct": 0.99,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 16.8,
-            "end_mi": 17.1,
-            "avg_grade_pct": 0.95,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 16.75,
+            "end_mi": 17.0,
+            "avg_grade_pct": 1.9,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 17.1,
-            "end_mi": 17.4,
-            "avg_grade_pct": -3.31,
+            "start_mi": 17.0,
+            "end_mi": 17.25,
+            "avg_grade_pct": -3.79,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 17.4,
-            "end_mi": 17.7,
-            "avg_grade_pct": -0.02,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 17.25,
+            "end_mi": 17.5,
+            "avg_grade_pct": -2.61,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 17.7,
-            "end_mi": 19.3,
-            "avg_grade_pct": 1.44,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 17.5,
+            "end_mi": 17.75,
+            "avg_grade_pct": 0.83,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 19.3,
-            "end_mi": 19.6,
-            "avg_grade_pct": 3.72,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 17.75,
+            "end_mi": 18.0,
+            "avg_grade_pct": 1.39,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 19.6,
-            "end_mi": 19.9,
-            "avg_grade_pct": 1.26,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 18.0,
+            "end_mi": 18.25,
+            "avg_grade_pct": 2.74,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 19.9,
-            "end_mi": 20.7,
-            "avg_grade_pct": -0.18,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 18.25,
+            "end_mi": 18.5,
+            "avg_grade_pct": 1.24,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 20.7,
+            "start_mi": 18.5,
+            "end_mi": 18.75,
+            "avg_grade_pct": 2.0,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 18.75,
+            "end_mi": 19.0,
+            "avg_grade_pct": 0.54,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 19.0,
+            "end_mi": 19.25,
+            "avg_grade_pct": 2.13,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 19.25,
+            "end_mi": 19.5,
+            "avg_grade_pct": 1.97,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 19.5,
+            "end_mi": 19.75,
+            "avg_grade_pct": 4.54,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 19.75,
+            "end_mi": 20.0,
+            "avg_grade_pct": -0.46,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 20.0,
+            "end_mi": 20.25,
+            "avg_grade_pct": -1.12,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 20.25,
+            "end_mi": 20.5,
+            "avg_grade_pct": -0.19,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 20.5,
+            "end_mi": 20.75,
+            "avg_grade_pct": 2.02,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 20.75,
             "end_mi": 21.0,
-            "avg_grade_pct": -0.87,
+            "avg_grade_pct": -3.6,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 21.0,
-            "end_mi": 22.3,
-            "avg_grade_pct": -0.41,
+            "end_mi": 21.25,
+            "avg_grade_pct": -0.19,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 22.3,
-            "end_mi": 22.6,
-            "avg_grade_pct": 2.17,
+            "start_mi": 21.25,
+            "end_mi": 21.5,
+            "avg_grade_pct": -0.51,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 22.6,
-            "end_mi": 23.2,
-            "avg_grade_pct": -0.27,
+            "start_mi": 21.5,
+            "end_mi": 21.75,
+            "avg_grade_pct": -0.85,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 23.2,
-            "end_mi": 24.7,
-            "avg_grade_pct": -1.34,
+            "start_mi": 21.75,
+            "end_mi": 22.0,
+            "avg_grade_pct": -0.59,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 24.7,
-            "end_mi": 25.1,
-            "avg_grade_pct": 3.01,
+            "start_mi": 22.0,
+            "end_mi": 22.25,
+            "avg_grade_pct": 2.12,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 25.1,
-            "end_mi": 27.3,
-            "avg_grade_pct": -0.56,
+            "start_mi": 22.25,
+            "end_mi": 22.5,
+            "avg_grade_pct": 0.52,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 27.3,
-            "end_mi": 27.7,
-            "avg_grade_pct": 4.8,
+            "start_mi": 22.5,
+            "end_mi": 22.75,
+            "avg_grade_pct": 0.9,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 27.7,
-            "end_mi": 28.5,
-            "avg_grade_pct": -1.4,
+            "start_mi": 22.75,
+            "end_mi": 23.0,
+            "avg_grade_pct": -0.72,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 23.0,
+            "end_mi": 23.25,
+            "avg_grade_pct": -0.38,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 23.25,
+            "end_mi": 23.5,
+            "avg_grade_pct": 1.24,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 23.5,
+            "end_mi": 23.75,
+            "avg_grade_pct": 1.5,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 23.75,
+            "end_mi": 24.0,
+            "avg_grade_pct": -1.01,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 24.0,
+            "end_mi": 24.25,
+            "avg_grade_pct": -2.58,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 24.25,
+            "end_mi": 24.5,
+            "avg_grade_pct": -2.51,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 24.5,
+            "end_mi": 24.75,
+            "avg_grade_pct": -2.62,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 24.75,
+            "end_mi": 25.0,
+            "avg_grade_pct": 2.05,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 25.0,
+            "end_mi": 25.25,
+            "avg_grade_pct": 2.09,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 25.25,
+            "end_mi": 25.5,
+            "avg_grade_pct": -1.69,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 25.5,
+            "end_mi": 25.75,
+            "avg_grade_pct": -2.48,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 25.75,
+            "end_mi": 26.0,
+            "avg_grade_pct": -2.66,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 26.0,
+            "end_mi": 26.25,
+            "avg_grade_pct": -1.26,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 26.25,
+            "end_mi": 26.5,
+            "avg_grade_pct": -2.17,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 26.5,
+            "end_mi": 26.75,
+            "avg_grade_pct": 1.56,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 26.75,
+            "end_mi": 27.0,
+            "avg_grade_pct": 0.63,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 27.0,
+            "end_mi": 27.25,
+            "avg_grade_pct": -2.16,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 27.25,
+            "end_mi": 27.5,
+            "avg_grade_pct": 2.92,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 27.5,
+            "end_mi": 27.75,
+            "avg_grade_pct": 2.54,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 27.75,
+            "end_mi": 28.0,
+            "avg_grade_pct": 0.42,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 28.0,
+            "end_mi": 28.25,
+            "avg_grade_pct": -0.21,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 28.25,
+            "end_mi": 28.5,
+            "avg_grade_pct": -1.9,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 28.5,
-            "end_mi": 28.8,
-            "avg_grade_pct": -3.33,
+            "end_mi": 28.75,
+            "avg_grade_pct": -3.17,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 28.8,
+            "start_mi": 28.75,
+            "end_mi": 29.0,
+            "avg_grade_pct": -3.0,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 29.0,
+            "end_mi": 29.25,
+            "avg_grade_pct": -2.7,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 29.25,
             "end_mi": 29.5,
             "avg_grade_pct": -2.65,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 29.5,
-            "end_mi": 29.7,
-            "avg_grade_pct": -0.42,
+            "end_mi": 29.75,
+            "avg_grade_pct": -0.47,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 29.7,
-            "end_mi": 30.1,
-            "avg_grade_pct": -2.89,
+            "start_mi": 29.75,
+            "end_mi": 30.0,
+            "avg_grade_pct": -4.13,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 30.1,
+            "start_mi": 30.0,
+            "end_mi": 30.25,
+            "avg_grade_pct": -1.83,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 30.25,
             "end_mi": 30.5,
-            "avg_grade_pct": 0.24,
+            "avg_grade_pct": 0.03,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 30.5,
+            "end_mi": 30.75,
+            "avg_grade_pct": 3.63,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 30.75,
             "end_mi": 31.0,
-            "avg_grade_pct": 3.14,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "avg_grade_pct": 3.04,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 31.0,
-            "end_mi": 31.2,
-            "avg_grade_pct": 1.57,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "end_mi": 31.25,
+            "avg_grade_pct": 1.69,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 31.2,
-            "end_mi": 33.3,
+            "start_mi": 31.25,
+            "end_mi": 31.5,
+            "avg_grade_pct": 5.6,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 31.5,
+            "end_mi": 31.75,
+            "avg_grade_pct": -3.76,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 31.75,
+            "end_mi": 32.0,
+            "avg_grade_pct": -3.75,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 32.0,
+            "end_mi": 32.25,
+            "avg_grade_pct": 0.9,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 32.25,
+            "end_mi": 32.5,
+            "avg_grade_pct": 0.29,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 32.5,
+            "end_mi": 32.75,
+            "avg_grade_pct": 0.52,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 32.75,
+            "end_mi": 33.0,
+            "avg_grade_pct": 2.86,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 33.0,
+            "end_mi": 33.25,
+            "avg_grade_pct": -2.03,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 33.25,
+            "end_mi": 33.5,
+            "avg_grade_pct": -3.27,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 33.5,
+            "end_mi": 33.75,
+            "avg_grade_pct": -2.1,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 33.75,
+            "end_mi": 34.0,
+            "avg_grade_pct": 0.18,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 34.0,
+            "end_mi": 34.25,
+            "avg_grade_pct": -1.36,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 34.25,
+            "end_mi": 34.75,
+            "avg_grade_pct": 0.3,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 34.75,
+            "end_mi": 35.0,
+            "avg_grade_pct": 0.74,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 35.0,
+            "end_mi": 35.5,
+            "avg_grade_pct": 0.91,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 35.5,
+            "end_mi": 35.75,
+            "avg_grade_pct": -1.72,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 35.75,
+            "end_mi": 36.0,
+            "avg_grade_pct": 0.7,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 36.0,
+            "end_mi": 36.25,
+            "avg_grade_pct": -0.71,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 36.25,
+            "end_mi": 36.5,
+            "avg_grade_pct": -0.7,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 36.5,
+            "end_mi": 36.75,
+            "avg_grade_pct": 2.19,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 36.75,
+            "end_mi": 37.0,
+            "avg_grade_pct": 4.01,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 37.0,
+            "end_mi": 37.25,
+            "avg_grade_pct": -4.07,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 37.25,
+            "end_mi": 37.5,
+            "avg_grade_pct": -1.7,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 37.5,
+            "end_mi": 37.75,
             "avg_grade_pct": -0.12,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 33.3,
-            "end_mi": 33.6,
-            "avg_grade_pct": -1.53,
+            "start_mi": 37.75,
+            "end_mi": 38.0,
+            "avg_grade_pct": 0.22,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 33.6,
-            "end_mi": 36.3,
-            "avg_grade_pct": -0.14,
+            "start_mi": 38.0,
+            "end_mi": 38.25,
+            "avg_grade_pct": 0.39,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 36.3,
-            "end_mi": 36.6,
-            "avg_grade_pct": 1.25,
+            "start_mi": 38.25,
+            "end_mi": 38.5,
+            "avg_grade_pct": -1.1,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 36.6,
-            "end_mi": 37.4,
-            "avg_grade_pct": 1.74,
+            "start_mi": 38.5,
+            "end_mi": 38.75,
+            "avg_grade_pct": 1.68,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 37.4,
-            "end_mi": 38.1,
-            "avg_grade_pct": -0.05,
+            "start_mi": 38.75,
+            "end_mi": 39.0,
+            "avg_grade_pct": 1.75,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 38.1,
-            "end_mi": 38.9,
-            "avg_grade_pct": 0.32,
+            "start_mi": 39.0,
+            "end_mi": 39.25,
+            "avg_grade_pct": 2.96,
             "terrain": "hills",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 38.9,
-            "end_mi": 39.6,
-            "avg_grade_pct": 3.16,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 39.25,
+            "end_mi": 39.5,
+            "avg_grade_pct": 3.33,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 39.6,
+            "start_mi": 39.5,
+            "end_mi": 39.75,
+            "avg_grade_pct": 3.29,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 39.75,
+            "end_mi": 40.0,
+            "avg_grade_pct": -1.49,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 40.0,
+            "end_mi": 40.25,
+            "avg_grade_pct": -4.24,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 40.25,
             "end_mi": 40.5,
-            "avg_grade_pct": -2.38,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "avg_grade_pct": -2.41,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 40.5,
-            "end_mi": 41.9,
+            "end_mi": 40.75,
+            "avg_grade_pct": -2.32,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 40.75,
+            "end_mi": 41.0,
+            "avg_grade_pct": -0.11,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 41.0,
+            "end_mi": 41.25,
             "avg_grade_pct": -0.17,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 41.9,
-            "end_mi": 43.6,
-            "avg_grade_pct": 1.2,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 41.25,
+            "end_mi": 41.5,
+            "avg_grade_pct": -0.5,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 43.6,
-            "end_mi": 43.9,
-            "avg_grade_pct": -5.19,
+            "start_mi": 41.5,
+            "end_mi": 41.75,
+            "avg_grade_pct": -0.43,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 43.9,
-            "end_mi": 44.2,
-            "avg_grade_pct": -0.38,
+            "start_mi": 41.75,
+            "end_mi": 42.0,
+            "avg_grade_pct": 0.7,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 44.2,
-            "end_mi": 45.3,
-            "avg_grade_pct": 1.49,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 42.0,
+            "end_mi": 42.25,
+            "avg_grade_pct": 0.45,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 45.3,
-            "end_mi": 45.6,
-            "avg_grade_pct": -4.24,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 42.25,
+            "end_mi": 42.5,
+            "avg_grade_pct": 0.23,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 45.6,
-            "end_mi": 46.9,
-            "avg_grade_pct": -0.21,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "start_mi": 42.5,
+            "end_mi": 42.75,
+            "avg_grade_pct": 1.42,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 46.9,
+            "start_mi": 42.75,
+            "end_mi": 43.25,
+            "avg_grade_pct": 2.52,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 43.25,
+            "end_mi": 43.5,
+            "avg_grade_pct": 1.68,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 43.5,
+            "end_mi": 43.75,
+            "avg_grade_pct": -0.68,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 43.75,
+            "end_mi": 44.0,
+            "avg_grade_pct": -2.93,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 44.0,
+            "end_mi": 44.25,
+            "avg_grade_pct": -4.42,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 44.25,
+            "end_mi": 44.5,
+            "avg_grade_pct": 1.64,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 44.5,
+            "end_mi": 44.75,
+            "avg_grade_pct": 1.48,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 44.75,
+            "end_mi": 45.0,
+            "avg_grade_pct": 2.45,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 45.0,
+            "end_mi": 45.25,
+            "avg_grade_pct": 2.71,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 45.25,
+            "end_mi": 45.5,
+            "avg_grade_pct": 2.55,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 45.5,
+            "end_mi": 45.75,
+            "avg_grade_pct": -6.13,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 45.75,
+            "end_mi": 46.0,
+            "avg_grade_pct": -3.45,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 46.0,
+            "end_mi": 46.25,
+            "avg_grade_pct": -2.73,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 46.25,
+            "end_mi": 46.5,
+            "avg_grade_pct": 0.38,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 46.5,
+            "end_mi": 46.75,
+            "avg_grade_pct": 0.7,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 46.75,
+            "end_mi": 47.0,
+            "avg_grade_pct": 3.3,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 47.0,
+            "end_mi": 47.25,
+            "avg_grade_pct": 1.84,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 47.25,
             "end_mi": 47.5,
-            "avg_grade_pct": 0.35,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "avg_grade_pct": -0.26,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 47.5,
-            "end_mi": 48.1,
-            "avg_grade_pct": -2.09,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "end_mi": 47.75,
+            "avg_grade_pct": -0.96,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 48.1,
+            "start_mi": 47.75,
+            "end_mi": 48.0,
+            "avg_grade_pct": -2.78,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 48.0,
+            "end_mi": 48.25,
+            "avg_grade_pct": -2.21,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 48.25,
             "end_mi": 48.5,
-            "avg_grade_pct": -0.05,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "avg_grade_pct": 0.06,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 48.5,
+            "end_mi": 48.75,
+            "avg_grade_pct": 0.62,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 48.75,
             "end_mi": 49.0,
-            "avg_grade_pct": 0.93,
+            "avg_grade_pct": 0.47,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 49.0,
-            "end_mi": 49.8,
-            "avg_grade_pct": -0.29,
+            "end_mi": 49.25,
+            "avg_grade_pct": 0.62,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 49.8,
-            "end_mi": 50.9,
-            "avg_grade_pct": 1.45,
+            "start_mi": 49.25,
+            "end_mi": 49.75,
+            "avg_grade_pct": 0.11,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 50.9,
-            "end_mi": 51.4,
-            "avg_grade_pct": -0.14,
+            "start_mi": 49.75,
+            "end_mi": 50.0,
+            "avg_grade_pct": -1.0,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 51.4,
+            "start_mi": 50.0,
+            "end_mi": 50.25,
+            "avg_grade_pct": 1.97,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 50.25,
+            "end_mi": 50.5,
+            "avg_grade_pct": 1.92,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 50.5,
+            "end_mi": 50.75,
+            "avg_grade_pct": 1.64,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 50.75,
+            "end_mi": 51.0,
+            "avg_grade_pct": 0.31,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 51.0,
+            "end_mi": 51.25,
+            "avg_grade_pct": 0.54,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 51.25,
+            "end_mi": 51.5,
+            "avg_grade_pct": -1.15,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 51.5,
+            "end_mi": 51.75,
+            "avg_grade_pct": 1.95,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 51.75,
             "end_mi": 52.0,
-            "avg_grade_pct": 1.08,
+            "avg_grade_pct": -0.21,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 52.0,
-            "end_mi": 53.8,
-            "avg_grade_pct": 0.04,
+            "end_mi": 52.25,
+            "avg_grade_pct": 1.18,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 53.8,
-            "end_mi": 55.1,
-            "avg_grade_pct": 0.93,
+            "start_mi": 52.25,
+            "end_mi": 53.0,
+            "avg_grade_pct": -0.43,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 55.1,
-            "end_mi": 56.2,
-            "avg_grade_pct": 0.66,
+            "start_mi": 53.0,
+            "end_mi": 53.25,
+            "avg_grade_pct": -0.12,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 56.2,
-            "end_mi": 56.7,
-            "avg_grade_pct": 1.54,
+            "start_mi": 53.25,
+            "end_mi": 53.5,
+            "avg_grade_pct": 0.75,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 56.7,
-            "end_mi": 57.2,
-            "avg_grade_pct": 0.72,
+            "start_mi": 53.5,
+            "end_mi": 53.75,
+            "avg_grade_pct": 1.0,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 57.2,
-            "end_mi": 57.9,
-            "avg_grade_pct": 1.67,
+            "start_mi": 53.75,
+            "end_mi": 54.0,
+            "avg_grade_pct": 1.02,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 57.9,
-            "end_mi": 59.1,
-            "avg_grade_pct": 0.18,
+            "start_mi": 54.0,
+            "end_mi": 54.25,
+            "avg_grade_pct": 0.6,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 59.1,
+            "start_mi": 54.25,
+            "end_mi": 55.25,
+            "avg_grade_pct": 0.69,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 55.25,
+            "end_mi": 55.5,
+            "avg_grade_pct": 0.16,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 55.5,
+            "end_mi": 55.75,
+            "avg_grade_pct": 1.29,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 55.75,
+            "end_mi": 56.0,
+            "avg_grade_pct": 1.23,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 56.0,
+            "end_mi": 56.25,
+            "avg_grade_pct": 0.29,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 56.25,
+            "end_mi": 56.5,
+            "avg_grade_pct": 3.12,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 56.5,
+            "end_mi": 56.75,
+            "avg_grade_pct": 0.68,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 56.75,
+            "end_mi": 57.0,
+            "avg_grade_pct": 1.02,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 57.0,
+            "end_mi": 57.25,
+            "avg_grade_pct": 1.24,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 57.25,
+            "end_mi": 57.5,
+            "avg_grade_pct": 0.16,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 57.5,
+            "end_mi": 57.75,
+            "avg_grade_pct": 0.96,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 57.75,
+            "end_mi": 58.0,
+            "avg_grade_pct": 3.07,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 58.0,
+            "end_mi": 58.25,
+            "avg_grade_pct": 0.28,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 58.25,
+            "end_mi": 58.5,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 58.5,
+            "end_mi": 58.75,
+            "avg_grade_pct": 1.24,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 58.75,
+            "end_mi": 59.0,
+            "avg_grade_pct": -0.35,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 59.0,
+            "end_mi": 59.25,
+            "avg_grade_pct": -0.01,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 59.25,
             "end_mi": 59.5,
-            "avg_grade_pct": -1.2,
+            "avg_grade_pct": -0.39,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 59.5,
-            "end_mi": 61.2,
-            "avg_grade_pct": 0.12,
+            "end_mi": 59.75,
+            "avg_grade_pct": -0.49,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 61.2,
-            "end_mi": 61.6,
-            "avg_grade_pct": -0.87,
+            "start_mi": 59.75,
+            "end_mi": 60.0,
+            "avg_grade_pct": -1.49,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 61.6,
-            "end_mi": 63.7,
-            "avg_grade_pct": -0.3,
+            "start_mi": 60.0,
+            "end_mi": 60.25,
+            "avg_grade_pct": 0.15,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 63.7,
+            "start_mi": 60.25,
+            "end_mi": 60.5,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 60.5,
+            "end_mi": 60.75,
+            "avg_grade_pct": -0.39,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 60.75,
+            "end_mi": 61.25,
+            "avg_grade_pct": -0.47,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 61.25,
+            "end_mi": 61.5,
+            "avg_grade_pct": -0.29,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 61.5,
+            "end_mi": 61.75,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 61.75,
+            "end_mi": 62.0,
+            "avg_grade_pct": 0.16,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 62.0,
+            "end_mi": 62.75,
+            "avg_grade_pct": 0.25,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 62.75,
+            "end_mi": 63.0,
+            "avg_grade_pct": -0.37,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 63.0,
+            "end_mi": 63.5,
+            "avg_grade_pct": -0.65,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 63.5,
+            "end_mi": 63.75,
+            "avg_grade_pct": -0.45,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 63.75,
+            "end_mi": 64.0,
+            "avg_grade_pct": 1.41,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 64.0,
+            "end_mi": 64.25,
+            "avg_grade_pct": 1.04,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 64.25,
             "end_mi": 64.5,
-            "avg_grade_pct": 1.45,
+            "avg_grade_pct": 0.5,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 64.5,
-            "end_mi": 65.7,
-            "avg_grade_pct": 0.72,
+            "end_mi": 64.75,
+            "avg_grade_pct": 1.13,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 65.7,
-            "end_mi": 66.2,
-            "avg_grade_pct": 1.79,
+            "start_mi": 64.75,
+            "end_mi": 65.0,
+            "avg_grade_pct": 1.06,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 66.2,
-            "end_mi": 68.8,
-            "avg_grade_pct": 0.71,
+            "start_mi": 65.0,
+            "end_mi": 65.25,
+            "avg_grade_pct": 0.64,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 68.8,
-            "end_mi": 69.6,
-            "avg_grade_pct": 1.6,
+            "start_mi": 65.25,
+            "end_mi": 65.5,
+            "avg_grade_pct": 0.59,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 69.6,
-            "end_mi": 71.2,
-            "avg_grade_pct": 0.3,
+            "start_mi": 65.5,
+            "end_mi": 65.75,
+            "avg_grade_pct": 0.51,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 71.2,
+            "start_mi": 65.75,
+            "end_mi": 66.0,
+            "avg_grade_pct": 1.28,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 66.0,
+            "end_mi": 66.25,
+            "avg_grade_pct": 1.99,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 66.25,
+            "end_mi": 66.5,
+            "avg_grade_pct": 0.98,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 66.5,
+            "end_mi": 66.75,
+            "avg_grade_pct": 0.6,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 66.75,
+            "end_mi": 67.0,
+            "avg_grade_pct": 0.74,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 67.0,
+            "end_mi": 67.25,
+            "avg_grade_pct": 0.89,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 67.25,
+            "end_mi": 67.5,
+            "avg_grade_pct": 1.42,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 67.5,
+            "end_mi": 69.0,
+            "avg_grade_pct": 0.49,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 69.0,
+            "end_mi": 69.25,
+            "avg_grade_pct": 3.08,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 69.25,
+            "end_mi": 69.5,
+            "avg_grade_pct": 0.57,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 69.5,
+            "end_mi": 69.75,
+            "avg_grade_pct": 0.88,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 69.75,
+            "end_mi": 70.0,
+            "avg_grade_pct": 1.44,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 70.0,
+            "end_mi": 70.25,
+            "avg_grade_pct": 0.96,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 70.25,
+            "end_mi": 70.5,
+            "avg_grade_pct": 0.92,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 70.5,
+            "end_mi": 70.75,
+            "avg_grade_pct": 0.94,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 70.75,
+            "end_mi": 71.0,
+            "avg_grade_pct": -0.48,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 71.0,
+            "end_mi": 71.25,
+            "avg_grade_pct": -0.73,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 71.25,
             "end_mi": 71.5,
-            "avg_grade_pct": -1.43,
+            "avg_grade_pct": -0.82,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
             "start_mi": 71.5,
-            "end_mi": 72.1,
-            "avg_grade_pct": 0.04,
+            "end_mi": 71.75,
+            "avg_grade_pct": -0.46,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 72.1,
-            "end_mi": 72.7,
-            "avg_grade_pct": -0.16,
+            "start_mi": 71.75,
+            "end_mi": 72.0,
+            "avg_grade_pct": -1.49,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 72.7,
-            "end_mi": 73.4,
-            "avg_grade_pct": 0.43,
+            "start_mi": 72.0,
+            "end_mi": 72.25,
+            "avg_grade_pct": 0.32,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 73.4,
-            "end_mi": 74.2,
-            "avg_grade_pct": 0.85,
+            "start_mi": 72.25,
+            "end_mi": 72.5,
+            "avg_grade_pct": -0.11,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 74.2,
-            "end_mi": 74.8,
-            "avg_grade_pct": -0.3,
+            "start_mi": 72.5,
+            "end_mi": 72.75,
+            "avg_grade_pct": -0.46,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 74.8,
-            "end_mi": 75.2,
-            "avg_grade_pct": 0.86,
+            "start_mi": 72.75,
+            "end_mi": 73.0,
+            "avg_grade_pct": 1.49,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 75.2,
-            "end_mi": 77.7,
-            "avg_grade_pct": -0.23,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 77.7,
-            "end_mi": 78.2,
-            "avg_grade_pct": -1.38,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 78.2,
-            "end_mi": 80.8,
-            "avg_grade_pct": -0.09,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 80.8,
-            "end_mi": 81.1,
-            "avg_grade_pct": 0.93,
-            "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
-          },
-          {
-            "start_mi": 81.1,
-            "end_mi": 81.6,
+            "start_mi": 73.0,
+            "end_mi": 73.25,
             "avg_grade_pct": 0.0,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 81.6,
-            "end_mi": 82.2,
-            "avg_grade_pct": 0.28,
+            "start_mi": 73.25,
+            "end_mi": 73.5,
+            "avg_grade_pct": 0.45,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 82.2,
-            "end_mi": 82.6,
-            "avg_grade_pct": -0.34,
+            "start_mi": 73.5,
+            "end_mi": 73.75,
+            "avg_grade_pct": 1.13,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 82.6,
-            "end_mi": 83.2,
-            "avg_grade_pct": 0.23,
+            "start_mi": 73.75,
+            "end_mi": 74.0,
+            "avg_grade_pct": 0.92,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 83.2,
-            "end_mi": 83.7,
-            "avg_grade_pct": -0.76,
+            "start_mi": 74.0,
+            "end_mi": 74.25,
+            "avg_grade_pct": 0.52,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 83.7,
-            "end_mi": 87.6,
-            "avg_grade_pct": -1.31,
+            "start_mi": 74.25,
+            "end_mi": 74.5,
+            "avg_grade_pct": 0.72,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 87.6,
-            "end_mi": 88.4,
+            "start_mi": 74.5,
+            "end_mi": 74.75,
+            "avg_grade_pct": -0.54,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 74.75,
+            "end_mi": 75.0,
+            "avg_grade_pct": -0.14,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 75.0,
+            "end_mi": 75.25,
+            "avg_grade_pct": 1.17,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 75.25,
+            "end_mi": 75.5,
+            "avg_grade_pct": -0.38,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 75.5,
+            "end_mi": 75.75,
+            "avg_grade_pct": -0.68,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 75.75,
+            "end_mi": 76.0,
+            "avg_grade_pct": -0.18,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 76.0,
+            "end_mi": 76.25,
             "avg_grade_pct": -0.16,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           },
           {
-            "start_mi": 88.4,
-            "end_mi": 89.0,
-            "avg_grade_pct": -0.03,
+            "start_mi": 76.25,
+            "end_mi": 76.5,
+            "avg_grade_pct": -0.09,
             "terrain": "flat",
-            "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 76.5,
+            "end_mi": 76.75,
+            "avg_grade_pct": -0.02,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 76.75,
+            "end_mi": 77.0,
+            "avg_grade_pct": -0.26,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 77.0,
+            "end_mi": 77.25,
+            "avg_grade_pct": 0.52,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 77.25,
+            "end_mi": 77.5,
+            "avg_grade_pct": -0.8,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 77.5,
+            "end_mi": 78.0,
+            "avg_grade_pct": -0.85,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 78.0,
+            "end_mi": 78.5,
+            "avg_grade_pct": -0.91,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 78.5,
+            "end_mi": 78.75,
+            "avg_grade_pct": -0.49,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 78.75,
+            "end_mi": 79.0,
+            "avg_grade_pct": -0.43,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 79.0,
+            "end_mi": 79.25,
+            "avg_grade_pct": -0.69,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 79.25,
+            "end_mi": 79.5,
+            "avg_grade_pct": -0.26,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 79.5,
+            "end_mi": 79.75,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 79.75,
+            "end_mi": 80.0,
+            "avg_grade_pct": 0.25,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 80.0,
+            "end_mi": 80.75,
+            "avg_grade_pct": 0.0,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 80.75,
+            "end_mi": 81.0,
+            "avg_grade_pct": 1.87,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 81.0,
+            "end_mi": 81.25,
+            "avg_grade_pct": 1.43,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 81.25,
+            "end_mi": 81.5,
+            "avg_grade_pct": -0.09,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 81.5,
+            "end_mi": 81.75,
+            "avg_grade_pct": -0.15,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 81.75,
+            "end_mi": 82.0,
+            "avg_grade_pct": 0.65,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 82.0,
+            "end_mi": 82.25,
+            "avg_grade_pct": 1.93,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 82.25,
+            "end_mi": 82.5,
+            "avg_grade_pct": -1.37,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 82.5,
+            "end_mi": 82.75,
+            "avg_grade_pct": -0.52,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 82.75,
+            "end_mi": 83.0,
+            "avg_grade_pct": -0.6,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 83.0,
+            "end_mi": 83.25,
+            "avg_grade_pct": -1.42,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 83.25,
+            "end_mi": 83.5,
+            "avg_grade_pct": 2.22,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 83.5,
+            "end_mi": 83.75,
+            "avg_grade_pct": -0.41,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 83.75,
+            "end_mi": 84.0,
+            "avg_grade_pct": -0.76,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 84.0,
+            "end_mi": 84.25,
+            "avg_grade_pct": -2.2,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 84.25,
+            "end_mi": 84.5,
+            "avg_grade_pct": 1.0,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 84.5,
+            "end_mi": 84.75,
+            "avg_grade_pct": 0.53,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 84.75,
+            "end_mi": 85.0,
+            "avg_grade_pct": 0.4,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 85.0,
+            "end_mi": 85.25,
+            "avg_grade_pct": -0.64,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 85.25,
+            "end_mi": 85.5,
+            "avg_grade_pct": -2.01,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 85.5,
+            "end_mi": 85.75,
+            "avg_grade_pct": -2.19,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 85.75,
+            "end_mi": 86.25,
+            "avg_grade_pct": -2.85,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 86.25,
+            "end_mi": 86.5,
+            "avg_grade_pct": -2.39,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 86.5,
+            "end_mi": 86.75,
+            "avg_grade_pct": -1.49,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 86.75,
+            "end_mi": 87.0,
+            "avg_grade_pct": -1.14,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 87.0,
+            "end_mi": 87.25,
+            "avg_grade_pct": -1.02,
+            "terrain": "hills",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 87.25,
+            "end_mi": 87.5,
+            "avg_grade_pct": -1.7,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 87.5,
+            "end_mi": 87.75,
+            "avg_grade_pct": -1.12,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 87.75,
+            "end_mi": 88.0,
+            "avg_grade_pct": -0.75,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 88.0,
+            "end_mi": 88.25,
+            "avg_grade_pct": -0.26,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 88.25,
+            "end_mi": 88.5,
+            "avg_grade_pct": 0.51,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 88.5,
+            "end_mi": 88.75,
+            "avg_grade_pct": -0.92,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 88.75,
+            "end_mi": 89.0,
+            "avg_grade_pct": 1.0,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 89.0,
+            "end_mi": 89.25,
+            "avg_grade_pct": -1.07,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
+          },
+          {
+            "start_mi": 89.25,
+            "end_mi": 89.42,
+            "avg_grade_pct": -0.36,
+            "terrain": "flat",
+            "source": "Read: Valhalla /height elevation along the leg's own truck route, sampled at every route vertex and binned at a quarter mile; terrain derived from the shared relief-in-context rule (tools/reclassify_terrain.py)."
           }
         ],
-        "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wyoming",
             "miles": 89.0
           }
         ],
-        "landmarks": [
-          {
-            "name": "North Laramie River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.0,
-            "spoken": "Crossing the North Laramie River"
-          },
-          {
-            "name": "Laramie River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.0,
-            "spoken": "Crossing the Laramie River"
-          },
-          {
-            "name": "Glendo",
-            "at_mi": 32.4,
-            "off_mi": 0.2,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=town node 151385011, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Entering Glendo"
-          },
-          {
-            "name": "Douglas",
-            "at_mi": 47.0,
-            "off_mi": 11.62,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=town node 151866897, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Passing Douglas"
-          },
-          {
-            "name": "North Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 56.3,
-            "spoken": "Crossing the North Platte River"
-          },
-          {
-            "name": "Niobrara River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 77.6,
-            "spoken": "Crossing the Niobrara River"
-          },
-          {
-            "name": "Manville",
-            "at_mi": 79.3,
-            "off_mi": 0.32,
-            "category": "village",
-            "kind": "point",
-            "source": "OpenStreetMap place=village node 151416796, projected onto the leg's OpenRouteService driving-hgv route",
-            "spoken": "Entering Manville"
-          }
-        ],
         "speed_limits": [
           {
-            "at_mi": 2.1,
+            "at_mi": 2.0,
             "mph": 80,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
@@ -32464,16 +33980,140 @@
             "hgv": false
           },
           {
-            "at_mi": 25.1,
+            "at_mi": 25.0,
             "mph": 80,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 47.5,
+            "at_mi": 47.3,
             "mph": 70,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 49.8,
+            "mph": 65,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 50.1,
+            "mph": 70,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          }
+        ],
+        "interchanges": [
+          {
+            "at_mi": 2.1,
+            "exit_ref": "80",
+            "name": "",
+            "destinations": [
+              "Wheatland"
+            ],
+            "via": "I 25;US 87",
+            "highway": "I-25",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 5.4,
+            "exit_ref": "84",
+            "name": "",
+            "destinations": [],
+            "via": "",
+            "highway": "I-25",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 8.2,
+            "exit_ref": "87",
+            "name": "",
+            "destinations": [],
+            "via": "",
+            "highway": "I-25",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 13.2,
+            "exit_ref": "92",
+            "name": "",
+            "destinations": [
+              "Guernsey",
+              "Torrington"
+            ],
+            "via": "",
+            "highway": "I-25",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 15.6,
+            "exit_ref": "94",
+            "name": "",
+            "destinations": [],
+            "via": "",
+            "highway": "I-25",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 20.9,
+            "exit_ref": "100",
+            "name": "",
+            "destinations": [],
+            "via": "",
+            "highway": "I-25",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 24.8,
+            "exit_ref": "104",
+            "name": "",
+            "destinations": [
+              "Middle Bear"
+            ],
+            "via": "",
+            "highway": "I-25",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 32.3,
+            "exit_ref": "111",
+            "name": "",
+            "destinations": [],
+            "via": "",
+            "highway": "I-25",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
+          },
+          {
+            "at_mi": 46.8,
+            "exit_ref": "126",
+            "name": "",
+            "destinations": [
+              "Lusk"
+            ],
+            "via": "US 18 East;US 20 East",
+            "highway": "I-25",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_control": "stop",
+            "ramp_control_source": "OpenStreetMap highway=traffic_signals/highway=stop node within 120 m of the walked terminal node where this exit's ramp chain ends (read; the walk supplies the node, the tag supplies the control), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "ramp_far_end": "surface",
+            "ramp_far_end_source": "derived: this exit's motorway_link chains walked from the gore in a local Geofabrik extract, accessed 2026-06-23. 'motorway' means every chain merges onto a highway=motorway way; 'surface' means at least one chain ends off the motorway network: https://www.openstreetmap.org/"
           }
         ],
         "restrictions": [],
@@ -32500,27 +34140,82 @@
         ],
         "traffic_aadt": [
           {
-            "at_mi": 20.0,
+            "at_mi": 0.0,
             "aadt": 7000.0,
             "lanes": 2,
             "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
           },
           {
-            "at_mi": 40.0,
+            "at_mi": 20.0,
+            "aadt": 6500.0,
+            "lanes": 2,
+            "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
+          },
+          {
+            "at_mi": 30.0,
             "aadt": 6000.0,
             "lanes": 2,
             "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
           }
         ],
-        "hpms_terrain": {
-          "type": 1,
-          "name": "level",
-          "sections": 800,
-          "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        "checkpoints": [
+          {
+            "name": "Glendo",
+            "at_mi": 32.4,
+            "type": "place",
+            "state": "Wyoming",
+            "highway": "I-25",
+            "lat": 42.50275,
+            "lon": -105.02608,
+            "source": "Real town on I-25 between wheatland_wy_us and lusk_wy_us; position matched to the nearest point on the leg's checked-in route geometry (0.21 mi off-route at closest approach)."
+          },
+          {
+            "name": "Manville",
+            "at_mi": 79.3,
+            "type": "place",
+            "state": "Wyoming",
+            "highway": "I-25",
+            "lat": 42.77913,
+            "lon": -104.61774,
+            "source": "Real town on I-25 between wheatland_wy_us and lusk_wy_us; position matched to the nearest point on the leg's checked-in route geometry (0.34 mi off-route at closest approach)."
+          }
+        ],
+        "landmarks": [
+          {
+            "name": "Laramie River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 4.6,
+            "spoken": "Crossing the Laramie River"
+          },
+          {
+            "name": "North Laramie River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 9.1,
+            "spoken": "Crossing the North Laramie River"
+          },
+          {
+            "name": "North Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 46.3,
+            "spoken": "Crossing the North Platte River"
+          },
+          {
+            "name": "Douglas",
+            "at_mi": 47.0,
+            "off_mi": 11.62,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 151866897, projected onto the leg's checked-in route geometry",
+            "spoken": "Passing Douglas"
+          }
+        ]
       },
-      "terrain": "flat",
-      "lanes": 2
+      "terrain": "hills",
+      "lanes": 2,
+      "rerouted": true
     }
   ]
 }

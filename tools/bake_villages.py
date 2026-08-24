@@ -47,6 +47,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import enrich_routes as er  # noqa: E402  (the composed tool: ORS fetch + cache)
+import leg_geometry  # noqa: E402
 from bake_landmarks import hav, project_on_route, route_cum  # noqa: E402
 from enrich_routes_landmarks import clean_landmark_name  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
@@ -79,6 +80,10 @@ MAX_PER_LEG = 30
 # Interstates bypass towns rather than enter them, so anything farther out is
 # phrased as passing.
 ENTER_OFF_MI = 0.5
+
+# Which polyline a village was projected onto, named in its own source line.
+ARCHIVE_ROUTE_NOTE = "the leg's checked-in route geometry"
+ORS_ROUTE_NOTE = "the leg's OpenRouteService driving-hgv route"
 
 
 def load_places() -> list[dict]:
@@ -182,8 +187,16 @@ def spoken_village(name: str, off_mi: float) -> str:
 
 
 def bake_leg(leg, data, index, anchors, api_key) -> tuple[list[dict], int, int]:
-    parsed = er._cached_ors_route(data, leg, CACHE_PATH, 0.0, api_key)
-    coords = parsed["coordinates"]
+    # The leg's own checked-in polyline first. Re-asking ORS would hand back
+    # the route this leg was ORIGINALLY baked from, which on a rerouted leg is
+    # a different road entirely -- the villages would be projected onto a
+    # highway the truck no longer drives.
+    shape = leg_geometry.archived_shape(f"{leg['from']}:{leg['to']}")
+    if shape is not None:
+        coords, route_note = shape, ARCHIVE_ROUTE_NOTE
+    else:
+        parsed = er._cached_ors_route(data, leg, CACHE_PATH, 0.0, api_key)
+        coords, route_note = parsed["coordinates"], ORS_ROUTE_NOTE
     if len(coords) < 2:
         return [], 0, 0
     route = [(lat, lon) for lon, lat in coords]
@@ -192,7 +205,14 @@ def bake_leg(leg, data, index, anchors, api_key) -> tuple[list[dict], int, int]:
     cum = [c * scale for c in raw_cum]
 
     corridor = leg.setdefault("corridor", {})
-    taken = {_norm(lm.get("name")) for lm in corridor.get("landmarks", ())}
+    # Villages this bake wrote last time are NOT competition -- it regenerates
+    # them wholesale below. Counting them made a re-run dedupe against its own
+    # previous output and return four names where the first run found thirty.
+    taken = {
+        _norm(lm.get("name"))
+        for lm in corridor.get("landmarks", ())
+        if lm.get("category") != "village"
+    }
     taken |= {_norm(cp.get("name")) for cp in corridor.get("checkpoints", ())}
     for slug in (leg["from"], leg["to"]):
         taken.add(_norm(data["cities"][slug].get("spoken_city") or slug))
@@ -228,7 +248,7 @@ def bake_leg(leg, data, index, anchors, api_key) -> tuple[list[dict], int, int]:
             "kind": "point",
             "source": (
                 f"OpenStreetMap place={place['place']} node {place['id']}, "
-                "projected onto the leg's OpenRouteService driving-hgv route"
+                f"projected onto {route_note}"
             ),
         }
         previous = best.get(_norm(name))
@@ -260,9 +280,10 @@ def main() -> int:
     args = ap.parse_args()
     only = {frozenset(p.split(":")) for p in args.only.split(";") if ":" in p}
 
+    # Only legs with no archived polyline still need ORS; that is one leg in
+    # the whole network, so the key is checked where it is used rather than
+    # refusing the run outright.
     api_key = os.environ.get("ORS_API_KEY", "").strip()
-    if not api_key:
-        raise SystemExit("set ORS_API_KEY (use 'selfhosted' with the local ORS server)")
 
     data = load_world()
     index = grid_index(load_places())

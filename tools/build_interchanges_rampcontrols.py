@@ -22,9 +22,9 @@ from __future__ import annotations
 from build_interchanges_base import *
 from build_interchanges_maxspeed import (
     OSM_REGION_CACHE_DIR,
-    _interpolated_geometry,
     _leg_states,
     _pbf_for_states,
+    corridor_geometry,
 )
 
 # The terminal control sits at the far end of the ramp -- routinely 300m to
@@ -285,10 +285,7 @@ def bake_ramp_controls_for_leg(
     interchanges = list(leg.get("corridor", {}).get("interchanges", ()))
     if not interchanges:
         return 0
-    route_points = list(leg.get("corridor", {}).get("route_points", ()))
-    geom = _osrm_geometry(route_points, rate_limit, cached_only=True) or _interpolated_geometry(
-        route_points
-    )
+    geom, _note = corridor_geometry(leg, rate_limit)
     if not geom:
         return 0
     leg_miles = float(leg["miles"])

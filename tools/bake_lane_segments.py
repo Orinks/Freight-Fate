@@ -8,7 +8,8 @@ same way grades and dense speed limits were baked ahead of their physics.
 Method (reuses the Job 2 way-matching machinery, ``straw_curve_sample``):
   * coords come from the archived dense polyline (``world_data/us/geometry/
     <state>.jsonl``), decoded -- fully offline and deterministic, no ORS
-    re-fetch. Only the self-hosted Overpass (``OVERPASS_URL``) is queried, for
+    re-fetch. Overpass is queried through the shared cached/mirrored client
+    (the self-hosted server first where ``OVERPASS_URL`` is set), for
     the leg's ``lanes``-tagged ways.
   * each ~0.25 mi sample point is matched to the nearest governing way exactly
     like ``bake_speed_limits`` (shield-ref preferred, within
@@ -44,7 +45,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
 import sys
 import urllib.error
 import urllib.parse
@@ -55,11 +55,11 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import straw_curve_sample as scs  # noqa: E402  (the ratified matcher primitives)
+from bake_landmarks import hav  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 GEOM_DIR = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "geometry"
-OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
 
 SOURCE_NOTE = (
     "OpenStreetMap lanes tags on the corridor highway ways (Overpass), "
@@ -113,24 +113,63 @@ def lanes_from_tags(tags: dict[str, Any]) -> dict[str, Any] | None:
 
 # --- Overpass: one bbox query per leg, matched locally ----------------------
 def _overpass(query: str) -> dict[str, Any]:
-    data = urllib.parse.urlencode({"data": query}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data)
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    """One Overpass query, through the shared cached/mirrored client.
+
+    Was a bare request at ``OVERPASS_URL``, which meant the bake simply died
+    on any machine without the self-hosted server running -- and it does not
+    have to, because the public mirrors answer this query. ``OVERPASS_URL``
+    still leads when it is set (the local server turns a sweep from hours into
+    minutes); the mirrors are the fallback, and the answer is cached either
+    way so a re-run costs nothing.
+    """
+    import build_interchanges as bi
+
+    payload = bi._cached_post(query, rate_limit=1.0)
+    if payload is None:
+        raise RuntimeError("no Overpass mirror answered")
+    return payload
+
+
+# How much corridor one bbox query covers. A single box around a whole leg is
+# fine against a self-hosted server and hopeless against a public one: Buffalo
+# to New York spans five degrees of longitude, and its bounding box asks for
+# every lanes-tagged way in the north-east, most of them nowhere near the
+# road. Chunking follows the route instead of enclosing it.
+LANE_QUERY_SPAN_MI = 60.0
 
 
 def query_leg_lane_ways(coords: list[list[float]]) -> list[dict]:
-    """One bbox query for the leg's lanes-tagged ways (mirror of Job 2's query)."""
-    lons = [c[0] for c in coords]
-    lats = [c[1] for c in coords]
+    """The leg's lanes-tagged ways, one bbox query per stretch of corridor."""
+    spans: list[list[list[float]]] = []
+    run: list[list[float]] = []
+    covered = 0.0
+    for i, point in enumerate(coords):
+        run.append(point)
+        if i:
+            lon1, lat1 = coords[i - 1]
+            lon2, lat2 = point
+            covered += hav(lat1, lon1, lat2, lon2)
+        if covered >= LANE_QUERY_SPAN_MI:
+            spans.append(run)
+            run = [point]  # overlap by a vertex so nothing falls between boxes
+            covered = 0.0
+    if len(run) > 1 or not spans:
+        spans.append(run)
+
+    found: dict[int, dict] = {}
     pad = 0.02
-    box = f"{min(lats) - pad},{min(lons) - pad},{max(lats) + pad},{max(lons) + pad}"
-    query = f"""
-    [out:json][timeout:120];
-    way["highway"~"{HIGHWAY_FILTER}"]["lanes"]({box});
-    out geom tags;
-    """
-    return _overpass(query).get("elements", [])
+    for span in spans:
+        lons = [c[0] for c in span]
+        lats = [c[1] for c in span]
+        box = f"{min(lats) - pad},{min(lons) - pad},{max(lats) + pad},{max(lons) + pad}"
+        query = f"""
+        [out:json][timeout:120];
+        way["highway"~"{HIGHWAY_FILTER}"]["lanes"]({box});
+        out geom tags;
+        """
+        for element in _overpass(query).get("elements", []):
+            found[element["id"]] = element
+    return list(found.values())
 
 
 # --- geometry archive: decode per-leg coords --------------------------------
@@ -238,7 +277,8 @@ def build_lane_segments(
         if length <= 0:
             continue
         at_ic = any(
-            abs(s["start_mi"] - m) <= INTERCHANGE_TOL_MI or abs(s["end_mi"] - m) <= INTERCHANGE_TOL_MI
+            abs(s["start_mi"] - m) <= INTERCHANGE_TOL_MI
+            or abs(s["end_mi"] - m) <= INTERCHANGE_TOL_MI
             for m in interchange_mi
         )
         if length < MIN_SEG_MI and not at_ic:
@@ -359,8 +399,13 @@ def main() -> int:
             empty += 1
 
         report.append(
-            {"leg": lid, "state": state, "segments": len(segs),
-             "covered_mi": covered_mi, "total_mi": total_mi}
+            {
+                "leg": lid,
+                "state": state,
+                "segments": len(segs),
+                "covered_mi": covered_mi,
+                "total_mi": total_mi,
+            }
         )
         if n % 10 == 0 or n == len(legs):
             pct = 100.0 * covered_mi / total_mi if total_mi else 0.0
@@ -377,7 +422,9 @@ def main() -> int:
         save_world(world)
         print("saved world source", flush=True)
 
-    print(f"\nDONE: {done} legs with lanes, {empty} no-coverage, {failed} skipped/failed", flush=True)
+    print(
+        f"\nDONE: {done} legs with lanes, {empty} no-coverage, {failed} skipped/failed", flush=True
+    )
     print(f"total segments: {total_segs}", flush=True)
     print("coverage by state (covered / total route-mi):", flush=True)
     net_cov = net_tot = 0.0
@@ -393,9 +440,13 @@ def main() -> int:
     if args.json_out:
         Path(args.json_out).write_text(
             json.dumps(
-                {"legs": report, "network_covered_mi": round(net_cov, 1),
-                 "network_total_mi": round(net_tot, 1), "network_pct": round(net_pct, 2),
-                 "total_segments": total_segs},
+                {
+                    "legs": report,
+                    "network_covered_mi": round(net_cov, 1),
+                    "network_total_mi": round(net_tot, 1),
+                    "network_pct": round(net_pct, 2),
+                    "total_segments": total_segs,
+                },
                 indent=2,
             ),
             encoding="utf-8",

@@ -23,10 +23,10 @@ from __future__ import annotations
 from build_interchanges_base import *
 from build_interchanges_maxspeed import (
     OSM_REGION_CACHE_DIR,
-    _interpolated_geometry,
     _leg_states,
     _pbf_for_states,
     _route_digits,
+    corridor_geometry,
 )
 
 # Mainline classes only: link/service/residential ways under a low bridge are
@@ -446,11 +446,7 @@ def bake_restrictions_for_leg(
     ways: list[LocalRestrictionWay],
     rate_limit: float,
 ) -> list[dict[str, Any]]:
-    route_points = list(leg.get("corridor", {}).get("route_points", ()))
-    # Cached dense geometry only; never a live request (same policy as maxspeed).
-    geom = _osrm_geometry(route_points, rate_limit, cached_only=True) or _interpolated_geometry(
-        route_points
-    )
+    geom, _note = corridor_geometry(leg, rate_limit)
     if not geom:
         return []
     return assemble_restrictions(ways, geom, float(leg["miles"]), str(leg.get("highway", "")))

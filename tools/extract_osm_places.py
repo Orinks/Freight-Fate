@@ -66,13 +66,43 @@ def extract_places(pbf_path: Path) -> list[dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pbf", type=Path, default=DEFAULT_PBF)
+    ap.add_argument(
+        "--pbf",
+        type=Path,
+        action="append",
+        default=[],
+        help="repeatable: one extract to scan (defaults to the full US extract)",
+    )
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    ap.add_argument(
+        "--merge",
+        action="store_true",
+        help="add to the existing cache instead of replacing it, so the "
+        "per-state Geofabrik extracts can be scanned a few at a time",
+    )
     args = ap.parse_args()
-    if not args.pbf.exists():
-        print(f"extract not found: {args.pbf}", file=sys.stderr)
+    sources = args.pbf or [DEFAULT_PBF]
+    missing = [path for path in sources if not path.exists()]
+    if missing:
+        for path in missing:
+            print(f"extract not found: {path}", file=sys.stderr)
         return 2
-    places = extract_places(args.pbf)
+
+    # Keyed by OSM id: the state extracts overlap at their borders, and one
+    # node scanned twice is still one place.
+    by_id: dict[int, dict] = {}
+    if args.merge and args.out.exists():
+        for place in json.loads(args.out.read_text(encoding="utf-8")):
+            by_id[int(place["id"])] = place
+        print(f"merging into {len(by_id)} cached places")
+    for path in sources:
+        found = extract_places(path)
+        fresh = sum(1 for place in found if int(place["id"]) not in by_id)
+        for place in found:
+            by_id[int(place["id"])] = place
+        print(f"  {path.name}: {len(found)} places ({fresh} new)")
+
+    places = sorted(by_id.values(), key=lambda p: p["id"])
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(places), encoding="utf-8")
     towns = sum(1 for p in places if p["place"] == "town")

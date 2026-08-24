@@ -1,7 +1,8 @@
 """Bake narratable roadside features onto legs -- the map-pipeline half of the
 OSM roadside-narration feature (the SELECT filter is tools/enrich_routes_landmarks.py).
 
-For each leg: query the self-hosted Overpass (OVERPASS_URL) for narratable OSM
+For each leg: query Overpass (the self-hosted server first where OVERPASS_URL
+is set, the public mirrors otherwise) for narratable OSM
 features along the corridor, find WHERE the route meets each one by geometry --
   node  (mountain pass / museum): nearest projection onto the route,
   way   (river): line crossing with the route,
@@ -17,16 +18,13 @@ enforcement semantics). Additive + idempotent (overwrites the leg's landmarks).
 from __future__ import annotations
 
 import argparse
-import json
 import math
-import os
 import sys
-import urllib.parse
-import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+import leg_geometry  # noqa: E402
 from enrich_routes_landmarks import (  # noqa: E402
     NARRATABLE_OSM_TAGS,
     classify_narratable_feature,
@@ -34,7 +32,6 @@ from enrich_routes_landmarks import (  # noqa: E402
 )
 from world_source import load_world, save_world  # noqa: E402
 
-OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
 R_MI = 3958.8
 
 # Curated landmark categories owned elsewhere -- hand-placed heritage markers and
@@ -181,13 +178,25 @@ def _element_line(el):
     return [(g["lat"], g["lon"]) for g in el.get("geometry", [])]
 
 
+def _query(q):
+    """One Overpass query, through the shared cached/mirrored client.
+
+    This was a bare request at ``OVERPASS_URL``: on a machine with no
+    self-hosted Overpass the whole bake found nothing and still exited 0. The
+    public mirrors answer these queries perfectly well, and the shared client
+    caches each answer, so re-running a batch costs nothing.
+    """
+    import build_interchanges as bi
+
+    payload = bi._cached_post(q, rate_limit=1.0)
+    if payload is None:
+        raise RuntimeError("no Overpass mirror answered")
+    return payload
+
+
 def overpass(bbox):
     body = "\n".join(f'  {t}["{k}"="{v}"]({bbox});' for t, k, v in NARRATABLE_OSM_TAGS)
-    q = f"[out:json][timeout:90];\n(\n{body}\n);\nout geom;"
-    data = urllib.parse.urlencode({"data": q}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data)
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        return json.loads(resp.read())
+    return _query(f"[out:json][timeout:90];\n(\n{body}\n);\nout geom;")
 
 
 _REL_CACHE: dict = {}
@@ -197,12 +206,8 @@ def fetch_relation(rel_id):
     """Full geometry for one relation by id (a bbox query strips members outside it)."""
     if rel_id in _REL_CACHE:
         return _REL_CACHE[rel_id]
-    q = f"[out:json][timeout:90];rel({rel_id});out geom;"
-    data = urllib.parse.urlencode({"data": q}).encode("utf-8")
-    req = urllib.request.Request(OVERPASS_URL, data=data)
     try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
-            els = json.loads(resp.read()).get("elements", [])
+        els = _query(f"[out:json][timeout:90];rel({rel_id});out geom;").get("elements", [])
         result = els[0] if els else None
     except Exception:
         result = None
@@ -217,10 +222,19 @@ def _bbox(lat, lon, radius_m):
 
 
 def bake_leg(leg, per_leg):
-    rp = leg.get("corridor", {}).get("route_points", [])
-    if len(rp) < 2:
-        return []
-    route = [(p["lat"], p["lon"]) for p in rp]
+    # The checked-in dense polyline, not the route points. A landmark's
+    # ``at_mi`` and its off-route rejection are both measured against this
+    # line, and route points are 25 miles apart: projecting onto chords that
+    # long puts a riverside town miles from where the road really passes it,
+    # and silently rejects features that are in fact on the corridor.
+    shape = leg_geometry.archived_shape(f"{leg['from']}:{leg['to']}")
+    if shape is not None:
+        route = [(lat, lon) for lon, lat in shape]
+    else:
+        rp = leg.get("corridor", {}).get("route_points", [])
+        if len(rp) < 2:
+            return []
+        route = [(p["lat"], p["lon"]) for p in rp]
     raw_cum = route_cum(route)
     scale = float(leg["miles"]) / (raw_cum[-1] or 1.0)
     cum = [c * scale for c in raw_cum]

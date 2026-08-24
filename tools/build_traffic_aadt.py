@@ -36,6 +36,7 @@ if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
 import build_interchanges as bi  # noqa: E402
+import build_interchanges_maxspeed as bx  # noqa: E402  (the shared corridor geometry)
 from world_source import WORLD_SOURCE_PATH, load_world, save_world  # noqa: E402
 
 HPMS_QUERY_URL = (
@@ -94,10 +95,8 @@ def _leg_f_system_where(highway: str) -> str:
 
 
 def _leg_geometry(leg: dict[str, Any]) -> list[tuple[float, float, float]] | None:
-    route_points = list(leg.get("corridor", {}).get("route_points", ()))
-    return bi._osrm_geometry(route_points, 0.0, cached_only=True) or bi._interpolated_geometry(
-        route_points
-    )
+    geom, _note = bx.corridor_geometry(leg, 0.0)
+    return geom
 
 
 def _corridor_envelopes(
