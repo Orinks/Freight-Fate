@@ -383,8 +383,11 @@ impl DrivingState {
         }
         // `current_station` re-resolves the dial (and may take an identity
         // handover), which needs `&mut`; `lines()`/`presence()` are `&self`,
-        // so the read runs on a copy and the handover is left to the tick.
-        let station = self.radio.clone().current_station();
+        // so this reads without re-pointing the dial and the handover is
+        // left to the tick. It used to do that by resolving on a whole
+        // clone of the radio -- 757 stations and their identity map, copied
+        // sixty times a second, which measured 2.4 ms of every frame.
+        let station = self.radio.tuned_station();
         let mut clause = format!("listening to {}", station.display_name());
         // And the song, when the stream says: broadcast metadata the station
         // itself publishes to every listener, so no more private than the

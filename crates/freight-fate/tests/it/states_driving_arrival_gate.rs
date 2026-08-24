@@ -66,15 +66,6 @@ fn frame(harness: &mut PlaytestHarness) {
     harness.with_drive(|drive, ctx| drive.update_frame(ctx, DT));
 }
 
-fn last_event(harness: &PlaytestHarness) -> String {
-    harness
-        .app
-        .event_lines()
-        .last()
-        .cloned()
-        .unwrap_or_default()
-}
-
 /// The one event line containing `needle`, or a failure naming everything
 /// that was said instead.
 fn an_event_containing(harness: &PlaytestHarness, needle: &str) -> String {
@@ -83,12 +74,7 @@ fn an_event_containing(harness: &PlaytestHarness, needle: &str) -> String {
         .event_lines()
         .into_iter()
         .find(|line| line.contains(needle))
-        .unwrap_or_else(|| {
-            panic!(
-                "nothing said {needle:?}: {:#?}",
-                harness.app.event_lines()
-            )
-        })
+        .unwrap_or_else(|| panic!("nothing said {needle:?}: {:#?}", harness.app.event_lines()))
 }
 
 fn last_main(harness: &PlaytestHarness) -> String {

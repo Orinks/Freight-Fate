@@ -10,6 +10,20 @@
 //! one repair in that correction, checked through the loaders the runtime
 //! itself uses -- and checked against the baked container, because that is
 //! what a tester actually runs.
+//!
+//! # Why these are `#[ignore]`
+//!
+//! Building that container means baking the whole tree, about twelve
+//! seconds, which is why this file has its own binary (it repoints
+//! `FREIGHT_FATE_DATA_ROOT` for the whole process) and why it is deselected
+//! from the default run alongside `data_baked`. Run it deliberately:
+//!
+//! ```text
+//! cargo test -p ff-core --test data_map_correction -- --ignored
+//! ```
+//!
+//! See the module note on `data_baked.rs` for what these two are guarding
+//! and where they belong in the build and in CI.
 
 use std::path::{Path, PathBuf};
 
@@ -86,6 +100,7 @@ fn leg_between(
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn chicago_to_indianapolis_books_the_road_it_drives() {
     // 176 legs booked, timed and fuelled for less road than they cover; this
     // one gained two miles. A leg short of its own road pays short too.
@@ -102,6 +117,7 @@ fn chicago_to_indianapolis_books_the_road_it_drives() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn hickory_to_charlotte_names_the_road_under_the_truck() {
     // Five legs announced an interstate they never touch. This one is driven
     // on NC-16 and used to say I-40.
@@ -118,6 +134,7 @@ fn hickory_to_charlotte_names_the_road_under_the_truck() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn no_bend_is_advised_above_the_ceiling() {
     // Advisories read as high as 115 before the re-bake -- a bend "advising"
     // a speed no truck may legally drive is not advice, it is noise.

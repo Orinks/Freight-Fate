@@ -59,6 +59,10 @@ pub fn download(
     cancelled: Option<&AtomicBool>,
 ) -> Result<PathBuf, DownloadError> {
     let dest = dest_dir.join(&info.asset_name);
+    // The one send path in the crate that does not go through `net::request`
+    // (the archive is streamed to disk, not buffered into memory), so it
+    // carries the network capability itself.
+    net::require_real_network("GET", &info.asset_url);
     let mut response = net::agent(Tier::GitHub)
         .get(&info.asset_url)
         .header("User-Agent", USER_AGENT)

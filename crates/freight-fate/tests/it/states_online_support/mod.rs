@@ -3,9 +3,19 @@
 //! `online_presence.<call>`), as drop-guards that clear themselves, plus the
 //! downcast helpers for reading a screen on the stack.
 //!
-//! Every override is process-global, so each test holds a `TestApp` (and with
-//! it the environment lock) for as long as a guard lives: declare the app
-//! first, the guards after, and Rust drops the guards before the lock goes.
+//! Every override here is PER THREAD, and so is the save directory a
+//! `TestApp` pins, which is what lets these tests run alongside each other
+//! rather than queueing on one environment. Two things follow from that.
+//! Install a guard on the same thread that will use it -- a worker the test
+//! spawns sees none of them. And a guard is a convenience for asserting, not
+//! a safety net: what stands between this suite and the live world is the set
+//! of process-wide capabilities only the game's `main()` holds, so a
+//! forgotten guard fails the test instead of reaching orinks.net (see
+//! `browser_guard`, `network_guard`, `save_dir_guard` and
+//! `secret_store_guard`).
+//!
+//! Declare the app first and the guards after, so Rust drops them in the
+//! order that leaves nothing pointing at a dead app.
 
 #![allow(dead_code)]
 

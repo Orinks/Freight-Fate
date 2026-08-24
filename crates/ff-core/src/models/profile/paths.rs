@@ -57,9 +57,14 @@ pub struct SaveRoots {
 
 impl SaveRoots {
     pub fn current() -> Self {
-        let override_dir = std::env::var_os(DATA_DIR_ENV)
-            .filter(|v| !v.is_empty())
-            .map(PathBuf::from);
+        // The thread's pinned root first, then the process environment: the
+        // test suite injects a per-test root rather than sharing one
+        // process-global variable behind a lock (see `THREAD_DATA_DIR`).
+        let override_dir = crate::settings::paths::thread_data_dir().or_else(|| {
+            std::env::var_os(DATA_DIR_ENV)
+                .filter(|v| !v.is_empty())
+                .map(PathBuf::from)
+        });
         SaveRoots {
             override_dir,
             game_root: game_root(),
@@ -355,11 +360,32 @@ pub fn data_dir_in(roots: &SaveRoots, legacy_checked: &AtomicBool) -> PathBuf {
     target
 }
 
-/// Where settings and profiles live: `FREIGHT_FATE_DATA_DIR` when set, else
-/// the portable save root -- migrating older layouts into it on the first
-/// call of the process.
+/// Where settings and profiles live: this thread's pinned directory or
+/// `FREIGHT_FATE_DATA_DIR` when either says so, else the portable save root
+/// -- migrating older layouts into it on the first call of the process.
+///
+/// The second door to the player's own save folder, so it carries the same
+/// lock as `settings::paths::data_dir`; see the capability note there for
+/// why the fallback is refused rather than defaulted. The check comes before
+/// [`data_dir_in`] because that call is what migrates legacy layouts, and a
+/// migration is a write.
+///
+/// [`data_dir_in`] itself is deliberately NOT guarded: its roots are handed
+/// in, so the portable-save tests that build a synthetic layout under a
+/// temporary directory are asking about roots of their own, not the
+/// player's.
+///
+/// # Panics
+///
+/// When nothing is pinned, the environment says nothing, and
+/// `settings::paths::allow_real_save_dir` has not been called. The path is
+/// recorded in `settings::paths::refused_save_dirs` first.
 pub fn data_dir() -> PathBuf {
-    data_dir_in(&SaveRoots::current(), &LEGACY_CHECKED)
+    let roots = SaveRoots::current();
+    if roots.override_dir.is_none() && !crate::settings::paths::real_save_dir_allowed() {
+        crate::settings::paths::refuse_real_save_dir(&save_root_in(&roots));
+    }
+    data_dir_in(&roots, &LEGACY_CHECKED)
 }
 
 /// `data_dir()/profiles`, created.

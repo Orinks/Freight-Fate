@@ -5,6 +5,31 @@
 //! `FREIGHT_FATE_DATA_ROOT` then points the whole runtime at. Every loader
 //! that has a baked path is asked the same question twice and has to answer
 //! the same way -- if the two ever drift, the game ships data nobody tested.
+//!
+//! # Why these are `#[ignore]`, and where they DO run
+//!
+//! This is the most valuable suite in the repository to run and the worst
+//! one to run on every save. Every other test in the suite reads the JSON
+//! tree; players read the baked container. Nothing else would notice the two
+//! coming apart, and the suite would stay green while it happened -- which
+//! is not hypothetical: it is how the client came to advise 125 mph where
+//! the JSON said 80.
+//!
+//! What it costs is a full rebake of all 1,291 legs, about twelve seconds,
+//! and `data_map_correction` pays the same again: roughly a quarter of a
+//! minute on a suite meant to answer in well under thirty. So it takes the
+//! adversarial battery's shape -- deselected by default, run deliberately:
+//!
+//! ```text
+//! cargo test -p ff-core --test data_baked -- --ignored
+//! cargo test -p ff-core --test data_map_correction -- --ignored
+//! ```
+//!
+//! Deselected must not mean unrun. A bad container reaches a tester through
+//! a release build, so that is where the gate belongs: `tools/build_release.py`
+//! already runs `ff-bake --check` on every build, and CI should run both of
+//! these with `--ignored` whenever the data tree, the loaders or the baker
+//! change. Nothing else stands between a bad bake and a player.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -109,6 +134,7 @@ fn spread(total: usize, want: usize) -> Vec<usize> {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn baked_cities_match_the_json_tree_field_for_field() {
     let json = json_world();
     let baked = baked_world();
@@ -124,6 +150,7 @@ fn baked_cities_match_the_json_tree_field_for_field() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn baked_legs_carry_the_same_eager_fields() {
     let json = json_world();
     let baked = baked_world();
@@ -156,6 +183,7 @@ fn baked_legs_carry_the_same_eager_fields() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn a_spread_of_legs_has_identical_corridor_detail() {
     let json = json_world();
     let baked = baked_world();
@@ -204,6 +232,7 @@ fn a_spread_of_legs_has_identical_corridor_detail() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn baked_curves_match_the_screened_jsonl_table() {
     let json = json_world();
     let curves_text = std::fs::read_to_string(
@@ -235,6 +264,7 @@ fn baked_curves_match_the_screened_jsonl_table() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn the_five_side_maps_match() {
     let json = json_world();
     let baked = baked_world();
@@ -281,6 +311,7 @@ fn the_five_side_maps_match() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn a_side_map_named_by_path_falls_through_to_the_container() {
     // `--smoke` and the tools reach past `World` and name a file directly.
     // In a release that file is not on disk, and the answer still has to be
@@ -317,6 +348,7 @@ fn same_limits(got: &StreetLimits, want: &StreetLimits) {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn street_limits_buffs_and_the_radio_catalogs_match_in_full() {
     let json_dir = &fixture().json_dir;
 
@@ -343,6 +375,7 @@ fn street_limits_buffs_and_the_radio_catalogs_match_in_full() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn the_container_holds_every_section_and_nothing_stray() {
     let container = container();
     let mut want = vec![
@@ -365,6 +398,7 @@ fn the_container_holds_every_section_and_nothing_stray() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn baking_twice_gives_the_same_bytes() {
     assert!(
         bake_is_deterministic(&fixture().json_dir).expect("bake"),
@@ -373,6 +407,7 @@ fn baking_twice_gives_the_same_bytes() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn a_container_from_another_format_version_is_refused() {
     let bytes = std::fs::read(fixture().baked_dir.join(BAKED_FILE_NAME)).expect("read container");
     let dir = tempfile::tempdir().expect("tempdir");
@@ -397,6 +432,7 @@ fn a_container_from_another_format_version_is_refused() {
 }
 
 #[test]
+#[ignore = "bake: rebuilds the whole baked container (~12s); run with --ignored -- see the module note"]
 fn the_baked_world_loads_far_faster_than_the_json_tree() {
     let fixture = fixture();
     let started = Instant::now();

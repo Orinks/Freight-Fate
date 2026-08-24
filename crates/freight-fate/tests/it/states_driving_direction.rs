@@ -411,10 +411,7 @@ fn test_delivery_trip_carries_no_silent_arrival_zones() {
     let mut harness = PlaytestHarness::new();
     harness.start_delivery(StartDelivery::named("Arrival Zones"));
 
-    assert_eq!(
-        harness.read_drive(|d| d.phase),
-        DRIVE_PHASE_DELIVERY
-    );
+    assert_eq!(harness.read_drive(|d| d.phase), DRIVE_PHASE_DELIVERY);
     let reasons = harness.read_drive(|d| {
         d.trip
             .zones

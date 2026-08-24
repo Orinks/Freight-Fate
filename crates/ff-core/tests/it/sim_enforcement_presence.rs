@@ -641,12 +641,20 @@ fn test_the_safety_record_rides_on_the_profile_and_survives_a_save() {
     use ff_core::models::profile::Profile;
     use ff_core::models::safety_record::refresh_selection_score;
 
+    // Rendering a profile signs it, and the signing key lives in the save
+    // directory, so this case reached for the player's own save folder. That
+    // fallthrough is refused now, so pin the test's own directory instead.
+    let tmp = tempfile::tempdir().expect("a temp save dir");
+    let previous = ff_core::settings::set_thread_data_dir(Some(tmp.path().to_path_buf()));
+
     let mut profile = Profile::named("Record");
     profile.driving_record.citations = 3;
     refresh_selection_score(&mut profile, 60.0);
     assert!(profile.selection_score > 40.0);
     let restored = Profile::from_dict(&profile.to_dict());
     assert_eq!(restored.selection_score, profile.selection_score);
+
+    ff_core::settings::set_thread_data_dir(previous);
 }
 
 // `test_the_marked_unit_pass_actually_plays` is live in `crates/freight-fate/tests/states_driving_enforcement.rs`.

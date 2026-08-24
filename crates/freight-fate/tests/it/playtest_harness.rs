@@ -931,24 +931,49 @@ fn test_name_entry_uses_real_space_key_and_preserves_accessible_name() {
     assert!(result.transcript.iter().any(|line| line == "space"));
 }
 
-#[test]
-fn test_playtest_harness_delivery_properties() {
-    for job_rank in 0..4usize {
-        for route_rank in 0..3usize {
-            let mut harness = PlaytestHarness::new();
-            let mut setup = StartDelivery::named(&format!("Property {job_rank}-{route_rank}"));
-            setup.job_rank = job_rank;
-            setup.route_rank = route_rank;
-            harness.start_delivery(setup);
-            let result = harness.drive_delivery_to_completion();
+/// Whichever job and whichever route the player picks, the delivery
+/// completes at its destination with nothing left to drive.
+///
+/// One test per `(job_rank, route_rank)` pair rather than a nested loop in
+/// one test: twelve complete deliveries in a single `#[test]` are twelve
+/// deliveries on one thread, and a failure named none of them. The pairs are
+/// independent, so this is the same twelve drives spread over twelve
+/// threads.
+fn assert_delivery_completes(job_rank: usize, route_rank: usize) {
+    let mut harness = PlaytestHarness::new();
+    let mut setup = StartDelivery::named(&format!("Property {job_rank}-{route_rank}"));
+    setup.job_rank = job_rank;
+    setup.route_rank = route_rank;
+    harness.start_delivery(setup);
+    let result = harness.drive_delivery_to_completion();
 
-            assert_eq!(result.deliveries, 1);
-            assert_eq!(result.destination, result.current_city);
-            assert_eq!(result.remaining_miles, 0.0);
-            result.assert_no_known_destination_exit_regressions();
-        }
-    }
+    assert_eq!(result.deliveries, 1);
+    assert_eq!(result.destination, result.current_city);
+    assert_eq!(result.remaining_miles, 0.0);
+    result.assert_no_known_destination_exit_regressions();
 }
+
+macro_rules! delivery_property_case {
+    ($name:ident, $job_rank:expr, $route_rank:expr) => {
+        #[test]
+        fn $name() {
+            assert_delivery_completes($job_rank, $route_rank);
+        }
+    };
+}
+
+delivery_property_case!(test_playtest_harness_delivery_properties_job0_route0, 0, 0);
+delivery_property_case!(test_playtest_harness_delivery_properties_job0_route1, 0, 1);
+delivery_property_case!(test_playtest_harness_delivery_properties_job0_route2, 0, 2);
+delivery_property_case!(test_playtest_harness_delivery_properties_job1_route0, 1, 0);
+delivery_property_case!(test_playtest_harness_delivery_properties_job1_route1, 1, 1);
+delivery_property_case!(test_playtest_harness_delivery_properties_job1_route2, 1, 2);
+delivery_property_case!(test_playtest_harness_delivery_properties_job2_route0, 2, 0);
+delivery_property_case!(test_playtest_harness_delivery_properties_job2_route1, 2, 1);
+delivery_property_case!(test_playtest_harness_delivery_properties_job2_route2, 2, 2);
+delivery_property_case!(test_playtest_harness_delivery_properties_job3_route0, 3, 0);
+delivery_property_case!(test_playtest_harness_delivery_properties_job3_route1, 3, 1);
+delivery_property_case!(test_playtest_harness_delivery_properties_job3_route2, 3, 2);
 
 #[test]
 #[ignore = "needs the driver-tablet weather screen"]

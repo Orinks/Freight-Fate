@@ -15,8 +15,11 @@
 //!
 //! ```text
 //! CARGO_TARGET_DIR=target/bench cargo test --release -p freight-fate \
-//!     --test bench_drive -- --ignored --nocapture
+//!     --test it -- bench_drive --ignored --nocapture
 //! ```
+//!
+//! (`--test it`, not `--test bench_drive`: every integration test in this
+//! crate is one binary now. See `tests/it/main.rs`.)
 //!
 //! `FF_BENCH_FRAMES` and `FF_BENCH_WARMUP` override the frame counts (the
 //! Python side reads the same two variables).
@@ -39,9 +42,11 @@ const DT: f64 = 1.0 / 60.0;
 /// corridor decode) that no later frame repeats.
 const DEFAULT_WARMUP: usize = 600;
 /// 12 000 frames is 200 seconds of play at 60 Hz. The ceiling is the route:
-/// with the accelerator pinned the truck reaches Cheyenne at about 15 400
-/// frames, and every frame after that is a parked truck rather than a drive.
-/// 12 000 leaves the run entirely on the road (about 78 of the 100.4 miles).
+/// past its end every frame is a parked truck rather than a drive, which
+/// would flatter the numbers. 12 000 leaves the run entirely on the road --
+/// it ends at mile 42.988 of the 100.4, at 85.51 mph, still rolling. Both
+/// sides print that mile, and it is how a reader tells that the two runs
+/// did the same work rather than taking it on trust.
 const DEFAULT_FRAMES: usize = 12_000;
 
 fn env_usize(name: &str, fallback: usize) -> usize {

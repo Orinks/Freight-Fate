@@ -1,9 +1,18 @@
 //! Shared rigging for tests that build a headless [`App`]: the conftest of
 //! the Python suite in one place, so every later state port reuses it.
 //!
-//! * [`env_lock`] serialises the process-global environment
-//!   (`FREIGHT_FATE_DATA_DIR` above all) -- hold the guard for the life of
-//!   the app, since `shutdown` writes settings into that directory.
+//! * [`TestApp`] pins its own save directory on its OWN THREAD, so any
+//!   number of them run at once without seeing each other's saves. It used
+//!   to set the process-global `FREIGHT_FATE_DATA_DIR` instead, which meant
+//!   holding [`env_lock`] for the whole life of the app -- and that lock,
+//!   not the work, was what the suite's runtime actually was: 123.6 seconds
+//!   on one thread against 117.4 on eight, twenty-seven cores idle.
+//! * [`env_lock`] remains for the handful of tests that genuinely do write a
+//!   process-global environment variable (`FREIGHT_FATE_ONLINE_URL`,
+//!   `FREIGHT_FATE_LOG_FILE`). Those still have one environment between
+//!   them and still have to queue; there are few enough that it costs
+//!   nothing. Reach for a pinned root instead wherever the variable is only
+//!   standing in for "this test's own directory".
 //! * [`TestApp`] is `App()` under the conftest fixtures: headless drivers,
 //!   an isolated data directory, the first-run online offer already seen,
 //!   a `CaptureSpeech` in place of Prism, the null audio backend.
@@ -136,19 +145,70 @@ pub fn env_lock() -> EnvGuard {
 }
 
 /// The headless environment the Python conftest forced for every test.
+///
+/// Set exactly once per process, however many tests ask. All three values
+/// are constants, so the first caller's answer is every caller's answer --
+/// and writing a process-global from many threads at once is the one thing
+/// worth avoiding now that tests really do run at once.
 pub fn set_headless_env() {
-    std::env::set_var("SDL_VIDEODRIVER", "dummy");
-    std::env::set_var("SDL_AUDIODRIVER", "dummy");
-    std::env::set_var("FREIGHT_FATE_NO_SPEECH", "1");
+    static HEADLESS: std::sync::Once = std::sync::Once::new();
+    HEADLESS.call_once(|| {
+        std::env::set_var("SDL_VIDEODRIVER", "dummy");
+        std::env::set_var("SDL_AUDIODRIVER", "dummy");
+        std::env::set_var("FREIGHT_FATE_NO_SPEECH", "1");
+    });
 }
 
-/// A headless app over an isolated data directory, holding the environment
-/// lock until dropped.
+/// Pins this thread's save directory for as long as it lives, then puts back
+/// whatever was pinned before.
+///
+/// This is what [`TestApp`] holds in place of the old environment-lock
+/// guard, and the reason a suite of app tests can now run in parallel: the
+/// directory is the thread's, not the process's.
+pub struct DataDirGuard {
+    previous: Option<std::path::PathBuf>,
+}
+
+impl DataDirGuard {
+    /// Point this thread's saves at `dir`.
+    pub fn pin(dir: std::path::PathBuf) -> DataDirGuard {
+        DataDirGuard {
+            previous: ff_core::settings::set_thread_data_dir(Some(dir)),
+        }
+    }
+}
+
+impl Drop for DataDirGuard {
+    fn drop(&mut self) {
+        ff_core::settings::set_thread_data_dir(self.previous.take());
+    }
+}
+
+thread_local! {
+    /// Whether this thread already has a live [`TestApp`].
+    ///
+    /// Two at once on one thread would share the thread's pinned directory
+    /// and its save-listener slot, and the second one's shutdown would tear
+    /// out the first one's hook -- the same corruption the process-global
+    /// lock used to prevent, now scoped to the thread that can actually
+    /// cause it. Building a second one panics with the fix, exactly as the
+    /// old self-deadlock assertion did.
+    static APP_ALIVE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// A headless app over an isolated data directory, pinned to this thread
+/// until dropped.
+///
+/// Field order is drop order and matters: `app` shuts down first and writes
+/// its final settings and profile, `data_dir` then deletes the directory it
+/// wrote them to, and `_guard` unpins the thread last -- so the writes land
+/// where the test could see them and nothing leaks into the next test on
+/// this thread.
 pub struct TestApp {
     pub app: App,
     pub data_dir: TempDir,
     capture: Rc<RefCell<CaptureSpeech>>,
-    _guard: EnvGuard,
+    _guard: DataDirGuard,
 }
 
 impl std::ops::Deref for TestApp {
@@ -173,10 +233,18 @@ impl TestApp {
     /// `App()` with a particular capture (e.g. `CaptureSpeech::full_voice()`
     /// for a machine with a separate event voice).
     pub fn with_speech(speech: CaptureSpeech) -> TestApp {
-        let guard = env_lock();
+        assert!(
+            !APP_ALIVE.with(|alive| alive.replace(true)),
+            "this thread already has a live TestApp. A TestApp pins the \
+             thread's save directory and save-listener hook until it is \
+             dropped, so building a second one in the same scope would let \
+             the two share both -- shadowing the binding does not drop the \
+             first. Call drop(app) before building the next TestApp."
+        );
         set_headless_env();
         let data_dir = TempDir::new("ff-rust-app");
-        std::env::set_var("FREIGHT_FATE_DATA_DIR", data_dir.path().join("data"));
+        // The thread's own saves, not the process's: see the module note.
+        let guard = DataDirGuard::pin(data_dir.path().join("data"));
         // Seed the one-time first-run orinks.net offer as already spent, so a
         // test that is not about the offer can drive a career through the
         // app without knowing it exists.
@@ -260,6 +328,7 @@ impl Default for TestApp {
 impl Drop for TestApp {
     fn drop(&mut self) {
         self.app.shutdown();
+        APP_ALIVE.with(|alive| alive.set(false));
     }
 }
 

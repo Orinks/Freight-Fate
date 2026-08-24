@@ -11,7 +11,7 @@ use crate::states_main_menu_support::*;
 use ff_core::models::profile::Profile;
 use ff_core::settings::{Settings, PACE_RETIRED_NOTICES};
 use ff_core::sim::season::{date_text, real_clock_game_hours};
-use freight_fate::app::testing::{env_lock, set_headless_env, TempDir, TestApp};
+use freight_fate::app::testing::{set_headless_env, DataDirGuard, TempDir, TestApp};
 use freight_fate::app::App;
 use freight_fate::speech::CaptureSpeech;
 use freight_fate::states::base::{Key, Menu, State};
@@ -456,10 +456,11 @@ fn test_disabling_live_calendar_keeps_new_career_on_march_21() {
 fn test_settings_menu_volume_survives_new_app_session() {
     // Two apps over one data directory, by hand: `TestApp` writes its own
     // settings file on the way up, which would erase the first session's.
-    let _guard = env_lock();
     set_headless_env();
     let data_dir = TempDir::new("ff-rust-settings-session");
-    std::env::set_var("FREIGHT_FATE_DATA_DIR", data_dir.path().join("data"));
+    // This thread's directory, so the two sessions below share it with each
+    // other and with nothing else in the suite.
+    let _guard = DataDirGuard::pin(data_dir.path().join("data"));
     {
         let mut app = App::new_headless(Box::new(CaptureSpeech::new()));
         app.push_state(SettingsState::new());

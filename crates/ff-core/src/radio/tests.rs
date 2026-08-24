@@ -1537,6 +1537,43 @@ fn test_multi_site_station_hands_over_as_the_truck_moves() {
 }
 
 #[test]
+fn test_tuned_station_reads_the_dial_without_moving_it() {
+    // `tuned_station` is what the presence builders read sixty times a
+    // second. It must give the same answer as `current_station` -- through
+    // a handover and through a fallback, the two paths that make
+    // `current_station` need `&mut` -- while leaving station_id where it
+    // found it. Before it existed the caller cloned the whole radio to get
+    // this, which cost 2.4 ms of every driven frame.
+    let mut radio = RadioState::new(fixture_catalog())
+        .with_station_id("fixture-site-a")
+        .with_position(Some(SITE_A_POS));
+    assert_eq!(radio.tuned_station().id, radio.current_station().id);
+
+    // A handover: site B is the loud one now.
+    radio.update_position(Some(SITE_B_POS), None);
+    radio.station_id = "fixture-site-a".to_string();
+    let read = radio.tuned_station();
+    assert_eq!(read.id, "fixture-site-b");
+    assert_eq!(
+        radio.station_id, "fixture-site-a",
+        "reading the dial must not re-point it"
+    );
+    assert_eq!(radio.current_station().id, read.id);
+    assert_eq!(radio.station_id, "fixture-site-b"); // the writer still writes
+
+    // A fallback: nothing on the dial answers to that id at all.
+    radio.station_id = "not-a-station".to_string();
+    let read = radio.tuned_station();
+    assert_eq!(read.id, radio.fallback_station().id);
+    assert_eq!(
+        radio.station_id, "not-a-station",
+        "reading the dial must not re-point it"
+    );
+    assert_eq!(radio.current_station().id, read.id);
+    assert_eq!(radio.station_id, read.id);
+}
+
+#[test]
 fn test_multi_site_dead_stream_still_hands_over_to_a_different_station() {
     // Only Site A's id ever gets a play attempt (it's strongest at
     // SITE_A_POS); the assertion on the eventual station proves the failure

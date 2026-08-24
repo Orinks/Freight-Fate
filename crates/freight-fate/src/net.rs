@@ -15,6 +15,7 @@
 
 use std::fmt;
 use std::io;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::Duration;
 
@@ -78,12 +79,138 @@ static FEEDS_AGENT: Lazy<Agent> = Lazy::new(|| build_agent(Tier::Feeds.timeout_s
 
 /// The shared client for a tier. `ssl_context()` in Python was
 /// `lru_cache`d; these are built once per process the same way.
+///
+/// Holding an agent sends nothing -- it is a TLS config and an idle
+/// connection pool -- so this is not where the network capability below is
+/// checked. Every path that actually SENDS checks it: [`request`], and
+/// `updater::apply::download`, which streams its body off this agent and so
+/// calls [`require_real_network`] itself.
 pub fn agent(tier: Tier) -> &'static Agent {
     match tier {
         Tier::Orinks => &ORINKS_AGENT,
         Tier::GitHub => &GITHUB_AGENT,
         Tier::Feeds => &FEEDS_AGENT,
     }
+}
+
+// -- who may reach the real network ------------------------------------------------
+//
+// Every byte this process sends anywhere -- orinks.net presence, activation,
+// the journal outbox, cloud saves, the GitHub update check, and the live
+// weather, traffic and parking feeds -- leaves through `request` below. It is
+// the one door, so it is where the capability lives, exactly as
+// `browser::open_url` is the one door to a web browser.
+//
+// # Why the default is "refuse"
+//
+// The seam used to be per service: a test injected a `Transport` and the
+// service used it. That is fail OPEN in two ways at once.
+//
+// * `App::new_headless` builds `OnlinePresence`, `CloudSaves` and both
+//   `JournalOutbox`es with `..Default::default()`, which is the LIVE
+//   transport on background threads. Nothing an `install_transport` guard
+//   does reaches them -- they carry their own. The only thing keeping a test
+//   suite's heartbeats off orinks.net was that a pinned data directory yields
+//   no driver identity; a test that adopted one and turned presence on would
+//   have posted to the live site as the owner.
+// * The live-data feeds have no injectable seam at the drive at all: a drive
+//   with real weather on builds `RealWeatherProvider::with_nws(UreqTransport)`
+//   and requests every city on the route before a test can swap in a fake.
+//   Several cases do exactly that, and on 2026-08-24 the suite was measured
+//   asking api.weather.gov about Chicago, Gary and Indianapolis from
+//   `weather-city` and `weather-route` worker threads -- so what a drive was
+//   carrying depended on whether the machine had a network and on what the
+//   sky over Chicago was doing.
+//
+// So the capability is explicit and process-wide:
+//
+// * [`allow_real_network`] is called once, by `main()`, and only by `main()`.
+//   A test binary has no `main()` of the game's, so no test process can ever
+//   be granted it -- nothing to remember and nothing to forget.
+// * Until it is called, [`request`] records the address in
+//   [`refused_requests`] and panics. No socket is opened.
+// * It is an `AtomicBool` rather than a thread-local on purpose. Every one of
+//   these callers runs on a background worker -- presence, the outboxes,
+//   cloud saves, `weather-<city>` -- and a per-thread guard is invisible to a
+//   thread the test did not spawn. That is precisely the escape route
+//   discipline cannot close.
+//
+// The panic is deliberate. A quiet error return reads to every caller here as
+// "the network is down", which is a state the game handles gracefully and
+// nobody would ever look at -- and for the weather provider it reads as
+// literally `unavailable()`. On a worker thread the panic is not seen by the
+// test runner, which is what [`refused_requests`] is for: the attempt is on
+// the record whether or not anything was watching.
+
+/// Set once by `main()`. Process-wide: a spawned worker sees it exactly as
+/// the game loop does, which a thread-local could not manage.
+static REAL_NETWORK_ALLOWED: AtomicBool = AtomicBool::new(false);
+
+/// Every request that was refused, `"METHOD url"`, in order.
+static REFUSED_REQUESTS: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
+/// "This process is the real game": from here on [`request`] may reach the
+/// network.
+///
+/// Called from `main()` and nowhere else. Nothing undoes it -- a capability
+/// that can be handed back is one a stray call can take away from a player
+/// mid-session.
+pub fn allow_real_network() {
+    REAL_NETWORK_ALLOWED.store(true, Ordering::SeqCst);
+}
+
+/// Whether the real network may be reached in this process.
+pub fn real_network_allowed() -> bool {
+    REAL_NETWORK_ALLOWED.load(Ordering::SeqCst)
+}
+
+/// Every request [`request`] refused, oldest first, as `"METHOD url"`.
+pub fn refused_requests() -> Vec<String> {
+    REFUSED_REQUESTS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone()
+}
+
+/// Forget the refusals so far.
+pub fn clear_refused_requests() {
+    REFUSED_REQUESTS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clear();
+}
+
+/// Refuse, record and panic unless this process is the game.
+///
+/// [`request`] calls this for every caller that goes through it. The one
+/// caller that does not -- the update downloader, which streams a release
+/// archive straight off [`agent`] rather than buffering it -- calls it
+/// directly, so there is no send path in the crate the capability does not
+/// cover.
+///
+/// # Panics
+///
+/// When [`allow_real_network`] has not been called.
+pub fn require_real_network(method: &str, url: &str) {
+    if !real_network_allowed() {
+        refuse_request(method, url);
+    }
+}
+
+#[cold]
+fn refuse_request(method: &str, url: &str) -> ! {
+    REFUSED_REQUESTS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .push(format!("{method} {url}"));
+    panic!(
+        "refusing to send {method} {url} over the real network: this process \
+         never called net::allow_real_network(), so it is not the game. If \
+         this is a test, inject a transport -- net::testing::FakeTransport \
+         for an orinks.net service, a fake fetch or provider for a live feed \
+         -- into whatever is reaching for the wire, and assert on what it \
+         recorded."
+    );
 }
 
 // -- the error taxonomy -----------------------------------------------------------
@@ -310,6 +437,12 @@ pub struct RawResponse {
 /// there is no body and `POST` when there is, unless overridden. A status
 /// of 400 or above is returned as [`NetError::Http`] with the body attached,
 /// which is how `urllib` raised `HTTPError`.
+///
+/// # Panics
+///
+/// When [`allow_real_network`] has not been called, which outside the real
+/// game means something in a test process reached for the live web. The
+/// address is recorded in [`refused_requests`] first and no socket is opened.
 pub fn request(
     tier: Tier,
     method: Option<&str>,
@@ -317,10 +450,15 @@ pub fn request(
     body: Option<&[u8]>,
     headers: &[(String, String)],
 ) -> Result<RawResponse, NetError> {
-    let agent = agent(tier);
     let method = method
         .map(|m| m.to_ascii_uppercase())
         .unwrap_or_else(|| if body.is_some() { "POST" } else { "GET" }.to_string());
+    // Before the agent is built, before a name is resolved: nothing leaves
+    // this process until something has said it is the game.
+    if !real_network_allowed() {
+        refuse_request(&method, url);
+    }
+    let agent = agent(tier);
     let mut response = match (method.as_str(), body) {
         ("GET", _) => {
             let mut req = agent.get(url);

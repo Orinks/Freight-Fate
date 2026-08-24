@@ -412,21 +412,41 @@ impl RadioState {
     }
 
     pub fn current_station(&mut self) -> RadioStation {
+        let station = self.tuned_station();
+        // The write-back: a sibling handover or a fallback re-points the
+        // dial, and on the ordinary path this assigns the id it already
+        // holds. That is the whole reason this call needs `&mut self`.
+        self.station_id = station.id.clone();
+        station
+    }
+
+    /// Which station the dial is on RIGHT NOW, without re-pointing it.
+    ///
+    /// Same answer as [`RadioState::current_station`]; it just does not
+    /// persist the handover or the fallback, so a read that only wants the
+    /// station's name does not need `&mut`.
+    ///
+    /// It exists because the alternative callers reached for was
+    /// `radio.clone().current_station()` -- a deep copy of the whole dial
+    /// (757 stations plus the identity map) to throw away one field's
+    /// write. In the online-presence builder, which `App::tick` runs every
+    /// frame, that clone was 2.4 ms per frame on a mountain drive: 97% of
+    /// the entire frame, and fourteen per cent of the 60 Hz budget spent
+    /// copying a catalog nobody read. See
+    /// `crates/freight-fate/tests/it/frame_time.rs`.
+    pub fn tuned_station(&self) -> RadioStation {
         if let Some(station) = self.station_by_id(&self.station_id).cloned() {
             if self.station_allowed(&station) {
                 let reception = estimate_signal(&station, self.position, self.elevation_ft);
                 if reception.signal > 0.0 || station.always_available {
                     if let Some(handover) = self.identity_handover(&station, reception.signal) {
-                        self.station_id = handover.id.clone();
                         return handover;
                     }
                     return station;
                 }
             }
         }
-        let fallback = self.fallback_station();
-        self.station_id = fallback.id.clone();
-        fallback
+        self.fallback_station()
     }
 
     /// The stronger sibling site for a multi-site station, if one beats it now.

@@ -3,8 +3,8 @@
 //! `tests/test_legacy_career_gate.py` (the gate; the menu cases are ignored)
 //! and `tests/test_version.py`.
 //!
-//! `isolated_data_dir` is [`with_data_dir`]: a temp `FREIGHT_FATE_DATA_DIR`
-//! under the crate-wide environment lock.
+//! `isolated_data_dir` is [`with_data_dir`]: a temp save directory pinned on
+//! the running thread, so these cases isolate without serialising.
 
 use std::path::{Path, PathBuf};
 
@@ -18,41 +18,52 @@ use crate::settings::paths::ENV_LOCK;
 use crate::sim::vehicle::TruckState;
 
 struct EnvGuard {
-    _lock: std::sync::MutexGuard<'static, ()>,
-    previous: Option<std::ffi::OsString>,
-    previous_skip: Option<std::ffi::OsString>,
+    _lock: std::sync::RwLockReadGuard<'static, ()>,
+    previous: Option<PathBuf>,
     _tmp: tempfile::TempDir,
 }
 
 impl Drop for EnvGuard {
     fn drop(&mut self) {
-        match self.previous.take() {
-            Some(old) => std::env::set_var(DATA_DIR_ENV, old),
-            None => std::env::remove_var(DATA_DIR_ENV),
-        }
-        match self.previous_skip.take() {
-            Some(old) => std::env::set_var("FREIGHT_FATE_SKIP_SAVE_SIGNING", old),
-            None => std::env::remove_var("FREIGHT_FATE_SKIP_SAVE_SIGNING"),
-        }
+        crate::settings::paths::set_thread_data_dir(self.previous.take());
     }
 }
 
 /// `isolated_data_dir`: keep saves and settings out of the real user data
-/// directory, one test at a time (the variable is process-global).
+/// directory.
+///
+/// The directory is pinned on THIS THREAD, so these cases stop taking the
+/// process's one save location in turn and run together instead. The read
+/// guard is what keeps that safe: the two cases that really do set
+/// `FREIGHT_FATE_SKIP_SAVE_SIGNING` use [`with_data_dir_exclusive`] and get
+/// the process to themselves, which is the only reason a lock is left here.
+///
+/// The helper no longer clears the signing flag on entry. Only those two
+/// cases ever set it, and they put it back before releasing the write guard,
+/// so no reader can observe it set.
 pub(crate) fn with_data_dir<T>(body: impl FnOnce(&Path) -> T) -> T {
-    let lock = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let lock = ENV_LOCK.read().unwrap_or_else(|e| e.into_inner());
     let tmp = tempfile::tempdir().expect("a temp dir");
     let dir = tmp.path().join("data");
     let guard = EnvGuard {
         _lock: lock,
-        previous: std::env::var_os(DATA_DIR_ENV),
-        previous_skip: std::env::var_os("FREIGHT_FATE_SKIP_SAVE_SIGNING"),
+        previous: crate::settings::paths::set_thread_data_dir(Some(dir.clone())),
         _tmp: tmp,
     };
-    std::env::set_var(DATA_DIR_ENV, &dir);
-    std::env::remove_var("FREIGHT_FATE_SKIP_SAVE_SIGNING");
     let result = body(&dir);
     drop(guard);
+    result
+}
+
+/// [`with_data_dir`] for a case that really does write a process-global
+/// environment variable: it runs alone.
+pub(crate) fn with_data_dir_exclusive<T>(body: impl FnOnce(&Path) -> T) -> T {
+    let _lock = ENV_LOCK.write().unwrap_or_else(|e| e.into_inner());
+    let tmp = tempfile::tempdir().expect("a temp dir");
+    let dir = tmp.path().join("data");
+    let previous = crate::settings::paths::set_thread_data_dir(Some(dir.clone()));
+    let result = body(&dir);
+    crate::settings::paths::set_thread_data_dir(previous);
     result
 }
 
@@ -349,7 +360,8 @@ fn test_undecodable_save_is_quarantined() {
 
 #[test]
 fn test_skip_signing_flag_loads_tampered_save_from_source() {
-    with_data_dir(|_| {
+    // Sets a process-global environment variable, so it runs alone.
+    with_data_dir_exclusive(|_| {
         let p = Profile::named("Dev Tampered");
         let path = p.save().unwrap();
         let mut data = read_save(&path);
@@ -371,7 +383,8 @@ fn test_skip_signing_flag_loads_tampered_save_from_source() {
 
 #[test]
 fn test_skip_signing_flag_is_ignored_in_frozen_builds() {
-    with_data_dir(|_| {
+    // Sets a process-global environment variable, so it runs alone.
+    with_data_dir_exclusive(|_| {
         let p = Profile::named("Frozen Tampered");
         let path = p.save().unwrap();
         let mut data = read_save(&path);
@@ -841,10 +854,15 @@ fn test_remember_lane_dedupes_and_caps() {
 
 #[test]
 fn test_recent_lanes_survive_a_save_round_trip() {
-    let mut p = Profile::named_in("Variety", "denver_co_us");
-    p.remember_lane("denver_co_us:silverthorne_co_us");
-    let restored = Profile::from_dict(&p.to_dict());
-    assert_eq!(restored.recent_lanes, ["denver_co_us:silverthorne_co_us"]);
+    // Isolated like every other case here: building a profile reaches the
+    // save directory, and without a pinned one this reached the real folder
+    // the owner's careers live in.
+    with_data_dir(|_| {
+        let mut p = Profile::named_in("Variety", "denver_co_us");
+        p.remember_lane("denver_co_us:silverthorne_co_us");
+        let restored = Profile::from_dict(&p.to_dict());
+        assert_eq!(restored.recent_lanes, ["denver_co_us:silverthorne_co_us"]);
+    });
 }
 
 // -- the profile half of `tests/test_buffs.py` --------------------------------

@@ -6,7 +6,7 @@ ticks it at a fixed 60 Hz step, timing every frame. Reports mean, median,
 p99 and max frame time in microseconds.
 
 This is the Python half of a like-for-like comparison with the Rust port;
-the other half is ``crates/freight-fate/tests/bench_drive.rs``, which builds
+the other half is ``crates/freight-fate/tests/it/bench_drive.rs``, which builds
 the same drive from the same route at the same seed and ticks the same
 number of frames. Both silence speech and run the null audio backend, so
 what is timed is the simulation and nothing else. The method, the numbers
@@ -64,9 +64,11 @@ DT = 1.0 / 60.0  # the game's fixed frame step (app.FPS is 60)
 # that no later frame repeats.
 DEFAULT_WARMUP = 600
 # 12 000 frames is 200 seconds of play at 60 Hz. The ceiling is the route:
-# with the accelerator pinned the truck reaches Cheyenne at about 15 400
-# frames, and every frame after that is a parked truck rather than a drive.
-# 12 000 leaves the run entirely on the road (about 78 of the 100.4 miles).
+# past its end every frame is a parked truck rather than a drive, which would
+# flatter the numbers. 12 000 leaves the run entirely on the road -- it ends
+# at mile 42.988 of the 100.4, at 85.51 mph, still rolling. Both sides print
+# that mile, and it is how a reader tells that the two runs did the same work
+# rather than taking it on trust.
 DEFAULT_FRAMES = 12_000
 
 

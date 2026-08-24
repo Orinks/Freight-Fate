@@ -120,6 +120,39 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Rust port: drive-time frame cost is measured, and one bug found by
+      measuring it (2026-08-24).** `crates/freight-fate/tests/it/frame_time.rs`
+      drives a seeded, weather-pinned I-70 run out of Denver through the whole
+      per-frame path the shipped loop runs (`App::tick` plus the line build)
+      and reports mean/median/p95/p99/max, the split between the sim step, the
+      rest of the tick and the line build, and what the expensive frames were
+      doing. In release the driven frame is **~54 us mean, ~91 us p99** against
+      a 16 667 us budget at 60 fps -- 0.3% of the frame, 0 frames over budget
+      in 35 618. Before the fix below it was **2 150 us mean**, 13% of the
+      budget. Two gates hold it: an absolute one derived from the 60 Hz budget,
+      and a machine-independent ratio one asserting a presence string never
+      out-costs the simulation.
+- [x] **Rust port: the drivers-board line stops cloning the whole radio
+      (2026-08-24).** `online_presence_state` resolved the tuned station on
+      `self.radio.clone()` -- 757 stations and their identity map, deep-copied
+      every frame, 97% of the entire driven frame.
+      `RadioState::tuned_station` is the read-only resolve it wanted;
+      `current_station` keeps the write-back. Pinned by
+      `test_tuned_station_reads_the_dial_without_moving_it`.
+- [ ] **Rust port: the frame bench's driver cannot finish a mountain route.**
+      `DriveRig::steer` is a throttle and a brake, so on the descent off the
+      Divide it works the service brakes down to the low-air warning and the
+      spring brakes park the truck at mile 63.5 of 246 -- correct air-system
+      behaviour, a bad driver. Teaching it the retarder (or driving it through
+      the speed keeper) would take the bench across leg changes and an
+      arrival, which are the frames it currently never measures.
+- [ ] **Rust port: `App::tick` builds both presence strings every frame.**
+      They are handed to services that throttle to seconds, and to services
+      that are not running at all unless the player opted in. Cheap now that
+      the clone is gone (2.2 us of 54), so left alone deliberately -- but it
+      is per-frame work with a per-second consumer, and the first place to
+      look if the ratio gate ever starts creeping.
+
 - [x] **Rust port: the adversarial battery is ported, all 45 scenarios
       (2026-08-23).** `tools/playtest_break.py` and its ten scenario families
       are now `crates/freight-fate/src/playtest/break_scenarios/`, run by

@@ -275,8 +275,12 @@ fn test_save_survives_unwritable_game_dir() {
     let fallback = data_dir_of(&roots);
     assert_eq!(fallback, legacy);
     with_data_dir(|_| {
-        std::env::set_var(DATA_DIR_ENV, &fallback);
+        // Re-point THIS THREAD's save directory at the fallback. The pin is
+        // what `data_dir()` reads, and `with_data_dir` has just set it to a
+        // temp directory, so pinning again is how the override lands.
+        let previous = crate::settings::paths::set_thread_data_dir(Some(fallback.clone()));
         let saved = Profile::named("Ryan").save().unwrap();
+        crate::settings::paths::set_thread_data_dir(previous);
         assert_eq!(saved, legacy.join("profiles").join("Ryan.ffsave"));
         assert!(saved.is_file());
     });

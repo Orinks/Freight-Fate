@@ -13,9 +13,38 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{json, Value};
 
-use freight_fate::app::testing::{env_lock, TempDir};
+use freight_fate::app::testing::{env_lock, EnvGuard, TempDir};
 use freight_fate::online_presence::IdentityStore;
 use freight_fate::playtest::sandbox;
+
+/// The environment lock, plus putting `FREIGHT_FATE_DATA_DIR` back.
+///
+/// `sandbox::prepare` points the whole process at the sandbox, which is the
+/// job -- for the game. In a test binary it outlived the lock: the guard
+/// dropped, the temporary sandbox was deleted, and the variable went on
+/// naming that deleted directory for every test that ran afterwards. Anything
+/// that then asked where saves live got an answer belonging to a case that
+/// had already finished.
+struct SandboxEnv {
+    _lock: EnvGuard,
+    previous: Option<std::ffi::OsString>,
+}
+
+impl Drop for SandboxEnv {
+    fn drop(&mut self) {
+        match self.previous.take() {
+            Some(old) => std::env::set_var("FREIGHT_FATE_DATA_DIR", old),
+            None => std::env::remove_var("FREIGHT_FATE_DATA_DIR"),
+        }
+    }
+}
+
+fn sandbox_env() -> SandboxEnv {
+    SandboxEnv {
+        _lock: env_lock(),
+        previous: std::env::var_os("FREIGHT_FATE_DATA_DIR"),
+    }
+}
 
 /// A stand-in for the owner's `saves/`: settings, careers, identity.
 fn fake_real_saves(root: &Path) -> PathBuf {
@@ -58,7 +87,7 @@ fn read_settings(path: &Path) -> serde_json::Map<String, Value> {
 
 #[test]
 fn test_seeding_carries_careers_but_never_the_identity() {
-    let _guard = env_lock();
+    let _guard = sandbox_env();
     let root = TempDir::new("ff-sandbox");
     let source = fake_real_saves(root.path());
     let sandbox = root.path().join("sandbox");
@@ -77,7 +106,7 @@ fn test_seeding_carries_careers_but_never_the_identity() {
 
 #[test]
 fn test_the_seeded_settings_have_every_publishing_switch_off() {
-    let _guard = env_lock();
+    let _guard = sandbox_env();
     let root = TempDir::new("ff-sandbox");
     let source = fake_real_saves(root.path());
     let sandbox = root.path().join("sandbox");
@@ -98,7 +127,7 @@ fn test_the_seeded_settings_have_every_publishing_switch_off() {
 
 #[test]
 fn test_no_careers_leaves_the_sandbox_empty() {
-    let _guard = env_lock();
+    let _guard = sandbox_env();
     let root = TempDir::new("ff-sandbox");
     let source = fake_real_saves(root.path());
     let sandbox = root.path().join("sandbox");
@@ -112,7 +141,7 @@ fn test_no_careers_leaves_the_sandbox_empty() {
 /// by hand -- including the backup spellings of the file.
 #[test]
 fn test_the_audit_names_an_identity_that_got_in_somehow() {
-    let _guard = env_lock();
+    let _guard = sandbox_env();
     let root = TempDir::new("ff-sandbox");
     let source = fake_real_saves(root.path());
     let sandbox = root.path().join("sandbox");
@@ -131,7 +160,7 @@ fn test_the_audit_names_an_identity_that_got_in_somehow() {
 
 #[test]
 fn test_the_audit_names_a_publishing_switch_turned_back_on() {
-    let _guard = env_lock();
+    let _guard = sandbox_env();
     let root = TempDir::new("ff-sandbox");
     let source = fake_real_saves(root.path());
     let sandbox = root.path().join("sandbox");
@@ -158,7 +187,7 @@ fn test_the_audit_names_a_publishing_switch_turned_back_on() {
 /// nothing, so those are branches the drive never takes.
 #[test]
 fn test_a_sandbox_data_dir_has_no_driver_at_all() {
-    let _guard = env_lock();
+    let _guard = sandbox_env();
     let root = TempDir::new("ff-sandbox");
     let source = fake_real_saves(root.path());
     let sandbox = root.path().join("sandbox");
@@ -176,7 +205,7 @@ fn test_a_sandbox_data_dir_has_no_driver_at_all() {
 /// Seeding copies out of `saves/`; it must never write back into it.
 #[test]
 fn test_the_real_saves_are_only_ever_read() {
-    let _guard = env_lock();
+    let _guard = sandbox_env();
     let root = TempDir::new("ff-sandbox");
     let source = fake_real_saves(root.path());
     let before = snapshot(&source);

@@ -21,17 +21,20 @@ use super::*;
 use crate::speech_pacing::{Disposition, SpeechCategory};
 
 /// `isolated_data_dir`: run `body` with settings pointed at a fresh tempdir.
+///
+/// The directory is pinned on THIS THREAD rather than in the process
+/// environment, so these cases are isolated from each other without being
+/// serialised against each other. The read guard is still taken because that
+/// isolation only holds while nobody rewrites the process environment
+/// underneath it, and a couple of cases elsewhere in the crate do exactly
+/// that -- they take the write guard and get the process to themselves.
 fn with_data_dir<T>(body: impl FnOnce(&Path) -> T) -> T {
-    let _guard = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let _guard = ENV_LOCK.read().unwrap_or_else(|e| e.into_inner());
     let tmp = tempfile::tempdir().unwrap();
     let data = tmp.path().join("data");
-    let previous = std::env::var_os(DATA_DIR_ENV);
-    std::env::set_var(DATA_DIR_ENV, &data);
+    let previous = paths::set_thread_data_dir(Some(data.clone()));
     let result = body(&data);
-    match previous {
-        Some(old) => std::env::set_var(DATA_DIR_ENV, old),
-        None => std::env::remove_var(DATA_DIR_ENV),
-    }
+    paths::set_thread_data_dir(previous);
     result
 }
 

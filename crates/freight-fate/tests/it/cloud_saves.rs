@@ -689,28 +689,22 @@ fn test_resolve_keep_mine_rejection_logs_the_raw_reason_but_the_tag_never_speaks
 
 // -- the save-listener hook -------------------------------------------------------
 
-/// A temp `FREIGHT_FATE_DATA_DIR` and `listener` installed for the duration
-/// of `body`, so a real `Profile::save()` writes somewhere disposable
+/// A temp save directory and `listener` installed for the duration of
+/// `body`, so a real `Profile::save()` writes somewhere disposable
 /// (Python's `tmp_path` fixture, which `conftest.py` applied to every test).
 ///
-/// The listener is a process-wide hook, so it goes on and comes off inside
-/// the environment lock: without that, these two cases race each other and
-/// whichever saves second gets the other's listener.
+/// Both the directory and the hook belong to the calling THREAD, so these
+/// cases need no lock and cannot take each other's listener however many of
+/// them run at once.
 fn with_save_listener<T>(
     listener: impl Fn(&Profile) + Send + Sync + 'static,
     body: impl FnOnce() -> T,
 ) -> T {
-    let _guard = freight_fate::app::testing::env_lock();
     let tmp = tempfile::tempdir().expect("a temp dir");
-    let previous = std::env::var_os("FREIGHT_FATE_DATA_DIR");
-    std::env::set_var("FREIGHT_FATE_DATA_DIR", tmp.path().join("data"));
+    let _guard = freight_fate::app::testing::DataDirGuard::pin(tmp.path().join("data"));
     set_save_listener(Some(Arc::new(listener)));
     let result = body();
     set_save_listener(None);
-    match previous {
-        Some(value) => std::env::set_var("FREIGHT_FATE_DATA_DIR", value),
-        None => std::env::remove_var("FREIGHT_FATE_DATA_DIR"),
-    }
     result
 }
 

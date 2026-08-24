@@ -167,15 +167,41 @@ fn test_route_deadline_uses_baked_limit_near_city() {
 /// achievability invariant the deadline formula guarantees; the test guards it
 /// across the whole expanded network and all levels, including the corrected
 /// ORS mileages.
-#[test]
-fn test_deadlines_cover_required_hos_time_across_the_network() {
-    // Bounded, deterministic sample of origins rather than every city: this
-    // scans city x seed x generated jobs and grew with the map; the
-    // deadline-vs-HOS check is a formula invariant, so ~96 diverse origins
-    // exercise the distance/route range without an O(cities) scan.
+/// How many tests each whole-network sweep in this file is cut into.
+///
+/// The two sweeps were the slowest things in this crate by a wide margin --
+/// about nineteen seconds each against a median in the low milliseconds --
+/// and one `#[test]` runs on one thread however many cores the machine has,
+/// so between them they set the floor for the entire crate's suite. Sharding
+/// the SAME strided city list across several tests is the same origins, the
+/// same seeds and the same assertions on several threads, and a failure now
+/// names the shard it happened in.
+const SWEEP_SHARDS: usize = 6;
+
+/// The origins that shard `shard` of a whole-network sweep covers.
+///
+/// Both sweeps take the same bounded, deterministic sample -- every
+/// `stride`-th city, about 96 of them -- because scanning city x seed x
+/// generated jobs grew with the map and the invariants under test are
+/// formula invariants that ~96 diverse origins already exercise across the
+/// distance and route range. Handing each shard every `SWEEP_SHARDS`-th
+/// entry of that sample covers it exactly once between them: no city in two
+/// shards, none in none.
+fn sweep_origins(shard: usize) -> Vec<String> {
     let all_cities = world().city_names();
     let stride = (all_cities.len() / 96).max(1);
-    for city in all_cities.iter().step_by(stride) {
+    all_cities
+        .iter()
+        .step_by(stride)
+        .skip(shard)
+        .step_by(SWEEP_SHARDS)
+        .cloned()
+        .collect()
+}
+
+fn check_deadlines_cover_required_hos_time(shard: usize) {
+    for city in sweep_origins(shard) {
+        let city = city.as_str();
         for seed in 0..3 {
             let jobs = board(seed).offers(
                 city,
@@ -197,6 +223,27 @@ fn test_deadlines_cover_required_hos_time_across_the_network() {
         }
     }
 }
+
+macro_rules! sweep_shard_tests {
+    ($check:ident, $($name:ident = $shard:expr),+ $(,)?) => {
+        $(
+            #[test]
+            fn $name() {
+                $check($shard);
+            }
+        )+
+    };
+}
+
+sweep_shard_tests!(
+    check_deadlines_cover_required_hos_time,
+    test_deadlines_cover_required_hos_time_across_the_network_shard0 = 0,
+    test_deadlines_cover_required_hos_time_across_the_network_shard1 = 1,
+    test_deadlines_cover_required_hos_time_across_the_network_shard2 = 2,
+    test_deadlines_cover_required_hos_time_across_the_network_shard3 = 3,
+    test_deadlines_cover_required_hos_time_across_the_network_shard4 = 4,
+    test_deadlines_cover_required_hos_time_across_the_network_shard5 = 5,
+);
 
 #[test]
 fn test_endorsement_gating() {
@@ -754,14 +801,15 @@ fn test_new_dispatches_only_use_metadata_supported_routes() {
     }
 }
 
-#[test]
-fn test_whole_board_never_offers_unsupported_route_legs() {
+fn check_whole_board_never_offers_unsupported_route_legs(shard: usize) {
     // Spot-check board generation across a bounded, deterministic sample of
-    // origin cities (x4 seeds) rather than every city.
-    let all_cities = world().city_names();
-    let stride = (all_cities.len() / 96).max(1);
+    // origin cities (x4 seeds) rather than every city. The route memo is per
+    // shard rather than per sweep, so a shard re-derives a route another
+    // shard already has -- a little repeated work, bought back many times
+    // over by the shards running at once.
     let mut routes: std::collections::HashMap<(String, String), Option<Route>> = Default::default();
-    for city in all_cities.iter().step_by(stride) {
+    for city in sweep_origins(shard) {
+        let city = city.as_str();
         for seed in 0..4 {
             for job in offers(seed, city, ALL, 6) {
                 let key = (job.origin.clone(), job.destination.clone());
@@ -785,6 +833,16 @@ fn test_whole_board_never_offers_unsupported_route_legs() {
         }
     }
 }
+
+sweep_shard_tests!(
+    check_whole_board_never_offers_unsupported_route_legs,
+    test_whole_board_never_offers_unsupported_route_legs_shard0 = 0,
+    test_whole_board_never_offers_unsupported_route_legs_shard1 = 1,
+    test_whole_board_never_offers_unsupported_route_legs_shard2 = 2,
+    test_whole_board_never_offers_unsupported_route_legs_shard3 = 3,
+    test_whole_board_never_offers_unsupported_route_legs_shard4 = 4,
+    test_whole_board_never_offers_unsupported_route_legs_shard5 = 5,
+);
 
 #[test]
 fn test_former_legacy_routes_are_now_metadata_supported_for_dispatch() {

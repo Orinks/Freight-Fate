@@ -47,12 +47,18 @@ fn main() {
     // First of all, so the opening phase mark charges process creation and
     // dynamic linking to the launch instead of losing them.
     app::boot_timing::start();
-    // This process is the game, so it -- and only it -- may put a page in
-    // front of a player. Every other process that links the crate, the test
-    // binaries above all, never runs this function and so never gets the
-    // capability: `browser::open_url` refuses and records instead of
-    // reaching the live site. See `freight_fate::browser`.
+    // This process is the game, so it -- and only it -- may reach the real
+    // world: a web page in front of the player, the network, the player's own
+    // save folder, and the platform store holding their driver token. Every
+    // other process that links the crate, the test binaries above all, never
+    // runs this function and so never gets any of these, and each door then
+    // records the attempt and refuses instead of reaching the live thing.
+    // See `freight_fate::browser`, `freight_fate::net`,
+    // `ff_core::settings::paths` and `freight_fate::online_presence`.
     freight_fate::browser::allow_real_browser();
+    freight_fate::net::allow_real_network();
+    ff_core::settings::paths::allow_real_save_dir();
+    freight_fate::online_presence::allow_real_secret_store();
     let args: Vec<String> = std::env::args().skip(1).collect();
     // Before anything writes a byte: a GUI-subsystem process starts with no
     // console and, on every shell tested, no standard handles either, so an

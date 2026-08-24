@@ -34,14 +34,154 @@ use parking_lot::Mutex;
 /// Environment variable that pins the save directory for a run.
 pub const DATA_DIR_ENV: &str = "FREIGHT_FATE_DATA_DIR";
 
+thread_local! {
+    /// This thread's save directory, when something has pinned one.
+    ///
+    /// The environment variable above is what a PLAYER's run uses, and a
+    /// process has exactly one environment. That was fine while the game was
+    /// the only caller and fatal for the test suite: every test that wanted
+    /// its own saves had to set the same process-global variable, so every
+    /// test that wanted its own saves had to take a lock and wait its turn.
+    /// The whole freight-fate suite ran at one-core speed on a 28-core
+    /// machine because of it -- 123.6 seconds on one thread against 117.4 on
+    /// eight, which is no parallelism at all.
+    ///
+    /// A thread-local override is the injectable per-test root that removes
+    /// the reason for the lock. Tests pin their own directory here and never
+    /// touch the environment, so hundreds of them can run at once without
+    /// being able to see each other's saves. The game sets it never and is
+    /// bit-for-bit unaffected: with nothing pinned, [`data_dir`] falls
+    /// through to exactly the environment variable and [`save_root`] it
+    /// always used.
+    ///
+    /// Threading a root through every call site instead would be the purer
+    /// fix, but `data_dir()` is read from the profile model, the settings
+    /// model, the cloud service and the online store, none of which have a
+    /// test-supplied value to thread. This puts the injection at the one
+    /// place that reads the process's answer.
+    static THREAD_DATA_DIR: std::cell::RefCell<Option<PathBuf>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Pin this thread's save directory (`None` clears it), returning whatever
+/// was pinned before so a scope guard can put it back.
+pub fn set_thread_data_dir(dir: Option<PathBuf>) -> Option<PathBuf> {
+    THREAD_DATA_DIR.with(|slot| std::mem::replace(&mut *slot.borrow_mut(), dir))
+}
+
+/// This thread's pinned save directory, if any.
+pub fn thread_data_dir() -> Option<PathBuf> {
+    THREAD_DATA_DIR.with(|slot| slot.borrow().clone())
+}
+
+// -- who may reach the player's real save folder ---------------------------------
+//
+// [`THREAD_DATA_DIR`] above is thread-local, and it has to be: it is what
+// lets hundreds of tests each have their own saves at once. But a
+// thread-local is invisible to a thread the test did not pin, and the value
+// a thread with nothing pinned falls through to is [`save_root`] -- the
+// owner's real save folder, with their careers in it.
+//
+// Nothing spawns such a thread today (every worker captures the directory
+// before spawning), and "nothing does today" is not a guarantee. It is the
+// one seam here whose failure mode is writing over somebody's career, so the
+// fallback is a capability rather than a default:
+//
+// * [`allow_real_save_dir`] is called once, by the game's `main()`, and only
+//   by it. A test binary has no such `main()`, so no test process can hold
+//   it -- nothing to remember and nothing to forget.
+// * Process-wide (`AtomicBool`) on purpose, so a spawned worker refuses
+//   exactly as the game loop would allow. That is the case a per-thread flag
+//   could not reach and the reason this seam exists at all.
+// * Without it, [`data_dir`] records the path in [`refused_save_dirs`] and
+//   panics naming it. A quiet fallback to a temporary folder would read as a
+//   fresh career -- a state the game handles perfectly gracefully and nobody
+//   would ever look at.
+//
+// A pinned thread directory and `FREIGHT_FATE_DATA_DIR` both still answer
+// first and are untouched: they are somebody saying, explicitly, which
+// directory to use.
+
+/// Set once by the game's `main()`. Process-wide, so a spawned worker sees
+/// it exactly as the game loop does.
+static REAL_SAVE_DIR_ALLOWED: AtomicBool = AtomicBool::new(false);
+
+/// Every real save directory that was asked for and refused, in order.
+static REFUSED_SAVE_DIRS: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+
+/// "This process is the real game": from here on [`data_dir`] may fall
+/// through to the player's own save folder.
+///
+/// Called from `main()` and nowhere else. Nothing undoes it.
+pub fn allow_real_save_dir() {
+    REAL_SAVE_DIR_ALLOWED.store(true, Ordering::SeqCst);
+}
+
+/// Whether the player's real save folder may be reached in this process.
+pub fn real_save_dir_allowed() -> bool {
+    REAL_SAVE_DIR_ALLOWED.load(Ordering::SeqCst)
+}
+
+/// Every real save directory that was refused, oldest first.
+pub fn refused_save_dirs() -> Vec<String> {
+    REFUSED_SAVE_DIRS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone()
+}
+
+/// Forget the refusals so far.
+pub fn clear_refused_save_dirs() {
+    REFUSED_SAVE_DIRS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clear();
+}
+
+/// Record `path` and panic: something that is not the game asked for the
+/// player's own save folder.
+///
+/// Shared with `models::profile::paths`, which has its own `data_dir` over
+/// the same roots, so both doors carry the same lock.
+///
+/// # Panics
+///
+/// Always.
+#[cold]
+pub fn refuse_real_save_dir(path: &Path) -> ! {
+    REFUSED_SAVE_DIRS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .push(path.display().to_string());
+    panic!(
+        "refusing to use the real save directory {}: this process never \
+         called settings::paths::allow_real_save_dir(), so it is not the \
+         game. If this is a test, pin a directory for the thread that asked \
+         -- set_thread_data_dir(Some(dir)) -- and remember a thread you \
+         spawn does NOT inherit the pin.",
+        path.display()
+    );
+}
+
 static UNWRITABLE_WARNED: AtomicBool = AtomicBool::new(false);
 static WRITABLE_CACHE: Lazy<Mutex<HashMap<PathBuf, bool>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
-/// Serialises tests that set process-global environment variables
-/// (`FREIGHT_FATE_DATA_DIR`); every test that touches one holds this.
+/// Guards the process environment for tests that genuinely write one.
+///
+/// A read guard means "I am relying on the environment holding still"; a
+/// write guard means "I am about to change it". Readers run together, so the
+/// common case -- a test that just wants its own save directory, which now
+/// pins [`THREAD_DATA_DIR`] instead -- costs nothing, while the handful that
+/// really do set `FREIGHT_FATE_SKIP_SAVE_SIGNING` or `FREIGHT_FATE_DATA_DIR`
+/// still get the whole process to themselves.
+///
+/// This was a plain `Mutex` held by every test that wanted an isolated data
+/// directory, which is most of them: `ff-core`'s own suite ran 33.1 seconds
+/// on one thread and still 18.8 on sixteen. `sim::weather` already used the
+/// read/write shape for the same reason.
 #[cfg(test)]
-pub(crate) static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+pub(crate) static ENV_LOCK: std::sync::RwLock<()> = std::sync::RwLock::new(());
 
 fn home_dir() -> PathBuf {
     #[allow(deprecated)]
@@ -206,23 +346,39 @@ pub fn game_root() -> PathBuf {
     executable_dir().unwrap_or_else(|| PathBuf::from("."))
 }
 
-/// Where settings and profiles live: `FREIGHT_FATE_DATA_DIR` when set (and
-/// not empty), else [`save_root`].
+/// Where settings and profiles live: this thread's pinned directory,
+/// `FREIGHT_FATE_DATA_DIR` when set (and not empty), else [`save_root`].
+///
+/// # Panics
+///
+/// When nothing is pinned, the environment says nothing, and
+/// [`allow_real_save_dir`] has not been called -- which outside the real
+/// game means something reached for the player's own careers. The path is
+/// recorded in [`refused_save_dirs`] first.
 pub fn data_dir() -> PathBuf {
+    if let Some(pinned) = thread_data_dir() {
+        return pinned;
+    }
     if let Some(override_dir) = std::env::var_os(DATA_DIR_ENV) {
         if !override_dir.is_empty() {
             return PathBuf::from(override_dir);
         }
     }
-    save_root()
+    let root = save_root();
+    if !real_save_dir_allowed() {
+        refuse_real_save_dir(&root);
+    }
+    root
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    /// These cases are ABOUT the environment variable, so they really do
+    /// write it and take the exclusive guard.
     fn with_env<T>(value: Option<&Path>, body: impl FnOnce() -> T) -> T {
-        let _guard = ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let _guard = ENV_LOCK.write().unwrap_or_else(|e| e.into_inner());
         let previous = std::env::var_os(DATA_DIR_ENV);
         match value {
             Some(path) => std::env::set_var(DATA_DIR_ENV, path),
@@ -243,7 +399,16 @@ mod tests {
             assert_eq!(data_dir(), tmp.path());
         });
         with_env(Some(Path::new("")), || {
-            assert_eq!(data_dir(), save_root());
+            // An empty override is not an override, so `data_dir` falls
+            // through to `save_root` -- which in a process that is not the
+            // game is refused BY NAME rather than handed over. The refusal
+            // naming exactly `save_root()` is the same claim the old
+            // `assert_eq!(data_dir(), save_root())` made, and it also proves
+            // the fallthrough never reached anybody's careers.
+            let root = save_root().display().to_string();
+            let outcome = std::panic::catch_unwind(data_dir);
+            assert!(outcome.is_err(), "the real save folder was handed over");
+            assert!(refused_save_dirs().contains(&root), "{root}");
         });
     }
 

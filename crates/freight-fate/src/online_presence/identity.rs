@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::Ordering;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 use serde_json::Value;
@@ -28,19 +28,104 @@ pub trait SecretStore: Send + Sync {
     fn delete_password(&self, service: &str, user: &str) -> Result<(), String>;
 }
 
+// -- who may reach the platform secret store -------------------------------------
+//
+// [`TOKEN_SERVICE`] is a fixed string, not a per-directory one, so a store
+// built over a test's temporary data directory still keys the OWNER's entry
+// in Windows Credential Manager. Pinning a save directory buys nothing here;
+// only the process itself tells the game from a test.
+//
+// Nothing calls it from a test today -- a temporary data directory has no
+// `online.json`, so no Driver ID is ever looked up -- which makes this latent
+// rather than live. It is one line of a first-run flow away from being live,
+// and the entry it would reach holds the owner's posting secret, so it takes
+// the same capability as the browser, the network and the save folder:
+// granted once by the game's `main()`, held by no test process, refused and
+// recorded otherwise.
+
+/// Set once by the game's `main()`. Process-wide, so a spawned worker sees
+/// it exactly as the game loop does.
+static REAL_SECRET_STORE_ALLOWED: AtomicBool = AtomicBool::new(false);
+
+/// Every `(service, user)` the platform store was asked for and refused.
+static REFUSED_SECRET_KEYS: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
+/// "This process is the real game": from here on [`KeyringStore`] may reach
+/// the platform secret store.
+///
+/// Called from `main()` and nowhere else.
+pub fn allow_real_secret_store() {
+    REAL_SECRET_STORE_ALLOWED.store(true, Ordering::SeqCst);
+}
+
+/// Whether the platform secret store may be reached in this process.
+pub fn real_secret_store_allowed() -> bool {
+    REAL_SECRET_STORE_ALLOWED.load(Ordering::SeqCst)
+}
+
+/// Every platform-store key that was refused, oldest first, as
+/// `"service/user"`.
+pub fn refused_secret_keys() -> Vec<String> {
+    REFUSED_SECRET_KEYS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone()
+}
+
+/// Forget the refusals so far.
+pub fn clear_refused_secret_keys() {
+    REFUSED_SECRET_KEYS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clear();
+}
+
+#[cold]
+fn refuse_secret_key(service: &str, user: &str) -> ! {
+    REFUSED_SECRET_KEYS
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .push(format!("{service}/{user}"));
+    panic!(
+        "refusing to reach the platform secret store for {service}/{user}: \
+         this process never called \
+         online_presence::allow_real_secret_store(), so it is not the game. \
+         If this is a test, build the store over MemoryStore (or \
+         RefusingStore for the no-backend shape) instead of \
+         IdentityStore::platform."
+    );
+}
+
 /// The real platform store through the `keyring` crate: Windows Credential
 /// Manager, the macOS Keychain, Secret Service on Linux.
+///
+/// Every method refuses unless this process is the game; see the capability
+/// note above. A test wants [`MemoryStore`], which unlike the keyring really
+/// is its own.
 #[derive(Debug, Default, Clone, Copy)]
 pub struct KeyringStore;
 
+impl KeyringStore {
+    /// # Panics
+    ///
+    /// When [`allow_real_secret_store`] has not been called.
+    fn require_capability(service: &str, user: &str) {
+        if !real_secret_store_allowed() {
+            refuse_secret_key(service, user);
+        }
+    }
+}
+
 impl SecretStore for KeyringStore {
     fn set_password(&self, service: &str, user: &str, password: &str) -> Result<(), String> {
+        Self::require_capability(service, user);
         keyring::Entry::new(service, user)
             .and_then(|entry| entry.set_password(password))
             .map_err(|e| e.to_string())
     }
 
     fn get_password(&self, service: &str, user: &str) -> Result<Option<String>, String> {
+        Self::require_capability(service, user);
         match keyring::Entry::new(service, user).and_then(|entry| entry.get_password()) {
             Ok(token) => Ok(Some(token)),
             Err(keyring::Error::NoEntry) => Ok(None),
@@ -49,6 +134,7 @@ impl SecretStore for KeyringStore {
     }
 
     fn delete_password(&self, service: &str, user: &str) -> Result<(), String> {
+        Self::require_capability(service, user);
         match keyring::Entry::new(service, user).and_then(|entry| entry.delete_credential()) {
             Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
             Err(e) => Err(e.to_string()),

@@ -22,7 +22,7 @@
 //! lookup reaches it by the road it actually walks.
 
 use ff_core::sim::trip_models::RoadStop;
-use ff_core::sim::weather::WeatherKind;
+use ff_core::sim::weather::{WeatherKind, WeatherProvider};
 
 use freight_fate::playtest::harness::{key_event, PlaytestHarness, StartDelivery};
 use freight_fate::states::base::Key;
@@ -34,9 +34,30 @@ const MPH_PER_MPS: f64 = 2.23694;
 // -- rigging -------------------------------------------------------------------------
 
 fn a_drive(name: &str) -> PlaytestHarness {
+    a_drive_with_weather(name, None)
+}
+
+/// The rigging, with the trip's weather SOURCE named rather than left to
+/// whatever the drive was built with.
+///
+/// Every case in this file counts what lands on the shared event-speech
+/// channel, so anything else that can speak there has to be pinned, and the
+/// weather source is one of them. Pinning `weather.current` alone -- which is
+/// all this used to do -- pins today's reading and leaves the source open: a
+/// live provider that answers, one that fails, and one whose fetch never
+/// finishes each leave the weather system in a different state, and two of
+/// those can put a condition line on this channel. That is not a hypothetical
+/// difference between machines; it is the difference between a drive that is
+/// asserting about exits and a drive that is also asserting about the weather
+/// over Chicago.
+///
+/// So the source is an argument: `None` is no live source at all, and a
+/// caller that wants one hands in a fake. Nothing here ever reaches the
+/// weather service (see `network_guard.rs` for why it could not if it tried).
+fn a_drive_with_weather(name: &str, provider: Option<Box<dyn WeatherProvider>>) -> PlaytestHarness {
     let mut harness = PlaytestHarness::new();
     harness.start_delivery(StartDelivery::named(name));
-    harness.with_drive(|drive, _| {
+    harness.with_drive(move |drive, _| {
         drive.tutorial = None;
         drive.departure_checked = true;
         drive.trip.hazard_check_mi = 1e9;
@@ -45,12 +66,29 @@ fn a_drive(name: &str) -> PlaytestHarness {
         drive.trip.set_npc_vehicles(Vec::new());
         drive.trip.traffic_pressures.clear();
         drive.trip.zones.retain(|z| z.aadt.is_none());
+        drive.trip.weather.live = provider.is_some();
+        drive.trip.weather.provider = provider;
         drive.trip.weather.current = WeatherKind::Clear;
         drive.trip.set_patrols(Vec::new());
         drive.trip.posts.clear();
     });
     harness.clear_speech();
     harness
+}
+
+/// A live source that answers with `kind` for every city, or -- with `None` --
+/// one whose fetch has not come back yet. The two live shapes the drive can
+/// actually be in, without a network between them and the answer.
+struct FixedWeather {
+    kind: Option<WeatherKind>,
+}
+
+impl WeatherProvider for FixedWeather {
+    fn request(&mut self, _city: &str, _lat: f64, _lon: f64) {}
+
+    fn get(&mut self, _city: &str) -> Option<WeatherKind> {
+        self.kind
+    }
 }
 
 /// `monkeypatch.setattr(driving.trip, "upcoming_stop", lambda _window: None)`:
@@ -187,11 +225,40 @@ fn test_announced_destination_exit_stays_actionable_when_window_shrinks() {
     }
 }
 
-#[test]
-fn test_destination_exit_response_queues_behind_intervening_safety_cue() {
-    // X must not silence a newer warning on the shared event-speech channel.
-    let mut harness = a_drive("Queue Behind");
-    no_optional_stops(&mut harness);
+/// Arm the destination exit, let a safety warning land, then press X, and
+/// return every line that reached the event channel.
+///
+/// The whole subject is those lines: the warning first, the confirmation
+/// second, and the confirmation queueing rather than cutting in. Nothing
+/// about the road, the traffic or the weather is being measured here, which
+/// is why `a_drive` pins all of it -- and why this body is shared with the
+/// case below that runs it against a live weather source.
+/// Advance the pacer's clock until it says the event voice has finished,
+/// instead of guessing at a number of seconds.
+///
+/// The guess used to be ten. Ten is long enough for SOME destination-exit
+/// callouts: the line names the exit number, the road, the places the road
+/// serves, the facility, the town and the state, so how long the channel
+/// stays busy follows whichever delivery the board handed out. When it was
+/// not long enough the warning arrived on top of a callout still notionally
+/// mid-sentence, the delivery layer flushed the backlog and requeued the
+/// callout behind it, and a third line appeared -- which reads as this case
+/// failing, and is nothing to do with what it is about. Asking the pacer is
+/// the same question with an answer that does not depend on the wording.
+fn wait_for_the_event_voice(harness: &mut PlaytestHarness) {
+    let mut waited = 0.0;
+    while harness.app.ctx.event_pacer.busy() && waited < 300.0 {
+        harness.advance_clock(0.5);
+        waited += 0.5;
+    }
+    assert!(
+        !harness.app.ctx.event_pacer.busy(),
+        "the event voice was still speaking after {waited} seconds"
+    );
+}
+
+fn queue_behind_a_safety_cue(harness: &mut PlaytestHarness) -> Vec<(String, bool)> {
+    no_optional_stops(harness);
     harness.with_drive(|drive, ctx| {
         drive.trip.time_scale = 20.0;
         drive.truck_mut().velocity_mps = 54.0 / MPH_PER_MPS;
@@ -205,7 +272,7 @@ fn test_destination_exit_response_queues_behind_intervening_safety_cue() {
     let stops_before = harness.app.speech().stop_event_calls();
     // The callout has finished speaking; see the sibling case above for why
     // that matters before an interrupting line lands.
-    harness.advance_clock(10.0);
+    wait_for_the_event_voice(harness);
 
     harness.app.ctx.say_event("Brake now. Hazard ahead.");
     // The player hears the warning, then reaches for X. Without the pause the
@@ -214,10 +281,13 @@ fn test_destination_exit_response_queues_behind_intervening_safety_cue() {
     // behind it -- the pacer's own rescue, not anything X did, and its own
     // suite's business.
     harness.advance_clock(5.0);
-    press_x(&mut harness);
+    press_x(harness);
 
     assert_eq!(harness.app.speech().stop_event_calls(), stops_before);
-    let calls = harness.app.event_calls();
+    harness.app.event_calls()
+}
+
+fn assert_warning_then_queued_confirmation(calls: &[(String, bool)]) {
     assert_eq!(calls.len(), 2, "{calls:#?}");
     assert_eq!(calls[0].0, "Brake now. Hazard ahead.");
     assert!(calls[1].0.contains("Signal on for"), "{calls:#?}");
@@ -225,6 +295,43 @@ fn test_destination_exit_response_queues_behind_intervening_safety_cue() {
         !calls[1].1,
         "the confirmation queues rather than cutting in"
     );
+}
+
+#[test]
+fn test_destination_exit_response_queues_behind_intervening_safety_cue() {
+    // X must not silence a newer warning on the shared event-speech channel.
+    let mut harness = a_drive("Queue Behind");
+    let calls = queue_behind_a_safety_cue(&mut harness);
+    assert_warning_then_queued_confirmation(&calls);
+}
+
+/// The same two lines, whatever the weather is doing.
+///
+/// The case above counts the lines on the event channel, so a weather source
+/// that also speaks there changes its answer -- and until the drive's weather
+/// source was pinned, which source it had was decided by a setting and by
+/// whether a fetch happened to come back. A live reading that lands, a live
+/// fetch that has not come back, and no live source at all are the three
+/// states the drive can be in; the exits behave identically in all three, and
+/// that is what this pins so nothing has to be inferred from a run that
+/// happened to be offline.
+#[test]
+fn test_the_exit_confirmation_queue_does_not_depend_on_the_weather_source() {
+    for (label, provider) in [
+        ("answering", Some(WeatherKind::Rain)),
+        ("still loading", None),
+    ] {
+        let mut harness = a_drive_with_weather(
+            &format!("Queue Behind {label}"),
+            Some(Box::new(FixedWeather { kind: provider })),
+        );
+        let calls = queue_behind_a_safety_cue(&mut harness);
+        assert_warning_then_queued_confirmation(&calls);
+        assert!(
+            harness.read_drive(|d| d.trip.weather.provider.is_some()),
+            "{label}: the live source was supposed to still be attached"
+        );
+    }
 }
 
 #[test]

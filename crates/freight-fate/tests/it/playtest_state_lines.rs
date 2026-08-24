@@ -1,15 +1,15 @@
 //! The mapped state line, heard on a whole delivery (a case of
 //! `tests/test_playtest_harness.py`).
 //!
-//! # Why this test lives alone in its own binary
+//! # One route per test, on purpose
 //!
-//! It drives four complete 500-mile deliveries, which takes over a minute,
-//! and a [`TestApp`][freight_fate::app::testing::TestApp] holds the
-//! process-global environment lock for its whole life. Every other test in
-//! the same binary therefore queues behind it, and the lock guard panics at
-//! thirty seconds of waiting -- so parked in `playtest_harness.rs` this one
-//! test failed twenty others that had nothing wrong with them. A separate
-//! integration test is a separate process, so here it starves nobody.
+//! Each case here drives a complete 500-mile delivery, and the four of them
+//! together were once a single test with a loop in it. That one test took
+//! 54.8 seconds of the suite's 123 -- and because it is one test, it is one
+//! thread: it set the floor for the whole run no matter how many cores the
+//! machine had. Four tests over the same four routes is the same coverage on
+//! four threads, and a failure now names the route it happened on instead of
+//! whichever iteration got there first.
 
 use freight_fate::playtest::{PlaytestHarness, RouteSetup};
 
@@ -34,36 +34,13 @@ use freight_fate::playtest::{PlaytestHarness, RouteSetup};
 /// it. What this test is about survives untouched: the crossing is spoken,
 /// once, at the surveyed mile, and the city line never carries the
 /// unmapped-route fallback prefix.
-#[test]
-fn test_mapped_state_lines_are_authoritative_in_delivery_transcripts() {
-    for (cities, state, passing_city, expected_crossings) in [
-        (
-            vec!["Indianapolis", "Nashville", "Atlanta"],
-            "Tennessee",
-            "Nashville",
-            1usize,
-        ),
-        (
-            vec!["Atlanta", "Nashville", "Indianapolis"],
-            "Tennessee",
-            "Nashville",
-            1,
-        ),
-        (
-            vec!["Shreveport", "Dallas", "Albuquerque"],
-            "Texas",
-            "Dallas",
-            1,
-        ),
-        // No mapped boundary on this route, so nothing is lost and the
-        // fallback is the only announcement either way.
-        (
-            vec!["Dallas", "San Antonio", "Houston"],
-            "Texas",
-            "San Antonio",
-            0,
-        ),
-    ] {
+fn assert_state_line_is_authoritative(
+    cities: Vec<&str>,
+    state: &str,
+    passing_city: &str,
+    expected_crossings: usize,
+) {
+    {
         let mut harness = PlaytestHarness::new();
         // Seeded: the road's random furniture (patrols, chatter, weather)
         // decides how busy the voice is around the city, and this test is
@@ -139,4 +116,46 @@ fn test_mapped_state_lines_are_authoritative_in_delivery_transcripts() {
             );
         }
     }
+}
+
+#[test]
+fn test_mapped_state_lines_are_authoritative_northbound_to_atlanta() {
+    assert_state_line_is_authoritative(
+        vec!["Indianapolis", "Nashville", "Atlanta"],
+        "Tennessee",
+        "Nashville",
+        1,
+    );
+}
+
+#[test]
+fn test_mapped_state_lines_are_authoritative_southbound_to_indianapolis() {
+    assert_state_line_is_authoritative(
+        vec!["Atlanta", "Nashville", "Indianapolis"],
+        "Tennessee",
+        "Nashville",
+        1,
+    );
+}
+
+#[test]
+fn test_mapped_state_lines_are_authoritative_westbound_to_albuquerque() {
+    assert_state_line_is_authoritative(
+        vec!["Shreveport", "Dallas", "Albuquerque"],
+        "Texas",
+        "Dallas",
+        1,
+    );
+}
+
+/// No mapped boundary on this route, so nothing is lost and the fallback is
+/// the only announcement either way.
+#[test]
+fn test_mapped_state_lines_are_authoritative_within_one_state() {
+    assert_state_line_is_authoritative(
+        vec!["Dallas", "San Antonio", "Houston"],
+        "Texas",
+        "San Antonio",
+        0,
+    );
 }

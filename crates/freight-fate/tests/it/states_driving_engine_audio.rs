@@ -537,10 +537,7 @@ fn test_rest_menu_shutdown_also_stops_engine_audio() {
     assert!(!harness.app.ctx.audio.engine_running());
 
     // Already off: no double narration, audio stays off.
-    assert_eq!(
-        harness.with_drive(shut_down_engine),
-        ""
-    );
+    assert_eq!(harness.with_drive(shut_down_engine), "");
     assert!(!harness.app.ctx.audio.engine_running());
 }
 

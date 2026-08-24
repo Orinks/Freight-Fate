@@ -27,7 +27,6 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use indexmap::IndexMap;
-use parking_lot::Mutex;
 use serde_json::{Map, Value};
 
 use crate::models::business_constants::{is_owner_operator, COMPANY_DRIVER, INDEPENDENT_AUTHORITY};
@@ -174,15 +173,35 @@ pub const PROFILE_FIELDS: &[&str] = &[
 /// local save.
 pub type SaveListener = Arc<dyn Fn(&Profile) + Send + Sync>;
 
-static SAVE_LISTENER: Mutex<Option<SaveListener>> = Mutex::new(None);
+thread_local! {
+    /// The hook belongs to whichever thread installed it.
+    ///
+    /// One `App` owns one `GameContext`, the context is the only thing that
+    /// saves a profile, and it holds `Rc`s and boxed sinks -- so it is
+    /// `!Send` and can never leave the thread that built it. Installer and
+    /// caller are therefore always the same thread, and a thread-local is
+    /// exactly as correct for the game as the process-global `Mutex` it
+    /// replaces.
+    ///
+    /// What it is not is exactly as correct for the TESTS. A global made
+    /// every `App` in the suite share one hook, so a second app's shutdown
+    /// tore out the first app's listener; the fix at the time was to let
+    /// only one app exist at a time, behind the process-wide environment
+    /// lock. Per thread, apps stop being able to see each other and the
+    /// reason for that lock goes away.
+    static SAVE_LISTENER: std::cell::RefCell<Option<SaveListener>> =
+        const { std::cell::RefCell::new(None) };
+}
 
-/// Install (or clear) the `save_listener` hook.
+/// Install (or clear) the `save_listener` hook for the current thread.
 pub fn set_save_listener(listener: Option<SaveListener>) {
-    *SAVE_LISTENER.lock() = listener;
+    SAVE_LISTENER.with(|slot| *slot.borrow_mut() = listener);
 }
 
 fn notify_save_listener(profile: &Profile) {
-    let listener = SAVE_LISTENER.lock().clone();
+    // Cloned out of the slot before the call: a listener that saves a
+    // profile itself would otherwise re-enter this borrow and panic.
+    let listener = SAVE_LISTENER.with(|slot| slot.borrow().clone());
     if let Some(listener) = listener {
         // A panicking listener must not take the save with it.
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| listener(profile)));

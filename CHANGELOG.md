@@ -945,6 +945,15 @@
 
 ### Fixed
 
+- **The game stops doing pointless work sixty times a second while you drive.**
+  Every moment at the wheel, it was rebuilding the entire list of radio
+  stations from scratch just to work out which station to name on the drivers
+  board -- hundreds of stations, sixty times every second, thrown away again
+  each time. It now simply reads the station it is already tuned to. A moment
+  of driving costs the computer about forty times less than it did, which
+  matters most on a slower machine: the drive keeps up, speech stays prompt,
+  and nothing you hear has changed.
+
 - **Quitting the game no longer stalls for two silent seconds.** With Discord
   running, closing Freight Fate could sit there for a couple of seconds before
   the window went, saying nothing, and it happened most often when you had just
