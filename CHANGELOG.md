@@ -1241,6 +1241,15 @@
   re-read.
 
 ### Fixed
+- **Brake lights ahead no longer make you stop dead.** A slow vehicle in your
+  lane was treated the same as a tyre carcass: the warning only counted as
+  answered once you were down to a crawl, and with automatic braking on the
+  truck did that for you whether you wanted it or not. On a long interstate
+  run it could happen every couple of minutes, and since a loaded truck takes
+  over a minute to get back to seventy, you never did -- which felt like
+  cruise control giving up. A vehicle ahead now clears once you are down to
+  ITS speed, which is what you would do anyway. Debris, animals and traffic
+  that has actually stopped still ask for everything they always did.
 - **The upcoming readout stops saying "in 0 miles".** U rounded every
   distance to a whole mile, so anything closer than half a mile came out as
   zero, and on a slow crawl into a yard it would sit on the same number for

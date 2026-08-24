@@ -112,6 +112,25 @@ class PendingAmbient:
     render: Callable[[], str | None] | None = None
 
 
+def _hazard_lead_speed(event) -> float | None:
+    """How fast the vehicle this hazard is about is going, or None.
+
+    A traffic hazard carries the lead's own context; debris, an animal or a
+    stopped truck carries nothing, and None is what says "this thing is not
+    going anywhere". Read defensively: the harness and the trip's own
+    NPCVehicle share this surface without carrying the dataclass.
+    """
+    context = event.data.get("traffic")
+    lead = getattr(context, "lead", None)
+    speed = getattr(lead, "speed_mph", None)
+    if speed is None:
+        return None
+    try:
+        return max(0.0, float(speed))
+    except (TypeError, ValueError):
+        return None
+
+
 class DrivingEventMixin:
     def _log_ambient_event(self, message: str) -> None:
         """Log an ambient line the moment it queues, not when it is spoken.
@@ -368,6 +387,7 @@ class DrivingEventMixin:
                 self._hazard_names = [name]
                 self._horn_scare_tried = False
                 self._hazard_dodgeable = dodgeable
+                self._hazard_lead_mph = _hazard_lead_speed(event)
                 self._hazard_deadline = new_deadline
                 self._hazard_lane = self.lane.lane
                 self._release_hazard_brake()
@@ -380,6 +400,7 @@ class DrivingEventMixin:
                 self._hazard_names = [name]
                 self._horn_scare_tried = False
                 self._hazard_dodgeable = dodgeable
+                self._hazard_lead_mph = _hazard_lead_speed(event)
                 self._hazard_deadline = new_deadline
                 self._hazard_lane = self.lane.lane
                 self._release_hazard_brake()
@@ -390,6 +411,14 @@ class DrivingEventMixin:
                 # wording; the shorter deadline is the one still governing
                 # how much time is actually left.
                 self._hazard_names.append(name)
+                # Folding a second hazard in: the slower demand wins, and a
+                # thing that is not moving has no lead speed at all, so it
+                # takes the group back to the near-stop rule.
+                folded = _hazard_lead_speed(event)
+                if folded is None or self._hazard_lead_mph is None:
+                    self._hazard_lead_mph = None
+                else:
+                    self._hazard_lead_mph = min(self._hazard_lead_mph, folded)
                 self._hazard_dodgeable = self._hazard_dodgeable and dodgeable
                 self._hazard_deadline = min(self._hazard_deadline, new_deadline)
             # _hazard_lane is stamped by the two FRESH branches above and by

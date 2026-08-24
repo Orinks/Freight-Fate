@@ -4110,3 +4110,115 @@ def test_the_automatic_grade_cap_never_undoes_the_drivers_own_brake():
         assert driving._cruise_mph == pytest.approx(65.0)
     finally:
         app.shutdown()
+
+
+def test_a_vehicle_hazard_clears_at_the_vehicles_speed_not_a_near_stop():
+    """Brandon, 2026-08-23: cruise "drops speed dramatically... and never
+    comes back up to highway speed".
+
+    His log is sixteen brake-light hazards in ninety minutes on I-70 in
+    Kansas -- level road, limit 75, cruise set 70 -- each one demanding he go
+    nearly to a stop, and with automatic braking the truck obeyed without him
+    choosing it. A loaded truck needs over a minute to climb back, and they
+    arrived a median of 112 seconds apart, so he lived at 37 to 40.
+
+    The cause was `dodgeable` doing two jobs: "you can steer around this" and
+    "this is not moving, so nearly stop". True together for a tyre carcass,
+    false for a truck doing 55. A vehicle hazard now clears at the vehicle's
+    own speed, which is what a driver actually does and is honestly clear --
+    you are no longer closing on it.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_CREEP_MPH, HAZARD_SAFE_MPH
+
+    class _Lead:
+        def __init__(self, mph):
+            self.speed_mph = mph
+
+    class _Context:
+        def __init__(self, mph):
+            self.lead = _Lead(mph)
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        def arm(**data):
+            driving._hazard_deadline = None
+            driving._hazard_lead_mph = None
+            driving._handle_trip_event(
+                TripEvent(TripEventKind.HAZARD, "Brake!", {"deadline_s": 3.0, **data})
+            )
+            return driving._hazard_target_mph()
+
+        # A moving vehicle: match it, do not stop for it.
+        assert arm(dodgeable=True, name="the brake lights", traffic=_Context(55.0)) == 55.0
+        assert arm(dodgeable=True, name="the slow truck", traffic=_Context(30.0)) == 30.0
+
+        # Everything that is not a moving vehicle is exactly as it was.
+        assert arm(dodgeable=True, name="retread debris") == HAZARD_CREEP_MPH
+        assert arm(dodgeable=False, name="the deer") == HAZARD_SAFE_MPH
+        # A lead that has itself stopped still asks for a stop: the creep
+        # speed is a floor, not a starting point.
+        assert arm(dodgeable=True, name="stopped traffic", traffic=_Context(0.0)) == (
+            HAZARD_CREEP_MPH
+        )
+    finally:
+        app.shutdown()
+
+
+def test_folding_a_fixed_obstacle_into_a_vehicle_hazard_takes_the_near_stop_back():
+    """Two hazards at once take the harsher demand.
+
+    A truck ahead and a tyre carcass under it is not "match the truck": the
+    carcass is not going anywhere, and the group has to be crawled.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_CREEP_MPH
+
+    class _Lead:
+        def __init__(self, mph):
+            self.speed_mph = mph
+
+    class _Context:
+        def __init__(self, mph):
+            self.lead = _Lead(mph)
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 70.0 / 2.2369362920544
+
+        driving._hazard_deadline = None
+        driving._hazard_lead_mph = None
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake!",
+                {
+                    "deadline_s": 3.0,
+                    "dodgeable": True,
+                    "name": "the brake lights",
+                    "traffic": _Context(55.0),
+                },
+            )
+        )
+        assert driving._hazard_target_mph() == 55.0
+
+        # Debris folds in while the first is still live.
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake now!",
+                {"deadline_s": 2.0, "dodgeable": True, "name": "retread debris"},
+            )
+        )
+        assert driving._hazard_target_mph() == HAZARD_CREEP_MPH
+    finally:
+        app.shutdown()

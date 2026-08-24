@@ -1368,6 +1368,32 @@ onto exit signalling.
       otherwise the level that earns the next tier -- so the question is
       answerable at any time, not only when the game happens to raise it.
 
+- [x] **A vehicle hazard clears at the vehicle's speed (2026-08-23).**
+      Brandon: cruise "drops speed dramatically to say something like 40 mph
+      or 39 mph and never comes back up". Two wrong diagnoses before his log
+      arrived -- the descent ratchet (his set speed was 70 in all 135
+      readouts, so it never fired) and a braking-NPC deadlock (benched at
+      posted 75 with no zone: no difference, change reverted unshipped).
+
+      HIS LOG, I-70 East in Kansas, level road, limit 75, cruise set 70:
+      sixteen "Change lanes or brake! Brake lights right ahead" in ninety
+      minutes, a median 112 seconds apart, each resolving only at
+      `HAZARD_CREEP_MPH` -- a near stop -- and each followed by "Resuming
+      automatic speed control at 70". A loaded truck needs over a minute to
+      climb 40 to 70, so he lived at 37 to 40 and cruise looked broken.
+
+      `dodgeable` was doing two jobs: "you can steer around this" and "this
+      is not moving, so nearly stop". Both true of a tyre carcass, only the
+      first true of a truck doing 55. `_hazard_target_mph` now takes the
+      lead's own speed when the hazard is a vehicle, floored at the creep
+      speed so stopped traffic still asks for a stop, and folding a fixed
+      obstacle in takes the group back to the near stop.
+
+      THE FREQUENCY IS UNTOUCHED and may still want looking at: 13 hazards
+      an hour is a lot of interstate drama. It stopped mattering once each
+      one cost a lift rather than a stop, so it is recorded rather than
+      tuned.
+
 - [x] **Descent brake capture stops rewriting the set speed (2026-08-23).**
       Brandon: cruise "won't speed back up to highway speed... maintaining a
       speed of forty nine mph or lower and losing speed". Reproduced exactly,
