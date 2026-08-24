@@ -147,13 +147,18 @@ fn test_facility_menu_waits_for_full_stop() {
             .deliveries,
         0
     );
-    let last_event = harness
-        .app
-        .event_lines()
-        .last()
-        .cloned()
-        .unwrap_or_default();
-    assert!(last_event.contains("Stop to dock"), "{last_event}");
+    // Looked up rather than assumed last: the frame can also carry a
+    // speeding warning, depending on the posted limit of the route dispatch
+    // drew.
+    assert!(
+        harness
+            .app
+            .event_lines()
+            .iter()
+            .any(|line| line.contains("Stop to dock")),
+        "{:#?}",
+        harness.app.event_lines()
+    );
     let hud = harness.with_drive(|d, ctx| d.lines(ctx));
     assert!(
         hud.last()

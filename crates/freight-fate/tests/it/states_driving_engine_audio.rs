@@ -530,7 +530,7 @@ fn test_rest_menu_shutdown_also_stops_engine_audio() {
     update_audio(&mut harness, 0.0);
     assert!(harness.app.ctx.audio.engine_running());
 
-    let prefix = harness.with_drive(|drive, ctx| shut_down_engine(drive, ctx));
+    let prefix = harness.with_drive(shut_down_engine);
 
     assert_eq!(prefix, "You shut down the engine. ");
     assert!(!harness.read_drive(|d| d.truck().engine_on));
@@ -538,7 +538,7 @@ fn test_rest_menu_shutdown_also_stops_engine_audio() {
 
     // Already off: no double narration, audio stays off.
     assert_eq!(
-        harness.with_drive(|drive, ctx| shut_down_engine(drive, ctx)),
+        harness.with_drive(shut_down_engine),
         ""
     );
     assert!(!harness.app.ctx.audio.engine_running());

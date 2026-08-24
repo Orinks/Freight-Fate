@@ -23,7 +23,14 @@ that case fixed, so all 57 now run. Updated again the same day for the
 ramp-and-exit pass, which closed `test_ramp_terminals.py` and
 `test_driving_exits.py`: 68 cases written from nothing into the new
 `crates/freight-fate/tests/it/states_driving_ramps.rs` and
-`states_driving_exits.rs`, none of them ignored.
+`states_driving_exits.rs`, none of them ignored. Updated once more the same
+day for the `test_driving_features.py` pass, which closed the largest single
+gap in the audit: its 116 cases written from nothing across thirteen new
+`states_driving_*` files and one `states_city_route_planning.rs`, none of them
+ignored, and one small production seam added for them --
+`GameContext::set_real_weather_provider`, so a city screen can be asked what
+it says about a route whose live weather is part answered, part failed and
+part still loading.
 
 Note the tree move that landed the same day: the integration tests of both
 crates now live in `crates/<crate>/tests/it/` and are compiled as ONE binary,
@@ -81,8 +88,8 @@ Classes:
 
 | Class | Files | Previous sweep |
 |---|---|---|
-| PORTED | 112 | 76 |
-| PARTIAL | 86 | 103 |
+| PORTED | 113 | 76 |
+| PARTIAL | 85 | 103 |
 | TOOLS-ONLY | 27 | 27 |
 | NOT PORTED | 6 | 25 |
 | HELPER | 8 | 8 |
@@ -93,9 +100,9 @@ By test case, across all 239 files:
 | | Cases | Previous sweep |
 |---|---|---|
 | Python test functions | 4239 | 4234 |
-| live Rust namesake | 3379 | 3125 |
+| live Rust namesake | 3492 | 3125 |
 | `#[ignore]`d Rust stub only | 132 | 313 |
-| no Rust namesake | 728 | 796 |
+| no Rust namesake | 615 | 796 |
 
 Merge `af96db01` added 5 Python cases and all 5 were ported with it, so
 live coverage moved +5 and the unported backlog did not grow again. (Merges
@@ -109,7 +116,11 @@ not depend on the game crate, so those eighteen cases moved bodily to
 `crates/freight-fate/tests/app_achievements.rs`. The ramp-and-exit pass on the
 same day moved another 68, all of them cases that had no Rust namesake at all
 rather than stubs, so the unported backlog fell for the first time since the
-sweep began. Live parity is 79.7 percent of the Python suite. (The `44c1e296` sweep before it took the
+sweep began. The `test_driving_features.py` pass on the same day closed the
+largest single gap in the audit: 113 more cases with no Rust namesake at all,
+written across thirteen new files and one in `states_city_*`, taking that
+file from 13 of 129 to PORTED (the other three of its 116 came with the
+ramp-and-exit pass). Live parity is 82.4 percent of the Python suite. (The `44c1e296` sweep before it took the
 suite from 4193 to 4220 cases, live coverage +368, ignored-only stubs -21 and
 cases with no Rust namesake -320, from 65.4 percent.)
 
@@ -188,7 +199,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_driving_cruise_weather.py` | PORTED | 108 / 0 / 108 | `crates/freight-fate/tests/transcript_driving_cruise_weather_acc.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather_retarder.rs`, +3 more | live +4, Python +4 |
 | `tests/test_driving_damage_bands.py` | PARTIAL | 20 / 0 / 55 | `crates/freight-fate/tests/states_driving_road.rs`, `crates/ff-core/src/models/economy.rs`, `crates/freight-fate/tests/states_driving_core.rs` |  |
 | `tests/test_driving_exits.py` | PORTED | 31 / 0 / 31 | `crates/freight-fate/tests/it/states_driving_exits.rs`, `crates/freight-fate/tests/states_driving_events_chains.rs` | live +30, PARTIAL -> PORTED |
-| `tests/test_driving_features.py` | PARTIAL | 13 / 0 / 129 | `crates/freight-fate/tests/states_driving_updates.rs`, `crates/freight-fate/tests/states_driving_events_chains.rs`, `crates/ff-core/src/units.rs` | live +2, Python +2 |
+| `tests/test_driving_features.py` | PORTED | 129 / 0 / 129 | `crates/freight-fate/tests/it/states_driving_destination_exit.rs`, `crates/freight-fate/tests/it/states_driving_direction.rs`, `crates/freight-fate/tests/it/states_driving_retarder.rs`, +13 more | live +116, PARTIAL -> PORTED |
 | `tests/test_driving_manual_controls.py` | PORTED | 1 / 0 / 1 | `crates/freight-fate/tests/states_driving_controls.rs` |  |
 | `tests/test_driving_modes.py` | PARTIAL | 3 / 0 / 6 | `crates/ff-core/src/sim/driving_modes.rs`, `crates/freight-fate/tests/states_driving_controls.rs` |  |
 | `tests/test_driving_place_keys.py` | PORTED | 7 / 0 / 7 | `crates/freight-fate/tests/states_driving_turns.rs` |  |
@@ -498,124 +509,58 @@ PARTIAL and NOT PORTED files only; TOOLS-ONLY and HELPER files are omitted.
 - `test_hazard_damage_alone_is_not_ruled_preventable`
 - `test_the_settlement_grade_round_trips_through_a_snapshot`
 
-### `tests/test_driving_features.py` -- 116 of 129
+### `tests/test_driving_features.py` -- closed
 
-- `test_trip_event_sounds_use_contextual_cues`
-- `test_active_drive_applies_manual_setting_and_announces_it`
-- `test_passing_hazard_plays_clear_sound`
-- `test_single_hazard_is_named_in_its_resolution_line`
-- `test_two_stacked_hazards_are_each_named_once`
-- `test_stacked_hazard_wording_follows_the_strictest_dodgeability`
-- `test_a_hazard_already_outrun_gets_its_own_line_before_the_next_arms`
-- `test_terse_hazard_resolution_stays_silent_words`
-- `test_assist_releases_its_own_emergency_application`
-- `test_fuel_rescue_stops_the_truck_before_restart`
-- `test_control_stops_event_voice_without_flushing_main_speech`
-- `test_shift_key_does_not_press_clutch_in_automatic`
-- `test_automatic_reverse_selection_is_spoken`
-- `test_simple_automatic_fresh_press_at_standstill_changes_direction`
-- `test_delivery_trip_carries_no_silent_arrival_zones`
-- `test_brake_hold_through_a_stop_never_selects_reverse`
-- `test_controller_trigger_edges_gate_direction_changes`
-- `test_automatic_held_brake_does_not_engage_reverse`
-- `test_automatic_held_accelerator_does_not_flip_out_of_reverse`
-- `test_accelerator_does_not_thrust_while_braking_in_reverse`
-- `test_driving_help_explains_selected_automatic_direction_style`
-- `test_driving_f1_describes_safe_shutdown_and_destination_parking`
-- `test_closing_status_panel_does_not_restart_drive_music`
-- `test_drive_music_advances_to_next_track_while_paused`
-- `test_how_to_play_documents_new_gameplay_systems`
-- `test_dispatch_board_keeps_route_planning_out_of_load_offer`
-- `test_terse_air_brake_startup_omits_control_instructions`
-- `test_air_brake_startup_blocks_movement_until_ready_and_released`
-- `test_terse_hazard_drops_brake_now_instruction`
-- `test_low_air_warning_flushes_event_voice`
-- `test_terse_lane_departure_omits_recovery_instruction`
-- `test_lane_departure_warning_flushes_event_voice`
-- `test_a_pull_over_flushes_event_voice`
-- `test_air_brake_help_and_status_are_spoken`
-- `test_driver_apps_screen_uses_keyboard_and_vague_road_chatter`
-- `test_status_traffic_line_falls_back_to_legacy_npc_vehicles`
-- `test_engine_shutdown_is_blocked_at_highway_speed`
-- `test_metric_status_lines_do_not_mix_mph_and_miles`
-- `test_engine_shutdown_is_allowed_once_stopped`
-- `test_delivery_requires_parking_at_destination`
-- `test_arrival_gate_repeats_after_overshoot`
-- `test_curve_assist_cues_do_not_thrash`
-- `test_armed_exit_counts_down`
-- `test_armed_exit_counts_down_from_two_miles_when_the_truck_holds_the_lane`
-- `test_armed_exit_countdown_silent_on_terse`
-- `test_cargo_mass_is_loaded_on_delivery_and_empty_on_pickup`
-- `test_delivery_exit_uses_real_destination_interchange`
-- `test_delivery_exit_prefers_nearest_interchange_over_early_city_sign`
-- `test_destination_exit_scan_is_cached_until_the_exit_passes`
-- `test_terse_destination_exit_omits_press_x_instruction`
-- `test_destination_exit_keeps_cruise_and_eases_for_ramp`
-- `test_a_zone_past_the_destination_exit_is_never_announced`
-- `test_taking_the_announced_exit_does_not_repeat_the_ramp_cap`
-- `test_signaling_for_an_exit_eases_cruise_to_ramp_speed`
-- `test_destination_exit_suppresses_matching_interchange_gps_cue`
-- `test_destination_exit_announcement_names_lane_move_when_drift_is_on`
-- `test_delivery_does_not_complete_without_taking_destination_exit`
-- `test_missed_destination_exit_reroutes_every_time`
-- `test_missed_destination_exit_suppresses_facility_zone_cues`
-- `test_missed_destination_recovery_does_not_keep_issuing_gate_speed_strikes`
-- `test_destination_exit_opens_delivery_gate`
-- `test_destination_exit_completion_clears_remaining_route_miles`
-- `test_facility_menu_waits_for_full_stop`
-- `test_exit_flow_reaches_the_rest_stop_menu`
-- `test_rest_stop_menu_can_save_active_drive`
-- `test_engine_brake_cannot_be_enabled_while_accelerating`
-- `test_jake_engages_at_last_selected_stage`
-- `test_jake_stage_keys_do_nothing_while_the_jake_is_off`
-- `test_accelerating_turns_engine_brake_off`
-- `test_opening_a_route_stop_secures_the_truck`
-- `test_poi_menu_uses_curated_roadside_assistance_label`
-- `test_rest_stop_sleep_warns_before_redundant_double_sleep`
-- `test_lot_sleep_warns_before_redundant_double_sleep`
-- `test_status_map_screen_describes_source_backed_poi_services`
-- `test_toll_route_delivery_settlement_records_expense`
-- `test_engine_audio_load_eases_without_dropping_out_during_automatic_shift`
-- `test_auto_shift_voice_sighs_with_physics_and_clunks_on_engagement`
-- `test_manual_clutch_out_ducks_load_but_keeps_live_revs`
-- `test_engine_audio_load_tracks_manual_throttle_smoothly`
-- `test_curve_assist_takes_corners_on_the_drums_and_grades_on_the_jake`
-- `test_curve_assist_leaves_the_jake_alone_for_a_gentle_bend`
-- `test_a_corner_never_raises_the_retarder_however_fast_you_take_it`
-- `test_curve_assist_jakes_a_bend_on_a_real_downgrade`
-- `test_curve_assist_holds_a_long_downgrade_on_the_jake_not_the_drums`
-- `test_curve_assist_does_not_guess_the_retarder_without_an_advisory`
-- `test_jake_growl_follows_stage_rpm_and_cuts_through_shifts`
-- `test_cold_start_buzzer_waits_out_the_crank`
-- `test_reverse_audio_loop_restarts_after_pause_resume`
-- `test_pause_menu_reports_off_duty_to_the_drivers_board`
-- `test_drivers_board_line_names_the_station_playing_in_the_cab`
-- `test_can_back_up_to_a_missed_rest_stop_with_t_menu`
-- `test_exit_window_scales_with_speed_and_pacing`
-- `test_destination_exit_announced_within_scaled_window`
-- `test_announced_destination_exit_stays_actionable_when_window_shrinks`
-- `test_destination_exit_response_queues_behind_intervening_safety_cue`
-- `test_announced_destination_exit_grace_rejects_expired_and_passed_exit`
-- `test_announced_destination_exit_wins_over_nearer_optional_stop`
-- `test_exit_announcements_speak_each_name_once`
-- `test_labeled_missed_exit_names_the_exit_once`
-- `test_exit_key_is_a_toggle_and_needs_an_exit_nearby`
-- `test_rest_menu_shutdown_also_stops_engine_audio`
-- `test_engine_audio_mirror_sync_catches_any_out_of_band_stop`
-- `test_route_planning_labels_name_through_cities_with_states`
-- `test_live_route_weather_accounts_for_loading_and_unavailable_cities`
-- `test_destination_exit_scan_stays_on_the_final_approach`
-- `test_setting_the_parking_brake_at_speed_dynamites_the_brakes`
-- `test_road_joint_thumps_use_physical_distance_at_every_pace`
-- `test_a_steep_downgrade_is_called_out_before_the_truck_is_on_it`
-- `test_a_gentle_grade_gets_no_advisory`
-- `test_a_short_dip_is_not_announced_as_a_grade`
-- `test_the_next_grade_is_announced_after_the_road_levels_out`
-- `test_an_upgrade_is_called_out_too`
-- `test_terse_speech_hears_no_grade_advisories`
-- `test_the_destination_exit_call_outranks_chatter`
-- `test_a_folded_hazard_does_not_follow_the_truck_into_its_new_lane`
-- `test_the_speed_readout_says_what_the_keeper_is_holding_not_just_what_is_set`
+All 116 were written on 2026-08-24 and all 116 run. The file is a grab-bag,
+so it went to fourteen homes by subject rather than one:
+`states_driving_hazards.rs` (hazard arming, folding and resolution, plus the
+event earcon map), `states_driving_air_brakes.rs` (the cold-start sequence,
+low air, lane departure, the pull-over, the parking valve at speed),
+`states_driving_direction.rs` (the direction-change gesture, the fuel rescue,
+the Control key), `states_driving_retarder.rs` (the jake stalk and the curve
+assist's choice of tool), `states_driving_engine_audio.rs` (the engine voice
+through a shift, the jake growl, the cold-start buzzer, road joints, the
+engine-loop mirror), `states_driving_grades.rs` (the grade advisory),
+`states_driving_help_text.rs` (F1, How to play, the dispatch board),
+`states_driving_status_screens.rs` (the Tab screens, the driver tablet, the
+speed readout), `states_driving_cab_systems.rs` (the ignition, the radio, the
+drivers board), `states_driving_stop_menus.rs` (the dock and rest-stop
+screens), `states_driving_arrival_gate.rs` (the arrival gate, cargo mass, the
+tolled settlement), `states_driving_exit_windows.rs` (the exit window and
+what X answers), `states_driving_destination_exit.rs` (which interchange, the
+countdown, cruise, and missing it) and `states_city_route_planning.rs` (route
+labels and the partial live forecast). Three of the 116 --
+`test_missed_destination_exit_reroutes_every_time`,
+`test_can_back_up_to_a_missed_rest_stop_with_t_menu` and
+`test_destination_exit_scan_stays_on_the_final_approach` -- landed in
+`states_driving_exits.rs` in the ramp-and-exit pass instead.
+
+Every Python monkeypatch in the file was replaced by arranging the real
+condition, and each is named at its use site. The four that cost the most:
+`trip.grade_at` became real baked `GradeSegment`s on a bench leg;
+`trip.curve_at` became a real `RouteCurve` on `trip.curves` with the bench
+road twenty miles from any town, so `engine_brake_ban_at` genuinely answers
+nothing; `driving.lane.update`/`describe` became a truck actually off the
+pavement, which also means the line under test is the real
+`LaneKeeping::describe` rather than the invented "Right rumble strip." the
+Python stub returned; and `ctx.real_weather_provider` became a real
+`RealWeatherProvider` over a stub fetch run inline, with one city answered,
+one failed and one never asked.
+
+Two Python assertions could not be ported as written and are noted where they
+sit: `_scan_destination_exit_details` cannot be call-counted, so the caching
+case watches the cache field a sentinel is written into; and the rumble
+severity for a road joint is unreachable behind `RumbleEngine`'s private
+one-shot queue, so it is pinned through the thump's own volume, which is the
+same number.
+
+The other recurring difference is TIME. Python stubbed `say_event`, so its
+assertions read the call. Here the real delivery layer runs, and a queued
+line landing on a channel the pacer still thinks is mid-sentence is promoted
+to an interrupt, with the line it cut handed back and requeued. Every case
+that pins an interrupt flag or a line's position therefore moves the clock by
+the seconds the drive would really have taken -- `advance_clock` -- rather
+than weakening the assertion.
 
 ### `tests/test_driving_modes.py` -- 3 of 6
 
@@ -1580,10 +1525,10 @@ PORTED and neither turned up a defect in the port.
    -- past both the stale budget and the 2.5-second repeat window between
    calls, which is also what keeps the counts honest: past the repeat window
    a line spoken twice by a broken latch is still counted twice.
-6. **`tests/test_driving_features.py` -- 116 missing.** The largest gap by
-   count, but it is a grab-bag rather than one seam, so it is cheapest read as
-   several smaller passes rather than one file. Same shape:
-   `tests/test_driving_damage_bands.py` (35) and
+6. **`tests/test_driving_features.py` -- closed on 2026-08-24.** It was the
+   largest gap by count, and being a grab-bag rather than one seam it went to
+   fourteen homes by subject; see its own section above. The same shape is
+   still open in `tests/test_driving_damage_bands.py` (35) and
    `tests/test_driving_speech_ladder.py` (34).
 
 Genuinely blocked, and not cheap: the eight `trip.grade_at` cases in

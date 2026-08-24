@@ -75,6 +75,22 @@ fn last_event(harness: &PlaytestHarness) -> String {
         .unwrap_or_default()
 }
 
+/// The one event line containing `needle`, or a failure naming everything
+/// that was said instead.
+fn an_event_containing(harness: &PlaytestHarness, needle: &str) -> String {
+    harness
+        .app
+        .event_lines()
+        .into_iter()
+        .find(|line| line.contains(needle))
+        .unwrap_or_else(|| {
+            panic!(
+                "nothing said {needle:?}: {:#?}",
+                harness.app.event_lines()
+            )
+        })
+}
+
 fn last_main(harness: &PlaytestHarness) -> String {
     harness.app.main_lines().last().cloned().unwrap_or_default()
 }
@@ -96,8 +112,10 @@ fn test_delivery_requires_parking_at_destination() {
     frame(&mut harness);
 
     assert!(harness.state_is::<DrivingState>());
-    let said = last_event(&harness);
-    assert!(said.contains("Destination ahead"), "{said}");
+    // Looked up rather than assumed last: whatever the posted limit is on the
+    // route dispatch drew, sixty may be over it, and the speeding warning
+    // that earns lands in the same frame.
+    let said = an_event_containing(&harness, "Destination ahead");
     assert!(
         said.to_lowercase().contains("come to a complete stop"),
         "{said}"
@@ -177,7 +195,7 @@ fn test_arrival_gate_repeats_after_overshoot() {
 
     frame(&mut harness);
     assert!(harness.state_is::<DrivingState>());
-    assert!(last_event(&harness).contains("Destination ahead"));
+    an_event_containing(&harness, "Destination ahead");
     let announced = harness.app.event_lines().len();
 
     // Inside the reminder interval the gate stays quiet.
@@ -193,8 +211,7 @@ fn test_arrival_gate_repeats_after_overshoot() {
         drive.gate_reminder_s = 0.0;
     });
     frame(&mut harness);
-    let said = last_event(&harness);
-    assert!(said.contains("Still at"), "{said}");
+    let said = an_event_containing(&harness, "Still at");
     assert!(said.to_lowercase().contains("stop to dock"), "{said}");
     assert!(harness.read_drive(|d| d.cruise_mph).is_none());
 
