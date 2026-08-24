@@ -20,6 +20,7 @@ from .audio import EARCON_DUCK_S, SPEECH_DUCK_LEVEL, AudioEngine
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
+from .held_keys import HeldKeys
 from .ladder_earcons import register_ladder_earcons
 from .lane_guide_tone import register_lane_guide_tone
 from .message_log import MessageCategory, MessageLog
@@ -96,6 +97,7 @@ class GameContext:
         self.speech: Speech = app.speech
         self.audio: AudioEngine = app.audio
         self.controller: ControllerManager = app.controller
+        self.held_keys: HeldKeys = app.held_keys
         self.settings: Settings = app.settings
         self.world: World = app.world
         self.economy: Economy = app.economy
@@ -1053,6 +1055,10 @@ class App:
             enabled=self.settings.controller_enabled,
             haptics=self.settings.haptics_enabled,
         )
+        # What the player is holding, as driving polls it. Fed from the
+        # event loop so a screen reader that re-sends keys as instant
+        # press-and-release pairs (JAWS) still reads as a hold.
+        self.held_keys = HeldKeys()
         self.ctx = GameContext(self)
         self.ctx.apply_volumes()
         self.ctx.apply_speech()
@@ -1067,6 +1073,7 @@ class App:
         return self.states[-1] if self.states else None
 
     def push_state(self, state: State, should_enter: bool = True) -> None:
+        self.held_keys.clear()  # a new screen never inherits held keys
         self.states.append(state)
         if should_enter:
             state.enter()
@@ -1106,6 +1113,7 @@ class App:
         state, so they use this instead of pop_state.
         """
         if self.states:
+            self.held_keys.clear()
             state = self.states.pop()
             if should_exit:
                 state.exit()
@@ -1187,7 +1195,9 @@ class App:
                     with contextlib.suppress(Exception):
                         pygame.event.pump()
                     continue
+                self.held_keys.begin_frame(pygame.time.get_ticks())
                 for event in events:
+                    self.held_keys.note(event)
                     if event.type == pygame.WINDOWFOCUSGAINED:
                         # Switching screen readers happens outside the game;
                         # re-check speech the moment the player comes back.

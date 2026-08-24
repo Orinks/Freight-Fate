@@ -7104,6 +7104,21 @@ milestone below (speeding consequences especially).
 
 From a batch of player reports:
 
+- [x] **Driving keys did nothing under JAWS without JAWS Key+3 -- FIXED
+  2026-08-24 (player report relayed by Norm, 1.8.8).** JAWS binds the
+  arrows to its own scripts in every application, swallows the physical
+  key, and re-sends it as an instant press-and-release pair, once per
+  keyboard auto-repeat; driving polls `pygame.key.get_pressed()` and
+  never saw a hold (menus react to the press event, so they worked).
+  `held_keys.py` turns the pair train back into a hold sized to the
+  Windows repeat delay and rate, OR'd with SDL's own state so the
+  physical-keyboard path is byte-for-byte what it was. `tools/key_probe.py`
+  logs what any screen reader actually delivers.
+- [ ] Under a key-re-sending screen reader a tap cannot be told from a
+  hold until the first auto-repeat, so tap-length gestures (1.9's
+  double-tap-and-hold pedal latch) are invisible through JAWS; a gesture
+  counted in press events would see them. Run the probe on a JAWS
+  machine and tighten the grace constants to the measured pair timing.
 - [x] **Map screen read raw data keys for the route -- FIXED 2026-07-21
   (NVDA player report).** Its first line joined the world's city slugs, so an
   east-coast run opened with "new underscore york underscore n y underscore u
