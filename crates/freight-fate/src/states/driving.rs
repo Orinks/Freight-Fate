@@ -449,6 +449,14 @@ pub struct DrivingState {
     // from the engage speed up to _cruise_mph so a big resume error never
     // lands on the pedal at once. None whenever cruise is off.
     pub cruise_working_mph: Option<f64>,
+    // What cruise ACTUALLY held this frame, after every cap, and the phrase
+    // for why -- published by the loop so the status keys can answer with the
+    // number the truck is on rather than the number the dial is set to. The
+    // reason is empty when nothing named it (the weather cap, or nothing
+    // capping at all). None whenever cruise is off, and until the loop has
+    // run once in a fresh session.
+    pub cruise_held_mph: Option<f64>,
+    pub cruise_held_reason: String,
     pub cruise_throttle: f64,
     pub cruise_applied: f64,
     pub cruise_trim: f64,       // integral trim on top of the grade feed-forward

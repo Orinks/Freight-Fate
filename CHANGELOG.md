@@ -945,6 +945,30 @@
 
 ### Fixed
 
+- **The speed keys now tell you the speed cruise is really holding.** Adaptive
+  cruise slows itself for plenty of things -- a ramp you have signalled for, a
+  bend, a lower posted number, a work zone, weather, the truck in front. It
+  said so when it eased, but if you then pressed the speed key or opened the
+  status screen, both answered with the number on the dial instead. Coming
+  down a ramp at forty-four you would hear "adaptive cruise resuming at
+  thirty-three for the ramp" and, a second later, "adaptive cruise set at
+  eighty". Now both read out what the truck is actually being held to and name
+  why -- "adaptive cruise holding thirty-three for the ramp, set eighty" --
+  and go back to the plain "set at" line the moment nothing is holding it
+  down.
+
+- **A turn instruction stops being wiped out by the line right behind it.**
+  Coming off a ramp into city streets, the truck often had three things to
+  say inside the same fortieth of a second -- where the streets start, which
+  way the first corner goes, how far the gate is. The newest one cut the
+  others off, and because they had not got a word out yet, they were gone
+  for good: "Off the ramp and onto city streets, start on Halleck Street,
+  then turn right" was silenced before the voice said "off", and the turn
+  was never spoken at all. Now a line cut off before it managed to say
+  anything comes straight back, right behind the line that cut it, so you
+  hear both. A line that has already been reading for a while still gives
+  way -- by then it has told you what it was going to.
+
 - **No black terminal window beside the game any more.** Starting Freight
   Fate opened a second, empty window along with it, which took the focus and
   sat there in the way for the whole session -- one more thing to skip past

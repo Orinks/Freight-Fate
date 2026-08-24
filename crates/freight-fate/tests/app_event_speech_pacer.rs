@@ -70,8 +70,29 @@ fn test_say_event_flushes_a_stale_route_backlog_end_to_end() {
     );
     // Every line still reached the voice in order; for ROUTE, staleness
     // changes delivery, never drops the newest information.
+    //
+    // And a flush that lands inside a line's pre-utterance pause hands that
+    // line back to be queued behind the one that cut it, so the whole burst
+    // is still heard rather than only its last member: submitting all four
+    // in one frame used to leave the player with the fourth alone at the
+    // voice, three yard instructions destroyed before the voice said a word
+    // of them. The two hand-backs below are those recoveries.
     let texts: Vec<&str> = calls.iter().map(|(t, _)| t.as_str()).collect();
-    assert_eq!(texts, approach.to_vec());
+    assert_eq!(
+        texts,
+        vec![
+            approach[0],
+            approach[1],
+            approach[0], // handed back: cut 0 ms into its own delivery
+            approach[2],
+            approach[3],
+            approach[2], // handed back for the same reason
+        ]
+    );
+    // Nothing was lost: every line of the approach reached the voice.
+    for line in approach {
+        assert!(texts.contains(&line), "{line} never reached the voice");
+    }
     app.shutdown();
 }
 

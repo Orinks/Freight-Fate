@@ -671,6 +671,17 @@ fn test_speed_keeper_takes_the_next_street_up_to_its_posted_number() {
         "{:#?}",
         spoken(&harness)
     );
+    // Raised once for the street. The zone-entry line lands in the same
+    // frame and purges the channel, so the keeper line is handed back and
+    // submitted a second time -- that pair is the pacer delivering ONE
+    // occurrence (without the hand-back the player would hear none of it,
+    // the flush having cut it before the voice said a word). What must not
+    // happen is the assist raising it again as the frames run on.
+    let said_at_the_street = spoken(&harness)
+        .iter()
+        .filter(|e| e.contains("Speed keeper holding 25"))
+        .count();
+    assert_eq!(said_at_the_street, 2, "{:#?}", spoken(&harness));
     frames(&mut harness, 60 * 40, DT);
     let speed = harness.read_drive(|d| d.truck().speed_mph());
     assert!(speed > 21.0, "{speed}");
@@ -680,7 +691,9 @@ fn test_speed_keeper_takes_the_next_street_up_to_its_posted_number() {
             .iter()
             .filter(|e| e.contains("Speed keeper holding 25"))
             .count(),
-        1
+        said_at_the_street,
+        "{:#?}",
+        spoken(&harness)
     );
 
     // A lower street is still simply obeyed, without re-arming the number or

@@ -671,6 +671,38 @@ impl DrivingState {
             self.say_route_confirmation(ctx, "Traffic ahead, adaptive cruise reducing speed.");
         }
         self.acc_following = following;
+        // Publish what cruise is really holding, for the status keys. The
+        // engage and resume line has named the number the truck will hold
+        // since 2026-08-20 (Brandon: cruise said "resuming at 70" and held 23
+        // through a zone); Space and the status screen still read out the set
+        // speed. Owner's own session log, New York, 2026-08-23, one second
+        // apart: "Adaptive cruise resuming at 33 miles per hour for the ramp"
+        // and then "44 miles per hour, ... adaptive cruise set at 80 miles per
+        // hour". A driver checking mid-ramp was answered with a number nothing
+        // on the road was going to allow.
+        //
+        // Recorded here rather than re-derived in the readout because this is
+        // the only place that knows which cap won, and because asking again
+        // from a key press would re-run look-aheads that latch state.
+        self.cruise_held_mph = Some(target_mph);
+        self.cruise_held_reason = if following {
+            "for the traffic ahead".to_string()
+        } else if exit_capped {
+            "for the ramp".to_string()
+        } else if curve_capped {
+            "for the bend".to_string()
+        } else if limit_capped {
+            "for the lower limit".to_string()
+        } else if self
+            .cruise_descent_mph
+            .is_some_and(|descent| (descent - target_mph).abs() < 0.01)
+        {
+            "for the grade".to_string()
+        } else {
+            // The weather cap, or nothing at all. Holding a number without
+            // naming a reason is still true; inventing one would not be.
+            String::new()
+        };
         let error = target_mph - self.trip.truck.speed_mph();
         // Feed-forward first: the truck's own physics knows what throttle
         // balances the grade under the wheels, so cruise answers a hill as it

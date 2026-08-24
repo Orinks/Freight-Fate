@@ -64,6 +64,8 @@ impl DrivingState {
     pub fn clear_cruise(&mut self, preserve_exit_cap: bool) {
         self.cruise_mph = None;
         self.cruise_working_mph = None;
+        self.cruise_held_mph = None;
+        self.cruise_held_reason = String::new();
         self.cruise_throttle = 0.0;
         self.cruise_applied = 0.0;
         self.cruise_trim = 0.0;

@@ -441,6 +441,8 @@ impl DrivingState {
             destination_exit_cache: None,
             cruise_mph: None,
             cruise_working_mph: None,
+            cruise_held_mph: None,
+            cruise_held_reason: String::new(),
             cruise_throttle: 0.0,
             cruise_applied: 0.0,
             cruise_trim: 0.0,

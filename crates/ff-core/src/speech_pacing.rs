@@ -812,16 +812,39 @@ impl EventSpeechPacer {
             // latent until that cue stopped being AMBIENT -- as chatter it
             // was dropped by would_start_stale before ever reaching here.
             //
-            // Narrowly CRITICAL only. A backlog of stale ROUTE announcements
-            // really does describe road already driven and is right to go --
-            // rescuing those turned one flush into a recital of everything
-            // it had just purged. A safety call is the exception: it is the
-            // one line whose worth does not decay while it waits.
-            let held_critical = self
-                .protected
-                .as_ref()
-                .is_some_and(|held| held.priority == EventPriority::Critical);
-            if held_critical {
+            // An AGED backlog of ROUTE announcements really does describe
+            // road already driven and is right to go -- rescuing those
+            // turned one flush into a recital of everything it had just
+            // purged. A safety call is the standing exception: it is the one
+            // line whose worth does not decay while it waits.
+            //
+            // But "aged" was read off the INCOMING line only, and the two
+            // come apart the moment the road speaks twice in one frame.
+            // Measured on the owner's 23 August session: of 59 lines a flush
+            // destroyed, 34 were cut inside `BASE_UTTERANCE_S` of their own
+            // start -- the pause before the voice gets going -- so by this
+            // pacer's own duration model the player had not heard one
+            // character of them. Three route lines arriving inside 37 ms
+            // took the ramp-exit briefing with them: "Off the ramp and onto
+            // city streets: start on unnamed public road. Then turn right
+            // now onto Halleck Street" was purged 22 ms in, and that turn
+            // was never spoken. A line that young is not a backlog; it is
+            // this same instant of road, and destroying it costs the whole
+            // line rather than its tail.
+            //
+            // So the rescue asks how much of the outgoing line the player
+            // actually got. Past the pre-utterance window it has said
+            // something and its tail is expendable; inside it, nothing was
+            // heard and the words are still current, so they are handed back
+            // to be queued behind the line that cut them -- the same
+            // contract a CRITICAL cut has always had. `RESCUE_ONCE_WINDOW_S`
+            // still caps it at one hand-back per line, so a run of urgent
+            // lines cannot replay it.
+            let held_rescuable = self.protected.as_ref().is_some_and(|held| {
+                held.priority == EventPriority::Critical
+                    || now - (held.done_at - Self::duration_s(&held.text)) < Self::BASE_UTTERANCE_S
+            });
+            if held_rescuable {
                 self.flush_cut = self.take_protected(Some(text));
             } else {
                 self.protected = None;
@@ -1349,33 +1372,98 @@ mod tests {
         assert_eq!(pacer.take_flush_cut(), None);
     }
 
-    /// The other half, and why the rescue is narrow. Route announcements go
-    /// stale by their nature -- they describe road already driven -- so a
-    /// flush that handed them all back would perform the very backlog it
-    /// purged.
+    /// The other half, and why the rescue is narrow. A route announcement
+    /// the player has been listening to for a while has said its piece and
+    /// describes road already driven; handing its tail back would perform
+    /// the very backlog the flush purged.
     #[test]
-    fn test_a_stale_flush_still_discards_a_stale_route_backlog() {
+    fn test_a_stale_flush_still_discards_an_aged_route_backlog() {
         let clock = FakeClock::at(0.0);
         let mut pacer = EventSpeechPacer::with_clock(clock.clock());
 
-        pacer.note_queued(
-            "Next stop in 5 miles: service plaza.",
-            EventPriority::Route,
-            None,
-            None,
+        let stop = "Next stop in 5 miles: service plaza."; // ~3.2 s spoken
+        pacer.note_queued(stop, EventPriority::Route, None, None);
+        // Well past the pre-utterance pause: the voice has been reading this
+        // line aloud, and it is still mid-sentence when the flush lands.
+        clock.advance(2.0);
+        assert!(
+            flush_at(
+                &mut pacer,
+                "Zone ahead; speed limit 45.",
+                EventPriority::Route
+            ),
+            "the backlog was not deep enough to flush"
         );
-        clock.advance(0.05);
-        if flush_at(
+        assert_eq!(
+            pacer.take_flush_cut(),
+            None,
+            "an aged route backlog was resurrected"
+        );
+    }
+
+    /// The owner's 23 August drive, three route lines inside 37 ms: the
+    /// ramp-exit briefing was purged 22 ms into its own delivery -- by this
+    /// pacer's own duration model, before the voice had uttered a character
+    /// -- and the turn it named was never spoken at all. A line that young
+    /// is not a stale backlog; it is the same instant of road as the line
+    /// cutting it, so it comes back behind that line instead of dying.
+    #[test]
+    fn test_a_flush_hands_back_a_route_line_that_never_got_a_word_out() {
+        let clock = FakeClock::at(0.0);
+        let mut pacer = EventSpeechPacer::with_clock(clock.clock());
+
+        let briefing = "Off the ramp and onto city streets: start on unnamed \
+                        public road. Then turn right now onto Halleck Street. \
+                        1 mile to the facility gate.";
+        pacer.note_queued(briefing, EventPriority::Route, None, None);
+        // The next route line lands in the same frame.
+        clock.advance(0.022);
+        assert!(
+            flush_at(
+                &mut pacer,
+                "Start on unnamed public road.",
+                EventPriority::Route
+            ),
+            "the burst did not flush"
+        );
+        assert_eq!(
+            pacer.take_flush_cut(),
+            cut(briefing, EventPriority::Route),
+            "the turn instruction was destroyed before it said anything"
+        );
+        // Collected once only, exactly as a safety call's hand-back is.
+        assert_eq!(pacer.take_flush_cut(), None);
+    }
+
+    /// And it is a hand-back, not a licence to replay: the cap that stops a
+    /// run of urgent lines reciting the same words still applies.
+    #[test]
+    fn test_a_handed_back_route_line_is_not_handed_back_twice() {
+        let clock = FakeClock::at(0.0);
+        let mut pacer = EventSpeechPacer::with_clock(clock.clock());
+
+        let briefing = "Off the ramp and onto city streets: start on unnamed \
+                        public road. Then turn right now onto Halleck Street.";
+        pacer.note_queued(briefing, EventPriority::Route, None, None);
+        clock.advance(0.02);
+        flush_at(
             &mut pacer,
-            "Zone ahead; speed limit 45.",
+            "Start on unnamed public road.",
             EventPriority::Route,
-        ) {
-            assert_eq!(
-                pacer.take_flush_cut(),
-                None,
-                "a stale route backlog was resurrected"
-            );
-        }
+        );
+        let (text, priority) = pacer.take_flush_cut().expect("the first hand-back");
+        pacer.note_queued(&text, priority, None, None); // the app requeues it
+        clock.advance(0.015);
+        flush_at(
+            &mut pacer,
+            "In half a mile, facility gate ahead. Speed limit 15.",
+            EventPriority::Route,
+        );
+        assert_eq!(
+            pacer.take_flush_cut(),
+            None,
+            "the same line was handed back a second time"
+        );
     }
 
     /// Darren and Jerry, 2026-08-21: the repeat the build note describes at

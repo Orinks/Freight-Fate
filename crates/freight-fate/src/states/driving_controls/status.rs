@@ -87,14 +87,11 @@ impl DrivingState {
                 time_of_day(self.trip.local_hour())
             ),
         ];
-        if let Some(cruise) = self.cruise_mph {
-            lines.insert(
-                1,
-                format!(
-                    "Cruise: adaptive cruise set at {}",
-                    ctx.settings.speed_text(cruise)
-                ),
-            );
+        if self.cruise_mph.is_some() {
+            // The same live-then-set shape the keeper's row below uses: when
+            // anything holds cruise under its set speed, the status screen has
+            // to say which of the two numbers is real.
+            lines.insert(1, format!("Cruise: {}", self.cruise_holding_text(ctx)));
             if let Some(context) = self.trip.traffic_context() {
                 lines.insert(
                     2,

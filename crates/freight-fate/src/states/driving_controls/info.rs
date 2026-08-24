@@ -41,6 +41,46 @@ impl DrivingState {
         format!("speed keeper holding {}", ctx.settings.speed_text(held))
     }
 
+    /// What adaptive cruise is holding RIGHT NOW, for a readout.
+    ///
+    /// The same two numbers the keeper's readout above already separates, for
+    /// the other controller. The engage and resume line has named the number
+    /// the truck will actually hold since 2026-08-20 (Brandon: cruise said
+    /// "resuming at 70" and held 23 through a zone); the status keys never
+    /// did. Owner's own session log, New York, 2026-08-23 -- one second apart:
+    ///
+    ///   Open road. Adaptive cruise resuming at 33 miles per hour for the ramp.
+    ///   44 miles per hour, gear 9, 1324 RPM, ... adaptive cruise set at 80
+    ///   miles per hour
+    ///
+    /// A driver pressing the status key mid-ramp was answered with a number
+    /// nothing on the road was going to allow. Say the live one, and the set
+    /// one only when a ceiling is holding it down.
+    ///
+    /// The number comes from the loop, which publishes what it actually held
+    /// after every cap -- the armed ramp, a bend, a lower posted limit, a
+    /// zone, the grade, the weather, the lead vehicle. Re-deriving it from a
+    /// key press would mean re-running look-aheads that latch state.
+    pub fn cruise_holding_text(&self, ctx: &GameContext) -> String {
+        let set = self.cruise_mph.unwrap_or(0.0);
+        if let Some(held) = self.cruise_held_mph {
+            // Half a mile an hour under is the same number once spoken.
+            if held < set - 0.5 {
+                let why = if self.cruise_held_reason.is_empty() {
+                    String::new()
+                } else {
+                    format!(" {}", self.cruise_held_reason)
+                };
+                return format!(
+                    "adaptive cruise holding {}{why}, set {}",
+                    ctx.settings.speed_text(held),
+                    ctx.settings.speed_text(set)
+                );
+            }
+        }
+        format!("adaptive cruise set at {}", ctx.settings.speed_text(set))
+    }
+
     /// `_speak_speed()`: Space.
     pub fn speak_speed(&mut self, ctx: &mut GameContext) {
         let gear = self.gear_text();
@@ -48,10 +88,10 @@ impl DrivingState {
             Some(mph) => format!(", open-road target {}", ctx.settings.speed_text(mph)),
             None => ", open-road target will use the posted limit".to_string(),
         };
-        let cruise = if let Some(mph) = self.cruise_mph {
+        let cruise = if self.cruise_mph.is_some() {
             format!(
-                ", automatic speed control, adaptive cruise set at {}",
-                ctx.settings.speed_text(mph)
+                ", automatic speed control, {}",
+                self.cruise_holding_text(ctx)
             )
         } else if self.keeper_mph.is_some() {
             format!(

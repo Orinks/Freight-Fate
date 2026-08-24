@@ -510,7 +510,13 @@ fn test_adaptive_cruise_follow_cue_does_not_repeat_within_the_cooldown() {
 
     frame(&mut harness, DT);
     assert!(harness.read_drive(|d| d.acc_following));
-    assert_eq!(cue_count(&harness), 1);
+    // Raised once. The route-start line lands in the same frame and purges
+    // the channel, so the pacer hands this one back and submits it again --
+    // that pair is ONE occurrence reaching the player, and without the
+    // hand-back the flush would take the whole of it before the voice said a
+    // word of why the truck was slowing.
+    let raised_once = cue_count(&harness);
+    assert_eq!(raised_once, 2, "{:#?}", spoken(&harness));
 
     harness.with_drive(|d, _| d.trip.set_npc_vehicles(Vec::new())); // drifts out
     frame(&mut harness, DT);
@@ -519,7 +525,7 @@ fn test_adaptive_cruise_follow_cue_does_not_repeat_within_the_cooldown() {
     slow_lead(&mut harness); // and back in
     frame(&mut harness, DT);
     assert!(harness.read_drive(|d| d.acc_following)); // follows again, but quietly
-    assert_eq!(cue_count(&harness), 1);
+    assert_eq!(cue_count(&harness), raised_once);
 }
 
 #[test]
@@ -901,12 +907,18 @@ fn test_speed_control_restores_cruise_target_after_zone() {
         harness.read_drive(|d| d.cruise_mph).expect("cruise"),
         original_target
     ));
+    // Once for the zone. The work-zone warning lands in the same frame and
+    // purges the channel, so the keeper line is handed back and submitted
+    // again; the pair is one occurrence reaching the player, where the flush
+    // alone used to take all of it.
     assert_eq!(
         spoken(&harness)
             .iter()
             .filter(|e| e.contains("Speed keeper holding"))
             .count(),
-        1
+        2,
+        "{:#?}",
+        spoken(&harness)
     );
     assert_eq!(
         spoken(&harness)
