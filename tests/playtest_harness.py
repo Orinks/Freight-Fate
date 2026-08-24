@@ -696,6 +696,14 @@ class PlaytestHarness:
             relative_lane,
             behavior,
         )
+        # The vehicle put here has to be the ONLY traffic on the road.
+        # Assigning the list is not enough on its own: the rolling bubble
+        # tops the highway up on the next frame, and a jam it placed speaks
+        # first. That is what made the merging-vehicle test flaky -- about
+        # one run in three heard backing-up traffic instead of the merge.
+        self.driving.trip.traffic_manager.rolling_bubble = False
+        self.driving.trip.traffic_pressures = []
+        self.driving.trip.zones = [zone for zone in self.driving.trip.zones if zone.aadt is None]
         self.driving.trip.traffic_manager.vehicles = [vehicle]
         return vehicle
 
