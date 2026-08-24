@@ -1,3 +1,13 @@
+// The game is a windowed application, so the binary is linked into the
+// Windows GUI subsystem: no console window is ever created for it. The
+// Python build did the same (`tools/build_release.py` passes Nuitka
+// `--windows-console-mode=disable`); the port had lost it, and a packaged
+// launch opened a black terminal beside the game. For a screen reader that
+// is a second window in the player's world, competing for focus, so this is
+// not cosmetic. `console::attach_parent` below gives the drive tools their
+// output back.
+#![cfg_attr(windows, windows_subsystem = "windows")]
+
 //! `freightfate`: the game's entry point (`freight_fate/__main__.py`), plus
 //! the drive tools that used to be separate Python scripts.
 //!
@@ -35,7 +45,80 @@ use freight_fate::speech::CaptureSpeech;
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    // Before anything writes a byte: a GUI-subsystem process starts with no
+    // console and, on every shell tested, no standard handles either, so an
+    // un-attached tool run prints into the void.
+    console::attach_parent(&args);
     std::process::exit(run(&args));
+}
+
+/// Giving the drive tools their terminal back, without giving the player one.
+///
+/// `AttachConsole` never CREATES a console (that is `AllocConsole`), so it
+/// cannot put a window on screen; it only borrows the one the parent shell
+/// already owns. Nothing here can undo the guarantee at the top of the file.
+mod console {
+    /// Attach to the parent shell's console, when there is a reason to.
+    ///
+    /// # When
+    ///
+    /// Only when the command line carries at least one argument. A player
+    /// launches Freight Fate with none -- a double-click, a shortcut, the
+    /// Start menu -- and that launch stays completely detached: not attached
+    /// to any console, so it cannot be killed by a Ctrl-C meant for the shell
+    /// or by that shell's window closing. Every path that PRINTS needs an
+    /// argument to reach it: `--help`, `-h`, `/?`, an unrecognised switch
+    /// (which prints the usage and exits 2), `--list-break-scenarios`,
+    /// `--break-scenario`, `--break-battery`, `--playtest-sandbox`,
+    /// `--playtest-road`, `--smoke`, `--headless`. Keying on "any argument at
+    /// all" rather than on a list of switches means a switch added later
+    /// cannot be forgotten here and silently lose its output.
+    #[cfg(windows)]
+    pub fn attach_parent(args: &[String]) {
+        use windows_sys::Win32::Foundation::{HANDLE, INVALID_HANDLE_VALUE};
+        use windows_sys::Win32::System::Console::{
+            AttachConsole, GetStdHandle, SetStdHandle, ATTACH_PARENT_PROCESS, STD_ERROR_HANDLE,
+            STD_INPUT_HANDLE, STD_OUTPUT_HANDLE,
+        };
+
+        if args.is_empty() {
+            return;
+        }
+        // SAFETY: three kernel32 calls that take no pointers of ours. The
+        // handles are the process's own standard handles, borrowed and put
+        // back; none is closed here.
+        unsafe {
+            // Redirection has to survive the attach. `cmd.exe` hands a
+            // redirected child its file or pipe in the standard slots WITHOUT
+            // setting `STARTF_USESTDHANDLES`, and `AttachConsole` then
+            // overwrites exactly those slots with the console's own handles:
+            // measured on 2026-08-23, `freightfate --break-battery > out.txt`
+            // from cmd left out.txt zero bytes and printed the whole run to
+            // the terminal instead. So remember what was there and restore
+            // whatever was real.
+            let saved: [(u32, HANDLE); 3] = [
+                (STD_OUTPUT_HANDLE, GetStdHandle(STD_OUTPUT_HANDLE)),
+                (STD_ERROR_HANDLE, GetStdHandle(STD_ERROR_HANDLE)),
+                (STD_INPUT_HANDLE, GetStdHandle(STD_INPUT_HANDLE)),
+            ];
+            if AttachConsole(ATTACH_PARENT_PROCESS) == 0 {
+                // No parent console: a double-click, or a launcher that has
+                // none. Nothing to print to and nothing to fix.
+                return;
+            }
+            for (slot, previous) in saved {
+                // An empty slot is left as `AttachConsole` set it: it fills
+                // the standard handles from the console it just attached,
+                // which is what makes a plain terminal run print at all.
+                if !previous.is_null() && previous != INVALID_HANDLE_VALUE {
+                    SetStdHandle(slot, previous);
+                }
+            }
+        }
+    }
+
+    #[cfg(not(windows))]
+    pub fn attach_parent(_args: &[String]) {}
 }
 
 fn run(args: &[String]) -> i32 {

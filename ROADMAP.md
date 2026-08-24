@@ -182,6 +182,45 @@ onto exit signalling.
       line, the pull-over demand and its failure-to-stop escalation, the
       collision damage total, the scale's red light, and the green light that
       is deliberately never rescued.
+- [x] **Rust port: a Python-written save verifies here (2026-08-23).**
+      A career created and played entirely in the Python 1.9 game loaded in
+      the Rust build as "changed outside the game, or copied from another
+      computer": the port set `integrity_modified` -- sticky, and carried into
+      profile sharing -- and re-signed the file. Python agreed that save was
+      validly signed with that install's key; the port's `is_signature_valid`
+      did not, on the same bytes.
+      The divergence is the READING of the numbers, not the rendering.
+      `serde_json`'s default parser takes a fast path that converts the
+      significand to f64 before scaling by a power of ten, so a literal past
+      fifteen significant digits can land one ulp from what `float()` returns
+      for the same text. Six numbers out of the 441 in that 23 kB save moved,
+      every one by exactly one ulp: `duty_log` segment 3's `end_hour` and
+      segment 4's `start_hour` (both `9.171009505452611` -> `...613`),
+      `game_hours`, `hos.non_driving_min`, and the rig's `brake_wear_pct`
+      and `engine_wear_pct`. The signature is an HMAC over exactly those
+      numbers rendered back to text, so six ulps three bytes apart is a
+      different signature and an honest career reads as edited.
+      Fixed by turning on serde_json's `float_roundtrip` feature
+      workspace-wide, which makes the parser correctly rounded as `float()`
+      is. The Rust canonical payload for that save is now byte-identical to
+      Python's, all 23,489 of them.
+      Pinned against bytes no Rust code produced: `tests/python_signed_save.json`
+      is a real career with the driver's name replaced, re-signed by the
+      shipped Python `_signature_for` (`tests/gen_python_signed_save.py`), and
+      `models::profile::tests_python_fixture` verifies it, loads it through the
+      gate, and guards the feature flag itself. All four of its tests fail
+      against the pre-fix build. Every earlier signing test signed with Rust
+      and verified with Rust, which is why none of them saw this: the port
+      agreed with itself perfectly.
+      Note for anyone re-testing on a career that already loaded once in a
+      Rust build -- it will now pass, because that build re-signed the file in
+      the port's own reading. Judge the fix against a save Python wrote and
+      Rust has never touched.
+      Not done: nothing clears `integrity_modified` once it is set on a save
+      on disk, and the load gate cannot tell a false mark from a real one, so
+      it must not try. The supported absolution is the existing cloud round
+      trip -- back the career up, restore it, and the server grants
+      `clearIntegrityFlag` on a signed revision that passed the full gate.
 - [x] **Rust port: a failed `DriveRef` borrow is loud now (2026-08-23).**
       `with` / `read` / `call` used to answer `None` for two unrelated
       reasons -- there is no drive, and the drive is already borrowed further
@@ -238,6 +277,36 @@ onto exit signalling.
       real check: with the container moved aside the same run panics on
       "the shipped world data loads" rather than passing. Left to do: the
       macOS `.app` bundle.
+
+- [x] **Rust port: the packaged game opens no console window (2026-08-23).**
+      The port had no `windows_subsystem` attribute anywhere, so the binary
+      linked into the console subsystem and Windows gave every launch a
+      terminal beside the game -- measured live on the `nightly-rustport`
+      tester build, whose running process owned a real console window. The
+      Python build never did this (`--windows-console-mode=disable`).
+      `crates/freight-fate/src/main.rs` now carries
+      `#![cfg_attr(windows, windows_subsystem = "windows")]`, and the drive
+      tools get their output back from `AttachConsole(ATTACH_PARENT_PROCESS)`
+      at the top of `main`, taken only when the command line carries at least
+      one argument, so a player's launch is attached to nothing at all.
+      Two measured traps are handled: a GUI-subsystem process starts with NO
+      standard handles on every shell tested (so an un-attached tool run
+      prints into the void), and `AttachConsole` OVERWRITES the standard
+      handles that `cmd.exe` gave a redirected child, which sent
+      `freightfate --break-battery > out.txt` to the terminal and left the
+      file empty until the attach began restoring them. Verified in the
+      packaged build: `--help`, `--list-break-scenarios`, `--smoke` and a
+      redirected `--break-scenario ... --transcript` all print and exit 0
+      from a terminal, from `cmd.exe` redirection, from a pipe and from
+      `subprocess.run`; a no-argument launch has no console and no `conhost`
+      child. Pinned by `crates/freight-fate/tests/windows_subsystem.rs`,
+      which reads the `Subsystem` field out of the built binary's PE header.
+      Known gap, in PowerShell only: `FreightFate.exe ... > out.txt` writes
+      an empty file, because PowerShell does not wait for a GUI-subsystem
+      process and closes the pipe under it. `| Set-Content out.txt`,
+      `cmd /c`, a bash shell and `Start-Process -Wait` all work. Left to do
+      only if that bites: a second console-subsystem binary in the workspace
+      for the drive tools.
 
 - [x] **Rust port: CI (`.github/workflows/rust.yml`, 2026-08-22).**
       `cargo fmt --all --check` on Linux, then `cargo clippy --all-targets

@@ -60,6 +60,8 @@ mod tests_compat;
 mod tests_gate;
 #[cfg(test)]
 mod tests_portable;
+#[cfg(test)]
+mod tests_python_fixture;
 
 pub use condition::{fresh_condition, truck_tank_gal, CONDITION_FIELDS};
 pub use paths::{data_dir, game_root, profiles_dir, save_root, SaveRoots, DATA_DIR_ENV};

@@ -945,6 +945,26 @@
 
 ### Fixed
 
+- **No black terminal window beside the game any more.** Starting Freight
+  Fate opened a second, empty window along with it, which took the focus and
+  sat there in the way for the whole session -- one more thing to skip past
+  every time you tabbed between windows, and one more thing your screen
+  reader had to describe. The game now starts as the single window it should
+  always have been.
+
+- **Your own career stops being called a copy from another computer.** A
+  career made and driven in the game, sitting untouched in its own saves
+  folder, could be greeted on loading with "this save was changed outside the
+  game, or copied from another computer, so it is now marked as modified".
+  Nothing had been changed and nothing had been copied. The game seals a save
+  with a fingerprint taken from every number in it, and it was reading a few
+  of the longest of those numbers back a hair differently from the way it had
+  written them, so the seal on an honest career failed to match. It now reads
+  every number back exactly as written, so a save the game made is a save the
+  game trusts. The mark stays on a career once it is set, and it follows you
+  into a shared profile, so if one of yours was marked this way: back it up
+  online and then restore it, and the mark is lifted.
+
 - **The interstate stops warning you about bends that are not on it.** A
   curve the co-driver called out on the interstate was often not on the
   interstate at all. It was the ramp you took to get on, the business route
