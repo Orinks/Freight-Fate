@@ -15,6 +15,18 @@
 
 ### Fixed
 
+- **Driving keys now work with JAWS without the pass-through key.** JAWS
+  hands the game each arrow key as an instant tap rather than a held key,
+  so holding Up, Down, Left, or Right to accelerate, brake, or steer did
+  nothing until you pressed JAWS Key and 3 before every key. The game now
+  reads the stream of taps JAWS sends while a key is held as the hold it
+  is, so you drive with the same keys as everyone else. Menus were never
+  affected. Two limits remain, because JAWS only re-sends a held key
+  about four times a second and never says how long you held it: letting
+  go of a pedal or the wheel takes effect about a third of a second
+  later, and a single quick tap of a pedal reads as a short press of
+  about half a second.
+
 - **The cloud backup list now tells you how to fix a conflict.** A career
   whose backups stopped because another computer changed the cloud copy now
   says, in the list and inside the career, that opening it lets you choose
