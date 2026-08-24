@@ -945,6 +945,16 @@
 
 ### Fixed
 
+- **Quitting the game no longer stalls for two silent seconds.** With Discord
+  running, closing Freight Fate could sit there for a couple of seconds before
+  the window went, saying nothing, and it happened most often when you had just
+  started the game and quit again. The game was waiting for Discord to answer a
+  question it no longer needed answered. It now waits only when there is
+  actually a Discord status to take down, so the game closes straight away.
+  Nothing about what Discord shows while you play has changed, and the status
+  is still cleared when you quit. Turning Discord status off in Settings,
+  Online, used to be able to freeze the game the same way; that is gone too.
+
 - **The speed keys now tell you the speed cruise is really holding.** Adaptive
   cruise slows itself for plenty of things -- a ramp you have signalled for, a
   bend, a lower posted number, a work zone, weather, the truck in front. It

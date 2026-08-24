@@ -50,6 +50,12 @@ const WORKER_TICK_S: f64 = MIN_UPDATE_INTERVAL_S;
 // Backoff between connection attempts when Discord is not running.
 const RECONNECT_INTERVAL_S: f64 = 30.0;
 
+// How long quitting (or switching the feature off) waits for a worker that
+// holds a live Discord client, so its presence can be cleared before the
+// pipe goes. See `Inner::wait_for_worker` for why a worker without one is
+// never waited for at all.
+const WORKER_JOIN_S: Duration = Duration::from_secs(2);
+
 /// A broad, player-facing activity snapshot reported by gameplay code.
 ///
 /// `activity` is the headline line (e.g. "Driving a route"); `detail` is an
@@ -396,7 +402,7 @@ impl DiscordPresence {
         self.inner.wake.set();
         let handle = self.inner.thread.lock().unwrap().take();
         if let Some(handle) = handle {
-            join_with_timeout(handle, Duration::from_secs(2));
+            self.inner.wait_for_worker(handle);
         }
         self.inner.close();
         self.inner.started.store(false, Ordering::SeqCst);
@@ -425,7 +431,7 @@ impl DiscordPresence {
             let handle = self.inner.thread.lock().unwrap().take();
             if let Some(handle) = handle {
                 if was_started {
-                    join_with_timeout(handle, Duration::from_secs(2));
+                    self.inner.wait_for_worker(handle);
                 }
             }
             self.inner.close();
@@ -442,8 +448,42 @@ impl DiscordPresence {
 }
 
 impl Inner {
+    fn enabled(&self) -> bool {
+        self.enabled.load(Ordering::SeqCst)
+    }
+
+    /// Wait for the worker to finish, but only while waiting can achieve
+    /// something.
+    ///
+    /// The point of waiting at all is [`close`](Self::close): a worker that
+    /// owns a live client must be off the pipe before the presence is cleared,
+    /// or it re-shows what we just cleared. When the worker holds no client
+    /// there is nothing to hand back and nothing to race with, so waiting buys
+    /// the player nothing -- and it is exactly then that waiting is expensive.
+    ///
+    /// Discord's IPC handshake is a blocking pipe read with no timeout, and
+    /// Discord stops answering handshakes for a while when a game is launched
+    /// several times in quick succession. A worker parked in that read cannot
+    /// be interrupted and will not return inside any timeout we pick, so the
+    /// old unconditional two-second join simply charged the player two silent
+    /// seconds at quit -- measured on 2026-08-24 as the whole of a packaged
+    /// launch's timing spread, 0.65 s of work stretched to 2.65 s. Nothing is
+    /// deferred and nothing is skipped: a connected worker is still waited for
+    /// and its presence still cleared.
+    fn wait_for_worker(&self, handle: JoinHandle<()>) {
+        if self.state.lock().unwrap().rpc.is_none() {
+            return;
+        }
+        join_with_timeout(handle, WORKER_JOIN_S);
+    }
+
     fn run(&self) {
-        while !self.stop.is_set() {
+        // `enabled` as well as `stop`, because a worker can outlive the stop
+        // flag: `set_enabled(false)` sets it, tidies up, and clears it again,
+        // and a worker parked in the handshake through all three wakes up to a
+        // clear flag. Now it reads the switch the player actually threw and
+        // leaves.
+        while !self.stop.is_set() && self.enabled() {
             self.pump();
             wait_seconds(&self.wake, self.worker_wait());
             self.wake.clear();
@@ -470,7 +510,7 @@ impl Inner {
 
     /// One connect-then-maybe-send cycle. Swallows all RPC errors.
     fn pump(&self) {
-        if self.stop.is_set() {
+        if self.stop.is_set() || !self.enabled() {
             return;
         }
         if !self.ensure_connected() {
@@ -546,6 +586,17 @@ impl Inner {
             log::debug!("Discord not available; presence stays hidden: {e}");
             // A failed handshake must not leave the pipe half-open; tear the
             // client down without sending anything (e.g. a wrong app id).
+            teardown_rpc(rpc, false);
+            return false;
+        }
+        // The handshake is a blocking read that can outlast the reason for it:
+        // quitting no longer waits on a worker with no client (see
+        // `wait_for_worker`), and switching Discord status off in Settings
+        // clears the stop flag again once it has tidied up. A reply arriving
+        // after either must be dropped -- otherwise it shows the player as
+        // playing a game they have shut, or as playing at all after they asked
+        // not to be. Both switches are read, not just the stop flag.
+        if self.stop.is_set() || !self.enabled() {
             teardown_rpc(rpc, false);
             return false;
         }

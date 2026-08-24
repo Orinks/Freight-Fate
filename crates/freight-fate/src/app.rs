@@ -31,6 +31,7 @@ use crate::states::base::{InputEvent, State};
 use crate::states::driving::DrivingState;
 use crate::states::main_menu::ConfirmQuitState;
 
+pub mod boot_timing;
 pub mod context;
 pub mod logging;
 pub mod sdl_shell;
@@ -142,8 +143,11 @@ impl App {
         // instead of stalling the first sound played.
         prefetch_sound_pack();
         let shell = SdlShell::new(&format!("Freight Fate {}", version()))?;
+        boot_timing::mark("window");
         let speech: Box<dyn SpeechSink> = Box::new(Speech::new());
+        boot_timing::mark("speech");
         let audio: Box<dyn Audio> = Box::new(AudioEngine::new());
+        boot_timing::mark("audio");
         Ok(Self::build(Some(shell), speech, audio))
     }
 
@@ -164,8 +168,10 @@ impl App {
 
     fn build(shell: Option<SdlShell>, speech: Box<dyn SpeechSink>, audio: Box<dyn Audio>) -> App {
         let settings = Settings::load();
+        boot_timing::mark("settings");
         let message_log = MessageLog::new();
         let world = get_world();
+        boot_timing::mark("world");
         let economy = Economy::default();
         let presence = DiscordPresence::new(DiscordPresenceOptions {
             enabled: settings.discord_presence,
@@ -182,6 +188,7 @@ impl App {
         let data_dir = data_dir();
         let store = IdentityStore::platform(&data_dir);
         let identity = store.load();
+        boot_timing::mark("driver identity");
         let online = OnlinePresence::new(OnlinePresenceOptions {
             enabled: settings.online_presence,
             identity: identity.clone(),
@@ -214,6 +221,7 @@ impl App {
                 backup.queue_backup(&profile.name, serde_json::Value::Object(profile.to_dict()));
             },
         )));
+        boot_timing::mark("online services");
         let controller = match &shell {
             Some(shell) => ControllerManager::new(
                 settings.controller_enabled,
@@ -224,6 +232,7 @@ impl App {
                 ControllerManager::detached(settings.controller_enabled, settings.haptics_enabled)
             }
         };
+        boot_timing::mark("controller");
         let clipboard: Box<dyn Clipboard> = match &shell {
             Some(shell) => Box::new(shell.clipboard()),
             None => Box::new(MemoryClipboard::default()),
@@ -247,6 +256,7 @@ impl App {
         });
         ctx.apply_volumes();
         ctx.apply_speech();
+        boot_timing::mark("volumes and voice");
         App {
             ctx,
             shell,
@@ -553,14 +563,19 @@ impl App {
             .unwrap_or_else(|| Box::new(placeholder_main_menu));
         let first = factory(&mut self.ctx);
         self.push_shared(first);
+        boot_timing::mark("first screen");
         self.ctx.services.presence.start(); // after init; never blocks if Discord is absent
         self.ctx.services.online.start(); // opt-in drivers board; dormant unless confirmed
         self.ctx.services.cloud.start(); // opt-in save backup; dormant unless confirmed
+        boot_timing::mark("background services started");
         let mut frames = 0u32;
         while self.ctx.running {
             let dt = self.clock.tick(FPS);
             self.frame(dt);
             frames += 1;
+            if frames == 1 {
+                boot_timing::mark("first frame");
+            }
             if max_frames.is_some_and(|max| frames >= max) {
                 self.ctx.running = false;
             }
@@ -577,14 +592,22 @@ impl App {
         if let Err(e) = self.ctx.settings.save() {
             log::warn!("Could not save settings: {e}");
         }
+        boot_timing::mark("quit: saved");
         self.ctx.services.presence.shutdown();
+        boot_timing::mark("quit: rich presence");
         self.ctx.services.online.shutdown();
+        boot_timing::mark("quit: drivers board");
         self.ctx.services.cloud.shutdown(); // flushes the final save's backup, bounded
+        boot_timing::mark("quit: cloud backup");
         profile_module::set_save_listener(None);
         self.ctx.controller.shutdown();
+        boot_timing::mark("quit: controller");
         self.ctx.audio.shutdown();
+        boot_timing::mark("quit: audio");
         self.ctx.speech.shutdown();
+        boot_timing::mark("quit: speech");
         self.shell = None; // pygame.quit()
+        boot_timing::mark("quit: window");
     }
 }
 
@@ -651,6 +674,7 @@ impl CliOptions {
 /// `freight_fate.app.main()`: the process entry, returning the exit code.
 pub fn main_with(options: CliOptions) -> i32 {
     configure_logging();
+    boot_timing::mark("start up");
     if options.controller_diagnostics {
         return crate::controller::diagnostics::run_controller_diagnostics();
     }
@@ -659,8 +683,10 @@ pub fn main_with(options: CliOptions) -> i32 {
         log::warn!("Freight Fate is already running.");
         return 0;
     }
+    boot_timing::mark("single instance check");
     let code = run_game(&options);
     guard.release();
+    boot_timing::mark("quit: done");
     code
 }
 
@@ -671,6 +697,7 @@ fn run_game(options: &CliOptions) -> i32 {
             log::error!("Fatal error: {e}");
             return 1;
         }
+        boot_timing::mark("smoke checks");
     }
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         let mut app = if options.headless {

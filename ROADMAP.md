@@ -351,6 +351,48 @@ onto exit signalling.
       "the shipped world data loads" rather than passing. Left to do: the
       macOS `.app` bundle.
 
+- [x] **Rust port: a launch takes the same time every time, and the session
+      log says where it goes (2026-08-24).** Three runs of the packaged
+      `--smoke` check spanned 1128-2972 ms on identical input; 25 runs put the
+      median at 2668 ms with a floor of 676 ms. All of the spread was in the
+      quit, not the boot: `DiscordPresence::shutdown` joined its worker with an
+      unconditional two-second timeout, and the worker was parked in
+      `discord-rich-presence`'s handshake -- a blocking pipe read with no
+      timeout, which Discord stops answering for a while when a game is
+      launched several times in quick succession. The join could not finish and
+      simply charged the player two silent seconds at quit; the same join is on
+      the Settings, Online toggle, so turning Discord status off froze the game
+      the same way. `Inner::wait_for_worker` now waits only when the worker
+      holds a live client to hand back, and a handshake that lands after the
+      stop flag is torn down instead of re-showing a presence the player has
+      already quit. 30 runs after: median 690 ms, min 656, max 922 on a
+      quiet machine; median 774, max 1525 with another build running
+      alongside, and that spread is the whole boot moving together rather
+      than any one phase -- `quit: rich presence` reads 0 ms even on the
+      1525.
+      `app::boot_timing` marks every seam of the launch and the quit into
+      `logs/game.log` as `phase:` lines, which is how the two seconds were
+      found and how the next stall will be. Warm packaged phase table: SDL
+      window 293 ms, `--smoke` data checks 171 ms, controller subsystem 89 ms,
+      the quit-time profile save 68 ms, BASS and its four plugins 17 ms, first
+      frame 14 ms, everything else at or under 3 ms. Not addressed: the SDL
+      window and the controller subsystem are 380 ms of the 660, both genuinely
+      needed before the first frame.
+
+- [x] **Rust port: the update check reaches api.github.com during boot
+      (2026-08-24, by design, recorded because nothing said so).** Measured,
+      not read: with the DNS cache cleared, one packaged `--smoke` run leaves
+      exactly one new entry, `api.github.com`, and a TCP connection to
+      140.82.113.6:443 is open for the rest of the run. `MainMenuState::enter`
+      arms `UpdateChecker::new`, which is a detached thread, so it never
+      delays the first frame (measured at 3 ms after the menu is built) and
+      never delays the quit. It fires in `--smoke` and in a
+      `--playtest-sandbox` session too, because both boot into the main menu
+      and both are frozen builds. The sandbox isolates the driver identity,
+      so no orinks.net traffic happens; GitHub is the one host a sandboxed
+      session still touches, and `tools/playtest_watch.py` will report it.
+      Decide whether a sandboxed session should skip the update check.
+
 - [x] **Rust port: the packaged game opens no console window (2026-08-23).**
       The port had no `windows_subsystem` attribute anywhere, so the binary
       linked into the console subsystem and Windows gave every launch a

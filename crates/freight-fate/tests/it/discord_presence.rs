@@ -7,6 +7,7 @@
 //! RPC client and an injected clock keep every test deterministic and free of
 //! real sockets.
 
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -419,4 +420,191 @@ fn test_threaded_service_sends_and_shuts_down() {
     assert!(rpc.connects() >= 1);
     assert!(!rpc.updates().is_empty());
     assert_eq!(rpc.closed(), 1);
+}
+
+// -- quitting never waits on a handshake that will not come -------------------
+
+/// An RPC whose handshake blocks until the test releases it.
+///
+/// Discord's IPC handshake is a blocking pipe read with no timeout, and
+/// Discord stops answering handshakes for a while when a game is launched
+/// several times in quick succession. A worker parked in that read is the
+/// real shape this models.
+#[derive(Clone)]
+struct BlockingConnectRpc {
+    inner: FakeRpc,
+    entered: Arc<AtomicBool>,
+    released: Arc<AtomicBool>,
+}
+
+impl BlockingConnectRpc {
+    fn new() -> Self {
+        Self {
+            inner: FakeRpc::new(),
+            entered: Arc::new(AtomicBool::new(false)),
+            released: Arc::new(AtomicBool::new(false)),
+        }
+    }
+
+    fn factory(&self) -> RpcFactory {
+        let me = self.clone();
+        Arc::new(move |_cid: &str| Ok(Box::new(me.clone()) as Box<dyn RpcClient>))
+    }
+
+    /// Block until the worker is inside the handshake.
+    fn await_handshake(&self) {
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while !self.entered.load(Ordering::SeqCst) && Instant::now() < deadline {
+            thread::sleep(Duration::from_millis(5));
+        }
+        assert!(
+            self.entered.load(Ordering::SeqCst),
+            "the worker never reached the handshake"
+        );
+    }
+
+    fn release(&self) {
+        self.released.store(true, Ordering::SeqCst);
+    }
+}
+
+impl RpcClient for BlockingConnectRpc {
+    fn connect(&mut self) -> Result<(), String> {
+        self.entered.store(true, Ordering::SeqCst);
+        while !self.released.load(Ordering::SeqCst) {
+            thread::sleep(Duration::from_millis(5));
+        }
+        self.inner.connect()
+    }
+
+    fn update(&mut self, payload: &ActivityPayload) -> Result<(), String> {
+        self.inner.update(payload)
+    }
+
+    fn clear(&mut self) -> Result<(), String> {
+        self.inner.clear()
+    }
+
+    fn close(&mut self) -> Result<(), String> {
+        self.inner.close()
+    }
+}
+
+#[test]
+fn test_quitting_does_not_wait_on_a_handshake_that_never_answers() {
+    let rpc = BlockingConnectRpc::new();
+    let presence = DiscordPresence::new(DiscordPresenceOptions {
+        client_id: Some("test-app-id".to_string()),
+        min_interval_s: 0.0,
+        rpc_factory: Some(rpc.factory()),
+        threaded: true,
+        ..DiscordPresenceOptions::default()
+    });
+    presence.start();
+    presence.update(Some(PresenceState::activity("In the main menu")));
+    rpc.await_handshake();
+
+    let began = Instant::now();
+    presence.shutdown();
+    let waited = began.elapsed();
+    rpc.release();
+    assert!(
+        waited < Duration::from_millis(500),
+        "quitting waited {waited:?} on a worker with no presence to clear"
+    );
+}
+
+#[test]
+fn test_a_late_handshake_never_shows_a_presence_after_quitting() {
+    let rpc = BlockingConnectRpc::new();
+    let presence = DiscordPresence::new(DiscordPresenceOptions {
+        client_id: Some("test-app-id".to_string()),
+        min_interval_s: 0.0,
+        rpc_factory: Some(rpc.factory()),
+        threaded: true,
+        ..DiscordPresenceOptions::default()
+    });
+    presence.start();
+    presence.update(Some(PresenceState::activity("In the main menu")));
+    rpc.await_handshake();
+    presence.shutdown();
+
+    // Discord answers after the player has already quit: the reply is dropped
+    // rather than used to show them still playing.
+    rpc.release();
+    let deadline = Instant::now() + Duration::from_secs(2);
+    while rpc.inner.connects() == 0 && Instant::now() < deadline {
+        thread::sleep(Duration::from_millis(5));
+    }
+    thread::sleep(Duration::from_millis(100));
+    assert!(
+        rpc.inner.updates().is_empty(),
+        "a presence was shown after quitting: {:?}",
+        rpc.inner.updates()
+    );
+    assert!(!presence.connected());
+}
+
+/// The other half: a worker that *does* hold a live client is still waited
+/// for, and its presence still cleared, so nothing was traded away for the
+/// quick quit above.
+#[test]
+fn test_quitting_still_clears_a_presence_the_worker_is_showing() {
+    let rpc = FakeRpc::new();
+    let presence = DiscordPresence::new(DiscordPresenceOptions {
+        client_id: Some("test-app-id".to_string()),
+        min_interval_s: 0.0,
+        rpc_factory: Some(rpc.factory()),
+        threaded: true,
+        ..DiscordPresenceOptions::default()
+    });
+    presence.start();
+    presence.update(Some(PresenceState::activity("Driving a route")));
+    let deadline = Instant::now() + Duration::from_secs(2);
+    while rpc.updates().is_empty() && Instant::now() < deadline {
+        thread::sleep(Duration::from_millis(10));
+    }
+    assert!(presence.connected(), "the worker never connected");
+    presence.shutdown();
+    assert_eq!(rpc.cleared(), 1);
+    assert_eq!(rpc.closed(), 1);
+}
+
+#[test]
+fn test_a_late_handshake_never_shows_a_presence_after_switching_it_off() {
+    let rpc = BlockingConnectRpc::new();
+    let presence = DiscordPresence::new(DiscordPresenceOptions {
+        client_id: Some("test-app-id".to_string()),
+        min_interval_s: 0.0,
+        rpc_factory: Some(rpc.factory()),
+        threaded: true,
+        ..DiscordPresenceOptions::default()
+    });
+    presence.start();
+    presence.update(Some(PresenceState::activity("In the main menu")));
+    rpc.await_handshake();
+
+    // Settings, Online, Discord status: off. Unlike quitting, this clears the
+    // stop flag again afterwards, so the worker has to read the switch itself.
+    let began = Instant::now();
+    presence.set_enabled(false);
+    let waited = began.elapsed();
+    assert!(
+        waited < Duration::from_millis(500),
+        "switching Discord status off froze the game for {waited:?}"
+    );
+
+    rpc.release();
+    let deadline = Instant::now() + Duration::from_secs(2);
+    while rpc.inner.connects() == 0 && Instant::now() < deadline {
+        thread::sleep(Duration::from_millis(5));
+    }
+    thread::sleep(Duration::from_millis(100));
+    assert!(
+        rpc.inner.updates().is_empty(),
+        "a presence was shown after the player turned it off: {:?}",
+        rpc.inner.updates()
+    );
+    assert!(!presence.connected());
+    assert!(!presence.enabled());
 }
