@@ -7123,15 +7123,17 @@ From a batch of player reports:
   double-tap-and-hold pedal latch) are invisible through JAWS; a gesture
   counted in press events would see them. Second JAWS machine's probe
   log would confirm the ~250 ms spacing is JAWS-typical, not Norm's box.
-- [x] **Rust port: the JAWS hold ported with the fix (2026-08-24).**
-  `app::held_keys` carries the same pulse tracker, and every driving key
-  reads through it because the port already polls its own held-key store
-  rather than SDL. Two seams the port has and Python does not: the pulses
-  only run once the app loop has begun a frame, so the playtest harness
-  and the adversarial breaker -- which press keys straight onto the store
-  with no clock -- keep the plain set-and-clear they always had; and the
-  window losing focus is now an event the port raises, which drops every
-  key so alt-tabbing away mid-drive cannot leave a pedal down.
+- [x] **Rust port: the JAWS hold ported with the fix (2026-08-24, Noel
+  Romey, PR #168).** `app::held_keys` carries the same pulse tracker, and
+  every driving key reads through it because the port already polls its
+  own held-key store rather than SDL. Three seams the port has and Python
+  does not: the pulses only run once the app loop has begun a frame, so the
+  playtest harness and the adversarial breaker -- which press keys straight
+  onto the store with no clock -- keep the plain set-and-clear they always
+  had; SDL delivers the keyboard's own auto-repeat as more presses of a key
+  already down, so only a press from the released state can begin a pair;
+  and the window losing focus is now an event the port raises, which drops
+  every key so alt-tabbing away mid-drive cannot leave a pedal down.
 - [ ] **Rust port: no key probe.** `tools/key_probe.py` measures the
   Python build's timing, which is the one players run today. A player on
   a Rust build who needs to show what their screen reader delivers has

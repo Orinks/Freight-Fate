@@ -954,8 +954,9 @@
   affected. Two limits remain, because JAWS only re-sends a held key
   about four times a second and never says how long you held it: letting
   go of a pedal or the wheel takes effect about a third of a second
-  later, and a single quick tap of a pedal reads as a short press of
-  about half a second.
+  later, a single quick tap of a pedal reads as a short press of about
+  half a second, and the double tap and hold that latches a pedal cannot
+  be caught through JAWS.
 
 - **The game stops doing pointless work sixty times a second while you drive.**
   Every moment at the wheel, it was rebuilding the entire list of radio

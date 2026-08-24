@@ -118,9 +118,6 @@ pub struct App {
     pub ctx: GameContext,
     shell: Option<SdlShell>,
     clock: FrameClock,
-    /// `pygame.time.get_ticks()`'s zero: the held-key tracker times a screen
-    /// reader's re-injected press train against it (see `app::held_keys`).
-    started: Instant,
     initial_state: Option<InitialState>,
 }
 
@@ -266,7 +263,6 @@ impl App {
             ctx,
             shell,
             clock: FrameClock::new(true),
-            started: Instant::now(),
             initial_state: None,
         }
     }
@@ -278,11 +274,6 @@ impl App {
 
     pub fn is_headless(&self) -> bool {
         self.shell.is_none()
-    }
-
-    /// `pygame.time.get_ticks()`: milliseconds since the app was built.
-    fn ticks_ms(&self) -> u32 {
-        self.started.elapsed().as_millis() as u32
     }
 
     // -- state stack (forwarders; the stack lives on the context) ----------------------
@@ -443,6 +434,8 @@ impl App {
                 // a player who changed it gets it without a restart.
                 self.ctx.speech.request_refresh();
                 self.ctx.input.refresh_repeat_timing();
+                // Nothing held before the player left is held now, either.
+                self.ctx.input.clear_pulses();
                 // ...and then the screen gets it too. Python tests focus
                 // with its own `if`, not the `elif` chain, so the event
                 // carries on to the state; a `match` arm here quietly ate
@@ -554,10 +547,6 @@ impl App {
 
     /// One whole frame: pump events, tick, render. `dt` is the frame time.
     pub fn frame(&mut self, dt: f64) {
-        // Before the events, so a press and its release are timed against
-        // this frame: a pair inside one frame is a screen reader's, not a
-        // finger's, and reads as a hold rather than nothing at all.
-        self.ctx.input.begin_frame(self.ticks_ms());
         let events = match self.shell.as_mut() {
             Some(shell) => match shell.poll() {
                 Some(events) => events,
@@ -575,6 +564,10 @@ impl App {
             },
             None => Vec::new(),
         };
+        // Clock the held-key tracker before this frame's events: a screen
+        // reader's re-injected press-and-release pairs are told apart from a
+        // finger by which frame they land in (see `app::held_keys`).
+        self.ctx.input.begin_frame(dt);
         for event in &events {
             self.handle_event(event);
         }
