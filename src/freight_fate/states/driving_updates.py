@@ -4051,6 +4051,12 @@ class DrivingUpdateMixin:
                         f"at the scale, press {self.ctx.control_hint('rest')} "
                         "to check in."
                     )
+                # Bound here and passed as lambda defaults below, not read
+                # from the loop when the callback runs: the validity test has
+                # to compare against the distance this line actually SPOKE,
+                # and both names are rebound by the next stop in the sweep.
+                announced = self.ctx.settings.short_distance_text(ahead)
+                scale_mi = stop.at_mi
                 self.ctx.say_event(
                     # short_distance_text, not distance_text: the plain form
                     # rounds to whole miles, so a scale first seen inside half
@@ -4068,12 +4074,27 @@ class DrivingUpdateMixin:
                     # (playtest, 2026-08-20). The bypass judgment never
                     # needed it -- taking the scale's exit is what counts --
                     # and the ramp glide owns the slowing.
-                    f"Open weigh station ahead in "
-                    f"{self.ctx.settings.short_distance_text(ahead)}: "
-                    f"{stop.name}. {instruction}",
+                    f"Open weigh station ahead in {announced}: {stop.name}. {instruction}",
                     interrupt=False,
                     priority=EventPriority.ROUTE,
                     category=SpeechCategory.NAVIGATION,
+                    # valid: this sentence names a distance, and a distance is
+                    # a claim about now. The reminder below already dies once
+                    # the exit is behind the truck; this one has to die
+                    # sooner, because it goes wrong while the scale is still
+                    # ahead -- handed back after the half-mile reminder it
+                    # told the driver the scale was four miles off, the two
+                    # lines contradicting each other one after the other
+                    # (adversarial battery, scale_bypass_to_the_end). The test
+                    # is the line's OWN words rather than a chosen tolerance:
+                    # while the road left still speaks as the phrase already
+                    # spoken, replaying it says nothing untrue, and the moment
+                    # it does not, it does.
+                    valid=lambda at_mi=scale_mi, said=announced: (
+                        at_mi - self.trip.position_mi > 0
+                        and self.ctx.settings.short_distance_text(at_mi - self.trip.position_mi)
+                        == said
+                    ),
                 )
                 # The verdict line itself queues right behind the notice
                 # (both ROUTE, interrupt=False): green says keep rolling,

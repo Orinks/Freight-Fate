@@ -445,3 +445,46 @@ def test_zone_warning_lead_scales_with_speed_and_pacing():
         assert faster == pytest.approx(ZONE_WARNING_MAX_MI)
     finally:
         app.shutdown()
+
+
+class _FakeTrip:
+    """Just enough Trip for the warning builder, which reads only helpers."""
+
+    imperial = True
+
+    def _ahead_text(self, miles: float) -> str:
+        return f"{miles:.0f} miles"
+
+    def _speed_value(self, mph: float) -> str:
+        return f"{mph:.0f}"
+
+    @staticmethod
+    def _closure_phrases(zone):
+        return "right", "left"
+
+
+def test_the_construction_warning_does_not_shout_brake_now_from_eight_miles():
+    """Shane, 2026-08-24: "should really we be slowing down as early as we
+    are for construction routes?"
+
+    The assists do not, in fact, slow early -- his own log has the ease
+    landing within seconds of the zone. He was slowing because the advance
+    warning told him to: "Brake now! In 8 miles, construction ahead."
+
+    "Brake now" is the emergency hazard opening, the words used for debris
+    in your lane. Saying it about something eight miles off is untrue, gets
+    acted on, and spends a phrase that has to mean something when a real
+    emergency borrows it. The heavy-traffic and generic zone warnings have
+    always opened with the distance; construction was the odd one out.
+    """
+    from freight_fate.sim.trip import Trip
+    from freight_fate.sim.trip_models import Zone
+
+    zone = Zone(120.0, 124.0, 45.0, "construction")
+    message = Trip._zone_warning_message(_FakeTrip(), zone, 8.0)
+
+    assert "Brake now" not in message
+    assert message.startswith("In "), message
+    # The information all survives: how far, what, and both limits.
+    assert "construction ahead" in message
+    assert "45" in message and "55" in message

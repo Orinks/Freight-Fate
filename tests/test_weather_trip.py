@@ -1108,7 +1108,7 @@ def test_construction_zone_warns_before_entry(world):
 
     warnings = _gps_messages(events)
     assert warnings == [
-        f"Brake now! In {trip._ahead_text(lookahead)}, construction ahead. "
+        f"In {trip._ahead_text(lookahead)}, construction ahead. "
         f"{_closure_part(zone)}Speed limit "
         f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f} at the taper, then {zone.limit_mph:.0f} "
         "through the work zone."
@@ -1138,7 +1138,12 @@ def test_construction_warning_lead_allows_normal_braking(world):
     trip.position_mi = zone.start_mi - trip._zone_warning_lookahead_mi()
 
     events = trip.update(0.0)
-    assert _gps_messages(events)[0].startswith("Brake now!")
+    # NOT "Brake now!" -- that is the emergency hazard opening, and this
+    # warning fires miles out. It leads with the distance like every other
+    # zone warning (Shane, 2026-08-24).
+    first = _gps_messages(events)[0]
+    assert not first.startswith("Brake now")
+    assert first.startswith("In ")
 
     inspections = _brake_until_speed(trip, truck, zone.limit_mph)
 
@@ -1173,7 +1178,7 @@ def test_construction_zone_speeding_fine_waits_for_grace_distance(world):
     # construction warning itself is what this test pins down.
     construction_cues = [m for m in _gps_messages(advance) if "construction ahead" in m]
     assert construction_cues == [
-        "Brake now! In 2 miles, construction ahead. "
+        "In 2 miles, construction ahead. "
         f"{_closure_part(zone)}Speed limit "
         f"{CONSTRUCTION_TAPER_LIMIT_MPH:.0f} at the taper, then {zone.limit_mph:.0f} "
         "through the work zone."

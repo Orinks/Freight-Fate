@@ -600,13 +600,38 @@ class EventSpeechPacer:
             # latent until that cue stopped being AMBIENT -- as chatter it was
             # dropped by would_start_stale before ever reaching here.
             #
-            # Narrowly CRITICAL only. A backlog of stale ROUTE announcements
-            # really does describe road already driven and is right to go --
-            # rescuing those turned one flush into a recital of everything it
-            # had just purged. A safety call is the exception: it is the one
-            # line whose worth does not decay while it waits.
+            # An AGED backlog of ROUTE announcements really does describe road
+            # already driven and is right to go -- rescuing those turned one
+            # flush into a recital of everything it had just purged. A safety
+            # call is the standing exception: it is the one line whose worth
+            # does not decay while it waits.
+            #
+            # But "aged" was read off the INCOMING line only, and the two come
+            # apart the moment the road speaks twice in one frame. Measured on
+            # the owner's 23 August session: of 59 lines a flush destroyed, 34
+            # were cut inside BASE_UTTERANCE_S of their own start -- the pause
+            # before the voice gets going -- so by this pacer's own duration
+            # model the player had not heard one character of them. Three
+            # route lines arriving inside 37 ms took the ramp-exit briefing
+            # with them: "Off the ramp and onto city streets: start on unnamed
+            # public road. Then turn right now onto Halleck Street" was purged
+            # 22 ms in, and that turn was never spoken. A line that young is
+            # not a backlog; it is this same instant of road, and destroying
+            # it costs the whole line rather than its tail.
+            #
+            # So the rescue asks how much of the outgoing line the player
+            # actually got. Past the pre-utterance window it has said
+            # something and its tail is expendable; inside it, nothing was
+            # heard and the words are still current, so they are handed back
+            # to be queued behind the line that cut them -- the same contract
+            # a CRITICAL cut has always had. The once-per-line cap in
+            # _take_protected still applies, so a run of urgent lines cannot
+            # replay it.
             held = self._protected
-            if held is not None and held[1] is EventPriority.CRITICAL:
+            if held is not None and (
+                held[1] is EventPriority.CRITICAL
+                or now - (held[2] - self._duration_s(held[0])) < self.BASE_UTTERANCE_S
+            ):
                 self._flush_cut = self._take_protected(text)
             else:
                 self._protected = None
