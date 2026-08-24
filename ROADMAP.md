@@ -1897,6 +1897,38 @@ onto exit signalling.
       the two move differently. Any future claim about curve noise wants the
       second number.
 
+- [x] **Congestion stopped being a wall in the same place every run
+      (2026-08-24).** Owner-reported after the reroute: traffic zones felt
+      predictable. Measured, they were -- across 300 seeds Chicago to St
+      Louis produced exactly ONE heavy-traffic layout, and Dallas to Houston
+      one. That was by design, since congestion is read from HPMS volume
+      against capacity rather than rolled, and the design's answer to
+      predictability was the clock. Measured, that answer was thin: mile 5
+      to 35 out of Chicago ran slow from 06:00 to 18:00, so any daylight run
+      met it.
+
+      THE FIX IS IN THE VOLUME MODEL, not sprinkled on top of it. AADT is an
+      ANNUAL AVERAGE and no day is the average -- the FHWA Traffic Monitoring
+      Guide's day-of-week and monthly adjustment factors exist for exactly
+      that spread. Day-of-week was already modelled, so what was missing was
+      the residual day-to-day scatter: one draw per stretch per trip at a 10
+      percent coefficient of variation, applied both when the zone forms and
+      when it is asked whether it applies. An oversaturated stretch still
+      backs up every day because no ordinary day clears a ratio that far
+      over the line; a marginal one falls under on a quiet day.
+
+      MEASURED AFTER: Chicago to St Louis went from 1 layout across 300 seeds
+      to 10, the commonest appearing 177 times rather than 300. The slow
+      window went from a fixed 12-13 hours to between zero and fourteen --
+      one run finds the jam all day, one finds an hour of it at the evening
+      peak, one finds clear road.
+
+      AND A SELF-INFLICTED HALF OF IT: reconciling work zones against jams
+      had DELETED any roadworks drawn near one, which spends exactly the part
+      of a slow zone that is meant to vary. The jam's footprint is now
+      claimed before the draw, so roadworks relocate instead. Chicago to St
+      Louis went from 151 runs in 300 carrying a work zone to 167.
+
 - [ ] **`build_interchanges.py` cannot be imported twice in one process.**
       It merges its sub-modules' namespaces into its own globals at import,
       and those sub-modules are cached, so a second import by path leaves the

@@ -959,6 +959,19 @@
   true: the weigh station announcement that named four miles is dropped
   rather than read back to you once the scale is half a mile away, so it
   can no longer contradict the reminder you just heard.
+- **The same jam is not waiting in the same place every single run.** Where
+  traffic backs up is still the stretch that really carries the traffic --
+  that does not move, because in life it does not either. What changed is
+  that the road now has good days and bad ones. A stretch that only just
+  tips over on an average day flows freely on a quiet one, and on some runs
+  the jam is not there at all; the genuinely overloaded miles still crawl,
+  because those crawl every day. On the run out of Chicago the slow stretch
+  ran twelve or thirteen hours of every day without fail. Now one run finds
+  fourteen hours of it, another finds one hour at the evening peak, and
+  another finds clear road the whole way. Roadworks moved too: they used to
+  be quietly cancelled when they landed near a jam, and now they are simply
+  put somewhere else, so a run that has traffic can still have roadworks.
+
 - **Twenty-four runs go back on the interstate they are named for.** A run
   billed as I-37 out of Corpus Christi drove US-181 instead, and the
   co-driver still said I-37 the whole hundred and forty-seven miles.
