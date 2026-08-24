@@ -1623,3 +1623,59 @@ def test_the_hold_matches_the_one_speeding_has_always_had():
     speeding = "sample.over_limit_mi >= OBSERVE_HOLD_MI" in src
     following = "sample.closed_up_mi >= OBSERVE_HOLD_MI" in src
     assert speeding and following, src
+
+
+def test_a_gap_the_assist_owns_is_never_the_drivers_disregard():
+    """Darren, fined twice for a gap no control of his governed.
+
+    1,200 dollars on I-75 (2026-08-18) is what the carve-out was written
+    for, and it only forgave a gap while the assist was actively BRAKING --
+    which is adaptive cruise recovering, and nothing else.
+
+    The speed KEEPER does not follow traffic at all: driving_speed_control.py
+    has no notion of a lead vehicle, it holds the posted number. So in a work
+    zone it sits at the sign's 55 while the line ahead bunches up, closing
+    the gap with the throttle open and never touching the brake. That read as
+    the driver's disregard and cost him 2,400 dollars on I-94 (2026-08-24),
+    doubled for the construction zone, with the cab announcing "Speed keeper
+    holding 55 miles per hour" as it happened.
+
+    The question is who has the pedal, not what the pedal is doing.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _driving(app)
+        driving._closed_up_mi = 0.0
+        driving.truck.brake = 0.0
+
+        # The keeper owns the throttle and is holding the zone's number.
+        driving._speed_control_armed = True
+        driving._cruise_mph = None
+        driving._cruise_applied = 0.45
+        driving.truck.throttle = 0.45
+        assert driving._assist_owns_the_pedal() is True
+
+        # Adaptive cruise braking to recover a gap: the original case, still
+        # forgiven.
+        driving._cruise_mph = 60.0
+        driving._cruise_applied = 0.0
+        driving.truck.throttle = 0.0
+        driving.truck.brake = 0.3
+        assert driving._assist_owns_the_pedal() is True
+
+        # But a driver pressing PAST what the assist asked for is closing the
+        # gap themselves, and owns it.
+        driving._cruise_applied = 0.20
+        driving.truck.throttle = 0.85
+        driving.truck.brake = 0.0
+        assert driving._assist_owns_the_pedal() is False
+
+        # And with no assist at all it is entirely theirs.
+        driving._speed_control_armed = False
+        driving._cruise_mph = None
+        driving.truck.throttle = 0.0
+        assert driving._assist_owns_the_pedal() is False
+    finally:
+        app.shutdown()

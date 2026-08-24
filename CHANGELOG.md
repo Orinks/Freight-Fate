@@ -945,6 +945,18 @@
 
 ### Fixed
 
+- **A turn or exit instruction cut off by the next one can no longer vanish
+  unspoken.** When the road had two things to tell you at once, the second
+  line took the place of the first before the voice had said a word of it,
+  and the first was simply gone. Coming off a ramp into town or pulling away
+  from a gate, that was routinely the turn itself -- "then turn right now
+  onto Halleck Street" was never spoken, and the only thing you heard was
+  the line that had replaced it. Now, if a line is replaced before you have
+  heard any of it, it comes back and is read straight after the line that
+  replaced it, so you get both. A line you have already been listening to
+  for a while still gives way, because by then it has told you what you
+  needed and the road has moved on.
+
 - **The interstate stops warning you about bends that are not on it.** A
   curve the co-driver called out on the interstate was often not on the
   interstate at all. It was the ramp you took to get on, the business route
@@ -1241,6 +1253,19 @@
   re-read.
 
 ### Fixed
+- **A trooper stops fining you for a gap the assists are managing.** If a
+  speed assist had the throttle, it could close right up on traffic ahead --
+  the speed keeper holds the posted number and does not watch the vehicle in
+  front at all -- and you got the ticket for it. In a work zone that is
+  doubled, so it was 2,400 dollars for something no control of yours was
+  driving. The road now only counts it against you if you are the one on the
+  throttle.
+- **Construction warnings stop telling you to brake for something eight miles
+  away.** The advance warning opened with "brake now", which is the phrase the
+  cab uses for debris in your lane, and then said the work was miles off. It
+  now opens with the distance, like every other zone warning: "in eight miles,
+  construction ahead." Everything else about it is unchanged, and the assists
+  still ease at the taper rather than early.
 - **Brake lights ahead no longer make you stop dead.** A slow vehicle in your
   lane was treated the same as a tyre carcass: the warning only counted as
   answered once you were down to a crawl, and with automatic braking on the
