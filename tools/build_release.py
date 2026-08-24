@@ -934,13 +934,34 @@ def rust_data_files(package_dir: Path = PACKAGE_DIR) -> list[Path]:
 
 
 def rust_loose_sound_files(package_dir: Path = PACKAGE_DIR) -> list[Path]:
-    """The committed loose sound tree, relative to ``package_dir``."""
+    """The COMMITTED loose sound tree, relative to ``package_dir``.
+
+    Committed means asked of git, not read off the disk. Globbing the working
+    tree shipped whatever audio a developer happened to have sitting there:
+    on 2026-08-24 that was 254 MB of loose source audio the packs already
+    contain, in a release that should have been 284 MB and came out at 548.
+    The checkout it had always been built from happened to have an almost
+    empty tree, which is the only reason the sizes had looked right.
+
+    A release is a statement about what the project ships, so it is built
+    from what the project has committed. Anything else is a local accident.
+    """
     tree = package_dir / LOOSE_SOUND_TREE
     if not tree.is_dir():
         raise RuntimeError(f"Committed sound tree was not found: {tree}")
+    listed = subprocess.run(
+        ["git", "ls-files", str(tree.relative_to(ROOT))],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    tracked = [ROOT / name for name in listed.splitlines() if name]
+    if not tracked:
+        raise RuntimeError(f"git lists no committed files under {tree}")
     return [
         path.relative_to(package_dir)
-        for path in sorted(tree.rglob("*"))
+        for path in sorted(tracked)
         if path.is_file() and "__pycache__" not in path.parts
     ]
 
