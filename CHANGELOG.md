@@ -955,7 +955,10 @@
   heard any of it, it comes back and is read straight after the line that
   replaced it, so you get both. A line you have already been listening to
   for a while still gives way, because by then it has told you what you
-  needed and the road has moved on.
+  needed and the road has moved on. A line only comes back if it is still
+  true: the weigh station announcement that named four miles is dropped
+  rather than read back to you once the scale is half a mile away, so it
+  can no longer contradict the reminder you just heard.
 
 - **The interstate stops warning you about bends that are not on it.** A
   curve the co-driver called out on the interstate was often not on the

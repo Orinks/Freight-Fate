@@ -985,6 +985,70 @@ onto exit signalling.
       Three tests in `test_driving_speech_ladder.py`, driven from the log's
       own lines.
 
+- [x] **A stale flush stops destroying the line it lands on before that
+      line has said anything -- 2026-08-23.** `[pacer] stale event backlog
+      flushed` appears 57 times in the owner's 23 August session against 221
+      event-channel submissions -- about one flush in four. Replaying the
+      log's own timeline through the pacer's projection arithmetic says what
+      the flushes cost: **59 lines were purged before they finished, and 34
+      of those were cut inside `BASE_UTTERANCE_S` of their own start**, so by
+      the pacer's own duration model the voice had not uttered a character of
+      them. By kind the losses are the drive itself -- 26 turn-by-turn
+      navigation lines, 13 exit/destination lines, 9 traffic-light
+      instructions, 4 arrivals, 1 hazard call.
+
+      The mechanism: `should_flush` judged staleness from the INCOMING line
+      only, and rescued the outgoing one only when it was CRITICAL. A ROUTE
+      line 20 ms into its delivery is not an aged backlog -- it is the same
+      instant of road as the line cutting it -- but it was dropped with the
+      backlog and no requeue. Three route lines inside 37 ms took the
+      ramp-exit briefing with them ("Off the ramp and onto city streets:
+      start on unnamed public road. Then turn right now onto Halleck
+      Street"), and the turn was never spoken.
+
+      THE FIX (`speech_pacing.should_flush`): the rescue now asks how much
+      of the outgoing line the player actually got. Inside the pre-utterance
+      window it is handed back and queued behind the line that cut it,
+      exactly as a CRITICAL cut has always been; past it the line has said
+      something and its tail is still expendable, so an aged route backlog is
+      still discarded rather than recited. `RESCUE_ONCE_WINDOW_S` still caps
+      it at one hand-back per line. Three tests in
+      `test_event_speech_pacer.py`; the end-to-end dock-approach test was
+      counting submissions and had been pinning a real loss -- the yard
+      speed and the docking instruction were both destroyed before a word of
+      either was said -- and now pins the hand-backs instead. Found and
+      fixed first in the Rust port (`speech_pacing.rs`), which was
+      line-for-line identical here, so this was an inherited behaviour
+      rather than a port divergence.
+
+      AND ONE THING THE WIDER RESCUE EXPOSED, caught by the adversarial
+      battery rather than by the suite: `scale_bypass_to_the_end` began
+      hearing "Signal for the scale exit" three times, because the open-scale
+      notice ("Open weigh station ahead in 4.0 miles: ...") was now rescuable
+      and carried no `valid` callback, so it could be handed back AFTER the
+      half-mile reminder and tell the driver the scale was four miles off.
+      The half-mile reminder already had a guard; the notice did not, and it
+      goes wrong EARLIER than the reminder does -- while the scale is still
+      ahead, not once it is behind. Its guard is derived from the line's own
+      words rather than a chosen tolerance: the notice stays valid only while
+      the road left still speaks as the phrase it already spoke
+      (`short_distance_text`), which is exactly the span over which replaying
+      it says nothing untrue. Any other distance-bearing ROUTE line that can
+      be rescued wants the same treatment; `_scale_outranks_rest_planning`
+      still has none.
+
+- [ ] **The ramp-exit chain and the route's own first navigation cue say the
+      same street 20 ms apart.** The arrival/departure chain builds "Off the
+      ramp and onto city streets: start on <street>. Then <first corner>.
+      <distance> to the facility gate." from the first leg's local cue; the
+      navigation cue builder then speaks that same local cue on its own --
+      "Start on unnamed public road." -- one or two frames later. The pacer
+      cannot dedupe them because one text merely CONTAINS the other, so both
+      go to the voice and the second flushes the first. In the owner's
+      23 August log this pair fires on every ramp exit and every gate
+      departure, four times each way. One of the two should stand down when
+      the other has already named the street.
+
 - [x] **Realistic pacing retired; the row is Relaxed and Standard (owner,
       2026-08-19).** Realistic was 40x game-clock compression -- the FASTEST
       of the three, and therefore the least like real driving, which is 1x.

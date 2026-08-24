@@ -129,6 +129,47 @@ def test_open_scale_notice_carries_route_priority(monkeypatch):
         app.shutdown()
 
 
+def test_the_scale_notice_expires_once_the_distance_it_names_is_wrong(monkeypatch):
+    """The notice names a distance, and a distance is a claim about now.
+
+    A cut ROUTE line can be handed back to be spoken behind the line that cut
+    it, so this one has to say when it has stopped being true. It goes wrong
+    while the scale is still AHEAD, which is sooner than the reminder that
+    follows it: handed back after "Weigh station in half a mile" it told the
+    driver the scale was two miles off, the two lines contradicting each other
+    one after the other (adversarial battery, scale_bypass_to_the_end).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken, events = _capture(app, monkeypatch)
+        _with_scale(d, scale_mi=10.0)
+        d.trip.position_mi = 8.0
+        d.truck.velocity_mps = 45.0 / 2.23694
+
+        d._check_weigh_station_enforcement(7.8)
+
+        text, kwargs = next((t, k) for t, k in events if "Open weigh station ahead" in t)
+        still_true = kwargs.get("valid")
+        assert still_true is not None, "the notice carries no validity test"
+        # Where it was spoken, its own words are the road that is left.
+        assert "2.0 miles" in text
+        assert still_true() is True
+
+        # Closed to half a mile: the sentence now names a distance the truck
+        # drove through several minutes ago.
+        d.trip.position_mi = 9.5
+        assert still_true() is False, "the notice would be replayed with a stale distance"
+
+        # And past the scale it is dead too, for the same reason the reminder is.
+        d.trip.position_mi = 10.5
+        assert still_true() is False
+    finally:
+        app.shutdown()
+
+
 def test_scale_notice_lookahead_sample_covers_the_real_sentence():
     """The spoken lead is sized from a sample; it must not undershoot the
     real wording with a long stop name and the longest control phrases."""

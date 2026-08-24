@@ -107,7 +107,26 @@ def test_say_event_flushes_a_stale_route_backlog_end_to_end() -> None:
         )
         # Every line still reached the voice in order; for ROUTE, staleness
         # changes delivery, never drops the newest information.
-        assert [text for text, _ in calls] == approach
+        #
+        # And a flush landing inside a line's pre-utterance pause hands that
+        # line back to be queued behind the one that cut it, so the whole
+        # burst is still heard rather than only its last member: submitting
+        # all four in one frame used to leave the player with the fourth
+        # alone at the voice, the yard speed and the docking instruction
+        # destroyed before a word of either was said. The two repeats below
+        # are those recoveries.
+        texts = [text for text, _ in calls]
+        assert texts == [
+            approach[0],
+            approach[1],
+            approach[0],  # handed back: cut 0 ms into its own delivery
+            approach[2],
+            approach[3],
+            approach[2],  # handed back for the same reason
+        ]
+        # Nothing was lost: every line of the approach reached the voice.
+        for line in approach:
+            assert line in texts, f"{line} never reached the voice"
     finally:
         app.shutdown()
 
@@ -1472,19 +1491,77 @@ def test_a_stale_flush_never_steps_on_a_safety_call() -> None:
     assert pacer.take_flush_cut() is None
 
 
-def test_a_stale_flush_still_discards_a_stale_route_backlog() -> None:
-    """The other half, and why the rescue is narrow. Route announcements go
-    stale by their nature -- they describe road already driven -- so a flush
-    that handed them all back would perform the very backlog it purged."""
+def test_a_stale_flush_still_discards_an_aged_route_backlog() -> None:
+    """The other half, and why the rescue is narrow. A route announcement the
+    player has been listening to for a while has said its piece and describes
+    road already driven; handing its tail back would perform the very backlog
+    the flush purged."""
     from freight_fate.speech_pacing import EventPriority, EventSpeechPacer
 
     now = [0.0]
     pacer = EventSpeechPacer(clock=lambda: now[0])
 
     pacer.note_queued("Next stop in 5 miles: service plaza.", EventPriority.ROUTE)
-    now[0] += 0.05
-    if pacer.should_flush("Zone ahead; speed limit 45.", EventPriority.ROUTE):
-        assert pacer.take_flush_cut() is None, "a stale route backlog was resurrected"
+    # Well past the pre-utterance pause: the voice has been reading this line
+    # aloud, and it is still mid-sentence when the flush lands.
+    now[0] += 2.0
+    assert pacer.should_flush("Zone ahead; speed limit 45.", EventPriority.ROUTE), (
+        "the backlog was not deep enough to flush"
+    )
+    assert pacer.take_flush_cut() is None, "an aged route backlog was resurrected"
+
+
+def test_a_flush_hands_back_a_route_line_that_never_got_a_word_out() -> None:
+    """The owner's 23 August drive, three route lines inside 37 ms: the
+    ramp-exit briefing was purged 22 ms into its own delivery -- by the
+    pacer's own duration model, before the voice had uttered a character --
+    and the turn it named was never spoken at all. A line that young is not a
+    stale backlog; it is the same instant of road as the line cutting it, so
+    it comes back behind that line instead of dying."""
+    from freight_fate.speech_pacing import EventPriority, EventSpeechPacer
+
+    now = [0.0]
+    pacer = EventSpeechPacer(clock=lambda: now[0])
+
+    briefing = (
+        "Off the ramp and onto city streets: start on unnamed public road. "
+        "Then turn right now onto Halleck Street. 1 mile to the facility gate."
+    )
+    pacer.note_queued(briefing, EventPriority.ROUTE)
+    # The next route line lands in the same frame.
+    now[0] += 0.022
+    assert pacer.should_flush("Start on unnamed public road.", EventPriority.ROUTE), (
+        "the burst did not flush"
+    )
+    cut = pacer.take_flush_cut()
+    assert cut is not None, "the turn instruction was destroyed before it said anything"
+    assert cut[0] == briefing
+    assert cut[1] is EventPriority.ROUTE
+    # Collected once only, exactly as a safety call's hand-back is.
+    assert pacer.take_flush_cut() is None
+
+
+def test_a_handed_back_route_line_is_not_handed_back_twice() -> None:
+    """And it is a hand-back, not a licence to replay: the cap that stops a
+    run of urgent lines reciting the same words still applies."""
+    from freight_fate.speech_pacing import EventPriority, EventSpeechPacer
+
+    now = [0.0]
+    pacer = EventSpeechPacer(clock=lambda: now[0])
+
+    briefing = (
+        "Off the ramp and onto city streets: start on unnamed public road. "
+        "Then turn right now onto Halleck Street."
+    )
+    pacer.note_queued(briefing, EventPriority.ROUTE)
+    now[0] += 0.02
+    pacer.should_flush("Start on unnamed public road.", EventPriority.ROUTE)
+    cut = pacer.take_flush_cut()
+    assert cut is not None, "the first hand-back"
+    pacer.note_queued(cut[0], cut[1])  # the game requeues it behind the cutting line
+    now[0] += 0.015
+    pacer.should_flush("In half a mile, facility gate ahead. Speed limit 15.", EventPriority.ROUTE)
+    assert pacer.take_flush_cut() is None, "the same line was handed back a second time"
 
 
 def test_a_construction_zone_line_is_rescued_once_like_any_other() -> None:
