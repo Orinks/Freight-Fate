@@ -22,6 +22,8 @@ mod shifting;
 mod updates;
 
 #[cfg(test)]
+mod damage_band_tests;
+#[cfg(test)]
 mod physics_bench_tests;
 #[cfg(test)]
 mod tests;

@@ -93,6 +93,49 @@ pub fn scenario_names() -> Vec<&'static str> {
     scenarios().iter().map(|s| s.name).collect()
 }
 
+/// The shape of a [`tweak_rigs`] hook.
+type RigTweakFn = Rc<dyn Fn(&mut Rig)>;
+
+thread_local! {
+    /// The per-rig tweak [`tweak_rigs`] installs, if any.
+    static RIG_TWEAK: RefCell<Option<RigTweakFn>> = const { RefCell::new(None) };
+}
+
+/// A [`tweak_rigs`] installation, uninstalled when it is dropped.
+#[must_use = "the tweak is uninstalled as soon as this guard is dropped"]
+pub struct RigTweak;
+
+impl Drop for RigTweak {
+    fn drop(&mut self) {
+        RIG_TWEAK.with(|slot| *slot.borrow_mut() = None);
+    }
+}
+
+/// Apply `f` to every [`Rig`] this thread builds until the guard is dropped.
+///
+/// The battery's scenarios take no arguments -- the registry is a table of
+/// `fn() -> Outcome` -- so a caller that needs to shape the rig they all
+/// build has nowhere to say so. Python's whole-drive proof of the driving
+/// speech ladder (`test_a_drive_gets_quieter_as_the_rung_tightens`) said it
+/// by monkeypatching `Rig.__init__` to force a speech rung and mark the
+/// walkthrough done; this is that seam, made explicit. It runs after
+/// construction, so it overrides everything the rig set up for itself.
+///
+/// Thread-local, and only one at a time: a rig pins its thread's save
+/// directory for as long as it lives, so scenarios never build concurrently
+/// on one thread anyway.
+pub fn tweak_rigs(f: impl Fn(&mut Rig) + 'static) -> RigTweak {
+    RIG_TWEAK.with(|slot| {
+        let mut slot = slot.borrow_mut();
+        assert!(
+            slot.is_none(),
+            "this thread already has a rig tweak installed; drop that guard first"
+        );
+        *slot = Some(Rc::new(f));
+    });
+    RigTweak
+}
+
 /// Run one scenario by name; `None` when the name is unknown.
 pub fn run_scenario(name: &str) -> Option<Outcome> {
     let scenario = scenarios().iter().find(|s| s.name == name)?;
@@ -369,14 +412,18 @@ impl Rig {
         // `weather.update`: the condition stays whatever the scenario sets.
         drive.weather_mut().forced = Some(WeatherKind::Clear);
         drive.weather_mut().current = WeatherKind::Clear;
-        Rig {
+        let mut rig = Rig {
             app,
             drive: DriveSlot(Some(drive)),
             last_game_minutes: 0.0,
             problems: Vec::new(),
             problem_keys: std::collections::HashSet::new(),
             clock,
+        };
+        if let Some(tweak) = RIG_TWEAK.with(|slot| slot.borrow().clone()) {
+            tweak(&mut rig);
         }
+        rig
     }
 
     // -- speech ------------------------------------------------------------------
