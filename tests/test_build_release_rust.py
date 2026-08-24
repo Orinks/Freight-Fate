@@ -8,6 +8,7 @@ package tree, so it proves what the staged ``FreightFate/`` folder would hold
 from __future__ import annotations
 
 import importlib.util
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -72,11 +73,28 @@ def make_profile_dir(profile_dir: Path, exe_name: str) -> None:
     (deps / "serde_derive-abc123.dll").write_bytes(b"proc macro")
 
 
+def track_everything(root: Path) -> None:
+    """Make `root` a repository whose whole tree is tracked.
+
+    The staging plan asks git which loose sounds are committed, so a fake
+    package tree only means anything once git knows about it. Staging the
+    index is enough -- `git ls-files` reads the index, so nothing has to be
+    committed and no author identity is needed.
+    """
+    for args in (("init", "-q"), ("add", "-A")):
+        subprocess.run(["git", *args], cwd=root, check=True, capture_output=True)
+
+
 @pytest.fixture
 def planned(tmp_path, monkeypatch):
     build_release = load_build_release_module()
     package_dir = tmp_path / "src" / "freight_fate"
     make_package_tree(package_dir, build_release)
+    track_everything(tmp_path)
+    # Left on the disk after git was told what the project ships: the 254 MB
+    # of source audio that got into one release is exactly this, and it must
+    # not reach the plan.
+    (package_dir / "assets" / "sounds" / "idle_take3_source.wav").write_bytes(b"local accident")
     addon = tmp_path / "addon_lib"
     addon.mkdir()
     (addon / "basshls.dll").write_bytes(b"hls")
@@ -169,6 +187,16 @@ def test_plan_ships_committed_sounds_but_never_the_licensed_overlay(planned):
     assert "freight_fate/assets/sounds/CREDITS.md" in dests
     assert "freight_fate/assets/sounds/engine_classic/idle.ogg" in dests
     assert not any("sounds-licensed" in dest for dest in dests)
+
+
+def test_plan_leaves_uncommitted_sounds_on_the_builders_disk(planned):
+    """The 548 MB release: loose audio nobody had committed went out in it.
+
+    Committed means asked of git, so a file sitting in the tree that git has
+    never heard of is a local accident and stays home.
+    """
+    _, plan, _, _ = planned
+    assert "freight_fate/assets/sounds/idle_take3_source.wav" not in destinations(plan)
 
 
 def test_plan_stages_only_top_level_runtime_libraries(planned):

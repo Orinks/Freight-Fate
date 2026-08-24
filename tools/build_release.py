@@ -945,18 +945,24 @@ def rust_loose_sound_files(package_dir: Path = PACKAGE_DIR) -> list[Path]:
 
     A release is a statement about what the project ships, so it is built
     from what the project has committed. Anything else is a local accident.
+
+    Git is asked about the repository the tree is actually in, not about
+    this file's own checkout: ``package_dir`` is a parameter, and pinning
+    the question to ``ROOT`` meant any tree outside it -- a second
+    checkout, or the fake one the tests stage from -- raised on the way in
+    rather than answering.
     """
     tree = package_dir / LOOSE_SOUND_TREE
     if not tree.is_dir():
         raise RuntimeError(f"Committed sound tree was not found: {tree}")
     listed = subprocess.run(
-        ["git", "ls-files", str(tree.relative_to(ROOT))],
-        cwd=ROOT,
+        ["git", "ls-files", "-z", "--", "."],
+        cwd=tree,
         check=True,
         capture_output=True,
         text=True,
     ).stdout
-    tracked = [ROOT / name for name in listed.splitlines() if name]
+    tracked = [tree / name for name in listed.split("\0") if name]
     if not tracked:
         raise RuntimeError(f"git lists no committed files under {tree}")
     return [
