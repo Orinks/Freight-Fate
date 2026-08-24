@@ -2204,73 +2204,203 @@ onto exit signalling.
       and Glenwood Canyon is the standing proof that the two can honestly
       disagree.
 
-- [~] **Legs labelled for a road their route does not ride: SPLIT, and half
-      of it fixed (2026-08-23).** A truck router tells the two faults apart.
-      Ask Valhalla for the route between the two city nodes and measure how
-      much of ITS mileage rides the labelled interstate. The distribution has
-      a 14-point hole in it, so the split is read rather than chosen:
+- [x] **Legs labelled for a road their route does not ride: the ROUTE half
+      fixed (2026-08-23).** A truck router tells the two faults apart. Ask
+      Valhalla for the route between the two city nodes and measure how much
+      of ITS mileage rides the labelled interstate. A high share means the
+      interstate IS the road and the BAKED ROUTE is wrong; a low one means
+      the interstate does not serve that pair and the LABEL is wrong.
 
-          0 0 0 0 0 0 0 2 2 4  |  18 18 24 25 25 30 ... 93 98 98
+      THE SPLIT IS NOW A TOOL, not a thing to re-derive by hand.
+      `repair_leg_labels.py --split` always wanted a file no tool produced,
+      so the measurement had to be reconstructed every time anyone needed it
+      -- and reconstructing it is how the reroute set was lost between
+      sessions. `tools/probe_leg_labels.py` writes it: suspects come from the
+      map-matched coverage in `curve_osm.jsonl`, verdicts from the router.
 
-      TEN BELOW THE GAP -- the interstate does not serve that pair, and the
-      LABEL is the fault. Tampa to Miami is Florida's Turnpike; I-75 runs up
-      the west coast. `tools/repair_leg_labels.py` renamed the five with a
-      clear majority road: Ashland-Huntington to US-52 (54%), Cape Coral-
-      Lakeland to US-17 (55%), Hickory-Charlotte to NC-16 (78%), Tyler-
-      Longview to US-271 (60%), West Palm Beach-Cape Coral to SR-80 (65%).
+      THE LABEL HALF is the unchecked bullet below. Five legs with a clear
+      majority road have already been renamed (Ashland-Huntington to US-52,
+      Cape Coral-Lakeland to US-17, Hickory-Charlotte to NC-16,
+      Tyler-Longview to US-271, West Palm Beach-Cape Coral to SR-80). A
+      route threading four roads has no honest single name, so a leg with no
+      majority is left alone.
 
-      FIVE LEFT ALONE, deliberately: Burlington-Albany's best road is VT-22 at
-      32 percent, Tampa-Miami's is SR-70 at 35. A route threading four roads
-      has no honest single name, and a 30 percent plurality would be wrong
-      more quietly rather than less.
+      THE ROUTE HALF, now: **24 legs rerouted and fully re-enriched**, among
+      them Chicago to St Louis (96 percent I-55 by the router, 19 percent
+      baked), Beaumont to Houston (93 percent I-10), Charleston to Pittsburgh
+      (93 percent I-79), Corpus Christi to San Antonio (88 percent I-37) and
+      Norfolk to Richmond (82 percent I-64).
 
-      A METHOD BUG CAUGHT ITSELF: the first share calculation reported a leg
-      riding US-31 for 114 percent of its miles, because a concurrency credits
-      every shield it names and "US 31" and "US 31 BUS" scored the same mile
-      twice. Counting each mile once changed a real answer -- Cape Girardeau
-      to Paducah fell from a false IL-3 61 percent to an honest US-60 45, and
-      moved OUT of the rename set.
+      IT IS 24 AND NOT THE 30 THIS ENTRY USED TO SAY, for two reasons worth
+      recording rather than quietly reconciling. The truck profile changed
+      underneath the measurement -- routing as a loaded 80,000 lb semi rather
+      than Valhalla's 48,000 lb default moves real routes -- and the 14-point
+      hole the old split was read off has CLOSED: today's distribution runs
+      0 0 0 0 0 0 0 0 0 1 3 4 4 6 7 11 12 13 ... 88 93 93 96 with its widest
+      gap 19 points up at 54. So the line is no longer read off a gap; it is
+      `reroute_leg.MIN_ON_LABEL`, the same 25 percent that tool refuses
+      below, which means the probe can never nominate a leg the reroute would
+      then refuse.
 
-      THIRTY ABOVE THE GAP still open, and they are the bigger half: the
-      interstate IS the road and the BAKED route is wrong. Corpus Christi to
-      San Antonio is 98 percent I-37 by any sane routing, Norfolk to Richmond
-      93 percent I-64, Morgantown to Pittsburgh 87 percent I-79. Relabelling
-      those would enshrine a bad route. They want REROUTING, which means
-      replacing the baked polyline and re-deriving every layer keyed to it --
-      curves, grades, speed limits, mileage -- and that is a corridor re-bake,
-      not a data edit. ORS and Overpass are gone from this machine, so it
-      would be built on Valhalla: `/route` for the shape, `trace_attributes`
-      for road class and speed limit, `/height` for the elevation profile.
+      MILEAGE MOVED, AND MILEAGE IS PAY. The 24 legs went from 3,655 to
+      3,794 miles, +139 (+3.8 percent). Most moved under ten miles; Knoxville
+      to Atlanta is +36, Raleigh to Charlotte +25, Norfolk to Richmond -5.
+      Pay and deadlines follow, and the changelog says so.
 
-      THE BLOCKER IS ENRICHMENT, NOT ROUTING, and it is worth naming exactly.
-      A new polyline invalidates every layer keyed to the old one. Valhalla
-      can rebuild some of it -- `/route` for the shape, `trace_attributes` for
-      road class and speed limit, `/height` for elevation. It CANNOT rebuild
-      what came from Overpass and HPMS. Measured across the 30 legs, that is:
+      THE ENRICHMENT WAS THE BLOCKER, and it is what got built.
+      `reroute_leg.py` settles the route; `reroute_enrich.py` rebuilds every
+      layer keyed to it -- curves, ramps and posted limits via
+      `bake_curve_geometry.py --from-archive`, grades from a fresh dense
+      Valhalla elevation read, state context from Census boundaries,
+      interchanges/restrictions/ramp controls from the local extract,
+      landmarks and villages and lanes from Overpass, volume and terrain from
+      HPMS. It REFUSES to call a leg finished if a layer came back empty or
+      at under half its old size, because a builder that finds nothing and
+      exits zero is the failure this job hit twice.
 
-          807 landmarks        the towns you pass
-          532 interchanges     every exit called
-           81 stops            rest areas and truck stops
-          751 lane segments    and 133 AADT samples (HPMS)
-          111 checkpoints, 1 restriction
+      THREE REAL BUGS CAME OUT OF BUILDING IT:
 
-      Rerouting today would give those legs the right road name and strip
-      every exit, rest area and landmark from it -- "on I-37", then silence
-      for 147 miles. That is a worse trade than a wrong label, and the sort
-      of fix that looks complete in a diff and is a regression in the truck.
+      * every corridor builder located a leg by straight chords between
+        route points 25 miles apart, or by a cached route keyed to the road
+        the leg no longer drives. They all read the archived polyline now
+        (`tools/leg_geometry.py`), which is the road itself at full curve
+        fidelity and is right before and after a reroute;
+      * `bake_villages.py` counted its OWN previous output as names already
+        taken, so a second run on the same leg dropped every village it found
+        the first time -- 29 names down to 3, printed as a success;
+      * the Overpass client read a busy server as an empty map. The service
+        answers "the server is probably too busy" with a 200 and an HTML
+        body, which either crashed the JSON decode or, in the remark form,
+        looked like a road with nothing on it.
 
-      So this waits on the Overpass/HPMS enrichment pipeline being available
-      again, not on a router. When it is: reroute BEFORE any terrain work, as
-      a new polyline changes the elevation profile under the leg. Found by the connector bake above, which reads per-leg freeway
-      coverage as a by-product: 51 of 728 interstate legs spend under half
-      their route miles on a freeway at all, 10 of them under 5 percent. The
-      worst are Chico to Santa Rosa (labelled I-5, 3 percent freeway, 317
-      curves moved), Roanoke to Raleigh (I-40, 24 percent, 157), Evansville
-      to Nashville (I-24, 10 percent, 153) and Huntsville to Nashville (I-65,
-      6 percent, 122) -- that last one runs US-231 end to end, which
-      `bake_divided` already measures as undivided from another angle. The
-      cause is ORS's cost model preferring the surface route on a leg with no
-      `route_via` pin to stop it.
+      THE BOX WAS THE BUG, NOT THE SERVICE. Measured back to back on the same
+      leg: half-degree corridor boxes answered "too busy" more often than
+      they answered; quarter-degree boxes answered every time in 4 to 25
+      seconds. A local-extract reader was built to work around this and then
+      DELETED, because a second data path nobody had proved is worse than the
+      three-line fix that was actually indicated.
+
+- [x] **Ten legs renamed for the road they actually drive (2026-08-23).**
+      The other half of the split above. Re-measured with the loaded-semi
+      profile, 33 interstate legs ride their own shield for under a quarter
+      of their miles; ten of those have a clear majority road and were
+      renamed: Allentown-New York to I-78 (58%), Dover-Wilmington to DE-1
+      (54%), Evansville-Nashville to US-431 (70%), Killeen-Temple to US-190
+      (50%), Manchester-Providence to I-95 (54%), Pendleton-Tri-Cities to
+      US-395 (80%), Portsmouth-Manchester to NH-101 (65%), San Jose-
+      Sacramento to I-680 (59%), Trenton-Philadelphia to I-95 (52%),
+      Winston-Salem-Greensboro to US-421 (56%).
+
+      IT IS A NAMING FIX, NOT A CURVE FIX, and the first version of this
+      entry said otherwise. Measured: the ten renamed legs carry ONE spoken
+      interstate curve call between them. The 21 calls that do come from
+      mislabelled legs sit almost entirely on two legs with no majority road
+      -- Roanoke to Raleigh (16) and Burlington to Albany (4) -- which are in
+      the left-alone set below and are not renamed. Worth stating plainly
+      because the wrong number was used to justify doing this work.
+
+      THE OTHER 23 thread several roads and have no honest single name --
+      Tampa to Miami's best is SR-70 at 35 percent, Burlington to Albany's is
+      VT-22 at 32. A 30 percent plurality is wrong more quietly, not less, so
+      those want a decision rather than a tool.
+
+      TWO SHIELD MATCHERS, ON PURPOSE. `scs.matches_shield` collapses every
+      state route to one class so "State Highway 6" and "TX 6" compare equal,
+      which is right for asking whether a matched road IS the leg's road.
+      `repair_leg_labels.shield` keeps the written prefix, because its answer
+      becomes the leg's NAME and a player hears it: "NH-101", never
+      "STATE-101". Checked against each other on every relabel candidate --
+      the shares agree to the point, only the spelling differs.
+
+- [x] **Too many bends called on the interstate: measured, and mostly the
+      wrong-road bug (2026-08-23).** Reported from the 2026-08-22 tester
+      build. Measured with the game's own loader, counting only bends that
+      would actually ask a truck at 65 to slow:
+
+          that build (f4c19468)   1,440 calls   one every  60 miles
+          branch head             238 calls     one every 363 miles
+
+      So six sevenths of it was already fixed and unshipped -- the map-matched
+      connector read is not in any build yet.
+
+      WHERE THE REMAINING 238 COME FROM, by asking the map matcher what road
+      each one is actually on: 159 are on ``motorway`` and are real interstate
+      geometry; 79 are on ``trunk`` or a street, and the matcher knew it.
+      Of those 79, 56 are on legs REROUTED above -- Huntsville to Nashville
+      alone carries 34, every one of them a bend in US-231 through
+      Shelbyville announced as I-65. The remaining 23 sit on legs whose label
+      is wrong and whose route has no honest single name to replace it with,
+      16 of them on Roanoke to Raleigh.
+
+      TWO SCREENS TRIED AND BOTH REVERTED. A radius floor at the design
+      minimum was tried before this and took I-70 out of Glenwood Canyon. A
+      per-SEGMENT version of the same floor, using each leg's own dense
+      elevation profile instead of the whole-corridor HPMS class, was tried
+      here: it cut spoken interstate calls from 238 to 135, and it took
+      Glenwood Canyon from 70 curves to 52 and I-70 west of Glenwood from 53
+      to 18. Reverted. The canyon road follows the river at a mild grade, so
+      the profile calls its ground flat while the walls force the bends --
+      grade is not the discriminator, and two independent attempts now say
+      the same thing. `bake_curve_connectors` reached this conclusion first
+      and wrote it down: the remedy for a leg whose bends are not on its own
+      road is to fix the leg, not to add a screen. Chasing the last twenty
+      records with a third rule would be fitting to the residual.
+
+      THE MEASUREMENT IS THE POINT. "Bends baked" (16,038 in that build) is
+      not what a driver hears; "bends that speak at cruising speed" is, and
+      the two move differently. Any future claim about curve noise wants the
+      second number.
+
+- [x] **Congestion stopped being a wall in the same place every run
+      (2026-08-24).** Owner-reported after the reroute: traffic zones felt
+      predictable. Measured, they were -- across 300 seeds Chicago to St
+      Louis produced exactly ONE heavy-traffic layout, and Dallas to Houston
+      one. That was by design, since congestion is read from HPMS volume
+      against capacity rather than rolled, and the design's answer to
+      predictability was the clock. Measured, that answer was thin: mile 5
+      to 35 out of Chicago ran slow from 06:00 to 18:00, so any daylight run
+      met it.
+
+      THE FIX IS IN THE VOLUME MODEL, not sprinkled on top of it. AADT is an
+      ANNUAL AVERAGE and no day is the average -- the FHWA Traffic Monitoring
+      Guide's day-of-week and monthly adjustment factors exist for exactly
+      that spread. Day-of-week was already modelled, so what was missing was
+      the residual day-to-day scatter: one draw per stretch per trip at a 10
+      percent coefficient of variation, applied both when the zone forms and
+      when it is asked whether it applies. An oversaturated stretch still
+      backs up every day because no ordinary day clears a ratio that far
+      over the line; a marginal one falls under on a quiet day.
+
+      MEASURED AFTER: Chicago to St Louis went from 1 layout across 300 seeds
+      to 10, the commonest appearing 177 times rather than 300. The slow
+      window went from a fixed 12-13 hours to between zero and fourteen --
+      one run finds the jam all day, one finds an hour of it at the evening
+      peak, one finds clear road.
+
+      AND A SELF-INFLICTED HALF OF IT: reconciling work zones against jams
+      had DELETED any roadworks drawn near one, which spends exactly the part
+      of a slow zone that is meant to vary. The jam's footprint is now
+      claimed before the draw, so roadworks relocate instead. Chicago to St
+      Louis went from 151 runs in 300 carrying a work zone to 167.
+
+- [ ] **`build_interchanges.py` cannot be imported twice in one process.**
+      It merges its sub-modules' namespaces into its own globals at import,
+      and those sub-modules are cached, so a second import by path leaves the
+      new module holding the FIRST one's functions. A test that monkeypatches
+      the module then patches an object nothing calls, and the failure reads
+      as a data problem rather than an import one: `discover_leg` quietly
+      returns nothing at all. Cost one bisect on 2026-08-23. Until the
+      aggregate stops merging namespaces, a test wanting something defined in
+      `build_interchanges_base` should load THAT module, not the aggregate
+      that re-exports it.
+
+- [ ] **A rerouted leg's curated tolls need re-curating by hand.** A toll
+      event is a real plaza on a named road, and a reroute changes the road,
+      so `reroute_leg.py` drops them and prints what it dropped rather than
+      rescaling a plaza onto pavement that may not charge. None of the 24
+      carried any, so nothing is owed today -- but `tollway_detected` is now
+      re-read from the router per leg, so the coverage advisory will say when
+      one does.
 
 - [x] **`curve_artifacts.jsonl` re-baked against its own screen
       (2026-08-23).** The shipped US/state artifact table had drifted from

@@ -37,3 +37,33 @@ LOCAL_INDEX_CACHE_VERSION = 1
 LOCAL_INDEX_PROGRESS_INTERVAL_SEC = 60.0
 
 __all__ = [name for name in globals() if not name.startswith("__")]
+
+
+def select_only(legs: list[dict[str, Any]], only: str) -> list[dict[str, Any]]:
+    """The legs named by --only, which takes a LIST.
+
+    A->B for one leg, A->B;C->D for several. The list form is what
+    makes a per-leg re-bake affordable: every sub-mode below builds one index
+    over a local extract and keys its cache to the selected legs' bounds, so
+    thirty separate one-leg runs mean thirty full reads of a 12 GB PBF, where
+    one thirty-leg run means one.
+
+    Names are SLUGS, not spoken city names: corpus_christi_tx_us->
+    san_antonio_tx_us.
+    """
+    wanted = []
+    for piece in only.split(";"):
+        piece = piece.strip()
+        if not piece:
+            continue
+        start, sep, end = piece.partition("->")
+        if not sep:
+            raise SystemExit(f"--only wants 'from_slug->to_slug', got {piece!r}")
+        wanted.append((start.strip(), end.strip()))
+    if not wanted:
+        return legs
+    index = {(leg["from"], leg["to"]): leg for leg in legs}
+    missing = [pair for pair in wanted if pair not in index]
+    if missing:
+        raise SystemExit("No leg " + ", ".join(f"{a}->{b}" for a, b in missing))
+    return [index[pair] for pair in wanted]

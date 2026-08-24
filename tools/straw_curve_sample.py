@@ -392,6 +392,81 @@ def _shield_numbers(highway: str) -> set[str]:
     return set(re.findall(r"\d+", str(highway)))
 
 
+# How a route shield is written, in the world and in OpenStreetMap, reduced to
+# a class and a number so the two can be compared.
+#
+# This exists because matching on the NUMBER alone credits US 95 to a leg
+# named I-95, and matching on "does the name start with I" -- which is what
+# the reroute check did -- scores every US and state route at zero however
+# faithfully it drives its own road. Both are wrong in the same place: they
+# treat the shield's class as either irrelevant or as always "interstate".
+_SHIELD_CLASSES = {
+    "I": "I",
+    "INTERSTATE": "I",
+    "US": "US",
+    "US HIGHWAY": "US",
+    "US HWY": "US",
+    "US ROUTE": "US",
+    "SR": "STATE",
+    "STATE HIGHWAY": "STATE",
+    "STATE ROUTE": "STATE",
+    "STATE ROAD": "STATE",
+    "HIGHWAY": "STATE",
+    "ROUTE": "STATE",
+    "CR": "CR",
+    "COUNTY ROAD": "CR",
+    "COUNTY ROUTE": "CR",
+}
+# Anything else of the form "<two letters> <number>" is a state route: OSM
+# writes Texas 6 as "TX 6" and the world writes it as "TX-6". A state name
+# spelled out ("Illinois Route 3") lands on STATE through the table above.
+#
+# Direction words are stripped as whole TOKENS rather than matched inside the
+# pattern. Doing it in the pattern ate the N of "NC-16" as a compass point and
+# read "South US Highway 181" as a state route, both silently.
+_DIRECTIONS = frozenset({"N", "S", "E", "W", "NORTH", "SOUTH", "EAST", "WEST"})
+_SHIELD_RE = re.compile(r"^([A-Za-z][A-Za-z ]*?)\s*[-\s]\s*(\d+)")
+
+
+def shield_key(name: str) -> tuple[str, str] | None:
+    """``"South US Highway 181"`` -> ``("US", "181")``; a street name -> None."""
+    text = str(name).replace(".", " ").replace("-", " - ")
+    words = [word for word in text.split() if word]
+    while words and words[0].upper() in _DIRECTIONS:
+        words.pop(0)
+    while words and words[-1].upper() in _DIRECTIONS:
+        words.pop()
+    match = _SHIELD_RE.match(" ".join(words))
+    if not match:
+        return None
+    prefix = " ".join(match.group(1).upper().split())
+    if prefix in _SHIELD_CLASSES:
+        return _SHIELD_CLASSES[prefix], match.group(2)
+    # A spelled-out state name ("Illinois Route", "Kentucky Highway") is a
+    # state route, and so is a bare two-letter state code.
+    if prefix.endswith(" ROUTE") or prefix.endswith(" HIGHWAY") or prefix.endswith(" ROAD"):
+        return "STATE", match.group(2)
+    if len(prefix) == 2 and prefix.isalpha():
+        return "STATE", match.group(2)
+    return None
+
+
+def matches_shield(name: str, highway: str) -> bool:
+    """Is ``name`` (as OSM writes it) the road ``highway`` (as the world does)?
+
+    NOT the same job as ``repair_leg_labels.shield``, and the two must not be
+    merged. This one collapses every state route to one class so that "State
+    Highway 6" and "TX 6" compare equal -- right for asking whether a matched
+    road IS the leg's road. That tool keeps the written prefix, because its
+    answer becomes the leg's NAME and a player hears it: "NH-101", never
+    "STATE-101". Checked on the relabel candidates -- the shares agree to the
+    point, only the spelling differs.
+    """
+    wanted = shield_key(highway)
+    found = shield_key(name)
+    return bool(wanted and found and wanted == found)
+
+
 def _ref_matches_shield(ref: str, shield_nums: set[str]) -> bool:
     """True if any concurrency ref number matches the leg shield (US 60;SR 77)."""
     if not shield_nums:

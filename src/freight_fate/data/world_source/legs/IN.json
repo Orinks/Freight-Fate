@@ -7330,7 +7330,7 @@
     {
       "from": "evansville_in_us",
       "to": "nashville_tn_us",
-      "highway": "I-24",
+      "highway": "US-431",
       "miles": 162,
       "stops": [
         {

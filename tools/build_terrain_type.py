@@ -44,6 +44,8 @@ TOOLS_DIR = Path(__file__).resolve().parent
 if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
+import build_interchanges as bi  # noqa: E402
+import leg_geometry as lg  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
 HPMS_QUERY_URL = (
@@ -67,8 +69,18 @@ HPMS_SOURCE = (
 
 
 def _bbox(leg: dict[str, Any]) -> tuple[float, float, float, float] | None:
-    pts = (leg.get("corridor") or {}).get("route_points") or ()
-    coords = [(p["lat"], p["lon"]) for p in pts if isinstance(p, dict)]
+    """The envelope HPMS terrain sections are counted inside.
+
+    From the archived polyline where there is one, so a rerouted leg reads
+    the ground under the road it now drives; the 25-mile route points are the
+    fallback, and their chords can miss a whole range of hills.
+    """
+    geometry = lg.corridor_geometry(leg)
+    if geometry:
+        coords = [(lat, lon) for lat, lon, _at_mi in geometry]
+    else:
+        pts = (leg.get("corridor") or {}).get("route_points") or ()
+        coords = [(p["lat"], p["lon"]) for p in pts if isinstance(p, dict)]
     if len(coords) < 2:
         return None
     lats = [c[0] for c in coords]
@@ -105,11 +117,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--write", action="store_true", help="Write into the world source.")
     parser.add_argument("--force", action="store_true", help="Re-bake legs that already have one.")
     parser.add_argument("--max-legs", type=int, default=0)
+    parser.add_argument(
+        "--only",
+        default="",
+        help="Legs to rebake, as SLUG pairs -- "
+        "'corpus_christi_tx_us->san_antonio_tx_us', semicolons between several.",
+    )
     args = parser.parse_args(argv)
 
     data = load_world()
+    legs = bi.select_only(data["legs"], args.only) if args.only else data["legs"]
     targets = []
-    for leg in data["legs"]:
+    for leg in legs:
         corridor = leg.get("corridor", {})
         if corridor.get("hpms_terrain") and not args.force:
             continue

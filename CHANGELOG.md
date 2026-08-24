@@ -1010,6 +1010,59 @@
   into a shared profile, so if one of yours was marked this way: back it up
   online and then restore it, and the mark is lifted.
 
+- **The same jam is not waiting in the same place every single run.** Where
+  traffic backs up is still the stretch that really carries the traffic --
+  that does not move, because in life it does not either. What changed is
+  that the road now has good days and bad ones. A stretch that only just
+  tips over on an average day flows freely on a quiet one, and on some runs
+  the jam is not there at all; the genuinely overloaded miles still crawl,
+  because those crawl every day. On the run out of Chicago the slow stretch
+  ran twelve or thirteen hours of every day without fail. Now one run finds
+  fourteen hours of it, another finds one hour at the evening peak, and
+  another finds clear road the whole way. Roadworks moved too: they used to
+  be quietly cancelled when they landed near a jam, and now they are simply
+  put somewhere else, so a run that has traffic can still have roadworks.
+
+- **Twenty-four runs go back on the interstate they are named for.** A run
+  billed as I-37 out of Corpus Christi drove US-181 instead, and the
+  co-driver still said I-37 the whole hundred and forty-seven miles.
+  Twenty-four runs were wrong that way, among them Chicago to St Louis,
+  Norfolk to Richmond, Knoxville to Atlanta, and Albuquerque to Phoenix. Each
+  one now takes the road on the sign, and everything you hear along the way
+  was read again for the road you are actually on: the exits called, the
+  towns you pass, the grades the engine works against, the posted limits, the
+  lane counts, the traffic, the bends, and the states you cross. Towns placed
+  on those runs by hand kept their names and moved to where the new road
+  really passes them; a few the new road no longer goes near are gone.
+
+- **Those twenty-four runs pay and take differently now.** Changing the road
+  changes the distance, and distance is pay and delivery time. Together they
+  come to a hundred and thirty-nine miles longer than before. Most move by
+  under ten miles either way; Knoxville to Atlanta is thirty-six miles
+  longer, Raleigh to Charlotte twenty-five longer, and Norfolk to Richmond
+  five shorter. A run you know well will quote a different rate and a
+  different window than it used to.
+
+- **Ten runs stop calling themselves an interstate they never touch.** A run
+  billed as I-40 from Winston-Salem to Greensboro drives US-421. One billed
+  as I-24 from Evansville to Nashville drives US-431. Portsmouth to
+  Manchester is NH-101, Pendleton to the Tri-Cities is US-395, Killeen to
+  Temple is US-190, and Dover to Wilmington is the Delaware toll road. Three
+  more turn out to be a different interstate than the one on the paperwork:
+  Allentown to New York is I-78, Trenton to Philadelphia and Manchester to
+  Providence are both I-95, San Jose to Sacramento is I-680. Each now carries
+  the name of the road it really drives, so the co-driver stops naming a
+  highway you are nowhere near.
+
+- **The interstate is quiet again where the road is straight.** A call to
+  come off the pace for a bend on an interstate used to arrive about once an
+  hour of driving. It now arrives about once in a long day of it. Most of
+  that is bends the map had filed under the wrong road, and the rest is runs
+  put back on the interstate they are named for. What is left is the real
+  thing: I-5 over the Siskiyous, the Pigeon River Gorge, Lookout Pass, the
+  climb to the Eisenhower. Those still ask you to slow, because they should.
+
+
 - **The interstate stops warning you about bends that are not on it.** A
   curve the co-driver called out on the interstate was often not on the
   interstate at all. It was the ramp you took to get on, the business route

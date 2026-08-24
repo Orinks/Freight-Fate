@@ -169,6 +169,27 @@ def _cue_direction(text: str) -> str:
     return ""
 
 
+def _drop_work_zones_near(zones: list[Zone], spans: list[tuple[float, float]]) -> list[Zone]:
+    """Simulated work zones clear of ``spans``, by the open-road rule.
+
+    A construction zone and the merge taper ahead of it are one thing on the
+    road, so both go or neither does. Anything that is not a simulated work
+    zone is passed through untouched.
+    """
+    kept: list[Zone] = []
+    for zone in zones:
+        if zone.reason not in ("construction", "construction merge"):
+            kept.append(zone)
+            continue
+        clashes = any(
+            zone.start_mi < end + ZONE_MIN_GAP_MI and zone.end_mi > start - ZONE_MIN_GAP_MI
+            for start, end in spans
+        )
+        if not clashes:
+            kept.append(zone)
+    return kept
+
+
 class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
     """One delivery run along a chosen route."""
 
@@ -258,6 +279,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         self._rng = random.Random(seed)
         self._insp_rng = random.Random(None if seed is None else seed ^ 0x5EED)
         self._cond_rng = random.Random(None if seed is None else seed ^ 0xC0FFEE)
+        self._traffic_rng = random.Random(None if seed is None else seed ^ 0x7A4FF1C)
         self._events: list[TripEvent] = []
         self._leg_starts = self._compute_leg_starts()
         self._city_mileposts = list(self._leg_starts) + [self.total_miles]
@@ -1387,10 +1409,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         zones: list[Zone] = []
         total = self.route.miles
         n = max(0, int(total / 150))
+        # Congestion is worked out FIRST and its footprint claimed before any
+        # work zone is drawn, so the draw moves somewhere else instead of
+        # being thrown away afterwards. Deleting it cost a route its only
+        # roadworks on one run in ten -- and roadworks are the part of a slow
+        # zone that is supposed to differ between runs, so deleting them is
+        # exactly the wrong thing to spend.
+        congestion = self._place_congestion_zones()
         # Spans already claimed by placed zones. Real work zones are signed
         # well apart; without this, independent draws could nest one zone
         # inside another or butt two together with no open road between.
-        spans: list[tuple[float, float]] = []
+        spans: list[tuple[float, float]] = [(z.start_mi, z.end_mi) for z in congestion]
         for _ in range(n):
             for _attempt in range(8):
                 at = self._rng.uniform(15, max(16, total - 20))
@@ -1440,21 +1469,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             real_spans = [
                 (z.start_mi, z.end_mi) for z in real_construction if z.reason == "construction"
             ]
-            filtered: list[Zone] = []
-            for z in zones:
-                if z.reason not in ("construction", "construction merge"):
-                    filtered.append(z)
-                    continue
-                overlaps = any(
-                    z.start_mi < r_end + ZONE_MIN_GAP_MI and z.end_mi > r_start - ZONE_MIN_GAP_MI
-                    for r_start, r_end in real_spans
-                )
-                if not overlaps:
-                    filtered.append(z)
-            zones = filtered
+            zones = _drop_work_zones_near(zones, real_spans)
             zones.extend(real_construction)
-        # Congestion zones are always added regardless of construction data.
-        zones.extend(self._place_congestion_zones())
+        # Already claimed above, so nothing drawn here can be sitting in one.
+        zones.extend(congestion)
         zones.extend(self._facility_speed_zones())
         zones.sort(key=lambda z: z.start_mi)
         return zones
@@ -1488,6 +1506,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         if self._is_facility_approach_route() or total < 10.0:
             return []
         peak_share = max(HOURLY_SHARE_WEEKDAY)
+        # One draw for this stretch of road on this trip. Taken from a stream
+        # of its own so that adding it does not shift where the work zones
+        # land for a given seed -- those come off self._rng.
+        day = daily_volume_factor(self._traffic_rng)
         prone: list[Zone] = []
         run_start: float | None = None
         run_samples: list[tuple[float, int]] = []
@@ -1504,6 +1526,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                         "heavy traffic",
                         aadt=aadts[len(aadts) // 2],
                         lanes=min(sample[1] for sample in run_samples),
+                        day_factor=day,
                     )
                 )
             run_start, run_samples = None, []
@@ -1511,7 +1534,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         mile = 0.0
         while mile <= total:
             aadt, lanes = self._route_aadt_at(mile)
-            peak_ratio = aadt * peak_share * DIRECTIONAL_SPLIT / (max(1, lanes) * LANE_CAPACITY_VPH)
+            peak_ratio = (
+                aadt * day * peak_share * DIRECTIONAL_SPLIT / (max(1, lanes) * LANE_CAPACITY_VPH)
+            )
             if peak_ratio >= CONGESTION_MIN_RATIO:
                 if run_start is None:
                     run_start = mile
@@ -1532,6 +1557,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                     "heavy traffic",
                     aadt=max(prev.aadt or 0.0, zone.aadt or 0.0),
                     lanes=min(prev.lanes, zone.lanes),
+                    day_factor=day,
                 )
             else:
                 merged.append(zone)
@@ -1552,7 +1578,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         speed refreshed here so announcements and limits stay current."""
         if zone.aadt is None:
             return True
-        ratio = congestion_ratio(zone.aadt, self.current_hour, zone.lanes, self._is_weekend_now())
+        ratio = congestion_ratio(
+            zone.aadt * zone.day_factor, self.current_hour, zone.lanes, self._is_weekend_now()
+        )
         limit = congestion_limit_mph(ratio, self._corridor_limit_at(zone.start_mi))
         if limit is None:
             return False

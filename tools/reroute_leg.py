@@ -14,56 +14,35 @@ WHY IT IS SAFE TO DO NOW, HAVING SAID IT WAS NOT
 The earlier reading of this was that rerouting would strip a leg of its 807
 landmarks, 532 interchanges and 81 stops because those came from Overpass,
 which is not running. That was wrong, and worth correcting rather than
-quietly working around: ``build_interchanges.py`` already takes ``--pbf`` and
-rebuilds interchanges, posted maxspeed, height and weight restrictions and
-ramp-terminal controls from the local Geofabrik extracts. The enrichment was
-never gone; it simply had never been pointed at a new route.
+quietly working around: the enrichment was never gone, it had simply never
+been pointed at a new route. Every corridor builder now reads the leg's
+polyline from the geometry archive (``tools/leg_geometry.py``) instead of
+re-routing it, and the archive is what this tool writes.
 
-So the chain is::
+THIS IS THE FIRST HALF
+----------------------
+It settles the route and writes it. It does NOT re-derive the layers that
+ride on it, and a leg is not shippable until they are back -- a leg without
+``grade_segments`` has no grade simulation at all, which is why the first
+trial of this was reverted rather than committed::
 
-    reroute_leg.py --leg a:b --write          # new shape, mileage, curves
-    build_interchanges.py --pbf <extract> --only "A->B" --force --write \\
-        --maxspeed --restrictions --ramp-controls
-    curve_valhalla_facts.py --all             # re-read the road under each bend
-    bake_curve_connectors.py --write
-    clamp_curve_advisories.py --write
-    screen_curve_artifacts.py
+    reroute_leg.py    --leg a:b --write                    # the road
+    reroute_enrich.py --leg a:b --pbf us.osm.pbf --write   # everything on it
 
-PROVEN ON ONE LEG, AND NOT YET COMPLETE
----------------------------------------
-Corpus Christi to San Antonio was rerouted and re-enriched as a trial, then
-REVERTED, because the leg is not shippable until every layer is back. What
-the trial established:
+``--check`` on either tool lists any leg left between the two.
 
-  works   new shape (1,190 vertices), mileage 147 -> 143.6, elevation at
-          every vertex, 39 curves, and the route rides I-37 for 88 percent
-          of its matched miles against 0 before
-  works   build_interchanges.py --pbf rebuilt 35 interchanges, against 10 on
-          the old US-181 route; --restrictions gave 12
-  thin    --maxspeed produced 2 speed_limit rows against the old 24. It
-          samples off route_points, which are 25 miles apart. Dense limits
-          should come from the matcher instead -- curve_valhalla_facts.py
-          already reads edge.speed_limit and throws it away
-  MISSING grade_segments, landmarks, checkpoints, state_miles,
-          state_crossings, traffic_aadt, lane_segments
-
-A leg without grade_segments has no grade simulation at all, which is why
-the trial was reverted rather than committed. The remaining builders are
-bake_landmarks.py, bake_villages.py, bake_lane_segments.py,
-build_traffic_aadt.py and enrich_routes_states.py; enrich_routes.py is NOT
-the entry point for this -- its --only flag only governs geometry refresh.
-
-TWO TRAPS ALREADY PAID FOR
---------------------------
+TRAPS ALREADY PAID FOR
+----------------------
 Dropping route_points as "stale" and stopping there leaves the enrichment
-builders with no geometry to locate the leg by. build_interchanges then
-retained 0 of 59,924 ramp nodes and exited 0 -- a tool that finds nothing
-and reports success. That is why this writes the new route_points and
-elevation_samples rather than only clearing the old.
+builders with no bounds to prefilter a local OSM extract by, and
+``build_interchanges`` then retained 0 of 59,924 ramp nodes and exited 0 -- a
+tool that finds nothing and reports success. That is why this writes new
+route_points and elevation_samples rather than only clearing the old.
 
-The sub-mode flags do NOT compose. Passing --maxspeed --restrictions
---ramp-controls together dispatches to one and silently skips the rest, so
-they must be run in sequence.
+``--only`` on every builder in the chain takes SLUGS, never spoken city
+names, and the interchange sub-mode flags do not compose: passing
+``--maxspeed --restrictions --ramp-controls`` together dispatches to one and
+silently skips the rest. ``reroute_enrich.py`` runs them in sequence.
 
 WHAT THIS TOOL DOES AND DOES NOT DO
 -----------------------------------
@@ -71,8 +50,11 @@ It writes the new polyline into the geometry archive, sets ``leg.miles`` from
 the router's own distance, and drops every corridor layer keyed to the OLD
 polyline, because those are now wrong rather than merely stale -- a landmark
 at mile 40 of a route that no longer passes it is worse than no landmark.
-Rebuilding them is the enrichment pass above, and the leg is INCOMPLETE until
+Rebuilding them is ``reroute_enrich.py``, and the leg is INCOMPLETE until
 that has run. ``--check`` reports any leg left in that state.
+
+Curated CHECKPOINTS are the exception and are re-positioned rather than
+dropped: see ``CHECKPOINT_MAX_OFF_MI`` below.
 
 Elevation is refetched from Valhalla ``/height`` along the new shape, because
 grades are the one layer a driver feels immediately and a stale grade is a
@@ -97,6 +79,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import leg_geometry as lg  # noqa: E402
 import straw_curve_sample as scs  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
@@ -147,7 +130,6 @@ STALE_AFTER_REROUTE = (
     "speed_limits",
     "interchanges",
     "landmarks",
-    "checkpoints",
     "state_crossings",
     "state_miles",
     "traffic_aadt",
@@ -155,6 +137,29 @@ STALE_AFTER_REROUTE = (
     "restrictions",
     "toll_events",
 )
+
+# Neither are STOPS, and for a different reason. A stop is a real named
+# facility -- a Love's with a source URL and a counted 111 parking spaces --
+# but unlike a checkpoint it carries no coordinates, only a mile. So there is
+# nothing to re-position it against, and the two honest options are to drop
+# the curation or to carry it across proportionally. It is carried: dropping
+# seven truck stops off a leg takes its fuel, its parking and its food with
+# them, which is a worse leg than one whose stop sits a mile out. The same
+# proportional rule ``repair_leg_mileage.py`` uses for every other along-route
+# position, and it is recorded in the stop's own source line so nobody later
+# mistakes a carried mile for a surveyed one.
+#
+# A stop left past the end of a shorter leg is what made this necessary: the
+# world refuses to load at all when one does.
+#
+# Checkpoints are NOT in that list. Every other layer above is a reading taken
+# along the old polyline, and re-reading it against the new one is the whole
+# job. A checkpoint is not a reading: it is a real named town, curated by
+# hand, carrying its own coordinates. Beeville is on I-37 whichever way this
+# leg was baked. So the reroute moves the mile it falls at and keeps the
+# curation -- and drops only a town the new road now runs too far from, which
+# is the one case where the truck genuinely stopped passing it.
+CHECKPOINT_MAX_OFF_MI = 3.0
 
 
 def _post(path: str, body: dict) -> dict | None:
@@ -204,8 +209,9 @@ def decode_shape(encoded: str, precision: float = 1e-6) -> list[list[float]]:
     return coords
 
 
-def fetch_route(start: dict, end: dict) -> tuple[list[list[float]], float] | None:
-    """``(polyline, miles)`` for the truck route between two city nodes."""
+def fetch_route(start: dict, end: dict) -> tuple[list[list[float]], float, bool] | None:
+    """``(polyline, miles, whether it tolls)`` for the truck route between two
+    city nodes."""
     result = _post(
         "/route",
         {
@@ -225,7 +231,8 @@ def fetch_route(start: dict, end: dict) -> tuple[list[list[float]], float] | Non
         piece = decode_shape(leg.get("shape", ""))
         # Legs abut, so drop the duplicated joint rather than doubling a vertex.
         shape.extend(piece[1:] if shape else piece)
-    return shape, float(result["trip"]["summary"]["length"])
+    summary = result["trip"]["summary"]
+    return shape, float(summary["length"]), bool(summary.get("has_toll"))
 
 
 def fetch_elevation(shape: list[list[float]]) -> list[float] | None:
@@ -250,11 +257,15 @@ def rides_its_label(shape: list[list[float]], highway: str) -> tuple[float, str]
     named for, so this checks that it did. A reroute that lands somewhere else
     is not an improvement, it is a different wrong answer, and the tool
     refuses rather than writing it.
+
+    The match is on the shield's CLASS AND NUMBER (``scs.matches_shield``).
+    This used to require the matched road's name to begin with "I", which
+    scored every US and state route at zero however faithfully it drove its
+    own road -- so this tool would have refused to reroute any of them, and
+    the leg-label probe filtered them out before anyone found out.
     """
     import collections
-    import re
 
-    shields = set(re.findall(r"\d+", highway))
     cum = scs._cumulative_m(shape)
     tally: collections.Counter[str] = collections.Counter()
     on_label = matched = 0
@@ -291,11 +302,7 @@ def rides_its_label(shape: list[list[float]], highway: str) -> tuple[float, str]
                 matched += 1
                 if names:
                     tally[str(names[0])] += 1
-                if any(
-                    set(re.findall(r"\d+", str(n))) & shields
-                    and str(n).strip().upper().startswith("I")
-                    for n in names
-                ):
+                if any(scs.matches_shield(str(n), highway) for n in names):
                     on_label += 1
         if stop >= len(shape):
             break
@@ -376,7 +383,7 @@ def main() -> int:
     if fetched is None:
         print("the router returned no route")
         return 1
-    shape, miles = fetched
+    shape, miles, has_toll = fetched
     old_miles = float(leg.get("miles") or 0)
     cum = scs._cumulative_m(shape)
     print(f"{args.leg} ({leg.get('highway')})")
@@ -424,8 +431,43 @@ def main() -> int:
     leg["rerouted"] = True
     corridor = leg.get("corridor") or {}
     dropped = {k: len(corridor.get(k) or []) for k in STALE_AFTER_REROUTE if corridor.get(k)}
+    tolls = corridor.get("toll_events") or []
     for key in STALE_AFTER_REROUTE:
         corridor.pop(key, None)
+
+    stops = list(leg.get("stops") or [])
+    if stops and old_miles > 0:
+        scale = miles / old_miles
+        for stop in stops:
+            at_mi = stop.get("at_mi")
+            if at_mi is None:
+                continue
+            stop["at_mi"] = round(min(max(float(at_mi) * scale, 0.0), miles), 1)
+            note = stop.get("source") or ""
+            marker = " Mile carried across proportionally when the leg was rerouted."
+            if marker.strip() not in note:
+                stop["source"] = (note + marker).strip()
+        leg["stops"] = stops
+
+    kept, left_behind = lg.reposition_on_route(
+        list(corridor.get("checkpoints") or []),
+        shape,
+        miles,
+        CHECKPOINT_MAX_OFF_MI,
+    )
+    for record in kept:
+        off_mi = record.pop("_off_mi")
+        record["source"] = (
+            f"Real town on {leg.get('highway')} between {leg['from']} and {leg['to']}; "
+            "position matched to the nearest point on the leg's checked-in route "
+            f"geometry ({off_mi:.2f} mi off-route at closest approach)."
+        )
+    if kept or left_behind:
+        corridor["checkpoints"] = kept
+    # The old value described the old road. Valhalla says whether the route it
+    # returned uses a toll, so the advisory that asks a curator to look at a
+    # tolled leg with no toll events is answered about the RIGHT road.
+    corridor["tollway_detected"] = has_toll
 
     # The new road's own geometry, so the enrichment builders have something
     # to work from. Without this they cannot place the leg at all.
@@ -433,13 +475,21 @@ def main() -> int:
         "Valhalla truck route over OpenStreetMap, resampled at development time "
         "(replaces the OpenRouteService route this leg was first baked from)."
     )
+    # Positions run on the leg's ADOPTED mileage, which is the router's
+    # distance rounded to a whole mile. Writing them on the raw route length
+    # instead put the last route point at mile 140.16 of a 140-mile leg, and
+    # the world refuses to load a position past the end of its own leg.
+    adopted = float(leg["miles"])
+    raw_mi = cum[-1] / 1609.344
+    mile_scale = (adopted / raw_mi) if raw_mi else 1.0
     points, elevation = [], []
     last = -1e9
     for i, (lon, lat) in enumerate(shape):
-        at_mi = cum[i] / 1609.344
+        at_mi = cum[i] / 1609.344 * mile_scale
         if at_mi - last < SAMPLE_MI and i not in (0, len(shape) - 1):
             continue
         last = at_mi
+        at_mi = min(at_mi, adopted)
         points.append({"at_mi": round(at_mi, 2), "lat": round(lat, 5), "lon": round(lon, 5)})
         elevation.append(
             {
@@ -453,7 +503,22 @@ def main() -> int:
     leg["corridor"] = corridor
     save_world(world)
     print(f"\n  wrote the new route; dropped {sum(dropped.values())} stale rows: {dropped}")
-    print("  THIS LEG IS NOW INCOMPLETE -- run build_interchanges.py --pbf to re-enrich it.")
+    print(f"  kept {len(kept)} curated checkpoints, re-positioned onto the new road")
+    if stops:
+        print(f"  carried {len(stops)} curated stops across on the new mileage")
+    for record, off_mi in left_behind:
+        where = "no coordinates" if off_mi == float("inf") else f"{off_mi:.1f} mi off the new road"
+        print(f"    dropped checkpoint {record.get('name')!r} ({where})")
+    print(f"  the new route {'does' if has_toll else 'does not'} use a toll road")
+    if tolls:
+        # A curated toll is a real plaza on a named road, and this leg just
+        # changed roads. Rescaling it would move a plaza onto pavement that
+        # may not charge, so it goes -- and it is said out loud, because
+        # nothing downstream will put it back.
+        print(f"  DROPPED {len(tolls)} CURATED TOLL EVENTS -- re-curate if the new road tolls:")
+        for toll in tolls:
+            print(f"    {toll.get('name')} on {toll.get('road')} (${toll.get('amount')})")
+    print("  THIS LEG IS NOW INCOMPLETE -- run tools/reroute_enrich.py to finish it.")
     return 0
 
 

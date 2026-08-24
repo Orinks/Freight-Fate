@@ -34,7 +34,10 @@ determinism contract). Read those first if you have not.
   not to reset. Never delete a leg, stop, or checkpoint without reading it.
 - **Curated mileage is pay.** `leg["miles"]` drives pay and deadlines. The
   enrichment steps below never change it (`--refresh-geometry` preserves it;
-  `--adopt-ors-miles` is only for brand-new legs, always with `--only`).
+  `--adopt-ors-miles` is only for brand-new legs, always with `--only`). The
+  one job that does change it is replacing a leg's route outright -- see
+  *Putting a leg back on the road it is named for* -- and it says so in the
+  changelog when it does, because players feel it in the pay.
 - **Source notes on everything real.** Each checkpoint/stop records where it
   came from and how it was positioned. The placement tool writes these
   automatically; keep the convention if you edit by hand.
@@ -359,6 +362,57 @@ enrichment commit.
   re-running a batch is cheap and safe (all steps are idempotent).
 - The endpoint-city POI queries are cache-keyed per CITY, so working
   corridor-by-corridor gets cheaper as coverage grows.
+
+## Putting a leg back on the road it is named for
+
+The one job on this page that DOES change `leg["miles"]`, and therefore pay
+and deadlines. It is not enrichment; it is replacing the leg's route, and
+then enriching the new one.
+
+A leg can be labelled for an interstate its baked route never joins. Two
+different faults look identical from inside the data and a truck router tells
+them apart, so start by measuring rather than reading the label:
+
+```
+uv run python tools/curve_valhalla_facts.py --all      # map-matched coverage
+uv run python tools/probe_leg_labels.py --out .route-cache/label-split.json
+```
+
+That prints two lists. A leg whose ROUTER route barely touches the shield has
+the wrong LABEL, and `tools/repair_leg_labels.py --split` renames it. A leg
+whose router route rides the shield has the wrong ROUTE, and it wants this:
+
+```
+uv run python tools/reroute_leg.py --leg <from_slug>:<to_slug> --write
+uv run --group tooling python tools/reroute_enrich.py \
+    --all-pending --pbf ~/osm/us-latest.osm.pbf --write
+```
+
+`reroute_leg` settles the route, writes the polyline and the mileage, and
+drops every corridor layer that was a reading along the OLD road. Curated
+checkpoints are the exception: they are real towns with real coordinates, so
+they are re-positioned onto the new road and only dropped if it now runs more
+than three miles from them. Curated TOLL EVENTS are dropped and printed --
+nothing downstream puts them back, so a leg that still tolls wants
+re-curating by hand.
+
+`reroute_enrich` rebuilds everything else and refuses to call a leg finished
+if any layer came back empty or at less than half its old size. Between the
+two, the leg is INCOMPLETE, and `--check` on either tool lists any leg left
+that way. Run `tools/index_world.py` afterwards like any world edit, then the
+curve chain (`curve_valhalla_facts.py --all`, `bake_curve_connectors.py
+--write`, `clamp_curve_advisories.py --write`, `screen_curve_artifacts.py`),
+because the bends moved with the road.
+
+Two things bite:
+
+- **`--only` takes SLUGS on every tool in the chain**, semicolon-separated:
+  `corpus_christi_tx_us->san_antonio_tx_us`, never `Corpus Christi->San
+  Antonio`. The interchange family builds one index over a 12 GB extract per
+  run, so pass all the legs at once or pay for that read per leg.
+- **The interchange sub-mode flags do not compose.** `--maxspeed
+  --restrictions --ramp-controls` together dispatches to one and silently
+  skips the rest. `reroute_enrich` runs them in sequence.
 
 ## Building new corridors (composition)
 

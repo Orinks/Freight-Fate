@@ -161,6 +161,16 @@ reported it. Then one short report of what changed. Ask first only when the
 work spends money, is hard to reverse, or turns on a design rule only the
 owner sets -- "it is a separate report" is not a reason to hand it back.
 
+**Report short.** One or two sentences: what changed, and what is different
+now. Not a status board. No inventory of every file touched, no "found and
+fixed" lists, no narration of things tried and reverted, no restating numbers
+already given. A bug you hit and fixed is not news -- say it is fixed, or say
+nothing. Reported 2026-08-24, on a closing summary with five headed sections
+that left the owner unsure whether the bugs in it were fixed or still open.
+
+Longer only when he asks for analysis, a decision needs context, or something
+is genuinely still broken.
+
 **Stay steerable: background anything that would block.** A foreground tool
 call holds the turn and queues whatever the owner types next. Background any
 single call over ~30 seconds (full suites, the adversarial battery, OSM

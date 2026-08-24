@@ -370,7 +370,14 @@ CONGESTION_HEAVY_RATIO = 0.9  # dense, clearly slowed traffic
 CONGESTION_JAM_RATIO = 1.05  # demand over capacity: stop and go
 CONGESTION_SAMPLE_MI = 1.0  # stride when scanning a route for jam-prone stretches
 CONGESTION_MIN_ZONE_MI = 1.0  # ignore blips shorter than this
-CONGESTION_JOIN_GAP_MI = 2.0  # merge prone stretches separated by less
+# Merge prone stretches separated by less. DERIVED from ZONE_MIN_GAP_MI
+# rather than chosen: two busy stretches closer than the guaranteed open road
+# between zones cannot both stand, and the invariant is the one that speaks
+# for the driver -- "back up to speed" for four miles and then "slow again" is
+# the chaining that rule exists to prevent. At 2.0 the two numbers disagreed,
+# and any gap landing between them satisfied neither. Latent until a rebuilt
+# HPMS profile on Chicago to St Louis produced a five-mile one.
+CONGESTION_JOIN_GAP_MI = ZONE_MIN_GAP_MI
 
 # Hourly share of daily traffic (indexed by clock hour). Sums to ~1.0.
 # Shape follows FHWA/state-DOT urban hourly distributions: weekday twin
@@ -404,6 +411,30 @@ def hourly_volume_fraction(hour: float, weekend: bool) -> float:
     """Share of the day's traffic moving in this clock hour."""
     table = HOURLY_SHARE_WEEKEND if weekend else HOURLY_SHARE_WEEKDAY
     return table[int(hour) % 24]
+
+
+# AADT is an ANNUAL AVERAGE daily traffic, and no single day is the average.
+# The FHWA Traffic Monitoring Guide's whole apparatus of day-of-week and
+# monthly adjustment factors exists because of that spread; day-of-week is
+# already modelled here (weekday against weekend tables), so what is left is
+# the residual day-to-day scatter around the mean for a given kind of day.
+# Ten percent is the conservative end of the published range for a continuous
+# count station on a major route.
+#
+# This is what stops a busy stretch being a wall in the same place every run.
+# It is not a "chance of traffic" dial: an oversaturated stretch still backs
+# up every day, because its ratio is far enough over the line that no ordinary
+# day clears it, while a marginal one -- the midday shoulder of a commuter
+# corridor -- falls under on a quiet day and flows. The variety comes out of
+# the same volume model rather than being sprinkled on top of it.
+DAILY_VOLUME_CV = 0.10
+DAILY_VOLUME_MIN = 0.75
+DAILY_VOLUME_MAX = 1.30
+
+
+def daily_volume_factor(rng: random.Random) -> float:
+    """Today's traffic against the annual mean, for one stretch of road."""
+    return max(DAILY_VOLUME_MIN, min(DAILY_VOLUME_MAX, rng.gauss(1.0, DAILY_VOLUME_CV)))
 
 
 def congestion_ratio(aadt: float, hour: float, lanes: int, weekend: bool) -> float:
@@ -924,6 +955,11 @@ class Zone:
     Construction sets the closure; the taper zone ahead of the work carries
     the same one so the merge callout can say which way to move.
 
+    ``day_factor`` is that stretch's traffic today against its annual mean
+    (see ``daily_volume_factor``). One draw per zone per trip, used both when
+    the zone forms and whenever it is asked whether it applies, so a run is
+    consistent with itself.
+
     Congestion zones ("heavy traffic") carry ``aadt`` and per-direction
     ``lanes`` instead of a fixed schedule: whether the zone is active and how
     slow it runs are recomputed from the clock hour, so the same stretch jams
@@ -938,6 +974,7 @@ class Zone:
     aadt: float | None = None
     lanes: int = 2
     closed_side: str | None = None
+    day_factor: float = 1.0
 
     def __post_init__(self) -> None:
         if self.closed_side is None and self.closed_lane is not None:
