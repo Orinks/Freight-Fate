@@ -7,7 +7,8 @@
 
 mod transcript_cruise_support;
 
-use ff_core::sim::trip_models::{TripEvent, TripEventData, TripEventKind};
+use ff_core::sim::traffic_manager::TrafficVehicle;
+use ff_core::sim::trip_models::{TrafficContext, TripEvent, TripEventData, TripEventKind};
 use ff_core::sim::weather::WeatherKind;
 use freight_fate::playtest::harness::PlaytestHarness;
 use freight_fate::states::base::Key;
@@ -610,14 +611,27 @@ fn test_descent_control_levels_and_brake_capture() {
             "{level}"
         );
         if braking && (level == "balanced" || level == "interactive") {
+            // The brake caps THIS GRADE and leaves the driver's set speed
+            // alone. It used to assign into cruise_mph, which made every
+            // downhill brake permanent and cumulative (Brandon, 2026-08-23:
+            // a whole run pinned at "forty nine mph or lower"). See
+            // test_braking_on_a_grade_caps_it_without_rewriting_the_set_speed
+            // in transcript_driving_cruise_weather_grades.rs.
             assert!(approx(
                 harness.read_drive(|d| d.cruise_mph).expect("cruise"),
-                harness.read_drive(|d| d.truck().speed_mph())
+                60.0
+            ));
+            assert!(approx_abs(
+                harness
+                    .read_drive(|d| d.cruise_descent_mph)
+                    .expect("a grade cap"),
+                harness.read_drive(|d| d.truck().speed_mph()),
+                0.01
             ));
             assert_eq!(
                 spoken(&harness)
                     .iter()
-                    .filter(|t| t.contains("Descent target changed"))
+                    .filter(|t| t.contains("Descent control holding"))
                     .count(),
                 1
             );
@@ -625,7 +639,7 @@ fn test_descent_control_levels_and_brake_capture() {
             assert_eq!(
                 spoken(&harness)
                     .iter()
-                    .filter(|t| t.contains("Descent target changed"))
+                    .filter(|t| t.contains("Descent control holding"))
                     .count(),
                 1
             );
@@ -661,4 +675,116 @@ fn test_service_brakes_beat_a_highway_hazard_after_human_reaction() {
         harness.read_drive(|d| d.truck().damage_pct),
         damage_before
     )); // avoided, not collided
+}
+
+// -- a vehicle hazard is not a fixed object ------------------------------------
+
+/// [`hazard`] with a name, and optionally the lead vehicle it is about.
+fn named_hazard(name: &str, dodgeable: bool, lead_mph: Option<f64>) -> TripEvent {
+    let mut event = hazard("Brake!", 3.0, dodgeable);
+    event.data.name = Some(name.to_string());
+    event.data.traffic = lead_mph.map(|mph| TrafficContext {
+        lead: TrafficVehicle::new("lead", 0.5, mph, mph, 0, "cruise", "truck"),
+        gap_mi: 0.2,
+        closing_mph: 10.0,
+    });
+    event
+}
+
+/// `arm(**data)`: a fresh hazard, and the speed it now asks the truck down to.
+fn arm(harness: &mut PlaytestHarness, event: TripEvent) -> f64 {
+    harness.with_drive(move |d, ctx| {
+        d.hazard_deadline = None;
+        d.hazard_lead_mph = None;
+        d.handle_trip_event(ctx, &event);
+    });
+    harness.read_drive(|d| d.hazard_target_mph(None))
+}
+
+#[test]
+fn test_a_vehicle_hazard_clears_at_the_vehicles_speed_not_a_near_stop() {
+    // Brandon, 2026-08-23: cruise "drops speed dramatically... and never
+    // comes back up to highway speed".
+    //
+    // His log is sixteen brake-light hazards in ninety minutes on I-70 in
+    // Kansas -- level road, limit 75, cruise set 70 -- each one demanding he
+    // go nearly to a stop, and with automatic braking the truck obeyed
+    // without him choosing it. A loaded truck needs over a minute to climb
+    // back, and they arrived a median of 112 seconds apart, so he lived at 37
+    // to 40.
+    //
+    // The cause was `dodgeable` doing two jobs: "you can steer around this"
+    // and "this is not moving, so nearly stop". True together for a tyre
+    // carcass, false for a truck doing 55. A vehicle hazard now clears at the
+    // vehicle's own speed, which is what a driver actually does and is
+    // honestly clear -- you are no longer closing on it.
+    let mut harness = start_drive("Vehicle Hazard");
+    harness.with_drive(|d, _| quiet(&mut d.trip));
+
+    // A moving vehicle: match it, do not stop for it.
+    assert!(approx(
+        arm(
+            &mut harness,
+            named_hazard("the brake lights", true, Some(55.0))
+        ),
+        55.0
+    ));
+    assert!(approx(
+        arm(
+            &mut harness,
+            named_hazard("the slow truck", true, Some(30.0))
+        ),
+        30.0
+    ));
+
+    // Everything that is not a moving vehicle is exactly as it was.
+    assert!(approx(
+        arm(&mut harness, named_hazard("retread debris", true, None)),
+        HAZARD_CREEP_MPH
+    ));
+    assert!(approx(
+        arm(&mut harness, named_hazard("the deer", false, None)),
+        HAZARD_SAFE_MPH
+    ));
+    // A lead that has itself stopped still asks for a stop: the creep speed
+    // is a floor, not a starting point.
+    assert!(approx(
+        arm(
+            &mut harness,
+            named_hazard("stopped traffic", true, Some(0.0))
+        ),
+        HAZARD_CREEP_MPH
+    ));
+}
+
+#[test]
+fn test_folding_a_fixed_obstacle_into_a_vehicle_hazard_takes_the_near_stop_back() {
+    // Two hazards at once take the harsher demand.
+    //
+    // A truck ahead and a tyre carcass under it is not "match the truck": the
+    // carcass is not going anywhere, and the group has to be crawled.
+    let mut harness = start_drive("Folded Hazard");
+    harness.with_drive(|d, _| {
+        quiet(&mut d.trip);
+        d.truck_mut().velocity_mps = 70.0 / MPH_PER_MPS;
+    });
+    assert!(approx(
+        arm(
+            &mut harness,
+            named_hazard("the brake lights", true, Some(55.0))
+        ),
+        55.0
+    ));
+
+    // Debris folds in while the first is still live.
+    let debris = {
+        let mut event = named_hazard("retread debris", true, None);
+        event.data.deadline_s = Some(2.0);
+        event
+    };
+    harness.with_drive(move |d, ctx| d.handle_trip_event(ctx, &debris));
+    assert!(approx(
+        harness.read_drive(|d| d.hazard_target_mph(None)),
+        HAZARD_CREEP_MPH
+    ));
 }

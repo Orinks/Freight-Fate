@@ -486,7 +486,7 @@ impl DrivingState {
                 };
                 parts.push(format!(
                     "construction taper in {}, {merge}, speed limit {}, then construction zone {}",
-                    ctx.settings.distance_text(zone.start_mi - pos, false),
+                    ctx.settings.distance_text(zone.start_mi - pos, true),
                     ctx.settings.speed_text(zone.limit_mph),
                     ctx.settings.speed_text(paired.limit_mph)
                 ));
@@ -494,11 +494,19 @@ impl DrivingState {
                 parts.push(format!(
                     "{} in {}, speed limit {}",
                     zone.reason,
-                    ctx.settings.distance_text(zone.start_mi - pos, false),
+                    ctx.settings.distance_text(zone.start_mi - pos, true),
                     ctx.settings.speed_text(zone.limit_mph)
                 ));
             }
         }
+        // Every distance here is PRECISE. Whole miles bottom out at "0
+        // miles" -- `distance_text`'s own docstring says the precise form
+        // exists "where whole numbers would read as zero or lie by half a
+        // mile" -- and this readout is exactly that case, because a driver
+        // presses U most on the crawl into a facility. Shane P got "facility
+        // gate in 0 miles", and before that watched it sit on "2 miles" for
+        // three minutes while he closed on it (2026-08-23). The bend clause
+        // below always asked for precise; the rest did not.
         if let Some(stop) = self.trip.upcoming_stop(within_mi).cloned() {
             // The ramp's ending is part of the plan: a stop sign first heard
             // mid-ramp is too late to brake for.
@@ -513,7 +521,7 @@ impl DrivingState {
                 "{}{} in {}{ending}",
                 self.trip.planned_prefix(&stop),
                 stop.spoken_name(),
-                ctx.settings.distance_text(stop.at_mi - pos, false)
+                ctx.settings.distance_text(stop.at_mi - pos, true)
             ));
         }
         // Traffic pressure is gone from this key: two of its three sources

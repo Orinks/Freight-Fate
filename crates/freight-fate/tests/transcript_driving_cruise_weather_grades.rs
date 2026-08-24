@@ -15,7 +15,9 @@
 mod transcript_cruise_support;
 
 use freight_fate::playtest::harness::PlaytestHarness;
-use freight_fate::states::driving_core::{ACC_LIMIT_OFFSET_MPH, PCC_CREST_SAG_MPH};
+use freight_fate::states::driving_core::{
+    ACC_LIMIT_OFFSET_MPH, DESCENT_SAFE_MAX_MPH, MPH_PER_MPS, PCC_CREST_SAG_MPH,
+};
 
 use transcript_cruise_support::*;
 
@@ -441,4 +443,163 @@ fn test_cruise_leaves_the_retarder_alone_when_descent_control_is_off() {
     assert_eq!(harness.read_drive(|d| d.truck().engine_brake_stage), 0);
     assert!(max_of(&speeds) <= 68.0, "{}", max_of(&speeds));
     assert!(!harness.read_drive(|d| d.truck().air_brakes_holding()));
+}
+
+// -- the driver's own brake on a grade -----------------------------------------
+
+#[test]
+fn test_braking_on_a_grade_caps_it_without_rewriting_the_set_speed() {
+    // The same correction the interactive path already carries.
+    //
+    // Brandon drove a whole run pinned at "forty nine mph or lower and losing
+    // speed instead of getting back up to highway speed" (2026-08-23).
+    // Braking on a downgrade assigned straight into the cruise set speed, so
+    // it was permanent AND cumulative: 65 becomes 55 on one hill, 49 on the
+    // next, and cruise never climbs back on the flat because 49 IS the set
+    // speed by then. A ratchet that only ever turns down.
+    //
+    // `test_interactive_descent_control_caps_the_target_without_rewriting_it`
+    // above pins the identical rule one branch over. This one was missed out
+    // of it.
+    let mut harness = bench_drive("Grade Brake Ratchet", 200.0, 0.0);
+    harness.app.ctx.settings.descent_speed_control = "balanced".to_string();
+    harness.with_drive(|d, _| {
+        quiet(&mut d.trip);
+        d.truck_mut().start_engine();
+        d.truck_mut().velocity_mps = 65.0 / MPH_PER_MPS;
+        d.cruise_mph = Some(65.0);
+        d.cruise_working_mph = Some(65.0);
+    });
+
+    // Two hills, braking lower on the second one.
+    for slowed_to in [55.0_f64, 49.0] {
+        harness.with_drive(move |d, ctx| {
+            d.truck_mut().grade = -0.05;
+            d.truck_mut().velocity_mps = slowed_to / MPH_PER_MPS;
+            d.update_cruise(ctx, DT, true, false, false);
+        });
+        // The driver's number is untouched, and the grade carries the cap.
+        assert!(approx(
+            harness.read_drive(|d| d.cruise_mph).expect("cruise"),
+            65.0
+        ));
+        assert!(approx_abs(
+            harness
+                .read_drive(|d| d.cruise_descent_mph)
+                .expect("a grade cap"),
+            slowed_to,
+            0.01
+        ));
+    }
+
+    // Back on the level: the cap lifts and highway speed comes back.
+    harness.with_drive(|d, _| {
+        bench_road_segments(d, &[(0.0, 200.0)], &[(0.0, BENCH_MILES, 0.0)], 1.0);
+        d.truck_mut().grade = 0.0;
+    });
+    for _ in 0..600 {
+        harness.with_drive(|d, ctx| {
+            d.truck_mut().grade = 0.0;
+            d.update_cruise(ctx, DT, false, false, false);
+        });
+    }
+    assert!(harness.read_drive(|d| d.cruise_descent_mph).is_none());
+    assert!(approx(
+        harness.read_drive(|d| d.cruise_mph).expect("cruise"),
+        65.0
+    ));
+    assert!(approx(
+        harness
+            .read_drive(|d| d.cruise_working_mph)
+            .expect("a working target"),
+        65.0
+    ));
+}
+
+#[test]
+fn test_the_automatic_grade_cap_never_undoes_the_drivers_own_brake() {
+    // Capture is an instruction; the automatic ceiling must not raise it.
+    //
+    // Both write `cruise_descent_mph`, and on the frame after a deliberate
+    // brake the interactive ceiling would otherwise hand the speed straight
+    // back.
+    let mut harness = bench_drive("Grade Brake Instruction", 200.0, 0.0);
+    harness.app.ctx.settings.descent_speed_control = "interactive".to_string();
+    harness.with_drive(|d, _| {
+        quiet(&mut d.trip);
+        d.truck_mut().start_engine();
+        d.cruise_mph = Some(65.0);
+        d.cruise_working_mph = Some(65.0);
+    });
+
+    let slowed_to = DESCENT_SAFE_MAX_MPH - 10.0;
+    harness.with_drive(move |d, ctx| {
+        d.truck_mut().grade = -0.05;
+        d.truck_mut().velocity_mps = slowed_to / MPH_PER_MPS;
+        d.update_cruise(ctx, DT, true, false, false);
+    });
+    assert!(approx_abs(
+        harness
+            .read_drive(|d| d.cruise_descent_mph)
+            .expect("a grade cap"),
+        slowed_to,
+        0.01
+    ));
+
+    // Still on the grade, no brake: the automatic ceiling runs and must
+    // leave the lower, deliberate cap alone.
+    for _ in 0..60 {
+        harness.with_drive(|d, ctx| {
+            d.truck_mut().grade = -0.05;
+            d.update_cruise(ctx, DT, false, false, false);
+        });
+    }
+    assert!(harness.read_drive(|d| d.cruise_descent_mph).expect("a cap") <= slowed_to + 0.01);
+    assert!(approx(
+        harness.read_drive(|d| d.cruise_mph).expect("cruise"),
+        65.0
+    ));
+}
+
+#[test]
+fn test_the_status_readout_names_the_grade_cap_and_leaves_the_set_speed_alone() {
+    // The two halves of the grade fix have to compose.
+    //
+    // The cap is only honest if the driver can hear it as a cap: Space and Tab
+    // read what the loop published after every ceiling, so a grade brake must
+    // come back as the HELD number with the driver's own set speed still
+    // beside it. Before the fix the brake rewrote `cruise_mph`, so the two
+    // numbers were the same one and the readout fell through to "adaptive
+    // cruise set at 55" -- the truck changing its own target and saying
+    // nothing about it.
+    let mut harness = bench_drive("Grade Cap Readout", 200.0, 0.0);
+    harness.app.ctx.settings.descent_speed_control = "balanced".to_string();
+    harness.with_drive(|d, _| {
+        quiet(&mut d.trip);
+        d.truck_mut().start_engine();
+        d.cruise_mph = Some(65.0);
+        d.cruise_working_mph = Some(65.0);
+    });
+
+    // The driver brakes on the grade, then comes off the pedal still on it.
+    harness.with_drive(|d, ctx| {
+        d.truck_mut().grade = -0.05;
+        d.truck_mut().velocity_mps = 55.0 / MPH_PER_MPS;
+        d.update_cruise(ctx, DT, true, false, false);
+    });
+    harness.with_drive(|d, ctx| {
+        d.truck_mut().grade = -0.05;
+        d.update_cruise(ctx, DT, false, false, false);
+    });
+
+    let readout = harness.with_drive(|d, ctx| d.cruise_holding_text(ctx));
+    assert_eq!(
+        readout, "adaptive cruise holding 55 miles per hour for the grade, set 65 miles per hour",
+        "{readout}"
+    );
+    // And the driver's own number is still the set speed, not the cap.
+    assert!(approx(
+        harness.read_drive(|d| d.cruise_mph).expect("cruise"),
+        65.0
+    ));
 }

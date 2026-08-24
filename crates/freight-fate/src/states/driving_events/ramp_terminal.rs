@@ -719,9 +719,22 @@ impl DrivingState {
                 0.0,
             );
             if terse {
+                // The limit clause is CONDITIONAL, like every other one built
+                // from this text. `approach_limit_text` deliberately returns
+                // nothing when it cannot trust the number -- better no clause
+                // than a wrong one -- and interpolating that gave quiet
+                // drivers a sentence with a hole in it: "Light at ramp end,
+                // green. Limit ." (Shane P, 2026-08-23). The stop, yield and
+                // roundabout branches below always guarded it; this one did
+                // not.
+                let limit_clause = if limit_text.is_empty() {
+                    String::new()
+                } else {
+                    format!(" Limit {limit_text}.")
+                };
                 self.say_route_navigation(
                     ctx,
-                    &format!("Light at ramp end, {phase}. Limit {limit_text}."),
+                    &format!("Light at ramp end, {phase}.{limit_clause}"),
                 );
                 return;
             }

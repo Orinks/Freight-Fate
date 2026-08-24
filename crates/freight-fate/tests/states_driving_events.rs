@@ -1511,3 +1511,139 @@ fn test_the_objective_names_the_phase() {
     d.phase = DRIVE_PHASE_PICKUP;
     assert!(d.objective_text(&app.ctx).starts_with("pickup at "));
 }
+
+// -- the ramp-end limit clause, and the U readout (test_ramp_terminals.py) ------------
+
+#[test]
+fn test_a_ramp_terminal_call_never_speaks_a_limit_it_does_not_have() {
+    // Shane P, 2026-08-23: "Light at ramp end, green. Limit ."
+    //
+    // `approach_limit_text` returns nothing on purpose when it cannot trust
+    // the number -- a probe that reads the mainline through a gap once told
+    // the owner "Stop sign at ramp end. Limit 70" at two exits running, and
+    // better no clause than a wrong one. Interpolating that emptiness gave
+    // quiet drivers a sentence with a hole in it. The stop, yield and
+    // roundabout branches guarded it; the signal branch did not.
+    //
+    // Parametrised across all four controls because the fault was one branch
+    // of four missing what its siblings had, which is not a thing to fix
+    // singly. Python monkeypatched `_approach_limit_text`; the Rust bench
+    // arranges the two answers on the road instead -- out on the corridor
+    // with nothing posted behind the bar the probe reads the mainline's own
+    // number back, which is exactly the case the guard refuses to speak.
+    for control in ["signal", "stop", "yield", "roundabout"] {
+        let mut app = TestApp::new();
+        let mut d = a_real_drive(&mut app);
+        app.ctx.settings.imperial_units = true;
+        app.ctx.settings.driving_speech = "quiet".to_string();
+        d.trip.position_mi = 50.0;
+        d.trip.zones.clear();
+        on_ramp(&mut d, control, false, 30.0);
+        assert!(
+            d.approach_limit_text(&app.ctx).is_empty(),
+            "{control}: the bench is meant to have no vouchable limit"
+        );
+
+        app.clear_speech();
+        d.ramp_light_announced = false;
+        d.announce_ramp_terminal(&mut app.ctx);
+        let said = app.event_lines();
+        assert!(!said.is_empty(), "{control} says nothing at all");
+        // Every line the call put on the channel, not just the last: the
+        // terminal call can hand back a line it interrupted, so `[-1]` (what
+        // the Python stub read) is not always the one under test here.
+        for line in &said {
+            assert!(
+                !line.contains("Limit"),
+                "{control} promised a limit it does not have: {line:?}"
+            );
+            assert!(
+                !line.contains(". .") && !line.ends_with(", ."),
+                "{control}: {line:?}"
+            );
+            assert!(
+                !line.contains("  "),
+                "{control} left a gap where the number was: {line:?}"
+            );
+        }
+
+        // And with a real number it still says it.
+        app.clear_speech();
+        let pos = d.trip.position_mi;
+        d.trip
+            .zones
+            .push(Zone::new(pos + 0.02, pos + 1.0, 45.0, "city street"));
+        d.ramp_light_announced = false;
+        d.announce_ramp_terminal(&mut app.ctx);
+        let said = app.event_lines();
+        assert!(
+            said.iter().any(|line| line.contains("45 miles per hour")),
+            "{control}: {said:?}"
+        );
+    }
+}
+
+#[test]
+fn test_the_upcoming_readout_never_says_zero_miles() {
+    // Shane P, 2026-08-23: "Coming up: facility gate in 0 miles."
+    //
+    // U is pressed most on the crawl into a facility, which is exactly where
+    // whole-mile rounding falls apart: everything under half a mile reads as
+    // zero, and before that it sat on "2 miles" for three minutes while he
+    // closed on the gate. `distance_text`'s own docstring says the precise
+    // form exists "where whole numbers would read as zero or lie by half a
+    // mile". The bend clause always asked for it; the zone and stop clauses
+    // did not.
+    let mut app = TestApp::new();
+    let mut d = a_real_drive(&mut app);
+    app.ctx.settings.imperial_units = true;
+    d.trip.position_mi = 50.0;
+    d.trip.zones.clear();
+    d.trip.curves.clear();
+    let pos = d.trip.position_mi;
+    d.trip.stops = vec![RoadStop::new(
+        "Jackson Company Yard",
+        pos + 0.4,
+        "company_yard",
+    )];
+    app.clear_speech();
+
+    d.speak_upcoming(&mut app.ctx, 15.0);
+
+    let said = app.main_lines();
+    let line = said.last().expect("U said nothing at all");
+    assert!(!line.contains("0 miles"), "{line:?}");
+    assert!(line.contains("0.4 miles"), "{line:?}");
+}
+
+#[test]
+fn test_the_upcoming_readout_moves_as_the_truck_closes() {
+    // Two presses a few hundred feet apart must not read the same.
+    //
+    // The complaint under "the U key didn't keep up" was that the number sat
+    // still: at whole-mile rounding a truck doing 20 mph holds one figure for
+    // minutes at a time, which reads as a readout that has stopped working.
+    let mut app = TestApp::new();
+    let mut d = a_real_drive(&mut app);
+    app.ctx.settings.imperial_units = true;
+    d.trip.position_mi = 50.0;
+    d.trip.zones.clear();
+    d.trip.curves.clear();
+    let start = d.trip.position_mi;
+    d.trip.stops = vec![RoadStop::new(
+        "Jackson Company Yard",
+        start + 2.4,
+        "company_yard",
+    )];
+    app.clear_speech();
+
+    d.speak_upcoming(&mut app.ctx, 15.0);
+    let first = app.main_lines().last().expect("a first readout").clone();
+    d.trip.position_mi = start + 0.5; // half a mile further on
+    d.speak_upcoming(&mut app.ctx, 15.0);
+    let second = app.main_lines().last().expect("a second readout").clone();
+
+    assert_ne!(first, second, "the readout did not move: {first:?}");
+    assert!(first.contains("2.4 miles"), "{first:?}");
+    assert!(second.contains("1.9 miles"), "{second:?}");
+}

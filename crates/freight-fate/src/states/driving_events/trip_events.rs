@@ -21,6 +21,19 @@ use crate::states::driving_updates::live;
 use super::ambient::Ambient;
 use super::event_category_for_kind;
 
+/// How fast the vehicle this hazard is about is going, or None.
+///
+/// A traffic hazard carries the lead's own context; debris, an animal or a
+/// stopped truck carries nothing, and None is what says "this thing is not
+/// going anywhere".
+fn hazard_lead_speed(event: &TripEvent) -> Option<f64> {
+    let speed = event.data.traffic.as_ref()?.lead.speed_mph;
+    if speed.is_nan() {
+        return None;
+    }
+    Some(0.0f64.max(speed))
+}
+
 impl DrivingState {
     /// `_handle_trip_event(event)`: everything the road just said, delivered.
     pub fn handle_trip_event(&mut self, ctx: &mut GameContext, event: &TripEvent) {
@@ -229,6 +242,7 @@ impl DrivingState {
             self.hazard_names = vec![name];
             self.horn_scare_tried = false;
             self.hazard_dodgeable = dodgeable;
+            self.hazard_lead_mph = hazard_lead_speed(event);
             self.hazard_deadline = Some(new_deadline);
             self.hazard_lane = self.lane.lane;
             self.release_hazard_brake();
@@ -241,6 +255,7 @@ impl DrivingState {
             self.hazard_names = vec![name];
             self.horn_scare_tried = false;
             self.hazard_dodgeable = dodgeable;
+            self.hazard_lead_mph = hazard_lead_speed(event);
             self.hazard_deadline = Some(new_deadline);
             self.hazard_lane = self.lane.lane;
             self.release_hazard_brake();
@@ -251,6 +266,14 @@ impl DrivingState {
             // wording; the shorter deadline is the one still governing
             // how much time is actually left.
             self.hazard_names.push(name);
+            // Folding a second hazard in: the slower demand wins, and a
+            // thing that is not moving has no lead speed at all, so it
+            // takes the group back to the near-stop rule.
+            let folded = hazard_lead_speed(event);
+            self.hazard_lead_mph = match (self.hazard_lead_mph, folded) {
+                (Some(live), Some(folded)) => Some(live.min(folded)),
+                _ => None,
+            };
             self.hazard_dodgeable = self.hazard_dodgeable && dodgeable;
             self.hazard_deadline = self.hazard_deadline.map(|live| live.min(new_deadline));
         }

@@ -363,19 +363,40 @@ impl DrivingState {
             if braking && matches!(descent_level.as_str(), "balanced" | "interactive") {
                 self.descent_control_active = true;
                 let new_target = CRUISE_MIN_MPH.max(self.trip.truck.speed_mph());
+                let previous = self.cruise_descent_mph;
                 let should_announce = !self.descent_capture_active
-                    || (new_target - self.cruise_mph.unwrap_or(0.0)).abs() >= 2.0;
+                    || previous.is_none_or(|previous| (new_target - previous).abs() >= 2.0);
                 self.descent_capture_active = true;
-                self.cruise_mph = Some(new_target);
-                // Capture pins the set speed to what the truck is doing now, so
-                // the working setpoint follows it down rather than easing back
-                // up toward a target the driver just abandoned.
+                // A CAP FOR THIS GRADE, never a rewrite of the driver's set
+                // speed -- the same correction the interactive branch below
+                // already carries, which this one was missed out of. Assigning
+                // into cruise_mph made every brake on a downgrade permanent
+                // and cumulative: 65 becomes 55 on one hill, 49 on the next,
+                // and cruise never climbs back on the flat because 49 IS the
+                // set speed now. Brandon drove a whole run pinned at "forty
+                // nine mph or lower and losing speed" (2026-08-23).
+                //
+                // Taking the lower of any cap already standing keeps a
+                // deliberate brake from being undone by the automatic cap a
+                // frame later; the whole thing is released together when the
+                // grade ends.
+                self.cruise_descent_mph = Some(match previous {
+                    Some(previous) => previous.min(new_target),
+                    None => new_target,
+                });
+                // The working setpoint still follows the truck down now, so
+                // cruise does not fight the brake the driver is holding.
                 self.cruise_working_mph = Some(new_target);
                 if should_announce {
-                    let held = ctx.settings.speed_text(new_target);
+                    let held = ctx
+                        .settings
+                        .speed_text(self.cruise_descent_mph.expect("set above"));
                     let mut opts = SayEvent::queued();
                     opts.category = Some(SpeechCategory::Confirmation);
-                    ctx.say_event_with(format!("Descent target changed to {held}."), opts);
+                    ctx.say_event_with(
+                        format!("Descent control holding {held} for this grade."),
+                        opts,
+                    );
                 }
                 return true;
             }
@@ -420,7 +441,12 @@ impl DrivingState {
                     // cruise down to 55 permanently -- on the flat, uphill, the
                     // rest of the run (bench trace, 2026-07-25: 62 set, 55 held
                     // ever after). The driver's number now survives the hill.
-                    self.cruise_descent_mph = Some(DESCENT_SAFE_MAX_MPH);
+                    // Never above a cap the driver's own brake already set on
+                    // this grade: capture is an instruction, not a suggestion.
+                    self.cruise_descent_mph = Some(
+                        DESCENT_SAFE_MAX_MPH
+                            .min(self.cruise_descent_mph.unwrap_or(DESCENT_SAFE_MAX_MPH)),
+                    );
                     let safe_target = self.cruise_mph.unwrap_or(0.0).min(DESCENT_SAFE_MAX_MPH);
                     let speed = self.trip.truck.speed_mph();
                     if speed > safe_target + 8.0 {

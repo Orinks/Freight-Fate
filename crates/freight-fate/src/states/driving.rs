@@ -626,6 +626,10 @@ pub struct DrivingState {
     pub lane_before_narrow: Option<i64>,
     pub merge_taper_warned: Option<String>,
     pub hazard_dodgeable: bool,
+    // The speed of the VEHICLE this hazard is about, when it is a vehicle.
+    // None for debris, animals and anything else that is not going
+    // anywhere. See hazard_target_mph.
+    pub hazard_lead_mph: Option<f64>,
     pub hazard_lane: i64,
     pub left_lane_s: f64,
     pub keep_right_nags: i64,

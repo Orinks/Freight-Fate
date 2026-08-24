@@ -7,7 +7,9 @@ the test-parity re-sweep on 2026-08-23, current as of merge `44c1e296`
 by hand since for `test_curve_management.py` and `test_lane_discrete.py`,
 both of which are now closed, and again for merge `7a395758` (the map-data
 correction), which moved `test_curve_management.py`, `test_driving_features.py`
-and `test_world.py`.
+and `test_world.py`, and for merge `ffa34a16` (the four driving and speech
+fixes), which moved `test_driving_cruise_weather.py` and
+`test_ramp_terminals.py`.
 
 ## Method
 
@@ -53,13 +55,14 @@ By test case, across all 239 files:
 
 | | Cases | Previous sweep |
 |---|---|---|
-| Python test functions | 4227 | 4220 |
-| live Rust namesake | 3118 | 3111 |
+| Python test functions | 4234 | 4227 |
+| live Rust namesake | 3125 | 3118 |
 | `#[ignore]`d Rust stub only | 313 | 313 |
 | no Rust namesake | 796 | 796 |
 
-Merge `7a395758` added 7 Python cases and all 7 were ported with it, so
-live coverage moved +7 and the unported backlog did not grow. Live parity is
+Merge `ffa34a16` added 7 Python cases and all 7 were ported with it, so
+live coverage moved +7 and the unported backlog did not grow again. (Merge
+`7a395758` before it did the same with its own 7.) Live parity is
 73.8 percent of the Python suite. (The `44c1e296` sweep before it took the
 suite from 4193 to 4220 cases, live coverage +368, ignored-only stubs -21 and
 cases with no Rust namesake -320, from 65.4 percent.)
@@ -136,7 +139,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_dispatch_policy.py` | PORTED | 10 / 0 / 10 | `crates/ff-core/src/models/dispatch_policy/tests.rs` |  |
 | `tests/test_dispatch_variety.py` | PORTED | 3 / 0 / 3 | `crates/ff-core/src/models/profile/tests.rs`, `crates/freight-fate/tests/states_city.rs` |  |
 | `tests/test_divided_data.py` | PORTED | 3 / 0 / 3 | `crates/ff-core/tests/data_lane_data.rs` |  |
-| `tests/test_driving_cruise_weather.py` | PORTED | 104 / 0 / 104 | `crates/freight-fate/tests/transcript_driving_cruise_weather_acc.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather_retarder.rs`, +3 more | live +104, NOT PORTED -> PORTED |
+| `tests/test_driving_cruise_weather.py` | PORTED | 108 / 0 / 108 | `crates/freight-fate/tests/transcript_driving_cruise_weather_acc.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather.rs`, `crates/freight-fate/tests/transcript_driving_cruise_weather_retarder.rs`, +3 more | live +4, Python +4 |
 | `tests/test_driving_damage_bands.py` | PARTIAL | 20 / 0 / 55 | `crates/freight-fate/tests/states_driving_road.rs`, `crates/ff-core/src/models/economy.rs`, `crates/freight-fate/tests/states_driving_core.rs` |  |
 | `tests/test_driving_exits.py` | PARTIAL | 1 / 0 / 31 | `crates/freight-fate/tests/states_driving_events_chains.rs` |  |
 | `tests/test_driving_features.py` | PARTIAL | 13 / 0 / 129 | `crates/freight-fate/tests/states_driving_updates.rs`, `crates/freight-fate/tests/states_driving_events_chains.rs`, `crates/ff-core/src/units.rs` | live +2, Python +2 |
@@ -239,7 +242,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_radio_regional.py` | PARTIAL | 15 / 0 / 26 | `crates/ff-core/src/radio/tests.rs`, `crates/ff-core/src/music.rs` |  |
 | `tests/test_radio_streaming.py` | NOT PORTED | 0 / 0 / 4 | -- |  |
 | `tests/test_ramp_controls.py` | PARTIAL | 2 / 0 / 20 | `crates/freight-fate/tests/states_driving_core.rs` |  |
-| `tests/test_ramp_terminals.py` | PARTIAL | 11 / 0 / 49 | `crates/freight-fate/tests/states_driving_events.rs` |  |
+| `tests/test_ramp_terminals.py` | PARTIAL | 14 / 0 / 52 | `crates/freight-fate/tests/states_driving_events.rs` | live +3, Python +3 |
 | `tests/test_real_construction_zones.py` | PARTIAL | 85 / 0 / 86 | `crates/ff-core/src/sim/real_traffic_parsers/tests.rs`, `crates/ff-core/tests/sim_real_construction_zones.rs`, `crates/ff-core/src/sim/real_traffic/tests.rs`, +1 more |  |
 | `tests/test_real_traffic.py` | PORTED | 23 / 0 / 23 | `crates/ff-core/src/sim/real_traffic/tests.rs`, `crates/ff-core/src/sim/truck_parking/tests.rs`, `crates/ff-core/src/sim/real_traffic_parsers/tests.rs` |  |
 | `tests/test_real_weather.py` | PORTED | 39 / 0 / 39 | `crates/ff-core/src/sim/real_weather/tests.rs`, `crates/ff-core/src/sim/weather/tests.rs` |  |
@@ -919,7 +922,7 @@ PARTIAL and NOT PORTED files only; TOOLS-ONLY and HELPER files are omitted.
 - `test_a_roundabout_terminal_reads_as_yieldish`
 - `test_a_scale_ramp_flows_to_the_scale_not_a_dice_roll`
 
-### `tests/test_ramp_terminals.py` -- 38 of 49
+### `tests/test_ramp_terminals.py` -- 38 of 52
 
 - `test_baked_interchange_control_beats_the_heuristic`
 - `test_transition_assist_off_leaves_the_pedals_alone`

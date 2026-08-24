@@ -205,11 +205,25 @@ impl DrivingState {
     /// moving-hazard safe speed: it takes nearly a stop, then easing around.
     /// Defaults to the currently pending hazard's own flag; see
     /// `hazard_deadline_for` for why a caller would pass one explicitly.
+    ///
+    /// A VEHICLE IS NOT A FIXED OBJECT. Brake lights ahead are emitted
+    /// dodgeable too -- you can steer around them -- and that put a moving
+    /// truck under the same near-stop rule as a tyre carcass. With automatic
+    /// braking the truck obeys without the driver choosing it, so Brandon was
+    /// dragged from 70 to nearly stopped sixteen times in ninety minutes on
+    /// an open 75 interstate, each costing more than a minute to climb back:
+    /// "cruise control still drops speed dramatically... and never comes back
+    /// up" (2026-08-23). Matching the vehicle ahead is what a driver actually
+    /// does, and it clears the hazard honestly -- you are no longer closing
+    /// on it. Never below the creep floor, so a lead that has itself stopped
+    /// still asks for a stop.
     pub fn hazard_target_mph(&self, dodgeable: Option<bool>) -> f64 {
-        if dodgeable.unwrap_or(self.hazard_dodgeable) {
-            HAZARD_CREEP_MPH
-        } else {
-            HAZARD_SAFE_MPH
+        if !dodgeable.unwrap_or(self.hazard_dodgeable) {
+            return HAZARD_SAFE_MPH;
+        }
+        match self.hazard_lead_mph {
+            Some(lead_mph) => HAZARD_CREEP_MPH.max(lead_mph),
+            None => HAZARD_CREEP_MPH,
         }
     }
 
@@ -435,6 +449,10 @@ impl DrivingState {
     /// swerve, or an earlier hazard outrun before a new one armed.
     pub fn finish_hazard_clear(&mut self, ctx: &mut GameContext, message_text: &str) {
         self.hazard_deadline = None;
+        // The lead belonged to the hazard that just ended; a fresh one must
+        // not inherit it, or a tyre carcass would clear at the speed of a
+        // truck that is long gone.
+        self.hazard_lead_mph = None;
         // Everything below here can offer the hazard call its rescue -- the
         // clear line's own flush, or any urgent line that lands before the
         // next tick. That gate asks whether a hazard is still armed, so the
