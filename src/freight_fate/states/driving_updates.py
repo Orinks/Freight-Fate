@@ -48,7 +48,11 @@ class DrivingUpdateMixin:
                 # fresh, closer instruction once the normal window reaches them.
                 self._destination_exit_announced_key = ""
         self._sync_weather_source()
-        keys = pygame.key.get_pressed()
+        # Not the raw SDL state: the tracker also holds a key through the
+        # press-and-release pairs a screen reader such as JAWS re-sends in
+        # place of the physical key, so a held arrow drives under JAWS
+        # without the pass-through key (see held_keys.py).
+        keys = self.ctx.held_keys.snapshot()
         ramp = dt * 2.2
         self._brake_lockout_cue_timer = max(0.0, self._brake_lockout_cue_timer - dt)
         self._lane_rumble_timer = max(0.0, self._lane_rumble_timer - dt)
