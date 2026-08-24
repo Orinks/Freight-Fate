@@ -1148,15 +1148,23 @@ class DrivingControlsMixin:
                 else:
                     merge = "all lanes open"
                 parts.append(
-                    f"construction taper in {s.distance_text(zone.start_mi - pos)}, "
+                    f"construction taper in {s.distance_text(zone.start_mi - pos, precise=True)}, "
                     f"{merge}, speed limit {s.speed_text(zone.limit_mph)}, "
                     f"then construction zone {s.speed_text(paired.limit_mph)}"
                 )
             else:
                 parts.append(
-                    f"{zone.reason} in {s.distance_text(zone.start_mi - pos)}, "
+                    f"{zone.reason} in {s.distance_text(zone.start_mi - pos, precise=True)}, "
                     f"speed limit {s.speed_text(zone.limit_mph)}"
                 )
+        # Every distance here is PRECISE. Whole miles bottom out at "0
+        # miles" -- `distance_text`'s own docstring says the precise form
+        # exists "where whole numbers would read as zero or lie by half a
+        # mile" -- and this readout is exactly that case, because a driver
+        # presses U most on the crawl into a facility. Shane P got "facility
+        # gate in 0 miles", and before that watched it sit on "2 miles" for
+        # three minutes while he closed on it (2026-08-23). The bend clause
+        # below always asked for precise; the rest did not.
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
             # The ramp's ending is part of the plan: a stop sign first heard
@@ -1169,7 +1177,7 @@ class DrivingControlsMixin:
             }.get(self._ramp_control_for(stop), "")
             parts.append(
                 f"{self.trip.planned_prefix(stop)}{stop.spoken_name} "
-                f"in {s.distance_text(stop.at_mi - pos)}{ending}"
+                f"in {s.distance_text(stop.at_mi - pos, precise=True)}{ending}"
             )
         # Traffic pressure is gone from this key: two of its three sources
         # restate the clause printed right beside them here -- the

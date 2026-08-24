@@ -1241,6 +1241,12 @@
   re-read.
 
 ### Fixed
+- **The upcoming readout stops saying "in 0 miles".** U rounded every
+  distance to a whole mile, so anything closer than half a mile came out as
+  zero, and on a slow crawl into a yard it would sit on the same number for
+  minutes while you closed on the thing. It reads a decimal now -- "facility
+  gate in 0.4 miles" -- so the number moves as you do, which is most of what
+  the key is for.
 - **No more "Limit." with nothing after it at a ramp end.** On quiet speech,
   the traffic-light call at the end of a ramp read "Light at ramp end, green.
   Limit ." -- a sentence with a hole where the number should be. The game
