@@ -2,12 +2,11 @@
 //! case of `tests/test_multilane_speech.py`; the lane counts, the summary
 //! and the callouts are in `crates/ff-core/tests/sim_multilane_speech.rs`).
 
-
+use crate::states_driving_menus_support::*;
 use ff_core::sim::trip_models::{NavigationCue, TripEvent, TripEventData, TripEventKind};
 use ff_core::speech_text::SpokenMessage;
 use freight_fate::app::testing::TestApp;
 use freight_fate::speech::EventPriority;
-use crate::states_driving_menus_support::*;
 
 fn cue_event(kind: &str, advance: bool) -> TripEvent {
     let cue = NavigationCue::new(&format!("{kind}:0:10:x"), kind, 10.0, "a direction", "");

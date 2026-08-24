@@ -25,10 +25,9 @@
 //! being reported as one that worked. Where a case's whole subject is gone,
 //! the body says so and pins the invariant that made it gone.
 
-
+use crate::states_online_support::RefusingClipboard;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::{Clipboard, MemoryClipboard};
-use crate::states_online_support::RefusingClipboard;
 
 /// A clipboard that mangles what it is given the way the Windows path used
 /// to: every newline comes back as CRLF. Nothing in the game does this any

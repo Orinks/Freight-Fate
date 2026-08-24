@@ -45,12 +45,7 @@ fn press(harness: &mut PlaytestHarness, key: Key) {
 }
 
 fn last_main(harness: &PlaytestHarness) -> String {
-    harness
-        .app
-        .main_lines()
-        .last()
-        .cloned()
-        .unwrap_or_default()
+    harness.app.main_lines().last().cloned().unwrap_or_default()
 }
 
 // -- the ignition ----------------------------------------------------------------------
@@ -102,7 +97,9 @@ fn test_closing_status_panel_does_not_restart_drive_music() {
     );
     harness.key(key_event(Key::Escape, None));
 
-    assert!(harness.has_drive() && harness.state_is::<freight_fate::states::driving::DrivingState>());
+    assert!(
+        harness.has_drive() && harness.state_is::<freight_fate::states::driving::DrivingState>()
+    );
     assert!(log.borrow().music.is_empty(), "{:#?}", log.borrow().music);
 }
 
@@ -172,24 +169,23 @@ fn test_pause_menu_reports_off_duty_to_the_drivers_board() {
 fn test_drivers_board_line_names_the_station_playing_in_the_cab() {
     let mut harness = a_drive("Board Radio");
 
-    let (board_detail, discord_detail, stream_url, listening) =
-        harness.with_drive(|drive, ctx| {
-            drive.radio.enabled = true;
-            let station = drive.radio.clone().current_station();
-            let listening = format!("listening to {}", station.display_name());
-            let board = drive
-                .online_presence_state(ctx)
-                .expect("a rolling drive is on the board");
-            let discord = drive
-                .presence_state(ctx)
-                .expect("Discord presence is built too");
-            (
-                board.detail,
-                discord.detail,
-                station.stream_url.clone(),
-                listening,
-            )
-        });
+    let (board_detail, discord_detail, stream_url, listening) = harness.with_drive(|drive, ctx| {
+        drive.radio.enabled = true;
+        let station = drive.radio.clone().current_station();
+        let listening = format!("listening to {}", station.display_name());
+        let board = drive
+            .online_presence_state(ctx)
+            .expect("a rolling drive is on the board");
+        let discord = drive
+            .presence_state(ctx)
+            .expect("Discord presence is built too");
+        (
+            board.detail,
+            discord.detail,
+            station.stream_url.clone(),
+            listening,
+        )
+    });
 
     assert!(board_detail.ends_with(&listening), "{board_detail}");
     // The clause is board-only color: Discord presence keeps the plain

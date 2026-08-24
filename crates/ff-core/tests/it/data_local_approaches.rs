@@ -1,7 +1,6 @@
 //! Local approach data (the data-layer half of `tests/test_local_approaches.py`;
 //! the `tools/build_local_approaches.py` cases stay Python).
 
-
 use crate::data_support::{read_json, world};
 
 const RAW_MARKERS: &[&str] = &[

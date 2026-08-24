@@ -9,7 +9,7 @@
 //! ported the menu here is a `SimpleMenuState`, which exercises the same
 //! review path (a menu on top, not the driving state).
 
-
+use crate::states_driving_menus_support as drive_support;
 use ff_core::message_log::MessageCategory;
 use ff_core::sim::trip_models::{TripEvent, TripEventData, TripEventKind};
 use ff_core::speech_text::SpokenMessage;
@@ -18,7 +18,6 @@ use freight_fate::app::GameContext;
 use freight_fate::states::base::{InputEvent, Key, MenuItem, Mods, SimpleMenuState, State};
 use freight_fate::states::driving_core::{profile_mut_of, HAZARD_SAFE_MPH};
 use freight_fate::states::text_entry::TextEntryState;
-use crate::states_driving_menus_support as drive_support;
 
 fn key_event(key: Key) -> InputEvent {
     InputEvent::key(key)

@@ -6,7 +6,6 @@
 //! is another task's suite; what is pinned here is what the screens themselves
 //! decide and say, which is where `_resolve` charges the money exactly once.
 
-
 use ff_core::models::enforcement;
 use ff_core::sim::hos;
 

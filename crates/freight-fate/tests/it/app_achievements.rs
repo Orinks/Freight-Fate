@@ -6,7 +6,6 @@
 //! trackers at the wheel, and the main-menu achievements screens -- which
 //! `ff-core` cannot see, so these cases live on this side of the dependency.
 
-
 use ff_core::achievements::{achievement_by_id, achievements_in_category, categories};
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, JobBoard, OfferOptions};
@@ -18,6 +17,7 @@ use serde_json::json;
 
 use freight_fate::app::testing::TestApp;
 
+use crate::states_main_menu_support::*;
 use freight_fate::app::share;
 use freight_fate::states::base::Key;
 use freight_fate::states::city_pickup::{PickupFacilityState, PickupOptions};
@@ -27,7 +27,6 @@ use freight_fate::states::driving_menu_states::ArrivalState;
 use freight_fate::states::main_menu::{
     AchievementCareerState, AchievementCategoryState, AchievementsState, MainMenuState,
 };
-use crate::states_main_menu_support::*;
 
 // -- rigging -----------------------------------------------------------------------
 

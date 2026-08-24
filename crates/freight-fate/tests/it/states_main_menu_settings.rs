@@ -7,7 +7,7 @@
 //! `TestApp` writes its own settings file on the way up, and the loader's
 //! reading of an old file is pinned in the `ff_core` settings tests.
 
-
+use crate::states_main_menu_support::*;
 use ff_core::models::profile::Profile;
 use ff_core::settings::{Settings, PACE_RETIRED_NOTICES};
 use ff_core::sim::season::{date_text, real_clock_game_hours};
@@ -18,7 +18,6 @@ use freight_fate::states::base::{Key, Menu, State};
 use freight_fate::states::main_menu::{
     GameplaySettingsState, MainMenuState, SettingsCategoryState, SettingsState,
 };
-use crate::states_main_menu_support::*;
 
 // Gameplay is now a category with its own submenu; these four screens live one
 // level down from the Settings picker, under the "Gameplay" row.

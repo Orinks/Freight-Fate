@@ -158,7 +158,9 @@ fn test_a_steep_downgrade_is_called_out_before_the_truck_is_on_it() {
 
     let spoken = app.event_lines();
     assert!(
-        spoken.iter().any(|l| l.contains("6.0 percent downgrade ahead")),
+        spoken
+            .iter()
+            .any(|l| l.contains("6.0 percent downgrade ahead")),
         "{spoken:#?}"
     );
     assert!(spoken.iter().any(|l| l.contains("at least")), "{spoken:#?}");
@@ -210,7 +212,9 @@ fn test_a_short_dip_is_not_announced_as_a_grade() {
     drive.update_grade_advisory(&mut app.ctx);
     let spoken = app.event_lines();
     assert!(
-        spoken.iter().any(|l| l.contains("4.0 percent downgrade ahead")),
+        spoken
+            .iter()
+            .any(|l| l.contains("4.0 percent downgrade ahead")),
         "{spoken:#?}"
     );
 }
@@ -266,7 +270,9 @@ fn test_an_upgrade_is_called_out_too() {
 
     let spoken = app.event_lines();
     assert!(
-        spoken.iter().any(|l| l.contains("4.5 percent upgrade ahead")),
+        spoken
+            .iter()
+            .any(|l| l.contains("4.5 percent upgrade ahead")),
         "{spoken:#?}"
     );
     assert!(
@@ -295,11 +301,7 @@ fn test_terse_speech_hears_no_grade_advisories() {
 
     assert!(app.event_lines().is_empty(), "{:#?}", app.event_lines());
     // Silent means silent: no cue sound either.
-    assert!(
-        log.borrow().played.is_empty(),
-        "{:#?}",
-        log.borrow().played
-    );
+    assert!(log.borrow().played.is_empty(), "{:#?}", log.borrow().played);
     assert_eq!(drive.grade_scan_mi, -1e9); // never even scanned
 
     // Normal speech still gets it.

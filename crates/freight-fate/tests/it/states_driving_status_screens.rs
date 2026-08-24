@@ -80,12 +80,7 @@ fn press(harness: &mut PlaytestHarness, key: Key) {
 }
 
 fn last_main(harness: &PlaytestHarness) -> String {
-    harness
-        .app
-        .main_lines()
-        .last()
-        .cloned()
-        .unwrap_or_default()
+    harness.app.main_lines().last().cloned().unwrap_or_default()
 }
 
 // -- the air help and the status screens -------------------------------------------------
@@ -184,7 +179,9 @@ fn test_air_brake_help_and_status_are_spoken() {
 
     let navigation_lines = app_lines(&mut harness, "navigation");
     assert!(
-        navigation_lines.iter().any(|l| l.starts_with("Navigation:")),
+        navigation_lines
+            .iter()
+            .any(|l| l.starts_with("Navigation:")),
         "{navigation_lines:#?}"
     );
     assert!(
@@ -196,7 +193,9 @@ fn test_air_brake_help_and_status_are_spoken() {
 
     let weather_lines = app_lines(&mut harness, "weather");
     assert!(
-        weather_lines.iter().any(|l| l.starts_with("Weather source:")),
+        weather_lines
+            .iter()
+            .any(|l| l.starts_with("Weather source:")),
         "{weather_lines:#?}"
     );
     assert!(
@@ -208,7 +207,9 @@ fn test_air_brake_help_and_status_are_spoken() {
 
     let truck_stop_lines = app_lines(&mut harness, "truck_stops");
     assert!(
-        truck_stop_lines.iter().any(|l| l.starts_with("Truck stops:")),
+        truck_stop_lines
+            .iter()
+            .any(|l| l.starts_with("Truck stops:")),
         "{truck_stop_lines:#?}"
     );
 
@@ -344,14 +345,11 @@ fn test_metric_status_lines_do_not_mix_mph_and_miles() {
         // only when a traffic lead randomly landed in range, which made the
         // Python case flaky.
         let at = drive.trip.position_mi + 5.0;
-        drive.trip.navigation_cues = vec![NavigationCue::new(
-            "traffic:test",
-            "traffic",
-            at,
-            "traffic queue ahead",
-            "",
-        )
-        .with_speed(Some(50.0))];
+        drive.trip.navigation_cues =
+            vec![
+                NavigationCue::new("traffic:test", "traffic", at, "traffic queue ahead", "")
+                    .with_speed(Some(50.0)),
+            ];
     });
 
     let lines = harness.with_drive(|d, ctx| d.status_lines(ctx));
@@ -430,7 +428,10 @@ fn test_the_speed_readout_says_what_the_keeper_is_holding_not_just_what_is_set()
     harness.clear_speech();
     harness.with_drive(|drive, ctx| drive.speak_speed(ctx));
     let said = last_main(&harness);
-    assert!(said.contains("speed keeper holding 25 miles per hour"), "{said}");
+    assert!(
+        said.contains("speed keeper holding 25 miles per hour"),
+        "{said}"
+    );
     assert!(!said.contains("set 25"), "{said}");
 
     // The eased point already behind the truck is no longer what it holds.
@@ -441,6 +442,9 @@ fn test_the_speed_readout_says_what_the_keeper_is_holding_not_just_what_is_set()
     harness.clear_speech();
     harness.with_drive(|drive, ctx| drive.speak_speed(ctx));
     let said = last_main(&harness);
-    assert!(said.contains("speed keeper holding 25 miles per hour"), "{said}");
+    assert!(
+        said.contains("speed keeper holding 25 miles per hour"),
+        "{said}"
+    );
     assert!(!said.contains("for the corner"), "{said}");
 }

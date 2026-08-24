@@ -6,7 +6,6 @@
 //! ported with their bodies but ignored until `sim::trip` lands. The pure
 //! geometry-screen and radius-floor tests live inline in `curves.rs`.
 
-
 use std::collections::{HashMap, HashSet};
 
 use crate::data_support::{data_dir, shortest, supported, world};

@@ -5,7 +5,6 @@
 //!
 //! Wrapped in a module so `cargo test -p freight-fate audio` selects them.
 
-
 mod audio_speech_audio {
     use ff_core::music::ALL_MUSIC_TRACKS;
     use freight_fate::audio::{asset_bytes, Audio, VolumeUpdate, MUSIC_EXTENSIONS};

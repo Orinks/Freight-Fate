@@ -7,7 +7,7 @@
 //! `ff-core` cannot depend on the game crate, so neither screen is visible
 //! from there.
 
-
+use crate::states_city_support::*;
 use ff_core::models::career::LEVEL_XP;
 use ff_core::models::jobs::{Job, JobBoard, OfferOptions};
 use ff_core::models::profile::Profile;
@@ -15,7 +15,6 @@ use ff_core::sim::hos::limits;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, Menu};
 use freight_fate::states::city::{CityMenuState, JobBoardState};
-use crate::states_city_support::*;
 
 fn approx(a: f64, b: f64) -> bool {
     (a - b).abs() <= 1e-6 * b.abs().max(1.0)

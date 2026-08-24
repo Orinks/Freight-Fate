@@ -4,7 +4,6 @@
 //! of the checked-in base for later offline play, without ever overriding the
 //! base or changing the offline/deterministic path when no overlay is present.
 
-
 use std::collections::HashSet;
 use std::path::Path;
 

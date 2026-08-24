@@ -3,7 +3,6 @@
 //! until `sim::trip` lands; `spoken_road_text` is tested inline in
 //! `world_services.rs`.
 
-
 use crate::data_support::world;
 use ff_core::data::world_models::{Leg, Route};
 

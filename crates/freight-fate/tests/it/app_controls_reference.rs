@@ -3,14 +3,13 @@
 //! tests still read a real drive; listed here, ignored, so the suites diff
 //! by name.
 
-
+use crate::states_driving_menus_support::*;
 use ff_core::sim::hos;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Menu;
 use freight_fate::states::driving_core::profile_mut_of;
 use freight_fate::states::driving_pause_states::{mechanic_label, PauseMenuState};
 use freight_fate::states::main_menu::{controls_help_page, HelpState, HELP_PAGES};
-use crate::states_driving_menus_support::*;
 
 #[test]
 fn test_controls_help_page_points_at_the_driving_keys() {

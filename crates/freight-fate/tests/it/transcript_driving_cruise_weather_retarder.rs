@@ -6,7 +6,6 @@
 //! Python file is split and `transcript_cruise_support` for the bench road
 //! these cases run on.
 
-
 use ff_core::settings::ACC_GAP_CHOICES;
 use ff_core::sim::enforcement_observe::TAILGATE_GAP_S;
 use ff_core::sim::trip_models::Zone;

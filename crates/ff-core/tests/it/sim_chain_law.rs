@@ -7,12 +7,11 @@
 //! `test_vehicle.py` and `test_physics_bench.py`; these tests cover the law
 //! layer that sits on top of it.
 
-
+use crate::sim_support::*;
 use ff_core::data::world_models::GradeSegment;
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::WeatherKind;
-use crate::sim_support::*;
 
 /// A Chicago-Indianapolis trip; optionally with a synthetic grade profile
 /// baked onto leg 0 before construction so chain-law placement sees it.

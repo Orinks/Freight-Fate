@@ -8,7 +8,6 @@
 //! layer's earcon map -- it lives in
 //! `crates/freight-fate/tests/states_driving_facility_approaches.rs`.
 
-
 use std::collections::HashSet;
 
 use crate::data_support::{read_json, world};

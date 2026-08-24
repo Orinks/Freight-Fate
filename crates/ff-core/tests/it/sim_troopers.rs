@@ -6,11 +6,10 @@
 //! `crates/freight-fate/tests/states_driving_troopers.rs` and
 //! `states_driving_enforcement.rs`; see the note at the foot of this file.
 
-
+use crate::sim_support::*;
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::TripEventKind;
 use ff_core::sim::vehicle::TruckState;
-use crate::sim_support::*;
 
 fn trip_with(seed: i64, hazard_scale: f64, start_hour: f64) -> Trip {
     let route = first_route_option(world(), "Salt Lake City", "Las Vegas");

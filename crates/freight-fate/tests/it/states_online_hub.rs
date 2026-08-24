@@ -1,8 +1,8 @@
 //! Port of `tests/test_online_hub.py`: the Online hub, one main-menu home for
 //! the board, account, and sharing.
 
-
-
+use crate::states_main_menu_support as menus;
+use crate::states_online_support::*;
 use freight_fate::app::testing::TestApp;
 use freight_fate::net::testing::FakeTransport;
 use freight_fate::states::base::Key;
@@ -10,8 +10,6 @@ use freight_fate::states::main_menu::MainMenuState;
 use freight_fate::states::online_hub::OnlineHubState;
 use freight_fate::states::online_states::DriversOnlineState;
 use serde_json::{json, Map, Value};
-use crate::states_main_menu_support as menus;
-use crate::states_online_support::*;
 
 fn hub(app: &mut TestApp) -> freight_fate::app::SharedState {
     let hub = OnlineHubState::new(&mut app.ctx);

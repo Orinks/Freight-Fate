@@ -18,7 +18,6 @@
 //!
 //! `transcript_cruise_support` documents what replaced each monkeypatch.
 
-
 use ff_core::sim::trip_models::{NPCVehicle, Zone};
 use ff_core::sim::vehicle::{HIGH_IDLE_DEFAULT_RPM, HIGH_IDLE_STEP_RPM};
 use freight_fate::states::base::Key;

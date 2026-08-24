@@ -10,7 +10,6 @@
 //!
 //! Wrapped in a module so `cargo test -p freight-fate audio` selects them.
 
-
 mod audio_sound_pack {
     use std::path::{Path, PathBuf};
     use std::sync::Arc;

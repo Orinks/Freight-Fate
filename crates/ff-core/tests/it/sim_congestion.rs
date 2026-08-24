@@ -1,7 +1,7 @@
 //! Grounded congestion: HPMS volume against capacity on a commuter clock
 //! (port of `tests/test_congestion.py`).
 
-
+use crate::sim_support::*;
 use ff_core::data::world_models::{Leg, TrafficVolumeSample};
 use ff_core::sim::season::{day_of_week, is_weekend};
 use ff_core::sim::trip::{Trip, TripOptions};
@@ -10,7 +10,6 @@ use ff_core::sim::trip_models::{
     HOURLY_SHARE_WEEKDAY, HOURLY_SHARE_WEEKEND, URBAN_RADIUS_MI,
 };
 use ff_core::sim::vehicle::TruckState;
-use crate::sim_support::*;
 
 fn sample(at_mi: f64, aadt: f64, lanes: i64) -> TrafficVolumeSample {
     TrafficVolumeSample {

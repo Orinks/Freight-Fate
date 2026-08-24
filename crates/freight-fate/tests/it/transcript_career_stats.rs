@@ -1,13 +1,12 @@
 //! The terminal's Career stats screen: a reviewable menu with rest status
 //! (port of `tests/test_career_stats.py`).
 
-
+use crate::states_main_menu_support::*;
 use ff_core::models::profile::Profile;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, Menu};
 use freight_fate::states::career_stats::CareerStatsState;
 use freight_fate::states::city::CityMenuState;
-use crate::states_main_menu_support::*;
 
 #[test]
 fn test_career_stats_is_a_reviewable_menu_with_rest_status() {

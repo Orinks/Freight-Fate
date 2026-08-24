@@ -3,14 +3,13 @@
 //! `tests/test_interchanges.py`; phrasing and parsing live in
 //! `data_interchanges.rs`).
 
-
+use crate::sim_support::*;
 use ff_core::data::world::World;
 use ff_core::data::world_models::{Interchange, Leg, Route, Stop};
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::{NavigationCue, TripEventKind, Zone};
 use ff_core::sim::trip_route_helpers::{leg_heading, nearest_exit_label};
 use ff_core::sim::vehicle::TruckState;
-use crate::sim_support::*;
 
 fn strings(items: &[&str]) -> Vec<String> {
     items.iter().map(|s| s.to_string()).collect()

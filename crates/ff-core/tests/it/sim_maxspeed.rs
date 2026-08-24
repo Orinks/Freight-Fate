@@ -3,12 +3,11 @@
 //! `tests/test_maxspeed.py`; the `parse_osm_maxspeed` and dwell-filter
 //! cases exercise `tools/enrich_routes.py`, which stays Python).
 
-
+use crate::sim_support::*;
 use ff_core::data::world_models::{CorridorDetail, Leg, Route, SpeedLimitSample, StateMileage};
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::{corridor_speed_limit, leg_speed_limit_at};
 use ff_core::sim::vehicle::TruckState;
-use crate::sim_support::*;
 
 fn sample(at_mi: f64, mph: Option<f64>) -> SpeedLimitSample {
     SpeedLimitSample {

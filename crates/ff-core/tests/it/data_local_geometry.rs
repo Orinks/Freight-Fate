@@ -2,7 +2,6 @@
 //! the `tools/build_local_geometry.py` case stays Python and the Trip case is
 //! ignored until `sim::trip` lands).
 
-
 use crate::data_support::{read_json, world};
 use ff_core::data::world_models::{Leg, Route};
 

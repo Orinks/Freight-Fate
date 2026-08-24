@@ -634,6 +634,7 @@ impl PlaytestHarness {
         );
         self.app.push_state(drive);
         self.driving = self.app.state();
+        self.put_road_events_on_simulated_time();
         self.neutralize_random_trip_friction();
         self.result()
     }
@@ -689,6 +690,7 @@ impl PlaytestHarness {
         }
         assert!(self.state_is::<DrivingState>(), "the board did not drive");
         self.driving = self.app.state();
+        self.put_road_events_on_simulated_time();
         assert_eq!(self.read_drive(|d| d.phase), "pickup");
 
         if setup.arm_speed_control_on_deadhead {
@@ -752,6 +754,7 @@ impl PlaytestHarness {
         // Company drivers run dispatch's assigned route: route_rank is unused.
         assert!(self.state_is::<DrivingState>(), "departure did not drive");
         self.driving = self.app.state();
+        self.put_road_events_on_simulated_time();
         assert_eq!(self.read_drive(|d| d.phase), DRIVE_PHASE_DELIVERY);
         self.neutralize_random_trip_friction();
         self.result()
@@ -1076,6 +1079,7 @@ impl PlaytestHarness {
         }
         assert!(self.state_is::<DrivingState>());
         self.driving = self.app.state();
+        self.put_road_events_on_simulated_time();
         self.advance_frame_clock();
         self.with_drive(|drive, ctx| {
             drive.trip.position_mi = drive.trip.total_miles();
@@ -1094,6 +1098,7 @@ impl PlaytestHarness {
         }
         assert!(self.state_is::<DrivingState>());
         self.driving = self.app.state();
+        self.put_road_events_on_simulated_time();
         self.neutralize_random_trip_friction();
     }
 
@@ -1434,6 +1439,23 @@ impl PlaytestHarness {
             self.key(key_event(Key::Down, None));
         }
         panic!("Route index {target_index} not keyboard reachable");
+    }
+
+    /// Put the road-event breather on the same simulated clock as the pacer.
+    ///
+    /// `RoadEventBreather` holds off a repeat limit, traffic or zone line for
+    /// 10 to 15 REAL seconds, and this harness drives minutes of road in a
+    /// fraction of one. Left on the wall clock it suppresses almost every
+    /// such line, and exactly how many survive depends on how fast the
+    /// machine ran the loop -- which is a test that passes alone and fails in
+    /// a loaded suite. Four different tests were failing this way, one per
+    /// run, and never the same one twice.
+    ///
+    /// The breather exposes `set_clock` for precisely this; nothing was
+    /// calling it.
+    fn put_road_events_on_simulated_time(&mut self) {
+        let clock = self.clock.boxed();
+        self.with_drive(move |drive, _| drive.trip.event_breather.set_clock(clock));
     }
 
     fn neutralize_random_trip_friction(&mut self) {

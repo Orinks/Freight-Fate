@@ -6,11 +6,11 @@
 //! answered by a fake transport here -- the same style the network tier's own
 //! tests use -- so nothing in this file touches the network or a real browser.
 
-
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use crate::states_online_support::*;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::SharedState;
 use freight_fate::cloud_saves::AUTH_HELP;
@@ -24,7 +24,6 @@ use freight_fate::states::online_states::{
     SetupOutcome, SetupPhase, PROFILE_SHARING_CONSENT_VERSION,
 };
 use serde_json::{json, Value};
-use crate::states_online_support::*;
 
 fn an_activation() -> Activation {
     Activation {

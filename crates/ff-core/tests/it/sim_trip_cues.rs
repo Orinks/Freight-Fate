@@ -1,9 +1,9 @@
 //! Trip hazard, GPS cue, toll, and city-event tests (port of
 //! `tests/test_trip_cues.py`).
 
-
 use std::collections::HashMap;
 
+use crate::sim_support::*;
 use ff_core::data::state_welcome::welcome_sign;
 use ff_core::data::world_models::Route;
 use ff_core::pyrandom::PyRandom;
@@ -16,7 +16,6 @@ use ff_core::sim::trip_models::{
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::{WeatherKind, REGION_WEIGHTS};
 use ff_core::speech_text::brake_lights_cue;
-use crate::sim_support::*;
 
 fn pool(
     region: &str,

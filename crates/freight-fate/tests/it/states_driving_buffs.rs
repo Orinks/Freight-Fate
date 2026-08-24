@@ -8,7 +8,7 @@
 //! rows are private here, so each purchase goes through the menu row a
 //! player would land on -- which is the same code path plus its label.
 
-
+use crate::states_driving_menus_support::*;
 use ff_core::models::business::{COMPANY_DRIVER, LEASED_OWNER_OPERATOR};
 use ff_core::sim::trip_models::RoadStop;
 use freight_fate::app::testing::TestApp;
@@ -16,7 +16,6 @@ use freight_fate::app::{GameContext, SharedState};
 use freight_fate::states::base::Menu;
 use freight_fate::states::driving_menu_states::DriveRef;
 use freight_fate::states::driving_rest_states::{ParkingFullState, RestStopState};
-use crate::states_driving_menus_support::*;
 
 /// Activate the row whose HELP contains `needle`.
 ///

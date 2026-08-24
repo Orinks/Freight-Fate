@@ -6,7 +6,7 @@
 //! lane-position mechanics. Honest absence: legs with no baked lane data say
 //! nothing.
 
-
+use crate::sim_support::*;
 use ff_core::data::world_models::{CorridorDetail, LaneSegment, Leg, Route};
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::{
@@ -14,7 +14,6 @@ use ff_core::sim::trip_models::{
 };
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::WeatherSystem;
-use crate::sim_support::*;
 
 /// `tests/test_multilane_speech.py::_leg`.
 fn leg(a: &str, b: &str, miles: f64, segs: Vec<LaneSegment>) -> Leg {

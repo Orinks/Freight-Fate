@@ -9,7 +9,6 @@
 //! harness are listed here, ignored, with their bodies noted, so the two
 //! suites diff by name.
 
-
 use ff_core::models::business::COMPANY_DRIVER;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;

@@ -7,7 +7,7 @@
 //! The city hub, the online offer and the mid-trip resume are all real
 //! here, so these tests assert the screen the Python flow landed on.
 
-
+use crate::states_main_menu_support::*;
 use ff_core::models::profile::{Profile, DEFAULT_CITY};
 use ff_core::models::start_options::DEFAULT_START_KEY;
 use freight_fate::app::testing::TestApp;
@@ -23,7 +23,6 @@ use freight_fate::states::save_notice::{
     LegacyCareerNoticeState, SaveMigrationNoticeState, SaveModifiedNoticeState,
 };
 use freight_fate::updater;
-use crate::states_main_menu_support::*;
 
 // -- tests/test_main_menu_save_scan.py ------------------------------------------
 

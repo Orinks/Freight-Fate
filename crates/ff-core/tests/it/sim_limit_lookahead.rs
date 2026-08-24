@@ -5,14 +5,13 @@
 //! miles are honest data, but hitting one blind at 55 in a Class-8 is not
 //! playable.
 
-
+use crate::sim_support::*;
 use ff_core::data::world_models::{
     CorridorDetail, GradeSegment, Leg, Route, SpeedLimitSample, StateMileage,
 };
 use ff_core::sim::trip::{spoken_short_miles, Trip, TripOptions};
 use ff_core::sim::trip_models::{RoadStop, TripEventKind};
 use ff_core::sim::vehicle::TruckState;
-use crate::sim_support::*;
 
 fn sample(at_mi: f64, mph: Option<f64>) -> SpeedLimitSample {
     SpeedLimitSample {

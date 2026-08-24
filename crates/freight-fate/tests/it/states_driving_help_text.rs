@@ -44,12 +44,7 @@ fn a_drive(name: &str) -> PlaytestHarness {
 /// Everything the last help call put on the main channel, joined -- the help
 /// is spoken as one long block and Python read it as `spoken[-1]`.
 fn last_help(harness: &PlaytestHarness) -> String {
-    harness
-        .app
-        .main_lines()
-        .last()
-        .cloned()
-        .unwrap_or_default()
+    harness.app.main_lines().last().cloned().unwrap_or_default()
 }
 
 // -- the drive's own help ---------------------------------------------------------------
@@ -77,10 +72,7 @@ fn test_driving_help_explains_selected_automatic_direction_style() {
         said.contains("Fully stopped away from route points"),
         "{said}"
     );
-    assert!(
-        said.contains("emergency shoulder-sleep warning"),
-        "{said}"
-    );
+    assert!(said.contains("emergency shoulder-sleep warning"), "{said}");
 
     harness.app.ctx.settings.automatic_direction_changes = "deliberate".to_string();
     harness.clear_speech();
@@ -246,7 +238,10 @@ fn test_how_to_play_documents_new_gameplay_systems() {
         "streamer-safe status",
         "receivable stations",
     ] {
-        assert!(help_text.contains(phrase), "How to play never says {phrase:?}");
+        assert!(
+            help_text.contains(phrase),
+            "How to play never says {phrase:?}"
+        );
     }
 }
 
@@ -271,12 +266,18 @@ fn test_dispatch_board_keeps_route_planning_out_of_load_offer() {
         .map(|item| item.text(&state, &app.ctx))
         .collect();
 
-    assert!(rows.iter().any(|row| row.contains("Equipment:")), "{rows:#?}");
+    assert!(
+        rows.iter().any(|row| row.contains("Equipment:")),
+        "{rows:#?}"
+    );
     assert!(
         rows.iter().all(|row| !row.contains("Legal HOS plan")),
         "{rows:#?}"
     );
-    assert!(rows.iter().all(|row| !row.contains("Route has")), "{rows:#?}");
+    assert!(
+        rows.iter().all(|row| !row.contains("Route has")),
+        "{rows:#?}"
+    );
     assert!(
         rows.iter().all(|row| !row.contains("Fuel-capable stops")),
         "{rows:#?}"

@@ -337,7 +337,10 @@ fn test_manual_clutch_out_ducks_load_but_keeps_live_revs() {
     update_audio(&mut harness, 0.0);
     let (rpm, load) = last_rpm(&log);
     assert_eq!(rpm, 1400.0);
-    assert!(close(load, SHIFT_LOAD_CAP), "live revs, ducked load: {load}");
+    assert!(
+        close(load, SHIFT_LOAD_CAP),
+        "live revs, ducked load: {load}"
+    );
 
     harness.with_drive(|drive, _| drive.truck_mut().rpm = 1650.0); // the blip climbs
     update_audio(&mut harness, 0.0);
@@ -371,10 +374,7 @@ fn test_engine_audio_load_tracks_manual_throttle_smoothly() {
 
     // Raw throttle still controls audible load, but the 450-millisecond
     // filter prevents an immediate gain step for a cruise correction.
-    assert!(
-        close(rising, 0.5 + (0.75 - 0.5) * (0.1 / 0.45)),
-        "{rising}"
-    );
+    assert!(close(rising, 0.5 + (0.75 - 0.5) * (0.1 / 0.45)), "{rising}");
     assert!(
         close(falling, rising + (0.25 - rising) * (0.1 / 0.45)),
         "{falling}"
@@ -458,7 +458,9 @@ fn test_cold_start_buzzer_waits_out_the_crank() {
     log.borrow_mut().engine_starting = true;
     update_audio(&mut harness, 0.0);
     assert!(
-        !played_keys(&log).iter().any(|k| k == "vehicle/low_air_buzzer"),
+        !played_keys(&log)
+            .iter()
+            .any(|k| k == "vehicle/low_air_buzzer"),
         "{:#?}",
         played_keys(&log)
     );
@@ -468,7 +470,9 @@ fn test_cold_start_buzzer_waits_out_the_crank() {
     log.borrow_mut().engine_starting = false;
     update_audio(&mut harness, 0.0);
     assert!(
-        played_keys(&log).iter().any(|k| k == "vehicle/low_air_buzzer"),
+        played_keys(&log)
+            .iter()
+            .any(|k| k == "vehicle/low_air_buzzer"),
         "{:#?}",
         played_keys(&log)
     );
@@ -483,7 +487,9 @@ fn test_cold_start_buzzer_waits_out_the_crank() {
     });
     update_audio(&mut harness, 0.0);
     assert!(
-        !played_keys(&log).iter().any(|k| k == "vehicle/low_air_buzzer"),
+        !played_keys(&log)
+            .iter()
+            .any(|k| k == "vehicle/low_air_buzzer"),
         "{:#?}",
         played_keys(&log)
     );
@@ -552,4 +558,76 @@ fn test_engine_audio_mirror_sync_catches_any_out_of_band_stop() {
     update_audio(&mut harness, 0.0);
 
     assert!(!harness.app.ctx.audio.engine_running());
+}
+
+// -- road texture ---------------------------------------------------------------------
+
+#[test]
+fn test_road_joint_thumps_use_physical_distance_at_every_pace() {
+    // The thumps follow real wheel travel, not the trip model's compressed
+    // route distance, so the same stretch of concrete sounds the same at
+    // every time compression.
+    //
+    // Python stubbed `truck.update` to hold the speed; here the truck is
+    // re-pinned to 20 m/s at the top of each frame, which is the same
+    // arrangement without a fake. The rumble severity Python also read is
+    // unreachable -- `RumbleEngine`'s one-shot queue is private -- but it is
+    // the same number the thump's own volume carries (`0.015 * severity`),
+    // so the assertion below pins it there.
+    for time_scale in [10.0, 20.0, 40.0] {
+        let (mut harness, log) = a_drive(&format!("Joints {time_scale}"));
+        harness.app.ctx.settings.time_scale = time_scale;
+        harness.with_drive(move |drive, _| {
+            drive.road_joint_accumulator_m = 0.0;
+            drive.next_joint_distance_m = 15.0;
+            drive.trip.time_scale = time_scale;
+            drive.trip.set_patrols(Vec::new());
+            drive.trip.posts.clear();
+            drive.truck_mut().start_engine();
+        });
+        log.borrow_mut().played.clear();
+
+        for _ in 0..30 {
+            harness.advance_clock(1.0 / 60.0);
+            harness.with_drive(|drive, ctx| {
+                drive.truck_mut().velocity_mps = 20.0;
+                drive.update_audio(ctx, 1.0 / 60.0);
+            });
+        }
+        assert!(
+            (harness.read_drive(|d| d.road_joint_accumulator_m) - 10.0).abs() < 1e-3,
+            "{}",
+            harness.read_drive(|d| d.road_joint_accumulator_m)
+        );
+        assert!(joint_plays(&log).is_empty(), "{:#?}", joint_plays(&log));
+
+        for _ in 0..30 {
+            harness.advance_clock(1.0 / 60.0);
+            harness.with_drive(|drive, ctx| {
+                drive.truck_mut().velocity_mps = 20.0;
+                drive.update_audio(ctx, 1.0 / 60.0);
+            });
+        }
+        let thumps = joint_plays(&log);
+        assert_eq!(thumps.len(), 1, "{thumps:#?}");
+        // 0.015 * (20 / 30): the severity the rumble is given, in the volume.
+        assert!((thumps[0] - 0.01).abs() < 1e-5, "{}", thumps[0]);
+        assert!(
+            (harness.read_drive(|d| d.road_joint_accumulator_m) - 5.0).abs() < 1e-3,
+            "{}",
+            harness.read_drive(|d| d.road_joint_accumulator_m)
+        );
+        let next = harness.read_drive(|d| d.next_joint_distance_m);
+        assert!((14.0..=18.0).contains(&next), "{next}");
+    }
+}
+
+/// The volumes every road-joint thump played at.
+fn joint_plays(log: &Log) -> Vec<f64> {
+    log.borrow()
+        .played
+        .iter()
+        .filter(|(key, _)| key == "vehicle/road_joint")
+        .map(|(_, volume)| *volume)
+        .collect()
 }

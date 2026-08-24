@@ -5,7 +5,6 @@
 //! Python file is split and `transcript_cruise_support` for what replaced each
 //! monkeypatch.
 
-
 use ff_core::sim::traffic_manager::TrafficVehicle;
 use ff_core::sim::trip_models::{TrafficContext, TripEvent, TripEventData, TripEventKind};
 use ff_core::sim::weather::WeatherKind;

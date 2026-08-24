@@ -1,8 +1,8 @@
 //! Traffic bubble manager tests (port of `tests/test_traffic_manager.py`).
 
-
 use std::collections::HashSet;
 
+use crate::sim_support::*;
 use ff_core::data::world_models::Route;
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::traffic_manager::{
@@ -14,7 +14,6 @@ use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::{hourly_volume_fraction, DIRECTIONAL_SPLIT};
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::{effects, WeatherKind};
-use crate::sim_support::*;
 
 /// Route miles just past each on-ramp -- where a merge can come from.
 fn ramp_miles(manager: &TrafficManager) -> Vec<f64> {

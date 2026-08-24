@@ -53,7 +53,14 @@ fn a_drive(name: &str) -> PlaytestHarness {
 /// ones.
 fn reverse_controls(harness: &mut PlaytestHarness, accelerating: bool, braking_key: bool) -> bool {
     harness.with_drive(move |drive, ctx| {
-        drive.update_reverse_controls(ctx, accelerating, braking_key, accelerating, braking_key, DT)
+        drive.update_reverse_controls(
+            ctx,
+            accelerating,
+            braking_key,
+            accelerating,
+            braking_key,
+            DT,
+        )
     })
 }
 
@@ -236,7 +243,13 @@ fn test_controller_trigger_edges_gate_direction_changes() {
     // Trigger held coming into the stop: no edge, never engages.
     harness.with_drive(|drive, _| drive.reverse_brake_held = true);
     for _ in 0..60 {
-        assert!(!reverse_controls_with(&mut harness, false, true, false, true));
+        assert!(!reverse_controls_with(
+            &mut harness,
+            false,
+            true,
+            false,
+            true
+        ));
     }
     assert!(!harness.read_drive(|d| d.truck().transmission.in_reverse()));
 
@@ -398,7 +411,10 @@ fn test_delivery_trip_carries_no_silent_arrival_zones() {
     let mut harness = PlaytestHarness::new();
     harness.start_delivery(StartDelivery::named("Arrival Zones"));
 
-    assert_eq!(harness.read_drive(|d| d.phase.clone()), DRIVE_PHASE_DELIVERY);
+    assert_eq!(
+        harness.read_drive(|d| d.phase.clone()),
+        DRIVE_PHASE_DELIVERY
+    );
     let reasons = harness.read_drive(|d| {
         d.trip
             .zones

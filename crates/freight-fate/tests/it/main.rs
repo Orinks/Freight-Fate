@@ -6,7 +6,6 @@
 //! file is the only target and the `mod` lines below are what includes
 //! them. A new test file needs a line here.
 
-
 mod audio_support;
 mod states_city_support;
 mod states_driving_menus_support;
@@ -51,9 +50,11 @@ mod speech_live;
 mod states_city;
 mod states_city_hos;
 mod states_city_pickup;
+mod states_city_route_planning;
 mod states_city_shops;
 mod states_cloud_save_states;
 mod states_driving_air_brakes;
+mod states_driving_arrival_gate;
 mod states_driving_buffs;
 mod states_driving_cab_systems;
 mod states_driving_chain_law;
@@ -82,6 +83,7 @@ mod states_driving_ramps;
 mod states_driving_retarder;
 mod states_driving_road;
 mod states_driving_status_screens;
+mod states_driving_stop_menus;
 mod states_driving_trip_resume;
 mod states_driving_troopers;
 mod states_driving_turns;

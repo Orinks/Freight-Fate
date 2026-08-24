@@ -7,7 +7,7 @@
 //! costs a clean driver nothing, and nothing can bite a player it never made
 //! a sound for.
 
-
+use crate::sim_support::*;
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::enforcement_observe::{
     geometry_factor, observe, RoadSample, CERTAIN_OVER_MPH, OBSERVE_HOLD_MI, WHAT_FOLLOWING,
@@ -23,7 +23,6 @@ use ff_core::sim::season::day_of_week;
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::CB_CALLS_PER_RUN;
 use ff_core::sim::vehicle::TruckState;
-use crate::sim_support::*;
 
 fn trip_opts(a: &str, b: &str, opts: TripOptions) -> Trip {
     let route = supported(world(), a, b);

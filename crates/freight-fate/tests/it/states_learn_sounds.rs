@@ -2,11 +2,11 @@
 //! the state half of `tests/test_learn_sounds_state.py`; the sequencer's own
 //! tests live in `ff_core::sound_catalog::demo`).
 
-
-
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use crate::states_driving_menus_support as drive_support;
+use crate::states_main_menu_support::*;
 use ff_core::sound_catalog::{Cue, SoundCategory, SoundEntry, CATALOG};
 use freight_fate::app::testing::TestApp;
 use freight_fate::audio::{Audio, AudioError, SustainLoopSpec, VolumeUpdate};
@@ -16,8 +16,6 @@ use freight_fate::states::driving_menu_states::DriveRef;
 use freight_fate::states::driving_pause_states::PauseMenuState;
 use freight_fate::states::learn_sounds::{LearnSoundCategoryState, LearnSoundsState};
 use freight_fate::states::main_menu::MainMenuState;
-use crate::states_driving_menus_support as drive_support;
-use crate::states_main_menu_support::*;
 
 /// What the demo asked the audio engine for, in order (the Python
 /// `FakeAudio` / `monkeypatch.setattr(app.ctx.audio, ...)` seams).

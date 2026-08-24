@@ -2,12 +2,11 @@
 //! dock, and a long synthetic approach steps its posted speeds down (the sim
 //! half of `tests/test_facility_approaches.py`).
 
-
+use crate::sim_support::*;
 use ff_core::data::world_models::{CorridorDetail, Leg, Route, StateMileage};
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::WeatherSystem;
-use crate::sim_support::*;
 
 #[test]
 fn test_facility_approach_status_names_the_dock_not_the_town() {

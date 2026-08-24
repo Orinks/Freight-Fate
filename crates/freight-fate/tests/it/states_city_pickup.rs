@@ -5,7 +5,7 @@
 //! is the driving port's, so these build the pickup screen the arrival
 //! would have built and pin what happens on it.
 
-
+use crate::states_city_support::*;
 use ff_core::models::business::LEASED_OWNER_OPERATOR;
 use ff_core::models::jobs::{cargo_type, Job};
 use ff_core::models::trailer_yard::{
@@ -21,7 +21,6 @@ use freight_fate::states::city_pickup::{
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_pause_states::PauseMenuState;
 use freight_fate::states::main_menu::MainMenuState;
-use crate::states_city_support::*;
 
 /// A dispatch out of a facility that stages loaded trailers.
 fn drop_yard_job(facility_id: &str, distance_mi: f64) -> Job {

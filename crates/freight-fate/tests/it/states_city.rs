@@ -9,7 +9,7 @@
 //! Every flow that ends at the wheel now lands on the real `DrivingState`,
 //! through `states::city::launch_driving`.
 
-
+use crate::states_city_support::*;
 use ff_core::models::business::{INDEPENDENT_AUTHORITY, LEASED_OWNER_OPERATOR};
 use ff_core::models::career::LEVEL_XP;
 use ff_core::models::dispatch_policy::{NEW_HIRE_DECLINE_BUDGET, SENIOR_LOAD_CHOICE_LEVEL};
@@ -35,7 +35,6 @@ use freight_fate::states::driving_pause_states::{
 };
 use freight_fate::states::main_menu::{ConfirmQuitState, MainMenuState};
 use serde_json::{json, Map, Value};
-use crate::states_city_support::*;
 
 fn job(miles: f64) -> Job {
     job_with(miles, 900.0, 8.0)

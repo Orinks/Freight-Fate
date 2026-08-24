@@ -9,7 +9,6 @@
 //! is standing in -- because every one of them is a plain field the stub was
 //! standing in for.
 
-
 use ff_core::models::enforcement::{citation_fine, CHAIN_LAW_FINE};
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::trip_models::Zone;

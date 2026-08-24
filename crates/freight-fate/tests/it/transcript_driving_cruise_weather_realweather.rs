@@ -5,7 +5,6 @@
 //! Python file is split and `transcript_cruise_support` for what replaced each
 //! monkeypatch.
 
-
 use std::cell::RefCell;
 use std::rc::Rc;
 

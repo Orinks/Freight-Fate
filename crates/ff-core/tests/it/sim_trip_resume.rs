@@ -6,7 +6,6 @@
 //! `#[ignore]`d stubs, which is no coverage at all, and now run for real in
 //! `crates/freight-fate/tests/states_driving_trip_resume.rs`.
 
-
 use crate::sim_support::*;
 
 #[test]

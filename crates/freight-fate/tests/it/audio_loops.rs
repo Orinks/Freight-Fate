@@ -4,7 +4,6 @@
 //!
 //! Wrapped in a module so `cargo test -p freight-fate audio` selects them.
 
-
 mod audio_loops {
     use std::time::Duration;
 

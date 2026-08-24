@@ -2,7 +2,6 @@
 //! (the world-backed and cross-module half of `tests/test_regions.py`; the
 //! classifier cases live inline in `regions.rs`).
 
-
 use crate::data_support::world;
 use ff_core::data::regions::{classify_region, REGIONS};
 

@@ -12,7 +12,6 @@
 //!   `GradeSegment` over the whole leg; the loop still writes `t.grade` by
 //!   hand each frame exactly as Python did.
 
-
 use freight_fate::playtest::harness::PlaytestHarness;
 use freight_fate::states::driving_core::{
     ACC_LIMIT_OFFSET_MPH, DESCENT_SAFE_MAX_MPH, MPH_PER_MPS, PCC_CREST_SAG_MPH,

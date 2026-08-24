@@ -5,7 +5,6 @@
 //! Python file is split and `transcript_cruise_support` for what replaced each
 //! monkeypatch.
 
-
 use ff_core::sim::trip_models::{NPCVehicle, TripEvent, TripEventData, TripEventKind, Zone};
 use ff_core::sim::trip_route_helpers::zone_key;
 use ff_core::sim::weather::WeatherKind;

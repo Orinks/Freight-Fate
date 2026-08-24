@@ -6,7 +6,6 @@
 //!
 //! Wrapped in a module so `cargo test -p freight-fate audio` selects them.
 
-
 mod audio_speech_ducking {
     use freight_fate::audio::{Audio, Category, SPEECH_DUCK_LEVEL};
 

@@ -4,7 +4,7 @@
 //! garage cases of `tests/test_smoke.py`, and the truck-shop case of
 //! `tests/test_save_migration.py`.
 
-
+use crate::states_city_support::*;
 use ff_core::models::business::{
     business_status_summary, has_authority_readiness, AUTHORITY_ACTIVATION_COST,
     AUTHORITY_ACTIVATION_DELIVERIES, AUTHORITY_ACTIVATION_LEVEL, AUTHORITY_ACTIVATION_REPUTATION,
@@ -28,7 +28,6 @@ use freight_fate::states::city::{
 use freight_fate::states::city_garage::{
     CHAIN_SET_COST, TIRE_SERVICE_COST_PER_PCT, WINTER_TIRE_PREMIUM,
 };
-use crate::states_city_support::*;
 
 fn approx(a: f64, b: f64) {
     assert!((a - b).abs() < 0.01, "{a} != {b}");

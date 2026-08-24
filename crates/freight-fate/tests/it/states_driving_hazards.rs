@@ -16,9 +16,7 @@
 //! what the hazard machinery said.
 
 use ff_core::sim::traffic_manager::TrafficVehicle;
-use ff_core::sim::trip_models::{
-    NavigationCue, TripEvent, TripEventData, TripEventKind, Zone,
-};
+use ff_core::sim::trip_models::{NavigationCue, TripEvent, TripEventData, TripEventKind, Zone};
 use ff_core::sim::weather::WeatherKind;
 use ff_core::speech_text::{hazard_call, SpokenMessage};
 
@@ -206,7 +204,13 @@ fn test_trip_event_sounds_use_contextual_cues() {
             data: TripEventData {
                 cue: Some(traffic_cue.clone()),
                 npc_vehicle: Some(TrafficVehicle::new(
-                    "npc", 12.0, 55.0, 55.0, 1, "cruising", vehicle_class,
+                    "npc",
+                    12.0,
+                    55.0,
+                    55.0,
+                    1,
+                    "cruising",
+                    vehicle_class,
                 )),
                 ..Default::default()
             },

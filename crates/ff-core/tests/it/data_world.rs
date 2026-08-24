@@ -1,6 +1,5 @@
 //! World data and route graph tests (port of `tests/test_world.py`).
 
-
 use std::collections::{BTreeSet, HashSet};
 
 use crate::data_support::{data_dir, shortest, supported, world};

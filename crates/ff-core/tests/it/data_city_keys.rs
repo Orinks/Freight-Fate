@@ -8,7 +8,6 @@
 //! persisted (bare city names, "City, State" names, facility ids) still
 //! resolves.
 
-
 use crate::data_support::world;
 use ff_core::data::legacy_aliases::LEGACY_CITY_SLUGS;
 use regex::Regex;

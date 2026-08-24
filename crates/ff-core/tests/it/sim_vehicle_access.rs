@@ -9,9 +9,9 @@
 //! is a separate axis from parking certainty -- a lot can admit a rig for fuel
 //! and still have nowhere to park it.
 
-
 use std::collections::HashSet;
 
+use crate::sim_support::*;
 use ff_core::data::world_constants::{
     vehicle_access_allows, DEFAULT_VEHICLE_ACCESS, VEHICLE_ACCESS_LEVELS,
 };
@@ -21,7 +21,6 @@ use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::RoadStop;
 use ff_core::sim::vehicle::TruckState;
 use serde_json::{json, Value};
-use crate::sim_support::*;
 
 fn strings(items: &[&str]) -> Vec<String> {
     items.iter().map(|s| s.to_string()).collect()

@@ -1,12 +1,11 @@
 //! Property checks for route-backed trip simulation invariants (port of
 //! `tests/test_trip_properties.py`; hypothesis -> proptest).
 
-
+use crate::sim_support::*;
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::{TripEventKind, ZONE_MIN_GAP_MI};
 use ff_core::sim::vehicle::TruckState;
 use proptest::prelude::*;
-use crate::sim_support::*;
 
 const SUPPORTED_ROUTE_PAIRS: [(&str, &str); 5] = [
     ("Buffalo", "Rochester"),

@@ -10,7 +10,6 @@
 //!
 //! Wrapped in a module so `cargo test -p freight-fate audio` selects them.
 
-
 mod audio_backends {
     use std::cell::RefCell;
     use std::rc::Rc;

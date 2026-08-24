@@ -2,7 +2,7 @@
 //! `tests/test_delivery_summary_sharing.py` (the Mastodon toggle and link
 //! status). The clipboard half of that file belongs to the arrival menu.
 
-
+use crate::states_online_support::*;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::SharedState;
 use freight_fate::net::testing::FakeTransport;
@@ -14,7 +14,6 @@ use freight_fate::states::online_states::{
     MastodonLinkState, MastodonOutcome, ProfileSharingSyncState, DISCLOSURE,
 };
 use serde_json::json;
-use crate::states_online_support::*;
 
 #[test]
 fn test_disclosure_is_single_profile_sharing_consent() {

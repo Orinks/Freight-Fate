@@ -3,7 +3,7 @@
 //! new-career-to-delivery walk, plus the smoke verification of the baked
 //! data.
 
-
+use crate::states_city_support::*;
 use ff_core::models::business::LEASED_OWNER_OPERATOR;
 use ff_core::models::profile::Profile;
 use freight_fate::app::testing::TestApp;
@@ -21,7 +21,6 @@ use freight_fate::states::main_menu::{
     CareerStartState, HomeCityState, HomeTerminalState, MainMenuState, NameEntryState,
 };
 use freight_fate::updater;
-use crate::states_city_support::*;
 
 /// `accept_pickup_drive`'s head: New career through the four defaults, which
 /// lands on the destination terminal's city hub.

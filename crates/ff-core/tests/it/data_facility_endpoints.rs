@@ -2,7 +2,6 @@
 //! `tests/test_facility_endpoints.py`; the `tools/build_facility_endpoints.py`
 //! cases stay Python).
 
-
 use std::collections::HashSet;
 
 use crate::data_support::{read_json, world};

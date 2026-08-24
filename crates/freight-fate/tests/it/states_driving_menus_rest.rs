@@ -8,7 +8,6 @@
 //! `tests/test_rest_stop_assist.py`, and the pause/resume cases of
 //! `tests/test_trip_resume.py`.
 
-
 use ff_core::models::business::{COMPANY_DRIVER, LEASED_OWNER_OPERATOR};
 use ff_core::models::economy::{PAY_ADVANCE_ELIGIBLE_BELOW, PAY_ADVANCE_LIMIT};
 use ff_core::sim::hos;

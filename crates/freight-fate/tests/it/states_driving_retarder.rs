@@ -303,7 +303,10 @@ fn test_curve_assist_takes_corners_on_the_drums_and_grades_on_the_jake() {
     });
     assist_frame(&mut harness, 54.0);
     assert!(!jake_on(&harness), "no jake on ice");
-    assert!(service_brake(&harness) > 0.0, "gentle service braking instead");
+    assert!(
+        service_brake(&harness) > 0.0,
+        "gentle service braking instead"
+    );
 
     // Tip the same bend downhill and the retarder does come out -- that is
     // the grade's doing, not the corner's, and it is the one job the engine

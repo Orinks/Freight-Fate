@@ -17,8 +17,8 @@
 //! test is the real `LaneKeeping::describe`, not the invented "Right rumble
 //! strip." the Python stub returned.
 
-use ff_core::sim::enforcement_posts::{method_by_kind, EnforcementPost, KIND_MEDIAN};
 use ff_core::sim::enforcement_observe::OBSERVE_HOLD_MI;
+use ff_core::sim::enforcement_posts::{method_by_kind, EnforcementPost, KIND_MEDIAN};
 use ff_core::sim::lane::MAX_OFFSET;
 use ff_core::sim::weather::WeatherKind;
 
@@ -113,7 +113,10 @@ fn test_terse_air_brake_startup_omits_control_instructions() {
     // The exact psi depends on how much rpm the first second of running
     // banked (shift timing shifts it by one); terseness is the assertion.
     let last = main_lines(&harness).last().cloned().unwrap_or_default();
-    assert!(last.starts_with("Parking brake set. Air pressure"), "{last}");
+    assert!(
+        last.starts_with("Parking brake set. Air pressure"),
+        "{last}"
+    );
     assert!(last.ends_with("psi."), "{last}");
     assert!(!last.to_lowercase().contains("wait for"), "{last}");
 

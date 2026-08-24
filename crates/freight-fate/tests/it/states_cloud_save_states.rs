@@ -6,7 +6,7 @@
 //! offers to become it behind a spoken confirmation, and the choice goes to
 //! orinks.net.
 
-
+use crate::states_online_support::*;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::{share, SharedState};
 use freight_fate::net::testing::FakeTransport;
@@ -17,7 +17,6 @@ use freight_fate::states::cloud_save_states::{
 };
 use freight_fate::states::online_states::wall_time;
 use serde_json::{json, Map, Value};
-use crate::states_online_support::*;
 
 fn cloud_reply(public: Option<&str>) -> Value {
     json!({

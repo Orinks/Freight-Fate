@@ -9,8 +9,8 @@
 //! at the bottom drive a real career creation through the app instead, and
 //! wait on the main menu port.
 
-
-
+use crate::states_main_menu_support as menus;
+use crate::states_online_support::*;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::SharedState;
 use freight_fate::net::testing::FakeTransport;
@@ -22,8 +22,6 @@ use freight_fate::states::main_menu::{
 };
 use freight_fate::states::online_offer::{should_offer_online, OnlineOfferState};
 use freight_fate::states::online_states::OnlineSetupState;
-use crate::states_main_menu_support as menus;
-use crate::states_online_support::*;
 
 /// A base screen under the offer, so the offer's exits have something to
 /// replace and the stack never empties.

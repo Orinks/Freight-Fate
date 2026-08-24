@@ -3,7 +3,6 @@
 //! `tests/test_surface_streets.py`). The route-building half is live; the
 //! Trip-driven assertions are ignored until `sim::trip` lands.
 
-
 use crate::data_support::world;
 use ff_core::data::world::World;
 use ff_core::data::world_models::{Leg, LocalGeometry, Route};

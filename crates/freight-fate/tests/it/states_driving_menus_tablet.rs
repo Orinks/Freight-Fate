@@ -5,7 +5,6 @@
 //! `RadioState.search` cases live with the radio port), the drive cases of
 //! `tests/test_radio_favorites.py`, and `tests/test_driving_school.py`.
 
-
 use ff_core::models::profile::Profile;
 use ff_core::sim::vehicle::TruckState;
 

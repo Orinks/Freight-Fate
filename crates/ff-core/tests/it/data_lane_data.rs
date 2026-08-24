@@ -5,7 +5,6 @@
 //! These guard the raw shard data directly rather than through the world
 //! model, as the Python tests did.
 
-
 use std::collections::HashSet;
 
 use crate::data_support::data_dir;

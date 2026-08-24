@@ -2,9 +2,9 @@
 //! Trip half of `tests/test_real_construction_zones.py`; the provider and
 //! parser classes live with `sim::real_traffic`).
 
-
 use std::sync::Arc;
 
+use crate::sim_support::*;
 use ff_core::data::world_models::{
     CorridorDetail, LaneSegment, Leg, Route, RoutePoint, StateMileage,
 };
@@ -14,7 +14,6 @@ use ff_core::sim::trip_models::CONSTRUCTION_TAPER_MI;
 use ff_core::sim::trip_route_helpers::nearest_mile_on_leg;
 use ff_core::sim::trip_traffic::TrafficProvider;
 use ff_core::sim::vehicle::{TruckSpecs, TruckState};
-use crate::sim_support::*;
 
 // --- Helpers ----------------------------------------------------------------
 

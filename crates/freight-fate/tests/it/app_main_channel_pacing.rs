@@ -9,13 +9,12 @@
 //! today's immediate behavior, mirroring how screen readers cancel speech
 //! on navigation.
 
-
+use crate::states_driving_menus_support as drive_support;
 use ff_core::speech_pacing::EventPriority;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::{Say, SayEvent};
 use freight_fate::controller::ControllerButton;
 use freight_fate::states::base::{InputEvent, Key, State};
-use crate::states_driving_menus_support as drive_support;
 
 struct Wheel;
 impl State for Wheel {
