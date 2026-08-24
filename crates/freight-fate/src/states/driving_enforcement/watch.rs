@@ -212,6 +212,33 @@ impl DrivingState {
         self.cruise_mph.is_some() || self.speed_control_armed
     }
 
+    /// Whether the truck's speed is the assist's choice, not the driver's.
+    ///
+    /// This used to ask whether the assist was actively BRAKING, which
+    /// covered adaptive cruise recovering a gap and nothing else. The speed
+    /// KEEPER does not follow traffic at all -- `driving_speed_control.rs` has
+    /// no notion of a lead vehicle; it holds the posted number -- so in a work
+    /// zone it will sit at the sign's 55 while the line ahead bunches up,
+    /// closing the gap with the throttle open and never braking. The old test
+    /// read that as the driver's disregard and fined them for it.
+    ///
+    /// Darren, twice: 1,200 dollars on I-75 (2026-08-18), which is what the
+    /// carve-out was written for, and 2,400 in an I-94 work zone (2026-08-24)
+    /// with the keeper holding 55 -- doubled, because it was a construction
+    /// zone. The rule the first fix wrote down is the right one and was drawn
+    /// too narrowly: "the driver cannot even choose the gap... ticketing them
+    /// for it fined them for using the feature."
+    ///
+    /// So the question is who has the pedal. `cruise_applied` is what the
+    /// assist asked for; a driver pressing past that is closing the gap
+    /// themselves and owns it.
+    pub fn assist_owns_the_pedal(&self) -> bool {
+        if !self.speed_control_engaged() {
+            return false;
+        }
+        self.trip.truck.throttle <= 0.05_f64.max(self.cruise_applied + 0.02)
+    }
+
     /// Road covered while genuinely closed up on the vehicle ahead.
     ///
     /// The mirror of the over-limit accumulator above, and it exists for the
@@ -239,11 +266,9 @@ impl DrivingState {
             self.closed_up_mi = 0.0;
             return;
         }
-        if self.speed_control_engaged()
-            && self.trip.truck.brake > 0.0
-            && self.trip.truck.throttle <= 0.05
-        {
-            // An assist is already recovering the gap. Not disregard.
+        if self.assist_owns_the_pedal() {
+            // An assist owns the speed, so the gap is its doing. Not
+            // disregard.
             self.closed_up_mi = 0.0;
             return;
         }

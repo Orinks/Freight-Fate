@@ -1913,7 +1913,7 @@ fn test_construction_zone_warns_before_entry() {
     assert_eq!(
         warnings,
         vec![format!(
-            "Brake now! In {}, construction ahead. {}Speed limit {:.0} at the taper, then {:.0} through the work zone.",
+            "In {}, construction ahead. {}Speed limit {:.0} at the taper, then {:.0} through the work zone.",
             trip.ahead_text(lookahead),
             closure_part(&zone),
             CONSTRUCTION_TAPER_LIMIT_MPH,
@@ -1972,7 +1972,12 @@ fn test_construction_warning_lead_allows_normal_braking() {
     trip.position_mi = zone.start_mi - trip.zone_warning_lookahead_mi();
 
     let events = trip.update(0.0);
-    assert!(gps_messages(&events)[0].starts_with("Brake now!"));
+    // NOT "Brake now!" -- that is the emergency hazard opening, and this
+    // warning fires miles out. It leads with the distance like every other
+    // zone warning (Shane, 2026-08-24).
+    let first = &gps_messages(&events)[0];
+    assert!(!first.starts_with("Brake now"));
+    assert!(first.starts_with("In "));
 
     let inspections = brake_until_speed(&mut trip, zone.limit_mph, false, 20.0);
     assert!(trip.position_mi < zone.start_mi);
@@ -2029,7 +2034,7 @@ fn test_construction_zone_speeding_fine_waits_for_grace_distance() {
     assert_eq!(
         construction_cues,
         vec![format!(
-            "Brake now! In 2 miles, construction ahead. {}Speed limit {:.0} at the taper, then {:.0} through the work zone.",
+            "In 2 miles, construction ahead. {}Speed limit {:.0} at the taper, then {:.0} through the work zone.",
             closure_part(&zone),
             CONSTRUCTION_TAPER_LIMIT_MPH,
             zone.limit_mph

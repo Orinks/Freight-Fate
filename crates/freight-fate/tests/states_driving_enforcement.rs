@@ -868,6 +868,133 @@ fn test_the_open_scale_lookahead_is_at_least_the_flat_notice_distance() {
 }
 
 #[test]
+fn test_the_scale_notice_expires_once_the_distance_it_names_is_wrong() {
+    // The notice names a distance, and a distance is a claim about now.
+    //
+    // A cut ROUTE line can be handed back to be spoken behind the line that
+    // cut it, so this one has to say when it has stopped being true. It goes
+    // wrong while the scale is still AHEAD, which is sooner than the reminder
+    // that follows it: handed back after "Weigh station in half a mile" it
+    // told the driver the scale was two miles off, the two lines
+    // contradicting each other one after the other (Python adversarial
+    // battery, scale_bypass_to_the_end).
+    //
+    // Python asserts on the `valid` callable the notice carries. A Rust gate
+    // is a boxed closure the capture cannot hand back, so this drives the
+    // rescue itself: queue the real notice, cut the channel with an urgent
+    // line, and count what the player heard.
+    //
+    // The urgent line that cuts the channel, as in `states_driving_valid_gates`.
+    const CUTTER: &str = "Emergency vehicle approaching from behind.";
+    let notices = |app: &TestApp| {
+        app.event_lines()
+            .into_iter()
+            .filter(|line| line.starts_with("Open weigh station ahead in "))
+            .collect::<Vec<_>>()
+    };
+
+    // Where it was spoken, its own words are the road that is left, so a cut
+    // that early still gets it back -- the gate must not be nailed shut.
+    {
+        let mut app = TestApp::new();
+        let _clock = app.fake_pacer_clock();
+        let mut drive = a_drive(&mut app, "Jerry");
+        with_scale(&mut drive, 10.0, 11.0, true);
+        drive.trip.position_mi = 8.0;
+        drive.trip.truck.velocity_mps = mph_to_mps(45.0);
+        app.clear_speech();
+
+        drive.check_weigh_station_enforcement(&mut app.ctx, 7.8);
+        assert_eq!(notices(&app).len(), 1, "{:?}", app.event_lines());
+        assert!(notices(&app)[0].starts_with("Open weigh station ahead in 2.0 miles"));
+        app.ctx.say_event(CUTTER);
+        assert_eq!(
+            notices(&app).len(),
+            2,
+            "a notice cut while its own words are still true must come back: {:?}",
+            app.event_lines()
+        );
+    }
+
+    // Closed to half a mile: the sentence now names a distance the truck
+    // drove through several minutes ago, so the rescue must let it die.
+    // And past the scale it is dead too, for the same reason the reminder is.
+    for moved_to in [9.5, 10.5] {
+        let mut app = TestApp::new();
+        let _clock = app.fake_pacer_clock();
+        let mut drive = a_drive(&mut app, "Jerry");
+        with_scale(&mut drive, 10.0, 11.0, true);
+        drive.trip.position_mi = 8.0;
+        drive.trip.truck.velocity_mps = mph_to_mps(45.0);
+        app.clear_speech();
+
+        drive.check_weigh_station_enforcement(&mut app.ctx, 7.8);
+        assert_eq!(notices(&app).len(), 1);
+        drive.trip.position_mi = moved_to;
+        drive.refresh_live_facts();
+        app.ctx.say_event(CUTTER);
+        assert_eq!(
+            notices(&app).len(),
+            1,
+            "the notice was replayed at mile {moved_to} naming the distance it \
+             spoke from mile 8: {:?}",
+            app.event_lines()
+        );
+    }
+}
+
+#[test]
+fn test_a_gap_the_assist_owns_is_never_the_drivers_disregard() {
+    // Darren, fined twice for a gap no control of his governed.
+    //
+    // 1,200 dollars on I-75 (2026-08-18) is what the carve-out was written
+    // for, and it only forgave a gap while the assist was actively BRAKING --
+    // which is adaptive cruise recovering, and nothing else.
+    //
+    // The speed KEEPER does not follow traffic at all: driving_speed_control
+    // has no notion of a lead vehicle, it holds the posted number. So in a
+    // work zone it sits at the sign's 55 while the line ahead bunches up,
+    // closing the gap with the throttle open and never touching the brake.
+    // That read as the driver's disregard and cost him 2,400 dollars on I-94
+    // (2026-08-24), doubled for the construction zone, with the cab
+    // announcing "Speed keeper holding 55 miles per hour" as it happened.
+    //
+    // The question is who has the pedal, not what the pedal is doing.
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Darren");
+    drive.closed_up_mi = 0.0;
+    drive.trip.truck.brake = 0.0;
+
+    // The keeper owns the throttle and is holding the zone's number.
+    drive.speed_control_armed = true;
+    drive.cruise_mph = None;
+    drive.cruise_applied = 0.45;
+    drive.trip.truck.throttle = 0.45;
+    assert!(drive.assist_owns_the_pedal());
+
+    // Adaptive cruise braking to recover a gap: the original case, still
+    // forgiven.
+    drive.cruise_mph = Some(60.0);
+    drive.cruise_applied = 0.0;
+    drive.trip.truck.throttle = 0.0;
+    drive.trip.truck.brake = 0.3;
+    assert!(drive.assist_owns_the_pedal());
+
+    // But a driver pressing PAST what the assist asked for is closing the gap
+    // themselves, and owns it.
+    drive.cruise_applied = 0.20;
+    drive.trip.truck.throttle = 0.85;
+    drive.trip.truck.brake = 0.0;
+    assert!(!drive.assist_owns_the_pedal());
+
+    // And with no assist at all it is entirely theirs.
+    drive.speed_control_armed = false;
+    drive.cruise_mph = None;
+    drive.trip.truck.throttle = 0.0;
+    assert!(!drive.assist_owns_the_pedal());
+}
+
+#[test]
 fn test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, "Jerry");

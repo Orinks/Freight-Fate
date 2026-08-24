@@ -48,8 +48,19 @@ impl Trip {
             } else {
                 "All lanes stay open through the work; hold your lane. ".to_string()
             };
+            // NOT "Brake now!". This is an advance warning that fires up to
+            // eight miles out, and "Brake now" is the emergency hazard
+            // opening -- the words the cab uses for debris in your lane.
+            // Telling a driver to brake now for something eight miles away is
+            // untrue, and they act on it: Shane asked why the game slows "as
+            // early as we are" for construction when the assists in fact ease
+            // at the taper, and he had been braking because he was told to
+            // (2026-08-24). It also spends the phrase that has to mean
+            // something when a real emergency uses it. The heavy-traffic and
+            // generic zone warnings below have always opened with the
+            // distance; this one was the odd sibling out.
             return format!(
-                "Brake now! In {}, construction ahead. {merge_part}Speed limit {} at the taper, then {} through the work zone.",
+                "In {}, construction ahead. {merge_part}Speed limit {} at the taper, then {} through the work zone.",
                 self.ahead_text(ahead),
                 self.speed_value(CONSTRUCTION_TAPER_LIMIT_MPH),
                 self.speed_value(zone.limit_mph)

@@ -9,7 +9,10 @@ both of which are now closed, and again for merge `7a395758` (the map-data
 correction), which moved `test_curve_management.py`, `test_driving_features.py`
 and `test_world.py`, and for merge `ffa34a16` (the four driving and speech
 fixes), which moved `test_driving_cruise_weather.py` and
-`test_ramp_terminals.py`.
+`test_ramp_terminals.py`, and for merge `af96db01` (the pacer fix and two
+assist fixes), which moved `test_announcements.py`,
+`test_enforcement_presence.py`, `test_event_speech_pacer.py` and
+`test_scale_check_in_guidance.py`.
 
 ## Method
 
@@ -55,14 +58,14 @@ By test case, across all 239 files:
 
 | | Cases | Previous sweep |
 |---|---|---|
-| Python test functions | 4234 | 4227 |
-| live Rust namesake | 3125 | 3118 |
+| Python test functions | 4239 | 4234 |
+| live Rust namesake | 3130 | 3125 |
 | `#[ignore]`d Rust stub only | 313 | 313 |
 | no Rust namesake | 796 | 796 |
 
-Merge `ffa34a16` added 7 Python cases and all 7 were ported with it, so
-live coverage moved +7 and the unported backlog did not grow again. (Merge
-`7a395758` before it did the same with its own 7.) Live parity is
+Merge `af96db01` added 5 Python cases and all 5 were ported with it, so
+live coverage moved +5 and the unported backlog did not grow again. (Merges
+`ffa34a16` and `7a395758` before it did the same with 7 each.) Live parity is
 73.8 percent of the Python suite. (The `44c1e296` sweep before it took the
 suite from 4193 to 4220 cases, live coverage +368, ignored-only stubs -21 and
 cases with no Rust namesake -320, from 65.4 percent.)
@@ -82,7 +85,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_achievement_flavor_relocated.py` | PARTIAL | 1 / 1 / 2 | `crates/ff-core/src/achievements/tests.rs` |  |
 | `tests/test_achievements.py` | PARTIAL | 11 / 17 / 29 | `crates/ff-core/src/achievements/tests.rs` |  |
 | `tests/test_amenities.py` | PORTED | 11 / 0 / 11 | `crates/ff-core/src/data/amenities.rs`, `crates/freight-fate/tests/states_driving_core.rs` |  |
-| `tests/test_announcements.py` | PORTED | 14 / 0 / 14 | `crates/freight-fate/tests/transcript_announcements.rs` | live +14, NOT PORTED -> PORTED |
+| `tests/test_announcements.py` | PORTED | 15 / 0 / 15 | `crates/freight-fate/tests/transcript_announcements.rs` | live +1 (`af96db01`) |
 | `tests/test_assigned_reposition.py` | PORTED | 5 / 0 / 5 | `crates/freight-fate/tests/states_city.rs` | live +1, PARTIAL -> PORTED |
 | `tests/test_audio_backends.py` | PARTIAL | 48 / 0 / 52 | `crates/freight-fate/tests/audio_backends.rs` |  |
 | `tests/test_audio_fades.py` | PORTED | 9 / 0 / 9 | `crates/ff-core/src/audio_fades.rs` |  |
@@ -148,11 +151,11 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_driving_place_keys.py` | PORTED | 7 / 0 / 7 | `crates/freight-fate/tests/states_driving_turns.rs` |  |
 | `tests/test_driving_school.py` | PORTED | 3 / 0 / 3 | `crates/freight-fate/tests/states_driving_menus_tablet.rs` |  |
 | `tests/test_driving_speech_ladder.py` | PARTIAL | 46 / 0 / 80 | `crates/freight-fate/tests/app_driving_speech_ladder.rs`, `crates/ff-core/src/settings/tests.rs`, `crates/ff-core/src/speech_pacing.rs`, +2 more |  |
-| `tests/test_enforcement_presence.py` | PARTIAL | 63 / 14 / 77 | `crates/ff-core/tests/sim_enforcement_presence.rs`, `crates/freight-fate/tests/states_driving_enforcement.rs`, `crates/ff-core/src/models/safety_record.rs`, +1 more |  |
+| `tests/test_enforcement_presence.py` | PARTIAL | 64 / 14 / 78 | `crates/ff-core/tests/sim_enforcement_presence.rs`, `crates/freight-fate/tests/states_driving_enforcement.rs`, `crates/ff-core/src/models/safety_record.rs`, +1 more |  |
 | `tests/test_enforcement_record.py` | PARTIAL | 34 / 22 / 56 | `crates/ff-core/src/models/enforcement/tests.rs`, `crates/freight-fate/tests/states_city.rs` |  |
 | `tests/test_engine_audio.py` | PORTED | 10 / 0 / 10 | `crates/ff-core/src/engine_audio.rs` |  |
 | `tests/test_engine_brake_zones.py` | PARTIAL | 15 / 1 / 19 | `crates/freight-fate/tests/states_driving_road.rs` |  |
-| `tests/test_event_speech_pacer.py` | PARTIAL | 49 / 0 / 73 | `crates/ff-core/src/speech_pacing.rs`, `crates/freight-fate/tests/app_event_speech_pacer.rs` |  |
+| `tests/test_event_speech_pacer.py` | PARTIAL | 51 / 0 / 75 | `crates/ff-core/src/speech_pacing.rs`, `crates/freight-fate/tests/app_event_speech_pacer.rs` |  |
 | `tests/test_exit_recovery.py` | NOT PORTED | 0 / 0 / 5 | -- |  |
 | `tests/test_facility_approaches.py` | PARTIAL | 6 / 0 / 7 | `crates/ff-core/tests/data_facility_approaches.rs`, `crates/ff-core/tests/sim_facility_approaches.rs`, `crates/freight-fate/tests/states_driving_facility_approaches.rs` | live +6, NOT PORTED -> PARTIAL |
 | `tests/test_facility_endpoints.py` | PARTIAL | 4 / 2 / 6 | `crates/ff-core/tests/data_facility_endpoints.rs` |  |
@@ -256,7 +259,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_rumble.py` | PARTIAL | 9 / 0 / 12 | `crates/ff-core/src/rumble.rs` |  |
 | `tests/test_save_compat.py` | PORTED | 5 / 0 / 5 | `crates/ff-core/src/models/profile/tests_compat.rs` |  |
 | `tests/test_save_migration.py` | PORTED | 13 / 0 / 13 | `crates/ff-core/src/models/save_migration.rs`, `crates/freight-fate/tests/states_main_menu.rs`, `crates/freight-fate/tests/states_city_shops.rs` |  |
-| `tests/test_scale_check_in_guidance.py` | PARTIAL | 10 / 12 / 22 | `crates/freight-fate/tests/states_driving_enforcement.rs` |  |
+| `tests/test_scale_check_in_guidance.py` | PARTIAL | 11 / 12 / 23 | `crates/freight-fate/tests/states_driving_enforcement.rs` | live +1 (`af96db01`) |
 | `tests/test_season.py` | PARTIAL | 21 / 4 / 25 | `crates/ff-core/src/sim/season.rs` |  |
 | `tests/test_settings_menu.py` | PARTIAL | 57 / 2 / 61 | `crates/freight-fate/tests/states_main_menu_settings.rs`, `crates/ff-core/src/settings/tests.rs` |  |
 | `tests/test_settlement_accounting.py` | PORTED | 11 / 0 / 11 | `crates/freight-fate/tests/transcript_settlement_accounting.rs` | live +11, NOT PORTED -> PORTED |
@@ -653,7 +656,7 @@ PARTIAL and NOT PORTED files only; TOOLS-ONLY and HELPER files are omitted.
 - `test_curve_assist_takes_the_drums_for_a_corner_inside_a_zone`
 - `test_cruise_snubs_with_service_brakes_instead_of_the_jake_in_zone`
 
-### `tests/test_event_speech_pacer.py` -- 24 of 73
+### `tests/test_event_speech_pacer.py` -- 24 of 75
 
 - `test_a_planned_stop_never_goes_through_the_ambient_channel`
 - `test_stop_announcements_carry_route_priority`

@@ -622,3 +622,36 @@ fn test_zone_warning_lead_scales_with_speed_and_pacing() {
     assert!(faster >= fast);
     assert!((faster - ZONE_WARNING_MAX_MI).abs() < 1e-9);
 }
+
+#[test]
+fn test_the_construction_warning_does_not_shout_brake_now_from_eight_miles() {
+    // Shane, 2026-08-24: "should really we be slowing down as early as we are
+    // for construction routes?"
+    //
+    // The assists do not, in fact, slow early -- his own log has the ease
+    // landing within seconds of the zone. He was slowing because the advance
+    // warning told him to: "Brake now! In 8 miles, construction ahead."
+    //
+    // "Brake now" is the emergency hazard opening, the words used for debris
+    // in your lane. Saying it about something eight miles off is untrue, gets
+    // acted on, and spends a phrase that has to mean something when a real
+    // emergency borrows it. The heavy-traffic and generic zone warnings have
+    // always opened with the distance; construction was the odd one out.
+    //
+    // Python builds a duck-typed stand-in for the three helpers the builder
+    // reads. Rust has a real `Trip` to hand, so the wording comes off the
+    // real one.
+    let mut app = TestApp::new();
+    let d = a_drive(&mut app);
+    let zone = Zone::new(120.0, 124.0, 45.0, "construction");
+    let message = d.trip.zone_warning_message(&zone, 8.0);
+
+    assert!(!message.contains("Brake now"), "{message}");
+    assert!(message.starts_with("In "), "{message}");
+    // The information all survives: how far, what, and both limits.
+    assert!(message.contains("construction ahead"), "{message}");
+    assert!(
+        message.contains("45") && message.contains("55"),
+        "{message}"
+    );
+}

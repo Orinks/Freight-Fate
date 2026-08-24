@@ -805,48 +805,14 @@ impl Settings {
     /// short spans ("1.2 miles ahead") where whole numbers would read as
     /// zero or lie by half a mile.
     pub fn distance_text(&self, miles: f64, precise: bool) -> String {
-        let value = to_distance(miles, self.imperial_units);
-        let unit = if self.imperial_units {
-            "mile"
-        } else {
-            "kilometer"
-        };
-        let text = if precise {
-            fmt_f(value, 1)
-        } else {
-            fmt_f(value, 0)
-        };
-        let plural = if text.parse::<f64>().ok() == Some(1.0) {
-            ""
-        } else {
-            "s"
-        };
-        format!("{text} {unit}{plural}")
+        distance_text_for(miles, self.imperial_units, precise)
     }
 
     /// Colloquial short range for pacenote-style calls: quarter-mile steps
     /// under a mile ("half a mile"), 100-meter steps under a kilometer ("400
     /// meters"), the normal precise form beyond.
     pub fn short_distance_text(&self, miles: f64) -> String {
-        if self.imperial_units {
-            if miles > 1.125 {
-                return self.distance_text(miles, true);
-            }
-            let quarters = round_py_int(miles * 4.0).max(1);
-            return match quarters {
-                1 => "a quarter mile".to_string(),
-                2 => "half a mile".to_string(),
-                3 => "three quarters of a mile".to_string(),
-                4 => "one mile".to_string(),
-                _ => self.distance_text(miles, true),
-            };
-        }
-        let km = miles * MILES_TO_KM;
-        if km >= 0.95 {
-            return self.distance_text(miles, true);
-        }
-        let meters = round_py_int(km * 10.0).max(1) * 100;
-        format!("{meters} meters")
+        short_distance_text_for(miles, self.imperial_units)
     }
 
     /// A spoken distance kept to one decimal, for close-range cues.
@@ -883,6 +849,53 @@ impl Settings {
             per_mile / MILES_TO_KM
         }
     }
+}
+
+/// [`Settings::distance_text`] with the unit setting passed rather than
+/// borrowed.
+///
+/// The wording lives here, and the method is the one-line delegate, so a
+/// caller that cannot hold a `&Settings` still speaks the same sentence. A
+/// `say_event(valid=...)` gate is exactly that caller: it is `'static`, so it
+/// captures the player's unit as a `bool` and asks this.
+pub fn distance_text_for(miles: f64, imperial: bool, precise: bool) -> String {
+    let value = to_distance(miles, imperial);
+    let unit = if imperial { "mile" } else { "kilometer" };
+    let text = if precise {
+        fmt_f(value, 1)
+    } else {
+        fmt_f(value, 0)
+    };
+    let plural = if text.parse::<f64>().ok() == Some(1.0) {
+        ""
+    } else {
+        "s"
+    };
+    format!("{text} {unit}{plural}")
+}
+
+/// [`Settings::short_distance_text`] with the unit setting passed rather than
+/// borrowed. See [`distance_text_for`].
+pub fn short_distance_text_for(miles: f64, imperial: bool) -> String {
+    if imperial {
+        if miles > 1.125 {
+            return distance_text_for(miles, imperial, true);
+        }
+        let quarters = round_py_int(miles * 4.0).max(1);
+        return match quarters {
+            1 => "a quarter mile".to_string(),
+            2 => "half a mile".to_string(),
+            3 => "three quarters of a mile".to_string(),
+            4 => "one mile".to_string(),
+            _ => distance_text_for(miles, imperial, true),
+        };
+    }
+    let km = miles * MILES_TO_KM;
+    if km >= 0.95 {
+        return distance_text_for(miles, imperial, true);
+    }
+    let meters = round_py_int(km * 10.0).max(1) * 100;
+    format!("{meters} meters")
 }
 
 /// `LANE_KEEPING_LABELS.get(mode)`.

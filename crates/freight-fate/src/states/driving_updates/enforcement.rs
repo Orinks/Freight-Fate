@@ -5,6 +5,7 @@
 use ff_core::models::business::has_weigh_station_transponder;
 use ff_core::models::enforcement::{UNSAFE_DAMAGE_FINE, WEIGH_STATION_BYPASS_FINE};
 use ff_core::pyrandom::PyRandom;
+use ff_core::settings::short_distance_text_for;
 use ff_core::sim::trip_models::RoadStop;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::speech_text::overspeed_nag;
@@ -346,6 +347,16 @@ impl DrivingState {
                         ctx.control_hint("rest")
                     )
                 };
+                // Bound here and moved into the gate below, not read from the
+                // sweep when the gate runs: the validity test has to compare
+                // against the distance this line actually SPOKE, and the loop
+                // rebinds both at the next stop. (Python bound them as lambda
+                // defaults for the same reason -- the closure would otherwise
+                // capture the loop variable, which ruff B023 names.)
+                let announced = ctx.settings.short_distance_text(ahead);
+                let scale_mi = stop.at_mi;
+                let imperial = ctx.settings.imperial_units;
+                self.refresh_live_facts();
                 ctx.say_event_with(
                     // short_distance_text, not distance_text: the plain form
                     // rounds to whole miles, so a scale first seen inside half
@@ -364,13 +375,35 @@ impl DrivingState {
                     // needed it -- taking the scale's exit is what counts --
                     // and the ramp glide owns the slowing.
                     format!(
-                        "Open weigh station ahead in {}: {}. {instruction}",
-                        ctx.settings.short_distance_text(ahead),
+                        "Open weigh station ahead in {announced}: {}. {instruction}",
                         stop.name
                     ),
                     SayEvent::queued()
                         .priority(EventPriority::Route)
-                        .category(SpeechCategory::Navigation),
+                        .category(SpeechCategory::Navigation)
+                        // valid: this sentence names a distance, and a
+                        // distance is a claim about now. The reminder in
+                        // `check_scale_reminder` already dies once the exit is
+                        // behind the truck; this one has to die sooner,
+                        // because it goes wrong while the scale is still
+                        // AHEAD -- handed back after the half-mile reminder it
+                        // told the driver the scale was four miles off, the
+                        // two lines contradicting each other one after the
+                        // other (Python adversarial battery,
+                        // scale_bypass_to_the_end). The test is the line's OWN
+                        // words rather than a chosen tolerance: while the road
+                        // left still speaks as the phrase already spoken,
+                        // replaying it says nothing untrue, and the moment it
+                        // does not, it does.
+                        //
+                        // Rust: a `valid` gate is `'static`, so it reads the
+                        // drive through `live` and re-words through
+                        // `short_distance_text_for`, the settings method's own
+                        // body with the unit setting passed by value.
+                        .valid(move || {
+                            let left = scale_mi - live::position_mi();
+                            left > 0.0 && short_distance_text_for(left, imperial) == announced
+                        }),
                 );
                 // The verdict line itself queues right behind the notice
                 // (both ROUTE, interrupt=False): green says keep rolling,

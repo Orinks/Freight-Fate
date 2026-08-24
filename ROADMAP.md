@@ -182,6 +182,47 @@ onto exit signalling.
       line, the pull-over demand and its failure-to-stop escalation, the
       collision damage total, the scale's red light, and the green light that
       is deliberately never rescued.
+- [x] **Rust port: the open scale notice stops naming a distance it no longer
+      has (2026-08-24).** The thirteenth gate, carried over from the Python
+      fix that the widened flush rescue exposed. "Open weigh station ahead in
+      2.0 miles: ..." had no `valid` at all, so once it became rescuable it
+      could be handed back AFTER the half-mile reminder and tell the driver
+      the scale was two miles off. Its guard is the line's own words rather
+      than a chosen tolerance: it stays true only while the road left still
+      speaks as the phrase already spoken, which in Rust means capturing the
+      spoken phrase and the unit setting and asking
+      `settings::short_distance_text_for` against `live::position_mi()` --
+      the settings method's own body, split out so a `'static` gate can reach
+      it. Regression gate:
+      `test_the_scale_notice_expires_once_the_distance_it_names_is_wrong` in
+      `crates/freight-fate/tests/states_driving_enforcement.rs`, verified
+      against the unguarded code.
+
+      The Rust battery does NOT reproduce this one. `scale_bypass_to_the_end`
+      comes back CLEAN here before and after: the run's rescues land on other
+      lines (the route brief, the bypass call, the failure-to-stop warning),
+      never on the notice, so the Python battery's three "Signal for the scale
+      exit" never appears. The bug was real and live all the same, which the
+      regression test shows directly.
+- [ ] **Four more distance-bearing ROUTE lines can be rescued with no guard,
+      in BOTH trees.** The audit the scale notice prompted. Each names a
+      distance, each queues at ROUTE with `interrupt=False`, and each has a
+      later line about the same object that a hand-back would now contradict.
+      None is a port divergence -- Python has no gate on any of them either --
+      so they want fixing on the Python side and carrying over:
+      * `maybe_warn_jake_zone_ahead` -- "No engine brake zone in 3 miles,
+        coming into Rochester. Switch the engine brake off before the zone."
+        The worst of the four: handed back after the zone starts it offers
+        three miles of grace while the fine is already accruing.
+      * the exit-lane prep call -- "Exit lane in 1.2 miles. Signal is on;
+        steer right for the exit lane and slow to 40." Followed by "Exit lane
+        set", which a hand-back would undo.
+      * the facility-gate speed warning -- "Facility gate in 0.8 miles. Slow
+        to 15." This one starts the gate-miss clock, so it must never be
+        dropped; the distance going stale is the separate half.
+      * `scale_outranks_rest_planning` -- "Weigh station first: Ontario Scale,
+        2.0 miles ahead." The same object as the notice just fixed, so it can
+        join the very contradiction chain that fix ended.
 - [x] **Rust port: a Python-written save verifies here (2026-08-23).**
       A career created and played entirely in the Python 1.9 game loaded in
       the Rust build as "changed outside the game, or copied from another
