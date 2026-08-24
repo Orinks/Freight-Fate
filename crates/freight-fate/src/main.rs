@@ -44,6 +44,15 @@ use freight_fate::playtest::{breaker, road, sandbox};
 use freight_fate::speech::CaptureSpeech;
 
 fn main() {
+    // First of all, so the opening phase mark charges process creation and
+    // dynamic linking to the launch instead of losing them.
+    app::boot_timing::start();
+    // This process is the game, so it -- and only it -- may put a page in
+    // front of a player. Every other process that links the crate, the test
+    // binaries above all, never runs this function and so never gets the
+    // capability: `browser::open_url` refuses and records instead of
+    // reaching the live site. See `freight_fate::browser`.
+    freight_fate::browser::allow_real_browser();
     let args: Vec<String> = std::env::args().skip(1).collect();
     // Before anything writes a byte: a GUI-subsystem process starts with no
     // console and, on every shell tested, no standard handles either, so an

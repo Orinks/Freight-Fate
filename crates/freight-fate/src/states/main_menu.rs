@@ -21,6 +21,7 @@ use ff_core::playtest_levers::apply_continue_levers;
 use ff_core::pyfmt::fmt_grouped;
 
 use crate::app::{share, version, GameContext, Say, SharedState};
+use crate::browser::open_url;
 use crate::discord_presence::PresenceState;
 use crate::online_presence::IdentityStore;
 use crate::states::base::{Menu, MenuCore, MenuItem, SimpleMenuState};
@@ -581,7 +582,11 @@ impl MainMenuState {
             "https://github.com/{}/issues/new?template=bug_report.yml",
             updater::REPO
         );
-        let opened = webbrowser::open(&url).is_ok();
+        // Through `browser::open_url`, not `webbrowser::open` directly: this
+        // row used to be the one browser door with no seam on it at all, so
+        // nothing could stand between a test that pressed it and a real page
+        // in a real browser.
+        let opened = open_url(&url);
         if !opened {
             ctx.say(&format!(
                 "Could not open a web browser. You can report problems at github.com/{}/issues.",

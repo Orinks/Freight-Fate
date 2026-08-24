@@ -82,38 +82,26 @@ pub fn run_worker(
 }
 
 // -- the browser -----------------------------------------------------------------------
+//
+// The opener itself lives in `crate::browser`, because `main_menu`'s Report
+// a problem row needs the same door and has no business importing the online
+// menus to find it. Re-exported here so every online screen keeps reaching
+// for `open_url` where it always did.
+//
+// Note what changed under these two names: the browser is no longer reached
+// unless the process said it is the game (`browser::allow_real_browser`,
+// called by `main()`). A test that installs no override no longer gets a
+// real page in a real browser -- it gets a refusal and a panic naming the
+// address. See `crate::browser`.
 
-type OpenUrl = Arc<dyn Fn(&str) -> bool + Send + Sync>;
-
-static OPEN_URL_OVERRIDE: Mutex<Option<OpenUrl>> = Mutex::new(None);
-
-/// `webbrowser.open(url)`: true when a browser was asked to open the page.
-///
-/// False is the Python "raised" case, the one moment the game knows for
-/// certain that opening failed. Like `webbrowser.open`, a true answer does
-/// not prove a window appeared -- a remote or streamed session is the normal
-/// case where nothing happens -- which is why every caller keeps a spoken or
-/// clipboard fallback armed either way.
-pub fn open_url(url: &str) -> bool {
-    let override_fn = OPEN_URL_OVERRIDE
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .clone();
-    match override_fn {
-        Some(f) => f(url),
-        None => webbrowser::open(url).is_ok(),
-    }
-}
-
-/// Replace `open_url` for tests (`monkeypatch.setattr(webbrowser, "open", ...)`);
-/// `None` restores the real browser.
-pub fn set_open_url_override(f: Option<OpenUrl>) {
-    *OPEN_URL_OVERRIDE.lock().unwrap_or_else(|e| e.into_inner()) = f;
-}
+pub use crate::browser::{open_url, set_open_url_override};
 
 // -- the orinks.net transport -------------------------------------------------------
 
-static TRANSPORT_OVERRIDE: Mutex<Option<SharedTransport>> = Mutex::new(None);
+thread_local! {
+    static TRANSPORT_OVERRIDE: std::cell::RefCell<Option<SharedTransport>> =
+        const { std::cell::RefCell::new(None) };
+}
 
 /// The transport behind the one-shot orinks.net calls these menus make
 /// (`set_profile_sharing`, `fetch_board`, `fetch_mastodon_status`,
@@ -121,54 +109,74 @@ static TRANSPORT_OVERRIDE: Mutex<Option<SharedTransport>> = Mutex::new(None);
 /// installed a fake.
 pub fn online_transport() -> SharedTransport {
     TRANSPORT_OVERRIDE
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .clone()
+        .with(|slot| slot.borrow().clone())
         .unwrap_or_else(default_transport)
 }
 
 /// Replace [`online_transport`] for tests; `None` restores the real network.
+///
+/// Per thread. See [`identity_store`].
 pub fn set_online_transport_override(transport: Option<SharedTransport>) {
-    *TRANSPORT_OVERRIDE.lock().unwrap_or_else(|e| e.into_inner()) = transport;
+    TRANSPORT_OVERRIDE.with(|slot| *slot.borrow_mut() = transport);
 }
 
 // -- the identity store -------------------------------------------------------------------
 
-static IDENTITY_STORE: Mutex<Option<(PathBuf, Arc<IdentityStore>)>> = Mutex::new(None);
-static IDENTITY_STORE_OVERRIDE: Mutex<Option<Arc<IdentityStore>>> = Mutex::new(None);
+thread_local! {
+    static IDENTITY_STORE: std::cell::RefCell<Option<(PathBuf, Arc<IdentityStore>)>> =
+        const { std::cell::RefCell::new(None) };
+    static IDENTITY_STORE_OVERRIDE: std::cell::RefCell<Option<Arc<IdentityStore>>> =
+        const { std::cell::RefCell::new(None) };
+}
 
 /// The store `OnlineIdentity.load()` and `.save()` read and write: the
 /// platform keyring over the data directory, built once per data directory
-/// and kept for the life of the process. The Python token cache was a class
-/// attribute, so a process-lifetime store is what keeps the Online hub's
-/// per-frame labels from costing a secret-store round trip each.
+/// and kept for the life of the thread. The Python token cache was a class
+/// attribute, so a long-lived store is what keeps the Online hub's per-frame
+/// labels from costing a secret-store round trip each.
+///
+/// # Why these four seams are per thread
+///
+/// This one and the three above (`open_url`, the transport, and the cache
+/// below) are all *stand in for the outside world* seams: a test installs a
+/// fake and takes it away again. As process-globals they made every test
+/// that installed one exclusive with every other, which is a large part of
+/// why the whole suite ran behind a single lock at one-core speed.
+///
+/// Per thread they are exactly as correct and no longer exclusive. Nothing
+/// in the game ever installs an override, so a worker thread still gets the
+/// real browser, the real network and the platform keyring; and a test that
+/// installs one runs its services with `threaded: false`, which runs the job
+/// inline on the very thread that installed it.
+///
+/// The cache is per thread for the same reason it was a cache: each test has
+/// its own data directory, and one shared slot keyed by directory missed on
+/// almost every lookup once tests ran at once -- rebuilding a platform
+/// keyring store per call, which is the round trip the cache exists to
+/// avoid.
 pub fn identity_store() -> Arc<IdentityStore> {
-    if let Some(store) = IDENTITY_STORE_OVERRIDE
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .clone()
-    {
+    if let Some(store) = IDENTITY_STORE_OVERRIDE.with(|slot| slot.borrow().clone()) {
         return store;
     }
     let dir = data_dir();
-    let mut cached = IDENTITY_STORE.lock().unwrap_or_else(|e| e.into_inner());
-    match cached.as_ref() {
-        Some((cached_dir, store)) if *cached_dir == dir => Arc::clone(store),
-        _ => {
-            let store = Arc::new(IdentityStore::platform(&dir));
-            *cached = Some((dir, Arc::clone(&store)));
-            store
+    IDENTITY_STORE.with(|slot| {
+        let mut cached = slot.borrow_mut();
+        match cached.as_ref() {
+            Some((cached_dir, store)) if *cached_dir == dir => Arc::clone(store),
+            _ => {
+                let store = Arc::new(IdentityStore::platform(&dir));
+                *cached = Some((dir, Arc::clone(&store)));
+                store
+            }
         }
-    }
+    })
 }
 
 /// Replace [`identity_store`] for tests (`monkeypatch.setattr(OnlineIdentity,
 /// "load", ...)`): a store over a memory secret store stands in for the
 /// platform one. `None` restores the platform store.
 pub fn set_identity_store_override(store: Option<Arc<IdentityStore>>) {
-    *IDENTITY_STORE_OVERRIDE
-        .lock()
-        .unwrap_or_else(|e| e.into_inner()) = store;
+    IDENTITY_STORE_OVERRIDE.with(|slot| *slot.borrow_mut() = store);
 }
 
 /// `OnlineIdentity.load()`.

@@ -3,6 +3,7 @@
 
 pub mod app;
 pub mod audio;
+pub mod browser;
 pub mod cloud_saves;
 pub mod controller;
 pub mod discord_presence;

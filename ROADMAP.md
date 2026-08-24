@@ -379,6 +379,42 @@ onto exit signalling.
       window and the controller subsystem are 380 ms of the 660, both genuinely
       needed before the first frame.
 
+- [x] **Rust port: a test run can no longer open a real web browser
+      (2026-08-24).** The driver setup page opened in the owner's browser
+      while the suite was running. Opening a page went through one seam whose
+      DEFAULT was the real browser: a test that installed no stand-in got a
+      live page, and Report a problem did not even go through the seam -- it
+      called the browser library directly. The seam is also per thread, so a
+      page opened from a worker thread was never covered by a stand-in
+      installed on the test's own thread. Reversed: reaching a browser is now
+      a capability `main()` grants and nothing else does, so a test process
+      cannot have it; an unseamed open records the address and fails the test
+      by name. Report a problem goes through the same door. Proved by
+      `tests/it/browser_guard.rs`, including from a spawned thread, and
+      verified failing first against a build with the old default. The game
+      is unchanged: the verification page and the bug-report form still open.
+
+- [ ] **Rust port: three more outside-world seams still default to the real
+      thing.** Same shape as the browser was, found while fixing it. The
+      orinks.net transport (`online_transport`), the driver-identity store
+      (`identity_store`) and the thread's save directory are all per-thread
+      overrides whose default is the live network, the platform keyring and
+      the player's real save folder. Nothing in the suite reaches any of
+      them today -- measured, by refusing every one and re-running: zero
+      keyring calls, and the only live HTTP is below -- but each is one
+      forgotten stand-in or one spawned worker away from doing so, and a
+      spawned worker gets the REAL save folder because the pin is per
+      thread. The services every test app builds carry the live transport by
+      default and are only held back by having no driver identity to send.
+
+- [ ] **Rust port: the test suite calls api.weather.gov for real.** Eleven
+      requests in one run of the integration suite, from the live-weather
+      worker threads on the Chicago, Gary and Indianapolis routes. Refusing
+      them changes a driving test's spoken result
+      (`test_destination_exit_response_queues_behind_intervening_safety_cue`),
+      so at least one case is quietly reading the actual weather over
+      Chicago. Give the weather provider a stand-in in the test rig.
+
 - [x] **Rust port: the update check reaches api.github.com during boot
       (2026-08-24, by design, recorded because nothing said so).** Measured,
       not read: with the DNS cache cleared, one packaged `--smoke` run leaves
