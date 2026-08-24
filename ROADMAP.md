@@ -2762,6 +2762,43 @@ onto exit signalling.
       `test_the_approach_assist_stops_within_a_truck_length_of_the_gate`), but a
       grade feed-forward would make the finish gentler.
 
+- [x] **The facility street chain runs on the real clock, which is what the
+      approach assist was missing (FIXED 2026-08-24).** Owner, 2026-08-24:
+      "destination approach assistance works on some legs and not others."
+      The split was the destination's own shape, not the leg: measured over
+      fifty facilities in fifty states, every PLAIN facility (ramp ends at the
+      gate) docked at a crawl, while every one with a turn-level STREET CHAIN
+      crossed its own gate at 2 to 20.5 mph, median 9.7, two of them over the
+      gate's posted 15.
+
+      Cause. Time compression does not speed the clock up, it moves the truck
+      further per second (`position_mi += velocity * dt * scale`). The arrival
+      assist prices its shed in real metres and real seconds, which is exactly
+      right on the destination ramp -- `trip.dock_run_in` pins that to real
+      time -- and hopelessly optimistic on a chain, which had no such pin: the
+      ground closed four to seven times faster than the brakes could answer
+      for, and worse, the scale SNAPPED from 1 back to about 7 the instant a
+      corner released (`controlled_turn` was the chain's only decompression,
+      the 2026-08-21 entry below), eating the last two hundred metres of an
+      Asheville approach in a couple of seconds with the servo mid-shed.
+
+      Fix: `dock_run_in` now covers the surface chain as well as the ramp, and
+      `begin_surface_chain` sets it on the chain trip so not even the swap
+      frame runs compressed. The assist itself is untouched -- its curve was
+      never wrong, the road under it was. After: all fifty reach the gate at
+      the designed 2.0 mph walk and stop on it, 0 ft past.
+
+      Pinned by `crates/freight-fate/tests/it/states_driving_approach_sweep.rs`
+      (the fifty-destination sweep, seeded trip and pinned weather so the draw
+      cannot choose the case), which also discharges the four
+      `states_driving_facility.rs` approach-assist cases deferred on "a
+      hands-off end-to-end drive over baked chain data".
+
+      Recorded, not fixed: street chains carry no grade data at all -- they
+      are laid on local street geometry, which has no grade segments -- so
+      every chain in the world reads dead level. The uphill-gate case bakes
+      its own grade for that reason.
+
 - [x] **Street corners buy real seconds even when they have nothing to advise
       (FIXED 2026-08-21).** Owner's Spokane arrival fired four turn cues in
       fifteen real seconds -- 23:26:22, :25, :27, :35, the last two seconds

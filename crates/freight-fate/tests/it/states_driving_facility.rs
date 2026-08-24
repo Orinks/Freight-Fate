@@ -28,6 +28,13 @@ use freight_fate::states::driving_stops::{
     assist_full_decel_mps2, assist_servo_brake, bar_solid_zone_mi, bar_tick_range_mi,
 };
 
+use crate::states_driving_approach_sweep::{arrive, arrive_over, destinations, TRUCK_LENGTH_FT};
+
+/// How many facilities the single-chain cases below drive. Not one: the first
+/// chain in the world is among the gentlest, and a case that only ever drives
+/// it is measuring that chain rather than the assist.
+const FEW: usize = 5;
+
 // -- rigging -------------------------------------------------------------------------
 
 /// `_driving(app)`: a Buffalo to Rochester delivery.
@@ -513,18 +520,49 @@ fn test_the_hold_prompt_does_not_come_back_once_the_menu_is_open() {
 }
 
 #[test]
-#[ignore = "deferred: a hands-off end-to-end drive over baked chain data"]
 fn test_the_approach_assist_stops_the_truck_on_a_facility_street_chain() {
     // Owner, Spokane, 2026-08-21: "it did not automatically stop at the
-    // destination; I had to stop." Drives the whole frame loop hands off and
-    // measures where the truck comes to rest relative to the gate.
+    // destination; I had to stop." Drives the whole frame loop with the
+    // driver's hands off from the moment the assist speaks, and measures the
+    // speed the truck was doing when the gate went under its wheels.
+    //
+    // The rigging is the approach sweep's, because this case and that sweep
+    // want the identical drive -- see `states_driving_approach_sweep.rs`,
+    // which runs it over fifty destinations in fifty states. A handful of
+    // chains here, because ONE is what let this through: the chains differ in
+    // length, in how many corners they turn and in where the gate sits, and
+    // the first one in the world happens to be among the gentlest.
+    let (chain, _) = destinations(get_world(), FEW);
+    for destination in &chain {
+        let arrival = arrive(destination);
+        assert!(
+            arrival.on_chain,
+            "{}",
+            arrival.report(destination) // never reached the facility's own streets
+        );
+        assert!(arrival.ready, "{}", arrival.report(destination));
+        assert!(
+            arrival.speed_at_point_mph.unwrap_or(0.0) <= FACILITY_GATE_LIMIT_MPH,
+            "{}",
+            arrival.report(destination)
+        );
+    }
 }
 
 #[test]
-#[ignore = "deferred: a hands-off end-to-end drive over baked chain data"]
 fn test_the_approach_assist_stops_within_a_truck_length_of_the_gate() {
     // The other half of the Spokane report: stopping means stopping AT the
     // gate, not a city block past it.
+    let (chain, _) = destinations(get_world(), FEW);
+    for destination in &chain {
+        let arrival = arrive(destination);
+        assert!(
+            arrival.past_the_point_ft <= TRUCK_LENGTH_FT,
+            "stopped {:.0} feet past the gate\n{}",
+            arrival.past_the_point_ft,
+            arrival.report(destination)
+        );
+    }
 }
 
 #[test]
@@ -576,20 +614,56 @@ fn test_the_ramp_is_not_the_arrival_when_a_street_chain_follows_it() {
 }
 
 #[test]
-#[ignore = "deferred: a hands-off end-to-end drive over baked chain data"]
 fn test_the_approach_assist_delivers_the_truck_to_the_dock() {
     // Jerry, Hobbs Food Processing Plant, 2026-08-22: through the ramp light
     // on green, "Destination approach assistance slowing", 8 miles per hour,
-    // 2 miles per hour -- and then nothing. Level, uphill, downhill, and from
-    // the top of the ramp, the dock menu must open hands off.
+    // 2 miles per hour -- and then nothing. He sat, turned the assist off in
+    // settings, and the dock opened five seconds after he resumed. The
+    // requirement is the DOCK, not a stop: on a facility whose ramp ends at
+    // the gate, the menu has to open with nobody touching a pedal.
+    let (_, plain) = destinations(get_world(), 1);
+    let destination = &plain[0];
+    let arrival = arrive(destination);
+    assert!(arrival.docked, "{}", arrival.report(destination));
+    assert!(
+        arrival.assist_spoke,
+        "the assist took the pedals without a word\n{}",
+        arrival.report(destination)
+    );
+    // The assist walks the truck over the point at two miles an hour and its
+    // own brake lands it; the ramp must not bark "come to a complete stop" at
+    // a driver whose truck is already doing exactly that.
+    assert!(
+        !arrival.said("Come to a complete stop."),
+        "{}",
+        arrival.report(destination)
+    );
 }
 
 #[test]
-#[ignore = "deferred: a hands-off end-to-end drive over baked chain data"]
 fn test_the_approach_assist_delivers_the_truck_to_a_street_chain_gate_uphill() {
-    // The same promise on a facility street chain, with the gate at the top
-    // of a grade: the road takes speed off for free there, which is exactly
-    // where a brake-only profile stops short.
+    // The same promise on a facility street chain with the gate at the top of
+    // a grade: the road takes speed off for free there, which is exactly
+    // where a brake-only stop profile undershoots -- it converges on a halt
+    // SHORT of the gate, brake held, and the dock never opens.
+    //
+    // The grade is baked, because the shipped chains are laid on local street
+    // geometry that carries no grade segments at all: every one of them reads
+    // dead level, so a real climb to a gate cannot be found, only built.
+    let (chain, _) = destinations(get_world(), 1);
+    let destination = &chain[0];
+    let arrival = arrive_over(destination, Some(0.03));
+    assert!(
+        arrival.on_chain && arrival.ready && arrival.speed_mph <= DOCKING_MAX_MPH,
+        "{}",
+        arrival.report(destination)
+    );
+    assert!(
+        arrival.past_the_point_ft <= TRUCK_LENGTH_FT,
+        "stopped {:.0} feet past a gate at the top of a three percent climb\n{}",
+        arrival.past_the_point_ft,
+        arrival.report(destination)
+    );
 }
 
 #[test]

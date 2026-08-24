@@ -60,6 +60,7 @@ mod states_city_route_planning;
 mod states_city_shops;
 mod states_cloud_save_states;
 mod states_driving_air_brakes;
+mod states_driving_approach_sweep;
 mod states_driving_arrival_gate;
 mod states_driving_buffs;
 mod states_driving_cab_systems;

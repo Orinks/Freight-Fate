@@ -100,6 +100,11 @@ impl DrivingState {
             self.placeholder_weather(),
             options,
         );
+        // These streets ARE the run-in to the dock, so they run on the real
+        // clock from their first foot. The exit watch sets this every frame,
+        // but it has already run for this one, and a compressed tick here
+        // moves the truck seven times further than the brakes can answer for.
+        surface.dock_run_in = true;
         surface.game_minutes = self.trip.game_minutes; // deadline and clock continuity
         surface.toll_charges = self.trip.toll_charges.clone(); // settlement reads the live trip
         surface.hos_violation = self.trip.hos_violation;
