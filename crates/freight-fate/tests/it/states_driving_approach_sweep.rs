@@ -20,7 +20,14 @@
 
 use ff_core::data::world::{get_world, World};
 use ff_core::data::world_models::{CorridorDetail, GradeSegment, Leg, Route};
+use ff_core::models::career::{Career, LEVEL_XP};
+use ff_core::models::carrier_fleet::{assigned_truck_key, FLEET_TIERS};
+use ff_core::models::jobs::{cargo_type, Job};
+use ff_core::models::profile::Profile;
+use ff_core::models::trailers::trailer_keys_for_cargo;
+use ff_core::models::trucks::truck_model_or_panic;
 use ff_core::sim::trip_models::FACILITY_GATE_LIMIT_MPH;
+use ff_core::sim::vehicle::{G, KG_PER_TON, REFERENCE_CARGO_KG};
 use ff_core::sim::weather::WeatherKind;
 
 use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
@@ -134,6 +141,22 @@ pub struct Arrival {
     pub speed_at_point_mph: Option<f64>,
     /// How far the truck ran on past that point before it stopped, feet.
     pub past_the_point_ft: f64,
+    /// Carrier-catalog tractor used by this run.
+    pub truck_key: String,
+    /// Rated pull, so a failed profile names the driveline it used.
+    pub max_torque_nm: f64,
+    /// Gross combination mass after the trailer and payload are aboard.
+    pub gross_mass_kg: f64,
+    /// Strongest cold full-service deceleration the truck reported.
+    pub full_service_decel_mps2: f64,
+    /// Highest feed-forward pedal needed to hold the two-mph gate crawl.
+    pub max_creep_hold_throttle: f64,
+    /// Slowest physical sample while still short of the gate.
+    pub min_creep_speed_mph: Option<f64>,
+    /// Lowest gear the automatic selected during the gate crawl.
+    pub min_creep_gear: Option<i32>,
+    /// A dead engine at the gate would make a successful position misleading.
+    pub stalled: bool,
     /// Every line the driver heard.
     pub heard: Vec<String>,
 }
@@ -148,17 +171,26 @@ impl Arrival {
     pub fn report(&self, destination: &Destination) -> String {
         let tail: Vec<&String> = self.heard.iter().rev().take(6).rev().collect();
         format!(
-            "{} ({}, {}, {}): ready={} assist_spoke={} on_chain={} speed={:.2} mph, {:.0} ft short of \
-             the gate\nlast heard: {:#?}",
+            "{} ({}, {}, {}, truck={} torque={:.0} Nm gross={:.0} kg brake={:.2} m/s2): ready={} \
+             assist_spoke={} on_chain={} speed={:.2} mph, {:.0} ft short of the gate, creep hold \
+             {:.3}, creep speed {:?}, creep gear {:?}, stalled={}\nlast heard: {:#?}",
             destination.location,
             destination.city,
             destination.state,
             destination.kind(),
+            self.truck_key,
+            self.max_torque_nm,
+            self.gross_mass_kg,
+            self.full_service_decel_mps2,
             self.ready,
             self.assist_spoke,
             self.on_chain,
             self.speed_mph,
             self.short_by_ft,
+            self.max_creep_hold_throttle,
+            self.min_creep_speed_mph,
+            self.min_creep_gear,
+            self.stalled,
             tail,
         )
     }
@@ -187,7 +219,7 @@ pub fn driver_target_mph(d: &mut DrivingState) -> f64 {
 /// Drive the last mile to `destination`: down the destination ramp, through
 /// any street chain, to the gate.
 pub fn arrive(destination: &Destination) -> Arrival {
-    arrive_over(destination, None)
+    arrive_with(destination, None, None, 18.0)
 }
 
 /// Re-lay a facility's street chain on a constant grade.
@@ -232,21 +264,57 @@ fn regrade_chain(d: &mut DrivingState, grade_pct: f64) {
 
 /// [`arrive`], with the facility's street chain re-laid on a constant grade.
 pub fn arrive_over(destination: &Destination, chain_grade_pct: Option<f64>) -> Arrival {
+    arrive_with(destination, chain_grade_pct, None, 18.0)
+}
+
+/// Drive one tractor and payload through the same physical approach.
+fn arrive_with(
+    destination: &Destination,
+    chain_grade_pct: Option<f64>,
+    company_profile: Option<Profile>,
+    tons: f64,
+) -> Arrival {
     let world = get_world();
-    let origin = world.neighbors(&destination.city)[0]
-        .other(&destination.city)
-        .to_string();
+    let origin = if destination.city == "shelby_mt_us" && company_profile.is_some() {
+        "helena_mt_us".to_string()
+    } else {
+        world.neighbors(&destination.city)[0]
+            .other(&destination.city)
+            .to_string()
+    };
     let mut harness = PlaytestHarness::new();
     harness.app.ctx.settings.destination_approach_assist = true;
     harness.app.ctx.settings.speed_keeper = true;
-    harness.start_route(
-        &origin,
-        &destination.city,
-        RouteSetup::seeded(4242)
-            .named("Approach Sweep")
-            .destination_location(&destination.location),
-    );
+    harness.app.ctx.settings.automatic_transmission = true;
+    let mut route_setup = RouteSetup::seeded(4242)
+        .named("Approach Sweep")
+        .destination_location(&destination.location);
+    route_setup.tons = tons;
+    if origin == "helena_mt_us" {
+        route_setup.route_cities = Some(
+            world
+                .supported_route(&origin, &destination.city, None)
+                .expect("Helena to Shelby route lookup must succeed")
+                .expect("Helena to Shelby must remain a supported run")
+                .cities,
+        );
+    }
+    harness.start_route(&origin, &destination.city, route_setup);
+    let configured_truck_key = company_profile
+        .as_ref()
+        .map(Profile::active_truck_key)
+        .unwrap_or_else(|| "rig".to_string());
     harness.with_drive(|d, ctx| {
+        if let Some(profile) = company_profile {
+            d.trip.truck.specs = profile.truck_specs();
+            ctx.profile = Some(profile);
+        }
+        if destination.city == "shelby_mt_us" {
+            // Dispatch-board jobs carry the speakable city. start_route is a
+            // lower-level seam, so hydrate the same field and prove the dock
+            // never exposes an internal map key to the player.
+            d.job.destination_spoken = "Shelby, Montana".to_string();
+        }
         quiet(&mut d.trip);
         // Pinned, not drawn: rain changes what the road can shed, and a sweep
         // whose sky differs per destination is measuring the sky.
@@ -296,6 +364,9 @@ pub fn arrive_over(destination: &Destination, chain_grade_pct: Option<f64>) -> A
     let mut handed_off = false;
     let mut speed_at_point_mph: Option<f64> = None;
     let mut past_the_point_ft = 0.0;
+    let mut max_creep_hold_throttle = 0.0f64;
+    let mut min_creep_speed_mph: Option<f64> = None;
+    let mut min_creep_gear: Option<i32> = None;
     // Enough for a mile of city streets at a crawl, and no more: a truck that
     // has not arrived by then is not going to.
     for _ in 0..(60 * 600) {
@@ -321,6 +392,19 @@ pub fn arrive_over(destination: &Destination, chain_grade_pct: Option<f64>) -> A
             }
         }
         on_chain |= now_on_chain;
+        let (remaining, speed, hold_throttle, gear) = harness.read_drive(|d| {
+            (
+                d.ramp_mi.unwrap_or_else(|| d.trip.remaining_miles()),
+                d.truck().speed_mph(),
+                d.truck().hold_throttle(),
+                d.truck().transmission.gear,
+            )
+        });
+        if handed_off && remaining > 0.0 && speed <= 2.1 {
+            max_creep_hold_throttle = max_creep_hold_throttle.max(hold_throttle);
+            min_creep_speed_mph = Some(min_creep_speed_mph.map_or(speed, |seen| seen.min(speed)));
+            min_creep_gear = Some(min_creep_gear.map_or(gear, |seen| seen.min(gear)));
+        }
         // The arrival point, and everything after it. Integrated from the
         // truck's own speed rather than read off the trip: `position_mi`
         // jumps when the chain trip is swapped in, so it cannot measure how
@@ -372,16 +456,29 @@ pub fn arrive_over(destination: &Destination, chain_grade_pct: Option<f64>) -> A
         frame(&mut harness, DT);
     }
     release_keys(&mut harness);
-    let (speed_mph, short_by_ft) = if harness.has_drive() {
-        harness.read_drive(|d| {
+    let (speed_mph, short_by_ft, max_torque_nm, gross_mass_kg, full_service_decel_mps2, stalled) =
+        if harness.has_drive() {
+            harness.read_drive(|d| {
+                (
+                    d.truck().speed_mph(),
+                    d.ramp_mi.unwrap_or_else(|| d.trip.remaining_miles()) * 5280.0,
+                    d.truck().specs.max_torque_nm,
+                    d.truck().gross_mass_kg(),
+                    d.truck().full_service_decel_mps2(),
+                    d.truck().stalled,
+                )
+            })
+        } else {
+            let model = truck_model_or_panic(&configured_truck_key);
             (
-                d.truck().speed_mph(),
-                d.ramp_mi.unwrap_or_else(|| d.trip.remaining_miles()) * 5280.0,
+                0.0,
+                0.0,
+                model.specs.max_torque_nm,
+                model.specs.mass_kg - REFERENCE_CARGO_KG + tons * KG_PER_TON,
+                model.specs.max_brake_decel_g * G,
+                false,
             )
-        })
-    } else {
-        (0.0, 0.0)
-    };
+        };
     let heard = harness.transcript();
     Arrival {
         ready,
@@ -395,6 +492,14 @@ pub fn arrive_over(destination: &Destination, chain_grade_pct: Option<f64>) -> A
         on_chain,
         speed_at_point_mph,
         past_the_point_ft,
+        truck_key: configured_truck_key,
+        max_torque_nm,
+        gross_mass_kg,
+        full_service_decel_mps2,
+        max_creep_hold_throttle,
+        min_creep_speed_mph,
+        min_creep_gear,
+        stalled,
         heard,
     }
 }
@@ -528,36 +633,137 @@ fn test_shelby_cross_dock_approach_assist_reaches_the_arrival_gate() {
         state: "MT".to_string(),
         chain: false,
     };
-    let arrival = arrive(&destination);
+    // The report did not preserve Darren's tractor model or career level. Use
+    // the real company-fleet assignment function at every tier boundary under
+    // his name, so this covers each class of iron he could have been assigned
+    // rather than quietly substituting the harness's default truck. Level one
+    // is the standard-rig control; the other four are the contrast cases.
+    let levels = [1_i64, 4, 9, 13, 17];
+    let mut arrivals = Vec::new();
+    for level in levels {
+        let profile = darren_company_profile(level);
+        arrivals.push((level, arrive_with(&destination, None, Some(profile), 20.0)));
+    }
 
     assert_eq!(
-        what_went_wrong(&destination, &arrival),
-        None,
-        "{}",
-        arrival.report(&destination)
+        trailer_keys_for_cargo("general"),
+        ["dry_van"],
+        "general freight must continue to exercise the dry-van mass model"
     );
-    assert!(arrival.docked, "{}", arrival.report(&destination));
+    assert_eq!(arrivals[0].1.truck_key, "rig", "level-one control drifted");
+
+    for (level, arrival) in &arrivals {
+        println!("level {level}: {}", arrival.report(&destination));
+        assert_eq!(
+            what_went_wrong(&destination, arrival),
+            None,
+            "level {level}: {}",
+            arrival.report(&destination)
+        );
+        assert!(
+            arrival.docked && !arrival.stalled,
+            "level {level}: {}",
+            arrival.report(&destination)
+        );
+        assert!(
+            arrival
+                .min_creep_speed_mph
+                .is_some_and(|speed| (1.9..=2.1).contains(&speed))
+                && arrival.min_creep_gear.is_some()
+                && arrival.max_creep_hold_throttle <= 0.35,
+            "level {level}: gate crawl exceeded its throttle authority: {}",
+            arrival.report(&destination)
+        );
+        assert!(
+            arrival.said("Destination approach assistance slowing."),
+            "level {level}: {}",
+            arrival.report(&destination)
+        );
+        assert!(
+            arrival.said("Pulling into freight terminal Shelby Cross-Dock")
+                && arrival.said("dock menu opening in a moment."),
+            "level {level}: {}",
+            arrival.report(&destination)
+        );
+        assert!(
+            !arrival.said("Destination approach stopped and holding."),
+            "level {level}: {}",
+            arrival.report(&destination)
+        );
+        assert!(
+            !arrival.said("shelby_mt_us")
+                && arrival.said(
+                    "At freight terminal Shelby Cross-Dock in Shelby, Montana. Drop the loaded \
+                     trailer and hook an empty. 1 of 4."
+                ),
+            "level {level}: dock speech was not player-ready and actionable: {}",
+            arrival.report(&destination)
+        );
+    }
+
+    let min_torque = arrivals
+        .iter()
+        .map(|(_, arrival)| arrival.max_torque_nm)
+        .fold(f64::INFINITY, f64::min);
+    let max_torque = arrivals
+        .iter()
+        .map(|(_, arrival)| arrival.max_torque_nm)
+        .fold(f64::NEG_INFINITY, f64::max);
     assert!(
-        arrival.said("2 miles per hour"),
-        "{}",
-        arrival.report(&destination)
+        max_torque - min_torque >= 400.0,
+        "fleet-tier sweep did not span meaningfully different power profiles: {arrivals:#?}"
+    );
+    let brake_span = arrivals
+        .iter()
+        .map(|(_, arrival)| arrival.full_service_decel_mps2)
+        .fold((f64::INFINITY, f64::NEG_INFINITY), |(low, high), brake| {
+            (low.min(brake), high.max(brake))
+        });
+    assert!(
+        brake_span.1 - brake_span.0 < 0.001,
+        "cold dry service-brake capacity unexpectedly varies by tractor: {arrivals:#?}"
     );
     assert!(
-        arrival.said("Destination approach assistance slowing."),
-        "{}",
-        arrival.report(&destination)
+        arrivals
+            .iter()
+            .all(|(_, arrival)| arrival.min_creep_gear == Some(1)),
+        "the automatic did not reach its launch gear before the crawl: {arrivals:#?}"
     );
-    assert!(
-        arrival.said("Pulling into freight terminal Shelby Cross-Dock")
-            && arrival.said("dock menu opening in a moment."),
-        "{}",
-        arrival.report(&destination)
+}
+
+/// Darren's exact level was not logged. Resolve his deterministic company
+/// assignment at one level in each shipped fleet tier, including the real
+/// heavy-load slip-seat choice for the regional tier.
+fn darren_company_profile(level: i64) -> Profile {
+    let world = get_world();
+    let route = world
+        .supported_route("helena_mt_us", "shelby_mt_us", None)
+        .expect("Helena to Shelby route lookup must succeed")
+        .expect("Helena to Shelby must remain a supported run");
+    let mut job = Job::new(
+        cargo_type("general").expect("general freight remains in the catalog"),
+        20.0,
+        "helena_mt_us",
+        "Helena Terminal",
+        "shelby_mt_us",
+        route.miles().round(),
+        500.0,
+        2.0,
     );
-    assert!(
-        !arrival.said("Destination approach stopped and holding."),
-        "{}",
-        arrival.report(&destination)
-    );
+    job.destination_location = "Shelby Cross-Dock".to_string();
+
+    let mut profile = Profile::named_in("Darren", "helena_mt_us");
+    profile.career = Career::with_xp(LEVEL_XP[(level - 1) as usize]);
+    let expected = assigned_truck_key(&profile, Some(&job));
+    profile.take_slip_seat(&job);
+    assert_eq!(profile.active_truck_key(), expected);
+    let tier = FLEET_TIERS
+        .iter()
+        .rev()
+        .find(|tier| level >= tier.min_level)
+        .expect("level one has a carrier tier");
+    assert!(tier.pool.contains(&expected));
+    profile
 }
 
 #[test]
