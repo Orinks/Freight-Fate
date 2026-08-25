@@ -72,6 +72,8 @@ CURVE_RADIUS_FT = 3000.0  # a vertex tighter than this is "curving" for a Class-
 A_LAT_G = 0.30  # comfortable dry-loaded lateral accel for the advisory speed
 RADIUS_WINDOW_M = 80.0  # sliding-arc window for the circle-fit radius (Phil's #2)
 DP_EPS_TANGENT_M = 30.0  # loose simplification on near-straight runs
+
+
 CURVE_PAD_M = 80.0  # keep-all margin around curve spans so edges re-fit identically
 POINT_BUDGET = 600  # tangent-only vertex cap (curves set their own floor)
 SIGN_WOBBLE_DEG = 1.0  # |turn| under this is neutral (doesn't set a direction)
@@ -84,6 +86,27 @@ CONNECTOR_WINDOW_MI = 0.75  # first/last in-town stretch -> tag curves, don't dr
 #   any sweep, re-run tools/curve_valhalla_facts.py and bake_curve_connectors.py:
 #   those read the road class OSM records under each apex and finish the flag.
 MATCH_CORRIDOR_M = 90.0  # how near a maxspeed way must be to govern a sample point
+
+# How far the archived line may ever sit from the road it describes.
+#
+# The tangent simplifier used to loosen its tolerance to 4,000 m chasing a
+# vertex budget, and on a leg whose CURVES alone exceed that budget it ran
+# all the way there every time -- the target was unreachable, so the loop
+# just kept loosening. Newark to Trenton came out as 340 vertices of city
+# street, one 37-mile straight line where the New Jersey Turnpike is, and
+# 305 vertices of Trenton: 2.5 miles off the road at the worst point. 985
+# legs carry a hop over 5 percent of their own length for this reason.
+#
+# The cap is MATCH_CORRIDOR_M rather than a number picked to look right:
+# that is the distance within which a way is taken to govern a sample
+# point, so a line straying further can no longer be matched to its own
+# road, and everything that asks 'what road is this' -- interchanges,
+# lanes, posted limits, tolls -- starts reading a road the truck never
+# drives.
+#
+# The vertex budget is a file-size target. Fidelity to the road is not, so
+# where the two disagree the leg is allowed to exceed the budget.
+MAX_EPS_TANGENT_M = MATCH_CORRIDOR_M
 SPEED_GAP_MI = 4.0  # a posting-free run longer than this becomes an explicit gap
 
 MPS_TO_MPH = 2.2369362920544
@@ -345,9 +368,15 @@ def adaptive_simplify(
 
     ordered = build(DP_EPS_TANGENT_M)
     eps_t = DP_EPS_TANGENT_M
-    while len(ordered) > budget and eps_t < 4000:
+    while len(ordered) > budget and eps_t < MAX_EPS_TANGENT_M:
         eps_t *= 1.6
-        ordered = build(eps_t)
+        grown = build(eps_t)
+        # A wider tolerance cannot remove a vertex a CURVE is holding, so once
+        # loosening stops dropping points the budget is unreachable and every
+        # further step is paid for out of tangent fidelity for nothing.
+        if len(grown) >= len(ordered):
+            break
+        ordered = grown
     return ordered
 
 

@@ -70,6 +70,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import leg_geometry as lg  # noqa: E402
 import overpass_corridor as oc  # noqa: E402
+import reroute_leg as rr  # noqa: E402
 import straw_curve_sample as scs  # noqa: E402  (the ratified primitives)
 from enrich_routes_ors import fetch_ors_hgv_route, parse_ors_route  # noqa: E402
 from enrich_routes_pois import MAXSPEED_SOURCE, _maxspeed_from_tags  # noqa: E402
@@ -364,17 +365,42 @@ def route_from_archive(leg: dict) -> dict[str, Any]:
     return {"coordinates": coords, "elevations_ft": elevations}
 
 
+def route_from_router(leg: dict, cities: dict) -> dict[str, Any]:
+    """Ask the truck router for this leg's road again, at full density.
+
+    Re-simplifying the archive cannot undo an over-simplification: the
+    vertices a loose tolerance dropped are gone, and a tighter one has
+    nothing to keep. A leg whose archive strayed from the road has to be
+    fetched again.
+
+    Same router, same loaded-semi profile and same city nodes as the reroute
+    used, so this re-states the leg's existing route rather than choosing a
+    new one -- every corridor layer keyed to a mile stays valid.
+    """
+    fetched = rr.fetch_route(cities[leg["from"]], cities[leg["to"]])
+    if fetched is None:
+        raise RuntimeError(f"the router returned no route for {lg.leg_id_of(leg)}")
+    shape, _miles, _toll = fetched
+    elevations = rr.fetch_elevation(shape)
+    if elevations is None:
+        raise RuntimeError(f"no elevation for {lg.leg_id_of(leg)}")
+    return {"coordinates": shape, "elevations_ft": elevations}
+
+
 def process_leg(
     leg: dict,
     cities: dict,
     api_key: str,
     escape_cache: list[dict],
     from_archive: bool = False,
+    refetch: bool = False,
 ) -> dict[str, Any] | None:
     frm, to = leg["from"], leg["to"]
     highway = leg.get("highway", "")
     leg_miles = float(leg.get("miles", 0)) or None
-    if from_archive:
+    if refetch:
+        parsed = route_from_router(leg, cities)
+    elif from_archive:
         parsed = route_from_archive(leg)
     else:
         start = {"lat": cities[frm]["lat"], "lon": cities[frm]["lon"]}
@@ -472,6 +498,13 @@ def main() -> int:
     g.add_argument("--all", action="store_true", help="every leg in the network")
     ap.add_argument("--limit", type=int, help="cap leg count (with --all, for smoke tests)")
     ap.add_argument(
+        "--refetch",
+        action="store_true",
+        help="ask the truck router for the road again instead of reading the "
+        "archive. Needed when the archived line was simplified so far it left "
+        "the road -- the dropped vertices cannot be recovered from it.",
+    )
+    ap.add_argument(
         "--from-archive",
         action="store_true",
         help="take the route from world_data/us/geometry instead of routing it "
@@ -501,7 +534,7 @@ def main() -> int:
     for n, leg in enumerate(legs, 1):
         key = (leg["from"], leg["to"])
         try:
-            r = process_leg(leg, cities, api_key, escape_cache, args.from_archive)
+            r = process_leg(leg, cities, api_key, escape_cache, args.from_archive, args.refetch)
         except (
             urllib.error.URLError,
             urllib.error.HTTPError,

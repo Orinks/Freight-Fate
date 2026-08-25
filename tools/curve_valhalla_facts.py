@@ -163,6 +163,47 @@ def _post(url: str, body: dict, delay: float, attempts: int = 4) -> dict | None:
     return None
 
 
+def densify(coords: list[list[float]], step_m: float = COVERAGE_STEP_M / 2.0):
+    """``(coords with a point at least every step_m, original index -> new)``.
+
+    The archive keeps a vertex wherever the road BENDS and drops them where it
+    runs straight, which is exactly right for reading a curve and exactly
+    wrong for reading what a leg is made of: the surviving vertices cluster on
+    interchanges, ramps, city approaches and mountain bends, so a coverage
+    sample taken only at vertices barely sees the long straight interstate
+    running between them.
+
+    Measured across the network, the bias is monotonic in how much the
+    simplifier collapsed -- legs whose longest hop is under 5 percent of their
+    length read a median 85 percent on their own shield, legs over 20 percent
+    read 62 -- and it is worst on the freeway-heaviest legs, which are the
+    ones with the longest tangents to collapse.
+
+    Points go in at HALF the sample step. At exactly the step the sampler
+    skips every other one -- it only takes a sample once the distance since
+    the last one reaches the step, so a point landing a metre short is passed
+    over and the next is a whole step late.
+
+    Interpolating along the collapsed tangents costs nothing in fidelity: the
+    chord IS the road there (a route point sits a median 0.009 miles off the
+    archived line), which is why the simplifier was allowed to drop them.
+    """
+    out: list[list[float]] = [coords[0]]
+    index_of: list[int] = [0]
+    for a, b in zip(coords, coords[1:], strict=False):
+        span = _haversine_m(a[1], a[0], b[1], b[0])
+        for k in range(1, int(span // step_m) + 1):
+            t = k * step_m / span
+            out.append([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t])
+        out.append(list(b))
+        index_of.append(len(out) - 1)
+    return out, index_of
+
+
+def _haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    return scs._haversine_m(lat1, lon1, lat2, lon2)
+
+
 def match_leg(coords: list[list[float]], url: str, delay: float) -> dict[int, dict]:
     """``vertex index -> matched edge`` for one leg's polyline.
 
@@ -310,9 +351,10 @@ def main() -> int:
         if len(detected) != len(rows):
             skipped += 1
             continue
-        matched = match_leg(coords, url, delay)
+        dense, index_of = densify(coords)
+        matched = match_leg(dense, url, delay)
         for curve, row in zip(detected, rows, strict=False):
-            fact = facts_for(leg_id, row["seq"], matched.get(curve["_apex"]))
+            fact = facts_for(leg_id, row["seq"], matched.get(index_of[curve["_apex"]]))
             unread += fact.get("near_m") is None
             lines.append(json.dumps(fact, sort_keys=True))
         # What the leg is MADE of, from the same matching: one sample a mile.
@@ -320,10 +362,11 @@ def main() -> int:
         refs: dict[str, int] = {}
         samples = 0
         last = -math.inf
-        for i in range(len(coords)):
-            if cum[i] - last < COVERAGE_STEP_M and i != len(coords) - 1:
+        dense_cum = scs._cumulative_m(dense)
+        for i in range(len(dense)):
+            if dense_cum[i] - last < COVERAGE_STEP_M and i != len(dense) - 1:
                 continue
-            last = cum[i]
+            last = dense_cum[i]
             samples += 1
             edge = matched.get(i)
             if edge is None or str(edge.get("use")) in RAMP_USES:

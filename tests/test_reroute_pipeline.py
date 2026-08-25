@@ -355,3 +355,82 @@ def test_no_grade_profile_at_all_is_the_loudest_failure():
     re_ = _load("reroute_enrich")
     leg = {"from": "a_tx_us", "to": "b_tx_us", "miles": 20.0, "corridor": {}}
     assert re_.grade_coverage_gaps(leg) == ["no grade profile at all"]
+
+
+# --- a tileset that carries no elevation ---------------------------------
+
+
+def test_a_height_answer_full_of_nulls_is_a_refusal_not_a_sea_level_road():
+    # A Valhalla tileset built without elevation still ADVERTISES height in
+    # its available actions and answers 200 with a list of nulls. Read as
+    # data that is a road at sea level; read as arithmetic it is
+    # float(None). It went unnoticed because the overnight chain printed
+    # "GEOMETRY REPAIRED" after the step that had just died on it.
+    rr = _load("reroute_leg")
+    calls = []
+
+    def fake_post(path, body, base=None):
+        calls.append(base)
+        return {"height": [None] * len(body["shape"])}
+
+    rr._post = fake_post
+    assert rr.fetch_elevation([(-105.9, 39.6), (-105.8, 39.6)]) is None
+    # and it must have asked the elevation endpoint, not the routing one
+    assert calls and calls[0] == rr.VALHALLA_ELEVATION
+
+
+def test_real_heights_still_come_back_in_feet():
+    rr = _load("reroute_leg")
+    rr._post = lambda path, body, base=None: {"height": [1000.0, 2000.0]}
+    feet = rr.fetch_elevation([(-105.9, 39.6), (-105.8, 39.6)])
+    assert feet is not None
+    assert round(feet[0]) == 3281 and round(feet[1]) == 6562
+
+
+def test_elevation_and_routing_can_be_different_services():
+    # The whole point of the split: a local tileset is worth having for
+    # routing and map matching even when it carries no elevation tiles.
+    rr = _load("reroute_leg")
+    assert hasattr(rr, "VALHALLA_ELEVATION")
+
+
+# --- what a truck can actually be charged for ----------------------------
+
+
+def test_an_express_lane_is_not_a_toll_a_semi_can_pay():
+    # Managed, HOT and express lanes carry the free mainline's own route
+    # number and ban tractor-trailers. A truck in that corridor is on the
+    # free general-purpose lanes beside them. I-25 Express, the I-10 Metro
+    # ExpressLanes and the 95 Express Lanes were being counted as crossings.
+    te = _load("toll_evidence")
+    assert not te.chargeable({"highway": "motorway", "name": "I-10 Metro ExpressLanes"})
+    assert not te.chargeable({"highway": "motorway", "ref": "I 25 EXPR"})
+    assert not te.chargeable({"highway": "motorway", "name": "95 Express Lanes"})
+
+
+def test_a_tolled_ramp_is_not_the_road_being_charged_for():
+    # Ramps run beside the free mainline at every interchange, and 21,203 of
+    # the tolled ones carry no name, operator, ref or network at all -- which
+    # is how "unnamed tolled road" became the third most-sighted facility in
+    # the country.
+    te = _load("toll_evidence")
+    assert not te.chargeable({"highway": "motorway_link", "toll": "yes"})
+    assert not te.chargeable({"highway": "trunk_link", "toll": "yes"})
+
+
+def test_the_turnpike_itself_is_still_chargeable():
+    te = _load("toll_evidence")
+    assert te.chargeable({"highway": "motorway", "name": "New Jersey Turnpike"})
+    assert te.chargeable({"highway": "trunk", "name": "West Virginia Turnpike"})
+
+
+# --- the simplifier may not leave the road -------------------------------
+
+
+def test_loosening_stops_once_it_cannot_drop_another_vertex():
+    # The escalation used to climb to 4,000 m chasing a vertex budget. On a
+    # leg whose CURVES alone exceed that budget the target is unreachable, so
+    # it ran to the ceiling every time and paid for it out of tangent
+    # fidelity. Newark to Trenton came out with a 37-mile straight line where
+    # the New Jersey Turnpike is.
+    assert scs.MAX_EPS_TANGENT_M <= scs.MATCH_CORRIDOR_M

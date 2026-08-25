@@ -1707,6 +1707,83 @@ onto exit signalling.
       colour -- the same call already made for the toll charge -- so all four
       now ride `EventPriority.ROUTE`'s never-dropped contract.
 
+- [x] **The archived line is on the road it names (2026-08-25).** Every layer
+      that asks "what road is this" -- interchanges, lanes, postings, tolls,
+      curves -- reads the archived polyline, so a line that strays reads a
+      road the truck never drives. `tools/offroad.py` measures the real
+      thing: it samples inside every gap longer than two miles and asks the
+      router how far the nearest truck-drivable road actually is. 250 legs
+      sat outside the 90 m match corridor, worst 2,699 m.
+
+      BEWARE the metric that came before it, which counted a long straight
+      SEGMENT as damage and made 985 legs look broken. On a dead-straight
+      interstate two vertices thirty miles apart describe the road perfectly;
+      Douglas-Peucker is right to keep only those. Damage is the line lying
+      where no road is, and nothing else.
+
+      `tools/repair_geometry.py` re-fetches shape and elevation and re-runs
+      the corrected simplifier -- no Overpass, so it does not inherit that
+      service's refusals. It adopted 210 and refused 40, on two screens it
+      will not be talked out of: the new shape's length must still agree with
+      the miles the leg is PAID on (beyond 6 percent the router has chosen a
+      different road), and it must actually beat the old line's worst
+      distance.
+
+      NOT PLAYER-FACING ON ITS OWN, and this was nearly mis-shipped as a
+      changelog entry: nothing under `src/` reads `world_data/us/geometry/`.
+      Only the build tools do, through `leg_geometry.py`. Repairing the
+      archive changes what the NEXT bake produces and nothing a driver hears
+      until that bake runs.
+
+- [ ] **Re-bake the derived layers over the 210 repaired legs.** Curves,
+      speed postings and ramps for those legs were derived from the line that
+      has just been replaced, so they describe road the truck no longer
+      drives -- and they UNDER-report, because where the old line cut a
+      corner across open country it had no bends on it at all to find. The
+      four canyon controls are unmoved (Glenwood 70/20, Vail Pass 59/3, Salt
+      River 143/77, US-550 276/180), which says the repair broke nothing; it
+      does not say the repaired legs are now right.
+
+      Blocked on Overpass, not on the work: `bake_curve_geometry` asks it for
+      shields, postings and ramps, and it refused every corridor query on the
+      long legs -- HTTP 500 on Billings to Salt Lake, and again on Charleston
+      to Pittsburgh, which is what killed the 24-leg run. The fix is to stop
+      asking it. `us-latest.osm.pbf` is already on the box that builds the
+      routing tiles, and `tools/toll_ways.py` shows the shape of the answer:
+      a C++-side tag filter read the whole country in 124 seconds. A local
+      corridor query over that PBF replaces Overpass for every bake in this
+      repo, and removes the one dependency that fails on exactly the legs
+      that need it most.
+
+- [ ] **33 legs whose road a truck router will not take.** The refusals
+      above, minus 7 that were already within a few metres of the corridor.
+      On these the loaded-semi profile wants a route 6 to 84 percent longer
+      or shorter than the leg's curated mileage -- Hazard to London KY
+      +84 percent, Evansville to Clarksville +57, Payson to Winslow -41.
+      Either the mileage is wrong, or the road the leg is on is one an
+      80,000 lb rig should not be routed down. Both matter and they are not
+      the same fix; deciding needs the owner, because mileage drives pay and
+      deadlines. The list is in `logs/repair-geom.log` under "different road".
+
+- [ ] **Tolls: the reading is fixed, the pricing is half done.**
+      `tools/toll_evidence.py` matches each leg's line against the tolled
+      ways extracted from the PBF and groups hits into runs an authority's
+      schedule can actually answer. Two classes of sighting were being
+      counted that a tractor-trailer can never be charged for, and are now
+      excluded: managed, HOT and express lanes, which ban trucks and carry
+      the free mainline's own route number; and tolled RAMPS, which run
+      beside the free mainline at every interchange -- 21,203 of them carry
+      no name, operator, ref or network at all, which is where "unnamed
+      tolled road" came from as the third most-sighted facility in the
+      country.
+
+      `tools/toll_price.py` joins that evidence to the curated rates and
+      REFUSES to price a crossing nobody has read a schedule for, rather than
+      filling it with a plausible number -- which is the exact defect the 46
+      "estimated" toll events were rebuilt to remove. 38 city-pair rates are
+      researched and can be applied; the rest is a research queue the tool
+      prints, biggest road first.
+
 - [ ] **Data provenance: where each baked layer actually stands
       (audited 2026-08-19).** Moved out of `CLAUDE.md`, which should say how
       to behave rather than carry a status board that goes stale -- the

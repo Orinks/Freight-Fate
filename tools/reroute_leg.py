@@ -71,6 +71,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -86,7 +87,19 @@ from world_source import load_world, save_world  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 GEOM_DIR = ROOT / "src" / "freight_fate" / "data" / "world_data" / "us" / "geometry"
 
-VALHALLA = "https://valhalla1.openstreetmap.de"
+# The public FOSSGIS instance by default; point FF_VALHALLA_URL at a local
+# build to lose the rate limit, the politeness delay, and the outage window
+# that stopped this pipeline for half an hour on 2026-08-24.
+VALHALLA = os.environ.get("FF_VALHALLA_URL", "https://valhalla1.openstreetmap.de").rstrip("/")
+# Elevation is asked of its own endpoint, because a local build does not have
+# to carry elevation tiles to be worth having. Routing and map matching are
+# thousands of calls and want to be local; /height is a few dozen. A tileset
+# built without elevation still ADVERTISES height in its available actions
+# and answers with a list of nulls, which reads as a successful call right up
+# until something multiplies one by 3.28.
+VALHALLA_ELEVATION = os.environ.get(
+    "FF_VALHALLA_ELEVATION_URL", "https://valhalla1.openstreetmap.de"
+).rstrip("/")
 USER_AGENT = "Freight-Fate rerouting (https://github.com/Orinks/Freight-Fate)"
 COSTING = "truck"
 
@@ -162,9 +175,9 @@ STALE_AFTER_REROUTE = (
 CHECKPOINT_MAX_OFF_MI = 3.0
 
 
-def _post(path: str, body: dict) -> dict | None:
+def _post(path: str, body: dict, base: str | None = None) -> dict | None:
     request = urllib.request.Request(
-        f"{VALHALLA}{path}",
+        f"{base or VALHALLA}{path}",
         data=json.dumps(body).encode("utf-8"),
         headers={"Content-Type": "application/json", "User-Agent": USER_AGENT},
     )
@@ -243,10 +256,23 @@ def fetch_elevation(shape: list[list[float]]) -> list[float] | None:
         result = _post(
             "/height",
             {"shape": [{"lat": lat, "lon": lon} for lon, lat in chunk], "range": False},
+            base=VALHALLA_ELEVATION,
         )
         if not result or "height" not in result:
             return None
-        out.extend(float(h) * 3.280839895 for h in result["height"])
+        heights = result["height"]
+        # A tileset built without elevation answers 200 with nulls. That is a
+        # refusal wearing a success's clothes, so it is caught here rather
+        # than by a TypeError deep in the arithmetic.
+        if any(h is None for h in heights):
+            print(
+                f"  {VALHALLA_ELEVATION} returned no elevation "
+                f"({sum(h is None for h in heights)} of {len(heights)} points empty)."
+                " Point FF_VALHALLA_ELEVATION_URL at an instance built with"
+                " elevation tiles."
+            )
+            return None
+        out.extend(float(h) * 3.280839895 for h in heights)
     return out if len(out) == len(shape) else None
 
 

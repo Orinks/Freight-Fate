@@ -25,6 +25,15 @@ Three rules learned the hard way while assembling this:
 * Published web pages go stale. The Carquinez and Benicia-Martinez bridge pages
   still showed $30.50 when the adopted BATA resolution had moved to $40.50 for
   2026; the formally approved schedule beats the marketing page.
+* An axle multiplier is not a constant, even inside one authority. Florida's
+  own schedule effective 2026-04-21 charges a five-axle rig $3.44 where a car
+  pays $0.86 at the NW 27th Avenue plaza -- four times -- and $1.50 where a
+  car pays $0.60 at Lantana, two and a half times. The first is priced at a
+  flat rate for every axle after the first; the second at a lower rate for
+  every axle after the second. So a five-axle per-mile rate CANNOT be derived
+  by scaling the published two-axle per-mile table, which is what a pass
+  through this file nearly shipped for all 49 Florida crossings. Read the
+  five-axle column, or price the plazas.
 * Ask where the tolled road actually GOES before pricing a leg. A confident
   source said I-64 leaves Charleston toll-free; it does not, it runs concurrent
   with I-77 down the tolled Turnpike for 60 miles first. The mirror of that:

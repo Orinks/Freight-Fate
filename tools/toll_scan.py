@@ -27,12 +27,11 @@ import json
 import math
 import os
 import sys
-import time
-import urllib.error
-import urllib.request
 from pathlib import Path
 from typing import Any
 
+import leg_geometry as lg
+import overpass_corridor as oc
 from world_source import load_world
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,10 +43,8 @@ EARTH_RADIUS_MI = 3958.7613
 
 
 def _overpass_url() -> str:
-    url = os.environ.get("OVERPASS_URL", "").strip()
-    if not url:
-        raise SystemExit("Set OVERPASS_URL=http://localhost:12347/api/interpreter")
-    return url
+    """The endpoint to sample from; empty means "use the public mirrors"."""
+    return os.environ.get("OVERPASS_URL", "").strip()
 
 
 def _bbox(lat: float, lon: float, radius_m: float) -> str:
@@ -57,6 +54,20 @@ def _bbox(lat: float, lon: float, radius_m: float) -> str:
 
 
 def _polyline(leg: dict[str, Any]) -> list[tuple[float, float, float]]:
+    """The leg's real geometry, archive first.
+
+    A toll plaza is a point on a road. Walking the chords between route points
+    25 miles apart can pass several miles from where the road actually runs,
+    which for a 3 km sample radius is the difference between seeing a
+    turnpike and missing it.
+    """
+    archived = lg.corridor_geometry(leg)
+    if archived:
+        return archived
+    return _polyline_from_route_points(leg)
+
+
+def _polyline_from_route_points(leg: dict[str, Any]) -> list[tuple[float, float, float]]:
     points = (leg.get("corridor") or {}).get("route_points") or []
     out = [
         (float(p["lat"]), float(p["lon"]), float(p["at_mi"]))
@@ -78,18 +89,16 @@ def _interpolate(line: list[tuple[float, float, float]], at_mi: float) -> tuple[
 
 
 def _query(url: str, body: str) -> dict[str, Any]:
-    request = urllib.request.Request(
-        url, data=body.encode("utf-8"), headers={"User-Agent": "FreightFateTollScan/1.0"}
-    )
-    for attempt in range(3):
-        try:
-            with urllib.request.urlopen(request, timeout=90) as response:
-                return json.loads(response.read().decode("utf-8"))
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
-            if attempt == 2:
-                return {"elements": []}
-            time.sleep(2 * (attempt + 1))
-    return {"elements": []}
+    """One sample, or an exception. NEVER an empty answer it did not get.
+
+    This used to return ``{"elements": []}`` once its retries were spent,
+    which is the same shape as "there is no toll here" -- and the caller
+    cached it. A busy afternoon on the Overpass therefore wrote "no toll" into
+    the evidence permanently, for a road that tolls. The whole point of this
+    scan is that the evidence is read rather than remembered, so a reading it
+    failed to take has to stop it, not fill itself in.
+    """
+    return oc.post(body, urls=(url,) if url else oc.MIRRORS)
 
 
 def _sample(url: str, key: str, lat: float, lon: float) -> list[dict[str, Any]]:
@@ -103,6 +112,7 @@ def _sample(url: str, key: str, lat: float, lon: float) -> list[dict[str, Any]]:
         f'[highway~"^(motorway|trunk|primary|motorway_link|trunk_link)$"][toll];out tags 30;'
     )
     payload = _query(url, body)
+    # Cached only once it is a real answer -- see _query.
     path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
     return payload.get("elements", [])
 
