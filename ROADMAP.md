@@ -1763,7 +1763,45 @@ onto exit signalling.
       Either the mileage is wrong, or the road the leg is on is one an
       80,000 lb rig should not be routed down. Both matter and they are not
       the same fix; deciding needs the owner, because mileage drives pay and
-      deadlines. The list is in `logs/repair-geom.log` under "different road".
+      deadlines. Re-check with `tools/repair_geometry.py --only <leg>`, which
+      prints the router's length against the curated one and refuses rather
+      than adopting.
+
+        leg                                          router vs paid
+        hazard_ky_us:london_ky_us                     +83.6%
+        evansville_in_us:clarksville_tn_us            +57.2%
+        morristown_tn_us:london_ky_us                 +42.7%
+        payson_az_us:winslow_az_us                    -41.4%
+        charleston_wv_us:pikeville_ky_us              +38.7%
+        allentown_pa_us:trenton_nj_us                 +33.6%
+        portland_me_us:montpelier_vt_us               +29.4%
+        evansville_in_us:nashville_tn_us              +27.5%
+        wenatchee_wa_us:everett_wa_us                 -27.3%
+        las_vegas_nv_us:phoenix_az_us                 +21.6%
+        charleston_sc_us:florence_sc_us               +18.1%
+        coos_bay_or_us:roseburg_or_us                 -16.2%
+        hartford_ct_us:providence_ri_us               +15.9%
+        chico_ca_us:santa_rosa_ca_us                  +15.8%
+        pikeville_ky_us:hazard_ky_us                  +12.5%
+        spokane_wa_us:boise_id_us                     -11.7%
+        austin_tx_us:kerrville_tx_us                  -11.6%
+        albany_ny_us:bridgeport_ct_us                 +11.6%
+        tampa_fl_us:miami_fl_us                       +11.4%
+        paintsville_ky_us:pikeville_ky_us             +10.8%
+        charlotte_nc_us:knoxville_tn_us                -9.7%
+        denver_co_us:salt_lake_city_ut_us              +9.2%
+        charlotte_nc_us:lumberton_nc_us                -9.1%
+        williamsport_pa_us:harrisburg_pa_us            -7.7%
+        augusta_ga_us:savannah_ga_us                   +7.5%
+        roanoke_va_us:raleigh_nc_us                    +7.5%
+        elizabethtown_ky_us:evansville_in_us           +7.3%
+        clarksville_tn_us:louisville_ky_us             -7.3%
+        muskegon_mi_us:traverse_city_mi_us             -7.2%
+        south_bend_in_us:fort_wayne_in_us              +7.2%
+        denver_co_us:albuquerque_nm_us                 +7.1%
+        rochester_ny_us:new_york_ny_us                 -6.6%
+        santa_ana_ca_us:lancaster_ca_us                +6.4%
+
 
 - [ ] **Tolls: the reading is fixed, the pricing is half done.**
       `tools/toll_evidence.py` matches each leg's line against the tolled
