@@ -27,6 +27,7 @@ use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
 use freight_fate::states::base::Key;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::DOCKING_MAX_MPH;
+use freight_fate::states::driving_menu_states::FacilityArrivalState;
 
 use crate::transcript_cruise_support::{frame, hold, quiet, release_keys, DT, MPS_PER_MPH};
 
@@ -299,13 +300,18 @@ pub fn arrive_over(destination: &Destination, chain_grade_pct: Option<f64>) -> A
     // has not arrived by then is not going to.
     for _ in 0..(60 * 600) {
         if !harness.has_drive() {
-            ready = true; // the dock menu replaced the drive
-            docked = true;
+            // The automatic pull-in first replaces the drive with a timed
+            // spoken transition. Finish it and require the real dock menu;
+            // merely losing the drive is not proof that delivery can continue.
+            harness.finish_timed_state();
+            ready = harness.state_is::<FacilityArrivalState>();
+            docked = ready;
             break;
         }
         if harness.read_drive(|d| d.arrival_menu_open) {
-            ready = true;
-            docked = true;
+            harness.finish_timed_state();
+            ready = harness.state_is::<FacilityArrivalState>();
+            docked = ready;
             break;
         }
         let now_on_chain = harness.read_drive(|d| d.surface_chain);
@@ -505,6 +511,52 @@ fn test_the_approach_assist_stops_the_truck_at_every_kind_of_destination() {
     assert!(
         climbed > 0,
         "no destination in the sweep climbs to its gate any more"
+    );
+}
+
+#[test]
+fn test_shelby_cross_dock_approach_assist_reaches_the_arrival_gate() {
+    // Darren, 2026-08-25: approaching Shelby Cross-Dock, the assist took the
+    // truck from 30 to 14 to 5 to 2 mph while route status still said the
+    // facility was a mile away, then never opened the dock. Switching the
+    // assist off let the arrival fire eight seconds later. Drive the shipped
+    // facility and require the player-visible outcome, not merely a slow
+    // truck: hands off once the assist speaks, the dock opens at a crawl.
+    let destination = Destination {
+        city: "shelby_mt_us".to_string(),
+        location: "Shelby Cross-Dock".to_string(),
+        state: "MT".to_string(),
+        chain: false,
+    };
+    let arrival = arrive(&destination);
+
+    assert_eq!(
+        what_went_wrong(&destination, &arrival),
+        None,
+        "{}",
+        arrival.report(&destination)
+    );
+    assert!(arrival.docked, "{}", arrival.report(&destination));
+    assert!(
+        arrival.said("2 miles per hour"),
+        "{}",
+        arrival.report(&destination)
+    );
+    assert!(
+        arrival.said("Destination approach assistance slowing."),
+        "{}",
+        arrival.report(&destination)
+    );
+    assert!(
+        arrival.said("Pulling into freight terminal Shelby Cross-Dock")
+            && arrival.said("dock menu opening in a moment."),
+        "{}",
+        arrival.report(&destination)
+    );
+    assert!(
+        !arrival.said("Destination approach stopped and holding."),
+        "{}",
+        arrival.report(&destination)
     );
 }
 

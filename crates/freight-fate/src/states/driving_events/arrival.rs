@@ -131,6 +131,15 @@ impl DrivingState {
     /// `_handle_arrival_gate()`.
     pub fn handle_arrival_gate(&mut self, ctx: &mut GameContext) {
         if ctx.settings.destination_approach_assist {
+            // A ramp-end arrival may already have started the automatic
+            // pull-in before this frame reaches the finished-trip handler.
+            // Do not queue the manual "Press Enter" hold prompt behind the
+            // truthful dock-opening line: even though its validity gate keeps
+            // it out of speech, it leaves a contradictory transcript and can
+            // be handed to other announcement consumers as actionable text.
+            if self.arrival_menu_open {
+                return;
+            }
             self.cancel_cruise(ctx, false);
             self.trip.truck.throttle = 0.0;
             self.trip.truck.brake = 1.0;

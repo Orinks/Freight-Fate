@@ -1160,6 +1160,13 @@
   city street takes, so the corners on the way in stop arriving faster than
   you can take them.
 
+- **An automatic dock pull-in no longer also tells you to press Enter.** At a
+  ramp-end delivery such as Shelby Cross-Dock, destination approach assistance
+  could start opening the dock menu and still queue the manual "stopped and
+  holding" instruction behind it. The automatic arrival now says that the dock
+  menu is opening and completes that transition without a contradictory key
+  instruction.
+
 - **Driving keys now work with JAWS without the pass-through key.** JAWS
   hands the game each arrow key as an instant tap rather than a held key,
   so holding Up, Down, Left, or Right to accelerate, brake, or steer did
