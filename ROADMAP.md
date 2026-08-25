@@ -1748,12 +1748,37 @@ onto exit signalling.
       shields, postings and ramps, and it refused every corridor query on the
       long legs -- HTTP 500 on Billings to Salt Lake, and again on Charleston
       to Pittsburgh, which is what killed the 24-leg run. The fix is to stop
-      asking it. `us-latest.osm.pbf` is already on the box that builds the
-      routing tiles, and `tools/toll_ways.py` shows the shape of the answer:
-      a C++-side tag filter read the whole country in 124 seconds. A local
-      corridor query over that PBF replaces Overpass for every bake in this
-      repo, and removes the one dependency that fails on exactly the legs
-      that need it most.
+      asking it, and there are two answers, not one.
+
+      MOST OF IT IS ALREADY ANSWERED by the local router's own
+      `/trace_attributes`, which was checked against the running instance
+      rather than assumed. Valhalla does not store OSM; it compiles the PBF
+      once into its own graph and keeps a fixed schema per edge. What that
+      schema keeps is very nearly the bake's shopping list -- measured on
+      I-70 west of Denver:
+
+        names ['I 70']  road_class motorway  speed_limit  lane_count
+        toll  truck_route  use (road / ramp)  surface  bridge  tunnel
+        weighted_grade  way_id
+
+      Shields survive because Valhalla folds the OSM `ref` into `names`, and
+      ramps are labelled outright by `use`. Map matching also puts every one
+      of those on the leg's OWN line, which a bounding-box Overpass query
+      never did.
+
+      WHAT IT CANNOT ANSWER is anything outside that schema, because the tags
+      are gone: `maxheight`, `maxweight`, `hgv`, `destination` signs, POI
+      tags, any arbitrary key. Access limits survive only pre-digested, as
+      the `access_restrictions` on `/locate`. For those, go to the PBF --
+      `us-latest.osm.pbf` is already on the box, `tools/toll_ways.py` shows
+      the shape (a C++-side tag filter read the whole country in 124
+      seconds), and every edge carries `way_id` so a Valhalla answer can be
+      joined straight back to the OSM way it came from.
+
+      CAVEAT on grades: this tileset was built with `build_elevation=False`,
+      so `weighted_grade` is flat and `max_upward_grade` comes back as the
+      -500 sentinel. Grades still come from the elevation service, which is
+      why `FF_VALHALLA_ELEVATION_URL` is a separate endpoint.
 
 - [ ] **33 legs whose road a truck router will not take.** The refusals
       above, minus 7 that were already within a few metres of the corridor.
