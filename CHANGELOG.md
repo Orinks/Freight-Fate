@@ -945,6 +945,47 @@
 
 ### Fixed
 
+- **Traffic drives the road it is on, so far fewer slow vehicles are in your
+  way.** A car or truck out on the road took its speed from wherever it first
+  appeared and then kept that number for good. A US route drops to thirty
+  through every town it passes, so a car that appeared in one carried thirty
+  out onto the sixty-five on the far side -- and where the road had only one
+  lane, there was no way past it and nothing about the road explained why it
+  was there. It also worked the other way: a car that appeared out on the
+  highway held sixty-five through the next town. Everyone now speeds up and
+  slows down with the road under them, the way they always should have. Driven
+  over five thousand miles of real corridors, the times the road made you brake
+  for a vehicle ahead have roughly halved, on one-lane roads and on wider ones
+  alike -- and there is exactly as much traffic out there as before.
+
+- **No more phantom brake lights.** Vehicles were sometimes put on the road
+  already braking where there was nothing to brake for, most reliably in the
+  first few miles of every run. You were warned about brake lights with
+  nothing to say about the cause, because there was no cause. Traffic now only
+  brakes where the road gives it a reason -- a jam, roadwork, or a ramp -- and
+  a vehicle that has driven clear of one and got back up to speed is no longer
+  announced as brake lights for the rest of its life.
+
+- **"You slow to match the slow car" instead of a lane change you never
+  made.** Braking down behind a slower vehicle used to be confirmed with "you
+  slow nearly to a stop and ease around it" -- which was two things that had
+  not happened. The truck comes down to the vehicle's speed and stays behind
+  it, and on a one-lane road there is nowhere to ease around to. The line now
+  says what the truck actually did. Swerving into an open lane still has its
+  own line.
+
+- **The opening traffic on a route takes an exit like everybody else.** The
+  vehicles placed along your route when a run begins never left the highway,
+  so a slow one three hundred miles ahead was still in front of you when you
+  got there. They now turn off after a few miles, the same as the traffic
+  around you always has.
+
+- **Nobody passes you in a lane the road does not have.** Overtaking traffic
+  was always put in the left lane, including on the two-lane roads that have
+  no left lane, so on those roads it went by on a side that was not there and
+  was never really in your way. Traffic now uses the lanes the road actually
+  has, and keeps up with the road as the lane count changes under it.
+
 - **You get the whole on-ramp to build speed when you pull out of a yard.**
   Leaving a warehouse or yard that puts you on city streets, the ramp up onto
   the highway went by in a few seconds no matter how long it really was, so

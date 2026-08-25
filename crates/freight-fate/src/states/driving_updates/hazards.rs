@@ -434,8 +434,22 @@ impl DrivingState {
         }
     }
 
+    /// What actually happened, said in the driver's terms.
+    ///
+    /// A hazard with a LEAD SPEED is a vehicle, and since `hazard_target_mph`
+    /// started clearing those by matching the vehicle rather than by nearly
+    /// stopping (Brandon, 2026-08-23) this line had gone untrue: the truck
+    /// eased from sixty-five to fifty-five and was told it had nearly stopped
+    /// and eased around. On a one-lane road it was untrue twice over -- there
+    /// was nothing to ease around into, which is the same road the call
+    /// itself already gets right with a bare "Brake!". Easing around belongs
+    /// to a fixed object in the lane, which is the case that still has no
+    /// lead speed at all.
     pub fn hazard_resolution_text(&self) -> String {
         let names = self.hazard_names_text();
+        if self.hazard_lead_mph.is_some() {
+            return format!("You slow to match {names}. Well done.");
+        }
         if self.hazard_dodgeable {
             return format!("You slow nearly to a stop and ease around {names}. Well done.");
         }

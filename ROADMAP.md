@@ -1771,6 +1771,64 @@ onto exit signalling.
       to "feel right" in the meantime -- the Poisson number is the physically
       correct occupancy and the representation is what is short.
 
+      MEASURED, 2026-08-24 (`states_driving_traffic_rate.rs`, 5 200 seeded
+      route miles over twenty real corridors): the bubble holds 0.37 vehicles
+      per mile of road in the direction of travel against the 2.65 its own
+      volume model asks for at the same miles -- a seventh, not a fifth as the
+      saturation argument above estimated. The binding constraint is not
+      MAX_BUBBLE_VEHICLES (the mean population is two) but that
+      `spawned_cells` gives each cell of road exactly one draw ever, so the
+      window is only ever fed from its leading edge, and `exit_at_mi` retires
+      each vehicle after 2.5 to 11 miles of its own travel. Re-arming cells
+      behind the truck is the change that would close it, and it is a real
+      decision: it multiplies the population several-fold, which is a
+      frame-time, speech-pacing and pass-whoosh question and an owner call.
+
+- [x] **Traffic drives the road it is ON, not the road it was drawn on**
+      (2026-08-24, owner report: "I have to brake when I am in the only lane
+      available and it forces me to brake ... it happens far too often").
+      A bubble vehicle's speed was drawn once, from the number posted in the
+      cell it appeared in, and kept for life. A US route drops to thirty
+      through every town it passes, so a car drawn in one carried thirty out
+      onto the sixty-five beyond it, and a car drawn on the open road held
+      sixty-five into the next town. `TrafficVehicle` now stores the DRAW --
+      the driver's offset from whatever is posted, their machine's limiter,
+      and the rush-hour slowdown -- and re-reads the posting under the wheels
+      every update. Weather comes off live rather than frozen at spawn.
+
+      Measured before and after over the same 5 200 seeded miles: forced
+      slow-downs fell from 1.01 to 0.64 per hundred miles where the road has
+      one lane your side, and from 0.63 to 0.30 where it has two or more.
+      Bubble vehicles running slower than any speed their own road could draw
+      fell from 1.4 percent to 0.1 percent, and the population above 1.2 times
+      the posted number (a highway speed carried into a town, up to 3.3 times
+      posted) fell from 2 200 sightings to 80. Vehicles PLACED per hundred
+      miles went 41.7 to 42.1: the road carries exactly as much traffic as it
+      did, which is the invariant `the_road_still_has_traffic_on_it` pins.
+
+      Landed with it: braking traffic is gated on `braking_plausible_at` in
+      BOTH spawners (`spawn_initial_traffic` never checked, and `replenish`
+      exempted the first three miles of every run, so a phantom wave with no
+      cause line to offer was routine); the braking LABEL now ends when the
+      reason does, instead of following a recovered vehicle for life; the
+      route's opening traffic takes an exit like the rolling bubble's always
+      has, instead of being permanent; and a vehicle's LANE is held to the
+      lanes its road has, drawn and re-checked, where "passing traffic lives
+      in the left lane" used to be applied to two-lane US routes that have no
+      left lane. That last one moved the one-lane rate the OTHER way, 0.60 to
+      0.64, because a vehicle in a lane that does not exist could never hold
+      the truck up -- which is the honest direction for it to move.
+
+      OPEN, and the owner's to call: "in those situations you'd brake hard, ie
+      the emergency brake." A lead-vehicle hazard is emitted `dodgeable: true`
+      whatever the road, so the one-lane driver gets the lane-tap allowance in
+      the deadline budget that only a driver with a lane to tap into can use,
+      and the assist engages later for it. The CALL already tells the two
+      cases apart ("Brake!" against "Change lanes or brake!"). Making the
+      DECELERATION tell them apart means untangling `hazard_target_mph` from
+      `dodgeable` first, because a lead must keep clearing at the lead's speed
+      rather than at HAZARD_SAFE_MPH (Brandon, 2026-08-23).
+
 - [x] **The one-in-four keeper-ease flake, fixed at its three roots**
       (2026-08-20, was: 15.47 against a <= 15.0). Traced with a frame
       trace, not a guess. (1) `_keeper_ease_mi`'s 0.75-mi cap clipped the

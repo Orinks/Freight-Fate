@@ -96,6 +96,7 @@ mod states_driving_road;
 mod states_driving_speech_ladder;
 mod states_driving_status_screens;
 mod states_driving_stop_menus;
+mod states_driving_traffic_rate;
 mod states_driving_trip_resume;
 mod states_driving_troopers;
 mod states_driving_turns;
