@@ -1819,15 +1819,77 @@ onto exit signalling.
       0.64, because a vehicle in a lane that does not exist could never hold
       the truck up -- which is the honest direction for it to move.
 
-      OPEN, and the owner's to call: "in those situations you'd brake hard, ie
-      the emergency brake." A lead-vehicle hazard is emitted `dodgeable: true`
-      whatever the road, so the one-lane driver gets the lane-tap allowance in
-      the deadline budget that only a driver with a lane to tap into can use,
-      and the assist engages later for it. The CALL already tells the two
-      cases apart ("Brake!" against "Change lanes or brake!"). Making the
-      DECELERATION tell them apart means untangling `hazard_target_mph` from
-      `dodgeable` first, because a lead must keep clearing at the lead's speed
-      rather than at HAZARD_SAFE_MPH (Brandon, 2026-08-23).
+      The response half of it -- "in those situations you'd brake hard" -- is
+      the next entry, and is closed.
+
+- [x] **`dodgeable` means "is there somewhere to go", and nothing else**
+      (2026-08-24, the open half of the entry above). A lead-vehicle hazard
+      was emitted `dodgeable: true` whatever the road, so `hazard_deadline_for`
+      added `LANE_TAP_CHANGE_S` to the window of a driver who had no lane to
+      tap into: the assist waited out two and a half seconds of allowance for
+      a move that could not be made while the truck kept closing, and the
+      driver who could NOT go around was left nearer the vehicle in front
+      before anything acted than the driver who could.
+
+      Done in the order the trap demands. FIRST the target was untangled from
+      dodgeability -- `hazard_target_mph` now reads a `HazardShape`, keying
+      on `lead_mph` for a vehicle, then on `in_lane` for a thing lying in the
+      lane (near stop), and only otherwise on `HAZARD_SAFE_MPH`. Reverting
+      just that half and re-running the new file reproduces Brandon's
+      2026-08-23 regression exactly: "a vehicle doing 55 must clear at 55
+      whatever the road offers -- left: 25.0". THEN `dodgeable` was made to
+      mean what it says, at the emitter, for every hazard kind alike:
+      `hazard_is_in_lane(kind) && has_open_adjacent_lane_at(None)`. The words
+      and the physics read the same predicate now, which
+      `the_words_and_the_physics_read_the_same_lane_authority` pins.
+
+      Fixed obstacles came with it, on the owner's ruling that "we should be
+      able to swerve around some fixed obstacles": debris beside an open lane
+      is dodgeable and the call says so, debris with no lane is the near stop
+      and the resolution line no longer claims the truck eased around
+      something on a road with nothing to ease into. The catalog flag was
+      renamed `HazardDef::dodgeable` -> `in_lane` (and `hazard_is_dodgeable`
+      -> `hazard_is_in_lane`) because it never answered the dodge question;
+      it answers whether the thing occupies one lane. Fog, ice, a crosswind, a
+      dust storm, a deer that may bolt either way and traffic stopped across
+      the road stay brake-only however many lanes there are, and keep "Brake
+      now!" to themselves.
+
+      Measured on the same rigging as the entry above, 120 seeded deliveries
+      over 20 corridors, weather pinned, before and after. Where the road has
+      one lane your side: the window granted at the call 14.32 s -> 8.32 s,
+      the assist actually had to act on 19 of 32 -> 26 of 30, and the ground
+      covered before it did 3 025 ft -> 1 268 ft past the vehicle. Where the
+      road has two or more: 16.19 s -> 10.46 s, 15 of 31 -> 29 of 34,
+      3 286 ft -> 1 752 ft. Forced slow-downs did not rise on the road the
+      report was about (32 -> 30, 0.67 -> 0.63 per hundred miles); on wider
+      roads 31 -> 34 (0.48 -> 0.52), which is inside the counting noise of a
+      Poisson rate at n = 31 (+/- 5.6) and comes from the truck's own changed
+      speed trace, not from more traffic being placed.
+
+      The paired bench (`assist_response_paired_bench`) is the clean read,
+      because only the lane count differs. Truck at 65, a car doing 45. BEFORE
+      the two roads were identical in every number: window 14.89 s both, the
+      assist first acting 11.95 s after the call, by which time the truck was
+      194 ft PAST the car it was braking for. AFTER: one lane 6.61 s and the
+      assist acting 3.18 s after the call with the car still 28 ft ahead; two
+      lanes 9.11 s and 5.83 s, exactly `LANE_TAP_CHANGE_S` apart. Sooner and
+      firmer where there is no way past, which is what was asked for. The
+      emergency application was not spent in any bench run, and once in 64
+      field events (a 3.5 percent grade) -- the escalation rule itself is
+      untouched and still measures the stop actually underway.
+
+      OPEN, found by the measurement and NOT this entry's to fix: a
+      lead-vehicle hazard is a TIMER, and its countdown has no relation to
+      the geometry. The truck drives clean through the vehicle it is being
+      warned about -- mean 1 268 ft past it on one lane, and the modelled
+      collision only happens if the deadline runs out. That is a defensible
+      simplification for an audio-first game, but it means "time to collision"
+      and "closing distance" cannot both be true at once, and a driver who
+      hears a car right ahead and then passes through it is being told
+      something the world does not honour. Deriving the deadline from the
+      closing rate, or making bubble traffic solid in your own lane, is an
+      owner call: it changes what every traffic warning means.
 
 - [x] **The one-in-four keeper-ease flake, fixed at its three roots**
       (2026-08-20, was: 15.47 against a <= 15.0). Traced with a frame

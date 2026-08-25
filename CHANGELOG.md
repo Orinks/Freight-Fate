@@ -945,6 +945,36 @@
 
 ### Fixed
 
+- **On a road with no way past, the truck brakes sooner and harder.** When a
+  slower vehicle was ahead of you, the game said one thing and did another. On
+  a single lane it told you to brake, because there was nowhere to go -- and
+  then quietly gave you two and a half extra seconds anyway, the time a lane
+  change takes, for a lane change the road did not have. The automatic brake
+  waited out those seconds while you kept closing, so the driver with no way
+  past ended up nearer the vehicle in front before anything happened than the
+  driver who could simply go around. That is backwards, and it is fixed:
+  whether there is a lane to take is now decided once, and the words and the
+  truck both follow it. On a single lane the brake comes on sooner and holds
+  the truck further back; where a lane is open, the time to make the move is
+  still yours.
+
+- **Debris on a wide road can be gone around now, and the warning says so.** A
+  ladder, a mattress, spilled boxes, a shredded tarp -- anything lying in your
+  lane -- used to be a nearly-full stop no matter how much road was beside
+  you. Where there is an open lane you now hear "Change lanes or brake!" and
+  you can simply move over. Where there is not, it is still a near stop, and
+  the line afterwards no longer claims you eased around something on a road
+  with nothing to ease into. Things that cover the whole road -- fog, ice, a
+  crosswind, a deer, traffic stopped across the lanes -- are still brake-only,
+  because no lane change answers those.
+
+- **The truck no longer brakes for a stop it does not have to make.** The
+  warning about a vehicle ahead used to budget your time as if you had to come
+  nearly to a standstill for it, even though slowing to match its speed is
+  what actually clears it. You were left holding a long, vague window in which
+  nothing happened. The time you get is now measured against the slowing the
+  situation really needs, so the response starts when it should.
+
 - **Traffic drives the road it is on, so far fewer slow vehicles are in your
   way.** A car or truck out on the road took its speed from wherever it first
   appeared and then kept that number for good. A US route drops to thirty

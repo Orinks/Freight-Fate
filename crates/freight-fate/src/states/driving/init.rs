@@ -539,6 +539,7 @@ impl DrivingState {
             lane_before_narrow: None,
             merge_taper_warned: None,
             hazard_dodgeable: false,
+            hazard_in_lane: false,
             hazard_lead_mph: None,
             hazard_lane: 0,
             left_lane_s: 0.0,

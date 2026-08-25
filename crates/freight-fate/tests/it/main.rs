@@ -81,6 +81,7 @@ mod states_driving_exits;
 mod states_driving_facility;
 mod states_driving_facility_approaches;
 mod states_driving_grades;
+mod states_driving_hazard_dodge;
 mod states_driving_hazards;
 mod states_driving_help_text;
 mod states_driving_hos;

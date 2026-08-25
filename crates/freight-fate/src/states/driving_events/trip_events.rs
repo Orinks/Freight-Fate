@@ -225,16 +225,27 @@ impl DrivingState {
             .filter(|name| !name.is_empty())
             .unwrap_or_else(|| "it".to_string());
         let dodgeable = event.data.dodgeable.unwrap_or(false);
+        // What the thing IS, kept apart from whether there is anywhere to
+        // go. An event that says nothing falls back to the dodgeable flag,
+        // which is what the older callers meant by it.
+        let in_lane = event.data.in_lane.unwrap_or(dodgeable);
+        let lead_mph = hazard_lead_speed(event);
+        let shape = HazardShape {
+            dodgeable,
+            in_lane,
+            lead_mph,
+        };
         let slack = event.data.deadline_s.unwrap_or(4.0);
         let reaction = tuning_for_time_scale(self.trip.time_scale).reaction_window;
-        // Computed on THIS hazard's own dodgeable-ness, before it is
-        // folded with whatever else may be pending -- its budget (the
-        // lane-tap allowance included) is a property of itself, not of
-        // the combined wording the fold branch below settles on.
+        // Computed on THIS hazard's own shape, before it is folded with
+        // whatever else may be pending -- its budget (the lane-tap allowance
+        // included, and the speed braking alone has to reach) is a property
+        // of itself, not of the combined wording the fold branch below
+        // settles on.
         let fatigue = profile_of(ctx).fatigue;
         let new_deadline = self.hazard_deadline_for(
             slack * reaction * hos::reaction_window_mult(fatigue),
-            Some(dodgeable),
+            Some(shape),
         );
         if self.hazard_deadline.is_none() {
             // A fresh hazard starts the assist from an open pedal, with
@@ -242,7 +253,8 @@ impl DrivingState {
             self.hazard_names = vec![name];
             self.horn_scare_tried = false;
             self.hazard_dodgeable = dodgeable;
-            self.hazard_lead_mph = hazard_lead_speed(event);
+            self.hazard_in_lane = in_lane;
+            self.hazard_lead_mph = lead_mph;
             self.hazard_deadline = Some(new_deadline);
             self.hazard_lane = self.lane.lane;
             self.release_hazard_brake();
@@ -255,7 +267,8 @@ impl DrivingState {
             self.hazard_names = vec![name];
             self.horn_scare_tried = false;
             self.hazard_dodgeable = dodgeable;
-            self.hazard_lead_mph = hazard_lead_speed(event);
+            self.hazard_in_lane = in_lane;
+            self.hazard_lead_mph = lead_mph;
             self.hazard_deadline = Some(new_deadline);
             self.hazard_lane = self.lane.lane;
             self.release_hazard_brake();
@@ -269,11 +282,13 @@ impl DrivingState {
             // Folding a second hazard in: the slower demand wins, and a
             // thing that is not moving has no lead speed at all, so it
             // takes the group back to the near-stop rule.
-            let folded = hazard_lead_speed(event);
-            self.hazard_lead_mph = match (self.hazard_lead_mph, folded) {
+            self.hazard_lead_mph = match (self.hazard_lead_mph, lead_mph) {
                 (Some(live), Some(folded)) => Some(live.min(folded)),
                 _ => None,
             };
+            // Either one sitting in the lane takes the group to the near
+            // stop: the object is still there whatever else arrived with it.
+            self.hazard_in_lane = self.hazard_in_lane || in_lane;
             self.hazard_dodgeable = self.hazard_dodgeable && dodgeable;
             self.hazard_deadline = self.hazard_deadline.map(|live| live.min(new_deadline));
         }

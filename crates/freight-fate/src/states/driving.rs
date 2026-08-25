@@ -625,7 +625,14 @@ pub struct DrivingState {
     // the truck was never in.
     pub lane_before_narrow: Option<i64>,
     pub merge_taper_warned: Option<String>,
+    // A lane change answers the live hazard: it sits in one lane AND this
+    // road has an open lane on this side. Both halves -- see
+    // TripEventData::dodgeable. NOT "what kind of thing is it".
     pub hazard_dodgeable: bool,
+    // The live hazard occupies our lane and no other, whether or not there
+    // is anywhere to go. What braking ALONE must reach turns on this, not on
+    // hazard_dodgeable: see hazard_target_mph.
+    pub hazard_in_lane: bool,
     // The speed of the VEHICLE this hazard is about, when it is a vehicle.
     // None for debris, animals and anything else that is not going
     // anywhere. See hazard_target_mph.

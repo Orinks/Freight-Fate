@@ -174,6 +174,30 @@ pub struct Forced {
     pub closing_mph: f64,
     /// Speed the truck was down to when the hazard cleared.
     pub bottom_mph: f64,
+    /// The moment the ASSIST first put the pedal down, if it ever did: the
+    /// gap to the lead then, the time that gap was worth at the rate the
+    /// truck was closing, and the speed it acted at. NaN where the driver's
+    /// own window was never used up.
+    pub assist_gap_mi: f64,
+    pub assist_ttc_s: f64,
+    pub assist_mph: f64,
+    /// Time still left on the hazard's own deadline when the assist acted.
+    /// THIS is the game's time-to-collision: the traffic warning is a timer,
+    /// and the modelled collision happens when it reaches zero.
+    pub assist_deadline_s: f64,
+    /// Closest the truck ever got to the lead over the whole episode.
+    pub nearest_gap_mi: f64,
+    /// Whether the assist spent the emergency application on it.
+    pub emergency: bool,
+    /// The key of the vehicle the warning was ABOUT. Everything measured
+    /// during the episode is measured against this one: `traffic_context`
+    /// re-picks whatever is nearest each frame, so reading it after the
+    /// hazard cleared reports the gap to a different car entirely.
+    pub lead_key: String,
+    /// The whole window the call bought before the assist must act: the
+    /// hazard deadline the instant the warning landed. This is what the
+    /// lane-change allowance was being added to.
+    pub granted_s: f64,
     /// Gap to the lead when the hazard cleared, miles.
     pub cleared_gap_mi: f64,
     /// Game seconds from the call to the truck being back within 3 mph of
@@ -492,6 +516,14 @@ pub fn drive_corridor(corridor: &Corridor, seed: i64, hour: f64, max_miles: f64)
                         gap_mi: context.gap_mi,
                         closing_mph: context.closing_mph,
                         bottom_mph: d.truck().speed_mph(),
+                        assist_gap_mi: f64::NAN,
+                        assist_ttc_s: f64::NAN,
+                        assist_mph: f64::NAN,
+                        assist_deadline_s: f64::NAN,
+                        nearest_gap_mi: context.gap_mi,
+                        emergency: false,
+                        lead_key: context.lead.key.clone(),
+                        granted_s: d.hazard_deadline.unwrap_or(f64::NAN),
                         cleared_gap_mi: context.gap_mi,
                         recover_s: 0.0,
                         call: e.message.normal.clone(),
@@ -503,6 +535,11 @@ pub fn drive_corridor(corridor: &Corridor, seed: i64, hour: f64, max_miles: f64)
             if let Some(previous) = pending.take() {
                 run.forced.push(previous);
             }
+            if !forced.granted_s.is_finite() {
+                forced.granted_s = harness
+                    .read_drive(|d| d.hazard_deadline)
+                    .unwrap_or(f64::NAN);
+            }
             forced.bottom_mph = speed_mph;
             bottom_mph = speed_mph;
             pending = Some(forced);
@@ -511,6 +548,45 @@ pub fn drive_corridor(corridor: &Corridor, seed: i64, hour: f64, max_miles: f64)
         if let Some(forced) = pending.as_mut() {
             bottom_mph = bottom_mph.min(speed_mph);
             forced.bottom_mph = bottom_mph;
+            let key = forced.lead_key.clone();
+            let (aeb_on, emergency, gap, closing, left_s) = harness.read_drive(move |d| {
+                let lead = d
+                    .trip
+                    .traffic_manager
+                    .vehicles
+                    .iter()
+                    .find(|v| v.key == key);
+                (
+                    d.aeb_brake > 0.0,
+                    d.aeb_emergency,
+                    lead.map(|v| v.position_mi - d.trip.position_mi),
+                    lead.map(|v| d.truck().speed_mph() - v.speed_mph),
+                    d.hazard_deadline.unwrap_or(f64::NAN),
+                )
+            });
+            forced.emergency |= emergency;
+            // Only while the hazard is LIVE: once it has resolved the truck
+            // simply drives past, and the gap then says nothing about how
+            // close the assist let it get. The gap is SIGNED -- negative
+            // means the truck was already level with the vehicle it was
+            // still being warned about, which is a reading in its own right.
+            if let Some(gap) = gap.filter(|_| hazard_live) {
+                forced.nearest_gap_mi = forced.nearest_gap_mi.min(gap);
+                // The FIRST frame the assist takes the pedal is the moment
+                // the whole report is about: how near the vehicle in front
+                // the truck already is before anything acts.
+                if aeb_on && forced.assist_gap_mi.is_nan() {
+                    forced.assist_gap_mi = gap;
+                    forced.assist_mph = speed_mph;
+                    forced.assist_deadline_s = left_s;
+                    let closing = closing.unwrap_or(0.0);
+                    forced.assist_ttc_s = if closing > 0.1 {
+                        gap / closing * 3600.0
+                    } else {
+                        f64::INFINITY
+                    };
+                }
+            }
             forced.recover_s += DT * harness.read_drive(|d| d.trip.effective_time_scale());
             if !hazard_live {
                 if recovering.is_none() {
@@ -763,6 +839,371 @@ fn traffic_forced_slow_rate_sweep() {
             e.resolution,
         );
     }
+}
+
+// -- how hard the response is, split by whether there was anywhere to go -------------------
+
+/// Mean of a sample, or NaN for an empty one.
+fn mean(values: &[f64]) -> f64 {
+    let live: Vec<f64> = values.iter().copied().filter(|v| v.is_finite()).collect();
+    if live.is_empty() {
+        f64::NAN
+    } else {
+        live.iter().sum::<f64>() / live.len() as f64
+    }
+}
+
+/// Median of a sample, or NaN for an empty one.
+fn median(values: &[f64]) -> f64 {
+    let mut live: Vec<f64> = values.iter().copied().filter(|v| v.is_finite()).collect();
+    if live.is_empty() {
+        return f64::NAN;
+    }
+    live.sort_by(|a, b| a.partial_cmp(b).expect("finite"));
+    live[live.len() / 2]
+}
+
+/// What the assist did on one bucket of roads, printed as one block.
+fn report_bucket(label: &str, events: &[&Forced], miles: f64) {
+    let acted: Vec<&&Forced> = events
+        .iter()
+        .filter(|e| e.assist_gap_mi.is_finite())
+        .collect();
+    let gaps_ft: Vec<f64> = acted.iter().map(|e| e.assist_gap_mi * 5280.0).collect();
+    let ttcs: Vec<f64> = acted.iter().map(|e| e.assist_ttc_s).collect();
+    let at_mph: Vec<f64> = acted.iter().map(|e| e.assist_mph).collect();
+    let left: Vec<f64> = acted.iter().map(|e| e.assist_deadline_s).collect();
+    let given_up: Vec<f64> = events.iter().map(|e| e.given_up_mph()).collect();
+    let nearest_ft: Vec<f64> = events.iter().map(|e| e.nearest_gap_mi * 5280.0).collect();
+    let emergencies = events.iter().filter(|e| e.emergency).count();
+    println!("  {label}");
+    println!(
+        "    forced slow-downs          : {} ({:.2} per 100 mi over {:.0} mi)",
+        events.len(),
+        per_hundred(events.len(), miles),
+        miles
+    );
+    let granted: Vec<f64> = events.iter().map(|e| e.granted_s).collect();
+    println!(
+        "    window granted at the call : mean {:.2} s, median {:.2} s",
+        mean(&granted),
+        median(&granted)
+    );
+    println!("    the assist had to act      : {} of them", acted.len());
+    println!(
+        "    closing distance when it did: mean {:.0} ft, median {:.0} ft",
+        mean(&gaps_ft),
+        median(&gaps_ft)
+    );
+    println!(
+        "    deadline left when it did   : mean {:.2} s, median {:.2} s",
+        mean(&left),
+        median(&left)
+    );
+    println!(
+        "    (geometric time to contact) : mean {:.2} s, median {:.2} s",
+        mean(&ttcs),
+        median(&ttcs)
+    );
+    println!(
+        "    speed when it acted         : mean {:.1} mph",
+        mean(&at_mph)
+    );
+    println!(
+        "    speed given up              : mean {:.1} mph, median {:.1} mph",
+        mean(&given_up),
+        median(&given_up)
+    );
+    println!(
+        "    nearest the lead while live : worst {:.0} ft, mean {:.0} ft, median {:.0} ft",
+        nearest_ft
+            .iter()
+            .copied()
+            .filter(|v| v.is_finite())
+            .fold(f64::INFINITY, f64::min),
+        mean(&nearest_ft),
+        median(&nearest_ft)
+    );
+    println!("    emergency application spent : {emergencies}");
+    // The emergency application is reserved for a stop MEASURED to be losing
+    // ground, so any one of them has to be shown rather than counted.
+    for e in events.iter().filter(|e| e.emergency) {
+        println!(
+            "      -> {} mile {:.1}, {} lanes, truck {:.1} on a {:.0} limit, lead {:.1} ({} {}),              grade {:.2}%, window {:.2} s",
+            e.corridor,
+            e.mile,
+            e.lanes,
+            e.truck_mph,
+            e.posted_mph,
+            e.lead_mph,
+            e.lead_class,
+            e.lead_intent,
+            e.lead_grade_pct,
+            e.granted_s
+        );
+    }
+}
+
+/// One controlled meeting with a slower vehicle: same lead, same speeds, same
+/// closing rate, and nothing different but how many lanes the road has.
+///
+/// The sweep answers what the field does; this answers the question the field
+/// cannot, because no two real encounters are alike. Everything is measured
+/// against the lead the warning was about.
+#[derive(Debug, Clone)]
+pub struct BenchRun {
+    pub lanes: i64,
+    pub call: String,
+    pub resolution: String,
+    /// Gap when the warning landed, and when the assist first took the pedal.
+    pub warn_gap_ft: f64,
+    pub assist_gap_ft: f64,
+    pub assist_ttc_s: f64,
+    pub assist_mph: f64,
+    /// Slowest the truck got, and closest it ever came to the lead.
+    pub bottom_mph: f64,
+    pub nearest_gap_ft: f64,
+    pub emergency: bool,
+    /// Game seconds from the warning to the assist acting.
+    pub assist_after_s: f64,
+    /// The whole window the call bought before the assist had to act.
+    pub granted_s: f64,
+    /// Time left on the hazard's deadline when the assist acted.
+    pub assist_deadline_s: f64,
+}
+
+/// Drive into a lead doing `lead_mph` on a road of `lanes_your_side` lanes,
+/// hands off from the moment the warning lands, and measure the response.
+pub fn bench_lead(lanes_your_side: i64, lead_mph: f64) -> BenchRun {
+    use ff_core::sim::traffic_manager::TrafficVehicle;
+
+    let mut harness = PlaytestHarness::new();
+    harness.app.ctx.settings.speed_keeper = false;
+    harness.app.ctx.settings.automatic_emergency_braking = true;
+    harness.app.ctx.settings.time_scale = 1.0;
+    harness.start_route(
+        "aberdeen_sd_us",
+        "pierre_sd_us",
+        RouteSetup::seeded(7).named("Lead Response"),
+    );
+    harness.with_drive(|d, ctx| {
+        lane_bench(d, 65.0, lanes_your_side);
+        d.trip.time_scale = 1.0;
+        d.trip.hazard_check_mi = 1e9;
+        d.trip.inspection_check_mi = 1e9;
+        d.trip.posts.clear();
+        d.weather_mut().current = WeatherKind::Clear;
+        d.departure_checked = true;
+        d.truck_mut().start_engine();
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().set_air_ready(false);
+        d.trip.position_mi = 20.0;
+        d.truck_mut().velocity_mps = 65.0 / 2.23694;
+        d.trip.traffic_manager.rolling_bubble = false;
+        if let Some(profile) = ctx.profile.as_mut() {
+            profile.tutorial_done = true;
+        }
+        d.tutorial = None;
+    });
+    assert_eq!(
+        harness.read_drive(|d| d.trip.lane_count_at(None)),
+        lanes_your_side,
+        "the bench did not build the road the case asked for"
+    );
+    harness.clear_speech();
+    harness.with_drive(move |d, _| {
+        let gap_mi = lead_mph * (TRAFFIC_WARNING_GAP_S - 0.4) / 3600.0;
+        let mut lead = TrafficVehicle::new(
+            "bench:lead",
+            d.trip.position_mi + gap_mi,
+            lead_mph,
+            lead_mph,
+            0,
+            "following",
+            "car",
+        );
+        lead.lane = 0;
+        d.trip.set_npc_vehicles(vec![lead]);
+    });
+
+    let mut run = BenchRun {
+        lanes: lanes_your_side,
+        call: String::new(),
+        resolution: String::new(),
+        warn_gap_ft: f64::NAN,
+        assist_gap_ft: f64::NAN,
+        assist_ttc_s: f64::NAN,
+        assist_mph: f64::NAN,
+        bottom_mph: f64::INFINITY,
+        nearest_gap_ft: f64::INFINITY,
+        emergency: false,
+        assist_after_s: f64::NAN,
+        granted_s: f64::NAN,
+        assist_deadline_s: f64::NAN,
+    };
+    let mut warned = false;
+    let mut since_warn = 0.0;
+    for _ in 0..(60 * 180) {
+        if !harness.has_drive() {
+            break;
+        }
+        let rolling = !warned && harness.read_drive(|d| d.truck().speed_mph() < 64.0);
+        if rolling {
+            hold(&mut harness, &[Key::Up]);
+        } else {
+            release_keys(&mut harness);
+        }
+        frame(&mut harness, DT);
+        let (speed, live, aeb_on, emergency, gap_mi, left_s) = harness.read_drive(|d| {
+            let lead = d
+                .trip
+                .traffic_manager
+                .vehicles
+                .iter()
+                .find(|v| v.key == "bench:lead");
+            (
+                d.truck().speed_mph(),
+                d.hazard_deadline.is_some(),
+                d.aeb_brake > 0.0,
+                d.aeb_emergency,
+                lead.map(|v| v.position_mi - d.trip.position_mi),
+                d.hazard_deadline.unwrap_or(f64::NAN),
+            )
+        });
+        if live && !warned {
+            warned = true;
+            run.warn_gap_ft = gap_mi.unwrap_or(f64::NAN) * 5280.0;
+            run.granted_s = harness
+                .read_drive(|d| d.hazard_deadline)
+                .unwrap_or(f64::NAN);
+            run.call = harness
+                .transcript()
+                .iter()
+                .find(|line| line.contains("Brake!") || line.contains("brake!"))
+                .cloned()
+                .unwrap_or_default();
+        }
+        if warned {
+            since_warn += DT;
+        }
+        run.emergency |= emergency;
+        run.bottom_mph = run.bottom_mph.min(speed);
+        if let Some(gap) = gap_mi.filter(|_| live) {
+            run.nearest_gap_ft = run.nearest_gap_ft.min(gap * 5280.0);
+            if aeb_on && run.assist_gap_ft.is_nan() {
+                run.assist_gap_ft = gap * 5280.0;
+                run.assist_mph = speed;
+                run.assist_deadline_s = left_s;
+                run.assist_after_s = since_warn;
+                let closing = speed - lead_mph;
+                run.assist_ttc_s = if closing > 0.1 {
+                    gap / closing * 3600.0
+                } else {
+                    f64::INFINITY
+                };
+            }
+        }
+        if warned && !live {
+            run.resolution = harness
+                .transcript()
+                .iter()
+                .find(|line| line.contains("Well done"))
+                .cloned()
+                .unwrap_or_default();
+            break;
+        }
+        harness.with_drive(move |d, _| {
+            d.lane.offset = 0.0;
+            d.lane.steering = 0.0;
+            d.lane.lane = 0;
+            if let Some(lead) = d.trip.traffic_manager.vehicles.first_mut() {
+                lead.speed_mph = lead_mph;
+                lead.target_speed_mph = lead_mph;
+                lead.limit_offset_mph = None;
+            }
+        });
+    }
+    run
+}
+
+fn report_bench(run: &BenchRun) {
+    println!("  {} lane(s) your side, truck at 65", run.lanes);
+    println!("    call                        : {}", run.call);
+    println!(
+        "    gap when the warning landed : {:.0} ft, window granted {:.2} s",
+        run.warn_gap_ft, run.granted_s
+    );
+    println!(
+        "    the assist first acted      : {:.2} s after the call, {:.2} s left on the deadline, at {:.1} mph",
+        run.assist_after_s, run.assist_deadline_s, run.assist_mph
+    );
+    println!(
+        "    ... the lead was then        : {:.0} ft away (geometric time to contact {:.2} s)",
+        run.assist_gap_ft, run.assist_ttc_s
+    );
+    println!(
+        "    slowest, and nearest the lead: {:.1} mph, {:.0} ft",
+        run.bottom_mph, run.nearest_gap_ft
+    );
+    println!("    emergency application spent : {}", run.emergency);
+    println!("    resolution                  : {}", run.resolution);
+}
+
+#[test]
+#[ignore = "measurement bench: run with --ignored --nocapture"]
+fn assist_response_paired_bench() {
+    // Two leads: one the truck can coast down to, and one it cannot. The
+    // second is the case the assist exists for.
+    for lead_mph in [45.0, 10.0] {
+        println!("THE SAME MEETING ON TWO ROADS, LEAD DOING {lead_mph:.0}");
+        for lanes in [1, 2] {
+            report_bench(&bench_lead(lanes, lead_mph));
+        }
+    }
+}
+
+/// Seeds for the response sweep. Its own, not the rate sweep's: the question
+/// is what the assist DOES rather than how often it has to, and a rate of well
+/// under one an a hundred miles needs more deliveries before a difference of
+/// one event stops being noise.
+pub const RESPONSE_SEEDS: [i64; 6] = [11, 4242, 90210, 31337, 5150, 777];
+
+/// The measurement the response fix is judged on: a hundred and twenty seeded
+/// deliveries over twenty corridors, half single-lane-heavy, weather pinned.
+///
+/// The question is not how OFTEN traffic holds the truck up -- that is the
+/// sweep above, and it must not move -- but how the game RESPONDS when it
+/// does, split by whether the road offered anywhere to go.
+#[test]
+#[ignore = "measurement sweep: run with --release --ignored --nocapture"]
+fn assist_response_by_lane_count_sweep() {
+    let world = get_world();
+    let per_kind = env_f64("FF_TRAFFIC_PER_KIND", 10.0) as usize;
+    let miles_per_run = env_f64("FF_TRAFFIC_MILES", MILES_PER_RUN);
+    let (single, multi) = corridors(world, per_kind);
+    println!(
+        "{} single-lane-heavy corridors, {} multi-lane, {} seeds each",
+        single.len(),
+        multi.len(),
+        RESPONSE_SEEDS.len()
+    );
+    let mut events: Vec<Forced> = Vec::new();
+    let mut single_mi = 0.0;
+    let mut multi_mi = 0.0;
+    for corridor in single.iter().chain(multi.iter()) {
+        for (i, seed) in RESPONSE_SEEDS.iter().enumerate() {
+            let run = drive_corridor(corridor, *seed, HOURS[i % HOURS.len()], miles_per_run);
+            single_mi += run.single_mi;
+            multi_mi += run.multi_mi;
+            events.extend(run.forced);
+        }
+    }
+    let one: Vec<&Forced> = events.iter().filter(|e| e.lanes < 2).collect();
+    let more: Vec<&Forced> = events.iter().filter(|e| e.lanes >= 2).collect();
+    println!();
+    println!("ASSIST RESPONSE TO A LEAD VEHICLE");
+    report_bucket("one lane your side (nowhere to go)", &one, single_mi);
+    report_bucket("two or more (a lane to take)", &more, multi_mi);
 }
 
 // -- what the sweep earned ---------------------------------------------------------------

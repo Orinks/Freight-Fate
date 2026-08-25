@@ -314,7 +314,13 @@ impl Trip {
             {
                 self.traffic_warning_mi = self.position_mi + 8.0;
                 // A lead vehicle blocks one lane: braking always works, and a
-                // clear neighboring lane lets the player pass around it.
+                // clear neighboring lane lets the player pass around it --
+                // where there IS one. On a road with one lane your side there
+                // is no going around, and calling the hazard dodgeable there
+                // handed the driver a lane-change allowance for a move they
+                // could not make, so the assist waited while the truck kept
+                // closing (owner, 2026-08-24).
+                let dodgeable = self.has_open_adjacent_lane_at(None);
                 let reason = context
                     .lead
                     .reason()
@@ -328,7 +334,7 @@ impl Trip {
                 };
                 // "Or change lanes" is only true advice where there is
                 // somewhere to send it (playtest report, US-285, 2026-08-12).
-                let call = if self.has_open_adjacent_lane_at(None) {
+                let call = if dodgeable {
                     HAZARD_DODGE_CALL
                 } else {
                     "Brake!"
@@ -340,7 +346,11 @@ impl Trip {
                     TripEventData {
                         deadline_s: Some(2.5),
                         traffic: Some(context),
-                        dodgeable: Some(true),
+                        dodgeable: Some(dodgeable),
+                        // A vehicle ahead is in your lane and no other, so
+                        // brake-alone still has to reach ITS speed rather
+                        // than the road-spanning safe speed.
+                        in_lane: Some(true),
                         name: Some(format!("the {reason}")),
                         ..Default::default()
                     },
@@ -366,13 +376,19 @@ impl Trip {
             let weights: Vec<f64> = choices.iter().map(|(_, w)| *w).collect();
             let idx = self.rng.choices_indices_weighted(&weights, 1)[0];
             let hazard = choices[idx].0;
-            let dodgeable = hazard_is_dodgeable(hazard);
+            // The same two questions, in the same order, for every hazard:
+            // is the thing confined to one lane, and does the road give you
+            // another one. Only both together mean a lane change answers it.
+            // "Brake now!" is reserved for a hazard no lane change could ever
+            // answer -- fog, ice, a crosswind, a deer that may bolt either
+            // way -- so it never loses its meaning to a road that merely
+            // happens to be narrow here.
+            let in_lane = hazard_is_in_lane(hazard);
+            let dodgeable = in_lane && self.has_open_adjacent_lane_at(None);
             let call = if dodgeable {
-                if self.has_open_adjacent_lane_at(None) {
-                    HAZARD_DODGE_CALL
-                } else {
-                    "Brake!"
-                }
+                HAZARD_DODGE_CALL
+            } else if in_lane {
+                "Brake!"
             } else {
                 "Brake now!"
             };
@@ -390,6 +406,7 @@ impl Trip {
                 TripEventData {
                     deadline_s: Some(deadline_s),
                     dodgeable: Some(dodgeable),
+                    in_lane: Some(in_lane),
                     name: Some(hazard_name(hazard).to_string()),
                     ..Default::default()
                 },

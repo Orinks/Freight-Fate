@@ -64,18 +64,35 @@ impl DrivingState {
     /// traffic warning that remainder was half a second, and on hot brakes
     /// it was already spent when the words started (Munchkinbear, 2026-08-11).
     ///
-    /// `dodgeable` defaults to the currently pending hazard's own flag, but
-    /// a hazard arming while another is still live needs its OWN budget
-    /// computed on ITS OWN dodgeable-ness -- before `hazard_dodgeable` is
-    /// folded with the pending one -- so the caller can pass it explicitly.
-    pub fn hazard_deadline_for(&self, window_s: f64, dodgeable: Option<bool>) -> f64 {
-        let dodgeable = dodgeable.unwrap_or(self.hazard_dodgeable);
+    /// `shape` defaults to the currently pending hazard's own, but a hazard
+    /// arming while another is still live needs its OWN budget computed on
+    /// ITS OWN shape -- before the pending one is folded in -- so the caller
+    /// can pass it explicitly.
+    pub fn hazard_deadline_for(&self, window_s: f64, shape: Option<HazardShape>) -> f64 {
+        let shape = shape.unwrap_or_else(|| self.hazard_shape());
         let mut window = window_s.max(HAZARD_MIN_REACTION_S);
-        if dodgeable {
-            // The warning offers a lane change; leave room to actually make one.
+        if shape.dodgeable {
+            // The warning offers a lane change; leave room to actually make
+            // one. ONLY where one can actually be made: this allowance used
+            // to be handed to every lead-vehicle hazard whatever the road,
+            // so the driver with one lane and nowhere to go got two and a
+            // half seconds of grace for a move they could not make, and the
+            // assist waited it out while the truck kept closing. That put
+            // the driver who could NOT go around nearer the vehicle in front
+            // before anything acted than the one who could (owner,
+            // 2026-08-24).
             window += LANE_TAP_CHANGE_S;
         }
-        self.aeb_engage_s(self.hazard_target_mph(Some(dodgeable))) + window
+        self.aeb_engage_s(self.hazard_target_mph(Some(shape))) + window
+    }
+
+    /// The live hazard's own shape, for the assist to budget against.
+    pub fn hazard_shape(&self) -> HazardShape {
+        HazardShape {
+            dodgeable: self.hazard_dodgeable,
+            in_lane: self.hazard_in_lane,
+            lead_mph: self.hazard_lead_mph,
+        }
     }
 
     /// Whether a lane change already in progress will land in time.
@@ -201,30 +218,40 @@ impl DrivingState {
 
     /// The speed that resolves the active hazard by brake alone.
     ///
-    /// A fixed object in your lane (dodgeable) cannot be rolled over at the
-    /// moving-hazard safe speed: it takes nearly a stop, then easing around.
-    /// Defaults to the currently pending hazard's own flag; see
-    /// `hazard_deadline_for` for why a caller would pass one explicitly.
+    /// KEYED ON WHAT THE HAZARD IS, never on whether there is a lane to take
+    /// instead. Those are separate questions and this used to answer both
+    /// with one flag; see [`HazardShape`]. Defaults to the live hazard's own
+    /// shape; see `hazard_deadline_for` for why a caller would pass one.
     ///
-    /// A VEHICLE IS NOT A FIXED OBJECT. Brake lights ahead are emitted
-    /// dodgeable too -- you can steer around them -- and that put a moving
-    /// truck under the same near-stop rule as a tyre carcass. With automatic
-    /// braking the truck obeys without the driver choosing it, so Brandon was
-    /// dragged from 70 to nearly stopped sixteen times in ninety minutes on
-    /// an open 75 interstate, each costing more than a minute to climb back:
-    /// "cruise control still drops speed dramatically... and never comes back
-    /// up" (2026-08-23). Matching the vehicle ahead is what a driver actually
+    /// A VEHICLE IS NOT A FIXED OBJECT. Brake lights ahead used to fall under
+    /// the same near-stop rule as a tyre carcass, and with automatic braking
+    /// the truck obeys without the driver choosing it, so Brandon was dragged
+    /// from 70 to nearly stopped sixteen times in ninety minutes on an open
+    /// 75 interstate, each costing more than a minute to climb back: "cruise
+    /// control still drops speed dramatically... and never comes back up"
+    /// (2026-08-23). Matching the vehicle ahead is what a driver actually
     /// does, and it clears the hazard honestly -- you are no longer closing
     /// on it. Never below the creep floor, so a lead that has itself stopped
     /// still asks for a stop.
-    pub fn hazard_target_mph(&self, dodgeable: Option<bool>) -> f64 {
-        if !dodgeable.unwrap_or(self.hazard_dodgeable) {
-            return HAZARD_SAFE_MPH;
+    ///
+    /// A FIXED OBJECT IN THE LANE cannot be rolled over at the moving-hazard
+    /// safe speed whether or not a lane is open beside it: brake alone means
+    /// nearly stopping. That is why this reads `in_lane` and not `dodgeable`
+    /// -- a carcass on a one-lane road became a 25 mph problem the moment
+    /// "dodgeable" started meaning "there is somewhere to go".
+    ///
+    /// ANYTHING THAT SPANS THE ROAD -- fog, ice, a crosswind, a deer that may
+    /// bolt either way -- takes the moving-hazard safe speed, because there
+    /// is no object in the lane to creep past.
+    pub fn hazard_target_mph(&self, shape: Option<HazardShape>) -> f64 {
+        let shape = shape.unwrap_or_else(|| self.hazard_shape());
+        if let Some(lead_mph) = shape.lead_mph {
+            return HAZARD_CREEP_MPH.max(lead_mph);
         }
-        match self.hazard_lead_mph {
-            Some(lead_mph) => HAZARD_CREEP_MPH.max(lead_mph),
-            None => HAZARD_CREEP_MPH,
+        if shape.in_lane {
+            return HAZARD_CREEP_MPH;
         }
+        HAZARD_SAFE_MPH
     }
 
     // -- grades ---------------------------------------------------------------------
@@ -445,13 +472,22 @@ impl DrivingState {
     /// itself already gets right with a bare "Brake!". Easing around belongs
     /// to a fixed object in the lane, which is the case that still has no
     /// lead speed at all.
+    ///
+    /// And easing around needs a lane to ease into. A carcass on a one-lane
+    /// road is answered by nearly stopping and crawling past it, so that is
+    /// what the line says now -- the same untruth the vehicle case had, in
+    /// the case the vehicle fix did not reach.
     pub fn hazard_resolution_text(&self) -> String {
         let names = self.hazard_names_text();
         if self.hazard_lead_mph.is_some() {
             return format!("You slow to match {names}. Well done.");
         }
-        if self.hazard_dodgeable {
-            return format!("You slow nearly to a stop and ease around {names}. Well done.");
+        if self.hazard_in_lane {
+            return if self.hazard_dodgeable {
+                format!("You slow nearly to a stop and ease around {names}. Well done.")
+            } else {
+                format!("You slow nearly to a stop for {names}. Well done.")
+            };
         }
         if names == "it" {
             return "Hazard avoided. Well done.".to_string();
@@ -465,8 +501,10 @@ impl DrivingState {
         self.hazard_deadline = None;
         // The lead belonged to the hazard that just ended; a fresh one must
         // not inherit it, or a tyre carcass would clear at the speed of a
-        // truck that is long gone.
+        // truck that is long gone. Same for what it was: a hazard that spans
+        // the road must not inherit the near stop the last object asked for.
         self.hazard_lead_mph = None;
+        self.hazard_in_lane = false;
         // Everything below here can offer the hazard call its rescue -- the
         // clear line's own flush, or any urgent line that lands before the
         // next tick. That gate asks whether a hazard is still armed, so the
@@ -527,7 +565,13 @@ impl DrivingState {
         // longer does. Braking past the moving-hazard speed with the object
         // still in the lane earns the how-to once, so the quiet is never
         // read as an already-cleared hazard.
-        if self.hazard_dodgeable
+        // "It is still in your lane. Nearly stop." belongs to a THING sitting
+        // in the lane, which is the case whose target really is the near
+        // stop. A vehicle is cleared by matching it, so telling the driver to
+        // nearly stop for one would be an instruction the assist is not
+        // following.
+        if self.hazard_in_lane
+            && self.hazard_lead_mph.is_none()
             && !self.hazard_slow_hint_said
             && self.trip.truck.speed_mph() <= HAZARD_SAFE_MPH
         {

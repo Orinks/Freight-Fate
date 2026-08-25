@@ -31,8 +31,9 @@ use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::PURSUIT_HOLD_S;
 use freight_fate::states::driving_core::{
-    hos_mut_of, profile_mut_of, DRIVE_PHASE_DELIVERY, EXIT_LANE_READY, MICROSLEEP_BASE_GM,
-    MICROSLEEP_MIN_GM, STEER_CUE_ARM_S, STEER_CUE_HOLD, STEER_CUE_TOCK_S,
+    hos_mut_of, profile_mut_of, HazardShape, DRIVE_PHASE_DELIVERY, EXIT_LANE_READY,
+    LANE_TAP_CHANGE_S, MICROSLEEP_BASE_GM, MICROSLEEP_MIN_GM, STEER_CUE_ARM_S, STEER_CUE_HOLD,
+    STEER_CUE_TOCK_S,
 };
 use freight_fate::states::driving_rest_states::{FelonyStopState, TrafficStopState};
 use freight_fate::states::driving_updates::limit_drop_speech_latency_s;
@@ -1006,14 +1007,35 @@ fn test_the_hazard_budget_leaves_the_driver_their_own_window() {
     let mut d = a_drive(&mut app);
     d.trip.truck.velocity_mps = mph_to_mps(65.0);
     d.hazard_dodgeable = false;
+    d.hazard_in_lane = false;
     let window = 4.0;
     let deadline = d.hazard_deadline_for(window, None);
     assert!(deadline >= window);
     assert!((deadline - (d.aeb_engage_s(d.hazard_target_mph(None)) + window)).abs() < 1e-9);
-    // A dodgeable hazard asks for nearly a stop, and buys the lane change
-    // the warning offered.
-    let dodgeable = d.hazard_deadline_for(window, Some(true));
-    assert!(dodgeable > deadline);
+    // An object in the lane asks for nearly a stop; a lane to take instead
+    // buys the driver the time that move costs. They are separate additions
+    // now, so the test asks for them separately.
+    let in_lane_only = d.hazard_deadline_for(
+        window,
+        Some(HazardShape {
+            dodgeable: false,
+            in_lane: true,
+            lead_mph: None,
+        }),
+    );
+    assert!(
+        in_lane_only > deadline,
+        "the near stop takes longer than 25"
+    );
+    let dodgeable = d.hazard_deadline_for(
+        window,
+        Some(HazardShape {
+            dodgeable: true,
+            in_lane: true,
+            lead_mph: None,
+        }),
+    );
+    assert!((dodgeable - (in_lane_only + LANE_TAP_CHANGE_S)).abs() < 1e-9);
 }
 
 #[test]

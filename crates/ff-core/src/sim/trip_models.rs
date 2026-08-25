@@ -20,7 +20,7 @@ use crate::speech_text::{typed_name, SpokenMessage};
 
 mod hazards;
 mod ramps;
-pub use hazards::{eligible_hazards, hazard_is_dodgeable, hazard_name, HazardDef, HAZARDS};
+pub use hazards::{eligible_hazards, hazard_is_in_lane, hazard_name, HazardDef, HAZARDS};
 pub use ramps::{
     acceleration_lane_mi, deceleration_lane_mi, ramp_speed_mph, truck_merge_speed_mph,
     ACCELERATION_LANE_FT, ACCELERATION_LANE_GRADE_FACTOR, DECELERATION_LANE_FT,
@@ -587,7 +587,17 @@ pub struct TripEventData {
     pub amount: Option<f64>,
     pub deadline_s: Option<f64>,
     pub traffic: Option<TrafficContext>,
+    /// A lane change answers this hazard: it is confined to one lane AND
+    /// the road has an open lane on this side to take. Both halves, folded
+    /// together once at the emitter, so the words and the physics can never
+    /// disagree about whether there is somewhere to go.
     pub dodgeable: Option<bool>,
+    /// The hazard occupies YOUR lane and no other -- an object, a stopped
+    /// car, the vehicle you are closing on. Decides what braking ALONE has
+    /// to reach when there is no lane to take instead: a near stop for a
+    /// thing sitting in the lane, the moving-hazard safe speed for weather
+    /// that spans the road.
+    pub in_lane: Option<bool>,
     pub name: Option<String>,
     pub weather: Option<WeatherKind>,
     pub curve: Option<RouteCurve>,
@@ -987,10 +997,10 @@ mod tests {
             })
             .collect();
         assert_eq!(debris.len(), 6);
-        assert!(debris.iter().all(|h| h.dodgeable));
+        assert!(debris.iter().all(|h| h.in_lane));
         assert!((debris.iter().map(|h| h.weight).sum::<f64>() - 1.2).abs() < 1e-9);
         assert_eq!(hazard_name("no such hazard"), "it");
-        assert!(hazard_is_dodgeable("debris on the road"));
+        assert!(hazard_is_in_lane("debris on the road"));
     }
 
     #[test]
