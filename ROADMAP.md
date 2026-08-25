@@ -1780,6 +1780,41 @@ onto exit signalling.
       -500 sentinel. Grades still come from the elevation service, which is
       why `FF_VALHALLA_ELEVATION_URL` is a separate endpoint.
 
+- [ ] **Elevation: give the build box its own, and do not mix sources.**
+      Two separate things, and they were briefly confused for each other.
+
+      NOTHING WAS LOST. The 145,752 grade segments in `world_data` came from
+      OpenRouteService elevation profiles, not from Valhalla, and are intact
+      across all 1,291 legs. Per-vertex elevation is in the geometry archive
+      and is real on the repaired legs -- Soldier Summit reads 7,490 ft
+      against a true 7,477.
+
+      WHAT IS MISSING is only that the local tileset cannot answer `/height`,
+      because it was built with `build_elevation=False`, so bakes borrow the
+      public instance -- the same external dependency that Overpass turned
+      out to be. `valhalla.json` already points at `/custom_files/
+      elevation_data` and the directory is empty. Populating it is enough;
+      `/height` reads that directory, NOT the routing graph, so this does not
+      mean repeating the five-hour tile build.
+
+      DO NOT RE-BAKE GRADES LEG BY LEG. Measured ORS against Valhalla at the
+      spacing grades are actually built at (`ELEVATION_STEP_MI` = 0.1), over
+      902 runs on five mountain legs the repair never touched:
+
+        grade disagreement   median 1.29%   p90 6.49%   p99 14.42%
+
+      One tenth-mile run in ten differs by more than a full mountain grade.
+      Re-surveying some legs on one terrain model and leaving the rest on
+      another puts both in the same world, and a driver feels it as a hill
+      that exists on one route and not on the equivalent road next door. If
+      the source ever changes it changes for all 1,291 legs at once, as a
+      deliberate re-survey.
+
+      Beware measuring this the quick way: comparing slopes over runs SHORTER
+      than the bake spacing turns a constant offset between the two models
+      into a fake grade. A first attempt reported a 6 percent p90 that was
+      mostly its own sampling noise.
+
 - [ ] **33 legs whose road a truck router will not take.** The refusals
       above, minus 7 that were already within a few metres of the corridor.
       On these the loaded-semi profile wants a route 6 to 84 percent longer
