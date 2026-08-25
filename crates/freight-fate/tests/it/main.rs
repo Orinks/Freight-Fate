@@ -68,6 +68,7 @@ mod states_driving_chain_law;
 mod states_driving_controls;
 mod states_driving_core;
 mod states_driving_damage;
+mod states_driving_departure_sweep;
 mod states_driving_destination_exit;
 mod states_driving_direction;
 mod states_driving_enforcement;

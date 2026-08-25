@@ -2762,6 +2762,83 @@ onto exit signalling.
       `test_the_approach_assist_stops_within_a_truck_length_of_the_gate`), but a
       grade feed-forward would make the finish gentler.
 
+- [x] **The DEPARTURE chain does not carry the arrival's clock fault, but the
+      acceleration lane after it does (MEASURED and FIXED 2026-08-24).** The
+      question the entry below leaves open: `begin_departure_chain` sets no
+      `dock_run_in`, so the streets a truck drives LEAVING a facility still
+      run compressed. Swept the same way -- twenty-five chain-capable
+      facilities, one per state, fixed order, seeded trip and pinned weather,
+      the driver holding the game's own advised number for the corner in play.
+
+      VERDICT on the streets: clean, and no pin is wanted. `controlled_turn`
+      already holds the clock at real time from the moment a corner enters its
+      own window until it resolves, and that window is itself sized in real
+      seconds (`TURN_WARNING_REAL_S`), so a corner's run-up is never
+      compressed. Measured: 0 to 13 feet of compressed ground in the last
+      tenth of a mile before an unjudged corner, per departure, against a
+      truck 70 feet long -- and all of that is the frame or two between one
+      corner resolving and the next latching. Driving the same twenty-five
+      with the whole clock pinned to real time changes the outcome of 2
+      corners in 125. The ARRIVAL chain, which IS pinned, scores the same on
+      every corner measure (125 corners each: 74 vs 74 come in under a third
+      of the design lead, 91 vs 90 are not cleanly taken), which is what says
+      the remaining corner difficulty is the shipped street geometry --
+      corners 260 feet apart with a 20 mph advisory -- and not the clock.
+      Copying the arrival's flag here would have been copying the flag that
+      exists rather than the fault that exists.
+
+      RECORDED, not fixed, and not the clock: a departure loses more corners
+      to the miss loop than an arrival does -- 16 of 125 against 5 -- because
+      an arrival has the approach assist shedding speed over its last stretch
+      and a departure is driven the whole way, which is the design. Pinning
+      the clock to real time moves that 16 to 14. What is left is the
+      commitment loop meeting a downtown grid: a corner advised at 20 with the
+      next one 260 feet on, and a loaded truck that has to be under it. Worth
+      a look as a turn-machinery question, not as a clock one.
+
+      No stop signs, lights or yields exist on a chain to price wrongly:
+      `Leg::local` carries no stops, so `place_stops` puts none on either
+      direction's chain. Every zone and exit warning already converts through
+      `effective_time_scale`.
+
+      TWO REAL DEFECTS the sweep did find, both fixed here.
+
+      1. The acceleration lane out of the streets IS priced in real feet and
+         spent by compressed ground. `finish_departure_chain` sizes it from
+         AASHTO Green Book Table 10-3 and `update_departure_ramp` decrements
+         it by `moved_mi`, which carries the scale, so the truck built speed
+         in real seconds while the lane ran out about seven times too fast.
+         Measured before: Abilene's 1790 feet went by in 12.8 real seconds
+         where a truck merely holding the 27 mph it reached needs 45.2; tapers
+         came out at 14 to 28 mph, median 27 under the road, twenty-three of
+         twenty-five more than 10 under. Fix: `controlled_ramp` now covers
+         the departure lane as well as the exit ramp -- the same law, the
+         other direction --
+         and set in `finish_departure_chain` so not even the handoff frame is
+         compressed. After: tapers 34 to 56 mph, median 5 under, nine still
+         more than 10 under, and those are a loaded truck on a short ramp,
+         which `update_departure_ramp`'s own line already treats as normal.
+      2. The destination approach assist fired on EVERY chain departure, all
+         twenty-five. `update_destination_approach_assist` measured off
+         `is_facility_approach_route()`, which cannot tell the origin's
+         streets from the destination's -- they are the same streets -- so it
+         read the on-ramp as the dock, said "Destination approach assistance
+         slowing" with the delivery a whole run away, and took the pedals for
+         the merge -- three to four mph off the taper even with the lane
+         itself pinned, and the spoken line untrue at all twenty-five. Fix:
+         it now also requires `!trip.outbound`, which is the trip's own word
+         for which end of a facility's streets the gate is at.
+
+      Pinned by `crates/freight-fate/tests/it/states_driving_departure_sweep.rs`:
+      the lane is not outrun by its own length and its closing line quotes the
+      truck's real speed; the arrival assist never takes the pedals leaving a
+      yard; and the verdict itself -- a corner's run-up is never covered at
+      compressed pace -- asserted against the mechanism rather than a flag, so
+      it fires whether the turn latch or the real-second window is what goes.
+      Verified to fail without each fix (25 of 25 in every case). The file
+      also keeps the arrival-side control and the pacing A/B as probes, which
+      is the evidence for the verdict.
+
 - [x] **The facility street chain runs on the real clock, which is what the
       approach assist was missing (FIXED 2026-08-24).** Owner, 2026-08-24:
       "destination approach assistance works on some legs and not others."

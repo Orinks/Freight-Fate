@@ -67,6 +67,18 @@ impl DrivingState {
         // the arrival a mile further on. Treating it as the gate stopped the
         // truck dead at the bottom of the ramp with the city still to drive
         // (owner, Spokane, 2026-08-22).
+        //
+        // `outbound` is the trip's own word for which END of a facility's
+        // streets the gate is at, and it is why a street chain alone is not
+        // enough to arrive on. The origin's chain is the SAME streets driven
+        // the other way -- same shape, same route test -- so a departure read
+        // as an arrival, latched on the on-ramp as though it were the dock,
+        // and braked the truck to a walk on the way OUT of the yard. It did
+        // this on all twenty-five chain departures swept: every one of them
+        // heard "Destination approach assistance slowing" with the delivery
+        // still a whole run away, and lost the pedals for the merge -- three
+        // to four miles an hour off the taper even once the lane itself ran
+        // on the real clock, and the spoken line untrue at every one.
         let ramp_is_destination = self
             .ramp_stop
             .as_ref()
@@ -76,7 +88,10 @@ impl DrivingState {
             && !self.destination_street_chain_ahead(ctx)
         {
             self.ramp_mi
-        } else if !self.trip.finished && self.trip.is_facility_approach_route() {
+        } else if !self.trip.finished
+            && self.trip.is_facility_approach_route()
+            && !self.trip.outbound
+        {
             Some(self.trip.remaining_miles())
         } else {
             None

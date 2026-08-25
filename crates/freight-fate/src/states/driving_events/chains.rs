@@ -307,6 +307,12 @@ impl DrivingState {
         let (highway_mph, _) = self.trip.speed_limit_at(0.0);
         let grade = self.trip.grade_at(0.0);
         self.departure_ramp_mi = Some(acceleration_lane_mi(highway_mph, grade));
+        // A real length of road is only room to build speed on if it is spent
+        // at the rate a truck really covers it. The exit watch pins the lane
+        // to the real clock every frame, but it has already run for this one,
+        // and the shortest lane the table gives is 360 feet -- of which a
+        // single compressed tick eats two dozen.
+        self.trip.controlled_ramp = true;
         let lane_text = spoken_feet_or_meters(
             self.departure_ramp_mi.unwrap_or(0.0),
             ctx.settings.imperial_units,

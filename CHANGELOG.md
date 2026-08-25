@@ -945,6 +945,27 @@
 
 ### Fixed
 
+- **You get the whole on-ramp to build speed when you pull out of a yard.**
+  Leaving a warehouse or yard that puts you on city streets, the ramp up onto
+  the highway went by in a few seconds no matter how long it really was, so
+  you reached the end of the merging lane far slower than the traffic you
+  were joining -- as little as twenty-seven where the road was running
+  seventy-five -- and were then told you were under speed as though that were
+  your doing. The merging lane now takes the time it really takes. Driven out
+  of twenty-five yards in twenty-five states, the truck used to reach the end
+  of the lane at fourteen to twenty-eight miles an hour and now reaches it at
+  thirty-four to fifty-six; where it is still short of the road, that is a
+  loaded truck on a short ramp rather than the clock.
+
+- **Destination approach assistance no longer brakes you on the way OUT of a
+  yard.** With the assist switched on, pulling out of a warehouse or yard onto
+  city streets, it announced "destination approach assistance slowing" and
+  took the pedals as you reached the on-ramp -- with the delivery still a
+  whole run away -- and set you down at the merge barely rolling. It happened
+  at every yard with city streets, because the streets out of a yard and the
+  streets in to one are the same streets. The assist now knows which way you
+  are driving them and leaves a departure alone.
+
 - **Destination approach assistance now stops you at the gate on every
   delivery, not just some of them.** With the assist switched on, the truck
   was brought to a stop ready to pull in at some warehouses and driven

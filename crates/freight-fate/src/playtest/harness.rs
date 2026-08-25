@@ -262,6 +262,11 @@ pub struct RouteSetup {
     /// construction, so a facility assigned afterwards is measured against
     /// the terminal's approach for the rest of the run.
     pub destination_location: Option<String>,
+    /// The facility the load is picked up FROM, when the caller needs a
+    /// particular one. `None` uses the terminal. Same rule as its arrival
+    /// twin: the departure chain is chosen off this on the drive's very
+    /// first frame, so a facility assigned later is never the one driven.
+    pub origin_location: Option<String>,
 }
 
 impl Default for RouteSetup {
@@ -273,6 +278,7 @@ impl Default for RouteSetup {
             route_cities: None,
             trip_seed: None,
             destination_location: None,
+            origin_location: None,
         }
     }
 }
@@ -299,6 +305,12 @@ impl RouteSetup {
     /// Deliver to this facility rather than the destination's terminal.
     pub fn destination_location(mut self, location: &str) -> Self {
         self.destination_location = Some(location.to_string());
+        self
+    }
+
+    /// Load at this facility rather than the origin's terminal.
+    pub fn origin_location(mut self, location: &str) -> Self {
+        self.origin_location = Some(location.to_string());
         self
     }
 }
@@ -627,11 +639,15 @@ impl PlaytestHarness {
         let miles = route.miles().round();
         let cargo = cargo_type(&setup.cargo)
             .unwrap_or_else(|| panic!("{:?} is not in the cargo catalog", setup.cargo));
+        let origin_location = setup
+            .origin_location
+            .clone()
+            .unwrap_or_else(|| format!("{origin} Terminal"));
         let mut job = Job::new(
             cargo,
             setup.tons,
             origin,
-            &format!("{origin} Terminal"),
+            &origin_location,
             destination,
             miles,
             (miles * 10.0).max(500.0),

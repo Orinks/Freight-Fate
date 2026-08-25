@@ -15,12 +15,26 @@ impl DrivingState {
         // Real time from the gore to the terminal: while the ramp ends in
         // a live light or sign, the clock must not compress the seconds
         // the driver needs to brake for it.
-        self.trip.controlled_ramp = self.ramp_mi.is_some()
-            && matches!(
-                self.ramp_control.as_str(),
-                "signal" | "stop" | "yield" | "roundabout"
-            )
-            && !self.ramp_terminal_done;
+        //
+        // The same law on the way back UP. The acceleration lane out of a
+        // facility's streets is a real length of road -- Green Book Table
+        // 10-3, sized so a vehicle can build speed on it -- and it is spent
+        // by the ground the truck covers, which is compressed. So the truck
+        // built speed in real seconds while the lane ran out seven times too
+        // fast. Measured over twenty-five chain departures: Abilene's 1790
+        // feet went by in 12.8 real seconds, where a truck merely HOLDING the
+        // 27 miles an hour it reached needs 45; it arrived at the taper 48
+        // under the Interstate it was joining, and was told so as though that
+        // were its own doing. Tapers came out at 14 to 28 miles an hour,
+        // median 27 under the road, twenty-three of the twenty-five more than
+        // 10 under. Nothing about the lane was wrong; the clock under it was.
+        self.trip.controlled_ramp = self.departure_ramp_mi.is_some()
+            || (self.ramp_mi.is_some()
+                && matches!(
+                    self.ramp_control.as_str(),
+                    "signal" | "stop" | "yield" | "roundabout"
+                )
+                && !self.ramp_terminal_done);
         // The run-in to the dock, which is the destination ramp AND the
         // facility's own streets where it has them. Both are real time.
         //
