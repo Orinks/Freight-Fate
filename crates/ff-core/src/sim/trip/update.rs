@@ -275,12 +275,17 @@ impl Trip {
         let weekend = self.is_weekend_now();
         self.traffic_manager
             .sync_environment(self.truck.speed_mph(), effects);
-        self.traffic_manager
-            .update(dt, self.position_mi, time_scale, Some(hour), Some(weekend));
         // Where traffic has a reason to be on the brakes: the congestion the
         // trip placed from real volumes, plus its approach, with the zone's
         // limit riding along as the pace braking traffic settles at
         // (Brandon, 2026-08-20).
+        //
+        // Handed over BEFORE the manager runs, not after. It used to be set
+        // below, which left the manager driving one tick on the previous
+        // tick's list -- and on the first tick of a trip, on no list at all.
+        // Now that a braking vehicle's label is read off these zones, a queue
+        // injected into a jam and updated before the jam was handed over lost
+        // its brake lights on the spot.
         self.traffic_manager.braking_zones = self
             .zones
             .iter()
@@ -294,6 +299,8 @@ impl Trip {
                 )
             })
             .collect();
+        self.traffic_manager
+            .update(dt, self.position_mi, time_scale, Some(hour), Some(weekend));
         self.check_zones();
         self.check_chain_law();
         self.check_speed_limit();

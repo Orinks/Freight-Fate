@@ -1029,6 +1029,21 @@ impl TrafficManager {
             // piece of road, and one bubble vehicle in seventy was running
             // slower than any speed its own road could have drawn for it.
             let road_mph = self.vehicle_road_speed_mph(&vehicle);
+            // Braking ends when the REASON does, and the reason is on the
+            // ROAD -- so the question has to be asked BEFORE the near-gap jam
+            // branch below, not only after it. That branch holds a braking
+            // vehicle down at the zone pace, or at the 45-percent floor where
+            // there is no zone, for as long as it stays within 1.8 miles of
+            // the truck; and 1.8 miles is inside the 2.2 the cue announces
+            // in. So the one braking vehicle a driver could actually hear
+            // about was the one whose label could never expire: it crawled at
+            // 45 percent of the posting with no jam anywhere under it, while
+            // "Brake lights ahead" named no cause because `braking_cause_line`
+            // had none to name. That is the invented phantom wave the bubble
+            // is supposed to refuse.
+            if vehicle.intent == "braking" && !self.braking_plausible_at(vehicle.position_mi) {
+                vehicle.intent = "cruising".to_string();
+            }
             if vehicle.intent == "braking" && (0.0..=1.8).contains(&gap) {
                 // Inside a zone the pace is the zone's own prevailing speed,
                 // not the generic 45-percent-of-posted floor (Brandon,
@@ -1080,18 +1095,11 @@ impl TrafficManager {
                 // for the couple of miles the cue reaches, since the window a
                 // merger is created in is under half a mile long.
                 //
-                // Braking ends when the REASON does. A vehicle that has
-                // driven clear of a jam and is climbing back up to speed is
-                // accelerating, which is the opposite of braking, and
-                // "Brake lights ahead" for it warns about something that is
-                // not happening -- with no cause to name, because the road no
-                // longer has one.
-                let done = if vehicle.intent == "merging" {
-                    vehicle.speed_mph >= cruise - 2.0
-                } else {
-                    !self.braking_plausible_at(vehicle.position_mi)
-                };
-                if done {
+                // Braking is settled above, at every gap rather than only at
+                // this one: anything still labelled braking by the time it
+                // gets here has a jam under it, so there is nothing left to
+                // ask.
+                if vehicle.intent == "merging" && vehicle.speed_mph >= cruise - 2.0 {
                     vehicle.intent = "cruising".to_string();
                 }
             } else if let Some(road_mph) = road_mph {

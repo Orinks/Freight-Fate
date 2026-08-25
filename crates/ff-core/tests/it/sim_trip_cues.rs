@@ -304,11 +304,30 @@ fn test_traffic_context_and_warning_are_grounded_in_lead_vehicle() {
     trip.truck.velocity_mps = 29.0;
     trip.position_mi = 9.98;
     trip.traffic_manager.rolling_bubble = false;
+    // The ROAD carries the reason now, not the vehicle's own label: a jam it
+    // is slowing for, covering the mile the lead sits on. Without one, the
+    // braking label ends the moment the update runs and the lead is just
+    // steady traffic.
+    //
+    // Put on the TRIP, not straight onto the traffic manager: the manager's
+    // braking zones are derived from the trip's, handed over on every update,
+    // so a list poked in from the side is gone by the time the vehicles run.
+    // The jam starts ahead of the truck so entering it is not part of what
+    // this test is about; the approach mile the handover adds is what reaches
+    // back over the lead.
+    trip.zones
+        .push(Zone::new(10.5, 12.0, 45.0, "heavy traffic"));
+    // Held DOWN to 45 from a 65 cruise, which is what "braking_traffic"
+    // means. This fixture used to give the same number twice -- a vehicle
+    // sitting at its own target, so not braking by any reading, while still
+    // carrying the braking label. It passed only because the label was taken
+    // at its word for the life of the vehicle; now that the label ends when
+    // its reason does, the fixture has to depict the thing it is named for.
     trip.traffic_manager.vehicles = vec![TrafficVehicle::from(NPCVehicle::new(
         "npc:queue",
         10.0,
         45.0,
-        45.0,
+        65.0,
         0,
         "braking_traffic",
     ))];
@@ -325,11 +344,15 @@ fn test_traffic_context_and_warning_are_grounded_in_lead_vehicle() {
         .filter(|e| e.kind == TripEventKind::Hazard)
         .collect();
     assert!(!hazards.is_empty());
-    assert!(
-        hazards[0].text().contains("Brake lights"),
-        "{}",
-        hazards[0].text()
+    // Pinned whole, call included: this stretch of I-65 out of Chicago has
+    // three lanes and no closure, so the lane change is a move the driver can
+    // actually make and the dodge call is the right one. A bare "Brake!" here
+    // would mean the open-lane test had stopped seeing the road.
+    assert_eq!(
+        hazards[0].text(),
+        "Change lanes or brake! Brake lights right ahead."
     );
+    assert_eq!(hazards[0].data.dodgeable, Some(true));
     assert!(hazards[0].data.traffic.is_some());
 }
 

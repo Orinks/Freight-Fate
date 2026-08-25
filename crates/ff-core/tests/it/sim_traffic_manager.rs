@@ -238,6 +238,12 @@ fn test_merging_vehicle_moves_into_player_lane_and_creates_situation() {
 #[test]
 fn test_braking_vehicle_slows_and_creates_lead_situation() {
     let mut manager = manager(1);
+    // The congestion it is braking for. The fixture used to name none, which
+    // is a car with a wrong label rather than a braking car -- and now that
+    // the label ends with its reason, it is a cruising car by the first tick
+    // and raises no situation at all. No pace on the zone, so the ratchet to
+    // the generic floor is what this test still watches.
+    manager.braking_zones = vec![BrakingZone::new(0.0, 2.0, "heavy traffic", None)];
     manager.vehicles = vec![v("brake", 0.7, 45.0, 0, "braking", "car")];
 
     manager.update(1.0, 0.0, 20.0, None, None);
@@ -256,19 +262,38 @@ fn test_braking_vehicle_in_a_zone_paces_the_zone_speed() {
     // (Brandon, 2026-08-20).
     let mut manager = manager(1);
     manager.rolling_bubble = false;
-    manager.braking_zones = vec![BrakingZone::new(4.0, 8.0, "heavy traffic", Some(45.0))];
-    manager.vehicles = vec![v("brake", 5.5, 49.0, 0, "braking", "car")];
+    // In a real merge window, because the second half below is the
+    // merge-window case and has to actually be one. It used to sit at mile
+    // 5.5, which is clear of every ramp on this leg: once the zones were
+    // taken away the car had no reason of any kind left to be braking, so
+    // what the second half really pinned was a label outliving its cause.
+    let route = route_from_cities(world(), &["Chicago", "Indianapolis"]);
+    let at_mi = route.legs[0].interchanges()[0].at_mi + 0.1;
+    assert!(
+        manager.merge_plausible_at(at_mi),
+        "the fixture has to sit in a merge window"
+    );
+    manager.braking_zones = vec![BrakingZone::new(
+        at_mi - 1.5,
+        at_mi + 2.5,
+        "heavy traffic",
+        Some(45.0),
+    )];
+    manager.vehicles = vec![v("brake", at_mi, 49.0, 0, "braking", "car")];
 
     for _ in 0..8 {
-        manager.update(1.0, 5.0, 0.0, None, None);
+        manager.update(1.0, at_mi - 0.5, 0.0, None, None);
     }
     assert_eq!(manager.vehicles[0].target_speed_mph, 45.0);
     // Outside any zone the old floor still governs: the merge-window case.
+    // The ramp is still beside it, so it still has a reason to be on the
+    // brakes; what it no longer has is a zone pace to settle at.
     manager.braking_zones = Vec::new();
     for _ in 0..8 {
-        manager.update(1.0, 5.0, 0.0, None, None);
+        manager.update(1.0, at_mi - 0.5, 0.0, None, None);
     }
-    let floor = manager.floor_speed(manager.posted_limit_at(5.5));
+    assert_eq!(manager.vehicles[0].intent, "braking");
+    let floor = manager.floor_speed(manager.posted_limit_at(at_mi));
     assert_eq!(manager.vehicles[0].target_speed_mph, floor);
 }
 
@@ -767,23 +792,29 @@ fn test_merging_and_braking_are_transient_not_careers() {
     let at_mi = 8.0;
     let limit = manager.posted_limit_at(at_mi);
     let spawn_mph = limit - 15.0; // the merging draw's midpoint: a real deficit
+                                  // The jam the braking car is braking FOR. The fixture used to name no
+                                  // reason at all: a vehicle labelled braking on a stretch with no
+                                  // congestion and no ramp under it, which is not a braking car, it is a
+                                  // car with a wrong label. The label is read off the road now, so the road
+                                  // has to carry the thing. It ends at 8.2 so the car drives clear of it
+                                  // and has to prove it comes back up.
+    manager.braking_zones = vec![BrakingZone::new(
+        7.0,
+        8.2,
+        "rush hour congestion",
+        Some(30.0),
+    )];
+    // Both carry a speed draw, as every vehicle the spawner makes does. A
+    // vehicle placed with no draw is documented as one the road is not
+    // allowed to move (an injected jam, a marked unit), so asking it to
+    // recover to road speed was asking for the one thing it is built not to
+    // do -- and it "passed" only while a target drawn once was kept for life.
+    let drawn = |key: &str, intent: &str| {
+        v(key, at_mi, spawn_mph, 0, intent, "semi").with_speed_draw(0.0, None, 0.0)
+    };
     manager.vehicles = vec![
-        v(
-            "traffic:0:99:merging",
-            at_mi,
-            spawn_mph,
-            0,
-            "merging",
-            "semi",
-        ),
-        v(
-            "traffic:0:99:braking",
-            at_mi,
-            spawn_mph,
-            0,
-            "braking",
-            "semi",
-        ),
+        drawn("traffic:0:99:merging", "merging"),
+        drawn("traffic:0:99:braking", "braking"),
     ];
     for _ in 0..120 {
         manager.update(1.0, at_mi - 1.5, 1.0, None, None);
@@ -794,12 +825,26 @@ fn test_merging_and_braking_are_transient_not_careers() {
             .iter()
             .find(|v| v.key == key)
             .expect("the slowpoke is still in the bubble");
-        let cruise = manager
-            .zone_pace_at(vehicle.position_mi)
-            .unwrap_or_else(|| manager.posted_limit_at(vehicle.position_mi));
+        // Recovered means back up to the speed THIS road asks of THIS
+        // vehicle where it now is -- read fresh off the posting under it,
+        // not the number it was carrying two miles ago. The road climbs from
+        // 45 to 55 across the stretch it covers in two minutes, so a vehicle
+        // frozen at the cruise it recovered to back at the merge fails this.
+        let road = manager
+            .vehicle_road_speed_mph(vehicle)
+            .expect("a drawn vehicle reads the road");
         assert!(
-            vehicle.speed_mph >= cruise - 3.0,
-            "{} vehicle never recovered: {:.0} mph",
+            road > spawn_mph + 5.0,
+            "the fixture has to leave a deficit to recover from: road {road:.0}, spawned {spawn_mph:.0}"
+        );
+        assert_eq!(
+            vehicle.intent, "cruising",
+            "{key} is still labelled {}",
+            vehicle.intent
+        );
+        assert!(
+            vehicle.speed_mph >= road - 3.0,
+            "{} vehicle never recovered: {:.0} mph against a road speed of {road:.0}",
             vehicle.intent,
             vehicle.speed_mph
         );

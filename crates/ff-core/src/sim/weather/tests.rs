@@ -2453,11 +2453,26 @@ fn test_metric_toggle_updates_npc_traffic_cue_speed_units() {
     trip.position_mi = 10.0;
     trip.set_imperial(false);
     trip.traffic_manager.rolling_bubble = false;
+    // The jam the lead is on the brakes for. Without one on the road there is
+    // no brake-lights cue to check the units of: the braking label ends when
+    // its reason does, and a lead with no reason under it is steady traffic,
+    // which is not announced at all. It goes on the TRIP, which is what hands
+    // the manager its braking zones on every update; one poked straight onto
+    // the manager is overwritten before the vehicles run.
+    trip.zones.push(crate::sim::trip_models::Zone::new(
+        11.0,
+        12.5,
+        42.0,
+        "heavy traffic",
+    ));
+    // Held down to 42 from a 65 cruise: the same fixture fault as the one in
+    // test_traffic_context_and_warning_are_grounded_in_lead_vehicle -- the
+    // number twice over is a vehicle at its own target, which is not braking.
     trip.traffic_manager.vehicles = vec![TrafficVehicle::from(NPCVehicle::new(
         "npc:metric-brake",
         10.8,
         42.0,
-        42.0,
+        65.0,
         0,
         "braking_traffic",
     ))];
@@ -2946,11 +2961,28 @@ fn test_traffic_context_and_warning_are_grounded_in_lead_vehicle() {
     trip.truck.velocity_mps = 29.0;
     trip.position_mi = 9.98;
     trip.traffic_manager.rolling_bubble = false;
+    // The ROAD carries the reason now, not the vehicle's own label: a jam it
+    // is slowing for, covering the mile the lead sits on. It goes on the
+    // TRIP, which is what hands the manager its braking zones on every
+    // update; one poked straight onto the manager is overwritten before the
+    // vehicles run.
+    trip.zones.push(crate::sim::trip_models::Zone::new(
+        10.5,
+        12.0,
+        45.0,
+        "heavy traffic",
+    ));
+    // Held DOWN to 45 from a 65 cruise, which is what "braking_traffic" means.
+    // This fixture used to give the same number twice -- a vehicle sitting at
+    // its own target, so not braking by any reading, while still carrying the
+    // braking label. It passed only because the label was taken at its word
+    // for the life of the vehicle; now that the label ends when its reason
+    // does, the fixture has to actually depict the thing it is named for.
     trip.traffic_manager.vehicles = vec![TrafficVehicle::from(NPCVehicle::new(
         "npc:queue",
         10.0,
         45.0,
-        45.0,
+        65.0,
         0,
         "braking_traffic",
     ))];

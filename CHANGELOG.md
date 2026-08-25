@@ -945,6 +945,15 @@
 
 ### Fixed
 
+- **Traffic stops crawling in front of you for a jam that is not there.** A
+  vehicle that had slowed for congestion kept doing it long after the
+  congestion was behind it, and near enough for you to hear about it: it sat
+  at under half the posted limit for mile after mile, and the warning said
+  brake lights ahead without ever saying what for, because by then there was
+  nothing to say. Once the traffic it was caught in is behind it, it is
+  ordinary traffic again -- it comes back up to the speed of the road it is
+  on, and the warning for it stops.
+
 - **The engine brake waits for a hill that actually needs it now.** It was
   coming on down every dip in the road -- one, two, three percent, the sort of
   grade you barely feel -- and holding on for miles at a stretch on hills the

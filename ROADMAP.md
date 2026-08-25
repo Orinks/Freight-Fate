@@ -1942,6 +1942,19 @@ onto exit signalling.
       The response half of it -- "in those situations you'd brake hard" -- is
       the next entry, and is closed.
 
+      Finished 2026-08-25: the label expiry above was only asked in the
+      far-gap arm of the vehicle update, so it could not fire while a vehicle
+      was within 1.8 miles of the truck -- inside the 2.2 the cue announces
+      in. The one braking vehicle a driver could actually hear about was the
+      one whose label could never end: held at 45 percent of the posting with
+      no jam under it, cued as brake lights with no cause to name. The
+      question is asked at every gap now. Alongside it, `braking_zones` is
+      handed to the manager BEFORE it runs rather than after, so it no longer
+      drives a tick on the previous tick's zone list -- on the first tick of a
+      trip, on no list at all, which stripped the label off a queue injected
+      into a jam. Both surfaced only when ff-core became buildable again: its
+      tests had not run all day.
+
 - [x] **`dodgeable` means "is there somewhere to go", and nothing else**
       (2026-08-24, the open half of the entry above). A lead-vehicle hazard
       was emitted `dodgeable: true` whatever the road, so `hazard_deadline_for`
