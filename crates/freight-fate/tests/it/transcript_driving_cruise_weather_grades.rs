@@ -14,7 +14,8 @@
 
 use freight_fate::playtest::harness::PlaytestHarness;
 use freight_fate::states::driving_core::{
-    ACC_LIMIT_OFFSET_MPH, DESCENT_SAFE_MAX_MPH, MPH_PER_MPS, PCC_CREST_SAG_MPH,
+    ACC_LIMIT_OFFSET_MPH, CRUISE_BRAKE_OVER_MPH, DESCENT_SAFE_MAX_MPH, MPH_PER_MPS,
+    PCC_CREST_SAG_MPH,
 };
 
 use crate::transcript_cruise_support::*;
@@ -31,14 +32,41 @@ fn test_cruise_does_not_run_away_down_a_grade() {
     // speed and a 6 percent descent accelerated without limit (bench trace,
     // 2026-07-25: 62 set, 100 mph and still climbing). The retarder now stages
     // against the overspeed, and the drums snub when it is not enough.
-    for (grade, ceiling) in [(-0.02, 63.5), (-0.04, 66.0), (-0.06, 66.0)] {
-        let (_harness, speeds, _stages) = grade_hold("Runaway", grade, GradeHold::default());
+    let set_mph = GradeHold::default().set_mph;
+    // Two percent is the SHALLOW case and its bound is now the design deadband
+    // itself, `CRUISE_BRAKE_OVER_MPH`: cruise is allowed to sit that far over
+    // the number before it puts a foot on the drums, because dragging the
+    // brakes down a hill is how a truck runs out of air. It used to be pinned
+    // at 63.5 -- half a mile an hour tighter -- and that half was the mark of
+    // a retarder trimming a grade the drums hold on their own all day, which
+    // is precisely what `retarder_warranted` has since taken away from it. The
+    // stage trace is asserted below so this cannot come back unnoticed.
+    for (grade, ceiling) in [
+        (-0.02, set_mph + CRUISE_BRAKE_OVER_MPH),
+        (-0.04, 66.0),
+        (-0.06, 66.0),
+    ] {
+        let (_harness, speeds, stages) = grade_hold("Runaway", grade, GradeHold::default());
         assert!(max_of(&speeds) <= ceiling, "{grade} {}", max_of(&speeds));
         // And it is holding a speed, not braking the truck to a stop: the jake
         // used to be pinned wide open the moment the grade passed 2.5 percent,
         // which dragged the truck well under its own target.
         let tail = &speeds[speeds.len().saturating_sub(600)..];
         assert!(min_of(tail) >= 58.0, "{grade} {}", min_of(tail));
+        // It SETTLES rather than creeping: the tail is inside the same bound
+        // the whole trace is, so the shallow grade is being held and not
+        // slowly given away.
+        assert!(max_of(tail) <= ceiling, "{grade} tail {}", max_of(tail));
+        if grade == -0.02 {
+            // And it is the DRUMS holding it. A two percent descent is not a
+            // hill the service brakes cannot handle, so no retarder belongs on
+            // it at all -- the owner's report of 2026-08-24, pinned.
+            assert!(
+                stages.iter().all(|stage| *stage == 0),
+                "the retarder came up on a two percent descent: {:?}",
+                stages.iter().filter(|s| **s > 0).count()
+            );
+        }
     }
 }
 

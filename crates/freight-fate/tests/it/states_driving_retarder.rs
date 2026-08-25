@@ -23,6 +23,7 @@ use ff_core::data::curves::RouteCurve;
 use ff_core::data::world::get_world;
 use ff_core::data::world_models::{CorridorDetail, GradeSegment, Leg, Route};
 use ff_core::sim::trip::{Trip, TripOptions};
+use ff_core::sim::vehicle::REFERENCE_CARGO_KG;
 use ff_core::sim::weather::{WeatherKind, WeatherSystem};
 
 use freight_fate::playtest::breaker::force_grade;
@@ -127,6 +128,15 @@ fn bench_bend(drive: &mut DrivingState, advisory_mph: i64, grade_pct: f64) {
     truck.throttle = 0.0;
     truck.grip = 1.0;
     truck.grade = grade_pct / 100.0;
+    // PIN THE LOAD. Whether an assist may reach for the retarder is a question
+    // about weight as much as about slope -- `retarder_warranted` asks whether
+    // the service brakes could hold this hill, and a grossed-out truck reaches
+    // for it past four percent where an empty one does not until past nine.
+    // `StartDelivery::named` draws a job per driver NAME, so leaving the
+    // cargo alone let the draw decide which of these cases had a retarder to
+    // talk about: two cases with identical roads disagreed purely on the name
+    // over them (2026-08-24). Grossed out is the truck the retarder exists for.
+    truck.cargo_kg = REFERENCE_CARGO_KG;
 }
 
 /// `_AssistRig`: the bench bend with the curve assist switched on.

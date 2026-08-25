@@ -2010,30 +2010,40 @@ fn test_curve_assist_jake_arrives_once_the_latched_throttle_drains() {
     let mut d = a_drive_between(&mut app, "Denver", "Grand Junction", "company yard");
     ready_to_roll(&mut d);
     app.ctx.settings.curve_speed_assist = true;
+    // `jake_capable` needs a truck actually in gear -- a drive with velocity
+    // set directly (skipping a real launch) is still in neutral. Set up
+    // BEFORE the road is chosen, because the mile this needs depends on the
+    // truck: the assist raises the retarder on a grade the service brakes
+    // could not hold, which is weight and speed as much as slope.
+    d.trip.truck.transmission.automatic = true;
+    d.trip.truck.transmission.gear = 9;
+    d.trip.truck.rpm = 1500.0;
+    d.trip.truck.grip = 1.0;
+    d.trip.truck.velocity_mps = mph_to_mps(50.0);
     let total = d.trip.total_miles();
+    // Ask the predicate for the road rather than guessing a percentage: three
+    // percent used to qualify and no longer does, because the drums hold three
+    // percent all day (see `states_driving_jake_line`).
     let mut steep = None;
     let mut mile = 0.0;
     while mile < total {
-        if d.trip.grade_at(mile) * 100.0 <= -3.0 {
+        d.trip.position_mi = mile;
+        d.trip.truck.grade = d.trip.grade_at(mile);
+        if d.retarder_warranted() {
             steep = Some(mile);
             break;
         }
         mile += 0.25;
     }
-    let steep = steep.expect("I-70 west of Denver carries a real downgrade");
+    let steep = steep.expect("I-70 west of Denver carries a grade the drums cannot hold");
     d.trip.position_mi = steep;
     assert!(d.on_downgrade());
+    assert!(d.retarder_warranted());
     assert!(
         d.assist_jake_allowed(&mut app.ctx),
         "no engine-brake ban on this mile"
     );
     d.trip.truck.grade = d.trip.grade_at(steep);
-    // `jake_capable` needs a truck actually in gear -- a drive with velocity
-    // set directly (skipping a real launch) is still in neutral.
-    d.trip.truck.transmission.automatic = true;
-    d.trip.truck.transmission.gear = 9;
-    d.trip.truck.rpm = 1500.0;
-    d.trip.truck.grip = 1.0;
     latch_the_throttle(&mut d, &mut app);
     d.trip.truck.velocity_mps = mph_to_mps(50.0);
 

@@ -5,16 +5,29 @@
 //! jake still activates on flat road with cruise on -- unless that's real
 //! behaviour, in which case leave it".
 //!
+//! And a third report, 2026-08-24: "the jake activates on every single
+//! descent it seems, even shallow descent like 1-3 percent."
+//!
 //! A retarder is a device for holding a loaded truck BACK. On a climb the
 //! truck should be building speed, or at worst holding what it has, so a
 //! retarder there is a controller asking for the opposite of what the road
-//! needs. The rule the whole game already draws is
-//! `DrivingState::on_downgrade` -- the same two percent line the spoken G
-//! readout and the town ordinance exemption draw -- and every assist that can
-//! raise the retarder consults it. This file drives real frames over real
-//! baked road and COUNTS, so that "does the jake come on where it should not"
-//! has an answer with numbers under it instead of a bench built to match a
-//! memory.
+//! needs. Two rules answer that between them, and until the shallow-descent
+//! report they were one:
+//!
+//! * `DrivingState::on_downgrade` -- the two percent line the spoken G readout
+//!   and the town ordinance exemption draw -- says whether the road is going
+//!   downhill, which is what a retarder already up is HELD by.
+//! * `DrivingState::retarder_warranted` says whether the service brakes could
+//!   hold this hill on their own, which is what an assist may RAISE the
+//!   retarder for. Derived, not chosen: see its own doc comment and
+//!   `states_driving_jake_line`, which measures it against real drum heat.
+//!
+//! This file drives real frames over real baked road and COUNTS, so that "does
+//! the jake come on where it should not" has an answer with numbers under it
+//! instead of a bench built to match a memory. The grade-band table is the one
+//! to read against the shallow-descent report: before the split it showed 33
+//! seconds of retarder on two to three percent and 137 on three to four; after
+//! it, zero in both.
 //!
 //! Every road here is seeded and its weather pinned: an unseeded delivery
 //! draws its own route and its own sky, and letting that draw decide which
@@ -43,8 +56,12 @@ use crate::transcript_cruise_support::{
 /// look-aheads.
 const SWEEP_TIME_SCALE: f64 = 10.0;
 
-/// The line the whole game draws between level road and a grade
+/// The line the game draws between level road and a grade at all
 /// (`JAKE_ZONE_EXEMPT_GRADE_PCT`, `GRADE_WARN_CLEAR_PCT`, and the G readout).
+/// This classifies the ROAD, and it is deliberately still the shallow line:
+/// the strict question the assertions ask is "did a retarder stay up somewhere
+/// that is not going downhill at all", and the shallow line is the strictest
+/// way to ask it.
 const GRADE_PCT: f64 = 2.0;
 
 // -- what the sweep records ------------------------------------------------------------
@@ -101,6 +118,82 @@ impl Road {
     }
 }
 
+/// The grade bands the report is read in -- the owner's own, so the before
+/// and after tables answer the report in the words it was made in.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, PartialOrd, Ord)]
+enum Band {
+    Down0to1,
+    Down1to2,
+    Down2to3,
+    Down3to4,
+    Down4to6,
+    Down6plus,
+    LevelOrClimb,
+}
+
+impl Band {
+    const ALL: [Band; 7] = [
+        Band::Down0to1,
+        Band::Down1to2,
+        Band::Down2to3,
+        Band::Down3to4,
+        Band::Down4to6,
+        Band::Down6plus,
+        Band::LevelOrClimb,
+    ];
+
+    fn of(grade_pct: f64) -> Band {
+        let down = -grade_pct;
+        if down <= 0.0 {
+            return Band::LevelOrClimb;
+        }
+        if down < 1.0 {
+            Band::Down0to1
+        } else if down < 2.0 {
+            Band::Down1to2
+        } else if down < 3.0 {
+            Band::Down2to3
+        } else if down < 4.0 {
+            Band::Down3to4
+        } else if down < 6.0 {
+            Band::Down4to6
+        } else {
+            Band::Down6plus
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Band::Down0to1 => "down 0-1%",
+            Band::Down1to2 => "down 1-2%",
+            Band::Down2to3 => "down 2-3%",
+            Band::Down3to4 => "down 3-4%",
+            Band::Down4to6 => "down 4-6%",
+            Band::Down6plus => "down 6%+",
+            Band::LevelOrClimb => "level or climb",
+        }
+    }
+}
+
+/// The sustained-length buckets, in miles of descent end to end.
+const LENGTH_BUCKETS: [(f64, f64, &str); 6] = [
+    (0.0, 0.5, "under 0.5 mi"),
+    (0.5, 1.0, "0.5 to 1 mi"),
+    (1.0, 2.0, "1 to 2 mi"),
+    (2.0, 5.0, "2 to 5 mi"),
+    (5.0, 10.0, "5 to 10 mi"),
+    (10.0, f64::INFINITY, "10 mi and up"),
+];
+
+fn length_bucket(miles: f64) -> &'static str {
+    for (low, high, label) in LENGTH_BUCKETS {
+        if miles >= low && miles < high {
+            return label;
+        }
+    }
+    "under 0.5 mi"
+}
+
 /// One frame with the retarder up, and everything that could have asked for it.
 #[derive(Clone, Debug)]
 struct Sample {
@@ -125,11 +218,22 @@ struct Sample {
     lead_mph: Option<f64>,
     curve_cap: Option<f64>,
     zone: Option<String>,
+    /// How long the descent the truck is on runs, end to end, in miles.
+    /// Zero when the road under the wheels is not a descent at all. This is
+    /// the other half of the question "should the retarder be here": a three
+    /// percent grade held for ten miles is a different road from three percent
+    /// for a furlong, even though the slope reads the same.
+    descent_len_mi: f64,
 }
 
 impl Sample {
     fn road(&self) -> Road {
         Road::of(self.grade_pct)
+    }
+
+    /// Which slope bucket this frame belongs to, in the owner's own bands.
+    fn band(&self) -> Band {
+        Band::of(self.grade_pct)
     }
 
     /// The one-line "name what asked for it" the report is made of.
@@ -165,6 +269,10 @@ struct Trace {
     frames: usize,
     /// (mile, mph) once per frame: the drive the numbers above came off.
     track: Vec<(f64, f64)>,
+    /// The grade under the wheels on every frame, retarder or not, so the
+    /// band table can say how much road was DRIVEN in each band and a zero
+    /// in a band can be told apart from a band nothing ever drove.
+    track_grade: Vec<f64>,
     /// The road class of EVERY frame, retarder or not: a retarder frame is
     /// only fairly called "off the grade" once the road has been off the
     /// grade for longer than one controller pass.
@@ -481,6 +589,42 @@ fn roads() -> Vec<Bench> {
     two_numbers.auto_mode_at = Some(45.0);
     out.push(two_numbers);
 
+    // 19-23. THE ROADS THE OWNER'S REPORT LIVES ON, and which this sweep did
+    //        not have until 2026-08-24: shallow sustained descents. Everything
+    //        above is four percent or steeper, so a sweep of them can say
+    //        nothing at all about "the jake activates on every single descent
+    //        it seems, even shallow descent like 1-3 percent". One road per
+    //        band, each long enough that the drums would reach their settling
+    //        temperature if they were ever going to.
+    for (name, pct) in [
+        ("sustained 1 percent descent", -1.0),
+        ("sustained 2 percent descent", -2.0),
+        ("sustained 3 percent descent", -3.0),
+        ("sustained 5 percent descent", -5.0),
+        ("sustained 7 percent descent", -7.0),
+    ] {
+        out.push(Bench::new(name, 62.0, profile(&[(20.0, pct)])));
+    }
+
+    // 24. The long shallow haul: three percent for ten miles is the case the
+    //     energy argument is usually made with -- more total heat into the
+    //     drums than a short steep pitch -- and the drums still hold it,
+    //     because they settle below fade and stay there however long it runs.
+    out.push(Bench::new(
+        "ten miles of three percent",
+        62.0,
+        profile(&[(10.0, -3.0)]),
+    ));
+
+    // 25. A quarter-mile of seven percent: steep enough that the drums could
+    //     never hold it forever, short enough that they never get near fade.
+    //     The sustained-run filter is what keeps this one quiet.
+    out.push(Bench::new(
+        "a quarter mile of seven percent",
+        62.0,
+        profile(&[(0.25, -7.0)]),
+    ));
+
     out
 }
 
@@ -538,6 +682,7 @@ fn drive_road(road: &Bench) -> Trace {
     let mut rises = Vec::new();
     let mut road_class = Vec::with_capacity(total);
     let mut track = Vec::with_capacity(total);
+    let mut track_grade = Vec::with_capacity(total);
     let mut previous_stage = harness.read_drive(|d| d.truck().engine_brake_stage);
     for index in 0..total {
         frame(&mut harness, DT);
@@ -549,6 +694,7 @@ fn drive_road(road: &Bench) -> Trace {
             )
         });
         track.push((mile, mph));
+        track_grade.push(grade_pct);
         road_class.push(Road::of(grade_pct));
         match harness.with_drive(|d, _| sample_frame(d, road.name, index)) {
             Some(sample) => {
@@ -565,6 +711,7 @@ fn drive_road(road: &Bench) -> Trace {
         name: road.name,
         frames: total,
         track,
+        track_grade,
         road_class,
         retarding,
         rises,
@@ -623,7 +770,38 @@ fn sample_frame(d: &mut DrivingState, road_name: &'static str, index: usize) -> 
         lead_mph,
         curve_cap: d.cruise_curve_mph,
         zone,
+        descent_len_mi: descent_length_mi(d, mile),
     })
+}
+
+/// How far the descent under `mile` runs, backwards and forwards, at the
+/// stride the baked grade segments use and the same "still the same grade"
+/// line the game's own `grade_run_mi` draws.
+fn descent_length_mi(d: &DrivingState, mile: f64) -> f64 {
+    const STEP_MI: f64 = 0.25;
+    const CAP_MI: f64 = 40.0;
+    if d.trip.grade_at(mile) * 100.0 > -GRADE_PCT {
+        return 0.0;
+    }
+    let total = d.trip.total_miles();
+    let mut length = STEP_MI;
+    let mut probe = mile;
+    while length < CAP_MI {
+        probe += STEP_MI;
+        if probe >= total || d.trip.grade_at(probe) * 100.0 > -GRADE_PCT {
+            break;
+        }
+        length += STEP_MI;
+    }
+    let mut probe = mile;
+    while length < CAP_MI {
+        probe -= STEP_MI;
+        if probe <= 0.0 || d.trip.grade_at(probe) * 100.0 > -GRADE_PCT {
+            break;
+        }
+        length += STEP_MI;
+    }
+    length
 }
 
 // -- the report ------------------------------------------------------------------------
@@ -719,6 +897,94 @@ fn print_tables(traces: &[Trace]) {
             100.0 * *up as f64 / all_frames as f64,
             *barking as f64 * DT,
             100.0 * *barking as f64 / all_frames as f64,
+        );
+    }
+
+    println!(
+        "
+== RETARDER SECONDS BY GRADE BAND (the owner's bands) =="
+    );
+    println!("(genuinely barking, not merely staged; every cause, every road)");
+    println!(
+        "{:<18} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "grade band", "cruise s", "curve s", "auto s", "driver s", "TOTAL s"
+    );
+    let mut by_band: BTreeMap<(Band, Cause), usize> = BTreeMap::new();
+    let mut band_frames: BTreeMap<Band, usize> = BTreeMap::new();
+    for trace in traces {
+        for (index, class) in trace.road_class.iter().enumerate() {
+            let _ = class;
+            let grade = trace.track_grade[index];
+            *band_frames.entry(Band::of(grade)).or_insert(0) += 1;
+        }
+        for sample in &trace.retarding {
+            if !sample.barking {
+                continue;
+            }
+            *by_band.entry((sample.band(), sample.cause)).or_insert(0) += 1;
+        }
+    }
+    for band in Band::ALL {
+        let get = |cause: Cause| *by_band.get(&(band, cause)).unwrap_or(&0) as f64 * DT;
+        let cruise = get(Cause::Cruise);
+        let curve = get(Cause::CurveAssist);
+        let auto = get(Cause::AutoMode);
+        let driver = get(Cause::Driver);
+        println!(
+            "{:<18} {:>12.2} {:>12.2} {:>12.2} {:>12.2} {:>12.2}",
+            band.label(),
+            cruise,
+            curve,
+            auto,
+            driver,
+            cruise + curve + auto + driver,
+        );
+    }
+    println!(
+        "
+   for scale, seconds of road DRIVEN in each band:"
+    );
+    for band in Band::ALL {
+        println!(
+            "   {:<18} {:>10.2} s",
+            band.label(),
+            *band_frames.get(&band).unwrap_or(&0) as f64 * DT
+        );
+    }
+
+    println!(
+        "
+== RETARDER SECONDS BY SUSTAINED DESCENT LENGTH =="
+    );
+    println!("(how long the hill the truck was on runs, end to end)");
+    println!(
+        "{:<18} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "descent length", "cruise s", "curve s", "auto s", "driver s", "TOTAL s"
+    );
+    let mut by_length: BTreeMap<(&str, Cause), usize> = BTreeMap::new();
+    for trace in traces {
+        for sample in &trace.retarding {
+            if !sample.barking {
+                continue;
+            }
+            let bucket = length_bucket(sample.descent_len_mi);
+            *by_length.entry((bucket, sample.cause)).or_insert(0) += 1;
+        }
+    }
+    for (_, _, label) in LENGTH_BUCKETS {
+        let get = |cause: Cause| *by_length.get(&(label, cause)).unwrap_or(&0) as f64 * DT;
+        let cruise = get(Cause::Cruise);
+        let curve = get(Cause::CurveAssist);
+        let auto = get(Cause::AutoMode);
+        let driver = get(Cause::Driver);
+        println!(
+            "{:<18} {:>12.2} {:>12.2} {:>12.2} {:>12.2} {:>12.2}",
+            label,
+            cruise,
+            curve,
+            auto,
+            driver,
+            cruise + curve + auto + driver,
         );
     }
 

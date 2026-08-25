@@ -182,10 +182,23 @@ impl DrivingState {
         // held a six percent descent on the drums alone and went past fade
         // in four and a half minutes, 585 degrees at ten (bench trace,
         // 2026-08-11).
+        //
+        // Which grade, though. `on_downgrade` is geometry at two percent --
+        // the spoken advisory's release edge, never a braking number -- so the
+        // assist barked its way through every shallow dip that happened to
+        // carry a bend ("the jake activates on every single descent it seems,
+        // even shallow descent like 1-3 percent", owner, 2026-08-24). It comes
+        // UP now only where `retarder_warranted` says the drums cannot hold
+        // the hill on their own, which is grade against weight against speed
+        // on the truck's own brake heat model. It stays up while the road is
+        // still going down at all, so the pair is hysteresis rather than one
+        // line decided twice -- the same shape the ramp cap below has, for the
+        // same reason.
         let worth_the_bark = curve_assisting && excess_now.is_some() && downhill;
+        let worth_raising = curve_assisting && excess_now.is_some() && self.retarder_warranted();
         // Town no-engine-brake zones close the jake to the assist as well
         // (real downgrades stay exempt); the service trim below answers.
-        if worth_the_bark
+        if worth_raising
             && !self.curve_assist_jake
             && jake_capable
             && !self.trip.truck.engine_brake()

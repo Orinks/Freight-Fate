@@ -945,6 +945,31 @@
 
 ### Fixed
 
+- **The engine brake waits for a hill that actually needs it now.** It was
+  coming on down every dip in the road -- one, two, three percent, the sort of
+  grade you barely feel -- and holding on for miles at a stretch on hills the
+  service brakes were never in any trouble on. Whether it belongs on a descent
+  is not really a question about how steep the road is. It is whether the
+  brakes can hold the hill without cooking, and that is the slope, the weight
+  behind you and your speed, all three together. Loaded to eighty thousand
+  pounds the brakes will hold anything up to about four percent all day and
+  begin to lose it just past that; empty, they cope with nearly ten. So that
+  is what the truck works out now, from the load you are actually carrying and
+  the speed you are actually doing, instead of one flat number for every
+  truck on every hill.
+
+  On a shallow descent the engine brake stays out of it and the service brakes
+  hold your speed exactly as they did -- sooner, if anything, because they no
+  longer stand by waiting for an engine brake that is not coming -- and
+  descent control still tells you the number it is holding. Once the engine
+  brake is on for a real grade it stays on until the road is properly level
+  again, so rolling country no longer makes it stutter on and off. Across the
+  test hills it now runs a little under four minutes where it used to run
+  more than eight, and none of that is on anything shallower than four
+  percent. Nothing changes about the engine brake you work yourself: the
+  stalk, the cylinder choices on 1, 2 and 3, and the automatic engine brake
+  you arm with J all behave exactly as before, on any grade you like.
+
 - **The engine brake stops coming on where there is nothing to hold back.**
   The engine brake exists to hold a loaded truck back on a hill going down.
   Two things had it running where it had no business. A bend that started on
