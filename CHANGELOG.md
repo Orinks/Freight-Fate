@@ -954,6 +954,21 @@
   ordinary traffic again -- it comes back up to the speed of the road it is
   on, and the warning for it stops.
 
+- **"Descent control cannot hold this grade" is only said when it cannot.**
+  On a run of short dips at highway speed you could be told to get on the
+  brakes three times in a minute while the truck was slowing hard, and press
+  G a moment later to be told the road was level. Both things were happening
+  at once: the warning went off the instant a dip began, before descent
+  control had done anything about it, and by the time you heard it the dip
+  was behind you. It now waits until the truck is genuinely getting away --
+  well over the speed descent control is working to, still gaining with the
+  engine brake and the service brakes already in it, and staying that way
+  rather than for a heartbeat at the top of a hill. On a real runaway you
+  hear it exactly as before. It also asks the same question of the truck
+  that the G key does, so the warning and the readout can no longer tell you
+  two different things about the same piece of road.
+
+
 - **The engine brake waits for a hill that actually needs it now.** It was
   coming on down every dip in the road -- one, two, three percent, the sort of
   grade you barely feel -- and holding on for miles at a stretch on hills the

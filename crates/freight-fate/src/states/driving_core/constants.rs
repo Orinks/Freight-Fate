@@ -429,6 +429,27 @@ pub const CRUISE_SNUB_BRAKE: f64 = 0.3; // a real application, not a drag
                                         // Interactive descent control's ceiling while a grade lasts. A cap on the
                                         // working target only -- it must never be written into the set speed.
 pub const DESCENT_SAFE_MAX_MPH: f64 = 55.0;
+// When has a hill BEATEN the descent control, as opposed to merely being held?
+//
+// The descent twin of CRUISE_GRADE_BEATEN_*, and it did not exist until
+// 2026-08-25. "Descent control cannot hold this grade. Apply service brakes."
+// was said on the first frame the truck was this far over the ceiling
+// interactive mode had just imposed -- which on a 75 mph road with cruise set
+// at 80 is the instant a dip starts, before the control has done anything at
+// all. Measured over the owner's own I-70 run (Silverthorne to Glenwood
+// Springs, seed 4242): eight warnings, every one of them while the drums were
+// applied between 0.44 and 0.70 and the truck was LOSING three to five miles
+// an hour a second, on quarter-mile dips the G key called level three seconds
+// later. The three guards mirror the climb side: still genuinely over, still
+// genuinely gaining, and holding rather than catching one frame.
+pub const DESCENT_BEATEN_MPH: f64 = 10.0; // this far over what the control works to
+pub const DESCENT_BEATEN_S: f64 = 3.0; // ...and still losing it for this long
+                                       // The line between "this is being held" and "this is getting away", in mph per
+                                       // second of net acceleration. It is the G readout's own number: the spoken
+                                       // "Jake stage 3 is not holding it" and "Speed is building" branches have judged
+                                       // a descent by it since the readout shipped, and the descent control now asks
+                                       // the same question of the same physics so the two can never disagree.
+pub const GRADE_HOLDING_MPH_PER_S: f64 = 0.2;
 // Predictive cruise: the road profile ahead, read the way a real system reads
 // a stored 3D map (Volvo I-See, Detroit Intelligent Powertrain Management).
 // The preview distance is what those systems use, and the baked grade segments

@@ -306,7 +306,7 @@ impl DrivingState {
         self.announce_limp_cruise_cap(ctx);
         self.acc_follow_cue_s = 0.0f64.max(self.acc_follow_cue_s - dt);
         self.descent_cue_s = 0.0f64.max(self.descent_cue_s - dt);
-        if self.update_descent_control(ctx, braking) {
+        if self.update_descent_control(ctx, dt, braking) {
             return;
         }
         let t = &self.trip.truck;
@@ -355,8 +355,47 @@ impl DrivingState {
         self.run_cruise_loop(ctx, dt);
     }
 
+    /// Has the hill actually beaten descent control, or is it holding it?
+    ///
+    /// "Descent control cannot hold this grade. Apply service brakes." is the
+    /// loudest thing the assist says, and it used to be a single frame's
+    /// arithmetic: speed over the ceiling by ten. On the interactive level
+    /// that ceiling is [`DESCENT_SAFE_MAX_MPH`], imposed the moment a
+    /// downgrade starts, so on a 75 mph road with cruise set at 80 the sum was
+    /// already true on the first frame of every dip -- before the control had
+    /// done anything, and while it was about to do it. The owner heard it
+    /// three times in a minute on I-70 west of Vail (2026-08-24) and the G key
+    /// answered "Level road" in between: the dips are a quarter of a mile, and
+    /// the truck was braking hard through every one of them.
+    ///
+    /// So being over the number is only the first of three, and the other two
+    /// are the ones that make the sentence true:
+    ///
+    /// * still genuinely over what the control is working to, by
+    ///   [`DESCENT_BEATEN_MPH`];
+    /// * still GAINING speed with everything applied -- the same net-force
+    ///   verdict the spoken G readout gives the driver
+    ///   ([`TruckState::net_accel_mph_per_s`] against
+    ///   [`GRADE_HOLDING_MPH_PER_S`]), so the warning and the readout can
+    ///   never contradict each other about one moment of road;
+    /// * and holding that for [`DESCENT_BEATEN_S`], because one frame is a
+    ///   grade boundary, not a runaway.
+    ///
+    /// The mirror of `say_cruise_out_of_truck` on the climb side, which was
+    /// given these same three guards in 2026-07 for the same reason.
+    fn descent_is_beaten(&mut self, dt: f64) -> bool {
+        let over = self.trip.truck.speed_mph() - self.descent_hold_mph();
+        let gaining = self.trip.truck.net_accel_mph_per_s() > GRADE_HOLDING_MPH_PER_S;
+        if over <= DESCENT_BEATEN_MPH || !gaining {
+            self.descent_beaten_s = 0.0;
+            return false;
+        }
+        self.descent_beaten_s += dt;
+        self.descent_beaten_s >= DESCENT_BEATEN_S
+    }
+
     /// The descent-control half of `_update_cruise`; true when it returns.
-    fn update_descent_control(&mut self, ctx: &mut GameContext, braking: bool) -> bool {
+    fn update_descent_control(&mut self, ctx: &mut GameContext, dt: f64, braking: bool) -> bool {
         let descent_level = ctx.settings.descent_speed_control.clone();
         let descending = self.trip.truck.grade <= -0.025 && descent_level != "off";
         if descending && self.cruise_mph.is_some() {
@@ -422,10 +461,12 @@ impl DrivingState {
             if !self.trip.truck.transmission.automatic && self.trip.truck.rpm < 1100.0 {
                 limit_state = "gear".to_string();
                 limit_message = "Descent control needs a lower gear. Downshift now.".to_string();
+                self.descent_beaten_s = 0.0; // a different limit; not this count
             } else if self.trip.truck.grip < 0.55 {
                 limit_state = "traction".to_string();
                 limit_message =
                     "Low traction limits descent control. Apply brakes carefully.".to_string();
+                self.descent_beaten_s = 0.0;
             } else {
                 // The retarder is staged against the overspeed further down,
                 // not pinned open here. Selecting all three stages the moment
@@ -454,7 +495,7 @@ impl DrivingState {
                         self.trip.truck.brake = self.trip.truck.brake.max(brake);
                     }
                 }
-                if self.trip.truck.speed_mph() > self.descent_hold_mph() + 10.0 {
+                if self.descent_is_beaten(dt) {
                     limit_state = "grade".to_string();
                     limit_message =
                         "Descent control cannot hold this grade. Apply service brakes.".to_string();
@@ -469,6 +510,7 @@ impl DrivingState {
         } else if self.descent_control_active {
             self.descent_control_active = false;
             self.descent_limit_state = String::new();
+            self.descent_beaten_s = 0.0;
             self.descent_capture_active = false;
             self.cruise_descent_mph = None; // the grade is behind us; so is its cap
                                             // Release only the retarder cruise itself raised: the driver's own
