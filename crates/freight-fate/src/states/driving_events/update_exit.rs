@@ -21,11 +21,29 @@ impl DrivingState {
                 "signal" | "stop" | "yield" | "roundabout"
             )
             && !self.ramp_terminal_done;
-        self.trip.dock_run_in = self.ramp_mi.is_some()
-            && self
-                .ramp_stop
-                .as_ref()
-                .is_some_and(|stop| stop.stop_type == "delivery_destination");
+        // The run-in to the dock, which is the destination ramp AND the
+        // facility's own streets where it has them. Both are real time.
+        //
+        // The ramp half was here from the start; the street chain was not,
+        // and that omission is the whole of "the approach assist works on
+        // some legs and not others" (owner, 2026-08-24). Compression does not
+        // speed the clock up, it moves the truck further per second --
+        // `position_mi += velocity * dt * scale` -- so on a compressed road
+        // the ground closes four to seven times faster than the brakes can
+        // shed speed. The arrival assist prices its shed in real metres and
+        // real seconds, which is exactly right on the ramp (pinned to real
+        // time by this flag) and hopelessly optimistic on a chain, where the
+        // scale also SNAPPED back from 1 to 7 the instant a corner released
+        // and ate the last two hundred metres of the approach in a couple of
+        // seconds. Measured over fifty destinations: every plain facility
+        // docked at a crawl, while street-chain facilities crossed their own
+        // gate at up to 24.7 miles an hour with the brake on the floor.
+        self.trip.dock_run_in = self.surface_chain
+            || (self.ramp_mi.is_some()
+                && self
+                    .ramp_stop
+                    .as_ref()
+                    .is_some_and(|stop| stop.stop_type == "delivery_destination"));
         // And the road left to an exit the driver has signalled for, which the
         // clock reads to decide whether the approach itself is close enough to
         // be driven in real time. None once the ramp is taken -- from there

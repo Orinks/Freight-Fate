@@ -945,6 +945,21 @@
 
 ### Fixed
 
+- **Destination approach assistance now stops you at the gate on every
+  delivery, not just some of them.** With the assist switched on, the truck
+  was brought to a stop ready to pull in at some warehouses and driven
+  straight over the entrance at others. Which one you got came down to the
+  facility: where the last stretch in is the exit ramp itself the assist
+  always worked, but where the ramp hands you over to city streets for the
+  last mile, the streets went by far faster than the brakes could answer for,
+  and the truck reached the gate still doing as much as twenty-five miles an
+  hour. Those last city miles now pass at the same speed the ramp does, so
+  the assist has the room it needs. Driven to fifty warehouses and yards in
+  fifty states, the truck now reaches every gate at a two mile an hour walk
+  and stops on it. The same change gives you the real seconds a turn onto a
+  city street takes, so the corners on the way in stop arriving faster than
+  you can take them.
+
 - **Driving keys now work with JAWS without the pass-through key.** JAWS
   hands the game each arrow key as an instant tap rather than a held key,
   so holding Up, Down, Left, or Right to accelerate, brake, or steer did

@@ -239,7 +239,7 @@ cases with no Rust namesake -320, from 65.4 percent.)
 | `tests/test_facility_endpoints.py` | PARTIAL | 4 / 2 / 6 | `crates/ff-core/tests/data_facility_endpoints.rs` |  |
 | `tests/test_facility_engine.py` | PORTED | 12 / 0 / 12 | `crates/freight-fate/tests/states_city_pickup.rs`, `crates/freight-fate/tests/states_driving_menus.rs` | live +1, PARTIAL -> PORTED |
 | `tests/test_facility_naming.py` | PARTIAL | 2 / 0 / 4 | `crates/ff-core/src/speech_text.rs` |  |
-| `tests/test_facility_overshoot.py` | PARTIAL | 19 / 4 / 23 | `crates/freight-fate/tests/states_driving_facility.rs` |  |
+| `tests/test_facility_overshoot.py` | PORTED | 23 / 0 / 23 | `crates/freight-fate/tests/it/states_driving_facility.rs`, `crates/freight-fate/tests/it/states_driving_approach_sweep.rs` | the four approach-assist cases now driven for real, PARTIAL -> PORTED |
 | `tests/test_home_terminal.py` | PARTIAL | 4 / 0 / 19 | `crates/freight-fate/tests/states_city.rs`, `crates/freight-fate/tests/states_main_menu.rs` | live +3, Python +3 |
 | `tests/test_hos.py` | PORTED | 114 / 0 / 114 | `crates/ff-core/src/sim/hos/tests.rs`, `crates/freight-fate/tests/states_driving_hos.rs`, `crates/freight-fate/tests/states_city_hos.rs` | live +29, PARTIAL -> PORTED |
 | `tests/test_index_world.py` | TOOLS-ONLY | 0 / 0 / 4 | -- |  |
@@ -1141,13 +1141,6 @@ a name in both suites, but nothing running behind it.
 - `test_build_tool_classifies_tiny_osm_fixture` -- `crates/ff-core/tests/data_facility_endpoints.rs`: tools/build_facility_endpoints.py stays Python (needs osmium)
 - `test_build_tool_marks_missing_extracts_as_fallback` -- `crates/ff-core/tests/data_facility_endpoints.rs`: tools/build_facility_endpoints.py stays Python (needs osmium)
 
-### `tests/test_facility_overshoot.py` -- 4
-
-- `test_the_approach_assist_stops_the_truck_on_a_facility_street_chain` -- `crates/freight-fate/tests/states_driving_facility.rs`: deferred: a hands-off end-to-end drive over baked chain data
-- `test_the_approach_assist_stops_within_a_truck_length_of_the_gate` -- `crates/freight-fate/tests/states_driving_facility.rs`: deferred: a hands-off end-to-end drive over baked chain data
-- `test_the_approach_assist_delivers_the_truck_to_the_dock` -- `crates/freight-fate/tests/states_driving_facility.rs`: deferred: a hands-off end-to-end drive over baked chain data
-- `test_the_approach_assist_delivers_the_truck_to_a_street_chain_gate_uphill` -- `crates/freight-fate/tests/states_driving_facility.rs`: deferred: a hands-off end-to-end drive over baked chain data
-
 ### `tests/test_info_keys.py` -- 9
 
 - `test_grade_key_reads_the_slope_and_whether_the_truck_holds_it` -- `crates/freight-fate/tests/states_driving_controls.rs`: needs a Trip seam for the monkeypatched trip.grade_at
@@ -1550,8 +1543,17 @@ PORTED and neither turned up a defect in the port.
 Genuinely blocked, and not cheap: the eight `trip.grade_at` cases in
 `states_driving_controls.rs` and the two `_upcoming_exit_stop` cases in
 `playtest_harness.rs` want a seam Rust has no equivalent for (Python patched
-an instance method on a live object); the four `states_driving_facility.rs`
-approach-assist cases want a hands-off end-to-end drive over baked chain data.
+an instance method on a live object).
+
+The four `states_driving_facility.rs` approach-assist cases -- closed on
+2026-08-24 -- were the ones wanting a hands-off end-to-end drive over baked
+chain data. They have it now: `states_driving_approach_sweep.rs` builds the
+drive (a seeded delivery, pinned weather, and a driver who rolls the ramp and
+the streets at the posted number and lifts the moment the assist speaks), runs
+it over fifty real destinations, and the four named cases use the same rigging
+for their own narrower bars. The sweep found the defect it was deferred over:
+the facility street chain ran under time compression, so the assist's shed was
+priced in real metres over ground that closed seven times faster.
 
 The ramp-and-exit pass shows what the `trip.grade_at` shape costs when it is
 paid rather than deferred: every Python patch of a live trip method was

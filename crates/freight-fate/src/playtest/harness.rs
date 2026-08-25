@@ -255,6 +255,13 @@ pub struct RouteSetup {
     /// must start at `origin` and end at `destination`.
     pub route_cities: Option<Vec<String>>,
     pub trip_seed: Option<i64>,
+    /// The delivery's facility at the far end, when the caller needs a
+    /// particular one. `None` uses the terminal, which is what dispatch's
+    /// own default draws. It has to be set BEFORE the drive is built: the
+    /// trip sizes its arrival approach from the facility's own record at
+    /// construction, so a facility assigned afterwards is measured against
+    /// the terminal's approach for the rest of the run.
+    pub destination_location: Option<String>,
 }
 
 impl Default for RouteSetup {
@@ -265,6 +272,7 @@ impl Default for RouteSetup {
             tons: 18.0,
             route_cities: None,
             trip_seed: None,
+            destination_location: None,
         }
     }
 }
@@ -285,6 +293,12 @@ impl RouteSetup {
 
     pub fn cities(mut self, cities: &[&str]) -> Self {
         self.route_cities = Some(cities.iter().map(|c| c.to_string()).collect());
+        self
+    }
+
+    /// Deliver to this facility rather than the destination's terminal.
+    pub fn destination_location(mut self, location: &str) -> Self {
+        self.destination_location = Some(location.to_string());
         self
     }
 }
@@ -623,7 +637,10 @@ impl PlaytestHarness {
             (miles * 10.0).max(500.0),
             (miles / 25.0).max(2.0),
         );
-        job.destination_location = format!("{destination} Terminal");
+        job.destination_location = setup
+            .destination_location
+            .clone()
+            .unwrap_or_else(|| format!("{destination} Terminal"));
         let drive = DrivingState::new(
             &mut self.app.ctx,
             job,
