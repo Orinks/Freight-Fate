@@ -232,6 +232,11 @@ impl DrivingState {
         if key_up && !backing && !self.trip.truck.transmission.in_reverse() {
             if self.trip.truck.engine_brake() {
                 self.trip.truck.set_engine_brake(false);
+                // And the AMT manager with it, or "Jake off" is a lie: auto
+                // mode is allowed to sit at stage zero now, so an armed
+                // manager left behind here would quietly bring the retarder
+                // back a moment after the cab said it was off.
+                self.auto_jake = false;
                 // ROUTE, not the ambient default: an automation (the engine
                 // brake) just released, and a driver who assumed it still held
                 // needs to hear that (automation-handoff sweep, 2026-08-20,
@@ -255,9 +260,10 @@ impl DrivingState {
         if pad_throttle > 0.05 && !backing && !self.trip.truck.transmission.in_reverse() {
             if self.trip.truck.engine_brake() {
                 self.trip.truck.set_engine_brake(false);
-                // ROUTE, not the ambient default: same as the keyboard branch
-                // above (automation-handoff sweep, 2026-08-20, the deferred
-                // 2026-08-15 audit).
+                self.auto_jake = false; // see the keyboard branch above
+                                        // ROUTE, not the ambient default: same as the keyboard branch
+                                        // above (automation-handoff sweep, 2026-08-20, the deferred
+                                        // 2026-08-15 audit).
                 ctx.say_event_with(
                     "Jake off.",
                     SayEvent::queued()

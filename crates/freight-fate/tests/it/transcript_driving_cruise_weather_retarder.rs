@@ -153,33 +153,31 @@ fn test_cruise_gives_the_retarder_back_when_the_grade_runs_out_in_a_bend() {
     assert_eq!(harness.read_drive(|d| d.cruise_jake_stage), 0);
 }
 
-#[test]
-fn test_auto_jake_does_not_chase_a_bend_advisory() {
-    // The AMT retarder manager holds the driver's number, not the corner's.
-    //
-    // The third retarder path: the driver armed the stalk with J, so auto mode
-    // owns the stage. It targets the speed it was armed at (or descent
-    // control's ceiling on a grade) and never reads a curve advisory, so a
-    // bend cannot step it up. Pinned because it is the one path that would
-    // otherwise reintroduce the corner bark by another route.
-    let mut harness = cruising("Auto Jake", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
-    harness.app.ctx.settings.descent_speed_control = "realistic".to_string();
-    harness.with_drive(|d, ctx| {
-        d.cancel_cruise(ctx, false);
-        d.truck_mut().grade = 0.0;
+/// Cruise's bench road with the AMT retarder manager armed by hand, exactly
+/// as pressing J on an automatic box arms it.
+///
+/// Returns the stage trace, one entry per frame. The frame mirrors the
+/// driving loop's order for the pieces the retarder rides on: the manager
+/// runs, the automatic picks a gear, then the physics steps.
+fn auto_jake_run(
+    harness: &mut PlaytestHarness,
+    armed_at: f64,
+    grade: f64,
+    seconds: f64,
+) -> Vec<i32> {
+    harness.with_drive(move |d, _| {
+        d.truck_mut().grade = grade;
         d.truck_mut().throttle = 0.0;
         d.auto_jake = true;
-        d.auto_jake_hold_mph = Some(5.0f64.max(d.truck().speed_mph()));
+        d.auto_jake_hold_mph = Some(5.0f64.max(armed_at));
+        d.auto_jake_cooldown_s = 0.0;
         d.truck_mut().engine_brake_stage = 1; // the controller climbs from here
-        d.cruise_curve_mph = Some(45.0);
-        d.cruise_curve_end_mi = Some(d.trip.position_mi + 5.0);
     });
-
     let mut stages = Vec::new();
-    for _ in 0..(20 * 60) {
+    for _ in 0..((seconds * 60.0) as usize) {
         harness.advance_clock(DT);
-        let stage = harness.with_drive(|d, ctx| {
-            d.truck_mut().grade = 0.0;
+        let stage = harness.with_drive(move |d, ctx| {
+            d.truck_mut().grade = grade;
             d.truck_mut().throttle = 0.0;
             d.update_auto_jake(ctx, DT);
             d.truck_mut().auto_shift();
@@ -188,8 +186,172 @@ fn test_auto_jake_does_not_chase_a_bend_advisory() {
         });
         stages.push(stage);
     }
+    stages
+}
+
+#[test]
+fn test_auto_jake_does_not_chase_a_bend_advisory() {
+    // The AMT retarder manager holds the driver's number, not the corner's.
+    //
+    // The third retarder path: the driver armed the stalk with J, so auto mode
+    // owns the stage. It targets the speed it was armed at (or the number an
+    // engaged speed authority is holding) and never reads a curve advisory, so
+    // a bend cannot step it up. Pinned because it is the one path that would
+    // otherwise reintroduce the corner bark by another route.
+    //
+    // Level road, at its number: there is nothing for a retarder to hold, so
+    // it does not merely refuse to climb -- it comes all the way off. The
+    // floor used to be stage one with no reason recorded for it anywhere, and
+    // that floor is what put the jake on level road every time cruise lifted
+    // off the fuel (jake sweep, 2026-08-24).
+    let mut harness = cruising("Auto Jake", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    harness.app.ctx.settings.descent_speed_control = "realistic".to_string();
+    let armed_at = harness.read_drive(|d| d.truck().speed_mph());
+    harness.with_drive(|d, ctx| {
+        d.cancel_cruise(ctx, false);
+        d.cruise_curve_mph = Some(45.0);
+        d.cruise_curve_end_mi = Some(d.trip.position_mi + 5.0);
+    });
+
+    let stages = auto_jake_run(&mut harness, armed_at, 0.0, 20.0);
+
     let peak = stages.iter().cloned().max().unwrap_or(0);
-    assert_eq!(peak, 1, "{peak}");
+    assert_eq!(peak, 0, "the bend bought the retarder a stage: {peak}");
+    // And the manager is still armed -- it put the retarder down, it did not
+    // switch itself off, so a real overspeed later still gets answered.
+    assert!(harness.read_drive(|d| d.auto_jake));
+}
+
+#[test]
+fn test_auto_jake_still_snubs_a_real_overspeed_on_level_road() {
+    // The half that is NOT a bug, pinned so the question is not asked again.
+    //
+    // A retarder on level road has a legitimate reason to be there: the truck
+    // is genuinely running over the number, which is what a driver arms the
+    // manager for -- a crest that gave the truck speed, or the run-out of a
+    // descent. Adaptive cruise reaches for the drums in that situation, on its
+    // own doctrine; auto mode is the driver's own retarder and reaches for the
+    // retarder.
+    let mut harness = cruising("Auto Jake Over", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    harness.app.ctx.settings.descent_speed_control = "realistic".to_string();
+    harness.with_drive(|d, ctx| d.cancel_cruise(ctx, false));
+
+    // Armed at 45, running 62: seventeen over its own number on level road.
+    let stages = auto_jake_run(&mut harness, 45.0, 0.0, 60.0);
+
+    let peak = stages.iter().cloned().max().unwrap_or(0);
+    assert!(
+        peak >= 2,
+        "no retarder for a seventeen mph overspeed: {peak}"
+    );
+    // ...and it hands it back once the truck is down to the number rather
+    // than riding it on down the road.
+    assert_eq!(
+        stages.last().copied().unwrap_or(-1),
+        0,
+        "the retarder never came off: {:?}",
+        &stages[stages.len() - 5..]
+    );
+    let speed = harness.read_drive(|d| d.truck().speed_mph());
+    assert!(speed <= 47.0, "never got down to its number: {speed:.1}");
+}
+
+#[test]
+fn test_auto_jake_drops_the_retarder_the_moment_the_road_turns_up() {
+    // The owner's report, on the driver's own retarder: "on uphill ascents the
+    // truck should gain speed instead of using the engine brakes".
+    //
+    // Coming off a descent the truck is over its number, which on level road
+    // is a legitimate snub (above). On a CLIMB it is not: the hill takes the
+    // speed off by itself, and a real driver powers up a grade rather than
+    // barking the retarder at it. Auto mode used to walk down one stage per
+    // step and never below stage one, so a hill got seconds of retarder and
+    // then a permanent two cylinders.
+    let mut harness = cruising("Auto Jake Climb", 62.0, 200.0, &[(0.0, BENCH_MILES, 4.0)]);
+    harness.app.ctx.settings.descent_speed_control = "realistic".to_string();
+    harness.with_drive(|d, ctx| {
+        d.cancel_cruise(ctx, false);
+        d.truck_mut().velocity_mps = 70.0 * MPS_PER_MPH; // eight over, uphill
+    });
+
+    let stages = auto_jake_run(&mut harness, 62.0, 0.04, 10.0);
+
+    let peak = stages.iter().cloned().max().unwrap_or(0);
+    assert_eq!(peak, 0, "auto mode retarded a climb at stage {peak}");
+}
+
+#[test]
+fn test_auto_jake_works_to_the_number_cruise_is_set_to() {
+    // Two controllers with two answers is what put a full-stage retarder on
+    // level road: armed at 45 and then cruise set to 62, auto mode spent the
+    // drive trying to pull the truck back to a number cruise had never heard
+    // of (jake sweep, 2026-08-24). An engaged speed authority owns the number.
+    let mut harness = cruising("Auto Jake Cruise", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    harness.app.ctx.settings.descent_speed_control = "realistic".to_string();
+    assert_eq!(harness.read_drive(|d| d.cruise_mph), Some(62.0));
+
+    // Armed at 45 while cruise holds 62: seventeen over the armed speed, and
+    // on the number that actually governs.
+    let stages = auto_jake_run(&mut harness, 45.0, 0.0, 20.0);
+
+    let peak = stages.iter().cloned().max().unwrap_or(0);
+    assert_eq!(peak, 0, "auto mode fought cruise at stage {peak}");
+}
+
+#[test]
+fn test_auto_jake_still_holds_a_downgrade() {
+    // The control. Everything above is about giving the retarder back where
+    // there is nothing to hold; a real grade is the one place there IS, and
+    // dropping it there would put the whole hill onto the drums.
+    let mut harness = cruising("Auto Jake Grade", 62.0, 200.0, &[(0.0, BENCH_MILES, -6.0)]);
+    harness.app.ctx.settings.descent_speed_control = "realistic".to_string();
+    harness.with_drive(|d, ctx| d.cancel_cruise(ctx, false));
+
+    let stages = auto_jake_run(&mut harness, 62.0, -0.06, 30.0);
+
+    let peak = stages.iter().cloned().max().unwrap_or(0);
+    assert!(peak >= 2, "the grade went unretarded: {peak}");
+    let tail = &stages[stages.len() - 60..];
+    assert!(
+        tail.iter().all(|s| *s >= 1),
+        "the retarder was dropped on a six percent descent: {tail:?}"
+    );
+}
+
+#[test]
+fn test_the_jake_stalk_still_answers_an_auto_mode_that_has_put_it_down() {
+    // Auto mode is allowed to sit at stage zero now, so the two controls that
+    // used to read the STAGE to decide whether the jake was on have to read
+    // the manager instead -- or J would arm a second one and the cylinder
+    // keys would do nothing at all.
+    let mut harness = cruising("Auto Jake Stalk", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    harness.with_drive(|d, ctx| d.cancel_cruise(ctx, false));
+    let armed_at = harness.read_drive(|d| d.truck().speed_mph());
+    auto_jake_run(&mut harness, armed_at, 0.0, 2.0);
+    assert_eq!(harness.read_drive(|d| d.truck().engine_brake_stage), 0);
+    assert!(harness.read_drive(|d| d.auto_jake));
+
+    // Two takes the retarder back by hand, at two cylinders.
+    harness.clear_speech();
+    harness.with_drive(|d, ctx| d.select_jake_stage(ctx, 2));
+    assert_eq!(harness.read_drive(|d| d.truck().engine_brake_stage), 2);
+    assert!(!harness.read_drive(|d| d.auto_jake));
+    assert!(
+        said_any(&harness, "Jake stage two selected, manual."),
+        "{:#?}",
+        spoken(&harness)
+    );
+
+    // And J switches an idle manager off, so the cab never says "Jake off"
+    // over a manager that is still armed to bring it back.
+    harness.with_drive(|d, _| {
+        d.truck_mut().engine_brake_stage = 0;
+        d.auto_jake = true;
+    });
+    harness.clear_speech();
+    harness.with_drive(|d, ctx| d.toggle_engine_brake(ctx));
+    assert!(!harness.read_drive(|d| d.auto_jake));
+    assert!(said_any(&harness, "Jake off."), "{:#?}", spoken(&harness));
 }
 
 #[test]

@@ -22,7 +22,10 @@ impl DrivingState {
             ctx.say("Release the accelerator before turning the jake on.");
             return;
         }
-        if self.trip.truck.engine_brake() {
+        // Auto mode counts as ON even with the stage down: the manager puts
+        // the retarder all the way off wherever there is nothing to hold, and
+        // J has to switch the manager off rather than arm a second one.
+        if self.trip.truck.engine_brake() || self.auto_jake {
             self.trip.truck.engine_brake_stage = 0;
             self.auto_jake = false;
             ctx.say("Jake off.");
@@ -70,7 +73,9 @@ impl DrivingState {
     /// for other bindings in other contexts (owner, 2026-07-21). On an
     /// automatic box a manual pick takes over from auto mode.
     pub fn select_jake_stage(&mut self, ctx: &mut GameContext, stage: i32) {
-        if !self.trip.truck.engine_brake() {
+        // Armed auto mode answers even with its stage down -- picking a
+        // cylinder count is how the driver takes it back.
+        if !self.trip.truck.engine_brake() && !self.auto_jake {
             return;
         }
         let was_auto = self.auto_jake;
@@ -87,7 +92,7 @@ impl DrivingState {
     /// `_cycle_jake_stage()`: controller -- modifier plus the jake button
     /// walks 1 -> 2 -> 3 -> 1.
     pub fn cycle_jake_stage(&mut self, ctx: &mut GameContext) {
-        if !self.trip.truck.engine_brake() {
+        if !self.trip.truck.engine_brake() && !self.auto_jake {
             return;
         }
         let next = self.trip.truck.engine_brake_stage % JAKE_STAGES + 1;

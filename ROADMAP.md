@@ -120,6 +120,83 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **The retarder answers a grade and nothing else, measured across a
+      seeded sweep (2026-08-24)** (owner: "on uphill ascents the truck should
+      gain speed instead of using the engine brakes", plus "edge cases where
+      the jake still activates on flat road with cruise on").
+      `crates/freight-fate/tests/it/states_driving_jake_sweep.rs` drives
+      eighteen seeded, weather-pinned roads through the real `update_frame`
+      path -- descents, sags, crests, rollers, mountain bends, a lead, a
+      posted drop, a storm ease, a climb entered hot, and auto mode armed --
+      and classifies every retarder frame by which controller held it and what
+      the road under the wheels was. Cruise and the curve assist both already
+      gated their RAISE on `on_downgrade`; what neither gated was the RELEASE,
+      and the third path (AMT auto mode) gated neither.
+      * Curve assist: released only when the CORNER ended, never when the
+        grade under it did. 6.9 s barking on level road and 4.6 s barking at a
+        climb per bend out of a dip. The raise/release decision is now taken
+        every frame off `curve_assisting && on_downgrade`, which also subsumes
+        the old latch-yield retry.
+      * AMT auto mode (J): floored at stage one with no reason recorded
+        anywhere, so it kept two cylinders cut for the whole drive and spoke
+        every time cruise lifted off the fuel on level road; and it worked to
+        the speed it was armed at rather than the number cruise or the keeper
+        was holding. It now releases to zero at once on a climb and wherever
+        there is nothing to hold, works to the engaged authority's set speed,
+        and still snubs a genuine overspeed on level road. New `on_climb`
+        predicate in `driving_engine_brake`, on the same two percent line.
+      * Off-grade assist retardation across the sweep went from 11.5 s to one
+        frame at each grade boundary (the pass the controller already made on
+        the old mile). Ten seconds up a four percent climb out of a bend: 29
+        mph released against 25 held.
+- [x] **The retarder's line is derived from brake heat, not from a grade
+      anybody picked (2026-08-24)** (owner: "the jake activates on every single
+      descent it seems, even shallow descent like 1-3 percent... like 6%+.
+      That's just a number I threw out there"). Both numbers were guesses. The
+      two percent that shipped is `GRADE_WARN_CLEAR_PCT`, the RELEASE edge of
+      the spoken grade advisory's hysteresis pair -- a speech constant with no
+      brake in it, reused as a control threshold because it made the ordinance
+      carve-out agree with the G readout.
+      * `on_downgrade` and "may an assist raise the retarder" were one
+        predicate and are now two. `on_downgrade` keeps the geometry (the
+        hold, the release, the ordinance carve-out, "is a bend's cap the
+        grade's doing"). New `DrivingState::retarder_warranted` gates every
+        assist RAISE -- cruise's descent staging and the curve assist. Auto
+        mode (J) is deliberately untouched: arming it is an explicit choice.
+        The pair is hysteresis, so a rolling grade cannot chatter a loud
+        device.
+      * The rule is FHWA's Grade Severity Rating System criterion -- grade,
+        length and gross weight against a drum-temperature ceiling -- evaluated
+        on the truck's own heat model: `T_settle = T_ambient + P_brake /
+        (C * k(v)) >= brake_fade_onset_c()`. Below that line the drums settle
+        cooler than fade and hold the hill at any length; above it only length
+        decides when they arrive. Sustained-run filter reuses
+        `GRADE_WARN_MIN_RUN_MI`, already calibrated against the baked
+        corridors.
+      * It is a CURVE IN WEIGHT, not a constant: 4.2% at eighty thousand
+        pounds, 4.5% at seventy-one, 5.7% at fifty-five, 9.3% empty, and flat
+        in speed (4.14 to 4.27% across 45-70 mph at max gross).
+      * Measured, not argued.
+        `crates/freight-fate/tests/it/states_driving_jake_line.rs` drives a
+        grossed-out truck fifteen minutes down each grade with no retarder
+        available and reads the drums: -1% never warms them, -2% 113 degC, -3%
+        241, -4% 368, -4.5% 430, -5% 493, -6% 592, against a 400 degC fade
+        onset. The drums cross fade between 4 and 4.5 percent, where the
+        arithmetic said, and the predicate says yes for exactly the rows that
+        cooked. The closed form tracks the simulation to within ~12 degC.
+      * The jake sweep gained six shallow-descent roads (1, 2, 3, 5, 7
+        percent, ten miles of 3, and a quarter mile of 7) and now reports
+        retarder seconds by grade band and by sustained descent length --
+        without those roads it could say nothing at all about this report.
+        Retarder seconds by band, before against after: 2-3% 33.1 -> 0,
+        3-4% 137.3 -> 0, 4-6% 71.0 -> 51.3, 6%+ 250.1 -> 180.6; by length,
+        under half a mile 17.5 -> 0 and half to one mile 33.9 -> 0. Total
+        491.6 s -> 231.9 s over the same 25 roads.
+      * Found while landing it: the curve-assist bench rig never pinned its
+        LOAD -- it took whatever cargo `StartDelivery::named` drew for the
+        driver name, so once the rule depended on weight, two cases with
+        identical roads disagreed about the retarder purely on the name over
+        them. Pinned to gross.
 - [x] **Rust port: drive-time frame cost is measured, and one bug found by
       measuring it (2026-08-24).** `crates/freight-fate/tests/it/frame_time.rs`
       drives a seeded, weather-pinned I-70 run out of Denver through the whole

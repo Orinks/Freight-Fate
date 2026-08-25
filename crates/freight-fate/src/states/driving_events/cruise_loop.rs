@@ -930,14 +930,28 @@ impl DrivingState {
         // raises means no storm-ease raises, and a retarder already holding
         // a real grade stays up, wet or dry, because dropping it puts the
         // whole hill onto the drums.
-        let may_retard = ctx.settings.descent_speed_control != "off"
-            && self.assist_jake_allowed(ctx)
-            && self.on_downgrade();
+        //
+        // RAISING and HOLDING are two different questions and used to be one
+        // predicate. `on_downgrade` is geometry -- two percent, which is the
+        // spoken grade advisory's release edge and was never a braking number
+        // -- so cruise reached for the retarder on every shallow dip in the
+        // road ("the jake activates on every single descent it seems, even
+        // shallow descent like 1-3 percent", owner, 2026-08-24). It comes up
+        // now only where `retarder_warranted` says the DRUMS cannot hold the
+        // hill: grade against weight against speed, measured on the truck's
+        // own brake heat model, which puts the line just past four percent at
+        // eighty thousand pounds and past nine percent empty. It stays up
+        // until the road is level again, which is the hysteresis that keeps a
+        // rolling grade from chattering a loud device.
+        let stalk_open =
+            ctx.settings.descent_speed_control != "off" && self.assist_jake_allowed(ctx);
+        let still_a_grade = stalk_open && self.on_downgrade();
+        let may_retard = still_a_grade && self.retarder_warranted();
         let mut wanted = 0;
         if may_retard && over > CRUISE_JAKE_OVER_MPH && self.trip.truck.throttle <= 0.05 {
             let steps = ((over - CRUISE_JAKE_OVER_MPH) / CRUISE_JAKE_STEP_MPH) as i32;
             wanted = JAKE_STAGES.min(1 + steps);
-        } else if may_retard && over > CRUISE_JAKE_RELEASE_MPH {
+        } else if still_a_grade && over > CRUISE_JAKE_RELEASE_MPH {
             wanted = self.cruise_jake_stage; // inside the deadband, hold
         }
         wanted = wanted.min(0.max(self.auto_jake_max_stage()));
@@ -962,6 +976,15 @@ impl DrivingState {
         // everything it can -- or once it is clear there is no retarder coming,
         // which is the whole of it when the stalk is off -- and then as a snub
         // that finishes and lets go.
+        //
+        // `may_retard`, deliberately, not `still_a_grade`: on a shallow descent
+        // no retarder is coming, so the drums are the answer and they must not
+        // stand around waiting for a stage that will never be raised. This is
+        // what keeps the truck ON its number down a two or three percent grade
+        // now that the jake stays out of it -- and it reaches for them sooner
+        // than the old code did, which waited for the retarder to max out
+        // first. A stage already up under the hysteresis above satisfies
+        // `jake_maxed` on its own, so the drums stay available there too.
         let jake_ceiling = if may_retard {
             JAKE_STAGES.min(self.auto_jake_max_stage())
         } else {

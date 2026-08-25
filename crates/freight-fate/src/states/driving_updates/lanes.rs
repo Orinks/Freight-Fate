@@ -127,79 +127,97 @@ impl DrivingState {
         // target speed, which is what service brakes are for, and a retarder
         // drives only the tractor's rear wheels, which is the last axle you
         // want retarding mid-bend.
-        if curve_assisting
-            && (!self.curve_assist_active
-                // A yielded latch is still draining on the engage frame, so the
-                // jake_capable check below sees throttle above its threshold and
-                // the corner would never get its grade retarder. Retry while the
-                // latch is the reason -- a HAND on the throttle still means the
-                // driver is overriding, and for them this engages on the
-                // transition frame only, exactly as before.
-                || (self.latch_yielding && !self.curve_assist_jake))
+        let jake_capable = {
+            let t = &self.trip.truck;
+            t.engine_on
+                && t.throttle < 0.05
+                && !t.transmission.in_neutral()
+                && !t.transmission.shifting()
+                && t.transmission.clutch <= 0.5
+                && t.grip >= 0.55
+                && t.rpm >= JAKE_MIN_RPM
+        };
+        // A real downgrade is the retarder's own job -- holding a loaded
+        // truck back on a grade is the one use every noise ordinance
+        // leaves legal -- so the overspeed line does not apply there.
+        // on_downgrade draws the same line the G readout and the
+        // ordinance exemption already draw between level road and a
+        // grade, and adaptive cruise now asks it too. Without this
+        // carve-out the assist held a six percent descent on the drums
+        // alone: past fade in four and a half minutes, 585 degrees at ten
+        // (bench trace, 2026-08-11).
+        //
+        // Asked EVERY frame, not once when the assist engages. A bend is a
+        // stretch of road, not a moment, and the grade under it changes
+        // while the truck is in it: a corner that starts on a pitch and
+        // finishes on the flat or on the way up used to keep whatever the
+        // pitch bought for the whole corner, because the release below only
+        // ever ran when the CORNER ended. Measured on the jake sweep,
+        // 2026-08-24: 6.9 seconds barking on level road and 4.6 seconds
+        // barking at a climb, per bend, which is the owner's "on uphill
+        // ascents the truck should gain speed instead of using the engine
+        // brakes". Asking per frame also subsumes the old latch-yield retry:
+        // a yielded latch is still draining on the engage frame, so the
+        // throttle test above fails once and passes as soon as it drains.
+        let downhill = self.on_downgrade();
+        // A GRADE is the only thing that raises the retarder here. Slowing
+        // FOR a corner is the service brakes' job, however much speed the
+        // corner wants off -- owner ruling 2026-08-11, narrowing the
+        // jake-first ruling of 2026-07-22 to grades only.
+        //
+        // The training material is unambiguous and it is not about noise.
+        // The CDL manual's rule for a curve is to reach a safe speed
+        // BEFORE entering it and then pull through on gentle throttle,
+        // because braking mid-corner is what locks a wheel and jackknifes
+        // a trailer -- and a retarder drives only the tractor's rear
+        // wheels, which is precisely the axle you do not want retarding
+        // through a bend. Jacobs, who build the thing, draw the same line:
+        // the engine brake is for SUSTAINED speed control and is "not a
+        // substitute for a service braking system", because it cannot give
+        // the precise control the drums give. A corner is a precise target
+        // speed. A descent is sustained control. Only the descent qualifies.
+        //
+        // A bend ON a grade still retards, because that is the grade's
+        // doing, not the corner's -- and it has to: without this the assist
+        // held a six percent descent on the drums alone and went past fade
+        // in four and a half minutes, 585 degrees at ten (bench trace,
+        // 2026-08-11).
+        //
+        // Which grade, though. `on_downgrade` is geometry at two percent --
+        // the spoken advisory's release edge, never a braking number -- so the
+        // assist barked its way through every shallow dip that happened to
+        // carry a bend ("the jake activates on every single descent it seems,
+        // even shallow descent like 1-3 percent", owner, 2026-08-24). It comes
+        // UP now only where `retarder_warranted` says the drums cannot hold
+        // the hill on their own, which is grade against weight against speed
+        // on the truck's own brake heat model. It stays up while the road is
+        // still going down at all, so the pair is hysteresis rather than one
+        // line decided twice -- the same shape the ramp cap below has, for the
+        // same reason.
+        let worth_the_bark = curve_assisting && excess_now.is_some() && downhill;
+        let worth_raising = curve_assisting && excess_now.is_some() && self.retarder_warranted();
+        // Town no-engine-brake zones close the jake to the assist as well
+        // (real downgrades stay exempt); the service trim below answers.
+        if worth_raising
+            && !self.curve_assist_jake
+            && jake_capable
+            && !self.trip.truck.engine_brake()
+            && self.assist_jake_allowed(ctx)
         {
-            let jake_capable = {
-                let t = &self.trip.truck;
-                t.engine_on
-                    && t.throttle < 0.05
-                    && !t.transmission.in_neutral()
-                    && !t.transmission.shifting()
-                    && t.transmission.clutch <= 0.5
-                    && t.grip >= 0.55
-                    && t.rpm >= JAKE_MIN_RPM
-            };
-            // A real downgrade is the retarder's own job -- holding a loaded
-            // truck back on a grade is the one use every noise ordinance
-            // leaves legal -- so the overspeed line does not apply there.
-            // on_downgrade draws the same line the G readout and the
-            // ordinance exemption already draw between level road and a
-            // grade, and adaptive cruise now asks it too. Without this
-            // carve-out the assist held a six percent descent on the drums
-            // alone: past fade in four and a half minutes, 585 degrees at ten
-            // (bench trace, 2026-08-11).
-            let downhill = self.on_downgrade();
-            // A GRADE is the only thing that raises the retarder here. Slowing
-            // FOR a corner is the service brakes' job, however much speed the
-            // corner wants off -- owner ruling 2026-08-11, narrowing the
-            // jake-first ruling of 2026-07-22 to grades only.
-            //
-            // The training material is unambiguous and it is not about noise.
-            // The CDL manual's rule for a curve is to reach a safe speed
-            // BEFORE entering it and then pull through on gentle throttle,
-            // because braking mid-corner is what locks a wheel and jackknifes
-            // a trailer -- and a retarder drives only the tractor's rear
-            // wheels, which is precisely the axle you do not want retarding
-            // through a bend. Jacobs, who build the thing, draw the same line:
-            // the engine brake is for SUSTAINED speed control and is "not a
-            // substitute for a service braking system", because it cannot give
-            // the precise control the drums give. A corner is a precise target
-            // speed. A descent is sustained control. Only the descent qualifies.
-            //
-            // A bend ON a grade still retards, because that is the grade's
-            // doing, not the corner's -- and it has to: without this the assist
-            // held a six percent descent on the drums alone and went past fade
-            // in four and a half minutes, 585 degrees at ten (bench trace,
-            // 2026-08-11).
-            let worth_the_bark = excess_now.is_some() && downhill;
-            // Town no-engine-brake zones close the jake to the assist as well
-            // (real downgrades stay exempt); the service trim below answers.
-            if jake_capable
-                && worth_the_bark
-                && !self.trip.truck.engine_brake()
-                && self.assist_jake_allowed(ctx)
-            {
-                // Stage one is a token two cylinders: past this line it would
-                // bark without taking off the speed that called for it.
-                self.trip.truck.engine_brake_stage =
-                    if excess_now.unwrap_or(0.0) > CURVE_ASSIST_JAKE_FULL_MPH {
-                        3
-                    } else {
-                        2
-                    };
-                self.curve_assist_jake = true;
-            }
-        } else if !curve_assisting && self.curve_assist_jake {
-            // Release only the jake WE engaged; the player's own selection
-            // (or their mid-curve override) is never touched.
+            // Stage one is a token two cylinders: past this line it would
+            // bark without taking off the speed that called for it.
+            self.trip.truck.engine_brake_stage =
+                if excess_now.unwrap_or(0.0) > CURVE_ASSIST_JAKE_FULL_MPH {
+                    3
+                } else {
+                    2
+                };
+            self.curve_assist_jake = true;
+        } else if self.curve_assist_jake && !worth_the_bark {
+            // The corner ended, or the grade under it did. Either way the
+            // reason is gone, so the retarder goes back at once. Release
+            // only the jake WE engaged; the player's own selection (or
+            // their mid-curve override) is never touched.
             if self.trip.truck.engine_brake() {
                 self.trip.truck.engine_brake_stage = 0;
             }
