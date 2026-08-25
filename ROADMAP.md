@@ -3810,9 +3810,36 @@ onto exit signalling.
       corridor-keyed (nineteen new shield keys) or riding a low-weight
       tribute pool that draws about one sign in ten. Titles and artist
       names only, never lyric quotes.
+- [x] **Billboards are placed, not just corridor-keyed (2026-08-24).**
+      Reported as "OKC billboards in Tennessee". Two faults, both in the
+      lookup: the corridor pool was keyed on the shield alone, so every
+      place a sign named was true the whole length of an interstate
+      (Interstate 40 runs through Oklahoma AND Tennessee), and the shield
+      key dropped the prefix, so US-90, AZ-90 and SR-80 all inherited an
+      interstate's roadside. Every corridor line now carries a
+      `SignAnchor` -- `Corridor` for a line that names no place, `States`
+      for a region or an unmodelled town, `Approaching` for a world city
+      within `SIGN_APPROACH_MI` (150) of route ahead -- and the placer
+      refuses a sign anywhere its copy is untrue, falling through to the
+      anywhere pool. Two lines were evicted from the national tribute
+      pool for naming places (redwood country, the Appalachian hollers)
+      and re-anchored on Interstate 5 and Interstate 77. Measured by
+      `crates/ff-core/tests/it/sim_billboard_placement.rs`, a 288-run
+      seeded sweep with a geography oracle independent of the anchor
+      table: 996 of 1608 place-naming billboards misplaced (61.9%) before,
+      0 of 684 after, with corridor character up rather than down.
 - [ ] Billboard tribute copy could use one more polish pass with the
       owner's own eye -- shipped at "good enough for now" after three
       revision rounds; the closer style rules are in the module docstring.
+- [ ] Two billboard authoring calls the anchor pass surfaced and could not
+      settle itself. "Meramec-style caverns ahead" sits in the Interstate
+      40 pool, but the real Meramec Caverns is on Interstate 44 in
+      Missouri; it is anchored to Arkansas as Ozark cavern country, on the
+      strength of the "-style" hedge, and wants an owner's eye. And eleven
+      signs name towns the world has no node for (Biloxi, Okemah, Abbott,
+      Fort Payne, Newnan, Hope, Nazareth, Moorcroft, Dyess, Ionia, Wall),
+      so they anchor to a state rather than an approach; adding any of
+      those as a world city would let its sign tighten to a real approach.
 - [ ] Split the first-drive tutorial across multiple runs (owner call,
       future session). Interacts with the speech redesign's R15 rule:
       first-run guidance is exempt from verbosity until the walkthrough

@@ -1,6 +1,14 @@
 //! Roadside billboard content -- the spoken flavor you pass on the
 //! interstate (port of `freight_fate/data/billboards.py`).
 //!
+//! THIS SIDE DELIBERATELY LEADS THE PYTHON as of 2026-08-24. The port was a
+//! line-for-line copy until a tester reported Oklahoma billboards being read
+//! in Tennessee; the anchoring below is the fix, and the Python original still
+//! has the shield-only lookup that caused it. The copy itself is unchanged in
+//! both -- what moved is where each line is allowed to be read, plus two lines
+//! evicted from the anywhere pool for naming places. Anyone reconciling the
+//! two should port the anchors FORWARD, not strip them back.
+//!
 //! Billboards are ambient roadside color: short, funny, occasionally corridor-
 //! specific signs the event voice reads on the low-priority ambient tier
 //! (safety callouts always preempt them). This is the CONTENT layer -- the
@@ -11,14 +19,24 @@
 //!
 //! Two placement modes the content is written for:
 //!
-//! * RANDOM en route -- the corridor-agnostic pools (generic Americana,
-//!   attorney ads, church signs, roadside oddities), drawn from a seeded
-//!   per-trip RNG so a drive is deterministic and offline.
-//! * CORRIDOR-KEYED -- `CORRIDOR_BILLBOARDS` maps a highway shield to signs
-//!   for the real roadside culture of that route, so a South Dakota Interstate
-//!   90 run passes the "free ice water, three hundred miles to go" genre and a
-//!   Mojave Interstate 15 run passes alien jerky. Placed signs feel like
-//!   somewhere, not anywhere.
+//! * ANYWHERE -- the corridor-agnostic pools (generic Americana, attorney ads,
+//!   church signs, roadside oddities), drawn from a seeded per-trip RNG so a
+//!   drive is deterministic and offline. THE ONLY THING THAT MAY GO IN THESE
+//!   POOLS is a line that would be true beside any road in the country: an
+//!   invented diner, a fireworks outlet, a joke about the road. A line naming
+//!   a real town, region, exit or attraction belongs to a corridor, not here.
+//! * PLACED -- `CORRIDOR_BILLBOARDS` maps an interstate shield to signs for
+//!   the real roadside culture of that route, so a South Dakota Interstate 90
+//!   run passes the "free ice water, three hundred miles to go" genre and a
+//!   Mojave Interstate 15 run passes alien jerky.
+//!
+//! A shield alone is not a place. Interstate 40 runs through Oklahoma AND
+//! Tennessee, so keying only on the shield read Okemah and Muskogee to drivers
+//! outside Knoxville -- a billboard is one of the few things telling a driver
+//! who cannot see the road where they are, and a misplaced one is the game
+//! asserting something untrue about the truck's position. So every corridor
+//! line carries a `SignAnchor` saying where its copy is true, and the placer
+//! refuses it anywhere else.
 //!
 //! Real roadside attractions are named the way real truck-stop brands already
 //! are (nominative -- a driver really does pass Wall Drug on Interstate 90).
@@ -41,12 +59,13 @@
 //! SONG TRIBUTES (2026-08-12): every achievement in achievements.py credits a
 //! song, and the highway pays some of them back. Tribute signs name the artist
 //! and the song title only -- never a lyric, never a quoted line -- and read
-//! as home-turf pride, not advertising. Tributes whose anchor sits on a mapped
-//! corridor live in `CORRIDOR_BILLBOARDS` under that shield; the handful with
-//! no corridor to call home live in `SONG_TRIBUTE_BILLBOARDS`, which the
-//! random picker reaches for only about one draw in ten
-//! (`TRIBUTE_DRAW_CHANCE`) so the roadside stays attorneys, fireworks, and
-//! pie, with a tribute as an occasional treat rather than a museum wall.
+//! as home-turf pride, not advertising. A tribute that names a place lives in
+//! `CORRIDOR_BILLBOARDS` under that shield with an anchor; only the ones whose
+//! whole point is being from everywhere at once live in
+//! `SONG_TRIBUTE_BILLBOARDS`, which the random picker reaches for about one
+//! draw in ten (`TRIBUTE_DRAW_CHANCE`) so the roadside stays attorneys,
+//! fireworks, and pie, with a tribute as an occasional treat rather than a
+//! museum wall.
 
 use once_cell::sync::Lazy;
 
@@ -130,181 +149,269 @@ pub const META_BILLBOARDS: &[&str] = &[
     "Don't like this billboard? Keep driving.",
 ];
 
-// Corridor-keyed signs, mapped by highway shield. The lookup normalizes to the
-// route number, so "I-90", "I 90", and "Interstate 90" all match.
-pub const CORRIDOR_BILLBOARDS: &[(&str, &[&str])] = &[
+/// Where a corridor sign is TRUE -- the geography a line's copy asserts.
+///
+/// A billboard is one of the few things that tells a driver who cannot see
+/// the road where they are, so a sign naming a town is a claim about the
+/// truck's position. Keying only on the shield made every such claim true the
+/// whole length of an interstate: Interstate 40 runs through Oklahoma AND
+/// Tennessee, so Okemah and Muskogee were being read outside Knoxville.
+/// Every line now says where it holds, and the placer refuses it anywhere
+/// else.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum SignAnchor {
+    /// True the length of the shield, because the line names no place --
+    /// an invented business, or a joke about the road itself.
+    Corridor,
+    /// True only inside these states (two-letter postal codes). The honest
+    /// anchor for a line naming a region, or a town the world does not model
+    /// as a node.
+    States(&'static [&'static str]),
+    /// True only while one of these cities is still AHEAD on the route and
+    /// within `within_mi` of road. A billboard is read from a road on the way
+    /// to the thing, so the window is measured along the route, not as the
+    /// crow flies.
+    Approaching {
+        cities: &'static [&'static str],
+        within_mi: f64,
+    },
+}
+
+/// How far ahead of a named place its sign may be read, in road miles.
+///
+/// Signs land every `BILLBOARD_MIN_GAP_MI`..`BILLBOARD_MAX_GAP_MI` (thirty-five
+/// to sixty-five), so a window has to clear sixty-five by a wide margin or an
+/// anchored sign gets one coin-flip per trip and mostly never speaks. A
+/// hundred and fifty gives it two to four chances while staying inside the
+/// genre: the game's own longest-lead copy is Big Buck's at two hundred and
+/// sixty-two miles, and that distance IS the joke. At a hundred and fifty,
+/// "Jacksonville ahead" reaches back into Georgia and no further.
+pub const SIGN_APPROACH_MI: f64 = 150.0;
+
+/// One corridor sign: the copy, and where that copy is true.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CorridorSign {
+    pub text: &'static str,
+    pub anchor: SignAnchor,
+}
+
+/// A sign true anywhere on its shield -- it names no place.
+const fn anywhere_on(text: &'static str) -> CorridorSign {
+    CorridorSign {
+        text,
+        anchor: SignAnchor::Corridor,
+    }
+}
+
+/// A sign true only in these states.
+const fn in_states(text: &'static str, states: &'static [&'static str]) -> CorridorSign {
+    CorridorSign {
+        text,
+        anchor: SignAnchor::States(states),
+    }
+}
+
+/// A sign true only while one of these cities is ahead, within the standard
+/// approach.
+const fn approaching(text: &'static str, cities: &'static [&'static str]) -> CorridorSign {
+    CorridorSign {
+        text,
+        anchor: SignAnchor::Approaching {
+            cities,
+            within_mi: SIGN_APPROACH_MI,
+        },
+    }
+}
+
+// Corridor-keyed signs, mapped by INTERSTATE shield. The lookup normalizes
+// "I-90", "I 90" and "Interstate 90" to the same corridor, and deliberately
+// does NOT match "US-90" or "AZ-90": a sign written for Interstate 90's
+// roadside is not true beside a different road that happens to share a number.
+pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     ("I-90", &[
-        "Free ice water at Wall Drug. Only three hundred miles. You're basically there.",
-        "Wall Drug. Five-cent coffee since your grandfather was your age.",
+        in_states("Free ice water at Wall Drug. Only three hundred miles. You're basically there.", &["MT", "WY", "SD", "MN"]),
+        in_states("Wall Drug. Five-cent coffee since your grandfather was your age.", &["MT", "WY", "SD", "MN"]),
         // Song tributes -- Boston (The Willis Brothers), Moorcroft, Wyoming
         // (Chancey Williams), and the Idaho panhandle (Colby Acuff).
-        "Boston ahead. The Willis Brothers needed forty acres to turn a rig around in this town. It hasn't gotten any wider.",
-        "Wyoming, Land of the Buffalo. Chancey Williams sings it from right up the road. Buffalo cross wherever they please.",
-        "Idaho panhandle country. Colby Acuff and the Western White Pines both grew up here.",
+        approaching("Boston ahead. The Willis Brothers needed forty acres to turn a rig around in this town. It hasn't gotten any wider.", &["boston_ma_us"]),
+        in_states("Wyoming, Land of the Buffalo. Chancey Williams sings it from right up the road. Buffalo cross wherever they please.", &["WY"]),
+        in_states("Idaho panhandle country. Colby Acuff and the Western White Pines both grew up here.", &["ID"]),
     ]),
     ("I-95", &[
-        "The big sombrero tower ahead. Fireworks, tacos, and a lookout. You never sausage a place.",
-        "South of the Border, coming up. Or is it? Keep driving to find out.",
+        in_states("The big sombrero tower ahead. Fireworks, tacos, and a lookout. You never sausage a place.", &["SC", "NC"]),
+        in_states("South of the Border, coming up. Or is it? Keep driving to find out.", &["SC", "NC"]),
         // 2026-08-12 owner batch -- Carolinas fireworks-stand country, the
         // genre South of the Border already trades on. "362 days" keeps its
         // numerals verbatim (owner sign-off, see test_billboards.py).
-        "Bubba's Fireworks: open 362 days a year! Closed on the other three because we're usually in the hospital.",
+        anywhere_on("Bubba's Fireworks: open 362 days a year! Closed on the other three because we're usually in the hospital."),
         // Song tributes -- the Haynesville Woods in Maine (Dick Curless), the
         // Jersey Turnpike (Elle King), and Jacksonville (Lynyrd Skynyrd).
-        "The Haynesville Woods are up north of here. Dick Curless counted A Tombstone Every Mile. Watch for moose.",
-        "New Jersey: more state than it gets credit for. Elle King sings one called Jersey Giant.",
-        "Jacksonville ahead, hometown of Lynyrd Skynyrd. Down here even the breeze plays guitar -- they named a song for it, Call Me the Breeze.",
+        in_states("The Haynesville Woods are up north of here. Dick Curless counted A Tombstone Every Mile. Watch for moose.", &["ME", "NH"]),
+        in_states("New Jersey: more state than it gets credit for. Elle King sings one called Jersey Giant.", &["NJ"]),
+        approaching("Jacksonville ahead, hometown of Lynyrd Skynyrd. Down here even the breeze plays guitar -- they named a song for it, Call Me the Breeze.", &["jacksonville_fl_us"]),
     ]),
     ("I-10", &[
-        "The Thing? Mystery of the desert. Two hundred miles of suspense building.",
-        "Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.",
+        in_states("The Thing? Mystery of the desert. Two hundred miles of suspense building.", &["AZ", "NM"]),
+        in_states("Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.", &["CA"]),
         // Song tributes -- the southern transcontinental collects song towns:
         // Phoenix, Houston, Baton Rouge, Biloxi, El Paso, and the Big Thicket.
-        "Phoenix ahead, eventually. The desert gives you time to think. Glen Campbell got By the Time I Get to Phoenix out of it.",
-        "Houston ahead. Larry Gatlin measured this trip in days and just called the song Houston.",
-        "Baton Rouge ahead. Kris Kristofferson set Me and Bobby McGee hitchhiking out of here. Pick up the song, not the hitchhikers.",
-        "Biloxi by two? Only if you keep it moving. Ellis Bullard makes it sound easy.",
-        "El Paso, out past the haze. Marty Robbins sang El Paso City and the Streets of Laredo. West Texas gave him the material.",
-        "The Big Thicket, off to the north -- deep pines and deeper voices. George Jones grew up in there. Welcome to Possum country.",
+        approaching("Phoenix ahead, eventually. The desert gives you time to think. Glen Campbell got By the Time I Get to Phoenix out of it.", &["phoenix_az_us"]),
+        approaching("Houston ahead. Larry Gatlin measured this trip in days and just called the song Houston.", &["houston_tx_us"]),
+        approaching("Baton Rouge ahead. Kris Kristofferson set Me and Bobby McGee hitchhiking out of here. Pick up the song, not the hitchhikers.", &["baton_rouge_la_us"]),
+        in_states("Biloxi by two? Only if you keep it moving. Ellis Bullard makes it sound easy.", &["MS"]),
+        approaching("El Paso, out past the haze. Marty Robbins sang El Paso City and the Streets of Laredo. West Texas gave him the material.", &["el_paso_tx_us"]),
+        approaching("The Big Thicket, off to the north -- deep pines and deeper voices. George Jones grew up in there. Welcome to Possum country.", &["beaumont_tx_us", "houston_tx_us"]),
     ]),
     ("I-15", &[
-        "Alien jerky, next exit. They won't say who the jerky's made from.",
-        "The Mad Greek. Gyros in the middle of the Mojave. Trust the desert.",
+        in_states("Alien jerky, next exit. They won't say who the jerky's made from.", &["CA"]),
+        in_states("The Mad Greek. Gyros in the middle of the Mojave. Trust the desert.", &["CA"]),
         // Song tribute -- Las Vegas (Elvis Presley).
-        "Las Vegas ahead. Elvis said Viva. The lights are on all night.",
+        approaching("Las Vegas ahead. Elvis said Viva. The lights are on all night.", &["las_vegas_nv_us"]),
     ]),
     ("I-40", &[
-        "Historic Route sixty-six. Get your kicks, then get back on schedule.",
-        "Meramec-style caverns ahead. Outlaws hid here. So can you, for nine ninety-five.",
+        in_states("Historic Route sixty-six. Get your kicks, then get back on schedule.", &["CA", "AZ", "NM", "TX", "OK"]),
+        in_states("Meramec-style caverns ahead. Outlaws hid here. So can you, for nine ninety-five.", &["AR"]),
         // Song tributes -- the old Route Sixty-Six corridor is wall-to-wall
         // song country: Winslow, Memphis, Muskogee, Okemah, the Smokies, and
         // the mother road itself.
-        "Historic Route Sixty-Six, right under your wheels. Bobby Troup gave it a song and half the country followed. The old road still takes visitors.",
-        "Winslow, Arizona, home of the world-famous corner. The Eagles sang Take It Easy about it, so the town built a park. Statue included.",
-        "Memphis, on down the road. Every highway in Tennessee gets there eventually. Tom T. Hall named his route That's How I Got to Memphis.",
-        "Muskogee, Oklahoma, up the road. Merle Haggard put it on the map. The proudest Okies you'll ever wave at.",
-        "Okemah, Oklahoma. Home of Woody Guthrie. This Land Is Your Land. This billboard is somebody else's.",
-        "East Tennessee, home of Dolly Parton. The Smokies raised her. Nobody's worked a longer shift with a bigger smile.",
+        in_states("Historic Route Sixty-Six, right under your wheels. Bobby Troup gave it a song and half the country followed. The old road still takes visitors.", &["CA", "AZ", "NM", "TX", "OK"]),
+        approaching("Winslow, Arizona, home of the world-famous corner. The Eagles sang Take It Easy about it, so the town built a park. Statue included.", &["winslow_az_us"]),
+        approaching("Memphis, on down the road. Every highway in Tennessee gets there eventually. Tom T. Hall named his route That's How I Got to Memphis.", &["memphis_tn_us"]),
+        in_states("Muskogee, Oklahoma, up the road. Merle Haggard put it on the map. The proudest Okies you'll ever wave at.", &["OK"]),
+        in_states("Okemah, Oklahoma. Home of Woody Guthrie. This Land Is Your Land. This billboard is somebody else's.", &["OK"]),
+        approaching("East Tennessee, home of Dolly Parton. The Smokies raised her. Nobody's worked a longer shift with a bigger smile.", &["knoxville_tn_us"]),
     ]),
     ("I-80", &[
-        "World's largest porch swing. Seats twenty-five. Zero of them truckers.",
-        "Little America, ahead. Ice cream, cheap gas, and a very large sign about it.",
+        in_states("World's largest porch swing. Seats twenty-five. Zero of them truckers.", &["NE"]),
+        in_states("Little America, ahead. Ice cream, cheap gas, and a very large sign about it.", &["WY", "UT"]),
         // Song tribute -- San Francisco Bay at the far western end (Otis
         // Redding).
-        "The Dock of the Bay is at the far end of this road. Otis Redding held the best seat. No parking for trailers.",
+        in_states("The Dock of the Bay is at the far end of this road. Otis Redding held the best seat. No parking for trailers.", &["CA", "NV"]),
     ]),
     // 2026-08-12 owner batch -- the Rockies climb, where the scenery genuinely
     // earns the joke.
     ("I-70", &[
-        "Have you seen the scenery? Neither has your driver!",
+        anywhere_on("Have you seen the scenery? Neither has your driver!"),
         // Song tributes -- the San Juans (C.W. McCall), the Front Range (Joe
         // Walsh), and Kansas City (Roger Miller).
-        "Black Bear Road, way south of here: one lane, hairpins, no guardrails off the Rockies. C.W. McCall sang his way down it. Keep the convoy on the pavement.",
-        "The Rockies, straight ahead and getting bigger. Joe Walsh saw this view and wrote Rocky Mountain Way.",
-        "Kansas City ahead. Roger Miller made it famous twice -- Kansas City Star, then King of the Road.",
+        in_states("Black Bear Road, way south of here: one lane, hairpins, no guardrails off the Rockies. C.W. McCall sang his way down it. Keep the convoy on the pavement.", &["CO"]),
+        in_states("The Rockies, straight ahead and getting bigger. Joe Walsh saw this view and wrote Rocky Mountain Way.", &["CO", "KS"]),
+        approaching("Kansas City ahead. Roger Miller made it famous twice -- Kansas City Star, then King of the Road.", &["kansas_city_mo_us"]),
     ]),
     // Song tributes -- the Missouri and Oklahoma road. Franklin County,
     // Missouri (Union, Pacific, Saint Clair, Sullivan) is the Franklin County
     // Trucking Company's home turf, by owner order; Tulsa belongs to Don
     // Williams.
     ("I-44", &[
-        "Franklin County, Missouri -- Union, Pacific, Saint Clair, and Sullivan. Home turf of the Franklin County Trucking Company. If you're a trucker, they already wrote your song.",
-        "Tulsa ahead. Set your watch to Tulsa Time. Don Williams says it runs a little easier.",
+        in_states("Franklin County, Missouri -- Union, Pacific, Saint Clair, and Sullivan. Home turf of the Franklin County Trucking Company. If you're a trucker, they already wrote your song.", &["MO"]),
+        approaching("Tulsa ahead. Set your watch to Tulsa Time. Don Williams says it runs a little easier.", &["tulsa_ok_us"]),
     ]),
     // Song tributes -- the Texas-to-Minnesota main street of country music:
     // San Antonio, Austin, Waco, Abbott, Fort Worth, and Wichita.
     ("I-35", &[
-        "You're deep in George Strait country now. All his exes live around here somewhere. Amarillo can wait till morning.",
-        "Abbott, Texas -- Willie Nelson's hometown. He's on the road again.",
-        "Waco ahead. Croy and the Boys wrote Don't Let Me Die in Waco. The city would like everyone to relax.",
-        "Austin ahead. Dale Watson territory -- honky-tonk for people who read weigh station signs.",
-        "San Antonio, down the road. Western swing was born in Texas and Bob Wills drove it. New San Antonio Rose still blooms.",
-        "Flattest stretch in Kansas: wheat, sky, and telephone poles. Glen Campbell got Wichita Lineman out of one of those poles. Plenty left.",
+        in_states("You're deep in George Strait country now. All his exes live around here somewhere. Amarillo can wait till morning.", &["TX"]),
+        in_states("Abbott, Texas -- Willie Nelson's hometown. He's on the road again.", &["TX"]),
+        approaching("Waco ahead. Croy and the Boys wrote Don't Let Me Die in Waco. The city would like everyone to relax.", &["waco_tx_us"]),
+        approaching("Austin ahead. Dale Watson territory -- honky-tonk for people who read weigh station signs.", &["austin_tx_us"]),
+        approaching("San Antonio, down the road. Western swing was born in Texas and Bob Wills drove it. New San Antonio Rose still blooms.", &["san_antonio_tx_us"]),
+        in_states("Flattest stretch in Kansas: wheat, sky, and telephone poles. Glen Campbell got Wichita Lineman out of one of those poles. Plenty left.", &["KS"]),
     ]),
     // Song tributes -- the Central Valley grade and the Bakersfield Sound.
     ("I-5", &[
-        "Bakersfield Sound country. Buck Owens and Merle Haggard tuned it, Red Simpson trucked it, Dwight Yoakam kept it running. Turn it up.",
-        "The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.",
+        in_states("Bakersfield Sound country. Buck Owens and Merle Haggard tuned it, Red Simpson trucked it, Dwight Yoakam kept it running. Turn it up.", &["CA"]),
+        in_states("The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.", &["CA"]),
+        // Moved off the corridor-less tribute pool: "far off this road" is a
+        // claim about WHERE the truck is, and on the national pool it was
+        // being read in Georgia. Redwood country is the far northern end of
+        // this run and nowhere else.
+        in_states("Redwood country, far off this road: trees taller than your rig is long. Andrew Gabbard wrote one called Redwood.", &["CA", "OR"]),
     ]),
     // Song tributes -- the Delta highway: Dyess, Arkansas (Johnny Cash) and
     // the old rail line to New Orleans (Willie Nelson's version).
     ("I-55", &[
-        "Arkansas Delta bottomland. Johnny Cash grew up picking cotton out here in Dyess. Hold your lane and walk the line.",
-        "The old rail line to New Orleans runs this same stretch. Willie Nelson sang the City of New Orleans down it.",
+        in_states("Arkansas Delta bottomland. Johnny Cash grew up picking cotton out here in Dyess. Hold your lane and walk the line.", &["AR"]),
+        approaching("The old rail line to New Orleans runs this same stretch. Willie Nelson sang the City of New Orleans down it.", &["new_orleans_la_us"]),
     ]),
     // Song tributes -- Alabama into Tennessee: Hank Williams's home state,
     // Birmingham (Andrea and Mud), and Nashville (Curtis Grimes).
     ("I-65", &[
-        "Alabama, Hank Williams's home state. Move It On Over -- he meant the dog, but the left lane applies.",
-        "Birmingham by eight thirty in the morning? It's been done. Andrea and Mud wrote a song about it.",
-        "Nashville ahead, where a songwriter waits ten years for one hit. Curtis Grimes wrote Ten Year Town about the wait.",
+        in_states("Alabama, Hank Williams's home state. Move It On Over -- he meant the dog, but the left lane applies.", &["AL"]),
+        approaching("Birmingham by eight thirty in the morning? It's been done. Andrea and Mud wrote a song about it.", &["birmingham_al_us"]),
+        approaching("Nashville ahead, where a songwriter waits ten years for one hit. Curtis Grimes wrote Ten Year Town about the wait.", &["nashville_tn_us"]),
     ]),
     // Song tribute -- Fort Payne, Alabama, hometown of the band Alabama.
     ("I-59", &[
-        "Fort Payne, Alabama -- hometown of the band Alabama. They wrote Roll On for every eighteen wheeler on this road.",
+        in_states("Fort Payne, Alabama -- hometown of the band Alabama. They wrote Roll On for every eighteen wheeler on this road.", &["AL"]),
     ]),
     // Song tributes -- the long north-south haul: Saginaw and Detroit at the
     // top, Macon, Georgia at the bottom.
     ("I-75", &[
-        "Detroit City ahead. Bobby Bare sang it for every homesick southerner on the assembly lines up here.",
-        "Saginaw, Michigan, up the interstate. Lefty Frizzell made a fishing town famous. The bay is cold.",
-        "Macon, Georgia -- the Allman Brothers' town. Southbound never sounded better than it does on this stretch.",
+        approaching("Detroit City ahead. Bobby Bare sang it for every homesick southerner on the assembly lines up here.", &["detroit_mi_us"]),
+        approaching("Saginaw, Michigan, up the interstate. Lefty Frizzell made a fishing town famous. The bay is cold.", &["saginaw_mi_us"]),
+        approaching("Macon, Georgia -- the Allman Brothers' town. Southbound never sounded better than it does on this stretch.", &["macon_ga_us"]),
     ]),
     // Song tributes -- Atlanta owns this corridor: Jerry Reed, Alan Jackson,
     // and Gladys Knight all call it home.
     ("I-85", &[
-        "Atlanta ahead, Jerry Reed's town. He made hauling freight in a hurry flat-out famous -- East Bound and Down.",
-        "Newnan, Georgia raised Alan Jackson. He learned to drive on the back roads out here and wrote Drive about it.",
-        "Atlanta ahead. Gladys Knight caught the Midnight Train home to it.",
+        approaching("Atlanta ahead, Jerry Reed's town. He made hauling freight in a hurry flat-out famous -- East Bound and Down.", &["atlanta_ga_us"]),
+        in_states("Newnan, Georgia raised Alan Jackson. He learned to drive on the back roads out here and wrote Drive about it.", &["GA"]),
+        approaching("Atlanta ahead. Gladys Knight caught the Midnight Train home to it.", &["atlanta_ga_us"]),
     ]),
     // Song tribute -- Chattanooga (Glenn Miller).
     ("I-24", &[
-        "Chattanooga ahead. The Choo Choo is real -- an actual train, parked downtown since Glenn Miller made it swing. No ticket required.",
+        approaching("Chattanooga ahead. The Choo Choo is real -- an actual train, parked downtown since Glenn Miller made it swing. No ticket required.", &["chattanooga_tn_us"]),
     ]),
     // Song tributes -- Wisconsin gave trucking Dave Dudley; Detroit gave
     // everyone Motown and Bob Seger.
     ("I-94", &[
-        "Wisconsin made Dave Dudley, and Dave Dudley made Six Days on the Road. Every truck stop jukebox since owes him a quarter.",
-        "Detroit, the Motown assembly line. Marvin Gaye, Stevie Wonder, and no mountain high enough to slow the freight.",
-        "Detroit builds engines, and it built Bob Seger. Night Moves and Turn the Page came off these roads.",
+        in_states("Wisconsin made Dave Dudley, and Dave Dudley made Six Days on the Road. Every truck stop jukebox since owes him a quarter.", &["WI"]),
+        approaching("Detroit, the Motown assembly line. Marvin Gaye, Stevie Wonder, and no mountain high enough to slow the freight.", &["detroit_mi_us"]),
+        approaching("Detroit builds engines, and it built Bob Seger. Night Moves and Turn the Page came off these roads.", &["detroit_mi_us"]),
     ]),
     // Song tribute -- Ionia County, Michigan (Billy Strings).
     ("I-96", &[
-        "Ionia County, Michigan -- Billy Strings picked his way out of here. Long Journey Home, played fast.",
+        in_states("Ionia County, Michigan -- Billy Strings picked his way out of here. Long Journey Home, played fast.", &["MI"]),
     ]),
     // Song tribute -- Cincinnati (Arlo McKinley).
     ("I-71", &[
-        "Cincinnati ahead, Arlo McKinley's hometown -- the one he wrote Back Home about. The hills sing sad and the chili is a controversy.",
+        approaching("Cincinnati ahead, Arlo McKinley's hometown -- the one he wrote Back Home about. The hills sing sad and the chili is a controversy.", &["cincinnati_oh_us"]),
     ]),
     // Song tributes -- Charleston, West Virginia raised Red Sovine and Kathy
     // Mattea both.
     ("I-77", &[
-        "Charleston, West Virginia raised Red Sovine, the voice of every ghost rig and truck stop prayer. Give the Phantom the right of way.",
-        "Kathy Mattea grew up just down the river. Her big one, Eighteen Wheels and a Dozen Roses, is about the last run before retirement.",
+        approaching("Charleston, West Virginia raised Red Sovine, the voice of every ghost rig and truck stop prayer. Give the Phantom the right of way.", &["charleston_wv_us"]),
+        in_states("Kathy Mattea grew up just down the river. Her big one, Eighteen Wheels and a Dozen Roses, is about the last run before retirement.", &["WV"]),
+        // Moved off the corridor-less tribute pool for the same reason: a
+        // holler is an Appalachian hollow, and "the little valleys off this
+        // road" only holds up on a road in those mountains. Rewritten
+        // 2026-08-20 after a tester was honestly befuddled by the old
+        // three-fragment form -- spoken text gets one pass at the ear, so it
+        // has to carry its own context.
+        in_states("The little valleys off this road are called hollers: a porch, a banjo, somebody picking. Dirty Grass Soul wrote the song about going home to one -- Back to the Holler. Leave the trailer, though; a holler road has never turned a rig around.", &["WV", "VA", "KY", "NC"]),
     ]),
     // Song tributes -- the Appalachian valley: Russell County, Virginia
     // (Forty-Nine Winchester) and Smoky Mountain fog (Flatt and Scruggs).
     ("I-81", &[
-        "Russell County line, a valley over. Forty-Nine Winchester put it on every honky-tonk jukebox in Virginia. Wave as you pass.",
-        "Mountain fog ahead is a local specialty. Flatt and Scruggs turned it into the fastest banjo tune ever cut, Foggy Mountain Breakdown. Use low beams in fog.",
+        in_states("Russell County line, a valley over. Forty-Nine Winchester put it on every honky-tonk jukebox in Virginia. Wave as you pass.", &["VA"]),
+        in_states("Mountain fog ahead is a local specialty. Flatt and Scruggs turned it into the fastest banjo tune ever cut, Foggy Mountain Breakdown. Use low beams in fog.", &["VA", "TN", "WV"]),
     ]),
     // Song tributes -- Kentucky: the bluegrass east (Brit Taylor) and the
     // coalfields (Tennessee Ernie Ford).
     ("I-64", &[
-        "Eastern Kentucky, where the grass really does look blue. Brit Taylor wrote Kentucky Blue about home.",
-        "Coal country. Tennessee Ernie Ford counted Sixteen Tons of it and famously came up broke.",
+        in_states("Eastern Kentucky, where the grass really does look blue. Brit Taylor wrote Kentucky Blue about home.", &["KY"]),
+        in_states("Coal country. Tennessee Ernie Ford counted Sixteen Tons of it and famously came up broke.", &["KY", "WV", "VA"]),
     ]),
     // Song tribute -- Hope, Arkansas (Brennen Leigh).
     ("I-30", &[
-        "Hope, Arkansas, next exit. Brennen Leigh wrote a song about running out of it. Fuel up before you do.",
+        in_states("Hope, Arkansas, next exit. Brennen Leigh wrote a song about running out of it. Fuel up before you do.", &["AR"]),
     ]),
     // Song tribute -- border-blaster radio country (Wall of Voodoo).
     ("I-8", &[
-        "Border radio country. The old megawatt stations down south out-shouted every dial in America -- Wall of Voodoo caught one and cut Mexican Radio. Scan the dial.",
+        anywhere_on("Border radio country. The old megawatt stations down south out-shouted every dial in America -- Wall of Voodoo caught one and cut Mexican Radio. Scan the dial."),
     ]),
     // Song tribute -- Nazareth, Pennsylvania (The Band).
     ("I-78", &[
-        "Nazareth, Pennsylvania, a few exits north. The Weight is about a stranger rolling in looking for a bed. Book ahead.",
+        in_states("Nazareth, Pennsylvania, a few exits north. The Weight is about a stranger rolling in looking for a bed. Book ahead.", &["PA"]),
     ]),
     // Song tribute -- Abilene, Texas (George Hamilton the Fourth).
     ("I-20", &[
@@ -312,9 +419,9 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[&str])] = &[
         // for songs whose whole point is being from everywhere at once, and
         // these two name a place. On the loose pool they played in Maine
         // (owner). I-20 is the West Texas run they are actually about.
-        "West Texas cotton flats made Waylon Jennings. One question -- Are You Sure Hank Done It This Way -- and outlaw country was born.",
-        "Somewhere out there is Lubbock, Texas. Mac Davis kept it in his rear view mirror until he missed it.",
-        "Abilene ahead. George Hamilton the Fourth made the town sound gentle as a Sunday. Watch for crosswinds.",
+        in_states("West Texas cotton flats made Waylon Jennings. One question -- Are You Sure Hank Done It This Way -- and outlaw country was born.", &["TX"]),
+        in_states("Somewhere out there is Lubbock, Texas. Mac Davis kept it in his rear view mirror until he missed it.", &["TX"]),
+        approaching("Abilene ahead. George Hamilton the Fourth made the town sound gentle as a Sunday. Watch for crosswinds.", &["abilene_tx_us"]),
     ]),
 ];
 
@@ -345,23 +452,21 @@ pub const BIG_BUCKS_BILLBOARDS: &[&str] = &[
     "Big Buck's ahead. Acres of gleaming fuel islands, and not one of them for you. Drop the trailer and dream.",
 ];
 
-// Song tributes with no mapped corridor to call home -- either the anchor
-// sits off the interstate grid (Lubbock, the hollers, redwood country) or the
-// song's whole point is being from everywhere at once. Same rules as every
-// tribute: artist names and song titles only, never a lyric.
+// Song tributes drawn from the ANYWHERE pool, on any road in the country. The
+// bar is therefore absolute: a line belongs here only if its whole point is
+// being from everywhere at once, so that it stays true whichever mile marker
+// the truck happens to be passing. Same rules as every tribute -- artist names
+// and song titles only, never a lyric.
+//
+// Two lines were evicted from here on 2026-08-24 for failing that bar. Redwood
+// country and the Appalachian hollers each said "off this road", which is a
+// claim about where the truck IS, and a national draw was making that claim in
+// the wrong half of the country. They now sit in the Interstate 5 and
+// Interstate 77 pools behind state anchors. NOTHING THAT NAMES A PLACE GOES IN
+// HERE.
 pub const SONG_TRIBUTE_BILLBOARDS: &[&str] = &[
     "Hank Snow claimed he'd been everywhere. This mile marker confirms it.",
     "The girl on the billboard? Wrong billboard. Del Reeves saw her a few hundred miles back. Eyes on the road.",
-    "Redwood country, far off this road: trees taller than your rig is long. Andrew Gabbard wrote one called Redwood.",
-    // Rewritten 2026-08-20 after a tester was honestly befuddled: the old
-    // form was three fragments with no connective tissue ("Up any of these
-    // hollers: a porch, a banjo, somebody picking. Dirty Grass Soul calls
-    // it Back to the Holler. No trailers past the cattle gate.") -- a
-    // riddle unless you already knew that a holler is an Appalachian
-    // hollow, that picking means playing, and that the last line is a
-    // trucker joke. Spoken text gets one pass at the ear; it has to carry
-    // its own context.
-    "The little valleys off this road are called hollers: a porch, a banjo, somebody picking. Dirty Grass Soul wrote the song about going home to one -- Back to the Holler. Leave the trailer, though; a holler road has never turned a rig around.",
 ];
 
 // The whole weighting mechanism for the tribute pool: the corridor-agnostic
@@ -371,19 +476,34 @@ pub const SONG_TRIBUTE_BILLBOARDS: &[&str] = &[
 // handful of tributes -- the roadside stays attorneys, fireworks, and pie.
 pub const TRIBUTE_DRAW_CHANCE: f64 = 0.1;
 
-/// The route number from a shield/ref, e.g. 'Interstate 90' or 'I 90' -> '90'.
-fn highway_key(highway: &str) -> String {
-    let mut digits = String::new();
-    let mut seen_digit = false;
-    for ch in highway.chars() {
-        if ch.is_ascii_digit() {
-            digits.push(ch);
-            seen_digit = true;
-        } else if seen_digit {
-            break;
-        }
+/// The interstate a shield names: "I-90", "I 90", "i-90" and "Interstate 90"
+/// all give `Some(90)`.
+///
+/// Anything that is not an interstate gives `None`, and that is the point.
+/// The old lookup took the first run of digits and threw the prefix away, so
+/// "US-90", "AZ-90" and "SR-90" all keyed to Interstate 90 -- which put South
+/// Dakota's Wall Drug signs on US-90 in Louisiana, Michigan's Ionia County
+/// sign on K-96 in Kansas, and the Mexican border-radio sign on MS-8 in
+/// Mississippi. A shield number is only meaningful together with its prefix.
+fn interstate_number(highway: &str) -> Option<u32> {
+    let trimmed = highway.trim();
+    let split = trimmed.find(|c: char| c.is_ascii_digit())?;
+    let (prefix, digits) = trimmed.split_at(split);
+    let prefix: String = prefix
+        .chars()
+        .filter(|c| c.is_ascii_alphabetic())
+        .flat_map(|c| c.to_lowercase())
+        .collect();
+    if prefix != "i" && prefix != "interstate" {
+        return None;
     }
-    digits
+    let number: String = digits.chars().take_while(|c| c.is_ascii_digit()).collect();
+    // Trailing text after the number (a business loop, a concurrency) is a
+    // different road from the mainline the copy was written for.
+    if digits.len() != number.len() {
+        return None;
+    }
+    number.parse().ok()
 }
 
 /// Every corridor-agnostic sign, for the random picker.
@@ -419,19 +539,28 @@ pub fn random_billboard(rng: &mut PyRandom) -> &'static str {
     *rng.choice(&ROADSIDE)
 }
 
-/// Signs specific to a highway's real roadside culture, or `&[]` if none.
-/// The lookup normalizes to the route number, so "I-90", "I 90", and
-/// "Interstate 90" all match.
-pub fn corridor_billboards(highway: &str) -> &'static [&'static str] {
-    let key = highway_key(highway);
-    if key.is_empty() {
+/// Signs specific to an interstate's real roadside culture, each with the
+/// geography its copy is true in, or `&[]` if the road has no pool.
+///
+/// The lookup normalizes shield format ("I-90", "I 90", "Interstate 90") but
+/// not shield TYPE: a US or state route sharing the number gets nothing.
+pub fn corridor_signs(highway: &str) -> &'static [CorridorSign] {
+    let Some(number) = interstate_number(highway) else {
         return &[];
-    }
+    };
     CORRIDOR_BILLBOARDS
         .iter()
-        .find(|(shield, _)| highway_key(shield) == key)
+        .find(|(shield, _)| interstate_number(shield) == Some(number))
         .map(|(_, pool)| *pool)
         .unwrap_or(&[])
+}
+
+/// Just the copy from `corridor_signs`, with the anchors dropped -- for
+/// content checks over the catalog. THE PLACER MUST NOT USE THIS: it is the
+/// unfiltered pool, and reading from it anywhere on the shield is the bug
+/// this module exists to prevent.
+pub fn corridor_billboards(highway: &str) -> Vec<&'static str> {
+    corridor_signs(highway).iter().map(|s| s.text).collect()
 }
 
 /// Every Big Buck's approach sign, for the near-a-Big-Buck's picker.
@@ -472,7 +601,7 @@ mod tests {
     fn all_lines() -> Vec<&'static str> {
         let mut out: Vec<&str> = pools().into_iter().flatten().copied().collect();
         for (_, pool) in CORRIDOR_BILLBOARDS {
-            out.extend(pool.iter().copied());
+            out.extend(pool.iter().map(|sign| sign.text));
         }
         out
     }
@@ -525,6 +654,124 @@ mod tests {
     fn test_unknown_corridor_returns_empty() {
         assert!(corridor_billboards("I-976").is_empty());
         assert!(corridor_billboards("some county road").is_empty());
+    }
+
+    #[test]
+    fn test_a_shield_number_never_matches_a_different_kind_of_road() {
+        // Taking the digits and dropping the prefix put Wall Drug on US-90 in
+        // Louisiana, the Ionia County sign on K-96 in Kansas, and the Mexican
+        // border-radio sign on MS-8 in Mississippi. Every one of these shields
+        // is a real road in the world data that shares a number with a mapped
+        // interstate, and none of them may inherit that interstate's roadside.
+        for shield in [
+            "US-90", "AZ-90", "US-95", "AZ-95", "US-10", "US-15", "US-40", "US-80", "AZ-80",
+            "KY-80", "SR-80", "US-70", "TX-70", "CA-44", "US-35", "ID-55", "NJ-55", "US-65",
+            "US-59", "WY-59", "US-75", "FL-85", "US-85", "US-24", "K-96", "US-96", "US-71",
+            "AZ-77", "US-77", "US-81", "US-64", "US-30", "MS-8", "US-78", "US-20",
+        ] {
+            assert!(
+                corridor_billboards(shield).is_empty(),
+                "{shield} inherited an interstate's signs"
+            );
+        }
+        // Nor may a business loop or spur take the mainline's copy.
+        assert!(corridor_billboards("I-90 Business").is_empty());
+        // And the interstates themselves still resolve.
+        assert!(!corridor_billboards("I-90").is_empty());
+    }
+
+    #[test]
+    fn test_the_anywhere_pools_hold_nothing_that_names_a_place() {
+        // The whole reason a sign turns up in the wrong state: a line naming a
+        // real town, region, road or attraction sitting in a pool the picker
+        // draws from anywhere in the country. Names that ARE fine here are
+        // invented businesses (Big Jim, Big Bob's, Mamma's) and generic
+        // Americana, because those are true beside any road.
+        const PLACE_NAMES: &[&str] = &[
+            "Alabama",
+            "Appalachian",
+            "Arizona",
+            "Arkansas",
+            "Atlanta",
+            "Bakersfield",
+            "California",
+            "Georgia",
+            "Kansas",
+            "Kentucky",
+            "Memphis",
+            "Michigan",
+            "Missouri",
+            "Nashville",
+            "Nevada",
+            "Oklahoma",
+            "Oregon",
+            "Redwood",
+            "Rockies",
+            "Tennessee",
+            "Texas",
+            "Virginia",
+            "Wisconsin",
+            "Wyoming",
+            "hollers",
+            "Interstate",
+            "Route Sixty-Six",
+            "Wall Drug",
+        ];
+        let anywhere: Vec<&str> = roadside_billboards()
+            .iter()
+            .chain(SONG_TRIBUTE_BILLBOARDS.iter())
+            .copied()
+            .collect();
+        for line in anywhere {
+            for name in PLACE_NAMES {
+                assert!(
+                    !line.contains(name),
+                    "the anywhere pool claims {name}: {line}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_every_corridor_sign_carries_the_geography_its_copy_claims() {
+        // An anchor is only meaningful if it is filled in: an empty state list
+        // or an empty city list can never match, and a zero window silently
+        // retires the sign. Corridor is reserved for lines that name no place,
+        // so those are listed explicitly rather than reachable by default.
+        const NAMES_NO_PLACE: &[&str] = &[
+            "Bubba's Fireworks",
+            "Have you seen the scenery",
+            "Border radio country",
+        ];
+        for (shield, pool) in CORRIDOR_BILLBOARDS {
+            for sign in pool.iter() {
+                match sign.anchor {
+                    SignAnchor::Corridor => assert!(
+                        NAMES_NO_PLACE.iter().any(|k| sign.text.contains(k)),
+                        "{shield}: unanchored line names a place: {}",
+                        sign.text
+                    ),
+                    SignAnchor::States(states) => {
+                        assert!(!states.is_empty(), "{shield}: {}", sign.text);
+                        for state in states {
+                            assert_eq!(state.len(), 2, "{shield}: {state}");
+                            assert!(state.chars().all(|c| c.is_ascii_uppercase()));
+                        }
+                    }
+                    SignAnchor::Approaching { cities, within_mi } => {
+                        assert!(!cities.is_empty(), "{shield}: {}", sign.text);
+                        for city in cities {
+                            // A world key, not a spoken name -- the placer
+                            // matches it against the route's own city list.
+                            assert!(city.ends_with("_us"), "{shield}: {city}");
+                        }
+                        // The window has to outrun the sign spacing, or an
+                        // anchored line gets at most one chance per trip.
+                        assert!(within_mi > 65.0, "{shield}: {within_mi}");
+                    }
+                }
+            }
+        }
     }
 
     #[test]

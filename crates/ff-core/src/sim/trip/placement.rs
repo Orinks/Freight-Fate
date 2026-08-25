@@ -3,7 +3,7 @@
 //! plus the per-tick checks that walk those schedules (the placement half of
 //! `trip.py`).
 
-use crate::data::billboards::{corridor_billboards, random_billboard};
+use crate::data::billboards::{corridor_signs, random_billboard, SignAnchor};
 use crate::data::curves::{route_curves, RouteCurve};
 use crate::pyfmt::{fmt_f, py_str_float};
 use crate::pyrandom::PyRandom;
@@ -446,11 +446,11 @@ impl Trip {
         let mut at = BILLBOARD_LEAD_IN_MI + rng.uniform(0.0, BILLBOARD_MIN_GAP_MI);
         while at < self.total_miles() - 5.0 {
             let (leg_i, _) = self.leg_at_mile(at);
-            let pool = corridor_billboards(&self.route.legs[leg_i].highway);
+            let pool = corridor_signs(&self.route.legs[leg_i].highway);
             let fresh_corridor: Vec<&'static str> = pool
                 .iter()
-                .copied()
-                .filter(|text| !used.contains(text))
+                .filter(|sign| !used.contains(&sign.text) && self.sign_belongs_at(&sign.anchor, at))
+                .map(|sign| sign.text)
                 .collect();
             let text = if !fresh_corridor.is_empty() && rng.random() < 0.5 {
                 *rng.choice(&fresh_corridor)
@@ -476,6 +476,72 @@ impl Trip {
             at += rng.uniform(BILLBOARD_MIN_GAP_MI, BILLBOARD_MAX_GAP_MI);
         }
         callouts
+    }
+
+    /// Whether a corridor sign's copy is true at this trip milepost.
+    ///
+    /// This is the whole placement fix. A shield is not a place: Interstate 40
+    /// runs through Oklahoma and Tennessee both, so drawing its pool anywhere
+    /// on the shield read Okemah to a driver outside Knoxville. A billboard is
+    /// one of the few things telling a driver who cannot see the road where
+    /// they are, so a sign that names a place has to be refused everywhere the
+    /// place is not, and the pool simply falls through to the anywhere signs.
+    fn sign_belongs_at(&self, anchor: &SignAnchor, at: f64) -> bool {
+        match anchor {
+            SignAnchor::Corridor => true,
+            SignAnchor::States(states) => match self.state_code_at(at) {
+                // An unbaked state is not a licence to claim a place. The
+                // roadside falls back to signs that are true anywhere.
+                None => false,
+                Some(code) => states.contains(&code.as_str()),
+            },
+            SignAnchor::Approaching { cities, within_mi } => {
+                // Measured ALONG THE ROUTE, not as the crow flies: a billboard
+                // is read from a road, on the way to the thing it advertises.
+                // A city the route never reaches is never "ahead", which is
+                // why an off-route anchor stays silent instead of guessing.
+                self.route
+                    .cities
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, slug)| cities.contains(&slug.as_str()))
+                    .filter_map(|(i, _)| self.city_mileposts.get(i))
+                    .any(|milepost| {
+                        let ahead = milepost - at;
+                        ahead > 0.0 && ahead <= *within_mi
+                    })
+            }
+        }
+    }
+
+    /// The two-letter state code at a trip milepost, or None where the bake is
+    /// silent and the route names no city we can fall back on.
+    fn state_code_at(&self, at: f64) -> Option<String> {
+        let name = self.state_at(Some(at));
+        if !name.is_empty() {
+            if let Some(code) = self.state_codes.get(&name) {
+                return Some(code.clone());
+            }
+            if name.len() == 2 {
+                return Some(name.to_uppercase());
+            }
+        }
+        // Fallback for a leg with no state bake: the nearer endpoint city.
+        // World keys carry their state ("memphis_tn_us"), which is the same
+        // fact the bake would have given, from the other end.
+        let (leg_i, leg_start) = self.leg_at_mile(at);
+        let leg = &self.route.legs[leg_i];
+        let nearer = if at - leg_start < leg.miles / 2.0 {
+            leg_i
+        } else {
+            leg_i + 1
+        };
+        let slug = self.route.cities.get(nearer)?;
+        let mut parts = slug.rsplitn(3, '_');
+        parts.next()?; // country
+        let state = parts.next()?;
+        (state.len() == 2 && state.chars().all(|c| c.is_ascii_alphabetic()))
+            .then(|| state.to_uppercase())
     }
 
     // -- curves ---------------------------------------------------------------------
