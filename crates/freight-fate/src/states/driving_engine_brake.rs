@@ -141,6 +141,20 @@ impl DrivingState {
         self.trip.grade_at(self.trip.position_mi) * 100.0 <= -JAKE_ZONE_EXEMPT_GRADE_PCT
     }
 
+    /// Is the road under the truck a real UPGRADE?
+    ///
+    /// The mirror of [`Self::on_downgrade`], on the same line, and the one
+    /// road no retarder belongs on at all. A hill takes the speed off by
+    /// itself; a driver climbing one wants power. Overspeed carried into an
+    /// upgrade is the hill's to eat, never the jake's -- a real driver powers
+    /// up a grade and does not bark the retarder at it (Brandon, 2026-08-20,
+    /// which is the rule adaptive cruise's raise gate has followed since, and
+    /// the owner again on 2026-08-24: "on uphill ascents the truck should gain
+    /// speed instead of using the engine brakes").
+    pub fn on_climb(&self) -> bool {
+        self.trip.grade_at(self.trip.position_mi) * 100.0 >= JAKE_ZONE_EXEMPT_GRADE_PCT
+    }
+
     /// Drop an assist-raised retarder at the town line.
     ///
     /// Runs every frame inside a zone; releasing is idempotent and the raise

@@ -27,6 +27,7 @@ use ff_core::sim::weather::WeatherKind;
 use freight_fate::app::testing::{stepping_clock, TestApp};
 use freight_fate::audio::{Audio, AudioError, SustainLoopSpec, VolumeUpdate, CH_AIR};
 use freight_fate::controller::{fakes::FakePad, ControllerAxis};
+use freight_fate::playtest::breaker::force_grade;
 use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::PURSUIT_HOLD_S;
@@ -1376,10 +1377,27 @@ fn test_auto_jake_manages_stages_on_an_automatic_box() {
     d.update_auto_jake(&mut app.ctx, 2.0);
     assert_eq!(d.trip.truck.engine_brake_stage, 3);
 
-    // Over-slowed: it steps back down.
+    // Over-slowed on level road: the retarder comes all the way off, at once.
+    // A retarder is for holding a truck BACK, and a truck seven under its own
+    // number on flat ground needs no holding -- walking down a stage at a time
+    // was what kept two cylinders cut for the rest of the drive.
+    d.trip.truck.velocity_mps = mph_to_mps(48.0);
+    d.update_auto_jake(&mut app.ctx, 2.0);
+    assert_eq!(d.trip.truck.engine_brake_stage, 0);
+
+    // On a real grade the ladder is still a ladder: there the retarder IS what
+    // is keeping the number, so an over-slowed truck gives back one stage at a
+    // time rather than dropping the whole hill onto the drums.
+    force_grade(&mut d.trip, -0.06);
+    d.trip.truck.engine_brake_stage = 3;
+    d.auto_jake_cooldown_s = 0.0;
     d.trip.truck.velocity_mps = mph_to_mps(48.0);
     d.update_auto_jake(&mut app.ctx, 2.0);
     assert_eq!(d.trip.truck.engine_brake_stage, 2);
+    d.update_auto_jake(&mut app.ctx, 2.0);
+    assert_eq!(d.trip.truck.engine_brake_stage, 1);
+    force_grade(&mut d.trip, 0.0);
+    d.trip.truck.engine_brake_stage = 3;
 
     // Ice arrives: the stage collapses to what the drives can hold.
     d.trip.truck.velocity_mps = mph_to_mps(60.0);

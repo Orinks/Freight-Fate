@@ -25,6 +25,7 @@ use ff_core::data::world_models::{CorridorDetail, GradeSegment, Leg, Route};
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::weather::{WeatherKind, WeatherSystem};
 
+use freight_fate::playtest::breaker::force_grade;
 use freight_fate::playtest::harness::{key_event, PlaytestHarness, StartDelivery};
 use freight_fate::states::base::{Key, Mods};
 use freight_fate::states::driving::DrivingState;
@@ -158,6 +159,31 @@ fn service_brake(harness: &PlaytestHarness) -> f64 {
 
 fn assist_jake(harness: &PlaytestHarness) -> bool {
     harness.read_drive(|d| d.curve_assist_jake)
+}
+
+/// One frame of the same, CONTINUING assist episode.
+///
+/// [`assist_frame`] clears `curve_assist_active` first, which starts a fresh
+/// episode every frame -- exactly what the ported cases wanted. The grade
+/// under a bend changes while the truck is still IN the bend, so the cases
+/// below need the opposite: one episode that outlives the grade that bought
+/// it.
+fn same_bend_frame(harness: &mut PlaytestHarness, mph: f64) {
+    harness.advance_clock(DT);
+    harness.with_drive(move |drive, ctx| {
+        drive.truck_mut().velocity_mps = mph / MPH_PER_MPS;
+        drive.truck_mut().brake = 0.0;
+        drive.update_lane(ctx, DT);
+    });
+}
+
+/// Re-grade the road under the truck without touching the bend, the position,
+/// or the assist's episode -- the one thing these cases change.
+fn regrade(harness: &mut PlaytestHarness, grade: f64) {
+    harness.with_drive(move |drive, _| {
+        force_grade(&mut drive.trip, grade);
+        drive.truck_mut().grade = grade;
+    });
 }
 
 // -- the dash switch -------------------------------------------------------------------
@@ -489,4 +515,99 @@ fn test_curve_assist_cues_do_not_thrash() {
     assert_eq!(cues, vec!["Curve speed assistance slowing.".to_string()]);
     assert_eq!(engagements, 1, "the assist engaged more than once");
     assert_eq!(releases, 0, "the assist let go inside its own hysteresis");
+}
+
+// -- the grade under the bend, not the bend --------------------------------------------
+
+#[test]
+fn test_the_curve_assist_hands_the_retarder_back_when_the_grade_under_the_bend_ends() {
+    // A bend is a stretch of road, not a moment, and the grade under it
+    // changes while the truck is still in it.
+    //
+    // The release only ever ran when the CORNER ended, so a bend that started
+    // on a pitch and finished on the flat kept whatever the pitch bought for
+    // the whole corner: 6.9 seconds of retarder on level road, per bend
+    // (jake sweep, 2026-08-24). Nothing about the corner has changed here --
+    // same bend, same overspeed -- only the grade that bought the retarder.
+    let mut harness = assist_rig("Bend Off The Grade", 30, -6.0);
+
+    same_bend_frame(&mut harness, 60.0);
+    assert!(assist_jake(&harness), "the pitch did not buy the retarder");
+    assert!(jake_on(&harness));
+
+    regrade(&mut harness, 0.0);
+    same_bend_frame(&mut harness, 60.0);
+
+    assert!(
+        !assist_jake(&harness),
+        "the assist kept the retarder onto level road"
+    );
+    assert!(!jake_on(&harness));
+    // The corner still gets slowed -- on the drums, which is its own tool.
+    assert!(service_brake(&harness) > 0.0);
+}
+
+#[test]
+fn test_the_curve_assist_hands_the_retarder_back_when_the_road_turns_up() {
+    // The owner's report, 2026-08-24: "on uphill ascents the truck should gain
+    // speed instead of using the engine brakes." A bend out of a dip is where
+    // that happened -- the same episode, the road climbing under it, and the
+    // retarder still barking at a hill the truck has to get up.
+    let mut harness = assist_rig("Bend Into The Climb", 30, -6.0);
+
+    same_bend_frame(&mut harness, 60.0);
+    assert!(assist_jake(&harness));
+
+    regrade(&mut harness, 0.04);
+    same_bend_frame(&mut harness, 60.0);
+
+    assert!(
+        !assist_jake(&harness),
+        "the assist barked the retarder at a four percent climb"
+    );
+    assert!(!jake_on(&harness));
+}
+
+#[test]
+fn test_the_truck_climbs_out_of_the_bend_faster_without_the_retarder() {
+    // The same climb, driven twice: once as the truck behaves now, and once
+    // with the retarder pinned up the way the old release rule left it. The
+    // difference is the speed the driver keeps for the hill.
+    //
+    // Both runs are the same seeded bench road at the same weight, off the
+    // throttle, with only the retarder differing -- so the gap between them is
+    // the retarder's doing and nothing else's.
+    fn climb_out(name: &str, hold_the_retarder: bool) -> f64 {
+        let mut harness = assist_rig(name, 30, -6.0);
+        same_bend_frame(&mut harness, 60.0);
+        assert!(assist_jake(&harness), "the pitch has to buy the retarder");
+        regrade(&mut harness, 0.04);
+        // Ten seconds of the climb, hands off, the assist doing whatever it
+        // does with the retarder.
+        for _ in 0..(10 * 60) {
+            harness.advance_clock(DT);
+            harness.with_drive(move |d, ctx| {
+                d.truck_mut().brake = 0.0;
+                d.truck_mut().throttle = 0.0;
+                d.update_lane(ctx, DT);
+                if hold_the_retarder {
+                    // What the old rule did: the corner has not ended, so the
+                    // stage the pitch bought stays up the whole way.
+                    d.curve_assist_jake = true;
+                    d.truck_mut().engine_brake_stage = 2;
+                }
+                d.truck_mut().auto_shift();
+                d.truck_mut().update(DT);
+            });
+        }
+        harness.read_drive(|d| d.truck().speed_mph())
+    }
+
+    let held = climb_out("Climb Retarded", true);
+    let released = climb_out("Climb Free", false);
+    assert!(
+        released > held + 2.0,
+        "the retarder cost nothing on the climb: {released:.1} against {held:.1}"
+    );
+    println!("climb out of the bend: {held:.1} mph retarded, {released:.1} mph released");
 }

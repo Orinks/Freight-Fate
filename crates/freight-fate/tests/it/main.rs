@@ -83,6 +83,7 @@ mod states_driving_grades;
 mod states_driving_hazards;
 mod states_driving_help_text;
 mod states_driving_hos;
+mod states_driving_jake_sweep;
 mod states_driving_lanes;
 mod states_driving_menus;
 mod states_driving_menus_rest;

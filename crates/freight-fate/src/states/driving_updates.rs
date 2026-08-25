@@ -197,6 +197,11 @@ pub const CURVE_ASSIST_JAKE_FULL_MPH: f64 = 15.0;
 pub const AUTO_JAKE_STEP_S: f64 = 1.5; // seconds between stage steps
 pub const AUTO_JAKE_OVER_MPH: f64 = 1.0; // this far above target: step up
 pub const AUTO_JAKE_UNDER_MPH: f64 = 3.0; // this far below target: step down
+                                          // Still this far over the number and the stage stands, so the release does
+                                          // not chase the raise threshold a quarter of a mile per hour away. The same
+                                          // hysteresis pair adaptive cruise uses (CRUISE_JAKE_OVER_MPH against
+                                          // CRUISE_JAKE_RELEASE_MPH), sized to this controller's own raise line.
+pub const AUTO_JAKE_RELEASE_MPH: f64 = 0.25;
 
 // The air-fill loop re-arms only this far below governor release. air_ready
 // flips at exactly 100 psi and normal service braking dips the reservoirs a

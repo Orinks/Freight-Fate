@@ -120,6 +120,35 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **The retarder answers a grade and nothing else, measured across a
+      seeded sweep (2026-08-24)** (owner: "on uphill ascents the truck should
+      gain speed instead of using the engine brakes", plus "edge cases where
+      the jake still activates on flat road with cruise on").
+      `crates/freight-fate/tests/it/states_driving_jake_sweep.rs` drives
+      eighteen seeded, weather-pinned roads through the real `update_frame`
+      path -- descents, sags, crests, rollers, mountain bends, a lead, a
+      posted drop, a storm ease, a climb entered hot, and auto mode armed --
+      and classifies every retarder frame by which controller held it and what
+      the road under the wheels was. Cruise and the curve assist both already
+      gated their RAISE on `on_downgrade`; what neither gated was the RELEASE,
+      and the third path (AMT auto mode) gated neither.
+      * Curve assist: released only when the CORNER ended, never when the
+        grade under it did. 6.9 s barking on level road and 4.6 s barking at a
+        climb per bend out of a dip. The raise/release decision is now taken
+        every frame off `curve_assisting && on_downgrade`, which also subsumes
+        the old latch-yield retry.
+      * AMT auto mode (J): floored at stage one with no reason recorded
+        anywhere, so it kept two cylinders cut for the whole drive and spoke
+        every time cruise lifted off the fuel on level road; and it worked to
+        the speed it was armed at rather than the number cruise or the keeper
+        was holding. It now releases to zero at once on a climb and wherever
+        there is nothing to hold, works to the engaged authority's set speed,
+        and still snubs a genuine overspeed on level road. New `on_climb`
+        predicate in `driving_engine_brake`, on the same two percent line.
+      * Off-grade assist retardation across the sweep went from 11.5 s to one
+        frame at each grade boundary (the pass the controller already made on
+        the old mile). Ten seconds up a four percent climb out of a bend: 29
+        mph released against 25 held.
 - [x] **Rust port: drive-time frame cost is measured, and one bug found by
       measuring it (2026-08-24).** `crates/freight-fate/tests/it/frame_time.rs`
       drives a seeded, weather-pinned I-70 run out of Denver through the whole

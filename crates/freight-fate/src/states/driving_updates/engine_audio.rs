@@ -13,9 +13,9 @@ use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_updates::{
     shift_recovery_curve, AIR_FILL_REARM_PSI, AIR_FILL_VOLUME, AUTO_JAKE_OVER_MPH,
-    AUTO_JAKE_STEP_S, AUTO_JAKE_UNDER_MPH, ENGINE_LOAD_SMOOTH_S, JAKE_LOOP_RPMS, JAKE_MIN_RPM,
-    JAKE_STAGE_GAIN, SHIFT_DISENGAGE_DUCK, SHIFT_END_CLUNK_VOLUME, SHIFT_LOAD_CAP,
-    SHIFT_LOAD_RECOVERY_S,
+    AUTO_JAKE_RELEASE_MPH, AUTO_JAKE_STEP_S, AUTO_JAKE_UNDER_MPH, ENGINE_LOAD_SMOOTH_S,
+    JAKE_LOOP_RPMS, JAKE_MIN_RPM, JAKE_STAGE_GAIN, SHIFT_DISENGAGE_DUCK, SHIFT_END_CLUNK_VOLUME,
+    SHIFT_LOAD_CAP, SHIFT_LOAD_RECOVERY_S,
 };
 
 impl DrivingState {
@@ -67,11 +67,17 @@ impl DrivingState {
     }
 
     /// AMT retarder management: hold the target by stepping the stage.
+    ///
+    /// A retarder is a device for holding a loaded truck BACK. Auto mode
+    /// therefore reaches for it when the truck is running over the number it
+    /// is holding and gives it back when it is not -- it is not a switch that
+    /// sits at two cylinders for the rest of the drive.
     pub fn update_auto_jake(&mut self, _ctx: &mut GameContext, dt: f64) {
-        if !(self.auto_jake
-            && self.trip.truck.engine_brake()
-            && self.trip.truck.transmission.automatic
-            && self.trip.truck.engine_on)
+        // Deliberately NOT gated on the stalk being up. Auto mode is allowed
+        // to put the retarder all the way down (see the release below), and a
+        // manager that stopped running the moment it did so could never bring
+        // it back. J and Alt+J are what end auto mode; the stage is not.
+        if !(self.auto_jake && self.trip.truck.transmission.automatic && self.trip.truck.engine_on)
         {
             return;
         }
@@ -81,24 +87,64 @@ impl DrivingState {
         let mut target = self
             .auto_jake_hold_mph
             .unwrap_or_else(|| self.trip.truck.speed_mph());
-        if self.descent_control_active {
-            if let Some(cruise) = self.cruise_mph {
-                target = cruise; // descent control owns the number
-            }
+        // An engaged speed authority owns the number. Auto mode working to
+        // whatever the driver happened to be doing when they armed it, while
+        // cruise or the keeper works to a different one, is two controllers
+        // with two answers: armed at 45 and then cruise set to 62, the
+        // retarder sat at full stage on level road barking against a number
+        // cruise had never heard of (jake sweep, 2026-08-24).
+        //
+        // The SET speed, not the working one. Cruise easing up to its number
+        // after a resume, and cruise capping itself for a bend, a ramp, a
+        // lower limit or a lead, are cruise doing its job on the drums -- a
+        // target speed to arrive at, which is not an overspeed for a retarder
+        // to snub. Descent control's ceiling reaches auto mode through this
+        // same line, which is what the old `descent_control_active` branch
+        // said in the one case it covered.
+        if let Some(keeper) = self.keeper_mph {
+            target = keeper;
+        } else if let Some(cruise) = self.cruise_mph {
+            target = cruise;
         }
         self.auto_jake_cooldown_s = (self.auto_jake_cooldown_s - dt).max(0.0);
         let max_stage = self.auto_jake_max_stage();
         let stage = self.trip.truck.engine_brake_stage;
         let mut desired = stage;
+        // A release goes through at once; a raise waits out the quiet time,
+        // because the jake is loud and a rolling road would otherwise make it
+        // chatter. The same asymmetry adaptive cruise draws, and for the same
+        // reason: holding retard the truck no longer needs is what drags it
+        // under the speed the controller is supposed to be keeping.
+        let mut at_once = false;
         let err = self.trip.truck.speed_mph() - target;
-        if err > AUTO_JAKE_OVER_MPH {
+        if self.on_climb() || (!self.on_downgrade() && err <= AUTO_JAKE_RELEASE_MPH) {
+            // Two cases, one answer: the road is CLIMBING, where a hill
+            // takes the speed off by itself and overspeed is the hill's to
+            // eat; or the road is level and the truck is not running over its
+            // number, so there is nothing for a retarder to do. Either way it
+            // comes all the way off rather than walking down a stage at a
+            // time. A genuine overspeed on LEVEL road still gets snubbed --
+            // that is what the driver armed the manager for.
+            //
+            // The floor used to be stage one, with no reason written anywhere
+            // for it, so auto mode kept two cylinders cut for the whole drive.
+            // Every time cruise lifted off the fuel on level road the retarder
+            // spoke, and on a climb it barked at a truck that was already
+            // losing speed to the hill -- the owner's "on uphill ascents the
+            // truck should gain speed instead of using the engine brakes"
+            // (2026-08-24). On a real downgrade the stage stays: there the
+            // retarder IS what is keeping the number, and dropping it puts the
+            // whole hill onto the drums.
+            desired = 0;
+            at_once = true;
+        } else if err > AUTO_JAKE_OVER_MPH {
             desired = stage + 1;
         } else if err < -AUTO_JAKE_UNDER_MPH {
             desired = stage - 1;
         }
         let ceiling = if max_stage >= 1 { max_stage } else { 1 };
-        desired = desired.min(ceiling).clamp(1, JAKE_STAGES);
-        if desired != stage && self.auto_jake_cooldown_s <= 0.0 {
+        desired = desired.min(ceiling).clamp(0, JAKE_STAGES);
+        if desired != stage && (at_once || self.auto_jake_cooldown_s <= 0.0) {
             self.trip.truck.engine_brake_stage = desired;
             self.auto_jake_cooldown_s = AUTO_JAKE_STEP_S;
         } else if stage > max_stage && max_stage >= 1 && self.auto_jake_cooldown_s <= 0.0 {
