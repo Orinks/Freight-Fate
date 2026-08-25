@@ -349,4 +349,20 @@ impl TruckState {
         let direction = if self.velocity_mps > 0.0 { 1.0 } else { -1.0 };
         direction * (self.service_brake_force() + self.jake_brake_force())
     }
+
+    /// Is the truck gaining speed or losing it, right now, in mph per second?
+    ///
+    /// Everything pushing the truck along less everything holding it back --
+    /// gravity, drag, rolling resistance, the drums and the retarder -- over
+    /// the gross mass. The one number that answers "is this being held", and
+    /// deliberately ONE copy of it: the spoken G readout and the descent
+    /// control both ask this, and a descent control that decided it could not
+    /// hold a hill while the G key told the driver the speed was in hand is
+    /// exactly the disagreement two copies produce (owner playtest, I-70 west
+    /// of Vail, 2026-08-24 -- warned to get on the brakes while the truck was
+    /// already shedding five miles an hour a second).
+    pub fn net_accel_mph_per_s(&self) -> f64 {
+        let net = self.drive_force() - self.resistance_force() - self.brake_force();
+        net / self.gross_mass_kg() * super::MPS_TO_MPH
+    }
 }

@@ -480,6 +480,7 @@ impl DrivingState {
             acc_follow_cue_s: 0.0,
             descent_control_active: false,
             descent_limit_state: String::new(),
+            descent_beaten_s: 0.0,
             descent_capture_active: false,
             assist_exit_slowing_said: false,
             lane_keeping_grant_said: false,

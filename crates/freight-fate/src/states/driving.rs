@@ -511,6 +511,10 @@ pub struct DrivingState {
     pub acc_follow_cue_s: f64, // quiet window between "Traffic ahead" cues
     pub descent_control_active: bool,
     pub descent_limit_state: String,
+    // How long the truck has been over what descent control works to AND
+    // still gaining speed with everything applied. The descent twin of
+    // climb_beaten_s: one frame of either is a grade boundary, not a runaway.
+    pub descent_beaten_s: f64,
     pub descent_capture_active: bool,
     pub assist_exit_slowing_said: bool,
     // Lane keeping on full grants the exit lane and takes the destination

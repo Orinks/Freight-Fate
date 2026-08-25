@@ -297,13 +297,15 @@ impl DrivingState {
         }
         let truck = &self.trip.truck;
         if truck.velocity_mps > 0.5 {
-            let net = truck.drive_force() - truck.resistance_force() - truck.brake_force();
-            let accel_mph_s = net / truck.gross_mass_kg() * 2.23694;
+            // The same one reading the descent control judges a hill by, so a
+            // driver can never be told the assist has lost a grade the G key
+            // calls held (see `DrivingState::descent_is_beaten`).
+            let accel_mph_s = truck.net_accel_mph_per_s();
             let stage = truck.engine_brake_stage;
             if grade > 0.005 {
-                if accel_mph_s < -0.2 {
+                if accel_mph_s < -GRADE_HOLDING_MPH_PER_S {
                     parts.push("The hill has the load; expect to lose speed.".to_string());
-                } else if accel_mph_s > 0.2 {
+                } else if accel_mph_s > GRADE_HOLDING_MPH_PER_S {
                     parts.push("Pulling it with speed to spare.".to_string());
                 } else {
                     parts.push("Holding speed.".to_string());
@@ -313,7 +315,7 @@ impl DrivingState {
                     parts.push(
                         "The jake is sliding the drive wheels; back it off a stage.".to_string(),
                     );
-                } else if accel_mph_s > 0.2 {
+                } else if accel_mph_s > GRADE_HOLDING_MPH_PER_S {
                     if stage > 0 {
                         let losing = if truck.transmission.automatic {
                             "snub the brakes"

@@ -149,6 +149,37 @@ onto exit signalling.
         frame at each grade boundary (the pass the controller already made on
         the old mile). Ten seconds up a four percent climb out of a bend: 29
         mph released against 25 held.
+- [x] **"Descent control cannot hold this grade" now means it (2026-08-25)**
+      (owner, live I-70 playtest west of Vail: the warning three times inside
+      a minute, with the G key answering "Level road. Nothing steep in the
+      next 15 miles" in between).
+      * The warning was one frame of arithmetic -- `speed > descent_hold_mph()
+        + 10` -- and under the "All assists" preset `descent_hold_mph()` is
+        `DESCENT_SAFE_MAX_MPH` (55) the moment a downgrade starts. On a 75 mph
+        road with cruise set at 80 that sum is true on the FIRST frame of
+        every dip, before descent control has acted and while it is about to
+        act successfully. Measured on his own seeded route (Silverthorne ->
+        Edwards -> Glenwood Springs, seed 4242): eight warnings, every one
+        with the drums applied 0.44 to 0.70 and the truck LOSING 3 to 5 mph
+        per second, on quarter-mile dips the G key called level 3 s later.
+        None of that day's three assist commits caused it; the block dates to
+        the Rust port.
+      * `DrivingState::descent_is_beaten` now takes the climb side's three
+        guards (`CRUISE_GRADE_BEATEN_*`, 2026-07): still over by
+        `DESCENT_BEATEN_MPH`, still GAINING, and holding for
+        `DESCENT_BEATEN_S` rather than catching one frame.
+      * "Still gaining" is `TruckState::net_accel_mph_per_s` against
+        `GRADE_HOLDING_MPH_PER_S` -- one copy of the net-force verdict, shared
+        with the G readout's "Jake stage N is not holding it" / "Speed in
+        hand" branches, so the two cannot contradict each other about one
+        moment of road. The readout had its own inline copy and the bare 0.2.
+      * `crates/freight-fate/tests/it/states_driving_descent_truth.rs`: the
+        owner's own route silent (with the descent control proven to have
+        engaged and braked, so silence is not an assist switched off), a
+        genuine runaway on faded drums still spoken verbatim, quarter-mile
+        dips held with the retarder still down, and a grade sweep in all three
+        descent modes where every warned frame is also a frame the G key says
+        the speed is getting away.
 - [x] **The retarder's line is derived from brake heat, not from a grade
       anybody picked (2026-08-24)** (owner: "the jake activates on every single
       descent it seems, even shallow descent like 1-3 percent... like 6%+.
