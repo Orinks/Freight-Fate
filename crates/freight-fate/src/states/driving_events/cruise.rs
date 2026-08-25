@@ -5,7 +5,7 @@ use ff_core::pyfmt::round_py;
 use ff_core::speech_pacing::SpeechCategory;
 use ff_core::speech_text::SpokenMessage;
 
-use crate::app::{GameContext, Say};
+use crate::app::{GameContext, Say, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
@@ -432,8 +432,41 @@ impl DrivingState {
             }
         }
         let error = target_mph - self.trip.truck.speed_mph();
-        self.keeper_throttle =
-            (self.keeper_throttle + error * 0.1 * dt).clamp(0.0, KEEPER_MAX_THROTTLE);
+        // Feed-forward first, exactly as adaptive cruise does: the truck's own
+        // physics already knows which pedal balances the road under the
+        // wheels, so the keeper answers a hill as the hill arrives. The trim
+        // below only ever corrects from there.
+        //
+        // Without it the keeper was a bare integrator against a HALF-THROTTLE
+        // ceiling, and the ceiling's premise -- "zone speeds never need more
+        // than half throttle" -- is a claim about FLAT road. On a hill the
+        // truck simply settled wherever half throttle happened to balance
+        // gravity and stayed there, silently: a 55 zone held 49 on a one
+        // percent pull and 34 on a two percent one, a 45 zone held 37 on two
+        // percent, and a merge asked to build to 65 asymptoted at 58 and never
+        // arrived (bench, 2026-08-24, the owner's "sometimes it doesn't hold
+        // the posted speeds"). The trim keeps its own half-throttle limit --
+        // that is the assist's gentleness and it is unchanged -- but it is now
+        // a limit on what the keeper adds OVER the road's own demand rather
+        // than on the whole pedal.
+        let mut hold = self.trip.truck.hold_throttle();
+        if error < 0.0 {
+            // Over the number: come off the fuel across the same band the snub
+            // starts at, so the feed-forward cannot hold the truck parked just
+            // above its own target waiting for the drums.
+            hold *= 0.0f64.max(1.0 + error / KEEPER_SNUB_OVER_MPH);
+        }
+        let trim = (self.keeper_throttle + error * 0.1 * dt).clamp(0.0, KEEPER_MAX_THROTTLE);
+        let demand = hold + trim;
+        // Anti-windup, the cruise loop's own rule: a grade the engine cannot
+        // pull pins the pedal at the roof for as long as it lasts, and
+        // integrating through that buries the trim at its limit and leaves the
+        // truck overshooting for seconds after the road levels out.
+        let saturated = (demand >= 1.0 && error > 0.0) || (trim <= 0.0 && error < 0.0);
+        if !saturated {
+            self.keeper_throttle = trim;
+        }
+        let mut applied = demand.clamp(0.0, 1.0);
         if let Some((ahead_mph, _)) = ahead.as_ref() {
             if self.trip.truck.speed_mph() >= *ahead_mph {
                 // Easing toward a lower number: rebuild throttle under it freely,
@@ -446,10 +479,69 @@ impl DrivingState {
                 // (ROADMAP 2026-08-19). Coasting at the boundary caps the peak at
                 // the number; the snub thresholds below it are untouched.
                 self.keeper_throttle = 0.0;
+                applied = 0.0;
             }
         }
-        self.trip.truck.throttle = self.keeper_throttle;
+        self.trip.truck.throttle = applied;
+        self.say_keeper_out_of_truck(ctx, dt, error, applied, target_mph);
         self.keeper_snub_brakes(ctx, dt, -error, target_mph);
+    }
+
+    /// Say plainly when the hill has beaten the speed keeper.
+    ///
+    /// The keeper has warned about running OVER its number since the snub
+    /// landed (`keeper_snub_brakes` below) and said nothing at all about
+    /// running under it. A sighted driver reads a sagging speedo in a second;
+    /// a blind driver has the engine note and the downshifts, which say the
+    /// truck is working, not that it is losing -- and losing is the part that
+    /// decides whether to take it over by hand. Adaptive cruise has said this
+    /// for a while ("Cruise is flat out and still losing the grade"); this is
+    /// the same sentence for the other controller.
+    ///
+    /// Only once the pedal is genuinely on the floor and the truck is still
+    /// falling past the droop band, so an ordinary pull the keeper recovers
+    /// from on its own stays quiet.
+    pub fn say_keeper_out_of_truck(
+        &mut self,
+        ctx: &mut GameContext,
+        dt: f64,
+        error: f64,
+        applied: f64,
+        target_mph: f64,
+    ) {
+        self.keeper_droop_cue_s = 0.0f64.max(self.keeper_droop_cue_s - dt);
+        let beaten = applied >= CRUISE_FLOORED_THROTTLE
+            && self.trip.truck.grade * 100.0 >= CRUISE_GRADE_BEATEN_PCT
+            && error > KEEPER_DROOP_MPH;
+        if !beaten {
+            self.keeper_droop_s = 0.0;
+            if error < KEEPER_DROOP_MPH * 0.5 {
+                self.keeper_droop_said = false; // back on its number: arm again
+            }
+            return;
+        }
+        if self.trip.truck.transmission.shifting() {
+            return; // an open driveline is no evidence either way; hold the count
+        }
+        self.keeper_droop_s += dt;
+        if self.keeper_droop_s < CRUISE_GRADE_BEATEN_S {
+            return;
+        }
+        if self.keeper_droop_said || self.keeper_droop_cue_s > 0.0 || self.terse_speech(ctx) {
+            return;
+        }
+        self.keeper_droop_said = true;
+        self.keeper_droop_cue_s = CLIMB_CUE_COOLDOWN_S;
+        let wanted = ctx.settings.speed_text(target_mph);
+        let held = ctx.settings.speed_text(self.trip.truck.speed_mph());
+        let mut opts = SayEvent::queued();
+        opts.category = Some(SpeechCategory::Status);
+        ctx.say_event_with(
+            format!(
+                "Speed keeper is flat out and cannot make {wanted} on this grade. Holding {held}."
+            ),
+            opts,
+        );
     }
 
     /// Hand the keeper back up to street speed when the street changes.
