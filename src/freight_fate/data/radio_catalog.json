@@ -16401,6 +16401,23 @@
       "stream_format": "mp3",
       "stream_url": "http://listen.jjhof.com:6969/stream",
       "supported": true
+    },
+    {
+      "always_available": true,
+      "call_sign": "WGPA",
+      "codec": "aac",
+      "format": "classic country, rockabilly and western swing",
+      "id": "wgpa-sunny-1100",
+      "name": "Sunny 1100",
+      "notes": "Sunny 1100 WGPA-AM, Bethlehem, Pennsylvania. The station's own site offers only phone apps, so the stream address is its SecureNet Systems mount, found by matching the sister stations on the same site. Verified live 2026-08-25: HTTP 200, Content-Type audio/aacp, AAC+ 64 kbps stereo at 44.1 kHz, icy-name DB91-TX-WGPA. Carried as an always-available web station rather than a local signal, so it plays anywhere in the country.",
+      "real_stream": true,
+      "safe_for_streaming": false,
+      "source": "station site (wmgh.com) plus the SecureNet Systems mount it streams from, checked 2026-08-25",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_format": "aac",
+      "stream_url": "https://ice24.securenetsystems.net/WGPA2",
+      "supported": true
     }
   ]
 }

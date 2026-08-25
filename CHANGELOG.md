@@ -40,6 +40,10 @@
 - **Phoenix Fire FM is on the dial as a named station.** Requested by Jerry.
   It used to be there only as the community directory's "PhoenixFireFM" row.
 
+- **Sunny 1100 WGPA is on the dial everywhere.** The Bethlehem, Pennsylvania
+  station that plays classic country, rockabilly and western swing now comes
+  in anywhere in the country, the way the other web stations do.
+
 - **City streets into a facility now run at your state's own speed limit.**
   The last mile in to a warehouse or yard used to be a flat twenty-five
   everywhere in the country. It now uses the speed each state's own law sets
