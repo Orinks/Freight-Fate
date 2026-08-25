@@ -21,14 +21,21 @@ def test_local_geometry_data_covers_supported_map(world):
     assert "OpenRouteService driving-hgv" in data["generated"]["routing_decision"]
     assert "not ORS-certified HGV routes" in data["generated"]["routing_decision"]
     assert coverage["targets"] == 6910
-    assert coverage["turn_level"] == 1076
-    assert coverage["fallback"] == 5834
-    assert coverage["estimated"] == 5834
+    # 1077, not the 1076 this pinned before the 2026-08-25 re-bake. The
+    # shipped file predated a builder fix and had never been regenerated, so
+    # one city service -- the Jonesboro garage -- was still carrying the
+    # single-line fallback "Use Commerce Square for the local approach" where
+    # the builder now finds a real eight-turn route. Same extracts, same
+    # accessed date, and two consecutive rebuilds are byte-identical, so this
+    # is the bake catching up rather than the data moving.
+    assert coverage["turn_level"] == 1077
+    assert coverage["fallback"] == 5833
+    assert coverage["estimated"] == 5833
     assert coverage["by_type"]["city_service"] == {
-        "estimated": 793,
-        "fallback": 793,
+        "estimated": 792,
+        "fallback": 792,
         "total": 1869,
-        "turn_level": 1076,
+        "turn_level": 1077,
     }
     assert coverage["by_type"]["facility"] == {
         "estimated": 5041,

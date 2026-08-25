@@ -275,7 +275,9 @@ def fallback_reason(target: FacilityTarget, state_set: set[str], turn_level: boo
 
 
 def clean_segment(segment: dict[str, Any]) -> dict[str, Any]:
-    road = clean_text(str(segment["road"])) or "unnamed public road"
+    # Inherited from build_local_geometry, which decides the wording; a
+    # blank here means the segment carried no road at all.
+    road = clean_text(str(segment["road"])) or "a side street"
     cue = clean_text(str(segment["cue"])) or f"Use {road} for the facility approach."
     return {
         "road": road,

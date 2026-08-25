@@ -31,6 +31,24 @@ EARTH_RADIUS_MI = 3958.7613
 GRID_DEGREES = 0.08
 SEARCH_RADIUS_MI = 1.25
 
+# What to call a road OSM has no name for. Kept in step with the same names in
+# tools/build_local_geometry.py, which builds the turn-level segments this
+# file's approaches lead into -- a driver hearing "a service road" on approach
+# and "unnamed public road" one turn later would think they were two roads.
+UNNAMED_SERVICE = "a service road"
+UNNAMED_STREET = "a side street"
+SERVICE_CLASSES = frozenset({"service", "living_street"})
+# Every label that describes a road rather than naming one. The nearest-NAMED
+# snap below tests membership here rather than comparing against one literal,
+# so a second generic label cannot quietly start counting as a real name.
+GENERIC_ROADS = frozenset({UNNAMED_SERVICE, UNNAMED_STREET, "unnamed public road"})
+
+
+def is_named(road: str) -> bool:
+    """Does this label name a road, or merely describe one?"""
+    return bool(road) and road not in GENERIC_ROADS
+
+
 ROAD_HIGHWAYS = {
     "motorway",
     "trunk",
@@ -184,7 +202,7 @@ def snap_roads(osm_path: Path, targets: list[Target]) -> None:
         road = road_label(tags)
         if not road:
             continue
-        named = road != "unnamed public road"
+        named = is_named(road)
         for lat, lon in way_coords(way):
             for target in nearby_targets(grid, lat, lon):
                 distance = haversine_mi(lat, lon, target.lat, target.lon)
@@ -198,7 +216,7 @@ def snap_roads(osm_path: Path, targets: list[Target]) -> None:
 
 def approach_record(target: Target) -> dict[str, Any]:
     # Prefer the nearest *named* road inside the radius over a closer unnamed
-    # way: the road name is what the player hears, and "unnamed public road"
+    # way: the road name is what the player hears, and a road described
     # right next to a named street is a worse answer than the street itself.
     has_named = bool(target.best_named_road) and target.best_named_distance_mi <= SEARCH_RADIUS_MI
     has_road = has_named or (bool(target.best_road) and target.best_distance_mi <= SEARCH_RADIUS_MI)
@@ -280,7 +298,7 @@ def coverage_summary(approaches: dict[str, dict[str, Any]]) -> dict[str, Any]:
             item["fallback"] += 1
         else:
             item["osm_road"] += 1
-            if record["road"] != "unnamed public road":
+            if is_named(record["road"]):
                 item["named_road"] += 1
         if record["estimated"]:
             item["estimated"] += 1
@@ -290,7 +308,7 @@ def coverage_summary(approaches: dict[str, dict[str, Any]]) -> dict[str, Any]:
         "named_road": sum(
             1
             for record in approaches.values()
-            if not record["fallback"] and record["road"] != "unnamed public road"
+            if not record["fallback"] and is_named(record["road"])
         ),
         "fallback": sum(1 for record in approaches.values() if record["fallback"]),
         "estimated": sum(1 for record in approaches.values() if record["estimated"]),
@@ -322,13 +340,16 @@ def cell(lat: float, lon: float) -> tuple[int, int]:
 
 
 def road_label(tags: dict[str, str]) -> str:
-    if tags.get("highway") not in ROAD_HIGHWAYS:
+    highway = tags.get("highway", "")
+    if highway not in ROAD_HIGHWAYS:
         return ""
     name = clean_name(tags.get("name", ""))
     ref = clean_name(tags.get("ref", ""))
     if name and ref:
         return f"{name} ({ref})"
-    return name or ref or "unnamed public road"
+    if name or ref:
+        return name or ref
+    return UNNAMED_SERVICE if highway in SERVICE_CLASSES else UNNAMED_STREET
 
 
 def clean_name(value: str) -> str:

@@ -1780,6 +1780,56 @@ onto exit signalling.
       -500 sentinel. Grades still come from the elevation service, which is
       why `FF_VALHALLA_ELEVATION_URL` is a separate endpoint.
 
+- [ ] **Finish the geometry repair: 250 legs' curves still describe the old
+      line.** `repair_geometry.py` writes the geometry shards and nothing
+      else, so the legs it put back on their road still carry curves derived
+      from the line that was OFF it. Those curves were already wrong -- they
+      were read off a line up to 2.7 km from the road -- so this is an
+      unfinished repair rather than a new fault, but it is unfinished. It
+      shows up as `curve_valhalla_facts --all` reporting 205 legs skipped
+      where it used to skip none: the rows no longer re-detect against the
+      geometry they are supposed to describe.
+
+      THE OBVIOUS FIX IS THE SLOW ONE. `bake_curve_geometry --from-archive`
+      re-derives them correctly, but it also asks Overpass for speed limits
+      per leg, and that took twelve minutes for ONE leg before it was killed
+      -- fifty hours for the 250. Overpass is the whole cost here and none of
+      it is spent on curves: `analyse_curvature` reads the geometry alone.
+
+      So the work is a curves-only mode that skips `query_leg_ways`,
+      `bake_speed_limits` and `harvest_ramps` and rewrites only the curve
+      rows. Then re-run `curve_valhalla_facts --all --local` and check the
+      four controls with `tools/curve_noise.py`. EXPECT THE CONTROLS TO MOVE:
+      Salt River Canyon is one of the 250, and its old 143 curves were read
+      off a line 834 m from the road, so a change there is the repair
+      working. Judge the new number against the road, not against the old one.
+
+- [x] **Unnamed local roads are named by what they are.** 1,195 of the 12,820
+      turn-level segments said "unnamed public road", heard at every turn onto
+      one, on 12 percent of arrivals.
+
+      THE NAMES ARE NOT RECOVERABLE and it is worth writing down why, so
+      nobody spends a week on it. Measured over the whole us-latest extract:
+      of 24,671,936 drivable local ways with no `name`, 22,951,151 are
+      `highway=service` -- driveways, delivery lanes, parking aisles -- and
+      only 162,733 carry a recoverable TIGER name, 82,354 of those outside
+      the service classes. That is 0.33 percent, or about EIGHT of the 1,195.
+      Valhalla cannot help at all: it compiles OSM into a fixed per-edge
+      schema and the tags a name might hide in are not in it.
+
+      What shipped instead is the road's CLASS, which OSM does know: "a
+      service road" for the service ways, "a side street" for unnamed
+      residential and minor streets. Owner picked the wording; both are rows
+      in `docs/ontology.md`.
+
+      ONE TRAP, RECORDED BECAUSE IT IS INVISIBLE: the 15 mph local zone was
+      chosen by comparing the road name against the literal "unnamed public
+      road". A second generic label would have read as a real name and moved
+      1,179 segments to 25 mph without a single test failing. Both builders
+      now ask `is_named()`, which tests membership of the generic set --
+      including the retired wording, so data baked before this does not
+      change speed on load.
+
 - [ ] **Elevation: give the build box its own, and do not mix sources.**
       Two separate things, and they were briefly confused for each other.
 

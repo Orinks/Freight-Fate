@@ -48,6 +48,41 @@ TARGET_SNAP_RADIUS_MI = 0.75
 CITY_SNAP_RADIUS_MI = 1.25
 GRAPH_PAD_MI = 1.5
 
+# What to call a road OSM has no name for.
+#
+# Measured over the whole us-latest extract: of 24,671,936 drivable local ways
+# carrying no `name`, 22,951,151 are `highway=service` -- driveways, delivery
+# lanes and parking aisles -- and only 162,733 hold a recoverable TIGER name.
+# So these roads are not missing their names; they do not have any. Valhalla
+# cannot help either: it compiles OSM into a fixed schema that has no room for
+# the tags a name might hide in.
+#
+# What CAN improve is the sentence. "Turn right onto unnamed public road" is
+# heard at every turn onto one, on 12 percent of arrivals, and tells the
+# driver nothing about what they are turning onto. The road class does know:
+# a service way really is a service road, and an unnamed residential street
+# really is a side street. Both are true, and both are worth more at the
+# wheel than the absence of a name.
+#
+# The leading article is part of the label because every cue interpolates it
+# directly -- "Turn right onto {road}." -- and "onto service road" is not
+# English.
+UNNAMED_SERVICE = "a service road"
+UNNAMED_STREET = "a side street"
+# The classes whose namelessness is honest rather than a data gap.
+SERVICE_CLASSES = frozenset({"service", "living_street"})
+# Every label that stands in for a name rather than being one. Anything that
+# has to ask "is this road actually named" tests membership here: the speed
+# default used to compare against one literal string, so adding a second
+# generic label would have silently moved 1,179 segments from 15 to 25 mph.
+GENERIC_ROADS = frozenset({UNNAMED_SERVICE, UNNAMED_STREET, "unnamed public road"})
+
+
+def is_named(road: str) -> bool:
+    """Does this label name a road, or merely describe one?"""
+    return bool(road) and road not in GENERIC_ROADS
+
+
 ROUTABLE_HIGHWAYS = {
     "primary",
     "secondary",
@@ -183,6 +218,7 @@ def collect_targets() -> list[Target]:
     )
     approaches = json.loads(LOCAL_APPROACHES_PATH.read_text(encoding="utf-8"))["approaches"]
     targets: list[Target] = []
+    missing_facilities: list[str] = []
     for city_name in world.city_names():
         city = world.city(city_name)
         for entry in services.get(city_name, ()):
@@ -210,7 +246,15 @@ def collect_targets() -> list[Target]:
             )
         for location in city.locations:
             target_id = f"facility:{location.id}"
-            approach = approaches[target_id]
+            # A facility the world knows and local_approaches.json does not is
+            # a stale INPUT, not a reason to abandon the build: the approaches
+            # bake predates it. Crashing here threw away 6,910 good targets
+            # over one quarry in Elberton, and named no way to find out how
+            # many others were missing.
+            approach = approaches.get(target_id)
+            if approach is None:
+                missing_facilities.append(target_id)
+                continue
             targets.append(
                 Target(
                     target_id=target_id,
@@ -233,6 +277,15 @@ def collect_targets() -> list[Target]:
                     source_note=location.source_note,
                 )
             )
+    if missing_facilities:
+        print(
+            f"  {len(missing_facilities)} facilities have no approach record and were"
+            " skipped -- rebuild local_approaches.json to cover them:"
+        )
+        for target_id in missing_facilities[:8]:
+            print(f"    {target_id}")
+        if len(missing_facilities) > 8:
+            print(f"    ... and {len(missing_facilities) - 8} more")
     return targets
 
 
@@ -343,11 +396,11 @@ def _resolve_speed(speed_miles: dict[float, float], road: str) -> float:
     """The segment's posted limit: the real OSM value covering the most miles
     (ties broken toward the higher limit, deterministically), or the honest
     default where no way on this run carries a ``maxspeed`` -- 25 for a named
-    street, 15 for an unnamed public road."""
+    street, 15 for a road carrying no name of its own."""
     if speed_miles:
         mph, _ = max(speed_miles.items(), key=lambda kv: (kv[1], kv[0]))
         return float(mph)
-    return 25.0 if road != "unnamed public road" else 15.0
+    return 25.0 if is_named(road) else 15.0
 
 
 def collapse_segments(
@@ -548,7 +601,7 @@ def geometry_record(target: Target, geometry: GeometryPath | None, extract: Path
 def clean_segments(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for segment in segments:
-        road = clean_text(str(segment["road"])) or "unnamed public road"
+        road = clean_text(str(segment["road"])) or UNNAMED_STREET
         cue = clean_text(str(segment["cue"]))
         out.append(
             {
@@ -662,7 +715,9 @@ def road_label(tags: dict[str, str]) -> str:
     ref = clean_text(tags.get("ref", ""))
     if name and ref:
         return f"{name} ({ref})"
-    return name or ref or "unnamed public road"
+    if name or ref:
+        return name or ref
+    return UNNAMED_SERVICE if highway in SERVICE_CLASSES else UNNAMED_STREET
 
 
 def way_coords(way) -> list[tuple[int, float, float]]:

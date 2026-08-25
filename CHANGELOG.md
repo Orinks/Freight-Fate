@@ -380,6 +380,15 @@
 
 ### Changed
 
+- **The truck says what kind of road you are turning onto.** On the local
+  drive at each end of a run, a turn onto a street the map has no name for
+  used to be announced as "unnamed public road", every time, and that told
+  you nothing about what you were turning onto. It now says what the road
+  actually is: "a service road" for a yard road, delivery lane or parking
+  aisle, and "a side street" for a small residential street. Roughly one
+  arrival in eight has at least one of these turns. How fast you take them
+  has not changed.
+
 - **A slow station is no longer written off as dead.** The radio now waits
   thirty seconds for a station to answer instead of eight, and a station
   that does not come up on the first try gets one more connect on the spot,

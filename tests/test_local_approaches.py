@@ -176,7 +176,10 @@ def test_build_tool_prefers_named_road_over_closer_unnamed(tmp_path, world):
 
     # The unnamed service way is nearer, but the player hears the road name,
     # so the record must pick the named street inside the search radius.
-    assert target.best_road == "unnamed public road"
+    # The nearer way is described by its class rather than by the absence of
+    # a name -- it really is a service road -- and that description must not
+    # count as a name, or the snap would stop preferring Main Street.
+    assert target.best_road == "a service road"
     assert target.best_named_road == "Main Street"
     record = build_local_approaches.approach_record(target)
     assert record["road"] == "Main Street"
@@ -205,3 +208,33 @@ def test_build_tool_marks_missing_road_context_as_fallback(monkeypatch):
     assert record["estimated"]
     assert record["road"] == "local facility access road"
     assert record["fallback_reason"] == "Representative fixture coordinate."
+
+
+def test_unnamed_roads_are_described_by_class_not_by_absence():
+    """A nameless road is called what it IS, and still reads as nameless.
+
+    Two things have to stay true together. The label must say something
+    useful -- a driveway is a service road, a minor street is a side street,
+    and OSM has a name for neither. And every check that asks "is this road
+    actually named" must keep answering no, because those checks drive both
+    the nearest-NAMED snap and the 15 mph local zone. When the label was one
+    fixed string those checks compared against it directly, so a second
+    generic label would have started reading as a real name and quietly moved
+    1,179 segments from 15 to 25 mph.
+    """
+    service = {"highway": "service"}
+    alley = {"highway": "living_street"}
+    street = {"highway": "residential"}
+    named = {"highway": "residential", "name": "Main Street"}
+
+    assert build_local_approaches.road_label(service) == "a service road"
+    assert build_local_approaches.road_label(alley) == "a service road"
+    assert build_local_approaches.road_label(street) == "a side street"
+    assert build_local_approaches.road_label(named) == "Main Street"
+
+    for tags in (service, alley, street):
+        assert not build_local_approaches.is_named(build_local_approaches.road_label(tags))
+    assert build_local_approaches.is_named(build_local_approaches.road_label(named))
+    # The retired wording still reads as nameless, so data baked before this
+    # change does not silently become 25 mph on load.
+    assert not build_local_approaches.is_named("unnamed public road")
