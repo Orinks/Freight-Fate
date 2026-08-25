@@ -542,6 +542,12 @@ pub struct DrivingState {
     // and how long it has been out of authority with the truck still over
     // the number -- past which it owns up rather than riding it out.
     pub keeper_snub: f64,
+    // And the mirror of that on the other side of the number: how long the
+    // keeper has been flat out and still losing the grade, plus the
+    // say-once latch and the per-hill cooldown for owning up to it.
+    pub keeper_droop_s: f64,
+    pub keeper_droop_said: bool,
+    pub keeper_droop_cue_s: f64,
     pub keeper_overrun_s: f64,
     pub keeper_overrun_said: bool,
 

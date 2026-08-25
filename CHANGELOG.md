@@ -945,6 +945,23 @@
 
 ### Fixed
 
+- **The speed keeper now holds the posted number up a hill, and says so when
+  it cannot.** With automatic speed control on, the keeper announced the
+  number it was holding through a work zone, a heavy-traffic stretch, or the
+  streets in to a facility, and then quietly lost it the moment the road
+  tilted up. On a one percent rise a fifty-five held forty-nine; on two
+  percent it held thirty-four; a forty-five zone on a three percent pull sank
+  to twenty-seven, and a steep grade put every one of them down in the
+  teens -- with nothing said. The same ceiling was why pulling out of a yard
+  onto an acceleration lane took so long: the keeper said it was building to
+  the road's speed and then never quite got there. It now uses as much of
+  the throttle as the hill actually needs, so it sits on its number instead
+  of settling wherever half a pedal happened to balance the climb, and a
+  merge that used to stall out five miles an hour short arrives. Where the
+  hill genuinely beats a loaded truck it now tells you, once, the way
+  adaptive cruise already did: "Speed keeper is flat out and cannot make
+  fifty-five miles per hour on this grade."
+
 - **Destination approach assistance now stops you at the gate on every
   delivery, not just some of them.** With the assist switched on, the truck
   was brought to a stop ready to pull in at some warehouses and driven

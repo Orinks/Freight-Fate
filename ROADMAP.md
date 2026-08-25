@@ -1771,6 +1771,49 @@ onto exit signalling.
       to "feel right" in the meantime -- the Poisson number is the physically
       correct occupancy and the representation is what is short.
 
+- [x] **The playtest harness kept losing its simulated clock (2026-08-24).**
+      `put_road_events_on_simulated_time` wired the road-event breather onto
+      the harness's fake clock at `start_delivery` and `start_route`, and the
+      very next `with_drive` that laid a bench road or a street chain tore the
+      wiring straight back out: a fresh `Trip` carries a fresh breather, and a
+      fresh breather runs on the wall clock. With a 10-to-15 REAL second hold
+      over minutes of simulated road, how many lines survived came down to how
+      loaded the machine was -- the exit-call audit in
+      `transcript_spoken_truth` was dropping a call about one full-suite run
+      in five. The wiring now lives in `with_drive` itself, so a trip swap
+      cannot outlive it.
+
+- [x] **The speed keeper holds the posted number on a grade, and owns up
+      when it cannot (2026-08-24).** Owner: "sometimes it doesn't hold the
+      posted speeds." Measured on a zone bench at four posted numbers across
+      nine grades, loaded, with the weather pinned: the keeper held its
+      number on the flat and then sagged the moment the road tilted -- 55
+      held 49.4 on one percent and 33.9 on two, 45 held 37.5 on two percent
+      and 27.4 on three, and every number was in the teens on six. The cause
+      was `KEEPER_MAX_THROTTLE`, a half-pedal ceiling whose stated premise
+      ("zone speeds never need more than half throttle") is a claim about
+      FLAT road: the keeper was a bare integrator against it, so on a hill it
+      wound to the clamp and settled wherever half throttle balanced gravity.
+      Silently -- the keeper warned about running OVER its number and had
+      nothing at all to say about running under it. It now feed-forwards on
+      `hold_throttle()` exactly as adaptive cruise does, with the half-pedal
+      limit kept as the ceiling on its own TRIM over the road's demand, and
+      says "Speed keeper is flat out and cannot make X on this grade" once a
+      hill genuinely beats the truck. Every measured sag now holds its
+      number; a 65 mph merge that asymptoted at 58 and never arrived now
+      does, and a 45 recovers in 28 s against 41. Pinned in
+      `states_driving_speed_keeper_sweep.rs`, which also carries the
+      measurement rigs (`--ignored`) and pins the two by-design answers to
+      the owner's second sentence: the keeper eases for a corner only where
+      the corner's advisory is under the number it holds, and adaptive
+      cruise caps for a bend only where the bend's advisory is under the
+      posted limit. NOT DONE: the keeper is deaf to `trip.curves`. It reads
+      street turn cues and posted limits only, so inside a work-zone or
+      heavy-traffic zone that contains a baked bend advising below the zone
+      limit, nothing eases for it -- 0 cases in the 20-corridor sweep,
+      because every bend met there advised at or above posted, but the gap
+      is real and belongs with the 2.0 assist work.
+
 - [x] **The one-in-four keeper-ease flake, fixed at its three roots**
       (2026-08-20, was: 15.47 against a <= 15.0). Traced with a frame
       trace, not a guess. (1) `_keeper_ease_mi`'s 0.75-mi cap clipped the

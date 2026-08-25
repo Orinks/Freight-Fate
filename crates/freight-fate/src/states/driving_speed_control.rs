@@ -102,6 +102,8 @@ impl DrivingState {
         self.keeper_ease_said = None;
         self.keeper_ease_target = None;
         self.keeper_snub = 0.0;
+        self.keeper_droop_s = 0.0;
+        self.keeper_droop_said = false;
         self.keeper_overrun_s = 0.0;
         self.keeper_overrun_said = false;
     }

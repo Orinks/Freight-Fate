@@ -339,7 +339,19 @@ pub const KEEP_RIGHT_MIN_MPH: f64 = 45.0; // lane discipline only matters at hig
 pub const PASSING_LOOKAHEAD_MI: f64 = 0.6; // slower right-lane traffic inside this justifies the left lane
 
 pub const KEEPER_MIN_MPH: f64 = 2.0; // the speed keeper just needs the truck rolling
-pub const KEEPER_MAX_THROTTLE: f64 = 0.5; // zone speeds never need more than half throttle
+                                     // How far the keeper's own trim may pull away from the feed-forward. On the
+                                     // flat at a zone speed the road itself asks for a tenth to a third of the
+                                     // pedal, so half a pedal of trim on top is a generous authority and the
+                                     // assist still reads unhurried -- which is what the number was chosen for.
+                                     // It is NOT a ceiling on the whole pedal: read that way (as it was until
+                                     // 2026-08-24) the keeper simply settled wherever half throttle balanced the
+                                     // hill and never said so.
+pub const KEEPER_MAX_THROTTLE: f64 = 0.5;
+// How far under its number the keeper has to be falling before it owns up.
+// The same fraction of a zone speed that CRUISE_DROOP_MPH is of a highway
+// set speed: six in sixty-two is a tenth, and three in a twenty-five or
+// thirty-five zone is about the same.
+pub const KEEPER_DROOP_MPH: f64 = 3.0;
 pub const KEEPER_GAP_SECONDS: f64 = 3.0; // follow queued traffic at this gap, down to a stop
 pub const CRUISE_MIN_MPH: f64 = 20.0; // cruise control needs road speed to hold
 pub const CRUISE_STEP_MPH: f64 = 5.0; // set-point change per Accel/Coast (+/-) tap

@@ -93,6 +93,7 @@ mod states_driving_ramps;
 mod states_driving_retarder;
 mod states_driving_road;
 mod states_driving_speech_ladder;
+mod states_driving_speed_keeper_sweep;
 mod states_driving_status_screens;
 mod states_driving_stop_menus;
 mod states_driving_trip_resume;
