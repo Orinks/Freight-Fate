@@ -528,7 +528,7 @@ fn test_debris_speaks_its_kind_and_the_split_keeps_the_old_rate() {
     ];
     let debris: Vec<_> = HAZARDS.iter().filter(|h| names.contains(&h.name)).collect();
     assert_eq!(debris.len(), 6);
-    assert!(debris.iter().all(|h| h.dodgeable));
+    assert!(debris.iter().all(|h| h.in_lane));
     assert!((debris.iter().map(|h| h.weight).sum::<f64>() - 1.2).abs() < 1e-9);
     let found: Vec<&str> = debris.iter().map(|h| h.name).collect();
     assert!(found.contains(&"the ladder") && found.contains(&"the mattress"));

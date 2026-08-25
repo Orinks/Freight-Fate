@@ -413,6 +413,28 @@ pub fn set_engine_running(ctx: &mut GameContext, truck: &mut TruckState, running
 
 // -- small types the DrivingState struct is built from ----------------------------------
 
+/// The three facts about a hazard the assist has to budget against.
+///
+/// They were one flag once, and that is the defect this type exists to make
+/// impossible: `dodgeable` decided BOTH whether the driver got a lane-change
+/// allowance AND what braking alone had to reach, so the two could never be
+/// told apart. They answer different questions.
+///
+/// * `dodgeable` -- is there somewhere to go: the hazard sits in one lane
+///   AND the road has an open lane on this side. It buys the driver
+///   `LANE_TAP_CHANGE_S` of extra window, and nothing else.
+/// * `in_lane` -- is the thing sitting in our lane (an object, a stopped
+///   car, the vehicle ahead) rather than spanning the road (fog, ice, a
+///   crosswind). It decides the near stop.
+/// * `lead_mph` -- the hazard IS a moving vehicle, and its speed is what
+///   clears it.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct HazardShape {
+    pub dodgeable: bool,
+    pub in_lane: bool,
+    pub lead_mph: Option<f64>,
+}
+
 /// One ambient line waiting its turn, and how long it has waited
 /// (`driving_events.PendingAmbient`, defined here because the struct holds
 /// the queue from construction).

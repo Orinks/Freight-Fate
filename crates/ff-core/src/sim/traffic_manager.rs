@@ -18,8 +18,9 @@ use crate::pyrandom::PyRandom;
 use crate::sim::enforcement_posts::{seed_text, EnforcementPost};
 use crate::sim::hos::is_night;
 use crate::sim::trip_models::{
-    corridor_speed_limit, hourly_volume_fraction, leg_aadt_at, leg_speed_limit_at, TrafficContext,
-    DIRECTIONAL_SPLIT, RUSH_HOUR_WINDOWS, TRAFFIC_LOOKAHEAD_MI,
+    corridor_speed_limit, hourly_volume_fraction, leg_aadt_at, leg_lane_count, leg_speed_limit_at,
+    TrafficContext, DEFAULT_LEG_LANES, DIRECTIONAL_SPLIT, MAX_DRIVABLE_LANES, RUSH_HOUR_WINDOWS,
+    TRAFFIC_LOOKAHEAD_MI,
 };
 use crate::sim::vehicle::{AIR_DENSITY, G as GRAVITY_MPS2, MPS_TO_MPH};
 use crate::sim::weather::{effects, WeatherEffects, WeatherKind};
@@ -361,7 +362,6 @@ impl TrafficManager {
     pub fn spawn_initial_traffic(&mut self) {
         let mut rng = self.rng();
         let mut vehicles: Vec<TrafficVehicle> = Vec::new();
-        let weather_slowdown = self.weather_slowdown();
         let night = is_night(self.start_hour);
         for (leg_index, (start, leg)) in self
             .leg_starts
@@ -384,30 +384,50 @@ impl TrafficManager {
                 if high <= low {
                     continue;
                 }
-                let intent = choose(
-                    &mut rng,
-                    &["cruising", "following", "merging", "braking", "passing"],
-                    &[3.0, 1.5, 1.2, 1.0, 1.1],
-                );
+                // Where it is has to be settled BEFORE what it is doing:
+                // merging and braking are positional (see MERGE_WINDOW_MI),
+                // and this spawner used to hand them out anywhere on the
+                // route. A vehicle on the brakes where nothing on the road
+                // explains it has no cause line to give the driver either --
+                // `braking_cause_line` answers with silence -- so the warning
+                // came out as "Brake lights right ahead." and stopped there,
+                // which is the invented phantom wave the bubble is supposed
+                // to refuse.
+                let position_mi = start + rng.uniform(low, high);
+                let mut options = vec!["cruising", "following", "passing"];
+                let mut weights = vec![3.0, 1.5, 1.1];
+                if self.merge_plausible_at(position_mi) {
+                    options.push("merging");
+                    weights.push(1.2);
+                }
+                if self.braking_plausible_at(position_mi) {
+                    options.push("braking");
+                    weights.push(1.0);
+                }
+                let intent = choose(&mut rng, &options, &weights);
                 let vehicle_class = choose(
                     &mut rng,
                     &["car", "box truck", "semi", "service vehicle"],
                     &[5.0, 1.4, 2.0, 0.3],
                 );
-                let position_mi = start + rng.uniform(low, high);
-                let limit_mph = self.posted_limit_at(position_mi);
-                let base_speed = Self::intent_speed(intent, limit_mph, &mut rng, vehicle_class);
+                let (limit_offset, governor) =
+                    Self::intent_speed_draw(intent, &mut rng, vehicle_class);
                 let rush_slowdown = if self.rush_hour_traffic_bias(leg) != 0.0 {
                     rng.uniform(4.0, 10.0)
                 } else {
                     0.0
                 };
-                let speed = self
-                    .floor_speed(limit_mph)
-                    .max(base_speed - weather_slowdown - rush_slowdown);
-                // Passing traffic lives in the left lane; everyone else holds
-                // the right lane, where trucks are supposed to be.
-                let lane = if intent == "passing" { 1 } else { 0 };
+                let speed = self.road_speed_mph(position_mi, limit_offset, governor, rush_slowdown);
+                // Passing traffic lives in the left lane where the road has
+                // one; everyone else holds the right lane, where trucks are
+                // supposed to be.
+                let lane = self.intent_lane_at(intent, position_mi);
+                // Nobody shares a whole corridor with you -- the same rule the
+                // rolling bubble already applied. Without it the route's
+                // opening population was permanent: a slow vehicle placed at
+                // mile 300 was still in front of you at mile 400, and on a
+                // one-lane road it never turned off and never could be passed.
+                let exit_at = position_mi + rng.uniform(EXIT_AFTER_MIN_MI, EXIT_AFTER_MAX_MI);
                 vehicles.push(
                     TrafficVehicle::new(
                         &format!("traffic:{leg_index}:{slot}:{intent}"),
@@ -418,7 +438,9 @@ impl TrafficManager {
                         intent,
                         vehicle_class,
                     )
-                    .with_lane(lane),
+                    .with_lane(lane)
+                    .with_exit_at(Some(exit_at))
+                    .with_speed_draw(limit_offset, governor, rush_slowdown),
                 );
             }
         }
@@ -669,10 +691,14 @@ impl TrafficManager {
         found
     }
 
-    /// The leg a route mile falls in, and how far into that leg it is
-    /// (leg-relative and direction-aware).
-    pub fn leg_and_offset_at(&self, mile: f64) -> Option<(&Leg, f64)> {
-        let mut found: Option<(&Leg, f64)> = None;
+    /// The leg a route mile falls in, how far into that leg it is
+    /// (leg-relative and direction-aware), and which way the route runs
+    /// along it.
+    ///
+    /// The one walk the lane, limit and grade lookups all read, so they
+    /// cannot come to different answers about which leg a mile is on.
+    pub fn leg_offset_forward_at(&self, mile: f64) -> Option<(&Leg, f64, bool)> {
+        let mut found: Option<(&Leg, f64, bool)> = None;
         for (index, (start, leg)) in self
             .leg_starts
             .iter()
@@ -682,12 +708,57 @@ impl TrafficManager {
             if mile + 1e-9 >= *start {
                 let offset = (mile - start).clamp(0.0, leg.miles.max(0.0));
                 let forward = self.route.cities.get(index).is_some_and(|c| *c == leg.a);
-                found = Some((leg, if forward { offset } else { leg.miles - offset }));
+                found = Some((
+                    leg,
+                    if forward { offset } else { leg.miles - offset },
+                    forward,
+                ));
             } else {
                 break;
             }
         }
         found
+    }
+
+    /// The leg a route mile falls in, and how far into that leg it is
+    /// (leg-relative and direction-aware).
+    pub fn leg_and_offset_at(&self, mile: f64) -> Option<(&Leg, f64)> {
+        self.leg_offset_forward_at(mile)
+            .map(|(leg, offset, _)| (leg, offset))
+    }
+
+    /// Lanes in the direction of travel at a route mile.
+    ///
+    /// Mirrors `Trip::lane_count_at`, which is the answer the driving state
+    /// steers by, because the bubble cannot reach the trip and has to place
+    /// vehicles in the lanes the road actually has. Without it "passing"
+    /// traffic went into lane 1 on every road, including the two-lane US
+    /// routes that have no lane 1: the vehicle sat in a lane that does not
+    /// exist, where it could never be the lead the driver has to deal with
+    /// and where its pass-by whoosh panned to a side of a road with no side.
+    pub fn lane_count_at(&self, mile: f64) -> i64 {
+        let Some((leg, offset, forward)) = self.leg_offset_forward_at(mile) else {
+            return DEFAULT_LEG_LANES;
+        };
+        for seg in leg.lane_segments() {
+            if seg.start_mi <= offset && offset <= seg.end_mi {
+                return 1.max(MAX_DRIVABLE_LANES.min(seg.your_side(forward)));
+            }
+        }
+        if leg.divided == Some(false) {
+            return 1;
+        }
+        MAX_DRIVABLE_LANES.min(leg_lane_count(Some(leg)))
+    }
+
+    /// The lane a vehicle with this intent takes here. Passing traffic lives
+    /// in the left lane where the road has one, and in the only lane there is
+    /// where it does not.
+    pub fn intent_lane_at(&self, intent: &str, mile: f64) -> i64 {
+        if intent != "passing" {
+            return 0;
+        }
+        (self.lane_count_at(mile) - 1).clamp(0, 1)
     }
 
     /// The posted limit for a car here -- the posted number rather than the
@@ -708,25 +779,7 @@ impl TrafficManager {
     /// descends. Zero where the bake has nothing to say, so an unsurveyed
     /// stretch simply leaves the limiter in charge.
     pub fn grade_pct_at(&self, mile: f64) -> f64 {
-        let mut found: Option<(&Leg, f64, bool)> = None;
-        for (index, (start, leg)) in self
-            .leg_starts
-            .iter()
-            .zip(self.route.legs.iter())
-            .enumerate()
-        {
-            if mile + 1e-9 < *start {
-                break;
-            }
-            let offset = (mile - start).clamp(0.0, leg.miles.max(0.0));
-            let forward = self.route.cities.get(index).is_some_and(|c| *c == leg.a);
-            found = Some((
-                leg,
-                if forward { offset } else { leg.miles - offset },
-                forward,
-            ));
-        }
-        let Some((leg, sample_offset, forward)) = found else {
+        let Some((leg, sample_offset, forward)) = self.leg_offset_forward_at(mile) else {
             return 0.0;
         };
         for segment in leg.grade_segments() {
@@ -759,12 +812,71 @@ impl TrafficManager {
         rng: &mut PyRandom,
         vehicle_class: &str,
     ) -> f64 {
-        let (low, high) = traffic_speed_offsets_mph(intent);
-        let speed = limit_mph + rng.uniform(low, high);
-        if let Some(band) = governed_band(vehicle_class) {
-            return speed.min(rng.uniform(band.0, band.1));
+        let (offset_mph, governor_mph) = Self::intent_speed_draw(intent, rng, vehicle_class);
+        let speed = limit_mph + offset_mph;
+        match governor_mph {
+            Some(governor) => speed.min(governor),
+            None => speed,
         }
-        speed
+    }
+
+    /// The two draws behind [`TrafficManager::intent_speed`], kept apart.
+    ///
+    /// A speed is not a property of a vehicle -- it is what this driver does
+    /// on the road they are on, and the number posted changes under them all
+    /// the way along a leg. What IS a property of the vehicle is how far off
+    /// the posting they run and what limiter their machine carries, so those
+    /// are what the bubble stores; the speed is re-read from the road every
+    /// update (see [`TrafficManager::road_speed_mph`]).
+    ///
+    /// Draws in the same order as `intent_speed` always has, so a seeded run
+    /// puts the same vehicle in the same place as before.
+    pub fn intent_speed_draw(
+        intent: &str,
+        rng: &mut PyRandom,
+        vehicle_class: &str,
+    ) -> (f64, Option<f64>) {
+        let (low, high) = traffic_speed_offsets_mph(intent);
+        let offset_mph = rng.uniform(low, high);
+        let governor_mph = governed_band(vehicle_class).map(|band| rng.uniform(band.0, band.1));
+        (offset_mph, governor_mph)
+    }
+
+    /// What a driver with this habit would be doing on the road under them.
+    ///
+    /// The posting where the vehicle IS, plus the driver's own offset from
+    /// it, under their machine's limiter, with the conditions off the top and
+    /// never below the road's own floor. This is the whole reason the offset
+    /// is stored rather than the speed: a car drawn on a town's thirty and
+    /// kept at thirty used to carry that number out onto a sixty-five, where
+    /// it was a wall nothing on the road explained.
+    pub fn road_speed_mph(
+        &self,
+        mile: f64,
+        limit_offset_mph: f64,
+        governor_mph: Option<f64>,
+        slowdown_mph: f64,
+    ) -> f64 {
+        let posted = self.posted_limit_at(mile);
+        let mut speed = posted + limit_offset_mph;
+        if let Some(governor) = governor_mph {
+            speed = speed.min(governor);
+        }
+        self.floor_speed(posted)
+            .max(speed - self.weather_slowdown() - slowdown_mph)
+    }
+
+    /// [`TrafficManager::road_speed_mph`] for a vehicle that carries a draw,
+    /// or `None` for one that does not.
+    pub fn vehicle_road_speed_mph(&self, vehicle: &TrafficVehicle) -> Option<f64> {
+        vehicle.limit_offset_mph.map(|offset| {
+            self.road_speed_mph(
+                vehicle.position_mi,
+                offset,
+                vehicle.governor_mph,
+                vehicle.slowdown_mph,
+            )
+        })
     }
 
     /// A generator belonging to one cell of road, keyed on the route and
@@ -788,7 +900,6 @@ impl TrafficManager {
             .map(|v| (v.position_mi / SPAWN_CELL_MI) as i64)
             .collect();
         let night = is_night(self.hour);
-        let weather_slowdown = self.weather_slowdown();
         let first = (low / SPAWN_CELL_MI) as i64;
         let last = (high / SPAWN_CELL_MI) as i64;
         for cell in first..=last {
@@ -819,12 +930,18 @@ impl TrafficManager {
                 choose(&mut rng, &["passing", "cruising"], &[3.0, 1.0])
             } else if mile < MERGE_FREE_START_MI {
                 // Not merging into a truck that has not got up to speed yet
-                // (owner report, 2026-08-16).
-                choose(
-                    &mut rng,
-                    &["cruising", "following", "braking", "passing"],
-                    &[3.0, 1.5, 1.0, 0.6],
-                )
+                // (owner report, 2026-08-16). Braking still needs the road's
+                // permission here, exactly as it does everywhere else: the
+                // exemption is about MERGING into a truck still accelerating,
+                // and letting braking through with it put a phantom wave in
+                // the first three miles of every single run.
+                let mut options = vec!["cruising", "following", "passing"];
+                let mut weights = vec![3.0, 1.5, 0.6];
+                if self.braking_plausible_at(mile) {
+                    options.push("braking");
+                    weights.push(1.0);
+                }
+                choose(&mut rng, &options, &weights)
             } else {
                 // Merging and braking only where the road gives a reason.
                 let mut options = vec!["cruising", "following", "passing"];
@@ -844,17 +961,14 @@ impl TrafficManager {
                 &["car", "box truck", "semi", "service vehicle"],
                 &[5.0, 1.4, 2.0, 0.3],
             );
-            let limit_mph = self.posted_limit_at(mile);
-            let base_speed = Self::intent_speed(intent, limit_mph, &mut rng, vehicle_class);
+            let (limit_offset, governor) = Self::intent_speed_draw(intent, &mut rng, vehicle_class);
             let rush_slowdown = if self.rush_hour_traffic_bias(leg) != 0.0 {
                 rng.uniform(4.0, 10.0)
             } else {
                 0.0
             };
-            let speed = self
-                .floor_speed(limit_mph)
-                .max(base_speed - weather_slowdown - rush_slowdown);
-            let lane = if intent == "passing" { 1 } else { 0 };
+            let speed = self.road_speed_mph(mile, limit_offset, governor, rush_slowdown);
+            let lane = self.intent_lane_at(intent, mile);
             let exit_at = mile + rng.uniform(EXIT_AFTER_MIN_MI, EXIT_AFTER_MAX_MI);
             self.vehicles.push(
                 TrafficVehicle::new(
@@ -867,7 +981,8 @@ impl TrafficManager {
                     vehicle_class,
                 )
                 .with_lane(lane)
-                .with_exit_at(Some(exit_at)),
+                .with_exit_at(Some(exit_at))
+                .with_speed_draw(limit_offset, governor, rush_slowdown),
             );
         }
     }
@@ -891,7 +1006,29 @@ impl TrafficManager {
         let vehicles = std::mem::take(&mut self.vehicles);
         for mut vehicle in vehicles {
             let gap = vehicle.position_mi - position_mi;
+            // The lane follows the road for the same reason the speed does:
+            // a vehicle drawn in the left lane of a divided stretch drives on
+            // into the two-lane US route beyond it, where there is no left
+            // lane to be in. Held to the lanes the road has under it, the
+            // same clamp `LaneKeeping::set_lane_count` puts on the player.
+            vehicle.lane = vehicle
+                .lane
+                .min(self.lane_count_at(vehicle.position_mi) - 1)
+                .max(0);
             vehicle.relative_lane = self.player_lane - vehicle.lane;
+            // What this driver would be doing on the road UNDER THEM, which
+            // is not what they were doing where they were drawn: a US route
+            // drops to thirty through every town it passes and climbs back to
+            // sixty-five on the far side, and a speed drawn once and kept
+            // forever crossed those boundaries without noticing. A car drawn
+            // on the town's thirty was a thirty-mile-an-hour wall out on the
+            // open road; one drawn on the open road held sixty-five through
+            // the town. Measured over five thousand seeded route miles
+            // (`states_driving_traffic_rate.rs`): most of the traffic that
+            // forced the truck to brake was carrying a number from a slower
+            // piece of road, and one bubble vehicle in seventy was running
+            // slower than any speed its own road could have drawn for it.
+            let road_mph = self.vehicle_road_speed_mph(&vehicle);
             if vehicle.intent == "braking" && (0.0..=1.8).contains(&gap) {
                 // Inside a zone the pace is the zone's own prevailing speed,
                 // not the generic 45-percent-of-posted floor (Brandon,
@@ -907,14 +1044,58 @@ impl TrafficManager {
             } else if vehicle.intent == "merging" || vehicle.intent == "braking" {
                 // Merging and braking are TRANSIENT states, not careers: a
                 // real merger builds to road speed once the lane change is
-                // done, capped at the zone's own pace inside a jam.
+                // done, capped at the zone's own pace inside a jam. Road speed
+                // is what the ROAD posts here, under this machine's limiter --
+                // a governed semi finishing a merge onto a seventy-five does
+                // not build to seventy-six.
                 let cruise = match self.zone_pace_at(vehicle.position_mi) {
                     Some(pace) => pace,
-                    None => self.posted_limit_at(vehicle.position_mi) + 1.0,
+                    None => {
+                        let mut open = self.posted_limit_at(vehicle.position_mi) + 1.0;
+                        if let Some(governor) = vehicle.governor_mph {
+                            open = open.min(governor);
+                        }
+                        open
+                    }
                 };
                 if vehicle.target_speed_mph < cruise {
                     vehicle.target_speed_mph = cruise.min(vehicle.target_speed_mph + 4.0 * dt);
+                } else {
+                    // And back DOWN when the road slows under them: the ramp
+                    // above only ever climbed, so a merger that had built to
+                    // highway speed took it into the next town.
+                    vehicle.target_speed_mph = cruise;
                 }
+                // The LABEL is as transient as the speed, and only the speed
+                // used to recover. A vehicle that braked once inside a jam and
+                // then drove out of it, back up to road speed, kept "braking"
+                // for the rest of its life -- so the cue for it was still
+                // "Brake lights ahead" while it ran sixty-eight on a seventy,
+                // with no cause to name because the road no longer had one.
+                // Once the reason is behind it and it is back up to the pace,
+                // it is just traffic.
+                // A merge ENDS when the vehicle is up with the traffic it
+                // merged into; that is what finishing a merge means, and it
+                // is also the only reading that leaves a merger announceable
+                // for the couple of miles the cue reaches, since the window a
+                // merger is created in is under half a mile long.
+                //
+                // Braking ends when the REASON does. A vehicle that has
+                // driven clear of a jam and is climbing back up to speed is
+                // accelerating, which is the opposite of braking, and
+                // "Brake lights ahead" for it warns about something that is
+                // not happening -- with no cause to name, because the road no
+                // longer has one.
+                let done = if vehicle.intent == "merging" {
+                    vehicle.speed_mph >= cruise - 2.0
+                } else {
+                    !self.braking_plausible_at(vehicle.position_mi)
+                };
+                if done {
+                    vehicle.intent = "cruising".to_string();
+                }
+            } else if let Some(road_mph) = road_mph {
+                vehicle.target_speed_mph = road_mph;
             }
             // The hill has the last word. A limiter is a ceiling the truck
             // sits on when the road lets it; a climb takes the choice away,

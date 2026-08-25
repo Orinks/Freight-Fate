@@ -22,9 +22,7 @@ use ff_core::models::profile::Profile;
 use ff_core::sim::lane::lane_label;
 use ff_core::sim::traffic_manager::TrafficVehicle;
 use ff_core::sim::trip::{Trip, TripOptions};
-use ff_core::sim::trip_models::{
-    hazard_is_dodgeable, TripEvent, TripEventData, TripEventKind, Zone,
-};
+use ff_core::sim::trip_models::{hazard_is_in_lane, TripEvent, TripEventData, TripEventKind, Zone};
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::{WeatherKind, WeatherSystem};
 
@@ -215,13 +213,16 @@ fn logged(app: &TestApp) -> Vec<String> {
 // -- Hazard dodgeability --------------------------------------------------------------
 
 #[test]
-fn test_fixed_lane_hazards_are_dodgeable_and_sweeping_ones_are_not() {
-    assert!(hazard_is_dodgeable("debris on the road"));
-    assert!(hazard_is_dodgeable("a vehicle stopped on the shoulder"));
-    assert!(hazard_is_dodgeable("a mattress lying in the lane"));
-    assert!(!hazard_is_dodgeable("a deer crossing the road"));
-    assert!(!hazard_is_dodgeable("ice on the bridge deck"));
-    assert!(!hazard_is_dodgeable("a dust storm dropping visibility"));
+fn test_fixed_lane_hazards_are_in_lane_and_sweeping_ones_are_not() {
+    // A property of the THING, not of the road: whether a lane change
+    // actually answers it also needs a lane to change into, which the
+    // emitter folds in separately (see the emitter cases below).
+    assert!(hazard_is_in_lane("debris on the road"));
+    assert!(hazard_is_in_lane("a vehicle stopped on the shoulder"));
+    assert!(hazard_is_in_lane("a mattress lying in the lane"));
+    assert!(!hazard_is_in_lane("a deer crossing the road"));
+    assert!(!hazard_is_in_lane("ice on the bridge deck"));
+    assert!(!hazard_is_in_lane("a dust storm dropping visibility"));
 }
 
 // -- Construction closures ------------------------------------------------------------
@@ -1062,8 +1063,12 @@ fn test_traffic_pressure_hazard_says_brake_only_with_no_lane_to_swerve_into() {
     assert!(!events.is_empty());
     assert_eq!(events[0].text(), "Brake! Brake lights right ahead.");
     assert!(!events[0].text().contains("change lanes"));
-    // Brake alone still takes it nearly to a stop.
-    assert_eq!(events[0].data.dodgeable, Some(true));
+    // And the physics is told the same thing the words were: there is
+    // nowhere to go, so no lane-change allowance is added to the driver's
+    // window. It is still a thing in our lane, which is what decides the
+    // speed brake alone has to reach.
+    assert_eq!(events[0].data.dodgeable, Some(false));
+    assert_eq!(events[0].data.in_lane, Some(true));
 }
 
 /// Same lead-vehicle warning, but on a road with somewhere to go: the wording
@@ -1128,7 +1133,11 @@ fn test_random_dodgeable_hazard_says_brake_only_with_no_lane_to_swerve_into() {
             continue;
         }
         assert_eq!(event.text(), "Brake! Debris on the road.");
-        assert_eq!(event.data.dodgeable, Some(true));
+        // Same rule for an object as for a vehicle: no lane, no dodge. The
+        // debris is still in our lane, so brake alone still owes the near
+        // stop -- that is `in_lane`, not `dodgeable`.
+        assert_eq!(event.data.dodgeable, Some(false));
+        assert_eq!(event.data.in_lane, Some(true));
         return;
     }
     panic!("no seed in 0..400 drew debris on the road");
@@ -1149,7 +1158,11 @@ fn test_hazard_hint_and_clearing_need_no_lane_when_there_is_none() {
     assert!(!d.trip.has_open_adjacent_lane_at(None));
     rolling(&mut d, 65.0);
     d.hazard_deadline = Some(5.0);
-    d.hazard_dodgeable = true;
+    // One lane our side: an object in it is not dodgeable, and the emitter
+    // says so now. It is still in the lane, which is what the hint and the
+    // near stop both key on.
+    d.hazard_dodgeable = false;
+    d.hazard_in_lane = true;
     d.hazard_lane = d.lane.lane;
     d.hazard_slow_hint_said = false;
     d.automatic_braking_announced = false;

@@ -172,7 +172,7 @@ impl Arrival {
 /// is the posted number, eased to the advised speed for a corner in play --
 /// a driver who hears "turn right, ten miles an hour" and holds twenty-nine
 /// through it is testing the missed-turn loop-back, not the assist.
-fn driver_target_mph(d: &mut DrivingState) -> f64 {
+pub fn driver_target_mph(d: &mut DrivingState) -> f64 {
     if d.ramp_mi.is_some() {
         return d.armed_ramp_mph(None);
     }

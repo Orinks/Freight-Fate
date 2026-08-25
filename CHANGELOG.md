@@ -962,6 +962,99 @@
   adaptive cruise already did: "Speed keeper is flat out and cannot make
   fifty-five miles per hour on this grade."
 
+- **On a road with no way past, the truck brakes sooner and harder.** When a
+  slower vehicle was ahead of you, the game said one thing and did another. On
+  a single lane it told you to brake, because there was nowhere to go -- and
+  then quietly gave you two and a half extra seconds anyway, the time a lane
+  change takes, for a lane change the road did not have. The automatic brake
+  waited out those seconds while you kept closing, so the driver with no way
+  past ended up nearer the vehicle in front before anything happened than the
+  driver who could simply go around. That is backwards, and it is fixed:
+  whether there is a lane to take is now decided once, and the words and the
+  truck both follow it. On a single lane the brake comes on sooner and holds
+  the truck further back; where a lane is open, the time to make the move is
+  still yours.
+
+- **Debris on a wide road can be gone around now, and the warning says so.** A
+  ladder, a mattress, spilled boxes, a shredded tarp -- anything lying in your
+  lane -- used to be a nearly-full stop no matter how much road was beside
+  you. Where there is an open lane you now hear "Change lanes or brake!" and
+  you can simply move over. Where there is not, it is still a near stop, and
+  the line afterwards no longer claims you eased around something on a road
+  with nothing to ease into. Things that cover the whole road -- fog, ice, a
+  crosswind, a deer, traffic stopped across the lanes -- are still brake-only,
+  because no lane change answers those.
+
+- **The truck no longer brakes for a stop it does not have to make.** The
+  warning about a vehicle ahead used to budget your time as if you had to come
+  nearly to a standstill for it, even though slowing to match its speed is
+  what actually clears it. You were left holding a long, vague window in which
+  nothing happened. The time you get is now measured against the slowing the
+  situation really needs, so the response starts when it should.
+
+- **Traffic drives the road it is on, so far fewer slow vehicles are in your
+  way.** A car or truck out on the road took its speed from wherever it first
+  appeared and then kept that number for good. A US route drops to thirty
+  through every town it passes, so a car that appeared in one carried thirty
+  out onto the sixty-five on the far side -- and where the road had only one
+  lane, there was no way past it and nothing about the road explained why it
+  was there. It also worked the other way: a car that appeared out on the
+  highway held sixty-five through the next town. Everyone now speeds up and
+  slows down with the road under them, the way they always should have. Driven
+  over five thousand miles of real corridors, the times the road made you brake
+  for a vehicle ahead have roughly halved, on one-lane roads and on wider ones
+  alike -- and there is exactly as much traffic out there as before.
+
+- **No more phantom brake lights.** Vehicles were sometimes put on the road
+  already braking where there was nothing to brake for, most reliably in the
+  first few miles of every run. You were warned about brake lights with
+  nothing to say about the cause, because there was no cause. Traffic now only
+  brakes where the road gives it a reason -- a jam, roadwork, or a ramp -- and
+  a vehicle that has driven clear of one and got back up to speed is no longer
+  announced as brake lights for the rest of its life.
+
+- **"You slow to match the slow car" instead of a lane change you never
+  made.** Braking down behind a slower vehicle used to be confirmed with "you
+  slow nearly to a stop and ease around it" -- which was two things that had
+  not happened. The truck comes down to the vehicle's speed and stays behind
+  it, and on a one-lane road there is nowhere to ease around to. The line now
+  says what the truck actually did. Swerving into an open lane still has its
+  own line.
+
+- **The opening traffic on a route takes an exit like everybody else.** The
+  vehicles placed along your route when a run begins never left the highway,
+  so a slow one three hundred miles ahead was still in front of you when you
+  got there. They now turn off after a few miles, the same as the traffic
+  around you always has.
+
+- **Nobody passes you in a lane the road does not have.** Overtaking traffic
+  was always put in the left lane, including on the two-lane roads that have
+  no left lane, so on those roads it went by on a side that was not there and
+  was never really in your way. Traffic now uses the lanes the road actually
+  has, and keeps up with the road as the lane count changes under it.
+
+- **You get the whole on-ramp to build speed when you pull out of a yard.**
+  Leaving a warehouse or yard that puts you on city streets, the ramp up onto
+  the highway went by in a few seconds no matter how long it really was, so
+  you reached the end of the merging lane far slower than the traffic you
+  were joining -- as little as twenty-seven where the road was running
+  seventy-five -- and were then told you were under speed as though that were
+  your doing. The merging lane now takes the time it really takes. Driven out
+  of twenty-five yards in twenty-five states, the truck used to reach the end
+  of the lane at fourteen to twenty-eight miles an hour and now reaches it at
+  thirty-four to fifty-six; where it is still short of the road, that is a
+  loaded truck on a short ramp rather than the clock.
+
+- **Destination approach assistance no longer brakes you on the way OUT of a
+  yard.** With the assist switched on, pulling out of a warehouse or yard onto
+  city streets, it announced "destination approach assistance slowing" and
+  took the pedals as you reached the on-ramp -- with the delivery still a
+  whole run away -- and set you down at the merge barely rolling. It happened
+  at every yard with city streets, because the streets out of a yard and the
+  streets in to one are the same streets. The assist now knows which way you
+  are driving them and leaves a departure alone.
+
+
 - **Destination approach assistance now stops you at the gate on every
   delivery, not just some of them.** With the assist switched on, the truck
   was brought to a stop ready to pull in at some warehouses and driven

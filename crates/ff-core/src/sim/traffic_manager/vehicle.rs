@@ -24,6 +24,25 @@ pub struct TrafficVehicle {
     /// The route mile this vehicle leaves the highway at, for bubble
     /// traffic: without it a slower vehicle ahead was permanent.
     pub exit_at_mi: Option<f64>,
+    /// How this driver runs relative to whatever is posted, in mph. Drawn
+    /// once from the intent's band; `None` for a vehicle whose speed did not
+    /// come from a draw at all (a marked unit, an injected jam, a vehicle a
+    /// test placed by hand), which is left alone.
+    ///
+    /// The speed itself is NOT a property of the vehicle: the number posted
+    /// changes along a leg -- through every town a US route passes -- and a
+    /// speed drawn once at the spawn cell and kept forever is a town speed
+    /// carried out onto the open road, or a highway speed carried into town.
+    /// Keeping the OFFSET and re-reading the posting under the wheels is what
+    /// makes a vehicle drive the road it is on.
+    pub limit_offset_mph: Option<f64>,
+    /// The limiter this vehicle's machine carries, drawn once from its
+    /// class's band. `None` for a class that is not governed.
+    pub governor_mph: Option<f64>,
+    /// Conditions coming off the top that belong to this vehicle rather than
+    /// to the road: the rush-hour draw. Weather is read live instead, so a
+    /// clearing sky lifts the whole road rather than only what spawns next.
+    pub slowdown_mph: f64,
 }
 
 impl TrafficVehicle {
@@ -47,7 +66,25 @@ impl TrafficVehicle {
             length_mi: 0.25,
             lane: 0,
             exit_at_mi: None,
+            limit_offset_mph: None,
+            governor_mph: None,
+            slowdown_mph: 0.0,
         }
+    }
+
+    /// Record what the speed draw decided, so the target can be re-read
+    /// against the road the vehicle is on rather than the road it was drawn
+    /// on. See [`TrafficVehicle::limit_offset_mph`].
+    pub fn with_speed_draw(
+        mut self,
+        limit_offset_mph: f64,
+        governor_mph: Option<f64>,
+        slowdown_mph: f64,
+    ) -> Self {
+        self.limit_offset_mph = Some(limit_offset_mph);
+        self.governor_mph = governor_mph;
+        self.slowdown_mph = slowdown_mph;
+        self
     }
 
     pub fn with_lane(mut self, lane: i64) -> Self {
@@ -123,6 +160,9 @@ impl From<NPCVehicle> for TrafficVehicle {
             length_mi: npc.length_mi,
             lane: npc.lane,
             exit_at_mi: None,
+            limit_offset_mph: None,
+            governor_mph: None,
+            slowdown_mph: 0.0,
         }
     }
 }

@@ -24,9 +24,17 @@ const WILDLIFE_TIMES: [&str; 3] = ["dawn", "dusk", "night"];
 /// One grounded road hazard and the conditions under which it can occur.
 ///
 /// `None` on `regions`/`weather`/`terrain` means "no restriction on that
-/// axis". `animal` hazards are biased to dawn, dusk, and night. `dodgeable`
-/// marks hazards a quick lane change clears. `name` is the short noun phrase
-/// a resolution line names this hazard by ("the deer").
+/// axis". `animal` hazards are biased to dawn, dusk, and night. `name` is the
+/// short noun phrase a resolution line names this hazard by ("the deer").
+///
+/// `in_lane` marks a hazard that sits in YOUR lane and no other: an object
+/// on the pavement, a car stopped on the shoulder, a coned-off lane. It is a
+/// property of the THING, and it is deliberately not the same question as
+/// whether the hazard can be dodged -- that also needs a lane to dodge into,
+/// which is a property of the ROAD (`Trip::has_open_adjacent_lane_at`). Fog,
+/// ice, a crosswind and a deer that may bolt either way are not in-lane: they
+/// span the road, so no lane change answers them however many lanes there
+/// are. The two are combined once, at the emitter.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HazardDef {
     pub text: &'static str,
@@ -35,7 +43,7 @@ pub struct HazardDef {
     pub weather: Option<&'static [WeatherKind]>,
     pub terrain: Option<&'static [&'static str]>,
     pub animal: bool,
-    pub dodgeable: bool,
+    pub in_lane: bool,
     pub name: &'static str,
 }
 
@@ -47,7 +55,7 @@ const fn hz(text: &'static str, weight: f64, name: &'static str) -> HazardDef {
         weather: None,
         terrain: None,
         animal: false,
-        dodgeable: false,
+        in_lane: false,
         name,
     }
 }
@@ -72,7 +80,7 @@ pub static HAZARDS: &[HazardDef] = &[
     // blind needs to know WHAT is in it (Brandon, 2026-08-20). The split's
     // weights sum to the 1.2 the one generic entry carried.
     HazardDef {
-        dodgeable: true,
+        in_lane: true,
         ..hz(
             "a ladder fallen from a truck in the lane",
             0.25,
@@ -80,32 +88,32 @@ pub static HAZARDS: &[HazardDef] = &[
         )
     },
     HazardDef {
-        dodgeable: true,
+        in_lane: true,
         ..hz("loose lumber dropped across the lane", 0.25, "the lumber")
     },
     HazardDef {
-        dodgeable: true,
+        in_lane: true,
         ..hz("a mattress lying in the lane", 0.2, "the mattress")
     },
     HazardDef {
-        dodgeable: true,
+        in_lane: true,
         ..hz("spilled cargo boxes across the lane", 0.2, "the boxes")
     },
     HazardDef {
-        dodgeable: true,
+        in_lane: true,
         ..hz("a shredded truck tarp in the lane", 0.15, "the tarp")
     },
     HazardDef {
-        dodgeable: true,
+        in_lane: true,
         ..hz("debris on the road", 0.15, "the debris")
     },
     HazardDef {
-        dodgeable: true,
+        in_lane: true,
         ..hz("retread debris from a blown tire", 1.0, "the tire debris")
     },
     // The move-over law in action: shift a lane away from the shoulder.
     HazardDef {
-        dodgeable: true,
+        in_lane: true,
         ..hz(
             "a vehicle stopped on the shoulder",
             1.0,
@@ -115,7 +123,7 @@ pub static HAZARDS: &[HazardDef] = &[
     // "A slow vehicle ahead" is deliberately NOT here (owner call,
     // 2026-08-20): a slow vehicle in the flow is the traffic bubble's job.
     HazardDef {
-        dodgeable: true,
+        in_lane: true,
         ..hz("a sudden lane closure ahead", 0.8, "the lane closure")
     },
     hz(
@@ -159,7 +167,7 @@ pub static HAZARDS: &[HazardDef] = &[
     // Wet weather only.
     HazardDef {
         weather: Some(WET),
-        dodgeable: true,
+        in_lane: true,
         ..hz(
             "standing water flooding the lane",
             1.1,
@@ -207,7 +215,7 @@ pub static HAZARDS: &[HazardDef] = &[
     },
     HazardDef {
         weather: Some(&[WeatherKind::Ice]),
-        dodgeable: true,
+        in_lane: true,
         ..hz("a car spun out on the glaze ahead", 1.1, "the spun-out car")
     },
     // Dense fog only.
@@ -233,7 +241,7 @@ pub static HAZARDS: &[HazardDef] = &[
     HazardDef {
         weather: Some(&[WeatherKind::Wind]),
         regions: Some(&["desert_southwest", "great_basin", "southern_plains"]),
-        dodgeable: true,
+        in_lane: true,
         ..hz("tumbleweeds piling in your lane", 0.5, "the tumbleweeds")
     },
     // Mountain terrain only.
@@ -246,7 +254,7 @@ pub static HAZARDS: &[HazardDef] = &[
             "pacific_northwest",
             "california",
         ]),
-        dodgeable: true,
+        in_lane: true,
         ..hz("rockfall debris on the road", 1.0, "the rockfall")
     },
     HazardDef {
@@ -259,8 +267,10 @@ pub static HAZARDS: &[HazardDef] = &[
     },
 ];
 
-pub fn hazard_is_dodgeable(text: &str) -> bool {
-    HAZARDS.iter().any(|h| h.dodgeable && h.text == text)
+/// Whether this hazard sits in your lane alone -- the half of "can I go
+/// around it" that belongs to the hazard rather than to the road.
+pub fn hazard_is_in_lane(text: &str) -> bool {
+    HAZARDS.iter().any(|h| h.in_lane && h.text == text)
 }
 
 /// The short noun phrase a resolution line names this hazard by; "it" for a

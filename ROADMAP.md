@@ -1814,6 +1814,127 @@ onto exit signalling.
       because every bend met there advised at or above posted, but the gap
       is real and belongs with the 2.0 assist work.
 
+      MEASURED, 2026-08-24 (`states_driving_traffic_rate.rs`, 5 200 seeded
+      route miles over twenty real corridors): the bubble holds 0.37 vehicles
+      per mile of road in the direction of travel against the 2.65 its own
+      volume model asks for at the same miles -- a seventh, not a fifth as the
+      saturation argument above estimated. The binding constraint is not
+      MAX_BUBBLE_VEHICLES (the mean population is two) but that
+      `spawned_cells` gives each cell of road exactly one draw ever, so the
+      window is only ever fed from its leading edge, and `exit_at_mi` retires
+      each vehicle after 2.5 to 11 miles of its own travel. Re-arming cells
+      behind the truck is the change that would close it, and it is a real
+      decision: it multiplies the population several-fold, which is a
+      frame-time, speech-pacing and pass-whoosh question and an owner call.
+
+- [x] **Traffic drives the road it is ON, not the road it was drawn on**
+      (2026-08-24, owner report: "I have to brake when I am in the only lane
+      available and it forces me to brake ... it happens far too often").
+      A bubble vehicle's speed was drawn once, from the number posted in the
+      cell it appeared in, and kept for life. A US route drops to thirty
+      through every town it passes, so a car drawn in one carried thirty out
+      onto the sixty-five beyond it, and a car drawn on the open road held
+      sixty-five into the next town. `TrafficVehicle` now stores the DRAW --
+      the driver's offset from whatever is posted, their machine's limiter,
+      and the rush-hour slowdown -- and re-reads the posting under the wheels
+      every update. Weather comes off live rather than frozen at spawn.
+
+      Measured before and after over the same 5 200 seeded miles: forced
+      slow-downs fell from 1.01 to 0.64 per hundred miles where the road has
+      one lane your side, and from 0.63 to 0.30 where it has two or more.
+      Bubble vehicles running slower than any speed their own road could draw
+      fell from 1.4 percent to 0.1 percent, and the population above 1.2 times
+      the posted number (a highway speed carried into a town, up to 3.3 times
+      posted) fell from 2 200 sightings to 80. Vehicles PLACED per hundred
+      miles went 41.7 to 42.1: the road carries exactly as much traffic as it
+      did, which is the invariant `the_road_still_has_traffic_on_it` pins.
+
+      Landed with it: braking traffic is gated on `braking_plausible_at` in
+      BOTH spawners (`spawn_initial_traffic` never checked, and `replenish`
+      exempted the first three miles of every run, so a phantom wave with no
+      cause line to offer was routine); the braking LABEL now ends when the
+      reason does, instead of following a recovered vehicle for life; the
+      route's opening traffic takes an exit like the rolling bubble's always
+      has, instead of being permanent; and a vehicle's LANE is held to the
+      lanes its road has, drawn and re-checked, where "passing traffic lives
+      in the left lane" used to be applied to two-lane US routes that have no
+      left lane. That last one moved the one-lane rate the OTHER way, 0.60 to
+      0.64, because a vehicle in a lane that does not exist could never hold
+      the truck up -- which is the honest direction for it to move.
+
+      The response half of it -- "in those situations you'd brake hard" -- is
+      the next entry, and is closed.
+
+- [x] **`dodgeable` means "is there somewhere to go", and nothing else**
+      (2026-08-24, the open half of the entry above). A lead-vehicle hazard
+      was emitted `dodgeable: true` whatever the road, so `hazard_deadline_for`
+      added `LANE_TAP_CHANGE_S` to the window of a driver who had no lane to
+      tap into: the assist waited out two and a half seconds of allowance for
+      a move that could not be made while the truck kept closing, and the
+      driver who could NOT go around was left nearer the vehicle in front
+      before anything acted than the driver who could.
+
+      Done in the order the trap demands. FIRST the target was untangled from
+      dodgeability -- `hazard_target_mph` now reads a `HazardShape`, keying
+      on `lead_mph` for a vehicle, then on `in_lane` for a thing lying in the
+      lane (near stop), and only otherwise on `HAZARD_SAFE_MPH`. Reverting
+      just that half and re-running the new file reproduces Brandon's
+      2026-08-23 regression exactly: "a vehicle doing 55 must clear at 55
+      whatever the road offers -- left: 25.0". THEN `dodgeable` was made to
+      mean what it says, at the emitter, for every hazard kind alike:
+      `hazard_is_in_lane(kind) && has_open_adjacent_lane_at(None)`. The words
+      and the physics read the same predicate now, which
+      `the_words_and_the_physics_read_the_same_lane_authority` pins.
+
+      Fixed obstacles came with it, on the owner's ruling that "we should be
+      able to swerve around some fixed obstacles": debris beside an open lane
+      is dodgeable and the call says so, debris with no lane is the near stop
+      and the resolution line no longer claims the truck eased around
+      something on a road with nothing to ease into. The catalog flag was
+      renamed `HazardDef::dodgeable` -> `in_lane` (and `hazard_is_dodgeable`
+      -> `hazard_is_in_lane`) because it never answered the dodge question;
+      it answers whether the thing occupies one lane. Fog, ice, a crosswind, a
+      dust storm, a deer that may bolt either way and traffic stopped across
+      the road stay brake-only however many lanes there are, and keep "Brake
+      now!" to themselves.
+
+      Measured on the same rigging as the entry above, 120 seeded deliveries
+      over 20 corridors, weather pinned, before and after. Where the road has
+      one lane your side: the window granted at the call 14.32 s -> 8.32 s,
+      the assist actually had to act on 19 of 32 -> 26 of 30, and the ground
+      covered before it did 3 025 ft -> 1 268 ft past the vehicle. Where the
+      road has two or more: 16.19 s -> 10.46 s, 15 of 31 -> 29 of 34,
+      3 286 ft -> 1 752 ft. Forced slow-downs did not rise on the road the
+      report was about (32 -> 30, 0.67 -> 0.63 per hundred miles); on wider
+      roads 31 -> 34 (0.48 -> 0.52), which is inside the counting noise of a
+      Poisson rate at n = 31 (+/- 5.6) and comes from the truck's own changed
+      speed trace, not from more traffic being placed.
+
+      The paired bench (`assist_response_paired_bench`) is the clean read,
+      because only the lane count differs. Truck at 65, a car doing 45. BEFORE
+      the two roads were identical in every number: window 14.89 s both, the
+      assist first acting 11.95 s after the call, by which time the truck was
+      194 ft PAST the car it was braking for. AFTER: one lane 6.61 s and the
+      assist acting 3.18 s after the call with the car still 28 ft ahead; two
+      lanes 9.11 s and 5.83 s, exactly `LANE_TAP_CHANGE_S` apart. Sooner and
+      firmer where there is no way past, which is what was asked for. The
+      emergency application was not spent in any bench run, and once in 64
+      field events (a 3.5 percent grade) -- the escalation rule itself is
+      untouched and still measures the stop actually underway.
+
+      OPEN, found by the measurement and NOT this entry's to fix: a
+      lead-vehicle hazard is a TIMER, and its countdown has no relation to
+      the geometry. The truck drives clean through the vehicle it is being
+      warned about -- mean 1 268 ft past it on one lane, and the modelled
+      collision only happens if the deadline runs out. That is a defensible
+      simplification for an audio-first game, but it means "time to collision"
+      and "closing distance" cannot both be true at once, and a driver who
+      hears a car right ahead and then passes through it is being told
+      something the world does not honour. Deriving the deadline from the
+      closing rate, or making bubble traffic solid in your own lane, is an
+      owner call: it changes what every traffic warning means.
+
+
 - [x] **The one-in-four keeper-ease flake, fixed at its three roots**
       (2026-08-20, was: 15.47 against a <= 15.0). Traced with a frame
       trace, not a guess. (1) `_keeper_ease_mi`'s 0.75-mi cap clipped the
@@ -2804,6 +2925,83 @@ onto exit signalling.
       firm application. It stops within a truck length of the point (pinned by
       `test_the_approach_assist_stops_within_a_truck_length_of_the_gate`), but a
       grade feed-forward would make the finish gentler.
+
+- [x] **The DEPARTURE chain does not carry the arrival's clock fault, but the
+      acceleration lane after it does (MEASURED and FIXED 2026-08-24).** The
+      question the entry below leaves open: `begin_departure_chain` sets no
+      `dock_run_in`, so the streets a truck drives LEAVING a facility still
+      run compressed. Swept the same way -- twenty-five chain-capable
+      facilities, one per state, fixed order, seeded trip and pinned weather,
+      the driver holding the game's own advised number for the corner in play.
+
+      VERDICT on the streets: clean, and no pin is wanted. `controlled_turn`
+      already holds the clock at real time from the moment a corner enters its
+      own window until it resolves, and that window is itself sized in real
+      seconds (`TURN_WARNING_REAL_S`), so a corner's run-up is never
+      compressed. Measured: 0 to 13 feet of compressed ground in the last
+      tenth of a mile before an unjudged corner, per departure, against a
+      truck 70 feet long -- and all of that is the frame or two between one
+      corner resolving and the next latching. Driving the same twenty-five
+      with the whole clock pinned to real time changes the outcome of 2
+      corners in 125. The ARRIVAL chain, which IS pinned, scores the same on
+      every corner measure (125 corners each: 74 vs 74 come in under a third
+      of the design lead, 91 vs 90 are not cleanly taken), which is what says
+      the remaining corner difficulty is the shipped street geometry --
+      corners 260 feet apart with a 20 mph advisory -- and not the clock.
+      Copying the arrival's flag here would have been copying the flag that
+      exists rather than the fault that exists.
+
+      RECORDED, not fixed, and not the clock: a departure loses more corners
+      to the miss loop than an arrival does -- 16 of 125 against 5 -- because
+      an arrival has the approach assist shedding speed over its last stretch
+      and a departure is driven the whole way, which is the design. Pinning
+      the clock to real time moves that 16 to 14. What is left is the
+      commitment loop meeting a downtown grid: a corner advised at 20 with the
+      next one 260 feet on, and a loaded truck that has to be under it. Worth
+      a look as a turn-machinery question, not as a clock one.
+
+      No stop signs, lights or yields exist on a chain to price wrongly:
+      `Leg::local` carries no stops, so `place_stops` puts none on either
+      direction's chain. Every zone and exit warning already converts through
+      `effective_time_scale`.
+
+      TWO REAL DEFECTS the sweep did find, both fixed here.
+
+      1. The acceleration lane out of the streets IS priced in real feet and
+         spent by compressed ground. `finish_departure_chain` sizes it from
+         AASHTO Green Book Table 10-3 and `update_departure_ramp` decrements
+         it by `moved_mi`, which carries the scale, so the truck built speed
+         in real seconds while the lane ran out about seven times too fast.
+         Measured before: Abilene's 1790 feet went by in 12.8 real seconds
+         where a truck merely holding the 27 mph it reached needs 45.2; tapers
+         came out at 14 to 28 mph, median 27 under the road, twenty-three of
+         twenty-five more than 10 under. Fix: `controlled_ramp` now covers
+         the departure lane as well as the exit ramp -- the same law, the
+         other direction --
+         and set in `finish_departure_chain` so not even the handoff frame is
+         compressed. After: tapers 34 to 56 mph, median 5 under, nine still
+         more than 10 under, and those are a loaded truck on a short ramp,
+         which `update_departure_ramp`'s own line already treats as normal.
+      2. The destination approach assist fired on EVERY chain departure, all
+         twenty-five. `update_destination_approach_assist` measured off
+         `is_facility_approach_route()`, which cannot tell the origin's
+         streets from the destination's -- they are the same streets -- so it
+         read the on-ramp as the dock, said "Destination approach assistance
+         slowing" with the delivery a whole run away, and took the pedals for
+         the merge -- three to four mph off the taper even with the lane
+         itself pinned, and the spoken line untrue at all twenty-five. Fix:
+         it now also requires `!trip.outbound`, which is the trip's own word
+         for which end of a facility's streets the gate is at.
+
+      Pinned by `crates/freight-fate/tests/it/states_driving_departure_sweep.rs`:
+      the lane is not outrun by its own length and its closing line quotes the
+      truck's real speed; the arrival assist never takes the pedals leaving a
+      yard; and the verdict itself -- a corner's run-up is never covered at
+      compressed pace -- asserted against the mechanism rather than a flag, so
+      it fires whether the turn latch or the real-second window is what goes.
+      Verified to fail without each fix (25 of 25 in every case). The file
+      also keeps the arrival-side control and the pacing A/B as probes, which
+      is the evidence for the verdict.
 
 - [x] **The facility street chain runs on the real clock, which is what the
       approach assist was missing (FIXED 2026-08-24).** Owner, 2026-08-24:

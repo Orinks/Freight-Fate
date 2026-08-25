@@ -242,7 +242,7 @@ pub fn named_hazards_keep_their_frequency() -> Outcome {
     // And the contract the naming exists for: a hazard the driver has to clear
     // must be nameable when they clear it.
     for hazard in HAZARDS {
-        if (hazard.dodgeable || hazard.animal) && hazard.name.is_empty() {
+        if (hazard.in_lane || hazard.animal) && hazard.name.is_empty() {
             findings.push(format!(
                 "hazard {:?} has no name to clear it by",
                 hazard.text
