@@ -21,6 +21,27 @@ Massachusetts. Anchoring each sign to the attraction's real coordinate makes it
 geographic by construction: it speaks because you are actually approaching the
 thing.
 
+**That paragraph described a live defect for as long as it has existed.** The
+hand-keyed pool in `billboards.rs` *was* keyed on shield alone, so every sign
+naming a place was true the whole length of an interstate: I-40 runs through
+Oklahoma and Tennessee both, and a tester duly heard the Oklahoma signs outside
+Knoxville. Worse, the key threw the shield's prefix away, so US-90 and AZ-90
+inherited I-90's roadside too. Fixed 2026-08-24 — each corridor line now
+carries a `SignAnchor` (`Corridor` for a line naming no place, `States` for a
+region or a town the world does not model, `Approaching` for a world city
+within `SIGN_APPROACH_MI` of route ahead), the lookup matches interstates only,
+and the placer refuses a sign wherever its copy is untrue, falling through to
+the anywhere pool.
+
+The two mechanisms are not rivals and should not be merged. The spider bakes a
+*measured* milepost for a real attraction; the anchored pool carries *authored*
+lines whose subject is often a region, a song's home turf, or a town the map
+has no node for, and for which no coordinate exists to measure. A sign that
+earns a real coordinate should graduate from the pool to a baked landmark; the
+rest keep their anchors. This is the provenance rule in `AGENTS.md` applied to
+placement: an anchor is deliberately coarse-grained so that a *derived*
+placement never wears the shape of a *measured* one.
+
 ---
 
 ## 1. End state — when a corridor's billboards are "done"

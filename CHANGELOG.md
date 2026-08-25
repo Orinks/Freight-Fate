@@ -993,6 +993,20 @@
   on the flat, and switching it off by hand, picking cylinders with 1, 2 and
   3, and touching the accelerator all work the same.
 
+- **Billboards now stand where the sign says they do.** A sign naming a town
+  used to be read anywhere on that interstate, so Interstate 40 across
+  Tennessee advertised Oklahoma, "Jacksonville ahead" turned up in New
+  England, and redwood country and the Appalachian hollers could be read in
+  any state in the country. A sign that names a place now only appears near
+  it: a town's sign starts about a hundred and fifty miles out on the road
+  that reaches it, and a sign about a region only reads in that region. Roads
+  that merely share a number with an interstate, like a US or state route
+  ninety, no longer borrow that interstate's signs either. The everyday
+  roadside is untouched -- the diners, the fireworks, the attorney, the
+  church signs still turn up anywhere -- and every corridor kept all of its
+  own signs.
+
+
 - **The speed keeper now holds the posted number up a hill, and says so when
   it cannot.** With automatic speed control on, the keeper announced the
   number it was holding through a work zone, a heavy-traffic stretch, or the
