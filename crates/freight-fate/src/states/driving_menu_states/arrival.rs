@@ -66,6 +66,13 @@ pub struct ArrivalState {
 
 impl ArrivalState {
     pub fn new(ctx: &mut GameContext, driving: &mut DrivingState) -> Self {
+        let arrival_hours = settlement_hours(driving);
+        Self::new_at(ctx, driving, arrival_hours)
+    }
+
+    /// Build settlement with an appointment time captured at receiver
+    /// check-in. `driving` may already include later unloading time.
+    pub fn new_at(ctx: &mut GameContext, driving: &mut DrivingState, arrival_hours: f64) -> Self {
         let terminal = ctx
             .world
             .home_terminal(&driving.job.destination)
@@ -81,7 +88,7 @@ impl ArrivalState {
             summary_lines: Vec::new(),
             terminal,
         };
-        state.settle(ctx, driving);
+        state.settle(ctx, driving, arrival_hours);
         state
     }
 
@@ -264,14 +271,18 @@ impl ArrivalState {
         )
     }
 
-    fn settle(&mut self, ctx: &mut GameContext, d: &mut DrivingState) {
+    fn settle(&mut self, ctx: &mut GameContext, d: &mut DrivingState, arrival_hours: f64) {
         let job = d.job.clone();
-        let hours = settlement_hours(d);
+        let elapsed_hours = settlement_hours(d);
         let trip_damage = (d.trip.truck.damage_pct - d.start_damage).max(0.0);
         if job.bobtail {
-            self.settle_bobtail(ctx, d, hours, trip_damage);
+            self.settle_bobtail(ctx, d, elapsed_hours, trip_damage);
             return;
         }
+        // Appointment performance and haul pay stop at receiver check-in.
+        // The post-check-in clock still advances below so unloading remains
+        // real calendar, market, HOS, idle-fuel, and player-visible time.
+        let hours = arrival_hours;
         let gross_base = job.payout_default(hours, trip_damage);
         let toll_expense = d.trip.toll_expense();
         let on_time = hours <= job.deadline_game_h;
@@ -544,7 +555,7 @@ impl ArrivalState {
         }
         let (game_hours, market_day) = {
             let p = profile_mut_of(ctx);
-            p.game_hours += hours;
+            p.game_hours += elapsed_hours;
             (p.game_hours, p.market_day())
         };
         {
@@ -598,10 +609,19 @@ impl ArrivalState {
 
         let destination_timezone = d.trip.destination_timezone();
         let money = profile_of(ctx).money;
+        let receiver_service_hours = (elapsed_hours - hours).max(0.0);
+        let receiver_service_clause = if receiver_service_hours >= 0.05 {
+            format!(
+                " Receiver service after check-in took {} hours.",
+                fmt_f(receiver_service_hours, 1)
+            )
+        } else {
+            String::new()
+        };
         self.summary_parts.insert(
             0,
             format!(
-                "Delivered {} tons of {} to {} in {} hours, {}. It is {}. {} {} dollars. \
+                "Delivered {} tons of {} to {} in {} hours, {}.{receiver_service_clause} It is {}. {} {} dollars. \
                  Carrier-paid or reimbursed charges {} dollars: tolls {}, accessorials {}. \
                  These are billed to carrier settlement and not deducted from driver pay. \
                  Business status: {}. Business costs {} dollars. Fines carried over {} dollars. \
@@ -832,6 +852,15 @@ impl ArrivalState {
             ),
             format!("Business status: {}.", business.status_label),
         ];
+        if receiver_service_hours >= 0.05 {
+            lines.insert(
+                2,
+                format!(
+                    "Receiver service after check-in: {} hours.",
+                    fmt_f(receiver_service_hours, 1)
+                ),
+            );
+        }
         lines.extend(business_cost_lines);
         lines.extend(charge_lines);
         lines.extend(advance_lines);

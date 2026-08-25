@@ -958,6 +958,11 @@
 
 ### Fixed
 
+- **Receiver unloading no longer turns an on-time arrival into a late
+  delivery.** The appointment, pay, and on-time bonus now use the time the
+  truck checked in at the receiver. Unloading still advances the clock, and
+  the delivery summary names that later service time separately.
+
 - **Traffic stops crawling in front of you for a jam that is not there.** A
   vehicle that had slowed for congestion kept doing it long after the
   congestion was behind it, and near enough for you to hear about it: it sat

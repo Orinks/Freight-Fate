@@ -363,6 +363,15 @@ onto exit signalling.
       `test_old_active_trip_gets_deadline_floor_and_model_marker` in
       `crates/freight-fate/tests/states_driving_trip_resume.rs`, which was
       written complete and left failing when the defect was found.
+- [x] **Rust settlement keeps unloading outside the delivery appointment
+      (2026-08-25).** A receiver's 45-minute live unload advanced the trip
+      clock before settlement, so an on-time gate arrival could lose its
+      bonus as though receiver service were driving time. Settlement now
+      captures check-in before unloading for the deadline and pay while the
+      calendar clock still advances through service. The Tyler-to-Payson
+      regression carries the reported 19-ton bulk load, assigned long-run
+      mid-roof, automatic transmission, 10-hour reset, Mountain Time boundary,
+      and spoken settlement verdict entirely through Rust.
 - [x] **Rust port: the trooper and enforcement-record cases run (2026-08-24).**
       56 `#[ignore]`d wrong-crate stubs deleted from `ff-core`, where they
       could never run, and rewritten against the real screens: 34 in

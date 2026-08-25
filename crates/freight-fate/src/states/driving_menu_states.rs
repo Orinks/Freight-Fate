@@ -109,6 +109,14 @@ impl DrivingState {
         ctx.replace_state(state);
     }
 
+    /// Settle after receiver service while judging the appointment at the
+    /// instant the truck checked in. The drive clock may have advanced for
+    /// unloading since then, and still owns the later calendar time.
+    pub fn replace_with_arrival_state_at(&mut self, ctx: &mut GameContext, arrival_hours: f64) {
+        let state = ArrivalState::new_at(ctx, self, arrival_hours);
+        ctx.replace_state(state);
+    }
+
     /// `ctx.replace_state(FacilityArrivalState(ctx, self))`.
     pub fn replace_with_facility_arrival_state(&mut self, ctx: &mut GameContext) {
         let mut state = FacilityArrivalState::new(ctx);

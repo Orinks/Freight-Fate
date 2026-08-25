@@ -21,7 +21,7 @@ use crate::states::driving_core::{
     advance_rest_clock, carrier_accessorial_charges, charge_summary, charge_total, hos_mut_of,
     profile_of, FacilityEngine, DOCKING_MAX_MPH, UNLOADING_WAIT_S,
 };
-use crate::states::driving_menu_states::{keep_rows, DriveRef};
+use crate::states::driving_menu_states::{keep_rows, settlement_hours, DriveRef};
 
 pub struct FacilityArrivalState {
     menu: MenuCore<Self>,
@@ -157,6 +157,12 @@ impl FacilityArrivalState {
     fn dock(&mut self, ctx: &mut GameContext) {
         let plan = self.delivery_plan(ctx);
         let facility = self.facility(ctx);
+        // The delivery appointment is met when the receiver accepts the
+        // truck at the dock, not when the receiver finishes unloading it.
+        // Keep that instant before the live-unload clock advances below.
+        let Some(arrival_hours) = self.driving.read(|d| settlement_hours(d)) else {
+            return;
+        };
         let Some(speed) = self.driving.read(|d| d.trip.truck.speed_mph()) else {
             return;
         };
@@ -205,7 +211,9 @@ impl FacilityArrivalState {
                     ctx.award_achievement("dropped_the_bad_one");
                 }
             }
-            drive.with(ctx, |d, ctx| d.arrive(ctx));
+            drive.with(ctx, |d, ctx| {
+                d.replace_with_arrival_state_at(ctx, arrival_hours)
+            });
         };
 
         let (title, message, status) = if drop_hook {
