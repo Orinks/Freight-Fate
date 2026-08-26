@@ -1,8 +1,5 @@
 //! The in-cab radio: reception, the FM fringe, station rotation, personal
-//! playlists, the dial keys, the badges the dial earns, and the live-data
-//! source syncs that share this pass of the frame.
-
-use std::sync::Arc;
+//! playlists, the dial keys, and the badges the dial earns.
 
 use ff_core::music::RADIO_TRACKS_PER_HOST_BREAK;
 use ff_core::radio::{
@@ -11,16 +8,11 @@ use ff_core::radio::{
     PERSONAL_PLAYLIST_SOURCE_TYPE,
 };
 use ff_core::radio_content::{content_duration_s, plan_break};
-use ff_core::sim::real_traffic::RealTrafficProvider;
-use ff_core::sim::real_weather::RealWeatherProvider;
-use ff_core::sim::trip_traffic::TrafficProvider;
-use ff_core::sim::truck_parking::TruckParkingProvider;
-use ff_core::sim::weather::WeatherProvider;
+use ff_core::radio_rotation::{cue_after, RotationCue, StationRotation};
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
 use crate::audio::{VolumeUpdate, CH_RADIO_FX};
-use crate::net::UreqTransport;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_updates::{
@@ -37,6 +29,7 @@ impl DrivingState {
     /// silent when the current bed runs out. Day/night flavor stays as it
     /// was when the menu opened; it catches up when driving resumes.
     pub fn tick_drive_music(&mut self, ctx: &mut GameContext, dt: f64) {
+        self.advance_radio_airtime(dt);
         self.sync_radio_power(ctx); // a rest-menu shutdown kills the radio too
         if self.radio.enabled && self.trip.truck.engine_on {
             let night = self.music_night;
@@ -232,6 +225,42 @@ impl DrivingState {
         }
     }
 
+    /// Every station is on the air for this long, whatever the dial says.
+    ///
+    /// Called once a frame from whichever update owns the frame -- the drive
+    /// itself, or the covered-music tick while a menu is over it -- so the
+    /// clock runs at the same rate with the radio off, tuned elsewhere, or
+    /// playing. Real seconds, like the rotation it drives.
+    pub fn advance_radio_airtime(&mut self, dt: f64) {
+        self.radio_airtime_s += dt.max(0.0);
+    }
+
+    /// The key that fixes this station's running order for this trip.
+    fn station_seed_key(&self, station: &RadioStation) -> String {
+        format!("{}|{}", self.trip_seed, station.id)
+    }
+
+    /// Where this station's rotation stands right now.
+    ///
+    /// `radio_airtime_s` opens the drive part way in, so the first tune-in
+    /// arrives mid-song the way a real dial does, and keeps running while the
+    /// driver is elsewhere on the dial, which is why tuning back finds the
+    /// station further along instead of back at the top.
+    fn station_cue(&self, station: &RadioStation, tracks: &[String]) -> RotationCue {
+        if tracks.is_empty() {
+            return RotationCue::default();
+        }
+        let seed_key = self.station_seed_key(station);
+        let rotation = StationRotation {
+            station_id: &station.id,
+            host: &station.host,
+            playlist: &station.playlist,
+            seed_key: &seed_key,
+            tracks,
+        };
+        cue_after(&rotation, self.radio_airtime_s)
+    }
+
     pub fn station_rotation_pool(&self, station: &RadioStation, night: bool) -> Vec<String> {
         if station.playlist == "route" {
             return if night {
@@ -262,14 +291,21 @@ impl DrivingState {
         self.music_night = night;
         self.radio_station_id = station.id.clone();
         self.radio_playlist = self.station_rotation_pool(station, night);
-        self.radio_track_index = 0;
-        self.radio_elapsed_s = 0.0;
-        self.radio_break_queue = Vec::new();
-        self.radio_break_pos = 0;
-        self.radio_break_count = 0;
-        self.radio_tracks_since_break = 0;
-        if let Some(first) = self.radio_playlist.first().cloned() {
-            ctx.audio.play_music_with(&first, fade_ms);
+        let cue = self.station_cue(station, &self.radio_playlist);
+        let key = cue.current_key(&self.radio_playlist);
+        // A spoken host break, station ID or ad plays whole. Cutting into one
+        // mid-word is what a real dial does and what a screen reader user
+        // should never have to sit through, and a few seconds of drift on a
+        // rotation nobody is timing costs nothing.
+        let start_s = if cue.in_break() { 0.0 } else { cue.elapsed_s };
+        self.radio_track_index = cue.track_index;
+        self.radio_elapsed_s = start_s;
+        self.radio_break_queue = cue.break_queue;
+        self.radio_break_pos = cue.break_pos;
+        self.radio_break_count = cue.break_count;
+        self.radio_tracks_since_break = cue.tracks_since_break;
+        if !key.is_empty() {
+            ctx.audio.play_music_at(&key, fade_ms, start_s);
         }
     }
 
@@ -921,72 +957,5 @@ impl DrivingState {
         } else {
             ctx.say(&format!("Radio volume {pct} percent."));
         }
-    }
-
-    // -- live-data sources -------------------------------------------------------------
-    //
-    // `GameContext` only hands out borrows of its session-long providers, and
-    // a `WeatherSystem`/`Trip` has to OWN its provider, so a switch flipped
-    // mid-drive builds this drive's own -- the same class, transport and
-    // behaviour, exactly as `driving/init.rs` does at construction.
-
-    pub fn sync_weather_source(&mut self, ctx: &mut GameContext) {
-        let real = ctx.settings.real_weather;
-        let controls_calendar = ctx.settings.live_weather_controls_calendar;
-        if real == self.weather_source_real
-            && controls_calendar == self.live_weather_controls_calendar
-        {
-            return;
-        }
-        self.weather_source_real = real;
-        self.live_weather_controls_calendar = controls_calendar;
-        self.trip.weather.provider = if real {
-            Some(
-                Box::new(RealWeatherProvider::with_nws(Arc::new(UreqTransport)))
-                    as Box<dyn WeatherProvider>,
-            )
-        } else {
-            None
-        };
-        self.trip.weather.live_weather_controls_calendar = controls_calendar;
-        if !controls_calendar {
-            // Include time already driven when the active trip switches back
-            // to the independent in-game calendar.
-            self.trip.weather.game_hours =
-                Some(profile_of(ctx).calendar_game_hours() + self.trip.game_minutes / 60.0);
-        }
-        if !real {
-            self.trip.weather.live = false;
-        }
-        let effects = self.trip.weather.effects();
-        ctx.audio.set_weather(effects.sound);
-        ctx.audio.set_wind(effects.wind);
-    }
-
-    pub fn sync_traffic_source(&mut self, ctx: &mut GameContext) {
-        let real = ctx.settings.real_traffic;
-        if real == self.traffic_source_real {
-            return;
-        }
-        self.traffic_source_real = real;
-        self.trip.traffic_provider = if real {
-            Some(Arc::new(RealTrafficProvider::new(Arc::new(UreqTransport)))
-                as Arc<dyn TrafficProvider>)
-        } else {
-            None
-        };
-    }
-
-    pub fn sync_parking_source(&mut self, ctx: &mut GameContext) {
-        let real = ctx.settings.real_parking;
-        if real == self.parking_source_real {
-            return;
-        }
-        self.parking_source_real = real;
-        self.trip.parking_provider = if real {
-            Some(Arc::new(TruckParkingProvider::new(Arc::new(UreqTransport))))
-        } else {
-            None
-        };
     }
 }

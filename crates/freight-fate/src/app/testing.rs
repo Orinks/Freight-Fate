@@ -464,6 +464,9 @@ pub struct AudioCalls {
     /// `set_speech_duck(level)` in order.
     pub ducks: Vec<f64>,
     pub music: Vec<(String, u32)>,
+    /// Seconds into the track each `music` entry was asked to start at.
+    /// Parallel to `music`; zero for a track played from the top.
+    pub music_start_s: Vec<f64>,
     /// `"start"` / `"stop"` for every horn call, in order.
     pub horn: Vec<&'static str>,
     /// `set_engine_rpm(rpm, throttle)` in order. What the engine loop was
@@ -584,10 +587,12 @@ impl Audio for RecordingAudio {
     fn reverse_stop(&mut self) {}
     fn stop_world(&mut self) {}
     fn play_music_with(&mut self, track: &str, fade_ms: u32) {
-        self.log
-            .borrow_mut()
-            .music
-            .push((track.to_string(), fade_ms));
+        self.play_music_at(track, fade_ms, 0.0);
+    }
+    fn play_music_at(&mut self, track: &str, fade_ms: u32, start_s: f64) {
+        let mut log = self.log.borrow_mut();
+        log.music.push((track.to_string(), fade_ms));
+        log.music_start_s.push(start_s);
     }
     fn play_radio_stream_with(&mut self, _url: &str, _fade_ms: u32) -> Result<(), AudioError> {
         Ok(())

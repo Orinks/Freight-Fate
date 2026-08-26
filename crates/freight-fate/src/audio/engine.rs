@@ -560,6 +560,12 @@ impl Audio for AudioEngine {
         self.backend.play_music(track, fade_ms);
     }
 
+    /// Stream a music track from `start_s` seconds in, for tuning into a
+    /// station that was already playing it.
+    fn play_music_at(&mut self, track: &str, fade_ms: u32, start_s: f64) {
+        self.backend.play_music_at(track, fade_ms, start_s);
+    }
+
     /// Stream a live radio URL when the active backend supports it.
     fn play_radio_stream_with(&mut self, url: &str, fade_ms: u32) -> Result<(), AudioError> {
         self.backend.play_radio_stream(url, fade_ms)

@@ -1372,6 +1372,23 @@ onto exit signalling.
       (8-10 each) for country, classic rock, blues, and jazz, and 2-3 new
       Night Line ballads. `tools/generate_radio.py --plan-songs` supports
       capped waves via `--limit`.
+- [x] **The in-house stations run their own clock -- landed 2026-08-26
+      (Marie, issue #158).** Every tune-in restarted a station's shuffled
+      order at track one, second zero, so re-tuning always opened on the same
+      song. `radio_rotation::cue_after` replays the station's own rules
+      (songs, a break every `RADIO_TRACKS_PER_HOST_BREAK`) forward over a
+      drive-wide airtime clock and hands back the cue the playback loop
+      resumes from; `initial_airtime_s(trip_seed)` signs the stations on
+      before the drive starts, so the first tune-in is mid-song too.
+      `Audio::play_music_at` seeks the BASS stream, and a spoken break plays
+      whole rather than being cut into. Personal playlists deliberately keep
+      starting their entries from the top -- the player's own library is not
+      a broadcast.
+- [ ] **Song-aware host back-announces.** The rotation now knows exactly
+      what a station has just played, so a host break could name it. The
+      shipped host segments are generic road chatter, which is what makes
+      tuning into the middle of one safe today; a back-announce would have to
+      be generated per song and would tie the break pools to the track pools.
 - [ ] **Ad music beds.** Light instrumental beds mixed under the ad reads,
       with a ducking pass in the imaging chain; the ad scripts only need a
       cheap re-TTS pass to carry them.

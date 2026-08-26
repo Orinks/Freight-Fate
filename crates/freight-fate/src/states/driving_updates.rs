@@ -40,6 +40,7 @@ pub mod fatigue;
 pub mod frame;
 pub mod hazards;
 pub mod lanes;
+pub mod live_sources;
 pub mod pending;
 pub mod radio;
 pub mod stops;

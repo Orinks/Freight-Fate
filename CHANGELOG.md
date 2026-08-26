@@ -964,6 +964,20 @@
 
 ### Fixed
 
+- **Freight Fate's own stations keep playing while you are tuned away.**
+  Reported by Marie. Tuning back to Big Sky Country, or any of the other
+  stations the game plays itself, used to start its song list over from the
+  top, so the same song opened it every single time you came back. Each
+  station now runs its own hours through the whole drive whether you are
+  listening or not, so coming back finds it wherever it has got to: a
+  different song, part way through, and sometimes the host talking. It has
+  also been on the air a while before your drive starts, so the first time
+  you tune in you arrive in the middle of a song the way you would on a real
+  radio, and two stations never open on the same one. A host break, station
+  ident, or advert always plays from its beginning rather than being cut into
+  half way through. Your own playlists are untouched: they still resume on
+  the track they left off on and always start it from the beginning.
+
 - **Receiver unloading no longer turns an on-time arrival into a late
   delivery.** The appointment, pay, and on-time bonus now use the time the
   truck checked in at the receiver. Unloading still advances the clock, and

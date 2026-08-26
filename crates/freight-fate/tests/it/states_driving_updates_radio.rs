@@ -57,6 +57,8 @@ fn a_denver_drive(app: &mut TestApp, trip_seed: i64) -> DrivingState {
 #[derive(Default)]
 struct MusicAudio {
     music: Rc<RefCell<Vec<(String, u32)>>>,
+    /// Seconds into the track each `music` entry was asked to start at.
+    starts: Rc<RefCell<Vec<f64>>>,
     stops: Rc<RefCell<Vec<u32>>>,
     volume: Rc<Cell<f64>>,
     playing: Rc<Cell<bool>>,
@@ -66,6 +68,7 @@ struct MusicAudio {
 #[derive(Clone, Default)]
 struct MusicTape {
     music: Rc<RefCell<Vec<(String, u32)>>>,
+    starts: Rc<RefCell<Vec<f64>>>,
     stops: Rc<RefCell<Vec<u32>>>,
 }
 
@@ -86,6 +89,11 @@ impl MusicTape {
         self.music.borrow().is_empty()
     }
 
+    /// How far into the last track playback was asked to start.
+    fn last_start(&self) -> f64 {
+        self.starts.borrow().last().copied().expect("music played")
+    }
+
     fn clear_stops(&self) {
         self.stops.borrow_mut().clear();
     }
@@ -100,6 +108,7 @@ impl MusicAudio {
         let audio = MusicAudio::default();
         let tape = MusicTape {
             music: Rc::clone(&audio.music),
+            starts: Rc::clone(&audio.starts),
             stops: Rc::clone(&audio.stops),
         };
         app.ctx.audio = Box::new(audio);
@@ -188,7 +197,11 @@ impl Audio for MusicAudio {
     fn reverse_stop(&mut self) {}
     fn stop_world(&mut self) {}
     fn play_music_with(&mut self, track: &str, fade_ms: u32) {
+        self.play_music_at(track, fade_ms, 0.0);
+    }
+    fn play_music_at(&mut self, track: &str, fade_ms: u32, start_s: f64) {
         self.music.borrow_mut().push((track.to_string(), fade_ms));
+        self.starts.borrow_mut().push(start_s);
         self.playing.set(true);
     }
     fn play_radio_stream_with(&mut self, _url: &str, _fade_ms: u32) -> Result<(), AudioError> {
@@ -431,8 +444,13 @@ fn test_break_queue_delivers_host_id_ad_slots_in_order() {
     let mut app = TestApp::new();
     let mut d = a_denver_drive(&mut app, 42);
     let tape = MusicAudio::install(&mut app);
+    // Sign the station on at the top of its order: a drive normally opens
+    // with the stations already part way through theirs, which is a
+    // different case (below) from the shape of the break pattern.
+    d.radio_airtime_s = 0.0;
     tune_to_fixture(&mut d, &mut app, "brk-fixture", "roadhouse");
     assert!(tape.last().0.starts_with("radio_country_"));
+    assert_eq!(tape.last_start(), 0.0);
 
     play_next(&mut d, &mut app, &tape); // song 2
     assert!(tape.last().0.starts_with("radio_country_"));
@@ -466,6 +484,140 @@ fn test_no_host_station_chains_songs_without_break() {
         assert!(tape.last().0.starts_with("radio_country_"));
     }
     assert!(d.radio_break_queue.is_empty());
+}
+
+// -- tuning back to a station that kept playing (issue #158) ---------------------------
+
+/// Two fixture stations on the dial, so a drive can flip between them.
+fn two_fixture_stations(d: &mut DrivingState) {
+    let mut catalog = d.radio.catalog.clone();
+    for id in ["keep-a", "keep-b"] {
+        catalog.push(RadioStation {
+            playlist: "country".to_string(),
+            host: "roadhouse".to_string(),
+            ..RadioStation::new(id, "Fixture", "KFX", "country", "test fixture")
+        });
+    }
+    d.radio.set_catalog(catalog);
+}
+
+fn tune(d: &mut DrivingState, app: &mut TestApp, id: &str) {
+    let id = id.to_string();
+    d.with_radio_backend(app_ctx(app), |radio, backend| {
+        radio.select_station(&id, Some(backend))
+    });
+}
+
+#[test]
+fn test_a_station_keeps_playing_while_you_are_tuned_away() {
+    // Issue #158: every tune back to a station restarted its running order at
+    // the first song, second zero, so a driver moving around the dial heard
+    // the same opening over and over.
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 42);
+    let tape = MusicAudio::install(&mut app);
+    two_fixture_stations(&mut d);
+
+    tune(&mut d, &mut app, "keep-a");
+    let (first_track, _) = tape.last();
+    let first_start = tape.last_start();
+    let order = d.radio_playlist.clone();
+    assert!(!order.is_empty());
+
+    // Five minutes of driving with the dial parked somewhere else.
+    tune(&mut d, &mut app, "keep-b");
+    for _ in 0..300 {
+        d.update_audio(&mut app.ctx, 1.0);
+    }
+
+    tune(&mut d, &mut app, "keep-a");
+    assert_eq!(
+        d.radio_playlist, order,
+        "the station keeps the running order it had"
+    );
+    let (again, _) = tape.last();
+    let again_start = tape.last_start();
+    assert!(
+        again != first_track || again_start > first_start,
+        "back on {first_track} at {first_start} again: the station restarted"
+    );
+    // The station moved on while nobody in this cab was listening.
+    assert!(d.radio_track_index > 0 || d.radio_break_count > 0);
+}
+
+#[test]
+fn test_tuning_in_lands_part_way_through_whatever_is_playing() {
+    // A real station is already mid-song when you find it.
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 42);
+    let tape = MusicAudio::install(&mut app);
+    two_fixture_stations(&mut d);
+
+    tune(&mut d, &mut app, "keep-a");
+
+    let (track, _) = tape.last();
+    let start = tape.last_start();
+    if track.starts_with("radio_") {
+        assert!(start > 0.0, "{track} started at the very top");
+        assert!(start < content_duration_s(&track));
+        // The playback loop believes the same thing, so the song ends when it
+        // would have ended on the air rather than running long.
+        assert!((d.radio_elapsed_s - start).abs() < 1e-9);
+    } else {
+        // A spoken break plays whole rather than being cut into mid-word.
+        assert_eq!(start, 0.0);
+        assert_eq!(d.radio_elapsed_s, 0.0);
+    }
+}
+
+#[test]
+fn test_two_stations_do_not_open_on_the_same_song() {
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 42);
+    let tape = MusicAudio::install(&mut app);
+    two_fixture_stations(&mut d);
+
+    tune(&mut d, &mut app, "keep-a");
+    let a = tape.last();
+    tune(&mut d, &mut app, "keep-b");
+    let b = tape.last();
+
+    assert_ne!(a.0, b.0);
+}
+
+#[test]
+fn test_the_same_trip_always_finds_a_station_in_the_same_place() {
+    // The head start is drawn from the trip seed, never from a clock.
+    fn opening(seed: i64) -> (String, f64) {
+        let mut app = TestApp::new();
+        let mut d = a_denver_drive(&mut app, seed);
+        let tape = MusicAudio::install(&mut app);
+        two_fixture_stations(&mut d);
+        tune(&mut d, &mut app, "keep-a");
+        (tape.last().0, tape.last_start())
+    }
+    assert_eq!(opening(42), opening(42));
+    assert_ne!(opening(42), opening(43));
+}
+
+#[test]
+fn test_a_personal_playlist_still_starts_its_tracks_at_the_top() {
+    // The player's own music is not a broadcast: it resumes on the entry it
+    // left off on, and never cuts into the middle of a track they chose.
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 42);
+    let tape = MusicAudio::install(&mut app);
+    let station = a_playlist_station("pl-keep", &["C:/music/one.ogg", "C:/music/two.ogg"]);
+
+    d.start_playlist_station(&mut app.ctx, &station, 900, false);
+    assert_eq!(d.playlist_entry(&station), "C:/music/one.ogg");
+    d.start_playlist_station(&mut app.ctx, &station, 900, true);
+    assert_eq!(d.playlist_entry(&station), "C:/music/two.ogg");
+    // Tuning back resumes there rather than at the first entry.
+    d.radio_station_id = "somewhere-else".to_string();
+    d.update_playlist_playback(&mut app.ctx, &station, 0.5);
+    assert_eq!(d.playlist_entry(&station), "C:/music/two.ogg");
+    assert!(tape.tracks().iter().all(|t| t.starts_with("C:/music/")));
 }
 
 #[test]

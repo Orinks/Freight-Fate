@@ -51,6 +51,20 @@ impl BassBackend {
         if self.music_track.as_deref() == Some(track) {
             return;
         }
+        self.play_music_at(track, fade_ms, 0.0);
+    }
+
+    /// Play a shipped track from `start_s` seconds in.
+    ///
+    /// The station rotation tunes in part way through whatever is on the air,
+    /// so the stream is positioned before it is started -- decoded from
+    /// memory, so the seek is exact. A seek that fails is only ever the
+    /// difference between hearing the song from the middle and hearing it
+    /// from the top, so it is logged and the track plays anyway.
+    ///
+    /// Unlike [`Self::play_music`] this does not short-circuit on the track
+    /// already being the one loaded: the point of the call is the position.
+    pub(super) fn play_music_at(&mut self, track: &str, fade_ms: u32, start_s: f64) {
         self.cancel_radio_connect();
         let Some((data, _ext)) = asset_bytes(&format!("music/{track}"), MUSIC_EXTENSIONS) else {
             log::warn!("Missing music track: {track}");
@@ -65,6 +79,13 @@ impl BassBackend {
         };
         let handle = stream.handle();
         let level = self.buses.music_level();
+        if start_s > 0.0 {
+            if let Err(err) = safe::seconds_to_bytes(handle, start_s)
+                .and_then(|bytes| safe::channel_set_position_bytes(handle, bytes))
+            {
+                log::info!("Could not start {track} at {start_s:.1}s ({err})");
+            }
+        }
         if let Err(err) = set_volume(handle, 0.0)
             .and_then(|()| safe::channel_play(handle, false))
             .and_then(|()| slide(handle, BASS_ATTRIB_VOL, level, fade_ms))
