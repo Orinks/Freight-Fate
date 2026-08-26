@@ -10,9 +10,10 @@ use ff_core::pyrandom::PyRandom;
 
 use super::{
     asset_bytes, Audio, AudioBackend, AudioError, BassBackend, Buses, KeyProbe, NullBackend,
-    SustainLoopSpec, VolumeUpdate, ALERT_HOLD_TIMEOUT_S, CH_AIR, CH_ALERT, CH_AMBIENT, CH_EDGE,
-    CH_HORN, CH_JAKE, CH_RADIO_FX, CH_ROAD, CH_WEATHER, CH_WEATHER_B, CUE_HOLD_TIMEOUT_S,
-    HORN_LOOP, JAKE_BAND_PREFIX, JAKE_CLASSIC_KEY, JAKE_RECORDED_KEY, SFX_EXTENSIONS,
+    SustainLoopSpec, VolumeUpdate, ALERT_HOLD_TIMEOUT_S, BASS_NO_SOUND_DEVICE, CH_AIR, CH_ALERT,
+    CH_AMBIENT, CH_EDGE, CH_HORN, CH_JAKE, CH_RADIO_FX, CH_ROAD, CH_WEATHER, CH_WEATHER_B,
+    CUE_HOLD_TIMEOUT_S, HORN_LOOP, JAKE_BAND_PREFIX, JAKE_CLASSIC_KEY, JAKE_RECORDED_KEY,
+    SFX_EXTENSIONS,
 };
 
 /// Facade over the active backend; the rest of the game talks only to this.
@@ -32,6 +33,9 @@ pub struct AudioEngine {
     // place of the real pack-and-loose lookup (the Python tests monkeypatched
     // `_asset_bytes` for the same purpose).
     asset_probe: Option<KeyProbe>,
+    // This run asked for sound and did not get it, and nobody has told the
+    // player yet. Cleared by `take_silence_notice`.
+    silence_notice: bool,
 }
 
 impl Default for AudioEngine {
@@ -50,7 +54,9 @@ impl AudioEngine {
     /// Build the facade on an explicit backend preference (`""` or `"bass"`
     /// tries BASS first; anything else is the null backend).
     pub fn from_preference(pref: &str) -> Self {
-        let engine = Self::with_backend(pick_backend(pref));
+        let (backend, silent) = pick_backend(pref);
+        let mut engine = Self::with_backend(backend);
+        engine.silence_notice = silent;
         log::info!("Audio backend: {}", engine.backend.name());
         engine
     }
@@ -71,7 +77,18 @@ impl AudioEngine {
             jake_voice_classic: false,
             rng: PyRandom::new_unseeded(),
             asset_probe: None,
+            silence_notice: false,
         }
+    }
+
+    /// Arm (or disarm) the "this run has no sound" notice by hand.
+    ///
+    /// Only [`from_preference`](Self::from_preference) arms it for real, from
+    /// what the environment actually gave the player. A caller-built engine --
+    /// a test double, a headless run -- is silent on purpose and says nothing,
+    /// so a test that wants the notice asks for it here.
+    pub fn set_silence_notice(&mut self, pending: bool) {
+        self.silence_notice = pending;
     }
 
     /// The active backend.
@@ -181,17 +198,38 @@ impl AudioEngine {
 /// The backend `FREIGHT_FATE_AUDIO_BACKEND` asks for: "" or "bass" tries BASS
 /// and falls back to the null backend; anything else (the Python build's
 /// "pygame") is the null backend outright.
-fn pick_backend(pref: &str) -> Box<dyn AudioBackend> {
+/// The backend for a preference, and whether this run wanted sound and is
+/// not going to get any.
+///
+/// Running on rather than failing to start is deliberate (README: "If BASS is
+/// unavailable, the game continues with a silent audio backend rather than
+/// failing to start"). Doing it without a word to the player is not: a driver
+/// who cannot see a log has no way to tell a broken install from a broken
+/// game. So the fallback still happens, and the second half of the pair is
+/// what the main menu says out loud.
+///
+/// A run that ASKED to be silent -- `SDL_AUDIODRIVER=dummy`, headless CI,
+/// the playtest harness -- got what it asked for and is told nothing.
+fn pick_backend(pref: &str) -> (Box<dyn AudioBackend>, bool) {
     let pref = pref.trim().to_ascii_lowercase();
+    let headless = BassBackend::headless_requested();
     if pref.is_empty() || pref == "bass" {
         match BassBackend::new() {
-            Ok(backend) => return Box::new(backend),
+            Ok(backend) => {
+                // BASS came up, but possibly on its no-sound device: the
+                // device open failed and it fell back inside `new`. That is
+                // audibly identical to no backend at all.
+                let deaf = !headless && backend.output_device() == BASS_NO_SOUND_DEVICE as u32;
+                return (Box::new(backend), deaf);
+            }
             Err(err) => log::warn!("BASS unavailable ({err}); running silent"),
         }
-    } else if pref == "pygame" {
+        return (Box::new(NullBackend::new()), !headless);
+    }
+    if pref == "pygame" {
         log::warn!("FREIGHT_FATE_AUDIO_BACKEND=pygame: the pygame mixer is not part of this build; running silent");
     }
-    Box::new(NullBackend::new())
+    (Box::new(NullBackend::new()), false)
 }
 
 impl Audio for AudioEngine {
@@ -201,6 +239,10 @@ impl Audio for AudioEngine {
 
     fn backend_name(&self) -> &str {
         self.backend.name()
+    }
+
+    fn take_silence_notice(&mut self) -> bool {
+        std::mem::take(&mut self.silence_notice)
     }
 
     fn master_volume(&self) -> f64 {
