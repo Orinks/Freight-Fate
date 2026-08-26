@@ -5367,6 +5367,22 @@ onto exit signalling.
       5, hold until within 2) and the spoken cues carry a 15-second
       cooldown, so a cruise-vs-curve-brake fight can no longer chant
       slowing/released seven times a second.
+- [ ] **Colorado's real traffic and construction are dead (found
+      2026-08-26, driving Grand Junction to Delta on US-50).** Every
+      fetch logs `invalid JSON: expected value at line 1 column 1` for
+      both endpoints, so a Colorado drive gets no real work zones and
+      no real incidents. CDOT retired the CARS GraphQL endpoint:
+      `POST https://www.cotrip.org/api/graphql` now answers 200 with
+      `text/html`, the site's own page shell. This is Colorado alone --
+      511in.org and 511mn.org, the other two CARS states, both still
+      return `application/json` to the same query, so the platform is
+      fine and only this deployment moved. `data.cotrip.org` is live
+      and answers in JSON (404 on `/api/graphql`), which looks like
+      where CDOT went; the usual CDOT data portal wants an API key, so
+      this is a new provider rather than a URL swap. Worth checking
+      whether CDOT publishes a WZDx v4 feed first -- the v4 parser
+      already exists and would cover the construction half with no key
+      and no new parser, leaving only incidents to decide on.
 - [x] **Indiana and Wisconsin real-traffic feeds rebuilt -- SHIPPED
       2026-08-09**, with the full-registry sweep. Indiana, Minnesota,
       and Colorado now ride the CARS GraphQL platform
