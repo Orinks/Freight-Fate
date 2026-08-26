@@ -142,11 +142,32 @@ onto exit signalling.
         an optional stop, false for the destination: there is no later exit
         that reaches the dock, only the scripted turnaround at route end. The
         four lines now name the loop-back the manual has always described.
-- [ ] **A missed destination exit still calls the facility by its map key in
-      one rig.** `start_route` without a dispatch-board job leaves
-      `job.destination_spoken` empty, so the miss line said "in
-      hattiesburg_ms_us". Seen only on the low-level test seam, never on a
-      real dispatch; worth closing so the seam cannot hide a real one.
+- [x] **The playtest tools can start you AT the delivery exit --
+      `--playtest-road --find destination` (2026-08-26).** Ten finders and
+      every one of them mid-route, so the one place both reported
+      destination-exit defects lived could only be reached by taking a job
+      and driving the whole way, or by guessing a mile with `--at` and
+      hearing nothing when the guess was wrong. The new finder asks the
+      drive's own scan which interchange it will call the destination exit
+      (that ranking is now one free function, `scan_destination_exit`, rather
+      than a copy per caller), so the mile the tool promises is the mile the
+      game announces. Rural approaches with no signed interchange fall back
+      to the synthetic end-of-route exit, which is what those routes really
+      have -- Hattiesburg among them. The run-in is derived from the
+      callout's own trigger: one `exit_window_mi` plus the tool's standard
+      twenty-five real seconds, so the driver has the wheel before the first
+      call rather than arriving in the middle of the approach. Covered by
+      `playtest_road_destination.rs`, including transcript cases for the call
+      and for the loop-back after blowing past it.
+      * `--scan` no longer takes the single-instance lock. It answers off the
+        world data and returns before any app is built, so refusing it while
+        a drive was open cost the tool its one use during a playtest.
+      * Both playtest seams now speak the delivery city rather than its map
+        key. `road::build_driving` labelled the facility off the pair as
+        typed, so `--to hattiesburg_ms_us` put the slug into the opening
+        summary, the exit call and the miss line; `start_route` left the
+        spoken endpoints empty for the same effect. Closes the follow-up
+        recorded above.
 
 - [x] **The CB call you missed can be heard again -- Alt C (2026-08-26)**
       (marrie, issue 156: "a key to repeat the cb chatter I hear from
