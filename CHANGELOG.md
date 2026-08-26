@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Two new songs on the country stations.** "Dangerous Dan", an outlaw
+  country song, and "Dial-up Summer", a country ballad about a summer spent
+  online instead of outdoors. Both join the rotation on The Rawhide 98.1,
+  Big Wheel Country 104.5, Prairie Line 95.7 and Big Sky Country 99.3, so
+  they can turn up on any of the four the same as the rest of the country
+  library. Press Tab at the wheel to hear what is playing.
+
 - **Exit ramps now use real advisory signs where the map has them.** Freight
   Fate matched trusted OpenStreetMap readings to 6,539 interchanges and keeps
   each direction separate. Missing signs still use the existing calculated

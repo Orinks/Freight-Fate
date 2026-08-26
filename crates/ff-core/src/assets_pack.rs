@@ -947,10 +947,11 @@ mod tests {
         }
         // Split out of sounds.pak on 2026-08-14 alongside the radio
         // station-identity batch: 356 entries, the music/ subtree plus the new
-        // station jingles and songs. Only the size and header are checked
-        // here: hashing 261 MB is the Python suite's job, once.
+        // station jingles and songs. 358 since 2026-08-26, when Dangerous Dan
+        // and Dial-up Summer joined the country pool. Only the size and header
+        // are checked here: hashing 267 MB is the Python suite's job, once.
         let len = std::fs::metadata(&path).unwrap().len();
-        assert_eq!(len, 261_358_688);
+        assert_eq!(len, 266_803_726);
         let mut head = [0u8; 6];
         std::fs::File::open(&path)
             .unwrap()

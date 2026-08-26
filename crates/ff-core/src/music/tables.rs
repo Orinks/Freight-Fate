@@ -495,6 +495,18 @@ pub static COUNTRY_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
             "Front-porch country stroll instrumental",
             165.8,
         ),
+        (
+            "radio_country_dangerous_dan",
+            "Dangerous Dan",
+            "Outlaw country song",
+            307.2,
+        ),
+        (
+            "radio_country_dial_up_summer",
+            "Dial-up Summer",
+            "Country ballad about a summer spent online",
+            190.0,
+        ),
     ])
 });
 

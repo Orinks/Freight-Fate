@@ -1371,7 +1371,10 @@ onto exit signalling.
       (2026-09-06).** Gospel +5, tejano +5, synthwave +7, plus top-ups
       (8-10 each) for country, classic rock, blues, and jazz, and 2-3 new
       Night Line ballads. `tools/generate_radio.py --plan-songs` supports
-      capped waves via `--limit`.
+      capped waves via `--limit`. Two of the country top-ups arrived early
+      and by hand on 2026-08-26 -- Dangerous Dan and Dial-up Summer, owner
+      renders rather than a generated wave -- so the country pool is 2 down
+      on its target and the rest of the batch still waits on the quota.
 - [ ] **Ad music beds.** Light instrumental beds mixed under the ad reads,
       with a ducking pass in the imaging chain; the ad scripts only need a
       cheap re-TTS pass to carry them.
