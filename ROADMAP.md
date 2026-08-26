@@ -405,6 +405,32 @@ onto exit signalling.
       * `scale_outranks_rest_planning` -- "Weigh station first: Ontario Scale,
         2.0 miles ahead." The same object as the notice just fixed, so it can
         join the very contradiction chain that fix ended.
+- [x] **The destination-exit loop-back tells the truth about who is taking
+      the exit (2026-08-26, issue #155).** Full lane keeping takes the
+      destination exit with no signal -- documented in the manual, the
+      ontology row and the setting's own spoken label. The loop-back after a
+      miss did not know it: the normal-verbosity reroute line named the
+      take-exit control in every steering mode, where its own terse sibling
+      three lines above already guarded on `lane_is_manual()`, and
+      `handle_missed_destination_exit` reset every other say-once latch on the
+      approach except `lane_keeping_takes_exit_said`. So the second approach
+      told an automated driver to press X and then carried no automation
+      warning at all. Both fixed in
+      `states/driving_events/arrival.rs`; gates are the three
+      `test_the_loop_back_*` cases in
+      `crates/freight-fate/tests/it/states_driving_destination_exit.rs`,
+      verified against the pre-fix code. Not a port divergence -- Python's
+      `_handle_missed_destination_exit` has both faults too.
+- [ ] **Say who is taking the destination exit in the LAST call, not only
+      the first.** The remaining half of #155. Under full lane keeping the
+      one "Lane keeping will take this exit" rides the first destination-exit
+      callout, which arms as far out as `EXIT_WINDOW_MAX_MI`; every line after
+      it -- the countdown anchors in `update_exit_countdown` -- is word for
+      word the manual driver's ("Destination exit in half a mile."), which is
+      the line that in every other mode means press X now. The only line at
+      the gore is the past-tense "You take ... destination exit". Give the
+      automated countdown its own tail clause, or move the warning to the
+      anchor nearest the ramp.
 - [x] **Rust port: a Python-written save verifies here (2026-08-23).**
       A career created and played entirely in the Python 1.9 game loaded in
       the Rust build as "changed outside the game, or copied from another

@@ -1031,13 +1031,15 @@ Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
 and tells you to slow down and set up for the ramp. With lane keeping on partial
 or off, use X to signal and move right for the exit lane. On full, lane keeping
-takes the destination exit for you, and the first one of each run says so. If automatic speed control is
+takes the destination exit for you, and the first call of each approach says so. If automatic speed control is
 active, it eases the truck to 40 miles per hour or your lower cruise target,
 below the 45 mile-per-hour ramp limit, so you can reach ramp speed without an
 abrupt handoff. Press X to take the exit; automatic speed control releases as
 you enter the ramp, then you brake to the stop. If you miss the destination
 exit, continue to the next safe turnaround. Dispatch loops you back onto the
-approach so you can hear the exit call again and press X to take it.
+approach so you can hear the exit call again and press X to take it. On full,
+the turnaround and the fresh exit call both say lane keeping is taking it, so
+you are never told to signal for an exit the truck takes itself.
 
 Ordinary highway exits that do not lead to a current action are not announced
 during the drive. The status screen lists the next exit for route

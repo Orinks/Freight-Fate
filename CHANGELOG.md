@@ -958,6 +958,16 @@
 
 ### Fixed
 
+- **After you miss your destination exit, the game stops telling you to
+  signal for an exit the truck is taking itself.** With lane keeping on full
+  the truck takes your destination exit for you. Miss it once, and the
+  turnaround still said "press X when you are close enough to take it" -- so
+  you were reaching for the key when the truck left the highway on its own,
+  with nothing having said it would. The turnaround now says lane keeping is
+  taking it and to hold the right lane and slow down, and the exit call on
+  the way back round says so again. With lane keeping on partial or off,
+  where the exit really is yours to take, it still asks you for the signal.
+
 - **Receiver unloading no longer turns an on-time arrival into a late
   delivery.** The appointment, pay, and on-time bonus now use the time the
   truck checked in at the receiver. Unloading still advances the clock, and

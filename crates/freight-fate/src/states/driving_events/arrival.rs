@@ -96,17 +96,38 @@ impl DrivingState {
         self.destination_exit_announced_key = String::new();
         self.destination_exit_response_s = 0.0;
         self.destination_exit_cache = None;
+        // The loop-back is a whole fresh approach, so the once-per-drive
+        // "lane keeping will take this exit" warning is owed again. Spending
+        // it on the first approach and then never repeating it is half of how
+        // a truck comes to leave the highway with nothing said (Sarah A,
+        // St. George to Cedar City, 2026-08-26).
+        self.lane_keeping_takes_exit_said = false;
+        let automated = ctx.settings.lane_is_automated();
         let reroute_text = if self.terse_speech(ctx) {
-            // The signal reset with the miss; when the lane work is theirs, terse
-            // players still need to hear that arming it is on them again.
-            if ctx.settings.lane_is_manual() {
+            // Terse holds on to consequences, and who is driving the second
+            // approach is one: the signal reset with the miss, so when the
+            // lane work is theirs they still need to hear that arming it is
+            // on them again -- and when it is not, that it is not.
+            if automated {
+                "Safe turnaround. Destination exit ahead again; lane keeping will take it."
+                    .to_string()
+            } else {
                 format!(
                     "Safe turnaround. Destination exit ahead again; press {} to signal.",
                     ctx.control_hint("take_exit")
                 )
-            } else {
-                "Safe turnaround. Destination exit ahead again.".to_string()
             }
+        } else if automated {
+            // The other half. This line used to name the take-exit control in
+            // every steering mode, so the last thing a full-lane-keeping
+            // driver heard before the truck took the ramp for them was an
+            // instruction to take it themselves -- which is what "I was about
+            // to hit X when the truck took the exit" is describing. Never
+            // name a control the driver's own settings have taken off them.
+            "You continue to the next safe turnaround and loop back onto the approach. The \
+             destination exit is ahead again, and lane keeping will take it, so hold the right \
+             lane and slow down for the ramp."
+                .to_string()
         } else {
             format!(
                 "You continue to the next safe turnaround and loop back onto the approach. The \
