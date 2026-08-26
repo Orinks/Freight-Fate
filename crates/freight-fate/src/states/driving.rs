@@ -119,6 +119,11 @@ pub struct DrivingState {
     pub radio_break_pos: usize,
     pub radio_break_count: usize,
     pub radio_tracks_since_break: usize,
+    // How long the stations have been on the air this drive, in real seconds.
+    // A station keeps broadcasting while the driver is listening to another
+    // one (or to nothing at all), so tuning back in has to land where it got
+    // to rather than restarting its running order.
+    pub radio_airtime_s: f64,
     // Personal playlist stations: where each playlist left off this drive,
     // and a hold between entries so neither a fade-in nor a stream still
     // connecting ever reads as a finished track.

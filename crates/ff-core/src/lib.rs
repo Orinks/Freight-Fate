@@ -27,6 +27,7 @@ pub mod profile_integrity_invariants;
 pub mod profile_invariants;
 pub mod radio;
 pub mod radio_content;
+pub mod radio_rotation;
 pub mod rumble;
 pub mod settings;
 pub mod sound_catalog;

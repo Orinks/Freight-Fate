@@ -296,6 +296,10 @@ pub trait AudioBackend {
 
     // -- music ----------------------------------------------------------------------
     fn play_music(&mut self, _track: &str, _fade_ms: u32) {}
+    /// Start a track part way in; a backend without seeking plays it whole.
+    fn play_music_at(&mut self, track: &str, fade_ms: u32, _start_s: f64) {
+        self.play_music(track, fade_ms);
+    }
     fn play_radio_stream(&mut self, _url: &str, _fade_ms: u32) -> Result<(), AudioError> {
         Err(AudioError::new("radio stream unavailable"))
     }

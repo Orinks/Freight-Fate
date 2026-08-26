@@ -915,6 +915,10 @@ impl AudioBackend for BassBackend {
         BassBackend::play_music(self, track, fade_ms);
     }
 
+    fn play_music_at(&mut self, track: &str, fade_ms: u32, start_s: f64) {
+        BassBackend::play_music_at(self, track, fade_ms, start_s);
+    }
+
     fn play_radio_stream(&mut self, url: &str, fade_ms: u32) -> Result<(), AudioError> {
         BassBackend::play_radio_stream(self, url, fade_ms)
     }

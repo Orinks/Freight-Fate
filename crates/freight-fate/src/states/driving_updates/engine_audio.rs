@@ -377,6 +377,10 @@ impl DrivingState {
         } else {
             ctx.audio.set_ambient(None);
         }
+        // Before the dial check: the stations are on the air whether or not
+        // this cab is listening, which is what lets a re-tune pick a station
+        // up where it got to.
+        self.advance_radio_airtime(dt);
         if self.radio.enabled && self.trip.truck.engine_on {
             self.update_radio_reception(ctx, dt);
             self.update_radio_playback(ctx, night, dt);

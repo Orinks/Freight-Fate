@@ -17,6 +17,7 @@ use ff_core::pyrandom::PyRandom;
 use ff_core::radio::{
     default_radio_catalog, load_personal_playlists, RadioState, RadioStation, PLAYLISTS_DIR_NAME,
 };
+use ff_core::radio_rotation::initial_airtime_s;
 use ff_core::sim::lane_guidance::{HAIRPIN_ADVISORY_MPH, STRIP_LEAD_MI};
 use ff_core::sim::real_traffic::RealTrafficProvider;
 use ff_core::sim::real_weather::RealWeatherProvider;
@@ -261,6 +262,8 @@ impl DrivingState {
             radio_break_pos: 0,
             radio_break_count: 0,
             radio_tracks_since_break: 0,
+            // The stations were already on the air before this drive began.
+            radio_airtime_s: initial_airtime_s(trip_seed),
             playlist_positions: HashMap::new(),
             playlist_wait_s: 0.0,
             playlist_stream_tries: 0,

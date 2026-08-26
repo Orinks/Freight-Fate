@@ -560,6 +560,16 @@ pub trait Audio {
     fn play_music(&mut self, track: &str) {
         self.play_music_with(track, 1500);
     }
+    /// Start a music track `start_s` seconds in.
+    ///
+    /// Tuning into a station that has been on the air a while lands part way
+    /// through whatever it is playing, the way a real dial does. A backend
+    /// that cannot seek falls back to the top of the track rather than
+    /// refusing to play it.
+    fn play_music_at(&mut self, track: &str, fade_ms: u32, start_s: f64) {
+        let _ = start_s;
+        self.play_music_with(track, fade_ms);
+    }
     fn play_radio_stream_with(&mut self, url: &str, fade_ms: u32) -> Result<(), AudioError>;
     fn play_radio_stream(&mut self, url: &str) -> Result<(), AudioError> {
         self.play_radio_stream_with(url, 1500)
