@@ -964,6 +964,24 @@
 
 ### Fixed
 
+- **The speed warning stays on after you miss your delivery exit.** Reported
+  by Tyler Rodick, who blew the exit at the Hattiesburg, Mississippi yard and
+  then held eighty-nine miles an hour all the way round the loop-back without
+  a word from the dash. Missing the delivery exit used to switch the warning
+  off until you finally took the exit, so the one stretch where you most need
+  to shed speed was the one stretch nothing warned you about -- and a trooper
+  who saw it could still write you up for it. The warning now works the whole
+  way, exactly as it does anywhere else on the road.
+
+- **Missing your delivery exit no longer sends you hunting for an exit that
+  is not there.** At the ramp the game used to tell you to stay on the highway
+  and recover at the next safe exit. There is no next exit that gets you to
+  the dock: you carry on to the end of the route, take the safe turnaround,
+  and the delivery exit comes around again. That is what it says now, so the
+  loop-back is something you are waiting for rather than something that
+  happens after you have given up. Ordinary stops along the way are unchanged
+  -- you really can pick one of those up from a later exit.
+
 - **Receiver unloading no longer turns an on-time arrival into a late
   delivery.** The appointment, pay, and on-time bonus now use the time the
   truck checked in at the receiver. Unloading still advances the clock, and

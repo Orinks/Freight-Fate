@@ -120,6 +120,33 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **A missed delivery exit no longer costs the driver the speed warning,
+      and no longer promises a recovery that does not exist (2026-08-26)**
+      (Tyler Rodick, issue #169, Hattiesburg MS: "it gave me the usual
+      dispatch will reroute you message, yet it never rerouted me... it let me
+      get up to 89 mph in that zone without anybody saying something").
+      One latch, two faults, neither of them local to Hattiesburg -- the
+      loop-back itself repositions correctly, proven by driving all five
+      approaches into that city plus twelve more cities elsewhere.
+      * `update_speeding` returned early on
+        `missed_destination_exit_said && !destination_exit_taken`. That was
+        right in June 2026, when the method charged silent speeding fines and
+        the carve-out spared a recovering driver. Once the fines moved to the
+        enforcement watch the method became the DASH, and the same line
+        switched the overspeed warning off from the first miss to the dock --
+        while the watch, which never read the flag, went on accruing
+        over-limit distance. The driver kept the ticket and lost the warning.
+        Gone; the warning now runs through the whole loop-back.
+      * At the gore, every way of blowing the DESTINATION exit told the driver
+        to "stay on the highway and recover at the next safe exit". True for
+        an optional stop, false for the destination: there is no later exit
+        that reaches the dock, only the scripted turnaround at route end. The
+        four lines now name the loop-back the manual has always described.
+- [ ] **A missed destination exit still calls the facility by its map key in
+      one rig.** `start_route` without a dispatch-board job leaves
+      `job.destination_spoken` empty, so the miss line said "in
+      hattiesburg_ms_us". Seen only on the low-level test seam, never on a
+      real dispatch; worth closing so the seam cannot hide a real one.
 - [x] **The retarder answers a grade and nothing else, measured across a
       seeded sweep (2026-08-24)** (owner: "on uphill ascents the truck should
       gain speed instead of using the engine brakes", plus "edge cases where
