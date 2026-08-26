@@ -49,6 +49,23 @@ impl DrivingState {
             self.destination_assist_brake = 0.0;
             return;
         }
+        // A controlled ramp terminal is part of the route, not the facility
+        // gate. Let route-transition assistance own its mandatory stop first;
+        // otherwise the full stop at a red light satisfies the arrival's creep
+        // branch and latches the truck at two miles per hour after green. Once
+        // the terminal releases the driver, the arrival is evaluated afresh
+        // against the actual distance left to the destination.
+        if self.ramp_mi.is_some()
+            && !self.ramp_terminal_done
+            && matches!(
+                self.ramp_control.as_str(),
+                "signal" | "stop" | "yield" | "roundabout"
+            )
+        {
+            self.destination_arrival_active = false;
+            self.destination_assist_brake = 0.0;
+            return;
+        }
         // HOW FAR TO THE GATE -- which is not the same as how far to the end
         // of the route. trip.remaining_miles measures the route, and it stays
         // parked while the truck is on the ramp: the harness showed it reading

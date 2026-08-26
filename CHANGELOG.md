@@ -983,6 +983,14 @@
 
 ### Fixed
 
+- **A red light on the destination ramp no longer leaves the truck crawling
+  after green.** Destination approach assistance used to take the pedals before
+  a ramp-end light, then mistake the light's full stop for the final gate crawl
+  and hold two miles per hour for the rest of the approach. Route-transition
+  assistance now handles the light first; after green you pull ahead normally,
+  and destination assistance slows again only when the facility entrance is
+  actually close.
+
 - **A start with no game sounds now tells you so.** If Freight Fate cannot
   open the sound on your computer it still starts, the way it always has, and
   the voice still reads everything out. Until now nothing said that the engine,

@@ -33,7 +33,9 @@ use ff_core::sim::weather::WeatherKind;
 use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
 use freight_fate::states::base::Key;
 use freight_fate::states::driving::DrivingState;
-use freight_fate::states::driving_core::DOCKING_MAX_MPH;
+use freight_fate::states::driving_core::{
+    DOCKING_MAX_MPH, RAMP_ACCESS_MI, RAMP_LIGHT_GREEN_S, RAMP_LIGHT_RED_S,
+};
 use freight_fate::states::driving_menu_states::FacilityArrivalState;
 
 use crate::transcript_cruise_support::{frame, hold, quiet, release_keys, DT, MPS_PER_MPH};
@@ -617,6 +619,178 @@ fn test_the_approach_assist_stops_the_truck_at_every_kind_of_destination() {
         climbed > 0,
         "no destination in the sweep climbs to its gate any more"
     );
+}
+
+#[test]
+fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
+    // Shane P, 2026-08-26: on the logged Eugene-to-Great-Falls bulk run, the
+    // destination assist announced before the ramp-end signal, the
+    // route-transition assist stopped the truck at red, and the destination
+    // assist then held two mph after green until he disabled it. Recreate the
+    // same route, facility, load, carrier tractor, automatic transmission and
+    // clear Montana weather. The player lifts for each assist, then pulls away
+    // on green until destination assistance truthfully takes the pedals near
+    // the entrance.
+    let route_cities = [
+        "eugene_or_us",
+        "tri_cities_wa_us",
+        "spokane_wa_us",
+        "coeur_d_alene_id_us",
+        "kellogg_id_us",
+        "superior_mt_us",
+        "missoula_mt_us",
+        "helena_mt_us",
+        "great_falls_mt_us",
+    ];
+    let mut setup = RouteSetup::seeded(4242)
+        .named("munchkinbear")
+        .cities(&route_cities)
+        .origin_location("Eugene Grain Elevator")
+        .destination_location("Great Falls Materials Yard");
+    setup.cargo = "bulk".to_string();
+    setup.tons = 15.0;
+
+    let mut harness = PlaytestHarness::new();
+    harness.app.ctx.settings.destination_approach_assist = true;
+    harness.app.ctx.settings.route_transition_assist = true;
+    harness.app.ctx.settings.speed_keeper = true;
+    harness.app.ctx.settings.automatic_transmission = true;
+    harness.start_route("eugene_or_us", "great_falls_mt_us", setup);
+
+    let mut truck_key = String::new();
+    harness.with_drive(|d, ctx| {
+        let mut profile = Profile::named_in("munchkinbear", "eugene_or_us");
+        profile.career = Career::with_xp(LEVEL_XP[10]);
+        truck_key = profile.take_slip_seat(&d.job);
+        d.trip.truck.specs = profile.truck_specs();
+        ctx.profile = Some(profile);
+        d.job.origin_type = "farm_elevator".to_string();
+        d.job.destination_type = "construction_materials_yard".to_string();
+        quiet(&mut d.trip);
+        d.weather_mut().current = WeatherKind::Clear;
+        d.departure_checked = true;
+        d.tutorial = None;
+        d.truck_mut().start_engine();
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().set_air_ready(false);
+        d.speed_control_armed = true;
+    });
+    assert_eq!(trailer_keys_for_cargo("bulk"), ["bulk"]);
+
+    let exit = harness.with_drive(|d, ctx| {
+        d.destination_exit_stop(ctx)
+            .expect("the Great Falls delivery has a destination exit")
+    });
+    let exit_at = exit.at_mi;
+    harness.with_drive(move |d, ctx| {
+        d.exit_stop = Some(exit);
+        d.exit_lane_alignment = 1.0;
+        d.exit_signal_on = true;
+        d.trip.position_mi = exit_at;
+        d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;
+        d.update_exit(ctx, 0.0, 0.0);
+
+        // Shane met a green about 1000 feet from the bar, then yellow and red.
+        // Pin that same sequence and the same 39 mph approach from his log.
+        d.ramp_mi = Some(RAMP_ACCESS_MI + 850.0 / 5280.0);
+        d.ramp_control = "signal".to_string();
+        d.ramp_terminal_done = false;
+        d.ramp_light_announced = true;
+        d.ramp_light_last_phase = "green".to_string();
+        d.ramp_light_offset_s = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S - 2.0;
+        d.ramp_light_timer = 0.0;
+        d.ramp_waiting_at_light = false;
+        d.ramp_assist_said = false;
+        d.ramp_assist_brake = 0.0;
+        d.truck_mut().velocity_mps = 39.0 * MPS_PER_MPH;
+    });
+    harness.clear_speech();
+
+    let mut terminal_done = false;
+    let mut docked = false;
+    let mut max_speed_after_green = 0.0f64;
+    let mut two_mph_crawl_ft = 0.0f64;
+    let mut previous_ramp_mi = harness.read_drive(|d| d.ramp_mi.unwrap_or(0.0));
+    for _ in 0..(60 * 300) {
+        if !harness.has_drive() {
+            harness.finish_timed_state();
+            docked = harness.state_is::<FacilityArrivalState>();
+            break;
+        }
+        if harness.read_drive(|d| d.arrival_menu_open) {
+            harness.finish_timed_state();
+            docked = harness.state_is::<FacilityArrivalState>();
+            break;
+        }
+        let (done, waiting, destination_active, speed) = harness.read_drive(|d| {
+            (
+                d.ramp_terminal_done,
+                d.ramp_waiting_at_light,
+                d.destination_arrival_active,
+                d.truck().speed_mph(),
+            )
+        });
+        // Hold the logged red until the truck has made its complete stop,
+        // then let the next frame deliver green. The report preserves the
+        // phases and the stop, not the light's random offset.
+        harness.with_drive(|d, _| {
+            if !done && !waiting && d.ramp_light_phase() == "red" {
+                d.ramp_light_offset_s = 1.0;
+                d.ramp_light_timer = 0.0;
+            } else if waiting {
+                d.ramp_light_offset_s = RAMP_LIGHT_RED_S;
+                d.ramp_light_timer = 0.0;
+                d.ramp_light_last_phase = "red".to_string();
+            }
+        });
+        terminal_done |= done;
+        if terminal_done {
+            max_speed_after_green = max_speed_after_green.max(speed);
+        }
+        if done && !destination_active && speed < 20.0 {
+            hold(&mut harness, &[Key::Up]);
+        } else {
+            release_keys(&mut harness);
+        }
+        frame(&mut harness, DT);
+        if !harness.has_drive() {
+            continue;
+        }
+        let (now_ramp_mi, now_speed) =
+            harness.read_drive(|d| (d.ramp_mi.unwrap_or(0.0), d.truck().speed_mph()));
+        if terminal_done && (1.5..=2.5).contains(&now_speed) {
+            two_mph_crawl_ft += (previous_ramp_mi - now_ramp_mi).max(0.0) * 5280.0;
+        }
+        previous_ramp_mi = now_ramp_mi;
+        if waiting {
+            release_keys(&mut harness);
+        }
+    }
+    release_keys(&mut harness);
+
+    println!(
+        "truck={truck_key} max_after_green={max_speed_after_green:.1} mph two_mph_crawl={two_mph_crawl_ft:.0} ft\n{}",
+        harness.transcript_text()
+    );
+    assert_eq!(truck_key, "long_run_midroof");
+    assert!(docked, "{}", harness.transcript_text());
+    assert!(
+        max_speed_after_green >= 10.0,
+        "the signal stop still held the truck at a crawl: {}",
+        harness.transcript_text()
+    );
+    assert!(
+        two_mph_crawl_ft < 250.0,
+        "the final two-mph creep lasted {two_mph_crawl_ft:.0} feet"
+    );
+    harness.result().assert_ordered(&[
+        "Route-transition assistance braking for the light.",
+        "Stopped at the red light. Assistance is holding the brakes for green.",
+        "Green light. Pull ahead to the entrance.",
+        "Destination approach assistance slowing.",
+        "Pulling into construction materials yard Great Falls Materials Yard",
+        "At construction materials yard Great Falls Materials Yard in Great Falls.",
+    ]);
 }
 
 #[test]
