@@ -24,6 +24,9 @@ fn test_controls_help_page_points_at_the_driving_keys() {
     assert!(joined.contains("S speaks the posted speed limit"));
     assert!(joined.contains("R speaks how far along you are"));
     assert!(joined.contains("A repeats the last driving announcement"));
+    // The CB repeat is documented where players go looking for keys, not
+    // only in the F1 layout (issue 156).
+    assert!(joined.contains("Alt C repeats the last CB chatter"));
     // U stopped being a recital of everything ahead (2026-08-15): the exit
     // cue, the traffic-pressure advisory and two of the three bends were
     // already other keys' answers, so the help now promises only the road

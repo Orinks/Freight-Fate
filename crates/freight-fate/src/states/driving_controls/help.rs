@@ -136,6 +136,9 @@ impl DrivingState {
         text.push_str("soft tock once a beat, panned to where you sit inside your lane, ");
         text.push_str("running until you turn it off, on lane keeping partial or off. ");
         text.push_str("A repeats the last driving announcement. ");
+        text.push_str("Alt C repeats the last CB chatter on its own, in case something ");
+        text.push_str("else was said over the top of it, and gives the distance as it ");
+        text.push_str("is now rather than the one you first heard. ");
         text.push_str(
             "Comma repeats what was just said and keeps stepping back, and Period moves \
              forward again. ",

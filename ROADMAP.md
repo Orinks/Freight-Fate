@@ -147,6 +147,30 @@ onto exit signalling.
       `job.destination_spoken` empty, so the miss line said "in
       hattiesburg_ms_us". Seen only on the low-level test seam, never on a
       real dispatch; worth closing so the seam cannot hide a real one.
+
+- [x] **The CB call you missed can be heard again -- Alt C (2026-08-26)**
+      (marrie, issue 156: "a key to repeat the cb chatter I hear from
+      the sappy voice... not the chunk chunk of the radio").
+      Neither existing replay answered for it. `last_event_message` behind A
+      is one slot every non-hazard route announcement overwrites, so a
+      landmark or a lane count seconds later takes the CB call away; the
+      message log walks by recency, never by topic. `DrivingState`'s
+      `last_cb_chatter` is a topic-selected slot holding the newest call and
+      the post it was about, written at HANDLE time (like `log_ambient_event`)
+      so a line the ambient queue later ages out is still repeatable.
+      The repeat re-derives the distance at the truck's position now rather
+      than parroting the one it was first heard at, and says "you have passed
+      it" once the post is behind -- the same "a rescued line has to still be
+      true" rule the hazard, curve and stop callouts carry. Spoken through
+      `player_asked`, so the ladder cannot silence it at quiet. Documented in
+      F1, in the controls help page, and in `docs/ontology.md`.
+      Covered by `states_driving_controls.rs` (six cases) and the keep-right
+      nag case in `states_driving_lanes.rs`.
+- [ ] **Older CB calls than the newest one are only reachable through the
+      message log.** Deliberate for now: CB heads-ups are rationed to
+      `CB_CALLS_PER_RUN` so a stepping history would mostly be empty, and a
+      second stepping model beside the message log costs a screen reader user
+      a second thing to learn. Revisit if the CB budget ever grows.
 - [x] **The retarder answers a grade and nothing else, measured across a
       seeded sweep (2026-08-24)** (owner: "on uphill ascents the truck should
       gain speed instead of using the engine brakes", plus "edge cases where

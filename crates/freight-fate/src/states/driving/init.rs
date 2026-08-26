@@ -302,6 +302,7 @@ impl DrivingState {
             aeb_decel_mps2: 0.0,
             aeb_last_speed_mps: None,
             last_event_message: String::new(),
+            last_cb_chatter: None,
             speed_announce_timer: 0.0,
             last_announced_mph: 0.0,
             enforced_limit_prev: None,

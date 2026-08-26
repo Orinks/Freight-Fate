@@ -237,6 +237,54 @@ impl DrivingState {
         ctx.say_with(message, Say::new().review(false));
     }
 
+    /// Alt C -- the last CB call, said again.
+    ///
+    /// A narrower question than A's "what was the last thing the road said",
+    /// and a different one: CB chatter is about what is sitting up the road,
+    /// and it goes past once. A single landmark, lane count or weather
+    /// change after it takes the A slot away, which leaves a driver who
+    /// missed the call nothing to act on (Sarah A., issue 156).
+    ///
+    /// Only the voice comes back. The squelch that marks a CB call is an
+    /// earcon for the moment it arrived, and the moment is not what is being
+    /// asked for.
+    ///
+    /// The distance is re-derived at the truck's position NOW, so a repeat
+    /// two miles later says two miles, not the four it said at the time; a
+    /// post already behind says so instead of counting down to nothing.
+    pub fn speak_last_cb_chatter(&mut self, ctx: &mut GameContext) {
+        let Some(recall) = self.last_cb_chatter.clone() else {
+            ctx.say_with("No CB chatter to repeat.", Say::new().review(false));
+            return;
+        };
+        let text = match recall.post.as_ref() {
+            // Chatter with no post behind it carries no distance to go
+            // stale, so it comes back word for word.
+            None => recall.text.clone(),
+            Some(post) => {
+                let ahead = post.watch_start_mi() - self.trip.position_mi;
+                if ahead <= 0.0 {
+                    // Past it. The CB's own words would now be a lie, and
+                    // "you have passed it" is the fact the driver is after.
+                    format!(
+                        "The CB called an enforcement post {}. You have passed it.",
+                        Trip::cb_side(post)
+                    )
+                } else if post.tableau {
+                    self.trip.cb_tableau_message(post, ahead)
+                } else {
+                    self.trip.cb_patrol_message(post, ahead)
+                }
+            }
+        };
+        // Asking for a repeat is a deliberate act: the event voice gives way
+        // rather than talking over the line that was asked for.
+        ctx.stop_event_speech();
+        // Already in the log from when the CB first said it; logging the
+        // repeat would leave the reviewer a duplicate to step over.
+        ctx.say_with(text, Say::new().review(false));
+    }
+
     /// `_toggle_lane_locator()`: I -- a periodic panned tock marking where
     /// the truck sits in its lane.
     ///
