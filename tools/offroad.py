@@ -25,11 +25,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
+import os  # noqa: E402
+
 import leg_geometry as lg  # noqa: E402
 import straw_curve_sample as scs  # noqa: E402
 from world_source import load_world  # noqa: E402
-
-import os  # noqa: E402
 
 VALHALLA = os.environ.get("FF_VALHALLA_URL", "http://localhost:8002").rstrip("/")
 # Gaps shorter than this cannot hide a meaningful excursion: a two-mile chord
@@ -84,12 +84,20 @@ def main() -> int:
                 probes.append((lat1 + (lat2 - lat1) * f, lon1 + (lon2 - lon1) * f))
                 owner.append(key)
 
-    print(f"{len(probes):,} points inside gaps over {MIN_GAP_MI:.0f} mi, across "
-          f"{len(set(owner)):,} legs", flush=True)
+    print(
+        f"{len(probes):,} points inside gaps over {MIN_GAP_MI:.0f} mi, across "
+        f"{len(set(owner)):,} legs",
+        flush=True,
+    )
 
     worst: dict[str, float] = {}
     for start in range(0, len(probes), BATCH):
-        for key, dist in zip(owner[start:start + BATCH], locate(probes[start:start + BATCH])):
+        # strict=True: Valhalla's /locate returns one entry per location, so a
+        # short reply means the batch came back wrong -- worth a raise rather
+        # than silently scoring only the legs that happened to line up.
+        for key, dist in zip(
+            owner[start : start + BATCH], locate(probes[start : start + BATCH]), strict=True
+        ):
             d = 1e6 if dist is None else dist
             if d > worst.get(key, -1.0):
                 worst[key] = d
@@ -108,9 +116,12 @@ def main() -> int:
         print(f"  {key:46s} {shown}")
 
     args.json.parent.mkdir(parents=True, exist_ok=True)
-    args.json.write_text(json.dumps(
-        {k: round(v, 1) for k, v in sorted(off.items(), key=lambda kv: -kv[1])}, indent=1),
-        encoding="utf-8")
+    args.json.write_text(
+        json.dumps(
+            {k: round(v, 1) for k, v in sorted(off.items(), key=lambda kv: -kv[1])}, indent=1
+        ),
+        encoding="utf-8",
+    )
     print(f"\nwrote {args.json}")
     return 0
 

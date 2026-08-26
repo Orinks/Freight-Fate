@@ -36,8 +36,9 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 os.environ.setdefault("FREIGHT_FATE_NO_SPEECH", "1")
 
-from freight_fate.data import curves as C  # noqa: E402
 from world_source import load_world  # noqa: E402
+
+from freight_fate.data import curves as C  # noqa: E402
 
 # The speed a truck holds when nothing is in the way. A curve advising less
 # than this is a curve the driver is told about.

@@ -166,7 +166,7 @@ def main() -> int:
     for key, ev in sorted(events.items(), key=lambda kv: -kv[1]["amount"]):
         print(f"  {key:44s} ${ev['amount']:7.2f}  {ev['road']}")
 
-    print(f"\nunpriced, by how much road is involved (the research queue):")
+    print("\nunpriced, by how much road is involved (the research queue):")
     for key, miles, facility in sorted(unpriced, key=lambda x: -x[1])[:30]:
         print(f"  {key:44s} {miles:6.1f} mi  {facility}")
     if len(unpriced) > 30:

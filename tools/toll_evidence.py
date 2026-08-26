@@ -77,9 +77,7 @@ def chargeable(tags: dict) -> bool:
     # name, operator, ref or network at all, which is where "unnamed tolled
     # road" came from as the third most-sighted facility in the country.
     # The facility a truck actually pays is mainline, and mainline is named.
-    if str(tags.get("highway", "")).endswith("_link"):
-        return False
-    return True
+    return not str(tags.get("highway", "")).endswith("_link")
 
 
 def facility_of(tags: dict) -> str:
