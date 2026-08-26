@@ -43,7 +43,7 @@ mod sustain;
 pub use assets::{
     asset_bytes, asset_bytes_from, asset_length_s, asset_path, asset_path_in, asset_roots,
     assets_dir, assets_licensed_dir, playback_bytes, plugin_lib_dir, verify_sound_assets,
-    AssetBytes, MUSIC_EXTENSIONS, SFX_EXTENSIONS,
+    AssetBytes, MUSIC_EXTENSIONS, SFX_EXTENSIONS, SOUND_ASSETS_MISSING,
 };
 pub use backend::{loop_category, one_shot_category, AudioBackend, Buses, Category, VolumeUpdate};
 pub use bass::BassBackend;

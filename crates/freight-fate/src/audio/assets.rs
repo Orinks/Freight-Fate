@@ -386,12 +386,15 @@ pub fn asset_length_s(key: &str) -> f64 {
 /// shipped sound pack.
 pub fn verify_sound_assets() -> Result<(), AudioError> {
     if asset_bytes("ui/menu_select", SFX_EXTENSIONS).is_none() {
-        return Err(AudioError::new(
-            "Sound assets are missing or unreadable: ui/menu_select",
-        ));
+        return Err(AudioError::new(SOUND_ASSETS_MISSING));
     }
     Ok(())
 }
+
+/// The message [`verify_sound_assets`] fails with, named so the smoke test's
+/// skip-on-an-LFS-less-checkout guard matches the same string this returns
+/// rather than a copy that can drift out of step with it.
+pub const SOUND_ASSETS_MISSING: &str = "Sound assets are missing or unreadable: ui/menu_select";
 
 #[cfg(test)]
 mod tests {

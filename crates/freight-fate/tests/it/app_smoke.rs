@@ -77,7 +77,12 @@ fn smoke_checks_find_every_baked_runtime_file() {
         // guard the audio cases use, and it prints WHY it skipped, so an
         // unmaterialised pack cannot quietly turn this into a green run that
         // proved nothing.
-        if e.starts_with("Sound assets are missing or unreadable")
+        // `contains`, not `starts_with`: smoke_checks wraps this one as
+        // `format!("smoke: {e}")`, so the message arrives as
+        // "smoke: Sound assets are missing or unreadable: ui/menu_select".
+        // The secret-store arm below is returned unprefixed, which is why it
+        // can match from the start and this cannot.
+        if e.contains("Sound assets are missing or unreadable")
             && !crate::audio_support::shipped_sounds()
         {
             return;
@@ -87,6 +92,20 @@ fn smoke_checks_find_every_baked_runtime_file() {
             "smoke check failed: {e}"
         );
     }
+}
+
+#[test]
+fn the_smoke_sound_error_is_recognisable_through_its_prefix() {
+    // The guard in smoke_checks_find_every_baked_runtime_file has to spot the
+    // sound-asset failure to skip it on an LFS-less checkout, and it got this
+    // wrong once: `smoke_checks` wraps this one error as `format!("smoke: {e}")`
+    // while returning the secret-store one unprefixed, so a `starts_with` match
+    // never fired and the Windows runner stayed red. Neither string is
+    // reachable from a machine that HAS the pack, so nothing here would have
+    // caught it -- this pins the shape instead.
+    let wrapped = format!("smoke: {}", freight_fate::audio::SOUND_ASSETS_MISSING);
+    assert!(!wrapped.starts_with("Sound assets are missing or unreadable"));
+    assert!(wrapped.contains("Sound assets are missing or unreadable"));
 }
 
 #[test]
