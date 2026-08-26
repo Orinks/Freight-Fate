@@ -361,7 +361,11 @@ impl GameContext {
     /// this after every dispatch and update; harmless when nothing waits.
     pub fn run_deferred(&mut self) {
         while !self.deferred.is_empty() {
-            let pending: Vec<Deferred> = self.deferred.drain(..).collect();
+            // take, not drain-collect: the whole queue moves out in one
+            // swap instead of being copied element by element, and the
+            // handlers below may push new deferred calls onto the empty
+            // vec left behind, which the loop then picks up.
+            let pending: Vec<Deferred> = std::mem::take(&mut self.deferred);
             for call in pending {
                 match call {
                     Deferred::Enter(state) => match state.try_borrow_mut() {
