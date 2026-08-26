@@ -13,8 +13,8 @@
   at two if that is where you are. Once you have gone by what the CB called,
   it tells you that instead. If the CB has not said anything yet, it says so
   rather than going quiet, and it answers at every speech setting, including
-  the quiet ones, because you asked for it. Thanks to Sarah Alawami for
-  asking for this.
+  the quiet ones, because you asked for it. Thanks to marrie for asking
+  for this.
 
 - **Exit ramps now use real advisory signs where the map has them.** Freight
   Fate matched trusted OpenStreetMap readings to 6,539 interchanges and keeps
