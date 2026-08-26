@@ -1,9 +1,18 @@
 # Agent Contributor Guide
 
 Freight Fate is an audio-first, accessibility-first trucking simulation for
-blind and low-vision players. Python 3.12, managed with `uv`. Full contributor
-policy lives in `CONTRIBUTING.md`; this file is the short version a coding
-agent needs at authoring time.
+blind and low-vision players. Full contributor policy lives in
+`CONTRIBUTING.md`; this file is the short version a coding agent needs at
+authoring time.
+
+**Career 1.9 is a native Rust game.** The Cargo workspace under `crates/`
+(`ff-core`, `freight-fate`, `prism`, `prism-sys`, `bass-sys`) is the shipping
+runtime. Python is no longer part of gameplay: `src/freight_fate/` remains as
+the port's reference implementation and as the home of the world data tree,
+and `tools/` stays Python for baking, packaging, and data generation. Write
+gameplay changes in Rust. The `dev` line is still Python-only, so a fix that
+must reach both lines has to be written twice -- ask before assuming it
+should be.
 
 ## Branches and PRs
 
@@ -45,41 +54,72 @@ code, in the same change:
 
 ## Commands
 
+The gameplay runtime is Rust; the tooling around it is Python. Which one you
+need depends on what you touched.
+
+### Rust -- gameplay, and what CI gates
+
+- Setup: install `rustup` (the pinned toolchain and its `rustfmt`/Clippy
+  components come from `rust-toolchain.toml` via `rustup show`), then
+  `uv sync` and `uv run python tools/fetch_bass.py` for the licensed BASS
+  runtime. Without BASS the workspace still builds and the audio tests skip
+  themselves, which reads as a green run that proved nothing -- so fetch it.
+- Run the game: `cargo run --release -p freight-fate`
+- Format: `cargo fmt --all --check`
+- Lint: `cargo clippy --all-targets --locked -- -D warnings`. Warnings are
+  errors, and `--all-targets` means test and bench code is linted too.
+- Tests: `cargo test -p ff-core` and `cargo test -p freight-fate`.
+  Integration tests live in `crates/ff-core/tests/it/*.rs`, wired in through
+  `main.rs` -- one test binary per crate, deliberately, so add a module there
+  rather than a new top-level file.
+- **Focused tests while you iterate, the full run once before you push.**
+  `cargo test -p ff-core <name_filter>` while the change is in motion. The
+  full pair at the end, exactly once, because that is where the surprises
+  live: a change to spoken text can strand an assertion in a file three
+  directories from anything obviously related.
+- Adversarial battery: `cargo run -p freight-fate --bin freightfate --
+  --break-battery`. All 45 scenarios, deliberately unreasonable play against
+  the real driving state. `--list-break-scenarios` names them,
+  `--break-scenario NAME --transcript` runs one and prints what was said.
+  **The battery is NOT part of `cargo test`**, so a green test run says
+  nothing about whether floor-it-through-town still behaves -- which is
+  exactly what a change to driving, traffic, speech or world data breaks.
+  Run it after the tests pass. Rust has no `xfail`, so a scenario that starts
+  passing is a verdict change you fix or record, not something to leave.
+- The playtest harness is a library module, `crates/freight-fate/src/playtest/`
+  (`harness`, `menu`, `sandbox`, `road`, `breaker`), reachable from both the
+  tests and the binary. Everything in it runs headless and isolated -- dummy
+  SDL drivers, no speech, a throwaway `FREIGHT_FATE_DATA_DIR` -- so it never
+  touches the operator's real settings, saves or keyring.
+- Rust CI (`.github/workflows/rust.yml`) is **Windows only**, deliberately:
+  SDL2 and BASS are vendored for `windows-x86_64` alone. Linux and macOS are
+  not covered. Add a platform's vendored libraries before adding its runner.
+
+### Python -- tools, data, packaging
+
 - Setup: `uv sync --group dev`
 - Tests: `uv run pytest` (config already applies `-q -n auto` and a per-test
-  timeout). **Focused tests while you iterate, the full suite once before you
-  push or merge.** The full run is about four minutes, so spending it on every
-  one-line change is waste -- run the files covering your area instead, as
-  many times as it takes. Run it in full exactly once, at the end, because
-  that is where the surprises live: a canonical-phrase change on 2026-08-17
-  passed every focused suite and still had a stale assertion waiting in
-  `test_lane_discrete.py`, three files away from anything obviously related.
-  A slow sweep test needs its own `@pytest.mark.timeout` -- under
-  xdist the thread timeout kills the worker and reads as "node down". What
-  `-n auto` resolves to is capped in `tests/conftest.py`: workers load pygame
-  and the audio stack, so past about eight the run stops getting faster, and
-  uncapped on a 28-core machine it died in the reporter rather than merely
-  running slowly.
-- Adversarial battery: `uv run pytest tests/adversarial -m adversarial`. Slow,
-  so it is deselected by default and not even collected without the marker.
-  Deliberately unreasonable play (floor it through town, coast a mountain in
-  neutral, save-scum a traffic stop) against the real driving state. Known
-  open findings are strict xfails in `KNOWN_OPEN`; fix one and delete its
-  entry in the same change, which is what the XPASS failure will tell you to
-  do. Same scenarios still run as a tool for reading spoken output:
-  `uv run python tools/playtest_break.py --scenario NAME --transcript`.
-- After the full suite passes, run the adversarial battery too:
-  `uv run pytest tests/adversarial -m adversarial`. The playtest HARNESS is
-  already in the full run (`tests/test_playtest_harness.py`, 54 tests); the
-  battery is not, because `-m "not adversarial"` lives in the addopts. So a
-  green suite says nothing about whether deliberately unreasonable play still
-  behaves, which is exactly what a change to driving, traffic, speech or the
-  world data can break. Fix any XPASS by deleting its `KNOWN_OPEN` entry in
-  the same change.
+  timeout). Same rule: focused files while iterating, the full suite once at
+  the end. The full run is about four minutes. A slow sweep test needs its
+  own `@pytest.mark.timeout` -- under xdist the thread timeout kills the
+  worker and reads as "node down". What `-n auto` resolves to is capped in
+  `tests/conftest.py`: workers load pygame and the audio stack, so past about
+  eight the run stops getting faster, and uncapped on a 28-core machine it
+  died in the reporter rather than merely running slowly.
 - Lint: `uv run ruff check src tests tools`
 - Byte-compile check: `uv run python -m compileall src tests tools`
+
+### Both
+
 - Headless runs: set `FREIGHT_FATE_NO_SPEECH=1` (CI also uses
   `SDL_VIDEODRIVER=dummy` and `SDL_AUDIODRIVER=dummy`).
+- **Exactly one test run in flight anywhere, ever.** Parallel agents each
+  starting `pytest -n auto`, or each building the Cargo workspace at full
+  job count, is the recurring way this machine falls over. Cap concurrent
+  agents' builds with `CARGO_BUILD_JOBS`.
+- Never pipe a test run to `tail`: the shell reports the pipeline's status,
+  so `pytest | tail` exits 0 while pytest is failing. Redirect to a file and
+  read the count.
 
 ## Accessibility expectations
 
@@ -114,8 +154,16 @@ code, in the same change:
 - Enriching a leg (real checkpoints, truck-stop POIs, fine grades) or
   finishing a new corridor: follow `docs/map-enrichment-recipe.md` exactly --
   it encodes the judgment rules and the spoken-text invariants.
-- After data changes run the world and route tests, e.g.
-  `uv run pytest tests/test_world.py tests/test_world_overlay.py`.
+- The shipped game reads a single baked container, not the JSON tree. After
+  a data change re-bake it with `cargo run -p ff-core --bin ff-bake --
+  --data-dir src/freight_fate/data --out dist/freight_fate/data/world.ffdata`,
+  and prove a committed container matches its tree with the same command plus
+  `--check`, which re-bakes to a temp file and compares bytes.
+- After data changes run the world and route tests. In Rust that is the
+  `data_*` and `sim_*` cases in `crates/ff-core/tests/it/` -- e.g.
+  `cargo test -p ff-core data_world`. The Python equivalents
+  (`uv run pytest tests/test_world.py tests/test_world_overlay.py`) still
+  exist for the reference tree.
 
 ### Provenance: read, derived, or assumed -- never blurred
 
