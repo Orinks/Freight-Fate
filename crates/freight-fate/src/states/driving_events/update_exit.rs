@@ -30,6 +30,7 @@ impl DrivingState {
         // median 27 under the road, twenty-three of the twenty-five more than
         // 10 under. Nothing about the lane was wrong; the clock under it was.
         self.trip.controlled_ramp = self.departure_ramp_mi.is_some()
+            || self.departure_merge_recovery
             || (self.ramp_mi.is_some()
                 && matches!(
                     self.ramp_control.as_str(),

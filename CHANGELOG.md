@@ -991,6 +991,13 @@
   and destination assistance slows again only when the facility entrance is
   actually close.
 
+- **A slow loaded truck gets a safe highway handoff after an on-ramp.** If a
+  heavy load reaches the end of its acceleration lane well below traffic
+  speed, Freight Fate keeps the speed assistance on the real-time clock until
+  the truck is close enough to merge safely. The lane length is still the
+  same road it announced; the game does not pretend that extra pavement is
+  there.
+
 - **A start with no game sounds now tells you so.** If Freight Fate cannot
   open the sound on your computer it still starts, the way it always has, and
   the voice still reads everything out. Until now nothing said that the engine,

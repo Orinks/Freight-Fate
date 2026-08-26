@@ -307,6 +307,7 @@ impl DrivingState {
         let (highway_mph, _) = self.trip.speed_limit_at(0.0);
         let grade = self.trip.grade_at(0.0);
         self.departure_ramp_mi = Some(acceleration_lane_mi(highway_mph, grade));
+        self.departure_merge_recovery = false;
         // A real length of road is only room to build speed on if it is spent
         // at the rate a truck really covers it. The exit watch pins the lane
         // to the real clock every frame, but it has already run for this one,
@@ -361,6 +362,12 @@ impl DrivingState {
     /// says.
     pub fn update_departure_ramp(&mut self, ctx: &mut GameContext, moved_mi: f64) {
         let Some(left) = self.departure_ramp_mi else {
+            if self.departure_merge_recovery {
+                let (limit, _) = self.trip.speed_limit_at(self.trip.position_mi);
+                if limit - self.trip.truck.speed_mph() < MERGE_UNDER_SPEED_MPH {
+                    self.departure_merge_recovery = false;
+                }
+            }
             return;
         };
         let left = left - 0.0f64.max(moved_mi);
@@ -378,6 +385,14 @@ impl DrivingState {
         // as a fault. Only a truck that is genuinely up to speed gets the
         // plain merge line.
         let message = if short_by >= MERGE_UNDER_SPEED_MPH {
+            // The length just consumed remains the map-derived fallback; do
+            // not invent more Carlisle pavement for a truck that needs more
+            // room. It is now on the mainline's right lane, where adaptive
+            // cruise still protects its following gap. Keeping this handoff
+            // on the real clock until it is close to traffic speed prevents
+            // time compression from turning a slow, loaded join into a
+            // sudden highway-speed transition.
+            self.departure_merge_recovery = true;
             format!(
                 "Lane ending at {}. You are under the {} traffic is running, so take a big gap \
                  and keep building speed once you are in.",

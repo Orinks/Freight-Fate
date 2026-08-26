@@ -15,9 +15,11 @@
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::make_reposition_job;
 use ff_core::models::profile::Profile;
+use ff_core::models::trucks::truck_model_or_panic;
 use ff_core::sim::trip_models::{
     NavigationCue, RoadStop, TrafficPressure, TripEvent, TripEventData, TripEventKind, Zone,
 };
+use ff_core::sim::vehicle::KG_PER_TON;
 use ff_core::sim::weather::WeatherKind;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::speech_text::SpokenMessage;
@@ -1397,6 +1399,61 @@ fn test_the_acceleration_lane_closes_with_a_merge_line() {
     let spoken = app.event_lines().join(" ");
     assert!(spoken.contains("Lane ending"), "{spoken}");
     assert!(spoken.contains("take a big gap"), "{spoken}");
+}
+
+#[test]
+fn test_a_loaded_yard_mule_keeps_the_merge_handoff_on_the_real_clock() {
+    // Brandon's Carlisle departure: a 25-ton flatbed behind a yard mule
+    // reached the 70-mph I-76 taper at 46 mph. The 1,600-foot fallback stays
+    // honest; the low-speed join itself must not jump to compressed highway
+    // time before the truck is close enough to traffic speed.
+    let mut app = TestApp::new();
+    let world = get_world();
+    let mut profile = Profile::named_in("Brandon Merge", "Carlisle");
+    profile.tutorial_done = true;
+    app.ctx.profile = Some(profile);
+    let job = make_reposition_job(world, "Carlisle", "Pittsburgh", false, None)
+        .expect("Carlisle to Pittsburgh is a supported reposition");
+    let route = world
+        .shortest_route("Carlisle", "Pittsburgh", None, false)
+        .expect("the world routes")
+        .expect("Carlisle to Pittsburgh has a route");
+    let mut d = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        Some(0),
+        DRIVE_PHASE_DELIVERY,
+        Some(12.0),
+    );
+    d.trip.truck.specs = truck_model_or_panic("yard_mule").specs.clone();
+    d.trip.truck.cargo_kg = 25.0 * KG_PER_TON;
+    d.trip.truck.transmission.automatic = true;
+    d.trip.truck.trailer_attached = true;
+    d.weather_mut().current = WeatherKind::Clear;
+    d.departure_ramp_mi = Some(0.05);
+    d.trip.truck.start_engine();
+    let position = d.trip.position_mi;
+    let (limit, _) = d.trip.speed_limit_at(position);
+    assert_eq!(limit, 70.0);
+    d.trip.truck.velocity_mps = mph_to_mps(46.0);
+
+    d.update_departure_ramp(&mut app.ctx, 0.10);
+    d.update_exit(&mut app.ctx, 0.0, 0.0);
+
+    assert!(d.departure_ramp_mi.is_none());
+    assert!(d.departure_merge_recovery);
+    assert!(d.trip.controlled_ramp);
+    assert!(app.event_lines().join(" ").contains("take a big gap"));
+
+    // A truck already within the established merge band returns to ordinary
+    // highway pacing instead of needlessly slowing every departure.
+    d.trip.truck.velocity_mps = mph_to_mps(limit - MERGE_UNDER_SPEED_MPH + 1.0);
+    d.update_departure_ramp(&mut app.ctx, 0.0);
+    d.update_exit(&mut app.ctx, 0.0, 0.0);
+
+    assert!(!d.departure_merge_recovery);
+    assert!(!d.trip.controlled_ramp);
 }
 
 #[test]

@@ -636,6 +636,10 @@ pub struct DrivingState {
     // facility. None once the lane is behind the truck (or when the run
     // never started at a facility at all).
     pub departure_ramp_mi: Option<f64>,
+    // The real pavement has ended but this truck is still materially slower
+    // than the traffic it joined. Keep the low-speed merge handoff on the
+    // real-time clock until it can safely become ordinary highway driving.
+    pub departure_merge_recovery: bool,
     // Lanes on our side last tick, so a road that narrows under the truck
     // can be told apart from a driver who steered into the cones.
     pub lane_count_seen: Option<i64>,
