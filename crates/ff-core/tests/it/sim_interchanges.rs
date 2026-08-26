@@ -6,8 +6,11 @@
 use crate::sim_support::*;
 use ff_core::data::world::World;
 use ff_core::data::world_models::{Interchange, Leg, Route, Stop};
+use ff_core::data::world_parsing::parse_interchange;
 use ff_core::sim::trip::{Trip, TripOptions};
-use ff_core::sim::trip_models::{NavigationCue, TripEventKind, Zone};
+use ff_core::sim::trip_models::{
+    ramp_speed_mph, NavigationCue, RampAdvisorySpeed, TripEventKind, Zone,
+};
 use ff_core::sim::trip_route_helpers::{leg_heading, nearest_exit_label};
 use ff_core::sim::vehicle::TruckState;
 
@@ -179,6 +182,88 @@ fn test_reverse_direction_mirrors_interchange_position() {
         fwd_cue.at_mi,
         rev_miles - rev_cue.at_mi
     );
+}
+
+#[test]
+fn observed_ramp_advisory_wins_by_travel_direction_and_missing_uses_calculation() {
+    let w = world();
+    let forward = first_route_option(w, "Chicago", "Indianapolis");
+    let leg = forward.legs[0].clone();
+    let at = leg.miles / 2.0;
+    let fixture: serde_json::Value = serde_json::from_str(include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../tests/fixtures/ramp_advisory_harvest.json"
+    )))
+    .unwrap();
+    let mut raw = fixture["expected_interchange"].clone();
+    raw["at_mi"] = serde_json::json!(at);
+    let ix = parse_interchange(&raw, leg.miles, "Chicago", "Indianapolis", &leg.highway).unwrap();
+    let forward = replace_leg(
+        &forward,
+        0,
+        with_corridor(&leg, |detail| detail.interchanges = vec![ix.clone()]),
+    );
+    assert_eq!(
+        trip_on(forward, true).ramp_advisory_at(at),
+        RampAdvisorySpeed::Observed {
+            posted_mph: 25.0,
+            truck_target_mph: 25.0,
+        }
+    );
+
+    let reverse = first_route_option(w, "Indianapolis", "Chicago");
+    let rev_leg = reverse.legs[0].clone();
+    let route_mile = rev_leg.miles - at;
+    let reverse = replace_leg(
+        &reverse,
+        0,
+        with_corridor(&rev_leg, |detail| detail.interchanges = vec![ix]),
+    );
+    assert_eq!(
+        trip_on(reverse, true).ramp_advisory_at(route_mile),
+        RampAdvisorySpeed::Observed {
+            posted_mph: 30.0,
+            truck_target_mph: 30.0,
+        }
+    );
+
+    let no_observation = first_route_option(w, "Chicago", "Indianapolis");
+    assert!(matches!(
+        trip_on(no_observation, true).ramp_advisory_at(at),
+        RampAdvisorySpeed::Calculated { .. }
+    ));
+}
+
+#[test]
+fn passenger_vehicle_ramp_sign_never_raises_the_truck_target() {
+    let w = world();
+    let route = first_route_option(w, "Chicago", "Indianapolis");
+    let leg = route.legs[0].clone();
+    let at = leg.miles / 2.0;
+    let raw = serde_json::json!({
+        "at_mi": at,
+        "exit_ref": "fixture",
+        "source": "test fixture",
+        "ramp_far_end": "surface",
+        "ramp_advisory_forward": 70.0,
+        "ramp_advisory_source": "OpenStreetMap maxspeed:advisory (read)",
+    });
+    let ix = parse_interchange(&raw, leg.miles, "Chicago", "Indianapolis", &leg.highway).unwrap();
+    let route = replace_leg(
+        &route,
+        0,
+        with_corridor(&leg, |detail| detail.interchanges = vec![ix]),
+    );
+    let trip = trip_on(route, true);
+    let calculated = ramp_speed_mph(trip.corridor_limit_at(at), false);
+    assert_eq!(
+        trip.ramp_advisory_at(at),
+        RampAdvisorySpeed::Observed {
+            posted_mph: 70.0,
+            truck_target_mph: calculated,
+        }
+    );
+    assert_eq!(trip.ramp_speed_at(at), calculated);
 }
 
 #[test]

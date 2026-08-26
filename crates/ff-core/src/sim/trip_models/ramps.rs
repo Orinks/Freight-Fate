@@ -122,6 +122,33 @@ pub fn ramp_speed_mph(highway_mph: f64, directional: bool) -> f64 {
     RAMP_MIN_DESIGN_MPH.max(round_py(highway_mph * share))
 }
 
+/// Provenance travels with ramp speed so a calculated design fallback cannot
+/// be mistaken for an observed advisory sign.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum RampAdvisorySpeed {
+    /// A roadside value was read, but the truck target remains no faster than
+    /// Freight Fate's existing conservative ramp calculation. Ordinary ramp
+    /// advisory signs are generally intended for passenger vehicles.
+    Observed {
+        posted_mph: f64,
+        truck_target_mph: f64,
+    },
+    Calculated {
+        mph: f64,
+    },
+}
+
+impl RampAdvisorySpeed {
+    pub fn mph(self) -> f64 {
+        match self {
+            Self::Observed {
+                truck_target_mph, ..
+            } => truck_target_mph,
+            Self::Calculated { mph } => mph,
+        }
+    }
+}
+
 /// What a loaded truck is really doing at the end of that lane: Long's curve
 /// integrated over the lane, capped at the highway's own limit.
 pub fn truck_merge_speed_mph(highway_mph: f64, entry_mph: f64, lane_mi: f64) -> f64 {

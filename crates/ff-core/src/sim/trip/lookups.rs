@@ -380,19 +380,45 @@ impl Trip {
         best
     }
 
-    /// The speed the ramp at this mile is actually built for: a DIRECTIONAL
-    /// connector takes about 85 percent of the road it leaves, a ramp onto a
-    /// surface road about 70.
+    pub fn ramp_advisory_at(&self, route_mile: f64) -> RampAdvisorySpeed {
+        let interchange = self.interchange_with_direction_at(route_mile, 2.0);
+        let directional = interchange.is_some_and(|(ix, _)| ix.ramp_far_end == "motorway");
+        let calculated_mph = ramp_speed_mph(self.corridor_limit_at(route_mile), directional);
+        if let Some((ix, forward)) = interchange {
+            let observed = if forward {
+                ix.ramp_advisory_mph_forward
+            } else {
+                ix.ramp_advisory_mph_backward
+            };
+            if let Some(posted_mph) = observed {
+                return RampAdvisorySpeed::Observed {
+                    posted_mph,
+                    truck_target_mph: posted_mph.min(calculated_mph),
+                };
+            }
+        }
+        RampAdvisorySpeed::Calculated {
+            mph: calculated_mph,
+        }
+    }
+
     pub fn ramp_speed_at(&self, route_mile: f64) -> f64 {
-        let directional = self
-            .interchange_at(route_mile, 2.0)
-            .is_some_and(|ix| ix.ramp_far_end == "motorway");
-        ramp_speed_mph(self.corridor_limit_at(route_mile), directional)
+        self.ramp_advisory_at(route_mile).mph()
     }
 
     /// The baked interchange nearest a route mile, or None.
     pub fn interchange_at(&self, route_mile: f64, tol_mi: f64) -> Option<&Interchange> {
+        self.interchange_with_direction_at(route_mile, tol_mi)
+            .map(|(ix, _)| ix)
+    }
+
+    fn interchange_with_direction_at(
+        &self,
+        route_mile: f64,
+        tol_mi: f64,
+    ) -> Option<(&Interchange, bool)> {
         let mut best: Option<&Interchange> = None;
+        let mut best_forward = true;
         let mut best_dist = tol_mi;
         for (i, (start, leg)) in self
             .leg_starts
@@ -407,10 +433,11 @@ impl Trip {
                 if dist <= best_dist {
                     best_dist = dist;
                     best = Some(ix);
+                    best_forward = forward;
                 }
             }
         }
-        best
+        best.map(|ix| (ix, best_forward))
     }
 
     /// The live traffic speed of a congestion zone here, or None when it

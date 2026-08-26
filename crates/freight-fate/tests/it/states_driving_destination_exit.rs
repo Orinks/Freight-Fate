@@ -264,6 +264,7 @@ fn an_interchange(at_mi: f64, exit_ref: &str, destination: &str, highway: &str) 
         source: "test".to_string(),
         ramp_control: String::new(),
         ramp_far_end: String::new(),
+        ..Default::default()
     }
 }
 

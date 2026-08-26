@@ -31,6 +31,9 @@ pub struct Interchange {
     pub source: String,
     pub ramp_control: String,
     pub ramp_far_end: String,
+    pub ramp_advisory_mph_forward: Option<f64>,
+    pub ramp_advisory_mph_backward: Option<f64>,
+    pub ramp_advisory_source: String,
 }
 
 impl Interchange {

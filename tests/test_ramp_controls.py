@@ -8,6 +8,9 @@ walks link topology for the far end everywhere else, and the seeded heuristic
 only decides the exits neither could judge.
 """
 
+import json
+from pathlib import Path
+
 import pytest
 
 from freight_fate.states.driving_core import FREEWAY_VIA_RE
@@ -163,9 +166,31 @@ def _topo_tools():
     tools = str(Path(__file__).resolve().parents[1] / "tools")
     if tools not in sys.path:
         sys.path.insert(0, tools)
-    import build_interchanges_rampcontrols as m
+    import build_interchanges
 
-    return m
+    return build_interchanges._RAMPCONTROL_MODULE
+
+
+def test_production_harvester_bakes_directional_advisories_end_to_end():
+    """A deterministic PBF-boundary fixture exercises the production path."""
+    m = _topo_tools()
+    fixture = json.loads(
+        (Path(__file__).parent / "fixtures" / "ramp_advisory_harvest.json").read_text()
+    )
+    observations = []
+    for way in fixture["ways"]:
+        locations = {int(k): tuple(v) for k, v in way["locations"].items()}
+        observations.extend(
+            m.advisory_observations_for_way(way["refs"], way["oneway"], way["tags"], locations)
+        )
+    geom = [
+        (point["lat"], point["lon"], point["at_mi"])
+        for point in fixture["leg"]["corridor"]["route_points"]
+    ]
+    assert m.bake_ramp_advisories_for_leg(fixture["leg"], observations, geom) == 1
+    interchange = fixture["leg"]["corridor"]["interchanges"][0]
+    assert interchange == fixture["expected_interchange"]
+    assert "(read; directional suffix resolved" in interchange["ramp_advisory_source"]
 
 
 def test_a_gore_is_a_departure_not_a_merge():

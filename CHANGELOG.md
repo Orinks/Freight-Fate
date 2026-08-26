@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Exit ramps now use real advisory signs where the map has them.** Freight
+  Fate matched trusted OpenStreetMap readings to 6,539 interchanges and keeps
+  each direction separate. Missing signs still use the existing calculated
+  ramp speed. Because ordinary ramp signs are usually passenger-vehicle
+  guidance, a read sign can make the truck's target slower but can never make
+  it faster than the game's existing conservative ramp calculation.
 - **Trucks climb hills like trucks.** Heavy traffic used to hold its speed up
   a mountain grade the same as it did across Kansas, so a line of trucks was a
   wall all doing the same number with nothing to choose between them. A loaded

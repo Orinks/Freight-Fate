@@ -42,6 +42,13 @@ RAMP_CONTROL_NEAR_GEOM_M = 2000.0
 JUNCTION_MATCH_MAX_M = 8000.0
 JUNCTION_INDEX_DEFAULT = Path.home() / ".cache" / "freight-fate-osm" / "interchanges-regions.json"
 RAMP_CONTROL_INDEX_CACHE_VERSION = 1
+RAMP_ADVISORY_NEAR_EXIT_M = 2200.0
+RAMP_ADVISORY_SOURCE = (
+    "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit "
+    "(read; directional suffix resolved from OSM way direction into leg "
+    f"direction), from a local Geofabrik extract, accessed {ACCESSED_DATE}: "
+    "https://www.openstreetmap.org/"
+)
 RAMP_CONTROL_SOURCE = (
     "OpenStreetMap highway=traffic_signals/highway=stop node on a "
     "motorway_link way at this exit, read from a local Geofabrik extract, "
@@ -50,6 +57,103 @@ RAMP_CONTROL_SOURCE = (
 
 # (lat, lon, kind) where kind is "signal" or "stop"
 RampControlPoint = tuple[float, float, str]
+
+
+def parse_osm_advisory_mph(value: str) -> float | None:
+    """Normalize the strict numeric subset accepted by the Rust loader."""
+    text = str(value).strip().lower()
+    factor = 0.621371192
+    for suffix, unit_factor in (("mph", 1.0), ("km/h", factor), ("kmh", factor), ("kph", factor)):
+        if text.endswith(suffix):
+            text = text[: -len(suffix)].strip()
+            factor = unit_factor
+            break
+    try:
+        speed = float(text) * factor
+    except ValueError:
+        return None
+    return speed if math.isfinite(speed) and 5.0 <= speed <= 100.0 else None
+
+
+def advisory_for_travel(tags: dict[str, str], forward: bool) -> float | None:
+    key = "maxspeed:advisory:forward" if forward else "maxspeed:advisory:backward"
+    for value in (tags.get(key), tags.get("maxspeed:advisory")):
+        if value is not None and (speed := parse_osm_advisory_mph(value)) is not None:
+            return speed
+    return None
+
+
+def advisory_observations_for_way(
+    refs: list[int],
+    oneway: str,
+    tags: dict[str, str],
+    locations: dict[int, tuple[float, float]],
+) -> list[tuple[float, float, float, float, float]]:
+    """Turn one harvested OSM link way into directed ramp observations."""
+    travel_orders: list[tuple[list[int], bool]] = []
+    if oneway == "-1":
+        travel_orders.append((list(reversed(refs)), False))
+    elif oneway in ("no", "false", "0"):
+        travel_orders.extend(((refs, True), (list(reversed(refs)), False)))
+    else:
+        travel_orders.append((refs, True))
+    observations = []
+    for travel, osm_forward in travel_orders:
+        speed = advisory_for_travel(tags, osm_forward)
+        located = [locations[n] for n in travel if n in locations]
+        if speed is not None and len(located) >= 2:
+            observations.append((*located[0], *located[1], speed))
+    return observations
+
+
+def bake_ramp_advisories_for_leg(
+    leg: dict[str, Any],
+    observations: list[tuple[float, float, float, float, float]],
+    geom: list[tuple[float, float, float]] | None = None,
+) -> int:
+    """Resolve ramp travel headings into the leg's A->B/B->A directions.
+
+    Observations are ``gore lat/lon, next lat/lon, mph`` in actual ramp travel
+    order. This is also the deterministic harvester boundary used by tests.
+    """
+    interchanges = list(leg.get("corridor", {}).get("interchanges", ()))
+    geom = geom or leg_corridor_geometry(leg, 0.0)
+    if not interchanges or not geom:
+        return 0
+    exit_locations = [
+        _exit_location(geom, float(ix["at_mi"]), float(leg["miles"])) for ix in interchanges
+    ]
+    chosen: list[dict[str, list[float]]] = [{"forward": [], "backward": []} for _ in interchanges]
+    for glat, glon, nlat, nlon, mph in observations:
+        exit_i = min(
+            range(len(interchanges)),
+            key=lambda i: _haversine_mi(glat, glon, *exit_locations[i]),
+        )
+        lat, lon = exit_locations[exit_i]
+        if _haversine_mi(lat, lon, glat, glon) * 1609.34 > RAMP_ADVISORY_NEAR_EXIT_M:
+            continue
+        nearest_i = min(
+            range(len(geom)), key=lambda i: _haversine_mi(lat, lon, geom[i][0], geom[i][1])
+        )
+        before = geom[max(0, nearest_i - 1)]
+        after = geom[min(len(geom) - 1, nearest_i + 1)]
+        leg_dx = (after[1] - before[1]) * math.cos(math.radians(lat))
+        leg_dy = after[0] - before[0]
+        ramp_dx = (nlon - glon) * math.cos(math.radians(glat))
+        ramp_dy = nlat - glat
+        direction = "forward" if leg_dx * ramp_dx + leg_dy * ramp_dy >= 0 else "backward"
+        chosen[exit_i][direction].append(mph)
+    touched = 0
+    for ix, speeds_by_direction in zip(interchanges, chosen, strict=True):
+        changed = False
+        for direction, speeds in speeds_by_direction.items():
+            if speeds:
+                ix[f"ramp_advisory_{direction}"] = round(min(speeds), 3)
+                changed = True
+        if changed:
+            ix["ramp_advisory_source"] = RAMP_ADVISORY_SOURCE
+            touched += 1
+    return touched
 
 
 def _build_ramp_control_index_from_pbf(
@@ -413,11 +517,9 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
         if not corridor.get("interchanges") or len(corridor.get("route_points", ())) < 2:
             continue
         if not args.force and all(
-            ix.get("ramp_control") and ix.get("ramp_far_end") for ix in corridor["interchanges"]
+            ix.get("ramp_control") and ix.get("ramp_far_end") and ix.get("ramp_advisory_source")
+            for ix in corridor["interchanges"]
         ):
-            # Done means a control AND a far-end verdict. Exits topology could
-            # not judge (no gore in range) keep the leg eligible and are
-            # re-walked on later runs, which costs a lookup and nothing else.
             continue
         if not args.max_legs or len(target_legs) < args.max_legs:
             target_legs.append(leg)
@@ -490,13 +592,20 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
                 topo=topo,
                 stats=stats,
             )
+            advisories = bake_ramp_advisories_for_leg(leg, topo.get("advisory_observations", []))
         except Exception as exc:  # noqa: BLE001 - one bad leg must not abort the batch
             print(f"    skipped: {type(exc).__name__}: {exc}", flush=True)
             baked = 0
+            advisories = 0
         total_ix = len(leg.get("corridor", {}).get("interchanges", ()))
-        print(f"    {baked}/{total_ix} interchanges given a control", flush=True)
-        if baked:
+        print(
+            f"    {baked}/{total_ix} interchanges given a control; "
+            f"{advisories} given observed ramp advisory speeds",
+            flush=True,
+        )
+        if baked or advisories:
             baked_total += baked
+            stats["advisory_interchanges"] = stats.get("advisory_interchanges", 0) + advisories
             baked_legs += 1
         if args.write and baked_legs and processed % 10 == 0:
             save_world(data)
@@ -505,6 +614,10 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
     print(
         f"\n{processed} legs processed, {baked_legs} touched, "
         f"{baked_total} interchanges given ramp controls or far ends."
+    )
+    print(
+        f"Observed ramp advisory coverage: {stats.get('advisory_interchanges', 0)} "
+        "interchanges (read from OSM); all others retain the calculated fallback."
     )
     examined = stats.get("exits", 0)
     if examined:
@@ -572,7 +685,7 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
 # far end, so the match radii are much tighter than the control pass's.
 RAMP_FAR_END_NEAR_JUNCTION_M = 500.0
 RAMP_FAR_END_NEAR_GEOM_M = 1200.0
-RAMP_TOPO_CACHE_VERSION = 4
+RAMP_TOPO_CACHE_VERSION = 5
 RAMP_TOPO_WALK_CAP = 600  # visited nodes per gore; a real ramp complex is far smaller
 # Ways that can meet a ramp at a node without being a road the ramp ends at:
 # a marked footpath crossing a system ramp is not a terminal, and counting it
@@ -854,6 +967,7 @@ def _build_ramp_topo_from_pbf(
         def __init__(self) -> None:
             super().__init__()
             self.link_ways: list[tuple[list[int], str]] = []
+            self.advisory_ways: list[tuple[list[int], str, dict[str, str]]] = []
             self.motorway_nodes: set[int] = set()
             self.trunk_nodes: set[int] = set()
             self.ways_seen = 0
@@ -869,7 +983,10 @@ def _build_ramp_topo_from_pbf(
                 if getattr(node_ref, "ref", None) is not None
             ]
             if highway == "motorway_link":
-                self.link_ways.append((refs, tags.get("oneway", "")))
+                oneway = tags.get("oneway", "")
+                self.link_ways.append((refs, oneway))
+                if any(key.startswith("maxspeed:advisory") for key in tags):
+                    self.advisory_ways.append((refs, oneway, tags))
             elif highway == "motorway":
                 self.motorway_nodes.update(refs)
             elif highway == "trunk":
@@ -1004,6 +1121,31 @@ def _build_ramp_topo_from_pbf(
             ],
         )
 
+    advisory_node_ids = {node_id for refs, _, _ in ways.advisory_ways for node_id in refs}
+    advisory_locs: dict[int, tuple[float, float]] = {}
+    if advisory_node_ids:
+
+        class AdvisoryLocationHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
+            def node(self, node: Any) -> None:
+                if node.location.valid():
+                    advisory_locs[int(node.id)] = (
+                        float(node.location.lat),
+                        float(node.location.lon),
+                    )
+
+        AdvisoryLocationHandler().apply_file(
+            str(pbf_path),
+            filters=[
+                osmium.filter.EntityFilter(osmium.osm.NODE),
+                osmium.filter.IdFilter(sorted(advisory_node_ids)),
+            ],
+        )
+    advisory_observations: list[tuple[float, float, float, float, float]] = []
+    for refs, oneway, tags in ways.advisory_ways:
+        advisory_observations.extend(
+            advisory_observations_for_way(refs, oneway, tags, advisory_locs)
+        )
+
     # Prune to what the in-bounds gores can reach: the cache carries exactly
     # the walkable subgraph, not a whole state's link network.
     reachable: set[int] = set()
@@ -1065,6 +1207,7 @@ def _build_ramp_topo_from_pbf(
         "control_points": tagged.control_points,
         "terminal_locs": {str(k): v for k, v in terminal_locs.items()},
         "gores": gore_points,
+        "advisory_observations": advisory_observations,
         "untagged_oneway_ways": graph["untagged_oneway_ways"],
         "link_way_count": len(ways.link_ways),
     }
@@ -1118,6 +1261,7 @@ def load_or_build_ramp_topo_index(
             "control_points": [],
             "terminal_locs": {},
             "gores": [],
+            "advisory_observations": [],
             "untagged_oneway_ways": 0,
             "link_way_count": 0,
         }
@@ -1134,6 +1278,7 @@ def load_or_build_ramp_topo_index(
                 "give_way",
                 "control_points",
                 "gores",
+                "advisory_observations",
             ):
                 merged[key].extend(part[key])
             merged["untagged_oneway_ways"] += part["untagged_oneway_ways"]
@@ -1165,6 +1310,7 @@ def load_or_build_ramp_topo_index(
         "control_grid": _GoreGrid([(c[0], c[1], str(c[2])) for c in merged["control_points"]]),
         "terminal_locs": {int(k): (v[0], v[1]) for k, v in merged["terminal_locs"].items()},
         "grid": _GoreGrid([(p[0], p[1], int(p[2])) for p in merged["gores"]]),
+        "advisory_observations": [tuple(p) for p in merged.get("advisory_observations", [])],
         "untagged_oneway_ways": merged["untagged_oneway_ways"],
         "link_way_count": merged["link_way_count"],
         "gore_count": len(merged["gores"]),

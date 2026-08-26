@@ -90,7 +90,8 @@ mirror!(BakedTollEvent => TollEvent {
 mirror!(BakedInterchange => Interchange {
     at_mi: f64, exit_ref: String, name: String, destinations: Vec<String>,
     via: String, highway: String, source: String, ramp_control: String,
-    ramp_far_end: String,
+    ramp_far_end: String, ramp_advisory_mph_forward: Option<f64>,
+    ramp_advisory_mph_backward: Option<f64>, ramp_advisory_source: String,
 });
 
 mirror!(BakedSpeedLimitSample => SpeedLimitSample {

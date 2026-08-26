@@ -804,6 +804,16 @@ pub fn parse_interchange(
             "{from_city} to {to_city} {label} has unknown ramp_far_end"
         )));
     }
+    let ramp_advisory_mph_forward = parse_advisory_field(raw, "ramp_advisory_forward");
+    let ramp_advisory_mph_backward = parse_advisory_field(raw, "ramp_advisory_backward");
+    let ramp_advisory_source = get_str(raw, "ramp_advisory_source");
+    if (ramp_advisory_mph_forward.is_some() || ramp_advisory_mph_backward.is_some())
+        && ramp_advisory_source.is_empty()
+    {
+        return Err(DataError::value(format!(
+            "{from_city} to {to_city} {label} has an observed ramp advisory without a source"
+        )));
+    }
     Ok(Interchange {
         at_mi,
         exit_ref,
@@ -814,6 +824,59 @@ pub fn parse_interchange(
         source,
         ramp_control,
         ramp_far_end,
+        ramp_advisory_mph_forward,
+        ramp_advisory_mph_backward,
+        ramp_advisory_source,
+    })
+}
+
+/// Normalize an OSM advisory speed. Bare values and metric suffixes are km/h,
+/// as required by OSM's maxspeed value syntax; an explicit mph suffix is kept.
+pub fn parse_osm_advisory_speed(value: &str) -> Option<f64> {
+    let value = value.trim().to_lowercase();
+    let (number, factor) = if let Some(v) = value.strip_suffix("mph") {
+        (v.trim(), 1.0)
+    } else if let Some(v) = value.strip_suffix("km/h") {
+        (v.trim(), 0.621_371_192)
+    } else if let Some(v) = value.strip_suffix("kmh") {
+        (v.trim(), 0.621_371_192)
+    } else if let Some(v) = value.strip_suffix("kph") {
+        (v.trim(), 0.621_371_192)
+    } else {
+        (value.as_str(), 0.621_371_192)
+    };
+    let speed = number.parse::<f64>().ok()? * factor;
+    (speed.is_finite() && (5.0..=100.0).contains(&speed)).then_some(speed)
+}
+
+/// Read the advisory applying OSM way direction before the generic value.
+/// Callers must positively identify a motorway/trunk ramp; ordinary-road
+/// advisory tags belong to the curve layer, not this first ramp slice.
+pub fn ramp_advisory_from_osm_tags(
+    tags: &Map<String, Value>,
+    traversal_forward: bool,
+    is_ramp: bool,
+) -> Option<f64> {
+    if !is_ramp {
+        return None;
+    }
+    let directional = if traversal_forward {
+        "maxspeed:advisory:forward"
+    } else {
+        "maxspeed:advisory:backward"
+    };
+    [directional, "maxspeed:advisory"]
+        .into_iter()
+        .find_map(|key| tags.get(key)?.as_str().and_then(parse_osm_advisory_speed))
+}
+
+fn parse_advisory_field(raw: &Map<String, Value>, key: &str) -> Option<f64> {
+    raw.get(key).and_then(|value| match value {
+        Value::String(text) => parse_osm_advisory_speed(text),
+        Value::Number(number) => number
+            .as_f64()
+            .filter(|speed| speed.is_finite() && (5.0..=100.0).contains(speed)),
+        _ => None,
     })
 }
 

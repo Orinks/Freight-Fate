@@ -1,0 +1,48 @@
+{
+  "leg": {
+    "from": "Fixture West",
+    "to": "Fixture East",
+    "highway": "I-90",
+    "miles": 10.0,
+    "corridor": {
+      "route_points": [
+        {"at_mi": 0.0, "lat": 40.0, "lon": -75.1},
+        {"at_mi": 5.0, "lat": 40.0, "lon": -75.0},
+        {"at_mi": 10.0, "lat": 40.0, "lon": -74.9}
+      ],
+      "interchanges": [
+        {"at_mi": 5.0, "exit_ref": "12", "source": "fixture OSM junction"}
+      ]
+    }
+  },
+  "expected_interchange": {
+    "at_mi": 5.0,
+    "exit_ref": "12",
+    "source": "fixture OSM junction",
+    "ramp_advisory_forward": 25.0,
+    "ramp_advisory_backward": 30.0,
+    "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/"
+  },
+  "ways": [
+    {
+      "refs": [1, 2],
+      "oneway": "yes",
+      "tags": {
+        "highway": "motorway_link",
+        "maxspeed:advisory": "45 mph",
+        "maxspeed:advisory:forward": "25 mph"
+      },
+      "locations": {"1": [40.0, -75.0], "2": [40.0, -74.99]}
+    },
+    {
+      "refs": [3, 4],
+      "oneway": "-1",
+      "tags": {
+        "highway": "motorway_link",
+        "maxspeed:advisory": "80 km/h",
+        "maxspeed:advisory:backward": "30 mph"
+      },
+      "locations": {"3": [40.0, -75.01], "4": [40.0, -75.0]}
+    }
+  ]
+}

@@ -8120,6 +8120,14 @@ From a batch of player reports:
   trooper milestone (below) remains the home for *visible, immediate*
   enforcement: getting pulled over and on-the-spot fines.
 
+- [x] **Directional ramp advisory speeds.** The production local-PBF harvester,
+  world schema, and Rust runtime path now preserve directional OSM
+  `maxspeed:advisory` readings separately from the calculated fallback. The
+  2026-08-26 national sweep matched 6,539 checked-in interchanges. Because
+  ordinary advisory signs are generally passenger-vehicle guidance, a read
+  value may lower but never raise the existing conservative truck target. No
+  state-DOT or truck-rollover sign inventory is part of this first slice.
+
 - [x] **Driving assistance presets and descent control.** Shipped for the current snapshot: Realistic, Balanced, All assists, and Custom coordinate optional lane, emergency-braking, stop-and-go, and interactive descent support without changing inherent adaptive-cruise behavior or simulation settings. Automatic exits, destination stops, yard entry, and docking remain deferred to Career 1.9 or later. On the 1.9 line, lane drift itself lives in the Driving assistance category but stays preset-independent like the speed keeper: presets tune warnings and support, never whether the lane task runs, so fresh careers keep the centered-lane accessible default.
 - [x] **A hot ramp speaks one assist line, not two (2026-08-23).** The
       2026-07-15 logged playtest of the four 1.9 assists had curve speed

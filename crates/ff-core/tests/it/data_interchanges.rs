@@ -3,11 +3,59 @@
 //! `sim_interchanges.rs`).
 
 use ff_core::data::world_models::{format_route_ref, join_destinations, Interchange};
-use ff_core::data::world_parsing::parse_interchange;
+use ff_core::data::world_parsing::{
+    parse_interchange, parse_osm_advisory_speed, ramp_advisory_from_osm_tags,
+};
 use serde_json::{json, Value};
 
 fn strings(items: &[&str]) -> Vec<String> {
     items.iter().map(|s| s.to_string()).collect()
+}
+
+#[test]
+fn advisory_speed_normalizes_osm_units_and_rejects_malformed_values() {
+    assert_eq!(parse_osm_advisory_speed("35 mph"), Some(35.0));
+    assert!((parse_osm_advisory_speed("80 km/h").unwrap() - 49.7097).abs() < 0.001);
+    assert!((parse_osm_advisory_speed("80").unwrap() - 49.7097).abs() < 0.001);
+    for malformed in ["signals", "35;45", "walk", "0 mph", "250 km/h", ""] {
+        assert_eq!(parse_osm_advisory_speed(malformed), None, "{malformed}");
+    }
+}
+
+#[test]
+fn interchange_preserves_directional_observations_and_requires_provenance() {
+    let mut value = raw();
+    {
+        let obj = value.as_object_mut().unwrap();
+        obj.insert("ramp_advisory_forward".into(), json!("30 mph"));
+        obj.insert("ramp_advisory_backward".into(), json!("80 km/h"));
+        obj.insert(
+            "ramp_advisory_source".into(),
+            json!("OpenStreetMap maxspeed:advisory tags (read)"),
+        );
+    }
+    let parsed = parse_interchange(&value, 100.0, "A", "B", "I-1").unwrap();
+    assert_eq!(parsed.ramp_advisory_mph_forward, Some(30.0));
+    assert!((parsed.ramp_advisory_mph_backward.unwrap() - 49.7097).abs() < 0.001);
+
+    value
+        .as_object_mut()
+        .unwrap()
+        .remove("ramp_advisory_source");
+    assert!(parse_interchange(&value, 100.0, "A", "B", "I-1").is_err());
+}
+
+#[test]
+fn osm_directional_advisory_has_priority_and_is_ramp_only() {
+    let tags = json!({
+        "maxspeed:advisory": "45 mph",
+        "maxspeed:advisory:forward": "25 mph",
+        "maxspeed:advisory:backward": "30 mph"
+    });
+    let tags = tags.as_object().unwrap();
+    assert_eq!(ramp_advisory_from_osm_tags(tags, true, true), Some(25.0));
+    assert_eq!(ramp_advisory_from_osm_tags(tags, false, true), Some(30.0));
+    assert_eq!(ramp_advisory_from_osm_tags(tags, true, false), None);
 }
 
 // --- phrasing ---------------------------------------------------------------
