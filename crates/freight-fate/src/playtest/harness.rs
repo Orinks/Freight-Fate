@@ -628,6 +628,28 @@ impl PlaytestHarness {
 
     // -- starting a run ---------------------------------------------------------------
 
+    /// Take the wheel exactly where `--playtest-road --find FEATURE` would.
+    ///
+    /// The whole value of a finder is WHERE it drops you, and that is decided
+    /// by [`road::build_driving`][super::road::build_driving] -- the job it
+    /// builds, the seed it carries over from the search, and the lead it
+    /// subtracts. A test that staged an equivalent drive by hand would be
+    /// checking its own arithmetic, not the tool's, so this runs the tool's
+    /// own construction and hands back the mile it chose.
+    ///
+    /// Returns the starting mile.
+    pub fn start_road_feature(
+        &mut self,
+        hit: &super::road::Hit,
+        opts: &super::road::RoadOptions,
+    ) -> f64 {
+        let (drive, start_mi) = super::road::build_driving(&mut self.app.ctx, hit, opts);
+        self.app.push_state(drive);
+        self.driving = self.app.state();
+        self.neutralize_random_trip_friction();
+        start_mi
+    }
+
     /// Set up a delivery on a specific supported route, skipping the menus.
     ///
     /// Useful for exercising one corridor's routing/data (e.g. a leg whose
@@ -658,10 +680,25 @@ impl PlaytestHarness {
         let miles = route.miles().round();
         let cargo = cargo_type(&setup.cargo)
             .unwrap_or_else(|| panic!("{:?} is not in the cargo catalog", setup.cargo));
+        // The dispatch board fills the spoken endpoints in; this seam skips
+        // the board, and without them every line that names the city aloud
+        // fell back to the map key -- "in hattiesburg_ms_us" on the
+        // missed-exit call, and "hattiesburg_ms_us Terminal" in the opening
+        // summary. A transcript test cannot tell that placeholder from a real
+        // defect, so the seam speaks the same names a real job does. Resolved
+        // first because callers hand this either a key or a display name.
+        let origin_spoken = {
+            let key = self.app.ctx.world.resolve_city_key(origin);
+            self.app.ctx.world.spoken_city(&key, None)
+        };
+        let destination_spoken = {
+            let key = self.app.ctx.world.resolve_city_key(destination);
+            self.app.ctx.world.spoken_city(&key, None)
+        };
         let origin_location = setup
             .origin_location
             .clone()
-            .unwrap_or_else(|| format!("{origin} Terminal"));
+            .unwrap_or_else(|| format!("{origin_spoken} Terminal"));
         let mut job = Job::new(
             cargo,
             setup.tons,
@@ -675,7 +712,9 @@ impl PlaytestHarness {
         job.destination_location = setup
             .destination_location
             .clone()
-            .unwrap_or_else(|| format!("{destination} Terminal"));
+            .unwrap_or_else(|| format!("{destination_spoken} Terminal"));
+        job.origin_spoken = origin_spoken;
+        job.destination_spoken = destination_spoken;
         let drive = DrivingState::new(
             &mut self.app.ctx,
             job,

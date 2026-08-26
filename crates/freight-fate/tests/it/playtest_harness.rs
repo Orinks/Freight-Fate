@@ -141,6 +141,29 @@ fn test_the_harness_pays_the_pacer_a_frame_of_real_time_per_frame() {
     );
 }
 
+/// A route started off the board still speaks city names, not map keys.
+///
+/// `start_route` skips the dispatch board, and the board is what fills in a
+/// job's spoken endpoints. Left empty, every line that names the delivery
+/// city fell back to the slug -- "in hattiesburg_ms_us" on the missed-exit
+/// call -- which a transcript test cannot tell from a real defect.
+#[test]
+fn test_start_route_speaks_the_city_not_its_map_key() {
+    let mut harness = PlaytestHarness::new();
+    harness.start_route("jackson_ms_us", "hattiesburg_ms_us", RouteSetup::default());
+    let (origin, destination) = harness.with_drive(|drive, _| {
+        (
+            drive.job.origin_spoken.clone(),
+            drive.job.destination_spoken.clone(),
+        )
+    });
+    // Disambiguated the way dispatch says them -- there is more than one
+    // Jackson on the map.
+    assert_eq!(origin, "Jackson, Mississippi");
+    assert_eq!(destination, "Hattiesburg");
+    assert!(!harness.transcript_text().contains("hattiesburg_ms_us"));
+}
+
 /// `test_app_forces_dummy_video_when_speech_is_disabled`: the Python test
 /// launched a subprocess that built a real windowed `App` with a sentinel
 /// video driver and checked pygame had replaced it. Porting it means

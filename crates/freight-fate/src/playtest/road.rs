@@ -40,6 +40,8 @@ use crate::states::driving_core::DRIVE_PHASE_DELIVERY;
 
 use super::MPH_PER_MPS;
 
+pub mod destination;
+
 /// Route sets swept when the caller does not name a pair. Hand-picked and
 /// small: a feature search is only useful if it finishes while you wait.
 pub const MOUNTAIN_ROUTES: [(&str, &str); 5] = [
@@ -70,7 +72,7 @@ pub const RANDOM_MAX_MILES: f64 = 600.0;
 /// How many pairs a random draw offers the search.
 pub const RANDOM_SAMPLE: usize = 6;
 
-pub const FEATURES: [&str; 10] = [
+pub const FEATURES: [&str; 11] = [
     "downgrade",
     "upgrade",
     "zone",
@@ -81,6 +83,7 @@ pub const FEATURES: [&str; 10] = [
     "interchange",
     "toll",
     "chain-law",
+    "destination",
 ];
 const SCAN_STEP_MI: f64 = 0.1;
 /// How far before the feature the SEARCH looks back to report a posted
@@ -386,6 +389,11 @@ pub fn find_feature(
             "interchange" => hits.extend(interchange_hits(&mut trip, origin, destination)),
             "toll" => hits.extend(toll_hits(&mut trip, origin, destination)),
             "chain-law" => hits.extend(chain_law_hits(&mut trip, origin, destination)),
+            "destination" => hits.extend(self::destination::destination_hits(
+                &mut trip,
+                origin,
+                destination,
+            )),
             _ => {}
         }
     }
@@ -824,6 +832,24 @@ fn lead_for_seconds(trip: &Trip, speed_mph: f64, seconds: f64) -> f64 {
     (speed_mph * scale * seconds / 3600.0).max(0.5)
 }
 
+/// The run-in this feature wants, in route miles.
+///
+/// Every feature gets the same twenty-five real seconds by default. The
+/// exceptions are features that announce themselves BEFORE you reach them: a
+/// lead measured to the feature drops the driver in on top of the callout
+/// with nothing to hear. `destination` is the one such finder, and its
+/// override is derived from the callout's own trigger rather than chosen
+/// (see [`destination::destination_lead_mi`]).
+///
+/// `--at` keeps the plain lead whatever `--find` says, because a named mile
+/// is a mile the operator measured for themselves.
+fn feature_lead_mi(trip: &Trip, opts: &RoadOptions) -> f64 {
+    match opts.feature.as_str() {
+        "destination" if opts.at.is_none() => destination::destination_lead_mi(trip, opts.speed),
+        _ => lead_for_seconds(trip, opts.speed, LEAD_REAL_SECONDS),
+    }
+}
+
 /// A `DrivingState` already rolling at the feature, set up as asked.
 pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (DrivingState, f64) {
     // Settings first: DrivingState reads the gearbox and the assist choices
@@ -908,9 +934,15 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
         2500.0,
         14.0,
     );
-    job.destination_location = format!("{} freight market", hit.destination);
+    // The SPOKEN city, not the pair as it was typed. `--from`/`--to` take a
+    // key as readily as a name, and the facility label is read aloud in the
+    // opening summary, in the destination-exit call and in the missed-exit
+    // line -- so a slug here put "the destination exit for freight terminal
+    // hattiesburg_ms_us freight market" into three of the lines a playtest
+    // is usually listening for.
     job.origin_spoken = ctx.world.spoken_city(&origin_key, None);
     job.destination_spoken = ctx.world.spoken_city(&destination_key, None);
+    job.destination_location = format!("{} freight market", job.destination_spoken);
 
     let mut driving = DrivingState::new(
         ctx,
@@ -926,7 +958,7 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
 
     let lead_mi = opts
         .lead
-        .unwrap_or_else(|| lead_for_seconds(&driving.trip, opts.speed, LEAD_REAL_SECONDS));
+        .unwrap_or_else(|| feature_lead_mi(&driving.trip, opts));
     let total = driving.trip.total_miles();
     let start_mi = (hit.at_mi - lead_mi).clamp(0.0, (total - 1.0).max(0.0));
     driving.trip.position_mi = start_mi;
@@ -1079,6 +1111,17 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
             trip_seed: Some(seed),
         });
     }
+    // A typo used to reach the search, match nothing, and come back as
+    // "Nothing matched. Try another route" -- which reads as a road without
+    // the feature rather than a name the tool does not have.
+    if !FEATURES.contains(&opts.feature.as_str()) {
+        println!(
+            "Unknown --find {:?}. Choose one of: {}.",
+            opts.feature,
+            FEATURES.join(", ")
+        );
+        return RoadPlan::Done(1);
+    }
     println!(
         "Searching {} route(s) for a {}...",
         pairs.len(),
@@ -1091,6 +1134,10 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
             "limit-drop" => "Loosen --min-drop",
             "curve" => "Raise --max-advisory",
             "toll" => "Tolled corridors are mostly eastern turnpikes",
+            // Every supported route has a delivery exit, so an empty find
+            // here is a routing failure rather than a road that lacks the
+            // feature -- the pair did not resolve at all.
+            "destination" => "Every route has one, so check the city names resolve",
             _ => "Try another route",
         };
         println!("Nothing matched. {hint}, or try --routes all.");

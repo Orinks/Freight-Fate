@@ -46,6 +46,7 @@ mod online_activation;
 mod online_journal;
 mod online_presence;
 mod playtest_harness;
+mod playtest_road_destination;
 mod playtest_sandbox;
 mod playtest_state_lines;
 mod save_dir_guard;

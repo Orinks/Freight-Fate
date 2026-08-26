@@ -247,7 +247,9 @@ Drive tools:
   --playtest-road --find FEATURE    start already rolling at a road feature
                                     (downgrade, upgrade, zone, limit-drop,
                                     stop, scale, curve, interchange, toll,
-                                    chain-law); --from/--to/--seed/--scan and
+                                    chain-law, destination); destination is
+                                    the delivery off-ramp at the end of the
+                                    route; --from/--to/--seed/--scan and
                                     the assist switches refine the search
   --playtest-sandbox [--launch]     a data directory that cannot reach the
                                     owner's account; --dir/--reset/--print
@@ -412,13 +414,16 @@ fn playtest_road(args: &[String]) -> i32 {
     let headless = flag_f64(args, "--headless").unwrap_or(0.0);
     let opts = road_options(args);
 
-    if headless == 0.0 {
+    if headless == 0.0 && !opts.scan {
         // `playtest_road` builds its own app and runs it, which means it never
         // passes through the guard `app::main_with` uses. Launching one while
         // a game was already open gave the owner two windows, the new drive
         // rolling unfocused behind the old one, and an open weigh station that
         // came and went unheard (2026-08-21). A bench is exempt: it opens no
-        // window and several are fine at once.
+        // window and several are fine at once -- and so is `--scan`, which
+        // `road::plan` answers off the world data and returns before any app
+        // is built. Refusing a search because a drive is open cost the tool
+        // its one use during a playtest: finding where to go next.
         let mut guard = freight_fate::single_instance::SingleInstanceGuard::new();
         if !guard.acquire() {
             eprintln!(
