@@ -617,6 +617,14 @@ fn test_a_blown_destination_exit_names_the_loop_back_not_a_later_exit() {
     for lane_keeping in ["off", "full"] {
         let mut harness = a_drive("Exits");
         harness.app.ctx.settings.lane_keeping = lane_keeping.to_string();
+        // No enforcement posts on this road. 89 in a 65 is exactly what earns
+        // a trooper, and being pulled over cancels the exit approach ("Exit
+        // approach canceled; plan it again after the stop") -- so the run
+        // never reaches the gore and the loop-back line never comes. That is
+        // the game behaving correctly; it just answers a different question
+        // than this case asks. Cleared for the same reason `a_drive_noisy`
+        // pushes hazards and inspections out of reach.
+        harness.with_drive(|d, _| d.trip.posts.clear());
         let stop = destination_exit(&mut harness);
         let at = stop.at_mi;
         harness.with_drive(move |d, _| {

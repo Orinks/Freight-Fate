@@ -68,6 +68,20 @@ fn smoke_checks_find_every_baked_runtime_file() {
     if let Err(e) = smoke_checks() {
         // The secret store is the one check that depends on the machine
         // rather than the build; everything before it must pass.
+        //
+        // The sound assets are the other. CI checks out without LFS on
+        // purpose -- fetching the packs on every push is what exhausted the
+        // repository's LFS budget -- so `sounds.pak` is a 130-byte pointer
+        // there and the lookup fails against pointer text, not because
+        // anything is wrong with the build. `shipped_sounds()` is the same
+        // guard the audio cases use, and it prints WHY it skipped, so an
+        // unmaterialised pack cannot quietly turn this into a green run that
+        // proved nothing.
+        if e.starts_with("Sound assets are missing or unreadable")
+            && !crate::audio_support::shipped_sounds()
+        {
+            return;
+        }
         assert!(
             e.starts_with("Secret store unreachable"),
             "smoke check failed: {e}"
