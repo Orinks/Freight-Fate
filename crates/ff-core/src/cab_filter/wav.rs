@@ -95,9 +95,14 @@ impl WavPcm16 {
         // Whole frames only, as wave.readframes(getnframes()) returns.
         let frame_bytes = 2 * channels as usize;
         let usable = pcm.len() / frame_bytes * frame_bytes;
-        let samples = pcm[..usable]
-            .chunks_exact(2)
-            .map(|b| i16::from_le_bytes([b[0], b[1]]))
+        // `as_chunks::<2>` rather than `chunks_exact(2)`: the size is a
+        // constant, so the compiler gets fixed-size arrays and no bounds
+        // check per sample, and newer Clippy denies the chunks_exact form
+        // for exactly that reason.
+        let (frames, _) = pcm[..usable].as_chunks::<2>();
+        let samples = frames
+            .iter()
+            .map(|&[lo, hi]| i16::from_le_bytes([lo, hi]))
             .collect();
         Ok(Self {
             sample_rate: rate,
