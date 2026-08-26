@@ -1,6 +1,7 @@
 //! The per-frame advance of an armed exit or an active ramp, the destination
 //! terminal loop-back, and the planned-stop stopping assist.
 
+use ff_core::sim::trip_models::RoadStop;
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
@@ -241,6 +242,37 @@ impl DrivingState {
         self.say_confirmation_interrupt(ctx, &line);
     }
 
+    /// What to do about the exit that just went by, in one clause.
+    ///
+    /// An optional stop really can be picked up from a later exit, so "recover
+    /// at the next safe exit" is true for one. The DESTINATION exit has no
+    /// later exit to recover at: the route runs on to its end and the scripted
+    /// loop-back through the safe turnaround brings this same exit back, which
+    /// is what the manual has always described. Sending a driver looking for
+    /// another exit sends them off the route, and then the loop-back a mile
+    /// later reads as a reroute that was promised and never came (Tyler
+    /// Rodick, Hattiesburg, 2026-08-26: "it never rerouted me").
+    fn missed_exit_recovery(stop: &RoadStop) -> &'static str {
+        if stop.stop_type == "delivery_destination" {
+            "Stay on the highway: you loop back through the safe turnaround and the destination \
+             exit comes around again."
+        } else {
+            "Stay on the highway and recover at the next safe exit."
+        }
+    }
+
+    /// The same promise as a tail, for the two lines that already say the
+    /// truck stayed on the highway. Empty for an optional stop, whose lines
+    /// deliberately leave the driver to choose whether to come back at all.
+    fn missed_destination_note(stop: &RoadStop) -> &'static str {
+        if stop.stop_type == "delivery_destination" {
+            " You loop back through the safe turnaround, and the destination exit comes around \
+             again."
+        } else {
+            ""
+        }
+    }
+
     /// The `_ramp_mi is None` half of `_update_exit`.
     fn update_armed_exit(&mut self, ctx: &mut GameContext) {
         let Some(stop) = self.exit_stop.clone() else {
@@ -279,7 +311,8 @@ impl DrivingState {
             } else {
                 "You missed the exit window and stayed on the highway."
             };
-            self.say_confirmation_event(ctx, message);
+            let note = Self::missed_destination_note(&stop);
+            self.say_confirmation_event(ctx, &format!("{message}{note}"));
             return;
         }
         if !self.exit_intent_ready(ctx, &stop) {
@@ -289,12 +322,10 @@ impl DrivingState {
                 self.clear_selected_stop_intent();
             }
             let place = self.missed_exit_phrase(ctx, &stop);
+            let recovery = Self::missed_exit_recovery(&stop);
             self.say_confirmation_event(
                 ctx,
-                &format!(
-                    "You missed {place}: the turn signal was not set. Stay on the highway and \
-                     recover at the next safe exit."
-                ),
+                &format!("You missed {place}: the turn signal was not set. {recovery}"),
             );
             return;
         }
@@ -305,22 +336,20 @@ impl DrivingState {
                 self.clear_selected_stop_intent();
             }
             let missed = self.missed_exit_phrase(ctx, &stop);
+            let recovery = Self::missed_exit_recovery(&stop);
             let pressure = self.active_exit_pressure(&stop);
             if pressure.is_some() {
                 self.say_confirmation_event(
                     ctx,
                     &format!(
                         "Traffic boxed you out of the exit lane at the gore, so you missed \
-                         {missed}. Stay on the highway and recover at the next safe exit."
+                         {missed}. {recovery}"
                     ),
                 );
             } else {
                 self.say_confirmation_event(
                     ctx,
-                    &format!(
-                        "You missed {missed}: you were not in the exit lane. Stay on the highway \
-                         and recover at the next safe exit."
-                    ),
+                    &format!("You missed {missed}: you were not in the exit lane. {recovery}"),
                 );
             }
             return;
@@ -333,7 +362,9 @@ impl DrivingState {
             self.take_the_ramp(ctx, &stop);
         } else {
             let missed = self.missed_exit_phrase(ctx, &stop);
-            let mut line = format!("You were going too fast for the ramp and missed {missed}.");
+            let note = Self::missed_destination_note(&stop);
+            let mut line =
+                format!("You were going too fast for the ramp and missed {missed}.{note}");
             if self.trip.is_planned(&stop) {
                 // Fold the plan cancellation into this one line so the driver
                 // hears a single cue, and clear it here so _check_stops doesn't

@@ -791,6 +791,28 @@ fn test_the_dash_still_warns_even_though_nothing_is_charged() {
 }
 
 #[test]
+fn test_the_dash_still_warns_while_looping_back_to_a_missed_destination_exit() {
+    // Tyler Rodick, Hattiesburg, 2026-08-26: missed the destination exit, was
+    // told the approach loops back, and then held 89 the whole way round with
+    // nobody saying anything. The loop-back set a latch that returned early
+    // out of the dash -- a carve-out left over from when this method charged
+    // silent speeding fines -- so the one system that would have told him to
+    // shed speed for the retry was off from the first miss to the dock, while
+    // the enforcement watch went on accruing against him regardless.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.missed_destination_exit_said = true;
+    d.destination_exit_taken = false;
+    app.clear_speech();
+    let limit = speed_on_an_empty_road(&mut d, &mut app, 24.0, 2.0);
+    let spoken = app.event_lines();
+    assert!(
+        spoken.iter().any(|line| line.contains("Watch your speed")),
+        "24 over a {limit:.0} on the loop-back said nothing: {spoken:?}"
+    );
+}
+
+#[test]
 fn test_a_dropped_limit_still_earns_braking_room() {
     // The one fairness rule worth keeping from the strike era. A loaded truck
     // cannot shed fifteen mph the instant a sign changes, so the grace that

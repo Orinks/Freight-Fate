@@ -602,6 +602,55 @@ fn test_missed_destination_exit_reroutes_every_time() {
     assert!(harness.read_drive(|d| d.exit_signal_on));
 }
 
+#[test]
+fn test_a_blown_destination_exit_names_the_loop_back_not_a_later_exit() {
+    // Tyler Rodick, Hattiesburg, 2026-08-26: "it never rerouted me". At the
+    // gore the game told him to stay on the highway and recover at the next
+    // safe exit. For an optional stop that is true. For the DESTINATION exit
+    // there is no later exit to recover at: the route runs on to its end and
+    // the scripted loop-back through the safe turnaround brings this same
+    // exit back. A driver sent looking for another exit is off the route, and
+    // the loop-back a mile later reads as a reroute nobody delivered.
+    //
+    // Both ways of blowing it, because a driver at 89 hits the second one:
+    // no signal at all, and signalled and lined up but far too fast.
+    for lane_keeping in ["off", "full"] {
+        let mut harness = a_drive("Exits");
+        harness.app.ctx.settings.lane_keeping = lane_keeping.to_string();
+        let stop = destination_exit(&mut harness);
+        let at = stop.at_mi;
+        harness.with_drive(move |d, _| {
+            d.trip.position_mi = at - 1.0;
+            d.truck_mut().velocity_mps = 89.0 * MPS_PER_MPH;
+            d.exit_lane_alignment = 1.0;
+        });
+        harness.clear_speech();
+        frame(&mut harness, DT);
+
+        harness.with_drive(move |d, _| {
+            d.trip.position_mi = at;
+            d.truck_mut().velocity_mps = 89.0 * MPS_PER_MPH;
+        });
+        frame(&mut harness, DT);
+
+        assert!(
+            harness.read_drive(|d| d.ramp_mi.is_none()),
+            "{lane_keeping}"
+        );
+        assert!(
+            said_any(&harness, "the destination exit comes around again"),
+            "{lane_keeping}: {:?}",
+            spoken(&harness)
+        );
+        assert!(
+            !said_any(&harness, "recover at the next safe exit"),
+            "{lane_keeping}: {:?}",
+            spoken(&harness)
+        );
+        drop(harness);
+    }
+}
+
 // -- the exit lane ---------------------------------------------------------------------
 
 #[test]

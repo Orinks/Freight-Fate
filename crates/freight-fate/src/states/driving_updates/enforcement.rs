@@ -31,12 +31,20 @@ impl DrivingState {
     /// disregard, not the transition. That grace now gates the enforcement
     /// watch's over-limit distance, which is the measure an officer actually
     /// reads.
+    ///
+    /// One carve-over from those fining days had to go with them: a missed
+    /// destination exit used to return early here, so nothing was charged
+    /// while the driver looped back. Once this became the DASH, that same
+    /// line switched the speed warning off from the first miss all the way to
+    /// the dock -- while the enforcement watch, which never checked the flag,
+    /// went on accruing over-limit distance. The driver kept the ticket and
+    /// lost the warning, which is the wrong half to lose: the loop-back is
+    /// exactly the stretch where a driver has to shed speed to make the exit
+    /// this time. Tyler Rodick drove the Hattiesburg approach at 89 with
+    /// nothing said, lap after lap (2026-08-26).
     pub fn update_speeding(&mut self, ctx: &mut GameContext, dt: f64, accelerator_held: bool) {
         if self.ramp_mi.is_some() {
             return; // the ramp is off the highway and unpatrolled
-        }
-        if self.missed_destination_exit_said && !self.destination_exit_taken {
-            return; // recovery state: guide the player back to the missed exit
         }
         if self.pull_over.is_some() {
             return; // already stopped; the dash has nothing to add
