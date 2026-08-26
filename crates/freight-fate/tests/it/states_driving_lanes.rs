@@ -27,6 +27,7 @@ use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::{WeatherKind, WeatherSystem};
 
 use freight_fate::app::testing::TestApp;
+use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{DRIVE_PHASE_DELIVERY, HAZARD_CREEP_MPH, HAZARD_SAFE_MPH};
 
@@ -1207,6 +1208,26 @@ fn test_camping_the_left_lane_draws_a_cb_nag() {
         d.update_keep_right(&mut app.ctx, 1.0);
     }
     assert_eq!(d.keep_right_nags, 1);
+    // The grumble is CB chatter, so Alt C brings it back word for word --
+    // there is no distance in it to go stale (issue 156).
+    let recalled = d
+        .last_cb_chatter
+        .as_ref()
+        .expect("the nag is repeatable")
+        .clone();
+    assert!(
+        recalled.text.starts_with("CB chatter:"),
+        "{}",
+        recalled.text
+    );
+    assert!(recalled.text.contains("Keep right except to pass"));
+    assert!(recalled.post.is_none());
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &InputEvent::key_mods(Key::C, Mods::ALT));
+    assert_eq!(
+        app.main_lines().last().cloned().unwrap_or_default(),
+        recalled.text
+    );
     // Dropping back right resets the pressure.
     d.lane.lane = 0;
     d.update_keep_right(&mut app.ctx, 1.0);

@@ -109,6 +109,18 @@ impl DrivingState {
         if !message.normal.is_empty() && kind != TripEventKind::Hazard {
             self.last_event_message = message.normal.clone(); // replayable with A
         }
+        if let Some(post) = event.data.cb_patrol.as_ref() {
+            // Recorded when the CB call is HANDLED, not when the voice finally
+            // gets to it: the ambient queue can drop a line that waited out a
+            // hazard, and a driver who heard the squelch and nothing else is
+            // precisely who reaches for Alt C. Same reasoning as
+            // `log_ambient_event`, which files the line at queue time for the
+            // same reason.
+            self.last_cb_chatter = Some(CbChatterRecall {
+                text: message.normal.clone(),
+                post: Some(post.clone()),
+            });
+        }
         let category = Self::event_category(event);
         match kind {
             TripEventKind::Hazard => self.handle_hazard_event(ctx, event, sound, message),

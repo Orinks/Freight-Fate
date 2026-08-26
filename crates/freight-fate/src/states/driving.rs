@@ -56,7 +56,7 @@ use crate::app::GameContext;
 use crate::discord_presence::PresenceState;
 use crate::states::base::{InputEvent, State};
 use crate::states::driving_core::{
-    CurveRun, Instructor, PendingAmbient, PendingSound, RigBuffs, SirenLoop,
+    CbChatterRecall, CurveRun, Instructor, PendingAmbient, PendingSound, RigBuffs, SirenLoop,
 };
 
 pub use snapshot::ACTIVE_TRIP_DEADLINE_MODEL;
@@ -192,6 +192,11 @@ pub struct DrivingState {
     pub aeb_decel_mps2: f64,
     pub aeb_last_speed_mps: Option<f64>,
     pub last_event_message: String, // last spoken route announcement, for replay
+    /// The newest CB call, for the Alt C repeat. Its own slot because the
+    /// one above is overwritten by every landmark, lane count and weather
+    /// change that follows, which is exactly the case a driver who missed
+    /// the CB is in. See [`CbChatterRecall`].
+    pub last_cb_chatter: Option<CbChatterRecall>,
     pub speed_announce_timer: f64,
     pub last_announced_mph: f64,
     // Compliance grace after a posted-limit drop: braking time before

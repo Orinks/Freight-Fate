@@ -40,9 +40,10 @@ use ff_core::models::jobs::{cargo_type, Job};
 use ff_core::models::profile::Profile;
 use ff_core::sim::driving_modes::tuning_for_time_scale;
 use freight_fate::app::testing::{FakeClock, TestApp};
-use freight_fate::states::base::{InputEvent, Key};
+use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{AMBIENT_EVENT_SPACING_S, DRIVE_PHASE_DELIVERY};
+use freight_fate::states::driving_events::AMBIENT_QUEUE_MAX_AGE_S;
 
 /// Advance the ambient queue and the pacer's clock together, so simulated
 /// seconds and the staleness projection agree (see the module note).
@@ -413,6 +414,44 @@ fn test_truly_ambient_chatter_is_spaced_without_blocking_safety() {
             false
         ))
     );
+}
+
+#[test]
+fn test_the_cb_call_a_hazard_swallowed_still_comes_back_on_alt_c() {
+    // Sarah A., issue 156. The CB names what is sitting up the road and
+    // says it once. Here a hazard owns the road when the call arrives, the
+    // queue ages it out before things go quiet, and the driver hears the
+    // squelch and not one word of the call. Alt C is the whole way back to
+    // it -- which is why the call is recorded when it is HANDLED rather
+    // than when the voice finally gets to it.
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    d.trip.position_mi = 0.0;
+    d.hazard_deadline = Some(6.0);
+    app.clear_speech();
+
+    let post = always_observing_post(6.0, 2.0); // watched from mile 4
+    d.handle_trip_event(
+        &mut app.ctx,
+        &cb_chatter("CB chatter, in 4 miles: a driver reports a bear.", 6.0, 2.0),
+    );
+    advance_ambient(&mut app, &mut d, &clock, AMBIENT_QUEUE_MAX_AGE_S + 1.0);
+    d.hazard_deadline = None;
+    advance_ambient(&mut app, &mut d, &clock, AMBIENT_EVENT_SPACING_S);
+    assert!(
+        app.event_lines().is_empty(),
+        "the call was never spoken: {:?}",
+        app.event_lines()
+    );
+
+    // Two miles on, the driver asks what the CB said.
+    d.trip.position_mi = 2.0;
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &InputEvent::key_mods(Key::C, Mods::ALT));
+    let said = app.main_lines();
+    assert_eq!(said, vec![d.trip.cb_patrol_message(&post, 2.0)]);
+    assert!(said[0].starts_with("CB chatter"), "{}", said[0]);
 }
 
 #[test]

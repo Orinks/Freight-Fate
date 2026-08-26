@@ -243,6 +243,141 @@ fn test_repeat_key_replays_the_last_route_announcement() {
     assert!(last(&app).contains("construction ahead"), "{}", last(&app));
 }
 
+// -- Alt C: the CB call you missed, said again (issue 156) ----------------------------
+
+/// A CB heads-up shaped the way `check_enforcement_heads_up` emits one: a
+/// GPS cue carrying the post it is about. Returns the event and the words
+/// the CB used at the distance it was first heard.
+fn a_cb_call(d: &DrivingState, post: &EnforcementPost) -> (TripEvent, String) {
+    let ahead = post.watch_start_mi() - d.trip.position_mi;
+    let text = d.trip.cb_patrol_message(post, ahead);
+    let event = TripEvent {
+        kind: TripEventKind::GpsCue,
+        message: SpokenMessage::new(text.clone()),
+        data: TripEventData {
+            cb_patrol: Some(post.clone()),
+            ..Default::default()
+        },
+    };
+    (event, text)
+}
+
+#[test]
+fn test_alt_c_says_so_when_the_cb_has_said_nothing() {
+    // Silence is indistinguishable from a broken key.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &alt(Key::C));
+    assert_eq!(last(&app), "No CB chatter to repeat.");
+}
+
+#[test]
+fn test_alt_c_repeats_the_cb_call_at_the_distance_it_is_now() {
+    // A rescued line has to still be true: "in four miles" spoken with two
+    // left is worse than not repeating it at all.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.position_mi = 0.0;
+    let post = observing_post(6.0, 2.0); // watched from mile 4
+    let (event, first_heard) = a_cb_call(&d, &post);
+    d.handle_trip_event(&mut app.ctx, &event);
+
+    d.trip.position_mi = 2.0;
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &alt(Key::C));
+    let said = last(&app);
+    assert!(said.starts_with("CB chatter"), "{said}");
+    assert_eq!(said, d.trip.cb_patrol_message(&post, 2.0));
+    assert_ne!(said, first_heard, "the distance went stale");
+}
+
+#[test]
+fn test_alt_c_says_you_have_passed_what_the_cb_called() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.position_mi = 0.0;
+    let post = observing_post(6.0, 2.0);
+    let (event, _) = a_cb_call(&d, &post);
+    d.handle_trip_event(&mut app.ctx, &event);
+
+    d.trip.position_mi = 7.0;
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &alt(Key::C));
+    assert_eq!(
+        last(&app),
+        "The CB called an enforcement post in the median. You have passed it."
+    );
+}
+
+#[test]
+fn test_a_later_announcement_takes_the_a_key_but_not_the_cb_repeat() {
+    // The whole reason this key exists. A is one slot, and every route
+    // announcement after the CB call overwrites it -- which is exactly the
+    // situation a driver who missed the CB is in.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.position_mi = 0.0;
+    let post = observing_post(6.0, 2.0);
+    let (cb, _) = a_cb_call(&d, &post);
+    d.handle_trip_event(&mut app.ctx, &cb);
+    d.handle_trip_event(
+        &mut app.ctx,
+        &TripEvent {
+            kind: TripEventKind::Lane,
+            message: SpokenMessage::new("Two lanes each way."),
+            data: TripEventData::default(),
+        },
+    );
+
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::A));
+    assert!(!last(&app).contains("CB chatter"), "{}", last(&app));
+
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &alt(Key::C));
+    assert!(last(&app).starts_with("CB chatter"), "{}", last(&app));
+}
+
+#[test]
+fn test_alt_c_brings_back_the_voice_and_not_the_squelch() {
+    // She asked for the spoken call, not the chunk-chunk that marked it.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.position_mi = 0.0;
+    let post = observing_post(6.0, 2.0);
+    let (cb, _) = a_cb_call(&d, &post);
+    d.handle_trip_event(&mut app.ctx, &cb);
+
+    let audio = app.record_audio();
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &alt(Key::C));
+    assert!(last(&app).starts_with("CB chatter"), "{}", last(&app));
+    assert!(
+        !audio
+            .borrow()
+            .played
+            .iter()
+            .any(|(sound, _, _)| sound.contains("cb_radio_chatter")),
+        "{:?}",
+        audio.borrow().played
+    );
+}
+
+#[test]
+fn test_plain_c_still_speaks_the_clock() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::C));
+    let said = last(&app);
+    assert!(!said.contains("CB chatter"), "{said}");
+    assert!(
+        said.to_lowercase().contains("deadline") || said.contains(':'),
+        "{said}"
+    );
+}
+
 #[test]
 fn test_upcoming_key_reports_an_imposed_limit_ahead() {
     let mut app = TestApp::new();

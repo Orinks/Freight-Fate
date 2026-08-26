@@ -42,6 +42,7 @@ use ff_core::radio::{
     RadioSettingsAccess, RadioState, RadioStation, PERSONAL_PLAYLIST_SOURCE_TYPE,
 };
 use ff_core::settings::Settings;
+use ff_core::sim::enforcement_posts::EnforcementPost;
 use ff_core::sim::hos::HosClock;
 use ff_core::sim::trip_models::{RoadStop, TripEvent, TripEventKind};
 use ff_core::sim::vehicle::TruckState;
@@ -461,6 +462,27 @@ pub struct PendingAmbient {
 /// The re-render hook of a [`PendingAmbient`]: given the drive as it is at
 /// delivery, the line to speak now, or `None` when its moment has passed.
 pub type AmbientRender = Rc<dyn Fn(&DrivingState, &GameContext) -> Option<String>>;
+
+/// The last thing the CB said, kept so a driver who missed it can hear it
+/// again (Sarah A., issue 156).
+///
+/// CB chatter names something on the road ahead and goes past exactly once,
+/// so missing it used to cost the chance to act on it. Neither existing
+/// replay answers for it: `last_event_message` behind the A key is one slot
+/// that every other route announcement overwrites within seconds, and the
+/// message log walks the history by recency, never by topic.
+///
+/// `post` rides along whenever the call was about an enforcement post, so
+/// the repeat can say how far off it is NOW instead of parroting the
+/// distance it was then. A rescued line has to still be true -- the same
+/// rule the hazard, curve and stop callouts already carry.
+#[derive(Clone, Debug)]
+pub struct CbChatterRecall {
+    /// The line as the CB said it, for chatter with no distance in it.
+    pub text: String,
+    /// The post the call was about, when it was about one.
+    pub post: Option<EnforcementPost>,
+}
 
 impl PendingAmbient {
     pub fn new(message: impl Into<String>) -> Self {

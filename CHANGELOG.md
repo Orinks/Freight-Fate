@@ -4,6 +4,18 @@
 
 ### Added
 
+- **Alt C says the CB chatter again.** The CB tells you what is sitting up
+  the road, and it goes by once: miss it, or have a landmark or a lane count
+  spoken over the top of it, and there was no way back to it. Alt C at the
+  wheel now says the last CB call again on its own. Only the voice comes
+  back, not the squelch that marked it, and the distance is the distance
+  from where you are now, so a call you first heard at four miles comes back
+  at two if that is where you are. Once you have gone by what the CB called,
+  it tells you that instead. If the CB has not said anything yet, it says so
+  rather than going quiet, and it answers at every speech setting, including
+  the quiet ones, because you asked for it. Thanks to Sarah Alawami for
+  asking for this.
+
 - **Exit ramps now use real advisory signs where the map has them.** Freight
   Fate matched trusted OpenStreetMap readings to 6,539 interchanges and keeps
   each direction separate. Missing signs still use the existing calculated

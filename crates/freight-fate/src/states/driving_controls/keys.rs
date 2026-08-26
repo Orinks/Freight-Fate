@@ -145,7 +145,15 @@ impl DrivingState {
         } else if key == Key::F {
             self.speak_fuel(ctx);
         } else if key == Key::C {
-            self.speak_clock(ctx, false);
+            if mods.alt {
+                // C for the CB, on the Alt layer that already answers one
+                // narrow question at a time (Alt A/S/D hours, Alt 1 to 4
+                // place). Plain C stays the clock, the same way plain S, D,
+                // A, J and T keep theirs.
+                self.speak_last_cb_chatter(ctx);
+            } else {
+                self.speak_clock(ctx, false);
+            }
         } else if key == Key::R {
             // Shift+R used to read the next listed exit. Removed 2026-08-17:
             // the exit list is reference material the drive never asks the
