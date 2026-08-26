@@ -228,6 +228,30 @@ onto exit signalling.
         driver name, so once the rule depended on weight, two cases with
         identical roads disagreed about the retarder purely on the name over
         them. Pinned to gross.
+- [x] **Rust port: a start with no sound says so (2026-08-26).** Reported on a
+      Linux nightly (issue #166): the sound device would not open, the game
+      fell back to a silent backend exactly as designed, and the only trace was
+      a warning in the session log. A driver who cannot see that log has no way
+      to tell a broken sound setup from a broken game. `pick_backend` now
+      returns whether the run wanted sound and did not get it -- BASS landing
+      on its no-sound device counts, and a run that asked for silence
+      (`SDL_AUDIODRIVER=dummy`, headless, a caller-built engine) does not --
+      and the main menu speaks it once in the same warning slot the unreadable
+      save and lane-keeping notices use. Starting anyway is unchanged.
+- [ ] **Rust port: no Linux build.** `.github/workflows/rust.yml` vendors SDL2
+      and BASS for windows-x86_64 only and Prism for Windows and macOS; there
+      is no Linux runner and no vendored Linux native libraries. The Linux
+      nightlies players are running are the Python build, so a Linux report
+      cannot be reproduced or fixed on this line until the libraries and a
+      runner exist.
+- [ ] **Rust port: startup work is not held off the input loop.** The Linux
+      report above also had the menu deaf to arrow keys for the first sixteen
+      seconds, because the speech-backend probe and the audio device probe both
+      ran to completion before anything pumped events. The Rust boot has the
+      same shape (`SdlShell::new`, then `Speech::new`, then `AudioEngine::new`,
+      all before the loop) and would stall the same way on a machine where a
+      probe is slow. Worth pumping the window and accepting keys while the
+      backends come up, or at least saying "starting up" before the wait.
 - [x] **Rust port: drive-time frame cost is measured, and one bug found by
       measuring it (2026-08-24).** `crates/freight-fate/tests/it/frame_time.rs`
       drives a seeded, weather-pinned I-70 run out of Denver through the whole

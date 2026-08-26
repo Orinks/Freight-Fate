@@ -440,6 +440,15 @@ pub trait Audio {
     // -- properties -----------------------------------------------------------
     fn enabled(&self) -> bool;
     fn backend_name(&self) -> &str;
+    /// Whether the player still needs telling that this run has no sound,
+    /// clearing the flag as it answers.
+    ///
+    /// True once, and only when the run wanted sound and the device would not
+    /// open. Silence that was asked for -- headless, a test double, a
+    /// caller-built engine -- answers false, so nothing announces the obvious.
+    fn take_silence_notice(&mut self) -> bool {
+        false
+    }
     fn master_volume(&self) -> f64;
     fn sfx_volume(&self) -> f64;
     fn music_volume(&self) -> f64;

@@ -10,8 +10,9 @@
 use crate::states_main_menu_support::*;
 use ff_core::models::profile::{Profile, DEFAULT_CITY};
 use ff_core::models::start_options::DEFAULT_START_KEY;
-use freight_fate::app::testing::TestApp;
+use freight_fate::app::testing::{set_headless_env, TestApp};
 use freight_fate::app::version;
+use freight_fate::audio::{Audio, AudioEngine, NullBackend};
 use freight_fate::states::base::{Key, State};
 use freight_fate::states::city::CityMenuState;
 use freight_fate::states::main_menu::{
@@ -439,4 +440,65 @@ fn continue_latest_career_welcomes_the_driver_back() {
         .iter()
         .any(|line| line.starts_with("Welcome back, Road Star. You are parked at")));
     assert!(is::<CityMenuState>(&app));
+}
+
+// -- the run that has no sound ----------------------------------------------
+
+/// Speak a fresh main menu's entry announcement.
+///
+/// `Menu` is imported here rather than at the top of the file because
+/// `MainMenuState` implements `enter` on both `Menu` and `State`, and having
+/// both traits in scope makes every unqualified `enter` call ambiguous.
+fn announce_main_menu(app: &mut TestApp) {
+    use freight_fate::states::base::Menu;
+    MainMenuState::new().announce_entry(&mut app.ctx);
+}
+
+#[test]
+fn a_run_with_no_sound_says_so_instead_of_leaving_the_player_in_silence() {
+    // Starting anyway when the sound device will not open is the design.
+    // Starting anyway without a word is not: reported on Linux, where the
+    // device failed to open, the whole drive ran silent, and the only trace
+    // was a line in a log a blind player has no reason to read.
+    let mut app = TestApp::new();
+    let mut engine = AudioEngine::with_backend(Box::new(NullBackend::new()));
+    engine.set_silence_notice(true);
+    app.ctx.audio = Box::new(engine);
+    announce_main_menu(&mut app);
+    let spoken = app.main_lines();
+    assert!(spoken
+        .iter()
+        .any(|line| line.contains("Game sounds could not start on this computer")));
+    assert!(spoken
+        .iter()
+        .any(|line| line.contains("no engine, traffic, or alert sounds")));
+    // Said once, not on every trip back to the main menu.
+    app.clear_speech();
+    announce_main_menu(&mut app);
+    assert!(!app
+        .main_lines()
+        .iter()
+        .any(|line| line.contains("Game sounds could not start")));
+}
+
+#[test]
+fn silence_that_was_asked_for_is_announced_to_nobody() {
+    // A headless run, a test double, the playtest harness: silent on purpose,
+    // and saying so on every start would be noise.
+    let mut app = TestApp::new();
+    announce_main_menu(&mut app);
+    assert!(!app
+        .main_lines()
+        .iter()
+        .any(|line| line.contains("Game sounds could not start")));
+}
+
+#[test]
+fn a_headless_run_on_the_no_sound_device_arms_no_notice() {
+    // The real backend pick, under the environment CI and the harness use:
+    // BASS lands on its no-sound device because this run asked it to, which
+    // must not read as a device that failed to open.
+    set_headless_env();
+    let mut engine = AudioEngine::from_preference("");
+    assert!(!engine.take_silence_notice());
 }

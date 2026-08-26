@@ -693,6 +693,21 @@ impl Menu for MainMenuState {
                  in Settings, Gameplay, Driving assistance. ",
             );
         }
+        if ctx.audio.take_silence_notice() {
+            // The game starts anyway when the sound device will not open --
+            // that is the design, and a driver who can still hear the voice
+            // can still work. What must not happen is the player being left
+            // to guess: with no engine, no traffic and no alerts, and nothing
+            // said, a broken sound setup is indistinguishable from a broken
+            // game. Reported on Linux, where the device open failed and the
+            // whole drive ran silent without a word.
+            warning.push_str(
+                "Game sounds could not start on this computer, so you will \
+                 hear the voice but no engine, traffic, or alert sounds. \
+                 Check that sound is working elsewhere, then start Freight \
+                 Fate again. ",
+            );
+        }
         if loadable_saves().is_empty() && !legacy_saves().is_empty() {
             // Every saved career predates 1.9, so there is no Continue item
             // where the player expects one. Say where the careers went before

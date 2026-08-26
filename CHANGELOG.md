@@ -971,6 +971,14 @@
 
 ### Fixed
 
+- **A start with no game sounds now tells you so.** If Freight Fate cannot
+  open the sound on your computer it still starts, the way it always has, and
+  the voice still reads everything out. Until now nothing said that the engine,
+  the traffic and the alerts were gone, so a silent drive was impossible to
+  tell apart from a broken game. The main menu now says once, on the way in,
+  that game sounds could not start and that you will hear the voice but no
+  engine, traffic, or alert sounds.
+
 - **Receiver unloading no longer turns an on-time arrival into a late
   delivery.** The appointment, pay, and on-time bonus now use the time the
   truck checked in at the receiver. Unloading still advances the clock, and
