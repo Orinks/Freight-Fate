@@ -4,9 +4,9 @@ use serde_json::{json, Value};
 
 use super::pyjson::{py_float_or, py_iter, py_max, py_repr_str, py_str, py_str_or};
 use super::{
-    duration_text, is_duty_status, is_non_enforced, limits, positive_minutes, BREAK_MIN,
-    HOS_HISTORY_MAX, HOS_SPLIT_REST_HISTORY_MAX, SLEEP_MIN, SPLIT_LONG_ALT_MIN, SPLIT_LONG_MIN,
-    SPLIT_SHORT_ALT_MIN, SPLIT_SHORT_MIN, WARNING_THRESHOLDS_MIN,
+    duration_text, is_duty_status, limits, positive_minutes, BREAK_MIN, HOS_HISTORY_MAX,
+    HOS_SPLIT_REST_HISTORY_MAX, SLEEP_MIN, SPLIT_LONG_ALT_MIN, SPLIT_LONG_MIN, SPLIT_SHORT_ALT_MIN,
+    SPLIT_SHORT_MIN, WARNING_THRESHOLDS_MIN,
 };
 use crate::pyfmt::{fmt_f, py_str_float};
 
@@ -140,22 +140,6 @@ fn keep_last<T>(items: &mut Vec<T>, max: usize) {
     if items.len() > max {
         let excess = items.len() - max;
         items.drain(..excess);
-    }
-}
-
-const ENFORCEMENT_OFF: &str =
-    "Hours of service enforcement is off; the ELD clock still records time.";
-const RESET_ADVICE: &str = "Sleep 10 hours at a rest stop to reset.";
-
-/// kind -> (clause after "you are", sentence that can lead a readout)
-fn shift_over(kind: &str) -> (&'static str, &'static str) {
-    match kind {
-        "drive" => (
-            "out of driving time for this shift",
-            "Out of driving time for this shift.",
-        ),
-        "duty" => ("past your duty window", "Your duty window has closed."),
-        other => panic!("no shift-over wording for HOS kind {other:?}"),
     }
 }
 
@@ -451,7 +435,7 @@ impl HosClock {
     // -- rule queries ----------------------------------------------------------
 
     /// (kind, minutes remaining, what is due) per enforced limit.
-    fn statuses(&self, mode: &str) -> Vec<HosLimit> {
+    pub(super) fn statuses(&self, mode: &str) -> Vec<HosLimit> {
         let Some((drive_limit, duty_limit, break_after)) = limits(mode) else {
             return Vec::new();
         };
@@ -459,17 +443,17 @@ impl HosClock {
             HosLimit {
                 kind: "break",
                 remaining_min: break_after - self.since_break_min,
-                due: "you must take a 30 minute break at a rest stop",
+                due: "your 30-minute break is due",
             },
             HosLimit {
                 kind: "drive",
                 remaining_min: drive_limit - self.driving_min,
-                due: "your driving time for this shift ends. You need 10 hours of sleep",
+                due: "your driving allowance ends",
             },
             HosLimit {
                 kind: "duty",
                 remaining_min: duty_limit - self.duty_min,
-                due: "your duty window closes. You need 10 hours of sleep",
+                due: "you must stop driving",
             },
         ]
     }
@@ -509,7 +493,7 @@ impl HosClock {
             .filter(|s| s.remaining_min <= 0.0)
             .filter_map(|s| match s.kind {
                 "drive" => Some("you had driven past the 11-hour driving limit"),
-                "duty" => Some("your 14-hour duty window had expired"),
+                "duty" => Some("you had driven past the 14-hour driving window"),
                 "break" => Some("you were past the 30-minute break requirement"),
                 _ => None,
             })
@@ -536,6 +520,12 @@ impl HosClock {
     /// marks them all so nothing fires late.
     pub fn check_warnings(&mut self, mode: &str) -> Vec<String> {
         let mut candidates: Vec<(i32, f64, String)> = Vec::new();
+        let binding_kind = self.next_limit(mode).map(|limit| limit.kind);
+        let drive_available = limits(mode)
+            .map(|(drive_limit, _, _)| {
+                duration_text(py_max(0.0, drive_limit - self.driving_min) / 60.0)
+            })
+            .unwrap_or_default();
         for HosLimit {
             kind,
             remaining_min: rem,
@@ -559,14 +549,19 @@ impl HosClock {
                         "break" => 2,
                         _ => 9,
                     };
-                    candidates.push((
-                        priority,
-                        rem,
-                        format!(
-                            "Hours of service violation: {due}. \
-                             Driving on risks fines at inspections."
-                        ),
-                    ));
+                    let message = match kind {
+                        "break" => "Hours of service violation: Your 30-minute break is overdue. \
+                                    Take the required break before driving again."
+                            .to_string(),
+                        "drive" => "Hours of service violation: Your driving allowance is \
+                                    exhausted. Do not drive until a 10-hour reset."
+                            .to_string(),
+                        "duty" => "Hours of service violation: Your legal driving cutoff has \
+                                   passed. Do not drive until a 10-hour reset."
+                            .to_string(),
+                        _ => format!("Hours of service violation: {due}."),
+                    };
+                    candidates.push((priority, rem, message));
                 }
                 continue;
             }
@@ -579,9 +574,27 @@ impl HosClock {
                 for t in &crossed {
                     self.warned.push(format!("{kind}:{}", fmt_f(*t, 0)));
                 }
+                if binding_kind != Some(kind) {
+                    continue;
+                }
                 let smallest = crossed.iter().copied().fold(f64::INFINITY, f64::min);
                 let phrase = threshold_phrase(smallest);
-                candidates.push((10, rem, format!("Hours of service: {phrase} until {due}.")));
+                let message = match kind {
+                    "break" => format!(
+                        "Hours of service: 30-minute break due in {phrase}. Plan to stop within \
+                         {phrase}."
+                    ),
+                    "drive" => format!(
+                        "Hours of service: Driving allowance ends in {phrase}. Plan to park \
+                         within {phrase}."
+                    ),
+                    "duty" => format!(
+                        "Hours of service: You have {drive_available} of driving available, but \
+                         you must stop driving in {phrase}. Plan to park within {phrase}."
+                    ),
+                    _ => format!("Hours of service: {phrase} until {due}."),
+                };
+                candidates.push((10, rem, message));
             }
         }
         if candidates.is_empty() {
@@ -597,262 +610,6 @@ impl HosClock {
             }
         }
         vec![candidates.swap_remove(best).2]
-    }
-
-    /// Spoken status for the C key and Tab report.
-    pub fn summary(&self, mode: &str) -> String {
-        if is_non_enforced(mode) {
-            return ENFORCEMENT_OFF.to_string();
-        }
-        let (drive_limit, duty_limit, break_after) =
-            limits(mode).expect("HOS mode is realistic or relaxed");
-        let drive_left = py_max(0.0, drive_limit - self.driving_min) / 60.0;
-        let duty_left = py_max(0.0, duty_limit - self.duty_min) / 60.0;
-        let break_left = py_max(0.0, break_after - self.since_break_min) / 60.0;
-        if self.in_violation(mode) {
-            let blown: Vec<&str> = self
-                .statuses(mode)
-                .iter()
-                .filter(|s| s.remaining_min <= 0.0)
-                .map(|s| s.kind)
-                .collect();
-            if blown == ["break"] {
-                return "Hours of service: you are past your break limit. \
-                        Take a 30-minute break at a rest stop."
-                    .to_string();
-            }
-            return "Hours of service: you are past your limit. Sleep 10 hours at a rest stop to reset."
-                .to_string();
-        }
-        let status = self.status.replace('_', " ");
-        let suffix = match self.split_pending_summary() {
-            Some(pending) => format!(" {pending}"),
-            None => String::new(),
-        };
-        if duty_left <= break_left {
-            return format!(
-                "ELD status {status}. Hours of service: \
-                 {} hours of driving left, \
-                 {} hours of duty window left.{suffix}",
-                fmt_f(drive_left, 1),
-                fmt_f(duty_left, 1),
-            );
-        }
-        format!(
-            "ELD status {status}. Hours of service: \
-             {} hours of driving left, \
-             break due in {} hours, \
-             duty window closes in {} hours.{suffix}",
-            fmt_f(drive_left, 1),
-            fmt_f(break_left, 1),
-            fmt_f(duty_left, 1),
-        )
-    }
-
-    // -- the one-answer readouts ------------------------------------------------
-    //
-    // `summary` speaks the whole picture; these three answer one question each,
-    // for the Alt A, Alt S, and Alt D keys (see DrivingControlsMixin). None may
-    // go silent -- a blind driver cannot tell a quiet key from a dead one -- and
-    // none names a limit in hours: relaxed runs 1.25 times realistic, so a
-    // hard-coded "11-hour limit" would be a lie in it.
-
-    /// (driving, duty window, break) hours left, floored at zero.
-    fn hours_left(&self, mode: &str) -> (f64, f64, f64) {
-        let (drive_limit, duty_limit, break_after) =
-            limits(mode).expect("HOS mode is realistic or relaxed");
-        (
-            py_max(0.0, drive_limit - self.driving_min) / 60.0,
-            py_max(0.0, duty_limit - self.duty_min) / 60.0,
-            py_max(0.0, break_after - self.since_break_min) / 60.0,
-        )
-    }
-
-    /// Which blown limit ended the shift, or None; the driving clock leads.
-    fn shift_over_kind(&self, mode: &str) -> Option<&'static str> {
-        let statuses = self.statuses(mode);
-        let blown = |kind: &str| {
-            statuses
-                .iter()
-                .any(|s| s.kind == kind && s.remaining_min <= 0.0)
-        };
-        if blown("drive") {
-            Some("drive")
-        } else if blown("duty") {
-            Some("duty")
-        } else {
-            None
-        }
-    }
-
-    /// Alt A: how much of this shift is spent -- not the hours on this run.
-    pub fn wheel_time_summary(&self, mode: &str, terse: bool) -> String {
-        let fresh = self.driving_min <= 0.0;
-        let driven = duration_text(self.driving_min / 60.0);
-        let lead = if terse {
-            if fresh {
-                "At the wheel: no driving yet".to_string()
-            } else {
-                format!("At the wheel {driven}")
-            }
-        } else {
-            let spent = if fresh {
-                "no driving yet".to_string()
-            } else {
-                format!("{driven} driving")
-            };
-            format!(
-                "At the wheel so far: {spent}, {} on duty this shift",
-                duration_text(self.duty_min / 60.0)
-            )
-        };
-        let note = if limits(mode).is_none() {
-            ENFORCEMENT_OFF
-        } else if self.shift_over_kind(mode).is_some() {
-            "You are out of hours."
-        } else if self.hours_left(mode).2 <= 0.0 {
-            "Your 30-minute break is overdue."
-        } else {
-            ""
-        };
-        format!("{lead}. {note}").trim_end().to_string()
-    }
-
-    /// Alt S: when the 30-minute break comes due.
-    pub fn break_summary(&self, mode: &str, terse: bool) -> String {
-        if limits(mode).is_none() {
-            return format!("Break: none required. {ENFORCEMENT_OFF}");
-        }
-        let (_drive_left, duty_left, break_left) = self.hours_left(mode);
-        let over = self.shift_over_kind(mode);
-        let mut answer;
-        let detail;
-        if break_left <= 0.0 {
-            answer = "Break overdue".to_string();
-            detail = if terse {
-                ""
-            } else {
-                " Take a 30 minute break at a rest stop."
-            };
-        } else {
-            answer = format!(
-                "Break due in {}{}",
-                duration_text(break_left),
-                if terse { "" } else { " of driving" }
-            );
-            detail = "";
-            if over.is_none() && duty_left <= break_left {
-                // summary drops the break when the window closes first; a key
-                // pressed for the break answers it, then the overriding fact.
-                answer.push_str(&if terse {
-                    format!(", duty window {}", duration_text(duty_left))
-                } else {
-                    format!(
-                        ", but your duty window closes first, in {}",
-                        duration_text(duty_left)
-                    )
-                });
-            }
-        }
-        if let Some(kind) = over {
-            return format!(
-                "{answer}, but you are {}. {RESET_ADVICE}",
-                shift_over(kind).0
-            );
-        }
-        format!("{answer}.{detail}")
-    }
-
-    /// Alt D: what ends this shift. Both clocks are named; the binding one leads.
-    pub fn drive_time_summary(&self, mode: &str, terse: bool) -> String {
-        if limits(mode).is_none() {
-            let no_limit = format!(
-                "Driving time left: no limit{}",
-                if terse { "" } else { ", and no duty window" }
-            );
-            return format!("{no_limit}. {ENFORCEMENT_OFF}");
-        }
-        let (drive_left, duty_left, break_left) = self.hours_left(mode);
-        if let Some(kind) = self.shift_over_kind(mode) {
-            return format!("{} {RESET_ADVICE}", shift_over(kind).1);
-        }
-        let drive_text = format!("Driving time left: {}", duration_text(drive_left));
-        let duty_text = format!("Duty window closes in {}", duration_text(duty_left));
-        let duty_binds = duty_left <= drive_left; // the window, not the wheel, ends this shift
-        let mut text = if terse {
-            if duty_binds {
-                format!(
-                    "Duty window {}, {}",
-                    duration_text(duty_left),
-                    drive_text.to_lowercase()
-                )
-            } else {
-                format!("{drive_text}, duty window {}", duration_text(duty_left))
-            }
-        } else if duty_binds {
-            format!("{duty_text}, before your driving time runs out. {drive_text}")
-        } else {
-            format!("{drive_text}. {duty_text}")
-        };
-        if break_left <= 0.0 {
-            text.push_str(if terse {
-                ", break overdue"
-            } else {
-                ". Your 30-minute break is overdue and comes first"
-            });
-        }
-        match self.split_pending_summary() {
-            Some(pending) => format!("{text}. {pending}"),
-            None => format!("{text}."),
-        }
-    }
-
-    /// One clause relating an ETA to the nearest HOS limit, or ''.
-    ///
-    /// Used by the stop details screen: says whether the player would reach
-    /// the stop before the limit that matters most right now. Mirrors
-    /// `summary`'s omission rule -- when the duty window closes before the
-    /// break is due, the break is irrelevant and never mentioned.
-    pub fn arrival_note(&self, mode: &str, eta_min: f64) -> String {
-        if is_non_enforced(mode) || self.in_violation(mode) {
-            return String::new();
-        }
-        let (drive_limit, duty_limit, break_after) =
-            limits(mode).expect("HOS mode is realistic or relaxed");
-        let drive_left = drive_limit - self.driving_min;
-        let duty_left = duty_limit - self.duty_min;
-        let break_left = break_after - self.since_break_min;
-        let mut candidates = vec![
-            (
-                "drive",
-                drive_left,
-                "your driving time for this shift runs out",
-            ),
-            ("duty", duty_left, "your duty window closes"),
-        ];
-        if duty_left > break_left {
-            candidates.push(("break", break_left, "your 30-minute break is due"));
-        }
-        let mut nearest = candidates[0];
-        for candidate in &candidates[1..] {
-            if candidate.1 < nearest.1 {
-                nearest = *candidate;
-            }
-        }
-        let (kind, nearest_min, phrase) = nearest;
-        if eta_min < nearest_min {
-            return format!(" You would arrive before {phrase}.");
-        }
-        let gap_h = (eta_min - nearest_min) / 60.0;
-        let limit_name = match kind {
-            "drive" => "driving-time limit",
-            "duty" => "duty window",
-            _ => "break",
-        };
-        format!(
-            " Your {limit_name} comes about {} hours before you would reach it.",
-            fmt_f(gap_h, 1)
-        )
     }
 
     pub fn split_pending_summary(&self) -> Option<&'static str> {

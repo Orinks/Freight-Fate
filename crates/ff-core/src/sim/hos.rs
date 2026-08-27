@@ -21,13 +21,14 @@
 mod clock;
 mod duty_log;
 mod pyjson;
+mod readouts;
 #[cfg(test)]
 mod tests;
 
 pub use clock::{HosClock, HosEvent, HosLimit};
 pub use duty_log::{DutyLog, DutySegment, DutyTotals};
 
-use crate::pyfmt::{fmt_f, pct02, py_int, round_py_int};
+use crate::pyfmt::{pct02, py_int, round_py_int};
 use crate::pyrandom::PyRandom;
 
 pub const HOS_MODES: [&str; 3] = ["realistic", "relaxed", "debug_off"];
@@ -122,12 +123,31 @@ fn positive_minutes(minutes: f64) -> f64 {
     minutes
 }
 
-pub fn duration_text(hours: f64) -> String {
-    let minutes = pyjson::py_max(0.0, hours * 60.0);
-    if minutes < 60.0 {
-        return format!("{} minutes", fmt_f(minutes, 0));
+fn duration_minutes_text(minutes: i64) -> String {
+    if minutes <= 0 {
+        return "less than a minute".to_string();
     }
-    format!("{} hours", fmt_f(minutes / 60.0, 1))
+    let hours = minutes / 60;
+    let minutes = minutes % 60;
+    let hours_text = format!("{hours} hour{}", if hours == 1 { "" } else { "s" });
+    let minutes_text = format!("{minutes} minute{}", if minutes == 1 { "" } else { "s" });
+    match (hours, minutes) {
+        (0, _) => minutes_text,
+        (_, 0) => hours_text,
+        _ => format!("{hours_text} and {minutes_text}"),
+    }
+}
+
+/// A remaining allowance, rounded down so the readout never overstates it.
+pub fn duration_text(hours: f64) -> String {
+    let minutes = (pyjson::py_max(0.0, hours * 60.0) + 1e-9).floor() as i64;
+    duration_minutes_text(minutes)
+}
+
+/// An ETA or elapsed duration, rounded up so the readout never understates it.
+pub fn duration_text_up(hours: f64) -> String {
+    let minutes = (pyjson::py_max(0.0, hours * 60.0) - 1e-9).ceil() as i64;
+    duration_minutes_text(minutes)
 }
 
 // ---------------------------------------------------------------------------

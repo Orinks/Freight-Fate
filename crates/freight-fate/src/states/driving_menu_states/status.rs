@@ -7,6 +7,7 @@ use ff_core::models::solvency::debt_line;
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
 use ff_core::radio::PLAYLISTS_DIR_NAME;
 use ff_core::settings::Settings;
+use ff_core::sim::hos;
 use ff_core::sim::trip_models::RoadStop;
 
 use crate::app::{GameContext, Say};
@@ -163,12 +164,15 @@ impl DrivingStatusScreenState {
                 let deadline = d.job.deadline_game_h - hours_used;
                 let deadline_text = if deadline >= 0.0 {
                     format!(
-                        "{} hours before the deadline, due {}",
-                        fmt_f(deadline, 1),
+                        "delivery due in {}, at {}",
+                        hos::duration_text(deadline),
                         deadline_appointment(d, ctx)
                     )
                 } else {
-                    format!("{} hours past the deadline", fmt_f(-deadline, 1))
+                    format!(
+                        "{} past the delivery deadline",
+                        hos::duration_text_up(-deadline)
+                    )
                 };
                 let load_line = format!(
                     "Load: {} tons of {}, gross {} tons, freight {}",

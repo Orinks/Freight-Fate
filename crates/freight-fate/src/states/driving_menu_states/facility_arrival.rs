@@ -9,6 +9,7 @@
 use ff_core::models::trailer_yard::{delivery_plan, pickup_plan, DeliveryPlan};
 use ff_core::music::{select_menu_music_sequence, MenuMusicProfile};
 use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_n};
+use ff_core::sim::hos;
 use ff_core::sim::vehicle::TruckState;
 
 use crate::app::GameContext;
@@ -124,7 +125,7 @@ impl FacilityArrivalState {
             primary,
             self.facility_engine_item_for(driving.trip.truck.engine_on),
             MenuItem::new("Check paperwork", |s: &mut Self, ctx| s.paperwork(ctx))
-                .help("Review pay, deadline, cargo condition, and charges."),
+                .help("Review pay, delivery deadline, cargo condition, and charges."),
             MenuItem::new("Check arrival status", |s: &mut Self, ctx| s.status(ctx))
                 .help("Hear the facility, cargo, speed, and next step."),
         ]
@@ -285,9 +286,12 @@ impl FacilityArrivalState {
                 String::new()
             };
             let timing = if remaining >= 0.0 {
-                format!("{} hours remain before the deadline", fmt_f(remaining, 1))
+                format!("delivery due in {}", hos::duration_text(remaining))
             } else {
-                format!("{} hours past the deadline", fmt_f(-remaining, 1))
+                format!(
+                    "{} past the delivery deadline",
+                    hos::duration_text_up(-remaining)
+                )
             };
             let cargo_condition = if trip_damage > 1.0 {
                 format!(

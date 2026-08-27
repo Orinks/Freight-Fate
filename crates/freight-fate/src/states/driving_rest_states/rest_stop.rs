@@ -116,7 +116,7 @@ impl RestStopState {
             ctx.audio.play("ui/warning");
             ctx.say(
                 "You are already rested: fresh hours of service and no more rest to gain here. \
-                 Sleeping now would only move the clock and your deadline forward. Press Enter \
+                 Sleeping now would only move the clock and your delivery deadline forward. Press Enter \
                  again to sleep anyway.",
             );
             return true;
@@ -197,7 +197,7 @@ impl RestStopState {
                     s.food_break(ctx)
                 })
                 .help(
-                    "A short off-duty break for food or coffee. The clock and your deadline \
+                    "A short off-duty break for food or coffee. The clock and your delivery deadline \
                      advance fifteen minutes. Coffee eases fatigue a little, but does not \
                      satisfy the 30-minute break rule.",
                 ),
@@ -210,7 +210,7 @@ impl RestStopState {
                 })
                 .help(
                     "Satisfies the 30-minute break rule and eases fatigue. The clock and your \
-                     deadline advance half an hour.",
+                     delivery deadline advance half an hour.",
                 ),
             );
         }
@@ -227,7 +227,7 @@ impl RestStopState {
             items.push(
                 MenuItem::new("Sleep 10 hours", |s: &mut Self, ctx| s.sleep(ctx)).help(
                     "A full reset: fresh hours of service and zero fatigue. The clock and your \
-                     deadline advance 10 hours.",
+                     delivery deadline advance 10 hours.",
                 ),
             );
         } else if !is_scale {
@@ -526,22 +526,41 @@ impl RestStopState {
                 if hos::HOS_NON_ENFORCED_MODES.contains(&mode.as_str()) {
                     format!("{pending} ")
                 } else {
-                    let duty_limit = hos::limits(&mode).map(|(_, duty, _)| duty).unwrap_or(0.0);
-                    let duty_left_h = (duty_limit - hos_of(ctx).duty_min).max(0.0) / 60.0;
-                    let window = if duty_left_h <= 0.0 {
-                        "Warning: this sleep did NOT reset your hours, and your duty window has \
-                         already closed. Do not drive: finish the split or take a full 10-hour \
-                         reset first. "
-                            .to_string()
-                    } else {
-                        let closes = clock_text((d.trip.local_hour() + duty_left_h) % 24.0);
+                    let limit = hos_of(ctx)
+                        .next_limit(&mode)
+                        .expect("enforced HOS has a limit");
+                    let remaining_h = limit.remaining_min.max(0.0) / 60.0;
+                    let warning = if limit.remaining_min <= 0.0 {
+                        let reason = match limit.kind {
+                            "drive" => "your driving allowance is exhausted",
+                            "duty" => "your legal driving cutoff has passed",
+                            _ => "your 30-minute break is overdue",
+                        };
                         format!(
-                            "This sleep did NOT reset your hours. Your duty window closes in {} \
-                             hours, at {closes}. ",
-                            fmt_f(duty_left_h, 1)
+                            "Warning: this sleep did NOT reset your hours, and {reason}. Do not \
+                             drive: finish the split or take a full 10-hour reset first. "
                         )
+                    } else {
+                        let remaining = hos::duration_text(remaining_h);
+                        match limit.kind {
+                            "drive" => format!(
+                                "This sleep did NOT reset your hours. Your driving allowance \
+                                 ends in {remaining}. "
+                            ),
+                            "duty" => {
+                                let cutoff = clock_text((d.trip.local_hour() + remaining_h) % 24.0);
+                                format!(
+                                    "This sleep did NOT reset your hours. You must stop driving \
+                                     in {remaining}, at {cutoff}. "
+                                )
+                            }
+                            _ => format!(
+                                "This sleep did NOT reset your hours. Your 30-minute break is \
+                                 due in {remaining}. "
+                            ),
+                        }
                     };
-                    format!("{window}{pending} ")
+                    format!("{warning}{pending} ")
                 }
             };
             format!(
@@ -1096,7 +1115,7 @@ fn sleeper_split_help(hours: i64) -> String {
         7 => "Can pair with 3 more hours at sleep-capable parking.",
         _ => "Can pair with 2 more hours at sleep-capable parking.",
     };
-    format!("{pair} The clock and your deadline advance {hours} hours.")
+    format!("{pair} The clock and your delivery deadline advance {hours} hours.")
 }
 
 fn brake_label(ctx: &GameContext, d: &DrivingState) -> String {

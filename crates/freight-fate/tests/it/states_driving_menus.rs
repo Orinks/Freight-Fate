@@ -12,6 +12,7 @@
 use ff_core::models::business::COMPANY_DRIVER;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
+use ff_core::sim::hos;
 use ff_core::sim::trip_models::RoadStop;
 
 use freight_fate::app::testing::TestApp;
@@ -130,6 +131,23 @@ fn test_map_screen_speaks_city_names_never_slug_keys() {
 }
 
 #[test]
+fn test_driver_status_qualifies_delivery_deadline_and_uses_hours_and_minutes() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    with_drive(&drive, |d| d.trip.game_minutes = 30.0);
+    let mut screen = DrivingStatusScreenState::new(drive_ref(&drive), "driver");
+
+    let time = build_labels(&mut screen, &mut app.ctx)
+        .into_iter()
+        .find(|line| line.starts_with("Time:"))
+        .expect("driver time line");
+
+    assert!(time.contains("delivery due in"), "{time}");
+    assert!(!time.contains("before the deadline"), "{time}");
+    assert!(!time.contains(".0 hours"), "{time}");
+}
+
+#[test]
 fn test_enter_on_map_stop_opens_structured_detail_view() {
     let mut app = TestApp::new();
     let drive = a_drive(&mut app);
@@ -198,7 +216,7 @@ fn test_eta_line_mirrors_eld_pace_rules() {
         .expect("an ETA line");
     assert!(line.contains("at a typical highway pace"), "{line}");
     assert!(
-        line.contains(&format!("{:.1} hours", 110.0 / 55.0)),
+        line.contains(&hos::duration_text_up(110.0 / 55.0)),
         "{line}"
     );
 
@@ -213,9 +231,42 @@ fn test_eta_line_mirrors_eld_pace_rules() {
         .expect("an ETA line");
     assert!(line.contains("at your current speed"), "{line}");
     assert!(
-        line.contains(&format!("{:.1} hours", 110.0 / speed)),
+        line.contains(&hos::duration_text_up(110.0 / speed)),
         "{line}"
     );
+}
+
+#[test]
+fn test_stop_eta_warns_when_legal_cutoff_arrives_before_the_stop() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    let far = with_drive(&drive, |d| {
+        let far = RoadStop::new(
+            "Far Travel Center",
+            d.trip.position_mi + 110.0,
+            "travel_center",
+        );
+        d.trip.stops = vec![far.clone()];
+        far
+    });
+    {
+        let clock = &mut app.ctx.profile.as_mut().expect("a career").hos;
+        clock.driving_min = 120.0;
+        clock.since_break_min = 120.0;
+        clock.duty_min = 780.0;
+    }
+    let mut state = StopDetailState::new(drive_ref(&drive), far);
+
+    let line = build_labels(&mut state, &mut app.ctx)
+        .into_iter()
+        .find(|line| line.starts_with("Estimated time"))
+        .expect("an ETA line");
+
+    assert!(
+        line.contains("legal driving cutoff arrives 1 hour"),
+        "{line}"
+    );
+    assert!(line.contains("Plan to park within 1 hour"), "{line}");
 }
 
 #[test]

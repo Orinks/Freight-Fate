@@ -44,7 +44,7 @@ impl DrivingState {
         }
     }
 
-    /// `_speak_clock(full_hours=False)`: C -- local time, then the deadline
+    /// `_speak_clock(full_hours=False)`: C -- local time, then the delivery deadline
     /// verdict, then the nearest hours limit.
     ///
     /// Ordered for braille as much as speech: a display shows one short line
@@ -62,6 +62,7 @@ impl DrivingState {
     /// buttons. A pad player must not lose hours of service.
     pub fn speak_clock(&mut self, ctx: &mut GameContext, full_hours: bool) {
         let hours_used = self.trip.game_minutes / 60.0;
+        let road_time = hos::duration_text_up(hours_used);
         let terse = self.terse_speech(ctx);
         let now = if terse {
             format!(
@@ -100,7 +101,7 @@ impl DrivingState {
                 .settings
                 .distance_text(self.trip.remaining_miles(), false);
             ctx.say(&format!(
-                "{now} Pickup at {facility}: {remaining} to go, {hours_used:.1} hours used.{tail}"
+                "{now} Pickup at {facility}: {remaining} to go, {road_time} on the road.{tail}"
             ));
             return;
         }
@@ -108,9 +109,9 @@ impl DrivingState {
         let eta = self.trip.eta_game_hours(self.trip.truck.speed_mph());
         if remaining <= 0.0 {
             ctx.say(&format!(
-                "{now} {:.1} hours past the deadline. The pay is shrinking, but finish the \
+                "{now} {} past the delivery deadline. The pay is shrinking, but finish the \
                  delivery.{tail}",
-                -remaining
+                hos::duration_text_up(-remaining)
             ));
             return;
         }
@@ -119,9 +120,11 @@ impl DrivingState {
         } else {
             "Running behind"
         };
+        let eta_text = hos::duration_text_up(eta);
+        let delivery_due = hos::duration_text(remaining);
         if terse {
             ctx.say(&format!(
-                "{now} {verdict}: arrival in {eta:.1} hours, deadline in {remaining:.1}.{tail}"
+                "{now} {verdict}: arrival in {eta_text}, delivery due in {delivery_due}.{tail}"
             ));
             return;
         }
@@ -137,14 +140,14 @@ impl DrivingState {
         };
         let appointment = deadline_appointment(self, ctx);
         ctx.say(&format!(
-            "{now} {verdict}: arrival in {eta:.1} hours {basis}, deadline in {remaining:.1}, due \
-             {appointment}.{push} {hours_used:.1} hours on the road.{tail}"
+            "{now} {verdict}: arrival in {eta_text} {basis}, delivery due in {delivery_due}, at \
+             {appointment}.{push} {road_time} on the road.{tail}"
         ));
     }
 
     // Alt A, Alt S, and Alt D split the three hours numbers a driver plans
     // around out of the C readout, one key each, left to right in the shape of
-    // a shift: what is behind you, what stops you next, what ends the day. The
+    // a shift: what is behind you, what stops you next, and the driving clocks. The
     // Alt chord keeps the right hand on the arrows, where the accelerator is,
     // and a slipped modifier lands on A, S, or D -- all spoken info, nothing
     // that moves the truck. Controllers keep the combined readout on D-pad
@@ -159,16 +162,16 @@ impl DrivingState {
         if limit.remaining_min <= 0.0 {
             return match limit.kind {
                 "break" => "Break overdue.",
-                "drive" => "Out of driving time for this shift.",
-                _ => "Your duty window has closed.",
+                "drive" => "Driving allowance exhausted. Do not drive.",
+                _ => "Legal driving cutoff passed. Do not drive.",
             }
             .to_string();
         }
         let left = hos::duration_text(limit.remaining_min / 60.0);
         match limit.kind {
             "break" => format!("Break due in {left}."),
-            "drive" => format!("Driving time left: {left}."),
-            _ => format!("Duty window closes in {left}."),
+            "drive" => format!("Driving allowance ends in {left}."),
+            _ => format!("You must stop driving in {left}."),
         }
     }
 
@@ -203,7 +206,7 @@ impl DrivingState {
         ctx.say(&text);
     }
 
-    /// `_speak_hos_drive_left()`: Alt D -- what ends this shift, and where you
+    /// `_speak_hos_drive_left()`: Alt D -- the two driving clocks, and where you
     /// can legally stop before it.
     pub fn speak_hos_drive_left(&mut self, ctx: &mut GameContext) {
         let terse = self.terse_speech(ctx);
@@ -229,26 +232,21 @@ impl DrivingState {
                 .to_string();
         }
         let legal_miles = self.legal_miles_for_hos(limit.remaining_min);
-        let next_stop = self.trip.upcoming_stop((legal_miles + 5.0).max(5.0));
-        let action = if limit.kind == "break" {
-            "break"
-        } else {
-            "sleep"
+        let (stop_action, plan_action, limit_name) = match limit.kind {
+            "break" => ("break", "stop", "30-minute break"),
+            "drive" => ("sleep", "park", "driving allowance"),
+            _ => ("sleep", "park", "legal driving cutoff"),
         };
+        let next_stop = self.upcoming_stop_with_action(stop_action, legal_miles);
         let Some(next_stop) = next_stop else {
             return format!(
-                "No route stop is currently visible before the next {action} limit, due in {:.1} \
-                 hours. If you cannot reach a stop, come to a stop and you can sleep on the \
-                 shoulder: poor rest, and a possible parking ticket.",
-                limit.remaining_min / 60.0
+                "No route stop is currently visible before your {limit_name} in {}. Plan to \
+                 {plan_action} within that time. If you cannot reach a stop, come to a stop and you \
+                 can sleep on the shoulder: poor rest, and a possible parking ticket.",
+                hos::duration_text(limit.remaining_min / 60.0)
             );
         };
         let ahead = 0.0f64.max(next_stop.at_mi - self.trip.position_mi);
-        let verdict = if ahead <= legal_miles {
-            "before"
-        } else {
-            "after"
-        };
         let mut stop_text = format!(
             "Next legal stop: {}{} in {}",
             self.trip.planned_prefix(next_stop),
@@ -259,7 +257,7 @@ impl DrivingState {
         if !parking_text.is_empty() {
             stop_text.push_str(&format!(", {parking_text}"));
         }
-        format!("{stop_text}, {verdict} the next {action} limit.")
+        format!("{stop_text}, before your {limit_name}.")
     }
 
     /// `_legal_miles_for_hos(remaining_min)`.
@@ -315,10 +313,10 @@ impl DrivingState {
                 );
             }
             if let Some(limit) = hos_of(ctx).next_limit(mode) {
-                let action = if limit.kind == "break" {
-                    "break"
-                } else {
-                    "sleep"
+                let (action, limit_name) = match limit.kind {
+                    "break" => ("break", "30-minute break"),
+                    "drive" => ("sleep", "driving allowance"),
+                    _ => ("sleep", "legal driving cutoff"),
                 };
                 let legal_miles = self.legal_miles_for_hos(limit.remaining_min);
                 if limit.remaining_min <= hos::SHOULDER_SLEEP_LIMIT_BUFFER_MIN
@@ -327,9 +325,9 @@ impl DrivingState {
                         .is_none()
                 {
                     return Some(format!(
-                        "Your next {action} limit is due in {:.1} hours, and no suitable route \
-                         stop is visible before it.",
-                        limit.remaining_min / 60.0
+                        "Your {limit_name} arrives in {}, and no suitable route stop is visible \
+                         before it.",
+                        hos::duration_text(limit.remaining_min / 60.0)
                     ));
                 }
             }

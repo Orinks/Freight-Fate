@@ -93,7 +93,7 @@ impl Menu for ShoulderSleepConfirmationState {
             })
             .help(
                 "Accept poor emergency rest, possible ticket, possible minor truck damage, and \
-                 deadline time loss.",
+                 delivery deadline time loss.",
             ),
         ]
     }

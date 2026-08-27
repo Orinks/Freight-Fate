@@ -933,7 +933,7 @@ impl Menu for JobBoardState {
                     )
                 } else if first_day_guidance_active(p) && !is_company_training_profile(p) {
                     "First-day objective: pick an unlocked load with a \
-                 deadline you can protect. Keep fuel, repairs, and \
+                 delivery deadline you can protect. Keep fuel, repairs, and \
                  your cash cushion in mind. "
                         .to_string()
                 } else {

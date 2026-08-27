@@ -121,11 +121,15 @@ pub fn deadline_text(driving: &DrivingState, ctx: &GameContext) -> String {
         // The appointment reads in the receiver's local time, the way a real
         // dispatcher quotes it -- the zone name keeps it unambiguous mid-route.
         return format!(
-            "{remaining:.1} hours left to deliver; that is {}.",
+            "Delivery due in {}; that is {}.",
+            hos::duration_text(remaining),
             deadline_appointment(driving, ctx)
         );
     }
-    format!("You are now {:.1} hours past the deadline.", -remaining)
+    format!(
+        "You are now {} past the delivery deadline.",
+        hos::duration_text_up(-remaining)
+    )
 }
 
 /// Apply the emergency shoulder-sleep outcome and return spoken text.

@@ -285,7 +285,7 @@ impl DriverAppScreenState {
                 }
                 lines.push(
                     "ELD keys: Alt A time at the wheel, Alt S when the break is due, \
-                     Alt D what ends this shift."
+                     Alt D driving allowance and legal driving cutoff."
                         .to_string(),
                 );
                 lines

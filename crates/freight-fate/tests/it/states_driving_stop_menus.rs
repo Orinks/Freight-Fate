@@ -231,7 +231,7 @@ fn test_facility_menu_waits_for_full_stop() {
         "Carrier-paid or reimbursed charges recorded so far",
         "Those charges do not reduce driver pay",
         "estimated net driver pay",
-        "hours remain before the deadline",
+        "delivery due in",
         "Cargo condition",
         "Dock and deliver to settle",
     ] {

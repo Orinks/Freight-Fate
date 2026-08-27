@@ -32,7 +32,7 @@ use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_controls::UPCOMING_MAX_CLAUSES;
 use freight_fate::states::driving_core::{
-    hos_mut_of, profile_of, DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP,
+    hos_mut_of, hos_of, profile_of, DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP,
 };
 use freight_fate::states::driving_location::spoken_closing_distance;
 use freight_fate::states::driving_menu_states::DrivingStatusState;
@@ -584,7 +584,7 @@ fn test_clock_key_leads_with_time_then_schedule_verdict() {
         .or_else(|| report.find("Running behind: arrival in"))
         .unwrap_or(usize::MAX);
     assert!(verdict_at > 0 && verdict_at < 60, "{report}");
-    assert!(report.contains("deadline in"), "{report}");
+    assert!(report.contains("delivery due in"), "{report}");
     assert!(report.contains("due"), "{report}");
 }
 
@@ -597,7 +597,7 @@ fn test_terse_clock_key_drops_calendar_and_stop_planning() {
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &key(Key::C));
     let terse_report = last(&app);
-    assert!(terse_report.contains("deadline in"), "{terse_report}");
+    assert!(terse_report.contains("delivery due in"), "{terse_report}");
 
     app.ctx.settings.driving_speech = "standard".to_string();
     app.clear_speech();
@@ -617,10 +617,31 @@ fn test_clock_key_keeps_one_hours_clause_instead_of_the_whole_report() {
     let report = last(&app);
     // The limit that comes first still rides the clock key: a driver can be on
     // schedule and out of hours at once.
-    assert!(report.contains("Break due in 3.0 hours."), "{report}");
+    assert!(report.contains("Break due in 3 hours."), "{report}");
     // ...but the full ELD report belongs to Tab and the three hours keys.
     assert!(!report.contains("hours of driving left"), "{report}");
     assert!(!report.contains("ELD status"), "{report}");
+}
+
+#[test]
+fn test_clock_keeps_legal_cutoff_distinct_from_delivery_due_time() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    {
+        let clock = hos_mut_of(&mut app.ctx);
+        clock.driving_min = 240.0;
+        clock.since_break_min = 240.0;
+        clock.duty_min = 720.0;
+        clock.status = "driving".to_string();
+    }
+    app.clear_speech();
+
+    d.handle_key_event(&mut app.ctx, &key(Key::C));
+
+    let report = last(&app);
+    assert!(report.contains("delivery due in"), "{report}");
+    assert!(report.contains("must stop driving in 2 hours"), "{report}");
+    assert!(!report.contains("shift deadline"), "{report}");
 }
 
 #[test]
@@ -652,12 +673,12 @@ fn test_alt_a_s_and_d_each_answer_one_hours_question() {
         "{}",
         last(&app)
     );
-    assert!(last(&app).contains("5.0 hours driving"), "{}", last(&app));
+    assert!(last(&app).contains("5 hours driving"), "{}", last(&app));
 
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &alt(Key::S));
     assert!(
-        last(&app).starts_with("Break due in 3.0 hours"),
+        last(&app).starts_with("Break due in 3 hours"),
         "{}",
         last(&app)
     );
@@ -665,12 +686,12 @@ fn test_alt_a_s_and_d_each_answer_one_hours_question() {
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &alt(Key::D));
     assert!(
-        last(&app).starts_with("Driving time left: 6.0 hours"),
+        last(&app).starts_with("Driving available: 6 hours"),
         "{}",
         last(&app)
     );
     assert!(
-        last(&app).contains("Duty window closes in 9.0 hours"),
+        last(&app).contains("must stop driving in 9 hours"),
         "{}",
         last(&app)
     );
@@ -719,6 +740,51 @@ fn test_alt_d_carries_the_next_legal_stop_context() {
 }
 
 #[test]
+fn test_hos_route_context_rejects_inspect_only_scale_as_legal_rest_stop() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let mut scale = ff_core::sim::trip_models::RoadStop::new(
+        "Inspect Only Scale",
+        d.trip.position_mi + 1.0,
+        "weigh_station",
+    );
+    scale.actions = vec!["inspect".to_string()];
+    scale.parking = "none".to_string();
+    d.trip.stops = vec![scale];
+    hos_mut_of(&mut app.ctx).drive(300.0);
+
+    let context = d.hos_route_context(&app.ctx);
+
+    assert!(context.contains("No route stop"), "{context}");
+    assert!(!context.contains("Inspect Only Scale"), "{context}");
+    assert!(!context.contains("Next legal stop"), "{context}");
+}
+
+#[test]
+fn test_hos_route_context_rejects_stop_beyond_legal_reach() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    hos_mut_of(&mut app.ctx).drive(300.0);
+    let limit = hos_of(&app.ctx)
+        .next_limit(&app.ctx.settings.hos_mode)
+        .expect("an enforced HOS limit");
+    let legal_miles = d.legal_miles_for_hos(limit.remaining_min);
+    let mut stop = ff_core::sim::trip_models::RoadStop::new(
+        "Just Beyond Reach Travel Center",
+        d.trip.position_mi + legal_miles + 1.0,
+        "truck_stop",
+    );
+    stop.actions = vec!["break".to_string(), "sleep".to_string()];
+    d.trip.stops = vec![stop];
+
+    let context = d.hos_route_context(&app.ctx);
+
+    assert!(context.contains("No route stop"), "{context}");
+    assert!(!context.contains("Just Beyond Reach"), "{context}");
+    assert!(!context.contains("Next legal stop"), "{context}");
+}
+
+#[test]
 fn test_status_menu_carries_the_drivers_board_progress_percent() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
@@ -759,11 +825,7 @@ fn test_controller_clock_button_keeps_the_whole_hours_report() {
     d.handle_controller_event(&mut app.ctx, &pad(ControllerButton::DPadRight));
     // A pad has nowhere to put three more info buttons, so this one press must
     // still carry the hours a keyboard player gets from Alt A/S/D.
-    assert!(
-        last(&app).contains("hours of driving left"),
-        "{}",
-        last(&app)
-    );
+    assert!(last(&app).contains("driving available"), "{}", last(&app));
     assert!(
         !last(&app).contains("Hours of service moved to"),
         "{}",

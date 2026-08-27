@@ -416,6 +416,11 @@
 
 ### Changed
 
+- **Hours-of-service reports now separate the clocks you plan around.** Driving
+  allowance, the legal driving cutoff, and the delivery deadline have distinct
+  names; reports use hours and minutes and lead with whichever driving limit or
+  required break comes first.
+
 - **The truck says what kind of road you are turning onto.** On the local
   drive at each end of a run, a turn onto a street the map has no name for
   used to be announced as "unnamed public road", every time, and that told

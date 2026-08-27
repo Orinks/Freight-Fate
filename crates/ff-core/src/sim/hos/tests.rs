@@ -349,16 +349,16 @@ fn test_warnings_fire_once_per_threshold() {
     let mut c = HosClock::new();
     let msgs = drive_collecting_realistic(&mut c, 485.0); // past the 8-hour break rule
     assert_eq!(
-        msgs.iter().filter(|m| m.contains("2 hours until")).count(),
+        msgs.iter().filter(|m| m.contains("due in 2 hours")).count(),
         1
     );
     assert_eq!(
-        msgs.iter().filter(|m| m.contains("1 hour until")).count(),
+        msgs.iter().filter(|m| m.contains("due in 1 hour")).count(),
         1
     );
     assert_eq!(
         msgs.iter()
-            .filter(|m| m.contains("30 minutes until"))
+            .filter(|m| m.contains("due in 30 minutes"))
             .count(),
         1
     );
@@ -367,7 +367,7 @@ fn test_warnings_fire_once_per_threshold() {
     // 11-hour drive limit may speak up as it approaches
     let later = drive_collecting_realistic(&mut c, 60.0);
     assert!(!later.iter().any(|m| m.contains("break")));
-    assert!(later.iter().all(|m| m.contains("driving time")));
+    assert!(later.iter().all(|m| m.contains("Driving allowance")));
 }
 
 #[test]
@@ -388,7 +388,7 @@ fn test_break_rearms_break_warnings_only() {
     let msgs = drive_collecting_realistic(&mut c, 60.0); // driving_min 485 -> 545
     assert!(msgs
         .iter()
-        .any(|m| m.contains("driving time") && m.contains("2 hours")));
+        .any(|m| m.contains("Driving allowance") && m.contains("2 hours")));
     // break thresholds can fire again on the fresh break window
     let msgs = drive_collecting_realistic(&mut c, 60.0); // since_break 60 -> 120... not yet
     assert!(!msgs.iter().any(|m| m.contains("break")));
@@ -416,7 +416,44 @@ fn test_warning_batch_speaks_only_most_urgent_limit() {
 
     assert_eq!(msgs.len(), 1);
     assert!(msgs[0].contains("violation"));
-    assert!(msgs[0].contains("driving time"));
+    assert!(msgs[0].contains("driving allowance"));
+}
+
+#[test]
+fn test_cutoff_warning_contrasts_remaining_driving_allowance() {
+    let mut c = HosClock::new();
+    c.driving_min = 240.0;
+    c.since_break_min = 240.0;
+    c.duty_min = 720.0;
+    c.status = "driving".to_string();
+
+    let msgs = c.check_warnings("realistic");
+
+    assert_eq!(msgs.len(), 1);
+    assert!(msgs[0].contains("7 hours of driving available"));
+    assert!(msgs[0].contains("must stop driving in 2 hours"));
+    assert!(msgs[0].contains("Plan to park within 2 hours"));
+}
+
+#[test]
+fn test_later_clock_cannot_steal_warning_from_binding_cutoff() {
+    let mut c = HosClock::new();
+    c.driving_min = 530.0;
+    c.since_break_min = 0.0;
+    c.duty_min = 710.0;
+    c.status = "on_duty_not_driving".to_string();
+
+    c.on_duty(10.0);
+    let cutoff_warning = c.check_warnings("realistic");
+    assert_eq!(cutoff_warning.len(), 1);
+    assert!(cutoff_warning[0].contains("must stop driving in 2 hours"));
+
+    c.drive(10.0);
+    let later_allowance_threshold = c.check_warnings("realistic");
+    assert!(
+        later_allowance_threshold.is_empty(),
+        "a later driving allowance stole the warning: {later_allowance_threshold:?}"
+    );
 }
 
 #[test]
@@ -437,13 +474,13 @@ fn test_hos_summary_includes_time_units() {
 
     let summary = c.summary("realistic");
 
-    assert!(summary.contains("9.0 hours of driving left"));
-    assert!(summary.contains("break due in 6.0 hours"));
-    assert!(summary.contains("duty window closes in 12.0 hours"));
+    assert!(summary.contains("9 hours of driving available"));
+    assert!(summary.contains("30-minute break due in 6 hours"));
+    assert!(summary.contains("must stop driving in 12 hours"));
 }
 
 #[test]
-fn test_hos_summary_omits_break_when_duty_window_closes_first() {
+fn test_hos_summary_contrasts_allowance_when_legal_cutoff_binds_first() {
     let mut c = HosClock::new();
     c.driving_min = 414.0;
     c.since_break_min = 270.0;
@@ -452,8 +489,9 @@ fn test_hos_summary_omits_break_when_duty_window_closes_first() {
 
     let summary = c.summary("realistic");
 
-    assert!(summary.contains("1.8 hours of duty window left"));
-    assert!(!summary.contains("break due"));
+    assert!(summary.contains("4 hours and 6 minutes of driving available"));
+    assert!(summary.contains("must stop driving in 1 hour and 48 minutes"));
+    assert!(summary.contains("Plan to park within 1 hour and 48 minutes"));
 }
 
 // -- the one-answer readouts (Alt A, Alt S, Alt D) ---------------------------------
@@ -476,8 +514,8 @@ fn test_wheel_time_leads_with_its_own_noun_and_names_both_spent_clocks() {
     let said = c.wheel_time_summary("realistic", false);
 
     assert!(said.starts_with("At the wheel so far:"));
-    assert!(said.contains("5.4 hours driving"));
-    assert!(said.contains("5.4 hours on duty this shift"));
+    assert!(said.contains("5 hours and 24 minutes driving"));
+    assert!(said.contains("5 hours and 24 minutes since coming on duty"));
 }
 
 #[test]
@@ -487,7 +525,7 @@ fn test_terse_wheel_time_keeps_the_driving_number_alone() {
 
     let said = c.wheel_time_summary("realistic", true);
 
-    assert_eq!(said, "At the wheel 5.4 hours.");
+    assert_eq!(said, "At the wheel 5 hours and 24 minutes.");
 }
 
 #[test]
@@ -498,6 +536,21 @@ fn test_wheel_time_speaks_short_stretches_as_minutes() {
     assert!(c
         .wheel_time_summary("realistic", false)
         .contains("24 minutes driving"));
+}
+
+#[test]
+fn test_ordinary_break_advances_cutoff_but_not_driving_allowance() {
+    let mut c = HosClock::new();
+    c.drive(60.0);
+    c.take_break(30.0);
+
+    let wheel = c.wheel_time_summary("realistic", false);
+    let clocks = c.drive_time_summary("realistic", false);
+
+    assert!(wheel.contains("1 hour driving"));
+    assert!(wheel.contains("1 hour and 30 minutes since coming on duty"));
+    assert!(clocks.contains("Driving available: 10 hours"));
+    assert!(clocks.contains("must stop driving in 12 hours and 30 minutes"));
 }
 
 #[test]
@@ -514,10 +567,10 @@ fn test_wheel_time_flags_being_out_of_hours() {
 
     assert!(c
         .wheel_time_summary("realistic", false)
-        .contains("You are out of hours."));
+        .contains("You may not drive until a 10-hour reset."));
     assert!(c
         .wheel_time_summary("realistic", true)
-        .contains("You are out of hours."));
+        .contains("You may not drive until a 10-hour reset."));
 }
 
 #[test]
@@ -538,7 +591,7 @@ fn test_wheel_time_answers_instead_of_going_quiet_with_enforcement_off() {
 
     for mode in ["off", "debug_off"] {
         let said = c.wheel_time_summary(mode, false);
-        assert!(said.contains("5.4 hours driving"));
+        assert!(said.contains("5 hours and 24 minutes driving"));
         assert!(said.contains("enforcement is off"));
     }
 }
@@ -550,12 +603,9 @@ fn test_break_key_leads_with_the_break_and_counts_driving_time() {
 
     assert_eq!(
         c.break_summary("realistic", false),
-        "Break due in 6.0 hours of driving."
+        "Break due in 6 hours of driving."
     );
-    assert_eq!(
-        c.break_summary("realistic", true),
-        "Break due in 6.0 hours."
-    );
+    assert_eq!(c.break_summary("realistic", true), "Break due in 6 hours.");
 }
 
 #[test]
@@ -574,16 +624,16 @@ fn test_break_key_answers_the_break_first_then_the_window_that_closes_first() {
     // has to answer the break, then add the fact that overrides it.
     let said = duty_closes_first().break_summary("realistic", false);
 
-    assert!(said.starts_with("Break due in 3.5 hours"));
-    assert!(said.contains("duty window closes first, in 1.8 hours"));
+    assert!(said.starts_with("Break due in 3 hours and 30 minutes"));
+    assert!(said.contains("must stop driving first, in 1 hour and 48 minutes"));
 }
 
 #[test]
 fn test_terse_break_key_still_names_the_window_that_closes_first() {
     let said = duty_closes_first().break_summary("realistic", true);
 
-    assert!(said.contains("Break due in 3.5 hours"));
-    assert!(said.contains("duty window 1.8 hours"));
+    assert!(said.contains("Break due in 3 hours and 30 minutes"));
+    assert!(said.contains("stop driving in 1 hour and 48 minutes"));
 }
 
 #[test]
@@ -593,7 +643,7 @@ fn test_break_key_reports_an_overdue_break_with_what_to_do() {
 
     assert_eq!(
         c.break_summary("realistic", false),
-        "Break overdue. Take a 30 minute break at a rest stop."
+        "Break overdue. Take a 30-minute break at a rest stop."
     );
     assert_eq!(c.break_summary("realistic", true), "Break overdue.");
 }
@@ -605,7 +655,7 @@ fn test_break_key_says_a_break_will_not_help_once_the_shift_is_over() {
 
     let said = c.break_summary("realistic", false);
 
-    assert!(said.contains("out of driving time for this shift"));
+    assert!(said.contains("driving allowance is exhausted"));
     assert!(said.contains("Sleep 10 hours"));
 }
 
@@ -618,7 +668,7 @@ fn test_break_key_names_the_duty_window_when_that_is_the_blown_clock() {
 
     let said = c.break_summary("realistic", false);
 
-    assert!(said.contains("past your duty window"));
+    assert!(said.contains("legal driving cutoff has passed"));
     assert_eq!(said.matches("but").count(), 1); // one overriding fact, not two stacked clauses
 }
 
@@ -641,11 +691,11 @@ fn test_drive_time_key_names_both_clocks_and_leads_with_driving_time() {
 
     assert_eq!(
         c.drive_time_summary("realistic", false),
-        "Driving time left: 6.0 hours. Duty window closes in 9.0 hours."
+        "Driving available: 6 hours. You must stop driving in 9 hours."
     );
     assert_eq!(
         c.drive_time_summary("realistic", true),
-        "Driving time left: 6.0 hours, duty window 9.0 hours."
+        "Driving available: 6 hours. You must stop driving in 9 hours."
     );
 }
 
@@ -653,8 +703,8 @@ fn test_drive_time_key_names_both_clocks_and_leads_with_driving_time() {
 fn test_drive_time_key_leads_with_the_duty_window_when_that_binds() {
     let said = duty_closes_first().drive_time_summary("realistic", false);
 
-    assert!(said.starts_with("Duty window closes in 1.8 hours"));
-    assert!(said.contains("Driving time left: 4.1 hours"));
+    assert!(said.starts_with("Legal driving cutoff in 1 hour and 48 minutes"));
+    assert!(said.contains("4 hours and 6 minutes of driving available"));
 }
 
 #[test]
@@ -667,11 +717,11 @@ fn test_drive_time_key_names_which_clock_ran_out() {
 
     assert_eq!(
         over_drive.drive_time_summary("realistic", false),
-        "Out of driving time for this shift. Sleep 10 hours at a rest stop to reset."
+        "Driving allowance exhausted. Do not drive. Sleep 10 hours at a rest stop to reset."
     );
     assert_eq!(
         over_duty.drive_time_summary("realistic", false),
-        "Your duty window has closed. Sleep 10 hours at a rest stop to reset."
+        "Legal driving cutoff passed. Do not drive. Sleep 10 hours at a rest stop to reset."
     );
 }
 
@@ -1014,8 +1064,10 @@ fn clock_text_pads_minutes_and_wraps_negative_hours() {
     assert_eq!(clock_text(13.05), "1:03 PM");
     assert_eq!(clock_text(-2.0), "10 PM");
     assert_eq!(duration_text(0.4), "24 minutes");
-    assert_eq!(duration_text(1.25), "1.2 hours");
-    assert_eq!(duration_text(-3.0), "0 minutes");
+    assert_eq!(duration_text(1.25), "1 hour and 15 minutes");
+    assert_eq!(duration_text(1.999), "1 hour and 59 minutes");
+    assert_eq!(duration_text_up(1.001), "1 hour and 1 minute");
+    assert_eq!(duration_text(-3.0), "less than a minute");
     assert_eq!(
         duty_status_label("on_duty_not_driving"),
         "on duty, not driving"
@@ -1281,15 +1333,15 @@ fn test_arrival_note_names_only_the_limit_that_matters() {
     // Fresh clock: the 8-hour break is the nearest limit.
     assert!(clock
         .arrival_note("realistic", 60.0)
-        .contains("break is due"));
+        .contains("30-minute break"));
     // Arriving after the nearest limit warns instead.
     let late = clock.arrival_note("realistic", 10.0 * 60.0);
-    assert!(late.contains("before you would reach it"));
+    assert!(late.contains("before you would reach this stop"));
     assert!(late.contains("break"));
-    // Duty window closing before the break drops the break entirely.
+    // The legal driving cutoff can bind before the break.
     clock.duty_min = 13.5 * 60.0;
     let note = clock.arrival_note("realistic", 15.0);
-    assert!(note.contains("duty window closes"));
+    assert!(note.contains("legal driving cutoff"));
     assert!(!note.contains("break"));
     // Non-enforced modes stay quiet.
     assert_eq!(HosClock::new().arrival_note("off", 60.0), "");
@@ -1300,11 +1352,11 @@ fn arrival_note_spells_the_gap_in_hours() {
     let clock = HosClock::new();
     assert_eq!(
         clock.arrival_note("realistic", 10.0 * 60.0),
-        " Your break comes about 2.0 hours before you would reach it."
+        " Your 30-minute break arrives 2 hours before you would reach this stop. Plan to stop within 8 hours."
     );
     assert_eq!(
         clock.arrival_note("realistic", 60.0),
-        " You would arrive before your 30-minute break is due."
+        " You would arrive 7 hours before your 30-minute break."
     );
 }
 
@@ -1388,7 +1440,7 @@ fn test_violation_causes_name_the_blown_limits_plainly() {
     clock.drive(14.0 * 60.0 + 30.0);
     let causes = clock.violation_causes("realistic");
     assert!(causes.iter().any(|c| c.contains("11-hour driving limit")));
-    assert!(causes.iter().any(|c| c.contains("14-hour duty window")));
+    assert!(causes.iter().any(|c| c.contains("14-hour driving window")));
 }
 
 // -- port-specific pins ---------------------------------------------------------------

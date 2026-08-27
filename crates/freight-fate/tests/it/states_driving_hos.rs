@@ -213,7 +213,7 @@ fn test_hos_violation_speech_interrupts_but_threshold_warning_does_not() {
     let calls = harness.app.event_calls();
     let warning = calls
         .iter()
-        .find(|(text, _)| text.starts_with("Hours of service: 2 hours"))
+        .find(|(text, _)| text.starts_with("Hours of service: Driving allowance ends in 2 hours"))
         .unwrap_or_else(|| panic!("the countdown was never spoken: {calls:?}"));
     assert!(!warning.1, "the countdown must not cut the driver off");
 
@@ -501,8 +501,33 @@ fn test_split_sleeper_rest_action_advances_clock_and_speaks_status() {
                 spoken(&harness)
             )
         });
-    assert!(completed.contains("hours of driving left"), "{completed}");
-    assert!(completed.contains("duty window closes"), "{completed}");
+    assert!(completed.contains("driving available"), "{completed}");
+    assert!(completed.contains("must stop driving in"), "{completed}");
+}
+
+#[test]
+fn test_pending_split_wake_does_not_imply_driving_after_allowance_is_exhausted() {
+    let mut harness = a_drive("Split Exhausted");
+    sleep_stop_here(&mut harness);
+    press_t(&mut harness);
+    {
+        let clock = &mut harness.app.ctx.profile.as_mut().expect("a career").hos;
+        clock.driving_min = 11.0 * 60.0;
+        clock.duty_min = 11.0 * 60.0;
+        clock.since_break_min = 0.0;
+        clock.status = "driving".to_string();
+    }
+    harness.clear_speech();
+
+    harness.select_menu_item("Sleep 2 hours in sleeper berth");
+
+    let wake = spoken(&harness)
+        .into_iter()
+        .find(|line| line.contains("did NOT reset your hours"))
+        .unwrap_or_else(|| panic!("no pending-split wake line: {:#?}", spoken(&harness)));
+    assert!(wake.contains("driving allowance is exhausted"), "{wake}");
+    assert!(wake.contains("Do not drive"), "{wake}");
+    assert!(!wake.contains("You must stop driving in"), "{wake}");
 }
 
 #[test]

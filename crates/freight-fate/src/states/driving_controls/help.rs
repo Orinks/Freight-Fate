@@ -119,10 +119,12 @@ impl DrivingState {
         text.push_str("Space speed, active speed-control mode, and target. ");
         text.push_str("S posted speed limit. G the grade under the wheels, whether the ");
         text.push_str("truck is holding it, and the next grade ahead. Tab status menu. F fuel. ");
-        text.push_str("C clock, deadline, and the hours limit that comes first. ");
+        text.push_str("C clock, delivery deadline, and the hours limit that comes first. ");
         text.push_str("Three keys answer one hours question each, without the rest of ");
         text.push_str("that report: Alt A time at the wheel so far, Alt S when your ");
-        text.push_str("30 minute break is due, and Alt D what ends this shift, with ");
+        text.push_str(
+            "30 minute break is due, and Alt D the driving allowance and legal driving cutoff, with ",
+        );
         text.push_str("where you can legally stop before it. ");
         text.push_str("R progress, distance left, and where you are. ");
         text.push_str("Four keys answer one part of that each, when you want the fact ");

@@ -2,7 +2,7 @@
 
 Freight Fate is an audio-first trucking game. You build a career by accepting
 freight, driving to the shipper, loading the trailer, running the route, and
-delivering before the deadline.
+delivering before the delivery deadline.
 
 This manual describes the game as it currently ships with your build. It
 focuses on what players can do from the menus and while driving. If you are
@@ -62,7 +62,7 @@ differently.
   the truck they happened to, so swapping tractors no longer carries your
   wear or your empty tank to the next rig.
 - **The hours clock answers one question at a time.** Alt+A, Alt+S, and Alt+D
-  each ask a single question; C keeps the clock, the deadline, and whichever
+  each ask a single question; C keeps the clock, the delivery deadline, and whichever
   limit comes first.
 - **Traffic lights have a yellow, and every change is spoken.** Ramp-end
   lights cycle green, yellow, red. Entering on green or yellow is legal.
@@ -159,7 +159,7 @@ Company-driver carrier choices are:
 | Start | Tradeoff |
 | --- | --- |
 | Northstar Freight Lines | Balanced company-driver wages and broad dispatch. |
-| Great Lakes Training Transport | Better short-load stop pay, more short-haul training work, and slightly more forgiving deadlines. |
+| Great Lakes Training Transport | Better short-load stop pay, more short-haul training work, and slightly more forgiving delivery deadlines. |
 | Prairie Link Regional | Better per-mile floor, lower stop pay, more same-region work, and grain/bulk emphasis. |
 | Summit Value Logistics | Better percentage and on-time bonus, smaller guarantee, and more long-haul/high-value lanes. |
 
@@ -291,7 +291,7 @@ the carrier supplies the right trailer for approved loads.
 Freight Fate can start you as a company driver for one of several fictional
 starter carriers. The dispatch board lists carrier gross, but your settlement
 pays driver wages and bonuses. The selected carrier changes wage floor, stop
-pay, pay share, on-time bonus, route-length mix, deadline slack, and in some
+pay, pay share, on-time bonus, route-length mix, delivery-deadline slack, and in some
 cases regional or freight emphasis. The carrier assigns the tractor and supplies
 the trailer, authority, insurance, fuel, and routine repairs.
 
@@ -445,7 +445,7 @@ Each job lists:
 - Destination facility.
 - Distance.
 - Pay.
-- Deadline.
+- Delivery deadline.
 - Equipment type.
 - Trailer program note for owner-operators.
 - Estimated driver pay or take-home before any pay advance.
@@ -455,9 +455,9 @@ Each job lists:
 Early drivers mostly see shorter regional work. Higher levels widen the
 distance cap and unlock more variety.
 
-Deadlines are set by a dispatcher who did the arithmetic: driving time from
+Delivery deadlines are set by a dispatcher who did the arithmetic: driving time from
 the route's real speeds, plus the 30-minute break, plus any 10-hour rest your
-current shift clock will force before you arrive. A deadline that sounds
+hours-of-service clocks will force before you arrive. A delivery deadline that sounds
 generous is usually covering a legal rest, and the job details say so when it
 is.
 
@@ -576,10 +576,10 @@ Driving controls are active while the road view is focused:
 | Enter | Arrive: accept a facility arrival once you are fully stopped. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
-| C | Report clock, deadline, estimated arrival, and the one hours-of-service limit that comes first. For the first few presses it also names the three keys below, then stops. |
-| Alt+A | Report time at the wheel so far this shift, and time on duty. |
+| C | Report clock, delivery deadline, estimated arrival, and the one hours-of-service limit that comes first. For the first few presses it also names the three keys below, then stops. |
+| Alt+A | Report time at the wheel so far, and time since coming on duty. |
 | Alt+S | Report when your 30 minute break is due, or that a break will not help. |
-| Alt+D | Report what ends this shift -- driving time left and duty window both -- and where you can legally stop before it. |
+| Alt+D | Contrast your driving allowance with the legal driving cutoff, and report where you can legally stop before the binding limit. |
 | R | Report trip progress (the same percent the online drivers board shows) and the distance left, then the road you are on with its direction, the state you are in, and the city you are heading toward. With a planned stop set, the distance counts down to that stop instead of the destination. On city streets -- pulling out of the origin gate, driving a pickup approach, or running the last streets to a facility gate -- it names the street under your wheels and counts down to the on-ramp or the gate instead. Distances close in quarter miles and then in feet, so the answer is never "0 miles" while the gate is still ahead. |
 | Alt+1 | Report the state you are in, and nothing else. |
 | Alt+2 | Report the road you are on, signed the way you would read it -- "I-90 East". On city streets it names the street instead. |
@@ -982,11 +982,11 @@ hour mid-drive is the road, not a fault.
 
 Delivery appointments read in the receiver's local time, with a day
 qualifier, the way a driver parked at that dock would say it: "6 PM Eastern
-Time tomorrow." That is why a deadline can look out of step with the clock
+Time tomorrow." That is why a delivery deadline can look out of step with the clock
 you just heard from a different zone.
 
 Nothing that measures a duration ever shifts. Your hours of service, the
-deadline itself, the seasons, and the market all run on one continuous
+delivery deadline itself, the seasons, and the market all run on one continuous
 timeline; only the spoken wall clock changes. Daylight saving is deliberately
 not modeled, so a zone's offset never moves under you.
 
@@ -1230,9 +1230,16 @@ A bad run in this game costs you time and earnings. It does not strand you.
 Freight Fate tracks an ELD-style hours clock. In realistic mode:
 
 - You can drive 11 hours after a 10-hour reset.
-- The duty window is 14 hours after coming on duty.
+- The 14-hour driving window starts when you come on duty. Its end is the
+  legal driving cutoff: you must stop driving then, even if driving allowance
+  remains.
 - You need a 30-minute break after 8 cumulative hours of driving.
-- Sleeping 10 hours resets the shift clock.
+- Sleeping 10 hours resets both driving clocks.
+
+Driving allowance decreases only while the truck is moving. The 14-hour
+driving window keeps running through loading, fueling, inspections, ordinary
+breaks, and ordinary off-duty stops. You may drive only until the earliest of
+your driving allowance, legal driving cutoff, or required break.
 
 At sleep-capable truck parking, the sleeper berth means the bunk in your cab.
 You can choose 2, 3, 7, or 8 hours in the sleeper berth to plan an 8+2 or 7+3
@@ -1240,8 +1247,8 @@ split. Sleep 10 hours remains the simplest full reset. Shoulder sleep and
 sleeping 10 hours in the lot are fallback rests, not clean split-rest planning
 tools.
 
-A nap in the sleeper berth that does not reset your 14-hour window says so
-when you wake, and names the time the window still closes, so a short rest
+A nap in the sleeper berth that does not reset your 14-hour driving window says so
+when you wake, and names when you must stop driving, so a short rest
 never reads as a fresh day.
 
 The game gives warnings at 2 hours, 1 hour, and 30 minutes before a limit.
@@ -1249,21 +1256,20 @@ Driving past a limit risks inspections, fines, reputation loss, and
 out-of-service orders. A log check that finds you over your hours is not a
 silent time jump: the officer orders you off the road, the stop names exactly
 which clock you broke and by how much, and the ten-hour hold plays out with
-the new shift time and what it means for your deadline spoken plainly.
+the new shift time and what it means for your delivery deadline spoken plainly.
 
 Three keys ask the clock one question each while you drive, so you do not have
 to sit through a whole report to hear the number you want. They read left to
 right in the shape of a shift:
 
-- **Alt+A** -- at the wheel so far: driving time this shift, and time on duty.
+- **Alt+A** -- at the wheel so far: driving time, and time since coming on duty.
 - **Alt+S** -- the break: when your 30 minute break comes due.
-- **Alt+D** -- what ends this shift: driving time left and the duty window, the
-  one that runs out first named first, plus where you can legally stop before
-  it.
+- **Alt+D** -- driving allowance and the legal driving cutoff, with the binding
+  one named first, plus where you can legally stop before it.
 
 Each answer starts with its own words, so a mis-key is obvious before the
 number arrives. With hours of service enforcement off, each key says so rather
-than going quiet. **C** still gives the clock, the deadline, and whichever
+than going quiet. **C** still gives the clock, the delivery deadline, and whichever
 limit comes first, and the **Tab** status menu keeps the full report.
 
 The Logbook is the spoken Record of Duty Status behind that clock. It records a
@@ -1303,10 +1309,10 @@ Use these keys when you need status without leaving the road:
 | --- | --- |
 | Space | Speed, gear, RPM, air pressure, and brake state. |
 | F | Fuel level and estimated range. |
-| C | Clock, deadline, estimated arrival, and the nearest hours-of-service limit. |
-| Alt+A | Time at the wheel so far this shift, and time on duty. |
+| C | Clock, delivery deadline, estimated arrival, and the nearest hours-of-service limit. |
+| Alt+A | Time at the wheel so far, and time since coming on duty. |
 | Alt+S | When your 30 minute break is due. |
-| Alt+D | What ends this shift, both clocks, plus the next legal stop. |
+| Alt+D | Driving allowance, legal driving cutoff, and the next legal stop. |
 | R | Route progress and GPS context. |
 | V | Weather and forecast. |
 | M | Toggle the in-cab radio. |
@@ -1323,7 +1329,7 @@ Tab opens the Driving status menu. It has four review screens and a Driver apps 
 | Screen | Information |
 | --- | --- |
 | Route | Current route status lines from the active drive. |
-| Driver | Driver name, money, load, objective, truck fuel and damage, transmission, fatigue, hours, and deadline. |
+| Driver | Driver name, money, load, objective, truck fuel and damage, transmission, fatigue, hours, and delivery deadline. |
 | Map | Route cities, highways, progress, next guidance, upcoming stops, map points, and toll exposure. |
 | Radio | Current station, stream-safety state, approximate reception position, and currently receivable stations. |
 | Driver apps | A tablet-style app menu for Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD. |
@@ -1380,7 +1386,7 @@ The destination menu includes:
 | Choice | What It Does |
 | --- | --- |
 | Dock and deliver | Unload the trailer, sign the paperwork, and open settlement. |
-| Check paperwork | Review facility, cargo, payout, deadline, damage, tolls, approved charges, driver charges, and net pay before settlement. |
+| Check paperwork | Review facility, cargo, payout, delivery deadline, damage, tolls, approved charges, driver charges, and net pay before settlement. |
 | Check arrival status | Review facility, cargo, speed, and next step. |
 
 Unloading gives a short spoken wait and advances the clock as on-duty work

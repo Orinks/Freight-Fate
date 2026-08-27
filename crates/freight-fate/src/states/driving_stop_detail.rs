@@ -2,7 +2,7 @@
 //! moving a planned stop (port of
 //! `freight_fate/states/driving_stop_detail.py`).
 
-use ff_core::pyfmt::fmt_f;
+use ff_core::sim::hos;
 use ff_core::sim::trip::ETA_MIN_MPH;
 use ff_core::sim::trip_models::RoadStop;
 
@@ -140,8 +140,8 @@ fn eta_line(d: &mut crate::states::driving::DrivingState, ctx: &GameContext, ahe
     let eta_h = ahead / mph.max(1.0);
     let hos_note = hos_of(ctx).arrival_note(&ctx.settings.hos_mode, eta_h * 60.0);
     format!(
-        "Estimated time to reach it: {} hours {basis}.{hos_note}",
-        fmt_f(eta_h, 1)
+        "Estimated time to reach it: {} {basis}.{hos_note}",
+        hos::duration_text_up(eta_h)
     )
 }
 

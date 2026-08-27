@@ -197,7 +197,7 @@ impl PauseMenuState {
                 .help(
                     "Emergency-only poor sleep on the shoulder. Resets hours of service, but \
                      fatigue remains, you may be ticketed, minor truck damage can happen, and \
-                     the deadline keeps running.",
+                     the delivery deadline keeps running.",
                 ),
             );
         }

@@ -183,7 +183,7 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
              fuel, repairs, truck wear, trailer programs, and business \
              reserves come out of \
              your cash. Your first objective is to open the dispatch board, \
-             choose an unlocked load with a deadline you can protect, and get \
+             choose an unlocked load with a delivery deadline you can protect, and get \
              to the shipper without burning your cushion.",
             option.carrier_name,
             fmt_grouped(p.money, 0)

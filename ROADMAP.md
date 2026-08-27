@@ -120,6 +120,12 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Hours-of-service speech separates driving allowance, the legal driving
+      cutoff, and the delivery deadline (2026-08-27).** Routine warnings lead
+      with the binding limit, explicit status reports keep all three clocks
+      distinct, and time is spoken in hours and minutes. The underlying
+      11-hour, 14-hour, break, reset, and sleeper-split rules are unchanged.
+
 - [x] **A missed delivery exit no longer costs the driver the speed warning,
       and no longer promises a recovery that does not exist (2026-08-26)**
       (Tyler Rodick, issue #169, Hattiesburg MS: "it gave me the usual

@@ -135,6 +135,31 @@ fn test_driving_f1_describes_safe_shutdown_and_destination_parking() {
     );
 }
 
+#[test]
+fn test_hos_help_distinguishes_the_driving_clocks_and_delivery_deadline() {
+    let mut harness = a_drive("HOS Help");
+    harness.with_drive(|drive, ctx| drive.speak_keyboard_help(ctx));
+    let driving_help = last_help(&harness);
+    assert!(driving_help.contains("delivery deadline"), "{driving_help}");
+    assert!(driving_help.contains("driving allowance"), "{driving_help}");
+    assert!(
+        driving_help.contains("legal driving cutoff"),
+        "{driving_help}"
+    );
+
+    let hours_help = HELP_PAGES
+        .iter()
+        .find(|(title, _)| *title == "Hours and rest")
+        .expect("hours help page")
+        .1
+        .join(" ");
+    assert!(hours_help.contains("fourteen hour driving window"));
+    assert!(hours_help.contains("Driving allowance decreases only while moving"));
+    assert!(hours_help.contains("loading, fueling, inspections"));
+    assert!(hours_help.contains("separate delivery deadline"));
+    assert!(!hours_help.contains("duty window"));
+}
+
 // -- the manual --------------------------------------------------------------------------
 
 #[test]

@@ -146,6 +146,24 @@ fn number_after(text: &str, pattern: &str) -> Option<f64> {
         .and_then(|m| m.as_str().parse::<f64>().ok())
 }
 
+fn driving_available_minutes(text: &str) -> Option<i64> {
+    let value = text
+        .split_once("Driving available: ")?
+        .1
+        .split('.')
+        .next()?;
+    let mut total = 0;
+    for part in value.split(" and ") {
+        let number = part.split_whitespace().next()?.parse::<i64>().ok()?;
+        total += if part.contains("hour") {
+            number * 60
+        } else {
+            number
+        };
+    }
+    Some(total)
+}
+
 /// A snapshot of everything the audit compares against, read in the same
 /// instant the keys were pressed (no frame runs in between).
 #[derive(Debug, Clone)]
@@ -781,8 +799,8 @@ fn test_the_hours_key_counts_down_the_same_wheel_time_the_duty_log_recorded() {
     harness.press_key(Key::K, None);
 
     let said_before = ask_alt(&mut harness, Key::D);
-    let left_before = number_after(&said_before, r"Driving time left: (\d+(?:\.\d+)?) hours")
-        .expect("the hours key names the driving time left");
+    let left_before =
+        driving_available_minutes(&said_before).expect("the hours key names the driving allowance");
     let logged_before = hos_of(&harness.app.ctx).driving_min;
 
     for _ in 0..12_000 {
@@ -790,22 +808,22 @@ fn test_the_hours_key_counts_down_the_same_wheel_time_the_duty_log_recorded() {
     }
 
     let said_after = ask_alt(&mut harness, Key::D);
-    let left_after = number_after(&said_after, r"Driving time left: (\d+(?:\.\d+)?) hours")
-        .expect("the hours key names the driving time left");
+    let left_after =
+        driving_available_minutes(&said_after).expect("the hours key names the driving allowance");
     let logged_after = hos_of(&harness.app.ctx).driving_min;
 
-    let counted_down_h = left_before - left_after;
-    let logged_h = (logged_after - logged_before) / 60.0;
+    let counted_down_min = left_before - left_after;
+    let logged_min = logged_after - logged_before;
     assert!(
-        logged_h > 0.2,
-        "the drive never put meaningful time on the wheel: {logged_h:.3} hours"
+        logged_min > 12.0,
+        "the drive never put meaningful time on the wheel: {logged_min:.1} minutes"
     );
-    // The spoken figure is rounded to a tenth of an hour, so a tenth of slack
-    // either way is the readout's own resolution, not a disagreement.
+    // Remaining legal time is rounded down to the minute, so one minute of
+    // slack is the readout's own resolution, not a disagreement.
     assert!(
-        (counted_down_h - logged_h).abs() <= 0.1,
-        "Alt+D counted down {counted_down_h:.2} hours; the duty log recorded \
-         {logged_h:.2} hours at the wheel ({said_before} / {said_after})"
+        (counted_down_min as f64 - logged_min).abs() <= 1.0,
+        "Alt+D counted down {counted_down_min} minutes; the duty log recorded \
+         {logged_min:.1} minutes at the wheel ({said_before} / {said_after})"
     );
 }
 
