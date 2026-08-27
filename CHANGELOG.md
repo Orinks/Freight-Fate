@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Truck status is now a list you can review.** At the terminal, choose
+  Truck status and use the arrow keys to hear assignment and eligibility,
+  fuel, condition, each wear reading, road grime, and snow chains one at a
+  time. Enter repeats just the line you are on, and Escape returns to the
+  terminal.
+
 - **Two new songs on the country stations.** "Dangerous Dan", an outlaw
   country song, and "Dial-up Summer", a country ballad about a summer spent
   online instead of outdoors. Both join the rotation on The Rawhide 98.1,

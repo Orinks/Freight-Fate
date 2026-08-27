@@ -1,16 +1,15 @@
 //! The hub screen while parked at a company terminal or yard
 //! (`CityMenuState`).
 
-use ff_core::models::business::{carrier_name, is_owner_operator, status_label, COMPANY_DRIVER};
+use ff_core::models::business::{is_owner_operator, status_label, COMPANY_DRIVER};
 use ff_core::models::career_objectives::career_objective;
 use ff_core::models::career_training::{
     is_company_training_profile, training_guidance, TrainingStage,
 };
-use ff_core::models::carrier_fleet::{fleet_assignment_text, slip_seats};
+use ff_core::models::carrier_fleet::fleet_assignment_text;
 use ff_core::models::economy::{pay_advance_grant, pay_advance_unavailable_reason};
 use ff_core::models::enforcement;
 use ff_core::models::solvency;
-use ff_core::models::trucks::{truck_model, truck_model_or_panic};
 use ff_core::music::{select_menu_music_sequence, MenuMusicProfile};
 use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_n};
 use ff_core::sim::hos::{clock_text, time_of_day};
@@ -34,6 +33,8 @@ use crate::states::city::{
 use crate::states::driving_school::DrivingSchoolState;
 use crate::states::logbook::LogbookState;
 use crate::states::main_menu::{MainMenuState, SettingsState};
+
+use super::truck_status::TruckStatusState;
 
 /// The hub screen while parked at a company terminal or yard.
 pub struct CityMenuState {
@@ -235,77 +236,9 @@ impl CityMenuState {
         ctx.push_state(CareerStatsState::new());
     }
 
-    /// `_truck_status`: assigned or owned tractor status at a glance.
+    /// Open the active tractor's reviewable status screen.
     pub fn truck_status(&mut self, ctx: &mut GameContext) {
-        let p = profile(ctx);
-        let specs = p.truck_specs();
-        let truck =
-            truck_model(&p.active_truck_key()).unwrap_or_else(|| truck_model_or_panic("rig"));
-        let fuel_pct = p.truck_fuel_gal() / specs.fuel_tank_gal * 100.0;
-        let damage = p.truck_damage_pct();
-        let condition = if damage < 5.0 {
-            "excellent"
-        } else if damage < 20.0 {
-            "good"
-        } else if damage < 50.0 {
-            "worn"
-        } else {
-            "poor"
-        };
-        let lead = if !p.owns_equipment() {
-            let mut lead = format!(
-                "Assigned {} tractor. {}",
-                carrier_name(p),
-                fleet_assignment_text(p)
-            );
-            if slip_seats(p) {
-                lead.push_str(
-                    " You slip-seat: dispatch matches one of the yard's spare \
-                     tractors to each load, and each spare keeps its own fuel \
-                     and wear between draws. A dedicated seat comes at level 9.",
-                );
-            }
-            lead
-        } else {
-            format!("Owned tractor: {}.", truck.label)
-        };
-        let compound = if p.tire_type() == "winter" {
-            "winter"
-        } else {
-            "all-season"
-        };
-        let chains = if !p.chains_owned() {
-            "No snow chains aboard.".to_string()
-        } else if p.chain_wear_pct() >= 100.0 {
-            "The snow chain set aboard is snapped scrap.".to_string()
-        } else if p.chain_wear_pct() >= 1.0 {
-            format!(
-                "Snow chains aboard, {} percent worn.",
-                fmt_f(p.chain_wear_pct(), 0)
-            )
-        } else {
-            "Snow chains aboard and fresh.".to_string()
-        };
-        let text = format!(
-            "{lead} Fuel {} percent, \
-             {} gallons of \
-             {}. \
-             Tractor condition {condition}, {} percent damage. \
-             Tire wear {} percent, {compound} compound. \
-             Brake wear {} percent. \
-             Engine wear {} percent. \
-             Road grime {} percent. \
-             {chains}",
-            fmt_f(fuel_pct, 0),
-            fmt_f(p.truck_fuel_gal(), 0),
-            fmt_f(specs.fuel_tank_gal, 0),
-            fmt_f(damage, 0),
-            fmt_f(p.tire_wear_pct(), 0),
-            fmt_f(p.brake_wear_pct(), 0),
-            fmt_f(p.engine_wear_pct(), 0),
-            fmt_f(p.road_grime_pct(), 0),
-        );
-        ctx.say(&text);
+        ctx.push_state(TruckStatusState::new());
     }
 
     fn time_weather(&mut self, ctx: &mut GameContext) {
@@ -777,8 +710,10 @@ impl Menu for CityMenuState {
             );
         }
         items.push(
-            MenuItem::new("Truck status", |s: &mut Self, ctx| s.truck_status(ctx))
-                .help("Hear assigned or owned tractor status at a glance."),
+            MenuItem::new("Truck status", |s: &mut Self, ctx| s.truck_status(ctx)).help(
+                "Review assignment, eligibility, fuel, condition, wear, grime, and snow chains \
+                 one line at a time.",
+            ),
         );
         items.push(
             MenuItem::new("Time and weather", |s: &mut Self, ctx| s.time_weather(ctx))

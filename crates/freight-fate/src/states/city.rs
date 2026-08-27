@@ -53,6 +53,7 @@ use crate::states::driving::DrivingState;
 mod board;
 mod extras;
 mod terminal;
+mod truck_status;
 mod weather;
 
 pub use board::{
@@ -60,6 +61,7 @@ pub use board::{
 };
 pub use extras::{BobtailDestState, PayDebtState};
 pub use terminal::CityMenuState;
+pub use truck_status::TruckStatusState;
 
 // `from .city_pickup import ...` / `from .city_business import ...`: the
 // Python module re-exported these, and the tests import them from here.
