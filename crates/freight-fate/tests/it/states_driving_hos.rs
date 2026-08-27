@@ -824,9 +824,13 @@ fn test_t_opens_roadside_sleep_confirmation_at_safe_stop() {
         let mut harness = a_drive("Roadside Sleep");
         let stop = sleep_stop_here(&mut harness);
         park_away_from_stops(&mut harness, &stop);
+        let planned_key = stop.key();
         harness.with_drive(move |d, _| {
             d.truck_mut().velocity_mps = speed_mph * MPS_PER_MPH;
             d.truck_mut().throttle = 0.4;
+            d.trip.planned_stop_key = Some(planned_key.clone());
+            d.selected_stop_key = Some(planned_key);
+            d.selected_stop_assist_armed = true;
         });
         harness.clear_speech();
 
@@ -844,6 +848,8 @@ fn test_t_opens_roadside_sleep_confirmation_at_safe_stop() {
         assert!(said.contains("poor rest"), "{said}");
         assert!(said.contains("minor truck damage"), "{said}");
         harness.with_drive(|d, _| {
+            assert!(d.trip.planned_stop_key.is_some());
+            assert!(d.selected_stop_key.is_some());
             assert_eq!(d.trip.truck.velocity_mps, 0.0);
             assert_eq!(d.trip.truck.throttle, 0.0);
             assert_eq!(d.trip.truck.brake, 1.0);

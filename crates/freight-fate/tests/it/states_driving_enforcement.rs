@@ -1110,9 +1110,12 @@ fn test_the_reminder_window_is_the_last_half_mile() {
 fn test_rest_key_at_speed_defers_to_the_open_scale() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, "Jerry");
-    with_scale(&mut drive, 10.0, 11.0, true);
+    let (_scale, plaza) = with_scale(&mut drive, 10.0, 11.0, true);
     drive.trip.position_mi = 8.2;
     drive.trip.truck.velocity_mps = mph_to_mps(54.0);
+    drive.trip.planned_stop_key = Some(plaza.key());
+    drive.selected_stop_key = Some(plaza.key());
+    drive.selected_stop_assist_armed = true;
     app.clear_speech();
 
     drive.try_rest_stop(&mut app.ctx);
@@ -1124,9 +1127,45 @@ fn test_rest_key_at_speed_defers_to_the_open_scale() {
         spoken.contains("Rest planning can wait until you are past the scale"),
         "{spoken}"
     );
-    // Nothing was planned or selected.
-    assert!(drive.trip.planned_stop_key.is_none());
-    assert!(drive.selected_stop_key.is_none());
+    assert_eq!(
+        drive.trip.planned_stop_key.as_deref(),
+        Some(plaza.key().as_str())
+    );
+    assert_eq!(
+        drive.selected_stop_key.as_deref(),
+        Some(plaza.key().as_str())
+    );
+}
+
+#[test]
+fn test_rest_key_on_a_scale_ramp_keeps_an_existing_sleep_plan() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Jerry");
+    let (scale, plaza) = with_scale(&mut drive, 10.0, 11.0, true);
+    drive.trip.position_mi = scale.at_mi;
+    drive.trip.truck.velocity_mps = mph_to_mps(15.0);
+    drive.ramp_stop = Some(scale);
+    drive.ramp_mi = Some(0.3);
+    drive.trip.planned_stop_key = Some(plaza.key());
+    drive.selected_stop_key = Some(plaza.key());
+    drive.selected_stop_assist_armed = true;
+    app.clear_speech();
+
+    drive.try_rest_stop(&mut app.ctx);
+
+    let spoken = app.main_lines().join(" ");
+    assert!(
+        spoken.contains("On the ramp for weigh station: Ontario Scale"),
+        "{spoken}"
+    );
+    assert_eq!(
+        drive.trip.planned_stop_key.as_deref(),
+        Some(plaza.key().as_str())
+    );
+    assert_eq!(
+        drive.selected_stop_key.as_deref(),
+        Some(plaza.key().as_str())
+    );
 }
 
 #[test]

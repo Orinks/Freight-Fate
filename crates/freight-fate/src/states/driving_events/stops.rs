@@ -88,24 +88,75 @@ impl DrivingState {
         }
 
         if let Some(active) = self.ramp_stop.clone() {
-            if self.is_selected_stop(Some(&active)) {
-                let assist = if self.selected_stop_assist_armed && ctx.settings.selected_stop_assist
-                {
-                    "assistance is armed and will stop at the entrance after the ramp control is \
-                     clear"
-                } else {
-                    "assistance is off; brake to a complete stop at the entrance"
-                };
-                let message = format!(
+            let active_is_selected = self.is_selected_stop(Some(&active));
+            let assist = if active_is_selected
+                && self.selected_stop_assist_armed
+                && ctx.settings.selected_stop_assist
+            {
+                "assistance is armed and will stop at the entrance after the ramp control is clear"
+            } else {
+                "assistance is off; brake to a complete stop at the entrance"
+            };
+            let message = if active_is_selected {
+                format!(
                     "On the selected ramp for {}; {assist}.",
                     active.spoken_name()
-                );
-                self.set_status(message.clone());
-                // The cab confirming a control the player just worked. At the
-                // quiet rung this becomes its earcon: you know you pressed K.
-                ctx.say_with(message, Say::new().category(SpeechCategory::Confirmation));
-                return;
+                )
+            } else {
+                format!("On the ramp for {}; {assist}.", active.spoken_name())
+            };
+            self.set_status(message.clone());
+            // The cab confirming a control the player just worked. At the
+            // quiet rung this becomes its earcon: you know you pressed K.
+            ctx.say_with(message, Say::new().category(SpeechCategory::Confirmation));
+            return;
+        }
+
+        // A selected plan only owns a repeated T while rolling freely. X can
+        // clear the selected-stop intent while deliberately leaving the route
+        // plan intact; the next T must then reselect that plan. Police stops,
+        // scales, stopped route menus, and an active ramp all returned above.
+        // Once this plan is canceled, no selected-stop or assist state may
+        // survive to steer a later optional exit.
+        if let Some(planned_key) = self
+            .trip
+            .planned_stop_key
+            .clone()
+            .filter(|_| self.selected_stop_key.is_some())
+        {
+            let active_exit = self.exit_stop.clone();
+            let exit_matches_plan = active_exit
+                .as_ref()
+                .is_some_and(|stop| stop.key() == planned_key);
+            let signal_was_on = exit_matches_plan && self.exit_signal_on;
+            self.trip.planned_stop_key = None;
+            self.clear_selected_stop_intent();
+            if exit_matches_plan {
+                self.exit_stop = None;
+                self.exit_signal_on = false;
+                self.exit_signal_canceled = false;
+                self.cruise_exit_mph = None;
+                self.reset_exit_lane_state();
             }
+            let message = if signal_was_on {
+                "Planned stop canceled. Exit signal canceled. Keep following the highway."
+                    .to_string()
+            } else if self.exit_signal_on {
+                active_exit.as_ref().map_or_else(
+                    || "Planned stop canceled.".to_string(),
+                    |stop| {
+                        format!(
+                            "Planned stop canceled. Exit signal remains active for {}.",
+                            stop.spoken_name()
+                        )
+                    },
+                )
+            } else {
+                "Planned stop canceled.".to_string()
+            };
+            self.set_status(message.clone());
+            self.say_plain(ctx, message);
+            return;
         }
 
         if let Some(selected) = self.selected_sleep_stop() {

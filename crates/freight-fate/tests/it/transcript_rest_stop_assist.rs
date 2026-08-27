@@ -134,16 +134,205 @@ fn test_rolling_t_plans_exact_sleep_stop_without_silently_selecting_exit() {
     assert!(harness
         .read_drive(|d| d.status_text.clone())
         .contains("Press X to signal for this exit"));
+}
+
+#[test]
+fn test_repeating_t_cancels_the_planned_sleep_stop() {
+    let mut harness = driving_app();
+    let stop = sleep_stop(&mut harness, 2.0);
+    rolling(&mut harness, 40.0);
 
     press_t(&mut harness);
-    let said = last(&harness);
-    assert!(
-        said.starts_with("Still selected: public rest area: Prairie View Rest Area"),
-        "{said}"
-    );
     assert_eq!(
-        harness.read_drive(|d| d.selected_stop_key.clone()),
+        harness.read_drive(|d| d.trip.planned_stop_key.clone()),
         Some(stop.key())
+    );
+
+    press_t(&mut harness);
+
+    assert!(harness.state_is::<DrivingState>());
+    assert!(harness.read_drive(|d| d.trip.planned_stop_key.is_none()));
+    assert!(harness.read_drive(|d| d.selected_stop_key.is_none()));
+    assert!(!harness.read_drive(|d| d.selected_stop_assist_armed));
+    assert_eq!(last(&harness), "Planned stop canceled.");
+    assert_eq!(
+        harness.read_drive(|d| d.status_text.clone()),
+        "Planned stop canceled."
+    );
+
+    press_t(&mut harness);
+    assert_eq!(
+        harness.read_drive(|d| d.trip.planned_stop_key.clone()),
+        Some(stop.key())
+    );
+}
+
+#[test]
+fn test_canceling_a_plan_clears_mismatched_selected_stop_intent() {
+    let mut harness = driving_app();
+    let planned = sleep_stop(&mut harness, 2.0);
+    let mut alternate = planned.clone();
+    alternate.name = "Alternate Rest Area".to_string();
+    alternate.at_mi += 1.0;
+    let staged = alternate.clone();
+    harness.with_drive(move |d, _| d.trip.stops.push(staged));
+    rolling(&mut harness, 40.0);
+
+    press_t(&mut harness);
+    let alternate_key = alternate.key();
+    harness.with_drive(move |d, _| {
+        d.selected_stop_key = Some(alternate_key);
+        d.selected_stop_assist_armed = true;
+        d.selected_stop_assist_said = true;
+        d.selected_stop_assist_brake = 0.3;
+        d.truck_mut().brake = 0.2;
+    });
+
+    press_t(&mut harness);
+
+    assert!(harness.read_drive(|d| d.trip.planned_stop_key.is_none()));
+    assert!(harness.read_drive(|d| d.selected_stop_key.is_none()));
+    assert!(!harness.read_drive(|d| d.selected_stop_assist_armed));
+    assert!(!harness.read_drive(|d| d.selected_stop_assist_said));
+    assert!(approx(harness.read_drive(|d| d.truck().brake), 0.0));
+    assert_eq!(last(&harness), "Planned stop canceled.");
+}
+
+#[test]
+fn test_canceling_a_planned_stop_resets_its_armed_exit_approach() {
+    let mut harness = driving_app();
+    let stop = sleep_stop(&mut harness, 2.0);
+    rolling(&mut harness, 40.0);
+
+    press_t(&mut harness);
+    press_x(&mut harness);
+    assert!(harness.read_drive(|d| d.exit_signal_on));
+    assert_eq!(
+        harness.read_drive(|d| d.exit_stop.as_ref().map(|active| active.key())),
+        Some(stop.key())
+    );
+    harness.with_drive(|d, _| {
+        d.selected_stop_assist_armed = true;
+        d.selected_stop_assist_said = true;
+        d.selected_stop_assist_brake = 0.3;
+        d.truck_mut().brake = 0.2;
+        d.cruise_exit_mph = Some(31.0);
+        d.exit_signal_canceled = true;
+        d.exit_lane_alignment = 0.75;
+        d.exit_lane_prompt_said = true;
+        d.exit_lane_ready_said = true;
+        d.exit_commit_said = true;
+        d.exit_cancel_armed = true;
+        d.exit_right_hold_s = 0.8;
+        d.exit_right_taps = 3;
+        d.exit_tap_hint_said = true;
+        d.exit_countdown_said = vec![5.0, 2.0];
+    });
+
+    press_t(&mut harness);
+
+    assert!(harness.read_drive(|d| d.trip.planned_stop_key.is_none()));
+    assert!(harness.read_drive(|d| d.selected_stop_key.is_none()));
+    assert!(!harness.read_drive(|d| d.selected_stop_assist_armed));
+    assert!(!harness.read_drive(|d| d.selected_stop_assist_said));
+    assert!(approx(
+        harness.read_drive(|d| d.selected_stop_assist_brake),
+        0.0
+    ));
+    assert!(approx(harness.read_drive(|d| d.truck().brake), 0.0));
+    assert!(harness.read_drive(|d| d.exit_stop.is_none()));
+    assert!(!harness.read_drive(|d| d.exit_signal_on));
+    assert!(!harness.read_drive(|d| d.exit_signal_canceled));
+    assert!(harness.read_drive(|d| d.cruise_exit_mph.is_none()));
+    assert!(approx(harness.read_drive(|d| d.exit_lane_alignment), 0.0));
+    assert!(!harness.read_drive(|d| d.exit_lane_prompt_said));
+    assert!(!harness.read_drive(|d| d.exit_lane_ready_said));
+    assert!(!harness.read_drive(|d| d.exit_commit_said));
+    assert!(!harness.read_drive(|d| d.exit_cancel_armed));
+    assert!(approx(harness.read_drive(|d| d.exit_right_hold_s), 0.0));
+    assert_eq!(harness.read_drive(|d| d.exit_right_taps), 0);
+    assert!(!harness.read_drive(|d| d.exit_tap_hint_said));
+    assert!(harness.read_drive(|d| d.exit_countdown_said.is_empty()));
+    assert_eq!(
+        last(&harness),
+        "Planned stop canceled. Exit signal canceled. Keep following the highway."
+    );
+}
+
+#[test]
+fn test_canceling_a_plan_preserves_a_different_armed_exit_approach() {
+    let mut harness = driving_app();
+    let planned = sleep_stop(&mut harness, 2.0);
+    let mut active_exit = RoadStop::new(
+        "Northside Freight Terminal",
+        planned.at_mi + 0.5,
+        "delivery_destination",
+    );
+    active_exit.actions = vec!["deliver".to_string()];
+    active_exit.parking = "confirmed".to_string();
+    active_exit.exit_label = "exit 100".to_string();
+    let staged = active_exit.clone();
+    harness.with_drive(move |d, _| d.trip.stops.push(staged));
+    rolling(&mut harness, 40.0);
+
+    press_t(&mut harness);
+    let armed_exit = active_exit.clone();
+    harness.with_drive(move |d, _| {
+        d.exit_stop = Some(armed_exit);
+        d.exit_signal_on = true;
+        d.exit_signal_canceled = true;
+        d.selected_stop_assist_armed = true;
+        d.selected_stop_assist_said = true;
+        d.selected_stop_assist_brake = 0.3;
+        d.truck_mut().brake = 0.2;
+        d.cruise_exit_mph = Some(31.0);
+        d.exit_lane_alignment = 0.75;
+        d.exit_lane_prompt_said = true;
+        d.exit_lane_ready_said = true;
+        d.exit_commit_said = true;
+        d.exit_cancel_armed = true;
+        d.exit_right_hold_s = 0.8;
+        d.exit_right_taps = 3;
+        d.exit_tap_hint_said = true;
+        d.exit_countdown_said = vec![5.0, 2.0];
+    });
+
+    press_t(&mut harness);
+
+    assert!(harness.read_drive(|d| d.trip.planned_stop_key.is_none()));
+    assert!(harness.read_drive(|d| d.selected_stop_key.is_none()));
+    assert!(!harness.read_drive(|d| d.selected_stop_assist_armed));
+    assert!(!harness.read_drive(|d| d.selected_stop_assist_said));
+    assert!(approx(
+        harness.read_drive(|d| d.selected_stop_assist_brake),
+        0.0
+    ));
+    assert!(approx(harness.read_drive(|d| d.truck().brake), 0.0));
+    assert_eq!(
+        harness.read_drive(|d| d.exit_stop.as_ref().map(|stop| stop.key())),
+        Some(active_exit.key())
+    );
+    assert!(harness.read_drive(|d| d.exit_signal_on));
+    assert!(harness.read_drive(|d| d.exit_signal_canceled));
+    assert_eq!(harness.read_drive(|d| d.cruise_exit_mph), Some(31.0));
+    assert!(approx(harness.read_drive(|d| d.exit_lane_alignment), 0.75));
+    assert!(harness.read_drive(|d| d.exit_lane_prompt_said));
+    assert!(harness.read_drive(|d| d.exit_lane_ready_said));
+    assert!(harness.read_drive(|d| d.exit_commit_said));
+    assert!(harness.read_drive(|d| d.exit_cancel_armed));
+    assert!(approx(harness.read_drive(|d| d.exit_right_hold_s), 0.8));
+    assert_eq!(harness.read_drive(|d| d.exit_right_taps), 3);
+    assert!(harness.read_drive(|d| d.exit_tap_hint_said));
+    assert_eq!(
+        harness.read_drive(|d| d.exit_countdown_said.clone()),
+        vec![5.0, 2.0]
+    );
+    let active_name = active_exit.spoken_name();
+    let said = last(&harness);
+    assert!(said.contains("Planned stop canceled."), "{said}");
+    assert!(
+        said.contains(&format!("Exit signal remains active for {active_name}.")),
+        "{said}"
     );
 }
 
@@ -484,15 +673,28 @@ fn test_selected_stop_outranks_unsignaled_destination_exit() {
 #[test]
 fn test_t_during_police_stop_names_the_trooper_action() {
     let mut harness = driving_app();
-    sleep_stop(&mut harness, 2.0);
+    let stop = sleep_stop(&mut harness, 2.0);
+    let planned_key = stop.key();
     harness.with_drive(|d, _| {
         d.pull_over = Some("lights".to_string());
         d.truck_mut().velocity_mps = 35.0 * MPS_PER_MPH;
     });
+    harness.with_drive(move |d, _| {
+        d.trip.planned_stop_key = Some(planned_key.clone());
+        d.selected_stop_key = Some(planned_key);
+        d.selected_stop_assist_armed = true;
+    });
 
     press_t(&mut harness);
 
-    assert!(harness.read_drive(|d| d.selected_stop_key.is_none()));
+    assert_eq!(
+        harness.read_drive(|d| d.trip.planned_stop_key.clone()),
+        Some(stop.key())
+    );
+    assert_eq!(
+        harness.read_drive(|d| d.selected_stop_key.clone()),
+        Some(stop.key())
+    );
     let said = last(&harness);
     assert!(said.contains("Resolve the police stop"), "{said}");
     assert!(
@@ -508,6 +710,7 @@ fn test_t_on_selected_ramp_reports_live_assist_state() {
     harness.app.ctx.settings.selected_stop_assist = true;
     let staged = stop.clone();
     harness.with_drive(move |d, _| {
+        d.trip.planned_stop_key = Some(staged.key());
         d.selected_stop_key = Some(staged.key());
         d.selected_stop_assist_armed = true;
         d.ramp_stop = Some(staged);
@@ -521,12 +724,71 @@ fn test_t_on_selected_ramp_reports_live_assist_state() {
     assert!(said.contains("On the selected ramp"), "{said}");
     assert!(said.contains("assistance is armed"), "{said}");
     assert!(!said.contains("behind you"), "{said}");
+    assert_eq!(
+        harness.read_drive(|d| d.trip.planned_stop_key.clone()),
+        Some(stop.key())
+    );
 
     harness.app.ctx.settings.selected_stop_assist = false;
     press_t(&mut harness);
     let said = last(&harness);
     assert!(said.contains("assistance is off"), "{said}");
     assert!(!said.contains("will stop"), "{said}");
+}
+
+#[test]
+fn test_t_on_a_different_active_ramp_keeps_the_future_sleep_plan_selected() {
+    let mut harness = driving_app();
+    let planned = sleep_stop(&mut harness, 2.0);
+    harness.app.ctx.settings.selected_stop_assist = true;
+    let mut active = planned.clone();
+    active.name = "Riverbend Travel Center".to_string();
+    active.stop_type = "travel_center".to_string();
+    active.at_mi -= 1.0;
+    let staged = active.clone();
+    let planned_key = planned.key();
+    let staged_planned_key = planned_key.clone();
+    harness.with_drive(move |d, _| {
+        d.trip.planned_stop_key = Some(staged_planned_key.clone());
+        d.selected_stop_key = Some(staged_planned_key);
+        d.selected_stop_assist_armed = true;
+        d.selected_stop_assist_brake = 0.4;
+        d.selected_stop_assist_said = true;
+        d.ramp_stop = Some(staged);
+        d.ramp_mi = Some(0.4);
+        d.truck_mut().velocity_mps = 20.0 * MPS_PER_MPH;
+        d.truck_mut().brake = 0.25;
+    });
+
+    press_t(&mut harness);
+
+    let said = last(&harness);
+    assert!(
+        said.contains("On the ramp for Riverbend Travel Center"),
+        "{said}"
+    );
+    assert!(!said.contains("selected ramp"), "{said}");
+    assert!(said.contains("assistance is off"), "{said}");
+    assert!(!said.contains("Planned stop canceled"), "{said}");
+    assert_eq!(
+        harness.read_drive(|d| d.trip.planned_stop_key.clone()),
+        Some(planned_key.clone())
+    );
+    assert_eq!(
+        harness.read_drive(|d| d.selected_stop_key.clone()),
+        Some(planned_key)
+    );
+    assert!(harness.read_drive(|d| d.selected_stop_assist_armed));
+    assert!(approx(
+        harness.read_drive(|d| d.selected_stop_assist_brake),
+        0.4
+    ));
+    assert!(harness.read_drive(|d| d.selected_stop_assist_said));
+    assert!(approx(harness.read_drive(|d| d.trip.truck.brake), 0.25));
+    assert_eq!(
+        harness.read_drive(|d| d.ramp_stop.as_ref().map(|stop| stop.key())),
+        Some(active.key())
+    );
 }
 
 #[test]
