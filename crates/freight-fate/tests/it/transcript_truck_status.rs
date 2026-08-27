@@ -1,6 +1,7 @@
 //! The terminal truck-status reader keeps every fact independently reachable.
 
 use crate::states_city_support::*;
+use ff_core::models::career::LEVEL_XP;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Key;
 use freight_fate::states::city::{CityMenuState, TruckStatusState};
@@ -59,4 +60,32 @@ fn truck_status_is_a_reviewable_menu_with_every_fact_on_its_own_row() {
 
     key(&mut app, Key::Escape);
     assert!(is::<CityMenuState>(&app));
+}
+
+#[test]
+fn held_back_driver_can_review_and_repeat_why_the_next_truck_is_unavailable() {
+    let mut app = TestApp::new();
+    career(&mut app, "Held Back Driver", "Chicago");
+    {
+        let profile = profile_mut(&mut app);
+        profile.career.xp = LEVEL_XP[10];
+        profile.career.reputation = 0.0;
+    }
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
+    app.clear_speech();
+
+    select::<CityMenuState>(&mut app, "Truck status");
+
+    let eligibility = labels::<TruckStatusState>(&app)
+        .into_iter()
+        .find(|line| line.starts_with("Eligibility: Your level earns"))
+        .expect("held-back drivers must get an eligibility reason");
+    assert!(eligibility.contains("dispatch trust is down"));
+    assert!(eligibility.contains("clean on-time runs"));
+    assert!(eligibility.contains("comes back to you"));
+
+    move_to::<TruckStatusState>(&mut app, "Eligibility: Your level earns");
+    key(&mut app, Key::Return);
+    assert_eq!(app.main_lines().last(), Some(&eligibility));
 }
