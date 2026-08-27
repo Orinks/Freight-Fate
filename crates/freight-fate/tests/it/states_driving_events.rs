@@ -1409,7 +1409,7 @@ fn test_a_loaded_yard_mule_keeps_the_merge_handoff_on_the_real_clock() {
     // time before the truck is close enough to traffic speed.
     let mut app = TestApp::new();
     let world = get_world();
-    let mut profile = Profile::named_in("Brandon Merge", "Carlisle");
+    let mut profile = Profile::named_in("Loaded Merge Recovery", "Carlisle");
     profile.tutorial_done = true;
     app.ctx.profile = Some(profile);
     let job = make_reposition_job(world, "Carlisle", "Pittsburgh", false, None)
@@ -1448,7 +1448,7 @@ fn test_a_loaded_yard_mule_keeps_the_merge_handoff_on_the_real_clock() {
 
     // A truck already within the established merge band returns to ordinary
     // highway pacing instead of needlessly slowing every departure.
-    d.trip.truck.velocity_mps = mph_to_mps(limit - MERGE_UNDER_SPEED_MPH + 1.0);
+    d.trip.truck.velocity_mps = mph_to_mps(merge_traffic_target_mph(limit) + 1.0);
     d.update_departure_ramp(&mut app.ctx, 0.0);
     d.update_exit(&mut app.ctx, 0.0, 0.0);
 

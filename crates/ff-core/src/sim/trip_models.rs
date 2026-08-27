@@ -22,10 +22,11 @@ mod hazards;
 mod ramps;
 pub use hazards::{eligible_hazards, hazard_is_in_lane, hazard_name, HazardDef, HAZARDS};
 pub use ramps::{
-    acceleration_lane_mi, deceleration_lane_mi, ramp_speed_mph, truck_merge_speed_mph,
-    RampAdvisorySpeed, ACCELERATION_LANE_FT, ACCELERATION_LANE_GRADE_FACTOR, DECELERATION_LANE_FT,
-    GRADE_MODEL_MAX_PCT, GRADE_MODEL_MIN_PCT, RAMP_DIRECTIONAL_SHARE, RAMP_MIN_DESIGN_MPH,
-    RAMP_SURFACE_SHARE, TRUCK_ACCEL_ALPHA_FPS2, TRUCK_ACCEL_BETA,
+    acceleration_lane_capability_mph, acceleration_lane_mi, deceleration_lane_mi,
+    merge_traffic_target_mph, ramp_speed_mph, truck_merge_speed_mph, RampAdvisorySpeed,
+    ACCELERATION_LANE_FT, ACCELERATION_LANE_GRADE_FACTOR, DECELERATION_LANE_FT,
+    GRADE_MODEL_MAX_PCT, GRADE_MODEL_MIN_PCT, MERGE_TRAFFIC_SPEED_SHARE, RAMP_DIRECTIONAL_SHARE,
+    RAMP_MIN_DESIGN_MPH, RAMP_SURFACE_SHARE, TRUCK_ACCEL_ALPHA_FPS2, TRUCK_ACCEL_BETA,
 };
 
 pub const BASE_SPEED_LIMIT_MPH: f64 = 70.0;

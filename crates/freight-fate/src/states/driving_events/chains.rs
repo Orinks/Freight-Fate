@@ -3,7 +3,6 @@
 //! run out of the origin's gate, and the acceleration lane that ends it.
 
 use ff_core::data::world_models::Route;
-use ff_core::sim::trip_models::acceleration_lane_mi;
 use ff_core::sim::weather::WeatherSystem;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::units::spoken_feet_or_meters;
@@ -306,7 +305,12 @@ impl DrivingState {
         // it feeds, and the truck has room to build speed on it.
         let (highway_mph, _) = self.trip.speed_limit_at(0.0);
         let grade = self.trip.grade_at(0.0);
-        self.departure_ramp_mi = Some(acceleration_lane_mi(highway_mph, grade));
+        let lane_mi = acceleration_lane_mi(highway_mph, grade * 100.0);
+        self.departure_ramp_mi = Some(lane_mi);
+        let capability_mph = acceleration_lane_capability_mph(&self.trip.truck, lane_mi, grade);
+        let merge_target_mph = merge_traffic_target_mph(highway_mph).max(CRUISE_MIN_MPH);
+        self.departure_cruise_handoff_mph =
+            (capability_mph + 0.5 >= merge_target_mph).then_some(merge_target_mph);
         self.departure_merge_recovery = false;
         // A real length of road is only room to build speed on if it is spent
         // at the rate a truck really covers it. The exit watch pins the lane
@@ -364,7 +368,7 @@ impl DrivingState {
         let Some(left) = self.departure_ramp_mi else {
             if self.departure_merge_recovery {
                 let (limit, _) = self.trip.speed_limit_at(self.trip.position_mi);
-                if limit - self.trip.truck.speed_mph() < MERGE_UNDER_SPEED_MPH {
+                if self.trip.truck.speed_mph() + 0.5 >= merge_traffic_target_mph(limit) {
                     self.departure_merge_recovery = false;
                 }
             }
@@ -376,15 +380,15 @@ impl DrivingState {
             return;
         }
         self.departure_ramp_mi = None;
+        self.departure_cruise_handoff_mph = None;
         let position = self.trip.position_mi;
         let (limit, _) = self.trip.speed_limit_at(position);
         let speed = self.trip.truck.speed_mph();
-        let short_by = limit - speed;
         // Under the limit by enough to matter is the NORMAL outcome for a
         // loaded truck, so it is said as a fact about the gap you need, never
         // as a fault. Only a truck that is genuinely up to speed gets the
         // plain merge line.
-        let message = if short_by >= MERGE_UNDER_SPEED_MPH {
+        let message = if speed + 0.5 < merge_traffic_target_mph(limit) {
             // The length just consumed remains the map-derived fallback; do
             // not invent more Carlisle pavement for a truck that needs more
             // room. It is now on the mainline's right lane, where adaptive

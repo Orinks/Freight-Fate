@@ -45,9 +45,9 @@
 use ff_core::sim::trip::NAV_LEAD_MIN_MI;
 use ff_core::sim::weather::WeatherKind;
 
+use ff_core::sim::trip_models::merge_traffic_target_mph;
 use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
 use freight_fate::states::base::Key;
-use freight_fate::states::driving_core::MERGE_UNDER_SPEED_MPH;
 use freight_fate::states::driving_turns::{
     is_judged_turn, TURN_COMMIT_TAIL_MI, TURN_WARNING_REAL_S,
 };
@@ -693,7 +693,7 @@ fn test_the_acceleration_lane_out_of_a_yard_is_not_outrun_by_the_clock() {
         match lane_ending_mph(&run.heard) {
             None => {
                 let road = run.highway_mph.unwrap_or(0.0);
-                if road - merge_mph >= MERGE_UNDER_SPEED_MPH {
+                if merge_mph < merge_traffic_target_mph(road) {
                     failures.push(fault(format!(
                         "reached the taper {:.0} under the road and was not told",
                         road - merge_mph

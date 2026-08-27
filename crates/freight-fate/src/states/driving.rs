@@ -636,6 +636,10 @@ pub struct DrivingState {
     // facility. None once the lane is behind the truck (or when the run
     // never started at a facility at all).
     pub departure_ramp_mi: Option<f64>,
+    // Cruise takes the acceleration lane at this traffic-relative speed only
+    // when this exact truck's predicted drivetrain/load/grade capability can
+    // reach it. Otherwise the keeper stays flat out through the taper.
+    pub departure_cruise_handoff_mph: Option<f64>,
     // The real pavement has ended but this truck is still materially slower
     // than the traffic it joined. Keep the low-speed merge handoff on the
     // real-time clock until it can safely become ordinary highway driving.

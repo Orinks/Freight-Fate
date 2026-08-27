@@ -989,6 +989,17 @@
 
 ### Fixed
 
+- **Acceleration-lane assistance now keeps pulling until cruise can take the
+  truck safely.** The speed keeper treated an on-ramp like a gentle steady-speed
+  zone, so a loaded automatic could waste much of a 1,600-foot lane below full
+  throttle and cruise would not take over until the pavement ended. The keeper
+  now uses the truck's full real drivetrain while it builds speed, then hands
+  to adaptive cruise at a traffic-relative threshold when that truck's load,
+  grade, wear, and conditions make the threshold reachable. A genuinely slow
+  truck still
+  gets the truthful big-gap warning and real-time recovery; no speed or pavement
+  is invented.
+
 - **A red light on the destination ramp no longer leaves the truck crawling
   after green.** Destination approach assistance used to take the pedals before
   a ramp-end light, then mistake the light's full stop for the final gate crawl

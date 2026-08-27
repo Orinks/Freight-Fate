@@ -103,8 +103,9 @@ pub use ff_core::sim::timezones::city_zone;
 pub use ff_core::sim::transmission::REVERSE;
 pub use ff_core::sim::trip::{Trip, TripOptions};
 pub use ff_core::sim::trip_models::{
-    acceleration_lane_mi, APPROACH_DECEL_MPS2, APPROACH_REACTION_S, DESTINATION_LOCAL_APPROACH_MI,
-    METERS_PER_MILE, RAMP_MAX_MPH as TRIP_RAMP_MAX_MPH, RAMP_MIN_DESIGN_MPH,
+    acceleration_lane_capability_mph, acceleration_lane_mi, merge_traffic_target_mph,
+    APPROACH_DECEL_MPS2, APPROACH_REACTION_S, DESTINATION_LOCAL_APPROACH_MI, METERS_PER_MILE,
+    RAMP_MAX_MPH as TRIP_RAMP_MAX_MPH, RAMP_MIN_DESIGN_MPH,
 };
 pub use ff_core::sim::vehicle::{
     CHAIN_SAFE_MPH, DAMAGE_BAND_LAST_CALL, DAMAGE_BAND_LIMP, DAMAGE_BAND_NONE,

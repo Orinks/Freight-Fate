@@ -68,6 +68,20 @@ impl DrivingState {
 
     /// Start adaptive cruise as part of the armed speed-control session.
     pub fn engage_cruise(&mut self, ctx: &mut GameContext, target_mph: f64, transition: bool) {
+        let transition_label = transition.then_some("Open road");
+        self.engage_cruise_with_transition(ctx, target_mph, transition_label);
+    }
+
+    fn engage_departure_cruise(&mut self, ctx: &mut GameContext, target_mph: f64) {
+        self.engage_cruise_with_transition(ctx, target_mph, Some("Acceleration lane"));
+    }
+
+    fn engage_cruise_with_transition(
+        &mut self,
+        ctx: &mut GameContext,
+        target_mph: f64,
+        transition_label: Option<&str>,
+    ) {
         self.speed_control_armed = true;
         self.speed_control_paused_at_stop = false;
         // Round to the whole mph the player actually hears (speed_text already
@@ -156,15 +170,19 @@ impl DrivingState {
         let message = format!(
             "Adaptive cruise {} at {}{exit_note}. Following gap {gap:.0} seconds. K or braking \
              cancels.",
-            if transition { "resuming" } else { "set" },
+            if transition_label.is_some() {
+                "resuming"
+            } else {
+                "set"
+            },
             ctx.settings.speed_text(effective_mph)
         );
-        if transition {
+        if let Some(label) = transition_label {
             // ROUTE: automation retaking the pedals after a zone, the same
             // handoff as the keeper's resume line (driving_speed_control 291,
             // already ROUTE). The quiet rung still silences it by category;
             // ROUTE only stops a busy channel eating it at standard.
-            self.say_route_confirmation(ctx, &format!("Open road. {message}"));
+            self.say_route_confirmation(ctx, &format!("{label}. {message}"));
         } else {
             self.say_plain(ctx, message);
         }
@@ -318,7 +336,7 @@ impl DrivingState {
         }
     }
 
-    /// Hold a gentle low-speed target while the zone lasts.
+    /// Hold a low-speed zone, or build speed through an acceleration lane.
     pub fn update_keeper(
         &mut self,
         ctx: &mut GameContext,
@@ -357,7 +375,8 @@ impl DrivingState {
             // minimum holding speed, so a driver coming off yard streets at
             // twenty had no automation at all until they had got themselves
             // back up to road speed by hand (Brandon, 2026-08-21). The keeper
-            // stays on and builds toward the road's own limit instead.
+            // builds toward the road's own limit, then hands to cruise once
+            // this truck reaches its capability-aware merge threshold.
             zone_reason = Some("acceleration lane".to_string());
         }
         let Some(zone_reason) = zone_reason else {
@@ -431,6 +450,19 @@ impl DrivingState {
                 target_mph = target_mph.min(context.lead.speed_mph);
             }
         }
+        let acceleration_lane = zone_reason == "acceleration lane";
+        if acceleration_lane
+            && self.departure_cruise_handoff_mph.is_some_and(|handoff| {
+                target_mph + 0.5 >= handoff
+                    && self.trip.truck.speed_mph() + 0.5 >= handoff
+                    && self.trip.truck.speed_mph() >= CRUISE_MIN_MPH
+            })
+        {
+            let target_mph = self.speed_control_target_mph.unwrap_or(limit);
+            self.cancel_keeper(ctx, true);
+            self.engage_departure_cruise(ctx, target_mph);
+            return;
+        }
         let error = target_mph - self.trip.truck.speed_mph();
         // Feed-forward first, exactly as adaptive cruise does: the truck's own
         // physics already knows which pedal balances the road under the
@@ -457,7 +489,15 @@ impl DrivingState {
             hold *= 0.0f64.max(1.0 + error / KEEPER_SNUB_OVER_MPH);
         }
         let trim = (self.keeper_throttle + error * 0.1 * dt).clamp(0.0, KEEPER_MAX_THROTTLE);
-        let demand = hold + trim;
+        // A restricted zone is a steady-speed job and keeps the keeper's
+        // gentle trim. An acceleration lane is time-limited pavement: while
+        // materially below its target, use the whole real drivetrain so the
+        // truck does not throw away the lane at half demand.
+        let demand = if acceleration_lane && error > KEEPER_SNUB_UNDER_MPH {
+            1.0
+        } else {
+            hold + trim
+        };
         // Anti-windup, the cruise loop's own rule: a grade the engine cannot
         // pull pins the pedal at the roof for as long as it lasts, and
         // integrating through that buries the trim at its limit and leaves the

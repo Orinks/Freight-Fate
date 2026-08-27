@@ -2528,6 +2528,31 @@ onto exit signalling.
       lane at zero throttle to working it at 0.42-0.50 throttle and gaining
       speed the whole way.
 
+- [x] **The acceleration-lane keeper yields to cruise on evidence, not at the
+      taper (2026-08-26).** Brandon's associated log pinned the remaining case:
+      an automatic yard mule pulling flatbed 2607 with 25 tons of heavy
+      machinery, leaving Carlisle Dry Warehouse for I-76 West toward Pittsburgh
+      in clear weather on a 1.1-percent downgrade. The cab announced 1,600 feet
+      toward a 70-mph road; the truck was 31 mph shortly after the call and 46
+      at the lane ending while the keeper's target was already 70.
+
+      Root cause: the ramp still used the keeper's gentle steady-zone trim for
+      a time-limited acceleration job, and cruise waited for the lane to end.
+      The keeper now asks the real drivetrain for full throttle while materially
+      below the merge target. At lane entry a cloned truck state predicts the
+      taper capability using the actual tractor, payload, trailer, transmission,
+      wear, weather effects, mapped grade, and physical lane length. Cruise takes
+      over at AASHTO's 75-percent-of-mainline target only when the capability
+      model says the truck can reach it. Otherwise the keeper stays flat out
+      through the taper. The live truck still drives every foot through normal
+      physics.
+
+      The same 75-percent target replaces the unexplained fixed 12-mph recovery
+      band. A truck that physical limits leave below it still hears the big-gap
+      warning and stays on the real clock while it builds speed on the mainline.
+      Pinned by the exact Carlisle player transcript plus a contrasting empty
+      standard rig and focused capability tests.
+
 - [x] **A held-back truck explains itself at dispatch (2026-08-21).** The
       carrier caps the fleet tier by dispatch trust, and `equipment_hold_text`
       has said so well for a while -- its own docstring calls this "the most

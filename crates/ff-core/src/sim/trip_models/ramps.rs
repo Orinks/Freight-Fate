@@ -2,6 +2,7 @@
 //! truck's merge speed (the ramp half of `freight_fate/sim/trip_models.py`).
 
 use crate::pyfmt::round_py;
+use crate::sim::vehicle::TruckState;
 
 // -- Getting onto the highway: the acceleration lane -------------------------
 // HOW LONG IS THE LANE comes from AASHTO Green Book Table 10-3 (TxDOT RDM
@@ -24,6 +25,11 @@ pub const TRUCK_ACCEL_ALPHA_FPS2: f64 = 1.90;
 pub const TRUCK_ACCEL_BETA: f64 = 0.0199;
 pub const GRADE_MODEL_MIN_PCT: f64 = -4.0;
 pub const GRADE_MODEL_MAX_PCT: f64 = 2.0;
+
+/// AASHTO's acceleration-lane design target: enter the mainline at 75 percent
+/// of its design speed. This is the traffic-relative floor used for both the
+/// assist handoff and the truthful slow-merge warning.
+pub const MERGE_TRAFFIC_SPEED_SHARE: f64 = 0.75;
 
 /// AASHTO's own grade multipliers on the lane length (TxDOT Table 3-14).
 pub const ACCELERATION_LANE_GRADE_FACTOR: [(f64, f64); 4] =
@@ -76,6 +82,35 @@ pub fn acceleration_lane_mi(highway_mph: f64, grade_pct: f64) -> f64 {
         }
     }
     feet * factor / 5280.0
+}
+
+/// Traffic-relative speed at which an acceleration-lane merge is no longer a
+/// materially slow join.
+pub fn merge_traffic_target_mph(highway_mph: f64) -> f64 {
+    highway_mph.max(0.0) * MERGE_TRAFFIC_SPEED_SHARE
+}
+
+/// What this exact truck can reach by the taper with its actual drivetrain,
+/// load, transmission, wear, weather drag and grip, and the mapped grade.
+///
+/// The clone is an instrument only: the live truck still covers every foot
+/// and gains every mile per hour through the ordinary vehicle physics.
+pub fn acceleration_lane_capability_mph(truck: &TruckState, lane_mi: f64, grade: f64) -> f64 {
+    const DT: f64 = 1.0 / 60.0;
+    const TIMEOUT_S: f64 = 180.0;
+
+    let mut simulated = truck.clone();
+    let start_mi = simulated.odometer_mi;
+    simulated.grade = grade;
+    simulated.brake = 0.0;
+    let mut elapsed = 0.0;
+    while simulated.odometer_mi - start_mi < lane_mi.max(0.0) && elapsed < TIMEOUT_S {
+        simulated.throttle = 1.0;
+        simulated.auto_shift();
+        simulated.update(DT);
+        elapsed += DT;
+    }
+    simulated.speed_mph()
 }
 
 // Getting OFF is the same problem mirrored: AASHTO Green Book Table 10-5
@@ -166,4 +201,43 @@ pub fn truck_merge_speed_mph(highway_mph: f64, entry_mph: f64, lane_mi: f64) -> 
         remaining -= step;
     }
     highway_mph.min(v * 3600.0 / 5280.0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::trucks::truck_model_or_panic;
+    use crate::sim::vehicle::{KG_PER_TON, MPS_TO_MPH};
+
+    fn automatic_truck(model: &str, cargo_tons: f64) -> TruckState {
+        let mut truck = TruckState::new(truck_model_or_panic(model).specs.clone());
+        truck.engine_on = true;
+        truck.transmission.automatic = true;
+        // Brandon's 18 mph ramp approach was recorded in sixth at 1,412 RPM.
+        // Neutral here would exercise the automatic's standing-start selector,
+        // not the rolling Carlisle handoff this capability estimate models.
+        truck.transmission.gear = 6;
+        truck.rpm = 1412.0;
+        truck.trailer_attached = true;
+        truck.cargo_kg = cargo_tons * KG_PER_TON;
+        truck.velocity_mps = 18.0 / MPS_TO_MPH;
+        truck
+    }
+
+    #[test]
+    fn merge_target_tracks_traffic_speed_instead_of_a_fixed_shortfall() {
+        assert_eq!(merge_traffic_target_mph(70.0), 52.5);
+        assert_eq!(merge_traffic_target_mph(55.0), 41.25);
+    }
+
+    #[test]
+    fn capability_uses_the_actual_truck_and_load() {
+        let lane_mi = acceleration_lane_mi(70.0, -1.1);
+        let loaded =
+            acceleration_lane_capability_mph(&automatic_truck("yard_mule", 25.0), lane_mi, -0.011);
+        let light = acceleration_lane_capability_mph(&automatic_truck("rig", 0.0), lane_mi, -0.011);
+
+        assert!(loaded > 18.0);
+        assert!(light > loaded, "loaded={loaded:.1}, light={light:.1}");
+    }
 }
