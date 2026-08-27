@@ -134,7 +134,7 @@ fn run_acceleration_lane_scenario(truck_key: &'static str, cargo_tons: f64) -> R
             d.truck().specs.max_torque_nm,
             d.truck().gross_mass_kg(),
             d.truck().cargo_kg,
-            d.weather().current.clone(),
+            d.weather().current,
             d.trip.route.legs[0].highway.clone(),
             d.trip.speed_limit_at(0.0).0,
             d.trip.grade_at(0.0) * 100.0,
