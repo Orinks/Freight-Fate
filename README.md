@@ -492,9 +492,9 @@ when every commit in the change set is non-user-facing.
 
 ### Sound and native libraries for source builds
 
-Career 1.9 stores its approved encrypted sound and music packs at
-`src/freight_fate/sounds.pak` and `src/freight_fate/music.pak` using Git
-Large File Storage (Git LFS).
+Career 1.9 stores its approved encrypted sound pack at
+`src/freight_fate/sounds.pak`. The larger private `music.pak` is a local build
+asset and is not stored in Git.
 
 On Windows, install Git LFS from PowerShell with Winget:
 
@@ -514,13 +514,26 @@ On macOS or Linux, follow the
 run `git lfs install` once for your user account before cloning or updating the
 project.
 
-A plain `git fetch` updates Git references and the small LFS pointers, but
-does not update the working tree or download the packs. With Git LFS
-installed, a normal `git pull` or checkout downloads both packs
-automatically; a separate `git lfs pull` is not normally needed. If
-`sounds.pak` or `music.pak` contains text beginning with
+A plain `git fetch` updates Git references and the small LFS pointer, but does
+not update the working tree or download `sounds.pak`. With Git LFS installed,
+a normal `git pull` or checkout downloads it automatically; a separate
+`git lfs pull` is not normally needed. If `sounds.pak` contains text beginning
+with
 `version https://git-lfs.github.com/spec/v1` instead of binary pack data, run
 `git lfs install` followed by `git lfs pull` from the repository root.
+
+The private music pack is downloaded only when a build needs it. Ask a
+maintainer for a temporary private download URL, then set it in the current
+PowerShell session; do not commit the URL:
+
+```powershell
+$env:FREIGHT_FATE_MUSIC_URL = "<temporary private URL>"
+$env:FREIGHT_FATE_MUSIC_SHA256 = "50F5440EB478F1E0E630E65081D83E6C308F48A6AA3EA5FE67C7DD1A7F50A8BB"
+python tools/build_release.py --rust --skip-smoke
+```
+
+The release script downloads `music.pak` only when it is absent, verifies the
+optional SHA-256 value, and keeps the downloaded pack local.
 
 GitHub Actions uses an LFS-enabled checkout for jobs that test or package the
 project. Loose fallback cues remain under `src/freight_fate/assets/sounds/`. See

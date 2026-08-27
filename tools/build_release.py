@@ -28,6 +28,7 @@ is. The Python mode stays the default.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -36,6 +37,8 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
+import urllib.request
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -916,6 +919,41 @@ def require_real_pack(path: Path) -> None:
         )
 
 
+def ensure_music_pack(path: Path = PACKAGE_DIR / "music.pak") -> None:
+    """Download the private music pack when a builder supplies its URL."""
+    if path.is_file() and not is_lfs_pointer(path):
+        return
+    url = os.environ.get("FREIGHT_FATE_MUSIC_URL")
+    if not url:
+        raise RuntimeError(
+            "music.pak is unavailable. Set FREIGHT_FATE_MUSIC_URL to a temporary "
+            "private download URL, then build again."
+        )
+    expected_sha256 = os.environ.get("FREIGHT_FATE_MUSIC_SHA256", "").lower()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        dir=path.parent, prefix="music.pak.", suffix=".download", delete=False
+    ) as temp:
+        temporary = Path(temp.name)
+    try:
+        urllib.request.urlretrieve(url, temporary)
+        digest = hashlib.sha256()
+        with temporary.open("rb") as source:
+            for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                digest.update(chunk)
+        actual_sha256 = digest.hexdigest()
+        if expected_sha256 and actual_sha256 != expected_sha256:
+            raise RuntimeError(
+                "Downloaded music.pak failed SHA-256 verification: "
+                f"expected {expected_sha256}, got {actual_sha256}"
+            )
+        temporary.replace(path)
+        print(f"Downloaded and verified music.pak ({actual_sha256}).")
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
 def rust_data_files(package_dir: Path = PACKAGE_DIR) -> list[Path]:
     """The data files to ship, as paths relative to ``package_dir``."""
     data_dir = package_dir / "data"
@@ -1148,6 +1186,7 @@ def verify_rust_payload(build_dir: Path) -> None:
 
 def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
     """The whole ``--rust`` pipeline, ending with the verified archive."""
+    ensure_music_pack()
     profile_dir = run_cargo(target_dir)
     baked_data = bake_world_data(target_dir)
     build_dir = stage_rust_build(profile_dir, baked_data=baked_data)

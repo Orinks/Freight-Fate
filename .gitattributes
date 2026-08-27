@@ -2,11 +2,9 @@
 tools/appimage/AppRun text eol=lf
 tools/appimage/*.desktop text eol=lf
 
-# Career 1.9 ships its encrypted sound packs through Git LFS. Raw audio stays
-# local. music.pak carries the music/ subtree split out of sounds.pak so a
-# sound-only change does not drag the much larger music payload with it.
+# Career 1.9 ships the smaller encrypted sound pack through Git LFS. Raw audio
+# stays local. music.pak is downloaded from a private release URL when needed.
 src/freight_fate/sounds.pak filter=lfs diff=lfs merge=lfs -text
-src/freight_fate/music.pak filter=lfs diff=lfs merge=lfs -text
 
 # The cloud-validator invariants export is pinned byte for byte against the
 # Rust exporter's output, which is LF on every platform. A CRLF checkout

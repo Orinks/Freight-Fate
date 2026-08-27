@@ -64,6 +64,8 @@ sound-source/
 # thing that ever will.
 !crates/ff-core/src/cab_filter/fixtures/*.wav
 # The shipped audio is src/freight_fate/sounds.pak (tools/pack_sounds.py).
+# music.pak is a private builder-local release asset downloaded when needed.
+src/freight_fate/music.pak
 # The loose assets/sounds tree is builder-local source material and never
 # ships through the repo (owner, 2026-08-08); only the credits ride along
 # so licensing stays reviewable in a clean clone.
