@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Live internet radio starts sooner after you tune it.** Freight Fate now
+  begins live stations with a smaller network cushion and a much shorter
+  fade, while still connecting away from the driving loop so steering and
+  safety cues stay responsive.
+
 - **Truck status is now a list you can review.** At the terminal, choose
   Truck status and use the arrow keys to hear assignment and eligibility,
   fuel, condition, each wear reading, road grime, and snow chains one at a

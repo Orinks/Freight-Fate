@@ -238,6 +238,17 @@ pub const BASS_NO_SOUND_DEVICE: i32 = 0;
 // coming. The price is a longer silence on a station that really is gone.
 pub const RADIO_CONNECT_TIMEOUT_MS: u32 = 30000; // give up on a station that will not answer
 pub const RADIO_READ_TIMEOUT_MS: u32 = 30000; // and on one that answers then stalls
+/// Download buffer retained by BASS for internet streams. BASS defaults to
+/// five seconds, which is useful for unreliable links but makes a tune feel
+/// much slower than a player that begins with a small buffer.
+pub const RADIO_NET_BUFFER_MS: u32 = 1500;
+/// Percentage of [`RADIO_NET_BUFFER_MS`] BASS downloads before playback.
+/// Twenty percent is a 300 ms tune-in cushion; the remaining buffer can fill
+/// while the stream plays.
+pub const RADIO_NET_PREBUF_PERCENT: u32 = 20;
+/// Player-facing live streams use a short ramp only to avoid a click. Network
+/// buffering, rather than a long cosmetic fade, decides when sound begins.
+pub const RADIO_TUNE_FADE_MS: u32 = 250;
 /// How long shutdown waits for a connect still in flight before freeing BASS.
 pub const RADIO_SHUTDOWN_JOIN_S: f64 = 2.0;
 
@@ -618,6 +629,14 @@ mod tests {
             parse_icy_stream_title_text("StreamTitle='a\nb';StreamTitle='c';"),
             Some("a b".to_string())
         );
+    }
+
+    #[test]
+    fn radio_tune_policy_has_a_short_bounded_start() {
+        assert_eq!(RADIO_NET_BUFFER_MS, 1500);
+        assert_eq!(RADIO_NET_PREBUF_PERCENT, 20);
+        assert_eq!(RADIO_NET_BUFFER_MS * RADIO_NET_PREBUF_PERCENT / 100, 300);
+        assert_eq!(RADIO_TUNE_FADE_MS, 250);
     }
 
     #[test]

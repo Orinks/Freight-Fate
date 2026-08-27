@@ -49,6 +49,7 @@ use ff_core::sim::vehicle::TruckState;
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, Say};
+use crate::audio::RADIO_TUNE_FADE_MS;
 use crate::states::base::{Menu, MenuItem};
 use crate::states::driving::DrivingState;
 
@@ -737,7 +738,7 @@ impl RadioPlaybackBackend for DrivingRadioBackend<'_> {
             return self
                 .ctx
                 .audio
-                .play_radio_stream_with(&station.stream_url, 900)
+                .play_radio_stream_with(&station.stream_url, RADIO_TUNE_FADE_MS)
                 .map_err(|_| RadioPlaybackError("external stream playback failed".to_string()));
         }
         self.driving.apply_radio_volume(self.ctx);

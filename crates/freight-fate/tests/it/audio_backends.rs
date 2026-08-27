@@ -291,6 +291,14 @@ fn test_bass_music_never_loops_catalog_tracks() {
 #[test]
 fn test_bass_radio_stream_uses_url_stream() {
     let Some(mut r) = bass_rig() else { return };
+    assert_eq!(
+        safe::get_config(bass_sys::BASS_CONFIG_NET_BUFFER),
+        Ok(RADIO_NET_BUFFER_MS)
+    );
+    assert_eq!(
+        safe::get_config(bass_sys::BASS_CONFIG_NET_PREBUF),
+        Ok(RADIO_NET_PREBUF_PERCENT)
+    );
     let server = IcyServer::start(sine_wav(6.0, 1), None);
     r.engine.play_radio_stream_with(&server.url, 321).unwrap();
     let bass = r.engine.bass().unwrap();
@@ -309,8 +317,6 @@ fn test_bass_radio_stream_uses_url_stream() {
     assert_eq!(server.connections(), 1);
     assert_eq!(bass.music_track(), Some(server.url.as_str()));
     let handle = bass.music_stream_handle().unwrap();
-    // The fade-in was asked for: the stream is sliding up from zero.
-    assert!(safe::channel_is_sliding(handle, bass_sys::BASS_ATTRIB_VOL));
     // A net stream may report "stalled" for a moment while its buffer
     // fills; it is producing audio shortly after.
     let bass = r.engine.bass().unwrap();
@@ -319,6 +325,11 @@ fn test_bass_radio_stream_uses_url_stream() {
         "stream state {}",
         safe::channel_is_active(handle)
     );
+    let bass = r.engine.bass_mut().unwrap();
+    bass.collect_radio_stream();
+    // Fade from silence only after BASS reports active playback, so the ramp
+    // protects the first audible sample instead of expiring while stalled.
+    assert!(safe::channel_is_sliding(handle, bass_sys::BASS_ATTRIB_VOL));
 }
 
 #[test]

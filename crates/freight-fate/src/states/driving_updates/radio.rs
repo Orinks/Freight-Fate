@@ -12,7 +12,7 @@ use ff_core::radio_rotation::{cue_after, RotationCue, StationRotation};
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
-use crate::audio::{VolumeUpdate, CH_RADIO_FX};
+use crate::audio::{VolumeUpdate, CH_RADIO_FX, RADIO_TUNE_FADE_MS};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_updates::{
@@ -507,7 +507,11 @@ impl DrivingState {
             // whose connect already failed fails here -- which is exactly
             // when the entry gets skipped, the same as an unreadable file.
             self.playlist_stream_tries += 1;
-            if ctx.audio.play_radio_stream_with(&entry, 600).is_ok() {
+            if ctx
+                .audio
+                .play_radio_stream_with(&entry, RADIO_TUNE_FADE_MS)
+                .is_ok()
+            {
                 self.playlist_wait_s = PLAYLIST_CONNECT_HOLD_S;
                 return;
             }

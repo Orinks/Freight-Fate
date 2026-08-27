@@ -23,8 +23,9 @@ use std::time::{Duration, Instant};
 use bass_sys::safe::{self, BassError, Stream};
 use bass_sys::{
     BASS_ACTIVE_PLAYING, BASS_ATTRIB_FREQ, BASS_ATTRIB_PAN, BASS_ATTRIB_VOL,
-    BASS_CONFIG_DEV_DEFAULT, BASS_CONFIG_NET_READTIMEOUT, BASS_CONFIG_NET_TIMEOUT,
-    BASS_DEFAULT_DEVICE, BASS_ERROR_ALREADY, BASS_STREAM_AUTOFREE,
+    BASS_CONFIG_DEV_DEFAULT, BASS_CONFIG_NET_BUFFER, BASS_CONFIG_NET_PREBUF,
+    BASS_CONFIG_NET_READTIMEOUT, BASS_CONFIG_NET_TIMEOUT, BASS_DEFAULT_DEVICE, BASS_ERROR_ALREADY,
+    BASS_STREAM_AUTOFREE,
 };
 use ff_core::audio_fades::FadeScheduler;
 use ff_core::audio_loops::SustainLoopSpec;
@@ -32,11 +33,12 @@ use ff_core::pyrandom::PyRandom;
 
 use super::assets::{playback_bytes, plugin_lib_dir, SFX_EXTENSIONS};
 use super::backend::{loop_category, one_shot_category, AudioBackend, Buses, VolumeUpdate};
-use super::bass_radio::RadioShared;
+use super::bass_radio::{PendingRadioStart, RadioShared};
 use super::sustain::SustainLoop;
 use super::{
     AudioError, KeyProbe, BASS_NO_SOUND_DEVICE, CH_REVERSE, CH_ROAD, ENGINE_RPM_IDLE,
-    RADIO_CONNECT_TIMEOUT_MS, RADIO_READ_TIMEOUT_MS, RADIO_SHUTDOWN_JOIN_S,
+    RADIO_CONNECT_TIMEOUT_MS, RADIO_NET_BUFFER_MS, RADIO_NET_PREBUF_PERCENT, RADIO_READ_TIMEOUT_MS,
+    RADIO_SHUTDOWN_JOIN_S,
 };
 
 /// `sound_lib.Channel.is_playing`: active and not stalled or paused.
@@ -145,6 +147,7 @@ pub struct BassBackend {
     // which alone touches `music_stream`.
     pub(super) radio: Arc<Mutex<RadioShared>>,
     pub(super) radio_threads: Vec<JoinHandle<()>>,
+    pub(super) radio_start: Option<PendingRadioStart>,
     pub(super) road_last_target: Option<f64>,
     // Test seams, mirroring what the Python tests monkeypatched onto
     // `_sfx_stream`: a key filter that makes a sound "absent", and a recorder
@@ -188,6 +191,8 @@ impl BassBackend {
         }
         let _ = safe::set_config(BASS_CONFIG_NET_TIMEOUT, RADIO_CONNECT_TIMEOUT_MS);
         let _ = safe::set_config(BASS_CONFIG_NET_READTIMEOUT, RADIO_READ_TIMEOUT_MS);
+        let _ = safe::set_config(BASS_CONFIG_NET_BUFFER, RADIO_NET_BUFFER_MS);
+        let _ = safe::set_config(BASS_CONFIG_NET_PREBUF, RADIO_NET_PREBUF_PERCENT);
         if no_sound {
             Self::init_device(BASS_NO_SOUND_DEVICE)?;
         } else {
@@ -227,6 +232,7 @@ impl BassBackend {
             wobble_rng: PyRandom::new_unseeded(),
             radio: Arc::new(Mutex::new(RadioShared::default())),
             radio_threads: Vec::new(),
+            radio_start: None,
             road_last_target: None,
             key_filter: None,
             requested_keys: None,
@@ -635,7 +641,13 @@ impl BassBackend {
         // Reapply engine volume through the rpm path: it knows the current
         // model (multisample ring or legacy loop) and keeps the load contour.
         self.set_engine_rpm(self.engine_last_rpm, self.engine_last_throttle);
-        if let Some(stream) = &self.music_stream {
+        if let Some(start) = self.radio_start.as_mut() {
+            start.level = self.buses.music_level();
+            if set_volume(start.handle, 0.0).is_err() {
+                self.radio_start = None;
+                self.music_stream = None;
+            }
+        } else if let Some(stream) = &self.music_stream {
             if set_volume(stream.handle(), self.buses.music_level()).is_err() {
                 self.music_stream = None;
             }

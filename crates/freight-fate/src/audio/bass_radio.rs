@@ -2,6 +2,7 @@
 //! files, and live radio streams opened off the game thread.
 
 use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
 use bass_sys::safe::{self, Stream};
 use bass_sys::{BASS_ATTRIB_VOL, BASS_STREAM_AUTOFREE};
@@ -18,13 +19,39 @@ use super::{parse_icy_stream_title_text, AudioError};
 #[derive(Default)]
 pub(super) struct RadioShared {
     pub generation: u64,
-    pub pending: Option<(String, u32, Stream)>, // (url, fade_ms, stream)
+    pub pending: Option<PendingRadioStream>,
     pub connecting_url: Option<String>,
     pub failed_url: Option<String>,
 }
 
+pub(super) struct PendingRadioStream {
+    url: String,
+    fade_ms: u32,
+    stream: Stream,
+    requested_at: Instant,
+    worker_started_at: Instant,
+    opened_at: Instant,
+}
+
+pub(super) struct PendingRadioStart {
+    pub(super) handle: u32,
+    pub(super) level: f64,
+    fade_ms: u32,
+    requested_at: Instant,
+    worker_started_at: Instant,
+    opened_at: Instant,
+    collected_at: Instant,
+}
+
 /// Open a stream off-thread, unless the driver has moved on since.
-fn radio_worker(shared: Arc<Mutex<RadioShared>>, url: String, generation: u64, fade_ms: u32) {
+fn radio_worker(
+    shared: Arc<Mutex<RadioShared>>,
+    url: String,
+    generation: u64,
+    fade_ms: u32,
+    requested_at: Instant,
+) {
+    let worker_started_at = Instant::now();
     match safe::stream_create_url(&url, BASS_STREAM_AUTOFREE) {
         Err(err) => {
             log::info!("Radio stream unavailable: {url} ({err})");
@@ -35,9 +62,17 @@ fn radio_worker(shared: Arc<Mutex<RadioShared>>, url: String, generation: u64, f
             }
         }
         Ok(stream) => {
+            let opened_at = Instant::now();
             let mut radio = shared.lock().unwrap_or_else(|e| e.into_inner());
             if generation == radio.generation {
-                radio.pending = Some((url, fade_ms, stream)); // handed over to the game thread
+                radio.pending = Some(PendingRadioStream {
+                    url,
+                    fade_ms,
+                    stream,
+                    requested_at,
+                    worker_started_at,
+                    opened_at,
+                }); // handed over to the game thread
                 radio.connecting_url = None;
             }
             // Otherwise a newer request already won and the stream is dropped
@@ -129,16 +164,18 @@ impl BassBackend {
             radio.connecting_url = Some(url.to_string());
             radio.generation
         };
+        self.radio_start = None;
         if let Some(stream) = self.music_stream.take() {
             self.fade_out(stream, 800);
             self.music_track = None;
         }
         let shared = Arc::clone(&self.radio);
         let worker_url = url.to_string();
+        let requested_at = Instant::now();
         self.radio_threads.retain(|thread| !thread.is_finished());
         match std::thread::Builder::new()
             .name("radio-connect".to_string())
-            .spawn(move || radio_worker(shared, worker_url, generation, fade_ms))
+            .spawn(move || radio_worker(shared, worker_url, generation, fade_ms, requested_at))
         {
             Ok(handle) => self.radio_threads.push(handle),
             Err(err) => {
@@ -155,13 +192,23 @@ impl BassBackend {
 
     /// Wire up a stream a worker finished opening; game thread only.
     pub fn collect_radio_stream(&mut self) {
+        self.finish_radio_start();
         let pending = {
             let mut radio = self.radio.lock().unwrap_or_else(|e| e.into_inner());
             radio.pending.take()
         };
-        let Some((url, fade_ms, stream)) = pending else {
+        let Some(pending) = pending else {
             return;
         };
+        let PendingRadioStream {
+            url,
+            fade_ms,
+            stream,
+            requested_at,
+            worker_started_at,
+            opened_at,
+        } = pending;
+        let collected_at = Instant::now();
         if self.music_track.is_some() {
             // Something else claimed the music channel while the station was
             // connecting (a menu bed, another tune); the late arrival loses.
@@ -170,10 +217,7 @@ impl BassBackend {
         }
         let handle = stream.handle();
         let level = self.buses.music_level();
-        if let Err(err) = set_volume(handle, 0.0)
-            .and_then(|()| safe::channel_play(handle, false))
-            .and_then(|()| slide(handle, BASS_ATTRIB_VOL, level, fade_ms))
-        {
+        if let Err(err) = set_volume(handle, 0.0).and_then(|()| safe::channel_play(handle, false)) {
             log::warn!("Could not play radio stream: {url} ({err})");
             let mut radio = self.radio.lock().unwrap_or_else(|e| e.into_inner());
             radio.failed_url = Some(url);
@@ -181,10 +225,56 @@ impl BassBackend {
         }
         self.music_stream = Some(stream);
         self.music_track = Some(url);
+        self.radio_start = Some(PendingRadioStart {
+            handle,
+            level,
+            fade_ms,
+            requested_at,
+            worker_started_at,
+            opened_at,
+            collected_at,
+        });
+    }
+
+    fn finish_radio_start(&mut self) {
+        let Some(start) = self.radio_start.as_ref() else {
+            return;
+        };
+        if self.music_stream.as_ref().map(Stream::handle) != Some(start.handle) {
+            self.radio_start = None;
+            return;
+        }
+        if !is_playing(start.handle) {
+            return;
+        }
+        let start = self.radio_start.take().expect("checked above");
+        if let Err(err) = slide(start.handle, BASS_ATTRIB_VOL, start.level, start.fade_ms) {
+            log::warn!("Could not fade in radio stream ({err})");
+            let _ = set_volume(start.handle, start.level);
+        }
+        let audible_at = Instant::now();
+        log::info!(
+            "Radio tune timing: worker_queue_ms={}, bass_open_ms={}, collection_ms={}, audible_start_ms={}, fade_ms={}",
+            start
+                .worker_started_at
+                .duration_since(start.requested_at)
+                .as_millis(),
+            start
+                .opened_at
+                .duration_since(start.worker_started_at)
+                .as_millis(),
+            start
+                .collected_at
+                .duration_since(start.opened_at)
+                .as_millis(),
+            audible_at.duration_since(start.collected_at).as_millis(),
+            start.fade_ms,
+        );
     }
 
     /// Orphan any connect in flight; its stream is freed, not wired up.
     fn cancel_radio_connect(&mut self) {
+        self.radio_start = None;
         let pending = {
             let mut radio = self.radio.lock().unwrap_or_else(|e| e.into_inner());
             radio.generation += 1;
