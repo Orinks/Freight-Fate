@@ -27,7 +27,8 @@ use freight_fate::states::base::{Key, Menu};
 use freight_fate::states::career_setback::CareerSetbackNoticeState;
 use freight_fate::states::city::{
     assigned_reposition_for_board, dispatch_cache_key, open_freight_market, CityMenuState,
-    JobBoardState, JobDetailState, PayDebtState, RouteSelectState, JOB_BOARD_INTRO_HELP,
+    JobBoardState, JobDetailState, PayDebtState, RouteSelectState, TruckStatusState,
+    JOB_BOARD_INTRO_HELP,
 };
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_pause_states::{
@@ -1516,14 +1517,27 @@ fn test_company_driver_truck_status_says_assigned_not_owned() {
         p.truck = "heavy_hauler".to_string();
         p.upgrades.insert("engine_tune".to_string(), 2);
     }
-    let mut menu = CityMenuState::new(&app.ctx, false);
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
     app.clear_speech();
-    menu.truck_status(&mut app.ctx);
+    select::<CityMenuState>(&mut app, "Truck status");
 
-    let said = app.main_lines().last().cloned().unwrap();
-    assert!(said.contains("Assigned Northstar Freight Lines tractor"));
-    assert!(!said.contains("Owned tractor"));
-    assert!(said.contains("standard rig"));
+    assert!(is::<TruckStatusState>(&app));
+    let rows = labels::<TruckStatusState>(&app);
+    assert!(
+        rows[0].starts_with("Assignment: assigned Northstar Freight Lines tractor."),
+        "{rows:#?}"
+    );
+    assert!(
+        !rows
+            .iter()
+            .any(|line| line.to_lowercase().contains("owned tractor")),
+        "{rows:#?}"
+    );
+    assert!(
+        rows.iter().any(|line| line.contains("standard rig")),
+        "{rows:#?}"
+    );
     assert_eq!(
         profile(&app).truck_specs().max_torque_nm,
         ff_core::sim::vehicle::TruckSpecs::default().max_torque_nm
