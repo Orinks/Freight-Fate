@@ -219,21 +219,15 @@ impl DriverAppScreenState {
         let next = self.next_traffic_line(ctx);
         self.driving
             .with(ctx, |d, ctx| {
-                let mut lines = Vec::new();
-                if let Some(context) = d.trip.traffic_context() {
-                    lines.push(format!(
-                        "Traffic: {}; pace about {}.",
-                        context.lead.status_label(),
-                        ctx.settings.speed_text(context.lead.speed_mph)
-                    ));
+                if d.trip.traffic_context().is_some() {
+                    return vec![d.trip.npc_traffic_status()];
                 }
-                lines.push(next.unwrap_or_else(|| {
+                vec![next.unwrap_or_else(|| {
                     format!(
                         "Traffic: no reported pinch in the next {}.",
                         ctx.settings.distance_text(20.0, false)
                     )
-                }));
-                lines
+                })]
             })
             .unwrap_or_default()
     }
@@ -300,10 +294,10 @@ impl DriverAppScreenState {
                 let ahead = lead.position_mi - pos;
                 if (0.0..=20.0).contains(&ahead) {
                     return Some(format!(
-                        "Traffic ahead: {} in {}; reported pace {}.",
+                        "Traffic: {}, {} ahead, {}.",
                         lead.status_label(),
-                        ctx.settings.distance_text(ahead, false),
-                        ctx.settings.speed_text(lead.speed_mph)
+                        d.trip.gap_text(ahead),
+                        d.trip.speed_text(lead.speed_mph)
                     ));
                 }
             }

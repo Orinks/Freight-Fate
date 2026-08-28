@@ -316,34 +316,43 @@ fn test_status_traffic_line_falls_back_to_legacy_npc_vehicles() {
     let lines = app_lines(&mut harness, "traffic");
 
     assert!(
-        lines.iter().any(|line| line
-            == "Traffic ahead: merging car in 2 miles; reported pace 42 miles per hour."),
+        lines
+            .iter()
+            .any(|line| line == "Traffic: Merging car, 2.5 miles ahead, 42 miles per hour."),
         "{lines:#?}"
     );
 }
 
 #[test]
-fn test_route_status_cruise_traffic_names_the_known_vehicle_type() {
-    let mut harness = a_drive("Typed Cruise Traffic");
+fn test_route_and_driver_traffic_name_box_truck_with_cruise_set() {
+    let mut harness = a_drive("Named Cruise Traffic");
     harness.with_drive(|drive, _| {
         drive.trip.position_mi = 10.0;
         drive.cruise_mph = Some(65.0);
-        let lead = TrafficVehicle::new("lead", 11.5, 55.0, 55.0, 0, "following", "semi");
+        let lead = TrafficVehicle::new("lead-box", 12.2, 60.0, 60.0, 0, "following", "box truck");
         drive.trip.set_npc_vehicles(vec![lead]);
     });
 
-    let lines = screen_lines(&mut harness, "route");
-    let traffic: Vec<&str> = lines
+    let route_lines = screen_lines(&mut harness, "route");
+    let route_traffic: Vec<_> = route_lines
         .iter()
         .filter(|line| line.starts_with("Traffic:"))
-        .map(String::as_str)
         .collect();
-
+    assert_eq!(route_traffic.len(), 1, "{route_lines:#?}");
     assert_eq!(
-        traffic,
-        vec!["Traffic: slow semi 1.5 miles ahead in your lane, moving 55 miles per hour."],
-        "the Route screen should carry one typed traffic row: {lines:#?}"
+        route_traffic[0],
+        "Traffic: Slow box truck, 2.2 miles ahead, 60 miles per hour."
     );
+
+    let traffic_lines = app_lines(&mut harness, "traffic");
+    assert_eq!(
+        traffic_lines,
+        vec!["Traffic: Slow box truck, 2.2 miles ahead, 60 miles per hour."],
+        "{traffic_lines:#?}"
+    );
+    let spoken = route_lines.join(" ").to_lowercase();
+    assert!(!spoken.contains("lead vehicle"), "{route_lines:#?}");
+    assert!(!spoken.contains("slow car"), "{route_lines:#?}");
 }
 
 #[test]

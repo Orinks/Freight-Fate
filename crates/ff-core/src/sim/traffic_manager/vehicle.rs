@@ -154,14 +154,30 @@ impl TrafficVehicle {
             return class.to_string();
         }
         match self.intent.as_str() {
-            "cruising" => format!("steady {class}"),
-            "following" => format!("slow {class}"),
-            "merging" => format!("merging {class}"),
-            "braking" => format!("{class} with brake lights"),
-            "passing" => format!("passing {class}"),
-            "patrolling" => format!("marked {class}"),
+            "cruising" => class.to_string(),
+            "following" => format!("Slow {class}"),
+            "merging" => format!("Merging {class}"),
+            "braking" => format!("Brake lights, {class}"),
             _ => class.to_string(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::TrafficVehicle;
+
+    #[test]
+    fn status_label_matches_traffic_cue_vocabulary() {
+        let label = |intent| {
+            TrafficVehicle::new("test", 0.0, 0.0, 0.0, 0, intent, "box truck").status_label()
+        };
+
+        assert_eq!(label("following"), "Slow box truck");
+        assert_eq!(label("merging"), "Merging box truck");
+        assert_eq!(label("braking"), "Brake lights, box truck");
+        assert_eq!(label("cruising"), "box truck");
+        assert_eq!(label("passing"), "box truck");
     }
 }
 

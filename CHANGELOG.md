@@ -1001,8 +1001,10 @@
 
 - **Traffic status now names the vehicle it is describing.** When Freight Fate
   knows the traffic is a car, semi, box truck, service vehicle, or trooper, the
-  Route screen and driver tablet say that instead of substituting a generic
-  "lead vehicle" or the wrong kind of vehicle.
+  Route screen and Driver Traffic app say that instead of a generic "lead
+  vehicle" or the wrong kind of vehicle. Slow, Merging, and Brake lights match
+  the spoken cues, with the vehicle, distance ahead, and speed separated by
+  commas instead of saying "in your lane" or "moving."
 
 - **Acceleration-lane assistance now keeps pulling until cruise can take the
   truck safely.** The speed keeper treated an on-ramp like a gentle steady-speed

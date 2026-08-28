@@ -2401,8 +2401,10 @@ fn test_npc_traffic_cue_and_status_are_reviewable() {
     assert!(npc_cues[0].text().contains("Merging vehicle"));
     assert!(npc_cues[0].text().contains("leave a gap"));
     let status = trip.npc_traffic_status();
-    assert!(status.contains("Traffic: merging vehicle"), "{status}");
-    assert!(status.contains("moving 42 miles per hour"), "{status}");
+    assert_eq!(
+        status,
+        "Traffic: Merging vehicle, 0.8 miles ahead, 42 miles per hour."
+    );
 }
 
 #[test]
@@ -2512,9 +2514,32 @@ fn test_npc_traffic_status_includes_speed_units() {
         0,
         "steady_truck",
     ))];
-    assert!(trip
-        .npc_traffic_status()
-        .contains("moving 68 miles per hour"));
+    assert_eq!(
+        trip.npc_traffic_status(),
+        "Traffic: vehicle, 0.8 miles ahead, 68 miles per hour."
+    );
+}
+
+#[test]
+fn test_npc_traffic_status_names_a_slow_box_truck_with_comma_shape() {
+    use crate::sim::traffic_manager::TrafficVehicle;
+
+    let mut trip = make_trip(2, 1.0);
+    trip.position_mi = 10.0;
+    trip.traffic_manager.rolling_bubble = false;
+    trip.traffic_manager.vehicles = vec![TrafficVehicle::new(
+        "lead-box",
+        12.2,
+        60.0,
+        60.0,
+        0,
+        "following",
+        "box truck",
+    )];
+    assert_eq!(
+        trip.npc_traffic_status(),
+        "Traffic: Slow box truck, 2.2 miles ahead, 60 miles per hour."
+    );
 }
 
 #[test]
