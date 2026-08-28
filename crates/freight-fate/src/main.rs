@@ -248,10 +248,14 @@ Drive tools:
   --playtest-road --find FEATURE    start at a road feature or departure gate
                                     (downgrade, upgrade, zone, limit-drop,
                                     stop, scale, curve, interchange, toll,
-                                    chain-law, destination, departure); destination is
+                                    chain-law, destination, departure, all); all scans every
+                                    launchable road family and current world instance.
+                                    Destination is
                                     the delivery off-ramp at the end of the
                                     route; departure scans loaded facility
-                                    exits and their on-ramps from current world data; --from/--to/--seed/--scan and
+                                    exits and their on-ramps from current world data. State
+                                    transitions requiring a live player history are not road-launchable;
+                                    --from/--to/--seed/--scan and
                                     the assist switches refine the search
   --playtest-sandbox [--launch]     a data directory that cannot reach the
                                     owner's account; --dir/--reset/--print
@@ -570,7 +574,7 @@ fn road_options(args: &[String]) -> road::RoadOptions {
     let mut opts = road::RoadOptions {
         origin: flag_value(args, "--from"),
         destination: flag_value(args, "--to"),
-        routes: flag_value(args, "--routes").unwrap_or_else(|| "mountain".to_string()),
+        routes: flag_value(args, "--routes").unwrap_or_else(|| "all".to_string()),
         seed: flag_i64(args, "--seed"),
         sample: flag_usize(args, "--sample").unwrap_or(road::RANDOM_SAMPLE),
         max_miles: flag_f64(args, "--max-miles").unwrap_or(road::RANDOM_MAX_MILES),

@@ -12,8 +12,7 @@ use ff_core::data::world::get_world;
 use freight_fate::playtest::harness::PlaytestHarness;
 use freight_fate::playtest::road::destination::destination_lead_mi;
 use freight_fate::playtest::road::{
-    build_trip, find_feature, Hit, RoadOptions, FEATURES, FLAT_ROUTES, MOUNTAIN_ROUTES,
-    ROLLING_ROUTES,
+    all_world_pairs, build_trip, find_feature, Hit, RoadOptions, FEATURES,
 };
 use freight_fate::states::driving_core::DESTINATION_EXIT_SCAN_WINDOW_MI;
 
@@ -42,6 +41,13 @@ fn find_one(origin: &str, destination: &str) -> Option<Hit> {
         .next()
 }
 
+fn world_pair() -> (String, String) {
+    all_world_pairs(get_world())
+        .into_iter()
+        .next()
+        .expect("current world has a supported route")
+}
+
 // -- the finder ------------------------------------------------------------------------
 
 #[test]
@@ -53,15 +59,10 @@ fn destination_is_one_of_the_named_features() {
 }
 
 #[test]
-fn every_named_route_offers_its_delivery_exit() {
+fn every_supported_route_offers_its_delivery_exit() {
     let world = get_world();
     let opts = destination_options();
-    let pairs: Vec<(String, String)> = MOUNTAIN_ROUTES
-        .iter()
-        .chain(ROLLING_ROUTES.iter())
-        .chain(FLAT_ROUTES.iter())
-        .map(|(a, b)| (a.to_string(), b.to_string()))
-        .collect();
+    let pairs = all_world_pairs(world);
     let hits = find_feature(world, &pairs, "destination", &opts, Some(TRIP_SEED));
     assert_eq!(
         hits.len(),
@@ -100,14 +101,10 @@ fn every_named_route_offers_its_delivery_exit() {
 }
 
 #[test]
-fn a_small_city_delivery_still_gets_a_hit() {
-    // Hattiesburg is where both reported destination-exit defects were
-    // driven, and its approach carries NO signed interchange -- the drive
-    // falls back to the synthetic end-of-route exit. A finder that only
-    // matched real interchanges would have nothing to offer at exactly the
-    // city the owner needs to reach.
-    let hit = find_one("jackson_ms_us", "hattiesburg_ms_us")
-        .expect("Jackson to Hattiesburg has a delivery exit");
+fn every_discovered_delivery_has_a_destination_hit() {
+    let (origin, destination) = world_pair();
+    let hit = find_one(&origin, &destination)
+        .expect("a supported delivery has a destination exit");
     assert!(hit.at_mi > 0.0 && hit.at_mi < hit.total_mi);
     assert!(
         hit.total_mi - hit.at_mi <= DESTINATION_EXIT_SCAN_WINDOW_MI,
@@ -121,9 +118,9 @@ fn a_small_city_delivery_still_gets_a_hit() {
 fn the_lead_clears_the_callout_window() {
     let world = get_world();
     let opts = destination_options();
-    for (origin, destination) in MOUNTAIN_ROUTES.iter().chain(FLAT_ROUTES.iter()) {
-        let trip = build_trip(world, origin, destination, Some(TRIP_SEED))
-            .expect("the named routes route");
+    for (origin, destination) in all_world_pairs(world) {
+        let trip = build_trip(world, &origin, &destination, Some(TRIP_SEED))
+            .expect("the discovered route routes");
         let lead = destination_lead_mi(&trip, opts.speed);
         // The drive announces one exit window out; the lead has to be
         // strictly longer or the call fires before the wheel is handed over.
@@ -193,7 +190,8 @@ fn drive_the_finder(origin: &str, destination: &str) -> (PlaytestHarness, Hit, f
 
 #[test]
 fn the_finder_starts_before_the_destination_exit_call_and_reaches_it() {
-    let (mut harness, hit, start_mi) = drive_the_finder("Chicago", "Indianapolis");
+    let (origin, destination) = world_pair();
+    let (mut harness, hit, start_mi) = drive_the_finder(&origin, &destination);
     assert!(
         start_mi < hit.at_mi,
         "started at {start_mi:.1}, exit at {:.1}",
@@ -230,7 +228,8 @@ fn the_finder_starts_before_the_destination_exit_call_and_reaches_it() {
 
 #[test]
 fn blowing_past_the_exit_loops_back() {
-    let (mut harness, _hit, _start_mi) = drive_the_finder("Chicago", "Indianapolis");
+    let (origin, destination) = world_pair();
+    let (mut harness, _hit, _start_mi) = drive_the_finder(&origin, &destination);
     // Never press X: the exit goes by unanswered, which is the case both
     // reported defects were driven from.
     let looped = roll(&mut harness, 62.0, 400_000, |h| {
@@ -261,26 +260,24 @@ fn blowing_past_the_exit_loops_back() {
 }
 
 #[test]
-fn the_miss_names_the_city_not_its_map_key() {
-    // `build_driving` fills in the job's spoken names; without them the miss
-    // line reads out the slug -- "in hattiesburg_ms_us" -- and an owner
-    // hearing that would file it as a fresh bug.
-    let (mut harness, _hit, _start_mi) = drive_the_finder("jackson_ms_us", "hattiesburg_ms_us");
+fn the_miss_names_the_destination_not_its_map_key() {
+    let (origin, destination) = world_pair();
+    let (mut harness, hit, _start_mi) = drive_the_finder(&origin, &destination);
     let looped = roll(&mut harness, 55.0, 400_000, |h| {
         h.read_drive(|d| d.missed_destination_exit_said)
     });
     assert!(
         looped,
-        "the Hattiesburg approach never missed its exit\n{}",
+        "the discovered approach never missed its exit\n{}",
         harness.transcript_text()
     );
     let text = harness.transcript_text();
     assert!(
-        !text.contains("hattiesburg_ms_us"),
+        !text.contains("_us"),
         "the map key was spoken:\n{text}"
     );
     assert!(
-        text.to_lowercase().contains("hattiesburg"),
-        "the city was never named:\n{text}"
+        text.to_lowercase().contains(&hit.destination.to_lowercase()),
+        "the destination was never named:\n{text}"
     );
 }

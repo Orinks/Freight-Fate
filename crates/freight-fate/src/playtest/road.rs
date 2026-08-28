@@ -44,29 +44,8 @@ use super::MPH_PER_MPS;
 
 pub mod destination;
 
-/// Route sets swept when the caller does not name a pair. Hand-picked and
-/// small: a feature search is only useful if it finishes while you wait.
-pub const MOUNTAIN_ROUTES: [(&str, &str); 5] = [
-    ("Denver", "Grand Junction"),
-    ("Albuquerque", "Denver"),
-    ("Sacramento", "Reno"),
-    ("Phoenix", "Flagstaff"),
-    ("Seattle", "Spokane"),
-];
-pub const ROLLING_ROUTES: [(&str, &str); 3] = [
-    ("Knoxville", "Asheville"),
-    ("Buffalo", "New York"),
-    ("Charlotte", "Knoxville"),
-];
-pub const FLAT_ROUTES: [(&str, &str); 2] = [("Chicago", "Indianapolis"), ("Dallas", "Houston")];
-
-/// `--routes random` is not a list: it is drawn from the whole map at run
-/// time. The named sets are ten hand-picked corridors and half of them are
-/// mountain, so playtest after playtest ran the same roads and kept landing
-/// on engine-brake country whatever the session was actually testing (owner,
-/// 2026-08-15). The draw prints its seed, so a road worth revisiting can be
-/// drawn again -- the work zones on it are a per-trip roll and will not
-/// repeat.
+/// `--routes random` is a bounded, seeded sample from the world. The default
+/// scan uses every currently supported pair instead of a curated corridor list.
 pub const RANDOM_ROUTES: &str = "random";
 /// Long hauls make a feature search crawl and put the interesting mile hours
 /// from the start. Past this the draw takes another pair instead.
@@ -106,11 +85,6 @@ const DEFAULT_LEAD_MI: f64 = 1.8;
 /// 2026-08-21). Twenty-five seconds is long enough to find the window, hear
 /// the truck, and still be waiting when the callout lands.
 const LEAD_REAL_SECONDS: f64 = 25.0;
-
-/// How many per-trip rolls to try before giving up on finding an OPEN scale.
-/// Whether a station is open is a seeded draw over its own key, so a route
-/// with one scale on it is roughly a coin flip per seed.
-const SCALE_SEED_TRIES: usize = 24;
 
 /// What waits at a ramp's far end, ranked by how much there is to hear. A
 /// signal or a stop puts the cross bubble in front of you -- real traffic on
@@ -209,7 +183,7 @@ impl Default for RoadOptions {
         RoadOptions {
             origin: None,
             destination: None,
-            routes: "mountain".to_string(),
+            routes: "all".to_string(),
             seed: None,
             sample: RANDOM_SAMPLE,
             max_miles: RANDOM_MAX_MILES,
@@ -249,31 +223,52 @@ pub fn route_pairs(world: &'static World, opts: &RoadOptions) -> Vec<(String, St
     if let (Some(origin), Some(destination)) = (&opts.origin, &opts.destination) {
         return vec![(origin.clone(), destination.clone())];
     }
-    if opts.routes == RANDOM_ROUTES {
-        let seed = opts
-            .seed
-            .unwrap_or_else(|| PyRandom::new_unseeded().randrange(1_000_000));
-        return random_pairs(world, opts.sample, opts.max_miles, seed);
-    }
-    let named: &[(&str, &str)] = match opts.routes.as_str() {
-        "rolling" => &ROLLING_ROUTES,
-        "flat" => &FLAT_ROUTES,
-        "all" => return all_named_pairs(),
-        _ => &MOUNTAIN_ROUTES,
+    let pairs = if opts.routes == RANDOM_ROUTES {
+        let seed = opts.seed.unwrap_or(DEPARTURE_TRIP_SEED);
+        random_pairs(world, opts.sample, opts.max_miles, seed)
+    } else {
+        all_world_pairs(world)
     };
-    named
-        .iter()
-        .map(|(a, b)| (a.to_string(), b.to_string()))
+    let origin = opts.origin.as_deref().map(|name| world.resolve_city_key(name));
+    let destination = opts
+        .destination
+        .as_deref()
+        .map(|name| world.resolve_city_key(name));
+    pairs
+        .into_iter()
+        .filter(|(from, to)| {
+            origin
+                .as_deref()
+                .map_or(true, |wanted| world.resolve_city_key(from) == wanted)
+                && destination
+                    .as_deref()
+                    .map_or(true, |wanted| world.resolve_city_key(to) == wanted)
+        })
         .collect()
 }
 
-fn all_named_pairs() -> Vec<(String, String)> {
-    MOUNTAIN_ROUTES
-        .iter()
-        .chain(ROLLING_ROUTES.iter())
-        .chain(FLAT_ROUTES.iter())
-        .map(|(a, b)| (a.to_string(), b.to_string()))
-        .collect()
+/// Every currently supported directed corridor, discovered from the world.
+/// There is deliberately no city or route list here: new baked routes appear
+/// in an `--routes all` scan without a launcher change.
+pub fn all_world_pairs(world: &'static World) -> Vec<(String, String)> {
+    let names = world.city_names();
+    let mut pairs = Vec::new();
+    for origin in &names {
+        for destination in &names {
+            if origin == destination {
+                continue;
+            }
+            if world
+                .supported_route(origin, destination, None)
+                .ok()
+                .flatten()
+                .is_some()
+            {
+                pairs.push((speakable(world, origin), speakable(world, destination)));
+            }
+        }
+    }
+    pairs
 }
 
 /// Supported city pairs drawn from the whole map, shortest first.
@@ -562,33 +557,40 @@ pub fn find_feature_seeded(
     feature: &str,
     opts: &RoadOptions,
 ) -> Vec<Hit> {
-    if feature == "departure" {
-        let seed = opts.trip_seed.or(opts.seed).or(Some(DEPARTURE_TRIP_SEED));
-        return find_feature(world, pairs, feature, opts, seed);
+    let seed = opts.trip_seed.or(opts.seed).or(Some(DEPARTURE_TRIP_SEED));
+    let mut hits = find_feature(world, pairs, feature, opts, seed);
+    if feature == "scale" {
+        hits.retain(|hit| hit.label.starts_with("OPEN"));
     }
-    if opts.trip_seed.is_some() {
-        return find_feature(world, pairs, feature, opts, opts.trip_seed);
-    }
-    let tries = if feature == "scale" {
-        SCALE_SEED_TRIES
-    } else {
-        1
-    };
-    let mut rng = PyRandom::new_unseeded();
-    for attempt in 0..tries {
-        let seed = rng.randrange(1 << 31);
-        let mut hits = find_feature(world, pairs, feature, opts, Some(seed));
-        if feature == "scale" {
-            hits.retain(|hit| hit.label.starts_with("OPEN"));
+    hits
+}
+
+/// Every launchable road family, with every instance supplied by the current
+/// world and catalog. State transitions that need a live player history are
+/// intentionally outside this launcher; their registered checks remain in
+/// the break-scenario runner rather than being faked as road starts.
+fn find_all_features(
+    world: &'static World,
+    pairs: &[(String, String)],
+    opts: &RoadOptions,
+) -> Vec<Hit> {
+    let mut hits = Vec::new();
+    for family in FEATURES {
+        let mut family_hits = find_feature_seeded(world, pairs, family, opts);
+        for hit in &mut family_hits {
+            hit.label = format!("{family}: {}", hit.label);
         }
-        if !hits.is_empty() {
-            if attempt > 0 {
-                println!("  (took {} trip rolls to find one open)", attempt + 1);
-            }
-            return hits;
-        }
+        hits.extend(family_hits);
     }
-    Vec::new()
+    hits.sort_by(|a, b| {
+        a.label
+            .cmp(&b.label)
+            .then(a.origin.cmp(&b.origin))
+            .then(a.origin_location.cmp(&b.origin_location))
+            .then(a.destination.cmp(&b.destination))
+            .then(a.at_mi.total_cmp(&b.at_mi))
+    });
+    hits
 }
 
 /// Sustained grades in the requested direction.
@@ -990,17 +992,19 @@ fn lead_for_seconds(trip: &Trip, speed_mph: f64, seconds: f64) -> f64 {
 ///
 /// `--at` keeps the plain lead whatever `--find` says, because a named mile
 /// is a mile the operator measured for themselves.
-fn feature_lead_mi(trip: &Trip, opts: &RoadOptions) -> f64 {
-    match opts.feature.as_str() {
-        "destination" if opts.at.is_none() => destination::destination_lead_mi(trip, opts.speed),
-        "departure" => 0.0,
-        _ => lead_for_seconds(trip, opts.speed, LEAD_REAL_SECONDS),
+fn feature_lead_mi(trip: &Trip, hit: &Hit, opts: &RoadOptions) -> f64 {
+    if hit.origin_location.is_some() {
+        0.0
+    } else if hit.label.contains("destination exit") && opts.at.is_none() {
+        destination::destination_lead_mi(trip, opts.speed)
+    } else {
+        lead_for_seconds(trip, opts.speed, LEAD_REAL_SECONDS)
     }
 }
 
 /// A `DrivingState` already rolling at the feature, set up as asked.
 pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (DrivingState, f64) {
-    let departure = opts.feature == "departure";
+    let departure = hit.origin_location.is_some();
     // Settings first: DrivingState reads the gearbox and the assist choices
     // in its constructor, so an override applied afterwards would not take.
     {
@@ -1148,7 +1152,7 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
 
     let lead_mi = opts
         .lead
-        .unwrap_or_else(|| feature_lead_mi(&driving.trip, opts));
+        .unwrap_or_else(|| feature_lead_mi(&driving.trip, hit, opts));
     let total = driving.trip.total_miles();
     let start_mi = (hit.at_mi - lead_mi).clamp(0.0, (total - 1.0).max(0.0));
     driving.trip.position_mi = start_mi;
@@ -1208,7 +1212,7 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
         "  trip seed         : {:?}  (--trip-seed to drive this exact run again)",
         hit.trip_seed
     );
-    if opts.feature == "departure" {
+    if hit.origin_location.is_some() {
         println!(
             "  facility streets  : {:.1} mi to {}",
             hit.run_mi, hit.label
@@ -1220,7 +1224,7 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
             reason.map(|r| format!(" ({r})")).unwrap_or_default()
         );
     }
-    if opts.feature == "departure" {
+    if hit.origin_location.is_some() {
         println!("  starting state    : stopped at the facility gate, {:.0} t aboard", opts.cargo);
     } else {
         println!(
@@ -1230,12 +1234,12 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
     }
     println!(
         "  {:<18}: {}",
-        if opts.feature == "departure" {
+        if hit.origin_location.is_some() {
             "speed control"
         } else {
             "cruise"
         },
-        if opts.feature == "departure" {
+        if hit.origin_location.is_some() {
             "armed: speed keeper takes the streets and ramp, then adaptive cruise resumes"
                 .to_string()
         } else if opts.cruise > 0.0 {
@@ -1273,7 +1277,7 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
     );
     println!("    assists preset  : {}", s.driving_assistance_preset);
     println!("    time scale      : {}", s.time_scale);
-    if opts.feature != "departure" {
+    if hit.origin_location.is_none() {
         println!("  grade ahead       :");
         for ahead in [0.0, 1.0, 2.0, 3.0, 5.0, 8.0] {
             let at = start_mi + ahead;
@@ -1285,7 +1289,7 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
             }
         }
     }
-    if opts.feature == "departure" {
+    if hit.origin_location.is_some() {
         let facility = hit
             .origin_location
             .as_deref()
@@ -1308,6 +1312,10 @@ pub enum RoadPlan {
 /// Pick the spot, against the world data alone -- no `App`, no window.
 pub fn plan(opts: &RoadOptions) -> RoadPlan {
     let world = get_world();
+    if opts.routes != "all" && opts.routes != RANDOM_ROUTES {
+        println!("Unknown --routes {:?}. Choose all or random.", opts.routes);
+        return RoadPlan::Done(1);
+    }
     if opts.feature == "departure" && opts.at.is_some() {
         println!("--at cannot select a facility departure; use --scan and --pick N.");
         return RoadPlan::Done(1);
@@ -1351,16 +1359,18 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
     // A typo used to reach the search, match nothing, and come back as
     // "Nothing matched. Try another route" -- which reads as a road without
     // the feature rather than a name the tool does not have.
-    if !FEATURES.contains(&opts.feature.as_str()) {
+    if opts.feature != "all" && !FEATURES.contains(&opts.feature.as_str()) {
         println!(
             "Unknown --find {:?}. Choose one of: {}.",
             opts.feature,
-            FEATURES.join(", ")
+            format!("all, {}", FEATURES.join(", "))
         );
         return RoadPlan::Done(1);
     }
     if opts.feature == "departure" {
         println!("Searching loaded facility departures from current world data...");
+    } else if opts.feature == "all" {
+        println!("Searching every launchable road feature in current world data...");
     } else {
         println!(
             "Searching {} route(s) for a {}...",
@@ -1368,7 +1378,11 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
             opts.feature
         );
     }
-    let hits = find_feature_seeded(world, &pairs, &opts.feature, opts);
+    let hits = if opts.feature == "all" {
+        find_all_features(world, &pairs, opts)
+    } else {
+        find_feature_seeded(world, &pairs, &opts.feature, opts)
+    };
     if hits.is_empty() {
         let hint = match opts.feature.as_str() {
             "downgrade" | "upgrade" => "Loosen --min-pct / --min-run",
@@ -1389,14 +1403,18 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
         for (i, found) in hits.iter().enumerate() {
             println!("  [{i:2}] {}", found.describe());
         }
-        if opts.feature == "departure" {
+        if opts.feature == "departure" || opts.feature == "all" {
             let seed = hits[0]
                 .trip_seed
-                .expect("departure hits always carry a stable trip seed");
+                .expect("data-driven hits always carry a stable trip seed");
             let scope = departure_scope_args(opts);
             println!(
-                "\nLaunch a zero-based row with: cargo run --release -p freight-fate --bin freightfate -- --playtest-road --find departure --pick N --trip-seed {seed}{scope}"
+                "\nLaunch a zero-based row with: cargo run --release -p freight-fate --bin freightfate -- --playtest-road --find {} --pick N --trip-seed {seed}{scope}",
+                opts.feature
             );
+            if opts.feature == "all" {
+                println!("  Boundary: state transitions that require live player history are not road-launchable; use the registered break scenarios for those checks.");
+            }
         } else {
             println!("\nDrive one with --pick N (keeping the same --find/--routes).");
         }
@@ -1411,7 +1429,19 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
 }
 
 fn departure_scope_args(opts: &RoadOptions) -> String {
-    let mut args = String::new();
+    let mut args = format!(
+        " --routes {:?} --sample {} --max-miles {} --min-pct {} --min-run {} --min-drop {} --max-advisory {}",
+        opts.routes,
+        opts.sample,
+        opts.max_miles,
+        opts.min_pct,
+        opts.min_run,
+        opts.min_drop,
+        opts.max_advisory
+    );
+    if let Some(seed) = opts.seed {
+        args.push_str(&format!(" --seed {seed}"));
+    }
     if let Some(origin) = &opts.origin {
         args.push_str(&format!(" --from {origin:?}"));
     }
