@@ -416,6 +416,26 @@
 
 ### Changed
 
+- **Detention, lumpers, washouts, and tolls now hit an owner-operator's
+  wallet.** Those dollars used to be spoken and never move. They come off
+  this settlement for owner-ops: detention pays you, and the rest charges
+  you. A company driver still hears the ledger, but it is billed to the
+  carrier -- the game does not promise a personal check that is not coming.
+
+- **Dispatched loads stay at or under 80,000 pounds.** Tractor, trailer,
+  and cargo against the federal cap. Fuel is not counted. An overweight
+  truck is red-lighted at a transponder scale instead of rolling the
+  bypass dice.
+
+- **Relaxed hours of service keep the same 11-hour drive, 14-hour window,
+  and 30-minute break as realistic.** Fines and inspection odds are
+  lighter. The clock is not 13.75 hours.
+
+- **A scale wave-through after you pull in takes a couple of minutes, not
+  fifteen.** Fifteen is the inspection lane. A missed 30-minute break is
+  thirty minutes out of service on the shoulder, not a ten-hour reset.
+  Drive or duty still takes the ten hours.
+
 - **Standard pacing no longer multiplies roadside chatter.** Town names,
   exits, curves, scales, work zones, and lane-count changes still speak
   once per place, the same at twenty-times speed as at Real time. CB

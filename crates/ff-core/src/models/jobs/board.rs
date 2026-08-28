@@ -21,6 +21,7 @@ use crate::models::start_options::{start_option, DEFAULT_START_KEY};
 use crate::pyfmt::round_py_n;
 use crate::pyrandom::PyRandom;
 use crate::sim::hos::HosClock;
+use crate::sim::vehicle::{combination_tare_kg, max_legal_cargo_tons, TruckSpecs};
 
 /// `(destination, route miles, route leg count)`.
 pub type Candidate = (String, f64, usize);
@@ -589,7 +590,14 @@ impl<'w> JobBoard<'w> {
         carrier_key: &str,
         direct_freight: bool,
     ) -> Job {
-        let weight = self.rng.uniform(cargo.weight_tons.0, cargo.weight_tons.1);
+        // Clamp to 80,000 lb GVW for a stock tractor + trailer. Heavier
+        // catalog ranges exist, but a dispatched load that starts illegal
+        // is a lie; the live overweight check still red-lights a truck
+        // that ends up over (a heavier tractor, a test load).
+        let max_tons = max_legal_cargo_tons(combination_tare_kg(&TruckSpecs::default()));
+        let hi = cargo.weight_tons.1.min(max_tons);
+        let lo = cargo.weight_tons.0.min(hi);
+        let weight = self.rng.uniform(lo, hi);
         let rate = cargo.rate_per_mile * self.rng.uniform(0.9, 1.15);
         let mult = market.map(|m| m.multiplier(cargo.key)).unwrap_or(1.0);
         let base_pay = HOOKUP_FEE + miles * rate * (1.0 + weight / 120.0);

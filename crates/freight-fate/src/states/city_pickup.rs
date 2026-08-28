@@ -5,6 +5,7 @@ use serde_json::{json, Map, Value};
 
 use ff_core::data::world::World;
 use ff_core::data::world_models::Route;
+use ff_core::models::business_constants::is_owner_operator;
 use ff_core::models::dispatch_policy::dispatch_policy;
 use ff_core::models::jobs::{job_from_payload, job_payload, plan_hos, Job};
 use ff_core::models::trailer_yard::{
@@ -691,7 +692,7 @@ impl PickupFacilityState {
             if plan.trailer.as_ref().is_some_and(|t| t.defect().is_some()) {
                 ctx.award_achievement("hooked_a_bad_one");
             }
-        } else if plan.detention_minutes > 0.0 {
+        } else if plan.detention_minutes > 0.0 && is_owner_operator(&profile(ctx).business_status) {
             ctx.award_achievement("detention_paid");
         }
     }
@@ -884,12 +885,17 @@ impl Menu for PickupFacilityState {
                 };
                 lead.push_str(&format!(" {verb} took {} minutes.", fmt_f(plan.minutes, 0)));
                 if plan.detention_minutes > 0.0 {
-                    lead.push_str(&format!(
-                        " That is {} minutes past the free time, \
-                         so you are owed {} dollars in detention.",
-                        fmt_f(plan.detention_minutes, 0),
-                        fmt_grouped(plan.detention_pay(), 0)
-                    ));
+                    let dollars = fmt_grouped(plan.detention_pay(), 0);
+                    let wait = fmt_f(plan.detention_minutes, 0);
+                    if is_owner_operator(&profile(ctx).business_status) {
+                        lead.push_str(&format!(
+                            " That is {wait} minutes past the free time, so you are owed {dollars} dollars in detention, paid on settlement."
+                        ));
+                    } else {
+                        lead.push_str(&format!(
+                            " That is {wait} minutes past the free time, so the carrier is owed {dollars} dollars in detention."
+                        ));
+                    }
                 }
                 if let Some(trailer) = plan.trailer.as_ref() {
                     lead.push_str(&format!(" {}", trailer.describe()));
@@ -953,10 +959,19 @@ impl Menu for PickupFacilityState {
                  trailer is whatever the yard has, so walk around it.",
             )
         } else if self.checked_in {
-            MenuItem::new("Load cargo at dock", |s: &mut Self, ctx| s.load(ctx)).help(
-                "Back into the assigned dock and wait while the trailer is loaded. \
-                 Past two hours the wait earns detention pay.",
-            )
+            let dock_help = if is_owner_operator(&profile(ctx).business_status) {
+                concat!(
+                    "Back into the assigned dock and wait while the trailer is loaded. ",
+                    "Past two hours the wait earns detention pay on this settlement.",
+                )
+            } else {
+                concat!(
+                    "Back into the assigned dock and wait while the trailer is loaded. ",
+                    "Past two hours the wait is billed as detention on the carrier ",
+                    "settlement, not a personal check.",
+                )
+            };
+            MenuItem::new("Load cargo at dock", |s: &mut Self, ctx| s.load(ctx)).help(dock_help)
         } else {
             MenuItem::new("Check in at shipping office", |s: &mut Self, ctx| {
                 s.check_in(ctx)

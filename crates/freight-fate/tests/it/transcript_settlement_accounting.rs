@@ -267,11 +267,44 @@ fn test_owner_operator_settlement_deducts_business_costs() {
     );
     assert!(expected.business_charge_total() > 0.0);
     let profile = app.ctx.profile.as_ref().expect("a career");
-    assert!(approx(profile.money, 1000.0 + expected.net_before_advance));
+    // NY-Philly electronics to a grocery DC: $30 tolls + $185 lumper, no washout.
+    // Those dollars used to be spoken and never hit the wallet.
+    let ledger = 30.0 + 185.0;
+    assert!(
+        summary.contains("These came off this settlement"),
+        "{summary}"
+    );
+    assert!(approx(
+        profile.money,
+        1000.0 + expected.net_before_advance - ledger
+    ));
     assert!(approx(
         profile.career.total_earnings,
         expected.net_before_advance
     ));
+}
+
+#[test]
+fn test_company_driver_accessorials_do_not_move_the_wallet() {
+    let mut app = TestApp::new();
+    let job = a_job(JobSpec {
+        destination_type: "retail_distribution",
+        ..Default::default()
+    });
+    let (gross, summary) = settle(
+        &mut app,
+        job.clone(),
+        &["New York", "Philadelphia"],
+        Settle::default(),
+    );
+    let expected = build_business_settlement_basic(COMPANY_DRIVER, &job, gross, true, 0.0);
+    assert!(
+        summary.contains("not deducted from driver pay"),
+        "{summary}"
+    );
+    assert!(!summary.contains("you are owed"), "{summary}");
+    let profile = app.ctx.profile.as_ref().expect("a career");
+    assert!(approx(profile.money, 1000.0 + expected.net_before_advance));
 }
 
 #[test]

@@ -77,7 +77,8 @@ pub const ROAD_TIRE_MIN: f64 = 75.0;
 pub const ROAD_BRAKE_COST_PER_PCT: f64 = 55.0; // road-shop premium over the garage's 40
 pub const ROAD_BRAKE_MIN: f64 = 120.0;
 pub const FUEL_STOP_MIN: f64 = 20.0; // fueling is on-duty-not-driving work
-pub const INSPECTION_MIN: f64 = 15.0; // routine scale/inspection check-in time
+pub const INSPECTION_MIN: f64 = 15.0; // inspection lane: they take you in
+pub const WAVE_THROUGH_MIN: f64 = 2.0; // scale wave-through after you pull in
 pub const OUT_OF_SERVICE_MIN: f64 = hos::SLEEP_MIN;
 // Dynamiting the parking brake: pulling the valve at speed slams the spring
 // brakes on and grinds flat spots into the tires. Above this speed the set

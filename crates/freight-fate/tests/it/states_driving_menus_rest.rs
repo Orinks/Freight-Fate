@@ -16,7 +16,8 @@ use ff_core::sim::trip_models::RoadStop;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Menu;
 use freight_fate::states::driving_core::{
-    ROAD_BRAKE_COST_PER_PCT, ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_SPECIALIST_COST_PER_PCT,
+    INSPECTION_MIN, ROAD_BRAKE_COST_PER_PCT, ROAD_TIRE_COST_PER_PCT,
+    ROAD_TIRE_SPECIALIST_COST_PER_PCT, WAVE_THROUGH_MIN,
 };
 use freight_fate::states::driving_menu_states::DriveRef;
 use freight_fate::states::driving_pause_states::{
@@ -772,4 +773,65 @@ fn test_the_pause_menu_keeps_its_rows_when_a_rebuild_misses_the_drive() {
         rows.iter().any(|row| row == "Resume driving"),
         "the pause menu lost the row that returns to the wheel: {rows:?}"
     );
+}
+
+fn a_scale_stop(at_mi: f64) -> RoadStop {
+    let mut stop = RoadStop::new("I-90 West Scale", at_mi, "weigh_station");
+    stop.actions = vec!["inspect".to_string()];
+    stop.parking = "none".to_string();
+    stop
+}
+
+#[test]
+fn test_scale_wave_through_is_two_minutes_not_fifteen() {
+    assert_eq!(WAVE_THROUGH_MIN, 2.0);
+    assert_eq!(INSPECTION_MIN, 15.0);
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = a_scale_stop(at);
+    let selected = drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.scale_selects_driver(ctx, &stop)
+    });
+    let before = with_drive(&drive, |d| d.trip.game_minutes);
+    let mut state = rest_stop_at(&mut app, &drive, stop);
+    activate(&mut state, &mut app.ctx, "Check in at inspection station");
+    let after = with_drive(&drive, |d| d.trip.game_minutes);
+    let expected = if selected {
+        INSPECTION_MIN
+    } else {
+        WAVE_THROUGH_MIN
+    };
+    assert!(
+        (after - before - expected).abs() < 1e-6,
+        "selected={selected} burned {} minutes, expected {expected}",
+        after - before
+    );
+}
+
+#[test]
+fn test_a_targeted_record_takes_the_inspection_lane() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
+    {
+        let p = app.ctx.profile.as_mut().expect("a career");
+        p.career.reputation = 10.0;
+        p.driving_record.citations = 6;
+        p.out_of_service_events = 3;
+    }
+    with_drive(&drive, |d| d.trip.truck.damage_pct = 70.0);
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = a_scale_stop(at);
+    let before = with_drive(&drive, |d| d.trip.game_minutes);
+    let mut state = rest_stop_at(&mut app, &drive, stop);
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Check in at inspection station");
+    let after = with_drive(&drive, |d| d.trip.game_minutes);
+    assert!(
+        (after - before - INSPECTION_MIN).abs() < 1e-6,
+        "targeted record burned {} minutes",
+        after - before
+    );
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("inspection lane"), "{said}");
 }

@@ -1156,7 +1156,7 @@ fn test_serious_hos_inspection_orders_out_of_service_reset() {
 
     // A serious violation is a REAL stop now: lights come on and nothing is
     // charged or reset until the truck is actually on the shoulder (the old
-    // instant path teleported the clock ten hours mid-drive).
+    // instant path teleported the clock mid-drive).
     harness.with_drive(|d, _| {
         assert_eq!(d.pull_over.as_deref(), Some("lights"));
         assert_eq!(d.pull_over_kind, "hos_out_of_service");
@@ -1168,8 +1168,18 @@ fn test_serious_hos_inspection_orders_out_of_service_reset() {
     );
     assert_eq!(harness.read_drive(|d| d.trip.game_minutes), minutes);
 
-    // The stop itself applies the fine, the ten hours, and the reset.
+    // 481 driving minutes is a missed 30-minute break, not a 10-hour reset.
     harness.with_drive(|d, ctx| {
+        assert!(
+            d.pull_over_summary.contains("thirty minutes"),
+            "{}",
+            d.pull_over_summary
+        );
+        assert!(
+            !d.pull_over_summary.contains("ten hours"),
+            "{}",
+            d.pull_over_summary
+        );
         d.pull_over_signaled = true;
         d.truck_mut().velocity_mps = 0.0;
         d.open_traffic_stop(ctx);
@@ -1177,11 +1187,12 @@ fn test_serious_hos_inspection_orders_out_of_service_reset() {
     {
         let p = harness.app.ctx.profile.as_ref().expect("a career");
         assert!(approx(p.money, money - hos::HOS_FINES[0]), "{}", p.money);
-        assert_eq!(p.hos.driving_min, 0.0);
+        assert_eq!(p.hos.driving_min, 481.0);
+        assert_eq!(p.hos.since_break_min, 0.0);
     }
     assert!(approx(
         harness.read_drive(|d| d.trip.game_minutes),
-        minutes + hos::SLEEP_MIN
+        minutes + hos::BREAK_MIN
     ));
     assert_eq!(harness.read_drive(|d| d.out_of_service_count), 1);
     harness.app.ctx.pop_state();
@@ -1194,6 +1205,53 @@ fn test_serious_hos_inspection_orders_out_of_service_reset() {
         money - hos::HOS_FINES[0]
     ));
     assert_eq!(harness.read_drive(|d| d.out_of_service_count), 1);
+}
+
+#[test]
+fn test_drive_limit_inspection_still_orders_ten_hours() {
+    let mut harness = a_drive("Drive Limit Oos");
+    harness.app.ctx.settings.hos_mode = "realistic".to_string();
+    harness
+        .app
+        .ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .hos
+        .drive(11.0 * 60.0 + 1.0);
+    let minutes = harness.read_drive(|d| d.trip.game_minutes);
+    let event = TripEvent {
+        kind: TripEventKind::Inspection,
+        message: "Inspection station open.".into(),
+        data: TripEventData {
+            key: Some("scale:drive".to_string()),
+            evidence: Some(vec!["HOS/ELD violation".to_string()]),
+            ..Default::default()
+        },
+    };
+    let staged = event.clone();
+    harness.with_drive(move |d, ctx| d.handle_inspection(ctx, &staged));
+    harness.with_drive(|d, ctx| {
+        assert!(
+            d.pull_over_summary.contains("ten hours"),
+            "{}",
+            d.pull_over_summary
+        );
+        assert!(
+            !d.pull_over_summary.contains("thirty minutes"),
+            "{}",
+            d.pull_over_summary
+        );
+        d.pull_over_signaled = true;
+        d.truck_mut().velocity_mps = 0.0;
+        d.open_traffic_stop(ctx);
+    });
+    let p = harness.app.ctx.profile.as_ref().expect("a career");
+    assert_eq!(p.hos.driving_min, 0.0);
+    assert!(approx(
+        harness.read_drive(|d| d.trip.game_minutes),
+        minutes + hos::SLEEP_MIN
+    ));
 }
 
 // -- the clock the shift runs on --------------------------------------------------------

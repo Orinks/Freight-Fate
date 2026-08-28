@@ -19,7 +19,7 @@ use crate::states::base::{Menu, MenuCore, MenuItem, TimedMessageState};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::{
     advance_rest_clock, carrier_accessorial_charges, charge_summary, charge_total, hos_mut_of,
-    profile_of, FacilityEngine, DOCKING_MAX_MPH, UNLOADING_WAIT_S,
+    is_owner_operator, profile_of, wallet_delta, FacilityEngine, DOCKING_MAX_MPH, UNLOADING_WAIT_S,
 };
 use crate::states::driving_menu_states::{keep_rows, settlement_hours, DriveRef};
 
@@ -273,7 +273,12 @@ impl FacilityArrivalState {
             // itself is charged on the shoulder by the trooper who saw it, or
             // not at all.
             let driver_charges = profile.fines_owed;
+            let owner_op = is_owner_operator(&profile.business_status);
             let mut net_estimated_pay = (estimated_pay - driver_charges).max(0.0);
+            if owner_op {
+                net_estimated_pay =
+                    (net_estimated_pay + wallet_delta(&accessorials, tolls)).max(0.0);
+            }
             let advance_due = round_py_n(profile.pay_advance.min(net_estimated_pay), 2);
             net_estimated_pay = round_py_n(net_estimated_pay - advance_due, 2);
             let advance_note = if advance_due > 0.0 {
@@ -298,11 +303,16 @@ impl FacilityArrivalState {
             } else {
                 "Cargo condition: no new damage recorded.".to_string()
             };
+            let charge_fate = if owner_op {
+                "Those charges come off this settlement."
+            } else {
+                "Those charges do not reduce driver pay."
+            };
             format!(
                 "Paperwork for {facility}: {} tons of {}. Rate sheet lists {} dollars; \
                  current gross payout is {} dollars. Carrier-paid or reimbursed charges \
                  recorded so far are {} dollars, including tolls {} and accessorials {}. \
-                 Those charges do not reduce driver pay. Fines carried over from earlier loads \
+                 {charge_fate} Fines carried over from earlier loads \
                  are {} dollars, for estimated net driver pay {}.{advance_note} {timing}. \
                  {cargo_condition} {finish} to settle.",
                 fmt_f(job.weight_tons, 0),

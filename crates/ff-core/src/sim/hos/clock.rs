@@ -499,6 +499,31 @@ impl HosClock {
         self.statuses(mode).iter().any(|s| s.remaining_min <= 0.0)
     }
 
+    /// Limit kinds currently blown, in status order (drive, duty, break).
+    pub fn blown_kinds(&self, mode: &str) -> Vec<&'static str> {
+        self.statuses(mode)
+            .iter()
+            .filter(|s| s.remaining_min <= 0.0)
+            .map(|s| s.kind)
+            .collect()
+    }
+
+    /// A missed 30-minute break, with drive and duty still legal.
+    pub fn is_break_only_violation(&self, mode: &str) -> bool {
+        let blown = self.blown_kinds(mode);
+        blown.len() == 1 && blown[0] == "break"
+    }
+
+    /// Out-of-service time for the current violation: 30 minutes for a missed
+    /// break, a full 10-hour reset for drive or duty.
+    pub fn out_of_service_minutes(&self, mode: &str) -> f64 {
+        if self.is_break_only_violation(mode) {
+            BREAK_MIN
+        } else {
+            SLEEP_MIN
+        }
+    }
+
     /// Plain spoken phrases for every limit currently blown.
     ///
     /// The roadside out-of-service stop uses these BEFORE the reset wipes
@@ -654,8 +679,8 @@ impl HosClock {
     // `summary` speaks the whole picture; these three answer one question each,
     // for the Alt A, Alt S, and Alt D keys (see DrivingControlsMixin). None may
     // go silent -- a blind driver cannot tell a quiet key from a dead one -- and
-    // none names a limit in hours: relaxed runs 1.25 times realistic, so a
-    // hard-coded "11-hour limit" would be a lie in it.
+    // none names a limit in hours: remaining time is read from the live
+    // clock so the spoken number stays true if the limits ever move.
 
     /// (driving, duty window, break) hours left, floored at zero.
     fn hours_left(&self, mode: &str) -> (f64, f64, f64) {

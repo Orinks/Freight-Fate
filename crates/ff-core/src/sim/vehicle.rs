@@ -52,6 +52,11 @@ pub const MAX_REVERSE_MPS: f64 = 4.5;
 
 /// Game cargo "tons" are treated as metric tonnes.
 pub const KG_PER_TON: f64 = 1000.0;
+/// International avoirdupois pound, for the federal 80,000 lb GVW cap.
+pub const KG_PER_LB: f64 = 0.45359237;
+/// Federal combination gross vehicle weight limit. Fuel is not counted.
+pub const LEGAL_GVW_LB: f64 = 80_000.0;
+pub const LEGAL_GVW_KG: f64 = LEGAL_GVW_LB * KG_PER_LB;
 // Reference loaded Class 8: ~36 t gross at a full ~21.5 t payload, leaving a
 // ~14.5 t tractor-and-empty-trailer tare. A TruckState's default cargo equals
 // this reference payload, so an unconfigured truck keeps the original loaded
@@ -61,6 +66,23 @@ pub const REFERENCE_CARGO_KG: f64 = 21_500.0;
 // off the tare, so a true bobtail runs five-plus tonnes lighter than a
 // deadhead hauling an empty box.
 pub const TRAILER_TARE_KG: f64 = 6_400.0;
+
+/// Tractor plus empty trailer for the stock Class 8 specs, used to clamp
+/// dispatched cargo so a legal load stays at or under 80,000 lb GVW.
+pub fn combination_tare_kg(specs: &TruckSpecs) -> f64 {
+    (specs.mass_kg - REFERENCE_CARGO_KG).max(0.0)
+}
+
+/// Heaviest cargo a combination of this tare can haul without going over
+/// the federal 80,000 lb cap.
+pub fn max_legal_cargo_kg(tare_kg: f64) -> f64 {
+    (LEGAL_GVW_KG - tare_kg).max(0.0)
+}
+
+pub fn max_legal_cargo_tons(tare_kg: f64) -> f64 {
+    max_legal_cargo_kg(tare_kg) / KG_PER_TON
+}
+
 pub const LAUNCH_TRACTION_LOW_SPEED_MPH: f64 = 25.0;
 pub const LAUNCH_TRACTION_START_G: f64 = 0.12;
 pub const LAUNCH_TRACTION_ROLLING_G: f64 = 0.33;
@@ -814,6 +836,12 @@ impl TruckState {
     /// grades, and stops longer, while an empty deadhead is light and brisk.
     pub fn gross_mass_kg(&self) -> f64 {
         self.tare_kg() + self.cargo_kg.max(0.0)
+    }
+
+    /// Whether this combination is over the federal 80,000 lb GVW cap.
+    /// Tractor + trailer + cargo only; fuel is not counted.
+    pub fn is_over_legal_gvw(&self) -> bool {
+        self.gross_mass_kg() > LEGAL_GVW_KG
     }
 
     /// Engine RPM implied by road speed in the given gear (the current gear
