@@ -1,20 +1,20 @@
-//! Latching pedals: double-tap-and-hold keeps a pedal held hands-free.
+//! Latching a pedal: double-tap-and-hold keeps it held hands-free.
 //!
 //! A free input-accessibility accommodation (owner design, playtest
-//! 2026-07-15): some players cannot keep a key held down through a long pull
-//! or a steady descent snub, and pumping taps tires everyone's fingers
-//! eventually. The latched accelerator is the old hand-throttle knob, a real
-//! cab control; a latched service brake on a long grade cooks the drums
-//! exactly like the brake-fire physics says it should.
+//! 2026-07-15): some players cannot keep a key held down through a steady
+//! descent snub, and pumping taps tires everyone's fingers eventually. The
+//! driving surface uses this machine for the service brake only -- a latched
+//! brake on a long grade cooks the drums exactly like the brake-fire physics
+//! says it should. The throttle key never latches: holding it is only for
+//! moving and for the direction-change hold.
 //!
-//! The gesture lives on the pedal keys themselves, no chord to learn. A bare
-//! double-tap would false-trigger on feathering (players pump the throttle in
-//! taps), so the catch is DOUBLE-TAP-AND-HOLD: tap, then press again and keep
-//! holding about half a second. The caller plays a catch click (its own
-//! sound, distinct from the gear click) and speaks the state both ways.
-//! Release is any fresh press of the same key, which returns the pedal to the
-//! hand; the caller also force-releases on the opposite pedal and on safety
-//! overrides (hazards, emergency braking, the overspeed alarm).
+//! The gesture lives on the pedal key itself, no chord to learn. A bare
+//! double-tap would false-trigger on feathering, so the catch is
+//! DOUBLE-TAP-AND-HOLD: tap, then press again and keep holding about half a
+//! second. The caller plays a catch click (its own sound, distinct from the
+//! gear click) and speaks the state both ways. Release is any fresh press of
+//! the same key, which returns the pedal to the hand; the caller also
+//! force-releases on the opposite pedal.
 //!
 //! The machine is polled with the pedal's held state each frame, so it works
 //! identically for keyboard keys and anything mapped onto them.

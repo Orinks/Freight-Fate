@@ -51,11 +51,11 @@ impl DrivingState {
              forward. Holding a brake through a stop just holds the truck. "
         };
         let latch_help = if ctx.settings.pedal_latch != "off" {
-            "Tap the accelerator or brake, then press again and hold half a \
-             second, to latch the pedal so it stays applied hands-free: a \
-             click and a spoken confirmation mark the catch. Press the same \
-             key once to take the pedal back; the opposite pedal or any \
-             safety alert releases it instantly. "
+            "Tap the brake, then press again and hold half a second, to latch \
+             it so it stays applied hands-free: a click and a spoken \
+             confirmation mark the catch. Press Down arrow once to take it \
+             back; the accelerator releases it instantly. The throttle key \
+             never latches. "
         } else {
             ""
         };

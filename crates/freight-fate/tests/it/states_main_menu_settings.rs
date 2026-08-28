@@ -188,7 +188,7 @@ fn gameplay_subcategory_rows(category: &str) -> &'static [&'static str] {
             "Planned rest-stop stopping assistance",
             "Curve speed assistance",
             "Route-transition assistance",
-            "Latching pedals",
+            "Latching brake",
             "Predictive cruise",
             "Curve callouts",
             "Speed keeper",

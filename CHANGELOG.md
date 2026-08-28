@@ -1002,6 +1002,16 @@
 
 ### Fixed
 
+- **The throttle key no longer latches.** Holding the accelerator never
+  catches a throttle latch -- no spoken "Throttle latched.", no catch
+  click, and no cruise or speed-keeper line about a latched throttle.
+  At a standstill that key is only for moving and for the hold that
+  changes direction, so pumping the pedal to get out of reverse works
+  with a normal hold. The brake can still latch; that setting is now
+  Latching brake, on or off. Older three-way Latching pedals values
+  carry over: anything that was on stays a latched brake, and off stays
+  off.
+
 - **The centered-lane chime now waits until the truck is actually centered.**
   With lane keeping off, easing just inside the guidance wake line could play
   the confirmation while the truck was still drifting. Manual correction now

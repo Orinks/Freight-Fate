@@ -5,8 +5,8 @@
 //! Ported from `tests/test_info_keys.py`, `test_cruise_steps.py` (its
 //! App-driven half; the pure `cruise_step_target` grid is in
 //! `states_driving_core.rs`), `test_driving_manual_controls.py`,
-//! `test_pedal_latch_assists.py` (the cases the latch machinery answers on its
-//! own), `test_driving_modes.py` (the keeper's ease window) and
+//! `test_pedal_latch_assists.py` (brake latch, and that the throttle key never
+//! catches one), `test_driving_modes.py` (the keeper's ease window) and
 //! `test_turn_commitment.py` (the keeper's corner planner) -- everything a real
 //! `DrivingState` can answer without the per-frame loop or a menu state. The
 //! rest are listed here, ignored, with their bodies noted, so the two suites
@@ -15,12 +15,12 @@
 //! `tests/test_controls_reference.py` is already ported in full as
 //! `app_controls_reference.rs`; it is not repeated here.
 
-use ff_core::data::curves::RouteCurve;
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::sim::enforcement_posts::{method_by_kind, EnforcementPost, KIND_MEDIAN};
 use ff_core::sim::hos;
+use ff_core::sim::transmission::REVERSE;
 use ff_core::sim::trip_models::{TripEvent, TripEventData, TripEventKind, Zone};
 use ff_core::sim::vehicle::{HIGH_IDLE_DEFAULT_RPM, HIGH_IDLE_STEP_RPM};
 use ff_core::sim::weather::WeatherKind;
@@ -1269,143 +1269,126 @@ fn test_the_restricted_zone_look_ahead_waits_for_the_spoken_warning() {
     assert_eq!(d.restricted_zone_limit_ahead(&mut app.ctx), None);
 }
 
-// -- the pedal latches (test_pedal_latch_assists.py) ---------------------------------
+// -- the brake latch, and the throttle key that never latches ----------------------
 
 const DT: f64 = 1.0 / 60.0;
 
-/// The real gesture, so the spoken confirmation path is the one players hear:
-/// tap, release, press and hold through the catch.
-fn latch_the_throttle(d: &mut DrivingState, app: &mut TestApp) {
+/// Tap, release, press and hold through the catch window.
+fn catch_gesture(d: &mut DrivingState, app: &mut TestApp, throttle: bool, seconds_held: f64) {
     let run = |held: bool, seconds: f64, d: &mut DrivingState, app: &mut TestApp| {
         let mut t = 0.0;
         while t < seconds {
-            d.update_pedal_latches(&mut app.ctx, held, false, 0.0, 0.0, false, DT);
+            let (up, down) = if throttle {
+                (held, false)
+            } else {
+                (false, held)
+            };
+            d.update_pedal_latches(&mut app.ctx, up, down, 0.0, DT);
             t += DT;
         }
     };
     run(true, 0.2, d, app);
     run(false, 0.2, d, app);
-    run(true, 0.8, d, app);
+    run(true, seconds_held, d, app);
+}
+
+fn throttle_latch_speech(app: &TestApp) -> Vec<String> {
+    app.event_lines()
+        .into_iter()
+        .chain(app.main_lines())
+        .filter(|l| {
+            let lower = l.to_lowercase();
+            lower.contains("throttle latched")
+                || l == "Throttle released."
+                || lower.contains("adaptive cruise holds the speed")
+                || lower.contains("speed keeper holds the speed")
+        })
+        .collect()
 }
 
 #[test]
-fn test_a_plain_catch_keeps_its_plain_line() {
+fn test_holding_the_throttle_never_latches() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     app.clear_speech();
-    latch_the_throttle(&mut d, &mut app);
+    catch_gesture(&mut d, &mut app, true, 0.8);
     assert!(
-        app.event_lines().iter().any(|l| l == "Throttle latched."),
+        throttle_latch_speech(&app).is_empty(),
         "{:?}",
         app.event_lines()
     );
-    assert!(d.throttle_latch.latched);
+    assert!(!d.brake_latch.latched);
+    // Releasing the key must not leave a hidden throttle catch behind:
+    // the function returns the brake, and the throttle side is gone.
+    let down = d.update_pedal_latches(&mut app.ctx, false, false, 0.0, DT);
+    assert!(!down);
 }
 
 #[test]
-fn test_the_catch_line_names_the_authority_holding_the_speed() {
+fn test_a_plain_brake_catch_keeps_its_plain_line() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
-    d.trip.truck.set_air_ready(false);
-    cruise_at(&mut d, &mut app, 60.0);
     app.clear_speech();
-    latch_the_throttle(&mut d, &mut app);
-    let lines = app.event_lines();
+    catch_gesture(&mut d, &mut app, false, 0.8);
     assert!(
-        lines
-            .iter()
-            .any(|l| l == "Throttle latched. Adaptive cruise holds the speed."),
-        "{lines:?}"
-    );
-    assert!(!lines.iter().any(|l| l == "Throttle latched."), "{lines:?}");
-}
-
-#[test]
-fn test_the_catch_line_names_the_keeper() {
-    let mut app = TestApp::new();
-    let mut d = a_drive(&mut app);
-    d.trip.truck.set_air_ready(false);
-    d.trip.truck.engine_on = true;
-    d.trip.truck.velocity_mps = mph_to_mps(25.0);
-    d.engage_keeper(&mut app.ctx, 25.0, "construction", Some(25.0), false);
-    app.clear_speech();
-    latch_the_throttle(&mut d, &mut app);
-    assert!(
-        app.event_lines()
-            .iter()
-            .any(|l| l == "Throttle latched. Speed keeper holds the speed."),
+        app.event_lines().iter().any(|l| l == "Brake latched."),
         "{:?}",
         app.event_lines()
     );
+    assert!(d.brake_latch.latched);
 }
 
 #[test]
-fn test_latch_first_catch_keeps_the_plain_line() {
-    // Owner revision: "latch first" is the pre-change behavior -- the plain
-    // line is the truth, since nothing outranks the latch in this mode, so the
-    // authority line must not appear even with cruise engaged.
+fn test_the_latch_setting_off_drops_a_held_brake_and_says_so() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
-    app.ctx.settings.pedal_latch = "latch first".to_string();
-    d.trip.truck.set_air_ready(false);
-    cruise_at(&mut d, &mut app, 60.0);
-    app.clear_speech();
-    latch_the_throttle(&mut d, &mut app);
-    let lines = app.event_lines();
-    assert!(lines.iter().any(|l| l == "Throttle latched."), "{lines:?}");
-    assert!(
-        !lines
-            .iter()
-            .any(|l| l == "Throttle latched. Adaptive cruise holds the speed."),
-        "{lines:?}"
-    );
-}
-
-#[test]
-fn test_the_latch_setting_off_drops_a_held_latch_and_says_so() {
-    let mut app = TestApp::new();
-    let mut d = a_drive(&mut app);
-    latch_the_throttle(&mut d, &mut app);
-    assert!(d.throttle_latch.latched);
+    catch_gesture(&mut d, &mut app, false, 0.8);
+    assert!(d.brake_latch.latched);
     app.ctx.settings.pedal_latch = "off".to_string();
     app.clear_speech();
-    let (_, _, latched) = d.update_pedal_latches(&mut app.ctx, false, false, 0.0, 0.0, false, DT);
-    assert!(!latched);
+    let down = d.update_pedal_latches(&mut app.ctx, false, false, 0.0, DT);
+    assert!(!down);
+    assert!(!d.brake_latch.latched);
     assert!(
-        app.event_lines().iter().any(|l| l == "Throttle released."),
+        app.event_lines().iter().any(|l| l == "Brake released."),
         "{:?}",
         app.event_lines()
     );
 }
 
 #[test]
-fn test_a_safety_override_surrenders_the_latched_throttle() {
+fn test_the_accelerator_releases_a_latched_brake() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
-    latch_the_throttle(&mut d, &mut app);
+    catch_gesture(&mut d, &mut app, false, 0.8);
+    assert!(d.brake_latch.latched);
     app.clear_speech();
-    d.overspeed_active = true;
-    let (_, _, latched) = d.update_pedal_latches(&mut app.ctx, false, false, 0.0, 0.0, false, DT);
-    assert!(!latched);
+    d.update_pedal_latches(&mut app.ctx, true, false, 0.0, DT);
+    assert!(!d.brake_latch.latched);
     assert!(
-        app.event_lines().iter().any(|l| l == "Throttle released."),
+        app.event_lines().iter().any(|l| l == "Brake released."),
         "{:?}",
         app.event_lines()
     );
 }
 
 #[test]
-fn test_the_catch_never_grabs_the_shift_back_to_forward() {
-    // The catch lands first by design (half a second against six tenths) and
-    // used to wipe the pending shift with it, so a driver pumping the throttle
-    // in reverse re-armed and lost it every single time (owner, at the scale,
-    // 2026-08-21: "I can't get out of reverse?").
+fn test_the_throttle_catch_gesture_never_grabs_the_shift_back_to_forward() {
+    // The catch used to land first (half a second against six tenths) and
+    // wipe the pending shift, so pumping the throttle in reverse re-armed
+    // and lost it every time (owner, at the scale, 2026-08-21: "I can't
+    // get out of reverse?"). The throttle side is gone, so the armed
+    // shift is still there after the same gesture.
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     d.direction_armed = "forward".to_string();
-    latch_the_throttle(&mut d, &mut app);
-    assert!(!d.throttle_latch.latched);
+    catch_gesture(&mut d, &mut app, true, 0.8);
     assert_eq!(d.direction_armed, "forward");
+    assert!(
+        throttle_latch_speech(&app).is_empty(),
+        "{:?}",
+        app.event_lines()
+    );
 }
 
 // -- cases whose mixin has not landed ------------------------------------------------
@@ -1821,29 +1804,16 @@ fn test_controller_back_button_stops_the_driving_voice() {
     // not. The "not" half is covered live above.
 }
 
-// -- a latched throttle yields to the speed authorities ------------------------------
+// -- a latched throttle is gone; the brake latch and a live key remain --------------
 //
-// The rest of `test_pedal_latch_assists.py`: the cases that need the real
-// per-frame loop.
-//
-// Two of Python's rigging tricks have no seam here and are arranged for real
-// instead.
-//
-// * `_latch_throttle` poked `PedalLatch._state` straight to "resting". The
-//   state is private in Rust, so these catch the latch with the real gesture
-//   ([`latch_the_throttle`] above, the same machine the frame loop polls) and
-//   then set the speed the case wants.
-// * `_silence_overspeed_alarm` replaced `_update_overspeed_warning`, because
-//   the dash alarm hard-releases a latched throttle and that is a separate,
-//   pre-existing system. There is no method seam, so these run the truck at a
-//   speed that is genuinely not an overspeed: out on the open interstate
-//   ([`on_the_open_road`]), or inside the warn band of the zone limit. Same
-//   isolation, arranged rather than stubbed.
+// The rest of the old `test_pedal_latch_assists.py` cases that needed the
+// real per-frame loop. Cruise/keeper/curve no longer fight a latched
+// throttle because that latch does not exist. The two hand-held-key cases
+// stay: a physical hold is still live manual override.
 
 /// Out on the corridor, where the posted limit is the interstate's own and 60
 /// miles an hour is not an overspeed. `start_drive` left the truck near the
-/// origin, where the limit is well under 60 and the dash alarm would arm and
-/// drop the latch before the case under test got a frame.
+/// origin, where the limit is well under 60 and the dash alarm would arm.
 fn on_the_open_road(d: &mut DrivingState) {
     d.trip.position_mi = d.trip.total_miles() / 2.0;
     let at = d.trip.position_mi;
@@ -1879,26 +1849,22 @@ fn ready_to_roll(d: &mut DrivingState) {
     d.trip.truck.engine_on = true;
 }
 
-#[test]
-fn test_cruise_holds_its_speed_under_a_latched_throttle() {
-    // The Brandon case: latch caught, cruise engaged -- cruise must drive the
-    // pedal, not fight a throttle ramping to full.
-    let mut app = TestApp::new();
-    let clock = app.fake_pacer_clock();
-    let mut d = a_drive(&mut app);
-    ready_to_roll(&mut d);
-    on_the_open_road(&mut d);
-    latch_the_throttle(&mut d, &mut app);
-    d.trip.truck.velocity_mps = mph_to_mps(60.0);
-    d.engage_cruise(&mut app.ctx, 55.0, false);
+fn press_for(d: &mut DrivingState, app: &mut TestApp, clock: &FakeClock, key: Key, seconds: f64) {
+    app.ctx.input.press(key, Mods::NONE);
+    drive_frames(d, app, clock, seconds);
+}
 
-    drive_frames(&mut d, &mut app, &clock, 3.0);
+fn release_for(d: &mut DrivingState, app: &mut TestApp, clock: &FakeClock, key: Key, seconds: f64) {
+    app.ctx.input.release(key, Mods::NONE);
+    drive_frames(d, app, clock, seconds);
+}
 
-    assert!(d.cruise_mph.is_some()); // cruise never stood down
-    assert!(d.throttle_latch.latched); // and the latch never dropped
-                                       // Cruise is trimming DOWN toward 55: a yielded latch cannot be holding the
-                                       // pedal at full power.
-    assert!(d.trip.truck.throttle < 0.5, "{}", d.trip.truck.throttle);
+fn in_reverse_at_rest(d: &mut DrivingState) {
+    ready_to_roll(d);
+    d.trip.truck.transmission.automatic = true;
+    d.trip.truck.transmission.gear = REVERSE;
+    d.trip.truck.velocity_mps = 0.0;
+    assert!(d.trip.truck.transmission.in_reverse());
 }
 
 #[test]
@@ -1920,177 +1886,132 @@ fn test_a_hand_held_key_still_stands_the_assists_down() {
 }
 
 #[test]
-fn test_the_latch_ramps_back_in_when_the_authority_releases() {
+fn test_the_throttle_catch_gesture_never_holds_the_pedal() {
     let mut app = TestApp::new();
     let clock = app.fake_pacer_clock();
     let mut d = a_drive(&mut app);
     ready_to_roll(&mut d);
     on_the_open_road(&mut d);
-    latch_the_throttle(&mut d, &mut app);
     d.trip.truck.velocity_mps = mph_to_mps(60.0);
-    d.engage_cruise(&mut app.ctx, 55.0, false);
-    drive_frames(&mut d, &mut app, &clock, 2.0);
-    assert!(d.trip.truck.throttle < 0.5, "{}", d.trip.truck.throttle);
-
-    d.cancel_cruise(&mut app.ctx, false);
-    drive_frames(&mut d, &mut app, &clock, 1.0);
-
-    assert!(d.throttle_latch.latched);
-    // the latch has the pedal again
-    assert!(d.trip.truck.throttle > 0.9, "{}", d.trip.truck.throttle);
-}
-
-#[test]
-fn test_keeper_holds_a_zone_speed_under_a_latched_throttle() {
-    let mut app = TestApp::new();
-    let clock = app.fake_pacer_clock();
-    let mut d = a_drive(&mut app);
-    ready_to_roll(&mut d);
-    // A school zone under the wheels, truck over its number. Python ran the
-    // truck at 40 in the 25 and stubbed the dash alarm out; 30 is over the
-    // zone number by the same shape and inside the alarm's seven-mile band,
-    // so the keeper is the only thing shedding speed here.
-    let start = d.trip.position_mi;
-    d.trip
-        .zones
-        .push(Zone::new(start - 0.1, start + 3.0, 25.0, "school"));
-    latch_the_throttle(&mut d, &mut app);
-    d.trip.truck.velocity_mps = mph_to_mps(30.0);
-    d.engage_keeper(&mut app.ctx, 25.0, "school", Some(25.0), false);
-
-    drive_frames(&mut d, &mut app, &clock, 8.0);
-
-    assert!(d.keeper_mph.is_some()); // keeper never stood down
-    assert!(d.throttle_latch.latched);
-    // shedding toward the zone number
-    assert!(
-        d.trip.truck.speed_mph() < 29.0,
-        "{}",
-        d.trip.truck.speed_mph()
-    );
-}
-
-#[test]
-fn test_releasing_the_latch_leaves_cruise_holding() {
-    // Owner rule 2026-08-13: unlatching hands the pedal back to the hand; it
-    // is not a cruise cancel. The brake stays the cancel, unchanged.
-    let mut app = TestApp::new();
-    let clock = app.fake_pacer_clock();
-    let mut d = a_drive(&mut app);
-    ready_to_roll(&mut d);
-    on_the_open_road(&mut d);
-    latch_the_throttle(&mut d, &mut app);
-    d.trip.truck.velocity_mps = mph_to_mps(60.0);
-    d.engage_cruise(&mut app.ctx, 55.0, false);
-    drive_frames(&mut d, &mut app, &clock, 1.0);
-    app.clear_speech();
-    // The truck was set down in the middle of the corridor, so those first
-    // frames paid every toll and passed every patrol behind it. The capture
-    // here sits UNDER the pacer (Python's replaced `ctx.say_event` outright),
-    // and an ambient confirmation queued behind that backlog is dropped as
-    // chatter that would start stale. Let the voice finish first: this case
-    // is about the latch, not the queue.
-    clock.advance(60.0);
-
-    // A fresh press of the throttle key returns the pedal to the hand...
-    app.ctx.input.press(Key::Up, Mods::NONE);
-    drive_frames(&mut d, &mut app, &clock, 0.3);
-    app.ctx.input.release(Key::Up, Mods::NONE);
-    drive_frames(&mut d, &mut app, &clock, 1.0);
-
-    assert!(!d.throttle_latch.latched);
-    let lines = app.event_lines();
-    assert!(lines.iter().any(|l| l == "Throttle released."), "{lines:?}");
-    assert!(d.cruise_mph.is_some()); // ...and cruise never blinked
-    assert!(
-        !lines
-            .iter()
-            .any(|l| l.to_lowercase().contains("cruise canceled")),
-        "{lines:?}"
-    );
-}
-
-#[test]
-fn test_curve_assist_drains_a_latched_throttle() {
-    // The 0.35 service trim must not fight a pedal ramping to full.
-    let mut app = TestApp::new();
-    let clock = app.fake_pacer_clock();
-    let mut d = a_drive(&mut app);
-    ready_to_roll(&mut d);
-    on_the_open_road(&mut d);
-    app.ctx.settings.curve_speed_assist = true;
-    // `_fake_curve(monkeypatch, driving, advisory=35)`: Rust has no seam for
-    // `trip.curve_at`, and does not need one -- a baked curve on the route is
-    // what that method reads.
-    d.trip.curves = vec![a_bend_under_the_truck(d.trip.position_mi, 35)];
-    latch_the_throttle(&mut d, &mut app);
-    d.trip.truck.velocity_mps = mph_to_mps(50.0);
-
-    drive_frames(&mut d, &mut app, &clock, 3.0);
-
-    assert!(d.curve_assist_active);
-    assert!(d.throttle_latch.latched);
-    // yielded and drained
-    assert!(d.trip.truck.throttle < 0.05, "{}", d.trip.truck.throttle);
-    // the trim is actually winning now
-    assert!(
-        d.trip.truck.speed_mph() < 48.0,
-        "{}",
-        d.trip.truck.speed_mph()
-    );
-}
-
-#[test]
-fn test_latch_first_mode_keeps_the_old_override_meaning() {
-    // Owner revision: "latch first" is the pre-change behavior -- a latched
-    // throttle is a manual override and cruise stands down (stays engaged,
-    // waiting, while the latch drives the pedal).
-    let mut app = TestApp::new();
-    let clock = app.fake_pacer_clock();
-    let mut d = a_drive(&mut app);
-    app.ctx.settings.pedal_latch = "latch first".to_string();
-    ready_to_roll(&mut d);
-    on_the_open_road(&mut d);
-    latch_the_throttle(&mut d, &mut app);
-    d.trip.truck.velocity_mps = mph_to_mps(60.0);
-    d.engage_cruise(&mut app.ctx, 55.0, false);
-
-    drive_frames(&mut d, &mut app, &clock, 2.0);
-
-    assert!(d.cruise_mph.is_some()); // engaged, standing down
-    assert!(d.throttle_latch.latched);
-    // the latch owns the pedal, old style
-    assert!(d.trip.truck.throttle > 0.9, "{}", d.trip.truck.throttle);
-    assert!(!d.latch_yielding);
-}
-
-#[test]
-fn test_the_brake_key_hard_releases_the_latch_and_cancels_cruise() {
-    // Spec: brake tap still hard-releases the latch and cancels cruise --
-    // unchanged behavior, but the return-shape refactor rebuilt the code
-    // around it, and nothing pinned this before now.
-    let mut app = TestApp::new();
-    let clock = app.fake_pacer_clock();
-    let mut d = a_drive(&mut app);
-    ready_to_roll(&mut d);
-    on_the_open_road(&mut d);
-    latch_the_throttle(&mut d, &mut app);
-    d.trip.truck.velocity_mps = mph_to_mps(60.0);
-    d.engage_cruise(&mut app.ctx, 55.0, false);
-    drive_frames(&mut d, &mut app, &clock, 1.0);
+    let audio = app.record_audio();
     app.clear_speech();
 
-    app.ctx.input.press(Key::Down, Mods::NONE);
-    drive_frames(&mut d, &mut app, &clock, 0.3);
-    app.ctx.input.release(Key::Down, Mods::NONE);
+    press_for(&mut d, &mut app, &clock, Key::Up, 0.2);
+    release_for(&mut d, &mut app, &clock, Key::Up, 0.2);
+    press_for(&mut d, &mut app, &clock, Key::Up, 0.8);
+    release_for(&mut d, &mut app, &clock, Key::Up, 1.0);
 
-    assert!(!d.throttle_latch.latched);
     assert!(
-        app.event_lines().iter().any(|l| l == "Throttle released."),
+        throttle_latch_speech(&app).is_empty(),
         "{:?}",
         app.event_lines()
     );
-    assert!(d.cruise_mph.is_none());
+    assert!(
+        !audio.borrow().played.iter().any(|(k, _, _)| k == "ui/tick"),
+        "{:?}",
+        audio.borrow().played
+    );
+    assert!(
+        d.trip.truck.throttle < 0.05,
+        "throttle stayed applied after release: {}",
+        d.trip.truck.throttle
+    );
+}
+
+#[test]
+fn test_a_normal_throttle_hold_leaves_reverse() {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    in_reverse_at_rest(&mut d);
+    let audio = app.record_audio();
+    app.clear_speech();
+
+    press_for(&mut d, &mut app, &clock, Key::Up, 0.8);
+
+    assert!(
+        !d.trip.truck.transmission.in_reverse(),
+        "gear {}",
+        d.trip.truck.transmission.gear
+    );
+    assert_eq!(d.trip.truck.transmission.gear, 1);
+    assert!(
+        throttle_latch_speech(&app).is_empty(),
+        "{:?}",
+        app.event_lines()
+    );
+    assert!(
+        !audio.borrow().played.iter().any(|(k, _, _)| k == "ui/tick"),
+        "{:?}",
+        audio.borrow().played
+    );
+}
+
+#[test]
+fn test_pumping_the_throttle_still_leaves_reverse() {
+    // The remaining reverse fight after the 2026-08-21 trap patch: a driver
+    // who taps then holds -- pumping to get moving -- used to catch the
+    // throttle latch at half a second and lose the six-tenth shift.
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    in_reverse_at_rest(&mut d);
+    let audio = app.record_audio();
+    app.clear_speech();
+
+    press_for(&mut d, &mut app, &clock, Key::Up, 0.2);
+    release_for(&mut d, &mut app, &clock, Key::Up, 0.2);
+    press_for(&mut d, &mut app, &clock, Key::Up, 0.8);
+
+    assert!(
+        !d.trip.truck.transmission.in_reverse(),
+        "gear {}",
+        d.trip.truck.transmission.gear
+    );
+    assert_eq!(d.trip.truck.transmission.gear, 1);
+    assert!(
+        throttle_latch_speech(&app).is_empty(),
+        "{:?}",
+        app.event_lines()
+    );
+    assert!(
+        !audio.borrow().played.iter().any(|(k, _, _)| k == "ui/tick"),
+        "{:?}",
+        audio.borrow().played
+    );
+}
+
+#[test]
+fn test_the_brake_latch_still_holds_hands_free() {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    ready_to_roll(&mut d);
+    on_the_open_road(&mut d);
+    d.trip.truck.velocity_mps = mph_to_mps(30.0);
+    let audio = app.record_audio();
+    app.clear_speech();
+    catch_gesture(&mut d, &mut app, false, 0.8);
+    assert!(d.brake_latch.latched);
+    assert!(
+        app.event_lines().iter().any(|l| l == "Brake latched."),
+        "{:?}",
+        app.event_lines()
+    );
+    assert!(
+        audio.borrow().played.iter().any(|(k, _, _)| k == "ui/tick"),
+        "{:?}",
+        audio.borrow().played
+    );
+
+    // Hands off: the blended brake latch must keep the pedal down.
+    drive_frames(&mut d, &mut app, &clock, 1.0);
+    assert!(d.brake_latch.latched);
+    assert!(
+        d.trip.truck.brake > 0.5,
+        "latched brake did not stay applied: {}",
+        d.trip.truck.brake
+    );
 }
 
 #[test]
@@ -2113,87 +2034,6 @@ fn test_a_hand_held_key_stands_the_keeper_down() {
 
     assert!(d.keeper_mph.is_some()); // engaged, waiting for the key to lift
     assert!(d.trip.truck.throttle > 0.9, "{}", d.trip.truck.throttle); // the hand owns the pedal
-}
-
-/// `_fake_curve(monkeypatch, driving, advisory)`: one bend the truck is
-/// already inside, matching the real `RouteCurve` constructor.
-fn a_bend_under_the_truck(at_mi: f64, advisory_mph: i64) -> RouteCurve {
-    let start_mi = at_mi - 0.05;
-    RouteCurve {
-        start_mi,
-        apex_mi: start_mi + 1.0,
-        end_mi: start_mi + 2.05,
-        direction: 'R',
-        advisory_mph,
-        min_radius_ft: 1500,
-        deflection_deg: 60.0,
-        connector: false,
-    }
-}
-
-#[test]
-fn test_curve_assist_jake_arrives_once_the_latched_throttle_drains() {
-    // On a real downgrade the assist raises the retarder -- but on the engage
-    // frame a yielded latch is still draining, so the capability check must
-    // retry while the latch is yielding.
-    //
-    // Python faked the descent with `trip.grade_at = lambda _: -0.06`. Rust
-    // has no seam for it, so this drives the real thing: I-70 west of Denver,
-    // parked on a mile the bake reads as a genuine downgrade.
-    let mut app = TestApp::new();
-    let clock = app.fake_pacer_clock();
-    let mut d = a_drive_between(&mut app, "Denver", "Grand Junction", "company yard");
-    ready_to_roll(&mut d);
-    app.ctx.settings.curve_speed_assist = true;
-    // `jake_capable` needs a truck actually in gear -- a drive with velocity
-    // set directly (skipping a real launch) is still in neutral. Set up
-    // BEFORE the road is chosen, because the mile this needs depends on the
-    // truck: the assist raises the retarder on a grade the service brakes
-    // could not hold, which is weight and speed as much as slope.
-    d.trip.truck.transmission.automatic = true;
-    d.trip.truck.transmission.gear = 9;
-    d.trip.truck.rpm = 1500.0;
-    d.trip.truck.grip = 1.0;
-    d.trip.truck.velocity_mps = mph_to_mps(50.0);
-    let total = d.trip.total_miles();
-    // Ask the predicate for the road rather than guessing a percentage: three
-    // percent used to qualify and no longer does, because the drums hold three
-    // percent all day (see `states_driving_jake_line`).
-    let mut steep = None;
-    let mut mile = 0.0;
-    while mile < total {
-        d.trip.position_mi = mile;
-        d.trip.truck.grade = d.trip.grade_at(mile);
-        if d.retarder_warranted() {
-            steep = Some(mile);
-            break;
-        }
-        mile += 0.25;
-    }
-    let steep = steep.expect("I-70 west of Denver carries a grade the drums cannot hold");
-    d.trip.position_mi = steep;
-    assert!(d.on_downgrade());
-    assert!(d.retarder_warranted());
-    assert!(
-        d.assist_jake_allowed(&mut app.ctx),
-        "no engine-brake ban on this mile"
-    );
-    d.trip.truck.grade = d.trip.grade_at(steep);
-    latch_the_throttle(&mut d, &mut app);
-    d.trip.truck.velocity_mps = mph_to_mps(50.0);
-
-    // No curve yet: let the latch ramp the pedal all the way up first, so the
-    // corner arrives on a throttle that is genuinely still high -- not one
-    // that just happens to read low because it never got the chance to ramp.
-    // That is the whole scenario the retry exists for.
-    drive_frames(&mut d, &mut app, &clock, 1.5);
-    assert!(d.trip.truck.throttle > 0.9, "{}", d.trip.truck.throttle);
-
-    d.trip.curves = vec![a_bend_under_the_truck(d.trip.position_mi, 30)];
-    drive_frames(&mut d, &mut app, &clock, 3.0);
-
-    assert!(d.curve_assist_active);
-    assert!(d.curve_assist_jake); // engaged after the drain, not never
 }
 
 // `test_rolling_t_plans_exact_sleep_stop_without_silently_selecting_exit`,

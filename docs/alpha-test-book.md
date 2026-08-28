@@ -577,26 +577,27 @@ Pass when: you always know how the ramp ends before you are on it, and
 you always have real time to brake for it. A free-flow ramp still
 passes in compressed time.
 
-### 4.7 Latching pedals
+### 4.7 Latching brake
 
-Setup: Settings, Driving assistance, Latching pedals on (the default).
+Setup: Settings, Driving assistance, Latching brake on (the default).
 
-Do: on open highway, tap the accelerator, then press it again and hold
-for half a second. Let go. Later, press it once to take it back. Latch
-it again and tap the brake. Latch the brake on a long downgrade and
-listen to the drums.
+Do: stop, shift to reverse, then hold the throttle to go forward.
+Pump the pedal -- tap, then hold -- and do the same. On a long
+downgrade, tap the brake, then press it again and hold for half a
+second. Let go. Later, press it once to take it back. Latch it
+again and tap the accelerator.
 
-Listen for: a catch click clearly different from the gear click, then
-"Throttle latched."; the truck holding power with your hands off;
-"Throttle released." on the single press or instantly on the opposite
-pedal; hazards, emergency braking, and the overspeed alarm dropping a
-latched throttle on their own, spoken. A latched brake on a grade
-heats and fades exactly like a held one -- the latch never edits
-physics.
+Listen for: getting out of reverse with a normal hold, including
+after pumping, with no "Throttle latched." and no catch click on
+the throttle. A brake catch click clearly different from the gear
+click, then "Brake latched."; the drums holding with your hands
+off; "Brake released." on the single press or instantly on the
+accelerator. A latched brake on a grade heats and fades exactly
+like a held one -- the latch never edits physics.
 
-Pass when: the gesture never fires from ordinary pumping taps, every
-latch and release is spoken, and no alarm ever has to shout over a
-latched pedal that refuses to let go.
+Pass when: the throttle key never latches, reverse lets go with a
+normal hold, the brake gesture never fires from ordinary pumping
+taps, and every brake latch and release is spoken.
 
 ## Chapter 5. Traffic with a clock
 

@@ -173,7 +173,7 @@ impl SettingsCategoryState {
         direction: i64,
     ) {
         if field == "pedal_latch" {
-            let modes = ["assists first", "latch first", "off"];
+            let modes = ["on", "off"];
             let i = cycle_index(&modes, &ctx.settings.pedal_latch, direction, 0);
             ctx.settings.pedal_latch = modes[i].to_string();
             self.announce(ctx);

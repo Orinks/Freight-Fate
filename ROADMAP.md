@@ -3351,6 +3351,10 @@ onto exit signalling.
       rolling into reverse is the dangerous direction, ending up in forward
       at a standstill is not.
 
+      The workaround was not enough -- pumping still fought the shared hold
+      -- so the throttle latch itself was removed on 2026-08-28. Holding the
+      throttle key never catches a latch; the brake latch remains.
+
       TWO THINGS THE INVESTIGATION GOT WRONG, recorded so the next one does
       not repeat them:
 
@@ -8967,6 +8971,12 @@ Deliver -> Earn and level up -> Repeat
       swap the catch click for a proper cab sound from the NAS library,
       and the driving-school lesson that teaches latch + jake + brake
       heat together (school-curriculum bullet).
+- [x] **Throttle latch removed -- 2026-08-28.** Players did not use
+      the throttle latch, and it still fought getting out of reverse
+      after the 2026-08-21 reverse-trap patch. Holding the throttle
+      key never catches a latch: no spoken line, no click, no cruise
+      or keeper variant. Brake latch remains as Settings, Driving
+      assistance, Latching brake, on or off.
 - [ ] **Endorsements earned by coursework, not just cash (owner idea
       2026-07-15).** Today an endorsement is a level threshold or a paid
       course with no learning in it; both should route through the

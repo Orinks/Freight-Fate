@@ -163,7 +163,7 @@ pub const ACC_GAP_DEFAULT: &str = "normal";
 
 pub const LANE_CUE_LOUDNESS_MODES: [&str; 3] = ["subtle", "standard", "prominent"];
 pub const DESCENT_SPEED_CONTROL_MODES: [&str; 4] = ["off", "realistic", "balanced", "interactive"];
-pub const PEDAL_LATCH_MODES: [&str; 3] = ["assists first", "latch first", "off"];
+pub const PEDAL_LATCH_MODES: [&str; 2] = ["on", "off"];
 pub const UPDATE_CHANNELS: [&str; 3] = ["", "stable", "dev"];
 
 /// One preset field's value: the assist switches are bools, descent speed
@@ -444,17 +444,14 @@ settings_fields! {
     /// level, so it sits outside the assistance presets the way the speed
     /// keeper does.
     predictive_cruise: bool = true => bool_truthy,
-    /// Double-tap-and-hold latches the accelerator or brake key so a long
-    /// pull or a steady snub needs no sustained hold; a fresh press of the
-    /// same key, the opposite pedal, or any safety override releases it.
-    /// The same input-accessibility layer as the keeper: presets never
-    /// touch it. Realism cover: the hand-throttle knob is a real cab
-    /// control. Modes (owner revision 2026-08-13): "assists first" lets
-    /// cruise, the speed keeper, and curve assist outrank a latched
-    /// throttle; "latch first" is the original meaning, the latch as a
-    /// manual override the assists stand down for; "off" is the plain
-    /// pedals.
-    pedal_latch: String = "assists first" => pedal_latch,
+    /// Double-tap-and-hold latches the brake key so a steady snub needs
+    /// no sustained hold; a fresh press of the same key or the opposite
+    /// pedal releases it. The throttle key never latches: at a standstill
+    /// it is only for moving and for the direction-change hold. The same
+    /// input-accessibility layer as the keeper: presets never touch it.
+    /// "on" / "off"; older three-way values ("assists first", "latch first")
+    /// migrate to on.
+    pedal_latch: String = "on" => pedal_latch,
     /// The co-driver reads the road: spoken curve calls from the baked
     /// geometry ("Sharp left, quarter mile, advise 35"), only for bends that
     /// actually demand slowing at your current speed. The first audible

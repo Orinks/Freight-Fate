@@ -725,14 +725,10 @@ pub struct DrivingState {
     // The gear engages only past DIRECTION_CHANGE_HOLD_S.
     pub direction_armed: String,
     pub direction_hold_s: f64,
-    // Latching pedals (double-tap-and-hold, see sim/pedal_latch.py):
-    // a latched pedal reads as held everywhere downstream.
-    pub throttle_latch: PedalLatch,
+    // Latching brake (double-tap-and-hold, see sim/pedal_latch.rs):
+    // a latched brake reads as held everywhere downstream. The throttle
+    // key never latches.
     pub brake_latch: PedalLatch,
-    // True while a caught throttle latch is standing down for a speed
-    // authority (see _speed_authority_engaged); the curve block reads
-    // it to retry the jake once the yielded throttle drains.
-    pub latch_yielding: bool,
     // Curve calls already made this trip (keys are curve entry miles).
     pub pacenote_spoken: HashSet<i64>,
     pub status_text: String,

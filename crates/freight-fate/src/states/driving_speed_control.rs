@@ -130,12 +130,9 @@ impl DrivingState {
     /// `_speed_authority_engaged()`: whether an automatic speed system
     /// currently owns the pedal.
     ///
-    /// This is the latch's whole priority rule: a LATCHED throttle is the
-    /// lowest-priority speed input and contributes nothing while any of these
-    /// is engaged (owner design 2026-08-13, after tester Brandon latched for
-    /// the whole trip expecting the assists to drive). A hand-held key is a
-    /// different thing entirely -- live manual override -- and never consults
-    /// this.
+    /// Cruise, the speed keeper, or curve assist is holding or shedding
+    /// speed. A hand-held throttle is live manual override and never
+    /// consults this.
     pub fn speed_authority_engaged(&self) -> bool {
         self.cruise_mph.is_some() || self.keeper_mph.is_some() || self.curve_assist_active
     }

@@ -119,8 +119,8 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 14] = [
     // the one setting, which is a real hazard in a spoken list.
     (
         "pedal_latch",
-        "Latching pedals",
-        "Tap the accelerator or brake, then press again and hold for half a second: a click and a spoken confirmation latch the pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly. Assists first, the default, lets cruise, the speed keeper, and curve assist manage speed over a latched throttle. Latch first treats the latch as a manual override those assists stand down for, the original behavior. Off turns latching pedals plain. Presets never change this.",
+        "Latching brake",
+        "Tap the brake, then press again and hold for half a second: a click and a spoken confirmation latch it so it stays applied hands-free. Press Down arrow once to take it back; the accelerator releases it instantly. The throttle key never latches -- holding it is only for moving and for the hold that changes direction. Off turns the brake latch plain. Presets never change this.",
     ),
     (
         "predictive_cruise",

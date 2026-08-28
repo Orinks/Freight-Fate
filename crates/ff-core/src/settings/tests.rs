@@ -100,7 +100,7 @@ fn the_defaults_match_the_python_dataclass() {
         "exit_speed_assist": true, "destination_approach_assist": false,
         "selected_stop_assist": false, "curve_speed_assist": true,
         "route_transition_assist": true, "speed_keeper": true, "predictive_cruise": true,
-        "pedal_latch": "assists first", "curve_callouts": true, "master_volume": 1.0,
+        "pedal_latch": "on", "curve_callouts": true, "master_volume": 1.0,
         "sfx_volume": 0.8, "music_volume": 0.5, "radio_volume": 0.25, "radio_enabled": true,
         "radio_station_id": "route_playlist", "radio_streamer_safe": false,
         "weather_volume": 0.65, "engine_volume": 0.55, "ui_volume": 0.9,
@@ -203,7 +203,7 @@ fn unknown_keys_are_ignored_and_wrong_shapes_take_the_python_fallbacks() {
     assert_eq!(s.lane_cue_loudness, "standard");
     assert_eq!(s.descent_speed_control, "realistic");
     assert_eq!(s.acc_following_gap, "normal");
-    assert_eq!(s.pedal_latch, "assists first");
+    assert_eq!(s.pedal_latch, "on");
     assert_eq!(s.event_backend, "SAPI");
     assert_eq!(s.radio_station_id, "route_playlist");
     assert_eq!(s.mastodon_linked_handle, "");
@@ -1013,22 +1013,21 @@ fn lane_keeping_labels_carry_their_clause_and_the_fallback_covers_junk() {
 
 #[test]
 fn test_legacy_bool_settings_migrate_to_modes() {
-    // Owner revision 2026-08-13: pedal_latch grew from a bool to a three-way
-    // mode: True -> "assists first", False -> "off". (The Python test set
-    // the bool on the dataclass and saved; the typed field takes the file
-    // route.)
-    assert_eq!(
-        from_json(json!({"pedal_latch": true})).pedal_latch,
-        "assists first"
-    );
+    // The throttle latch is gone: a bool true, and the old three-way
+    // "assists first" / "latch first" strings, all land on brake-only on.
+    assert_eq!(from_json(json!({"pedal_latch": true})).pedal_latch, "on");
     assert_eq!(from_json(json!({"pedal_latch": false})).pedal_latch, "off");
     assert_eq!(
         from_json(json!({"pedal_latch": "latch first"})).pedal_latch,
-        "latch first"
+        "on"
+    );
+    assert_eq!(
+        from_json(json!({"pedal_latch": "assists first"})).pedal_latch,
+        "on"
     );
     assert_eq!(
         from_json(json!({"pedal_latch": "sideways"})).pedal_latch,
-        "assists first"
+        "on"
     );
 }
 

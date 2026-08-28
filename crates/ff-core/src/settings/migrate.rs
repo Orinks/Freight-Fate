@@ -71,11 +71,12 @@ pub(crate) mod coerce {
         }
     }
 
-    /// `pedal_latch` briefly shipped as a bool; the migration maps the two
-    /// bools over, then checks membership.
+    /// `pedal_latch` shipped as a bool, then a three-way that also caught
+    /// the throttle. Bool true and the old "assists first" / "latch first"
+    /// strings land on "on" (brake latch only); false and "off" stay off.
     pub(crate) fn pedal_latch(target: &mut String, value: &Value, key: &str) {
         match value {
-            Value::Bool(true) => *target = "assists first".to_string(),
+            Value::Bool(true) => *target = "on".to_string(),
             Value::Bool(false) => *target = "off".to_string(),
             other => str_checked(target, other, key),
         }
@@ -461,10 +462,14 @@ impl Settings {
         {
             s.acc_following_gap = ACC_GAP_DEFAULT.to_string();
         }
-        // (Latching pedals briefly shipped as a bool; the raw copy mapped
-        // old saves over.)
+        // Latching brake used to be a three-way that also caught the
+        // throttle. The throttle half is gone; anything that was on
+        // stays a latched brake.
+        if s.pedal_latch == "assists first" || s.pedal_latch == "latch first" {
+            s.pedal_latch = "on".to_string();
+        }
         if !PEDAL_LATCH_MODES.contains(&s.pedal_latch.as_str()) {
-            s.pedal_latch = "assists first".to_string();
+            s.pedal_latch = "on".to_string();
         }
         // The two-value verbosity became a four-rung ladder (S4). A terse
         // player asked for less and lands on quiet; everyone else on

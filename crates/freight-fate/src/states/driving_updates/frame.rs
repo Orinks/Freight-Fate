@@ -154,44 +154,18 @@ impl DrivingState {
             0.0
         };
         let pad_brake = if pad_on { ctx.controller.brake() } else { 0.0 };
-        let mut key_up = ctx.input.is_pressed(Key::Up);
+        let key_up = ctx.input.is_pressed(Key::Up);
         let mut key_down = ctx.input.is_pressed(Key::Down);
         let b_held = ctx.input.is_pressed(Key::B);
-        // Latching pedals: after the double-tap-and-hold gesture a pedal
-        // reads as held right here, so everything downstream -- the reverse
-        // gesture, cruise cancel, the hazard's brake answer -- sees one
-        // truth. Microsleeps stay on the raw keys: only a live reaction
-        // proves the driver awake.
-        // The latch releases on the emergency application, so it has to see the
-        // pad's version of it too. Read raw here rather than gated on backing:
-        // a trigger buried to the floor should drop a latched pedal whichever
-        // direction the truck is going.
-        let (hand_up, latched_key_down, throttle_latched) = self.update_pedal_latches(
-            ctx,
-            key_up,
-            key_down,
-            pad_throttle,
-            pad_brake,
-            b_held || pad_brake >= PAD_EMERGENCY_BRAKE,
-            dt,
-        );
-        key_down = latched_key_down;
-        // The latch is the LOWEST-priority speed input in "assists first"
-        // mode: while cruise, the keeper, or curve assist is engaged it
-        // contributes nothing, and it ramps back in when the last of them
-        // releases -- no re-gesture (owner design 2026-08-13). A hand-held
-        // key stays a live manual override, which is why the assists are
-        // handed hand_accelerating below rather than this blended value.
-        // "latch first" is the original meaning: the latch is the driver
-        // insisting on speed, so the assists see it as a hand and stand
-        // down instead.
-        let latch_mode = ctx.settings.pedal_latch.clone();
-        self.latch_yielding =
-            throttle_latched && latch_mode == "assists first" && self.speed_authority_engaged();
-        key_up = hand_up || (throttle_latched && !self.latch_yielding);
+        // A latched brake reads as held right here, so everything
+        // downstream -- the reverse gesture, cruise cancel, the hazard's
+        // brake answer -- sees one truth. Microsleeps stay on the raw
+        // keys: only a live reaction proves the driver awake.
+        // The throttle key never latches: holding it is only for moving
+        // and for the direction-change hold.
+        key_down = self.update_pedal_latches(ctx, key_up, key_down, pad_throttle, dt);
         let accelerating = key_up || pad_throttle > 0.05;
-        let assist_up = hand_up || (throttle_latched && latch_mode == "latch first");
-        let hand_accelerating = assist_up || pad_throttle > 0.05;
+        let hand_accelerating = accelerating;
         let braking_key = key_down || pad_brake > 0.05;
         // The shift gesture keys off a fresh press, so it reads the trigger's
         // instantaneous position rather than the smoothed accelerate/brake

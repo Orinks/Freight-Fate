@@ -22,8 +22,8 @@
 //! * [`status`] -- the Tab status screen's lines, the gear name and the
 //!   air-brake sentence.
 //! * [`help`] -- F1: the keyboard layout, or the pad's, following the device.
-//! * [`latches`] -- `_update_pedal_latches`, called once per frame by
-//!   `driving_updates` with the raw pedal inputs.
+//! * [`latches`] -- `_update_pedal_latches`, the brake latch only, called
+//!   once per frame by `driving_updates` with the raw pedal inputs.
 //! * [`pending`] -- TEMPORARY stubs for everything this file calls on a mixin
 //!   that has not been ported yet, exactly as `driving_events::pending` works.
 //!   `driving_speed_control` shares them.
