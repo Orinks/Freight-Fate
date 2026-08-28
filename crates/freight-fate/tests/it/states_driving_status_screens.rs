@@ -345,9 +345,19 @@ fn test_route_and_driver_traffic_name_box_truck_with_cruise_set() {
     );
 
     let traffic_lines = app_lines(&mut harness, "traffic");
+    let app_traffic: Vec<_> = traffic_lines
+        .iter()
+        .filter(|line| line.starts_with("Traffic:"))
+        .cloned()
+        .collect();
     assert_eq!(
-        traffic_lines,
-        vec!["Traffic: Slow box truck, 2.2 miles ahead, 60 miles per hour."],
+        app_traffic,
+        vec!["Traffic: Slow box truck, 2.2 miles ahead, 60 miles per hour.".to_string()],
+        "{traffic_lines:#?}"
+    );
+    assert_eq!(
+        traffic_lines.last().map(String::as_str),
+        Some("Back to Driver apps"),
         "{traffic_lines:#?}"
     );
     let spoken = route_lines.join(" ").to_lowercase();
