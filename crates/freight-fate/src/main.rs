@@ -197,6 +197,7 @@ const KNOWN_SWITCHES: &[&str] = &[
     "--descent",
     "--dir",
     "--find",
+    "--facility",
     "--from",
     "--headless",
     "--help",
@@ -253,8 +254,11 @@ Drive tools:
                                     launchable road family and current world instance.
                                     Destination is
                                     the delivery off-ramp at the end of the
-                                    route; departure scans loaded facility
-                                    exits and their on-ramps from current world data. State
+                                    route; departure scans a small route sample
+                                    for loaded facility exits by default. Use
+                                    --routes all for an exhaustive inventory;
+                                    each result prints a direct --facility launch
+                                    that does not rescan the world. State
                                     transitions requiring a live player history are not road-launchable;
                                     --from/--to/--seed/--scan and
                                     the assist switches refine the search
@@ -429,7 +433,9 @@ fn playtest_road(args: &[String]) -> i32 {
         return 1;
     }
     if has(args, "--ai") && opts.lane_keeping.as_deref() != Some("full") {
-        eprintln!("--ai requires full lane keeping; remove the conflicting --lane-keeping setting.");
+        eprintln!(
+            "--ai requires full lane keeping; remove the conflicting --lane-keeping setting."
+        );
         return 1;
     }
 
@@ -613,14 +619,23 @@ fn road_builder(hit: road::Hit, args: &[String]) -> app::InitialState {
 }
 
 fn road_options(args: &[String]) -> road::RoadOptions {
+    let feature = flag_value(args, "--find").unwrap_or_default();
+    let routes = flag_value(args, "--routes").unwrap_or_else(|| {
+        if feature == "departure" {
+            road::RANDOM_ROUTES.to_string()
+        } else {
+            "all".to_string()
+        }
+    });
     let mut opts = road::RoadOptions {
         origin: flag_value(args, "--from"),
         destination: flag_value(args, "--to"),
-        routes: flag_value(args, "--routes").unwrap_or_else(|| "all".to_string()),
+        facility: flag_value(args, "--facility"),
+        routes,
         seed: flag_i64(args, "--seed"),
         sample: flag_usize(args, "--sample").unwrap_or(road::RANDOM_SAMPLE),
         max_miles: flag_f64(args, "--max-miles").unwrap_or(road::RANDOM_MAX_MILES),
-        feature: flag_value(args, "--find").unwrap_or_default(),
+        feature,
         at: flag_f64(args, "--at"),
         pick: flag_usize(args, "--pick").unwrap_or(0),
         trip_seed: flag_i64(args, "--trip-seed"),

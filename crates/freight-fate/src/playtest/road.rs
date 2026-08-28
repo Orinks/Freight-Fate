@@ -44,8 +44,9 @@ use super::MPH_PER_MPS;
 
 pub mod destination;
 
-/// `--routes random` is a bounded, seeded sample from the world. The default
-/// scan uses every currently supported pair instead of a curated corridor list.
+/// `--routes random` is a bounded, seeded sample from the world. Departure
+/// discovery uses this by default; `--routes all` remains available for an
+/// exhaustive inventory.
 pub const RANDOM_ROUTES: &str = "random";
 /// Long hauls make a feature search crawl and put the interesting mile hours
 /// from the start. Past this the draw takes another pair instead.
@@ -54,7 +55,7 @@ pub const RANDOM_MAX_MILES: f64 = 600.0;
 pub const RANDOM_SAMPLE: usize = 6;
 
 /// A stable trip roll keeps a scanned departure reproducible when it is
-/// launched later with `--pick`. It does not choose a facility or corridor.
+/// launched later. It does not choose a facility or corridor.
 const DEPARTURE_TRIP_SEED: i64 = 0;
 
 pub const FEATURES: [&str; 12] = [
@@ -145,6 +146,7 @@ impl Hit {
 pub struct RoadOptions {
     pub origin: Option<String>,
     pub destination: Option<String>,
+    pub facility: Option<String>,
     pub routes: String,
     pub seed: Option<i64>,
     pub sample: usize,
@@ -183,6 +185,7 @@ impl Default for RoadOptions {
         RoadOptions {
             origin: None,
             destination: None,
+            facility: None,
             routes: "all".to_string(),
             seed: None,
             sample: RANDOM_SAMPLE,
@@ -229,7 +232,10 @@ pub fn route_pairs(world: &'static World, opts: &RoadOptions) -> Vec<(String, St
     } else {
         all_world_pairs(world)
     };
-    let origin = opts.origin.as_deref().map(|name| world.resolve_city_key(name));
+    let origin = opts
+        .origin
+        .as_deref()
+        .map(|name| world.resolve_city_key(name));
     let destination = opts
         .destination
         .as_deref()
@@ -239,12 +245,53 @@ pub fn route_pairs(world: &'static World, opts: &RoadOptions) -> Vec<(String, St
         .filter(|(from, to)| {
             origin
                 .as_deref()
-                .map_or(true, |wanted| world.resolve_city_key(from) == wanted)
+                .is_none_or(|wanted| world.resolve_city_key(from) == wanted)
                 && destination
                     .as_deref()
-                    .map_or(true, |wanted| world.resolve_city_key(to) == wanted)
+                    .is_none_or(|wanted| world.resolve_city_key(to) == wanted)
         })
         .collect()
+}
+
+/// Candidate city pairs for a loaded departure search.
+///
+/// Exhaustive departure discovery lets `build_trip` perform the single route
+/// resolution pass it already needs. Sending it through `all_world_pairs`
+/// first would resolve every supported route twice. Sampled and exact
+/// selectors continue to use the normal bounded route picker.
+fn departure_candidate_pairs(world: &'static World, opts: &RoadOptions) -> Vec<(String, String)> {
+    if opts.routes == RANDOM_ROUTES || (opts.origin.is_some() && opts.destination.is_some()) {
+        return route_pairs(world, opts);
+    }
+    let names = world.city_names();
+    let wanted_origin = opts
+        .origin
+        .as_deref()
+        .map(|name| world.resolve_city_key(name));
+    let wanted_destination = opts
+        .destination
+        .as_deref()
+        .map(|name| world.resolve_city_key(name));
+    let mut pairs = Vec::new();
+    for origin in &names {
+        if wanted_origin
+            .as_deref()
+            .is_some_and(|wanted| wanted != origin)
+        {
+            continue;
+        }
+        for destination in &names {
+            if origin == destination
+                || wanted_destination
+                    .as_deref()
+                    .is_some_and(|wanted| wanted != destination)
+            {
+                continue;
+            }
+            pairs.push((origin.clone(), destination.clone()));
+        }
+    }
+    pairs
 }
 
 /// Every currently supported directed corridor, discovered from the world.
@@ -364,7 +411,14 @@ pub fn find_feature(
     seed: Option<i64>,
 ) -> Vec<Hit> {
     if feature == "departure" {
-        return departure_hits(world, opts, seed);
+        let owned_pairs;
+        let departure_pairs = if pairs.is_empty() {
+            owned_pairs = departure_candidate_pairs(world, opts);
+            &owned_pairs
+        } else {
+            pairs
+        };
+        return departure_hits(world, departure_pairs, opts, seed);
     }
     let mut hits: Vec<Hit> = Vec::new();
     for (origin, destination) in pairs {
@@ -432,33 +486,36 @@ pub fn find_feature(
 /// Loaded facility departures that can enter a real outbound road from the
 /// current world data. A candidate uses a catalog cargo the facility ships,
 /// its own turn-level departure chain, and every supported world corridor.
-fn departure_hits(world: &'static World, opts: &RoadOptions, seed: Option<i64>) -> Vec<Hit> {
-    let wanted_origin = opts.origin.as_deref().map(|name| world.resolve_city_key(name));
-    let wanted_destination = opts
-        .destination
-        .as_deref()
-        .map(|name| world.resolve_city_key(name));
-    let mut hits = Vec::new();
-
-    for origin_key in world.city_names() {
-        if wanted_origin
-            .as_deref()
-            .is_some_and(|wanted| wanted != origin_key.as_str())
-        {
+fn departure_hits(
+    world: &'static World,
+    pairs: &[(String, String)],
+    opts: &RoadOptions,
+    seed: Option<i64>,
+) -> Vec<Hit> {
+    let mut destinations_by_origin = std::collections::BTreeMap::<String, Vec<String>>::new();
+    for (origin, destination) in pairs {
+        let origin_key = world.resolve_city_key(origin);
+        let destination_key = world.resolve_city_key(destination);
+        if origin_key == destination_key {
             continue;
         }
+        destinations_by_origin
+            .entry(origin_key)
+            .or_default()
+            .push(destination_key);
+    }
+    for destinations in destinations_by_origin.values_mut() {
+        destinations.sort();
+        destinations.dedup();
+    }
+    let mut hits = Vec::new();
+
+    for (origin_key, destination_keys) in destinations_by_origin {
         let Ok(city) = world.city(&origin_key) else {
             continue;
         };
-        let destinations: Vec<(String, String, f64, f64, String)> = world
-            .city_names()
+        let destinations: Vec<(String, String, f64, f64, String)> = destination_keys
             .into_iter()
-            .filter(|destination| destination != &origin_key)
-            .filter(|destination| {
-                wanted_destination
-                    .as_deref()
-                    .map_or(true, |wanted| wanted == destination.as_str())
-            })
             .filter_map(|destination| {
                 let mut trip = build_trip(world, &origin_key, &destination, seed)?;
                 let highway = trip.route.legs.first()?.highway.clone();
@@ -475,6 +532,13 @@ fn departure_hits(world: &'static World, opts: &RoadOptions, seed: Option<i64>) 
             .collect();
 
         for location in &city.locations {
+            if opts
+                .facility
+                .as_deref()
+                .is_some_and(|wanted| !location.name.eq_ignore_ascii_case(wanted))
+            {
+                continue;
+            }
             // This is the catalog-backed freight check used by job dispatch:
             // locations without a shippable load are not a loaded departure.
             if JobBoard::cargo_for_location(location, "ships", Some(opts.level.unwrap_or(1)))
@@ -1109,7 +1173,7 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
         .unwrap_or_else(|| panic!("{cargo_key:?} is not in the cargo catalog"));
     let origin_location = departure_setup
         .as_ref()
-        .and_then(|_| hit.origin_location.as_deref())
+        .and(hit.origin_location.as_deref())
         .unwrap_or("company yard");
     let destination_location = departure_setup
         .as_ref()
@@ -1226,7 +1290,10 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
         );
     }
     if hit.origin_location.is_some() {
-        println!("  starting state    : stopped at the facility gate, {:.0} t aboard", opts.cargo);
+        println!(
+            "  starting state    : stopped at the facility gate, {:.0} t aboard",
+            opts.cargo
+        );
     } else {
         println!(
             "  rolling at        : {:.0} mph, {:.0} t aboard",
@@ -1318,15 +1385,19 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
         return RoadPlan::Done(1);
     }
     if opts.feature == "departure" && opts.at.is_some() {
-        println!("--at cannot select a facility departure; use --scan and --pick N.");
+        println!("--at cannot select a facility departure; use --scan, then its launch command.");
+        return RoadPlan::Done(1);
+    }
+    if opts.facility.is_some() && opts.feature != "departure" {
+        println!("--facility only applies to --find departure.");
         return RoadPlan::Done(1);
     }
     let pairs = if opts.feature == "departure" {
-        Vec::new()
+        departure_candidate_pairs(world, opts)
     } else {
         route_pairs(world, opts)
     };
-    if opts.feature != "departure" && pairs.is_empty() {
+    if pairs.is_empty() {
         println!(
             "No supported route under {:.0} miles came up; raise --max-miles.",
             opts.max_miles
@@ -1362,14 +1433,17 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
     // the feature rather than a name the tool does not have.
     if opts.feature != "all" && !FEATURES.contains(&opts.feature.as_str()) {
         println!(
-            "Unknown --find {:?}. Choose one of: {}.",
+            "Unknown --find {:?}. Choose one of: all, {}.",
             opts.feature,
-            format!("all, {}", FEATURES.join(", "))
+            FEATURES.join(", ")
         );
         return RoadPlan::Done(1);
     }
     if opts.feature == "departure" {
-        println!("Searching loaded facility departures from current world data...");
+        println!(
+            "Searching {} route(s) for loaded facility departures...",
+            pairs.len()
+        );
     } else if opts.feature == "all" {
         println!("Searching every launchable road feature in current world data...");
     } else {
@@ -1403,8 +1477,25 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
         println!("\n{} found:\n", hits.len());
         for (i, found) in hits.iter().enumerate() {
             println!("  [{i:2}] {}", found.describe());
+            if opts.feature == "departure" {
+                let facility = found
+                    .origin_location
+                    .as_deref()
+                    .expect("departure hits name their facility");
+                let seed = found
+                    .trip_seed
+                    .expect("data-driven hits carry a stable trip seed");
+                println!(
+                    "       launch: cargo run --release -p freight-fate --bin freightfate -- --playtest-road --find departure --from {:?} --to {:?} --facility {:?} --trip-seed {seed} --ai",
+                    found.origin, found.destination, facility
+                );
+            }
         }
-        if opts.feature == "departure" || opts.feature == "all" {
+        if opts.feature == "departure" {
+            println!(
+                "\nEach launch command selects one departure directly; it does not repeat the discovery scan. Use --routes all only for an exhaustive inventory."
+            );
+        } else if opts.feature == "all" {
             let seed = hits[0]
                 .trip_seed
                 .expect("data-driven hits always carry a stable trip seed");
@@ -1448,6 +1539,9 @@ fn departure_scope_args(opts: &RoadOptions) -> String {
     }
     if let Some(destination) = &opts.destination {
         args.push_str(&format!(" --to {destination:?}"));
+    }
+    if let Some(facility) = &opts.facility {
+        args.push_str(&format!(" --facility {facility:?}"));
     }
     if let Some(level) = opts.level {
         args.push_str(&format!(" --level {level}"));
