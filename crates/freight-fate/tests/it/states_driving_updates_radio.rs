@@ -281,6 +281,28 @@ fn test_engine_shutdown_cuts_the_radio() {
 }
 
 #[test]
+fn test_leaving_the_cab_mutes_the_radio() {
+    // The cab radio is for the cab. Walking to the terminal -- any
+    // exit of the drive -- must fade it, or the last station keeps
+    // playing over menus that are not the wheel.
+    let mut app = TestApp::new();
+    let mut d = a_denver_drive(&mut app, 777);
+    let tape = MusicAudio::install(&mut app);
+    d.trip.truck.start_engine();
+    d.update_audio(&mut app.ctx, 0.0);
+    assert!(!tape.is_empty());
+    tape.clear_stops();
+
+    d.exit_drive(&mut app.ctx);
+
+    assert!(
+        tape.stopped().contains(&600),
+        "leaving the cab must fade the radio, got {:?}",
+        tape.stopped()
+    );
+}
+
+#[test]
 fn test_radio_keys_speak_the_no_power_line_with_the_engine_off() {
     let mut app = TestApp::new();
     let mut d = a_denver_drive(&mut app, 777);
