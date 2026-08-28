@@ -49,6 +49,8 @@ impl DrivingState {
         // how much the truck's speed exceeds the advisory speed, scaled by
         // load, grip, and the curve's tightness.
         let active = self.trip.curve_at(self.trip.position_mi);
+        let route_transition_owns_ramp =
+            ctx.settings.route_transition_assist && self.ramp_mi.is_some();
         let mut curve;
         match active.as_ref().filter(|c| !c.connector) {
             Some(bend) => {
@@ -109,7 +111,7 @@ impl DrivingState {
                         Some(0.0f64.max(self.trip.truck.speed_mph() - bend.advisory_mph as f64));
                 }
                 None => {
-                    if curve != 0.0 {
+                    if curve != 0.0 && !route_transition_owns_ramp {
                         // Fallback: old terrain- or ramp-based heuristic
                         let mut heuristic = 50.0 - curve.abs() * 20.0;
                         if self.curve_assist_active {
@@ -239,9 +241,12 @@ impl DrivingState {
         // the sign or the light at the end of it and already says so. With
         // the realistic preset both are on by default, so every hot ramp
         // spoke twice, back to back (logged playtest of the four 1.9 assists,
-        // 2026-07-15). The braking is unchanged; only the second announcement
-        // goes, and the surviving line is the more useful one because it
-        // names WHAT it is braking for.
+        // 2026-07-15). The extra announcement goes, and the surviving line is
+        // the more useful one because it names WHAT is slowing the truck. The
+        // synthetic ramp weight remains for the lane model, but it is not a
+        // corner. Asking the curve assist to brake for it made two held
+        // service applications fight over the same descent (Joshua's ramp
+        // drive, 2026-08-28).
         let on_ramp = self.ramp_mi.is_some();
         if curve_assisting {
             if !self.curve_assist_active && self.curve_assist_cue_s <= 0.0 && !on_ramp {
@@ -291,8 +296,16 @@ impl DrivingState {
             && self.ramp_mi.is_some()
             && self.trip.truck.speed_mph() > ramp_hold_mph;
         if transition_assisting {
-            self.trip.truck.brake = self.trip.truck.brake.max(0.4);
+            // A ramp cap is sustained speed control, not the bar's stop.
+            // Lift first and let drag shed the excess; holding a service
+            // floor here spent air all the way down the ramp. The terminal
+            // servo below still owns the real stop and its full hold.
+            self.trip.truck.throttle = 0.0;
             if !self.transition_assist_active {
+                // Cruise would otherwise put power straight back on after
+                // this lane pass. Pausing it also keeps the lift from
+                // chattering against its own target until the bar is honored.
+                self.pause_speed_control(ctx, true);
                 // ROUTE, not the ambient default: names an automation taking
                 // the pedals (automation-handoff sweep, 2026-08-20, the
                 // deferred 2026-08-15 audit).

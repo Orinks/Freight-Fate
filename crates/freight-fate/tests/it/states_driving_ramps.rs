@@ -1532,6 +1532,60 @@ fn test_route_transition_assistance_stops_at_the_sign_on_the_air_it_has() {
 }
 
 #[test]
+fn test_route_transition_assistance_lifts_for_the_ramp_cap_before_the_stop() {
+    // The ramp cap is sustained speed control, not the terminal stop. A
+    // service-brake floor here held the drums for the whole ramp (and the
+    // synthetic ramp curve could add its own 0.35 floor) before the real
+    // approach-to-bar brake even began.
+    let mut harness = approaching_a_terminal("Ramps", "stop", 55.0);
+    harness.with_drive(|d, _| {
+        // Leave enough ramp ahead that this observes the cap itself, not the
+        // bar approach that correctly uses the service brakes to stop.
+        d.ramp_mi = Some(3.0);
+        d.ramp_stop = Some(a_stop(d.trip.position_mi + 3.0));
+    });
+    let mut cap_frames = 0;
+    let mut longest_service_hold = 0;
+    let mut service_hold = 0;
+    let mut lowest_psi = harness.read_drive(|d| d.truck().air_pressure_psi());
+
+    for _ in 0..(60 * 20) {
+        frame(&mut harness, DT);
+        let (at_cap, terminal_braking, pedal, psi) = harness.read_drive(|d| {
+            (
+                d.transition_assist_active,
+                d.ramp_assist_brake > 0.0,
+                d.truck().brake,
+                d.truck().air_pressure_psi(),
+            )
+        });
+        if terminal_braking {
+            break;
+        }
+        if at_cap {
+            cap_frames += 1;
+            if pedal >= 0.3 {
+                service_hold += 1;
+                longest_service_hold = longest_service_hold.max(service_hold);
+            } else {
+                service_hold = 0;
+            }
+            lowest_psi = lowest_psi.min(psi);
+        }
+    }
+
+    assert!(
+        cap_frames >= 60,
+        "the ramp cap never had a sustained control window"
+    );
+    assert!(
+        longest_service_hold < 30,
+        "the ramp cap held service brake for {longest_service_hold} frames"
+    );
+    assert!(lowest_psi > 110.0, "{lowest_psi}");
+}
+
+#[test]
 fn test_route_transition_assistance_does_not_chatter_at_the_ramp_cap() {
     // One threshold decided both ways announced itself over and over.
     let mut harness = approaching_a_terminal("Ramps", "stop", 46.0);

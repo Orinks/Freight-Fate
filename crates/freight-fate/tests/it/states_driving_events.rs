@@ -295,10 +295,14 @@ fn test_transition_assist_caps_a_hot_green_crossing() {
     on_ramp(&mut d, "signal", false, 40.0);
     d.ramp_mi = Some(RAMP_ACCESS_MI + 0.03);
     d.trip.truck.brake = 0.0;
+    d.trip.truck.throttle = 0.5;
 
     d.update_ramp_terminal_assist(&mut app.ctx);
 
-    assert!(d.trip.truck.brake > 0.0);
+    // A green crossing is a roll, not the bar's real stop: lift instead of
+    // holding service brake while the ramp cap is already slowing the truck.
+    assert_eq!(d.trip.truck.throttle, 0.0);
+    assert_eq!(d.trip.truck.brake, 0.0);
 }
 
 #[test]

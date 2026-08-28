@@ -51,13 +51,14 @@ impl DrivingState {
             let must_stop = phase == "red" || (phase == "yellow" && gap_mi > 0.0);
             if !must_stop {
                 // A green (or a yellow already at the bar) is legal to roll,
-                // but not at speed: hold the crossing under the clean-roll
-                // threshold with room to spare.
+                // but not at speed: lift for the clean-roll threshold with
+                // room to spare. This is a roll, not a stop; a held service
+                // floor here spent reservoir air after the ramp cap had
+                // already started slowing the truck (Joshua, 2026-08-28).
                 if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck)
                     && speed > GREEN_ROLL_MPH - 5.0
                 {
                     self.trip.truck.throttle = 0.0;
-                    self.trip.truck.brake = self.trip.truck.brake.max(0.4);
                 }
                 return;
             }
@@ -68,15 +69,14 @@ impl DrivingState {
                 .as_ref()
                 .is_none_or(|bubble| bubble.clear_to_cross());
             if clear {
-                // A clear yield is rolled, not stopped: the assist holds the
-                // crossing at roll speed and the gap verdict lands at the
-                // line. Braking to a dead stop on a clear yield is the
+                // A clear yield is rolled, not stopped: the assist lifts to
+                // roll speed and the gap verdict lands at the line. Braking
+                // to a dead stop on a clear yield is the
                 // rear-end setup the roadmap warns the LEAD car will pull.
                 if gap_mi <= crate::states::driving_stops::bar_tick_range_mi(&self.trip.truck)
                     && speed > YIELD_ROLL_MPH - 3.0
                 {
                     self.trip.truck.throttle = 0.0;
-                    self.trip.truck.brake = self.trip.truck.brake.max(0.4);
                 }
                 return;
             }

@@ -1002,6 +1002,12 @@
 
 ### Fixed
 
+- **Route-transition assistance no longer rides the service brake down a routine
+  ramp.** It now eases off the throttle for the ramp speed instead of holding
+  the brake and draining the air tanks toward the compressor cut-in or low-air
+  warning. The gauge may still tick, and stopping at a sign or red light still
+  uses the brakes for a real stop.
+
 - **The throttle key no longer latches.** Holding the accelerator never
   catches a throttle latch -- no spoken "Throttle latched.", no catch
   click, and no cruise or speed-keeper line about a latched throttle.
