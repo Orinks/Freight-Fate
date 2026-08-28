@@ -5,7 +5,7 @@
 //! normal app frame, and lets the existing keeper/cruise systems own every
 //! throttle and merge decision after that.
 
-use crate::app::{DrivingObservation, PlayerInputFrame};
+use crate::app::PlayerInputFrame;
 use crate::states::base::{InputEvent, Key};
 
 use super::road::Hit;
