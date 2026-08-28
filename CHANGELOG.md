@@ -15,6 +15,13 @@
 
 ### Fixed
 
+- **Missing the destination exit on a highway with no numbered interchange
+  no longer leaves you stuck.** If you rolled past the yard on an approach
+  that has no exit number on the signs -- Hattiesburg, Mississippi on US-49
+  or US-98 is one -- the cab used to say dispatch would reroute you and then
+  never move the trip. The turnaround now puts you back on the approach so
+  you can take the destination exit.
+
 - **Driving keys now work with JAWS without the pass-through key.** JAWS
   hands the game each arrow key as an instant tap rather than a held key,
   so holding Up, Down, Left, or Right to accelerate, brake, or steer did

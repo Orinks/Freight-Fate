@@ -373,7 +373,7 @@ class DrivingEventMixin:
             return None
         details = self._destination_exit_details()
         if details is None:
-            at_mi = max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
+            at_mi = self._synthetic_destination_exit_mi()
             exit_label = ""
             exit_phrase = ""
         else:
@@ -497,6 +497,15 @@ class DrivingEventMixin:
             return None
         candidates.sort()
         return candidates[0][3], candidates[0][4], candidates[0][5]
+
+    def _synthetic_destination_exit_mi(self) -> float:
+        """End-of-route approach used when the last miles have no labeled exit.
+
+        Rural and US-highway finishes bake no interchange inside the scan
+        window. Announcement already falls back to one mile before the end;
+        missed-exit recovery must rewind onto that same approach.
+        """
+        return max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
 
     def _update_exit_countdown(self, stop) -> None:
         """Distance reminders for an armed exit as it closes.
@@ -1181,33 +1190,42 @@ class DrivingEventMixin:
         self.trip.finished = False
         self._exit_stop = None
         self._cancel_cruise()
-        if exit_details is None:
-            # With no exit to loop back to, say the recovery instruction once
-            # instead of repeating it every frame.
+        # Labeled interchange when the scan found one; otherwise the same
+        # synthetic end-of-route approach announcement already uses. Speaking
+        # a dispatch reroute without moving left US-highway finishes such as
+        # Hattiesburg on US-49 / US-98 stuck past the yard.
+        recover_at_mi = (
+            exit_details[0] if exit_details is not None else self._synthetic_destination_exit_mi()
+        )
+        recover_pos = max(0.0, recover_at_mi - self._exit_window_mi())
+        if recover_pos >= recover_at_mi - 0.05:
             if self._missed_destination_exit_said:
                 return
             self._missed_destination_exit_said = True
-        reroute_text = (
-            "Continue to the next safe turnaround. Dispatch reroutes you back "
-            "onto the approach; take the destination exit when it comes up."
-        )
-        if exit_details is not None:
-            # Every miss must reposition the trip. The old say-once guard
-            # swallowed a second miss and left the truck stuck at zero miles.
-            self._missed_destination_exit_said = True
-            self.trip.game_minutes += 20.0
-            self.trip.position_mi = max(0.0, exit_details[0] - self._exit_window_mi())
-            self._destination_exit_announced_key = None
-            self._destination_exit_response_s = 0.0
-            if self._terse_speech():
-                reroute_text = "Safe turnaround. Destination exit ahead again."
-            else:
-                reroute_text = (
-                    "You continue to the next safe turnaround and loop back onto "
-                    "the approach. The destination exit is ahead again; press "
-                    f"{self.ctx.control_hint('take_exit')} "
-                    "when you are close enough to take it."
-                )
+            self.ctx.audio.play("ui/warning")
+            self._set_status("Destination exit missed. No safe turnaround on this approach.")
+            self.ctx.say_event(
+                f"You missed the destination exit for {self._destination_facility_text()}. "
+                "Dispatch cannot find a safe turnaround on this approach.",
+                interrupt=True,
+            )
+            return
+        # Every miss must reposition the trip. The old say-once guard
+        # swallowed a second miss and left the truck stuck at zero miles.
+        self._missed_destination_exit_said = True
+        self.trip.game_minutes += 20.0
+        self.trip.position_mi = recover_pos
+        self._destination_exit_announced_key = None
+        self._destination_exit_response_s = 0.0
+        if self._terse_speech():
+            reroute_text = "Safe turnaround. Destination exit ahead again."
+        else:
+            reroute_text = (
+                "You continue to the next safe turnaround and loop back onto "
+                "the approach. The destination exit is ahead again; press "
+                f"{self.ctx.control_hint('take_exit')} "
+                "when you are close enough to take it."
+            )
         self.ctx.audio.play("ui/warning")
         self._set_status("Destination exit missed. Use the next safe turnaround.")
         self.ctx.say_event(
