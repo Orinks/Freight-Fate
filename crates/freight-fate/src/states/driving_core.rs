@@ -84,7 +84,9 @@ pub use ff_core::models::jobs::{
     fair_active_deadline, job_from_payload, job_payload, normalize_job_cities, Job,
 };
 pub use ff_core::models::profile;
-pub use ff_core::models::settlement::{carrier_accessorial_charges, charge_summary, charge_total};
+pub use ff_core::models::settlement::{
+    carrier_accessorial_charges, charge_summary, charge_total, wallet_delta,
+};
 pub use ff_core::music::{
     select_drive_music_sequence, select_menu_music_sequence, select_station_playlist,
 };

@@ -35,7 +35,7 @@ use crate::states::driving::DrivingState;
 use crate::states::driving_core::{
     carrier_accessorial_charges, charge_summary, charge_total, clock_text,
     has_weigh_station_transponder, is_owner_operator, pay_label, profile_mut_of, profile_of,
-    reputation_pay_bonus, xp_class_multiplier, xp_streak_bonus,
+    reputation_pay_bonus, wallet_delta, xp_class_multiplier, xp_streak_bonus,
 };
 use crate::states::driving_damage::{damage_summary_line, preventable_damage_charge};
 use crate::states::driving_menu_states::badges::award_arrival_achievements;
@@ -442,8 +442,17 @@ impl ArrivalState {
         // early, so lifetime earnings book the whole settlement; book only
         // the remainder and the advanced money becomes cash the career cannot
         // account for, which reads as an edited save to cloud upload
-        // screening.
+        // screening. Accessorials and tolls are cash on the existing ledger,
+        // not a second settlement, so they never fold into career earnings.
         let settled_pay = net_pay;
+        // Owner-ops ARE the carrier: detention, lumpers, washouts, and tolls
+        // already sit on the existing ledger. Apply that ledger to the wallet
+        // here. Detention is a negative charge, so this pays them; the rest
+        // charges them. Company drivers keep the spoken ledger and the money
+        // stays put.
+        if is_owner_operator(&business_status) {
+            net_pay = round_py_n(net_pay + wallet_delta(&accessorials, toll_expense), 2);
+        }
         // A balance owed and an advance come out of the same capped share, so
         // a driver who is carrying both still finishes the run with money.
         // With nothing owed this is the arithmetic it has always been.
@@ -618,12 +627,17 @@ impl ArrivalState {
         } else {
             String::new()
         };
+        let accessorial_clause = if is_owner_operator(&business_status) {
+            "These came off this settlement."
+        } else {
+            "These are billed to carrier settlement and not deducted from driver pay."
+        };
         self.summary_parts.insert(
             0,
             format!(
                 "Delivered {} tons of {} to {} in {} hours, {}.{receiver_service_clause} It is {}. {} {} dollars. \
                  Carrier-paid or reimbursed charges {} dollars: tolls {}, accessorials {}. \
-                 These are billed to carrier settlement and not deducted from driver pay. \
+                 {accessorial_clause} \
                  Business status: {}. Business costs {} dollars. Fines carried over {} dollars. \
                  Net driver pay {} dollars, and you now have {}. After unloading, dispatch has \
                  you parked at {} for the {} service area.",

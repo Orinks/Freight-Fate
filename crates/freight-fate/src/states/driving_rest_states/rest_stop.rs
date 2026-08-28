@@ -21,7 +21,7 @@ use crate::states::driving_core::{
     profile_of, record_inspection, road_repair_cost, shut_down_engine, wake_air_instruction,
     RigBuff, FIELD_REPAIR_DAMAGE_PCT, INSPECTION_MIN, MECHANIC_CALLOUT_FEE, MECHANIC_WAIT_MIN,
     MOTEL_COST, ROAD_BRAKE_COST_PER_PCT, ROAD_BRAKE_MIN, ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_MIN,
-    ROAD_TIRE_SPECIALIST_COST_PER_PCT, ROAD_TIRE_SPECIALIST_MIN,
+    ROAD_TIRE_SPECIALIST_COST_PER_PCT, ROAD_TIRE_SPECIALIST_MIN, WAVE_THROUGH_MIN,
 };
 use crate::states::driving_menu_states::{keep_rows, DriveRef};
 use crate::states::driving_rest_states::fuel_pump::FuelPump;
@@ -1036,14 +1036,19 @@ impl RestStopState {
     fn inspect(&mut self, ctx: &mut GameContext) {
         let stop = self.stop.clone();
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
-            advance_rest_clock(d, ctx, INSPECTION_MIN, None, "");
-            hos_mut_of(ctx).on_duty(INSPECTION_MIN);
             ctx.audio.play("ui/notify");
             // Whether the screening lane waves you through or pulls you in is
             // the safety record's job. A clean career is waved through nearly
             // every time; a career carrying citations, out-of-service history
             // and a beaten-up truck is pulled in at every open scale.
             let selected = d.scale_selects_driver(ctx, &stop);
+            let minutes = if selected {
+                INSPECTION_MIN
+            } else {
+                WAVE_THROUGH_MIN
+            };
+            advance_rest_clock(d, ctx, minutes, None, "");
+            hos_mut_of(ctx).on_duty(minutes);
             let outcome = if selected {
                 "Officers pull you into the inspection lane."
             } else {

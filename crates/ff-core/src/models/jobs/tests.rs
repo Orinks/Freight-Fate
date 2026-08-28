@@ -1031,3 +1031,27 @@ fn make_reposition_job_pays_assigned_empty_miles_only() {
     assert_eq!(board_offer_count(12), 8);
     assert_eq!(lane_key(world(), &bobtail), "denver_co_us:cheyenne_wy_us");
 }
+
+#[test]
+fn test_dispatched_loads_stay_at_or_under_eighty_thousand_pounds() {
+    use crate::sim::vehicle::{
+        combination_tare_kg, max_legal_cargo_tons, TruckSpecs, KG_PER_TON, LEGAL_GVW_KG,
+    };
+    let tare = combination_tare_kg(&TruckSpecs::default());
+    let max_tons = max_legal_cargo_tons(tare);
+    let jobs = offers(7, "Chicago", ALL, 30);
+    assert!(!jobs.is_empty());
+    for job in &jobs {
+        assert!(
+            job.weight_tons <= max_tons + 1e-6,
+            "{} tons of {} exceeds the 80,000 lb clamp ({max_tons})",
+            job.weight_tons,
+            job.cargo.key
+        );
+        let gross = tare + job.weight_tons * KG_PER_TON;
+        assert!(
+            gross <= LEGAL_GVW_KG + 1e-6,
+            "GVW {gross} kg over cap {LEGAL_GVW_KG} kg"
+        );
+    }
+}

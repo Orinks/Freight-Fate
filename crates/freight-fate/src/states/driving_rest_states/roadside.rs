@@ -402,7 +402,8 @@ impl EnforcementStopState {
             // Capture the plain-language WHY before the reset wipes the
             // ledger: the stop must explain itself completely (owner ask,
             // 2026-07-24).
-            let causes = hos_of(ctx).violation_causes(&ctx.settings.hos_mode);
+            let mode = ctx.settings.hos_mode.clone();
+            let causes = hos_of(ctx).violation_causes(&mode);
             let why = if causes.is_empty() {
                 String::new()
             } else {
@@ -411,21 +412,35 @@ impl EnforcementStopState {
             // Ten hours parked is a real overnight fast-forward, the same as
             // every other sleep path -- the engine must not idle through the
             // whole order (log, 2026-08-12: it did, and the audio froze at
-            // pre-stop revs for the entire ten hours).
-            let engine_off = shut_down_engine(d, ctx);
-            d.place_out_of_service(ctx);
+            // pre-stop revs for the entire ten hours). A missed 30-minute
+            // break is not overnight: leave the engine running.
+            let minutes = hos_of(ctx).out_of_service_minutes(&mode);
+            let break_only = minutes < hos::SLEEP_MIN;
+            let engine_off = if break_only {
+                String::new()
+            } else {
+                shut_down_engine(d, ctx)
+            };
+            d.place_out_of_service_minutes(ctx, minutes);
             let lead = if engine_off.trim().is_empty() {
                 String::new()
             } else {
                 format!(" {}", engine_off.trim())
             };
-            self.outcome_text.push_str(&format!(
-                "{lead}{why} Out of service: ten hours pass parked on the shoulder before you \
-                 may roll. It is now {}, your hours of service are reset, and you wake rested -- \
-                 but the delivery deadline kept counting the whole time.{}",
-                clock_text(d.trip.local_hour()),
-                wake_air_instruction(d, ctx, false)
-            ));
+            let oos_line = if break_only {
+                format!(
+                    "{lead}{why} Out of service: thirty minutes pass parked on the shoulder before you may roll. It is now {}, the 30-minute break is satisfied -- but the delivery deadline kept counting the whole time.{}",
+                    clock_text(d.trip.local_hour()),
+                    wake_air_instruction(d, ctx, false)
+                )
+            } else {
+                format!(
+                    "{lead}{why} Out of service: ten hours pass parked on the shoulder before you may roll. It is now {}, your hours of service are reset, and you wake rested -- but the delivery deadline kept counting the whole time.{}",
+                    clock_text(d.trip.local_hour()),
+                    wake_air_instruction(d, ctx, false)
+                )
+            };
+            self.outcome_text.push_str(&oos_line);
         }
         if self.inspection_on_stop {
             // Reuses the same check-in cost the scale itself would have

@@ -54,11 +54,9 @@ pub const SLEEP_MIN: f64 = 600.0;
 /// (drive limit, duty window, driving allowed before a 30-minute break),
 /// all in game minutes.
 pub const REALISTIC_LIMITS: (f64, f64, f64) = (11.0 * 60.0, 14.0 * 60.0, 8.0 * 60.0);
-pub const RELAXED_LIMITS: (f64, f64, f64) = (
-    REALISTIC_LIMITS.0 * 1.25,
-    REALISTIC_LIMITS.1 * 1.25,
-    REALISTIC_LIMITS.2 * 1.25,
-);
+/// Relaxed keeps the same 11-hour drive, 14-hour window, and 8-hour-before-break
+/// rule as realistic. What it eases is money and odds, not the clock.
+pub const RELAXED_LIMITS: (f64, f64, f64) = REALISTIC_LIMITS;
 
 /// `LIMITS[mode]`: the enforced limits of a mode, None for the modes that
 /// enforce nothing.
@@ -141,6 +139,21 @@ pub const FATIGUE_SEVERE: f64 = 80.0;
 
 /// Escalating fines for failed roadside inspections while over hours.
 pub const HOS_FINES: [f64; 4] = [200.0, 500.0, 1000.0, 2000.0];
+/// Relaxed mode keeps the 11/14/30 clock and halves the ticket.
+pub const RELAXED_FINE_SCALE: f64 = 0.5;
+/// Relaxed mode also thins scale-house inspection-lane odds.
+pub const RELAXED_INSPECTION_SCALE: f64 = 0.5;
+
+/// Fine for this inspection, scaled down in relaxed mode.
+pub fn hos_fine(mode: &str, prior_count: i64) -> f64 {
+    let base = HOS_FINES[(prior_count as usize).min(HOS_FINES.len() - 1)];
+    if mode == "relaxed" {
+        base * RELAXED_FINE_SCALE
+    } else {
+        base
+    }
+}
+
 pub const HOS_REPUTATION_HIT: f64 = 3.0;
 pub const FATIGUE_COFFEE_RELIEF: f64 = 8.0;
 pub const FATIGUE_BREAK_RELIEF: f64 = 35.0;

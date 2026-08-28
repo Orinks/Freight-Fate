@@ -1569,3 +1569,19 @@ fn test_the_spoken_reason_is_the_posts_own_context_label() {
     let (summary, _, _) = drive.observed_stop_terms(&an_observation(&crossover, WHAT_LIGHTS));
     assert!(summary.contains("highway enforcement"), "{summary}");
 }
+
+#[test]
+fn test_overweight_cargo_is_a_real_check_and_red_lights_the_scale() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Heavy");
+    let scale = a_scale("I-90 West Scale", 10.0);
+    // 12-ton general load on a stock rig is legal.
+    assert!(!drive.cargo_is_overweight());
+    let legal = drive.roll_transponder_verdict(&scale, "weigh:legal");
+    assert!(legal == "green" || legal == "red", "{legal}");
+    // 30 metric tons of cargo on the stock tare is over 80,000 lb GVW.
+    drive.trip.truck.cargo_kg = 30.0 * KG_PER_TON;
+    assert!(drive.cargo_is_overweight());
+    let verdict = drive.roll_transponder_verdict(&scale, "weigh:heavy");
+    assert_eq!(verdict, "red");
+}

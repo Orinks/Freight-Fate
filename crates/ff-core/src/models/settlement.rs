@@ -110,6 +110,16 @@ pub fn charge_summary(charges: &[SettlementCharge]) -> String {
         .join(", ")
 }
 
+/// Wallet movement from the accessorial and toll ledger.
+///
+/// Detention is a negative charge, so it pays the driver. Lumpers, washouts,
+/// and tolls go out. Apply this only to owner-operators; company drivers
+/// keep the spoken ledger and the money stays put. Not a second settlement
+/// system -- the existing ledger, applied to cash.
+pub fn wallet_delta(charges: &[SettlementCharge], toll_expense: f64) -> f64 {
+    -(charge_total(charges) + toll_expense)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -152,6 +162,18 @@ mod tests {
         );
         assert_eq!(charge_summary(&[]), "none");
         assert_eq!(YARD_CARRIER_PAID, CARRIER_PAID);
+        // Lumper + washout out, no detention: the owner-op wallet drops.
+        assert_eq!(wallet_delta(&charges, 30.0), -260.0);
+        // Detention is a negative charge, so it pays.
+        let detention = SettlementCharge::new(
+            "detention",
+            "detention pay",
+            -90.0,
+            CARRIER_PAID,
+            "held past free time",
+        );
+        assert_eq!(wallet_delta(&[detention], 0.0), 90.0);
+        assert_eq!(wallet_delta(&[], 0.0), 0.0);
     }
 
     #[test]

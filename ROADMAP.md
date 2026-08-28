@@ -4599,14 +4599,13 @@ onto exit signalling.
       and both multipliers now live in `models/enforcement.py` behind one
       `citation_fine` helper; `CHAIN_LAW_FINE` had two live definitions
       on different paths, one shadowing the other, now collapsed.
-- [ ] **Detention, lumper fees, washouts and tolls are spoken but never
-      paid.** `carrier_charges` (`driving_menu_states.py:975`) computes
-      them and feeds two spoken strings; nothing moves money. The game
-      tells an owner-operator "you are owed 90 dollars in detention" and
-      then does not pay it, and bills them for nothing. Wrong in both
-      directions, and the owner-operator start is the mode that feels it.
-      Found by the 2026-08-11 realism audit; full report in
-      `docs/realism-audit-2026-08.md`.
+- [x] **Detention, lumper fees, washouts and tolls now move money -- SHIPPED
+      2026-08-28** on `feat/1.9-realism-wins`. The existing settlement
+      ledger applies to the owner-operator wallet: detention pays them,
+      lumpers, washouts, and tolls charge them. Company drivers still hear
+      the ledger; it is billed to the carrier and is not a personal check.
+      Found by the 2026-08-11 realism
+      audit; full report in `docs/realism-audit-2026-08.md`.
 - [x] **PrePass-style weigh-in-motion bypass -- SHIPPED 2026-08-20** (owner-
       approved design, from Brandon's realism-audit report below). A
       transponder-equipped truck now gets a green/red verdict as it
@@ -4619,13 +4618,11 @@ onto exit signalling.
       The bypass share is a named seeded roll off the trip seed and the
       stop, in `driving_updates._resolve_transponder_verdict`.
 
-      STILL OPEN, and why this is not a full close of the finding below:
-      the game still never weighs the truck against a legal gross limit --
-      `_cargo_is_overweight` is wired to always red-light an overweight
-      load the moment that state exists, but nothing computes it yet, so
-      every load takes the legal-truck bypass roll today. Loads routinely
-      gross to about 87,000 lb against the 80,000 lb federal limit, and
-      "overweight" still appears nowhere else in `src/`.
+      CLOSED 2026-08-28 on `feat/1.9-realism-wins`: dispatched cargo is
+      clamped to 80,000 lb GVW on a stock tractor and trailer, and
+      `cargo_is_overweight()` is tractor + trailer + cargo against that
+      cap (fuel is not counted). An overweight truck is always red-lighted
+      at a transponder scale.
 - [ ] **Weigh-in-motion bypass should be per-site, not everywhere.** Today
       every open scale runs the transponder verdict on one flat seeded
       share, so a transponder effectively works at every scale in the
@@ -4658,10 +4655,17 @@ onto exit signalling.
       drivewyze.com/help/bypass-restrictions. Raised by the owner during
       the 2026-08-21 playtest session, after driving the scale flow by
       hand; deferred to the following week.
-- [ ] **Relaxed hours-of-service mode misreports the law.** It multiplies
-      the legal limits by 1.25 and then speaks 13.75 hours as "the
-      11-hour driving limit". Whatever the mode does to the numbers, the
-      spoken text must not name a real regulation it is not enforcing.
+- [x] **Relaxed hours-of-service keeps the real 11 / 14 / 30 -- SHIPPED
+      2026-08-28** on `feat/1.9-realism-wins`. Relaxed no longer multiplies
+      the clock by 1.25. It halves fines and scale-house inspection odds.
+      Speech does not say 13.75 as hours of service.
+
+- [x] **Scale wave-through is a couple of minutes, and a missed 30-minute
+      break is 30 minutes out of service -- SHIPPED 2026-08-28** on
+      `feat/1.9-realism-wins`. Pulling into an open scale and being waved
+      through burns two minutes, not the inspection lane's fifteen. A
+      blown 30-minute break parks you thirty minutes on the shoulder with
+      the break satisfied; drive or duty still takes the ten-hour reset.
 - [ ] **Two roadmap claims are already false.** Split sleeper berth (8/2
       and 7/3) is fully implemented despite lines further down this file
       saying twice that it is not. Also worth knowing: the 30-minute
