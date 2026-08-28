@@ -250,8 +250,8 @@ Drive tools:
                                     stop, scale, curve, interchange, toll,
                                     chain-law, destination, departure); destination is
                                     the delivery off-ramp at the end of the
-                                    route; departure starts a loaded Carlisle
-                                    facility exit and I-76 on-ramp; --from/--to/--seed/--scan and
+                                    route; departure scans loaded facility
+                                    exits and their on-ramps from current world data; --from/--to/--seed/--scan and
                                     the assist switches refine the search
   --playtest-sandbox [--launch]     a data directory that cannot reach the
                                     owner's account; --dir/--reset/--print

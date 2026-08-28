@@ -69,6 +69,7 @@ pub fn destination_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec
         limit_mph: limit,
         label,
         trip_seed: None,
+        origin_location: None,
     }]
 }
 

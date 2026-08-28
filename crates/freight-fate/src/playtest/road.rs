@@ -28,7 +28,7 @@
 use ff_core::data::world::{get_world, World};
 use ff_core::models::career::LEVEL_XP;
 use ff_core::models::career_ladder::MAX_CAREER_LEVEL;
-use ff_core::models::jobs::{cargo_type, Job};
+use ff_core::models::jobs::{cargo_type, Job, JobBoard};
 use ff_core::models::profile::Profile;
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::enforcement_posts::KIND_FIXED_SCALE;
@@ -74,14 +74,9 @@ pub const RANDOM_MAX_MILES: f64 = 600.0;
 /// How many pairs a random draw offers the search.
 pub const RANDOM_SAMPLE: usize = 6;
 
-/// The repeatable real-facility departure used by `--find departure`.
-///
-/// This is deliberately a named scenario rather than an arbitrary facility
-/// sweep: its complete street chain, I-76 acceleration lane, and loaded-rig
-/// handoff are covered by the departure-merge regressions.
-const DEPARTURE_ORIGIN: &str = "Carlisle";
-const DEPARTURE_DESTINATION: &str = "Pittsburgh";
-const DEPARTURE_FACILITY: &str = "Carlisle Dry Warehouse";
+/// A stable trip roll keeps a scanned departure reproducible when it is
+/// launched later with `--pick`. It does not choose a facility or corridor.
+const DEPARTURE_TRIP_SEED: i64 = 0;
 
 pub const FEATURES: [&str; 12] = [
     "downgrade",
@@ -148,10 +143,18 @@ pub struct Hit {
     pub label: String,
     /// The per-trip roll this was found under.
     pub trip_seed: Option<i64>,
+    /// The real origin facility for a loaded departure, when applicable.
+    pub origin_location: Option<String>,
 }
 
 impl Hit {
     pub fn describe(&self) -> String {
+        if let Some(facility) = &self.origin_location {
+            return format!(
+                "{facility} in {}; loaded departure toward {}; {}",
+                self.origin, self.destination, self.label
+            );
+        }
         let run = if self.run_mi >= 0.1 {
             format!(", running {:.1} mi", self.run_mi)
         } else {
@@ -245,12 +248,6 @@ impl Default for RoadOptions {
 pub fn route_pairs(world: &'static World, opts: &RoadOptions) -> Vec<(String, String)> {
     if let (Some(origin), Some(destination)) = (&opts.origin, &opts.destination) {
         return vec![(origin.clone(), destination.clone())];
-    }
-    if opts.feature == "departure" {
-        return vec![(
-            DEPARTURE_ORIGIN.to_string(),
-            DEPARTURE_DESTINATION.to_string(),
-        )];
     }
     if opts.routes == RANDOM_ROUTES {
         let seed = opts
@@ -371,6 +368,9 @@ pub fn find_feature(
     opts: &RoadOptions,
     seed: Option<i64>,
 ) -> Vec<Hit> {
+    if feature == "departure" {
+        return departure_hits(world, opts, seed);
+    }
     let mut hits: Vec<Hit> = Vec::new();
     for (origin, destination) in pairs {
         // An unroutable pair must not kill the sweep.
@@ -412,11 +412,6 @@ pub fn find_feature(
                 origin,
                 destination,
             )),
-            "departure"
-                if origin == DEPARTURE_ORIGIN && destination == DEPARTURE_DESTINATION =>
-            {
-                hits.push(departure_hit(&mut trip, origin, destination));
-            }
             _ => {}
         }
     }
@@ -439,23 +434,120 @@ pub fn find_feature(
     hits
 }
 
-/// The real loaded-facility departure scenario. Its feature is the gate at
-/// mile zero: the first game frame replaces the highway trip with the
-/// facility's outbound streets, then the existing departure handoff builds
-/// the I-76 acceleration lane.
-fn departure_hit(trip: &mut Trip, origin: &str, destination: &str) -> Hit {
-    let (limit, _) = trip.speed_limit_at(0.0);
-    Hit {
-        origin: origin.to_string(),
-        destination: destination.to_string(),
-        at_mi: 0.0,
-        total_mi: trip.total_miles(),
-        magnitude: 1.0,
-        run_mi: 0.0,
-        limit_mph: limit,
-        label: format!("loaded departure from {DEPARTURE_FACILITY}"),
-        trip_seed: None,
+/// Loaded facility departures that can enter a real outbound road from the
+/// current world data. A candidate uses a catalog cargo the facility ships,
+/// its own turn-level departure chain, and every supported world corridor.
+fn departure_hits(world: &'static World, opts: &RoadOptions, seed: Option<i64>) -> Vec<Hit> {
+    let wanted_origin = opts.origin.as_deref().map(|name| world.resolve_city_key(name));
+    let wanted_destination = opts
+        .destination
+        .as_deref()
+        .map(|name| world.resolve_city_key(name));
+    let mut hits = Vec::new();
+
+    for origin_key in world.city_names() {
+        if wanted_origin
+            .as_deref()
+            .is_some_and(|wanted| wanted != origin_key.as_str())
+        {
+            continue;
+        }
+        let Ok(city) = world.city(&origin_key) else {
+            continue;
+        };
+        let destinations: Vec<(String, String, f64, f64, String)> = world
+            .city_names()
+            .into_iter()
+            .filter(|destination| destination != &origin_key)
+            .filter(|destination| {
+                wanted_destination
+                    .as_deref()
+                    .map_or(true, |wanted| wanted == destination.as_str())
+            })
+            .filter_map(|destination| {
+                let mut trip = build_trip(world, &origin_key, &destination, seed)?;
+                let highway = trip.route.legs.first()?.highway.clone();
+                let (limit, _) = trip.speed_limit_at(0.0);
+                Some((
+                    destination,
+                    speakable(world, &destination),
+                    trip.total_miles(),
+                    limit,
+                    highway,
+                ))
+            })
+            .collect();
+
+        for location in &city.locations {
+            // This is the catalog-backed freight check used by job dispatch:
+            // locations without a shippable load are not a loaded departure.
+            if JobBoard::cargo_for_location(location, "ships", Some(opts.level.unwrap_or(1)))
+                .is_empty()
+            {
+                continue;
+            }
+            let Ok(Some(departure_route)) =
+                world.facility_departure_route(&origin_key, &location.name)
+            else {
+                continue;
+            };
+            for (destination_key, destination, total_mi, limit_mph, highway) in &destinations {
+                if departure_job_setup(
+                    world,
+                    &origin_key,
+                    &location.name,
+                    destination_key,
+                    opts.level.unwrap_or(1),
+                )
+                .is_none()
+                {
+                    continue;
+                }
+                hits.push(Hit {
+                    origin: speakable(world, &origin_key),
+                    destination: destination.clone(),
+                    at_mi: 0.0,
+                    total_mi: *total_mi,
+                    magnitude: 0.0,
+                    run_mi: departure_route.miles(),
+                    limit_mph: *limit_mph,
+                    label: format!("merge onto {highway} via the facility on-ramp"),
+                    trip_seed: seed,
+                    origin_location: Some(location.name.clone()),
+                });
+            }
+        }
     }
+    hits.sort_by(|a, b| {
+        a.origin
+            .cmp(&b.origin)
+            .then(a.origin_location.cmp(&b.origin_location))
+            .then(a.destination.cmp(&b.destination))
+            .then(a.label.cmp(&b.label))
+    });
+    hits
+}
+
+/// The catalog-backed cargo and receiving facility for a selected departure.
+/// Keeping this lookup shared by scanning and launch prevents a listed row
+/// from staging a cargo that the destination cannot receive.
+fn departure_job_setup(
+    world: &World,
+    origin: &str,
+    origin_location: &str,
+    destination: &str,
+    level: i64,
+) -> Option<(&'static str, String)> {
+    let origin_location = world.facility_location(origin, origin_location).ok()?;
+    let destination_city = world.city(destination).ok()?;
+    for cargo in JobBoard::cargo_for_location(origin_location, "ships", Some(level)) {
+        if let Some(destination_location) = destination_city.locations.iter().find(|location| {
+            JobBoard::cargo_for_location(location, "receives", Some(level)).contains(&cargo)
+        }) {
+            return Some((cargo, destination_location.name.clone()));
+        }
+    }
+    None
 }
 
 /// `find_feature` on a pinned seed, re-rolled when the find is empty.
@@ -470,6 +562,10 @@ pub fn find_feature_seeded(
     feature: &str,
     opts: &RoadOptions,
 ) -> Vec<Hit> {
+    if feature == "departure" {
+        let seed = opts.trip_seed.or(opts.seed).or(Some(DEPARTURE_TRIP_SEED));
+        return find_feature(world, pairs, feature, opts, seed);
+    }
     if opts.trip_seed.is_some() {
         return find_feature(world, pairs, feature, opts, opts.trip_seed);
     }
@@ -535,6 +631,7 @@ fn grade_hits(
                         limit_mph: limit,
                         label: format!("{worst:.1}% {word}"),
                         trip_seed: None,
+                        origin_location: None,
                     });
                 }
             }
@@ -563,6 +660,7 @@ fn zone_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
                 limit_mph: limit,
                 label: format!("{} zone, {:.0} mph", zone.reason, zone.limit_mph),
                 trip_seed: None,
+                origin_location: None,
             }
         })
         .collect()
@@ -587,6 +685,7 @@ fn limit_drop_hits(trip: &mut Trip, origin: &str, destination: &str, min_drop: f
                 limit_mph: previous,
                 label: format!("limit drops {previous:.0} to {limit:.0}"),
                 trip_seed: None,
+                origin_location: None,
             });
         }
         previous = limit;
@@ -612,6 +711,7 @@ fn stop_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
                 limit_mph: limit,
                 label: format!("{}: {}", stop.stop_type, stop.name),
                 trip_seed: None,
+                origin_location: None,
             }
         })
         .collect()
@@ -655,6 +755,7 @@ fn scale_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
                     stop.name
                 ),
                 trip_seed: None,
+                origin_location: None,
             }
         })
         .collect()
@@ -698,6 +799,7 @@ fn curve_hits(trip: &mut Trip, origin: &str, destination: &str, max_advisory: f6
                 curve.min_radius_ft
             ),
             trip_seed: None,
+            origin_location: None,
         });
     }
     hits
@@ -778,6 +880,7 @@ fn interchange_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit
                 limit_mph: limit,
                 label,
                 trip_seed: None,
+                origin_location: None,
             }
         })
         .collect()
@@ -830,6 +933,7 @@ fn toll_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
                 limit_mph: limit,
                 label,
                 trip_seed: None,
+                origin_location: None,
             }
         })
         .collect()
@@ -854,6 +958,7 @@ fn chain_law_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> 
                 limit_mph: limit,
                 label: "chain-law area (needs winter weather to be active)".to_string(),
                 trip_seed: None,
+                origin_location: None,
             }
         })
         .collect()
@@ -973,17 +1078,43 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
     // sets' display names puts the label straight back after the first drop.
     // The spoken fields keep the display names, so nothing reads a slug
     // aloud.
-    let cargo = cargo_type(&opts.cargo_type)
-        .unwrap_or_else(|| panic!("{:?} is not in the cargo catalog", opts.cargo_type));
+    let departure_setup = if departure {
+        let facility = hit
+            .origin_location
+            .as_deref()
+            .expect("departure hit includes its origin facility");
+        Some(
+            departure_job_setup(
+                ctx.world,
+                &origin_key,
+                facility,
+                &destination_key,
+                opts.level.unwrap_or(1),
+            )
+            .expect("departure hit remains a catalog-backed job"),
+        )
+    } else {
+        None
+    };
+    let cargo_key = departure_setup
+        .as_ref()
+        .map(|(cargo, _)| *cargo)
+        .unwrap_or(&opts.cargo_type);
+    let cargo = cargo_type(cargo_key)
+        .unwrap_or_else(|| panic!("{cargo_key:?} is not in the cargo catalog"));
+    let origin_location = departure_setup
+        .as_ref()
+        .and_then(|_| hit.origin_location.as_deref())
+        .unwrap_or("company yard");
+    let destination_location = departure_setup
+        .as_ref()
+        .map(|(_, location)| location.as_str())
+        .unwrap_or("company yard");
     let mut job = Job::new(
         cargo,
         opts.cargo,
         &origin_key,
-        if departure {
-            DEPARTURE_FACILITY
-        } else {
-            "company yard"
-        },
+        origin_location,
         &destination_key,
         route.miles(),
         2500.0,
@@ -997,7 +1128,11 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
     // is usually listening for.
     job.origin_spoken = ctx.world.spoken_city(&origin_key, None);
     job.destination_spoken = ctx.world.spoken_city(&destination_key, None);
-    job.destination_location = format!("{} freight market", job.destination_spoken);
+    if !departure {
+        job.destination_location = format!("{} freight market", job.destination_spoken);
+    } else {
+        job.destination_location = destination_location.to_string();
+    }
 
     let mut driving = DrivingState::new(
         ctx,
@@ -1073,15 +1208,26 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
         "  trip seed         : {:?}  (--trip-seed to drive this exact run again)",
         hit.trip_seed
     );
-    println!("  starting at mile  : {start_mi:.1} of {total:.0}");
-    println!(
-        "  posted limit here : {limit:.0} mph{}",
-        reason.map(|r| format!(" ({r})")).unwrap_or_default()
-    );
-    println!(
-        "  rolling at        : {:.0} mph, {:.0} t aboard",
-        opts.speed, opts.cargo
-    );
+    if opts.feature == "departure" {
+        println!(
+            "  facility streets  : {:.1} mi to {}",
+            hit.run_mi, hit.label
+        );
+    } else {
+        println!("  starting at mile  : {start_mi:.1} of {total:.0}");
+        println!(
+            "  posted limit here : {limit:.0} mph{}",
+            reason.map(|r| format!(" ({r})")).unwrap_or_default()
+        );
+    }
+    if opts.feature == "departure" {
+        println!("  starting state    : stopped at the facility gate, {:.0} t aboard", opts.cargo);
+    } else {
+        println!(
+            "  rolling at        : {:.0} mph, {:.0} t aboard",
+            opts.speed, opts.cargo
+        );
+    }
     println!(
         "  {:<18}: {}",
         if opts.feature == "departure" {
@@ -1127,19 +1273,25 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
     );
     println!("    assists preset  : {}", s.driving_assistance_preset);
     println!("    time scale      : {}", s.time_scale);
-    println!("  grade ahead       :");
-    for ahead in [0.0, 1.0, 2.0, 3.0, 5.0, 8.0] {
-        let at = start_mi + ahead;
-        if at < total {
-            println!(
-                "    +{ahead:4.1} mi      {:+5.1}%",
-                trip.grade_at(at) * 100.0
-            );
+    if opts.feature != "departure" {
+        println!("  grade ahead       :");
+        for ahead in [0.0, 1.0, 2.0, 3.0, 5.0, 8.0] {
+            let at = start_mi + ahead;
+            if at < total {
+                println!(
+                    "    +{ahead:4.1} mi      {:+5.1}%",
+                    trip.grade_at(at) * 100.0
+                );
+            }
         }
     }
     if opts.feature == "departure" {
+        let facility = hit
+            .origin_location
+            .as_deref()
+            .unwrap_or("the selected facility");
         println!(
-            "  departure         : loaded at {DEPARTURE_FACILITY}; accelerate until automatic speed control takes over, then listen for the speed keeper to hand off to adaptive cruise on the acceleration lane before you merge"
+            "  departure         : loaded at {facility}; accelerate until automatic speed control takes over, then listen for the speed keeper to hand off to adaptive cruise on the acceleration lane before you merge"
         );
     }
 }
@@ -1156,8 +1308,16 @@ pub enum RoadPlan {
 /// Pick the spot, against the world data alone -- no `App`, no window.
 pub fn plan(opts: &RoadOptions) -> RoadPlan {
     let world = get_world();
-    let pairs = route_pairs(world, opts);
-    if pairs.is_empty() {
+    if opts.feature == "departure" && opts.at.is_some() {
+        println!("--at cannot select a facility departure; use --scan and --pick N.");
+        return RoadPlan::Done(1);
+    }
+    let pairs = if opts.feature == "departure" {
+        Vec::new()
+    } else {
+        route_pairs(world, opts)
+    };
+    if opts.feature != "departure" && pairs.is_empty() {
         println!(
             "No supported route under {:.0} miles came up; raise --max-miles.",
             opts.max_miles
@@ -1185,6 +1345,7 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
             limit_mph: limit,
             label: "chosen mile".to_string(),
             trip_seed: Some(seed),
+            origin_location: None,
         });
     }
     // A typo used to reach the search, match nothing, and come back as
@@ -1198,11 +1359,15 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
         );
         return RoadPlan::Done(1);
     }
-    println!(
-        "Searching {} route(s) for a {}...",
-        pairs.len(),
-        opts.feature
-    );
+    if opts.feature == "departure" {
+        println!("Searching loaded facility departures from current world data...");
+    } else {
+        println!(
+            "Searching {} route(s) for a {}...",
+            pairs.len(),
+            opts.feature
+        );
+    }
     let hits = find_feature_seeded(world, &pairs, &opts.feature, opts);
     if hits.is_empty() {
         let hint = match opts.feature.as_str() {
@@ -1221,10 +1386,20 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
     }
     if opts.scan {
         println!("\n{} found:\n", hits.len());
-        for (i, found) in hits.iter().take(25).enumerate() {
+        for (i, found) in hits.iter().enumerate() {
             println!("  [{i:2}] {}", found.describe());
         }
-        println!("\nDrive one with --pick N (keeping the same --find/--routes).");
+        if opts.feature == "departure" {
+            let seed = hits[0]
+                .trip_seed
+                .expect("departure hits always carry a stable trip seed");
+            let scope = departure_scope_args(opts);
+            println!(
+                "\nLaunch a zero-based row with: cargo run --release -p freight-fate --bin freightfate -- --playtest-road --find departure --pick N --trip-seed {seed}{scope}"
+            );
+        } else {
+            println!("\nDrive one with --pick N (keeping the same --find/--routes).");
+        }
         // Read-only: the game never started, so no window ever opened.
         return RoadPlan::Done(0);
     }
@@ -1233,4 +1408,18 @@ pub fn plan(opts: &RoadOptions) -> RoadPlan {
         return RoadPlan::Done(1);
     }
     RoadPlan::Drive(hits[opts.pick].clone())
+}
+
+fn departure_scope_args(opts: &RoadOptions) -> String {
+    let mut args = String::new();
+    if let Some(origin) = &opts.origin {
+        args.push_str(&format!(" --from {origin:?}"));
+    }
+    if let Some(destination) = &opts.destination {
+        args.push_str(&format!(" --to {destination:?}"));
+    }
+    if let Some(level) = opts.level {
+        args.push_str(&format!(" --level {level}"));
+    }
+    args
 }
