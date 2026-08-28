@@ -351,7 +351,9 @@ impl App {
     fn driving_observation(&self) -> Option<DrivingObservation> {
         let state = self.state()?;
         let state = state.borrow();
-        let drive = state.as_any().downcast_ref::<crate::states::driving::DrivingState>()?;
+        let drive = state
+            .as_any()
+            .downcast_ref::<crate::states::driving::DrivingState>()?;
         Some(DrivingObservation {
             position_mi: drive.trip.position_mi,
             air_ready: drive.trip.truck.air_ready(),

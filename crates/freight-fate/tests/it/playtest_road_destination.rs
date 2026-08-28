@@ -103,8 +103,7 @@ fn every_supported_route_offers_its_delivery_exit() {
 #[test]
 fn every_discovered_delivery_has_a_destination_hit() {
     let (origin, destination) = world_pair();
-    let hit = find_one(&origin, &destination)
-        .expect("a supported delivery has a destination exit");
+    let hit = find_one(&origin, &destination).expect("a supported delivery has a destination exit");
     assert!(hit.at_mi > 0.0 && hit.at_mi < hit.total_mi);
     assert!(
         hit.total_mi - hit.at_mi <= DESTINATION_EXIT_SCAN_WINDOW_MI,
@@ -272,12 +271,10 @@ fn the_miss_names_the_destination_not_its_map_key() {
         harness.transcript_text()
     );
     let text = harness.transcript_text();
+    assert!(!text.contains("_us"), "the map key was spoken:\n{text}");
     assert!(
-        !text.contains("_us"),
-        "the map key was spoken:\n{text}"
-    );
-    assert!(
-        text.to_lowercase().contains(&hit.destination.to_lowercase()),
+        text.to_lowercase()
+            .contains(&hit.destination.to_lowercase()),
         "the destination was never named:\n{text}"
     );
 }

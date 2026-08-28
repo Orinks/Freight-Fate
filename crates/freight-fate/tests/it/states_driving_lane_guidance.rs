@@ -25,13 +25,11 @@ fn test_lane_keeping_off_manual_correction_chimes_once_at_actual_center() {
         drive.lane.offset = CENTERED_MAX + 0.04;
         drive.update_lane_guidance_audio(ctx, 0.1);
     });
-    assert!(
-        audio
-            .borrow()
-            .played
-            .iter()
-            .all(|(key, _, _)| key != "vehicle/lane_centered")
-    );
+    assert!(audio
+        .borrow()
+        .played
+        .iter()
+        .all(|(key, _, _)| key != "vehicle/lane_centered"));
 
     harness.with_drive(|drive, ctx| {
         drive.lane.offset = CENTERED_MAX - 0.01;
