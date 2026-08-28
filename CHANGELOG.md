@@ -22,6 +22,14 @@
   never move the trip. The turnaround now puts you back on the approach so
   you can take the destination exit.
 
+- **Speeding is enforced again after a missed-exit turnaround.** Missing the
+  yard used to leave the cab silent on speed until you actually took the
+  destination exit, even after dispatch put you back on the highway
+  approach. Once you are on that approach again, a speeding strike calls
+  out the posted limit as usual. If dispatch cannot find a turnaround, the
+  cab still stays quiet on that dead-end rather than stacking facility-gate
+  strikes.
+
 - **Driving keys now work with JAWS without the pass-through key.** JAWS
   hands the game each arrow key as an instant tap rather than a held key,
   so holding Up, Down, Left, or Right to accelerate, brake, or steer did
