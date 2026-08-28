@@ -4,8 +4,10 @@
 //! Walking the menus to a specific hill, work zone, or limit drop takes
 //! minutes and lands you somewhere slightly different every time. This
 //! starts the real game -- real window, real speech, real input, your real
-//! settings -- already rolling at a road feature you named, with the truck
-//! and cruise in the state you asked for. Every spoken line goes to a
+//! settings -- at a road feature you named, with the truck and cruise in the
+//! state you asked for. The `departure` scenario instead begins loaded at a
+//! real facility gate, so its street chain and on-ramp remain to be driven.
+//! Every spoken line goes to a
 //! transcript, so the session can be read afterwards.
 //!
 //! # Shape of the port
@@ -72,7 +74,16 @@ pub const RANDOM_MAX_MILES: f64 = 600.0;
 /// How many pairs a random draw offers the search.
 pub const RANDOM_SAMPLE: usize = 6;
 
-pub const FEATURES: [&str; 11] = [
+/// The repeatable real-facility departure used by `--find departure`.
+///
+/// This is deliberately a named scenario rather than an arbitrary facility
+/// sweep: its complete street chain, I-76 acceleration lane, and loaded-rig
+/// handoff are covered by the departure-merge regressions.
+const DEPARTURE_ORIGIN: &str = "Carlisle";
+const DEPARTURE_DESTINATION: &str = "Pittsburgh";
+const DEPARTURE_FACILITY: &str = "Carlisle Dry Warehouse";
+
+pub const FEATURES: [&str; 12] = [
     "downgrade",
     "upgrade",
     "zone",
@@ -84,6 +95,7 @@ pub const FEATURES: [&str; 11] = [
     "toll",
     "chain-law",
     "destination",
+    "departure",
 ];
 const SCAN_STEP_MI: f64 = 0.1;
 /// How far before the feature the SEARCH looks back to report a posted
@@ -233,6 +245,12 @@ impl Default for RoadOptions {
 pub fn route_pairs(world: &'static World, opts: &RoadOptions) -> Vec<(String, String)> {
     if let (Some(origin), Some(destination)) = (&opts.origin, &opts.destination) {
         return vec![(origin.clone(), destination.clone())];
+    }
+    if opts.feature == "departure" {
+        return vec![(
+            DEPARTURE_ORIGIN.to_string(),
+            DEPARTURE_DESTINATION.to_string(),
+        )];
     }
     if opts.routes == RANDOM_ROUTES {
         let seed = opts
@@ -394,6 +412,11 @@ pub fn find_feature(
                 origin,
                 destination,
             )),
+            "departure"
+                if origin == DEPARTURE_ORIGIN && destination == DEPARTURE_DESTINATION =>
+            {
+                hits.push(departure_hit(&mut trip, origin, destination));
+            }
             _ => {}
         }
     }
@@ -414,6 +437,25 @@ pub fn find_feature(
         });
     }
     hits
+}
+
+/// The real loaded-facility departure scenario. Its feature is the gate at
+/// mile zero: the first game frame replaces the highway trip with the
+/// facility's outbound streets, then the existing departure handoff builds
+/// the I-76 acceleration lane.
+fn departure_hit(trip: &mut Trip, origin: &str, destination: &str) -> Hit {
+    let (limit, _) = trip.speed_limit_at(0.0);
+    Hit {
+        origin: origin.to_string(),
+        destination: destination.to_string(),
+        at_mi: 0.0,
+        total_mi: trip.total_miles(),
+        magnitude: 1.0,
+        run_mi: 0.0,
+        limit_mph: limit,
+        label: format!("loaded departure from {DEPARTURE_FACILITY}"),
+        trip_seed: None,
+    }
 }
 
 /// `find_feature` on a pinned seed, re-rolled when the find is empty.
@@ -846,12 +888,14 @@ fn lead_for_seconds(trip: &Trip, speed_mph: f64, seconds: f64) -> f64 {
 fn feature_lead_mi(trip: &Trip, opts: &RoadOptions) -> f64 {
     match opts.feature.as_str() {
         "destination" if opts.at.is_none() => destination::destination_lead_mi(trip, opts.speed),
+        "departure" => 0.0,
         _ => lead_for_seconds(trip, opts.speed, LEAD_REAL_SECONDS),
     }
 }
 
 /// A `DrivingState` already rolling at the feature, set up as asked.
 pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (DrivingState, f64) {
+    let departure = opts.feature == "departure";
     // Settings first: DrivingState reads the gearbox and the assist choices
     // in its constructor, so an override applied afterwards would not take.
     {
@@ -883,6 +927,13 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
         }
         if let Some(rung) = &opts.verbosity {
             s.driving_speech = rung.clone();
+        }
+        if departure {
+            // This scenario exists to hear the keeper cover the low-speed
+            // departure and hand off to adaptive cruise. The sandbox restores
+            // the operator's real settings on exit, so this cannot persist.
+            s.speed_keeper = true;
+            s.automatic_transmission = true;
         }
     }
 
@@ -928,7 +979,11 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
         cargo,
         opts.cargo,
         &origin_key,
-        "company yard",
+        if departure {
+            DEPARTURE_FACILITY
+        } else {
+            "company yard"
+        },
         &destination_key,
         route.miles(),
         2500.0,
@@ -971,10 +1026,18 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
     let gears = driving.truck().transmission.num_gears();
     driving.truck_mut().start_engine();
     driving.truck_mut().set_air_ready(false);
-    driving.truck_mut().velocity_mps = opts.speed / MPH_PER_MPS;
-    driving.truck_mut().transmission.gear = gears;
-    driving.truck_mut().grade = grade;
-    if opts.cruise > 0.0 {
+    if departure {
+        // Do not teleport past the facility: `update_frame` starts this
+        // loaded delivery on its real departure chain. The owner accelerates
+        // to rolling speed once, then the armed session selects the keeper.
+        driving.truck_mut().velocity_mps = 0.0;
+        driving.speed_control_armed = true;
+    } else {
+        driving.truck_mut().velocity_mps = opts.speed / MPH_PER_MPS;
+        driving.truck_mut().transmission.gear = gears;
+        driving.truck_mut().grade = grade;
+    }
+    if !departure && opts.cruise > 0.0 {
         // Engage the way K does, so the session is armed exactly as a
         // player's would be rather than a hand-set field the rest of the
         // state does not know about.
@@ -1020,8 +1083,16 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
         opts.speed, opts.cargo
     );
     println!(
-        "  cruise            : {}",
-        if opts.cruise > 0.0 {
+        "  {:<18}: {}",
+        if opts.feature == "departure" {
+            "speed control"
+        } else {
+            "cruise"
+        },
+        if opts.feature == "departure" {
+            "armed: speed keeper takes the streets and ramp, then adaptive cruise resumes"
+                .to_string()
+        } else if opts.cruise > 0.0 {
             format!("set {:.0} mph", opts.cruise)
         } else {
             "off".to_string()
@@ -1065,6 +1136,11 @@ pub fn print_setup(ctx: &mut GameContext, hit: &Hit, start_mi: f64, opts: &RoadO
                 trip.grade_at(at) * 100.0
             );
         }
+    }
+    if opts.feature == "departure" {
+        println!(
+            "  departure         : loaded at {DEPARTURE_FACILITY}; accelerate until automatic speed control takes over, then listen for the speed keeper to hand off to adaptive cruise on the acceleration lane before you merge"
+        );
     }
 }
 

@@ -25,8 +25,9 @@
 //! * `--playtest-sandbox` -- prepare (and with `--launch`, run the real game
 //!   in) a data directory that cannot reach the owner's account
 //!   (`tools/playtest_sandbox.py`).
-//! * `--playtest-road --find FEATURE` -- start the real game already rolling
-//!   at a named road feature (`tools/playtest_road.py`).
+//! * `--playtest-road --find FEATURE` -- start the real game at a named road
+//!   feature, or at the loaded facility gate for `departure`
+//!   (`tools/playtest_road.py`).
 //!
 //! # Why the tool parsing is here and not in `app::CliOptions`
 //!
@@ -244,12 +245,13 @@ const USAGE: &str = "freightfate -- Freight Fate
                                     log controller events, both layers
 
 Drive tools:
-  --playtest-road --find FEATURE    start already rolling at a road feature
+  --playtest-road --find FEATURE    start at a road feature or departure gate
                                     (downgrade, upgrade, zone, limit-drop,
                                     stop, scale, curve, interchange, toll,
-                                    chain-law, destination); destination is
+                                    chain-law, destination, departure); destination is
                                     the delivery off-ramp at the end of the
-                                    route; --from/--to/--seed/--scan and
+                                    route; departure starts a loaded Carlisle
+                                    facility exit and I-76 on-ramp; --from/--to/--seed/--scan and
                                     the assist switches refine the search
   --playtest-sandbox [--launch]     a data directory that cannot reach the
                                     owner's account; --dir/--reset/--print
@@ -534,7 +536,7 @@ fn road_session(opts: &road::RoadOptions, headless: f64, args: &[String]) -> i32
         // drive the same way it follows a sandbox launch.
         sandbox::open_session(dir, &log_path);
     }
-    println!("\n  G grade, J engine brake, K cruise, Down arrow brakes (hands cruise back).");
+    println!("\n  G grade, J engine brake, K automatic speed control, Down arrow brakes (hands it back).");
     println!("  To leave: Escape pauses; quit to the main menu, then Exit as usual.");
     println!("  Transcript: {}\n", log_path.display());
     app.run(None);
