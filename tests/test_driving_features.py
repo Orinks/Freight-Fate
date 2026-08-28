@@ -1735,9 +1735,12 @@ def test_missed_destination_recovery_does_not_keep_issuing_gate_speed_strikes(mo
         assert "missed the destination exit" in events[-1].lower()
         assert "back up" not in events[-1].lower()
 
-        driving.update(SPEEDING_HOLD_S + 1.0)
+        assert driving.trip.position_mi < driving.trip.total_miles - 0.05
+        driving._update_speeding(SPEEDING_HOLD_S + 1.0)
 
-        assert driving.speeding_strikes == 0
+        # Successful rewind is back on the highway, not the facility gate.
+        # Gate-zone strike spam was the stuck-miss bug; highway speeding
+        # after recover is asserted on the Hattiesburg path.
         assert not any("End of facility gate zone" in event for event in events)
     finally:
         app.shutdown()

@@ -1212,7 +1212,10 @@ class DrivingEventMixin:
             return
         # Every miss must reposition the trip. The old say-once guard
         # swallowed a second miss and left the truck stuck at zero miles.
-        self._missed_destination_exit_said = True
+        # Leave _missed_destination_exit_said false: that flag is the
+        # unrecoverable say-once, and it also suppresses speeding. After a
+        # successful rewind the truck is back on the highway approach, so
+        # posted-limit strikes must resume. A second miss rewinds again.
         self.trip.game_minutes += 20.0
         self.trip.position_mi = recover_pos
         self._destination_exit_announced_key = None
