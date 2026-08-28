@@ -41,7 +41,7 @@
 use std::path::PathBuf;
 
 use freight_fate::app::{self, App, CliOptions};
-use freight_fate::playtest::{breaker, road, sandbox};
+use freight_fate::playtest::{breaker, observer, road, sandbox};
 use freight_fate::speech::CaptureSpeech;
 
 fn main() {
@@ -184,6 +184,7 @@ fn run(args: &[String]) -> i32 {
 /// A new switch must be added here or it will be refused -- deliberately: a
 /// silent fall-through is what made `--help` launch the game.
 const KNOWN_SWITCHES: &[&str] = &[
+    "--ai",
     "--assists",
     "--at",
     "--break-battery",
@@ -257,6 +258,9 @@ Drive tools:
                                     transitions requiring a live player history are not road-launchable;
                                     --from/--to/--seed/--scan and
                                     the assist switches refine the search
+  --ai                               with a selected road scenario, use paced
+                                    player controls in the real window; live
+                                    player-facing speech streams to the terminal
   --playtest-sandbox [--launch]     a data directory that cannot reach the
                                     owner's account; --dir/--reset/--print
   --list-break-scenarios            name every adversarial scenario
@@ -420,6 +424,15 @@ fn playtest_road(args: &[String]) -> i32 {
     let headless = flag_f64(args, "--headless").unwrap_or(0.0);
     let opts = road_options(args);
 
+    if has(args, "--ai") && headless > 0.0 {
+        eprintln!("--ai requires the real window; remove --headless.");
+        return 1;
+    }
+    if has(args, "--ai") && opts.lane_keeping.as_deref() != Some("full") {
+        eprintln!("--ai requires full lane keeping; remove the conflicting --lane-keeping setting.");
+        return 1;
+    }
+
     if headless == 0.0 && !opts.scan {
         // `playtest_road` builds its own app and runs it, which means it never
         // passes through the guard `app::main_with` uses. Launching one while
@@ -446,6 +459,7 @@ fn playtest_road(args: &[String]) -> i32 {
 }
 
 fn road_session(opts: &road::RoadOptions, headless: f64, args: &[String]) -> i32 {
+    let ai = has(args, "--ai");
     // ON BY DEFAULT since 2026-08-20, because the opt-in version was a trap.
     // A bench run started to answer one question about the engine brake, with
     // the flag simply not typed, created a "Playtest" career in the real save
@@ -502,6 +516,21 @@ fn road_session(opts: &road::RoadOptions, headless: f64, args: &[String]) -> i32
         road::RoadPlan::Drive(hit) => hit,
     };
 
+    let mut observer = if ai {
+        match observer::AutonomousObserver::new(hit.clone()) {
+            Ok(observer) => Some(observer),
+            Err(boundary) => {
+                eprintln!("{boundary}");
+                return 1;
+            }
+        }
+    } else {
+        None
+    };
+
+    if ai {
+        std::env::set_var("FREIGHT_FATE_STREAM_TRANSCRIPT", "1");
+    }
     app::configure_logging();
     if headless > 0.0 {
         let mut app = App::new_headless(Box::new(CaptureSpeech::new()));
@@ -540,11 +569,24 @@ fn road_session(opts: &road::RoadOptions, headless: f64, args: &[String]) -> i32
         // drive the same way it follows a sandbox launch.
         sandbox::open_session(dir, &log_path);
     }
-    println!("\n  G grade, J engine brake, K automatic speed control, Down arrow brakes (hands it back).");
-    println!("  To leave: Escape pauses; quit to the main menu, then Exit as usual.");
+    if observer.is_some() {
+        println!("\n  AI observer is using the normal frame/input path. Player-facing speech streams below.");
+        println!("  It exits at the discovered feature, a keeper-to-cruise handoff, or a named safety boundary.");
+    } else {
+        println!("\n  G grade, J engine brake, K automatic speed control, Down arrow brakes (hands it back).");
+        println!("  To leave: Escape pauses; quit to the main menu, then Exit as usual.");
+    }
     println!("  Transcript: {}\n", log_path.display());
-    app.run(None);
-    app.shutdown();
+    if let Some(observer) = observer.as_mut() {
+        app.run_with_player_input(None, |app, dt| observer.step(app, dt));
+        match observer.outcome() {
+            Some(observer::ObserverOutcome::Complete(detail)) => println!("AI complete: {detail}."),
+            Some(observer::ObserverOutcome::Boundary(detail)) => println!("AI boundary: {detail}."),
+            None => println!("AI boundary: the observer ended without a declared outcome."),
+        }
+    } else {
+        app.run(None);
+    }
     if sandbox_dir.is_some() {
         sandbox::close_session();
     }
@@ -597,7 +639,8 @@ fn road_options(args: &[String]) -> road::RoadOptions {
         assists: flag_value(args, "--assists"),
         planned_stop_assist: flag_on_off(args, "--planned-stop-assist"),
         predictive_cruise: flag_on_off(args, "--predictive-cruise"),
-        lane_keeping: flag_value(args, "--lane-keeping"),
+        lane_keeping: flag_value(args, "--lane-keeping")
+            .or_else(|| has(args, "--ai").then(|| "full".to_string())),
         curve_assist: flag_on_off(args, "--curve-assist"),
         transmission: flag_value(args, "--transmission"),
         verbosity: flag_value(args, "--verbosity"),

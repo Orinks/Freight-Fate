@@ -119,6 +119,55 @@ pub struct App {
     shell: Option<SdlShell>,
     clock: FrameClock,
     initial_state: Option<InitialState>,
+    // Tooling may stage a small number of deliberate player inputs here. They
+    // join the SDL batch in `frame`, so they retain the normal held-key,
+    // controller, speech and state-dispatch behavior.
+    queued_player_input: Vec<InputEvent>,
+}
+
+/// Read-only driving facts available to a normal-input policy.
+///
+/// This deliberately contains values the observer may use to decide its next
+/// key, rather than the driving state itself. A policy cannot reach physics,
+/// assists, or the state stack through this snapshot.
+#[derive(Debug, Clone, Copy)]
+pub struct DrivingObservation {
+    pub position_mi: f64,
+    pub air_ready: bool,
+    pub parking_brake: bool,
+    pub speed_control_armed: bool,
+    pub keeper_active: bool,
+    pub cruise_active: bool,
+    pub departure_chain: bool,
+    pub hazard_active: bool,
+    pub pull_over_active: bool,
+    pub lane_keeping_full: bool,
+    pub off_pavement: bool,
+    pub truck_damage_pct: f64,
+    pub cargo_damage_pct: f64,
+}
+
+/// The only capability a windowed input policy receives for one frame.
+///
+/// It can inspect a value snapshot, queue the same input event a player can
+/// make, and ask the existing event pacer whether player-facing driving
+/// speech is still draining. It cannot mutate application or driving state.
+pub struct PlayerInputFrame<'a> {
+    app: &'a mut App,
+}
+
+impl PlayerInputFrame<'_> {
+    pub fn driving_observation(&self) -> Option<DrivingObservation> {
+        self.app.driving_observation()
+    }
+
+    pub fn queue_player_input(&mut self, event: InputEvent) {
+        self.app.queue_player_input(event);
+    }
+
+    pub fn event_speech_busy(&mut self) -> bool {
+        self.app.ctx.event_voice_busy()
+    }
 }
 
 impl App {
@@ -264,6 +313,7 @@ impl App {
             shell,
             clock: FrameClock::new(true),
             initial_state: None,
+            queued_player_input: Vec::new(),
         }
     }
 
@@ -292,6 +342,31 @@ impl App {
 
     pub fn set_running(&mut self, running: bool) {
         self.ctx.running = running;
+    }
+
+    fn queue_player_input(&mut self, event: InputEvent) {
+        self.queued_player_input.push(event);
+    }
+
+    fn driving_observation(&self) -> Option<DrivingObservation> {
+        let state = self.state()?;
+        let state = state.borrow();
+        let drive = state.as_any().downcast_ref::<crate::states::driving::DrivingState>()?;
+        Some(DrivingObservation {
+            position_mi: drive.trip.position_mi,
+            air_ready: drive.trip.truck.air_ready(),
+            parking_brake: drive.trip.truck.parking_brake,
+            speed_control_armed: drive.speed_control_armed,
+            keeper_active: drive.keeper_mph.is_some(),
+            cruise_active: drive.cruise_mph.is_some(),
+            departure_chain: drive.departure_chain,
+            hazard_active: drive.hazard_deadline.is_some(),
+            pull_over_active: drive.trip.pull_over_active,
+            lane_keeping_full: self.ctx.settings.lane_is_automated(),
+            off_pavement: drive.off_pavement(),
+            truck_damage_pct: drive.trip.truck.damage_pct,
+            cargo_damage_pct: drive.trip.truck.cargo_damage_pct,
+        })
     }
 
     pub fn push_state<S: State + 'static>(&mut self, state: S) {
@@ -547,7 +622,7 @@ impl App {
 
     /// One whole frame: pump events, tick, render. `dt` is the frame time.
     pub fn frame(&mut self, dt: f64) {
-        let events = match self.shell.as_mut() {
+        let mut events = match self.shell.as_mut() {
             Some(shell) => match shell.poll() {
                 Some(events) => events,
                 None => {
@@ -564,6 +639,7 @@ impl App {
             },
             None => Vec::new(),
         };
+        events.append(&mut self.queued_player_input);
         // Clock the held-key tracker before this frame's events: a screen
         // reader's re-injected press-and-release pairs are told apart from a
         // finger by which frame they land in (see `app::held_keys`).
@@ -578,6 +654,17 @@ impl App {
     /// Main loop. `max_frames` runs that many frames then exits cleanly;
     /// used by the `--smoke` build check.
     pub fn run(&mut self, max_frames: Option<u32>) {
+        self.run_with_player_input(max_frames, |_, _| true);
+    }
+
+    /// Run the normal windowed loop while a bounded policy stages player
+    /// inputs for its next frame. The policy receives only
+    /// [`PlayerInputFrame`], so it cannot bypass input dispatch or drive
+    /// physics.
+    pub fn run_with_player_input<F>(&mut self, max_frames: Option<u32>, mut policy: F)
+    where
+        F: FnMut(&mut PlayerInputFrame<'_>, f64) -> bool,
+    {
         self.ctx.running = true;
         let factory = self
             .initial_state
@@ -593,6 +680,14 @@ impl App {
         let mut frames = 0u32;
         while self.ctx.running {
             let dt = self.clock.tick(FPS);
+            let keep_running = {
+                let mut input = PlayerInputFrame { app: self };
+                policy(&mut input, dt)
+            };
+            if !keep_running {
+                self.ctx.running = false;
+                break;
+            }
             self.frame(dt);
             frames += 1;
             if frames == 1 {

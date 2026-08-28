@@ -10,6 +10,15 @@ use super::backend::{
 };
 use super::{PreviewFeature, SpeechSink, EVENT_BACKEND, REFRESH_INTERVAL_S};
 
+/// The observer's terminal stream is written at the real speech-sink
+/// boundary. That includes a backend-refresh announcement, but excludes
+/// pacing and transcript bookkeeping that never reaches the player.
+fn stream_player_speech(text: &str) {
+    if env::var_os("FREIGHT_FATE_STREAM_TRANSCRIPT").is_some_and(|value| !value.is_empty()) {
+        println!("{text}");
+    }
+}
+
 /// The player's speech parameters as last pushed, so a backend swap
 /// mid-session can re-apply them to the new voice (`Speech._config`).
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -425,19 +434,23 @@ impl SpeechSink for Speech {
         let Some(backend) = self.backend.as_mut() else {
             return;
         };
-        if Self::speak_with_backend(backend.as_mut(), text, interrupt) {
-            return;
-        }
-        // The utterance failed: the screen reader probably just quit or was
-        // switched. Re-detect immediately and retry once so this line is not
-        // lost; if nothing can speak right now, poll() keeps looking.
-        self.backend = None;
-        if self.refresh(false) {
-            if let Some(backend) = self.backend.as_mut() {
-                if !Self::speak_with_backend(backend.as_mut(), text, interrupt) {
-                    self.backend = None;
+        let mut spoken = Self::speak_with_backend(backend.as_mut(), text, interrupt);
+        if !spoken {
+            // The utterance failed: the screen reader probably just quit or was
+            // switched. Re-detect immediately and retry once so this line is not
+            // lost; if nothing can speak right now, poll() keeps looking.
+            self.backend = None;
+            if self.refresh(false) {
+                if let Some(backend) = self.backend.as_mut() {
+                    spoken = Self::speak_with_backend(backend.as_mut(), text, interrupt);
+                    if !spoken {
+                        self.backend = None;
+                    }
                 }
             }
+        }
+        if spoken {
+            stream_player_speech(text);
         }
     }
 
@@ -456,7 +469,9 @@ impl SpeechSink for Speech {
         // call. Calling stop() immediately before output(..., interrupt=True)
         // is redundant and could crash inside Prism's Windows SAPI stop path
         // when urgent road events arrived back to back (issue #85).
-        if !Self::speak_with_backend(backend.as_mut(), text, interrupt) {
+        if Self::speak_with_backend(backend.as_mut(), text, interrupt) {
+            stream_player_speech(text);
+        } else {
             self.event_backend = None;
             if interrupt {
                 self.stop_main();

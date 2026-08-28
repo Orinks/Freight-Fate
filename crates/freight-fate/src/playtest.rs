@@ -31,6 +31,7 @@ pub mod break_scenarios;
 pub mod breaker;
 pub mod harness;
 pub mod menu;
+pub mod observer;
 pub mod road;
 pub mod sandbox;
 
