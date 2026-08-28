@@ -292,13 +292,16 @@ pub fn channel_device(handle: u32) -> Result<u32, BassError> {
 /// loads (the Python game learned that the hard way).
 pub fn plugin_load(path: &Path) -> Result<HPLUGIN, BassError> {
     let a = lib()?;
-    let handle = if cfg!(windows) {
+    #[cfg(windows)]
+    let handle = {
         use std::os::windows::ffi::OsStrExt;
         let mut wide: Vec<u16> = path.as_os_str().encode_wide().collect();
         wide.push(0);
         // SAFETY: `wide` is NUL-terminated UTF-16 and outlives the call.
         unsafe { (a.plugin_load)(wide.as_ptr().cast(), BASS_UNICODE) }
-    } else {
+    };
+    #[cfg(not(windows))]
+    let handle = {
         let text = path.to_str().ok_or(BassError {
             code: BASS_ERROR_ILLPARAM,
         })?;
