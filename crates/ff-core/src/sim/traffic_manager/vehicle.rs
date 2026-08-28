@@ -143,6 +143,26 @@ impl TrafficVehicle {
             _ => "traffic ahead",
         }
     }
+
+    /// The vehicle and what it is doing, for a status row or navigation cue
+    /// that supplies its own distance grammar. Unlike the legacy
+    /// [`Self::reason`], this keeps the class the traffic model actually drew.
+    pub fn status_label(&self) -> String {
+        let class = self.vehicle_class.trim();
+        let class = if class.is_empty() { "vehicle" } else { class };
+        if class == "state trooper" {
+            return class.to_string();
+        }
+        match self.intent.as_str() {
+            "cruising" => format!("steady {class}"),
+            "following" => format!("slow {class}"),
+            "merging" => format!("merging {class}"),
+            "braking" => format!("{class} with brake lights"),
+            "passing" => format!("passing {class}"),
+            "patrolling" => format!("marked {class}"),
+            _ => class.to_string(),
+        }
+    }
 }
 
 impl From<NPCVehicle> for TrafficVehicle {

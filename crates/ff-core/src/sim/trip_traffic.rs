@@ -91,7 +91,7 @@ impl Trip {
         let lead = &context.lead;
         format!(
             "Traffic: {} {} ahead in {}, moving {}.",
-            lead.reason(),
+            lead.status_label(),
             self.gap_text(context.gap_mi),
             lead.lane_text(),
             self.speed_text(lead.speed_mph)
@@ -113,11 +113,12 @@ impl Trip {
         };
         self.event_breather.spoke("traffic");
         let lead = situation.vehicle;
+        let label = lead.status_label();
         let cue = NavigationCue::new(
             &format!("npc:{}", lead.key),
             "traffic",
             lead.position_mi,
-            lead.reason(),
+            &label,
             "",
         )
         .with_speed(Some(lead.speed_mph));

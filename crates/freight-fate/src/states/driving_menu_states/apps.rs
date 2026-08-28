@@ -223,7 +223,7 @@ impl DriverAppScreenState {
                 if let Some(context) = d.trip.traffic_context() {
                     lines.push(format!(
                         "Traffic: {}; pace about {}.",
-                        context.lead.reason(),
+                        context.lead.status_label(),
                         ctx.settings.speed_text(context.lead.speed_mph)
                     ));
                 }
@@ -301,7 +301,7 @@ impl DriverAppScreenState {
                 if (0.0..=20.0).contains(&ahead) {
                     return Some(format!(
                         "Traffic ahead: {} in {}; reported pace {}.",
-                        lead.reason(),
+                        lead.status_label(),
                         ctx.settings.distance_text(ahead, false),
                         ctx.settings.speed_text(lead.speed_mph)
                     ));

@@ -92,16 +92,6 @@ impl DrivingState {
             // anything holds cruise under its set speed, the status screen has
             // to say which of the two numbers is real.
             lines.insert(1, format!("Cruise: {}", self.cruise_holding_text(ctx)));
-            if let Some(context) = self.trip.traffic_context() {
-                lines.insert(
-                    2,
-                    format!(
-                        "Traffic: lead vehicle {} ahead, {}",
-                        ctx.settings.distance_text(context.gap_mi, false),
-                        ctx.settings.speed_text(context.lead.speed_mph)
-                    ),
-                );
-            }
         } else if self.keeper_mph.is_some() {
             lines.insert(
                 1,

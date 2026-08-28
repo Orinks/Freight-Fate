@@ -2401,7 +2401,7 @@ fn test_npc_traffic_cue_and_status_are_reviewable() {
     assert!(npc_cues[0].text().contains("Merging vehicle"));
     assert!(npc_cues[0].text().contains("leave a gap"));
     let status = trip.npc_traffic_status();
-    assert!(status.contains("Traffic: merging traffic"), "{status}");
+    assert!(status.contains("Traffic: merging vehicle"), "{status}");
     assert!(status.contains("moving 42 miles per hour"), "{status}");
 }
 

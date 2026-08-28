@@ -33,13 +33,13 @@
 //!
 //! Port of `freight_fate/sim/lane_guidance.py`.
 
-use super::lane::{LaneKeeping, LANE_EDGE, OFF_ROAD, RUMBLE_START};
+use super::lane::{LaneKeeping, CENTERED_MAX, LANE_EDGE, OFF_ROAD, RUMBLE_START};
 
 /// The guide stays asleep inside this much of lane center: normal wander on a
 /// straight never wakes it (WANDER_RATE drift stays well inside 0.35).
 pub const DRIFT_WAKE: f64 = 0.45;
 /// Hysteresis: once awake, sleep only after settling back inside this.
-pub const DRIFT_SLEEP: f64 = 0.30;
+pub const DRIFT_SLEEP: f64 = CENTERED_MAX;
 /// A curve wakes the guide this many miles before its start.
 pub const CURVE_LEAD_MI: f64 = 0.30;
 /// The bed never pans fully into one ear: some road stays on both sides so
@@ -195,7 +195,7 @@ impl LaneGuidance {
             curve_steer != 0.0 || curve_ahead_mi.is_some_and(|mi| mi <= CURVE_LEAD_MI);
         let was_awake = self.awake;
         if self.awake {
-            self.awake = in_curve_window || drift > DRIFT_SLEEP;
+            self.awake = in_curve_window || drift >= DRIFT_SLEEP;
         } else {
             self.awake = in_curve_window || drift > DRIFT_WAKE;
         }
@@ -334,12 +334,20 @@ mod tests {
     }
 
     #[test]
-    fn test_sleep_after_drift_flags_the_centered_earcon() {
+    fn test_manual_drift_correction_confirms_once_only_after_actual_center() {
         let mut g = LaneGuidance::new();
         frame(&mut g, &lane(0.7));
-        let f = frame(&mut g, &lane(0.05));
+        let f = frame(&mut g, &lane(CENTERED_MAX + 0.04));
+        assert!(f.awake);
+        assert!(!f.centered);
+
+        let f = frame(&mut g, &lane(CENTERED_MAX - 0.01));
         assert!(!f.awake);
         assert!(f.centered);
+
+        let f = frame(&mut g, &lane(0.0));
+        assert!(!f.centered);
+
         // A curve-only episode ends without the earcon: nothing drifted.
         frame_curve(&mut g, &lane(0.0), 0.4, None);
         let f = frame(&mut g, &lane(0.0));

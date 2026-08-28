@@ -317,8 +317,32 @@ fn test_status_traffic_line_falls_back_to_legacy_npc_vehicles() {
 
     assert!(
         lines.iter().any(|line| line
-            == "Traffic ahead: merging traffic in 2 miles; reported pace 42 miles per hour."),
+            == "Traffic ahead: merging car in 2 miles; reported pace 42 miles per hour."),
         "{lines:#?}"
+    );
+}
+
+#[test]
+fn test_route_status_cruise_traffic_names_the_known_vehicle_type() {
+    let mut harness = a_drive("Typed Cruise Traffic");
+    harness.with_drive(|drive, _| {
+        drive.trip.position_mi = 10.0;
+        drive.cruise_mph = Some(65.0);
+        let lead = TrafficVehicle::new("lead", 11.5, 55.0, 55.0, 0, "following", "semi");
+        drive.trip.set_npc_vehicles(vec![lead]);
+    });
+
+    let lines = screen_lines(&mut harness, "route");
+    let traffic: Vec<&str> = lines
+        .iter()
+        .filter(|line| line.starts_with("Traffic:"))
+        .map(String::as_str)
+        .collect();
+
+    assert_eq!(
+        traffic,
+        vec!["Traffic: slow semi 1.5 miles ahead in your lane, moving 55 miles per hour."],
+        "the Route screen should carry one typed traffic row: {lines:#?}"
     );
 }
 

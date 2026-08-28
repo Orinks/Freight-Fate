@@ -24,6 +24,9 @@ pub const OFF_ROAD: f64 = 1.3;
 pub const MAX_OFFSET: f64 = 1.5;
 pub const RUMBLE_START: f64 = 0.85;
 pub const RUMBLE_FULL: f64 = 1.15;
+/// Inside this offset the truck is truthfully centered, matching
+/// [`LaneKeeping::describe`].
+pub const CENTERED_MAX: f64 = 0.25;
 pub const OFF_ROAD_GRACE_S: f64 = 2.0;
 pub const OFF_ROAD_REPEAT_S: f64 = 3.0;
 pub const WANDER_RATE: f64 = 0.05;
@@ -232,7 +235,7 @@ impl LaneKeeping {
         let lane_part = format!("In {}", lane_phrase(self.lane, self.lane_count));
         let side = if self.offset < 0.0 { "left" } else { "right" };
         let away = self.offset.abs();
-        if away < 0.25 {
+        if away < CENTERED_MAX {
             return format!("{lane_part}, centered.");
         }
         if away < 0.7 {

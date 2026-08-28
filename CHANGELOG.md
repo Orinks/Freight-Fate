@@ -994,6 +994,16 @@
 
 ### Fixed
 
+- **The centered-lane chime now waits until the truck is actually centered.**
+  With lane keeping off, easing just inside the guidance wake line could play
+  the confirmation while the truck was still drifting. Manual correction now
+  gets one confirmation only after the truck is back near lane center.
+
+- **Traffic status now names the vehicle it is describing.** When Freight Fate
+  knows the traffic is a car, semi, box truck, service vehicle, or trooper, the
+  Route screen and driver tablet say that instead of substituting a generic
+  "lead vehicle" or the wrong kind of vehicle.
+
 - **Acceleration-lane assistance now keeps pulling until cruise can take the
   truck safely.** The speed keeper treated an on-ramp like a gentle steady-speed
   zone, so a loaded automatic could waste much of a 1,600-foot lane below full
