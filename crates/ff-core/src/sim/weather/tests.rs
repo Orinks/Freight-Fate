@@ -114,6 +114,34 @@ fn test_weather_eventually_changes() {
     assert!(changes.iter().any(|c| c.is_some()));
 }
 
+/// Spoken weather color sits on the wheel-time budget; the career clock
+/// still burns drive time. 20x must not drain the color timer twenty times
+/// as fast.
+#[test]
+fn test_weather_color_ticks_on_sitting_not_compressed_game_time() {
+    let mut ws = system_at("heartland", 1, 100.0);
+    ws.minutes_until_change = 10.0;
+    ws.update_paced(30.0, 1.0);
+    assert!(
+        (ws.game_hours.unwrap() - 100.5).abs() < 1e-9,
+        "career clock must still take the game minutes"
+    );
+    assert!(
+        (ws.minutes_until_change - 9.0).abs() < 1e-9,
+        "color timer must tick sitting minutes, not the compressed 30"
+    );
+}
+
+#[test]
+fn test_update_without_a_split_still_uses_one_clock() {
+    // Rest skips and the older call keep one interval for both clocks.
+    let mut ws = system_at("heartland", 1, 50.0);
+    ws.minutes_until_change = 12.0;
+    ws.update(6.0);
+    assert!((ws.game_hours.unwrap() - 50.1).abs() < 1e-9);
+    assert!((ws.minutes_until_change - 6.0).abs() < 1e-9);
+}
+
 #[test]
 fn test_bad_weather_reduces_grip() {
     assert!(effects(WeatherKind::Snow).grip < effects(WeatherKind::Clear).grip);

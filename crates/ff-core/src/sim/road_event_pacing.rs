@@ -25,6 +25,11 @@ use crate::speech_pacing::{monotonic_seconds, Clock};
 pub const LIMIT_GAP_REAL_S: f64 = 12.0; // posted-limit arrival lines
 pub const TRAFFIC_GAP_REAL_S: f64 = 10.0; // NPC traffic situation calls
 pub const ZONE_GAP_REAL_S: f64 = 15.0; // zone-entry colour
+/// Billboards and flavor landmarks: a sitting-time budget, not a sim-hour
+/// rate. ~90s is just under 1x highway spacing of the densest scenery
+/// (2 miles at 65), so Real time still hears the places; 20x cannot poke
+/// once per compressed mile.
+pub const CHATTER_GAP_REAL_S: f64 = 90.0;
 
 /// The window for a category; a category no caller defines is a
 /// programming error, as the Python `KeyError` was.
@@ -156,5 +161,6 @@ mod tests {
         assert_eq!(LIMIT_GAP_REAL_S, 12.0);
         assert_eq!(TRAFFIC_GAP_REAL_S, 10.0);
         assert_eq!(ZONE_GAP_REAL_S, 15.0);
+        assert_eq!(CHATTER_GAP_REAL_S, 90.0);
     }
 }

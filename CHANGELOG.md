@@ -416,6 +416,14 @@
 
 ### Changed
 
+- **Standard pacing no longer multiplies roadside chatter.** Town names,
+  exits, curves, scales, work zones, and lane-count changes still speak
+  once per place, the same at twenty-times speed as at Real time. CB
+  chatter, weather color, and roadside flavor now spend a sitting-time
+  budget, so a faster clock does not mean twenty times the pokes. Night,
+  fuel, and hours of service still run on drive time. Real time stays a
+  choice; Standard remains the sitting default.
+
 - **The truck says what kind of road you are turning onto.** On the local
   drive at each end of a run, a turn onto a street the map has no name for
   used to be announced as "unnamed public road", every time, and that told

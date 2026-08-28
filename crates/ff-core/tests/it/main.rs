@@ -41,6 +41,7 @@ mod sim_maxspeed;
 mod sim_multilane_speech;
 mod sim_real_construction_zones;
 mod sim_scale_check_in_guidance;
+mod sim_speech_clocks;
 mod sim_traffic_bubble;
 mod sim_traffic_manager;
 mod sim_trip_cues;

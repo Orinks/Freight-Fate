@@ -156,7 +156,10 @@ impl Trip {
             self.exit_approach_release_s = (self.exit_approach_release_s - dt).max(0.0);
         }
 
-        // weather drives truck grip and evolves over game time
+        // Night, fuel, ELD/HOS stay on drive time (game_min). Weather color
+        // and the sitting budget chatter reads tick on real dt instead, so
+        // 20x does not spawn 20x pokes.
+        self.sitting_s += dt;
         let scale = self.effective_time_scale();
         let game_min = dt * scale / 60.0;
         self.game_minutes += game_min;
@@ -170,7 +173,7 @@ impl Trip {
             }
             self.weather.set_city(&weather_key, lat, lon);
         }
-        let changed = self.weather.update(game_min);
+        let changed = self.weather.update_paced(game_min, dt / 60.0);
         let source_status = self.weather.source_status();
         let imperial = self.imperial();
         if let Some(changed) = changed {

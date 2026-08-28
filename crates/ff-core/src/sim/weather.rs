@@ -1,8 +1,14 @@
 //! Dynamic weather with regional flavor, driving modifiers, and forecasts.
 //!
-//! Weather evolves as a Markov chain over game time. Each condition carries
-//! physics modifiers (grip, drag, visibility) and an ambience sound key.
-//! A deterministic seed makes trips reproducible in tests.
+//! Weather evolves as a Markov chain. Each condition carries physics
+//! modifiers (grip, drag, visibility) and an ambience sound key. A
+//! deterministic seed makes trips reproducible in tests.
+//!
+//! Two clocks: the career/season clock (night, calendar, temperature) still
+//! advances on game minutes, the same drive-time law as fuel and HOS. Spoken
+//! weather color -- the condition timer and thunder -- ticks on sitting
+//! minutes so 20x does not spawn 20x pokes. A rest skip uses game minutes
+//! for both, because the skip is the time that passed.
 //!
 //! Port of `freight_fate/sim/weather.py`.
 
@@ -342,8 +348,22 @@ impl WeatherSystem {
     }
 
     /// Advance by game minutes. Returns the new condition if it changed.
+    ///
+    /// Rest skips and unit tests that are themselves in game minutes pass
+    /// one clock: sitting and drive time are the same interval. Driving
+    /// frames use [`Self::update_paced`] so color does not ride compression.
     pub fn update(&mut self, game_minutes: f64) -> Option<WeatherKind> {
-        self.thunder_cooldown = (self.thunder_cooldown - game_minutes).max(0.0);
+        self.update_paced(game_minutes, game_minutes)
+    }
+
+    /// Advance the career clock by `game_minutes` and the spoken-color
+    /// timer by `sitting_minutes`.
+    pub fn update_paced(
+        &mut self,
+        game_minutes: f64,
+        sitting_minutes: f64,
+    ) -> Option<WeatherKind> {
+        self.thunder_cooldown = (self.thunder_cooldown - sitting_minutes).max(0.0);
         if let Some(hours) = self.game_hours.as_mut() {
             *hours += game_minutes / 60.0; // advance the career clock
         }
@@ -391,7 +411,7 @@ impl WeatherSystem {
             }
         }
 
-        self.minutes_until_change -= game_minutes;
+        self.minutes_until_change -= sitting_minutes;
         if self.minutes_until_change > 0.0 {
             return None;
         }

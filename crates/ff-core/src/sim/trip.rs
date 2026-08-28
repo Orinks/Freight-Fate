@@ -239,6 +239,10 @@ pub struct Trip {
     pub outbound: bool,
     pub position_mi: f64,
     pub game_minutes: f64,
+    /// Real seconds spent in trip.update: the sitting budget chatter reads.
+    pub sitting_s: f64,
+    /// When the last billboard / flavor landmark was generated, on sitting_s.
+    pub last_chatter_s: Option<f64>,
     pub finished: bool,
     /// The control the stop callout names for signalling an exit.
     pub exit_hint: String,
@@ -402,6 +406,8 @@ impl Trip {
             outbound: opts.outbound,
             position_mi: 0.0,
             game_minutes: 0.0,
+            sitting_s: 0.0,
+            last_chatter_s: None,
             finished: false,
             exit_hint: "X".to_string(),
             facilities_named: HashSet::new(),

@@ -517,6 +517,13 @@ impl RoadsideCallout {
             explains_limit: false,
         }
     }
+
+    /// Town names and the ones that explain a limit change are places:
+    /// once per milepost, same count at 20x or 1:1. Everything else is
+    /// sitting-budget chatter.
+    pub fn is_place_callout(&self) -> bool {
+        self.category == "village" || self.explains_limit
+    }
 }
 
 pub const LANDMARK_MIN_SPACING_MI: f64 = 2.0;

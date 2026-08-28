@@ -7,6 +7,7 @@ use crate::data::billboards::{corridor_signs, random_billboard, SignAnchor};
 use crate::data::curves::{route_curves, RouteCurve};
 use crate::pyfmt::{fmt_f, py_str_float};
 use crate::pyrandom::PyRandom;
+use crate::sim::road_event_pacing::CHATTER_GAP_REAL_S;
 use crate::sim::trip_models::*;
 use crate::sim::trip_route_helpers::{leg_heading, nearest_exit_label, stop_offset_for_direction};
 use crate::speech_text::SpokenMessage;
@@ -799,18 +800,31 @@ impl Trip {
             if behind < 0.0 {
                 break; // sorted by mile; nothing further along is due yet
             }
+            // Past by more than a mile: stale scenery, consumed either way.
+            if behind > 1.0 {
+                announced.insert(callout.key.clone());
+                continue;
+            }
+            // Flavor (billboards, rivers, the rest of the scenery) spends a
+            // sitting budget like CB_CALLS_PER_RUN: skip extras rather than
+            // let 20x multiply pokes. Villages and limit-explaining names
+            // are places -- once per milepost, no budget.
+            if !callout.is_place_callout() && !self.chatter_ready() {
+                announced.insert(callout.key.clone());
+                continue;
+            }
             announced.insert(callout.key.clone());
-            // A callout overshot by more than a mile is stale scenery.
-            if behind <= 1.0 {
-                self.emit(
-                    kind,
-                    SpokenMessage::new(callout.spoken.clone()),
-                    TripEventData {
-                        category: Some(callout.category.clone()),
-                        explains_limit: Some(callout.explains_limit),
-                        ..Default::default()
-                    },
-                );
+            self.emit(
+                kind,
+                SpokenMessage::new(callout.spoken.clone()),
+                TripEventData {
+                    category: Some(callout.category.clone()),
+                    explains_limit: Some(callout.explains_limit),
+                    ..Default::default()
+                },
+            );
+            if !callout.is_place_callout() {
+                self.note_chatter_spoke();
             }
         }
         if billboards {
@@ -820,5 +834,17 @@ impl Trip {
             self.landmarks = callouts;
             self.announced_landmarks = announced;
         }
+    }
+
+    /// True when the sitting budget will still pay for a flavor poke.
+    pub fn chatter_ready(&self) -> bool {
+        match self.last_chatter_s {
+            None => true,
+            Some(last) => self.sitting_s - last >= CHATTER_GAP_REAL_S,
+        }
+    }
+
+    pub fn note_chatter_spoke(&mut self) {
+        self.last_chatter_s = Some(self.sitting_s);
     }
 }
