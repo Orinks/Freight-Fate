@@ -463,9 +463,10 @@ fn departure_hits(world: &'static World, opts: &RoadOptions, seed: Option<i64>) 
                 let mut trip = build_trip(world, &origin_key, &destination, seed)?;
                 let highway = trip.route.legs.first()?.highway.clone();
                 let (limit, _) = trip.speed_limit_at(0.0);
+                let destination_name = speakable(world, &destination);
                 Some((
                     destination,
-                    speakable(world, &destination),
+                    destination_name,
                     trip.total_miles(),
                     limit,
                     highway,
