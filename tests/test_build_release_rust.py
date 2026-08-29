@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import subprocess
+import urllib.error
 from pathlib import Path
 
 import pytest
@@ -380,13 +381,60 @@ def test_ensure_music_pack_preserves_existing_pack_when_download_fails(tmp_path,
     )
 
     def fail_download(_url, _destination):
-        raise OSError("download unavailable")
+        raise urllib.error.URLError("download unavailable")
 
     monkeypatch.setattr(build_release.urllib.request, "urlretrieve", fail_download)
-    with pytest.raises(OSError, match="download unavailable"):
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            "Music-pack download failed: download unavailable. "
+            "Check your connection and retry the build."
+        ),
+    ) as exc:
         build_release.ensure_music_pack(pack)
 
+    assert isinstance(exc.value.__cause__, urllib.error.URLError)
     assert pack.read_bytes() == old_payload
+    assert list(tmp_path.glob("*.download")) == []
+
+
+def test_ensure_music_pack_reports_http_status_and_preserves_the_cause(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "music.pak"
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", "a" * 64)
+
+    def fail_download(url, _destination):
+        raise urllib.error.HTTPError(url, 503, "Service Unavailable", None, None)
+
+    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", fail_download)
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            "Music-pack download failed with HTTP status 503. "
+            "Check your connection and retry the build."
+        ),
+    ) as exc:
+        build_release.ensure_music_pack(pack)
+
+    assert isinstance(exc.value.__cause__, urllib.error.HTTPError)
+    assert exc.value.__cause__.code == 503
+    assert not pack.exists()
+    assert list(tmp_path.glob("*.download")) == []
+
+
+def test_ensure_music_pack_does_not_mislabel_local_io_failures(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "music.pak"
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", "a" * 64)
+
+    def fail_download(_url, _destination):
+        raise PermissionError("destination is read-only")
+
+    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", fail_download)
+    with pytest.raises(PermissionError, match="destination is read-only"):
+        build_release.ensure_music_pack(pack)
+
+    assert not pack.exists()
     assert list(tmp_path.glob("*.download")) == []
 
 

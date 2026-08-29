@@ -99,6 +99,14 @@ jobs:
       - name: Check Rust formatting
         run: cargo fmt --all --check
 
+      - name: Fetch BASS
+        # Audio tests skip when the proprietary BASS runtime is absent. Fetch
+        # and verify it before Clippy or Cargo tests so a clean runner cannot
+        # report green without exercising the audio backend.
+        run: |
+          uv run python tools/fetch_bass.py
+          uv run python tools/fetch_bass.py --check
+
       - name: Lint Rust targets
         run: cargo clippy --all-targets --locked -- -D warnings
 

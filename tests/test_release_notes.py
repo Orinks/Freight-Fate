@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import yaml
+
 from freight_fate.updater import flatten_markdown
 
 
@@ -476,6 +478,24 @@ def test_career_19_snapshot_workflow_contract():
     assert '--target "$COMMIT_SHA"' in workflow
     assert '--target "$CAREER_BRANCH"' not in workflow
     assert "needs.build.result == 'success'" in workflow
+
+
+def test_career_19_snapshot_prepares_bass_before_rust_validation():
+    workflow_path = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    )
+    workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    steps = workflow["jobs"]["build"]["steps"]
+    named_steps = {
+        step["name"]: (index, step) for index, step in enumerate(steps) if "name" in step
+    }
+
+    bass_index, bass_step = named_steps["Fetch BASS"]
+    assert "uv run python tools/fetch_bass.py\n" in bass_step["run"]
+    assert "uv run python tools/fetch_bass.py --check" in bass_step["run"]
+    assert bass_index < named_steps["Lint Rust targets"][0]
+    assert bass_index < named_steps["Test Rust workspace"][0]
+    assert named_steps["Test Rust workspace"][0] < named_steps["Build the portable release"][0]
 
 
 def test_career_19_retry_is_bounded_to_one_delayed_attempt():

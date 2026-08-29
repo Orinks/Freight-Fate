@@ -442,10 +442,12 @@
   time. It is Drivers on duty everywhere now, including on the website, and
   "board" is left to mean the dispatch board, where your work comes from.
 
-- **Career 1.9 snapshot updates look for 1.9 tester builds, not public nightlies.**
-  Packaged 1.9 copies on the snapshot update channel download GitHub
-  prereleases tagged `1.9-tester-YYYYMMDD`. They ignore the public 1.8
-  `nightly-YYYYMMDD` snapshots, and 1.8 builds ignore the tester tags.
+- **Career 1.9 snapshot updates look for 1.9 prerelease builds, not public
+  developer snapshots.** Version 1.9 copies set to
+  `Update channel: developer snapshots` download prerelease builds with dated
+  tags such as `1.9-tester-20260829`, spoken as "1 point 9 tester, August 29,
+  2026." They ignore public 1.8 developer snapshots, and 1.8 builds ignore the
+  tester tags.
 
 - **From-source Career 1.9 builds no longer need Git LFS.** `sounds.pak` is a
   regular git file on `feat/career-1.9`. `music.pak` is still fetched at

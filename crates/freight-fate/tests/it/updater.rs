@@ -2,6 +2,7 @@
 //! notes flattening, apply scripts. The `tools/build_release.py` tests in
 //! that file stay Python (the build tooling is not ported).
 
+use std::cell::RefCell;
 use std::fs;
 use std::path::Path;
 
@@ -155,7 +156,7 @@ fn test_stable_channel_ignores_newer_19_tester_prerelease() {
     let api = |path: &str| -> Result<Value, NetError> {
         match path {
             "/releases/latest" => Ok(stable_at("v1.8.8.1", "2026-08-08T15:00:00Z")),
-            "/releases?per_page=20" => Ok(json!([
+            "/releases?per_page=100&page=1" => Ok(json!([
                 tester("1.9-tester-20260829"),
                 stable_at("v1.8.8.1", "2026-08-08T15:00:00Z"),
             ])),
@@ -448,7 +449,9 @@ fn test_check_for_update_uses_latest_and_the_release_list() {
     let api = |path: &str| -> Result<Value, NetError> {
         match path {
             "/releases/latest" => Ok(release("v9.9.9")),
-            "/releases?per_page=20" => Ok(json!([release("v9.9.9"), nightly("nightly-20260611")])),
+            "/releases?per_page=100&page=1" => {
+                Ok(json!([release("v9.9.9"), nightly("nightly-20260611")]))
+            }
             other => panic!("unexpected path {other}"),
         }
     };
@@ -467,6 +470,130 @@ fn test_check_for_update_uses_latest_and_the_release_list() {
     );
     let down = |_path: &str| -> Result<Value, NetError> { Err(NetError::http(503)) };
     assert!(check_for_update_with("stable", "1.5.0", None, &env, &down).is_err());
+}
+
+#[test]
+fn test_career_19_update_finds_a_tester_after_a_full_release_page() {
+    let first_page = vec![release("v1.8.8"); 100];
+    let requested = RefCell::new(Vec::new());
+    let api = |path: &str| -> Result<Value, NetError> {
+        requested.borrow_mut().push(path.to_string());
+        match path {
+            "/releases?per_page=100&page=1" => Ok(Value::Array(first_page.clone())),
+            "/releases?per_page=100&page=2" => Ok(json!([tester("1.9-tester-20260829")])),
+            other => panic!("unexpected path {other}"),
+        }
+    };
+    let build = BuildInfo::new("1.9-tester-20260820", "dev", "2026-08-20");
+
+    let info = check_for_update_with(
+        "dev",
+        "1.9.0",
+        Some(&build),
+        &env_on(Platform::Windows),
+        &api,
+    )
+    .unwrap()
+    .expect("a tester from the second release page");
+
+    assert_eq!(info.tag, "1.9-tester-20260829");
+    assert_eq!(
+        requested.into_inner(),
+        vec![
+            "/releases?per_page=100&page=1",
+            "/releases?per_page=100&page=2",
+        ]
+    );
+}
+
+#[test]
+fn test_career_19_release_pagination_stops_at_exhaustion_without_crossing_channels() {
+    let first_page = vec![nightly("nightly-20260829"); 100];
+    let requested = RefCell::new(Vec::new());
+    let api = |path: &str| -> Result<Value, NetError> {
+        requested.borrow_mut().push(path.to_string());
+        match path {
+            "/releases?per_page=100&page=1" => Ok(Value::Array(first_page.clone())),
+            "/releases?per_page=100&page=2" => Ok(json!([])),
+            other => panic!("unexpected path {other}"),
+        }
+    };
+    let build = BuildInfo::new("1.9-tester-20260820", "dev", "2026-08-20");
+
+    let info = check_for_update_with(
+        "dev",
+        "1.9.0",
+        Some(&build),
+        &env_on(Platform::Windows),
+        &api,
+    )
+    .unwrap();
+
+    assert!(info.is_none());
+    assert_eq!(
+        requested.into_inner(),
+        vec![
+            "/releases?per_page=100&page=1",
+            "/releases?per_page=100&page=2",
+        ]
+    );
+}
+
+#[test]
+fn test_career_19_release_pagination_is_bounded_to_ten_full_pages() {
+    let full_page = vec![nightly("nightly-20260829"); 100];
+    let requested = RefCell::new(Vec::new());
+    let api = |path: &str| -> Result<Value, NetError> {
+        requested.borrow_mut().push(path.to_string());
+        let page = path
+            .strip_prefix("/releases?per_page=100&page=")
+            .and_then(|value| value.parse::<usize>().ok())
+            .expect("a bounded release-page request");
+        assert!(page <= 10, "requested an eleventh release page");
+        Ok(Value::Array(full_page.clone()))
+    };
+    let build = BuildInfo::new("1.9-tester-20260820", "dev", "2026-08-20");
+
+    let info = check_for_update_with(
+        "dev",
+        "1.9.0",
+        Some(&build),
+        &env_on(Platform::Windows),
+        &api,
+    )
+    .unwrap();
+
+    assert!(info.is_none());
+    assert_eq!(requested.into_inner().len(), 10);
+}
+
+#[test]
+fn test_18_update_finds_a_nightly_after_a_full_tester_page() {
+    let first_page = vec![tester("1.9-tester-20260829"); 100];
+    let requested = RefCell::new(Vec::new());
+    let api = |path: &str| -> Result<Value, NetError> {
+        requested.borrow_mut().push(path.to_string());
+        match path {
+            "/releases?per_page=100&page=1" => Ok(Value::Array(first_page.clone())),
+            "/releases?per_page=100&page=2" => Ok(json!([nightly("nightly-20260829")])),
+            "/releases/latest" => Ok(stable_at("v1.8.8", "2026-08-20T15:00:00Z")),
+            other => panic!("unexpected path {other}"),
+        }
+    };
+    let build = BuildInfo::new("nightly-20260820", "dev", "2026-08-20");
+
+    let info = check_for_update_with(
+        "dev",
+        "1.8.9.dev0",
+        Some(&build),
+        &env_on(Platform::Windows),
+        &api,
+    )
+    .unwrap()
+    .expect("a nightly from the second release page");
+
+    assert_eq!(info.tag, "nightly-20260829");
+    assert_eq!(requested.into_inner().last().unwrap(), "/releases/latest");
 }
 
 // -- assets and notes ---------------------------------------------------------

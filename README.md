@@ -80,9 +80,11 @@ visual display mirrors all speech for sighted players and helpers.
 
 1. Open [Freight Fate releases](https://github.com/Orinks/Freight-fate/releases).
 2. Choose the latest numbered stable release. Stable is recommended for most
-   players. If you want to test Career 1.9, choose the newest tester release
-   named `1.9-tester-YYYYMMDD`. A career saved in a tester build may not load
-   in an older stable release.
+   players. If you want to test Career 1.9, choose the newest prerelease build.
+   Its dated tag looks like `1.9-tester-20260829`, spoken as "1 point 9 tester,
+   August 29, 2026." In Settings, choose `Update channel: developer snapshots`
+   to receive later Career 1.9 prerelease builds. A career saved in a tester
+   build may not load in an older stable release.
 3. Under Assets, download the file ending in `-windows-portable.zip`.
 4. Extract the zip file to a folder.
 5. Open the extracted `FreightFate` folder and run `FreightFate.exe`.

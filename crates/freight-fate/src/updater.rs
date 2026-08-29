@@ -46,6 +46,8 @@ pub const API_BASE: &str = "https://api.github.com/repos/Orinks/Freight-fate";
 pub const USER_AGENT: &str = "FreightFate-updater";
 /// Seconds, per HTTP request.
 pub const TIMEOUT: f64 = 15.0;
+const RELEASE_PAGE_SIZE: usize = 100;
+const MAX_RELEASE_PAGES: usize = 10;
 
 pub const CHANNELS: [&str; 2] = ["stable", "dev"];
 
@@ -786,6 +788,21 @@ fn snapshot_title(career_19: bool, spoken: &str) -> String {
     }
 }
 
+fn release_pages(api: &dyn Fn(&str) -> Result<Value, NetError>) -> Result<Vec<Value>, NetError> {
+    let mut releases = Vec::new();
+    for page in 1..=MAX_RELEASE_PAGES {
+        let path = format!("/releases?per_page={RELEASE_PAGE_SIZE}&page={page}");
+        let response = api(&path)?;
+        let page_releases = response.as_array().cloned().unwrap_or_default();
+        let exhausted = page_releases.len() < RELEASE_PAGE_SIZE;
+        releases.extend(page_releases);
+        if exhausted {
+            break;
+        }
+    }
+    Ok(releases)
+}
+
 /// Query GitHub for a newer release on `channel` through `api`
 /// (`_api_get`, injectable). Network trouble is the error; `Ok(None)` means
 /// already up to date.
@@ -797,14 +814,18 @@ pub fn check_for_update_with(
     api: &dyn Fn(&str) -> Result<Value, NetError>,
 ) -> Result<Option<UpdateInfo>, NetError> {
     if channel == "dev" {
-        // Nightlies come from the release list; the latest stable is fetched
-        // on its own so a long run of nightlies can't paginate it out of view.
-        let releases = api("/releases?per_page=20")?;
-        let releases = releases.as_array().cloned().unwrap_or_default();
-        let stable = match api("/releases/latest") {
-            Ok(stable) => Some(stable),
-            Err(NetError::Http { code: 404, .. }) => None, // no stable release published yet
-            Err(e) => return Err(e),
+        // Snapshot families share the release list. Read bounded 100-item
+        // pages so daily releases cannot hide the player's family, while the
+        // latest stable stays on its dedicated endpoint.
+        let releases = release_pages(api)?;
+        let stable = if is_career_19_line(current_version, build) {
+            None
+        } else {
+            match api("/releases/latest") {
+                Ok(stable) => Some(stable),
+                Err(NetError::Http { code: 404, .. }) => None, // no stable release published yet
+                Err(e) => return Err(e),
+            }
         };
         return Ok(snapshot_update_from(
             &releases,

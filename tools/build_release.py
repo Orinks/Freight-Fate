@@ -38,6 +38,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import urllib.error
 import urllib.request
 import zipfile
 from collections.abc import Mapping
@@ -964,7 +965,18 @@ def ensure_music_pack(path: Path = PACKAGE_DIR / "music.pak") -> None:
     ) as temp:
         temporary = Path(temp.name)
     try:
-        urllib.request.urlretrieve(url, temporary)
+        try:
+            urllib.request.urlretrieve(url, temporary)
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError(
+                f"Music-pack download failed with HTTP status {exc.code}. "
+                "Check your connection and retry the build."
+            ) from exc
+        except (urllib.error.URLError, ConnectionError, TimeoutError) as exc:
+            detail = exc.reason if isinstance(exc, urllib.error.URLError) else str(exc)
+            raise RuntimeError(
+                f"Music-pack download failed: {detail}. Check your connection and retry the build."
+            ) from exc
         actual_sha256 = file_sha256(temporary)
         if actual_sha256 != expected_sha256:
             raise RuntimeError(

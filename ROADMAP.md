@@ -120,11 +120,12 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
-- [x] **Career 1.9 tester snapshots are complete portable releases
-      (2026-08-29).** Each immutable Career 1.9 build publishes a Windows zip
-      with music and the required audio libraries. Packaged testers follow
-      newer `1.9-tester-YYYYMMDD` releases through the Snapshot update channel,
-      while stable players stay on stable releases.
+- [x] **Career 1.9 prerelease builds are complete portable releases
+      (2026-08-29).** Each Career 1.9 prerelease build publishes a Windows zip
+      with music and the required audio libraries. Career 1.9 copies set to
+      `Update channel: developer snapshots` follow newer prereleases with dated
+      tags such as `1.9-tester-20260829`, spoken as "1 point 9 tester, August
+      29, 2026," while stable players stay on stable releases.
 - [ ] **`test_signaling_for_an_exit_eases_cruise_to_ramp_speed` is flaky
       under a full parallel run (seen 2026-08-29)** It failed once in a
       whole-crate `cargo test -p freight-fate`, asserting the brake was on
