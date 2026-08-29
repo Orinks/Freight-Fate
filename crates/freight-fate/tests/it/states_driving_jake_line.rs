@@ -123,6 +123,16 @@ fn loaded_run(
         "off".to_string()
     };
     harness.app.ctx.settings.speed_keeper = true;
+    // Nobody is at the wheel for fifteen minutes, and lane wander runs off a
+    // seed the drive draws fresh when nobody hands it one -- so it was the one
+    // thing here that differed every run. Left in, the truck drifted onto the
+    // shoulder, took damage for every second it stayed there, went into limp
+    // mode and then out of service, and the "hold" being measured was a wreck
+    // coasting to a stop: that is what put 20 mph rows in the table and
+    // flipped the verdict on about two runs in five. Full lane keeping is how
+    // the break scenarios take steering out of an experiment that is not about
+    // steering, and it is what makes this table repeat exactly.
+    harness.app.ctx.settings.lane_keeping = "full".to_string();
     release_keys(&mut harness);
     harness.with_drive(move |d, _| {
         one_grade_road(d, 65.0, grade_pct, run_mi);
@@ -183,6 +193,9 @@ fn roll_onto_the_grade(harness: &mut PlaytestHarness) {
 
 struct Held {
     grade_pct: f64,
+    /// Damage taken during the hold. A hill does not damage a truck, so
+    /// anything above zero means something else got into the experiment.
+    damage_pct: f64,
     peak_temp_c: f64,
     settled_temp_c: f64,
     predicted_c: f64,
@@ -243,6 +256,7 @@ fn hold_on_the_drums(grade_pct: f64, set_mph: f64, seconds: f64) -> Held {
             retarder_frames += 1;
         }
     }
+    let damage_pct = harness.read_drive(|d| d.truck().damage_pct);
     let mean_mph = speeds.iter().sum::<f64>() / speeds.len().max(1) as f64;
     let spread_mph = speeds.iter().cloned().fold(f64::NEG_INFINITY, f64::max)
         - speeds.iter().cloned().fold(f64::INFINITY, f64::min);
@@ -269,6 +283,7 @@ fn hold_on_the_drums(grade_pct: f64, set_mph: f64, seconds: f64) -> Held {
     });
     Held {
         grade_pct,
+        damage_pct,
         peak_temp_c: peak,
         settled_temp_c: settled,
         predicted_c: predicted,
@@ -335,6 +350,18 @@ fn test_the_retarder_line_is_where_the_drums_stop_holding() {
             h.retarder_frames, 0,
             "{:.1}% ran with the retarder up, so the drum heat is not the drums'",
             h.grade_pct
+        );
+    }
+
+    // And it has to be measuring a truck, not a wreck. A grade does not
+    // damage a rig; damage here means something outside the experiment --
+    // the shoulder, a barrier, traffic -- got hold of the truck partway
+    // down, and every number in its row is about that instead of the hill.
+    for h in &held {
+        assert_eq!(
+            h.damage_pct, 0.0,
+            "{:.1}% took {:.0} percent damage on the way down, so the hold is not a hold",
+            h.grade_pct, h.damage_pct
         );
     }
 
