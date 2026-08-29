@@ -6,9 +6,8 @@ permissions:
 
 on:
   push:
-    # feat/career-1.9 is the long-lived 1.9 release line and gets direct
-    # pushes instead of PRs, so it needs its own hosted CI trigger.
-    branches: [main, dev, feat/career-1.9]
+    # The 1.9 release line has its own Rust CI in rust.yml.
+    branches: [main, dev]
   pull_request:
     branches: [main, dev]
   workflow_dispatch:

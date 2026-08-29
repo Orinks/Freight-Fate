@@ -14,8 +14,8 @@
 # Trigger note: `build.yml` fires only on `schedule`, `v*.*.*` tags and
 # `workflow_dispatch` -- it never sees an ordinary push -- so nothing there
 # will ever run these checks. Anything that must run on a push needs its own
-# push trigger, which is what this file has, mirroring ci.yml's branch list
-# plus the port branch.
+# push trigger, which is what this file has for main, dev, and the direct-push
+# Rust release lines.
 
 name: Rust
 
@@ -24,19 +24,9 @@ permissions:
 
 on:
   push:
-    # Same long-lived branches ci.yml watches, plus the port branch: like
-    # feat/career-1.9, feat/rust-port takes direct pushes instead of PRs, so
-    # without its own entry the port's own CI would never run on the port.
+    # Alongside main and dev, the Rust release lines take direct pushes instead
+    # of PRs, so each needs its own entry for this CI to run.
     branches: [main, dev, feat/career-1.9, feat/rust-port]
-    # Spelled out twice rather than shared through a YAML anchor: the Actions
-    # workflow parser does not resolve anchors and aliases.
-    paths:
-      - "crates/**"
-      - "vendor/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "rust-toolchain.toml"
-      - ".github/workflows/rust.yml"
   pull_request:
     branches: [main, dev]
     paths:
@@ -48,11 +38,10 @@ on:
       - ".github/workflows/rust.yml"
   workflow_dispatch:
 
-# The path filter above keeps a 30-plus-minute Windows build off pushes that
-# only touch Python, docs or world data. It has one cost worth knowing before
-# anyone wires it into branch protection: a *required* check that is path
-# filtered stays "expected -- waiting for status" forever on a PR that skips
-# it. Make it required only after dropping `paths:`.
+# The pull-request path filter keeps a 30-plus-minute Windows build off PRs
+# that only touch Python, docs or world data. A *required* check that is path
+# filtered stays "expected -- waiting for status" forever on a skipped PR, so
+# do not make it required unless the filter is dropped.
 
 concurrency:
   group: rust-${{ github.ref }}
@@ -115,43 +104,12 @@ jobs:
       # 40-minute run into something diagnosable without a re-run.
       RUST_BACKTRACE: "1"
     steps:
-      # NOT lfs: true. sounds.pak and music.pak are Git LFS (see
-      # .gitattributes) and a full fetch takes roughly 270 MB per run, 261 MB
-      # of it music.pak. That is what exhausted the repository's LFS budget:
-      # every run on this branch died at CHECKOUT with "This repository
-      # exceeded its LFS budget", before a single test ran (2026-08-23). The
-      # Python job (ci.yml) was changed the same day for the same reason and
-      # this follows it exactly -- the two jobs share one budget, so half a
-      # fix is no fix. Buying quota only postpones it: at this push rate a
-      # 50 GB data pack lasts about ten days.
-      #
-      # This file used to argue the other way, that the packs had to be
-      # fetched because two `assets_pack` tests guard with "if the file does
-      # not exist, skip" and an LFS pointer is a file that exists. It named
-      # the honest fix as teaching those tests to recognise a pointer, and
-      # that is now done: `ff_core::assets_pack::pack_available` tells a
-      # pointer from a pack, and every test that reads the shipped bytes
-      # skips with a note on the log naming the pointer rather than asserting
-      # against 130 bytes of pointer text -- or quietly passing.
+      # Keep LFS disabled: the large music pack is not needed for Rust CI.
+      # sounds.pak is a regular tracked file, so checkout already provides it
+      # without a separate LFS fetch.
       - uses: actions/checkout@v6
         with:
           lfs: false
-
-      # Only the small pack, and never fatally. The recorded sounds are what
-      # the Rust suite actually reaches for -- the engine ring, the horn, the
-      # loop seams, ui/menu_select -- at 7.5 MB. The music pack backs two
-      # content invariants (every catalog track has a real file, and the
-      # committed pack's own header) that belong to the pack rather than to
-      # the code, change rarely, and still run on any machine holding it.
-      #
-      # continue-on-error because the budget may already be spent: a quota
-      # failure must leave the pack unmaterialised and let the rest of the
-      # suite run, not turn the job red for a reason that has nothing to do
-      # with the code. That is the same state a clean clone without LFS is
-      # in, which the tests already handle by skipping.
-      - name: Fetch the sound pack only
-        continue-on-error: true
-        run: git lfs pull --include="src/freight_fate/sounds.pak"
 
       - name: Install the pinned toolchain
         run: rustup show
