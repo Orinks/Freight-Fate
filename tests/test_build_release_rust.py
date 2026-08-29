@@ -426,6 +426,9 @@ def test_prepare_rust_release_dependencies_fetches_bass_then_music(monkeypatch):
 def test_windows_release_wrapper_is_the_complete_beginner_command():
     root = Path(__file__).resolve().parents[1]
     script = (root / "build-release.ps1").read_text(encoding="utf-8")
+    readme_heading = "## Build a standalone copy"
+    assert readme_heading in (root / "README.md").read_text(encoding="utf-8")
+    assert readme_heading.removeprefix("## ") in script
     assert "Get-Command rustc" in script
     assert "Get-Command uv" in script
     assert "uv sync --group dev --group build" in script
