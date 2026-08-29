@@ -30,14 +30,17 @@ use crate::sim_support::{make_trip_with, world};
 /// the town's own state, plus the states the corridor enters it from.
 const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     // -- Interstate 90 -----------------------------------------------------
-    ("Wall Drug", &["SD", "WY", "MN", "MT"]),
+    // Wall, South Dakota. Minnesota is the I-90 approach from the east;
+    // Wyoming is the neighbouring approach from the west. Montana is too
+    // far west -- a tester hit there is a fail. Placement itself keeps the
+    // boards on SD and MN only.
+    ("Wall Drug", &["SD", "MN"]),
     ("Boston ahead", &["MA", "NY", "CT", "RI", "NH"]),
     ("Wyoming, Land of the Buffalo", &["WY", "MT", "SD"]),
     ("Idaho panhandle", &["ID", "WA", "MT"]),
     // -- Interstate 95 -----------------------------------------------------
     ("sombrero tower", &["SC", "NC"]),
     ("South of the Border", &["SC", "NC"]),
-    ("Haynesville Woods", &["ME", "NH"]),
     ("New Jersey: more state", &["NJ", "NY", "PA", "DE"]),
     ("Jacksonville ahead", &["FL", "GA"]),
     // -- Interstate 10 -----------------------------------------------------
@@ -62,7 +65,9 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
         "Route Sixty-Six",
         &["CA", "AZ", "NM", "TX", "OK", "MO", "KS", "IL"],
     ),
-    ("caverns ahead", &["MO", "AR", "TN", "KY"]),
+    // Meramec Caverns is Stanton, Missouri, on Interstate 44. Arkansas,
+    // Tennessee, and Kentucky were the I-40 misplacement.
+    ("caverns ahead", &["MO"]),
     ("Winslow, Arizona", &["AZ", "NM", "CA"]),
     ("Memphis, on down the road", &["TN", "AR", "MS"]),
     ("Muskogee, Oklahoma", &["OK", "AR"]),
@@ -71,16 +76,15 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     // -- Interstate 80 -----------------------------------------------------
     ("largest porch swing", &["NE", "KS", "IA"]),
     ("Little America", &["WY", "UT", "NE"]),
-    ("Dock of the Bay", &["CA", "NV"]),
+    // Otis Redding's dock is the San Francisco bay, not the Humboldt.
+    ("Dock of the Bay", &["CA"]),
     // -- Interstate 70 -----------------------------------------------------
-    ("Black Bear Road", &["CO", "UT"]),
     ("The Rockies, straight ahead", &["CO", "KS", "UT"]),
     ("Kansas City ahead", &["MO", "KS", "IL"]),
     // -- Interstate 44 -----------------------------------------------------
     ("Franklin County, Missouri", &["MO"]),
     ("Tulsa ahead", &["OK", "MO", "TX", "KS"]),
     // -- Interstate 35 -----------------------------------------------------
-    ("George Strait country", &["TX", "OK"]),
     ("Abbott, Texas", &["TX"]),
     ("Waco ahead", &["TX"]),
     ("Austin ahead", &["TX"]),
@@ -115,23 +119,16 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("Wisconsin made Dave Dudley", &["WI", "MN", "IL", "MI"]),
     ("Motown assembly line", &["MI", "OH", "IN"]),
     ("it built Bob Seger", &["MI", "OH", "IN"]),
-    // -- Interstate 96 -----------------------------------------------------
-    ("Ionia County, Michigan", &["MI"]),
-    // -- Interstate 71 -----------------------------------------------------
-    ("Cincinnati ahead", &["OH", "KY", "IN"]),
     // -- Interstate 77 -----------------------------------------------------
     ("Charleston, West Virginia", &["WV", "VA", "OH", "KY"]),
     ("Kathy Mattea", &["WV", "VA", "OH", "KY"]),
     // -- Interstate 81 -----------------------------------------------------
-    ("Russell County", &["VA", "TN", "WV", "NC"]),
     ("Foggy Mountain Breakdown", &["VA", "TN", "WV", "NC", "KY"]),
     // -- Interstate 64 -----------------------------------------------------
     ("Eastern Kentucky", &["KY", "WV", "VA", "OH"]),
     ("Sixteen Tons", &["KY", "WV", "VA", "OH", "PA"]),
     // -- Interstate 30 -----------------------------------------------------
     ("Hope, Arkansas", &["AR", "TX"]),
-    // -- Interstate 8 ------------------------------------------------------
-    ("Mexican Radio", &["CA", "AZ", "NM", "TX"]),
     // -- Interstate 78 -----------------------------------------------------
     ("Nazareth, Pennsylvania", &["PA", "NJ", "NY"]),
     // -- Interstate 20 -----------------------------------------------------
@@ -350,6 +347,53 @@ fn test_no_billboard_names_a_place_the_truck_is_not_near() {
     let mut by_phrase: HashMap<&'static str, usize> = HashMap::new();
     let mut claiming = 0usize;
     for sign in &shown {
+        for phrase in [
+            "All his exes live around here somewhere",
+            "Amarillo can wait till morning",
+            "Black Bear Road",
+            "Mexican Radio",
+            "Haynesville Woods",
+            "Ionia County, Michigan",
+            "Arlo McKinley",
+            "Russell County line",
+            "Forty-Nine Winchester",
+        ] {
+            assert!(
+                !sign.spoken.contains(phrase),
+                "pulled line fired in {} at mile {:.1} on {}: {}",
+                sign.state,
+                sign.at_mi,
+                sign.run,
+                sign.spoken
+            );
+        }
+        if sign.spoken.contains("Wall Drug") {
+            assert!(
+                sign.state == "SD" || sign.state == "MN" || sign.state.is_empty(),
+                "Wall Drug in {} at mile {:.1} on {}",
+                sign.state,
+                sign.at_mi,
+                sign.run
+            );
+        }
+        if sign.spoken.contains("Dock of the Bay") {
+            assert!(
+                sign.state == "CA" || sign.state.is_empty(),
+                "Dock of the Bay in {} at mile {:.1} on {}",
+                sign.state,
+                sign.at_mi,
+                sign.run
+            );
+        }
+        if sign.spoken.contains("caverns ahead") {
+            assert!(
+                sign.state == "MO" || sign.state.is_empty(),
+                "Meramec in {} at mile {:.1} on {}",
+                sign.state,
+                sign.at_mi,
+                sign.run
+            );
+        }
         let found = claims(&sign.spoken);
         if found.is_empty() {
             continue;
@@ -413,5 +457,132 @@ fn test_no_billboard_names_a_place_the_truck_is_not_near() {
             .map(|s| s.as_str())
             .collect::<Vec<_>>()
             .join("\n")
+    );
+}
+
+/// Wall Drug is a South Dakota attraction. Montana I-90 must never read it.
+#[test]
+fn test_wall_drug_never_reads_in_montana() {
+    let world = world();
+    let mut seen_any = false;
+    for seed in 1..=40i64 {
+        let trip = make_trip_with(
+            world,
+            "missoula_mt_us",
+            "billings_mt_us",
+            TripOptions::seeded(seed),
+        );
+        for callout in &trip.billboards {
+            seen_any = true;
+            assert!(
+                !callout.spoken.contains("Wall Drug"),
+                "seed {seed}: Wall Drug in Montana at mile {:.1}: {}",
+                callout.at_mi,
+                callout.spoken
+            );
+        }
+    }
+    assert!(
+        seen_any,
+        "the Montana I-90 run scheduled no billboard at all"
+    );
+}
+
+/// The two Wall Drug lines must still speak on the South Dakota I-90 run,
+/// or pulling Montana has traded a wrong sign for silence.
+#[test]
+fn test_wall_drug_still_reads_in_south_dakota() {
+    let world = world();
+    let mut hits = 0usize;
+    for seed in 1..=40i64 {
+        let trip = make_trip_with(
+            world,
+            "rapid_city_sd_us",
+            "sioux_falls_sd_us",
+            TripOptions::seeded(seed),
+        );
+        hits += trip
+            .billboards
+            .iter()
+            .filter(|c| c.spoken.contains("Wall Drug"))
+            .count();
+    }
+    assert!(hits > 0, "Wall Drug never appeared on South Dakota I-90");
+}
+
+/// Meramec Caverns is Interstate 44 Missouri. Interstate 40 Arkansas must
+/// never read it.
+#[test]
+fn test_meramec_never_reads_in_arkansas() {
+    let world = world();
+    let mut seen_any = false;
+    for seed in 1..=40i64 {
+        for (a, b) in [
+            ("fort_smith_ar_us", "little_rock_ar_us"),
+            ("little_rock_ar_us", "fort_smith_ar_us"),
+        ] {
+            if world.route_options(a, b, 3, false).is_err() {
+                continue;
+            }
+            let trip = make_trip_with(world, a, b, TripOptions::seeded(seed));
+            for callout in &trip.billboards {
+                seen_any = true;
+                assert!(
+                    !callout.spoken.contains("caverns ahead"),
+                    "{a} -> {b} seed {seed}: Meramec in Arkansas at mile {:.1}: {}",
+                    callout.at_mi,
+                    callout.spoken
+                );
+            }
+        }
+    }
+    assert!(
+        seen_any,
+        "the Arkansas I-40 run scheduled no billboard at all"
+    );
+}
+
+/// The moved Meramec line must still speak on Interstate 44 in Missouri.
+#[test]
+fn test_meramec_still_reads_on_interstate_44_missouri() {
+    let world = world();
+    let mut hits = 0usize;
+    for seed in 1..=40i64 {
+        let trip = make_trip_with(
+            world,
+            "st_louis_mo_us",
+            "springfield_mo_us",
+            TripOptions::seeded(seed),
+        );
+        hits += trip
+            .billboards
+            .iter()
+            .filter(|c| c.spoken.contains("Meramec-style caverns"))
+            .count();
+    }
+    assert!(hits > 0, "Meramec never appeared on Interstate 44 Missouri");
+}
+
+/// Otis Redding's dock is the San Francisco bay. Nevada I-80 must never
+/// read it.
+#[test]
+fn test_dock_of_the_bay_never_reads_in_nevada() {
+    let world = world();
+    let mut seen_any = false;
+    for seed in 1..=40i64 {
+        let trip = make_trip_with(world, "reno_nv_us", "elko_nv_us", TripOptions::seeded(seed));
+        for callout in &trip.billboards {
+            seen_any = true;
+            assert!(
+                !callout.spoken.contains("Dock of the Bay"),
+                "seed {seed}: Dock of the Bay in Nevada at mile {:.1}: {}",
+                callout.at_mi,
+                callout.spoken
+            );
+        }
+    }
+    assert!(
+        seen_any,
+        "the Nevada I-80 run scheduled no billboard at all"
     );
 }

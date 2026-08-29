@@ -1026,6 +1026,18 @@
 
 ### Fixed
 
+- **Corridor billboards that were lying got pulled or moved.** Wall Drug no
+  longer plays in Montana, or on western Interstate 90 in Wyoming; the two
+  boards stay on South Dakota and the Minnesota approach. The caverns sign
+  that named Meramec now sits on Interstate 44 in Missouri, where those
+  caverns actually are, instead of Interstate 40 in Arkansas. Dock of the Bay
+  stays in California and no longer plays in Nevada. A handful of radio-memory
+  tributes that were never paid boards -- Black Bear Road, Mexican Radio,
+  Haynesville Woods, Ionia County, Cincinnati, Russell County, and a George
+  Strait line that named Amarillo on the wrong road -- are gone. The roadside
+  still has its corridor character; the signs just have to be true where you
+  hear them.
+
 - **Route-transition assistance no longer rides the service brake down a routine
   ramp.** It now eases off the throttle for the ramp speed instead of holding
   the brake and draining the air tanks toward the compressor cut-in or low-air

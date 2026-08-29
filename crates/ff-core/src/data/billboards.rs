@@ -229,8 +229,11 @@ const fn approaching(text: &'static str, cities: &'static [&'static str]) -> Cor
 // roadside is not true beside a different road that happens to share a number.
 pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     ("I-90", &[
-        in_states("Free ice water at Wall Drug. Only three hundred miles. You're basically there.", &["MT", "WY", "SD", "MN"]),
-        in_states("Wall Drug. Five-cent coffee since your grandfather was your age.", &["MT", "WY", "SD", "MN"]),
+        // Wall Drug is Wall, South Dakota. The Minnesota approach is honest
+        // I-90 from the east. Montana is too far west to claim it, and
+        // Wyoming I-90 is still western I-90, so both stay off.
+        in_states("Free ice water at Wall Drug. Only three hundred miles. You're basically there.", &["SD", "MN"]),
+        in_states("Wall Drug. Five-cent coffee since your grandfather was your age.", &["SD", "MN"]),
         // Song tributes -- Boston (The Willis Brothers), Moorcroft, Wyoming
         // (Chancey Williams), and the Idaho panhandle (Colby Acuff).
         approaching("Boston ahead. The Willis Brothers needed forty acres to turn a rig around in this town. It hasn't gotten any wider.", &["boston_ma_us"]),
@@ -244,9 +247,8 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // genre South of the Border already trades on. "362 days" keeps its
         // numerals verbatim (owner sign-off, see test_billboards.py).
         anywhere_on("Bubba's Fireworks: open 362 days a year! Closed on the other three because we're usually in the hospital."),
-        // Song tributes -- the Haynesville Woods in Maine (Dick Curless), the
-        // Jersey Turnpike (Elle King), and Jacksonville (Lynyrd Skynyrd).
-        in_states("The Haynesville Woods are up north of here. Dick Curless counted A Tombstone Every Mile. Watch for moose.", &["ME", "NH"]),
+        // Song tributes -- the Jersey Turnpike (Elle King) and Jacksonville
+        // (Lynyrd Skynyrd). Haynesville Woods was radio memory, not a paid board.
         in_states("New Jersey: more state than it gets credit for. Elle King sings one called Jersey Giant.", &["NJ"]),
         approaching("Jacksonville ahead, hometown of Lynyrd Skynyrd. Down here even the breeze plays guitar -- they named a song for it, Call Me the Breeze.", &["jacksonville_fl_us"]),
     ]),
@@ -270,7 +272,6 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     ]),
     ("I-40", &[
         in_states("Historic Route sixty-six. Get your kicks, then get back on schedule.", &["CA", "AZ", "NM", "TX", "OK"]),
-        in_states("Meramec-style caverns ahead. Outlaws hid here. So can you, for nine ninety-five.", &["AR"]),
         // Song tributes -- the old Route Sixty-Six corridor is wall-to-wall
         // song country: Winslow, Memphis, Muskogee, Okemah, the Smokies, and
         // the mother road itself.
@@ -286,15 +287,17 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Little America, ahead. Ice cream, cheap gas, and a very large sign about it.", &["WY", "UT"]),
         // Song tribute -- San Francisco Bay at the far western end (Otis
         // Redding).
-        in_states("The Dock of the Bay is at the far end of this road. Otis Redding held the best seat. No parking for trailers.", &["CA", "NV"]),
+        // Otis is the San Francisco bay, not the Humboldt. Nevada I-80 is
+        // the wrong end of this road.
+        in_states("The Dock of the Bay is at the far end of this road. Otis Redding held the best seat. No parking for trailers.", &["CA"]),
     ]),
     // 2026-08-12 owner batch -- the Rockies climb, where the scenery genuinely
     // earns the joke.
     ("I-70", &[
         anywhere_on("Have you seen the scenery? Neither has your driver!"),
-        // Song tributes -- the San Juans (C.W. McCall), the Front Range (Joe
-        // Walsh), and Kansas City (Roger Miller).
-        in_states("Black Bear Road, way south of here: one lane, hairpins, no guardrails off the Rockies. C.W. McCall sang his way down it. Keep the convoy on the pavement.", &["CO"]),
+        // Song tributes -- the Front Range (Joe Walsh) and Kansas City
+        // (Roger Miller). Black Bear Road is a Jeep trail, not a paid board
+        // on Interstate 70.
         in_states("The Rockies, straight ahead and getting bigger. Joe Walsh saw this view and wrote Rocky Mountain Way.", &["CO", "KS"]),
         approaching("Kansas City ahead. Roger Miller made it famous twice -- Kansas City Star, then King of the Road.", &["kansas_city_mo_us"]),
     ]),
@@ -303,13 +306,15 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     // Trucking Company's home turf, by owner order; Tulsa belongs to Don
     // Williams.
     ("I-44", &[
+        // Moved from Interstate 40 Arkansas: Meramec Caverns is Stanton,
+        // Missouri, on Interstate 44, a real paid-board attraction.
+        in_states("Meramec-style caverns ahead. Outlaws hid here. So can you, for nine ninety-five.", &["MO"]),
         in_states("Franklin County, Missouri -- Union, Pacific, Saint Clair, and Sullivan. Home turf of the Franklin County Trucking Company. If you're a trucker, they already wrote your song.", &["MO"]),
         approaching("Tulsa ahead. Set your watch to Tulsa Time. Don Williams says it runs a little easier.", &["tulsa_ok_us"]),
     ]),
     // Song tributes -- the Texas-to-Minnesota main street of country music:
     // San Antonio, Austin, Waco, Abbott, Fort Worth, and Wichita.
     ("I-35", &[
-        in_states("You're deep in George Strait country now. All his exes live around here somewhere. Amarillo can wait till morning.", &["TX"]),
         in_states("Abbott, Texas -- Willie Nelson's hometown. He's on the road again.", &["TX"]),
         approaching("Waco ahead. Croy and the Boys wrote Don't Let Me Die in Waco. The city would like everyone to relax.", &["waco_tx_us"]),
         approaching("Austin ahead. Dale Watson territory -- honky-tonk for people who read weigh station signs.", &["austin_tx_us"]),
@@ -368,14 +373,8 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         approaching("Detroit, the Motown assembly line. Marvin Gaye, Stevie Wonder, and no mountain high enough to slow the freight.", &["detroit_mi_us"]),
         approaching("Detroit builds engines, and it built Bob Seger. Night Moves and Turn the Page came off these roads.", &["detroit_mi_us"]),
     ]),
-    // Song tribute -- Ionia County, Michigan (Billy Strings).
-    ("I-96", &[
-        in_states("Ionia County, Michigan -- Billy Strings picked his way out of here. Long Journey Home, played fast.", &["MI"]),
-    ]),
-    // Song tribute -- Cincinnati (Arlo McKinley).
-    ("I-71", &[
-        approaching("Cincinnati ahead, Arlo McKinley's hometown -- the one he wrote Back Home about. The hills sing sad and the chili is a controversy.", &["cincinnati_oh_us"]),
-    ]),
+    // I-96 Ionia County / Billy Strings and I-71 Cincinnati / Arlo McKinley
+    // were radio memory, not paid boards. Pulled; no replacement songs.
     // Song tributes -- Charleston, West Virginia raised Red Sovine and Kathy
     // Mattea both.
     ("I-77", &[
@@ -389,10 +388,9 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // has to carry its own context.
         in_states("The little valleys off this road are called hollers: a porch, a banjo, somebody picking. Dirty Grass Soul wrote the song about going home to one -- Back to the Holler. Leave the trailer, though; a holler road has never turned a rig around.", &["WV", "VA", "KY", "NC"]),
     ]),
-    // Song tributes -- the Appalachian valley: Russell County, Virginia
-    // (Forty-Nine Winchester) and Smoky Mountain fog (Flatt and Scruggs).
+    // Song tribute -- Smoky Mountain fog (Flatt and Scruggs). Russell County
+    // / Forty-Nine Winchester was radio memory, not a paid board.
     ("I-81", &[
-        in_states("Russell County line, a valley over. Forty-Nine Winchester put it on every honky-tonk jukebox in Virginia. Wave as you pass.", &["VA"]),
         in_states("Mountain fog ahead is a local specialty. Flatt and Scruggs turned it into the fastest banjo tune ever cut, Foggy Mountain Breakdown. Use low beams in fog.", &["VA", "TN", "WV"]),
     ]),
     // Song tributes -- Kentucky: the bluegrass east (Brit Taylor) and the
@@ -405,10 +403,8 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     ("I-30", &[
         in_states("Hope, Arkansas, next exit. Brennen Leigh wrote a song about running out of it. Fuel up before you do.", &["AR"]),
     ]),
-    // Song tribute -- border-blaster radio country (Wall of Voodoo).
-    ("I-8", &[
-        anywhere_on("Border radio country. The old megawatt stations down south out-shouted every dial in America -- Wall of Voodoo caught one and cut Mexican Radio. Scan the dial."),
-    ]),
+    // I-8 Mexican Radio / Wall of Voodoo was radio memory of Rio Grande
+    // border-blasters, not a paid board on Interstate 8. Pulled.
     // Song tribute -- Nazareth, Pennsylvania (The Band).
     ("I-78", &[
         in_states("Nazareth, Pennsylvania, a few exits north. The Weight is about a stranger rolling in looking for a bed. Book ahead.", &["PA"]),
@@ -738,11 +734,7 @@ mod tests {
         // or an empty city list can never match, and a zero window silently
         // retires the sign. Corridor is reserved for lines that name no place,
         // so those are listed explicitly rather than reachable by default.
-        const NAMES_NO_PLACE: &[&str] = &[
-            "Bubba's Fireworks",
-            "Have you seen the scenery",
-            "Border radio country",
-        ];
+        const NAMES_NO_PLACE: &[&str] = &["Bubba's Fireworks", "Have you seen the scenery"];
         for (shield, pool) in CORRIDOR_BILLBOARDS {
             for sign in pool.iter() {
                 match sign.anchor {
@@ -799,10 +791,86 @@ mod tests {
             .any(|line| line.contains("Franklin County Trucking Company")));
         assert_eq!(corridor_billboards("Interstate 44"), fctc);
         for shield in [
-            "I-35", "I-5", "I-55", "I-65", "I-59", "I-75", "I-85", "I-24", "I-94", "I-96", "I-71",
-            "I-77", "I-81", "I-64", "I-30", "I-8", "I-78", "I-20",
+            "I-35", "I-5", "I-55", "I-65", "I-59", "I-75", "I-85", "I-24", "I-94", "I-77", "I-81",
+            "I-64", "I-30", "I-78", "I-20",
         ] {
             assert!(!corridor_billboards(shield).is_empty(), "{shield}");
+        }
+        // I-96, I-71, and I-8 used to carry one radio-memory tribute each.
+        // Those lines were pulled; the shields have no honest paid-board
+        // replacement in this commit, so an empty pool is the honest result.
+        for shield in ["I-96", "I-71", "I-8"] {
+            assert!(
+                corridor_billboards(shield).is_empty(),
+                "{shield} still has a pulled radio-memory line"
+            );
+        }
+    }
+
+    #[test]
+    fn test_wall_drug_stays_on_south_dakota_and_the_minnesota_approach() {
+        let signs: Vec<_> = corridor_signs("I-90")
+            .iter()
+            .filter(|s| s.text.contains("Wall Drug"))
+            .collect();
+        assert_eq!(signs.len(), 2, "both Wall Drug lines must remain");
+        for sign in signs {
+            assert_eq!(
+                sign.anchor,
+                SignAnchor::States(&["SD", "MN"]),
+                "{}",
+                sign.text
+            );
+        }
+    }
+
+    #[test]
+    fn test_meramec_moved_to_interstate_44_missouri() {
+        assert!(
+            corridor_signs("I-40")
+                .iter()
+                .all(|s| !s.text.contains("caverns ahead")),
+            "Meramec is not on Interstate 40"
+        );
+        let signs: Vec<_> = corridor_signs("I-44")
+            .iter()
+            .filter(|s| s.text.contains("caverns ahead"))
+            .collect();
+        assert_eq!(signs.len(), 1);
+        assert_eq!(signs[0].anchor, SignAnchor::States(&["MO"]));
+        assert!(signs[0].text.contains("Meramec-style caverns"));
+    }
+
+    #[test]
+    fn test_dock_of_the_bay_stays_california_not_nevada() {
+        let signs: Vec<_> = corridor_signs("I-80")
+            .iter()
+            .filter(|s| s.text.contains("Dock of the Bay"))
+            .collect();
+        assert_eq!(signs.len(), 1);
+        assert_eq!(signs[0].anchor, SignAnchor::States(&["CA"]));
+    }
+
+    #[test]
+    fn test_pulled_radio_memory_and_jeep_trail_lines_are_gone() {
+        // Radio-memory tributes and a Jeep trail are not paid boards. They
+        // come out of the catalog entirely -- no rewrite, no clone onto a
+        // new road.
+        const PULLED: &[&str] = &[
+            "All his exes live around here somewhere",
+            "Amarillo can wait till morning",
+            "Black Bear Road",
+            "Mexican Radio",
+            "Haynesville Woods",
+            "Ionia County, Michigan",
+            "Arlo McKinley",
+            "Russell County line",
+            "Forty-Nine Winchester",
+        ];
+        for line in all_lines() {
+            for phrase in PULLED {
+                assert!(!line.contains(phrase), "pulled line still live: {line}");
+            }
         }
     }
 
