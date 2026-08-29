@@ -170,3 +170,33 @@ jobs:
 
       - name: cargo test -p freight-fate
         run: cargo test -p freight-fate
+
+  changelog:
+    # The changelog gate runs locally as a pre-push hook, which not every
+    # clone has installed. ci.yml used to enforce it on this branch; that
+    # workflow no longer runs on feat/career-1.9 (Python pytest stays on
+    # main/dev), so this job is the CI gate for the 1.9 release line. Same
+    # tool and skip markers as the pre-push hook (`tools.release_notes`
+    # check; `[skip changelog]` / `changelog: none`).
+    name: Changelog
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - name: Require a changelog entry for user-facing changes
+        env:
+          # PRs diff against their target branch; pushes diff against the
+          # ref the branch pointed at before this push.
+          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && ! git cat-file -e "$BASE" 2>/dev/null; then
+            # A brand-new branch pushes an all-zeros "before", and a force
+            # push can point at history this clone no longer has.
+            echo "Base commit $BASE unavailable (new branch or force push); skipping."
+            exit 0
+          fi
+          python3 tools/release_notes.py check --base "$BASE" --head HEAD
