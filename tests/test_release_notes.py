@@ -437,6 +437,46 @@ def test_build_workflow_uses_curated_nightly_decision_and_notes():
     assert 'git diff --name-only "$LAST_TAG"..HEAD' not in workflow
 
 
+def test_career_19_snapshot_workflow_contract():
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    ).read_text(encoding="utf-8")
+
+    assert 'CAREER_BRANCH: "feat/career-1.9"' in workflow
+    assert 'cron: "37 2 * * *"' in workflow
+    assert "tag=1.9-tester-$(date -u +%Y%m%d)" in workflow
+    assert 'git tag --list "1.9-tester-*"' in workflow
+    assert "tools/release_notes.py should-build-nightly" in workflow
+    assert "tools/release_notes.py nightly" in workflow
+    assert "./build-release.ps1" in workflow
+    assert "windows-portable.zip" in workflow
+    assert "--prerelease" in workflow
+    assert '--target "$CAREER_BRANCH"' in workflow
+    assert "needs.build.result == 'success'" in workflow
+
+
+def test_career_19_retry_is_bounded_to_one_delayed_attempt():
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "retry-failed-nightly.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "workflows: [Build, Career 1.9 snapshot]" in workflow
+    assert "github.event.workflow_run.run_attempt == 1" in workflow
+    assert 'if [ "$WORKFLOW_NAME" = "Career 1.9 snapshot" ]; then' in workflow
+    assert 'TAG="1.9-tester-$(date -u +%Y%m%d)"' in workflow
+    assert 'TARGET_BRANCH="feat/career-1.9"' in workflow
+    assert 'TAG="nightly-$(date -u +%Y%m%d)"' in workflow
+    assert 'TARGET_BRANCH="dev"' in workflow
+    assert (
+        'gh workflow run "Career 1.9 snapshot" --repo "$GITHUB_REPOSITORY" '
+        '--ref "feat/career-1.9" -f dry_run=false'
+    ) in workflow
+    assert (
+        'gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false'
+    ) in workflow
+    assert '"$TAG already exists; the nightly recovered while waiting."' in workflow
+
+
 def test_auto_base_follows_the_release_line_the_branch_was_cut_from(tmp_path, monkeypatch):
     """A hotfix is cut from main and never contains dev.
 
