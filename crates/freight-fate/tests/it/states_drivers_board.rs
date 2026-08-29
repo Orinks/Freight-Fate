@@ -256,7 +256,7 @@ fn test_refresh_still_answers_the_player_out_loud() {
     assert!(
         app.main_lines()
             .iter()
-            .any(|line| line.contains("Checking the drivers board")),
+            .any(|line| line.contains("Checking the drivers list")),
         "{:?}",
         app.main_lines()
     );

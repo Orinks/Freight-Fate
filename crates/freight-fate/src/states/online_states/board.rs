@@ -286,7 +286,7 @@ impl DriversOnlineState {
     fn refresh_board(&mut self, ctx: &mut GameContext) {
         self.start_fetch();
         self.refresh(ctx, false);
-        ctx.say("Checking the drivers board.");
+        ctx.say("Checking the drivers list.");
     }
 }
 
@@ -310,7 +310,7 @@ impl Menu for DriversOnlineState {
         if !self.fetched() && self.board.is_none() {
             self.row_keys = vec![RowKey::Status, RowKey::Back];
             return vec![
-                MenuItem::new("Checking the drivers board", |s: &mut Self, ctx| {
+                MenuItem::new("Checking the drivers list", |s: &mut Self, ctx| {
                     s.speak_current(ctx)
                 }),
                 MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)),
@@ -323,7 +323,7 @@ impl Menu for DriversOnlineState {
             None => {
                 items.push(
                     MenuItem::new(
-                        "The drivers board could not be reached",
+                        "The drivers list could not be reached",
                         |s: &mut Self, ctx| s.speak_current(ctx),
                     )
                     .help("orinks.net did not answer. Refresh to try again."),
@@ -372,7 +372,7 @@ impl Menu for DriversOnlineState {
         }
         items.push(
             MenuItem::new("Refresh", |s: &mut Self, ctx| s.refresh_board(ctx))
-                .help("Check the board again. The list also checks by itself while it is open."),
+                .help("Check the list again. It also checks by itself while it is open."),
         );
         self.row_keys.push(RowKey::Refresh);
         items.push(MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)));
@@ -418,7 +418,7 @@ impl Menu for DriversOnlineState {
 
         self.refresh(ctx, false);
         match self.board.as_ref().and_then(|b| b.as_ref()) {
-            None => ctx.say("The drivers board could not be reached."),
+            None => ctx.say("The drivers list could not be reached."),
             Some(board) if board.is_empty() => ctx.say("No drivers are on duty right now."),
             Some(board) => {
                 let count = format!(

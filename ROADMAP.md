@@ -120,6 +120,16 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **`test_signaling_for_an_exit_eases_cruise_to_ramp_speed` is flaky
+      under a full parallel run (seen 2026-08-29)** It failed once in a
+      whole-crate `cargo test -p freight-fate`, asserting the brake was on
+      approaching the gore, then passed 5 out of 5 on its own and passed the
+      next full run unchanged. Nothing in that change touched driving -- it
+      renamed menu strings -- so this is the test, not the code. Most likely
+      the same class as the jake-line case above: NPC traffic drawn per run
+      leaving the truck in a different state at the gore. Diagnose by
+      capturing the traffic draw on a failing run rather than by reading the
+      cruise code, which is what cost two wrong diagnoses last time.
 - [x] **The drivers board keeps itself current while it is open
       (2026-08-29)** It re-checks about once a minute, silently, and holds
       the player's place by DRIVER rather than by row number -- the hazard
