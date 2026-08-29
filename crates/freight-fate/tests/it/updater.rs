@@ -148,6 +148,27 @@ fn test_stable_no_update_without_platform_asset() {
     );
 }
 
+#[test]
+fn test_stable_channel_ignores_newer_19_tester_prerelease() {
+    // The stable channel reads GitHub's latest stable endpoint, not the
+    // prerelease list shared by both snapshot families.
+    let api = |path: &str| -> Result<Value, NetError> {
+        match path {
+            "/releases/latest" => Ok(stable_at("v1.8.8.1", "2026-08-08T15:00:00Z")),
+            "/releases?per_page=20" => Ok(json!([
+                tester("1.9-tester-20260829"),
+                stable_at("v1.8.8.1", "2026-08-08T15:00:00Z"),
+            ])),
+            other => panic!("unexpected path {other}"),
+        }
+    };
+
+    let info = check_for_update_with("stable", "1.8.8", None, &env_on(Platform::Windows), &api)
+        .unwrap()
+        .expect("a stable update");
+    assert_eq!(info.tag, "v1.8.8.1");
+}
+
 // -- dev channel --------------------------------------------------------------
 
 #[test]
@@ -400,6 +421,25 @@ fn test_19_snapshot_channel_picks_newest_19_tester() {
         .expect("an update");
     assert_eq!(info.tag, "1.9-tester-20260825");
     assert!(info.title.contains("1.9 tester snapshot 2026-08-25"));
+}
+
+#[test]
+fn test_19_snapshot_channel_skips_newest_tester_without_windows_archive() {
+    let releases = vec![
+        release_with("1.9-tester-20260829", true, "", "", &["-macos.zip"]),
+        tester("1.9-tester-20260828"),
+    ];
+    let build = BuildInfo::new("1.9-tester-20260827", "dev", "2026-08-27");
+
+    let info = snapshot_update_from(
+        &releases,
+        Some(&build),
+        "1.9.0",
+        None,
+        &env_on(Platform::Windows),
+    )
+    .expect("the newest compatible tester");
+    assert_eq!(info.tag, "1.9-tester-20260828");
 }
 
 #[test]

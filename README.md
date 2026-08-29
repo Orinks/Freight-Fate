@@ -78,41 +78,19 @@ visual display mirrors all speech for sighted players and helpers.
 
 ## Download and play
 
-The easiest way to play is a prebuilt portable build from the
-[releases page](https://github.com/Orinks/Freight-fate/releases):
-
-- **Stable releases** are the finished, numbered versions — pick the latest
-  one.
-- **Career 1.9 tester builds** (`1.9-tester-YYYYMMDD`, marked pre-release)
-  are packaged snapshots of this branch. They are not the public 1.8
-  `nightly-YYYYMMDD` snapshots from `dev`. Heads up: a career saved on a
-  tester build may not load on an older stable release, so treat tester
-  saves as one-way.
-
-Download the archive for your platform, extract it anywhere, and run the
-game from the extracted `FreightFate` folder — `FreightFate.exe` on
-Windows, `FreightFate` on macOS and Linux. There is nothing to install,
-and the game is truly portable: your saves and settings live in a `saves`
-folder inside the game folder, so you can move or copy the whole folder
-(USB stick included) and your career travels with it. The game checks for
-newer releases at the main menu and can download, install, and restart
-itself — updates replace only the game's own files and never touch the
-`saves` folder. Switch between stable and snapshot updates in Settings
-under "Update channel".
-
-On Linux there is also a single-file AppImage
-(`FreightFate-<version>-linux-x86_64.AppImage`): mark it executable and run
-it, no extraction needed, and it works beyond Ubuntu (Fedora, Arch,
-openSUSE). Since an AppImage is read-only, its saves live in
-`~/.local/share/FreightFate`. The in-game updater works here too — it
-downloads the new AppImage, swaps the file in place, and restarts the game.
+1. Open [Freight Fate releases](https://github.com/Orinks/Freight-fate/releases).
+2. Choose the latest numbered stable release, or the newest Career 1.9 tester
+   release named `1.9-tester-YYYYMMDD`.
+3. Under Assets, download the file ending in `-windows-portable.zip`.
+4. Extract the zip file to a folder.
+5. Open the extracted `FreightFate` folder and run `FreightFate.exe`.
 
 For a complete player-facing guide to installing, careers, dispatch, driving,
 route stops, saves, settings, audio, speech, and troubleshooting, see the
 [Freight Fate Player Manual](docs/user-manual.md).
 
 Want to help with code, docs, or world data? Start with
-[CONTRIBUTING.md](CONTRIBUTING.md).
+[the Freight Fate contribution guide](CONTRIBUTING.md).
 
 ## Run from source
 
@@ -120,123 +98,44 @@ Career 1.9 is a native Rust game. Python is not part of the gameplay runtime;
 it remains in this repository only for build, packaging, data-generation, and
 other maintainer tools.
 
-Best path, in this order:
+Install these prerequisites first:
 
-1. Install [Rust](https://www.rust-lang.org/tools/install) through `rustup`.
-   The repository's `rust-toolchain.toml` pins the toolchain. Cargo.toml
-   sets the minimum supported Rust version at 1.95.
-2. Clone Career 1.9 with Git. Git LFS is not required on current
-   `feat/career-1.9`.
-3. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and
-   fetch BASS.
-4. Run the Rust game with Cargo.
-5. For a portable zip, use the release script below.
+- [Git](https://git-scm.com/downloads)
+- [Rust through rustup](https://www.rust-lang.org/tools/install)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
-```bash
+Then clone Career 1.9 and run the game:
+
+```powershell
 git clone --branch feat/career-1.9 https://github.com/Orinks/Freight-Fate.git
 cd Freight-Fate
-uv sync
-uv run python tools/fetch_bass.py
+uv sync --group dev
 cargo run --release -p freight-fate
 ```
 
-`src/freight_fate/sounds.pak` is a regular git file, about 7.8 MB. You do
-not need Git LFS. If that file is 132 bytes of pointer
-text, you are
-on an old commit, not current Career 1.9.
-
-`music.pak` is not in git. A silent-audio source run is fine without it.
-A release zip needs it, and `tools/build_release.py` fetches it when you
-set `FREIGHT_FATE_MUSIC_URL` (see Sound and native libraries below).
-
 The first Cargo build takes longer because it compiles the workspace. Later
-runs reuse `target/`. On Windows, SDL2 and Prism are already vendored and are
-staged beside the executable automatically. If BASS has not been fetched, the
-game still starts but audio is silent.
-
-On macOS, SDL2 comes from Homebrew rather than the repository, so install it
-first — on both Apple silicon and Intel:
-
-```bash
-brew install sdl2 pkg-config
-```
-
-`pkg-config` is what tells the build where Homebrew put SDL2; without it the
-link fails even though SDL2 is installed. BASS and Prism are handled for you:
-`tools/fetch_bass.py` downloads the universal macOS BASS build, and Prism is
-already vendored for both architectures.
-
-On Linux, install your distribution's SDL2 and Speech Dispatcher runtime
-packages if they are not already present. Platform-native speech and audio
-library availability currently varies; Windows is the primary alpha-test
-target for Career 1.9.
-
-### Installing uv
-
-On Windows (PowerShell):
-
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-On macOS or Linux:
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-Close and reopen the terminal afterwards so the updated PATH takes effect.
+runs reuse `target/`.
 
 ## Build a standalone copy
 
-The Career 1.9 release tool uses Python as packaging glue around the Rust
-compiler. It builds the native executable, bakes the large JSON world into a
-compact data container, stages the runtime libraries and player documents,
-checks the packaged payload, and creates the portable archive:
+After installing Git, Rust, and `uv`, run the release builder from PowerShell:
 
-```bash
-uv sync --group build
-uv run python tools/fetch_bass.py
-uv run python tools/build_release.py --rust --smoke
+```powershell
+./build-release.ps1
 ```
 
-The staged folder is `build/FreightFate/`. The finished archive is written as
-`dist/FreightFate-<version>-windows-portable.zip` on Windows, with matching
-macOS and Linux archive names on those platforms. The package contains
-`FreightFate.exe` (renamed from Cargo's `freightfate.exe`), native SDL2, BASS,
-and Prism libraries where available, baked world data, sound and music packs,
-`build_info.json`, and player documentation.
+The script installs the required project dependencies, builds the native game,
+fetches and verifies BASS and the public music pack, checks the staged game,
+and writes the Windows portable zip to `dist/`. Normal players and ordinary
+source builders do not need to find or copy audio files themselves.
 
-Useful flags:
+### Advanced maintainer overrides
 
-- `--smoke` — boot the staged Rust build headlessly and verify that its data
-  and audio assets load. This is recommended for a release-ready local build.
-- `--skip-smoke` — override `--smoke` when booting the staged build is not
-  possible on the current machine.
-- `--tag <label>` — override the version label in the archive name. For a
-  Career 1.9 tester zip use `1.9-tester-YYYYMMDD`, never `nightly-YYYYMMDD`.
-- `--cargo-target-dir <dir>` — use a different Cargo target directory.
-
-### Publish a Career 1.9 tester build
-
-Do not tag 1.9 testers as `nightly-YYYYMMDD`; that family is the public 1.8
-snapshot stream from `dev`. Build on `feat/career-1.9`, then create a
-GitHub prerelease aimed at this branch:
-
-```bash
-uv run python tools/build_release.py --rust --smoke --tag 1.9-tester-YYYYMMDD
-gh release create 1.9-tester-YYYYMMDD --repo Orinks/Freight-Fate --target feat/career-1.9 --prerelease --title "Freight Fate 1.9 tester YYYY-MM-DD" dist/FreightFate-1.9-tester-YYYYMMDD-windows-portable.zip
-```
-
-The Dropbox tester zip can stay. The in-game updater on a 1.9 packaged
-build follows these `1.9-tester-YYYYMMDD` prereleases when the Update
-channel is set to snapshot.
-
-`sounds.pak` ships in the clone as a regular git file. `music.pak` is fetched
-at package time from `FREIGHT_FATE_MUSIC_URL`, not cloned. Packaging still
-refuses a 132-byte LFS pointer; that means the checkout is an old commit.
-No build step needs administrator rights; if a build fails, rerun it in a
-normal terminal and report the first error rather than retrying elevated.
+The release script passes extra options to `tools/build_release.py`. Maintainers
+can use `--tag` or `--cargo-target-dir` when preparing a specific release.
+`FREIGHT_FATE_MUSIC_URL`, `FREIGHT_FATE_MUSIC_SHA256`, and
+`FREIGHT_FATE_BASS_PATH` remain emergency overrides for pinned release inputs.
+Normal players and ordinary source builders do not need these overrides.
 
 If the build succeeds but the archive seems to vanish on Windows, check
 your antivirus: freshly built unsigned executables are sometimes
@@ -519,59 +418,6 @@ or when a commit message includes `nightly: build` or `[nightly build]` for an
 intentional snapshot refresh. Use `changelog: none` or `[skip changelog]` only
 when every commit in the change set is non-user-facing.
 
-### Sound and native libraries for source builds
-
-Career 1.9 stores its approved encrypted sound pack at
-`src/freight_fate/sounds.pak` as a regular git blob (about 7.8 MB). Git LFS
-is not required. The larger private `music.pak` is a local build asset and
-is not stored in Git.
-
-If `sounds.pak` is 132 bytes of Git LFS pointer text, the checkout is an
-old commit. Update to current `feat/career-1.9` instead of installing Git
-LFS.
-
-The private music pack is downloaded only when a release build needs it.
-Ask a maintainer for a temporary private download URL, then set it in the
-current session; do not commit the URL.
-
-PowerShell:
-
-```powershell
-$env:FREIGHT_FATE_MUSIC_URL = "<temporary private URL>"
-$env:FREIGHT_FATE_MUSIC_SHA256 = "50F5440EB478F1E0E630E65081D83E6C308F48A6AA3EA5FE67C7DD1A7F50A8BB"
-uv run python tools/build_release.py --rust --skip-smoke
-```
-
-bash:
-
-```bash
-export FREIGHT_FATE_MUSIC_URL="<temporary private URL>"
-export FREIGHT_FATE_MUSIC_SHA256="50F5440EB478F1E0E630E65081D83E6C308F48A6AA3EA5FE67C7DD1A7F50A8BB"
-uv run python tools/build_release.py --rust --skip-smoke
-```
-
-The release script downloads `music.pak` only when it is absent, verifies the
-optional SHA-256 value, and keeps the downloaded pack local.
-
-Loose fallback cues remain under `src/freight_fate/assets/sounds/`. See
-[CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md) for provenance and
-licensing.
-
-The Rust build also needs BASS for audible output. Because BASS is proprietary,
-its binaries are downloaded rather than committed to this public repository:
-
-```bash
-uv run python tools/fetch_bass.py
-uv run python tools/fetch_bass.py --check
-```
-
-The fetcher verifies pinned hashes and stages the libraries where Cargo and the
-release packager expect them; it covers Windows and macOS, and the macOS
-download is a universal binary that serves Apple silicon and Intel alike.
-Prism is kept in the repository for both platforms and copied beside Cargo's
-executable automatically. SDL2 is vendored on Windows and installed from
-Homebrew on macOS.
-
 ## License
 
 Freight Fate is licensed under the
@@ -580,7 +426,7 @@ to use, modify, and share for any noncommercial purpose, but only the copyright
 holder may sell it or put it to commercial use. This is a source-available
 license, not an OSI-approved open-source license. Bundled audio credits and
 provenance are tracked in
-[CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md).
+[the Freight Fate audio credits](src/freight_fate/assets/sounds/CREDITS.md).
 
 **BASS license caveat:** audio playback uses the
 [BASS](https://www.un4seen.com/) library through Freight Fate's Rust bindings.

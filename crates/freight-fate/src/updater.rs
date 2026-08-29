@@ -511,7 +511,7 @@ fn is_prerelease(release: &Value) -> bool {
     crate::online_presence::truthy(release.get("prerelease"))
 }
 
-fn update_from_release(release: &Value, title: &str, env: &UpdaterEnv) -> Option<UpdateInfo> {
+fn pick_update_asset(release: &Value, env: &UpdaterEnv) -> Option<(String, String, i64)> {
     let mut asset = pick_asset(release, None, env);
     if asset.is_none() && running_appimage_path(env.appimage.as_deref()).is_some() {
         // Releases published before the AppImage existed ship only the
@@ -519,7 +519,11 @@ fn update_from_release(release: &Value, title: &str, env: &UpdaterEnv) -> Option
         // a manual install (can_auto_apply is False) instead of hiding it.
         asset = pick_asset(release, Some(TARBALL_SUFFIX), env);
     }
-    let (name, url, size) = asset?;
+    asset
+}
+
+fn update_from_release(release: &Value, title: &str, env: &UpdaterEnv) -> Option<UpdateInfo> {
+    let (name, url, size) = pick_update_asset(release, env)?;
     Some(UpdateInfo {
         tag: tag_name(release),
         title: title.to_string(),
@@ -551,10 +555,18 @@ fn snapshot_tag_date(tag: &str, career_19: bool) -> String {
     }
 }
 
-fn snapshot_releases_newest_first(releases: &[Value], career_19: bool) -> Vec<&Value> {
+fn snapshot_releases_newest_first<'a>(
+    releases: &'a [Value],
+    career_19: bool,
+    env: &UpdaterEnv,
+) -> Vec<&'a Value> {
     let mut snapshots: Vec<&Value> = releases
         .iter()
-        .filter(|r| is_prerelease(r) && !snapshot_tag_date(&tag_name(r), career_19).is_empty())
+        .filter(|r| {
+            is_prerelease(r)
+                && !snapshot_tag_date(&tag_name(r), career_19).is_empty()
+                && pick_update_asset(r, env).is_some()
+        })
         .collect();
     snapshots.sort_by_key(|r| std::cmp::Reverse(snapshot_tag_date(&tag_name(r), career_19)));
     snapshots
@@ -721,7 +733,7 @@ pub fn snapshot_update_from(
     env: &UpdaterEnv,
 ) -> Option<UpdateInfo> {
     let career_19 = is_career_19_line(current_version, build);
-    let snapshots = snapshot_releases_newest_first(releases, career_19);
+    let snapshots = snapshot_releases_newest_first(releases, career_19, env);
     let latest_snapshot = snapshots.first().copied();
     let stable = if career_19 {
         None
