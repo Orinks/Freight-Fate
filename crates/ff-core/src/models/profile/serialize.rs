@@ -266,6 +266,7 @@ impl Profile {
             hos_key_notice_left: i("hos_key_notice_left", defaults.hos_key_notice_left),
             game_hours: f("game_hours", defaults.game_hours),
             calendar_offset_days: i("calendar_offset_days", 0),
+            calendar_offset_hours: 0.0,
             tutorial_done: b("tutorial_done", false),
             truck: s("truck", &defaults.truck),
             owned_trucks: list("owned_trucks"),

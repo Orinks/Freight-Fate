@@ -83,7 +83,7 @@ impl DrivingState {
             format!(
                 "Clock: {} {} ({})",
                 clock_text(self.trip.local_hour()),
-                self.trip.current_timezone().name,
+                self.clock_zone_label(ctx),
                 time_of_day(self.trip.local_hour())
             ),
         ];

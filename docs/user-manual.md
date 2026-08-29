@@ -975,8 +975,11 @@ item again after a moment rather than treating a modeled temperature as live.
 
 ### Time zones
 
-The clock you hear is local time where the truck is, and it carries its zone
-name with it -- press C for "4 PM Central Time" rather than a bare number.
+In the accelerated driving modes, the clock you hear is local time where the
+truck is, and it carries its zone name with it -- press C for "4 PM Central
+Time" rather than a bare number. Real time is the explicit exception: it
+starts from your computer's wall clock and calls that value "local game time"
+instead of attaching a geographic zone name that may not match your computer.
 Cross a zone boundary and the game says so and gives you the new time:
 "Crossing into Mountain Time. It is now 3 PM." Your clock going backward an
 hour mid-drive is the road, not a fault.
@@ -986,7 +989,8 @@ qualifier, the way a driver parked at that dock would say it: "6 PM Eastern
 Time tomorrow." That is why a deadline can look out of step with the clock
 you just heard from a different zone.
 
-Nothing that measures a duration ever shifts. Your hours of service, the
+Nothing that measures a duration ever shifts, including when Real time aligns
+the displayed calendar and clock. Your hours of service, the
 deadline itself, the seasons, and the market all run on one continuous
 timeline; only the spoken wall clock changes. Daylight saving is deliberately
 not modeled, so a zone's offset never moves under you.
@@ -1445,7 +1449,7 @@ listed under. Driving assistance is covered in full above.
 
 | Setting | Purpose |
 | --- | --- |
-| Driving mode | Choose Relaxed, Standard, or Real time pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most time to respond. Standard keeps balanced timing and consequences and moves distance and time twice as fast, so a driving day takes half the real time and decisions arrive sooner without extra forgiveness. Real time keeps Standard's pressure and runs the driving clock at the speed of a real clock, so a mile takes as long as it really would; with the weather source set to real world it is the most true to life the game gets. At low speed the compressed pacings ease toward real time, and deliberate parked waiting runs at double the selected pace; in Real time the clock is real at every speed, parked included. Breaks and sleep at stops pass the clock the same way in every mode. Any of the three can be changed mid-drive from the pause menu. An older setting, Realistic, was retired: it was simply the fastest pacing rather than the most true to life, and the row says so once to anyone whose save had it. |
+| Driving mode | Choose Relaxed, Standard, or Real time pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most time to respond. Standard keeps balanced timing and consequences and moves distance and time twice as fast, so a driving day takes half the real time and decisions arrive sooner without extra forgiveness. Real time keeps Standard's pressure, lines the date and time up with your computer's clock, and runs the driving clock at the speed of a real clock, so a mile takes as long as it really would; with the weather source set to real world it is the most true to life the game gets. Aligning the clock does not move delivery time remaining, career progress, or hours of service. At low speed the compressed pacings ease toward real time, and deliberate parked waiting runs at double the selected pace; in Real time the clock is real at every speed, parked included. Breaks and sleep at stops pass the clock the same way in every mode. Any of the three can be changed mid-drive from the pause menu. An older setting, Realistic, was retired: it was simply the fastest pacing rather than the most true to life, and the row says so once to anyone whose save had it. |
 | Hours of service | Choose realistic or relaxed legal limits. Relaxed hours rules lengthen the limits and further reduce random hazard frequency; real violations keep their normal consequences. |
 
 The dash overspeed alert has no setting. It speaks once and then chimes,

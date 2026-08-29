@@ -21,6 +21,7 @@ use ff_core::radio_rotation::initial_airtime_s;
 use ff_core::sim::lane_guidance::{HAIRPIN_ADVISORY_MPH, STRIP_LEAD_MI};
 use ff_core::sim::real_traffic::RealTrafficProvider;
 use ff_core::sim::real_weather::RealWeatherProvider;
+use ff_core::sim::season::real_clock_game_hours;
 use ff_core::sim::surge::{liquid_load_for, LiquidCargo};
 use ff_core::sim::trip_traffic::TrafficProvider;
 use ff_core::sim::truck_parking::TruckParkingProvider;
@@ -62,6 +63,10 @@ impl DrivingState {
         // unseeded when the drive is, which a derived trip seed would hide.
         let seed_arg = trip_seed;
         let trip_seed = trip_seed.unwrap_or_else(|| PyRandom::new_unseeded().randrange(1 << 31));
+        if ctx.settings.time_scale == 1.0 && start_hour.is_none() {
+            profile_mut_of(ctx).sync_calendar_to(real_clock_game_hours(None));
+            ctx.save_profile();
+        }
         // `_enforcement_init` opened with this; the synthesized signature has
         // to exist before the first enforcement cue can play.
         register_enforcement_sounds();
@@ -121,7 +126,13 @@ impl DrivingState {
             ctx.settings.live_weather_controls_calendar,
         );
 
-        let trip_start_hour = start_hour.unwrap_or_else(|| profile_of(ctx).game_hours % 24.0);
+        let trip_start_hour = start_hour.unwrap_or_else(|| {
+            if ctx.settings.time_scale == 1.0 {
+                profile_of(ctx).calendar_game_hours().rem_euclid(24.0)
+            } else {
+                profile_of(ctx).game_hours.rem_euclid(24.0)
+            }
+        });
         let hazard_scale = hos::hazard_scale(&ctx.settings.hos_mode)
             * tuning_for_time_scale(ctx.settings.time_scale).hazard_frequency;
         // The arrival zones size the approach from the facility's own record
@@ -176,6 +187,12 @@ impl DrivingState {
                 ..Default::default()
             },
         );
+        if ctx.settings.time_scale == 1.0 && start_hour.is_none() {
+            let local_hour = profile_of(ctx).calendar_game_hours().rem_euclid(24.0);
+            let reference_hour = (local_hour - trip.start_timezone.offset_h).rem_euclid(24.0);
+            trip.start_hour = reference_hour;
+            trip.traffic_manager.start_hour = reference_hour;
+        }
         if phase == DRIVE_PHASE_DELIVERY {
             // The destination exit, ramp terminal, and street chain own the
             // arrival speeds now. The trip's legacy last-miles arrival zones

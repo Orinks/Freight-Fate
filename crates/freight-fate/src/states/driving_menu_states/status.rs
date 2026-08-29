@@ -188,7 +188,7 @@ impl DrivingStatusScreenState {
                 let time_line = format!(
                     "Time: {} {}, {deadline_text}",
                     clock_text(d.trip.local_hour()),
-                    d.trip.current_timezone().name
+                    d.clock_zone_label(ctx)
                 );
                 let band =
                     crate::states::driving_damage::damage_band_clause(&ctx.settings, &d.trip.truck);

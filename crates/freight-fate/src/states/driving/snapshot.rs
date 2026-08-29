@@ -321,6 +321,16 @@ impl DrivingState {
             .unwrap_or_else(|| profile_of(ctx).game_hours % 24.0);
         let mut state =
             DrivingState::new(ctx, job, route, Some(trip_seed), phase, Some(start_hour));
+        // Restore the route position before rebuilding the session-only
+        // calendar anchor.  A real-time save may be beyond a time-zone
+        // crossing, so the departure clock must use the zone at the saved
+        // position rather than the route's starting zone.
+        state.trip.restore(position_mi, game_minutes);
+        if ctx.settings.time_scale == 1.0 {
+            let local_start =
+                (start_hour + state.trip.current_timezone().offset_h).rem_euclid(24.0);
+            profile_mut_of(ctx).sync_calendar_hour_to(local_start);
+        }
         state.resumed = true;
         state.start_damage = f(data, "start_damage", state.start_damage);
         // A save from before the damage bands carries neither key: derive
@@ -359,7 +369,6 @@ impl DrivingState {
         let target = data.get("speed_control_target_mph").and_then(Value::as_f64);
         let armed = b(data, "speed_control_armed", false);
         state.restore_speed_control_session(ctx, armed, target);
-        state.trip.restore(position_mi, game_minutes);
         // WeatherSystem starts at the profile's pre-trip calendar time, and
         // the profile clock only moves when the run ends. Add the elapsed
         // trip time back so the spoken date, season, and simulated weather

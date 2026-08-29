@@ -589,6 +589,21 @@ fn test_clock_key_leads_with_time_then_schedule_verdict() {
 }
 
 #[test]
+fn real_time_clock_names_the_synchronized_value_truthfully() {
+    let mut app = TestApp::new();
+    app.ctx.settings.time_scale = 1.0;
+    let mut d = a_drive(&mut app);
+    d.trip.start_hour = 15.0 - d.trip.start_timezone.offset_h;
+
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::C));
+    let report = last(&app);
+
+    assert!(report.starts_with("3 PM local game time"), "{report}");
+    assert!(report.contains("deadline in"), "{report}");
+}
+
+#[test]
 fn test_terse_clock_key_drops_calendar_and_stop_planning() {
     let mut app = TestApp::new();
     app.ctx.settings.driving_speech = "quiet".to_string();

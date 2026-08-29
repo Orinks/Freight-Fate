@@ -1013,6 +1013,9 @@ fn test_the_driving_mode_row_explains_the_retired_pacing() {
 #[test]
 fn test_the_driving_mode_row_cycles_relaxed_standard_and_real_time() {
     let mut app = TestApp::new();
+    let mut profile = Profile::named("Real Time Driver");
+    profile.game_hours = 50.0;
+    app.ctx.profile = Some(profile);
     app.ctx.settings.time_scale = 10.0;
     open_settings_category(&mut app, "Difficulty and hours of service");
     move_to::<Cat>(&mut app, "Driving mode");
@@ -1033,8 +1036,21 @@ fn test_the_driving_mode_row_cycles_relaxed_standard_and_real_time() {
         ]
     );
     // Real time is the 1x clock, and Left walks the row back the same way.
+    app.clear_speech();
     key(&mut app, Key::Left);
     assert_eq!(app.ctx.settings.time_scale, 1.0);
+    let target = real_clock_game_hours(None);
+    let profile = app.ctx.profile.as_ref().unwrap();
+    assert_eq!(profile.game_hours, 50.0);
+    assert_eq!(date_text(profile.calendar_game_hours()), date_text(target));
+    let hour_error = (profile.calendar_game_hours() - target)
+        .rem_euclid(24.0)
+        .min((target - profile.calendar_game_hours()).rem_euclid(24.0));
+    assert!(hour_error < 1.0 / 60.0);
+    assert!(app
+        .main_lines()
+        .iter()
+        .any(|line| line.contains("Clock aligned to")));
     key(&mut app, Key::Left);
     assert_eq!(app.ctx.settings.time_scale, 20.0);
 }

@@ -7,7 +7,8 @@ use ff_core::settings::{
     acc_gap_seconds, Settings, ACC_GAP_CHOICES, ACC_GAP_DEFAULT, DRIVING_ASSIST_FIELDS,
     DRIVING_ASSIST_PRESETS, LANE_KEEPING_MODES, PLACE_CALLOUT_MODES, TIME_SCALES,
 };
-use ff_core::sim::season::real_clock_game_hours;
+use ff_core::sim::hos::clock_text;
+use ff_core::sim::season::{date_text, real_clock_game_hours};
 use ff_core::speech_pacing::DRIVING_SPEECH_MODES;
 
 use super::settings::{save_settings, SettingsCategoryState};
@@ -249,13 +250,36 @@ impl SettingsCategoryState {
     }
 
     pub(super) fn cycle_pace(&mut self, ctx: &mut GameContext, d: i64) {
+        let previous = ctx.settings.time_scale;
         let i = TIME_SCALES
             .iter()
             .position(|s| *s == ctx.settings.time_scale)
             .unwrap_or(1) as i64;
         let next = (i + d).rem_euclid(TIME_SCALES.len() as i64) as usize;
         ctx.settings.time_scale = TIME_SCALES[next];
+        let mut aligned_clock = None;
+        if ctx.settings.time_scale == 1.0 && previous != 1.0 {
+            if let Some(profile) = ctx.profile.as_mut() {
+                if profile.has_started_career() {
+                    profile.sync_calendar_to(real_clock_game_hours(None));
+                    aligned_clock = Some(profile.calendar_game_hours());
+                    if let Err(e) = profile.save() {
+                        log::error!("Could not save the profile: {e}");
+                    }
+                }
+            }
+        }
         self.announce(ctx);
+        if let Some(hours) = aligned_clock {
+            ctx.say_with(
+                format!(
+                    "Clock aligned to {}, {}.",
+                    date_text(hours),
+                    clock_text(hours)
+                ),
+                Say::queued(),
+            );
+        }
     }
 
     fn level_field<'a>(s: &'a mut Settings, attr: &str) -> Option<&'a mut f64> {

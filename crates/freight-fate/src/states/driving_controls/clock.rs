@@ -16,6 +16,18 @@ use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
 impl DrivingState {
+    /// The spoken clock is anchored to the computer when Real time is
+    /// selected.  Calling that initial wall-clock reading a route timezone
+    /// would be misleading when the computer is elsewhere, so name it as the
+    /// game's local clock.  Accelerated modes retain the geographic label.
+    pub fn clock_zone_label(&self, ctx: &GameContext) -> &'static str {
+        if ctx.settings.time_scale == 1.0 {
+            "local game time"
+        } else {
+            self.trip.current_timezone().name
+        }
+    }
+
     /// `_calendar_phrase()`: calendar date and season for the spoken
     /// readouts; "" when unknown.
     pub fn calendar_phrase(&self, _ctx: &GameContext) -> String {
@@ -35,7 +47,7 @@ impl DrivingState {
         let base = format!(
             "{} {}",
             clock_text(self.trip.local_hour()),
-            self.trip.current_timezone().name
+            self.clock_zone_label(ctx)
         );
         if cal.is_empty() {
             format!("{base}.")
@@ -67,7 +79,7 @@ impl DrivingState {
             format!(
                 "{} {}.",
                 clock_text(self.trip.local_hour()),
-                self.trip.current_timezone().name
+                self.clock_zone_label(ctx)
             )
         } else {
             self.clock_phrase(ctx)

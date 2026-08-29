@@ -829,6 +829,17 @@ fn buffs_calendar_and_lanes_behave_like_the_dataclass() {
     });
 }
 
+#[test]
+fn real_time_calendar_anchor_preserves_career_clock() {
+    let mut profile = Profile::new();
+    profile.game_hours = 50.0;
+
+    profile.sync_calendar_to(100.0 * 24.0 + 15.5);
+
+    assert_eq!(profile.game_hours, 50.0);
+    assert!((profile.calendar_game_hours() - (100.0 * 24.0 + 15.5)).abs() < 1e-9);
+}
+
 // -- tests/test_dispatch_variety.py (the profile half) ---------------------------
 //
 // Owner playtest 2026-07-15: level-1 assigned dispatch bounced the same two

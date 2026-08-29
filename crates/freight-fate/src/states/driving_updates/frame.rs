@@ -1,6 +1,7 @@
 //! The frame loop itself (`DrivingUpdateMixin.update`), the safety-call
 //! re-speak, and the retarder transcript trace.
 
+use ff_core::sim::season::real_clock_game_hours;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent, TRANSCRIPT_TARGET};
@@ -119,8 +120,25 @@ impl DrivingState {
                 self.begin_departure_chain(ctx, true);
             }
         }
-        // pacing can be changed from the pause menu mid-trip; keep the trip's
-        // clock compression in step with the setting
+        // Pacing can be changed from the pause menu mid-trip. Entering Real
+        // time also moves the independent spoken clock to now, while the
+        // career, deadline, and HOS clocks keep their elapsed totals.
+        if ctx.settings.time_scale == 1.0 && self.trip.time_scale != 1.0 {
+            let elapsed_h = self.trip.game_minutes / 60.0;
+            let real_hours = real_clock_game_hours(None);
+            profile_mut_of(ctx).sync_calendar_to(real_hours - elapsed_h);
+            ctx.save_profile();
+            let local_hour = real_hours.rem_euclid(24.0);
+            let reference_now = local_hour - self.trip.current_timezone().offset_h;
+            let start_hour = (reference_now - elapsed_h).rem_euclid(24.0);
+            self.trip.start_hour = start_hour;
+            self.trip.traffic_manager.start_hour = start_hour;
+            if self.trip.weather.game_hours.is_some() {
+                self.trip.weather.game_hours =
+                    Some(profile_of(ctx).calendar_game_hours() + elapsed_h);
+            }
+        }
+        // Keep the trip's clock compression in step with the setting.
         self.trip.time_scale = ctx.settings.time_scale;
         let tuning = tuning_for_time_scale(self.trip.time_scale);
         self.trip.hazard_scale =

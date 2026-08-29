@@ -28,6 +28,7 @@
 use ff_core::models::business::LEASED_OWNER_OPERATOR;
 use ff_core::models::career::LEVEL_XP;
 use ff_core::sim::enforcement_observe::OBSERVE_HOLD_MI;
+use ff_core::sim::season::{date_text, real_clock_game_hours};
 use ff_core::sim::transmission::REVERSE;
 use ff_core::sim::trip_models::{TripEventData, TripEventKind};
 use ff_core::sim::weather::WeatherKind;
@@ -772,6 +773,26 @@ fn test_each_driving_mode_completes_a_full_spoken_delivery() {
         assert!(result.transcript_text().to_lowercase().contains("arrived"));
         result.assert_no_known_destination_exit_regressions();
     }
+}
+
+#[test]
+fn test_real_time_mode_starts_the_spoken_trip_clock_at_real_time() {
+    let mut harness = PlaytestHarness::new();
+    harness.app.ctx.settings.time_scale = 1.0;
+    harness.start_delivery(StartDelivery::named("Harness Real Time Clock"));
+
+    let target = real_clock_game_hours(None);
+    let calendar = harness
+        .app
+        .ctx
+        .profile
+        .as_ref()
+        .unwrap()
+        .calendar_game_hours();
+    let local_start_hour = harness.read_drive(|d| d.trip.local_start_hour());
+    assert_eq!(date_text(calendar), date_text(target));
+    assert!((calendar - target).abs() < 1.0 / 60.0);
+    assert!((local_start_hour - calendar.rem_euclid(24.0)).abs() < 1e-9);
 }
 
 #[test]

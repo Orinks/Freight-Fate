@@ -366,6 +366,10 @@ pub struct Profile {
     // Existing careers can anchor their independent calendar to today's date
     // without changing deadlines, HOS, markets, or elapsed career time.
     pub calendar_offset_days: i64,
+    // Session-only sub-day offset used by the spoken calendar and driving
+    // clock. Real-time driving re-anchors it on selection or drive start; it
+    // is intentionally not saved or sent to the cloud validator.
+    pub calendar_offset_hours: f64,
     pub tutorial_done: bool,
     /// owner-operator active tractor, or assignment key
     pub truck: String,
@@ -457,6 +461,7 @@ impl Default for Profile {
             hos_key_notice_left: 3,
             game_hours: 6.0,
             calendar_offset_days: 0,
+            calendar_offset_hours: 0.0,
             tutorial_done: false,
             truck: "rig".to_string(),
             owned_trucks: Vec::new(),
@@ -808,7 +813,7 @@ impl Profile {
     }
 
     pub fn calendar_game_hours(&self) -> f64 {
-        self.game_hours + self.calendar_offset_days as f64 * 24.0
+        self.game_hours + self.calendar_offset_days as f64 * 24.0 + self.calendar_offset_hours
     }
 
     /// Whether this profile has progressed beyond a just-created career.
@@ -832,6 +837,23 @@ impl Profile {
         let target_day = ((target_game_hours / 24.0).floor() as i64).rem_euclid(365);
         let career_day = ((self.game_hours / 24.0).floor() as i64).rem_euclid(365);
         self.calendar_offset_days = (target_day - career_day).rem_euclid(365);
+    }
+
+    /// Make the independent calendar show target's date and time without
+    /// moving career time, deadlines, or hours of service.
+    pub fn sync_calendar_to(&mut self, target_game_hours: f64) {
+        self.calendar_offset_hours = 0.0;
+        self.anchor_calendar_to(target_game_hours);
+        self.sync_calendar_hour_to(target_game_hours.rem_euclid(24.0));
+    }
+
+    /// Restore only the independent calendar's time of day. Resumed real-time
+    /// trips carry their departure clock in the trip snapshot while the date
+    /// remains in the profile's saved whole-day offset.
+    pub fn sync_calendar_hour_to(&mut self, target_hour: f64) {
+        self.calendar_offset_hours = 0.0;
+        self.calendar_offset_hours =
+            target_hour.rem_euclid(24.0) - self.calendar_game_hours().rem_euclid(24.0);
     }
 
     // -- persistence -----------------------------------------------------------

@@ -270,3 +270,49 @@ fn a_snapshot_round_trips_the_drive() {
     assert_eq!(resumed.record_events, vec!["Reputation up.".to_string()]);
     assert_eq!(resumed.phase, DRIVE_PHASE_DELIVERY);
 }
+
+#[test]
+fn a_real_time_snapshot_restores_the_spoken_calendar_hour() {
+    let mut app = TestApp::new();
+    app.ctx.settings.time_scale = 1.0;
+    let world = get_world();
+    app.ctx.profile = Some(Profile::named_in("Resume Clock", "Atlanta"));
+    let job = make_reposition_job(world, "Atlanta", "Dallas", false, None)
+        .expect("Atlanta to Dallas is supported");
+    let route = world
+        .shortest_route("Atlanta", "Dallas", None, false)
+        .expect("the world routes")
+        .expect("Atlanta to Dallas has a route");
+    let mut drive = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        Some(0),
+        DRIVE_PHASE_DELIVERY,
+        Some(12.0),
+    );
+    let departure_calendar = 100.0 * 24.0 + 22.5;
+    app.ctx
+        .profile
+        .as_mut()
+        .unwrap()
+        .sync_calendar_to(departure_calendar);
+    let crossing = drive
+        .trip
+        .timezone_crossings
+        .first()
+        .expect("the route crosses a timezone")
+        .at_mi;
+    drive.trip.restore(crossing + 5.0, 180.0);
+    assert_ne!(drive.trip.current_timezone(), drive.trip.start_timezone);
+    drive.trip.start_hour = (22.5 - drive.trip.current_timezone().offset_h).rem_euclid(24.0);
+    let data = drive.snapshot(&app.ctx);
+
+    let saved = app.ctx.profile.as_ref().unwrap().to_dict();
+    app.ctx.profile = Some(Profile::from_dict(&saved));
+    let resumed = DrivingState::from_snapshot(&mut app.ctx, &data).expect("the snapshot resumes");
+
+    let spoken_calendar =
+        app.ctx.profile.as_ref().unwrap().calendar_game_hours() + resumed.trip.game_minutes / 60.0;
+    assert!((spoken_calendar - (departure_calendar + 3.0)).abs() < 1e-9);
+}

@@ -69,7 +69,10 @@
   pause menu, and the clock follows at once. Parked waiting with the brake
   set, which fast-forwards the other two pacings, stays at real speed in
   Real time. Breaks and sleep at stops still pass the clock the way they
-  always have.
+  always have. The date and time you hear now also start in step with your
+  computer's clock when you choose Real time or begin a drive with it already
+  selected. Career progress, delivery time remaining, and hours of service do
+  not jump when the clocks line up.
 - **A Radio app on the driver tablet.** Under Tab, Driver apps, Radio: it
   says what is playing, switches the radio on or off, saves the tuned
   station to your favorites or removes it, lists your favorites, and lists

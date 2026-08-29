@@ -21,6 +21,8 @@ use ff_core::models::profile::Profile;
 use ff_core::sim::enforcement_observe::OBSERVE_HOLD_MI;
 use ff_core::sim::hos;
 use ff_core::sim::lane::LANE_WIDTH;
+use ff_core::sim::season::real_clock_game_hours;
+use ff_core::sim::timezones::PACIFIC;
 use ff_core::sim::trip_models::RoadStop;
 use ff_core::sim::weather::WeatherKind;
 
@@ -83,6 +85,26 @@ fn a_drive(app: &mut TestApp) -> DrivingState {
 
 fn mph_to_mps(mph: f64) -> f64 {
     mph / 2.23694
+}
+
+#[test]
+fn switching_to_real_time_mid_drive_aligns_the_spoken_clock_without_moving_career_time() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app);
+    drive.departure_checked = true;
+    drive.trip.game_minutes = 90.0;
+    drive.trip.start_timezone = PACIFIC;
+    let career_hours = app.ctx.profile.as_ref().unwrap().game_hours;
+
+    app.ctx.settings.time_scale = 1.0;
+    drive.update_frame(&mut app.ctx, 0.0);
+
+    let target = real_clock_game_hours(None);
+    let calendar_now =
+        app.ctx.profile.as_ref().unwrap().calendar_game_hours() + drive.trip.game_minutes / 60.0;
+    assert_eq!(app.ctx.profile.as_ref().unwrap().game_hours, career_hours);
+    assert!((calendar_now - target).abs() < 1.0 / 60.0);
+    assert!((drive.trip.local_hour() - target.rem_euclid(24.0)).abs() < 1.0 / 60.0);
 }
 
 /// `_capture(monkeypatch, app)`: every one-shot, plus the held-cue latch the

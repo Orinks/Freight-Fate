@@ -926,6 +926,10 @@ onto exit signalling.
       already re-reads `settings.time_scale` every frame and the pause menu
       opens the full Settings tree. Breaks and sleep still jump the clock
       through `_advance_rest_clock`, so nobody sits through a ten-hour rest.
+      Real time now anchors the independent player-facing calendar to the
+      computer's date and time at drive start and when selected mid-drive.
+      A session-only sub-day offset keeps that alignment without moving elapsed
+      career time, delivery time remaining, or hours of service.
       Tests: row cycle and Left/Right walk, tuning equality, 1x rolling and
       parked, settings round-trip of 1.0 without migration.
 

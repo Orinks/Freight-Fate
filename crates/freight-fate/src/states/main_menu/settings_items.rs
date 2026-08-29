@@ -395,7 +395,9 @@ impl SettingsCategoryState {
                      the clock twice as fast, so a driving day takes half as long \
                      and decisions arrive sooner. Real time keeps Standard's \
                      pressure and runs the driving clock at the speed of a real \
-                     clock, so a mile takes as long as it really would. With the \
+                     clock, so a mile takes as long as it really would. It lines \
+                     the spoken date and time up with your computer without \
+                     moving delivery time remaining or hours of service. With the \
                      weather source set to real world it is the most true to \
                      life the game gets. You can change it mid-drive from the \
                      pause menu.",
