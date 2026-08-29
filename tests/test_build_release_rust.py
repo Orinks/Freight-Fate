@@ -268,6 +268,128 @@ def test_lfs_pointer_is_refused_with_a_pull_hint(tmp_path):
         build_release.require_real_pack(tmp_path / "absent.pak")
 
 
+def test_music_download_config_uses_public_defaults(monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.delenv("FREIGHT_FATE_MUSIC_URL", raising=False)
+    monkeypatch.delenv("FREIGHT_FATE_MUSIC_SHA256", raising=False)
+    assert build_release.music_download_config() == (
+        "https://dev.orinks.net/downloads/music.pak",
+        "50f5440eb478f1e0e630e65081d83e6c308f48a6aa3ea5fe67c7dd1a7f50a8bb",
+    )
+
+
+def test_music_download_config_allows_independent_overrides():
+    build_release = load_build_release_module()
+    assert build_release.music_download_config(
+        {
+            "FREIGHT_FATE_MUSIC_URL": "https://example.test/music.pak",
+            "FREIGHT_FATE_MUSIC_SHA256": "A" * 64,
+        }
+    ) == ("https://example.test/music.pak", "a" * 64)
+
+
+def test_ensure_music_pack_keeps_a_verified_existing_pack(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "music.pak"
+    pack.write_bytes(b"approved pack")
+    digest = build_release.hashlib.sha256(pack.read_bytes()).hexdigest()
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", digest)
+    monkeypatch.setattr(
+        build_release.urllib.request,
+        "urlretrieve",
+        lambda *_: pytest.fail("downloaded"),
+    )
+    build_release.ensure_music_pack(pack)
+
+
+def test_music_download_config_rejects_a_non_hex_digest(monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", "not-a-digest")
+    with pytest.raises(
+        RuntimeError,
+        match="FREIGHT_FATE_MUSIC_SHA256 must be a 64-character hexadecimal digest",
+    ):
+        build_release.music_download_config()
+
+
+def test_ensure_music_pack_atomically_installs_a_verified_download(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "music.pak"
+    payload = b"replacement pack"
+    digest = build_release.hashlib.sha256(payload).hexdigest()
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_URL", "https://example.test/music.pak")
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", digest)
+
+    def download(url, destination):
+        assert url == "https://example.test/music.pak"
+        Path(destination).write_bytes(payload)
+
+    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", download)
+    build_release.ensure_music_pack(pack)
+
+    assert pack.read_bytes() == payload
+    assert list(tmp_path.glob("*.download")) == []
+
+
+def test_ensure_music_pack_rejects_a_mismatched_download(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "music.pak"
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", "a" * 64)
+    monkeypatch.setattr(
+        build_release.urllib.request,
+        "urlretrieve",
+        lambda _url, destination: Path(destination).write_bytes(b"unapproved pack"),
+    )
+
+    with pytest.raises(RuntimeError, match="failed SHA-256 verification"):
+        build_release.ensure_music_pack(pack)
+
+    assert not pack.exists()
+    assert list(tmp_path.glob("*.download")) == []
+
+
+def test_ensure_music_pack_replaces_a_mismatched_existing_pack_after_verification(
+    tmp_path, monkeypatch
+):
+    build_release = load_build_release_module()
+    pack = tmp_path / "music.pak"
+    pack.write_bytes(b"old pack")
+    payload = b"new approved pack"
+    digest = build_release.hashlib.sha256(payload).hexdigest()
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", digest)
+    monkeypatch.setattr(
+        build_release.urllib.request,
+        "urlretrieve",
+        lambda _url, destination: Path(destination).write_bytes(payload),
+    )
+
+    build_release.ensure_music_pack(pack)
+
+    assert pack.read_bytes() == payload
+    assert list(tmp_path.glob("*.download")) == []
+
+
+def test_ensure_music_pack_preserves_existing_pack_when_download_fails(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "music.pak"
+    old_payload = b"old pack"
+    pack.write_bytes(old_payload)
+    monkeypatch.setenv(
+        "FREIGHT_FATE_MUSIC_SHA256",
+        build_release.hashlib.sha256(b"new approved pack").hexdigest(),
+    )
+
+    def fail_download(_url, _destination):
+        raise OSError("download unavailable")
+
+    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", fail_download)
+    with pytest.raises(OSError, match="download unavailable"):
+        build_release.ensure_music_pack(pack)
+
+    assert pack.read_bytes() == old_payload
+    assert list(tmp_path.glob("*.download")) == []
+
+
 def test_cargo_command_honours_the_target_dir(tmp_path):
     build_release = load_build_release_module()
     assert build_release.cargo_build_command() == [

@@ -40,6 +40,7 @@ import tarfile
 import tempfile
 import urllib.request
 import zipfile
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -58,6 +59,8 @@ SOUND_LIB_ARCH_DIR = "x64"
 ADDON_LIB_DIR = PACKAGE_DIR / "lib"
 PRISM_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 PRISM_DEPENDENCY_DIR = "prismatoid.libs"
+DEFAULT_MUSIC_URL = "https://dev.orinks.net/downloads/music.pak"
+DEFAULT_MUSIC_SHA256 = "50f5440eb478f1e0e630e65081d83e6c308f48a6aa3ea5fe67c7dd1a7f50a8bb"
 
 
 def platform_native_exts() -> set[str]:
@@ -929,17 +932,31 @@ def require_real_pack(path: Path) -> None:
         )
 
 
+def file_sha256(path: Path) -> str:
+    """Return the SHA-256 digest of ``path`` using bounded memory."""
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def music_download_config(env: Mapping[str, str] = os.environ) -> tuple[str, str]:
+    """Return the music-pack URL and required lowercase SHA-256 digest."""
+    url = env.get("FREIGHT_FATE_MUSIC_URL", DEFAULT_MUSIC_URL)
+    expected_sha256 = env.get("FREIGHT_FATE_MUSIC_SHA256", DEFAULT_MUSIC_SHA256).lower()
+    if len(expected_sha256) != 64 or any(
+        character not in "0123456789abcdef" for character in expected_sha256
+    ):
+        raise RuntimeError("FREIGHT_FATE_MUSIC_SHA256 must be a 64-character hexadecimal digest")
+    return url, expected_sha256
+
+
 def ensure_music_pack(path: Path = PACKAGE_DIR / "music.pak") -> None:
-    """Download the private music pack when a builder supplies its URL."""
-    if path.is_file() and not is_lfs_pointer(path):
+    """Download and verify the public music pack when it is not already present."""
+    url, expected_sha256 = music_download_config()
+    if path.is_file() and not is_lfs_pointer(path) and file_sha256(path) == expected_sha256:
         return
-    url = os.environ.get("FREIGHT_FATE_MUSIC_URL")
-    if not url:
-        raise RuntimeError(
-            "music.pak is unavailable. Set FREIGHT_FATE_MUSIC_URL to a temporary "
-            "private download URL, then build again."
-        )
-    expected_sha256 = os.environ.get("FREIGHT_FATE_MUSIC_SHA256", "").lower()
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
         dir=path.parent, prefix="music.pak.", suffix=".download", delete=False
@@ -947,12 +964,8 @@ def ensure_music_pack(path: Path = PACKAGE_DIR / "music.pak") -> None:
         temporary = Path(temp.name)
     try:
         urllib.request.urlretrieve(url, temporary)
-        digest = hashlib.sha256()
-        with temporary.open("rb") as source:
-            for chunk in iter(lambda: source.read(1024 * 1024), b""):
-                digest.update(chunk)
-        actual_sha256 = digest.hexdigest()
-        if expected_sha256 and actual_sha256 != expected_sha256:
+        actual_sha256 = file_sha256(temporary)
+        if actual_sha256 != expected_sha256:
             raise RuntimeError(
                 "Downloaded music.pak failed SHA-256 verification: "
                 f"expected {expected_sha256}, got {actual_sha256}"
@@ -1224,7 +1237,9 @@ def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--tag", default="", help="release label override, e.g. 1.9-tester-20260828")
+    parser.add_argument(
+        "--tag", default="", help="release label override, e.g. 1.9-tester-20260828"
+    )
     parser.add_argument("--skip-smoke", action="store_true", help="skip booting the frozen build")
     parser.add_argument(
         "--check-dependencies",
