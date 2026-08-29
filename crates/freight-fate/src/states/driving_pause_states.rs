@@ -166,7 +166,7 @@ impl PauseMenuState {
             );
         }
         items.push(
-            MenuItem::new("Drivers board", |_s: &mut Self, ctx: &mut GameContext| {
+            MenuItem::new("Drivers on duty", |_s: &mut Self, ctx: &mut GameContext| {
                 let state = DriversOnlineState::new(ctx);
                 ctx.push_state(state);
             })

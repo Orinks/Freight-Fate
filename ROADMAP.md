@@ -132,11 +132,12 @@ onto exit signalling.
       website's live board, which landed the same day on orinks.net.
       * The endpoint behind it is cached for sixty seconds server-side, so
         the poll cannot usefully go faster without changing that first.
-      * Not done: the in-game list still says "Drivers online" as its title
-        and "Drivers board" on the hub row, while the website now says
-        "list" throughout. Three names for one thing costs a screen reader
-        user a re-read -- pick the canonical spoken noun and add it to
-        `docs/ontology.md`.
+      * Named, 2026-08-29: it is **Drivers on duty** everywhere, and the
+        thing itself is a *list*. "Board" stays dispatch's, and "online"
+        stays the hub's name and the services switch, both of which it
+        collided with. `docs/ontology.md` carries the row and a note on the
+        one cost accepted: "on duty" is also the player's own HOS duty
+        status, which the game only ever speaks in its qualified form.
       * Not done on the `dev` (Python) line, by owner ruling 2026-08-29:
         1.9 only for now.
 - [x] **The Python gameplay tests are retired; the suite now covers the

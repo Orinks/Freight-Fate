@@ -307,7 +307,7 @@ impl Menu for OnlineHubState {
 
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         vec![
-            MenuItem::new("Drivers board", |s: &mut Self, ctx| s.drivers_board(ctx)).help(
+            MenuItem::new("Drivers on duty", |s: &mut Self, ctx| s.drivers_board(ctx)).help(
                 "Hear who is hauling right now on the public orinks.net \
                  drivers board. Viewing the board shares nothing about you.",
             ),

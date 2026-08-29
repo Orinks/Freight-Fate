@@ -31,7 +31,7 @@ fn test_main_menu_online_item_opens_the_hub() {
     // The board leads because viewing it shares nothing; the
     // online-enhancement master switch sits right under it.
     let rows = labels::<OnlineHubState>(&hub, &app.ctx);
-    assert_eq!(rows[0], "Drivers board");
+    assert_eq!(rows[0], "Drivers on duty");
     assert_eq!(rows[1], "Online services: on");
     let help = helps::<OnlineHubState>(&hub, &app.ctx);
     for (row, help) in rows.iter().zip(help.iter()).take(rows.len() - 1) {
@@ -46,12 +46,12 @@ fn test_hub_drivers_board_item_opens_the_board() {
     let hub = hub(&mut app);
     assert_eq!(
         current_label::<OnlineHubState>(&hub, &app.ctx),
-        "Drivers board"
+        "Drivers on duty"
     );
     // The board leads because viewing it shares nothing; the
     // online-enhancement master switch sits right under it.
     let rows = labels::<OnlineHubState>(&hub, &app.ctx);
-    assert_eq!(rows[0], "Drivers board");
+    assert_eq!(rows[0], "Drivers on duty");
     assert_eq!(rows[1], "Online services: on");
     let help = helps::<OnlineHubState>(&hub, &app.ctx);
     for (row, help) in rows.iter().zip(help.iter()).take(rows.len() - 1) {
@@ -69,7 +69,7 @@ fn test_hub_left_right_adjust_rows_align_with_items() {
     let mut app = TestApp::new();
     let hub = hub(&mut app);
     for label in [
-        "Drivers board",
+        "Drivers on duty",
         "Open my driver setup page",
         "Restore a cloud backup",
         "Link a Mastodon account",

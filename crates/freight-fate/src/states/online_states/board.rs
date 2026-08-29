@@ -130,7 +130,7 @@ pub struct DriversOnlineState {
 }
 
 impl DriversOnlineState {
-    pub const TITLE: &'static str = "Drivers online";
+    pub const TITLE: &'static str = "Drivers on duty";
 
     /// `DriversOnlineState(ctx)`.
     pub fn new(_ctx: &mut GameContext) -> Self {

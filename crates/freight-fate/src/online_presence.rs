@@ -349,7 +349,7 @@ pub fn fetch_mastodon_status(
 ///
 /// Each entry has `displayName`, `activity`, `detail` and `updatedAt`
 /// (epoch milliseconds). Called from a background thread by the in-game
-/// "Drivers online" view; never called on the game loop.
+/// "Drivers on duty" view; never called on the game loop.
 pub fn fetch_board(transport: &dyn Transport) -> Option<Vec<Value>> {
     let reply = transport
         .call(

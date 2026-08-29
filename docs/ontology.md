@@ -371,10 +371,28 @@ from the words, and synonyms cost them a re-read.
 | The one career whose accepted backups front the player's public profile | public career | shared career, featured career, main save | `publicSaveName` |
 | A career's copy on orinks.net, and the act of sending it there | backed up / backup -- "<career> is backed up", "Backed up to the cloud" | synced, uploaded, saved to the cloud, cloud save (the *menu* is Cloud backup, but a career is never "a cloud save") | `cloud_saves.backup_status`, `cloud_saves.recovery_status`, `city._backup_outcome_text` |
 | The page on orinks.net where a player manages their driver name, their sharing, and the computers signed in to the account | driver setup page | account page, dashboard, my account, profile page (that name belongs to the public one) | `online_presence.setup_page_url`, the Online hub's "Open my driver setup page" |
+| The other players out working right now, and the screen that shows them | drivers on duty; the thing itself is the drivers **list** ("this list", "the drivers list") | drivers board (board belongs to dispatch, one row above), drivers online (Online is the hub's name *and* a setting the player toggles, so it reads as "drivers who have online services on"), roster, who's online, live board | `DriversOnlineState`, `getLivePresenceBoard` and the `Drivers on duty` heading on orinks.net |
 | Game sound lowering itself while the road voice speaks | game sounds step back for speech (the Settings > Audio row) | ducking, audio duck, attenuation | `settings.duck_audio_for_speech`, `AudioEngine.set_speech_duck` |
 | How loud the lane and edge cues are next to everything else | lane and edge cue volume (the Settings > Audio row), with quieter / standard / louder as its values | prominence (what the row said until 1.9, and what the owner could not decode), lane cue loudness, cue intensity | `settings.lane_cue_loudness`, `sim/lane_guidance.CUE_LOUDNESS` |
 
 Notes on the entries that are not simple:
+
+**"On duty" does double service, and that is a deliberate accepted cost.** It
+is already the player's own regulatory duty status -- `sim/hos.rs` speaks
+*"on duty, not driving"*, the logbook reads *"Today's totals: driving...,
+on duty not driving..."*, and the duty window is *"the 14-hour clock that
+starts when you go on duty"* two tables up. *Drivers on duty* uses the same
+two words for a different subject: whether somebody ELSE is out working.
+
+Both alternatives were worse. *Drivers board* takes a noun dispatch already
+owns, and dispatch's board is the one a player hears about far more often.
+*Drivers online* collides with the hub's own name and with the `Online
+services` switch, so it reads as "drivers who have online services turned
+on" -- close enough to true to mislead. The saving grace is that the HOS
+sense the game actually speaks aloud is always the qualified *"on duty, not
+driving"*, while bare "on duty" for "currently working" is ordinary English
+before it is jargon, and the two never appear in the same screen. If a
+tester ever reports confusing the two, this note is the place to start.
 
 **"Standing" is a code word, never a spoken one.** Dispatch trust answers to
 three things now -- the service record, the licence, and what the driver owes

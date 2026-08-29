@@ -4,9 +4,9 @@
 
 ### Added
 
-- **The drivers board keeps itself up to date while you read it.** Open
-  Drivers board from the Online menu and the list now checks again on its
-  own about once a minute, so drivers who set off or sign off turn up
+- **The list of drivers on duty keeps itself up to date while you read it.**
+  Open Drivers on duty from the Online menu and the list now checks again on
+  its own about once a minute, so drivers who set off or sign off turn up
   without you pressing Refresh. It does the checking quietly and never
   speaks over you. The list is in alphabetical order by driver name and
   stays that way, so when it changes, a line is rewritten and nothing moves
@@ -427,6 +427,12 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+
+- **"Drivers board" is now "Drivers on duty".** The Online menu and the
+  pause menu both used to call it the drivers board, and the screen itself
+  said Drivers online. Three names for one thing meant hearing it fresh each
+  time. It is Drivers on duty everywhere now, including on the website, and
+  "board" is left to mean the dispatch board, where your work comes from.
 
 - **Career 1.9 snapshot updates look for 1.9 tester builds, not public nightlies.**
   Packaged 1.9 copies on the snapshot update channel download GitHub
