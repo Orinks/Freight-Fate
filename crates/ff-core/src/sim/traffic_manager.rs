@@ -44,6 +44,12 @@ pub const MAX_BUBBLE_VEHICLES: usize = 28;
 /// into being a few hundred feet ahead appeared out of nowhere.
 pub const NO_SPAWN_AHEAD_MI: f64 = 1.1;
 pub const NO_SPAWN_BEHIND_MI: f64 = 0.6;
+/// Bounds for converting the road's existing spatial density into a temporal
+/// arrival interval while a 1x bubble is empty.
+pub const REAL_TIME_ARRIVAL_MIN_S: f64 = 8.0;
+pub const REAL_TIME_ARRIVAL_MAX_S: f64 = 90.0;
+/// The same seam `next_situation` uses for a spoken traffic warning.
+pub const TRAFFIC_SITUATION_AHEAD_MI: f64 = 2.2;
 /// How far into a run the bubble withholds the "merging" intent.
 pub const MERGE_FREE_START_MI: f64 = 3.0;
 /// How far past an interchange a vehicle can still be merging into you.
@@ -218,6 +224,10 @@ pub struct TrafficManager {
     pub player_lane: i64,
     /// The lane a tap-change is moving INTO, or None the rest of the time.
     pub player_lane_target: Option<i64>,
+    /// Real seconds for which a 1x rolling bubble has contained no vehicles.
+    empty_real_time_s: f64,
+    /// Keeps successive boundary arrivals deterministic but distinct.
+    real_time_arrival_seq: u64,
 }
 
 impl TrafficManager {
@@ -250,6 +260,8 @@ impl TrafficManager {
             braking_zones: Vec::new(),
             player_lane: 0,
             player_lane_target: None,
+            empty_real_time_s: 0.0,
+            real_time_arrival_seq: 0,
         }
     }
 
@@ -987,6 +999,101 @@ impl TrafficManager {
         }
     }
 
+    /// Admit one vehicle at the perceivable edge of an otherwise empty 1x bubble.
+    /// This models traffic entering over time without re-rolling occupied
+    /// road cells or materializing a hazard beside the player.
+    fn admit_real_time_boundary_traffic(&mut self, position_mi: f64) {
+        if self.nearby_traffic_count(position_mi) >= MAX_BUBBLE_VEHICLES {
+            return;
+        }
+        let ahead = position_mi + TRAFFIC_SITUATION_AHEAD_MI;
+        let behind = position_mi - BUBBLE_BEHIND_MI + SPAWN_CELL_MI / 2.0;
+        let (mile, behind_player) = if ahead <= self.route.miles() {
+            (ahead, false)
+        } else if behind >= 0.0 {
+            (behind, true)
+        } else {
+            return;
+        };
+        let Some(leg) = self.leg_at(mile).cloned() else {
+            return;
+        };
+        let sequence = self.real_time_arrival_seq;
+        self.real_time_arrival_seq += 1;
+        let mut rng = PyRandom::new_from_sha256_prefix16(&format!(
+            "{}:real-time-arrival:{sequence}",
+            self.seed_key()
+        ));
+        let intent = if behind_player {
+            choose(&mut rng, &["passing", "cruising"], &[3.0, 1.0])
+        } else {
+            // This is the empty-bubble recovery path: a faster cruiser could
+            // simply pull away without ever reaching speech or pass audio.
+            // A genuine slower lead uses the existing restrained traffic
+            // warning and remains reviewable in the traffic status.
+            "following"
+        };
+        let vehicle_class = choose(
+            &mut rng,
+            &["car", "box truck", "semi", "service vehicle"],
+            &[5.0, 1.4, 2.0, 0.3],
+        );
+        let (limit_offset, governor) = Self::intent_speed_draw(intent, &mut rng, vehicle_class);
+        let rush_slowdown = if self.rush_hour_traffic_bias(&leg) != 0.0 {
+            rng.uniform(4.0, 10.0)
+        } else {
+            0.0
+        };
+        let speed = self.road_speed_mph(mile, limit_offset, governor, rush_slowdown);
+        // Ahead arrivals enter the player's lane so the established traffic
+        // warning/status seam can make them perceivable immediately. A
+        // behind arrival keeps the normal passing-lane draw and is heard as
+        // it overtakes.
+        let lane = if behind_player {
+            self.intent_lane_at(intent, mile)
+        } else {
+            self.player_lane
+        };
+        let exit_at = mile + rng.uniform(EXIT_AFTER_MIN_MI, EXIT_AFTER_MAX_MI);
+        self.vehicles.push(
+            TrafficVehicle::new(
+                &format!("real-time:{sequence}"),
+                mile,
+                speed,
+                speed,
+                -lane,
+                intent,
+                vehicle_class,
+            )
+            .with_lane(lane)
+            .with_exit_at(Some(exit_at))
+            .with_speed_draw(limit_offset, governor, rush_slowdown),
+        );
+    }
+
+    fn nearby_traffic_count(&self, position_mi: f64) -> usize {
+        self.vehicles
+            .iter()
+            .filter(|vehicle| {
+                let gap = vehicle.position_mi - position_mi;
+                (-BUBBLE_BEHIND_MI..=BUBBLE_AHEAD_MI).contains(&gap)
+            })
+            .count()
+    }
+
+    /// Turn the existing vehicles-per-cell model into the expected real-time
+    /// wait between vehicles passing a point on the road.
+    fn real_time_arrival_interval_s(&self, position_mi: f64) -> Option<f64> {
+        let leg = self.leg_at(position_mi)?;
+        let density = self.leg_density(leg, is_night(self.hour), Some(position_mi));
+        let moving_mph = self.truck_speed_mph.abs().clamp(25.0, 70.0);
+        let expected_gap_mi = SPAWN_CELL_MI / density.max(f64::EPSILON);
+        Some(
+            (expected_gap_mi / moving_mph * 3600.0)
+                .clamp(REAL_TIME_ARRIVAL_MIN_S, REAL_TIME_ARRIVAL_MAX_S),
+        )
+    }
+
     pub fn update(
         &mut self,
         dt: f64,
@@ -1136,6 +1243,21 @@ impl TrafficManager {
         }
         self.vehicles = kept;
         self.replenish(position_mi);
+        if time_scale <= 1.0 + f64::EPSILON
+            && self.rolling_bubble
+            && self.nearby_traffic_count(position_mi) == 0
+        {
+            self.empty_real_time_s += dt.max(0.0);
+            if self
+                .real_time_arrival_interval_s(position_mi)
+                .is_some_and(|interval| self.empty_real_time_s >= interval)
+            {
+                self.admit_real_time_boundary_traffic(position_mi);
+                self.empty_real_time_s = 0.0;
+            }
+        } else {
+            self.empty_real_time_s = 0.0;
+        }
         sort_by_position(&mut self.vehicles);
     }
 
@@ -1145,7 +1267,7 @@ impl TrafficManager {
         truck_speed_mph: f64,
     ) -> Option<TrafficSituation> {
         let context = self.lead_vehicle(position_mi, truck_speed_mph)?;
-        if context.gap_mi > 2.2 {
+        if context.gap_mi > TRAFFIC_SITUATION_AHEAD_MI {
             return None;
         }
         let vehicle = context.lead.clone();
@@ -1213,6 +1335,107 @@ fn sort_by_position(vehicles: &mut [TrafficVehicle]) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::data::world_models::Route;
+
+    fn long_test_route() -> Route {
+        Route::from_legs(
+            vec!["A".to_string(), "B".to_string()],
+            vec![Leg::new("A", "B", 100.0, "I-1", "flat", Vec::new())],
+        )
+    }
+
+    #[test]
+    fn real_time_does_not_leave_an_exhausted_traffic_bubble_empty() {
+        let route = long_test_route();
+        let mut manager = TrafficManager::new(
+            &route,
+            &[0.0],
+            Some(7),
+            12.0,
+            1.0,
+            true,
+            65.0,
+            effects(WeatherKind::Clear),
+        );
+        let position_mi = 20.0;
+        let first = ((position_mi - BUBBLE_BEHIND_MI) / SPAWN_CELL_MI) as i64;
+        let last = ((position_mi + BUBBLE_AHEAD_MI) / SPAWN_CELL_MI) as i64;
+        manager.spawned_cells.extend(first..=last);
+        manager.vehicles.push(TrafficVehicle::new(
+            "future:traffic",
+            position_mi + 50.0,
+            65.0,
+            65.0,
+            0,
+            "cruising",
+            "car",
+        ));
+
+        for _ in 0..90 {
+            manager.update(1.0, position_mi, 1.0, Some(12.0), Some(false));
+            if manager
+                .vehicles
+                .iter()
+                .any(|vehicle| vehicle.key.starts_with("real-time:"))
+            {
+                break;
+            }
+        }
+
+        assert_eq!(manager.vehicles.len(), 2);
+        let arrival = manager
+            .vehicles
+            .iter()
+            .find(|vehicle| vehicle.key.starts_with("real-time:"))
+            .expect("the local Real time arrival was added beside future-route traffic");
+        let gap = arrival.position_mi - position_mi;
+        assert!(
+            gap >= NO_SPAWN_AHEAD_MI || gap <= -NO_SPAWN_BEHIND_MI,
+            "real-time traffic appeared too close to the player: {gap:.2} miles"
+        );
+        assert!(
+            manager.next_situation(position_mi, 65.0).is_some(),
+            "the admitted vehicle exists internally but is not perceivable"
+        );
+    }
+
+    #[test]
+    fn real_time_boundary_arrivals_follow_the_existing_time_of_day_density() {
+        let route = long_test_route();
+        let mut daytime = TrafficManager::new(
+            &route,
+            &[0.0],
+            Some(7),
+            12.0,
+            1.0,
+            true,
+            65.0,
+            effects(WeatherKind::Clear),
+        );
+        let mut night = TrafficManager::new(
+            &route,
+            &[0.0],
+            Some(7),
+            2.0,
+            1.0,
+            true,
+            65.0,
+            effects(WeatherKind::Clear),
+        );
+        let position_mi = 20.0;
+        let first = ((position_mi - BUBBLE_BEHIND_MI) / SPAWN_CELL_MI) as i64;
+        let last = ((position_mi + BUBBLE_AHEAD_MI) / SPAWN_CELL_MI) as i64;
+        daytime.spawned_cells.extend(first..=last);
+        night.spawned_cells.extend(first..=last);
+
+        for _ in 0..70 {
+            daytime.update(1.0, position_mi, 1.0, Some(12.0), Some(false));
+            night.update(1.0, position_mi, 1.0, Some(2.0), Some(false));
+        }
+
+        assert_eq!(daytime.vehicles.len(), 1);
+        assert!(night.vehicles.is_empty());
+    }
 
     #[test]
     fn test_traffic_vehicle_keeps_npc_compatibility_properties() {

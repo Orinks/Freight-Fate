@@ -1052,6 +1052,13 @@
 
 ### Fixed
 
+- **Real time driving no longer leaves the road empty for minutes at a time.**
+  When its nearby traffic bubble is completely empty, the road now converts
+  its normal route volume and time-of-day density into a real-time arrival
+  interval, then lets a modeled vehicle enter at the existing spoken-warning
+  distance in your lane, where the normal traffic warning and status readout
+  can identify it. Normal vehicle and speed rules still apply.
+
 - **Freight Fate builds on a Mac again.** Building from source on macOS
   stopped part way through in two places: the tool that downloads the audio
   library refused to run on a Mac at all, and the build could not find the

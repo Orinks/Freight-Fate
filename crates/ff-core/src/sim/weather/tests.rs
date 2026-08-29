@@ -1150,6 +1150,53 @@ fn make_trip(seed: i64, hazard_scale: f64) -> crate::sim::trip::Trip {
 }
 
 #[test]
+fn real_time_empty_bubble_arrival_reaches_the_player_traffic_status() {
+    use crate::sim::traffic_manager::TrafficVehicle;
+    use crate::sim::traffic_manager::{BUBBLE_AHEAD_MI, BUBBLE_BEHIND_MI, SPAWN_CELL_MI};
+
+    let mut trip = make_trip(7, 1.0);
+    trip.time_scale = 1.0;
+    trip.position_mi = 20.0;
+    trip.traffic_manager.rolling_bubble = true;
+    trip.traffic_manager.vehicles.clear();
+    trip.traffic_manager.vehicles.push(TrafficVehicle::new(
+        "future:traffic",
+        trip.position_mi + 50.0,
+        65.0,
+        65.0,
+        0,
+        "cruising",
+        "car",
+    ));
+    let first = ((trip.position_mi - BUBBLE_BEHIND_MI) / SPAWN_CELL_MI) as i64;
+    let last = ((trip.position_mi + BUBBLE_AHEAD_MI) / SPAWN_CELL_MI) as i64;
+    trip.traffic_manager.spawned_cells.extend(first..=last);
+
+    for _ in 0..90 {
+        trip.traffic_manager
+            .update(1.0, trip.position_mi, 1.0, Some(12.0), Some(false));
+        if trip
+            .traffic_manager
+            .vehicles
+            .iter()
+            .any(|vehicle| vehicle.key.starts_with("real-time:"))
+        {
+            break;
+        }
+    }
+
+    let status = trip.npc_traffic_status();
+    assert!(!status.contains("no close traffic"), "{status}");
+    trip.check_npc_traffic_cues();
+    assert!(
+        trip.events
+            .iter()
+            .any(|event| event.data.npc_vehicle.is_some()),
+        "the Real time arrival never reached the automatic traffic cue"
+    );
+}
+
+#[test]
 fn test_relaxed_mode_thins_random_inspection_odds() {
     // Relaxed mode pulls a violating driver over less often; the random log
     // check is thinned by the hazard scale (weigh stations are not).
