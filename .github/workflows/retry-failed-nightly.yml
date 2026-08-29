@@ -2,7 +2,7 @@ name: Retry failed nightly
 
 on:
   workflow_run:
-    workflows: [Build]
+    workflows: [Build, Career 1.9 snapshot]
     types: [completed]
 
 permissions:
@@ -29,21 +29,48 @@ jobs:
       - name: Dispatch one recovery build if still needed
         env:
           GH_TOKEN: ${{ github.token }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
         run: |
-          TAG="nightly-$(date -u +%Y%m%d)"
+          if [ "$WORKFLOW_NAME" = "Career 1.9 snapshot" ]; then
+            TAG="1.9-tester-$(date -u +%Y%m%d)"
+            TARGET_BRANCH="feat/career-1.9"
+          elif [ "$WORKFLOW_NAME" = "Build" ]; then
+            TAG="nightly-$(date -u +%Y%m%d)"
+            TARGET_BRANCH="dev"
+          else
+            echo "Unsupported workflow: $WORKFLOW_NAME" >&2
+            exit 1
+          fi
 
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "$TAG already exists; the nightly recovered while waiting."
+            if [ "$WORKFLOW_NAME" = "Career 1.9 snapshot" ]; then
+              echo "$TAG already exists; the Career 1.9 snapshot recovered while waiting."
+            else
+              echo "$TAG already exists; the nightly recovered while waiting."
+            fi
             exit 0
           fi
 
-          ACTIVE=$(gh run list --repo "$GITHUB_REPOSITORY" \
-            --workflow Build --branch dev --limit 20 \
-            --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length')
-          if [ "$ACTIVE" -gt 0 ]; then
-            echo "A dev Build is already queued or running; not dispatching a duplicate."
-            exit 0
-          fi
+          if [ "$WORKFLOW_NAME" = "Career 1.9 snapshot" ]; then
+            ACTIVE=$(gh run list --repo "$GITHUB_REPOSITORY" \
+              --workflow "Career 1.9 snapshot" --branch "$TARGET_BRANCH" --limit 20 \
+              --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length')
+            if [ "$ACTIVE" -gt 0 ]; then
+              echo "A Career 1.9 snapshot is already queued or running; not dispatching a duplicate."
+              exit 0
+            fi
 
-          echo "Scheduled nightly is still missing after 45 minutes; dispatching one retry."
-          gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false
+            echo "Scheduled Career 1.9 snapshot is still missing after 45 minutes; dispatching one retry."
+            gh workflow run "Career 1.9 snapshot" --repo "$GITHUB_REPOSITORY" --ref "feat/career-1.9" -f dry_run=false
+          else
+            ACTIVE=$(gh run list --repo "$GITHUB_REPOSITORY" \
+              --workflow Build --branch dev --limit 20 \
+              --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length')
+            if [ "$ACTIVE" -gt 0 ]; then
+              echo "A dev Build is already queued or running; not dispatching a duplicate."
+              exit 0
+            fi
+
+            echo "Scheduled nightly is still missing after 45 minutes; dispatching one retry."
+            gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false
+          fi
