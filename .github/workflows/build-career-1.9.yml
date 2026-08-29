@@ -1,0 +1,188 @@
+name: Career 1.9 snapshot
+
+on:
+  schedule:
+    - cron: "37 2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Skip release creation"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: career-19-snapshot
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  CAREER_BRANCH: "feat/career-1.9"
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      tag: ${{ steps.check.outputs.tag }}
+      commit_sha: ${{ steps.check.outputs.commit_sha }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CAREER_BRANCH }}
+          fetch-depth: 0
+
+      - name: Check snapshot conditions
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "tag=1.9-tester-$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | head -1)
+          if [ -z "$LAST_TAG" ]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          gh release view "$LAST_TAG" --json body -q .body > previous-notes.md || true
+          : > latest-stable-notes.md
+          LATEST_STABLE_TAG=$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
+            --jq '[.[] | select(.draft == false and .prerelease == false)][0].tag_name // ""')
+          if [ -n "$LATEST_STABLE_TAG" ]; then
+            gh release view "$LATEST_STABLE_TAG" --json body -q .body > latest-stable-notes.md || true
+          fi
+          python3 tools/release_notes.py should-build-nightly \
+            --previous-tag "$LAST_TAG" \
+            --exclude-notes previous-notes.md \
+            --latest-stable-tag "$LATEST_STABLE_TAG" \
+            --exclude-stable-notes latest-stable-notes.md \
+            >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build (Windows)
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      FREIGHT_FATE_NO_SPEECH: "1"
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: "1"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+          lfs: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+
+      - name: Fetch BASS
+        # Audio tests skip when the proprietary BASS runtime is absent. Fetch
+        # and verify it before Clippy or Cargo tests so a clean runner cannot
+        # report green without exercising the audio backend.
+        run: |
+          uv run python tools/fetch_bass.py
+          uv run python tools/fetch_bass.py --check
+
+      - name: Lint Rust targets
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test Rust workspace
+        run: cargo test -p ff-core -p freight-fate
+
+      - name: Build the portable release
+        run: ./build-release.ps1 --tag "${{ needs.prepare.outputs.tag }}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Windows
+          path: dist/FreightFate-*-windows-portable.zip
+          if-no-files-found: error
+
+  release:
+    name: Release
+    needs: [prepare, build]
+    if: always() && needs.prepare.outputs.should_build == 'true' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: Windows
+          path: assets
+
+      - name: Verify the Windows archive
+        shell: bash
+        run: |
+          shopt -s nullglob
+          archives=(assets/FreightFate-*-windows-portable.zip)
+          if [ "${#archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Windows portable archive; found ${#archives[@]}." >&2
+            exit 1
+          fi
+
+      - name: Prepare and verify release notes and checksums
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
+          (cd assets && sha256sum FreightFate-*-windows-portable.zip > checksums.txt)
+          (cd assets && sha256sum -c checksums.txt)
+
+          LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)
+          if [ -n "$LAST_TAG" ]; then
+            gh release view "$LAST_TAG" --json body -q .body > previous-notes.md || true
+            python3 tools/release_notes.py nightly \
+              --previous-tag "$LAST_TAG" \
+              --exclude-notes previous-notes.md \
+              --output notes.md
+          else
+            python3 tools/release_notes.py nightly --first-snapshot --output notes.md
+          fi
+          test -s notes.md
+          test -s assets/checksums.txt
+
+      - name: Create prerelease
+        if: ${{ inputs.dry_run != true }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release delete "$TAG" -y --cleanup-tag
+          elif git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            git push origin ":refs/tags/$TAG"
+          fi
+          gh release create "$TAG" assets/* --notes-file notes.md \
+            --title "Freight Fate 1.9 tester snapshot $(date -u +%Y-%m-%d)" \
+            --prerelease --target "$COMMIT_SHA"
