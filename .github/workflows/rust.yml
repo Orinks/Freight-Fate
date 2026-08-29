@@ -165,11 +165,16 @@ jobs:
         shell: bash
         run: ls -l target/debug/*.dll
 
-      - name: cargo test -p ff-core
-        run: cargo test -p ff-core
-
-      - name: cargo test -p freight-fate
-        run: cargo test -p freight-fate
+      # ONE invocation, not one per crate. Split, cargo ran two sequential
+      # builds with separate link phases and compiled ff-core twice -- once as
+      # its own test target, once as freight-fate's dependency -- costing 241s
+      # and 378s against roughly 25s and 31s of actual test time (2026-08-29,
+      # the first green run after the suite could finish at all). Asking for
+      # both in one dependency graph lets cargo build them together across the
+      # runner's cores. Each test binary still reports separately, so a
+      # failure still names which crate it came from.
+      - name: cargo test
+        run: cargo test -p ff-core -p freight-fate
 
   changelog:
     # The changelog gate runs locally as a pre-push hook, which not every
