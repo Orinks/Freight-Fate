@@ -247,7 +247,13 @@ fn test_an_enforcement_stop_charges_once_and_reads_back_as_history() {
 fn test_an_out_of_service_order_passes_the_ten_hours_on_the_shoulder() {
     let mut app = TestApp::new();
     let drive = a_drive(&mut app);
-    app.ctx.profile.as_mut().expect("a career").hos.drive(600.0);
+    // Past the 11-hour drive: that is a full reset, not a missed-break park.
+    app.ctx
+        .profile
+        .as_mut()
+        .expect("a career")
+        .hos
+        .drive(11.0 * 60.0 + 1.0);
     let before = with_drive(&drive, |d| d.trip.game_minutes);
     let state = drive_and_ctx(&drive, &mut app, |d, ctx| {
         EnforcementStopState::new(ctx, d, params("Hours violation", true, false))
@@ -265,6 +271,46 @@ fn test_an_out_of_service_order_passes_the_ten_hours_on_the_shoulder() {
     );
     assert_eq!(
         app.ctx.profile.as_ref().expect("a career").hos.driving_min,
+        0.0
+    );
+}
+
+#[test]
+fn test_a_missed_break_is_thirty_minutes_out_of_service() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    app.ctx.profile.as_mut().expect("a career").hos.drive(481.0);
+    let before = with_drive(&drive, |d| d.trip.game_minutes);
+    let state = drive_and_ctx(&drive, &mut app, |d, ctx| {
+        EnforcementStopState::new(ctx, d, params("Hours violation", true, false))
+    });
+    assert!(
+        state
+            .outcome_text()
+            .contains("Out of service: thirty minutes pass"),
+        "{}",
+        state.outcome_text()
+    );
+    assert!(
+        !state.outcome_text().contains("ten hours"),
+        "{}",
+        state.outcome_text()
+    );
+    assert_eq!(
+        with_drive(&drive, |d| d.trip.game_minutes),
+        before + hos::BREAK_MIN
+    );
+    assert_eq!(
+        app.ctx.profile.as_ref().expect("a career").hos.driving_min,
+        481.0
+    );
+    assert_eq!(
+        app.ctx
+            .profile
+            .as_ref()
+            .expect("a career")
+            .hos
+            .since_break_min,
         0.0
     );
 }

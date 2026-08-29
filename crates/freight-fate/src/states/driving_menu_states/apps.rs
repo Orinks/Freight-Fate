@@ -288,7 +288,7 @@ impl DriverAppScreenState {
     }
 
     fn next_traffic_line(&mut self, ctx: &mut GameContext) -> Option<String> {
-        self.driving.with(ctx, |d, ctx| {
+        self.driving.with(ctx, |d, _ctx| {
             let pos = d.trip.position_mi;
             for lead in d.trip.npc_vehicles() {
                 let ahead = lead.position_mi - pos;
