@@ -119,34 +119,34 @@ Career 1.9 is a native Rust game. Python is not part of the gameplay runtime;
 it remains in this repository only for build, packaging, data-generation, and
 other maintainer tools.
 
-Install these tools first:
+Best path, in this order:
 
-- [Rust](https://www.rust-lang.org/tools/install) through `rustup`. The
-  repository's `rust-toolchain.toml` selects the supported stable toolchain
-  and includes `rustfmt` and Clippy.
-- [Git](https://git-scm.com/downloads) and
-  [Git LFS](https://git-lfs.com/). The sound and music packs are stored with
-  Git LFS.
-- [uv](https://docs.astral.sh/uv/getting-started/installation/) for the
-  Python-based asset-fetch and maintainer tools. It downloads a suitable
-  Python automatically, so a separate system Python is not required.
-
-Clone the Career 1.9 branch and download its large audio packs:
+1. Install [Rust](https://www.rust-lang.org/tools/install) through `rustup`.
+   The repository's `rust-toolchain.toml` pins the toolchain. Cargo.toml
+   sets the minimum supported Rust version at 1.95.
+2. Clone Career 1.9 with Git. Git LFS is not required on current
+   `feat/career-1.9`.
+3. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and
+   fetch BASS.
+4. Run the Rust game with Cargo.
+5. For a portable zip, use the release script below.
 
 ```bash
-git clone --branch feat/career-1.9 https://github.com/Orinks/Freight-fate.git
-cd Freight-fate
-git lfs install
-git lfs pull
-```
-
-Fetch the licensed BASS runtime, then build and start the Rust game:
-
-```bash
+git clone --branch feat/career-1.9 https://github.com/Orinks/Freight-Fate.git
+cd Freight-Fate
 uv sync
 uv run python tools/fetch_bass.py
 cargo run --release -p freight-fate
 ```
+
+`src/freight_fate/sounds.pak` is a regular git file, about 7.8 MB. You do
+not need Git LFS. If that file is 132 bytes of pointer
+text, you are
+on an old commit, not current Career 1.9.
+
+`music.pak` is not in git. A silent-audio source run is fine without it.
+A release zip needs it, and `tools/build_release.py` fetches it when you
+set `FREIGHT_FATE_MUSIC_URL` (see Sound and native libraries below).
 
 The first Cargo build takes longer because it compiles the workspace. Later
 runs reuse `target/`. On Windows, SDL2 and Prism are already vendored and are
@@ -204,10 +204,11 @@ Useful flags:
   snapshot workflow does.
 - `--cargo-target-dir <dir>` — use a different Cargo target directory.
 
-The sound and music packs come from Git LFS. Packaging refuses LFS pointer
-files and tells you to run `git lfs pull`. No build step needs administrator
-rights; if a build fails, rerun it in a normal terminal and report the first
-error rather than retrying elevated.
+`sounds.pak` ships in the clone as a regular git file. `music.pak` is fetched
+at package time from `FREIGHT_FATE_MUSIC_URL`, not cloned. Packaging still
+refuses a 132-byte LFS pointer; that means the checkout is an old commit.
+No build step needs administrator rights; if a build fails, rerun it in a
+normal terminal and report the first error rather than retrying elevated.
 
 If the build succeeds but the archive seems to vanish on Windows, check
 your antivirus: freshly built unsigned executables are sometimes
@@ -493,50 +494,38 @@ when every commit in the change set is non-user-facing.
 ### Sound and native libraries for source builds
 
 Career 1.9 stores its approved encrypted sound pack at
-`src/freight_fate/sounds.pak`. The larger private `music.pak` is a local build
-asset and is not stored in Git.
+`src/freight_fate/sounds.pak` as a regular git blob (about 7.8 MB). Git LFS
+is not required. The larger private `music.pak` is a local build asset and
+is not stored in Git.
 
-On Windows, install Git LFS from PowerShell with Winget:
+If `sounds.pak` is 132 bytes of Git LFS pointer text, the checkout is an
+old commit. Update to current `feat/career-1.9` instead of installing Git
+LFS.
 
-```powershell
-winget install --id GitHub.GitLFS --exact --source winget
-```
+The private music pack is downloaded only when a release build needs it.
+Ask a maintainer for a temporary private download URL, then set it in the
+current session; do not commit the URL.
 
-Open a new PowerShell window, then initialize Git LFS and update the checkout:
-
-```powershell
-git lfs install
-git pull
-```
-
-On macOS or Linux, follow the
-[Git Large File Storage installation instructions](https://git-lfs.com/), then
-run `git lfs install` once for your user account before cloning or updating the
-project.
-
-A plain `git fetch` updates Git references and the small LFS pointer, but does
-not update the working tree or download `sounds.pak`. With Git LFS installed,
-a normal `git pull` or checkout downloads it automatically; a separate
-`git lfs pull` is not normally needed. If `sounds.pak` contains text beginning
-with
-`version https://git-lfs.github.com/spec/v1` instead of binary pack data, run
-`git lfs install` followed by `git lfs pull` from the repository root.
-
-The private music pack is downloaded only when a build needs it. Ask a
-maintainer for a temporary private download URL, then set it in the current
-PowerShell session; do not commit the URL:
+PowerShell:
 
 ```powershell
 $env:FREIGHT_FATE_MUSIC_URL = "<temporary private URL>"
 $env:FREIGHT_FATE_MUSIC_SHA256 = "50F5440EB478F1E0E630E65081D83E6C308F48A6AA3EA5FE67C7DD1A7F50A8BB"
-python tools/build_release.py --rust --skip-smoke
+uv run python tools/build_release.py --rust --skip-smoke
+```
+
+bash:
+
+```bash
+export FREIGHT_FATE_MUSIC_URL="<temporary private URL>"
+export FREIGHT_FATE_MUSIC_SHA256="50F5440EB478F1E0E630E65081D83E6C308F48A6AA3EA5FE67C7DD1A7F50A8BB"
+uv run python tools/build_release.py --rust --skip-smoke
 ```
 
 The release script downloads `music.pak` only when it is absent, verifies the
 optional SHA-256 value, and keeps the downloaded pack local.
 
-GitHub Actions uses an LFS-enabled checkout for jobs that test or package the
-project. Loose fallback cues remain under `src/freight_fate/assets/sounds/`. See
+Loose fallback cues remain under `src/freight_fate/assets/sounds/`. See
 [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md) for provenance and
 licensing.
 

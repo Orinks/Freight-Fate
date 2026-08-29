@@ -416,6 +416,10 @@
 
 ### Changed
 
+- **From-source Career 1.9 builds no longer need Git LFS.** `sounds.pak` is a
+  regular git file on `feat/career-1.9`. `music.pak` is still fetched at
+  package time, not cloned.
+
 - **Detention, lumpers, washouts, and tolls now hit an owner-operator's
   wallet.** Those dollars used to be spoken and never move. They come off
   this settlement for owner-ops: detention pays you, and the rest charges
