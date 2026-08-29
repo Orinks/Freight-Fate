@@ -405,6 +405,34 @@ def test_cargo_command_honours_the_target_dir(tmp_path):
     assert build_release.cargo_profile_dir() == build_release.ROOT / "target" / "release"
 
 
+def test_prepare_rust_release_dependencies_fetches_bass_then_music(monkeypatch):
+    """Release builds restore native audio before fetching the music pack."""
+    build_release = load_build_release_module()
+    calls = []
+    monkeypatch.setattr(
+        build_release.subprocess,
+        "run",
+        lambda command, **kwargs: calls.append((command, kwargs)),
+    )
+    monkeypatch.setattr(build_release, "ensure_music_pack", lambda: calls.append(("music", {})))
+
+    build_release.prepare_rust_release_dependencies()
+
+    assert calls[0][0] == [build_release.sys.executable, str(build_release.TOOLS / "fetch_bass.py")]
+    assert calls[0][1] == {"cwd": build_release.ROOT, "check": True}
+    assert calls[1][0] == "music"
+
+
+def test_windows_release_wrapper_is_the_complete_beginner_command():
+    root = Path(__file__).resolve().parents[1]
+    script = (root / "build-release.ps1").read_text(encoding="utf-8")
+    assert "Get-Command rustc" in script
+    assert "Get-Command uv" in script
+    assert "uv sync --group dev --group build" in script
+    assert "uv run python tools/build_release.py --rust --smoke" in script
+    assert "Start-Process" not in script
+
+
 def test_main_accepts_the_rust_flags(capsys):
     build_release = load_build_release_module()
     with pytest.raises(SystemExit) as exc:

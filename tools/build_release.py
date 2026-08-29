@@ -47,6 +47,7 @@ from pathlib import Path
 import tomllib
 
 ROOT = Path(__file__).resolve().parent.parent
+TOOLS = ROOT / "tools"
 DIST = ROOT / "dist"
 BUILD = ROOT / "build"
 APP_NAME = "FreightFate"
@@ -1097,6 +1098,17 @@ def run_cargo(target_dir: Path | None = None) -> Path:
     return cargo_profile_dir(target_dir)
 
 
+def fetch_bass_command() -> list[str]:
+    """Return the checkout-local BASS preparation command."""
+    return [sys.executable, str(TOOLS / "fetch_bass.py")]
+
+
+def prepare_rust_release_dependencies() -> None:
+    """Restore native audio and the verified music pack before Cargo runs."""
+    subprocess.run(fetch_bass_command(), cwd=ROOT, check=True)
+    ensure_music_pack()
+
+
 def stage_rust_build(
     profile_dir: Path,
     build_dir: Path = RUST_STAGE_DIR,
@@ -1209,7 +1221,7 @@ def verify_rust_payload(build_dir: Path) -> None:
 
 def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
     """The whole ``--rust`` pipeline, ending with the verified archive."""
-    ensure_music_pack()
+    prepare_rust_release_dependencies()
     profile_dir = run_cargo(target_dir)
     baked_data = bake_world_data(target_dir)
     build_dir = stage_rust_build(profile_dir, baked_data=baked_data)
