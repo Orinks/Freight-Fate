@@ -1,7 +1,6 @@
-# Career 1.9 pre-commit: gameplay is Rust. Python ruff is maintainer tooling
-# only, not a 1.9 gameplay suite. The 1.8 world_source -> world_data index
-# hook is gone -- the 1.9 runtime loads world_data via Rust (and the baked
-# container), not the Python world_source tree.
+# Career 1.9 gameplay is Rust. Ruff remains for Python maintenance outside
+# the retired reference gameplay suite. The Rust world loader still reads the
+# indexed world_data tree derived from world_source, so keep that check here.
 repos:
   - repo: local
     hooks:
@@ -17,14 +16,21 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types_or: [python, pyi]
-        files: ^tools/
+        exclude: ^src/freight_fate/
         stages: [pre-commit]
       - id: ruff-format
         name: Ruff format
         entry: uv run ruff format
         language: system
         types_or: [python, pyi]
-        files: ^tools/
+        exclude: ^src/freight_fate/
+        stages: [pre-commit]
+      - id: world-data-index
+        name: world_data is in sync with world_source
+        entry: uv run python tools/index_world.py --check
+        language: system
+        files: ^src/freight_fate/data/world_source/.*\.json$
+        pass_filenames: false
         stages: [pre-commit]
       - id: freight-fate-release-notes
         name: Freight Fate release-note gate
