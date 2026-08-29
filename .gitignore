@@ -147,3 +147,5 @@ crates/bass-sys/vendor/*/libbass*.dylib
 # The decision it feeds IS committed -- every connector row in curves.jsonl
 # carries the connector_source that flagged it.
 src/freight_fate/data/world_data/us/gameplay/curve_osm.jsonl
+# Local linked worktrees used by agentic implementation plans.
+.worktrees/
