@@ -62,9 +62,24 @@ def test_nightly_notes_use_curated_unreleased_entries(tmp_path, monkeypatch):
     notes = release_notes.nightly_notes()
 
     assert "Preview snapshot for players" in notes
+    assert "## Changes since the previous snapshot" in notes
     assert "## Added" in notes
     assert "- **Dispatch.** New spoken board details." in notes
     assert "chore: seed changelog" not in notes
+
+
+def test_first_career_snapshot_uses_accurate_release_notes_heading(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    repo = make_repo(
+        tmp_path,
+        changelog("### Added\n- **Career.** A new driver can begin a career.\n"),
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(first_snapshot=True)
+
+    assert "## Changes in this snapshot" in notes
+    assert "Changes since the previous snapshot" not in notes
 
 
 def test_stable_notes_extract_matching_version_block(tmp_path, monkeypatch):
@@ -453,6 +468,7 @@ def test_career_19_snapshot_workflow_contract():
     assert 'git tag --list "1.9-tester-*"' in workflow
     assert "tools/release_notes.py should-build-nightly" in workflow
     assert "tools/release_notes.py nightly" in workflow
+    assert "tools/release_notes.py nightly --first-snapshot" in workflow
     assert "./build-release.ps1" in workflow
     assert "windows-portable.zip" in workflow
     assert "--prerelease" in workflow

@@ -285,6 +285,8 @@ def nightly_notes(
     previous_tag: str = "",
     exclude_notes: str = "",
     exclude_stable_notes: str = "",
+    *,
+    first_snapshot: bool = False,
 ) -> str:
     changelog_text = changelog_file().read_text(encoding="utf-8")
     excluded_entries = excluded_entries_from_notes(exclude_notes)
@@ -295,7 +297,10 @@ def nightly_notes(
     else:
         sections = nightly_candidate_sections(changelog_text, released)
     body = format_sections(sections)
-    return f"{NIGHTLY_HEADER}\n\n## Changes since the previous snapshot\n\n{body}"
+    changes_heading = (
+        "Changes in this snapshot" if first_snapshot else "Changes since the previous snapshot"
+    )
+    return f"{NIGHTLY_HEADER}\n\n## {changes_heading}\n\n{body}"
 
 
 def current_branch() -> str:
@@ -499,6 +504,7 @@ def write_notes_command(args: argparse.Namespace) -> int:
             args.previous_tag,
             args.exclude_notes,
             getattr(args, "exclude_stable_notes", ""),
+            first_snapshot=getattr(args, "first_snapshot", False),
         )
     Path(args.output).write_text(notes + "\n", encoding="utf-8")
     print(f"Wrote release notes to {args.output}.")
@@ -516,6 +522,8 @@ def build_parser() -> argparse.ArgumentParser:
         notes.add_argument("--previous-tag", default="")
         notes.add_argument("--exclude-notes", default="")
         notes.add_argument("--exclude-stable-notes", default="")
+        if kind == "nightly":
+            notes.add_argument("--first-snapshot", action="store_true")
         notes.add_argument("--output", required=True)
 
     should_build = subparsers.add_parser(

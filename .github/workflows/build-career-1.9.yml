@@ -158,7 +158,7 @@ jobs:
               --exclude-notes previous-notes.md \
               --output notes.md
           else
-            python3 tools/release_notes.py nightly --output notes.md
+            python3 tools/release_notes.py nightly --first-snapshot --output notes.md
           fi
           test -s notes.md
           test -s assets/checksums.txt
