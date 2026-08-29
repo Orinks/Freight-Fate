@@ -220,6 +220,16 @@ def test_build_info_stamp_marks_stable_and_nightly_channels(tmp_path):
     assert nightly.channel == "dev"
     assert nightly.built_at
 
+    tester_dir = tmp_path / "tester"
+    tester_dir.mkdir()
+    stamp_build_info(tester_dir, "1.9-tester-20260828")
+    tester = build_info_from_dict(
+        json.loads((tester_dir / "build_info.json").read_text(encoding="utf-8")), "1.9.0"
+    )
+    assert tester.tag == "1.9-tester-20260828"
+    assert tester.channel == "dev"
+    assert tester.built_at
+
 
 def test_build_info_stamp_bakes_the_real_package_version(tmp_path):
     """package_version is the pyproject version, not the nightly tag -- a

@@ -622,23 +622,33 @@ def verify_packaged_payload(build_dir: Path) -> None:
         )
 
 
+def _is_snapshot_label(label: str) -> bool:
+    """True for public 1.8 nightlies and Career 1.9 tester prereleases."""
+    if label.startswith("nightly-"):
+        return True
+    prefix = "1.9-tester-"
+    suffix = label[len(prefix) :] if label.startswith(prefix) else ""
+    return len(suffix) == 8 and suffix.isdigit()
+
+
 def stamp_build_info(build_dir: Path, label: str) -> None:
     """Record what this build is, for the in-game updater.
 
-    ``label`` is either a nightly tag (``nightly-20260611``) or a plain
-    version (``1.6.0``); the release tag for the latter is ``v``-prefixed.
+    ``label`` is a snapshot tag (``nightly-20260611`` or
+    ``1.9-tester-20260828``) or a plain version (``1.6.0``); the release
+    tag for the latter is ``v``-prefixed.
 
     ``package_version`` is the exact ``pyproject.toml`` project version --
-    not ``label``, which for a nightly is a date-stamped tag, not a package
+    not ``label``, which for a snapshot is a date-stamped tag, not a package
     version. freight_fate.__init__ reads it back to skip the
     importlib.metadata lookup that costs real time on every launch (the
     metadata a frozen build would otherwise scan for is not even installed
     the normal way in a Nuitka standalone build).
     """
-    nightly = label.startswith("nightly-")
+    snapshot = _is_snapshot_label(label)
     info = {
-        "tag": label if nightly else f"v{label}",
-        "channel": "dev" if nightly else "stable",
+        "tag": label if snapshot else f"v{label}",
+        "channel": "dev" if snapshot else "stable",
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "package_version": project_version(),
     }
@@ -1214,7 +1224,7 @@ def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--tag", default="", help="release label override, e.g. nightly-20260610")
+    parser.add_argument("--tag", default="", help="release label override, e.g. 1.9-tester-20260828")
     parser.add_argument("--skip-smoke", action="store_true", help="skip booting the frozen build")
     parser.add_argument(
         "--check-dependencies",

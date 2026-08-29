@@ -105,8 +105,9 @@ install yourself.
 Use the newest stable release for normal play. Stable releases are numbered,
 such as `v1.6.0`.
 
-Snapshot builds are public pre-release builds named `nightly-YYYYMMDD`. They
-let you try newer work sooner, but may have rough edges. A career saved in a
+Career 1.9 snapshot builds are tester prereleases named `1.9-tester-YYYYMMDD`.
+They let you try newer 1.9 work sooner, but may have rough edges. They are not
+the public 1.8 snapshots named `nightly-YYYYMMDD`. A career saved in a
 snapshot build may not load in an older stable release, so treat snapshot saves
 as moving forward.
 

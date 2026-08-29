@@ -416,6 +416,11 @@
 
 ### Changed
 
+- **Career 1.9 snapshot updates look for 1.9 tester builds, not public nightlies.**
+  Packaged 1.9 copies on the snapshot update channel download GitHub
+  prereleases tagged `1.9-tester-YYYYMMDD`. They ignore the public 1.8
+  `nightly-YYYYMMDD` snapshots, and 1.8 builds ignore the tester tags.
+
 - **From-source Career 1.9 builds no longer need Git LFS.** `sounds.pak` is a
   regular git file on `feat/career-1.9`. `music.pak` is still fetched at
   package time, not cloned.

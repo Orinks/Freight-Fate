@@ -83,10 +83,11 @@ The easiest way to play is a prebuilt portable build from the
 
 - **Stable releases** are the finished, numbered versions — pick the latest
   one.
-- **Developer snapshots** (`nightly-...`, marked pre-release) are automatic
-  nightly builds of work in progress: new features sooner, rough edges
-  included. Heads up: a career saved on a developer snapshot may not load
-  on an older stable release, so treat nightly saves as one-way.
+- **Career 1.9 tester builds** (`1.9-tester-YYYYMMDD`, marked pre-release)
+  are packaged snapshots of this branch. They are not the public 1.8
+  `nightly-YYYYMMDD` snapshots from `dev`. Heads up: a career saved on a
+  tester build may not load on an older stable release, so treat tester
+  saves as one-way.
 
 Download the archive for your platform, extract it anywhere, and run the
 game from the extracted `FreightFate` folder — `FreightFate.exe` on
@@ -200,9 +201,24 @@ Useful flags:
   and audio assets load. This is recommended for a release-ready local build.
 - `--skip-smoke` — override `--smoke` when booting the staged build is not
   possible on the current machine.
-- `--tag <label>` — override the version label in the archive name, as the
-  snapshot workflow does.
+- `--tag <label>` — override the version label in the archive name. For a
+  Career 1.9 tester zip use `1.9-tester-YYYYMMDD`, never `nightly-YYYYMMDD`.
 - `--cargo-target-dir <dir>` — use a different Cargo target directory.
+
+### Publish a Career 1.9 tester build
+
+Do not tag 1.9 testers as `nightly-YYYYMMDD`; that family is the public 1.8
+snapshot stream from `dev`. Build on `feat/career-1.9`, then create a
+GitHub prerelease aimed at this branch:
+
+```bash
+uv run python tools/build_release.py --rust --smoke --tag 1.9-tester-YYYYMMDD
+gh release create 1.9-tester-YYYYMMDD --repo Orinks/Freight-Fate --target feat/career-1.9 --prerelease --title "Freight Fate 1.9 tester YYYY-MM-DD" dist/FreightFate-1.9-tester-YYYYMMDD-windows-portable.zip
+```
+
+The Dropbox tester zip can stay. The in-game updater on a 1.9 packaged
+build follows these `1.9-tester-YYYYMMDD` prereleases when the Update
+channel is set to snapshot.
 
 `sounds.pak` ships in the clone as a regular git file. `music.pak` is fetched
 at package time from `FREIGHT_FATE_MUSIC_URL`, not cloned. Packaging still

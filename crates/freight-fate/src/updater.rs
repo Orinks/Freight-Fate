@@ -6,16 +6,21 @@
 //! relaunches.
 //!
 //! Channels mirror the release pipeline: `stable` follows tagged releases
-//! (`v1.6.0`), `dev` follows the nightly prerelease snapshots
-//! (`nightly-20260611`). The packaged build carries a `build_info.json`
-//! next to the executable (written by `tools/build_release.py`) recording its
-//! tag, channel, and build date; that is how a nightly knows a newer nightly
-//! exists even though the project version number has not changed.
+//! (`v1.6.0`), `dev` follows snapshot prereleases. Public 1.8 snapshots use
+//! `nightly-YYYYMMDD`. Career 1.9 packaged builds on the same `dev` / snapshot
+//! setting follow a distinct family, `1.9-tester-YYYYMMDD`, so a 1.9 tester is
+//! never offered a 1.8 nightly and a 1.8 snapshot never picks a 1.9 tester.
+//! The packaged build carries a `build_info.json` next to the executable
+//! (written by `tools/build_release.py`) recording its tag, channel, and build
+//! date; that is how a snapshot knows a newer snapshot exists even though the
+//! project version number has not changed.
 //!
-//! The `dev` channel is not a one-way nightly track: once dev work is promoted
-//! to a stable release, the nightly that follows is content-identical. So when a
-//! stable release is at least as new (by date) as the newest nightly, dev
-//! followers are steered onto stable instead of the equivalent nightly.
+//! The 1.8 `dev` channel is not a one-way nightly track: once dev work is
+//! promoted to a stable release, the nightly that follows is content-identical.
+//! So when a stable release is at least as new (by date) as the newest nightly,
+//! 1.8 dev followers are steered onto stable instead of the equivalent nightly.
+//! Career 1.9 snapshot updates skip that steering so a 1.9 tester cannot be
+//! pulled onto a 1.8 stable.
 //!
 //! Updates only apply to frozen packaged builds. Source checkouts are managed
 //! by git and the updater stays out of the way.
@@ -121,7 +126,7 @@ fn home_dir() -> Option<PathBuf> {
 /// What this running copy of the game is.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BuildInfo {
-    /// "v1.5.0" or "nightly-20260611"
+    /// "v1.5.0", "nightly-20260611", or "1.9-tester-20260828"
     pub tag: String,
     /// "stable" or "dev"
     pub channel: String,
@@ -253,7 +258,7 @@ pub fn build_info_from_dict(data: &Value, version: &str) -> BuildInfo {
     }
     let mut channel = stamp_str(map.get("channel"));
     if !CHANNELS.contains(&channel.as_str()) {
-        channel = if nightly_date(&tag).is_empty() {
+        channel = if snapshot_date_of(&tag).is_empty() {
             "stable".to_string()
         } else {
             "dev".to_string()
@@ -448,6 +453,7 @@ pub fn flatten_markdown(body: Option<&str>) -> Vec<String> {
 }
 
 static NIGHTLY: Lazy<Regex> = Lazy::new(|| Regex::new(r"^nightly-(\d{8})$").unwrap());
+static TESTER_19: Lazy<Regex> = Lazy::new(|| Regex::new(r"^1\.9-tester-(\d{8})$").unwrap());
 
 /// `'nightly-20260611' -> '20260611'`; `''` when not a nightly tag.
 pub fn nightly_date(tag: &str) -> String {
@@ -455,6 +461,42 @@ pub fn nightly_date(tag: &str) -> String {
         .captures(tag)
         .map(|c| c[1].to_string())
         .unwrap_or_default()
+}
+
+/// `'1.9-tester-20260828' -> '20260828'`; `''` when not a Career 1.9 tester tag.
+pub fn tester_19_date(tag: &str) -> String {
+    TESTER_19
+        .captures(tag)
+        .map(|c| c[1].to_string())
+        .unwrap_or_default()
+}
+
+/// YYYYMMDD from a `nightly-` or `1.9-tester-` tag; `''` when neither.
+fn snapshot_date_of(tag: &str) -> String {
+    let tester = tester_19_date(tag);
+    if !tester.is_empty() {
+        tester
+    } else {
+        nightly_date(tag)
+    }
+}
+
+fn version_major_minor_is_19(text: &str) -> bool {
+    let parts = parse_version(text);
+    parts.first() == Some(&1) && parts.get(1) == Some(&9)
+}
+
+/// Career 1.9 binaries (package version 1.9, or already on a 1.9-tester tag)
+/// follow `1.9-tester-YYYYMMDD` on the snapshot channel. Everyone else stays
+/// on public `nightly-YYYYMMDD`.
+fn is_career_19_line(current_version: &str, build: Option<&BuildInfo>) -> bool {
+    if version_major_minor_is_19(current_version) {
+        return true;
+    }
+    let Some(build) = build else {
+        return false;
+    };
+    !tester_19_date(&build.tag).is_empty() || version_major_minor_is_19(&build.tag)
 }
 
 fn tag_name(release: &Value) -> String {
@@ -501,13 +543,21 @@ pub fn stable_update_from(
     update_from_release(release, &title, env)
 }
 
-fn nightly_releases_newest_first(releases: &[Value]) -> Vec<&Value> {
-    let mut nightlies: Vec<&Value> = releases
+fn snapshot_tag_date(tag: &str, career_19: bool) -> String {
+    if career_19 {
+        tester_19_date(tag)
+    } else {
+        nightly_date(tag)
+    }
+}
+
+fn snapshot_releases_newest_first(releases: &[Value], career_19: bool) -> Vec<&Value> {
+    let mut snapshots: Vec<&Value> = releases
         .iter()
-        .filter(|r| is_prerelease(r) && !nightly_date(&tag_name(r)).is_empty())
+        .filter(|r| is_prerelease(r) && !snapshot_tag_date(&tag_name(r), career_19).is_empty())
         .collect();
-    nightlies.sort_by_key(|r| std::cmp::Reverse(nightly_date(&tag_name(r))));
-    nightlies
+    snapshots.sort_by_key(|r| std::cmp::Reverse(snapshot_tag_date(&tag_name(r), career_19)));
+    snapshots
 }
 
 /// The highest-versioned non-prerelease in the list, or `None`.
@@ -524,9 +574,9 @@ fn release_date(release: Option<&Value>) -> String {
     let Some(release) = release else {
         return String::new();
     };
-    let nightly = nightly_date(&tag_name(release));
-    if !nightly.is_empty() {
-        return nightly;
+    let from_tag = snapshot_date_of(&tag_name(release));
+    if !from_tag.is_empty() {
+        return from_tag;
     }
     let published = release_timestamp(Some(release));
     if published.is_empty() {
@@ -542,9 +592,9 @@ fn build_date(build: Option<&BuildInfo>) -> String {
     let Some(build) = build else {
         return String::new();
     };
-    let nightly = nightly_date(&build.tag);
-    if !nightly.is_empty() {
-        nightly
+    let from_tag = snapshot_date_of(&build.tag);
+    if !from_tag.is_empty() {
+        from_tag
     } else {
         build.built_at.replace('-', "")
     }
@@ -618,7 +668,7 @@ fn stable_newer_than_build(
     !(!build_date.is_empty() && !stable_date.is_empty() && stable_date.as_str() <= build_date)
 }
 
-fn nightly_newer_than_build(
+fn snapshot_newer_than_build(
     release: &Value,
     build: Option<&BuildInfo>,
     build_date: &str,
@@ -629,50 +679,70 @@ fn nightly_newer_than_build(
         if tag == build.tag {
             return false;
         }
-        let nightly_ts = release_timestamp(Some(release));
-        if !build_ts.is_empty() && !nightly_ts.is_empty() {
-            return nightly_ts.as_str() > build_ts;
+        let snapshot_ts = release_timestamp(Some(release));
+        if !build_ts.is_empty() && !snapshot_ts.is_empty() {
+            return snapshot_ts.as_str() > build_ts;
         }
-        if !build_date.is_empty() && nightly_date(&tag).as_str() <= build_date {
+        let snap_date = snapshot_date_of(&tag);
+        if !build_date.is_empty() && !snap_date.is_empty() && snap_date.as_str() <= build_date {
             return false;
         }
     }
     true
 }
 
+fn spoken_ymd(date: &str) -> String {
+    format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..])
+}
+
 /// The update to offer a dev-channel player.
 ///
-/// Normally this is the newest nightly snapshot. But once dev work is
-/// promoted to a stable release, the nightly that follows is content-identical
-/// to that stable. So whenever the latest stable is at least as new (by date)
-/// as the newest nightly, steer the player onto stable instead -- ties favor
-/// stable, the promoted build -- so dev followers converge back rather than
-/// chasing an equivalent nightly. `stable` is the latest stable release
-/// (from `/releases/latest`); when omitted it is derived from `releases`.
+/// On public 1.8 builds this is the newest `nightly-YYYYMMDD` snapshot, with
+/// the usual steer-to-stable once a promotion postdates that nightly. Career
+/// 1.9 packaged builds on the same channel look only at `1.9-tester-YYYYMMDD`
+/// prereleases: they must not land on a 1.8 nightly or a 1.8 stable.
+/// `stable` is the latest stable release (from `/releases/latest`); when
+/// omitted it is derived from `releases`. Pass `current_version` so a 1.9
+/// binary is recognized even before it is stamped with a tester tag.
 pub fn dev_update_from(
     releases: &[Value],
     build: Option<&BuildInfo>,
     stable: Option<&Value>,
     env: &UpdaterEnv,
 ) -> Option<UpdateInfo> {
-    let nightlies = nightly_releases_newest_first(releases);
-    let latest_nightly = nightlies.first().copied();
-    let stable = stable.or_else(|| latest_stable_release(releases));
+    snapshot_update_from(releases, build, "", stable, env)
+}
+
+pub fn snapshot_update_from(
+    releases: &[Value],
+    build: Option<&BuildInfo>,
+    current_version: &str,
+    stable: Option<&Value>,
+    env: &UpdaterEnv,
+) -> Option<UpdateInfo> {
+    let career_19 = is_career_19_line(current_version, build);
+    let snapshots = snapshot_releases_newest_first(releases, career_19);
+    let latest_snapshot = snapshots.first().copied();
+    let stable = if career_19 {
+        None
+    } else {
+        stable.or_else(|| latest_stable_release(releases))
+    };
 
     let build_date = build_date(build);
     let build_ts = build_timestamp(build, releases, stable);
-    let nightly_date_s = release_date(latest_nightly);
+    let snapshot_date_s = release_date(latest_snapshot);
     let stable_date = release_date(stable);
-    let nightly_ts = release_timestamp(latest_nightly);
+    let snapshot_ts = release_timestamp(latest_snapshot);
     let stable_ts = release_timestamp(stable);
 
     // Timestamps order a same-day stable and nightly; dates alone cannot,
     // and a date tie wrongly favored a small-hours stable over the 04:00
     // nightly that carried fixes merged between them (2026-07-23).
-    let stable_leads = if !nightly_ts.is_empty() && !stable_ts.is_empty() {
-        stable_ts >= nightly_ts
+    let stable_leads = if !snapshot_ts.is_empty() && !stable_ts.is_empty() {
+        stable_ts >= snapshot_ts
     } else {
-        !stable_date.is_empty() && stable_date >= nightly_date_s
+        !stable_date.is_empty() && stable_date >= snapshot_date_s
     };
 
     if let Some(stable) = stable {
@@ -686,18 +756,22 @@ pub fn dev_update_from(
         }
     }
 
-    if let Some(nightly) = latest_nightly {
-        if nightly_newer_than_build(nightly, build, &build_date, &build_ts) {
-            let date = nightly_date(&tag_name(nightly));
-            let spoken = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
-            return update_from_release(
-                nightly,
-                &format!("Freight Fate developer snapshot {spoken}"),
-                env,
-            );
+    if let Some(snapshot) = latest_snapshot {
+        if snapshot_newer_than_build(snapshot, build, &build_date, &build_ts) {
+            let date = snapshot_tag_date(&tag_name(snapshot), career_19);
+            let spoken = spoken_ymd(&date);
+            return update_from_release(snapshot, &snapshot_title(career_19, &spoken), env);
         }
     }
     None
+}
+
+fn snapshot_title(career_19: bool, spoken: &str) -> String {
+    if career_19 {
+        format!("Freight Fate 1.9 tester snapshot {spoken}")
+    } else {
+        format!("Freight Fate developer snapshot {spoken}")
+    }
 }
 
 /// Query GitHub for a newer release on `channel` through `api`
@@ -720,7 +794,13 @@ pub fn check_for_update_with(
             Err(NetError::Http { code: 404, .. }) => None, // no stable release published yet
             Err(e) => return Err(e),
         };
-        return Ok(dev_update_from(&releases, build, stable.as_ref(), env));
+        return Ok(snapshot_update_from(
+            &releases,
+            build,
+            current_version,
+            stable.as_ref(),
+            env,
+        ));
     }
     let release = match api("/releases/latest") {
         Ok(release) => release,

@@ -13,8 +13,9 @@ use freight_fate::states::base::{Menu, State};
 use freight_fate::states::update::{UpdateDownloadState, UpdatePromptState};
 use freight_fate::updater::{
     self, build_info_from_dict, check_for_update_with, dev_update_from, flatten_markdown,
-    parse_version, pick_asset, resolve_channel, stable_update_from, write_apply_script, BuildInfo,
-    Platform, UpdateInfo, UpdaterEnv, APPIMAGE_SUFFIX, TARBALL_SUFFIX,
+    parse_version, pick_asset, resolve_channel, snapshot_update_from, stable_update_from,
+    write_apply_script, BuildInfo, Platform, UpdateInfo, UpdaterEnv, APPIMAGE_SUFFIX,
+    TARBALL_SUFFIX,
 };
 
 fn release_with(
@@ -44,6 +45,10 @@ fn release(tag: &str) -> Value {
 }
 
 fn nightly(tag: &str) -> Value {
+    release_with(tag, true, "", "", &ALL_ASSETS)
+}
+
+fn tester(tag: &str) -> Value {
     release_with(tag, true, "", "", &ALL_ASSETS)
 }
 
@@ -215,6 +220,13 @@ fn test_build_info_stamp_marks_stable_and_nightly_channels() {
     assert_eq!(nightly.tag, "nightly-20260615");
     assert_eq!(nightly.channel, "dev");
     assert!(!nightly.built_at.is_empty());
+
+    let tester = build_info_from_dict(
+        &json!({"tag": "1.9-tester-20260828", "built_at": "2026-08-28"}),
+        "1.9.0",
+    );
+    assert_eq!(tester.tag, "1.9-tester-20260828");
+    assert_eq!(tester.channel, "dev");
 }
 
 #[test]
@@ -350,6 +362,44 @@ fn test_dev_resumes_nightlies_once_they_outpace_stable() {
     let build = BuildInfo::new("v1.7.0", "stable", "2026-06-26");
     let info = dev_update_from(&releases, Some(&build), Some(&stable), &env()).expect("an update");
     assert_eq!(info.tag, "nightly-20260630");
+}
+
+#[test]
+fn test_18_snapshot_channel_ignores_19_tester_tags() {
+    // Public 1.8 nightlies and Career 1.9 testers share the GitHub releases
+    // list. A 1.8 snapshot on the dev channel must keep following nightly-*
+    // and never pick a 1.9-tester-* prerelease, even when the tester is newer.
+    let stable = stable_at("v1.8.5", "2026-08-01T15:00:00Z");
+    let releases = vec![
+        stable.clone(),
+        nightly("nightly-20260820"),
+        tester("1.9-tester-20260828"),
+        nightly("nightly-20260810"),
+    ];
+    let build = BuildInfo::new("nightly-20260810", "dev", "2026-08-10");
+    let info = snapshot_update_from(&releases, Some(&build), "1.8.6", Some(&stable), &env())
+        .expect("an update");
+    assert_eq!(info.tag, "nightly-20260820");
+}
+
+#[test]
+fn test_19_snapshot_channel_picks_newest_19_tester() {
+    // A Career 1.9 packaged build on the same snapshot/dev channel looks
+    // only at 1.9-tester-* prereleases, newest YYYYMMDD first, and ignores
+    // public 1.8 nightlies and 1.8 stables even when those are newer.
+    let stable = stable_at("v1.8.6", "2026-08-28T18:00:00Z");
+    let releases = vec![
+        stable.clone(),
+        nightly("nightly-20260828"),
+        tester("1.9-tester-20260820"),
+        tester("1.9-tester-20260825"),
+        tester("1.9-tester-20260822"),
+    ];
+    let build = BuildInfo::new("1.9-tester-20260820", "dev", "2026-08-20");
+    let info = snapshot_update_from(&releases, Some(&build), "1.9.0", Some(&stable), &env())
+        .expect("an update");
+    assert_eq!(info.tag, "1.9-tester-20260825");
+    assert!(info.title.contains("1.9 tester snapshot 2026-08-25"));
 }
 
 #[test]
