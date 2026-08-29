@@ -98,14 +98,15 @@ need depends on what you touched.
 ### Python -- tools, data, packaging
 
 - Setup: `uv sync --group dev`
-- Tests: `uv run pytest` (config already applies `-q -n auto` and a per-test
-  timeout). Same rule: focused files while iterating, the full suite once at
-  the end. The full run is about four minutes. A slow sweep test needs its
-  own `@pytest.mark.timeout` -- under xdist the thread timeout kills the
-  worker and reads as "node down". What `-n auto` resolves to is capped in
-  `tests/conftest.py`: workers load pygame and the audio stack, so past about
-  eight the run stops getting faster, and uncapped on a 28-core machine it
-  died in the reporter rather than merely running slowly.
+- Tests: `uv run pytest` -- about six seconds now, so just run all of it.
+  **The suite covers the Python that still ships and nothing else**: the
+  build, bake, indexing and release tooling under `tools/`, plus the workflow
+  and sound-pack guards. The ~220 files that mirrored gameplay in
+  `src/freight_fate/` were retired on 2026-08-29: Career 1.9 is the Rust game
+  and `cargo test` is what proves it, so do NOT add a gameplay test here --
+  write it in Rust. A slow sweep test still needs its own
+  `@pytest.mark.timeout`; under xdist the thread timeout kills the worker and
+  reads as "node down".
 - Lint: `uv run ruff check src tests tools`
 - Byte-compile check: `uv run python -m compileall src tests tools`
 
@@ -159,11 +160,11 @@ need depends on what you touched.
   --data-dir src/freight_fate/data --out dist/freight_fate/data/world.ffdata`,
   and prove a committed container matches its tree with the same command plus
   `--check`, which re-bakes to a temp file and compares bytes.
-- After data changes run the world and route tests. In Rust that is the
-  `data_*` and `sim_*` cases in `crates/ff-core/tests/it/` -- e.g.
-  `cargo test -p ff-core data_world`. The Python equivalents
-  (`uv run pytest tests/test_world.py tests/test_world_overlay.py`) still
-  exist for the reference tree.
+- After data changes run the world and route tests: the `data_*` and `sim_*`
+  cases in `crates/ff-core/tests/it/` -- e.g. `cargo test -p ff-core
+  data_world`. The Python world tests were retired with the rest of the
+  gameplay mirror; what remains on that side is the tooling that BUILDS the
+  data (`tests/test_index_world.py`, `tests/test_baked_data.py`).
 
 ### Provenance: read, derived, or assumed -- never blurred
 

@@ -28,8 +28,13 @@ snapshots begin.
 - Keep practical code files at or below 1000 lines. Split large code or test
   files into cohesive modules instead of adding more to an oversized file.
 - Run `uv sync --group dev` before tests in a fresh checkout or worktree.
-- Run focused tests for the area you changed. For broad or shared behavior,
-  run the full suite with `uv run pytest`.
+- Gameplay is Rust on Career 1.9: run `cargo test -p ff-core` and
+  `cargo test -p freight-fate` for anything the player can hear or do.
+- `uv run pytest` covers only the Python that still ships -- the build, bake,
+  indexing and release tooling under `tools/`, plus the workflow and
+  sound-pack guards. It takes a few seconds, so just run all of it. The
+  gameplay tests that used to live there were retired on 2026-08-29; a new
+  gameplay test belongs in `cargo test`.
 - Run `uv run ruff check src tests tools` and
   `uv run python -m compileall src tests tools`.
 - For user-facing changes, include how you checked the spoken text, keyboard
@@ -59,7 +64,13 @@ World data changes are welcome. Please keep them deterministic and offline:
 - After data changes, run the world and route tests, such as:
 
   ```powershell
-  uv run pytest tests/test_world.py tests/test_world_overlay.py
+  cargo test -p ff-core data_world
+  ```
+
+  and the tooling that builds the data:
+
+  ```powershell
+  uv run pytest tests/test_index_world.py tests/test_baked_data.py
   ```
 
 ## Changelog Entries

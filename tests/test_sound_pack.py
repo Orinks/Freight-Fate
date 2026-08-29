@@ -155,36 +155,49 @@ def test_asset_bytes_reads_loose_files_without_pack():
 def test_committed_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
-    # Repacked 2026-08-14 (weigh-station warning earcon): added the
-    # procedural events/weigh_station_warning.ogg cue (owner ruling --
-    # the scale gets its own earcon instead of reusing the shared
-    # inspection cue). sounds.pak now holds 160 entries, the prior 159
-    # preserved plus the one new asset.
-    assert len(pack_bytes) == 7_781_859
+    # Repacked 2026-08-29 (the scale verdict tones): added the procedural
+    # events/scale_green.ogg and events/scale_red.ogg cues, which the code and
+    # the sound catalog both named while the pack carried neither -- and the
+    # release ships THIS pack rather than baking a fresh one, so both lights
+    # changed in silence for players. 162 entries, the prior 160 preserved
+    # byte for byte plus the two new assets.
+    #
+    # Merged into rather than rebuilt, deliberately: a plain
+    # tools/pack_sounds.py run on the current builder machine yields 113
+    # entries, because 60 API-generated effects are no longer in the loose
+    # tree. Re-baking here would silently drop them.
+    #
+    # Repacked 2026-08-14 (weigh-station warning earcon): added the procedural
+    # events/weigh_station_warning.ogg cue, taking the pack 159 -> 160.
+    assert len(pack_bytes) == 7_788_924
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "3ce9fc6b6fab461eebf3b75050c90c142e7d2e260178cf5b09b350afd066e7a2"
+        "45f297c8c0562fb018674ce51e691d3cd93501793ce7b41d378bfc35b9d2cf99"
     )
 
 
 @pytest.mark.skipif(
     not music_pack_available(),
     reason=(
-        "music.pak not materialised (CI checks out without LFS: the pack is "
-        "250 MB and fetching it per push exhausted the repository's budget). "
-        "A pointer cannot be checked for the header it stands in for."
+        "music.pak is not in the repository: at 250 MB it is downloaded from "
+        "a private release URL when needed, so only a builder machine holding "
+        "it can check the header it stands in for."
     ),
 )
 def test_committed_music_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_MUSIC_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_MUSIC_PACK_PATH.read_bytes()
+    # Repacked for the two new country songs ("Dangerous Dan" and "Dial-up
+    # Summer", see CHANGELOG Unreleased): 356 -> 358 entries, the two added
+    # names being exactly those songs.
+    #
     # Split out of sounds.pak on 2026-08-14 alongside the radio
     # station-identity batch: 356 entries, the music/ subtree plus the new
     # station jingles and songs.
-    assert len(pack_bytes) == 261_358_688
+    assert len(pack_bytes) == 266_803_726
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "3471842988e2bc01c259395d0b4d885b4c85a3a2d628efddf7a73006fd471c0a"
+        "50f5440eb478f1e0e630e65081d83e6c308f48a6aa3ea5fe67c7dd1a7f50a8bb"
     )
 
 

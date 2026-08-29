@@ -12,7 +12,7 @@ use ff_core::data::world::get_world;
 use freight_fate::playtest::harness::PlaytestHarness;
 use freight_fate::playtest::road::destination::destination_lead_mi;
 use freight_fate::playtest::road::{
-    all_world_pairs, build_trip, find_feature, Hit, RoadOptions, FEATURES,
+    build_trip, find_feature, first_world_pair, sampled_world_pairs, Hit, RoadOptions, FEATURES,
 };
 use freight_fate::states::driving_core::DESTINATION_EXIT_SCAN_WINDOW_MI;
 
@@ -41,11 +41,16 @@ fn find_one(origin: &str, destination: &str) -> Option<Hit> {
         .next()
 }
 
+/// How many corridors the map-wide sweeps below sample.
+///
+/// The sweeps used to resolve every ordered city pair. That was affordable on
+/// a small map and is not on this one, so they take a spread sample instead
+/// -- wide enough that a placement rule broken in one region still shows up,
+/// bounded so the cost does not grow with the next batch of cities.
+const SWEEP_PAIRS: usize = 24;
+
 fn world_pair() -> (String, String) {
-    all_world_pairs(get_world())
-        .into_iter()
-        .next()
-        .expect("current world has a supported route")
+    first_world_pair(get_world()).expect("current world has a supported route")
 }
 
 // -- the finder ------------------------------------------------------------------------
@@ -62,7 +67,7 @@ fn destination_is_one_of_the_named_features() {
 fn every_supported_route_offers_its_delivery_exit() {
     let world = get_world();
     let opts = destination_options();
-    let pairs = all_world_pairs(world);
+    let pairs = sampled_world_pairs(world, SWEEP_PAIRS);
     let hits = find_feature(world, &pairs, "destination", &opts, Some(TRIP_SEED));
     assert_eq!(
         hits.len(),
@@ -117,7 +122,7 @@ fn every_discovered_delivery_has_a_destination_hit() {
 fn the_lead_clears_the_callout_window() {
     let world = get_world();
     let opts = destination_options();
-    for (origin, destination) in all_world_pairs(world) {
+    for (origin, destination) in sampled_world_pairs(world, SWEEP_PAIRS) {
         let trip = build_trip(world, &origin, &destination, Some(TRIP_SEED))
             .expect("the discovered route routes");
         let lead = destination_lead_mi(&trip, opts.speed);

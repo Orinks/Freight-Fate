@@ -922,21 +922,32 @@ mod tests {
             return;
         }
         let pack_bytes = std::fs::read(&path).unwrap();
+        // Repacked 2026-08-29 (the scale verdict tones): added the procedural
+        // events/scale_green.ogg and events/scale_red.ogg cues, which the code
+        // and the sound catalog both named while the pack carried neither --
+        // and the release ships THIS pack rather than baking a fresh one, so
+        // both lights changed in silence for players. 162 entries, the prior
+        // 160 preserved byte for byte plus the two new assets.
+        //
+        // Merged into rather than rebuilt, deliberately: a plain
+        // `tools/pack_sounds.py` run on the current builder machine yields
+        // 113 entries, because 60 API-generated effects are no longer in the
+        // loose tree. Re-baking here would silently drop them.
+        //
         // Repacked 2026-08-14 (weigh-station warning earcon): added the
         // procedural events/weigh_station_warning.ogg cue (owner ruling --
         // the scale gets its own earcon instead of reusing the shared
-        // inspection cue). sounds.pak now holds 160 entries, the prior 159
-        // preserved plus the one new asset.
-        assert_eq!(pack_bytes.len(), 7_781_859);
+        // inspection cue), taking the pack from 159 entries to 160.
+        assert_eq!(pack_bytes.len(), 7_788_924);
         assert!(pack_bytes.starts_with(PACK_MAGIC));
         use sha2::{Digest, Sha256};
         let digest = hex::encode(Sha256::digest(&pack_bytes));
         assert_eq!(
             digest,
-            "3ce9fc6b6fab461eebf3b75050c90c142e7d2e260178cf5b09b350afd066e7a2"
+            "45f297c8c0562fb018674ce51e691d3cd93501793ce7b41d378bfc35b9d2cf99"
         );
         let pack = SoundPack::open(&path).unwrap();
-        assert_eq!(pack.names().len(), 160);
+        assert_eq!(pack.names().len(), 162);
     }
 
     #[test]

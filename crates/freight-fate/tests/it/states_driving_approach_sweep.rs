@@ -329,6 +329,14 @@ fn arrive_with(
         d.tutorial = None;
         d.truck_mut().start_engine();
         d.truck_mut().transmission.automatic = true;
+        // IN GEAR, like a truck already doing highway speed. This used to be
+        // left in neutral and got away with it: speed control put throttle
+        // down and the automatic engaged from there. Route-transition
+        // assistance now pauses speed control when it takes the pedals, so
+        // nothing asked for a gear and the truck coasted the whole approach --
+        // and the whole gate crawl -- out of gear.
+        d.truck_mut().transmission.gear = 9;
+        d.truck_mut().rpm = 1500.0;
         d.truck_mut().set_air_ready(false);
         d.speed_control_armed = true;
     });
@@ -672,6 +680,14 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
         d.tutorial = None;
         d.truck_mut().start_engine();
         d.truck_mut().transmission.automatic = true;
+        // IN GEAR, like a truck already doing highway speed. This used to be
+        // left in neutral and got away with it: speed control put throttle
+        // down and the automatic engaged from there. Route-transition
+        // assistance now pauses speed control when it takes the pedals, so
+        // nothing asked for a gear and the truck coasted the whole approach --
+        // and the whole gate crawl -- out of gear.
+        d.truck_mut().transmission.gear = 9;
+        d.truck_mut().rpm = 1500.0;
         d.truck_mut().set_air_ready(false);
         d.speed_control_armed = true;
     });

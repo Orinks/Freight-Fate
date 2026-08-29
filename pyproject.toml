@@ -91,27 +91,22 @@ testpaths = ["tests"]
 # bare (`import enrich_routes`, `from world_source import load_world`), which
 # only resolves when tools/ is importable -- true when a tool runs as a script.
 pythonpath = ["tools"]
-# Per-test timeout (thread method works on Windows) so a hung simulation fails
+# Per-test timeout (thread method works on Windows) so a hung build tool fails
 # fast with a stack trace instead of stalling the whole run.
-# -n auto spreads the run across cores: the serial suite takes about eleven
-# minutes on a working checkout, long enough that nobody runs it before
-# pushing. CI already passed -n auto on the command line, so making it the
-# default here also stops local runs and CI diverging. Slow sweep tests must
-# carry their own @pytest.mark.timeout -- under xdist the thread timeout kills
-# the whole worker, which surfaces as "node down" rather than a test failure.
 #
-# What -n auto resolves to is capped in tests/conftest.py: a worker loads
-# pygame and the audio stack, so past about eight the run stops getting
-# faster and, on a 28-core machine, started dying with an INTERNALERROR in
-# the reporter instead of merely running slowly.
+# What remains here is the Python that still SHIPS: the build, bake, indexing
+# and release tooling under tools/, plus the workflow and sound-pack guards.
+# The ~220 files that mirrored gameplay in src/freight_fate/ were retired on
+# 2026-08-29 -- Career 1.9 is the Rust game, and `cargo test` is what proves
+# it. Keeping a second suite green against the reference implementation cost
+# more than it caught.
 #
-# The adversarial battery (tests/adversarial) is deselected here because it
-# drives whole simulated deliveries. Run it deliberately:
-#     uv run pytest tests/adversarial -m adversarial
-addopts = "-q -n auto --timeout=120 --timeout-method=thread -m 'not adversarial'"
+# -n auto still spreads the run across cores, capped in tests/conftest.py: a
+# worker loads pygame and the audio stack, so past about eight the run stops
+# getting faster and, on a 28-core machine, started dying with an
+# INTERNALERROR in the reporter instead of merely running slowly.
+addopts = "-q -n auto --timeout=120 --timeout-method=thread"
 markers = [
-    "adversarial: the break-the-game battery; slow, deselected by default",
-    "career_1_9: curated transcript-backed career 1.9 smoke coverage",
     "property: property-based randomized tests",
     "smoke: headless end-to-end smoke tests",
 ]

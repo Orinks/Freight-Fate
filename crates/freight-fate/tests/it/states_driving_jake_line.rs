@@ -126,6 +126,15 @@ fn loaded_run(
     release_keys(&mut harness);
     harness.with_drive(move |d, _| {
         one_grade_road(d, 65.0, grade_pct, run_mi);
+        // The hill has to be the ONLY thing acting on the truck. Traffic and
+        // patrols are drawn per run, and a truck that catches a slower vehicle
+        // holds ITS speed down the grade instead of the set speed -- which is
+        // a different experiment, and an unrepeatable one. Left in, this read
+        // as 20 mph held on a one percent downgrade, moved which grades
+        // "settled" from run to run, and failed roughly two runs in five on
+        // unchanged code.
+        d.trip.set_npc_vehicles(Vec::new());
+        d.trip.set_patrols(Vec::new());
         d.weather_mut().forced = Some(WeatherKind::Clear);
         d.weather_mut().current = WeatherKind::Clear;
         d.truck_mut().transmission.automatic = true;

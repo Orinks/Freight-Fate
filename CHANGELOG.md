@@ -1059,6 +1059,12 @@
   carry over: anything that was on stays a latched brake, and off stays
   off.
 
+- **The weigh station's green and red lights can be heard again.** The tone
+  that tells you the scale has cleared you through, and the one that sends
+  you into the inspection lane, had gone quiet: both sounds were missing from
+  what shipped with the game, so the lights changed in silence and the only
+  way to know the verdict was the spoken line. Both play at the scale again.
+
 - **The centered-lane chime now waits until the truck is actually centered.**
   With lane keeping off, easing just inside the guidance wake line could play
   the confirmation while the truck was still drifting. Manual correction now

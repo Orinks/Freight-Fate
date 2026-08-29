@@ -120,6 +120,43 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **The Python gameplay tests are retired; the suite now covers the
+      tooling only (2026-08-29)** 223 files mirroring `src/freight_fate/`
+      gameplay went, along with the Python adversarial battery the Rust
+      `--break-battery` replaced. What stays is the Python that still ships:
+      the build, bake, indexing and release tooling under `tools/`, plus the
+      workflow and sound-pack guards. 4453 tests in five minutes became 202 in
+      six seconds, and gameplay is proved once, in Rust, instead of twice.
+      * A gameplay test added on this line belongs in `cargo test`, not here.
+- [x] **CI was red or hung on every run for six days before this
+      (2026-08-22 to 2026-08-29)** Four independent faults, none of which
+      could be seen past the others: a map-wide sweep that grew with the
+      city list until it outran the 45 minute ceiling, `cargo fmt` and
+      `cargo clippy` drift, a truck-status test still reading a one-shot
+      line after the screen became a menu, and the sound-pack pointer
+      problem above. Because the Rust job never finished, a traffic-flaky
+      jake-line test had also never been seen: it drew NPC traffic per run,
+      so the truck sometimes held 20 mph on a one percent downgrade and the
+      case failed about two runs in five.
+- [x] **The sound pack travels in git instead of Git LFS, and the two weigh
+      station verdict tones are in it (2026-08-29)** The pack was an LFS
+      object; once the repository's LFS budget ran out a runner checked out a
+      132 byte pointer instead of a pack, so the audio tests either failed
+      against the pointer or skipped themselves -- a green run that had
+      checked no sound at all. At 7.8 MB the pack now lives in git directly.
+      * `events/scale_green` and `events/scale_red` were referenced by the
+        code and the catalog but were in neither pack, and the release ships
+        the COMMITTED pack rather than baking a fresh one, so both tones were
+        silent for players. Merged in; the pack is 162 entries.
+- [ ] **Re-fetch the 60 sound effects that only exist in the shipped pack.**
+      The committed pack cannot be rebuilt on the current builder machine: a
+      fresh bake from the loose tree yields 113 entries against the pack's
+      162, because 60 ElevenLabs-generated effects (ui, vehicle, weather,
+      ambient) are no longer on disk. Until they are restored the pack can
+      only be MERGED into, never regenerated -- a plain
+      `tools/pack_sounds.py` run would silently drop them. The API quota
+      resets 2026-09-06.
+
 - [x] **A missed delivery exit no longer costs the driver the speed warning,
       and no longer promises a recovery that does not exist (2026-08-26)**
       (Tyler Rodick, issue #169, Hattiesburg MS: "it gave me the usual

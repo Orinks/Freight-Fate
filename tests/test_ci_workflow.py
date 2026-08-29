@@ -5,6 +5,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 BUILD_WORKFLOW = ROOT / ".github" / "workflows" / "build.yml"
+GITATTRIBUTES = ROOT / ".gitattributes"
 
 
 def _load_ci_workflow() -> dict:
@@ -17,48 +18,49 @@ def _checkout_step(job: dict) -> dict:
     )
 
 
-def test_packaging_checkouts_fetch_git_lfs_objects() -> None:
-    """Anything that PACKAGES the game takes the whole payload.
+def test_nothing_depends_on_git_lfs_any_more() -> None:
+    """The sound pack travels in git, so no job may wait on an LFS fetch.
 
-    A build that shipped pointer files instead of the packs would produce a
-    silent game, so this is not negotiable for the jobs that release.
+    A build that shipped pointer files instead of the pack would produce a
+    silent game, which is why the packaging jobs used to force `lfs: true`.
+    The pack is an ordinary blob now (see .gitattributes), so a plain checkout
+    already has it -- and an `lfs: pull` step left behind would be worse than
+    redundant: it reintroduces a dependency on a budget that ran out, and a
+    quota failure would look like a code failure.
     """
-    ci = _load_ci_workflow()
-    build = yaml.load(BUILD_WORKFLOW.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    assert "filter=lfs" not in GITATTRIBUTES.read_text(encoding="utf-8"), (
+        "something is tracked by Git LFS again; the pack was moved out of it "
+        "because an exhausted budget turned every run red at checkout"
+    )
+    for workflow in (CI_WORKFLOW, BUILD_WORKFLOW):
+        assert "git lfs pull" not in workflow.read_text(encoding="utf-8"), workflow.name
 
-    assert _checkout_step(ci["jobs"]["build"])["with"]["lfs"] == "true"
-    assert _checkout_step(build["jobs"]["build"])["with"]["lfs"] == "true"
 
+def test_the_test_job_gets_the_sound_pack_from_a_plain_checkout() -> None:
+    """The audio guards must not be able to pass against a pointer.
 
-def test_the_test_job_takes_the_sound_pack_and_not_the_music_pack() -> None:
-    """Testing is not packaging, and the difference is 250 megabytes.
+    This assertion has been through three shapes. It began as `lfs: true` on
+    the test job, so the audio tests could not quietly pass against a pointer.
+    A full fetch on both matrix runners on every push then spent about half a
+    gigabyte of LFS bandwidth per commit, which exhausted the repository's
+    budget and turned every run red at checkout, before a single test ran
+    (2026-08-23); the job dropped to fetching sounds.pak alone. Once the
+    budget was gone outright that fetch returned a pointer too, and the tests
+    skipped themselves -- green, having checked nothing.
 
-    This assertion used to include the test job, added when the pack first
-    shipped so the audio tests could not quietly pass against a pointer. The
-    intent was right and is kept -- but a full fetch on both matrix runners
-    on every push spent about half a gigabyte of LFS bandwidth per commit,
-    which exhausted the repository's budget and turned every run red at
-    checkout, before a single test ran (2026-08-23).
-
-    So the test job takes sounds.pak, which the suite genuinely reaches for,
-    and leaves music.pak alone. The original worry is answered better than it
-    was: a pack that is not materialised now SKIPS its tests rather than
-    passing them, because ``asset_helpers.pack_available`` can tell a pointer
-    from a pack -- a pointer is a file that exists, which is exactly how this
-    would have gone unnoticed.
+    So the pack is committed as an ordinary blob and the checkout is plain.
+    The invariant that survived all three is the one asserted here: whatever
+    the job does, it must end up holding a real pack.
     """
     test_job = _load_ci_workflow()["jobs"]["test"]
-
-    assert _checkout_step(test_job)["with"]["lfs"] == "false"
-
-    pull = next(
-        step for step in test_job["steps"] if step.get("name") == "Fetch the sound pack only"
+    checkout = _checkout_step(test_job)
+    assert "lfs" not in (checkout.get("with") or {}), (
+        "the pack is not an LFS object any more; an lfs flag here is a "
+        "leftover that will read as though it were"
     )
-    assert "sounds.pak" in pull["run"]
-    assert "music.pak" not in pull["run"]
-    # A quota failure must leave the pack unmaterialised, not fail the run:
-    # the tests that need it skip, and everything else still gets to run.
-    assert pull["continue-on-error"] == "true"
+    assert not any("lfs" in (step.get("run") or "") for step in test_job["steps"]), (
+        "no LFS fetch step: a plain checkout already carries the pack"
+    )
 
 
 def test_nightly_recovery_is_not_a_pull_request_check() -> None:

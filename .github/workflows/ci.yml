@@ -13,6 +13,10 @@ on:
   workflow_dispatch:
 
 jobs:
+  # The Python that still SHIPS: the build, bake, indexing and release tooling
+  # under tools/, plus the workflow and sound-pack guards. Gameplay is Rust on
+  # Career 1.9 and rust.yml proves it; the ~220 files mirroring gameplay in
+  # src/freight_fate/ were retired 2026-08-29 rather than kept green twice.
   test:
     strategy:
       fail-fast: false
@@ -24,32 +28,19 @@ jobs:
       SDL_VIDEODRIVER: dummy
       SDL_AUDIODRIVER: dummy
       FREIGHT_FATE_NO_SPEECH: "1"
-      # sys.monitoring coverage core (Python 3.12+): the default tracer makes
-      # the CPU-bound network sweeps ~5x slower, and that multiplier grows CI
-      # time with every map expansion. sysmon measured ~1.15x on the same test.
+      # sys.monitoring coverage core (Python 3.12+): cheaper than the default
+      # tracer on the CPU-bound bake and sweep tools this job still runs.
       COVERAGE_CORE: sysmon
     steps:
-      # NOT lfs: true. The repo's LFS payload is music.pak at 250 MB plus
-      # sounds.pak at 7.5 MB, and a full fetch on every push across this
-      # matrix spent about half a gigabyte of LFS bandwidth per commit --
-      # which is what exhausted the repository's LFS budget and turned every
-      # run on this branch red at checkout, before a single test ran
-      # (2026-08-23). Buying quota only postpones that: at this push rate a
-      # 50 GB data pack lasts about ten days.
+      # sounds.pak is an ordinary 7.8 MB blob in git now, not a Git LFS object
+      # (see .gitattributes), so a plain checkout carries the real pack and
+      # the audio tests run here on every push. They used to depend on an LFS
+      # fetch: once the repository's LFS budget ran out that fetch returned a
+      # 132 byte pointer, and the tests either failed against it or skipped
+      # themselves -- a green run that had not checked a single sound. Only
+      # the 250 MB music.pak stays outside the repository, and the tests that
+      # read it skip here by design.
       - uses: actions/checkout@v6
-        with:
-          lfs: false
-
-      # Only the small pack, and never fatally. Sounds are what the suite
-      # actually reaches for; the music pack backs one content invariant
-      # (every track has a real file) that belongs to the pack rather than to
-      # the code, changes rarely, and still runs on any machine that has it.
-      # A quota failure here must not turn the whole run red either -- the
-      # asset tests skip when the pack is not materialised, which is the same
-      # thing a clean clone without LFS already does.
-      - name: Fetch the sound pack only
-        continue-on-error: true
-        run: git lfs pull --include="src/freight_fate/sounds.pak"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v8.2.0
@@ -63,7 +54,7 @@ jobs:
         run: uv run ruff check src tests tools
 
       - name: Run tests
-        run: uv run pytest tests/ -n auto --durations=15 --cov=src/freight_fate --cov-report=xml
+        run: uv run pytest tests/ -n auto --durations=15 --cov=tools --cov-report=xml
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
@@ -156,9 +147,8 @@ jobs:
     needs: [test, changelog]
     if: ${{ !cancelled() && needs.test.result == 'success' }}
     steps:
+      # Nothing is tracked by Git LFS any more; a plain checkout has the pack.
       - uses: actions/checkout@v6
-        with:
-          lfs: true
 
       - name: Install uv
         uses: astral-sh/setup-uv@v8.2.0

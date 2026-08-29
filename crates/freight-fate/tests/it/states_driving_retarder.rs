@@ -167,6 +167,10 @@ fn service_brake(harness: &PlaytestHarness) -> f64 {
     harness.read_drive(|d| d.truck().brake)
 }
 
+fn throttle(harness: &PlaytestHarness) -> f64 {
+    harness.read_drive(|d| d.truck().throttle)
+}
+
 fn assist_jake(harness: &PlaytestHarness) -> bool {
     harness.read_drive(|d| d.curve_assist_jake)
 }
@@ -475,8 +479,13 @@ fn test_curve_assist_does_not_guess_the_retarder_without_an_advisory() {
 
     assert!(!jake_on(&harness));
     assert!(!assist_jake(&harness));
-    // The ramp still gets slowed, on the drums.
-    assert!(service_brake(&harness) > 0.0);
+    // The ramp still gets slowed -- by lifting, not by the drums. Route
+    // transition assistance owns a ramp it is running (it is on by default),
+    // and holding a service floor all the way down spent reservoir air, so
+    // the cap lifts the throttle and lets drag shed the excess. The real
+    // stop at the bar still uses the brakes.
+    assert_eq!(throttle(&harness), 0.0);
+    assert_eq!(service_brake(&harness), 0.0);
 }
 
 #[test]

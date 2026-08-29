@@ -129,9 +129,16 @@ def _music_pack_instance():
 def _pack_for(pack_relative_name: str):
     """The pack that owns ``pack_relative_name``, mirroring the runtime's own
     routing in ``assets_pack._CombinedPack``: a ``music/...`` name comes from
-    music.pak when that pack exists, otherwise -- same as sounds.pak for
-    every other name -- from sounds.pak (which still carries ``music/``
-    itself until the real repack splits it out)."""
+    music.pak when that pack exists, otherwise from sounds.pak.
+
+    That fallback no longer finds anything. The split has happened: sounds.pak
+    carries no ``music/`` entries at all, and music.pak is not in the
+    repository. So a ``music/...`` lookup resolves only where the music pack
+    is, which is why a test that reads one has to be marked
+    ``needs_music_pack`` rather than ``needs_audio_assets`` -- the latter is
+    satisfied by sounds.pak and would let the test run somewhere the music
+    can never be found.
+    """
     if pack_relative_name.startswith("music/"):
         music = _music_pack_instance()
         if music is not None:

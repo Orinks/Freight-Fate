@@ -51,8 +51,10 @@ above 4 that is worth the contention with other agents.
   will test the wrong copy of the code. State which directory you used.
 - **Never edit any file.** You have no write tools by design. If a fix is
   obvious, describe it precisely and let the implementation agent apply it.
-- The adversarial battery is deselected by default and needs its marker:
-  `uv run pytest tests/adversarial -m adversarial -n 0`. It is slow. Only on
+- The Python adversarial battery is gone (retired 2026-08-29 with the rest
+  of the gameplay mirror); the Rust one replaced it and is NOT part of
+  `cargo test`: `cargo run -p freight-fate --bin freightfate -- --break-battery`.
+  It is slow. Only on
   explicit request.
 - Headless env (`SDL_VIDEODRIVER`, `SDL_AUDIODRIVER`, `FREIGHT_FATE_NO_SPEECH`)
   is already forced by `tests/conftest.py`. You do not need to set it.

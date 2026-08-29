@@ -318,6 +318,73 @@ pub fn all_world_pairs(world: &'static World) -> Vec<(String, String)> {
     pairs
 }
 
+/// The first supported corridor on the map, found without resolving the rest.
+///
+/// A caller that wants ONE road must not pay for all of them: `all_world_pairs`
+/// resolves every ordered pair, and at 624 cities that is 388,752 route
+/// lookups to reach a value taken with `.next()`. Short-circuiting keeps that
+/// caller flat as the map grows.
+pub fn first_world_pair(world: &'static World) -> Option<(String, String)> {
+    let names = world.city_names();
+    for origin in &names {
+        for destination in &names {
+            if origin == destination {
+                continue;
+            }
+            if world
+                .supported_route(origin, destination, None)
+                .ok()
+                .flatten()
+                .is_some()
+            {
+                return Some((speakable(world, origin), speakable(world, destination)));
+            }
+        }
+    }
+    None
+}
+
+/// A bounded, deterministic slice of the supported corridors.
+///
+/// `all_world_pairs` is exhaustive on purpose -- an operator's `--routes all`
+/// scan should see every baked road. A test asserting a map-wide invariant
+/// wants the same question asked cheaply, and the exhaustive form stopped
+/// being runnable as the map grew: 624 cities is 388,752 route resolutions
+/// per call, which ran past CI's 45 minute ceiling without finishing.
+///
+/// Striding the origin list spreads the sample across the whole map instead
+/// of clustering in whichever corner sorts first, and takes one corridor per
+/// sampled origin so the cost stays flat as cities are added. No RNG: a
+/// failure has to name the same corridor on a rerun.
+pub fn sampled_world_pairs(world: &'static World, limit: usize) -> Vec<(String, String)> {
+    let names = world.city_names();
+    let mut pairs = Vec::new();
+    if names.len() < 2 || limit == 0 {
+        return pairs;
+    }
+    let step = (names.len() / limit).max(1);
+    let mut index = 0;
+    while index < names.len() && pairs.len() < limit {
+        let origin = &names[index];
+        for destination in &names {
+            if origin == destination {
+                continue;
+            }
+            if world
+                .supported_route(origin, destination, None)
+                .ok()
+                .flatten()
+                .is_some()
+            {
+                pairs.push((speakable(world, origin), speakable(world, destination)));
+                break;
+            }
+        }
+        index += step;
+    }
+    pairs
+}
+
 /// Supported city pairs drawn from the whole map, shortest first.
 ///
 /// Named the way the hand-picked sets are and the way a player would say
