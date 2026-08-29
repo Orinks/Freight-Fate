@@ -76,7 +76,7 @@ jobs:
     # `crates/prism-sys/vendor/<os>-<arch>/`. Today the tree carries:
     #
     #   vendor/sdl2/            windows-x86_64 only
-    #   crates/bass-sys/vendor/ windows-x86_64 only
+    #   crates/bass-sys/vendor/ windows-x86_64 (fetched), macos-* (fetched)
     #   crates/prism-sys/vendor/windows-x86_64, macos-x86_64, macos-aarch64
     #
     # So an ubuntu-latest job would have no vendored SDL2 to link against --
@@ -85,10 +85,17 @@ jobs:
     # all. Installing `libsdl2-dev` there would get it to link, but it would
     # be testing a configuration nobody ships and nobody has ever run, and the
     # audio and speech loaders would silently fall back to their null
-    # backends. Windows is the primary target and the only fully vendored one,
-    # so this matrix is honest about the gap instead of papering over it:
-    # Linux and macOS are NOT covered by this workflow. Add each platform's
-    # vendored libraries first, then add the runner here.
+    # backends.
+    #
+    # macOS is a different gap: it builds from source (BASS is fetched for
+    # both architectures, Prism is vendored, SDL2 comes from Homebrew and is
+    # found through the `use-pkgconfig` feature), so a macos-latest job would
+    # work after a `brew install sdl2 pkg-config` step -- nobody has added one
+    # yet, and nobody has driven the Mac build with speech on.
+    #
+    # Windows is the primary target and the only fully vendored one, so this
+    # matrix is honest about the gap instead of papering over it: Linux and
+    # macOS are NOT covered by this workflow.
     name: Test (Windows)
     runs-on: windows-latest
     timeout-minutes: 45

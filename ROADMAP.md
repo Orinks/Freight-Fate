@@ -377,8 +377,23 @@ onto exit signalling.
       (`SDL_AUDIODRIVER=dummy`, headless, a caller-built engine) does not --
       and the main menu speaks it once in the same warning slot the unreadable
       save and lane-keeping notices use. Starting anyway is unchanged.
+- [x] **Rust port: macOS builds from source (2026-08-29).** It did not, for
+      two reasons a Mac tester hit in a row. `tools/fetch_bass.py` refused to
+      run anywhere but Windows, so there was no BASS to load; it now fetches
+      un4seen's universal `-osx` build, pinned by sha256, into both
+      `macos-x86_64` and `macos-aarch64` (one file, both slices). And SDL2
+      linked with a bare `-lSDL2` that never looked in `/opt/homebrew/lib` or
+      `/usr/local/lib`, so the link failed with Homebrew's SDL2 installed;
+      `freight-fate` now enables the `sdl2` crate's `use-pkgconfig` feature on
+      macOS only, which reads the prefix out of Homebrew's own `sdl2.pc`.
+      Prerequisite for a Mac developer: `brew install sdl2 pkg-config`.
+- [ ] **Rust port: no macOS CI runner.** The build works on a Mac now, but
+      nothing proves it stays working: SDL2 there is a Homebrew install rather
+      than a vendored library, so a runner has to `brew install sdl2
+      pkg-config` before it can build. Nobody has driven the Mac build with
+      speech on either, so VoiceOver through Prism is unverified.
 - [ ] **Rust port: no Linux build.** `.github/workflows/rust.yml` vendors SDL2
-      and BASS for windows-x86_64 only and Prism for Windows and macOS; there
+      for windows-x86_64 only, and BASS has no pinned Linux build; there
       is no Linux runner and no vendored Linux native libraries. The Linux
       nightlies players are running are the Python build, so a Linux report
       cannot be reproduced or fixed on this line until the libraries and a
@@ -802,10 +817,11 @@ onto exit signalling.
       `cargo fmt --all --check` on Linux, then `cargo clippy --all-targets
       --locked -D warnings`, `cargo test -p ff-core` and
       `cargo test -p freight-fate` on Windows, with the same headless trio
-      the Python jobs use. Windows only: SDL2 and BASS are vendored for
-      windows-x86_64 alone, so a Linux runner has nothing to link against and
-      nothing to load. Vendor each platform's libraries before adding its
-      runner.
+      the Python jobs use. Windows only: SDL2 is vendored for windows-x86_64
+      alone and BASS has no pinned Linux build, so a Linux runner has nothing
+      to link against and nothing to load. macOS can build (Homebrew SDL2 via
+      pkg-config, fetched BASS, vendored Prism) but has no runner yet. Sort
+      out each platform's libraries before adding its runner.
 
       **The Rust job follows the same LFS rule as the Python one, and must
       keep following it (2026-08-23).** It first checked out with `lfs: true`,

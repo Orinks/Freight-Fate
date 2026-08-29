@@ -1049,6 +1049,13 @@
 
 ### Fixed
 
+- **Freight Fate builds on a Mac again.** Building from source on macOS
+  stopped part way through in two places: the tool that downloads the audio
+  library refused to run on a Mac at all, and the build could not find the
+  windowing library even with it installed. Both are fixed for Apple silicon
+  and Intel alike. Install SDL2 first with `brew install sdl2 pkg-config`,
+  then the usual steps work. Thanks to the tester who tracked this down.
+
 - **Corridor billboards that were lying got pulled or moved.** Wall Drug no
   longer plays in Montana, or on western Interstate 90 in Wyoming; the two
   boards stay on South Dakota and the Minnesota approach. The caverns sign

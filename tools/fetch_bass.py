@@ -10,6 +10,11 @@ Where they land is what `crates/bass-sys` looks for:
 the test and game binaries. `FREIGHT_FATE_BASS_PATH` overrides the lot if a
 developer keeps BASS somewhere else.
 
+Windows and macOS are both pinned. The macOS downloads are universal
+binaries -- one file carrying the Intel and Apple silicon slices -- so the
+same bytes are written into `macos-x86_64` and `macos-aarch64`, and a build
+targeting either architecture finds its library.
+
 Every file is checked against a pinned sha256. A silent change upstream --
 un4seen ship rolling updates behind stable URLs -- would otherwise walk into
 a build with nothing said, and the audio backend is exactly where a quiet
@@ -80,24 +85,77 @@ WINDOWS_X64 = {
     ),
 }
 
-TARGETS = {"windows-x86_64": WINDOWS_X64}
+# macOS, from un4seen's own osx packages. Verified against upstream on
+# 2026-08-29, which is when these hashes were taken -- unlike the Windows
+# pins there is no older build the game was played against first, because
+# this is the first macOS support at all.
+#
+# There is no AAC add-on here and none is needed: BASS on macOS decodes
+# AAC and MP4 through the platform's own codecs, and `bass_aac24-osx.zip`
+# does not exist upstream (it 404s).
+#
+# Every file is a fat binary carrying x86_64, i386 and arm64, so one
+# download serves both of the macOS vendor directories.
+MACOS_UNIVERSAL = {
+    "libbass.dylib": (
+        "https://www.un4seen.com/files/bass24-osx.zip",
+        "libbass.dylib",
+        "e81fb7b4d0009ba6343fbfcd840620704dcb840686d405b9734cd37150d31974",
+    ),
+    "libbassflac.dylib": (
+        "https://www.un4seen.com/files/bassflac24-osx.zip",
+        "libbassflac.dylib",
+        "8efe6c0e372328708f6926b15748f01002da7eba01c790e306121c9853201de2",
+    ),
+    "libbassopus.dylib": (
+        "https://www.un4seen.com/files/bassopus24-osx.zip",
+        "libbassopus.dylib",
+        "3b59b7d63d684e78d8538d1ef0341da0c523a8ad1f7616038f272a7a4de361a2",
+    ),
+    "libbasshls.dylib": (
+        "https://www.un4seen.com/files/basshls24-osx.zip",
+        "libbasshls.dylib",
+        "283a87ccdcc53892128150380bd489d9d210a4ebaa34a11ebccc9cff5b21743e",
+    ),
+}
+
+TARGETS = {
+    "windows-x86_64": WINDOWS_X64,
+    "macos-x86_64": MACOS_UNIVERSAL,
+    "macos-aarch64": MACOS_UNIVERSAL,
+}
+
 
 # The same libraries ship inside the Python game's own dependency, so a
 # checkout that has already run `uv sync` can be served without reaching the
 # network at all. Offline machines and CI runners behind a proxy both land
-# here.
-LOCAL_FALLBACK = REPO_ROOT / ".venv" / "Lib" / "site-packages" / "sound_lib" / "lib"
+# here. Windows venvs put site-packages under `Lib/`; every other platform
+# puts it under `lib/pythonX.Y/`.
+def local_fallback_dirs() -> list[Path]:
+    venv = REPO_ROOT / ".venv"
+    return [
+        venv / "Lib" / "site-packages" / "sound_lib" / "lib",
+        *sorted(venv.glob("lib/python*/site-packages/sound_lib/lib")),
+    ]
 
 
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def target_key() -> str:
+def target_keys() -> list[str]:
+    """Vendor directories to fill for the machine running this script.
+
+    macOS gets two, because the download is universal and the same bytes are
+    correct for an Intel target and an Apple silicon one; filling both means
+    a cross build does not go looking for a library nobody fetched.
+    """
     if sys.platform == "win32":
-        return "windows-x86_64"
-    # Only Windows is pinned today; the game's other targets have no vendored
-    # BASS yet, and guessing a URL for them would be worse than saying so.
+        return ["windows-x86_64"]
+    if sys.platform == "darwin":
+        return ["macos-x86_64", "macos-aarch64"]
+    # Linux has no pinned build yet, and guessing a URL for it would be worse
+    # than saying so.
     raise SystemExit(
         f"fetch_bass: no pinned BASS build for {sys.platform}. "
         "Install BASS yourself and point FREIGHT_FATE_BASS_PATH at it."
@@ -105,11 +163,14 @@ def target_key() -> str:
 
 
 def from_local(name: str, want: str) -> bytes | None:
-    candidate = LOCAL_FALLBACK / name
-    if not candidate.is_file():
-        return None
-    data = candidate.read_bytes()
-    return data if digest(data) == want else None
+    for directory in local_fallback_dirs():
+        candidate = directory / name
+        if not candidate.is_file():
+            continue
+        data = candidate.read_bytes()
+        if digest(data) == want:
+            return data
+    return None
 
 
 def from_network(url: str, member: str, want: str) -> bytes:
@@ -145,43 +206,51 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    key = target_key()
-    out_dir = VENDOR / key
-    out_dir.mkdir(parents=True, exist_ok=True)
     missing: list[str] = []
+    # macOS fills two directories from one universal download, so bytes
+    # already fetched in this run are reused rather than downloaded twice.
+    fetched: dict[str, bytes] = {}
 
-    for name, (url, member, want) in TARGETS[key].items():
-        path = out_dir / name
-        if path.is_file() and not args.force:
-            if digest(path.read_bytes()) == want:
-                print(f"  ok       {name}")
+    for key in target_keys():
+        out_dir = VENDOR / key
+        out_dir.mkdir(parents=True, exist_ok=True)
+        for name, (url, member, want) in TARGETS[key].items():
+            path = out_dir / name
+            if path.is_file() and not args.force:
+                if digest(path.read_bytes()) == want:
+                    print(f"  ok       {key}/{name}")
+                    continue
+                print(f"  stale    {key}/{name}")
+            if args.check:
+                missing.append(f"{key}/{name}")
+                print(f"  MISSING  {key}/{name}")
                 continue
-            print(f"  stale    {name}")
-        if args.check:
-            missing.append(name)
-            print(f"  MISSING  {name}")
-            continue
-        data = from_local(name, want)
-        source = "sound_lib"
-        if data is None and not url:
-            raise SystemExit(
-                f"fetch_bass: {name} has no download URL and is not in "
-                f"{LOCAL_FALLBACK}. Run `uv sync` to install sound_lib, or "
-                "download the BASS AAC add-on from un4seen.com by hand and put "
-                f"it in {out_dir}."
-            )
-        if data is None:
-            try:
-                data = from_network(url, member, want)
-                source = url
-            except (urllib.error.URLError, TimeoutError) as err:
+            data = fetched.get(want)
+            source = "already fetched"
+            if data is None:
+                data = from_local(name, want)
+                source = "sound_lib"
+            if data is None and not url:
+                where = ", ".join(str(d) for d in local_fallback_dirs())
                 raise SystemExit(
-                    f"fetch_bass: could not reach {url} ({err}).\n"
-                    "Download it by hand, or run `uv sync` so the copy inside "
-                    "sound_lib can be used instead."
-                ) from err
-        path.write_bytes(data)
-        print(f"  fetched  {name}  <- {source}")
+                    f"fetch_bass: {name} has no download URL and is not in "
+                    f"{where}. Run `uv sync` to install sound_lib, or "
+                    "download the BASS AAC add-on from un4seen.com by hand and put "
+                    f"it in {out_dir}."
+                )
+            if data is None:
+                try:
+                    data = from_network(url, member, want)
+                    source = url
+                except (urllib.error.URLError, TimeoutError) as err:
+                    raise SystemExit(
+                        f"fetch_bass: could not reach {url} ({err}).\n"
+                        "Download it by hand, or run `uv sync` so the copy inside "
+                        "sound_lib can be used instead."
+                    ) from err
+            fetched[want] = data
+            path.write_bytes(data)
+            print(f"  fetched  {key}/{name}  <- {source}")
 
     if args.check and missing:
         print(

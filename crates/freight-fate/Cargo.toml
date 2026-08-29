@@ -48,5 +48,15 @@ webbrowser.workspace = true
 [target.'cfg(windows)'.dependencies]
 windows-sys.workspace = true
 
+# Windows links SDL2 against the prebuilt import library under `vendor/sdl2/`,
+# which build.rs puts on the linker's search path. macOS has no vendored SDL2
+# and gets it from Homebrew, which installs outside the default search path --
+# `/opt/homebrew/lib` on Apple silicon, `/usr/local/lib` on Intel. A bare
+# `-lSDL2` finds neither, so the link failed with SDL2 sitting right there.
+# pkg-config reads the prefix out of Homebrew's own `sdl2.pc` and hands the
+# linker the right path on both architectures.
+[target.'cfg(target_os = "macos")'.dependencies]
+sdl2 = { workspace = true, features = ["use-pkgconfig"] }
+
 [dev-dependencies]
 tempfile.workspace = true

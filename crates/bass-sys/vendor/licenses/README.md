@@ -12,8 +12,9 @@ Get them with:
 uv run python tools/fetch_bass.py
 ```
 
-That writes them into `vendor/windows-x86_64/`, where `build.rs` finds them
-and stages them beside the test and game binaries. Every file is pinned by
+That writes them into `vendor/windows-x86_64/` — or, on a Mac, into both
+`vendor/macos-x86_64/` and `vendor/macos-aarch64/` — where `build.rs` finds
+them and stages them beside the test and game binaries. Every file is pinned by
 sha256, so a silent change upstream is refused rather than absorbed — the
 audio backend is where a quiet substitution would be hardest to notice.
 `--check` verifies without writing, and `FREIGHT_FATE_BASS_PATH` overrides
@@ -63,10 +64,14 @@ The same disclaimer applies to `bass.dll` and the other add-ons per their
 respective `bass.txt` / `bassopus.txt` / `bassflac.txt` / `bass_aac.txt`
 release notes, which the `sound_lib` wheel does not include.
 
-Only the Windows x86-64 build is pinned so far. Linux (`libbass.so`) and
-macOS (`libbass.dylib`) builds go in sibling directories when they are
-added; the loader degrades to no audio rather than failing to start when a
-platform directory is absent.
+Windows x86-64 and macOS are both pinned. The macOS files come straight from
+un4seen's own `-osx` packages (pins taken 2026-08-29) and are universal
+binaries carrying the Intel and Apple silicon slices in one file, so the same
+bytes are written into `macos-x86_64` and `macos-aarch64`. There is no AAC
+add-on there and none is needed: BASS on macOS decodes AAC and MP4 through
+the platform's own codecs. Linux (`libbass.so`) goes in a sibling directory
+when it is added; the loader degrades to no audio rather than failing to
+start when a platform directory is absent.
 
 SDL2 (zlib) and Prism (MPL-2.0) stay vendored, under `vendor/sdl2/` and
 `crates/prism-sys/vendor/` — their licences permit redistribution without

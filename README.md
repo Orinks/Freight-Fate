@@ -154,6 +154,18 @@ runs reuse `target/`. On Windows, SDL2 and Prism are already vendored and are
 staged beside the executable automatically. If BASS has not been fetched, the
 game still starts but audio is silent.
 
+On macOS, SDL2 comes from Homebrew rather than the repository, so install it
+first — on both Apple silicon and Intel:
+
+```bash
+brew install sdl2 pkg-config
+```
+
+`pkg-config` is what tells the build where Homebrew put SDL2; without it the
+link fails even though SDL2 is installed. BASS and Prism are handled for you:
+`tools/fetch_bass.py` downloads the universal macOS BASS build, and Prism is
+already vendored for both architectures.
+
 On Linux, install your distribution's SDL2 and Speech Dispatcher runtime
 packages if they are not already present. Platform-native speech and audio
 library availability currently varies; Windows is the primary alpha-test
@@ -554,8 +566,11 @@ uv run python tools/fetch_bass.py --check
 ```
 
 The fetcher verifies pinned hashes and stages the libraries where Cargo and the
-release packager expect them. SDL2 and Prism libraries for supported targets
-are kept in the repository and copied beside Cargo's executable automatically.
+release packager expect them; it covers Windows and macOS, and the macOS
+download is a universal binary that serves Apple silicon and Intel alike.
+Prism is kept in the repository for both platforms and copied beside Cargo's
+executable automatically. SDL2 is vendored on Windows and installed from
+Homebrew on macOS.
 
 ## License
 

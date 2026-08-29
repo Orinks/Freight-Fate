@@ -92,8 +92,11 @@ need depends on what you touched.
   SDL drivers, no speech, a throwaway `FREIGHT_FATE_DATA_DIR` -- so it never
   touches the operator's real settings, saves or keyring.
 - Rust CI (`.github/workflows/rust.yml`) is **Windows only**, deliberately:
-  SDL2 and BASS are vendored for `windows-x86_64` alone. Linux and macOS are
-  not covered. Add a platform's vendored libraries before adding its runner.
+  SDL2 is vendored for `windows-x86_64` alone. Linux is not covered at all.
+  macOS builds from source (BASS is fetched for both Mac architectures, Prism
+  is vendored, SDL2 comes from `brew install sdl2 pkg-config` and is found
+  through the `use-pkgconfig` feature), but has no runner. Add a platform's
+  libraries before adding its runner.
 
 ### Python -- tools, data, packaging
 

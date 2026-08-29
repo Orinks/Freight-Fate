@@ -3,6 +3,9 @@
 //! SDL2 is linked dynamically against the prebuilt libsdl-org release under
 //! `vendor/sdl2/<os>-<arch>/`; building SDL from source needs a CMake/VS
 //! pairing this machine does not have, and the prebuilt links in seconds.
+//!
+//! That is a Windows arrangement. macOS has no vendored SDL2: it installs
+//! `sdl2` from Homebrew, and the crate's `use-pkgconfig` feature finds it.
 use std::{env, fs, path::PathBuf};
 
 fn main() {
@@ -16,7 +19,12 @@ fn main() {
         .join(format!("{os}-{arch}"));
     println!("cargo:rerun-if-changed={}", dir.display());
     if !dir.is_dir() {
-        println!("cargo:warning=freight-fate: no vendored SDL2 for {os}-{arch} under vendor/sdl2; expecting a system SDL2");
+        // macOS is not vendored on purpose: SDL2 comes from Homebrew and the
+        // `use-pkgconfig` feature (see Cargo.toml) tells the linker where it
+        // lives, so there is nothing missing and nothing to warn about.
+        if os != "macos" {
+            println!("cargo:warning=freight-fate: no vendored SDL2 for {os}-{arch} under vendor/sdl2; expecting a system SDL2");
+        }
         return;
     }
     println!("cargo:rustc-link-search=native={}", dir.display());
