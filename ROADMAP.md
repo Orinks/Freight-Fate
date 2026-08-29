@@ -120,6 +120,25 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **The drivers board keeps itself current while it is open
+      (2026-08-29)** It re-checks about once a minute, silently, and holds
+      the player's place by DRIVER rather than by row number -- the hazard
+      `OnlineSetupState` records, that players build positional memory of
+      spoken menus while `refresh()` preserves indices and not identity. The
+      list is sorted by name so a change rewrites a line instead of
+      reordering under a reader, a driver who signs off under the cursor is
+      held and marked until the player arrows away, and a quiet check that
+      cannot reach the site leaves the drivers on screen. Matches the
+      website's live board, which landed the same day on orinks.net.
+      * The endpoint behind it is cached for sixty seconds server-side, so
+        the poll cannot usefully go faster without changing that first.
+      * Not done: the in-game list still says "Drivers online" as its title
+        and "Drivers board" on the hub row, while the website now says
+        "list" throughout. Three names for one thing costs a screen reader
+        user a re-read -- pick the canonical spoken noun and add it to
+        `docs/ontology.md`.
+      * Not done on the `dev` (Python) line, by owner ruling 2026-08-29:
+        1.9 only for now.
 - [x] **The Python gameplay tests are retired; the suite now covers the
       tooling only (2026-08-29)** 223 files mirroring `src/freight_fate/`
       gameplay went, along with the Python adversarial battery the Rust

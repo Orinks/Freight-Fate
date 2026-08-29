@@ -4,6 +4,18 @@
 
 ### Added
 
+- **The drivers board keeps itself up to date while you read it.** Open
+  Drivers board from the Online menu and the list now checks again on its
+  own about once a minute, so drivers who set off or sign off turn up
+  without you pressing Refresh. It does the checking quietly and never
+  speaks over you. The list is in alphabetical order by driver name and
+  stays that way, so when it changes, a line is rewritten and nothing moves
+  under you. If a driver signs off while you are sitting on their line, the
+  line stays where it is and tells you they went off duty, until you arrow
+  away from it. Refresh is still there for when you want to ask straight
+  away, and it still answers out loud. If a quiet check cannot reach the
+  site, you keep the drivers you already had rather than losing the list.
+
 - **Live internet radio starts sooner after you tune it.** Freight Fate now
   begins live stations with a smaller network cushion and a much shorter
   fade, while still connecting away from the driving loop so steering and
