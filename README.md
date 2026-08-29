@@ -79,8 +79,10 @@ visual display mirrors all speech for sighted players and helpers.
 ## Download and play
 
 1. Open [Freight Fate releases](https://github.com/Orinks/Freight-fate/releases).
-2. Choose the latest numbered stable release, or the newest Career 1.9 tester
-   release named `1.9-tester-YYYYMMDD`.
+2. Choose the latest numbered stable release. Stable is recommended for most
+   players. If you want to test Career 1.9, choose the newest tester release
+   named `1.9-tester-YYYYMMDD`. A career saved in a tester build may not load
+   in an older stable release.
 3. Under Assets, download the file ending in `-windows-portable.zip`.
 4. Extract the zip file to a folder.
 5. Open the extracted `FreightFate` folder and run `FreightFate.exe`.
@@ -110,8 +112,12 @@ Then clone Career 1.9 and run the game:
 git clone --branch feat/career-1.9 https://github.com/Orinks/Freight-Fate.git
 cd Freight-Fate
 uv sync --group dev
+uv run python tools/fetch_bass.py
 cargo run --release -p freight-fate
 ```
+
+The BASS fetcher downloads and verifies the required audio libraries. A raw
+source run needs this command because `cargo run` does not fetch BASS itself.
 
 The first Cargo build takes longer because it compiles the workspace. Later
 runs reuse `target/`.
@@ -126,8 +132,9 @@ After installing Git, Rust, and `uv`, run the release builder from PowerShell:
 
 The script installs the required project dependencies, builds the native game,
 fetches and verifies BASS and the public music pack, checks the staged game,
-and writes the Windows portable zip to `dist/`. Normal players and ordinary
-source builders do not need to find or copy audio files themselves.
+and writes the Windows portable zip to `dist/`. Players using the portable zip
+and contributors using this standalone build script do not need to find or
+copy audio files themselves.
 
 ### Advanced maintainer overrides
 
