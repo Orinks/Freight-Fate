@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: career-19-snapshot-${{ github.ref }}
+  group: career-19-snapshot
   cancel-in-progress: true
 
 env:
@@ -29,6 +29,7 @@ jobs:
     outputs:
       should_build: ${{ steps.check.outputs.should_build }}
       tag: ${{ steps.check.outputs.tag }}
+      commit_sha: ${{ steps.check.outputs.commit_sha }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -41,6 +42,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "tag=1.9-tester-$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             echo "should_build=true" >> "$GITHUB_OUTPUT"
@@ -82,7 +84,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ env.CAREER_BRANCH }}
+          ref: ${{ needs.prepare.outputs.commit_sha }}
           fetch-depth: 0
           lfs: true
 
@@ -120,7 +122,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ env.CAREER_BRANCH }}
+          ref: ${{ needs.prepare.outputs.commit_sha }}
           fetch-depth: 0
 
       - uses: actions/download-artifact@v7
@@ -142,7 +144,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
         run: |
+          test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
           (cd assets && sha256sum FreightFate-*-windows-portable.zip > checksums.txt)
           (cd assets && sha256sum -c checksums.txt)
 
@@ -164,6 +168,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release delete "$TAG" -y --cleanup-tag
@@ -172,4 +177,4 @@ jobs:
           fi
           gh release create "$TAG" assets/* --notes-file notes.md \
             --title "Freight Fate 1.9 tester snapshot $(date -u +%Y-%m-%d)" \
-            --prerelease --target "$CAREER_BRANCH"
+            --prerelease --target "$COMMIT_SHA"

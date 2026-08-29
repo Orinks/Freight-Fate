@@ -443,15 +443,22 @@ def test_career_19_snapshot_workflow_contract():
     ).read_text(encoding="utf-8")
 
     assert 'CAREER_BRANCH: "feat/career-1.9"' in workflow
+    assert "group: career-19-snapshot\n" in workflow
+    assert "career-19-snapshot-${{ github.ref }}" not in workflow
     assert 'cron: "37 2 * * *"' in workflow
     assert "tag=1.9-tester-$(date -u +%Y%m%d)" in workflow
+    assert "commit_sha: ${{ steps.check.outputs.commit_sha }}" in workflow
+    assert 'echo "commit_sha=$(git rev-parse HEAD)"' in workflow
+    assert workflow.count("ref: ${{ needs.prepare.outputs.commit_sha }}") == 2
     assert 'git tag --list "1.9-tester-*"' in workflow
     assert "tools/release_notes.py should-build-nightly" in workflow
     assert "tools/release_notes.py nightly" in workflow
     assert "./build-release.ps1" in workflow
     assert "windows-portable.zip" in workflow
     assert "--prerelease" in workflow
-    assert '--target "$CAREER_BRANCH"' in workflow
+    assert "COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}" in workflow
+    assert '--target "$COMMIT_SHA"' in workflow
+    assert '--target "$CAREER_BRANCH"' not in workflow
     assert "needs.build.result == 'success'" in workflow
 
 
