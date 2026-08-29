@@ -739,40 +739,53 @@ fn test_the_three_hours_keys_never_share_a_first_word() {
 }
 
 #[test]
-fn test_the_hours_keys_never_hard_code_a_realistic_limit_in_relaxed_mode() {
-    // violation_causes still names "the 11-hour driving limit"; relaxed runs
-    // 13.75, so the new readouts name the clock and never the hour count.
+fn test_relaxed_does_not_speak_thirteen_seventy_five_as_hours_of_service() {
     let mut c = HosClock::new();
-    c.drive(13.0 * 60.0);
-
+    c.drive(10.0 * 60.0);
     for said in [
         c.wheel_time_summary("relaxed", false),
         c.break_summary("relaxed", false),
         c.drive_time_summary("relaxed", false),
+        c.summary("relaxed"),
     ] {
-        assert!(!said.contains("11-hour"));
-        assert!(!said.contains("14-hour"));
+        assert!(!said.contains("13.75"), "{said}");
+        assert!(!said.contains("13.8"), "{said}");
     }
 }
 
 // -- modes -------------------------------------------------------------------
 
 #[test]
-fn test_relaxed_limits_are_25_percent_longer() {
-    let (drive, duty, brk) = limits("realistic").unwrap();
+fn test_relaxed_keeps_the_same_eleven_fourteen_and_break() {
+    assert_eq!(limits("relaxed"), limits("realistic"));
     assert_eq!(
         limits("relaxed").unwrap(),
-        (drive * 1.25, duty * 1.25, brk * 1.25)
+        (11.0 * 60.0, 14.0 * 60.0, 8.0 * 60.0)
     );
 }
 
 #[test]
-fn test_relaxed_mode_delays_warnings() {
+fn test_relaxed_softens_fines_not_the_clock() {
+    assert_eq!(hos_fine("realistic", 0), 200.0);
+    assert_eq!(hos_fine("relaxed", 0), 100.0);
+    assert_eq!(hos_fine("relaxed", 3), 1000.0);
     let mut c = HosClock::new();
-    c.drive(470.0); // realistic would warn (10 minutes left before the break)
-    assert!(c.check_warnings("relaxed").is_empty()); // break rule now at 600
+    c.drive(481.0); // past the 8-hour break, still inside 11 and 14
+    assert!(c.in_violation("relaxed"));
+    assert!(c.is_break_only_violation("relaxed"));
+    assert_eq!(c.out_of_service_minutes("relaxed"), 30.0);
+    c.drive(200.0); // 681: past the 11-hour drive
+    assert!(!c.is_break_only_violation("relaxed"));
+    assert_eq!(c.out_of_service_minutes("relaxed"), 600.0);
+}
+
+#[test]
+fn test_relaxed_mode_warns_on_the_same_clock_as_realistic() {
+    let mut c = HosClock::new();
+    c.drive(470.0); // 10 minutes left before the 8-hour break
+    assert!(!c.check_warnings("relaxed").is_empty());
     assert!(!c.in_violation("relaxed"));
-    c.drive(140.0); // 610 driving minutes: past the relaxed break rule
+    c.drive(20.0); // 490: past the 8-hour break
     assert!(c.in_violation("relaxed"));
 }
 

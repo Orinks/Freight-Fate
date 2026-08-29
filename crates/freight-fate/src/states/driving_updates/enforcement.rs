@@ -489,13 +489,8 @@ impl DrivingState {
             }
         }
         let verdict = if self.cargo_is_overweight() {
-            // A truck over the legal limit is always red-lighted; no roll
-            // needed. Nothing in the game currently tracks cargo weight
-            // against a legal gross limit (ROADMAP.md: "Nothing ever weighs
-            // the truck"), so this is presently always False and every truck
-            // takes the seeded roll below -- wired here so the day that state
-            // lands, every overweight truck is red-lighted with no other
-            // change.
+            // A truck over the legal 80,000 lb GVW is always red-lighted;
+            // no roll needed.
             "red".to_string()
         } else {
             let mut rng =
@@ -547,14 +542,12 @@ impl DrivingState {
         }
     }
 
-    /// Whether this load is over the legal gross weight limit.
+    /// Whether this load is over the federal 80,000 lb GVW cap.
     ///
-    /// No part of the game currently weighs the truck against a legal
-    /// limit -- see ROADMAP.md's "Nothing ever weighs the truck" entry.
-    /// Always False until that lands; kept as its own method so
-    /// `roll_transponder_verdict` needs no change when it does.
+    /// Tractor + trailer + cargo only. Fuel is not counted. An overweight
+    /// truck is always red-lighted at a transponder scale.
     pub fn cargo_is_overweight(&self) -> bool {
-        false
+        self.trip.truck.is_over_legal_gvw()
     }
 
     /// Whether this stop's own exit is the one the driver is committed to.

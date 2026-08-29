@@ -52,6 +52,24 @@ impl DrivingState {
         let kind = event.kind;
         let sound = route_event_sound(event);
         let mut message = event.message.clone();
+        // Cue strings stay "billed to carrier settlement" so trip-cue tests
+        // stay green. Owner-ops hear the money move at speak time.
+        if ctx
+            .profile
+            .as_ref()
+            .is_some_and(|p| is_owner_operator(&p.business_status))
+        {
+            message.normal = message
+                .normal
+                .replace("billed to carrier settlement", "charged to your settlement")
+                .replace(
+                    "recorded for carrier settlement",
+                    "recorded for your settlement",
+                );
+            if let Some(terse) = message.terse.as_mut() {
+                *terse = terse.replace(", carrier.", ", your settlement.");
+            }
+        }
         if kind == TripEventKind::Lane && self.terse_speech(ctx) {
             // lane-count callouts are a normal-verbosity nicety, muted whole
             return;
@@ -954,7 +972,8 @@ impl DrivingState {
             return;
         }
         self.enforcement_events.insert(event_key);
-        let fine = hos::HOS_FINES[(self.hos_fine_count as usize).min(hos::HOS_FINES.len() - 1)];
+        let mode = ctx.settings.hos_mode.clone();
+        let fine = hos::hos_fine(&mode, self.hos_fine_count);
         self.hos_fine_count += 1;
         let mut evidence: Vec<String> = event.data.evidence.clone().unwrap_or_default();
         // A trailer hooked out of a drop yard came with whatever the last
@@ -971,21 +990,29 @@ impl DrivingState {
         let evidence_text = evidence.join(", ");
         ctx.audio.play("ui/error");
         ctx.controller.rumble.alert();
-        let mode = ctx.settings.hos_mode.clone();
         let serious_hos = !hos::HOS_NON_ENFORCED_MODES.contains(&mode.as_str())
             && hos_of(ctx).in_violation(&mode);
         if serious_hos {
             // A serious violation is a REAL roadside stop: lights, signal,
-            // brake to the shoulder, and the 10-hour out-of-service order
-            // passes while the truck is actually stopped. The old instant
-            // ledger hit teleported the clock ten hours mid-drive with the
-            // wheels still rolling -- the owner heard "you are stopped"
-            // while cruising, then found 3 AM had become 1:57 PM between
-            // two spoken lines (log, 2026-07-24). Fine and reputation are
+            // brake to the shoulder, and the out-of-service order passes
+            // while the truck is actually stopped. A missed 30-minute break
+            // is thirty minutes on the shoulder, not a 10-hour reset. Drive
+            // or duty still takes the ten hours. Fine and reputation are
             // applied by the stop itself, not here.
+            let break_only = hos_of(ctx).is_break_only_violation(&mode);
+            let oos_phrase = if break_only {
+                "thirty minutes"
+            } else {
+                "ten hours"
+            };
+            let return_message = if break_only {
+                "Back on the highway after the 30-minute break. Keep the logbook clean."
+            } else {
+                "Back on the highway with a reset clock. Keep the logbook clean."
+            };
             let summary = format!(
                 "{} Evidence: {evidence_text}. The officer writes the order: out of service, \
-                 ten hours, right here.",
+                 {oos_phrase}, right here.",
                 event.text()
             );
             let lights = format!(
@@ -1000,7 +1027,7 @@ impl DrivingState {
                 &summary,
                 fine,
                 hos::HOS_REPUTATION_HIT,
-                "Back on the highway with a reset clock. Keep the logbook clean.",
+                return_message,
                 &lights,
             );
             record_inspection(ctx);
@@ -1025,13 +1052,24 @@ impl DrivingState {
         record_inspection(ctx);
     }
 
-    /// `_place_out_of_service()`.
+    /// `_place_out_of_service()`. A full 10-hour reset: fatigue, drive, or
+    /// duty. A missed 30-minute break uses [`Self::place_out_of_service_minutes`].
     pub fn place_out_of_service(&mut self, ctx: &mut GameContext) {
-        advance_rest_clock(self, ctx, OUT_OF_SERVICE_MIN, None, "");
-        hos_mut_of(ctx).sleep();
-        {
+        self.place_out_of_service_minutes(ctx, OUT_OF_SERVICE_MIN);
+    }
+
+    /// Park for `minutes`. A full 10-hour order resets the clock and fatigue;
+    /// a 30-minute break order only takes the missed break.
+    pub fn place_out_of_service_minutes(&mut self, ctx: &mut GameContext, minutes: f64) {
+        advance_rest_clock(self, ctx, minutes, None, "");
+        if minutes >= hos::SLEEP_MIN {
+            hos_mut_of(ctx).sleep();
             let profile = profile_mut_of(ctx);
             profile.fatigue = hos::rest_sleep(profile.fatigue);
+        } else {
+            hos_mut_of(ctx).take_break(minutes);
+            let profile = profile_mut_of(ctx);
+            profile.fatigue = hos::rest_break(profile.fatigue);
         }
         self.out_of_service_count += 1;
         let snapshot = self.snapshot(ctx);

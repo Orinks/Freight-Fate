@@ -229,16 +229,21 @@ impl DrivingState {
     /// dirty record feel relentless without the game inventing bad luck.
     pub fn scale_selects_driver(&self, ctx: &mut GameContext, stop: &RoadStop) -> bool {
         let damage_pct = self.trip.truck.damage_pct;
+        let relaxed = ctx.settings.hos_mode == "relaxed";
         let Some(profile) = ctx.profile.as_mut() else {
             return false;
         };
         let score = refresh_selection_score(profile, damage_pct);
+        let mut chance = inspection_selection_chance(score);
+        if relaxed {
+            chance *= hos::RELAXED_INSPECTION_SCALE;
+        }
         let key = post_seed(
             Some(self.trip_seed),
             &format!("scale:{}", stop.key()),
             "select",
         );
-        PyRandom::new_from_str(&key).random() < inspection_selection_chance(score)
+        PyRandom::new_from_str(&key).random() < chance
     }
 
     /// The spoken safety-record line, for the driver's own status readout.

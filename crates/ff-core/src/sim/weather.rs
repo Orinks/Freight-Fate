@@ -358,11 +358,7 @@ impl WeatherSystem {
 
     /// Advance the career clock by `game_minutes` and the spoken-color
     /// timer by `sitting_minutes`.
-    pub fn update_paced(
-        &mut self,
-        game_minutes: f64,
-        sitting_minutes: f64,
-    ) -> Option<WeatherKind> {
+    pub fn update_paced(&mut self, game_minutes: f64, sitting_minutes: f64) -> Option<WeatherKind> {
         self.thunder_cooldown = (self.thunder_cooldown - sitting_minutes).max(0.0);
         if let Some(hours) = self.game_hours.as_mut() {
             *hours += game_minutes / 60.0; // advance the career clock

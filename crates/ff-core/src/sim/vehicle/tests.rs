@@ -1784,3 +1784,23 @@ fn test_engine_buff_slows_duty_wear_but_not_over_rev_abuse() {
         1e-3
     ));
 }
+
+#[test]
+fn test_legal_gvw_is_tractor_trailer_and_cargo_not_fuel() {
+    let mut t = TruckState::default();
+    t.cargo_kg = 12.0 * KG_PER_TON;
+    t.fuel_gal = t.specs.fuel_tank_gal;
+    assert!(!t.is_over_legal_gvw());
+    // 25 metric tons of cargo on the stock tare is over 80,000 lb.
+    t.cargo_kg = 25.0 * KG_PER_TON;
+    assert!(t.is_over_legal_gvw());
+    assert!(t.gross_mass_kg() > LEGAL_GVW_KG);
+    // Fuel is not part of the cap: emptying the tanks does not clear overweight.
+    t.fuel_gal = 0.0;
+    assert!(t.is_over_legal_gvw());
+    // At the cap is legal; over it is not.
+    t.cargo_kg = max_legal_cargo_kg(t.tare_kg());
+    assert!(!t.is_over_legal_gvw());
+    t.cargo_kg += 1.0;
+    assert!(t.is_over_legal_gvw());
+}

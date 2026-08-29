@@ -64,8 +64,10 @@ fn chatter_events(events: &[TripEvent]) -> usize {
         .iter()
         .filter(|e| match e.kind {
             TripEventKind::Billboard => true,
-            TripEventKind::Landmark => !e.data.explains_limit.unwrap_or(false)
-                && e.data.category.as_deref() != Some("village"),
+            TripEventKind::Landmark => {
+                !e.data.explains_limit.unwrap_or(false)
+                    && e.data.category.as_deref() != Some("village")
+            }
             TripEventKind::WeatherChange => true,
             TripEventKind::GpsCue => e.data.cb_patrol.is_some(),
             _ => false,
@@ -99,14 +101,7 @@ fn test_default_clock_is_still_compressed_standard() {
 #[test]
 fn test_hos_numbers_unchanged_by_the_speech_clock_split() {
     assert_eq!(REALISTIC_LIMITS, (11.0 * 60.0, 14.0 * 60.0, 8.0 * 60.0));
-    assert_eq!(
-        RELAXED_LIMITS,
-        (
-            REALISTIC_LIMITS.0 * 1.25,
-            REALISTIC_LIMITS.1 * 1.25,
-            REALISTIC_LIMITS.2 * 1.25
-        )
-    );
+    assert_eq!(RELAXED_LIMITS, REALISTIC_LIMITS);
     assert_eq!(CB_CALLS_PER_RUN, 2);
     assert_eq!(CHATTER_GAP_REAL_S, 90.0);
 }
@@ -158,7 +153,8 @@ fn test_20x_does_not_multiply_ambient_or_cb_over_the_same_sitting_time() {
         "20x multiplied ambient/CB over sitting time: 1x={real_chatter} 20x={compressed_chatter}"
     );
     // And 20x must not be a 20x pile-up of the planted billboards.
-    let uncompressed_would_be = compressed.billboards
+    let uncompressed_would_be = compressed
+        .billboards
         .iter()
         .filter(|c| c.at_mi <= compressed.position_mi)
         .count();
@@ -177,12 +173,8 @@ fn test_geo_callouts_fire_once_per_place_at_either_clock() {
     fn plant(trip: &mut Trip) {
         trip.landmarks = vec![
             {
-                let mut c = RoadsideCallout::new(
-                    "village:a",
-                    2.0,
-                    "village",
-                    "Entering Millville.",
-                );
+                let mut c =
+                    RoadsideCallout::new("village:a", 2.0, "village", "Entering Millville.");
                 c.explains_limit = false;
                 c
             },

@@ -404,7 +404,7 @@ impl SettingsCategoryState {
                     dyn_label(|s| format!("Hours of service: {}", hos_label(s))),
                     adjust(|s, ctx, d| s.cycle_hos(ctx, d)),
                     "Realistic enforces full hours rules and normal \
-                     road hazards. Relaxed eases the hours limits and \
+                     road hazards. Relaxed keeps the same 11-hour drive, 14-hour window, and 30-minute break, with lighter fines and fewer inspections, and \
                      makes road hazards rare, so you can focus on \
                      driver responsibility: hours, fueling, and repairs.",
                 ),
