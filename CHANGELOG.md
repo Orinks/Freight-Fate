@@ -4,10 +4,10 @@
 
 ### Added
 
-- **Career 1.9 tester downloads are ready to play.** The Windows portable zip
-  now includes the music and required audio libraries. Players using packaged
-  Career 1.9 tester builds can also move to newer builds through the Snapshot
-  update channel.
+- **Career 1.9 tester snapshots are ready to play.** The Windows portable zip
+  for each Career 1.9 prerelease build now includes the music and required audio
+  libraries. Players using a Career 1.9 tester snapshot can move to newer
+  prerelease builds by choosing `Update channel: developer snapshots`.
 
 - **The list of drivers on duty keeps itself up to date while you read it.**
   Open Drivers on duty from the Online menu and the list now checks again on
