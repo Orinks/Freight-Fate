@@ -1475,14 +1475,23 @@ def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
     stamp_build_info(build_dir, label, resource_root)
     stage_release_docs(build_dir, resource_root)
     verify_rust_payload(build_dir)
+    strip_user_data(build_dir)
+    if sys.platform == "darwin" and run_smoke:
+        # Apple Silicon requires valid signatures on executable code.  The
+        # install-name relocation above invalidates SDL's existing signature,
+        # so sign the bundle before asking macOS to launch it.
+        sign_distribution(build_dir)
     if run_smoke:
         smoke_check(build_dir)
+        # Retain the last-line privacy defense even though smoke redirects its
+        # data and log paths.  A runtime fallback must never enter the archive.
+        strip_user_data(build_dir)
     else:
         # The Rust binary's ``--smoke`` is not wired yet (main.rs is still
         # the stub); pass ``--smoke`` once it is.
         print("Skipped the smoke check (pass --smoke to boot the staged Rust build).")
-    strip_user_data(build_dir)
     if sys.platform == "darwin":
+        # Prove the archive input after every possible smoke-side mutation.
         sign_distribution(build_dir)
     DIST.mkdir(parents=True, exist_ok=True)
     out = archive(build_dir, label)

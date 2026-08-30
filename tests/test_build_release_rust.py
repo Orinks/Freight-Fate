@@ -798,8 +798,8 @@ def test_intel_macos_archive_keeps_legacy_suffix(tmp_path, monkeypatch):
     assert out.name == "FreightFate-1.8.8-macos.zip"
 
 
-def test_macos_signs_the_completed_app_after_smoke_cleanup(tmp_path, monkeypatch):
-    """Changing bundle contents after codesign invalidates the finished signature."""
+def test_macos_signs_before_smoke_then_cleans_and_resigns(tmp_path, monkeypatch):
+    """Smoke launches a signed app; the archive is cleaned and verified again."""
     build_release = load_build_release_module()
     app = tmp_path / "FreightFate.app"
     archive = tmp_path / "FreightFate-test-macos.zip"
@@ -820,7 +820,17 @@ def test_macos_signs_the_completed_app_after_smoke_cleanup(tmp_path, monkeypatch
 
     build_release.build_rust("test", None, True)
 
-    assert events == ["stamp", "docs", "verify", "smoke", "strip", "sign", "archive"]
+    assert events == [
+        "stamp",
+        "docs",
+        "verify",
+        "strip",
+        "sign",
+        "smoke",
+        "strip",
+        "sign",
+        "archive",
+    ]
 
 
 def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, monkeypatch):
