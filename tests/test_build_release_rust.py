@@ -709,6 +709,32 @@ def test_macos_sdl_resolves_an_rpath_install_name_through_homebrew(tmp_path, mon
     assert build_release.macos_sdl_library(exe) == sdl
 
 
+def test_macos_linked_libraries_ignores_fat_macho_slice_headers(tmp_path, monkeypatch):
+    """Every fat-binary architecture header names the file, not a dependency."""
+    build_release = load_build_release_module()
+    dylib = tmp_path / "libbass.dylib"
+    dylib.write_bytes(b"Mach-O")
+
+    def run(command, **_kwargs):
+        assert command == ["otool", "-L", str(dylib)]
+        output = (
+            f"{dylib} (architecture x86_64):\n"
+            "\t@rpath/libbass.dylib (compatibility version 1.0.0)\n"
+            "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n"
+            f"{dylib} (architecture arm64):\n"
+            "\t@rpath/libbass.dylib (compatibility version 1.0.0)\n"
+            "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n"
+        )
+        return subprocess.CompletedProcess(command, 0, output, "")
+
+    monkeypatch.setattr(build_release.subprocess, "run", run)
+
+    assert build_release.macos_linked_libraries(dylib) == [
+        "@rpath/libbass.dylib",
+        "/usr/lib/libSystem.B.dylib",
+    ]
+
+
 def test_macos_relocation_makes_sdl_bundle_relative(tmp_path, monkeypatch):
     """The app must not retain a build-machine Homebrew path."""
     build_release = load_build_release_module()

@@ -1122,9 +1122,17 @@ def macos_linked_libraries(executable: Path) -> list[str]:
         capture_output=True,
         text=True,
     )
-    return [
-        line.strip().split(" (", 1)[0] for line in result.stdout.splitlines()[1:] if line.strip()
-    ]
+    install_names: list[str] = []
+    for line in result.stdout.splitlines():
+        # Dependency rows are indented.  A fat Mach-O repeats an unindented
+        # ``<file> (architecture ...):`` header for every slice; that file
+        # path is not an install name and must not fail the builder-path audit.
+        if not line[:1].isspace():
+            continue
+        install_name = line.strip().split(" (", 1)[0]
+        if install_name and install_name not in install_names:
+            install_names.append(install_name)
+    return install_names
 
 
 def macos_sdl_library(executable: Path) -> Path:
