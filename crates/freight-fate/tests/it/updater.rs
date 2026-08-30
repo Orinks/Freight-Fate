@@ -39,8 +39,9 @@ fn release_with(
     })
 }
 
-const ALL_ASSETS: [&str; 3] = [
+const ALL_ASSETS: [&str; 4] = [
     "-windows-portable.zip",
+    "-macos.zip",
     "-macos-arm64.zip",
     "-linux-x64.tar.gz",
 ];
@@ -176,7 +177,13 @@ fn test_apple_silicon_macos_selects_only_arm64_archive() {
 
 #[test]
 fn test_intel_macos_does_not_offer_arm64_archive() {
-    let release = release_with("1.9-tester-20260830", true, "", "", &["-macos-arm64.zip"]);
+    let release = release_with(
+        "1.9-tester-20260830",
+        true,
+        "",
+        "",
+        &["-macos.zip", "-macos-arm64.zip"],
+    );
     assert!(pick_asset(&release, None, &mac_env(Architecture::X86_64)).is_none());
 }
 
@@ -187,6 +194,13 @@ fn test_stable_macos_keeps_legacy_archive_contract_on_both_architectures() {
         let asset = pick_asset(&release, None, &mac_env(architecture)).unwrap();
         assert!(asset.0.ends_with("-macos.zip"));
     }
+}
+
+#[test]
+fn test_shared_stable_fixture_offers_legacy_archive_on_apple_silicon_macos() {
+    let info = stable_update_from(&release("v1.8.8"), "1.8.7", &mac_env(Architecture::Aarch64))
+        .expect("the shared stable fixture must include its legacy Mac archive");
+    assert!(info.asset_name.ends_with("-macos.zip"));
 }
 
 #[test]
@@ -223,6 +237,19 @@ fn test_dev_update_skips_non_nightlies_and_finds_newer() {
     let info = dev_update_from(&releases, Some(&build), None, &env()).expect("an update");
     assert_eq!(info.tag, "nightly-20260611");
     assert!(info.title.contains("2026-06-11"));
+}
+
+#[test]
+fn test_shared_18_nightly_fixture_offers_legacy_archive_on_apple_silicon_macos() {
+    let build = BuildInfo::new("nightly-20260610", "dev", "2026-06-10");
+    let info = dev_update_from(
+        &[nightly("nightly-20260611")],
+        Some(&build),
+        None,
+        &mac_env(Architecture::Aarch64),
+    )
+    .expect("the shared 1.8 nightly fixture must include its legacy Mac archive");
+    assert!(info.asset_name.ends_with("-macos.zip"));
 }
 
 #[test]
