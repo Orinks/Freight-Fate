@@ -5272,47 +5272,80 @@ onto exit signalling.
       both were updated. Pushing it needs `git lfs push origin <branch>`
       by absolute path first (git-lfs is not on PATH here), then the
       normal `git push`.
-- [ ] **A real endorsement path (owner, 2026-08-15) -- design from
-      actual CDL structure.** Four endorsements (refrigerated,
-      heavy_haul, high_value, tank -- three of them done by level 4) is
-      not meaningful progression. The real credential ladder has far
-      more rungs, and each maps naturally onto freight, lanes, and pay
-      the game already models. Proposed two-track path, grounded in
-      FMCSA structure:
-      RESTRICTION REMOVALS (early game): a fresh CDL can carry
-      restrictions that are lifted by training, not levels -- the E
-      restriction (automatic transmission only) is the natural first
-      rung and ties straight into the game's existing transmission
-      setting: train out the restriction, drive manual boxes, better
-      settlements on manual-spec tractors.
-      CARRIER CERTIFICATIONS (early-mid, sponsored): today's
-      refrigerated / high-value stay here, joined by flatbed load
-      securement (steel, lumber, machinery classes) -- these are
-      company training, not CDL law, and dispatch trust is the gate.
-      CDL ENDORSEMENTS (mid-late, real names, knowledge tests +
-      course fees + time): T doubles/triples (unlocks double-trailer
-      freight), N tank (the existing tank endorsement, renamed to its
-      real letter), H hazmat -- the standout game beat: ELDT theory
-      course PLUS a TSA background check with a real waiting period of
-      in-game days and a fee before chemicals-class freight opens --
-      and X (tank + hazmat combined) for fuel-tanker work.
-      SPECIALIST CREDENTIALS (late game): LCV certification (49 CFR
-      380: requires the T endorsement plus six months of Class A
-      experience -- a real prerequisite chain worth copying) unlocking
-      turnpike doubles/triples ONLY on the specific corridors that
-      allow them, which fits the real-map corridor data; TWIC port
-      card for container freight out of port cities; oversize/
-      overweight permits per state with pilot-car escorts, curfews,
-      and route surveys deepening heavy_haul from one unlock into a
-      permit economy.
-      Pacing intent: restriction removal in act one, first CDL letters
-      in act two, LCV/TWIC/superload in act three -- so the back half
-      of the 30-level arc earns credentials instead of only numbers.
-      Each rung is a course (money + dwell time, motel-style), some
-      with prerequisites and waiting periods, all spoken in plain
-      language with the real-world name given once. Validator note:
-      endorsement keys ride the invariants export, so every new key is
-      an exporter regen + staging deploy in the same change.
+- [x] **The credential ladder SHIPPED (designed 2026-08-15, built
+      2026-08-30) -- four tiers from actual CDL structure, the numbers
+      verified against eCFR, TSA, and FHWA sources rather than blogs.**
+      One `CREDENTIALS` catalog (`ff-core/src/models/credentials.rs`)
+      replaced the five parallel endorsement tables; the terminal menu
+      is now Licenses and training; courses cost money AND game time;
+      grants repeat at the next terminal entry. Buying ahead is bounded
+      (owner rule 2026-08-30): a sponsored course books at most ONE
+      level before its grant level, so money never skips the ladder --
+      the old menu sold the tank course to a level-1 wallet. Per tier:
+      TRAINING: `manual_transmission` -- the E restriction removal
+      (49 CFR 383.95(c): a skills retest in a manual truck, not a fee)
+      paying a 3 percent manual-spec differential on settlements
+      driven manual. The transmission SETTING stays freely toggleable;
+      the credential only ever adds money, so accessibility is never
+      gated behind it.
+      CERTIFICATES (carrier training, level-sponsored, buyable early):
+      refrigerated 2; NEW `flatbed_securement` 2, which took steel and
+      lumber (securement rules are 49 CFR 393 subpart I -- coils get
+      their own section); heavy_haul 3 keeps machinery; high_value 4
+      keeps packaged chemicals and electronics.
+      ENDORSEMENTS (written test; only tank stays level-derived):
+      T `doubles_triples` (min level 8, $60 -- knowledge test only per
+      383.93(c), not ELDT-covered) unlocking NEW `parcel_doubles`
+      nationwide, because STAA twin 28s are legal in every state and
+      needed no corridor data; N `tank` (key unchanged, level 16
+      kept); H `hazmat` (min level 10, $185 all-in against the real
+      $85.25 TSA fee plus theory course) with a 30-game-day background
+      check that clears WHILE DRIVING (`pending_credentials` on the
+      career, activation at arrival or terminal), unlocking NEW
+      `hazardous` placarded freight; X is the derived tank-plus-hazmat
+      combination, and `fuel_bulk` now requires both.
+      SPECIALIST: `twic` (min 18, $125 -- the widely quoted $125.25 is
+      stale, TSA's published fee is $124 -- 20-day wait) gating NEW
+      `port_container` drayage out of port, port terminal, and
+      intermodal facilities; `lcv` (min 20, $2,000, requires T plus a
+      clean recent record via the existing `serious_in_window` window
+      -- the 49 CFR 380.203 shape, and LCV is a carrier-held training
+      certificate, never a DMV endorsement) gating NEW
+      `turnpike_doubles` offered only when BOTH lane endpoints sit in
+      ISTEA-freeze states (23 CFR 658 Appendix C list in
+      `LCV_STATES`).
+      Validator and site: export rows now carry `tier` and OMIT
+      `level` for course-only keys -- a missing level compares false
+      in the Convex held-check, so even undeployed site code cannot
+      level-grant a background-checked credential. Exporter
+      regenerated on both sides, byte-parity held. Six new cargo
+      badges. New adversarial scenario `credential_ladder_gates`.
+- [ ] **Oversize/overweight permit economy (deferred from the
+      credential ladder; act three).** Per-state single-trip permits
+      (state law, not federal: California $16, Texas $60 plus weight
+      fees), pilot cars above roughly 12 to 16 feet of width,
+      daylight-only and holiday curfews, and superloads (Texas: over
+      254,300 pounds, $375-plus fees, a three-to-four-week route
+      study) deepening heavy_haul into a permit economy. `TollEvent`
+      is the per-state-charge model to copy. This is also where
+      raising GVW above 80,000 pounds on the LCV network belongs --
+      today `turnpike_doubles` stays inside the game's legal-weight
+      clamp so overweight enforcement stays honest.
+- [ ] **LCV corridor fidelity.** The shipped gate checks lane
+      ENDPOINTS against the frozen state list; real LCV operation is
+      per-corridor (specific turnpikes, break-and-remake yards at the
+      state line). When corridor-level LCV data exists, tighten the
+      gate from state pairs to the actual turnpike legs.
+- [ ] **The frame-time p99 budget test is load-sensitive (found
+      2026-08-30, pre-existing).** `frame_time::a_driven_frame_stays_
+      well_inside_the_sixty_hertz_budget` fails inside a full
+      `cargo test -p freight-fate --test it` run on the dev machine
+      (p99 6.7-9.6 ms against the 4.2 ms debug ceiling, median a
+      healthy 107 us) and passes comfortably run solo (0.72 s).
+      Verified on the untouched branch too -- identical failure -- so
+      it is the parallel test binary's load, not a regression. Either
+      isolate the bench from sibling test threads or gate the p99
+      assertion on an idle-machine check; do NOT loosen the budget.
 - [ ] **Jail for a pursuit, not a three-hour "processing" fee.** Owner
       question 2026-08-10, roadmapped rather than built. Speeding is a
       citation even at the extreme end, so no change there -- but fleeing
@@ -9078,24 +9111,28 @@ Deliver -> Earn and level up -> Repeat
       key never catches a latch: no spoken line, no click, no cruise
       or keeper variant. Brake latch remains as Settings, Driving
       assistance, Latching brake, on or off.
-- [ ] **Endorsements earned by coursework, not just cash (owner idea
-      2026-07-15).** Today an endorsement is a level threshold or a paid
-      course with no learning in it; both should route through the
-      driving school as a spoken written-test module -- study material
-      read aloud, then a short question set to pass. Hazmat is the
-      flagship and does not exist yet: placarding, tunnel restrictions
-      (the map already bakes them), segregation rules, plus the real
-      TSA-style background wait modeled as game days before it
-      activates. Company drivers get courses on the carrier account;
-      owner-operators pay their own way.
-- [ ] **Endorsement grants must be heard, not missed.** The level-up
-      announcement is spoken once inside the delivery-summary chatter
-      and is gone; the owner declined a reefer load he was already
-      cleared for. The Career stats endorsements line (shipped
-      2026-07-15) is the reviewable record; still worth doing: repeat
-      the grant on the next terminal entry, and let unlocked
-      endorsement jobs on the board name the clearance ("you hold the
-      refrigerated endorsement") the first few times.
+- [ ] **Credentials earned by coursework, not just cash (owner idea
+      2026-07-15; half arrived with the 2026-08-30 credential ladder).**
+      Hazmat now EXISTS -- course fee, game-time dwell, and the real
+      TSA-style background wait in game days before it activates -- but
+      every course is still money plus time with no learning in it. The
+      remaining piece: route courses through the driving school as a
+      spoken written-test module (study material read aloud, then a
+      short question set to pass; hazmat's would cover placarding and
+      segregation). Also still open: company drivers taking sponsored
+      courses on the carrier account instead of their own wallet, and
+      hazmat ROUTE restrictions -- the map's baked restrictions are
+      only low-clearance and weight, so tunnel bans for placarded loads
+      are a data layer that does not exist yet (the old claim that the
+      map bakes them was wrong).
+- [x] **Endorsement grants must be heard, not missed -- CLOSED
+      2026-08-30 with the credential ladder.** Every grant now queues an
+      `unacknowledged_grants` repeat spoken at the next terminal entry,
+      cleared background checks are announced at the terminal and at
+      arrival, and an unlocked specialty job's detail screen says
+      "Cleared for it: you hold ..." -- permanently, not just the first
+      few times. The Career stats screen lists held credentials by tier
+      plus every check still in progress with days remaining.
 
 ### World
 - [x] More cities and regional highways (1.4.0)

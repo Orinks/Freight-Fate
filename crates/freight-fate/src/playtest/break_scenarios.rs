@@ -166,6 +166,12 @@ pub static SCENARIOS: &[Scenario] = &[
         run: career_economy::endorsement_wallet_edges,
     },
     Scenario {
+        name: "credential_ladder_gates",
+        description: "Book courses past their level, prerequisite, and background-check \
+                      gates; every refusal must be named and the TSA wait must be real.",
+        run: career_economy::credential_ladder_gates,
+    },
+    Scenario {
         name: "money_exact_zero_and_below",
         description: "Fines that land the balance on exactly $0, then below; escalation and \
                       ledger must agree.",

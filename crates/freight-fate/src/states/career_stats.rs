@@ -3,8 +3,8 @@
 
 use ff_core::models::career::xp_to_next_level;
 use ff_core::models::carrier_fleet::equipment_status_lines;
+use ff_core::models::credentials::{credential, CredentialTier, CREDENTIALS};
 use ff_core::models::enforcement;
-use ff_core::models::jobs::endorsement_label;
 use ff_core::models::profile::Profile;
 use ff_core::models::solvency::debt_line;
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
@@ -50,20 +50,59 @@ impl CareerStatsState {
         } else {
             format!("fatigue {} percent", fmt_f(p.fatigue, 0))
         };
-        let mut held: Vec<String> = career
-            .endorsements()
-            .iter()
-            .map(|e| endorsement_label(Some(e)).replace(" endorsement", ""))
-            .collect();
-        held.sort();
-        // Earned endorsements were only ever spoken once, at the level-up
-        // that granted them; this line is the reviewable record (owner got
-        // stuck declining a reefer load he was already cleared to haul).
-        let endorsements = if held.is_empty() {
-            "Endorsements: none yet".to_string()
-        } else {
-            format!("Endorsements: {}", held.join(", "))
+        let hours_now = p.game_hours;
+        // Earned credentials were only ever spoken once, at the level-up
+        // that granted them; these lines are the reviewable record (owner
+        // got stuck declining a reefer load he was already cleared to
+        // haul). One line per ladder tier, in tier order, plus what is
+        // still waiting on a background check.
+        let held = career.endorsements();
+        let tier_line = |tier: CredentialTier, noun: &str, empty: &str| {
+            let mut labels: Vec<&str> = CREDENTIALS
+                .iter()
+                .filter(|c| c.tier == tier && held.contains(c.key))
+                .map(|c| c.label)
+                .collect();
+            labels.sort_unstable();
+            if labels.is_empty() {
+                format!("{noun}: {empty}")
+            } else {
+                format!("{noun}: {}", labels.join(", "))
+            }
         };
+        let certificates = tier_line(CredentialTier::Certificate, "Certificates", "none yet");
+        let endorsements = if held.contains("tank") && held.contains("hazmat") {
+            let line = tier_line(CredentialTier::Endorsement, "Endorsements", "none yet");
+            format!("{line} -- the X combination")
+        } else {
+            tier_line(CredentialTier::Endorsement, "Endorsements", "none yet")
+        };
+        let mut specialist: Vec<&str> = CREDENTIALS
+            .iter()
+            .filter(|c| {
+                held.contains(c.key)
+                    && matches!(
+                        c.tier,
+                        CredentialTier::Specialist | CredentialTier::Training
+                    )
+            })
+            .map(|c| c.label)
+            .collect();
+        specialist.sort_unstable();
+        let mut pending: Vec<String> = career
+            .pending_credentials
+            .iter()
+            .filter_map(|p| {
+                let cred = credential(&p.key)?;
+                let days = ((p.ready_at_h - hours_now) / 24.0).ceil().max(0.0);
+                Some(format!(
+                    "{} background check in progress, about {} days left",
+                    cred.gate_label,
+                    fmt_f(days, 0)
+                ))
+            })
+            .collect();
+        pending.sort();
         // Money was reviewable nowhere on this screen, which left a player
         // asking "how much do I owe" with no way to find out short of opening
         // a fuel menu. Balance is always here now; what is owed joins it only
@@ -94,7 +133,12 @@ impl CareerStatsState {
         if !owed.is_empty() {
             lines.push(owed);
         }
+        lines.push(certificates);
         lines.push(endorsements);
+        if !specialist.is_empty() {
+            lines.push(format!("Training and cards: {}", specialist.join(", ")));
+        }
+        lines.extend(pending);
         lines.push(format!(
             "Deliveries: {}, {} percent on time",
             career.deliveries,

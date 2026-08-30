@@ -227,7 +227,12 @@ from the words, and synonyms cost them a re-read.
 | A truck stop or service POI | stop | POI, waypoint | `Stop`, `RoadStop` |
 | The level band | rank | tier, grade | `CareerRank` |
 | A group of related achievements | category | group, section, tab | `AchievementCategory` |
-| A license add-on | endorsement | certification, licence | `ENDORSEMENT_LEVELS` |
+| Any rung of the license-and-training ladder, taken together | credential (menu name "Licenses and training") | qualification, license add-on | `CREDENTIALS` |
+| A real CDL letter earned by written test (doubles T, tank N, hazmat H) | endorsement | certification, licence, permit | `CredentialTier::Endorsement` |
+| Carrier-issued training (refrigerated, flatbed securement, heavy-haul, high-value, LCV) | certificate | certification, endorsement (a certificate is not on the CDL), card | `CredentialTier::Certificate`, `"lcv"` |
+| Holding both the tank and hazmat endorsements | the X combination | X endorsement (it is a combination code, not a third test) | `X_COMBINATION_ANNOUNCEMENT` |
+| The port security card | TWIC port card | TWIC alone (say what it opens), port pass | `CREDENTIALS`, `"twic"` |
+| The federal vetting behind hazmat and the port card | background check | security threat assessment, STA, TSA check (the agency name is fine once, in help) | `PendingCredential` |
 | A purchasable consumable | its own name: "shower", "energy drink" | buff, item, power-up | `Buff` |
 | The tractor a carrier gave you | your assigned truck | your truck (when leased) | `FleetTier` |
 | How much of the lane-holding work the truck does | lane keeping, always with its value clause ("full, the truck holds the lane and takes your exits") | lane drift (retired 1.9), steering assist, lane keeping assist (that is `lane_centering_assist`, a reserved row for steering help that is not implemented -- never describe it as working), the bare value word alone -- "off" here is the hardest mode, the opposite of "off" on the rows around it | `settings.lane_keeping` |

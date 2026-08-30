@@ -62,8 +62,10 @@ fn test_career_stats_is_a_reviewable_menu_with_rest_status() {
     assert!(rows.iter().any(|l| l == "Rest: fatigue 40 percent"));
     assert!(!rows.iter().any(|l| l == "Rest: fully rested"));
 
-    // Endorsements are a reviewable record, not a one-time level-up
-    // announcement: a driver holding reefer and high-value hears both.
+    // Credentials are a reviewable record, not a one-time level-up
+    // announcement: a driver holding reefer and high-value hears both on
+    // the certificates line, and the endorsements line stays honest about
+    // holding none.
     {
         let p = app.ctx.profile.as_mut().unwrap();
         p.career
@@ -74,7 +76,25 @@ fn test_career_stats_is_a_reviewable_menu_with_rest_status() {
     let rows = labels::<CareerStatsState>(&app);
     assert!(rows
         .iter()
-        .any(|l| l == "Endorsements: high-value, refrigerated"));
+        .any(|l| l == "Certificates: high-value, refrigerated"));
+    assert!(rows.iter().any(|l| l == "Endorsements: none yet"));
+
+    // A check in flight is reviewable too, with the days it has left.
+    {
+        let p = app.ctx.profile.as_mut().unwrap();
+        let ready = p.game_hours + 12.0 * 24.0;
+        p.career
+            .pending_credentials
+            .push(ff_core::models::career::PendingCredential {
+                key: "hazmat".to_string(),
+                ready_at_h: ready,
+            });
+    }
+    with_state_mut::<CareerStatsState, _>(&mut app, |s, ctx| s.refresh(ctx, true));
+    let rows = labels::<CareerStatsState>(&app);
+    assert!(rows
+        .iter()
+        .any(|l| l == "hazmat endorsement background check in progress, about 12 days left"));
 
     key(&mut app, Key::Escape);
     assert!(is::<CityMenuState>(&app));

@@ -1604,7 +1604,7 @@ fn test_tank_freight_is_gated_to_the_back_half_of_the_career() {
             cargo.min_level >= 16,
             "tank work belongs to the back half of the arc"
         );
-        assert_eq!(cargo.endorsement, Some("tank"));
+        assert!(cargo.credentials.contains(&"tank"));
         assert!(cargo.tank);
         assert_eq!(trailer_keys_for_cargo(key), ["tank"]);
     }

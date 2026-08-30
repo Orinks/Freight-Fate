@@ -82,6 +82,20 @@ pub const TRAILER_CATALOG: &[TrailerType] = &[
         purchase_price: 96_000.0,
         owned_per_mile_reserve: 0.13,
     },
+    // Two 28-foot pups and a converter dolly: the parcel networks' linehaul
+    // set. Twice the hookups, twice the walk-around, and the price of two
+    // boxes -- but it is the equipment the doubles endorsement exists for.
+    TrailerType {
+        key: "double_van",
+        label: "Twin trailers",
+        equipment_text: "twin 28-foot trailers",
+        description:
+            "Twin-trailer program for doubles freight: two short vans and a converter dolly.",
+        lease_deposit: 11_000.0,
+        per_mile_reserve: 0.21,
+        purchase_price: 74_000.0,
+        owned_per_mile_reserve: 0.10,
+    },
 ];
 
 /// `TRAILER_CATALOG.get(key)`.
@@ -116,8 +130,12 @@ pub const CARGO_TRAILER_COMPATIBILITY: &[(&str, &[&str])] = &[
     ("refrigerated", &["reefer"]),
     ("chemicals", &["dry_van"]),
     ("electronics", &["dry_van"]),
+    ("parcel_doubles", &["double_van"]),
+    ("hazardous", &["dry_van"]),
     ("fuel_bulk", &["tank"]),
     ("liquid_food", &["tank"]),
+    ("port_container", &["flatbed"]),
+    ("turnpike_doubles", &["double_van"]),
 ];
 
 pub fn trailer_keys_for_cargo(cargo_key: &str) -> &'static [&'static str] {
@@ -324,9 +342,23 @@ mod tests {
     }
 
     #[test]
-    fn the_catalog_keys_are_unique_and_the_tank_is_last() {
+    fn the_catalog_keys_are_unique_and_stable() {
         let keys: Vec<&str> = TRAILER_CATALOG.iter().map(|t| t.key).collect();
-        assert_eq!(keys, ["dry_van", "reefer", "flatbed", "bulk", "tank"]);
+        assert_eq!(
+            keys,
+            ["dry_van", "reefer", "flatbed", "bulk", "tank", "double_van"]
+        );
         assert_eq!(TANK_CAPACITY_TONS, 26.0);
+    }
+
+    #[test]
+    fn doubles_freight_needs_the_twin_trailer_program() {
+        for key in ["parcel_doubles", "turnpike_doubles"] {
+            assert_eq!(trailer_keys_for_cargo(key), ["double_van"]);
+        }
+        assert_eq!(
+            equipment_text_for_cargo("parcel_doubles"),
+            "twin 28-foot trailers"
+        );
     }
 }

@@ -16,6 +16,7 @@ use ff_core::models::carrier_fleet::{
     assigned_truck_key, equipment_held_back, fleet_tier_for_level, fleet_upgrade_announcement,
     withheld_promotion_text, WITHHELD_UNLOCK_TAIL,
 };
+use ff_core::models::credentials::MANUAL_SPEC_DIFFERENTIAL;
 use ff_core::models::enforcement;
 use ff_core::models::jobs::{lane_key, Job};
 use ff_core::models::solvency::{self, deductions_from_settlement};
@@ -173,6 +174,18 @@ impl ArrivalState {
             p.market.advance_to(market_day);
             p.active_trip = None;
             p.pay_advance_used_for_load = false;
+        }
+        {
+            let cleared = {
+                let p = profile_mut_of(ctx);
+                let now = p.game_hours;
+                let lines = p.career.activate_pending(now, true);
+                if !lines.is_empty() {
+                    p.dispatch_board_cache = None;
+                }
+                lines
+            };
+            announcements.extend(cleared);
         }
         ctx.save_profile();
         self.summary_parts.insert(
@@ -444,6 +457,27 @@ impl ArrivalState {
         // account for, which reads as an edited save to cloud upload
         // screening. Accessorials and tolls are cash on the existing ledger,
         // not a second settlement, so they never fold into career earnings.
+        //
+        // The manual-spec differential: trained out of the automatic-only
+        // restriction, and actually rowing the gears on this run. Added
+        // before settled_pay is taken, so the cash and the career's booked
+        // earnings agree -- unbooked cash reads as an edited save to cloud
+        // upload screening.
+        if profile_of(ctx)
+            .career
+            .endorsements()
+            .contains("manual_transmission")
+            && !d.trip.truck.transmission.automatic
+        {
+            let manual_bonus = round_py_n(net_pay * MANUAL_SPEC_DIFFERENTIAL, 2).max(0.0);
+            if manual_bonus >= 1.0 {
+                net_pay = round_py_n(net_pay + manual_bonus, 2);
+                self.summary_parts.push(format!(
+                    "Manual-spec differential: {} dollars for running the manual gearbox.",
+                    fmt_grouped(manual_bonus, 0)
+                ));
+            }
+        }
         let settled_pay = net_pay;
         // Owner-ops ARE the carrier: detention, lumpers, washouts, and tolls
         // already sit on the existing ledger. Apply that ledger to the wallet
@@ -572,6 +606,22 @@ impl ArrivalState {
             p.market.advance_to(market_day);
             p.active_trip = None;
             p.pay_advance_used_for_load = false;
+        }
+        // A background check that came due mid-run clears here: the wait is
+        // paperwork time, not a hold on driving, so the news arrives with
+        // the settlement (and is repeated at the next terminal, since a
+        // grant buried in delivery chatter is easy to miss).
+        {
+            let cleared = {
+                let p = profile_mut_of(ctx);
+                let now = p.game_hours;
+                let lines = p.career.activate_pending(now, true);
+                if !lines.is_empty() {
+                    p.dispatch_board_cache = None;
+                }
+                lines
+            };
+            announcements.extend(cleared);
         }
         ctx.save_profile();
         let occurred_at_ms = SystemTime::now()

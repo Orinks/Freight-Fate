@@ -9,9 +9,11 @@ use ff_core::models::business::{
     INDEPENDENT_AUTHORITY, LEASED_OWNER_OPERATOR, OWNER_OPERATOR_BUY_IN,
     WEIGH_STATION_TRANSPONDER_SIGNUP_FEE,
 };
-use ff_core::models::career::{
-    endorsement_course_cost, endorsement_label_spoken, ENDORSEMENT_LEVELS,
+use ff_core::models::career::PendingCredential;
+use ff_core::models::credentials::{
+    course_eligibility, course_offer_text, credential, Credential, CREDENTIALS,
 };
+use ff_core::models::enforcement::HOURS_PER_DAY;
 use ff_core::models::trailers::{TrailerType, DEFAULT_TRAILER_PROGRAMS, TRAILER_CATALOG};
 use ff_core::models::trucks::{TruckModel, Upgrade, TRUCK_CATALOG, UPGRADE_CATALOG};
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
@@ -983,7 +985,7 @@ impl Menu for TrailerProgramState {
 
 impl_state_for_menu!(TrailerProgramState);
 
-// -- Endorsement courses -----------------------------------------------------------------------
+// -- Licenses and training (the credential ladder) ---------------------------------------------
 
 pub struct EndorsementCourseState {
     menu: MenuCore<Self>,
@@ -998,46 +1000,128 @@ impl Default for EndorsementCourseState {
 impl EndorsementCourseState {
     pub fn new() -> Self {
         EndorsementCourseState {
-            menu: MenuCore::new("Endorsement courses").with_intro_help(
-                "Each endorsement course unlocks its freight early, before the \
-                 carrier would sponsor the training at the listed level. Enter books \
-                 a course you can afford. Escape returns to the terminal.",
+            menu: MenuCore::new("Licenses and training").with_intro_help(
+                "The whole credential ladder: carrier certificates the company \
+                 sponsors at their listed levels, the real CDL endorsements \
+                 earned by written test, and the late-career cards. Enter books \
+                 a course you qualify for; a course you do not qualify for says \
+                 why. Courses take game time, and a background check keeps \
+                 running while you drive. Escape returns to the terminal.",
             ),
         }
     }
 
+    /// No live suspension and nothing serious on the recent record: the
+    /// 49 CFR 380.203 shape, judged from the record the game already keeps.
+    fn clean_record(ctx: &GameContext) -> bool {
+        let p = profile(ctx);
+        !p.driving_record.suspended(p.game_hours)
+            && p.driving_record.serious_in_window(p.game_hours) == 0
+    }
+
+    fn eligibility(ctx: &GameContext, cred: &Credential) -> (bool, Vec<String>) {
+        let p = profile(ctx);
+        let held = p.career.endorsements();
+        let pending: Vec<String> = p
+            .career
+            .pending_credentials
+            .iter()
+            .map(|pc| pc.key.clone())
+            .collect();
+        course_eligibility(
+            cred,
+            p.career.level(),
+            &held,
+            &pending,
+            Self::clean_record(ctx),
+        )
+    }
+
     fn buy(&mut self, ctx: &mut GameContext, key: &'static str) {
-        let label = endorsement_label_spoken(key).unwrap_or(key);
-        let cost = endorsement_course_cost(key).unwrap_or(0.0);
-        if profile(ctx).career.endorsements().contains(key) {
-            ctx.say(&format!("You already hold the {label} endorsement."));
+        let cred = credential(key).expect("a ladder credential key");
+        let (ok, reasons) = Self::eligibility(ctx, cred);
+        if !ok {
+            ctx.audio.play("ui/error");
+            ctx.say(&reasons.join(" "));
             return;
         }
-        if profile(ctx).money < cost {
+        if profile(ctx).money < cred.course_cost {
             ctx.audio.play("ui/error");
             ctx.say(&format!(
-                "The {label} course costs {} dollars and you have {}.",
-                fmt_grouped(cost, 0),
+                "The {} course costs {} dollars and you have {}.",
+                cred.label,
+                fmt_grouped(cred.course_cost, 0),
                 fmt_grouped(profile(ctx).money, 0)
             ));
             return;
         }
+        // The course takes real game time, off duty at the school -- the
+        // terminal-sleep shape: clock, duty log, market day, then speech.
+        let (start, end) = {
+            let p = profile_mut(ctx);
+            p.money -= cred.course_cost;
+            let start = p.game_hours;
+            p.game_hours += cred.course_hours;
+            (start, p.game_hours)
+        };
+        crate::states::city::record_city_duty(ctx, "off_duty", start, end, "credential course");
+        let mut announcements: Vec<String> = Vec::new();
         let money = {
             let p = profile_mut(ctx);
-            p.money -= cost;
-            p.career.purchased_endorsements.push(key.to_string());
+            // A day-long course covers a full rest; a morning one does not.
+            if cred.course_hours >= 10.0 {
+                p.hos.sleep();
+                p.fatigue = 0.0;
+            }
+            let day = p.market_day();
+            p.market.advance_to(day);
+            if cred.wait_days > 0.0 {
+                let ready_at_h = p.game_hours + cred.wait_days * HOURS_PER_DAY;
+                p.career.pending_credentials.push(PendingCredential {
+                    key: cred.key.to_string(),
+                    ready_at_h,
+                });
+            } else {
+                let before = p.career.endorsements();
+                p.career.purchased_endorsements.push(cred.key.to_string());
+                announcements.push(cred.announcement.to_string());
+                let after = p.career.endorsements();
+                if after.contains("tank")
+                    && after.contains("hazmat")
+                    && !(before.contains("tank") && before.contains("hazmat"))
+                {
+                    announcements
+                        .push(ff_core::models::career::X_COMBINATION_ANNOUNCEMENT.to_string());
+                }
+            }
             p.dispatch_board_cache = None;
             p.money
         };
         ctx.save_profile();
         ctx.audio.play("ui/cash");
-        ctx.say(&format!(
-            "Course complete: you paid {} dollars and earned the \
-             {label} endorsement. Matching freight is unlocked on the \
-             dispatch board. You have {} dollars left.",
-            fmt_grouped(cost, 0),
-            fmt_grouped(money, 0)
-        ));
+        if cred.wait_days > 0.0 {
+            ctx.say(&format!(
+                "Course complete and application submitted: you paid {} \
+                 dollars. The background check takes about {} days; keep \
+                 driving, and it clears while you work. You have {} dollars \
+                 left.",
+                fmt_grouped(cred.course_cost, 0),
+                cred.wait_days as i64,
+                fmt_grouped(money, 0)
+            ));
+        } else {
+            ctx.say(&format!(
+                "Course complete: you paid {} dollars and earned the \
+                 {}. Matching freight is unlocked on the \
+                 dispatch board. You have {} dollars left.",
+                fmt_grouped(cred.course_cost, 0),
+                cred.gate_label,
+                fmt_grouped(money, 0)
+            ));
+        }
+        for line in announcements {
+            ctx.say_with(line, crate::app::Say::queued());
+        }
         ctx.award_achievement("self_paid_course");
         self.refresh(ctx, true);
     }
@@ -1056,21 +1140,24 @@ impl Menu for EndorsementCourseState {
         let money = profile(ctx).money;
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "Endorsement courses. Pay for training yourself to unlock \
-             specialty freight early; the carrier sponsors each course for \
-             free at its listed level. You have {} dollars. \
+            "Licenses and training. Certificates are carrier training -- \
+             sponsored free at their listed levels, or pay your own way \
+             early. Endorsements and cards are yours to earn: a written \
+             test, a course fee, and for hazmat and the port card a real \
+             background-check wait. You have {} dollars. \
              {current}",
             fmt_grouped(money, 0)
         ));
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        let career = &profile(ctx).career;
+        let p = profile(ctx);
+        let career = &p.career;
         let earned = career.endorsements();
+        let now_h = p.game_hours;
         let mut items: Vec<MenuItem<Self>> = Vec::new();
-        for (key, level) in ENDORSEMENT_LEVELS {
-            let key: &'static str = key;
-            let label = endorsement_label_spoken(key).unwrap_or(key);
+        for cred in CREDENTIALS {
+            let key: &'static str = cred.key;
             if earned.contains(key) {
                 let how = if career.purchased_endorsements.iter().any(|k| k == key) {
                     "self-paid course"
@@ -1079,29 +1166,55 @@ impl Menu for EndorsementCourseState {
                 };
                 items.push(
                     MenuItem::new(
-                        format!("{} endorsement: earned, {how}", py_capitalize(label)),
+                        format!("{}: earned, {how}", py_capitalize(cred.gate_label)),
                         move |_s: &mut Self, ctx| {
-                            ctx.say(&format!("You already hold the {label} endorsement."))
+                            let cred = credential(key).expect("a ladder credential key");
+                            ctx.say(&format!("You already hold the {}.", cred.gate_label))
                         },
                     )
-                    .help("This endorsement is already on your license."),
+                    .help("This credential is already on your license."),
                 );
                 continue;
             }
-            let cost = endorsement_course_cost(key).unwrap_or(0.0);
+            if let Some(pending) = career.pending_credentials.iter().find(|pc| pc.key == key) {
+                let days = ((pending.ready_at_h - now_h) / HOURS_PER_DAY)
+                    .ceil()
+                    .max(0.0) as i64;
+                items.push(
+                    MenuItem::new(
+                        format!(
+                            "{}: background check in progress, about {days} days left",
+                            py_capitalize(cred.gate_label)
+                        ),
+                        move |_s: &mut Self, ctx| {
+                            let cred = credential(key).expect("a ladder credential key");
+                            ctx.say(&format!(
+                                "Your {} application is in: the background check \
+                                 clears on its own while you drive.",
+                                cred.gate_label
+                            ))
+                        },
+                    )
+                    .help(
+                        "The course is done and the paperwork is filed; the \
+                         credential activates when the check clears.",
+                    ),
+                );
+                continue;
+            }
             items.push(
                 MenuItem::new(
                     format!(
-                        "{} course: {} dollars \
-                         (carrier-sponsored free at level {level})",
-                        py_capitalize(label),
-                        fmt_grouped(cost, 0)
+                        "{} course: {}",
+                        py_capitalize(cred.gate_label),
+                        course_offer_text(cred)
                     ),
                     move |s: &mut Self, ctx| s.buy(ctx, key),
                 )
                 .help(format!(
-                    "Pay for the {label} training and testing now to \
-                     unlock that freight before level {level}."
+                    "Book the {} course. A course you do not qualify for \
+                     says exactly why.",
+                    cred.label
                 )),
             );
         }

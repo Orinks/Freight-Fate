@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
 use crate::models::career_ladder::{
     next_rank_for_level, rank_for_level, CareerRank, MAX_CAREER_LEVEL,
 };
+use crate::models::credentials::{credential, CREDENTIALS};
 use crate::models::enforcement::StandingProfile;
 use crate::pyfmt::{fmt_f, fmt_grouped};
 
@@ -38,56 +39,22 @@ pub const LEVEL_XP: [f64; 30] = [
     342_000.0, 364_000.0, 387_000.0,
 ];
 
-/// Endorsements unlock automatically at these levels: the carrier sponsors
-/// the training once dispatch trusts you with the freight. In the Python
-/// dict's order.
-pub const ENDORSEMENT_LEVELS: &[(&str, i64)] = &[
-    ("refrigerated", 2),
-    ("heavy_haul", 3),
-    ("high_value", 4),
-    // The back half of the arc stops being about heavier freight and starts
-    // being about freight that fights back. A tank is the first of those.
-    ("tank", 16),
-];
-
-/// Paying for the course yourself unlocks an endorsement before the carrier
-/// would sponsor it -- real drivers buy their own training to get ahead.
-pub const ENDORSEMENT_COURSE_COSTS: &[(&str, f64)] = &[
-    ("refrigerated", 900.0),
-    ("heavy_haul", 1_600.0),
-    ("high_value", 1_300.0),
-    ("tank", 2_400.0),
-];
-
-pub const ENDORSEMENT_LABELS_SPOKEN: &[(&str, &str)] = &[
-    ("refrigerated", "refrigerated"),
-    ("heavy_haul", "heavy-haul"),
-    ("high_value", "high-value"),
-    ("tank", "tank vehicle"),
-];
-
-/// `ENDORSEMENT_LEVELS[key]`.
+/// The credential a carrier sponsors at a level, if any: the carrier pays
+/// for the training once dispatch trusts you with the freight.
 pub fn endorsement_level(key: &str) -> Option<i64> {
-    ENDORSEMENT_LEVELS
-        .iter()
-        .find(|(k, _)| *k == key)
-        .map(|(_, level)| *level)
+    credential(key).and_then(|c| c.grant_level)
 }
 
-/// `ENDORSEMENT_COURSE_COSTS[key]`.
+/// The self-paid course price: paying for the course yourself earns a
+/// credential before the carrier would sponsor it -- real drivers buy their
+/// own training to get ahead.
 pub fn endorsement_course_cost(key: &str) -> Option<f64> {
-    ENDORSEMENT_COURSE_COSTS
-        .iter()
-        .find(|(k, _)| *k == key)
-        .map(|(_, cost)| *cost)
+    credential(key).map(|c| c.course_cost)
 }
 
-/// `ENDORSEMENT_LABELS_SPOKEN[key]`.
+/// The credential's spoken (and public-profile) label.
 pub fn endorsement_label_spoken(key: &str) -> Option<&'static str> {
-    ENDORSEMENT_LABELS_SPOKEN
-        .iter()
-        .find(|(k, _)| *k == key)
-        .map(|(_, label)| *label)
+    credential(key).map(|c| c.label)
 }
 
 // Experience scales with what the freight demands, not just its miles:
@@ -207,35 +174,17 @@ pub fn streak_bonus_xp(streak: i64, base_xp: f64, mileage_xp: f64) -> f64 {
     (xp_streak_bonus(streak) * base_xp).min(mileage_xp)
 }
 
-pub const ENDORSEMENT_ANNOUNCEMENTS: &[(&str, &str)] = &[
-    (
-        "refrigerated",
-        "You earned the refrigerated endorsement. \
-         Food and refrigerated cargo jobs are now available.",
-    ),
-    (
-        "heavy_haul",
-        "You earned the heavy-haul endorsement. Heavy machinery jobs are now available.",
-    ),
-    (
-        "high_value",
-        "You earned the high-value endorsement. Electronics jobs are now available.",
-    ),
-    (
-        "tank",
-        "You earned the tank vehicle endorsement. Liquid bulk jobs are now available. \
-         A tank load keeps moving after you do: brake early, brake once, and \
-         listen for the wave coming back.",
-    ),
-];
-
-/// `ENDORSEMENT_ANNOUNCEMENTS[key]`.
+/// The credential's grant sentence.
 pub fn endorsement_announcement(key: &str) -> Option<&'static str> {
-    ENDORSEMENT_ANNOUNCEMENTS
-        .iter()
-        .find(|(k, _)| *k == key)
-        .map(|(_, text)| *text)
+    credential(key).map(|c| c.announcement)
 }
+
+/// Spoken once when the tank and hazmat endorsements are both on the
+/// license: on a real CDL the pair prints as the single letter X
+/// (49 CFR 383.153(a)(9)(v)), and it is what the fuel-tanker fleet hires on.
+pub const X_COMBINATION_ANNOUNCEMENT: &str =
+    "You now hold both the tank vehicle and hazmat endorsements -- the X \
+     combination on a real license. Bulk fuel freight is open.";
 
 /// Experience still owed before the next level, or None at the ceiling.
 ///
@@ -261,6 +210,16 @@ pub fn level_for_xp(xp: f64) -> i64 {
     level.min(MAX_CAREER_LEVEL)
 }
 
+/// A credential whose course is done but whose federal background check
+/// has not cleared yet: hazmat's TSA threat assessment, TWIC's enrollment.
+/// The check clears on the game clock while the driver keeps working.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct PendingCredential {
+    pub key: String,
+    /// `Profile.game_hours` at which the check clears.
+    pub ready_at_h: f64,
+}
+
 /// The `Career` dataclass: saved as `dataclasses.asdict`, so the field names
 /// are the JSON keys and every field has its Python default.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -277,8 +236,15 @@ pub struct Career {
     pub dispatch_declines_used: i64,
     /// Consecutive on-time deliveries.
     pub on_time_streak: i64,
-    /// Self-paid courses.
+    /// Self-paid courses (and cleared background-check credentials).
     pub purchased_endorsements: Vec<String>,
+    /// Courses taken whose background check has not cleared yet.
+    pub pending_credentials: Vec<PendingCredential>,
+    /// Grants not yet repeated at a terminal. A level-up announcement is
+    /// spoken once inside the delivery-summary chatter and gone; the owner
+    /// once declined a reefer load he was already cleared for. Each grant
+    /// is repeated on the next terminal entry, then dropped.
+    pub unacknowledged_grants: Vec<String>,
 }
 
 impl Default for Career {
@@ -293,6 +259,8 @@ impl Default for Career {
             dispatch_declines_used: 0,
             on_time_streak: 0,
             purchased_endorsements: Vec::new(),
+            pending_credentials: Vec::new(),
+            unacknowledged_grants: Vec::new(),
         }
     }
 }
@@ -319,21 +287,73 @@ impl Career {
         rank_for_level(self.level())
     }
 
-    /// Earned (by level) and purchased endorsements. A set, as in Python;
-    /// iterate [`ENDORSEMENT_LEVELS`] where order matters.
+    /// Every credential held: carrier-granted (by level) and course-earned.
+    /// A set, as in Python; iterate [`CREDENTIALS`] where order matters.
+    /// A course still waiting on its background check is not held yet.
     pub fn endorsements(&self) -> BTreeSet<&'static str> {
         let level = self.level();
-        let mut out: BTreeSet<&'static str> = ENDORSEMENT_LEVELS
+        let mut out: BTreeSet<&'static str> = CREDENTIALS
             .iter()
-            .filter(|(_, lvl)| level >= *lvl)
-            .map(|(e, _)| *e)
+            .filter(|c| c.grant_level.is_some_and(|lvl| level >= lvl))
+            .map(|c| c.key)
             .collect();
         for purchased in &self.purchased_endorsements {
-            if let Some((key, _)) = ENDORSEMENT_LEVELS.iter().find(|(k, _)| k == purchased) {
-                out.insert(key);
+            if let Some(cred) = credential(purchased) {
+                out.insert(cred.key);
             }
         }
         out
+    }
+
+    /// Move every cleared background check onto the license. Returns the
+    /// grant announcements to speak; `queue_repeat` also queues each for
+    /// the terminal repeat (pass it where the announcement rides busy
+    /// delivery chatter, not when it is being spoken at the terminal
+    /// itself). `now_h` is the profile's `game_hours`.
+    pub fn activate_pending(&mut self, now_h: f64, queue_repeat: bool) -> Vec<String> {
+        let mut messages: Vec<String> = Vec::new();
+        let before = self.endorsements();
+        let (ready, waiting): (Vec<PendingCredential>, Vec<PendingCredential>) = self
+            .pending_credentials
+            .drain(..)
+            .partition(|p| now_h >= p.ready_at_h);
+        self.pending_credentials = waiting;
+        for pending in ready {
+            if !self.purchased_endorsements.contains(&pending.key) {
+                self.purchased_endorsements.push(pending.key.clone());
+            }
+            if let Some(cred) = credential(&pending.key) {
+                messages.push(cred.announcement.to_string());
+                if queue_repeat {
+                    self.unacknowledged_grants.push(cred.key.to_string());
+                }
+            }
+        }
+        self.push_x_combination(&before, &mut messages);
+        messages
+    }
+
+    /// The X-combination line, when tank and hazmat just became a pair.
+    fn push_x_combination(&self, before: &BTreeSet<&'static str>, messages: &mut Vec<String>) {
+        let after = self.endorsements();
+        let holds_pair = after.contains("tank") && after.contains("hazmat");
+        let held_pair = before.contains("tank") && before.contains("hazmat");
+        if holds_pair && !held_pair {
+            messages.push(X_COMBINATION_ANNOUNCEMENT.to_string());
+        }
+    }
+
+    /// The queued grant repeats for a terminal entry, drained.
+    ///
+    /// Each is the grant announcement again, behind a reminder lead-in, so
+    /// a clearance heard once through delivery chatter is heard a second
+    /// time somewhere quiet.
+    pub fn take_unacknowledged_grants(&mut self) -> Vec<String> {
+        let keys = std::mem::take(&mut self.unacknowledged_grants);
+        keys.iter()
+            .filter_map(|key| credential(key))
+            .map(|cred| format!("Reminder: you hold a new {}.", cred.gate_label))
+            .collect()
     }
 
     /// Apply a finished delivery; returns announcements (level ups etc.).
@@ -412,13 +432,13 @@ impl Career {
         // whose iteration order is hash-dependent; the catalogue order is
         // the one stable choice.
         let after = self.endorsements();
-        for (endorsement, _) in ENDORSEMENT_LEVELS {
-            if after.contains(endorsement) && !before_endorsements.contains(endorsement) {
-                if let Some(text) = endorsement_announcement(endorsement) {
-                    messages.push(text.to_string());
-                }
+        for cred in CREDENTIALS {
+            if after.contains(cred.key) && !before_endorsements.contains(cred.key) {
+                messages.push(cred.announcement.to_string());
+                self.unacknowledged_grants.push(cred.key.to_string());
             }
         }
+        self.push_x_combination(&before_endorsements, &mut messages);
         messages
     }
 

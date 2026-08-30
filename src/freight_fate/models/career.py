@@ -71,6 +71,24 @@ ENDORSEMENT_LABELS_SPOKEN = {
     "tank": "tank vehicle",
 }
 
+# The full credential ladder, as the invariants export renders it: the
+# carrier-sponsored level (None = course-only; the site must never
+# level-derive those), the spoken/public label, and the ladder tier.
+# Mirrors ``models::credentials::CREDENTIALS`` in the Rust runtime, which
+# is the source of truth for gameplay.
+CREDENTIALS_EXPORT = {
+    "manual_transmission": {"level": None, "label": "manual transmission", "tier": "training"},
+    "refrigerated": {"level": 2, "label": "refrigerated", "tier": "certificate"},
+    "flatbed_securement": {"level": 2, "label": "flatbed securement", "tier": "certificate"},
+    "heavy_haul": {"level": 3, "label": "heavy-haul", "tier": "certificate"},
+    "high_value": {"level": 4, "label": "high-value", "tier": "certificate"},
+    "doubles_triples": {"level": None, "label": "doubles", "tier": "endorsement"},
+    "tank": {"level": 16, "label": "tank vehicle", "tier": "endorsement"},
+    "hazmat": {"level": None, "label": "hazmat", "tier": "endorsement"},
+    "twic": {"level": None, "label": "TWIC port card", "tier": "specialist"},
+    "lcv": {"level": None, "label": "LCV", "tier": "specialist"},
+}
+
 # Experience scales with what the freight demands, not just its miles:
 # specialty (endorsement) cargo and premium mid-level cargo teach more per
 # mile, a run of consecutive on-time deliveries compounds the lesson, and
@@ -219,6 +237,11 @@ class Career:
     dispatch_declines_used: int = 0  # assigned-load refusals since last level-up
     on_time_streak: int = 0  # consecutive on-time deliveries
     purchased_endorsements: list[str] = field(default_factory=list)  # self-paid courses
+    # Courses taken whose background check has not cleared yet, and grants
+    # not yet repeated at a terminal (the Rust runtime drives both; the
+    # fields exist here so the exported careerFields list matches a save).
+    pending_credentials: list = field(default_factory=list)
+    unacknowledged_grants: list = field(default_factory=list)
 
     @property
     def level(self) -> int:

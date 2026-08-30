@@ -20,7 +20,9 @@ use ff_core::models::dispatch_policy::{
     declines_remaining, dispatch_policy, DECLINE_REPUTATION_PENALTY, SENIOR_LOAD_CHOICE_LEVEL,
 };
 use ff_core::models::enforcement;
-use ff_core::models::jobs::{facility_text, lane_key, route_drive_hours, DescribeOptions, Job};
+use ff_core::models::jobs::{
+    credentials_clause, facility_text, lane_key, route_drive_hours, DescribeOptions, Job,
+};
 use ff_core::models::profile::Profile;
 use ff_core::models::trailers::{
     compatible_with_programs, owned_trailer_for_cargo, required_program_text,
@@ -712,8 +714,8 @@ impl JobBoardState {
                 }
             } else {
                 ctx.say(&format!(
-                    "{locked} Keep delivering to level up, or book the \
-                     endorsement course at the terminal."
+                    "{locked} Keep delivering to level up, or open Licenses \
+                     and training at the terminal to book the course."
                 ));
             }
             return;
@@ -1118,8 +1120,11 @@ impl JobDetailState {
         let locked = locked_reason(p, job);
         if !locked.is_empty() {
             lines.push(format!("Locked: {locked}"));
-        } else if let Some(endorsement) = job.cargo.endorsement {
-            lines.push(format!("Endorsement: {}.", endorsement.replace('_', " ")));
+        } else if !job.cargo.credentials.is_empty() {
+            lines.push(format!(
+                "Cleared for it: you hold {}.",
+                credentials_clause(job.cargo.credentials)
+            ));
         }
         lines.push(
             "Route details happen after pickup: rest, fuel, tolls, weather, and stops.".to_string(),

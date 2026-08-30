@@ -1,7 +1,9 @@
-//! The achievement catalog: every badge and category, generated from
-//! `src/freight_fate/achievements.py` by the port's generator script so
-//! each string is byte-identical to the Python source. Do not hand-edit;
-//! regenerate instead (the digest test pins the content).
+//! The achievement catalog: every badge and category. Originally generated
+//! from `src/freight_fate/achievements.py`; since the Python gameplay
+//! mirror retired (2026-08-29) this file is the source of truth, and new
+//! badges are added here AND to the Python module (whose id list still
+//! feeds the invariants export). The digest test pins the content against
+//! accidental edits -- update it deliberately with each catalog change.
 //!
 //! Copy note (from the Python source): each badge has a specific
 //! inspiration, but player-facing text uses song-title-level allusions and
@@ -15,7 +17,7 @@ use super::{Achievement, AchievementCategory};
 /// sha256 over every category and achievement field, as the generator
 /// computed it from the Python catalog (see `catalog_digest` in the
 /// tests for the exact framing).
-pub const CATALOG_DIGEST: &str = "3362a78a52f7c731fc633a0050b1d57a1e1e2a5a8f97bfc7b1080ce5199708a3";
+pub const CATALOG_DIGEST: &str = "2431169ff4ace2bd390ec89b10d3db300fb3c8023f808d14685b600f5552fc94";
 
 /// What a locked, hidden achievement speaks in place of its real name and
 /// description. Keeps a hidden badge's surprise -- the joke, the calendar
@@ -68,7 +70,7 @@ pub const CATEGORIES: [AchievementCategory; 7] = [
 
 /// Every badge, in the Python catalog's order (the achievements menu and
 /// the cloud validator's allow-list both walk it in this order).
-pub const ACHIEVEMENTS: [Achievement; 173] = [
+pub const ACHIEVEMENTS: [Achievement; 179] = [
     Achievement {
         id: "first_dispatch",
         name: "Breaker, Breaker",
@@ -747,6 +749,54 @@ pub const ACHIEVEMENTS: [Achievement; 173] = [
         description: "Your first high-value load delivered with the seals intact. Cargo worth more than the truck rides quiet, stays locked up tight, and never stops for souvenirs.",
         category: "road",
         inspiration: "Amanda Fields - Diamonds",
+        hidden: false,
+    },
+    Achievement {
+        id: "securement_load",
+        name: "Chained and Checked",
+        description: "Your first open-deck load delivered with every chain still tight. Fifty miles out you stopped and checked the tie-downs, the way the book says. Nothing shifted, nothing slid.",
+        category: "road",
+        inspiration: "Red Simpson - Roll, Truck, Roll",
+        hidden: false,
+    },
+    Achievement {
+        id: "tank_load",
+        name: "The Load That Pushes Back",
+        description: "Your first liquid bulk load delivered with the shell intact and the surge spent. Twenty-some tons of cargo spent the whole trip trying to drive. You did not let it.",
+        category: "road",
+        inspiration: "Dave Dudley - Six Days on the Road",
+        hidden: false,
+    },
+    Achievement {
+        id: "doubles_load",
+        name: "Two Boxes, One Driver",
+        description: "Your first twin-trailer set delivered whole. The rear pup wandered every mile and the mirrors never lied. Two hookups, two walk-arounds, one clean arrival.",
+        category: "road",
+        inspiration: "Red Sovine - Giddy-Up Go",
+        hidden: false,
+    },
+    Achievement {
+        id: "hazmat_load",
+        name: "Placards Up",
+        description: "Your first placarded load delivered without incident. Every scale watched you through, every restriction sign applied to you, and the paperwork rode shotgun. Careful pays.",
+        category: "road",
+        inspiration: "Merle Haggard - Movin' On",
+        hidden: false,
+    },
+    Achievement {
+        id: "port_load",
+        name: "Through the Gate",
+        description: "Your first container hauled off the secure side of the waterfront. The card got you through the gate; the chassis and the crane line did the rest. Salt air, steel boxes.",
+        category: "road",
+        inspiration: "Johnny Cash - I've Been Everywhere",
+        hidden: false,
+    },
+    Achievement {
+        id: "lcv_load",
+        name: "The Long Combination",
+        description: "Your first turnpike doubles run delivered. Two long trailers on the only corridors that allow them, and every lane change planned half a mile out. The certificate earned its keep.",
+        category: "road",
+        inspiration: "Dick Curless - A Tombstone Every Mile",
         hidden: false,
     },
     Achievement {

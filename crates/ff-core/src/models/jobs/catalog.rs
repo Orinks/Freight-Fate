@@ -17,8 +17,10 @@ pub struct CargoType {
     /// base $ per mile
     pub rate_per_mile: f64,
     pub weight_tons: (f64, f64),
-    /// required license endorsement, if any
-    pub endorsement: Option<&'static str>,
+    /// every credential the load requires (empty = plain freight). Bulk
+    /// fuel is the one that takes two: a real fuel tanker is placarded, so
+    /// the fleet hires the X combination -- tank AND hazmat.
+    pub credentials: &'static [&'static str],
     pub fragile: bool,
     pub min_level: i64,
     pub equipment: &'static str,
@@ -29,6 +31,9 @@ pub struct CargoType {
     // the freight that is hardest to haul is the milk, not the fuel.
     pub tank: bool,
     pub baffled: bool,
+    /// Longer-combination-vehicle freight: only offered when both endpoint
+    /// states are on the frozen LCV network (23 CFR 658 Appendix C).
+    pub lcv_lanes: bool,
 }
 
 impl CargoType {
@@ -37,19 +42,20 @@ impl CargoType {
         label: &'static str,
         rate_per_mile: f64,
         weight_tons: (f64, f64),
-        endorsement: Option<&'static str>,
+        credentials: &'static [&'static str],
     ) -> Self {
         CargoType {
             key,
             label,
             rate_per_mile,
             weight_tons,
-            endorsement,
+            credentials,
             fragile: false,
             min_level: 1,
             equipment: "",
             tank: false,
             baffled: false,
+            lcv_lanes: false,
         }
     }
 
@@ -72,6 +78,33 @@ impl CargoType {
         }
     }
 
+    const fn lcv_lanes(self) -> Self {
+        CargoType {
+            lcv_lanes: true,
+            ..self
+        }
+    }
+
+    const fn equipment(self, equipment: &'static str) -> Self {
+        CargoType { equipment, ..self }
+    }
+
+    /// The first required credential, or None for plain freight -- the
+    /// one-credential view the XP and badge layers read.
+    pub fn primary_credential(&self) -> Option<&'static str> {
+        self.credentials.first().copied()
+    }
+
+    /// The credentials in `held` still missing for this cargo, in catalog
+    /// order.
+    pub fn missing_credentials<S: AsRef<str>>(&self, held: &[S]) -> Vec<&'static str> {
+        self.credentials
+            .iter()
+            .filter(|needed| !held.iter().any(|h| h.as_ref() == **needed))
+            .copied()
+            .collect()
+    }
+
     pub fn equipment_text(&self) -> String {
         if !self.equipment.is_empty() {
             return self.equipment.to_string();
@@ -90,7 +123,7 @@ impl CargoType {
 
 impl XpCargo for CargoType {
     fn endorsement(&self) -> Option<&str> {
-        self.endorsement
+        self.primary_credential()
     }
     fn min_level(&self) -> i64 {
         self.min_level
@@ -121,29 +154,34 @@ impl LiquidCargo for CargoType {
 /// `CARGO_CATALOG`, in the Python dict's insertion order.
 pub static CARGO_CATALOG: Lazy<IndexMap<&'static str, CargoType>> = Lazy::new(|| {
     let entries = [
-        CargoType::plain("general", "general freight", 2.10, (8.0, 20.0), None),
-        CargoType::plain("retail", "retail goods", 2.25, (6.0, 16.0), None),
-        CargoType::plain("parcel", "parcel freight", 2.55, (4.0, 12.0), None),
-        CargoType::plain("container", "shipping containers", 2.40, (12.0, 24.0), None),
-        CargoType::plain("bulk", "bulk materials", 2.30, (15.0, 25.0), None),
-        CargoType::plain("grain", "grain", 2.20, (18.0, 25.0), None),
-        CargoType::plain("farm_inputs", "farm inputs", 2.35, (10.0, 22.0), None),
+        CargoType::plain("general", "general freight", 2.10, (8.0, 20.0), &[]),
+        CargoType::plain("retail", "retail goods", 2.25, (6.0, 16.0), &[]),
+        CargoType::plain("parcel", "parcel freight", 2.55, (4.0, 12.0), &[]),
+        CargoType::plain("container", "shipping containers", 2.40, (12.0, 24.0), &[]),
+        CargoType::plain("bulk", "bulk materials", 2.30, (15.0, 25.0), &[]),
+        CargoType::plain("grain", "grain", 2.20, (18.0, 25.0), &[]),
+        CargoType::plain("farm_inputs", "farm inputs", 2.35, (10.0, 22.0), &[]),
         CargoType::plain(
             "construction",
             "construction materials",
             2.35,
             (14.0, 25.0),
-            None,
+            &[],
         ),
+        // Banded lumber and paper rolls ride open decks: real carriers put a
+        // driver through securement training before the first coil or unit
+        // of lumber (the rules are 49 CFR 393 subpart I), and so does this
+        // one -- the certificate sponsors at the same level the cargo
+        // appears, so nobody who could haul it yesterday loses it.
         CargoType::plain(
             "lumber_paper",
             "lumber and paper products",
             2.45,
             (10.0, 24.0),
-            None,
+            &["flatbed_securement"],
         )
         .min_level(2),
-        CargoType::plain("automotive", "automotive parts", 2.75, (8.0, 20.0), None)
+        CargoType::plain("automotive", "automotive parts", 2.75, (8.0, 20.0), &[])
             .fragile()
             .min_level(2),
         CargoType::plain(
@@ -151,31 +189,26 @@ pub static CARGO_CATALOG: Lazy<IndexMap<&'static str, CargoType>> = Lazy::new(||
             "heavy machinery",
             2.90,
             (15.0, 25.0),
-            Some("heavy_haul"),
+            &["heavy_haul"],
         )
         .fragile(),
+        // Steel is the securement class: coils get their own section of the
+        // federal cargo-securement rules (49 CFR 393.120).
         CargoType::plain(
             "steel",
             "steel products",
             2.85,
             (16.0, 25.0),
-            Some("heavy_haul"),
+            &["flatbed_securement"],
         )
         .min_level(3),
-        CargoType::plain(
-            "food",
-            "fresh food",
-            2.60,
-            (8.0, 18.0),
-            Some("refrigerated"),
-        )
-        .fragile(),
+        CargoType::plain("food", "fresh food", 2.60, (8.0, 18.0), &["refrigerated"]).fragile(),
         CargoType::plain(
             "refrigerated",
             "refrigerated goods",
             2.85,
             (8.0, 18.0),
-            Some("refrigerated"),
+            &["refrigerated"],
         )
         .fragile(),
         CargoType::plain(
@@ -183,7 +216,7 @@ pub static CARGO_CATALOG: Lazy<IndexMap<&'static str, CargoType>> = Lazy::new(||
             "packaged industrial chemicals",
             3.05,
             (10.0, 22.0),
-            Some("high_value"),
+            &["high_value"],
         )
         .min_level(4),
         CargoType::plain(
@@ -191,18 +224,50 @@ pub static CARGO_CATALOG: Lazy<IndexMap<&'static str, CargoType>> = Lazy::new(||
             "electronics",
             3.30,
             (4.0, 12.0),
-            Some("high_value"),
+            &["high_value"],
         )
         .fragile(),
+        // Twin 28-foot trailers: the parcel networks' linehaul workhorse.
+        // STAA doubles are legal on the National Network in every state --
+        // the freeze only bites the longer combinations -- so the T
+        // endorsement alone opens this freight coast to coast.
+        CargoType::plain(
+            "parcel_doubles",
+            "twin-trailer parcel freight",
+            3.15,
+            (10.0, 22.0),
+            &["doubles_triples"],
+        )
+        .min_level(8),
+        // Placarded loads: the freight the H endorsement exists for. The
+        // catalog's plain "chemicals" class stays non-placarded packaged
+        // goods; this is the tanker-adjacent dry side -- drums, cylinders,
+        // oxidizers -- that pays for the background check.
+        CargoType::plain(
+            "hazardous",
+            "placarded hazardous materials",
+            3.60,
+            (8.0, 22.0),
+            &["hazmat"],
+        )
+        .min_level(12),
         // Liquid bulk: the back half of the career, where the freight stops being
         // heavier and starts being harder. Both pay well over dry freight because
         // the load fights back -- it arrives at the stop bar a second after you do.
         //
         // Fuel rides in a baffled shell: the bulkheads spend the fore-and-aft wave
-        // and it settles in a few cycles. It is the one to learn on.
-        CargoType::plain("fuel_bulk", "bulk fuel", 3.45, (11.0, 25.0), Some("tank"))
-            .min_level(16)
-            .tank(true),
+        // and it settles in a few cycles. It is the one to learn on. Gasoline is
+        // placarded class 3 freight, so a real fuel hauler carries the X
+        // combination -- tank AND hazmat -- and so does this one.
+        CargoType::plain(
+            "fuel_bulk",
+            "bulk fuel",
+            3.45,
+            (11.0, 25.0),
+            &["tank", "hazmat"],
+        )
+        .min_level(16)
+        .tank(true),
         // Liquid food rides in a smooth bore, because sanitation rules forbid
         // baffles in a food-grade tank -- nobody can wash out the crevices. So the
         // gentlest cargo in the game travels in the most vicious equipment, and
@@ -212,10 +277,36 @@ pub static CARGO_CATALOG: Lazy<IndexMap<&'static str, CargoType>> = Lazy::new(||
             "liquid food products",
             3.85,
             (9.0, 24.0),
-            Some("tank"),
+            &["tank"],
         )
         .min_level(21)
         .tank(false),
+        // Drayage boxes off the secure side of the waterfront: unescorted
+        // access to an MTSA-regulated port terminal takes the TWIC card.
+        // Ordinary "container" freight stays open -- domestic intermodal
+        // ramps are not secure maritime areas.
+        CargoType::plain(
+            "port_container",
+            "port containers",
+            2.95,
+            (12.0, 24.0),
+            &["twic"],
+        )
+        .min_level(18)
+        .equipment("intermodal container chassis"),
+        // Turnpike doubles: two long trailers on the corridors whose networks
+        // were frozen into law in 1991. The game keeps the combination at
+        // legal GVW -- raising the weight ceiling on the frozen network is
+        // the oversize-permit economy's job, on the roadmap.
+        CargoType::plain(
+            "turnpike_doubles",
+            "turnpike doubles freight",
+            3.95,
+            (14.0, 25.0),
+            &["lcv"],
+        )
+        .min_level(20)
+        .lcv_lanes(),
     ];
     entries.into_iter().map(|c| (c.key, c)).collect()
 });
@@ -225,15 +316,30 @@ pub fn cargo_type(key: &str) -> Option<&'static CargoType> {
     CARGO_CATALOG.get(key)
 }
 
-/// `ENDORSEMENT_LABELS[endorsement]`; `None` is the standard CDL.
+/// The full spoken gate phrase for a required credential ("refrigerated
+/// certificate", "hazmat endorsement"); `None` is the standard CDL.
 pub fn endorsement_label(endorsement: Option<&str>) -> &'static str {
     match endorsement {
         None => "standard CDL",
-        Some("refrigerated") => "refrigerated endorsement",
-        Some("heavy_haul") => "heavy-haul endorsement",
-        Some("high_value") => "high-value endorsement",
-        Some("tank") => "tank vehicle endorsement",
-        Some(other) => panic!("no endorsement label for {other:?}"),
+        Some(key) => {
+            crate::models::credentials::credential(key)
+                .unwrap_or_else(|| panic!("no credential on the ladder for {key:?}"))
+                .gate_label
+        }
+    }
+}
+
+/// "the tank vehicle endorsement and the hazmat endorsement": the missing
+/// credentials as one spoken clause, in catalog order.
+pub fn credentials_clause(keys: &[&str]) -> String {
+    let phrases: Vec<String> = keys
+        .iter()
+        .map(|key| format!("the {}", endorsement_label(Some(key))))
+        .collect();
+    match phrases.as_slice() {
+        [] => String::new(),
+        [one] => one.clone(),
+        [head @ .., last] => format!("{} and {last}", head.join(", ")),
     }
 }
 
@@ -271,7 +377,7 @@ pub const MARKET_TAG_CARGO_BONUS: &[(&str, &[&str])] = &[
         &["automotive", "steel", "machinery", "electronics"],
     ),
     ("border", &["retail", "container", "general", "parcel"]),
-    ("chemical", &["chemicals", "bulk", "fuel_bulk"]),
+    ("chemical", &["chemicals", "bulk", "fuel_bulk", "hazardous"]),
     ("cold_chain", &["food", "refrigerated"]),
     (
         "construction",
@@ -293,8 +399,17 @@ pub const MARKET_TAG_CARGO_BONUS: &[(&str, &[&str])] = &[
         &["machinery", "electronics", "automotive", "steel"],
     ),
     ("mining", &["bulk", "construction", "machinery"]),
-    ("parcel", &["parcel", "electronics"]),
-    ("port", &["container", "bulk", "automotive", "chemicals"]),
+    ("parcel", &["parcel", "electronics", "parcel_doubles"]),
+    (
+        "port",
+        &[
+            "container",
+            "bulk",
+            "automotive",
+            "chemicals",
+            "port_container",
+        ],
+    ),
     ("retail", &["retail", "general", "parcel"]),
     ("river_port", &["bulk", "grain", "container"]),
     ("steel", &["steel", "machinery", "construction"]),

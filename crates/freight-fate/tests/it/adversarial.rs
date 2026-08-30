@@ -146,6 +146,7 @@ scenarios!(
     settlement_spoken_balance,
     abandon_and_advance_cycle,
     endorsement_wallet_edges,
+    credential_ladder_gates,
     money_exact_zero_and_below,
     level_up_at_settlement_boundary,
     owner_op_buyin_at_level_18_boundary,

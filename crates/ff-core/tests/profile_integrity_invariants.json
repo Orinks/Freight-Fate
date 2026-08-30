@@ -29,6 +29,7 @@
     "desert_summer",
     "detention_paid",
     "detroit_run",
+    "doubles_load",
     "dropped_the_bad_one",
     "eastbound_delivery",
     "eighty_eight_mph",
@@ -64,6 +65,7 @@
     "gulf_coast_by_two",
     "half_million_earned",
     "hazard_avoided",
+    "hazmat_load",
     "heavy_haul_load",
     "heavy_hauler",
     "high_value_load",
@@ -82,6 +84,7 @@
     "kansas_city_arrival",
     "kentucky_delivery",
     "laredo_arrival",
+    "lcv_load",
     "level_fifteen",
     "level_five",
     "level_ten",
@@ -116,6 +119,7 @@
     "perfect_streak",
     "phoenix_arrival",
     "pnw_delivery",
+    "port_load",
     "predictive_crest",
     "quarter_million_bank",
     "radio_dial_wanderer",
@@ -135,6 +139,7 @@
     "san_antonio_arrival",
     "scale_regular",
     "second_ticket",
+    "securement_load",
     "self_paid_course",
     "seventy_five_cities",
     "sixteen_tons",
@@ -146,6 +151,7 @@
     "spotless_long",
     "state_crossing",
     "storm_driving",
+    "tank_load",
     "ten_deliveries",
     "ten_thousand_miles",
     "texas_triangle",
@@ -179,10 +185,12 @@
     "dispatch_declines_used",
     "on_time_deliveries",
     "on_time_streak",
+    "pending_credentials",
     "purchased_endorsements",
     "reputation",
     "total_earnings",
     "total_miles",
+    "unacknowledged_grants",
     "xp"
   ],
   "cityLabels": {
@@ -812,21 +820,50 @@
     "zanesville_oh_us": "Zanesville, Ohio"
   },
   "endorsements": {
+    "doubles_triples": {
+      "label": "doubles",
+      "tier": "endorsement"
+    },
+    "flatbed_securement": {
+      "label": "flatbed securement",
+      "level": 2,
+      "tier": "certificate"
+    },
+    "hazmat": {
+      "label": "hazmat",
+      "tier": "endorsement"
+    },
     "heavy_haul": {
       "label": "heavy-haul",
-      "level": 3
+      "level": 3,
+      "tier": "certificate"
     },
     "high_value": {
       "label": "high-value",
-      "level": 4
+      "level": 4,
+      "tier": "certificate"
+    },
+    "lcv": {
+      "label": "LCV",
+      "tier": "specialist"
+    },
+    "manual_transmission": {
+      "label": "manual transmission",
+      "tier": "training"
     },
     "refrigerated": {
       "label": "refrigerated",
-      "level": 2
+      "level": 2,
+      "tier": "certificate"
     },
     "tank": {
       "label": "tank vehicle",
-      "level": 16
+      "level": 16,
+      "tier": "endorsement"
+    },
+    "twic": {
+      "label": "TWIC port card",
+      "tier": "specialist"
     }
   },
   "fleetTiers": [

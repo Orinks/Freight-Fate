@@ -332,8 +332,8 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
     ),
     (
         "chemical_petroleum_terminal",
-        &["chemicals", "bulk", "fuel_bulk"],
-        &["chemicals", "bulk", "general", "fuel_bulk"],
+        &["chemicals", "bulk", "fuel_bulk", "hazardous"],
+        &["chemicals", "bulk", "general", "fuel_bulk", "hazardous"],
     ),
     (
         "cold_storage",
@@ -352,8 +352,22 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
     ),
     (
         "cross_dock",
-        &["general", "retail", "parcel", "container"],
-        &["general", "retail", "parcel", "container"],
+        &[
+            "general",
+            "retail",
+            "parcel",
+            "container",
+            "parcel_doubles",
+            "turnpike_doubles",
+        ],
+        &[
+            "general",
+            "retail",
+            "parcel",
+            "container",
+            "parcel_doubles",
+            "turnpike_doubles",
+        ],
     ),
     (
         "distribution",
@@ -404,7 +418,14 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
     (
         "intermodal_ramp",
         &["container", "general", "retail", "automotive", "parcel"],
-        &["container", "general", "retail", "automotive", "parcel"],
+        &[
+            "container",
+            "general",
+            "retail",
+            "automotive",
+            "parcel",
+            "port_container",
+        ],
     ),
     (
         "lumber_paper",
@@ -418,8 +439,8 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
     ),
     (
         "manufacturing_plant",
-        &["machinery", "electronics", "general"],
-        &["bulk", "steel", "electronics", "general"],
+        &["machinery", "electronics", "general", "hazardous"],
+        &["bulk", "steel", "electronics", "general", "hazardous"],
     ),
     (
         "metro_market",
@@ -429,12 +450,24 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
     (
         "mine_quarry",
         &["bulk", "construction"],
-        &["machinery", "chemicals", "farm_inputs"],
+        &["machinery", "chemicals", "farm_inputs", "hazardous"],
     ),
     (
         "parcel_hub",
-        &["parcel", "electronics", "general"],
-        &["parcel", "electronics", "general"],
+        &[
+            "parcel",
+            "electronics",
+            "general",
+            "parcel_doubles",
+            "turnpike_doubles",
+        ],
+        &[
+            "parcel",
+            "electronics",
+            "general",
+            "parcel_doubles",
+            "turnpike_doubles",
+        ],
     ),
     (
         "port",
@@ -444,6 +477,7 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
             "electronics",
             "machinery",
             "automotive",
+            "port_container",
         ],
         &[
             "bulk",
@@ -451,6 +485,7 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
             "electronics",
             "machinery",
             "automotive",
+            "port_container",
         ],
     ),
     (
@@ -461,6 +496,7 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
             "automotive",
             "chemicals",
             "lumber_paper",
+            "port_container",
         ],
         &[
             "container",
@@ -468,12 +504,13 @@ pub const FACILITY_CARGO_ROLES: &[(&str, &[&str], &[&str])] = &[
             "automotive",
             "chemicals",
             "lumber_paper",
+            "port_container",
         ],
     ),
     (
         "rail",
         &["bulk", "container", "machinery", "grain"],
-        &["bulk", "container", "machinery", "grain"],
+        &["bulk", "container", "machinery", "grain", "port_container"],
     ),
     (
         "retail_distribution",

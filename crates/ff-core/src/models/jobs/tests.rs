@@ -257,10 +257,55 @@ fn test_endorsement_gating() {
     );
     let locked = no_endorsements
         .iter()
-        .filter(|j| j.cargo.endorsement.is_some())
+        .filter(|j| !j.cargo.credentials.is_empty())
         .count();
     // at most the single "teaser" job may require an endorsement
     assert!(locked <= 1);
+}
+
+#[test]
+fn fuel_bulk_asks_for_the_whole_x_combination() {
+    // A real fuel tanker is placarded freight: the load requires tank AND
+    // hazmat, and the refusal names exactly what is missing.
+    let fuel = cargo_type("fuel_bulk").unwrap();
+    assert_eq!(fuel.credentials, ["tank", "hazmat"]);
+    let job = Job::new(fuel, 20.0, "A", "Loc", "B", 300.0, 900.0, 24.0);
+    assert_eq!(
+        job.locked_reason(&["high_value"], 30, None, true),
+        "Requires the tank vehicle endorsement and the hazmat endorsement."
+    );
+    assert_eq!(
+        job.locked_reason(&["tank"], 30, None, true),
+        "Requires the hazmat endorsement."
+    );
+    assert_eq!(job.locked_reason(&["tank", "hazmat"], 30, None, true), "");
+}
+
+#[test]
+fn turnpike_doubles_never_leave_the_frozen_network() {
+    // Los Angeles is in California, which the ISTEA freeze never admitted:
+    // however senior the driver, no LCV freight may originate there.
+    let every_credential: Vec<&str> = crate::models::credentials::credential_keys().collect();
+    for seed in 0..6 {
+        let jobs = board(seed).offers(
+            "Los Angeles",
+            &every_credential,
+            OfferOptions {
+                count: 8,
+                level: 30,
+                ..Default::default()
+            },
+        );
+        assert!(
+            jobs.iter().all(|j| j.cargo.key != "turnpike_doubles"),
+            "seed {seed} offered LCV freight out of California"
+        );
+    }
+    // Salt Lake City sits in Utah, on the frozen network; an LCV lane is
+    // legal exactly when the destination's state is on it too.
+    let b = board(1);
+    assert!(b.lcv_lane("salt_lake_city_ut_us", "denver_co_us"));
+    assert!(!b.lcv_lane("salt_lake_city_ut_us", "los_angeles_ca_us"));
 }
 
 #[test]
@@ -712,7 +757,7 @@ fn test_higher_levels_unlock_more_facility_and_cargo_variety() {
     assert!(type_kinds(&high_jobs) > type_kinds(&low_jobs));
     assert!(high_jobs
         .iter()
-        .any(|job| job.cargo.min_level > 1 || job.cargo.endorsement.is_some()));
+        .any(|job| job.cargo.min_level > 1 || !job.cargo.credentials.is_empty()));
 }
 
 #[test]

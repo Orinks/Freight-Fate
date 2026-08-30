@@ -34,8 +34,9 @@ pub use deadline::{
 
 mod catalog;
 pub use catalog::{
-    cargo_type, endorsement_label, facility_cargo, facility_cargo_table, market_tag_cargo_bonus,
-    CargoType, CARGO_CATALOG, FACILITY_SELECTION_WEIGHTS, MARKET_TAG_CARGO_BONUS,
+    cargo_type, credentials_clause, endorsement_label, facility_cargo, facility_cargo_table,
+    market_tag_cargo_bonus, CargoType, CARGO_CATALOG, FACILITY_SELECTION_WEIGHTS,
+    MARKET_TAG_CARGO_BONUS,
 };
 
 pub fn facility_label(location_type: &str) -> String {
@@ -241,9 +242,10 @@ impl Job {
         } else {
             format!(" {}", opts.market_preview)
         };
-        let endorsement = match self.cargo.endorsement {
-            Some(e) => format!(" Requires {}.", endorsement_label(Some(e))),
-            None => String::new(),
+        let endorsement = if self.cargo.credentials.is_empty() {
+            String::new()
+        } else {
+            format!(" Requires {}.", credentials_clause(self.cargo.credentials))
         };
         let origin = format!("from {}", self.origin_offer_text());
         let dest = format!("to {}", self.destination_offer_text());
@@ -330,10 +332,9 @@ impl Job {
         if level < self.cargo.min_level {
             return format!("Level {} drivers unlock this cargo.", self.cargo.min_level);
         }
-        if let Some(required) = self.cargo.endorsement {
-            if !endorsements.iter().any(|e| e.as_ref() == required) {
-                return format!("Requires {}.", endorsement_label(Some(required)));
-            }
+        let missing = self.cargo.missing_credentials(endorsements);
+        if !missing.is_empty() {
+            return format!("Requires {}.", credentials_clause(&missing));
         }
         if !carrier_trailer_support {
             if let Some(programs) = trailer_programs {

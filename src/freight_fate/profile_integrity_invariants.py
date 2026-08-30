@@ -7,9 +7,8 @@ from pathlib import Path
 
 from .achievements import ACHIEVEMENTS
 from .models.career import (
+    CREDENTIALS_EXPORT,
     DELIVERY_COMPLETION_XP,
-    ENDORSEMENT_LABELS_SPOKEN,
-    ENDORSEMENT_LEVELS,
     LEVEL_XP,
     XP_CLEAN_BONUS,
     XP_PER_MILE_ON_TIME,
@@ -141,9 +140,17 @@ def invariant_data() -> dict:
         # drivers, the carrier fleet tier straight from the validated career.
         # Exported rather than copied so the site's projection moves with the
         # next balance pass instead of drifting behind it.
+        # A course-only credential carries no level at all: the site's
+        # held-check is `level >= entry.level || purchased`, and a missing
+        # key comparing false is what keeps a background-checked credential
+        # from being credited to every driver of some level.
         "endorsements": {
-            key: {"level": ENDORSEMENT_LEVELS[key], "label": ENDORSEMENT_LABELS_SPOKEN[key]}
-            for key in sorted(ENDORSEMENT_LEVELS)
+            key: (
+                {"label": row["label"], "tier": row["tier"]}
+                if row["level"] is None
+                else {"level": row["level"], "label": row["label"], "tier": row["tier"]}
+            )
+            for key, row in sorted(CREDENTIALS_EXPORT.items())
         },
         "fleetTiers": [{"minLevel": tier.min_level, "label": tier.label} for tier in FLEET_TIERS],
         "truckConditionFields": _truck_condition_fields(),

@@ -10,6 +10,39 @@
   need Homebrew to run the app; Intel Macs are not supported by this build.
   Players using a Career 1.9 tester snapshot can move to newer
   prerelease builds by choosing `Update channel: developer snapshots`.
+- **A real credential ladder, built the way real trucking licenses work.**
+  The old endorsement menu is now Licenses and training at every terminal,
+  and it runs the length of the career. Carrier certificates come first:
+  refrigerated, flatbed securement, heavy-haul, and high-value are company
+  training, sponsored free at their usual levels or paid for early, and
+  flatbed securement now covers steel and lumber. Then come the real CDL
+  letters, earned by written test: the doubles endorsement opens
+  twin-trailer parcel freight anywhere in the country, tank vehicle keeps
+  liquid bulk, and hazmat opens placarded chemical freight -- after a paid
+  background check that takes about a month of game days and clears on its
+  own while you keep driving. Holding tank and hazmat together is the X
+  combination, and bulk fuel now asks for both, exactly like a real fuel
+  tanker job. Late in the career, the TWIC port card opens container work
+  off the secure side of the ports, and the LCV certificate -- which needs
+  the doubles endorsement and a clean recent record -- opens heavy turnpike
+  doubles, but only between states whose road networks really allow them.
+  Courses cost money and game time, every locked course says exactly what
+  is missing, and Career stats lists everything you hold, everything still
+  in the works, and how many days each check has left. Money buys a head
+  start, never a skip: a sponsored course can be booked at most one level
+  before the company would pay for it, so a rich rookie cannot buy the
+  whole ladder on day one.
+- **You can train out of the automatic-only restriction.** A fresh CDL
+  earned on an automatic carries the real-world restriction that says so.
+  Book manual transmission training at any terminal -- a day at the school
+  and a skills retest in a manual truck -- and from then on, any run you
+  drive on the manual gearbox pays a small manual-spec differential in the
+  settlement, named as its own line.
+- **New credentials are announced twice, so they cannot be missed.** A
+  clearance earned mid-delivery used to be spoken once inside the arrival
+  summary and gone. Every new grant is now repeated the next time you walk
+  into a terminal, a cleared background check is announced there too, and
+  an unlocked specialty job on the board now says you are cleared for it.
 
 - **The list of drivers on duty keeps itself up to date while you read it.**
   Open Drivers on duty from the Online menu and the list now checks again on
@@ -437,6 +470,18 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+
+- **Bulk fuel now requires the hazmat endorsement alongside tank vehicle.**
+  Gasoline is placarded freight in the real world, so the fuel-tanker jobs
+  now ask for the X combination. If you already haul fuel, book the hazmat
+  course under Licenses and training; the background check runs while you
+  keep driving, and your other tank freight is untouched.
+
+- **Steel and lumber now ride on the flatbed securement certificate.** They
+  used to sit under heavy-haul and no training at all; securement is its
+  own company course in real trucking, so it is its own certificate here.
+  It is sponsored at level 2, at or below where that freight appears, so
+  nobody who could haul steel or lumber yesterday has lost it today.
 
 - **"Drivers board" is now "Drivers on duty".** The Online menu and the
   pause menu both used to call it the drivers board, and the screen itself

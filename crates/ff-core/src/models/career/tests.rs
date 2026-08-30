@@ -56,6 +56,65 @@ fn test_endorsements_unlock_with_levels() {
 }
 
 #[test]
+fn a_background_check_holds_the_credential_until_it_clears() {
+    use crate::models::career::PendingCredential;
+    let mut c = Career::new();
+    c.pending_credentials.push(PendingCredential {
+        key: "hazmat".to_string(),
+        ready_at_h: 720.0,
+    });
+    // Before the clear date: nothing granted, nothing spoken, still pending.
+    assert!(c.activate_pending(719.0, true).is_empty());
+    assert!(!c.endorsements().contains("hazmat"));
+    assert_eq!(c.pending_credentials.len(), 1);
+    // On the clear date: the endorsement lands, is announced, and queues
+    // its terminal repeat.
+    let messages = c.activate_pending(720.0, true);
+    assert!(messages.iter().any(|m| m.contains("hazmat")));
+    assert!(c.endorsements().contains("hazmat"));
+    assert!(c.pending_credentials.is_empty());
+    let reminders = c.take_unacknowledged_grants();
+    assert_eq!(reminders, ["Reminder: you hold a new hazmat endorsement."]);
+    // Drained means drained: the reminder is spoken once.
+    assert!(c.take_unacknowledged_grants().is_empty());
+}
+
+#[test]
+fn the_x_combination_is_announced_when_the_pair_completes() {
+    use crate::models::career::PendingCredential;
+    // A level-16 career already holds tank by level; the hazmat check
+    // clearing completes the pair.
+    let mut c = Career::with_xp(130_000.0);
+    assert!(c.endorsements().contains("tank"));
+    c.pending_credentials.push(PendingCredential {
+        key: "hazmat".to_string(),
+        ready_at_h: 0.0,
+    });
+    let messages = c.activate_pending(1.0, false);
+    assert!(messages.iter().any(|m| m.contains("X combination")));
+    // Activation at the terminal (queue_repeat false) leaves no reminder.
+    assert!(c.take_unacknowledged_grants().is_empty());
+}
+
+#[test]
+fn a_level_grant_queues_its_terminal_repeat() {
+    let mut c = Career::with_xp(950.0);
+    let messages = deliver(&mut c, 100.0, 300.0, true, 0.0);
+    assert!(messages
+        .iter()
+        .any(|m| m.contains("refrigerated certificate")));
+    // Level 2 sponsors two certificates at once; both queue, ladder order.
+    let reminders = c.take_unacknowledged_grants();
+    assert_eq!(
+        reminders,
+        [
+            "Reminder: you hold a new refrigerated certificate.",
+            "Reminder: you hold a new flatbed securement certificate.",
+        ]
+    );
+}
+
+#[test]
 fn test_record_delivery_announces_level_up() {
     let mut c = Career::with_xp(950.0);
     let messages = deliver(&mut c, 100.0, 300.0, true, 0.0);
@@ -327,6 +386,8 @@ fn test_career_round_trips_through_asdict_json() {
             "dispatch_declines_used",
             "on_time_streak",
             "purchased_endorsements",
+            "pending_credentials",
+            "unacknowledged_grants",
         ]
     );
     let old = serde_json::json!({"xp": 1200.0, "reputation": 61.0, "deliveries": 3});
@@ -335,6 +396,8 @@ fn test_career_round_trips_through_asdict_json() {
     assert_eq!(loaded.dispatch_declines_used, 0);
     assert_eq!(loaded.on_time_streak, 0);
     assert!(loaded.purchased_endorsements.is_empty());
+    assert!(loaded.pending_credentials.is_empty());
+    assert!(loaded.unacknowledged_grants.is_empty());
 }
 
 // --- test_career_progression.py ---------------------------------------------

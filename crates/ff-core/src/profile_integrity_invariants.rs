@@ -43,12 +43,15 @@ pub fn json_number(value: f64) -> Value {
     }
 }
 
-/// One endorsement row: key, the carrier-sponsored level, the spoken label.
+/// One credential row: key, the carrier-sponsored level (None for a
+/// credential only ever earned through its course -- the site must not
+/// level-derive those), the spoken label, and the ladder tier.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EndorsementRow {
     pub key: String,
-    pub level: i64,
+    pub level: Option<i64>,
     pub label: String,
+    pub tier: String,
 }
 
 /// One carrier fleet band: the first level it applies to and its label.
@@ -114,10 +117,11 @@ impl CatalogInputs {
     pub fn current() -> Self {
         use crate::achievements::ACHIEVEMENTS;
         use crate::models::career::{
-            Career, DELIVERY_COMPLETION_XP, ENDORSEMENT_LABELS_SPOKEN, ENDORSEMENT_LEVELS,
-            LEVEL_XP, XP_CLEAN_BONUS, XP_PER_MILE_ON_TIME, XP_SPECIALTY_MULT, XP_STREAK_MAX_BONUS,
+            Career, DELIVERY_COMPLETION_XP, LEVEL_XP, XP_CLEAN_BONUS, XP_PER_MILE_ON_TIME,
+            XP_SPECIALTY_MULT, XP_STREAK_MAX_BONUS,
         };
         use crate::models::carrier_fleet::FLEET_TIERS;
+        use crate::models::credentials::CREDENTIALS;
         use crate::models::economy::PAY_ADVANCE_LIMIT;
         use crate::models::market::MARKET_CARGO_KEYS;
         use crate::models::profile::{
@@ -139,18 +143,13 @@ impl CatalogInputs {
             .cloned()
             .collect();
 
-        let endorsements: Vec<EndorsementRow> = ENDORSEMENT_LEVELS
+        let endorsements: Vec<EndorsementRow> = CREDENTIALS
             .iter()
-            .map(|(key, level)| EndorsementRow {
-                key: (*key).to_string(),
-                level: *level,
-                label: ENDORSEMENT_LABELS_SPOKEN
-                    .iter()
-                    .find(|(labelled, _)| labelled == key)
-                    .map(|(_, label)| (*label).to_string())
-                    // Python would KeyError here; an endorsement with no
-                    // spoken label is a catalog bug, not an export shape.
-                    .unwrap_or_else(|| panic!("endorsement {key} has no spoken label")),
+            .map(|cred| EndorsementRow {
+                key: cred.key.to_string(),
+                level: cred.grant_level,
+                label: cred.label.to_string(),
+                tier: cred.tier.as_str().to_string(),
             })
             .collect();
 
@@ -322,8 +321,15 @@ pub fn invariant_data(data_root: &Path, inputs: &CatalogInputs) -> Result<Value,
     rows.sort_by(|a, b| a.key.cmp(&b.key));
     for row in rows {
         let mut entry = Map::new();
-        entry.insert("level".to_string(), Value::from(row.level));
+        // A course-only credential carries no level at all: the site's
+        // held-check is `level >= entry.level || purchased`, and a missing
+        // key comparing false is what keeps a background-checked credential
+        // from being credited to every driver of some level.
+        if let Some(level) = row.level {
+            entry.insert("level".to_string(), Value::from(level));
+        }
         entry.insert("label".to_string(), Value::from(row.label.clone()));
+        entry.insert("tier".to_string(), Value::from(row.tier.clone()));
         endorsements.insert(row.key.clone(), Value::Object(entry));
     }
 
@@ -542,13 +548,21 @@ mod tests {
             endorsements: vec![
                 EndorsementRow {
                     key: "refrigerated".into(),
-                    level: 2,
+                    level: Some(2),
                     label: "refrigerated".into(),
+                    tier: "certificate".into(),
                 },
                 EndorsementRow {
                     key: "heavy_haul".into(),
-                    level: 3,
+                    level: Some(3),
                     label: "heavy-haul".into(),
+                    tier: "certificate".into(),
+                },
+                EndorsementRow {
+                    key: "hazmat".into(),
+                    level: None,
+                    label: "hazmat".into(),
+                    tier: "endorsement".into(),
                 },
             ],
             fleet_tiers: vec![
@@ -724,9 +738,16 @@ mod tests {
                 ..Career::default()
             };
             assert_eq!(career.level(), level);
+            // A row without a level is course-only: the site must never
+            // level-derive it, and neither does the career.
             let expected: BTreeSet<&str> = endorsements
                 .iter()
-                .filter(|(_, entry)| level >= entry["level"].as_i64().unwrap())
+                .filter(|(_, entry)| {
+                    entry
+                        .get("level")
+                        .and_then(Value::as_i64)
+                        .is_some_and(|lvl| level >= lvl)
+                })
                 .map(|(key, _)| key.as_str())
                 .collect();
             let held: BTreeSet<&str> = career.endorsements().into_iter().collect();
@@ -808,7 +829,7 @@ mod tests {
     fn rendered_invariants_are_sorted_two_space_json() {
         let text = rendered_invariants(&world_data_root(), &inputs()).unwrap();
         assert!(text.starts_with("{\n  \"achievementIds\": [\n    \"antler_polisher\",\n"));
-        assert!(text.contains("\n  \"endorsements\": {\n    \"heavy_haul\": {\n      \"label\": \"heavy-haul\",\n      \"level\": 3\n    },"));
+        assert!(text.contains("\n  \"endorsements\": {\n    \"hazmat\": {\n      \"label\": \"hazmat\",\n      \"tier\": \"endorsement\"\n    },\n    \"heavy_haul\": {\n      \"label\": \"heavy-haul\",\n      \"level\": 3,\n      \"tier\": \"certificate\"\n    },"));
         assert!(text.ends_with("}\n"));
     }
 }

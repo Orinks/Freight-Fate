@@ -343,11 +343,21 @@ pub(crate) fn award_arrival_achievements(
     );
 
     // -- Cargo: what's in the box matters ---------------------------------
-    match job.cargo.endorsement {
-        Some("refrigerated") => push(&mut ids, "reefer_load"),
-        Some("heavy_haul") => push(&mut ids, "heavy_haul_load"),
-        Some("high_value") => push(&mut ids, "high_value_load"),
-        _ => {}
+    // Every credential the load needed gets its badge, so a fuel tanker
+    // (tank AND hazmat) counts for both.
+    for credential in job.cargo.credentials {
+        match *credential {
+            "refrigerated" => push(&mut ids, "reefer_load"),
+            "flatbed_securement" => push(&mut ids, "securement_load"),
+            "heavy_haul" => push(&mut ids, "heavy_haul_load"),
+            "high_value" => push(&mut ids, "high_value_load"),
+            "doubles_triples" => push(&mut ids, "doubles_load"),
+            "hazmat" => push(&mut ids, "hazmat_load"),
+            "tank" => push(&mut ids, "tank_load"),
+            "twic" => push(&mut ids, "port_load"),
+            "lcv" => push(&mut ids, "lcv_load"),
+            _ => {}
+        }
     }
     if job.cargo.key == "grain" || job.cargo.key == "farm_inputs" {
         push(&mut ids, "farm_load");

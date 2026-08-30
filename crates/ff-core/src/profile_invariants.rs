@@ -45,9 +45,12 @@ const TIRE_ALL_SEASON: &str = "all_season";
 const TIRE_WINTER: &str = "winter";
 const TIRE_TYPES: [&str; 2] = [TIRE_ALL_SEASON, TIRE_WINTER];
 
-/// Endorsement courses are a closed, stable set -- unlike trucks, new ones
-/// are a design event, so an unknown one is an edit. (`ENDORSEMENT_LEVELS`)
-const ENDORSEMENT_KEYS: [&str; 4] = ["refrigerated", "heavy_haul", "high_value", "tank"];
+/// Credential courses are a closed, stable set -- unlike trucks, new ones
+/// are a design event, so an unknown one is an edit. Read off the ladder
+/// itself (`models::credentials::CREDENTIALS`) so this list cannot drift.
+fn endorsement_keys() -> Vec<&'static str> {
+    crate::models::credentials::credential_keys().collect()
+}
 
 /// `UPGRADE_CATALOG` keys with their top tier (the length of each price
 /// tuple).
@@ -292,12 +295,13 @@ pub fn check_profile_invariants(profile: &Value) -> Vec<Violation> {
         }
     }
     if let Some(endorsements) = field(career, "purchased_endorsements", &empty_list).as_array() {
+        let known_keys = endorsement_keys();
         for endorsement in endorsements {
-            // Endorsement courses are a closed, stable set -- unlike trucks,
+            // Credential courses are a closed, stable set -- unlike trucks,
             // new ones are a design event, so an unknown one is an edit.
             let known = endorsement
                 .as_str()
-                .is_some_and(|key| ENDORSEMENT_KEYS.contains(&key));
+                .is_some_and(|key| known_keys.contains(&key));
             if !known {
                 out.push(Violation::new(
                     "endorsement",

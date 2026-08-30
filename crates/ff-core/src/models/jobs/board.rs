@@ -170,14 +170,17 @@ impl<'w> JobBoard<'w> {
             let location = self.choose_origin_location(city_obj, level, carrier_key);
             let cargo_key = self.choose_cargo_for_location(city_obj, location, level, carrier_key);
             let cargo = cargo_type(cargo_key).expect("a catalog cargo key");
-            let locked = cargo
-                .endorsement
-                .is_some_and(|e| !endorsements.iter().any(|x| x.as_ref() == e));
+            let locked = !cargo.missing_credentials(endorsements).is_empty();
             // a locked job may appear once in a while as a teaser, otherwise skip
             if locked && !(jobs.len() == count - 1 && self.rng.random() < 0.3) {
                 continue;
             }
             let (destination, miles, _legs) = dest_cycle[jobs.len() % dest_cycle.len()].clone();
+            // LCV freight only runs where the frozen network reaches: both
+            // ends of the lane must sit in states that allow the combination.
+            if cargo.lcv_lanes && !self.lcv_lane(&city, &destination) {
+                continue;
+            }
             let Some(dest_location) = self.destination_location(&destination, cargo, level) else {
                 continue;
             };
@@ -240,10 +243,10 @@ impl<'w> JobBoard<'w> {
             let location = self.choose_origin_location(city_obj, level, carrier_key);
             let cargo_key = self.choose_cargo_for_location(city_obj, location, level, carrier_key);
             let cargo = cargo_type(cargo_key).expect("a catalog cargo key");
-            if cargo
-                .endorsement
-                .is_some_and(|e| !endorsements.iter().any(|x| x.as_ref() == e))
-            {
+            if !cargo.missing_credentials(endorsements).is_empty() {
+                continue;
+            }
+            if cargo.lcv_lanes && !self.lcv_lane(&city, &destination) {
                 continue;
             }
             let Some(dest_location) = self.destination_location(&destination, cargo, level) else {
@@ -353,6 +356,22 @@ impl<'w> JobBoard<'w> {
             }
         }
         weight.max(1e-12)
+    }
+
+    /// Whether both ends of a lane sit in states on the frozen LCV network
+    /// (23 CFR 658 Appendix C). An endpoint check, deliberately: the route
+    /// between two LCV states can cross a non-LCV one, and modeling the
+    /// break-and-remake at the state line is the permit economy's job.
+    pub(crate) fn lcv_lane(&self, origin: &str, destination: &str) -> bool {
+        let state_of = |key: &str| {
+            self.world
+                .cities
+                .get(key)
+                .map(|c| c.state_code.as_str())
+                .unwrap_or("")
+        };
+        crate::models::credentials::lcv_state(state_of(origin))
+            && crate::models::credentials::lcv_state(state_of(destination))
     }
 
     /// `(destination, route miles, route leg count)` for every other city.
@@ -562,7 +581,7 @@ impl<'w> JobBoard<'w> {
             }
         }
         let cargo = cargo_type(cargo_key).expect("a catalog cargo key");
-        if cargo.endorsement.is_some() {
+        if !cargo.credentials.is_empty() {
             // Specialized company drivers see endorsement freight favored
             // instead of rationed; junior boards keep it occasional.
             weight *= if level >= SPECIALIZED_FREIGHT_LEVEL {

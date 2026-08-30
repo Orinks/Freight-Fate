@@ -20,7 +20,8 @@ use ff_core::models::business::{
     LEASED_OWNER_OPERATOR, OWNER_OPERATOR_BUY_IN, OWNER_OPERATOR_DELIVERIES, OWNER_OPERATOR_LEVEL,
     OWNER_OPERATOR_REPUTATION, OWNER_OPERATOR_WORKING_CAPITAL,
 };
-use ff_core::models::career::{Career, ENDORSEMENT_COURSE_COSTS, LEVEL_XP};
+use ff_core::models::career::{Career, LEVEL_XP};
+use ff_core::models::credentials::{credential, CREDENTIALS};
 use ff_core::models::economy::{pay_advance_grant, PAY_ADVANCE_LIMIT};
 use ff_core::models::jobs::MIN_JOB_DISTANCE_MI;
 use ff_core::models::profile::Profile;
@@ -228,10 +229,20 @@ pub fn endorsement_wallet_edges() -> Outcome {
     let (key, cost) = {
         let career = &rig.app.ctx.profile.as_ref().expect("a profile").career;
         let earned = career.endorsements();
-        ENDORSEMENT_COURSE_COSTS
+        let level = career.level();
+        // A course this fresh career can actually book: unheld, level-open,
+        // no prerequisites, and no background-check wait -- the wallet is
+        // the only thing under test here.
+        CREDENTIALS
             .iter()
-            .find(|(key, _)| !earned.contains(key))
-            .map(|(key, cost)| (*key, *cost))
+            .find(|c| {
+                !earned.contains(c.key)
+                    && level >= c.min_level
+                    && c.prereqs.is_empty()
+                    && c.wait_days == 0.0
+                    && !c.needs_clean_record
+            })
+            .map(|c| (c.key, c.course_cost))
             .expect("a course the driver does not hold")
     };
     if let Some(profile) = rig.app.ctx.profile.as_mut() {
@@ -294,8 +305,8 @@ pub fn endorsement_wallet_edges() -> Outcome {
             "purchase did not speak the zero balance: {purchase_lines:?}"
         ));
     }
-    // Re-buying an endorsement already held: the row is now the "earned" one.
-    rig.select_menu_containing("endorsement: earned");
+    // Re-buying a credential already held: the row is now the "earned" one.
+    rig.select_menu_containing("earned, self-paid course");
     let money = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
     if money != 0.0 {
         findings.push("re-buying an owned endorsement charged money".to_string());
@@ -308,10 +319,125 @@ pub fn endorsement_wallet_edges() -> Outcome {
     )
 }
 
+/// The credential ladder's gates: a level-locked course must refuse without
+/// charging, a prerequisite must be named, and a background-checked course
+/// must take the money but withhold the credential until the wait is served.
+pub fn credential_ladder_gates() -> Outcome {
+    let mut rig = Rig::new(RigOptions::default());
+    let mut findings: Vec<String> = Vec::new();
+    let hazmat = credential("hazmat").expect("hazmat is on the ladder");
+    let lcv = credential("lcv").expect("lcv is on the ladder");
+    if let Some(profile) = rig.app.ctx.profile.as_mut() {
+        profile.money = 50_000.0;
+    }
+    rig.app.ctx.push_state(EndorsementCourseState::new());
+    rig.app.ctx.run_deferred();
+
+    // 1. Level 1 books nothing federal: the refusal must name the level and
+    //    charge nothing.
+    let money_before = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+    if let Some(row) = course_row(&rig, "hazmat") {
+        rig.select_menu_containing(&row);
+        let refusal = rig.transcript().last().cloned().unwrap_or_default();
+        if !refusal.contains(&format!("level {}", hazmat.min_level)) {
+            findings.push(format!(
+                "a level-1 hazmat booking did not name the level gate: {refusal}"
+            ));
+        }
+    } else {
+        findings.push("no hazmat course row on the menu".to_string());
+    }
+    if rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money) != money_before {
+        findings.push("a refused course still took money".to_string());
+    }
+
+    // 2. LCV at level, without the T endorsement: the prerequisite is named.
+    if let Some(profile) = rig.app.ctx.profile.as_mut() {
+        profile.career.xp = LEVEL_XP[(lcv.min_level - 1) as usize];
+    }
+    rig.app.ctx.run_deferred();
+    if let Some(row) = course_row(&rig, "lcv") {
+        rig.select_menu_containing(&row);
+        let refusal = rig.transcript().last().cloned().unwrap_or_default();
+        if !refusal.contains("doubles endorsement") {
+            findings.push(format!(
+                "the LCV refusal does not name the doubles prerequisite: {refusal}"
+            ));
+        }
+    } else {
+        findings.push("no LCV course row on the menu".to_string());
+    }
+
+    // 3. Book hazmat for real: money out, credential NOT on the license yet.
+    let money_before = rig.app.ctx.profile.as_ref().map_or(0.0, |p| p.money);
+    if let Some(row) = course_row(&rig, "hazmat") {
+        rig.select_menu_containing(&row);
+    }
+    let (holds, pending, money) = {
+        let p = rig.app.ctx.profile.as_ref().expect("a profile");
+        (
+            p.career.endorsements().contains("hazmat"),
+            p.career
+                .pending_credentials
+                .iter()
+                .any(|pc| pc.key == "hazmat"),
+            p.money,
+        )
+    };
+    if holds {
+        findings.push(
+            "hazmat granted the moment the course was paid: the TSA wait is real \
+             and the endorsement cannot issue until the check clears"
+                .to_string(),
+        );
+    }
+    if !pending {
+        findings.push("the paid hazmat course left no pending background check".to_string());
+    }
+    if (money_before - money - hazmat.course_cost).abs() > 0.01 {
+        findings.push(format!(
+            "hazmat course charged {} instead of {}",
+            money_before - money,
+            hazmat.course_cost
+        ));
+    }
+
+    // 4. Serve the wait on the clock; the credential activates and is heard.
+    if let Some(profile) = rig.app.ctx.profile.as_mut() {
+        profile.game_hours += hazmat.wait_days * 24.0 + 1.0;
+    }
+    let cleared = {
+        let p = rig.app.ctx.profile.as_mut().expect("a profile");
+        let now = p.game_hours;
+        p.career.activate_pending(now, false)
+    };
+    let holds_now = rig
+        .app
+        .ctx
+        .profile
+        .as_ref()
+        .is_some_and(|p| p.career.endorsements().contains("hazmat"));
+    if !holds_now {
+        findings.push("the served background check never activated the endorsement".to_string());
+    }
+    if !cleared.iter().any(|line| line.contains("hazmat")) {
+        findings.push(format!(
+            "activation spoke nothing about the hazmat endorsement: {cleared:?}"
+        ));
+    }
+    outcome(
+        "credential_ladder_gates",
+        &rig,
+        findings,
+        "level gate, prerequisite, paid wait, and activation all honest",
+    )
+}
+
 /// The menu row that books `key`'s course, by the part of its label that does
 /// not move.
 fn course_row(rig: &Rig, key: &str) -> Option<String> {
-    let needle = format!("{key} course:");
+    let gate_label = credential(key).map(|c| c.gate_label).unwrap_or(key);
+    let needle = format!("{gate_label} course:");
     rig.menu_labels()
         .into_iter()
         .find(|label| label.to_lowercase().starts_with(&needle.to_lowercase()))

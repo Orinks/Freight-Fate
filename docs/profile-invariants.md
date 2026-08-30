@@ -67,8 +67,14 @@ Closed sets (stable enums — an unknown value is an edit):
 - `business_status`: `company_driver`, `leased_owner_operator`,
   `independent_authority`.
 - `truck_conditions[*].tire_type`: `all_season`, `winter`.
-- `career.purchased_endorsements` entries: `refrigerated`, `heavy_haul`,
-  `high_value`.
+- `career.purchased_endorsements` entries: any key on the credential
+  ladder (`models::credentials::CREDENTIALS` in the Rust runtime — the
+  four original keys plus `manual_transmission`, `flatbed_securement`,
+  `doubles_triples`, `hazmat`, `twic`, `lcv`). The client check reads the
+  ladder itself, so it cannot drift from the catalog.
+- `career.pending_credentials` entries: `{key, ready_at_h}` records for a
+  course paid but waiting on its background check; keys come from the
+  same closed set.
 
 Version tolerance (deliberate): unknown truck, trailer, buff, upgrade, or
 achievement KEYS pass the client check — a save written by a newer build
@@ -103,11 +109,17 @@ ceiling rather than under it: a copied value that falls even slightly
 behind a balance pass convicts the drivers who played best, which is what
 happened when a hardcoded 1.2 per mile met the 1.9 arc's higher rates.
 
-2.3 **Endorsements.** Earned endorsements come free at levels 2/3/4
-(refrigerated/heavy_haul/high_value) — they are DERIVED from level, never
-stored. Stored `purchased_endorsements` mean the player paid the course
-(900 / 1,600 / 1,300 dollars); a purchased endorsement on a profile whose
-earnings history could not have afforded it is suspicious, not fatal.
+2.3 **Credentials.** Level-granted credentials (the carrier certificates
+at levels 2/2/3/4 and the tank endorsement at 16) are DERIVED from level,
+never stored; their rows in the exported `endorsements` table carry a
+`level`. Course-only credentials (manual transmission training, the
+doubles and hazmat endorsements, the TWIC port card, the LCV certificate)
+carry NO `level` key in the export — the site and the validator must
+never level-derive them; they are real only when stored in
+`purchased_endorsements`. A stored course on a profile whose earnings
+history could not have afforded it is suspicious, not fatal. Each row
+also carries a `tier` (`training` / `certificate` / `endorsement` /
+`specialist`) for public-profile grouping.
 
 2.4 **Achievements against the stats that earn them.** Every id in
 `achievements` (see `src/freight_fate/achievements.py` for the canonical

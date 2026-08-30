@@ -130,7 +130,9 @@ pub fn career_level_guidance<P: CareerProfile + ?Sized>(profile: &P) -> CareerLe
     if level >= 18 {
         return CareerLevelGuidance::new(
             "Protect owner-operator readiness",
-            "Treat better freight as practice for fuel, maintenance, and reserve decisions.",
+            "Treat better freight as practice for fuel, maintenance, and reserve decisions. \
+             The late-career credentials are open now: the TWIC port card, and LCV \
+             training once you hold the doubles endorsement with a clean record.",
             "Pick freight with clean take-home and enough room to keep savings growing.",
             "reserve-building freight",
             "Owner-operator readiness depends on margin discipline before the truck is yours.",
@@ -148,7 +150,10 @@ pub fn career_level_guidance<P: CareerProfile + ?Sized>(profile: &P) -> CareerLe
     if level >= 10 {
         return CareerLevelGuidance::new(
             "Run like a senior company driver",
-            "Dispatch trusts you with premium lanes, specialized freight, and mentoring-level judgment.",
+            "Dispatch trusts you with premium lanes, specialized freight, and mentoring-level judgment. \
+             The CDL letters are worth booking now under Licenses and training: the doubles \
+             endorsement opens twin-trailer freight, and the hazmat background check clears \
+             while you keep driving.",
             "premium freight still needs clean timing, low damage, and steady service.",
             "senior company lane",
             "Senior company status is about consistency under better freight.",

@@ -336,6 +336,35 @@ impl CityMenuState {
         ));
     }
 
+    /// Background checks that cleared, and grants worth hearing twice.
+    ///
+    /// A grant announced inside the delivery-summary chatter is easy to
+    /// miss (the owner once declined a reefer load he was cleared for), so
+    /// each is repeated once here, somewhere quiet. A hazmat or TWIC check
+    /// that came due activates here too -- the terminal is where paperwork
+    /// catches up with the driver.
+    fn check_credentials(&mut self, ctx: &mut GameContext) {
+        let (activated, reminders) = {
+            let p = profile_mut(ctx);
+            let now = p.game_hours;
+            let activated = p.career.activate_pending(now, false);
+            let reminders = p.career.take_unacknowledged_grants();
+            if !activated.is_empty() {
+                p.dispatch_board_cache = None;
+            }
+            (activated, reminders)
+        };
+        if !activated.is_empty() {
+            ctx.save_profile();
+            ctx.audio.play("ui/notify");
+        } else if !reminders.is_empty() {
+            ctx.save_profile();
+        }
+        for line in activated.into_iter().chain(reminders) {
+            ctx.say_with(line, Say::queued());
+        }
+    }
+
     /// Speak a trust-band change, once, when it changes -- never on a timer.
     ///
     /// The band now answers to the licence and to what the driver owes as
@@ -619,6 +648,7 @@ impl Menu for CityMenuState {
         }
         self.check_carrier_termination(ctx);
         self.check_standing(ctx);
+        self.check_credentials(ctx);
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
@@ -691,13 +721,14 @@ impl Menu for CityMenuState {
             ),
         );
         items.push(
-            MenuItem::new("Endorsement courses", |s: &mut Self, ctx| {
+            MenuItem::new("Licenses and training", |s: &mut Self, ctx| {
                 s.endorsement_courses(ctx)
             })
             .help(
-                "Pay for endorsement training yourself to unlock \
-                 refrigerated, heavy-haul, high-value, or liquid bulk freight \
-                 before the carrier sponsors it at the listed level.",
+                "The credential ladder: carrier certificates, CDL \
+                 endorsements like doubles, tank, and hazmat, and the \
+                 late-career port card and LCV certificate. Courses cost \
+                 money and game time; some add a background-check wait.",
             ),
         );
         if DRIVING_SCHOOL_ENABLED {

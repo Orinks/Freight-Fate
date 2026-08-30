@@ -45,21 +45,21 @@ pub const CAREER_RANKS: [CareerRank; 30] = [
         2,
         "New Hire Company Driver",
         "Company driver",
-        "Refrigerated freight endorsement.",
+        "Refrigerated and flatbed securement certificates from carrier training.",
         "Running short freight with company dispatch and company equipment.",
     ),
     rank(
         3,
         "Solo Company Driver",
         "Company driver",
-        "Heavy-haul freight endorsement.",
+        "Heavy-haul freight certificate.",
         "Trusted for solo regional work and heavier freight.",
     ),
     rank(
         4,
         "Regional Company Driver",
         "Company driver",
-        "High-value freight endorsement, and dispatch moves you up to the \
+        "High-value freight certificate, and dispatch moves you up to the \
          regional fleet: you slip-seat between a few newer spare tractors, \
          matched to each load.",
         "Working broader lanes while the carrier still owns the business risk.",
@@ -90,7 +90,8 @@ pub const CAREER_RANKS: [CareerRank; 30] = [
         "Heavy Freight Driver",
         "Company driver",
         "Dispatch now lets you choose your own loads from the board, \
-         with more machinery, construction, and bulk opportunities.",
+         with more machinery, construction, and bulk opportunities. The \
+         doubles endorsement course opens under Licenses and training.",
         "Trusted with heavier freight while the carrier covers operating costs.",
     ),
     rank(
@@ -105,15 +106,17 @@ pub const CAREER_RANKS: [CareerRank; 30] = [
         10,
         "Lead Company Driver",
         "Company driver",
-        "Senior company-driver status, and the dispatch board grows to seven offers per visit.",
+        "Senior company-driver status, the dispatch board grows to seven \
+         offers per visit, and the hazmat endorsement course opens under \
+         Licenses and training.",
         "A veteran company driver, still protected from tractor operating costs.",
     ),
     rank(
         11,
         "Specialized Company Driver",
         "Senior company driver",
-        "Specialized endorsement freight now appears more often on your board.",
-        "Endorsements and careful service matter more to dispatch.",
+        "Specialized freight now appears more often on your board.",
+        "Credentials and careful service matter more to dispatch.",
     ),
     rank(
         12,
@@ -162,7 +165,8 @@ pub const CAREER_RANKS: [CareerRank; 30] = [
         18,
         "Leased-On Owner-Operator",
         "Owner-operator",
-        "Leased-on owner-operator buy-in unlocks when other gates are met.",
+        "Leased-on owner-operator buy-in unlocks when other gates are met, \
+         and TWIC port card enrollment opens under Licenses and training.",
         "Eligible to buy into a tractor position and pay operating costs.",
     ),
     rank(
@@ -176,7 +180,8 @@ pub const CAREER_RANKS: [CareerRank; 30] = [
         20,
         "Established Owner-Operator",
         "Owner-operator",
-        "Specialty trailer programs matter more.",
+        "Specialty trailer programs matter more, and LCV training opens for \
+         doubles-endorsed drivers with a clean recent record.",
         "Running as a steady leased-on business with clearer upside and costs.",
     ),
     rank(

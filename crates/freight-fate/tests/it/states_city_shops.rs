@@ -783,10 +783,17 @@ fn endorsement_courses_price_each_unearned_endorsement() {
     let rows = labels::<EndorsementCourseState>(&app);
     assert!(rows
         .iter()
-        .any(|t| t.starts_with("Refrigerated course:")
+        .any(|t| t.starts_with("Refrigerated certificate course:")
             && t.contains("carrier-sponsored free at level")));
+    // A background-checked course says so on its row; a course-only
+    // endorsement never claims a sponsor level.
+    assert!(rows
+        .iter()
+        .any(|t| t.starts_with("Hazmat endorsement course:")
+            && t.contains("background check")
+            && !t.contains("carrier-sponsored")));
     let before = profile(&app).money;
-    select::<EndorsementCourseState>(&mut app, "Refrigerated course:");
+    select::<EndorsementCourseState>(&mut app, "Refrigerated certificate course:");
     assert!(profile(&app).money < before);
     assert!(profile(&app)
         .career

@@ -27,7 +27,7 @@ fn approx(a: f64, b: f64) -> bool {
 /// for the endorsement, not for the hours these cases are about.
 fn job_with_supported_route(app: &TestApp, city: &str, level: i64, jobs: &[Job]) -> Job {
     let acceptable = |job: &Job| {
-        job.cargo.endorsement.is_none()
+        job.cargo.credentials.is_empty()
             && matches!(
                 app.ctx
                     .world
