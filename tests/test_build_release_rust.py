@@ -11,6 +11,7 @@ import importlib.util
 import plistlib
 import subprocess
 import urllib.error
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -650,7 +651,7 @@ def test_macos_sdl_resolves_an_rpath_install_name_through_homebrew(tmp_path, mon
     assert build_release.macos_sdl_library(exe) == sdl
 
 
-def test_macos_relocation_makes_sdl_bundle_relative_and_signs_deep(tmp_path, monkeypatch):
+def test_macos_relocation_makes_sdl_bundle_relative(tmp_path, monkeypatch):
     """The app must not retain a build-machine Homebrew path."""
     build_release = load_build_release_module()
     app = tmp_path / "FreightFate.app"
@@ -675,9 +676,7 @@ def test_macos_relocation_makes_sdl_bundle_relative_and_signs_deep(tmp_path, mon
         return subprocess.CompletedProcess(command, 0, "", "")
 
     monkeypatch.setattr(build_release.subprocess, "run", run)
-    monkeypatch.setattr(build_release.sys, "platform", "darwin")
     build_release.relocate_macos_libraries(app)
-    build_release.sign_distribution(app)
 
     commands = [call[0] for call in calls]
     assert [
@@ -694,7 +693,6 @@ def test_macos_relocation_makes_sdl_bundle_relative_and_signs_deep(tmp_path, mon
         str(exe),
     ] in commands
     assert ["install_name_tool", "-id", "@rpath/libSDL2-2.0.0.dylib", str(sdl)] in commands
-    assert ["codesign", "--force", "--deep", "--sign", "-", str(app)] in commands
 
 
 def test_macos_archive_name_matches_updater_suffix(tmp_path, monkeypatch):
@@ -734,3 +732,152 @@ def test_macos_signs_the_completed_app_after_smoke_cleanup(tmp_path, monkeypatch
     build_release.build_rust("test", None, True)
 
     assert events == ["stamp", "docs", "verify", "smoke", "strip", "sign", "archive"]
+
+
+def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    executable = app / "Contents" / "MacOS" / "FreightFate"
+    resources = app / "Contents" / "Resources"
+    frameworks = app / "Contents" / "Frameworks"
+    executable.parent.mkdir(parents=True)
+    resources.mkdir(parents=True)
+    frameworks.mkdir(parents=True)
+    executable.write_bytes(b"Mach-O")
+    executable.chmod(0o755)
+    for name in ("libbass.dylib", "libprism.dylib", "libSDL2-2.0.0.dylib"):
+        (frameworks / name).write_bytes(b"dylib")
+    required = (
+        "build_info.json",
+        "LICENSE.txt",
+        "CHANGELOG.md",
+        "USER_MANUAL.md",
+        "USER_MANUAL.html",
+        "ALPHA_TEST_BOOK.md",
+        "ALPHA_TEST_BOOK.html",
+        "SOUND_CREDITS.md",
+        "freight_fate/sounds.pak",
+        "freight_fate/music.pak",
+        "freight_fate/assets/sounds/CREDITS.md",
+    )
+    for relative in required:
+        path = resources / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"payload")
+    make_container(resources / "freight_fate" / "data" / "world.ffdata", build_release)
+    opened = []
+
+    class FakeSoundPack:
+        def __init__(self, path):
+            opened.append(Path(path))
+
+        def names(self):
+            return ["engine_classic/idle.ogg", "music/road_song.ogg"]
+
+    fake_assets = type("FakeAssets", (), {"SoundPack": FakeSoundPack})
+    fake_tool = type("FakeTool", (), {"_load_assets_pack": staticmethod(lambda: fake_assets)})
+    monkeypatch.setattr(build_release, "_load_tool", lambda _name: fake_tool)
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+
+    build_release.verify_rust_payload(app, platform_name="darwin")
+
+    assert opened == [
+        resources / "freight_fate" / "sounds.pak",
+        resources / "freight_fate" / "music.pak",
+    ]
+
+
+def write_macos_archive(
+    path: Path,
+    payload_root: str,
+    include_icon: bool = True,
+    include_prism: bool = True,
+) -> None:
+    entries = {
+        "FreightFate.app/Contents/MacOS/FreightFate": b"Mach-O",
+        "FreightFate.app/Contents/Info.plist": b"plist",
+        "FreightFate.app/Contents/Frameworks/libbass.dylib": b"bass",
+        "FreightFate.app/Contents/Frameworks/libSDL2-2.0.0.dylib": b"sdl",
+        f"{payload_root}/build_info.json": b"{}",
+        f"{payload_root}/LICENSE.txt": b"license",
+        f"{payload_root}/USER_MANUAL.md": b"manual",
+        f"{payload_root}/freight_fate/sounds.pak": b"sounds",
+        f"{payload_root}/freight_fate/music.pak": b"music",
+    }
+    if include_icon:
+        entries["FreightFate.app/Contents/Resources/FreightFate.icns"] = b"icon"
+    if include_prism:
+        entries["FreightFate.app/Contents/Frameworks/libprism.dylib"] = b"prism"
+    with zipfile.ZipFile(path, "w") as archive:
+        for name, content in entries.items():
+            info = zipfile.ZipInfo(name)
+            info.external_attr = (0o755 if name.endswith("/FreightFate") else 0o644) << 16
+            archive.writestr(info, content)
+
+
+def test_archive_verifier_keeps_legacy_macos_payload_in_macos_when_resources_has_only_icon(
+    tmp_path,
+):
+    build_release = load_build_release_module()
+    archive = tmp_path / "FreightFate-1.8.8-macos.zip"
+    write_macos_archive(archive, "FreightFate.app/Contents/MacOS")
+    build_release.verify_archive(archive)
+
+
+def test_archive_verifier_detects_new_rust_payload_by_resources_build_info(tmp_path):
+    build_release = load_build_release_module()
+    archive = tmp_path / "FreightFate-1.9-tester-20260830-macos.zip"
+    write_macos_archive(archive, "FreightFate.app/Contents/Resources")
+    build_release.verify_archive(archive)
+
+
+def test_macos_archive_verifier_rejects_a_bundle_without_prism(tmp_path):
+    build_release = load_build_release_module()
+    archive = tmp_path / "FreightFate-broken-macos.zip"
+    write_macos_archive(
+        archive,
+        "FreightFate.app/Contents/Resources",
+        include_prism=False,
+    )
+    with pytest.raises(RuntimeError, match="libprism.dylib"):
+        build_release.verify_archive(archive)
+
+
+def test_macos_audit_rejects_builder_local_dependencies(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    exe = app / "Contents" / "MacOS" / "FreightFate"
+    exe.parent.mkdir(parents=True)
+    exe.write_bytes(b"Mach-O")
+    monkeypatch.setattr(
+        build_release,
+        "macos_linked_libraries",
+        lambda _binary: ["/opt/homebrew/Cellar/sdl2/2.30/lib/libSDL2.dylib"],
+    )
+
+    with pytest.raises(RuntimeError, match="builder-local dependency"):
+        build_release.verify_macos_native_dependencies(app)
+
+
+def test_macos_signing_verifies_the_final_bundle(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    app.mkdir()
+    calls = []
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(
+        build_release.subprocess,
+        "run",
+        lambda command, **kwargs: calls.append((command, kwargs)),
+    )
+    monkeypatch.setattr(build_release, "verify_macos_native_dependencies", lambda _app: None)
+
+    build_release.sign_distribution(app)
+
+    assert calls == [
+        (["codesign", "--force", "--deep", "--sign", "-", str(app)], {"check": True}),
+        (
+            ["codesign", "--verify", "--deep", "--strict", str(app)],
+            {"check": True},
+        ),
+    ]

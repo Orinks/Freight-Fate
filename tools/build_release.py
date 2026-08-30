@@ -9,9 +9,9 @@ archives it for release:
 
 ``<label>`` is the project version from pyproject.toml, or the value of
 ``--tag`` (used for nightly developer snapshots). Builds use Nuitka on all
-platforms. macOS uses Nuitka's app mode with ad-hoc signing so Gatekeeper
-does not block the unsigned bundle on downloaded builds, while still not
-requiring an Apple Developer ID.
+platforms. macOS uses Nuitka's app mode with ad-hoc signing but no Apple
+Developer ID or notarization, so downloaded apps can require the documented
+first-launch Open Anyway step in System Settings.
 
 Run from the repository root: ``uv run python tools/build_release.py``
 
@@ -19,10 +19,10 @@ Run from the repository root: ``uv run python tools/build_release.py``
 freight-fate`` (``--cargo-target-dir`` picks the Cargo target directory),
 then ``ff-bake`` to turn the JSON data tree into ``world.ffdata``, then the
 same ``FreightFate/`` folder layout -- executable renamed to ``FreightFate``,
-the vendored SDL2/BASS/Prism libraries beside it, the baked data container
-under ``freight_fate/data``, the packs, ``build_info.json`` and the docs --
-staged under ``build/FreightFate`` and archived exactly as the Python build
-is. The Python mode stays the default.
+On macOS it creates ``FreightFate.app`` with the executable under
+``Contents/MacOS``, native libraries under ``Contents/Frameworks``, and data,
+packs, build metadata, and documents under ``Contents/Resources``. Other
+platforms retain the portable folder layout. The Python mode stays the default.
 """
 
 from __future__ import annotations
@@ -541,6 +541,8 @@ def run_nuitka() -> Path:
 
 def verify_sound_packs(root: Path) -> None:
     """Open the staged packs and prove they carry what the game reads."""
+    if root.suffix == ".app":
+        root = root / "Contents" / "Resources"
     assets_pack = _load_tool("pack_sounds")._load_assets_pack()
     pack_names = assets_pack.SoundPack(root / "freight_fate" / "sounds.pak").names()
     if not any(name.endswith((".ogg", ".wav")) for name in pack_names):
@@ -667,8 +669,13 @@ def sign_distribution(build_dir: Path) -> None:
     """Ad-hoc sign the finalized macOS app bundle."""
     if sys.platform != "darwin":
         return
+    verify_macos_native_dependencies(build_dir)
     subprocess.run(
         ["codesign", "--force", "--deep", "--sign", "-", str(build_dir)],
+        check=True,
+    )
+    subprocess.run(
+        ["codesign", "--verify", "--deep", "--strict", str(build_dir)],
         check=True,
     )
 
@@ -762,9 +769,7 @@ def verify_archive(out: Path) -> None:
 
     payload_root = root
     resources_root = f"{APP_NAME}.app/Contents/Resources"
-    if out.name.endswith("-macos.zip") and any(
-        name.startswith(f"{resources_root}/") for name in entries
-    ):
+    if out.name.endswith("-macos.zip") and f"{resources_root}/build_info.json" in entries:
         payload_root = resources_root
     required = (
         "build_info.json",
@@ -774,6 +779,19 @@ def verify_archive(out: Path) -> None:
         "freight_fate/music.pak",
     )
     missing = [name for name in required if f"{payload_root}/{name}" not in entries]
+    if out.name.endswith("-macos.zip") and payload_root == resources_root:
+        bundle_required = (
+            f"{APP_NAME}.app/Contents/Info.plist",
+            f"{APP_NAME}.app/Contents/Frameworks/libbass.dylib",
+            f"{APP_NAME}.app/Contents/Frameworks/libprism.dylib",
+        )
+        missing.extend(name for name in bundle_required if name not in entries)
+        frameworks = f"{APP_NAME}.app/Contents/Frameworks/"
+        if not any(
+            name.startswith(frameworks) and Path(name).name.startswith("libSDL2")
+            for name in entries
+        ):
+            missing.append(f"{frameworks}libSDL2*.dylib")
     if missing:
         raise RuntimeError(
             f"Release archive is missing payload files: {', '.join(missing)} in {out.name}"
@@ -1139,38 +1157,47 @@ def write_macos_info_plist(app: Path, label: str) -> None:
         plistlib.dump(info, stream, sort_keys=True)
 
 
-def relocate_macos_libraries(app: Path) -> None:
-    """Make the bundled SDL dependency independent of the builder's Homebrew."""
+def macos_bundle_binaries(app: Path) -> list[Path]:
+    """Mach-O files whose dependencies must stay inside the app or macOS."""
     executable = app / "Contents" / "MacOS" / APP_NAME
     frameworks = app / "Contents" / "Frameworks"
-    linked = macos_linked_libraries(executable)
-    sdl_install_name = next(
-        (
-            name
-            for name in linked
-            if Path(name).name.startswith("libSDL2") and Path(name).name.endswith(".dylib")
-        ),
-        None,
+    return [executable, *sorted(frameworks.rglob("*.dylib"))]
+
+
+def macos_system_install_name(name: str) -> bool:
+    return name.startswith(
+        ("@rpath/", "@loader_path/", "@executable_path/", "/usr/lib/", "/System/Library/")
     )
-    if sdl_install_name is None:
-        raise RuntimeError("Rust executable has no SDL2 dylib dependency to relocate")
-    bundled_sdl = frameworks / Path(sdl_install_name).name
-    if not bundled_sdl.is_file():
-        raise RuntimeError(f"macOS app is missing bundled SDL2 library {bundled_sdl.name}")
-    subprocess.run(
-        ["install_name_tool", "-id", f"@rpath/{bundled_sdl.name}", str(bundled_sdl)],
-        check=True,
-    )
-    subprocess.run(
-        [
-            "install_name_tool",
-            "-change",
-            sdl_install_name,
-            f"@rpath/{bundled_sdl.name}",
-            str(executable),
-        ],
-        check=True,
-    )
+
+
+def relocate_macos_libraries(app: Path) -> None:
+    """Rewrite every bundled dependency away from the builder's filesystem."""
+    executable = app / "Contents" / "MacOS" / APP_NAME
+    frameworks = app / "Contents" / "Frameworks"
+    bundled = {path.name: path for path in frameworks.rglob("*.dylib")}
+    if not any(name.startswith("libSDL2") for name in bundled):
+        raise RuntimeError("macOS app is missing its bundled SDL2 library")
+    for binary in macos_bundle_binaries(app):
+        if binary.suffix == ".dylib":
+            subprocess.run(
+                ["install_name_tool", "-id", f"@rpath/{binary.name}", str(binary)],
+                check=True,
+            )
+        for dependency in macos_linked_libraries(binary):
+            if macos_system_install_name(dependency):
+                continue
+            replacement = bundled.get(Path(dependency).name)
+            if replacement is not None:
+                subprocess.run(
+                    [
+                        "install_name_tool",
+                        "-change",
+                        dependency,
+                        f"@rpath/{replacement.name}",
+                        str(binary),
+                    ],
+                    check=True,
+                )
     subprocess.run(
         [
             "install_name_tool",
@@ -1180,6 +1207,17 @@ def relocate_macos_libraries(app: Path) -> None:
         ],
         check=True,
     )
+
+
+def verify_macos_native_dependencies(app: Path) -> None:
+    """Reject any Mach-O dependency that still names the builder's disk."""
+    forbidden: list[str] = []
+    for binary in macos_bundle_binaries(app):
+        for dependency in macos_linked_libraries(binary):
+            if dependency.startswith("/") and not macos_system_install_name(dependency):
+                forbidden.append(f"{binary.name}: {dependency}")
+    if forbidden:
+        raise RuntimeError("macOS app contains a builder-local dependency: " + "; ".join(forbidden))
 
 
 def plan_rust_layout(
@@ -1298,11 +1336,11 @@ def stage_rust_build(
     return build_dir
 
 
-def verify_rust_payload(build_dir: Path) -> None:
+def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> None:
     """Prove the staged Rust folder holds what the binary loads."""
     executable_root = runtime_root(build_dir)
     root = build_dir / "Contents" / "Resources" if build_dir.suffix == ".app" else executable_root
-    exe = executable_root / rust_exe_name()
+    exe = executable_root / rust_exe_name(platform_name)
     required = [
         exe,
         root / "build_info.json",
@@ -1363,7 +1401,7 @@ def verify_rust_payload(build_dir: Path) -> None:
             "Rust payload ships source-only files: " + ", ".join(sorted(leaked)[:10])
         )
 
-    if sys.platform == "win32":
+    if platform_name == "win32":
         for name in ("SDL2.dll", "bass.dll", "prism.dll"):
             if not (root / name).exists():
                 # BASS is fetched rather than committed, so a checkout that
@@ -1375,7 +1413,7 @@ def verify_rust_payload(build_dir: Path) -> None:
                     else ""
                 )
                 raise RuntimeError(f"Rust payload is missing the native library {name}.{hint}")
-    elif sys.platform == "darwin":
+    elif platform_name == "darwin":
         frameworks = build_dir / "Contents" / "Frameworks"
         required_macos = [*MACOS_REQUIRED_LIBRARIES]
         if not any(path.name.startswith("libSDL2") for path in frameworks.glob("*.dylib")):
@@ -1393,7 +1431,7 @@ def verify_rust_payload(build_dir: Path) -> None:
 
     verify_sound_packs(build_dir)
 
-    if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
+    if platform_name != "win32" and os.name != "nt" and not exe.stat().st_mode & 0o111:
         raise RuntimeError(f"Packaged executable is not runnable: {exe.relative_to(build_dir)}")
 
 

@@ -38,9 +38,10 @@ pub fn parse_level(name: &str) -> LevelFilter {
 /// Console logging from source; a fresh log file in the packaged game.
 ///
 /// The windowed build has no console, so without a file every warning --
-/// update failures especially -- vanishes. The log lives in the game folder
-/// (`logs/game.log`) where a player can find and share it without mixing it
-/// with durable saves. An explicit `FREIGHT_FATE_LOG_FILE` (set for
+/// update failures especially -- vanishes. Portable builds keep the log in
+/// the game folder; macOS keeps it with the player's data under Application
+/// Support because an installed app bundle is read-only. An explicit
+/// `FREIGHT_FATE_LOG_FILE` (set for
 /// playtests/observation) forces file output and an INFO default even from a
 /// source checkout, so a session can be reviewed after the fact without
 /// streaming to a console. Safe to call more than once; only the first call
@@ -66,7 +67,11 @@ pub fn configure_logging() {
 
     let log_path: Option<PathBuf> = match explicit {
         Some(path) => Some(PathBuf::from(path)),
-        None if packaged => Some(ff_core::settings::game_root().join("logs").join("game.log")),
+        None if packaged => Some(packaged_log_path(
+            cfg!(target_os = "macos"),
+            &ff_core::settings::game_root(),
+            &ff_core::models::profile::data_dir(),
+        )),
         None => None,
     };
     let file = log_path.as_deref().and_then(open_log_file);
@@ -140,6 +145,11 @@ fn open_log_file(path: &Path) -> Option<File> {
     File::create(path).ok()
 }
 
+fn packaged_log_path(macos: bool, game_root: &Path, data_dir: &Path) -> PathBuf {
+    let root = if macos { data_dir } else { game_root };
+    root.join("logs").join("game.log")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -165,5 +175,25 @@ mod tests {
             "old run"
         );
         assert!(fs::read_to_string(&path).unwrap().starts_with("new run"));
+    }
+
+    #[test]
+    fn packaged_macos_log_uses_application_support_not_the_app_bundle() {
+        let app = Path::new("/Applications/FreightFate.app");
+        let data = Path::new("/Users/driver/Library/Application Support/FreightFate");
+        assert_eq!(
+            packaged_log_path(true, app, data),
+            data.join("logs").join("game.log")
+        );
+    }
+
+    #[test]
+    fn packaged_portable_log_stays_beside_the_game() {
+        let game = Path::new("/games/FreightFate");
+        let data = game.join("saves");
+        assert_eq!(
+            packaged_log_path(false, game, &data),
+            game.join("logs").join("game.log")
+        );
     }
 }
