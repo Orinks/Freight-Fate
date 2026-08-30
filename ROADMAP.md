@@ -122,8 +122,9 @@ onto exit signalling.
 
 - [x] **Career 1.9 prerelease builds are complete portable releases
       (2026-08-29).** Each Career 1.9 prerelease build publishes a Windows zip
-      and a Mac app with music and the required audio libraries. The Mac app
-      carries SDL2 too, so players do not need Homebrew. Career 1.9 copies set to
+      and an Apple Silicon Mac app with music and the required audio libraries.
+      The Mac app carries SDL2 too, so players do not need Homebrew. The updater
+      does not offer this archive on Intel Macs. Career 1.9 copies set to
       `Update channel: developer snapshots` follow newer prereleases with dated
       tags such as `1.9-tester-20260829`, spoken as "1 point 9 tester, August
       29, 2026," while stable players stay on stable releases.

@@ -536,7 +536,7 @@ def test_career_19_snapshot_workflow_contract():
     assert "tag=1.9-tester-$(date -u +%Y%m%d)" in workflow
     assert "commit_sha: ${{ steps.check.outputs.commit_sha }}" in workflow
     assert 'echo "commit_sha=$(git rev-parse HEAD)"' in workflow
-    assert workflow.count("ref: ${{ needs.prepare.outputs.commit_sha }}") == 2
+    assert workflow.count("ref: ${{ needs.prepare.outputs.commit_sha }}") == 3
     assert 'git tag --list "1.9-tester-*"' in workflow
     assert "tools/release_notes.py should-build-nightly" in workflow
     assert "tools/release_notes.py nightly" in workflow
@@ -544,11 +544,90 @@ def test_career_19_snapshot_workflow_contract():
     assert "tools/release_notes.py check-size --input notes.md --max-characters 120000" in workflow
     assert "./build-release.ps1" in workflow
     assert "windows-portable.zip" in workflow
+    assert "macos-arm64.zip" in workflow
     assert "--prerelease" in workflow
     assert "COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}" in workflow
     assert '--target "$COMMIT_SHA"' in workflow
     assert '--target "$CAREER_BRANCH"' not in workflow
-    assert "needs.build.result == 'success'" in workflow
+    assert "needs.build_windows.result == 'success'" in workflow
+    assert "needs.build_macos.result == 'success'" in workflow
+
+
+def test_career_19_snapshot_builds_an_apple_silicon_macos_release():
+    workflow_path = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    )
+    workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    jobs = workflow["jobs"]
+    mac = jobs["build_macos"]
+
+    assert mac["runs-on"] == "macos-26"
+    steps = mac["steps"]
+    named_steps = {
+        step["name"]: (index, step) for index, step in enumerate(steps) if "name" in step
+    }
+    assert any(step.get("uses") == "astral-sh/setup-uv@v8.2.0" for step in steps)
+    assert named_steps["Install the pinned Rust toolchain"][1]["run"] == "rustup show"
+    assert "brew install sdl2 pkg-config" in named_steps["Install macOS dependencies"][1]["run"]
+    assert "uv run python tools/fetch_bass.py\n" in named_steps["Fetch BASS"][1]["run"]
+    assert "uv run python tools/fetch_bass.py --check" in named_steps["Fetch BASS"][1]["run"]
+    assert named_steps["Check Rust formatting"][1]["run"] == "cargo fmt --all --check"
+    assert (
+        named_steps["Lint Rust targets"][1]["run"]
+        == "cargo clippy --all-targets --locked -- -D warnings"
+    )
+    assert named_steps["Test Rust workspace"][1]["run"] == "cargo test -p ff-core -p freight-fate"
+    assert (
+        "uv run python tools/build_release.py --rust --smoke --tag"
+        in named_steps["Build the macOS release"][1]["run"]
+    )
+    assert all("build-release.ps1" not in step.get("run", "") for step in steps)
+    upload = next(step for step in steps if step.get("uses") == "actions/upload-artifact@v7")
+    assert upload["with"]["path"] == "dist/FreightFate-*-macos-arm64.zip"
+
+
+def test_career_19_release_requires_and_verifies_both_platform_archives():
+    workflow_path = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    )
+    workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    release = workflow["jobs"]["release"]
+
+    assert release["needs"] == ["prepare", "build_windows", "build_macos"]
+    assert "needs.build_windows.result == 'success'" in release["if"]
+    assert "needs.build_macos.result == 'success'" in release["if"]
+    downloads = [
+        step for step in release["steps"] if step.get("uses") == "actions/download-artifact@v7"
+    ]
+    assert {step["with"]["name"] for step in downloads} == {"Windows", "macOS-arm64"}
+    assert all(step["with"]["path"] == "assets" for step in downloads)
+    verify = next(
+        step for step in release["steps"] if step.get("name") == "Verify release archives"
+    )
+    assert "assets/FreightFate-*-windows-portable.zip" in verify["run"]
+    assert "assets/FreightFate-*-macos-arm64.zip" in verify["run"]
+    assert verify["run"].count('"${#') == 2
+    checksum = next(
+        step
+        for step in release["steps"]
+        if step.get("name") == "Prepare and verify release notes and checksums"
+    )
+    assert (
+        "sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip"
+        in checksum["run"]
+    )
+
+
+def test_player_manual_distinguishes_stable_and_career_19_mac_archives():
+    manual = (Path(__file__).resolve().parents[1] / "docs" / "user-manual.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "| macOS stable | `FreightFate-<version>-macos.zip` |" in manual
+    assert (
+        "| Career 1.9 macOS, Apple Silicon | `FreightFate-<version>-macos-arm64.zip` |"
+    ) in manual
+    assert "On an Intel Mac, the in-game updater will not offer" in manual
 
 
 def test_career_19_snapshot_prepares_bass_before_rust_validation():
@@ -556,17 +635,21 @@ def test_career_19_snapshot_prepares_bass_before_rust_validation():
         Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
     )
     workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
-    steps = workflow["jobs"]["build"]["steps"]
-    named_steps = {
-        step["name"]: (index, step) for index, step in enumerate(steps) if "name" in step
-    }
+    for job_name, build_step_name in (
+        ("build_windows", "Build the portable release"),
+        ("build_macos", "Build the macOS release"),
+    ):
+        steps = workflow["jobs"][job_name]["steps"]
+        named_steps = {
+            step["name"]: (index, step) for index, step in enumerate(steps) if "name" in step
+        }
 
-    bass_index, bass_step = named_steps["Fetch BASS"]
-    assert "uv run python tools/fetch_bass.py\n" in bass_step["run"]
-    assert "uv run python tools/fetch_bass.py --check" in bass_step["run"]
-    assert bass_index < named_steps["Lint Rust targets"][0]
-    assert bass_index < named_steps["Test Rust workspace"][0]
-    assert named_steps["Test Rust workspace"][0] < named_steps["Build the portable release"][0]
+        bass_index, bass_step = named_steps["Fetch BASS"]
+        assert "uv run python tools/fetch_bass.py\n" in bass_step["run"]
+        assert "uv run python tools/fetch_bass.py --check" in bass_step["run"]
+        assert bass_index < named_steps["Lint Rust targets"][0]
+        assert bass_index < named_steps["Test Rust workspace"][0]
+        assert named_steps["Test Rust workspace"][0] < named_steps[build_step_name][0]
 
 
 def test_career_19_retry_is_bounded_to_one_delayed_attempt():

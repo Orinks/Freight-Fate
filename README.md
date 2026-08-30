@@ -85,9 +85,14 @@ visual display mirrors all speech for sighted players and helpers.
    August 29, 2026." In Settings, choose `Update channel: developer snapshots`
    to receive later Career 1.9 prerelease builds. A career saved in a tester
    build may not load in an older stable release.
-3. Under Assets, download the file ending in `-windows-portable.zip`.
-4. Extract the zip file to a folder.
-5. Open the extracted `FreightFate` folder and run `FreightFate.exe`.
+3. Under Assets, Windows players should download the file ending in
+   `-windows-portable.zip`. Career 1.9 testers using an Apple Silicon Mac
+   should download the file ending in `-macos-arm64.zip`. The Career 1.9 Mac
+   build does not support Intel Macs.
+4. Extract the zip file. On Windows, open the extracted `FreightFate` folder
+   and run `FreightFate.exe`. On an Apple Silicon Mac, move `FreightFate.app`
+   to Applications and follow the first-launch instructions in the player
+   manual.
 
 For a complete player-facing guide to installing, careers, dispatch, driving,
 route stops, saves, settings, audio, speech, and troubleshooting, see the

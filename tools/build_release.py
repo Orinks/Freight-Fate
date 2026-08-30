@@ -5,7 +5,8 @@ archives it for release:
 
 * Windows: ``dist/FreightFate-<label>-windows-portable.zip``
 * Linux:   ``dist/FreightFate-<label>-linux-x64.tar.gz``
-* macOS:   ``dist/FreightFate-<label>-macos.zip``
+* macOS Apple Silicon: ``dist/FreightFate-<label>-macos-arm64.zip``
+* macOS Intel: ``dist/FreightFate-<label>-macos.zip``
 
 ``<label>`` is the project version from pyproject.toml, or the value of
 ``--tag`` (used for nightly developer snapshots). Builds use Nuitka on all
@@ -741,7 +742,8 @@ def verify_archive(out: Path) -> None:
     no runnable game inside (for example a Linux snapshot missing its
     executable) and nothing else would notice.
     """
-    if out.name.endswith("-macos.zip"):
+    macos_archive = out.name.endswith(("-macos-arm64.zip", "-macos.zip"))
+    if macos_archive:
         root = f"{APP_NAME}.app/Contents/MacOS"
         exe_entry = f"{root}/{APP_NAME}"
         needs_exec = True
@@ -769,7 +771,7 @@ def verify_archive(out: Path) -> None:
 
     payload_root = root
     resources_root = f"{APP_NAME}.app/Contents/Resources"
-    if out.name.endswith("-macos.zip") and f"{resources_root}/build_info.json" in entries:
+    if macos_archive and f"{resources_root}/build_info.json" in entries:
         payload_root = resources_root
     required = (
         "build_info.json",
@@ -779,7 +781,7 @@ def verify_archive(out: Path) -> None:
         "freight_fate/music.pak",
     )
     missing = [name for name in required if f"{payload_root}/{name}" not in entries]
-    if out.name.endswith("-macos.zip") and payload_root == resources_root:
+    if macos_archive and payload_root == resources_root:
         bundle_required = (
             f"{APP_NAME}.app/Contents/Info.plist",
             f"{APP_NAME}.app/Contents/Frameworks/libbass.dylib",
@@ -805,7 +807,10 @@ def archive(build_dir: Path, label: str) -> Path:
             for path in sorted(build_dir.rglob("*")):
                 z.write(path, Path(APP_NAME) / path.relative_to(build_dir))
     elif sys.platform == "darwin":
-        out = DIST / f"{APP_NAME}-{label}-macos.zip"
+        mac_suffix = (
+            "macos-arm64" if platform.machine().lower() in {"arm64", "aarch64"} else "macos"
+        )
+        out = DIST / f"{APP_NAME}-{label}-{mac_suffix}.zip"
         subprocess.run(["ditto", "-c", "-k", "--keepParent", str(build_dir), str(out)], check=True)
     else:
         out = DIST / f"{APP_NAME}-{label}-linux-x64.tar.gz"

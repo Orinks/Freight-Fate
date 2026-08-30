@@ -62,6 +62,28 @@ pub enum Platform {
     Other,
 }
 
+/// CPU architecture of the packaged game. Release assets must match this as
+/// closely as the operating system: an Apple Silicon app cannot run on an
+/// Intel-only Mac.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Architecture {
+    Aarch64,
+    X86_64,
+    Other,
+}
+
+impl Architecture {
+    pub fn current() -> Self {
+        if cfg!(target_arch = "aarch64") {
+            Self::Aarch64
+        } else if cfg!(target_arch = "x86_64") {
+            Self::X86_64
+        } else {
+            Self::Other
+        }
+    }
+}
+
 impl Platform {
     pub fn current() -> Self {
         if cfg!(target_os = "windows") {
@@ -81,6 +103,7 @@ impl Platform {
 #[derive(Debug, Clone)]
 pub struct UpdaterEnv {
     pub platform: Platform,
+    pub architecture: Architecture,
     /// `sys.executable`.
     pub executable: PathBuf,
     /// `os.environ.get("APPIMAGE")`.
@@ -95,6 +118,7 @@ impl UpdaterEnv {
     pub fn current() -> Self {
         Self {
             platform: Platform::current(),
+            architecture: Architecture::current(),
             executable: std::env::current_exe().unwrap_or_default(),
             appimage: std::env::var("APPIMAGE").ok(),
             home: home_dir(),
@@ -105,8 +129,17 @@ impl UpdaterEnv {
     /// A fake environment for tests: the given platform and executable,
     /// no `APPIMAGE`, no home, pid 4242.
     pub fn fake(platform: Platform, executable: &Path) -> Self {
+        Self::fake_with_architecture(platform, Architecture::current(), executable)
+    }
+
+    pub fn fake_with_architecture(
+        platform: Platform,
+        architecture: Architecture,
+        executable: &Path,
+    ) -> Self {
         Self {
             platform,
+            architecture,
             executable: executable.to_path_buf(),
             appimage: None,
             home: None,
@@ -398,6 +431,8 @@ pub fn running_appimage_path(appimage: Option<&str>) -> Option<PathBuf> {
 pub fn platform_suffix(env: &UpdaterEnv) -> &'static str {
     match env.platform {
         Platform::Windows => "-windows-portable.zip",
+        // Stable releases keep their existing Mac archive contract. Career
+        // 1.9 snapshots specialize it in pick_asset below.
         Platform::MacOs => "-macos.zip",
         _ => {
             if running_appimage_path(env.appimage.as_deref()).is_some() {
@@ -415,7 +450,20 @@ pub fn pick_asset(
     suffix: Option<&str>,
     env: &UpdaterEnv,
 ) -> Option<(String, String, i64)> {
-    let suffix = suffix.unwrap_or_else(|| platform_suffix(env));
+    let release_tag = release
+        .get("tag_name")
+        .and_then(Value::as_str)
+        .unwrap_or("");
+    let suffix = match (suffix, env.platform, release_tag.starts_with("1.9-tester-")) {
+        (Some(suffix), _, _) => suffix,
+        (None, Platform::MacOs, true) => match env.architecture {
+            Architecture::Aarch64 => "-macos-arm64.zip",
+            // The snapshots are built natively for Apple Silicon. Do not
+            // offer that app to an Intel process.
+            Architecture::X86_64 | Architecture::Other => return None,
+        },
+        (None, _, _) => platform_suffix(env),
+    };
     let assets = release.get("assets").and_then(Value::as_array)?;
     for asset in assets {
         let name = asset.get("name").and_then(Value::as_str).unwrap_or("");

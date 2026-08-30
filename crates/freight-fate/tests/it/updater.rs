@@ -15,7 +15,7 @@ use freight_fate::states::update::{UpdateDownloadState, UpdatePromptState};
 use freight_fate::updater::{
     self, build_info_from_dict, check_for_update_with, dev_update_from, flatten_markdown,
     parse_version, pick_asset, resolve_channel, snapshot_update_from, stable_update_from,
-    write_apply_script, BuildInfo, Platform, UpdateInfo, UpdaterEnv, APPIMAGE_SUFFIX,
+    write_apply_script, Architecture, BuildInfo, Platform, UpdateInfo, UpdaterEnv, APPIMAGE_SUFFIX,
     TARBALL_SUFFIX,
 };
 
@@ -39,7 +39,11 @@ fn release_with(
     })
 }
 
-const ALL_ASSETS: [&str; 3] = ["-windows-portable.zip", "-macos.zip", "-linux-x64.tar.gz"];
+const ALL_ASSETS: [&str; 3] = [
+    "-windows-portable.zip",
+    "-macos-arm64.zip",
+    "-linux-x64.tar.gz",
+];
 
 fn release(tag: &str) -> Value {
     release_with(tag, false, "", "", &ALL_ASSETS)
@@ -65,6 +69,14 @@ fn env() -> UpdaterEnv {
 
 fn env_on(platform: Platform) -> UpdaterEnv {
     UpdaterEnv::fake(platform, Path::new("/tmp/not-frozen/python"))
+}
+
+fn mac_env(architecture: Architecture) -> UpdaterEnv {
+    UpdaterEnv::fake_with_architecture(
+        Platform::MacOs,
+        architecture,
+        Path::new("/tmp/not-frozen/FreightFate"),
+    )
 }
 
 fn fake_appimage(dir: &Path) -> std::path::PathBuf {
@@ -147,6 +159,34 @@ fn test_stable_no_update_without_platform_asset() {
     assert!(
         stable_update_from(&release_with("v9.9.9", false, "", "", &[]), "1.5.0", &env()).is_none()
     );
+}
+
+#[test]
+fn test_apple_silicon_macos_selects_only_arm64_archive() {
+    let release = release_with(
+        "1.9-tester-20260830",
+        true,
+        "",
+        "",
+        &["-macos.zip", "-macos-arm64.zip"],
+    );
+    let asset = pick_asset(&release, None, &mac_env(Architecture::Aarch64)).unwrap();
+    assert!(asset.0.ends_with("-macos-arm64.zip"));
+}
+
+#[test]
+fn test_intel_macos_does_not_offer_arm64_archive() {
+    let release = release_with("1.9-tester-20260830", true, "", "", &["-macos-arm64.zip"]);
+    assert!(pick_asset(&release, None, &mac_env(Architecture::X86_64)).is_none());
+}
+
+#[test]
+fn test_stable_macos_keeps_legacy_archive_contract_on_both_architectures() {
+    let release = release_with("v1.8.8", false, "", "", &["-macos.zip"]);
+    for architecture in [Architecture::Aarch64, Architecture::X86_64] {
+        let asset = pick_asset(&release, None, &mac_env(architecture)).unwrap();
+        assert!(asset.0.ends_with("-macos.zip"));
+    }
 }
 
 #[test]
@@ -612,9 +652,12 @@ fn test_pick_asset_matches_platform_suffix() {
 #[test]
 fn test_pick_asset_chooses_the_macos_app_archive_for_mac_players() {
     let rel = tester("1.9-tester-20260830");
-    let (name, url, size) = pick_asset(&rel, None, &env_on(Platform::MacOs)).unwrap();
-    assert_eq!(name, "FreightFate-1.9-tester-20260830-macos.zip");
-    assert_eq!(url, "https://example.test/1.9-tester-20260830/-macos.zip");
+    let (name, url, size) = pick_asset(&rel, None, &mac_env(Architecture::Aarch64)).unwrap();
+    assert_eq!(name, "FreightFate-1.9-tester-20260830-macos-arm64.zip");
+    assert_eq!(
+        url,
+        "https://example.test/1.9-tester-20260830/-macos-arm64.zip"
+    );
     assert_eq!(size, 50_000_000);
 }
 

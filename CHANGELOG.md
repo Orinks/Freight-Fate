@@ -5,8 +5,9 @@
 ### Added
 
 - **Career 1.9 tester snapshots are ready to play.** The Windows portable zip
-  and Mac app for each Career 1.9 prerelease build now include the music and
-  required audio libraries. Mac players do not need Homebrew to run the app.
+  and Apple Silicon Mac app for each Career 1.9 prerelease build now include
+  the music and required audio libraries. Apple Silicon Mac players do not
+  need Homebrew to run the app; Intel Macs are not supported by this build.
   Players using a Career 1.9 tester snapshot can move to newer
   prerelease builds by choosing `Update channel: developer snapshots`.
 

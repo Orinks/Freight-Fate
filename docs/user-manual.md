@@ -15,12 +15,16 @@ returning from an earlier version, read What Changed Recently first.
 2. On Windows or Linux, extract the archive into a folder you control, open
    the extracted `FreightFate` folder, and run `FreightFate.exe` on Windows or
    `FreightFate` on Linux.
-3. On macOS, extract the archive, move `FreightFate.app` to Applications, and
-   open the app. The app is ad-hoc signed rather than notarized. The first time
-   you open it, macOS may block it. Open System Settings, Privacy & Security,
-   find the message about Freight Fate, choose Open Anyway, and confirm Open.
-   VoiceOver reads these controls. You only need to do this for the first
-   launch of a newly downloaded app.
+3. On macOS, the stable archive ends in `-macos.zip`. To test Career 1.9 on
+   an Apple Silicon Mac, choose the newest Career 1.9 prerelease and download
+   the archive ending in `-macos-arm64.zip`; Career 1.9 does not provide an
+   Intel Mac build. Extract the archive and move `FreightFate.app` to
+   Applications. Apple has not notarized this build, so macOS may block it the
+   first time you open it. Open System Settings, Privacy & Security, scroll to
+   the message about Freight Fate, choose Open Anyway, and confirm Open. The
+   button appears for about an hour after macOS blocks the launch. VoiceOver
+   reads these controls. You only need to do this for the first launch of a
+   newly downloaded app.
 4. Choose **New career**, enter a driver name, pick a home region, and pick a
    home terminal.
 5. Listen to the first-day briefing, open the dispatch board, accept a job,
@@ -91,7 +95,8 @@ Release archives are named by platform when that platform is available:
 | Platform | Archive Name |
 | --- | --- |
 | Windows | `FreightFate-<version>-windows-portable.zip` |
-| macOS | `FreightFate-<version>-macos.zip` |
+| macOS stable | `FreightFate-<version>-macos.zip` |
+| Career 1.9 macOS, Apple Silicon | `FreightFate-<version>-macos-arm64.zip` |
 | Linux | `FreightFate-<version>-linux-x64.tar.gz` |
 | Linux (AppImage) | `FreightFate-<version>-linux-x86_64.AppImage` |
 
@@ -107,6 +112,10 @@ then restarting. That needs the folder holding the AppImage to be writable
 by your user account; when it is not, the game keeps the downloaded update
 in your home folder and tells you where it is so you can finish the
 install yourself.
+
+The Career 1.9 Mac archive runs on Apple Silicon Macs. It does not run on
+Intel Macs. On an Intel Mac, the in-game updater will not offer the Apple
+Silicon archive.
 
 Use the newest stable release for normal play. Stable releases are numbered,
 such as `v1.6.0`.
