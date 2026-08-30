@@ -22,6 +22,13 @@ NIGHTLY_HEADER = (
     "stable release. Expect rough edges; your save files stay compatible "
     "whenever possible, but back them up first."
 )
+GITHUB_RELEASE_NOTES_SAFE_CHARACTERS = 120_000
+FIRST_SNAPSHOT_COMPLETE_LIST = (
+    "## Complete change list\n\n"
+    "This first snapshot contains more player-facing changes than fit on the "
+    "GitHub release page. Read `CHANGELOG.md` in the download for the complete "
+    "curated list."
+)
 SECTION_ORDER = ("Added", "Changed", "Improved", "Fixed", "Removed", "Deprecated", "Security")
 PLAYER_FACING_SECTIONS = SECTION_ORDER + ("Compatibility",)
 INTERNAL_SECTIONS = (
@@ -217,7 +224,7 @@ def format_entry(entry: str) -> str:
     return marker + " ".join([first_text, *lines[1:]])
 
 
-def format_sections(sections: list[ChangelogSection]) -> str:
+def format_sections(sections: list[ChangelogSection], *, heading_level: int = 2) -> str:
     if not sections:
         return "- No user-facing changes"
 
@@ -232,7 +239,7 @@ def format_sections(sections: list[ChangelogSection]) -> str:
         entries = "\n".join(
             entry for entry in dict.fromkeys(format_entry(e) for e in by_title[title]) if entry
         )
-        chunks.append(f"## {title}\n{entries}")
+        chunks.append(f"{'#' * heading_level} {title}\n{entries}")
     return "\n\n".join(chunks).strip()
 
 
@@ -281,6 +288,66 @@ def stable_notes(version: str) -> str:
     return format_sections(parse_sections(block))
 
 
+def format_nightly_notes(
+    sections: list[ChangelogSection],
+    changes_heading: str,
+    footer: str = "",
+    *,
+    section_heading_level: int = 2,
+) -> str:
+    body = format_sections(sections, heading_level=section_heading_level)
+    notes = f"{NIGHTLY_HEADER}\n\n## {changes_heading}\n\n{body}"
+    return f"{notes}\n\n{footer}" if footer else notes
+
+
+def first_snapshot_fits(notes: str) -> bool:
+    """Whether notes plus the file's final line feed fit the safe limit."""
+    return len(notes) + 1 <= GITHUB_RELEASE_NOTES_SAFE_CHARACTERS
+
+
+def bounded_first_snapshot_sections(
+    sections: list[ChangelogSection],
+) -> tuple[list[ChangelogSection], bool]:
+    """Keep complete recent entries from every section within GitHub's limit."""
+    if first_snapshot_fits(
+        format_nightly_notes(sections, "Changes in this snapshot", section_heading_level=3)
+    ):
+        return sections, False
+
+    selected: list[list[str]] = [[] for _ in sections]
+    offsets = [0 for _ in sections]
+
+    def selected_sections() -> list[ChangelogSection]:
+        return [
+            ChangelogSection(section.title, tuple(selected[index]))
+            for index, section in enumerate(sections)
+            if selected[index]
+        ]
+
+    while True:
+        added_this_round = False
+        for index, section in enumerate(sections):
+            if offsets[index] >= len(section.entries):
+                continue
+            entry = section.entries[offsets[index]]
+            selected[index].append(entry)
+            candidate = format_nightly_notes(
+                selected_sections(),
+                "Changes in this snapshot",
+                FIRST_SNAPSHOT_COMPLETE_LIST,
+                section_heading_level=3,
+            )
+            if first_snapshot_fits(candidate):
+                offsets[index] += 1
+                added_this_round = True
+            else:
+                selected[index].pop()
+        if not added_this_round:
+            break
+
+    return selected_sections(), True
+
+
 def nightly_notes(
     previous_tag: str = "",
     exclude_notes: str = "",
@@ -296,11 +363,20 @@ def nightly_notes(
         sections = sections_added_since(previous_tag, changelog_text, excluded_entries, released)
     else:
         sections = nightly_candidate_sections(changelog_text, released)
-    body = format_sections(sections)
     changes_heading = (
         "Changes in this snapshot" if first_snapshot else "Changes since the previous snapshot"
     )
-    return f"{NIGHTLY_HEADER}\n\n## {changes_heading}\n\n{body}"
+    footer = ""
+    if first_snapshot:
+        sections, was_bounded = bounded_first_snapshot_sections(sections)
+        if was_bounded:
+            footer = FIRST_SNAPSHOT_COMPLETE_LIST
+    return format_nightly_notes(
+        sections,
+        changes_heading,
+        footer,
+        section_heading_level=3 if first_snapshot else 2,
+    )
 
 
 def current_branch() -> str:
@@ -506,8 +582,21 @@ def write_notes_command(args: argparse.Namespace) -> int:
             getattr(args, "exclude_stable_notes", ""),
             first_snapshot=getattr(args, "first_snapshot", False),
         )
-    Path(args.output).write_text(notes + "\n", encoding="utf-8")
+    Path(args.output).write_text(notes + "\n", encoding="utf-8", newline="\n")
     print(f"Wrote release notes to {args.output}.")
+    return 0
+
+
+def check_size_command(args: argparse.Namespace) -> int:
+    characters = len(Path(args.input).read_bytes().decode("utf-8"))
+    if characters > args.max_characters:
+        print(
+            f"Release notes contain {characters} characters, exceeding the "
+            f"{args.max_characters}-character publication limit.",
+            file=sys.stderr,
+        )
+        return 1
+    print(f"Release notes fit the publication limit ({characters} characters).")
     return 0
 
 
@@ -542,11 +631,18 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("--head", default="HEAD")
     check.set_defaults(func=check_command)
 
+    check_size = subparsers.add_parser(
+        "check-size", help="Require release notes to fit the publication limit."
+    )
+    check_size.add_argument("--input", required=True)
+    check_size.add_argument("--max-characters", required=True, type=int)
+    check_size.set_defaults(func=check_size_command)
+
     return parser
 
 
-def main() -> int:
-    args = build_parser().parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
     return args.func(args)
 
 

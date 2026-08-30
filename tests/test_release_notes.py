@@ -84,6 +84,76 @@ def test_first_career_snapshot_uses_accurate_release_notes_heading(tmp_path, mon
     assert "Changes since the previous snapshot" not in notes
 
 
+def test_first_career_snapshot_notes_fit_github_without_cutting_entries(tmp_path, monkeypatch):
+    release_notes = load_release_notes_module()
+    added_entries = "\n".join(
+        f"- **Career improvement {index}.** " + ("Player-facing detail. " * 90)
+        for index in range(100)
+    )
+    fixed_entries = "\n".join(
+        f"- **Career fix {index}.** " + ("Clear fix detail. " * 90) for index in range(100)
+    )
+    repo = make_repo(
+        tmp_path,
+        changelog(f"### Added\n{added_entries}\n\n### Fixed\n{fixed_entries}\n"),
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(first_snapshot=True)
+
+    assert len(notes) <= release_notes.GITHUB_RELEASE_NOTES_SAFE_CHARACTERS
+    assert "### Added" in notes
+    assert "### Fixed" in notes
+    assert "\n## Added\n" not in notes
+    assert "\n## Fixed\n" not in notes
+    assert "**Career improvement 0.**" in notes
+    assert "**Career fix 0.**" in notes
+    assert "## Complete change list" in notes
+    assert "CHANGELOG.md" in notes
+    emitted = {
+        release_notes.format_entry(entry)
+        for section in release_notes.parse_sections(notes, min_heading_level=3)
+        for entry in section.entries
+    }
+    source = {
+        release_notes.format_entry(entry)
+        for entry in [*added_entries.splitlines(), *fixed_entries.splitlines()]
+    }
+    assert emitted
+    assert emitted <= source
+
+
+def test_release_notes_size_check_rejects_oversized_input(tmp_path, capsys):
+    release_notes = load_release_notes_module()
+    notes = tmp_path / "notes.md"
+    notes.write_text("x" * 101, encoding="utf-8")
+
+    result = release_notes.main(["check-size", "--input", str(notes), "--max-characters", "100"])
+
+    captured = capsys.readouterr()
+    assert result == 1
+    assert "101 characters" in captured.err
+    assert "100-character publication limit" in captured.err
+
+
+def test_release_notes_size_check_counts_crlf_characters(tmp_path, capsys):
+    release_notes = load_release_notes_module()
+    notes = tmp_path / "notes.md"
+    notes.write_bytes(b"x\r\n" * 40)
+
+    result = release_notes.main(["check-size", "--input", str(notes), "--max-characters", "100"])
+
+    assert result == 1
+    assert "120 characters" in capsys.readouterr().err
+
+
+def test_first_snapshot_budget_reserves_the_written_newline():
+    release_notes = load_release_notes_module()
+
+    assert release_notes.first_snapshot_fits("x" * 119_999)
+    assert not release_notes.first_snapshot_fits("x" * 120_000)
+
+
 def test_stable_notes_extract_matching_version_block(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     repo = make_repo(
@@ -471,6 +541,7 @@ def test_career_19_snapshot_workflow_contract():
     assert "tools/release_notes.py should-build-nightly" in workflow
     assert "tools/release_notes.py nightly" in workflow
     assert "tools/release_notes.py nightly --first-snapshot" in workflow
+    assert "tools/release_notes.py check-size --input notes.md --max-characters 120000" in workflow
     assert "./build-release.ps1" in workflow
     assert "windows-portable.zip" in workflow
     assert "--prerelease" in workflow

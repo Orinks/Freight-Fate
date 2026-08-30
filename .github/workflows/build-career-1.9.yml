@@ -169,6 +169,7 @@ jobs:
             python3 tools/release_notes.py nightly --first-snapshot --output notes.md
           fi
           test -s notes.md
+          python3 tools/release_notes.py check-size --input notes.md --max-characters 120000
           test -s assets/checksums.txt
 
       - name: Create prerelease
