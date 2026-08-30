@@ -69,7 +69,7 @@ jobs:
             --exclude-stable-notes latest-stable-notes.md \
             >> "$GITHUB_OUTPUT"
 
-  build:
+  build_windows:
     name: Build (Windows)
     needs: prepare
     if: needs.prepare.outputs.should_build == 'true'
@@ -122,10 +122,64 @@ jobs:
           path: dist/FreightFate-*-windows-portable.zip
           if-no-files-found: error
 
+  build_macos:
+    name: Build (macOS Apple Silicon)
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      FREIGHT_FATE_NO_SPEECH: "1"
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: "1"
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+          lfs: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+
+      - name: Install macOS dependencies
+        run: brew install sdl2 pkg-config
+
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+
+      - name: Fetch BASS
+        run: |
+          uv run python tools/fetch_bass.py
+          uv run python tools/fetch_bass.py --check
+
+      - name: Lint Rust targets
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test Rust workspace
+        run: cargo test -p ff-core -p freight-fate
+
+      - name: Build the macOS release
+        run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: macOS-arm64
+          path: dist/FreightFate-*-macos-arm64.zip
+          if-no-files-found: error
+
   release:
     name: Release
-    needs: [prepare, build]
-    if: always() && needs.prepare.outputs.should_build == 'true' && needs.build.result == 'success'
+    needs: [prepare, build_windows, build_macos]
+    if: always() && needs.prepare.outputs.should_build == 'true' && needs.build_windows.result == 'success' && needs.build_macos.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -138,13 +192,23 @@ jobs:
           name: Windows
           path: assets
 
-      - name: Verify the Windows archive
+      - uses: actions/download-artifact@v7
+        with:
+          name: macOS-arm64
+          path: assets
+
+      - name: Verify release archives
         shell: bash
         run: |
           shopt -s nullglob
-          archives=(assets/FreightFate-*-windows-portable.zip)
-          if [ "${#archives[@]}" -ne 1 ]; then
-            echo "Expected exactly one Windows portable archive; found ${#archives[@]}." >&2
+          windows_archives=(assets/FreightFate-*-windows-portable.zip)
+          if [ "${#windows_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Windows portable archive; found ${#windows_archives[@]}." >&2
+            exit 1
+          fi
+          macos_archives=(assets/FreightFate-*-macos-arm64.zip)
+          if [ "${#macos_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Apple Silicon macOS archive; found ${#macos_archives[@]}." >&2
             exit 1
           fi
 
@@ -155,7 +219,7 @@ jobs:
           COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
-          (cd assets && sha256sum FreightFate-*-windows-portable.zip > checksums.txt)
+          (cd assets && sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip > checksums.txt)
           (cd assets && sha256sum -c checksums.txt)
 
           LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)
