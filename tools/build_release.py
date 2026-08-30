@@ -784,8 +784,7 @@ def verify_archive(out: Path) -> None:
     if macos_archive and payload_root == resources_root:
         bundle_required = (
             f"{APP_NAME}.app/Contents/Info.plist",
-            f"{APP_NAME}.app/Contents/Frameworks/libbass.dylib",
-            f"{APP_NAME}.app/Contents/Frameworks/libprism.dylib",
+            *(f"{APP_NAME}.app/Contents/Frameworks/{name}" for name in MACOS_REQUIRED_LIBRARIES),
         )
         missing.extend(name for name in bundle_required if name not in entries)
         frameworks = f"{APP_NAME}.app/Contents/Frameworks/"
@@ -807,9 +806,9 @@ def archive(build_dir: Path, label: str) -> Path:
             for path in sorted(build_dir.rglob("*")):
                 z.write(path, Path(APP_NAME) / path.relative_to(build_dir))
     elif sys.platform == "darwin":
-        mac_suffix = (
-            "macos-arm64" if platform.machine().lower() in {"arm64", "aarch64"} else "macos"
-        )
+        is_career_19_tester = label.startswith("1.9-tester-")
+        is_apple_silicon = platform.machine().lower() in {"arm64", "aarch64"}
+        mac_suffix = "macos-arm64" if is_career_19_tester and is_apple_silicon else "macos"
         out = DIST / f"{APP_NAME}-{label}-{mac_suffix}.zip"
         subprocess.run(["ditto", "-c", "-k", "--keepParent", str(build_dir), str(out)], check=True)
     else:
@@ -886,7 +885,13 @@ LFS_POINTER_PREFIX = b"version https://git-lfs"
 # Build-only leftovers in the Cargo profile directory that are not runtime
 # libraries even though they carry a native suffix on some platforms.
 CARGO_NON_RUNTIME_SUFFIXES = {".pdb", ".d", ".rlib", ".lib", ".exp"}
-MACOS_REQUIRED_LIBRARIES = ("libbass.dylib", "libprism.dylib")
+MACOS_REQUIRED_LIBRARIES = (
+    "libbass.dylib",
+    "libbassopus.dylib",
+    "libbasshls.dylib",
+    "libbassflac.dylib",
+    "libprism.dylib",
+)
 
 
 def rust_exe_name(platform_name: str = sys.platform) -> str:
@@ -1151,7 +1156,6 @@ def write_macos_info_plist(app: Path, label: str) -> None:
         "CFBundlePackageType": "APPL",
         "CFBundleShortVersionString": short_version,
         "CFBundleVersion": macos_bundle_version(label),
-        "LSMinimumSystemVersion": "13.0",
         "NSAppleEventsUsageDescription": (
             "Freight Fate uses VoiceOver to speak menus, driving information, and alerts."
         ),

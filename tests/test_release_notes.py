@@ -522,6 +522,7 @@ def test_build_workflow_uses_curated_nightly_decision_and_notes():
     assert "--exclude-stable-notes latest-stable-notes.md" in workflow
     assert "tools/release_notes.py nightly" in workflow
     assert 'git diff --name-only "$LAST_TAG"..HEAD' not in workflow
+    assert "macos-arm64.zip" not in workflow
 
 
 def test_career_19_snapshot_workflow_contract():

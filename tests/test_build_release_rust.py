@@ -511,6 +511,7 @@ def make_macos_profile(profile_dir: Path) -> None:
         "libbass.dylib",
         "libbasshls.dylib",
         "libbassopus.dylib",
+        "libbassflac.dylib",
         "libprism.dylib",
     ):
         (profile_dir / name).write_bytes(b"dylib")
@@ -571,6 +572,7 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
         "libbass.dylib",
         "libbasshls.dylib",
         "libbassopus.dylib",
+        "libbassflac.dylib",
         "libprism.dylib",
     ):
         assert (frameworks / name).is_file()
@@ -584,6 +586,7 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     assert info["NSAppleEventsUsageDescription"] == (
         "Freight Fate uses VoiceOver to speak menus, driving information, and alerts."
     )
+    assert "LSMinimumSystemVersion" not in info
 
 
 def test_macos_stage_refuses_missing_player_libraries(tmp_path, monkeypatch):
@@ -710,6 +713,21 @@ def test_macos_archive_name_matches_updater_suffix(tmp_path, monkeypatch):
     assert out.name == "FreightFate-1.9-tester-20260830-macos-arm64.zip"
 
 
+def test_apple_silicon_stable_archive_keeps_legacy_suffix(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    app.mkdir()
+    monkeypatch.setattr(build_release, "DIST", tmp_path / "dist")
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(build_release.platform, "machine", lambda: "arm64")
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *_args, **_kwargs: None)
+    (tmp_path / "dist").mkdir()
+
+    out = build_release.archive(app, "v1.8.8")
+
+    assert out.name == "FreightFate-v1.8.8-macos.zip"
+
+
 def test_intel_macos_archive_keeps_legacy_suffix(tmp_path, monkeypatch):
     build_release = load_build_release_module()
     app = tmp_path / "FreightFate.app"
@@ -761,7 +779,14 @@ def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, mon
     frameworks.mkdir(parents=True)
     executable.write_bytes(b"Mach-O")
     executable.chmod(0o755)
-    for name in ("libbass.dylib", "libprism.dylib", "libSDL2-2.0.0.dylib"):
+    for name in (
+        "libbass.dylib",
+        "libbassopus.dylib",
+        "libbasshls.dylib",
+        "libbassflac.dylib",
+        "libprism.dylib",
+        "libSDL2-2.0.0.dylib",
+    ):
         (frameworks / name).write_bytes(b"dylib")
     required = (
         "build_info.json",
@@ -803,6 +828,59 @@ def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, mon
     ]
 
 
+@pytest.mark.parametrize(
+    ("missing_name", "error_fragment"),
+    [
+        ("libbass.dylib", "libbass.dylib"),
+        ("libbassopus.dylib", "libbassopus.dylib"),
+        ("libbasshls.dylib", "libbasshls.dylib"),
+        ("libbassflac.dylib", "libbassflac.dylib"),
+        ("libprism.dylib", "libprism.dylib"),
+        ("libSDL2-2.0.0.dylib", "libSDL2"),
+    ],
+)
+def test_macos_staged_payload_rejects_each_missing_runtime_library(
+    tmp_path, monkeypatch, missing_name, error_fragment
+):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    executable = app / "Contents" / "MacOS" / "FreightFate"
+    resources = app / "Contents" / "Resources"
+    frameworks = app / "Contents" / "Frameworks"
+    executable.parent.mkdir(parents=True)
+    resources.mkdir(parents=True)
+    frameworks.mkdir(parents=True)
+    executable.write_bytes(b"Mach-O")
+    executable.chmod(0o755)
+    for name in (*build_release.MACOS_REQUIRED_LIBRARIES, "libSDL2-2.0.0.dylib"):
+        if name != missing_name:
+            (frameworks / name).write_bytes(b"dylib")
+    required = (
+        "build_info.json",
+        "LICENSE.txt",
+        "CHANGELOG.md",
+        "USER_MANUAL.md",
+        "USER_MANUAL.html",
+        "ALPHA_TEST_BOOK.md",
+        "ALPHA_TEST_BOOK.html",
+        "SOUND_CREDITS.md",
+        "freight_fate/sounds.pak",
+        "freight_fate/music.pak",
+        "freight_fate/assets/sounds/CREDITS.md",
+    )
+    for relative in required:
+        path = resources / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"payload")
+    make_container(resources / "freight_fate" / "data" / "world.ffdata", build_release)
+    fake_assets = type("FakeAssets", (), {"SoundPack": lambda _self, _path: None})
+    fake_tool = type("FakeTool", (), {"_load_assets_pack": staticmethod(lambda: fake_assets)})
+    monkeypatch.setattr(build_release, "_load_tool", lambda _name: fake_tool)
+
+    with pytest.raises(RuntimeError, match=error_fragment):
+        build_release.verify_rust_payload(app, platform_name="darwin")
+
+
 def write_macos_archive(
     path: Path,
     payload_root: str,
@@ -813,6 +891,9 @@ def write_macos_archive(
         "FreightFate.app/Contents/MacOS/FreightFate": b"Mach-O",
         "FreightFate.app/Contents/Info.plist": b"plist",
         "FreightFate.app/Contents/Frameworks/libbass.dylib": b"bass",
+        "FreightFate.app/Contents/Frameworks/libbassopus.dylib": b"bassopus",
+        "FreightFate.app/Contents/Frameworks/libbasshls.dylib": b"basshls",
+        "FreightFate.app/Contents/Frameworks/libbassflac.dylib": b"bassflac",
         "FreightFate.app/Contents/Frameworks/libSDL2-2.0.0.dylib": b"sdl",
         f"{payload_root}/build_info.json": b"{}",
         f"{payload_root}/LICENSE.txt": b"license",
@@ -856,6 +937,35 @@ def test_macos_archive_verifier_rejects_a_bundle_without_prism(tmp_path):
         include_prism=False,
     )
     with pytest.raises(RuntimeError, match="libprism.dylib"):
+        build_release.verify_archive(archive)
+
+
+@pytest.mark.parametrize(
+    ("missing_name", "error_fragment"),
+    [
+        ("libbass.dylib", "libbass.dylib"),
+        ("libbassopus.dylib", "libbassopus.dylib"),
+        ("libbasshls.dylib", "libbasshls.dylib"),
+        ("libbassflac.dylib", "libbassflac.dylib"),
+        ("libSDL2-2.0.0.dylib", "libSDL2"),
+    ],
+)
+def test_macos_archive_verifier_rejects_each_missing_runtime_library(
+    tmp_path, missing_name, error_fragment
+):
+    archive = tmp_path / "FreightFate-broken-macos-arm64.zip"
+    write_macos_archive(archive, "FreightFate.app/Contents/Resources")
+    rewritten = tmp_path / "rewritten.zip"
+    missing_entry = f"FreightFate.app/Contents/Frameworks/{missing_name}"
+    with zipfile.ZipFile(archive) as source, zipfile.ZipFile(rewritten, "w") as target:
+        for info in source.infolist():
+            if info.filename != missing_entry:
+                target.writestr(info, source.read(info.filename))
+    archive.unlink()
+    rewritten.rename(archive)
+
+    build_release = load_build_release_module()
+    with pytest.raises(RuntimeError, match=error_fragment):
         build_release.verify_archive(archive)
 
 
