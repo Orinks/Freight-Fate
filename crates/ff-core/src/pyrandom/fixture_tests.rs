@@ -136,6 +136,50 @@ fn draw<F: FnMut(&mut PyRandom) -> f64>(r: &mut PyRandom, n: usize, mut f: F) ->
     (0..n).map(|_| f(r)).collect()
 }
 
+fn ordered_float_bits(bits: u64) -> u64 {
+    if bits & (1 << 63) == 0 {
+        bits | (1 << 63)
+    } else {
+        !bits
+    }
+}
+
+fn assert_gaussian_bits_close(got: u64, want: u64, context: &str) {
+    // Box-Muller's platform libm sin/cos may round one bit differently.  Keep
+    // this tolerance Gaussian-only; random() and every algebraic fixture are
+    // required to remain bit-exact with CPython.
+    let ulps = ordered_float_bits(got).abs_diff(ordered_float_bits(want));
+    assert!(
+        ulps <= 1,
+        "{context}: got {got:#x}, expected {want:#x} (difference: {ulps} ULPs)"
+    );
+}
+
+fn assert_gaussian_floats(got: &[f64], want: &Floats, seed: &str) {
+    assert_eq!(got.len(), want.bits.len(), "gauss length for seed {seed:?}");
+    for (i, (got, want)) in got.iter().zip(&want.bits).enumerate() {
+        assert_gaussian_bits_close(
+            got.to_bits(),
+            *want,
+            &format!("gauss[{i}] for seed {seed:?}"),
+        );
+    }
+}
+
+#[test]
+fn gaussian_fixture_comparison_allows_one_ulp_of_platform_math_rounding() {
+    let python_bits = 0x3ff7_30ed_e0eb_242a;
+    let apple_silicon_bits = python_bits + 1;
+    assert_gaussian_bits_close(apple_silicon_bits, python_bits, "portable Gaussian fixture");
+}
+
+#[test]
+#[should_panic(expected = "difference: 2 ULPs")]
+fn gaussian_fixture_comparison_rejects_two_ulps() {
+    let python_bits = 0x3ff7_30ed_e0eb_242a;
+    assert_gaussian_bits_close(python_bits + 2, python_bits, "nonportable Gaussian fixture");
+}
+
 #[test]
 fn fixtures_come_from_python_3_12() {
     assert!(
@@ -384,7 +428,7 @@ fn real_distributions_match() {
 
         let mut r = rng_for(b);
         let got = draw(&mut r, 6, |r| r.gauss(0.0, 1.0));
-        assert_floats(&got, &b.gauss, "gauss", &b.seed);
+        assert_gaussian_floats(&got, &b.gauss, &b.seed);
 
         let mut r = rng_for(b);
         let got = draw(&mut r, 6, |r| r.normalvariate(2.0, 3.0));
@@ -439,27 +483,27 @@ fn gauss_next_survives_state() {
     for b in &fixtures().seeds {
         let mut r = rng_for(b);
         let g1 = r.gauss(0.0, 1.0);
-        assert_eq!(
+        assert_gaussian_bits_close(
             g1.to_bits(),
             b.gauss_state.g1,
-            "gauss #1 for seed {:?}",
-            b.seed
+            &format!("gauss #1 for seed {:?}", b.seed),
         );
         let st = r.getstate();
-        assert_eq!(
-            st.gauss_next, b.gauss_state.gauss_next_bits,
-            "gauss_next in state for seed {:?}",
-            b.seed
+        assert_gaussian_bits_close(
+            st.gauss_next.expect("gauss caches the second draw"),
+            b.gauss_state
+                .gauss_next_bits
+                .expect("fixture contains the cached second draw"),
+            &format!("gauss_next in state for seed {:?}", b.seed),
         );
         let g2 = r.gauss(0.0, 1.0);
-        assert_eq!(
+        assert_gaussian_bits_close(
             g2.to_bits(),
             b.gauss_state.g2,
-            "gauss #2 for seed {:?}",
-            b.seed
+            &format!("gauss #2 for seed {:?}", b.seed),
         );
         r.setstate(&st);
-        assert_eq!(r.gauss(0.0, 1.0).to_bits(), b.gauss_state.g2);
+        assert_eq!(r.gauss(0.0, 1.0).to_bits(), g2.to_bits());
     }
 }
 
