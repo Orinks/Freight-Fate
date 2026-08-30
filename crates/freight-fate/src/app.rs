@@ -20,7 +20,7 @@ use ff_core::models::economy::Economy;
 use ff_core::models::profile::{self as profile_module, data_dir};
 use ff_core::settings::Settings;
 
-use crate::audio::{Audio, AudioEngine, NullBackend};
+use crate::audio::{Audio, AudioEngine, BassBackend, NullBackend};
 use crate::cloud_saves::{CloudSaves, CloudSavesOptions};
 use crate::controller::ControllerManager;
 use crate::discord_presence::{DiscordPresence, DiscordPresenceOptions};
@@ -766,6 +766,20 @@ pub fn smoke_checks() -> Result<(), String> {
     Ok(())
 }
 
+/// Prove a packaged headless build can dynamically load and initialise BASS.
+///
+/// BASS is opened through `libloading`, not Mach-O's static dependency table,
+/// so merely starting the executable does not validate the library beside it.
+/// The no-sound device exercises the real loader and required exports without
+/// needing an interactive audio session on a hosted runner.
+pub fn smoke_audio_checks() -> Result<(), String> {
+    let backend = BassBackend::new_headless()
+        .map_err(|e| format!("smoke: packaged BASS runtime could not initialize: {e}"))?;
+    let mut audio = AudioEngine::with_backend(Box::new(backend));
+    audio.shutdown();
+    Ok(())
+}
+
 /// Command-line switches `main` understands.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct CliOptions {
@@ -817,6 +831,12 @@ fn run_game(options: &CliOptions) -> i32 {
         if let Err(e) = smoke_checks() {
             log::error!("Fatal error: {e}");
             return 1;
+        }
+        if options.headless {
+            if let Err(e) = smoke_audio_checks() {
+                log::error!("Fatal error: {e}");
+                return 1;
+            }
         }
         boot_timing::mark("smoke checks");
     }

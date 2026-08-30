@@ -504,6 +504,27 @@ def test_main_accepts_the_rust_flags(capsys):
     assert "--smoke" in out
 
 
+def test_macos_smoke_uses_the_bounded_headless_app_path(tmp_path, monkeypatch):
+    """Hosted Mac runners have no interactive window or audio session."""
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    executable = app / "Contents" / "MacOS" / "FreightFate"
+    executable.parent.mkdir(parents=True)
+    executable.write_bytes(b"Mach-O")
+    calls = []
+    monkeypatch.setattr(
+        build_release.subprocess,
+        "run",
+        lambda command, **kwargs: calls.append((command, kwargs)),
+    )
+
+    build_release.smoke_check(app)
+
+    assert calls[0][0] == [str(executable), "--smoke", "--headless"]
+    assert calls[0][1]["cwd"] == executable.parent
+    assert calls[0][1]["timeout"] == 120
+
+
 def make_macos_profile(profile_dir: Path) -> None:
     profile_dir.mkdir(parents=True)
     (profile_dir / "freightfate").write_bytes(b"Mach-O")

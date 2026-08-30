@@ -695,8 +695,16 @@ def smoke_check(build_dir: Path) -> None:
         "SDL_AUDIODRIVER": "dummy",
         "FREIGHT_FATE_NO_SPEECH": "1",
     }
-    subprocess.run([str(exe), "--smoke"], check=True, cwd=exe.parent, env=env, timeout=120)
-    print("Smoke check passed: the frozen build boots and renders.")
+    command = [str(exe), "--smoke"]
+    if build_dir.suffix == ".app":
+        # GitHub's macOS runners have no interactive WindowServer/audio
+        # session.  Entering the real SDL/BASS path can therefore wait
+        # forever even with dummy drivers.  Headless smoke loads and validates
+        # the packaged resources, then explicitly initialises dynamically
+        # loaded BASS on its no-sound device before running five frames.
+        command.append("--headless")
+    subprocess.run(command, check=True, cwd=exe.parent, env=env, timeout=120)
+    print("Smoke check passed: the packaged runtime boots and loads its resources.")
 
 
 def strip_user_data(build_dir: Path) -> None:

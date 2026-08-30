@@ -7,7 +7,7 @@ use crate::states_city_support::*;
 use ff_core::models::business::LEASED_OWNER_OPERATOR;
 use ff_core::models::profile::Profile;
 use freight_fate::app::testing::TestApp;
-use freight_fate::app::{smoke_checks, version, CliOptions};
+use freight_fate::app::{smoke_audio_checks, smoke_checks, version, CliOptions};
 use freight_fate::states::base::{InputEvent, Key, Menu};
 use freight_fate::states::city::{
     CityMenuState, GarageState, JobBoardState, TruckShopState, UpgradeShopState,
@@ -91,6 +91,19 @@ fn smoke_checks_find_every_baked_runtime_file() {
             e.starts_with("Secret store unreachable"),
             "smoke check failed: {e}"
         );
+    }
+}
+
+#[test]
+fn smoke_audio_check_requires_the_real_bass_runtime() {
+    let _guard = crate::audio_support::audio_lock();
+    let result = smoke_audio_checks();
+    if bass_sys::native_available() {
+        result.expect("the fetched BASS runtime should initialize on its no-sound device");
+    } else {
+        assert!(result
+            .expect_err("a missing BASS runtime must fail the release smoke check")
+            .contains("BASS"));
     }
 }
 
