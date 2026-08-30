@@ -685,10 +685,10 @@ fn test_signaling_for_an_exit_eases_cruise_to_ramp_speed() {
         drive.trip.position_mi = 37.0;
         drive.truck_mut().start_engine();
         drive.truck_mut().grade = 0.0;
-        // Python lifted the posted limit out of the way with `open_limits`.
-        // There is no such seam here, so cruise is set to the road's own
-        // number instead -- which is what a driver would have set anyway.
-        let limit = drive.trip.speed_limit_at(37.0).0;
+        // Pin the low-corridor case that exposes the approach boundary. The
+        // route selected by a fresh career can vary as the world grows, and a
+        // 45 mph cruise reaches the braking window later than a faster road.
+        let limit = 45.0;
         drive.truck_mut().velocity_mps = limit / MPH_PER_MPS;
         // Holding the road, the way a drive arrives here.
         drive.truck_mut().throttle = 0.4;
@@ -735,9 +735,10 @@ fn test_signaling_for_an_exit_eases_cruise_to_ramp_speed() {
     // And the set speed is untouched.
     assert_eq!(harness.read_drive(|d| d.cruise_mph), Some(set_mph));
 
-    // Close to the gore it bites, and cruise acts on it: throttle off, brakes
-    // on.
-    harness.with_drive(|drive, _| drive.trip.position_mi = 40.0 - 0.25);
+    // Inside the reaction distance it has reached the ramp target, so this is
+    // independent of which real interchange happens to be nearest the
+    // invented stop: cruise acts on it with throttle off and brakes on.
+    harness.with_drive(|drive, _| drive.trip.position_mi = 40.0 - 0.05);
     let cap = harness
         .read_drive(|d| d.ramp_approach_cap_mph())
         .expect("an armed exit has an approach cap");
