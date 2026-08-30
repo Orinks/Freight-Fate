@@ -1590,12 +1590,11 @@ onto exit signalling.
       (2026-09-06).** Gospel +5, tejano +5, synthwave +7, plus top-ups
       (8-10 each) for country, classic rock, blues, and jazz, and 2-3 new
       Night Line ballads. `tools/generate_radio.py --plan-songs` supports
-      capped waves via `--limit`. Two of the country top-ups arrived early
-      and by hand on 2026-08-26 -- Dangerous Dan and Dial-up Summer, owner
-      renders rather than a generated wave -- so the country pool is 2 down
-      on its target and the rest of the batch still waits on the quota.
-
-      capped waves via `--limit`.
+      capped waves via `--limit`. Three of the country top-ups arrived early
+      and by hand -- Dangerous Dan and Dial-up Summer on 2026-08-26, Four
+      Sources and the Truth on 2026-08-30, all owner renders rather than a
+      generated wave -- so the country pool is 3 down on its target and the
+      rest of the batch still waits on the quota.
 - [x] **The in-house stations run their own clock -- landed 2026-08-26
       (Marie, issue #158).** Every tune-in restarted a station's shuffled
       order at track one, second zero, so re-tuning always opened on the same

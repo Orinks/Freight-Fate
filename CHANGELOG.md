@@ -67,6 +67,13 @@
   time. Enter repeats just the line you are on, and Escape returns to the
   terminal.
 
+- **A new song on the country stations.** "Four Sources and the Truth", a
+  country song about trusting the forecast -- and if the last verse sounds
+  like it knows a certain weather app, it does. It joins the rotation on
+  The Rawhide 98.1, Big Wheel Country 104.5, Prairie Line 95.7 and Big Sky
+  Country 99.3, same as the rest of the country library. Press Tab at the
+  wheel to hear what is playing.
+
 - **Two new songs on the country stations.** "Dangerous Dan", an outlaw
   country song, and "Dial-up Summer", a country ballad about a summer spent
   online instead of outdoors. Both join the rotation on The Rawhide 98.1,

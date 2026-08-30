@@ -187,17 +187,18 @@ def test_committed_pack_has_freight_fate_header():
 def test_committed_music_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_MUSIC_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_MUSIC_PACK_PATH.read_bytes()
-    # Repacked for the two new country songs ("Dangerous Dan" and "Dial-up
-    # Summer", see CHANGELOG Unreleased): 356 -> 358 entries, the two added
-    # names being exactly those songs.
+    # Repacked 2026-08-30 for "Four Sources and the Truth" (a country song
+    # about trusting the forecast, see CHANGELOG Unreleased): 358 -> 359
+    # entries. Before that, 356 -> 358 on 2026-08-26 for "Dangerous Dan" and
+    # "Dial-up Summer".
     #
     # Split out of sounds.pak on 2026-08-14 alongside the radio
     # station-identity batch: 356 entries, the music/ subtree plus the new
     # station jingles and songs.
-    assert len(pack_bytes) == 266_803_726
+    assert len(pack_bytes) == 270_786_839
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "50f5440eb478f1e0e630e65081d83e6c308f48a6aa3ea5fe67c7dd1a7f50a8bb"
+        "7787d682c4c289f7c0f33bb1fc714fb54221e10086cc9415d87304fdeffadfb3"
     )
 
 

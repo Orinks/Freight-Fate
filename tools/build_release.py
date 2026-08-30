@@ -64,7 +64,7 @@ ADDON_LIB_DIR = PACKAGE_DIR / "lib"
 PRISM_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 PRISM_DEPENDENCY_DIR = "prismatoid.libs"
 DEFAULT_MUSIC_URL = "https://dev.orinks.net/downloads/music.pak"
-DEFAULT_MUSIC_SHA256 = "50f5440eb478f1e0e630e65081d83e6c308f48a6aa3ea5fe67c7dd1a7f50a8bb"
+DEFAULT_MUSIC_SHA256 = "7787d682c4c289f7c0f33bb1fc714fb54221e10086cc9415d87304fdeffadfb3"
 
 
 def platform_native_exts() -> set[str]:

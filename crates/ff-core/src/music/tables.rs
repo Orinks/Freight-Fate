@@ -507,6 +507,12 @@ pub static COUNTRY_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
             "Country ballad about a summer spent online",
             190.0,
         ),
+        (
+            "radio_country_four_sources_and_the_truth",
+            "Four Sources and the Truth",
+            "Country song about trusting the forecast",
+            368.7,
+        ),
     ])
 });
 
