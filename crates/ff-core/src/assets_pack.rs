@@ -503,6 +503,13 @@ pub fn default_pack_dir() -> PathBuf {
     let mut candidates: Vec<PathBuf> = Vec::new();
     if let Ok(exe) = std::env::current_exe() {
         if let Some(dir) = exe.parent() {
+            candidates.push(
+                crate::data::data_resources::resource_dir_for_executable(
+                    &exe,
+                    cfg!(target_os = "macos"),
+                )
+                .join("freight_fate"),
+            );
             candidates.push(dir.join("freight_fate"));
             candidates.push(dir.to_path_buf());
         }

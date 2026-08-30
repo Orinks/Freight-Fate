@@ -610,6 +610,41 @@ fn test_pick_asset_matches_platform_suffix() {
 }
 
 #[test]
+fn test_pick_asset_chooses_the_macos_app_archive_for_mac_players() {
+    let rel = tester("1.9-tester-20260830");
+    let (name, url, size) = pick_asset(&rel, None, &env_on(Platform::MacOs)).unwrap();
+    assert_eq!(name, "FreightFate-1.9-tester-20260830-macos.zip");
+    assert_eq!(url, "https://example.test/1.9-tester-20260830/-macos.zip");
+    assert_eq!(size, 50_000_000);
+}
+
+#[test]
+fn test_macos_build_info_is_loaded_from_app_resources() {
+    let tmp = tempfile::tempdir().unwrap();
+    let exe = tmp
+        .path()
+        .join("FreightFate.app")
+        .join("Contents")
+        .join("MacOS")
+        .join("FreightFate");
+    fs::create_dir_all(exe.parent().unwrap()).unwrap();
+    fs::write(&exe, b"Mach-O").unwrap();
+    let resources = exe.parent().unwrap().parent().unwrap().join("Resources");
+    fs::create_dir_all(&resources).unwrap();
+    fs::write(
+        resources.join("build_info.json"),
+        r#"{"tag":"1.9-tester-20260830","channel":"dev","built_at":"2026-08-30"}"#,
+    )
+    .unwrap();
+    let env = UpdaterEnv::fake(Platform::MacOs, &exe);
+
+    let info = updater::load_build_info_in(&env, "1.9.0").unwrap();
+
+    assert_eq!(info.tag, "1.9-tester-20260830");
+    assert_eq!(info.channel, "dev");
+}
+
+#[test]
 fn test_flatten_markdown_strips_formatting() {
     let body = "## Changes\n\n- **Cruise control.** K sets cruise.\n\
 * See [the manual](https://example.test) for `details`.\n\

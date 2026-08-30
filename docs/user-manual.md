@@ -12,12 +12,18 @@ returning from an earlier version, read What Changed Recently first.
 
 1. Download the newest stable build from the
    [Freight Fate releases page](https://github.com/Orinks/Freight-Fate/releases).
-2. Extract the archive into a folder you control.
-3. Open the extracted `FreightFate` folder.
-4. Run `FreightFate.exe` on Windows, or `FreightFate` on macOS or Linux.
-5. Choose **New career**, enter a driver name, pick a home region, and pick a
+2. On Windows or Linux, extract the archive into a folder you control, open
+   the extracted `FreightFate` folder, and run `FreightFate.exe` on Windows or
+   `FreightFate` on Linux.
+3. On macOS, extract the archive, move `FreightFate.app` to Applications, and
+   open the app. The app is ad-hoc signed rather than notarized. The first time
+   you open it, macOS may block it. Open System Settings, Privacy & Security,
+   find the message about Freight Fate, choose Open Anyway, and confirm Open.
+   VoiceOver reads these controls. You only need to do this for the first
+   launch of a newly downloaded app.
+4. Choose **New career**, enter a driver name, pick a home region, and pick a
    home terminal.
-6. Listen to the first-day briefing, open the dispatch board, accept a job,
+5. Listen to the first-day briefing, open the dispatch board, accept a job,
    and follow the current objective.
 
 On Windows and Linux the game is portable: saves, settings, save identity

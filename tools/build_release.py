@@ -33,6 +33,7 @@ import importlib.util
 import json
 import os
 import platform
+import plistlib
 import shutil
 import subprocess
 import sys
@@ -299,9 +300,9 @@ def _load_tool(name: str):
     return module
 
 
-def stage_sound_pack(build_dir: Path) -> None:
+def stage_sound_pack(build_dir: Path, root: Path | None = None) -> None:
     """Stage the approved encrypted packs and keep the credits readable."""
-    root = runtime_root(build_dir)
+    root = root or runtime_root(build_dir)
     destination = root / "freight_fate" / "sounds.pak"
     music_destination = root / "freight_fate" / "music.pak"
     committed_pack = PACKAGE_DIR / "sounds.pak"
@@ -323,12 +324,12 @@ def stage_sound_pack(build_dir: Path) -> None:
     shutil.copy2(credits, root / "SOUND_CREDITS.md")
 
 
-def stage_release_docs(build_dir: Path) -> None:
+def stage_release_docs(build_dir: Path, root: Path | None = None) -> None:
     """Copy player-facing release documents into the packaged runtime."""
     changelog = ROOT / "CHANGELOG.md"
     if not changelog.exists():
         raise RuntimeError(f"Changelog was not found: {changelog}")
-    root = runtime_root(build_dir)
+    root = root or runtime_root(build_dir)
     shutil.copy2(changelog, root / "CHANGELOG.md")
 
     license_file = ROOT / "LICENSE"
@@ -636,7 +637,7 @@ def _is_snapshot_label(label: str) -> bool:
     return len(suffix) == 8 and suffix.isdigit()
 
 
-def stamp_build_info(build_dir: Path, label: str) -> None:
+def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> None:
     """Record what this build is, for the in-game updater.
 
     ``label`` is a snapshot tag (``nightly-20260611`` or
@@ -657,10 +658,7 @@ def stamp_build_info(build_dir: Path, label: str) -> None:
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "package_version": project_version(),
     }
-    if build_dir.suffix == ".app":
-        info_path = build_dir / "Contents" / "MacOS" / "build_info.json"
-    else:
-        info_path = build_dir / "build_info.json"
+    info_path = (root or runtime_root(build_dir)) / "build_info.json"
     with open(info_path, "w", encoding="utf-8") as f:
         json.dump(info, f, indent=2)
 
@@ -762,6 +760,12 @@ def verify_archive(out: Path) -> None:
             f"Release archive executable lost its executable permission: {exe_entry} in {out.name}"
         )
 
+    payload_root = root
+    resources_root = f"{APP_NAME}.app/Contents/Resources"
+    if out.name.endswith("-macos.zip") and any(
+        name.startswith(f"{resources_root}/") for name in entries
+    ):
+        payload_root = resources_root
     required = (
         "build_info.json",
         "LICENSE.txt",
@@ -769,7 +773,7 @@ def verify_archive(out: Path) -> None:
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
     )
-    missing = [name for name in required if f"{root}/{name}" not in entries]
+    missing = [name for name in required if f"{payload_root}/{name}" not in entries]
     if missing:
         raise RuntimeError(
             f"Release archive is missing payload files: {', '.join(missing)} in {out.name}"
@@ -859,6 +863,7 @@ LFS_POINTER_PREFIX = b"version https://git-lfs"
 # Build-only leftovers in the Cargo profile directory that are not runtime
 # libraries even though they carry a native suffix on some platforms.
 CARGO_NON_RUNTIME_SUFFIXES = {".pdb", ".d", ".rlib", ".lib", ".exp"}
+MACOS_REQUIRED_LIBRARIES = ("libbass.dylib", "libprism.dylib")
 
 
 def rust_exe_name(platform_name: str = sys.platform) -> str:
@@ -1062,6 +1067,121 @@ def rust_native_libraries(profile_dir: Path, exts: set[str] | None = None) -> li
     )
 
 
+def macos_linked_libraries(executable: Path) -> list[str]:
+    """Return the install names recorded in a Mach-O executable."""
+    result = subprocess.run(
+        ["otool", "-L", str(executable)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return [
+        line.strip().split(" (", 1)[0] for line in result.stdout.splitlines()[1:] if line.strip()
+    ]
+
+
+def macos_sdl_library(executable: Path) -> Path:
+    """Locate the exact Homebrew SDL dylib Cargo linked into ``executable``."""
+    for install_name in macos_linked_libraries(executable):
+        candidate = Path(install_name)
+        if candidate.name.startswith("libSDL2") and candidate.name.endswith(".dylib"):
+            if candidate.is_file():
+                return candidate
+            if install_name.startswith("@rpath/"):
+                brew = subprocess.run(
+                    ["brew", "--prefix", "sdl2"],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                brewed = Path(brew.stdout.strip()) / "lib" / candidate.name
+                if brewed.is_file():
+                    return brewed
+            raise RuntimeError(
+                f"Rust executable links SDL2 at {candidate}, but that library was not found"
+            )
+    raise RuntimeError("Rust executable has no SDL2 dylib dependency to bundle")
+
+
+def macos_bundle_version(label: str) -> str:
+    """A numeric Finder build identity, including the snapshot date."""
+    prefix = "1.9-tester-"
+    if label.startswith(prefix) and label[len(prefix) :].isdigit():
+        date = label[len(prefix) :]
+        if len(date) == 8:
+            return f"{date[:4]}.{date[4:6]}.{date[6:]}"
+    numeric = ".".join(part for part in label.lstrip("v").split(".") if part.isdigit())
+    return numeric or "1"
+
+
+def write_macos_info_plist(app: Path, label: str) -> None:
+    """Write the minimal metadata Finder and assistive technology need."""
+    short_version = project_version().split(".dev", 1)[0]
+    info = {
+        "CFBundleDevelopmentRegion": "en",
+        "CFBundleDisplayName": "Freight Fate",
+        "CFBundleExecutable": APP_NAME,
+        "CFBundleIdentifier": "net.orinks.freight-fate",
+        "CFBundleInfoDictionaryVersion": "6.0",
+        "CFBundleGetInfoString": f"Freight Fate {short_version} ({label})",
+        "CFBundleName": "Freight Fate",
+        "CFBundlePackageType": "APPL",
+        "CFBundleShortVersionString": short_version,
+        "CFBundleVersion": macos_bundle_version(label),
+        "LSMinimumSystemVersion": "13.0",
+        "NSAppleEventsUsageDescription": (
+            "Freight Fate uses VoiceOver to speak menus, driving information, and alerts."
+        ),
+    }
+    info_path = app / "Contents" / "Info.plist"
+    info_path.parent.mkdir(parents=True, exist_ok=True)
+    with info_path.open("wb") as stream:
+        plistlib.dump(info, stream, sort_keys=True)
+
+
+def relocate_macos_libraries(app: Path) -> None:
+    """Make the bundled SDL dependency independent of the builder's Homebrew."""
+    executable = app / "Contents" / "MacOS" / APP_NAME
+    frameworks = app / "Contents" / "Frameworks"
+    linked = macos_linked_libraries(executable)
+    sdl_install_name = next(
+        (
+            name
+            for name in linked
+            if Path(name).name.startswith("libSDL2") and Path(name).name.endswith(".dylib")
+        ),
+        None,
+    )
+    if sdl_install_name is None:
+        raise RuntimeError("Rust executable has no SDL2 dylib dependency to relocate")
+    bundled_sdl = frameworks / Path(sdl_install_name).name
+    if not bundled_sdl.is_file():
+        raise RuntimeError(f"macOS app is missing bundled SDL2 library {bundled_sdl.name}")
+    subprocess.run(
+        ["install_name_tool", "-id", f"@rpath/{bundled_sdl.name}", str(bundled_sdl)],
+        check=True,
+    )
+    subprocess.run(
+        [
+            "install_name_tool",
+            "-change",
+            sdl_install_name,
+            f"@rpath/{bundled_sdl.name}",
+            str(executable),
+        ],
+        check=True,
+    )
+    subprocess.run(
+        [
+            "install_name_tool",
+            "-add_rpath",
+            "@executable_path/../Frameworks",
+            str(executable),
+        ],
+        check=True,
+    )
+
+
 def plan_rust_layout(
     profile_dir: Path,
     package_dir: Path = PACKAGE_DIR,
@@ -1125,43 +1245,79 @@ def stage_rust_build(
     profile_dir: Path,
     build_dir: Path = RUST_STAGE_DIR,
     baked_data: Path | None = None,
+    platform_name: str = sys.platform,
+    label: str | None = None,
 ) -> Path:
     """Assemble the Rust release folder from the plan plus the packs and docs."""
+    if platform_name == "darwin":
+        for name in MACOS_REQUIRED_LIBRARIES:
+            if not (profile_dir / name).is_file():
+                raise RuntimeError(f"Rust build is missing macOS player library {name}")
     require_real_pack(PACKAGE_DIR / "sounds.pak")
     require_real_pack(PACKAGE_DIR / "music.pak")
-    plan = plan_rust_layout(profile_dir, baked_data=baked_data)
+    plan = plan_rust_layout(
+        profile_dir,
+        platform_name=platform_name,
+        native_exts={".dylib"} if platform_name == "darwin" else None,
+        baked_data=baked_data,
+    )
+    if platform_name == "darwin":
+        build_dir = build_dir.with_suffix(".app")
     if build_dir.exists():
         shutil.rmtree(build_dir)
-    build_dir.mkdir(parents=True)
+    executable_root = runtime_root(build_dir)
+    resource_root = (
+        build_dir / "Contents" / "Resources" if platform_name == "darwin" else executable_root
+    )
+    executable_root.mkdir(parents=True)
+    resource_root.mkdir(parents=True, exist_ok=True)
+    frameworks = build_dir / "Contents" / "Frameworks"
+    if platform_name == "darwin":
+        frameworks.mkdir(parents=True)
     for source, relative in plan:
-        destination = build_dir / relative
+        destination = (
+            frameworks / source.name
+            if platform_name == "darwin" and source.suffix == ".dylib"
+            else (
+                executable_root / relative
+                if relative == Path(rust_exe_name(platform_name))
+                else resource_root / relative
+            )
+        )
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
-    if sys.platform != "win32":
-        exe = build_dir / rust_exe_name()
+    if platform_name == "darwin":
+        sdl = macos_sdl_library(profile_dir / cargo_exe_name(platform_name))
+        shutil.copy2(sdl, frameworks / sdl.name)
+        write_macos_info_plist(build_dir, label or project_version())
+        relocate_macos_libraries(build_dir)
+    if platform_name != "win32":
+        exe = executable_root / rust_exe_name(platform_name)
         exe.chmod(exe.stat().st_mode | 0o755)
-    stage_sound_pack(build_dir)
+    stage_sound_pack(build_dir, resource_root)
     return build_dir
 
 
 def verify_rust_payload(build_dir: Path) -> None:
     """Prove the staged Rust folder holds what the binary loads."""
-    exe = build_dir / rust_exe_name()
+    executable_root = runtime_root(build_dir)
+    root = build_dir / "Contents" / "Resources" if build_dir.suffix == ".app" else executable_root
+    exe = executable_root / rust_exe_name()
     required = [
         exe,
-        build_dir / "build_info.json",
-        build_dir / "LICENSE.txt",
-        build_dir / "CHANGELOG.md",
-        build_dir / "USER_MANUAL.md",
-        build_dir / "USER_MANUAL.html",
-        build_dir / "ALPHA_TEST_BOOK.md",
-        build_dir / "ALPHA_TEST_BOOK.html",
-        build_dir / "SOUND_CREDITS.md",
-        build_dir / "freight_fate" / "sounds.pak",
-        build_dir / "freight_fate" / "music.pak",
-        build_dir / "freight_fate" / LOOSE_SOUND_TREE / "CREDITS.md",
+        root / "build_info.json",
+        root / "LICENSE.txt",
+        root / "CHANGELOG.md",
+        root / "USER_MANUAL.md",
+        root / "USER_MANUAL.html",
+        root / "ALPHA_TEST_BOOK.md",
+        root / "ALPHA_TEST_BOOK.html",
+        root / "SOUND_CREDITS.md",
+        root / "freight_fate" / "sounds.pak",
+        root / "freight_fate" / "music.pak",
+        root / "freight_fate" / LOOSE_SOUND_TREE / "CREDITS.md",
     ]
-    data_dir = build_dir / "freight_fate" / "data"
+    data_dir = root / "freight_fate" / "data"
     container = data_dir / RUST_BAKED_FILE
     required.append(container)
     required.extend(data_dir / relative for relative in RUST_DATA_FILES)
@@ -1196,7 +1352,7 @@ def verify_rust_payload(build_dir: Path) -> None:
             + ", ".join(sorted(doubled)[:10])
         )
 
-    package = build_dir / "freight_fate"
+    package = root / "freight_fate"
     leaked = [
         path.relative_to(build_dir).as_posix()
         for path in package.rglob("*")
@@ -1209,7 +1365,7 @@ def verify_rust_payload(build_dir: Path) -> None:
 
     if sys.platform == "win32":
         for name in ("SDL2.dll", "bass.dll", "prism.dll"):
-            if not (build_dir / name).exists():
+            if not (root / name).exists():
                 # BASS is fetched rather than committed, so a checkout that
                 # skipped the fetch would otherwise build a silent release and
                 # say nothing about why.
@@ -1219,7 +1375,17 @@ def verify_rust_payload(build_dir: Path) -> None:
                     else ""
                 )
                 raise RuntimeError(f"Rust payload is missing the native library {name}.{hint}")
-    elif not native_files(build_dir):
+    elif sys.platform == "darwin":
+        frameworks = build_dir / "Contents" / "Frameworks"
+        required_macos = [*MACOS_REQUIRED_LIBRARIES]
+        if not any(path.name.startswith("libSDL2") for path in frameworks.glob("*.dylib")):
+            required_macos.append("libSDL2*.dylib")
+        missing_macos = [name for name in required_macos if not (frameworks / name).exists()]
+        if missing_macos:
+            raise RuntimeError(
+                "Rust macOS payload is missing native libraries: " + ", ".join(missing_macos)
+            )
+    elif not native_files(root):
         print(
             "Warning: no native libraries staged beside the executable; the game "
             "will need system SDL2/BASS/Prism on this platform."
@@ -1236,16 +1402,13 @@ def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
     prepare_rust_release_dependencies()
     profile_dir = run_cargo(target_dir)
     baked_data = bake_world_data(target_dir)
-    build_dir = stage_rust_build(profile_dir, baked_data=baked_data)
-    stamp_build_info(build_dir, label)
-    stage_release_docs(build_dir)
+    build_dir = stage_rust_build(profile_dir, baked_data=baked_data, label=label)
+    resource_root = (
+        build_dir / "Contents" / "Resources" if build_dir.suffix == ".app" else build_dir
+    )
+    stamp_build_info(build_dir, label, resource_root)
+    stage_release_docs(build_dir, resource_root)
     verify_rust_payload(build_dir)
-    if sys.platform == "darwin":
-        # No .app bundle yet for the Rust port: ad-hoc sign the bare binary
-        # so Gatekeeper does not refuse it outright.
-        subprocess.run(
-            ["codesign", "--force", "--sign", "-", str(build_dir / rust_exe_name())], check=True
-        )
     if run_smoke:
         smoke_check(build_dir)
     else:
@@ -1253,6 +1416,8 @@ def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
         # the stub); pass ``--smoke`` once it is.
         print("Skipped the smoke check (pass --smoke to boot the staged Rust build).")
     strip_user_data(build_dir)
+    if sys.platform == "darwin":
+        sign_distribution(build_dir)
     DIST.mkdir(parents=True, exist_ok=True)
     out = archive(build_dir, label)
     verify_archive(out)

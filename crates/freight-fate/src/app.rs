@@ -65,7 +65,9 @@ pub fn version() -> &'static str {
 /// `package_version` from the `build_info.json` next to the executable.
 fn baked_version() -> Option<String> {
     let exe = std::env::current_exe().ok()?;
-    let info = std::fs::read_to_string(exe.parent()?.join("build_info.json")).ok()?;
+    let resource_dir =
+        ff_core::data::data_resources::resource_dir_for_executable(&exe, cfg!(target_os = "macos"));
+    let info = std::fs::read_to_string(resource_dir.join("build_info.json")).ok()?;
     let data: serde_json::Value = serde_json::from_str(&info).ok()?;
     data.get("package_version")?
         .as_str()

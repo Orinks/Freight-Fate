@@ -46,6 +46,28 @@ pub const BAKED_DATA_FILES: &[&str] = &[
 
 static DATA_ROOT: OnceCell<PathBuf> = OnceCell::new();
 
+/// Folder holding packaged data and sound packs for one executable.
+///
+/// macOS keeps immutable assets in the app bundle's Resources directory;
+/// portable Windows and Linux builds keep them beside the executable.
+pub fn resource_dir_for_executable(executable: &Path, macos: bool) -> PathBuf {
+    let executable_dir = executable.parent().unwrap_or_else(|| Path::new("."));
+    if macos
+        && executable_dir
+            .file_name()
+            .is_some_and(|name| name == "MacOS")
+        && executable_dir
+            .parent()
+            .is_some_and(|contents| contents.file_name().is_some_and(|name| name == "Contents"))
+    {
+        return executable_dir
+            .parent()
+            .expect("checked Contents parent")
+            .join("Resources");
+    }
+    executable_dir.to_path_buf()
+}
+
 /// Walk up from `start` looking for `src/freight_fate/data`.
 fn find_source_tree(start: &Path) -> Option<PathBuf> {
     let mut cursor = Some(start);
@@ -66,9 +88,17 @@ fn resolve_data_root() -> PathBuf {
             return root;
         }
     }
-    let exe_dir = std::env::current_exe()
-        .ok()
+    let executable = std::env::current_exe().ok();
+    let exe_dir = executable
+        .as_ref()
         .and_then(|exe| exe.parent().map(Path::to_path_buf));
+    if let Some(executable) = &executable {
+        let resources = resource_dir_for_executable(executable, cfg!(target_os = "macos"));
+        let packaged = resources.join("freight_fate").join("data");
+        if packaged.is_dir() {
+            return packaged;
+        }
+    }
     if let Some(dir) = &exe_dir {
         // A packaged build: `freight_fate/data` beside the executable.
         let packaged = dir.join("freight_fate").join("data");
@@ -121,6 +151,29 @@ pub fn read_text_at(path: &Path) -> Option<String> {
         return std::fs::read_to_string(path).ok();
     }
     baked_text_for(path)
+}
+
+#[cfg(test)]
+mod packaged_resource_tests {
+    use super::*;
+
+    #[test]
+    fn macos_app_resources_are_resolved_above_the_executable() {
+        let executable = Path::new("/Applications/FreightFate.app/Contents/MacOS/FreightFate");
+        assert_eq!(
+            resource_dir_for_executable(executable, true),
+            PathBuf::from("/Applications/FreightFate.app/Contents/Resources")
+        );
+    }
+
+    #[test]
+    fn non_macos_resources_stay_beside_the_executable() {
+        let executable = Path::new("/games/FreightFate/FreightFate");
+        assert_eq!(
+            resource_dir_for_executable(executable, false),
+            PathBuf::from("/games/FreightFate")
+        );
+    }
 }
 
 static BAKED: OnceCell<Option<Arc<BakedData>>> = OnceCell::new();

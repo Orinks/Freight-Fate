@@ -291,7 +291,16 @@ fn executable_dir() -> Option<PathBuf> {
 /// release layout); that is what "frozen" meant for the Python build.
 fn packaged_exe_dir() -> Option<PathBuf> {
     let dir = executable_dir()?;
-    if dir.join("freight_fate").join("data").is_dir() {
+    let executable = dir.join(if cfg!(windows) {
+        "FreightFate.exe"
+    } else {
+        "FreightFate"
+    });
+    let resources = crate::data::data_resources::resource_dir_for_executable(
+        &executable,
+        cfg!(target_os = "macos"),
+    );
+    if resources.join("freight_fate").join("data").is_dir() {
         Some(dir)
     } else {
         None

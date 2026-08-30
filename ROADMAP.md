@@ -122,7 +122,8 @@ onto exit signalling.
 
 - [x] **Career 1.9 prerelease builds are complete portable releases
       (2026-08-29).** Each Career 1.9 prerelease build publishes a Windows zip
-      with music and the required audio libraries. Career 1.9 copies set to
+      and a Mac app with music and the required audio libraries. The Mac app
+      carries SDL2 too, so players do not need Homebrew. Career 1.9 copies set to
       `Update channel: developer snapshots` follow newer prereleases with dated
       tags such as `1.9-tester-20260829`, spoken as "1 point 9 tester, August
       29, 2026," while stable players stay on stable releases.
@@ -393,11 +394,12 @@ onto exit signalling.
       `freight-fate` now enables the `sdl2` crate's `use-pkgconfig` feature on
       macOS only, which reads the prefix out of Homebrew's own `sdl2.pc`.
       Prerequisite for a Mac developer: `brew install sdl2 pkg-config`.
-- [ ] **Rust port: no macOS CI runner.** The build works on a Mac now, but
-      nothing proves it stays working: SDL2 there is a Homebrew install rather
-      than a vendored library, so a runner has to `brew install sdl2
-      pkg-config` before it can build. Nobody has driven the Mac build with
-      speech on either, so VoiceOver through Prism is unverified.
+- [x] **Rust port: a player-ready macOS app is packaged on a native runner
+      (2026-08-29).** The release builder creates `FreightFate.app`, carries
+      BASS, Prism, and SDL2 inside it, rewrites SDL2's build-machine path to the
+      app's Frameworks folder, and ad-hoc signs the whole bundle. Building from
+      source still uses Homebrew SDL2 and pkg-config; players do not need them.
+      VoiceOver through Prism still needs a listening pass on a physical Mac.
 - [ ] **Rust port: no Linux build.** `.github/workflows/rust.yml` vendors SDL2
       for windows-x86_64 only, and BASS has no pinned Linux build; there
       is no Linux runner and no vendored Linux native libraries. The Linux
@@ -709,7 +711,8 @@ onto exit signalling.
       is wired and the staged build boots and exits 0 on it -- and it is a
       real check: with the container moved aside the same run panics on
       "the shipped world data loads" rather than passing. Left to do: the
-      macOS `.app` bundle.
+      macOS `.app` bundle is now complete; a physical-Mac VoiceOver listening
+      pass remains.
 
 - [x] **Rust port: a launch takes the same time every time, and the session
       log says where it goes (2026-08-24).** Three runs of the packaged

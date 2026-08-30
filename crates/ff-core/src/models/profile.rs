@@ -218,9 +218,13 @@ fn notify_save_listener(profile: &Profile) {
 pub fn is_frozen() -> bool {
     std::env::current_exe()
         .ok()
-        .and_then(|exe| {
-            exe.parent()
-                .map(|dir| dir.join("build_info.json").is_file())
+        .map(|exe| {
+            crate::data::data_resources::resource_dir_for_executable(
+                &exe,
+                cfg!(target_os = "macos"),
+            )
+            .join("build_info.json")
+            .is_file()
         })
         .unwrap_or(false)
 }
@@ -228,7 +232,11 @@ pub fn is_frozen() -> bool {
 /// The version `tools/build_release.py` stamped into the build beside
 /// `executable`, if any (`freight_fate._baked_version`).
 pub fn baked_version_beside(executable: &Path) -> Option<String> {
-    let info_path = executable.parent()?.join("build_info.json");
+    let info_path = crate::data::data_resources::resource_dir_for_executable(
+        executable,
+        cfg!(target_os = "macos"),
+    )
+    .join("build_info.json");
     let text = std::fs::read_to_string(info_path).ok()?;
     let data: Value = serde_json::from_str(&text).ok()?;
     let version = data.as_object()?.get("package_version")?;

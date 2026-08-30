@@ -153,7 +153,7 @@ impl BuildInfo {
 /// `_internal` folder from the older PyInstaller layout). A `cargo run`
 /// binary in `target/` has none of those and stays a source checkout.
 pub fn is_frozen_in(env: &UpdaterEnv) -> bool {
-    let root = install_root_in(env);
+    let root = resource_root_in(env);
     let exe_name = env
         .executable
         .file_stem()
@@ -179,6 +179,14 @@ pub fn install_root_in(env: &UpdaterEnv) -> PathBuf {
 
 pub fn install_root() -> PathBuf {
     install_root_in(&UpdaterEnv::current())
+}
+
+/// Folder containing immutable packaged assets and build metadata.
+fn resource_root_in(env: &UpdaterEnv) -> PathBuf {
+    ff_core::data::data_resources::resource_dir_for_executable(
+        &env.executable,
+        env.platform == Platform::MacOs,
+    )
 }
 
 /// What the apply script replaces: the enclosing `.app` bundle on
@@ -209,7 +217,7 @@ pub fn load_build_info_in(env: &UpdaterEnv, version: &str) -> Option<BuildInfo> 
     if !is_frozen_in(env) {
         return None;
     }
-    let path = install_root_in(env).join("build_info.json");
+    let path = resource_root_in(env).join("build_info.json");
     let data: Option<Value> = fs::read_to_string(path)
         .ok()
         .and_then(|text| serde_json::from_str(&text).ok());

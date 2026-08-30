@@ -8,6 +8,7 @@ package tree, so it proves what the staged ``FreightFate/`` folder would hold
 from __future__ import annotations
 
 import importlib.util
+import plistlib
 import subprocess
 import urllib.error
 from pathlib import Path
@@ -500,3 +501,236 @@ def test_main_accepts_the_rust_flags(capsys):
     assert "--rust" in out
     assert "--cargo-target-dir" in out
     assert "--smoke" in out
+
+
+def make_macos_profile(profile_dir: Path) -> None:
+    profile_dir.mkdir(parents=True)
+    (profile_dir / "freightfate").write_bytes(b"Mach-O")
+    for name in (
+        "libbass.dylib",
+        "libbasshls.dylib",
+        "libbassopus.dylib",
+        "libprism.dylib",
+    ):
+        (profile_dir / name).write_bytes(b"dylib")
+
+
+def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
+    """A bare executable folder cannot be opened like a normal Mac app."""
+    build_release = load_build_release_module()
+    package_dir = tmp_path / "src" / "freight_fate"
+    make_package_tree(package_dir, build_release)
+    track_everything(tmp_path)
+    (package_dir / "sounds.pak").write_bytes(b"FFPK1 sounds")
+    (package_dir / "music.pak").write_bytes(b"FFPK1 music")
+    profile_dir = tmp_path / "target" / "release"
+    make_macos_profile(profile_dir)
+    sdl = tmp_path / "brew" / "libSDL2-2.0.0.dylib"
+    sdl.parent.mkdir()
+    sdl.write_bytes(b"SDL")
+    baked = make_container(tmp_path / "world.ffdata", build_release)
+    monkeypatch.setattr(build_release, "PACKAGE_DIR", package_dir)
+    monkeypatch.setattr(build_release, "ADDON_LIB_DIR", tmp_path / "no-addons")
+    monkeypatch.setattr(build_release, "macos_sdl_library", lambda _exe: sdl)
+    monkeypatch.setattr(build_release, "relocate_macos_libraries", lambda _app: None)
+
+    app = build_release.stage_rust_build(
+        profile_dir,
+        build_dir=tmp_path / "build" / "FreightFate",
+        baked_data=baked,
+        platform_name="darwin",
+        label="1.9-tester-20260830",
+    )
+
+    assert app == tmp_path / "build" / "FreightFate.app"
+    assert (app / "Contents" / "MacOS" / "FreightFate").is_file()
+    assert list((app / "Contents" / "MacOS").iterdir()) == [
+        app / "Contents" / "MacOS" / "FreightFate"
+    ]
+    resources = app / "Contents" / "Resources"
+    build_release.stamp_build_info(app, "1.9-tester-20260830", resources)
+    build_release.stage_release_docs(app, resources)
+    assert (resources / "freight_fate" / "data" / "world.ffdata").is_file()
+    assert (resources / "freight_fate" / "sounds.pak").is_file()
+    assert (resources / "freight_fate" / "music.pak").is_file()
+    assert (resources / "SOUND_CREDITS.md").is_file()
+    for name in (
+        "build_info.json",
+        "CHANGELOG.md",
+        "LICENSE.txt",
+        "USER_MANUAL.md",
+        "USER_MANUAL.html",
+        "ALPHA_TEST_BOOK.md",
+        "ALPHA_TEST_BOOK.html",
+    ):
+        assert (resources / name).is_file()
+    frameworks = app / "Contents" / "Frameworks"
+    for name in (
+        "libSDL2-2.0.0.dylib",
+        "libbass.dylib",
+        "libbasshls.dylib",
+        "libbassopus.dylib",
+        "libprism.dylib",
+    ):
+        assert (frameworks / name).is_file()
+    with (app / "Contents" / "Info.plist").open("rb") as stream:
+        info = plistlib.load(stream)
+    assert info["CFBundleExecutable"] == "FreightFate"
+    assert info["CFBundleName"] == "Freight Fate"
+    assert info["CFBundleIdentifier"] == "net.orinks.freight-fate"
+    assert info["CFBundleVersion"] == "2026.08.30"
+    assert info["CFBundleGetInfoString"] == "Freight Fate 1.9.0 (1.9-tester-20260830)"
+    assert info["NSAppleEventsUsageDescription"] == (
+        "Freight Fate uses VoiceOver to speak menus, driving information, and alerts."
+    )
+
+
+def test_macos_stage_refuses_missing_player_libraries(tmp_path, monkeypatch):
+    """A silent or Homebrew-dependent app must never become a release."""
+    build_release = load_build_release_module()
+    package_dir = tmp_path / "src" / "freight_fate"
+    make_package_tree(package_dir, build_release)
+    track_everything(tmp_path)
+    profile_dir = tmp_path / "target" / "release"
+    profile_dir.mkdir(parents=True)
+    (profile_dir / "freightfate").write_bytes(b"Mach-O")
+    baked = make_container(tmp_path / "world.ffdata", build_release)
+    monkeypatch.setattr(build_release, "PACKAGE_DIR", package_dir)
+    monkeypatch.setattr(build_release, "ADDON_LIB_DIR", tmp_path / "no-addons")
+
+    with pytest.raises(RuntimeError, match="missing macOS player library libbass.dylib"):
+        build_release.stage_rust_build(
+            profile_dir,
+            build_dir=tmp_path / "build" / "FreightFate",
+            baked_data=baked,
+            platform_name="darwin",
+        )
+
+
+def test_macos_sdl_is_found_from_the_executables_install_names(tmp_path, monkeypatch):
+    """The packager copies the exact SDL dylib Cargo linked, not a guessed prefix."""
+    build_release = load_build_release_module()
+    exe = tmp_path / "freightfate"
+    exe.write_bytes(b"Mach-O")
+    sdl = tmp_path / "Homebrew" / "lib" / "libSDL2-2.0.0.dylib"
+    sdl.parent.mkdir(parents=True)
+    sdl.write_bytes(b"SDL")
+    result = subprocess.CompletedProcess(
+        ["otool", "-L", str(exe)], 0, f"{exe}:\n\t{sdl} (compatibility version 1.0.0)\n", ""
+    )
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *_args, **_kwargs: result)
+
+    assert build_release.macos_sdl_library(exe) == sdl
+
+
+def test_macos_sdl_resolves_an_rpath_install_name_through_homebrew(tmp_path, monkeypatch):
+    """Homebrew may record SDL as @rpath; its own prefix supplies the real file."""
+    build_release = load_build_release_module()
+    exe = tmp_path / "freightfate"
+    exe.write_bytes(b"Mach-O")
+    prefix = tmp_path / "homebrew" / "opt" / "sdl2"
+    sdl = prefix / "lib" / "libSDL2-2.0.0.dylib"
+    sdl.parent.mkdir(parents=True)
+    sdl.write_bytes(b"SDL")
+
+    def run(command, **_kwargs):
+        if command[:2] == ["otool", "-L"]:
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                f"{exe}:\n\t@rpath/libSDL2-2.0.0.dylib (compatibility version 1.0.0)\n",
+                "",
+            )
+        if command == ["brew", "--prefix", "sdl2"]:
+            return subprocess.CompletedProcess(command, 0, f"{prefix}\n", "")
+        raise AssertionError(command)
+
+    monkeypatch.setattr(build_release.subprocess, "run", run)
+
+    assert build_release.macos_sdl_library(exe) == sdl
+
+
+def test_macos_relocation_makes_sdl_bundle_relative_and_signs_deep(tmp_path, monkeypatch):
+    """The app must not retain a build-machine Homebrew path."""
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    exe = app / "Contents" / "MacOS" / "FreightFate"
+    frameworks = app / "Contents" / "Frameworks"
+    exe.parent.mkdir(parents=True)
+    frameworks.mkdir(parents=True)
+    exe.write_bytes(b"Mach-O")
+    sdl = frameworks / "libSDL2-2.0.0.dylib"
+    sdl.write_bytes(b"SDL")
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append((command, kwargs))
+        if command[:2] == ["otool", "-L"]:
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                f"{exe}:\n\t/opt/homebrew/lib/libSDL2-2.0.0.dylib (compatibility version 1.0.0)\n",
+                "",
+            )
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(build_release.subprocess, "run", run)
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    build_release.relocate_macos_libraries(app)
+    build_release.sign_distribution(app)
+
+    commands = [call[0] for call in calls]
+    assert [
+        "install_name_tool",
+        "-change",
+        "/opt/homebrew/lib/libSDL2-2.0.0.dylib",
+        "@rpath/libSDL2-2.0.0.dylib",
+        str(exe),
+    ] in commands
+    assert [
+        "install_name_tool",
+        "-add_rpath",
+        "@executable_path/../Frameworks",
+        str(exe),
+    ] in commands
+    assert ["install_name_tool", "-id", "@rpath/libSDL2-2.0.0.dylib", str(sdl)] in commands
+    assert ["codesign", "--force", "--deep", "--sign", "-", str(app)] in commands
+
+
+def test_macos_archive_name_matches_updater_suffix(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    app.mkdir()
+    monkeypatch.setattr(build_release, "DIST", tmp_path / "dist")
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *_args, **_kwargs: None)
+    (tmp_path / "dist").mkdir()
+
+    out = build_release.archive(app, "1.9-tester-20260830")
+
+    assert out.name == "FreightFate-1.9-tester-20260830-macos.zip"
+
+
+def test_macos_signs_the_completed_app_after_smoke_cleanup(tmp_path, monkeypatch):
+    """Changing bundle contents after codesign invalidates the finished signature."""
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    archive = tmp_path / "FreightFate-test-macos.zip"
+    events = []
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(build_release, "prepare_rust_release_dependencies", lambda: None)
+    monkeypatch.setattr(build_release, "run_cargo", lambda _target: tmp_path / "release")
+    monkeypatch.setattr(build_release, "bake_world_data", lambda _target: tmp_path / "world.ffdata")
+    monkeypatch.setattr(build_release, "stage_rust_build", lambda *_args, **_kwargs: app)
+    monkeypatch.setattr(build_release, "stamp_build_info", lambda *_args: events.append("stamp"))
+    monkeypatch.setattr(build_release, "stage_release_docs", lambda *_args: events.append("docs"))
+    monkeypatch.setattr(build_release, "verify_rust_payload", lambda _app: events.append("verify"))
+    monkeypatch.setattr(build_release, "smoke_check", lambda _app: events.append("smoke"))
+    monkeypatch.setattr(build_release, "strip_user_data", lambda _app: events.append("strip"))
+    monkeypatch.setattr(build_release, "sign_distribution", lambda _app: events.append("sign"))
+    monkeypatch.setattr(build_release, "archive", lambda *_args: archive)
+    monkeypatch.setattr(build_release, "verify_archive", lambda _archive: events.append("archive"))
+
+    build_release.build_rust("test", None, True)
+
+    assert events == ["stamp", "docs", "verify", "smoke", "strip", "sign", "archive"]
