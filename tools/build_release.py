@@ -703,7 +703,18 @@ def smoke_check(build_dir: Path) -> None:
         # the packaged resources, then explicitly initialises dynamically
         # loaded BASS on its no-sound device before running five frames.
         command.append("--headless")
-    subprocess.run(command, check=True, cwd=exe.parent, env=env, timeout=120)
+    with tempfile.TemporaryDirectory(prefix="freight-fate-smoke-") as temp_dir:
+        smoke_root = Path(temp_dir)
+        smoke_log = smoke_root / "game.log"
+        env["FREIGHT_FATE_DATA_DIR"] = str(smoke_root / "player-data")
+        env["FREIGHT_FATE_LOG_FILE"] = str(smoke_log)
+        try:
+            subprocess.run(command, check=True, cwd=exe.parent, env=env, timeout=120)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            if smoke_log.is_file():
+                print("Packaged smoke log before failure:", file=sys.stderr)
+                print(smoke_log.read_text(encoding="utf-8", errors="replace"), file=sys.stderr)
+            raise
     print("Smoke check passed: the packaged runtime boots and loads its resources.")
 
 

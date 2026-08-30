@@ -525,6 +525,40 @@ def test_macos_smoke_uses_the_bounded_headless_app_path(tmp_path, monkeypatch):
     assert calls[0][1]["timeout"] == 120
 
 
+def test_smoke_timeout_uses_isolated_data_and_prints_the_packaged_log(
+    tmp_path, monkeypatch, capsys
+):
+    """A smoke failure reports phases without reading real player data."""
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    executable = app / "Contents" / "MacOS" / "FreightFate"
+    executable.parent.mkdir(parents=True)
+    executable.write_bytes(b"Mach-O")
+
+    def time_out(command, **kwargs):
+        smoke_env = kwargs["env"]
+        log_path = Path(smoke_env["FREIGHT_FATE_LOG_FILE"])
+        player_data = Path(smoke_env["FREIGHT_FATE_DATA_DIR"])
+        assert player_data == log_path.parent / "player-data"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        log_path.write_text(
+            "phase: smoke checks 12 ms (elapsed 50 ms)\n"
+            "phase: driver identity 17 ms (elapsed 67 ms)\n",
+            encoding="utf-8",
+        )
+        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+    monkeypatch.setattr(build_release.subprocess, "run", time_out)
+
+    with pytest.raises(subprocess.TimeoutExpired):
+        build_release.smoke_check(app)
+
+    err = capsys.readouterr().err
+    assert "Packaged smoke log before failure:" in err
+    assert "phase: smoke checks 12 ms" in err
+    assert "phase: driver identity 17 ms" in err
+
+
 def make_macos_profile(profile_dir: Path) -> None:
     profile_dir.mkdir(parents=True)
     (profile_dir / "freightfate").write_bytes(b"Mach-O")
