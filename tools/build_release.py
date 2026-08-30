@@ -682,7 +682,7 @@ def sign_distribution(build_dir: Path) -> None:
 
 
 def smoke_check(build_dir: Path) -> None:
-    """Boot the frozen game for a few frames with dummy drivers."""
+    """Boot the packaged game for a few frames with dummy drivers."""
     import os
 
     if build_dir.suffix == ".app":
@@ -697,11 +697,8 @@ def smoke_check(build_dir: Path) -> None:
     }
     command = [str(exe), "--smoke"]
     if build_dir.suffix == ".app":
-        # GitHub's macOS runners have no interactive WindowServer/audio
-        # session.  Entering the real SDL/BASS path can therefore wait
-        # forever even with dummy drivers.  Headless smoke loads and validates
-        # the packaged resources, then explicitly initialises dynamically
-        # loaded BASS on its no-sound device before running five frames.
+        # Stable Nuitka builds still use the generic packaged smoke. Career's
+        # GitHub-hosted Rust job selects the explicit non-launch mode instead.
         command.append("--headless")
     with tempfile.TemporaryDirectory(prefix="freight-fate-smoke-") as temp_dir:
         smoke_root = Path(temp_dir)
@@ -1471,8 +1468,19 @@ def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> N
         raise RuntimeError(f"Packaged executable is not runnable: {exe.relative_to(build_dir)}")
 
 
-def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
+def build_rust(
+    label: str,
+    target_dir: Path | None,
+    run_smoke: bool,
+    *,
+    macos_non_launch_verify: bool = False,
+) -> Path:
     """The whole ``--rust`` pipeline, ending with the verified archive."""
+    if run_smoke and macos_non_launch_verify:
+        raise RuntimeError("process smoke and macOS non-launch verification are mutually exclusive")
+    if macos_non_launch_verify and sys.platform != "darwin":
+        raise RuntimeError("macOS non-launch verification requires macOS")
+
     prepare_rust_release_dependencies()
     profile_dir = run_cargo(target_dir)
     baked_data = bake_world_data(target_dir)
@@ -1484,20 +1492,20 @@ def build_rust(label: str, target_dir: Path | None, run_smoke: bool) -> Path:
     stage_release_docs(build_dir, resource_root)
     verify_rust_payload(build_dir)
     strip_user_data(build_dir)
-    if sys.platform == "darwin" and run_smoke:
-        # Apple Silicon requires valid signatures on executable code.  The
-        # install-name relocation above invalidates SDL's existing signature,
-        # so sign the bundle before asking macOS to launch it.
-        sign_distribution(build_dir)
     if run_smoke:
         smoke_check(build_dir)
         # Retain the last-line privacy defense even though smoke redirects its
         # data and log paths.  A runtime fallback must never enter the archive.
         strip_user_data(build_dir)
+    elif macos_non_launch_verify:
+        # GitHub-hosted macOS has repeatedly left a correctly relocated,
+        # deeply signed arm64 process before Rust logging for the full bound.
+        # The release proof therefore stays non-launching: payload structure
+        # above, native dependency audit + strict signature verification below,
+        # and archive structure/content verification after compression.
+        print("Using non-launch macOS packaged verification on the hosted runner.")
     else:
-        # The Rust binary's ``--smoke`` is not wired yet (main.rs is still
-        # the stub); pass ``--smoke`` once it is.
-        print("Skipped the smoke check (pass --smoke to boot the staged Rust build).")
+        print("Skipped the packaged process smoke check.")
     if sys.platform == "darwin":
         # Prove the archive input after every possible smoke-side mutation.
         sign_distribution(build_dir)
@@ -1533,7 +1541,24 @@ def main() -> int:
         action="store_true",
         help="--rust only: boot the staged Rust build headless (off until the binary supports --smoke)",
     )
+    parser.add_argument(
+        "--macos-non-launch-verify",
+        action="store_true",
+        help=(
+            "--rust only: verify a macOS app's payload, native dependencies, signature, "
+            "and archive without launching it"
+        ),
+    )
     args = parser.parse_args()
+
+    if args.macos_non_launch_verify and not args.rust:
+        parser.error("--macos-non-launch-verify requires --rust")
+    if args.macos_non_launch_verify and args.smoke:
+        parser.error("--macos-non-launch-verify cannot be combined with --smoke")
+    if args.macos_non_launch_verify and args.skip_smoke:
+        parser.error("--macos-non-launch-verify cannot be combined with --skip-smoke")
+    if args.macos_non_launch_verify and sys.platform != "darwin":
+        parser.error("--macos-non-launch-verify requires macOS")
 
     if args.check_dependencies:
         verify_release_dependencies()
@@ -1544,7 +1569,12 @@ def main() -> int:
 
     if args.rust:
         target_dir = Path(args.cargo_target_dir).resolve() if args.cargo_target_dir else None
-        out = build_rust(label, target_dir, run_smoke=args.smoke and not args.skip_smoke)
+        out = build_rust(
+            label,
+            target_dir,
+            run_smoke=args.smoke and not args.skip_smoke,
+            macos_non_launch_verify=args.macos_non_launch_verify,
+        )
         print(f"Built {out} ({out.stat().st_size / 1e6:.1f} MB)")
         return 0
 

@@ -579,9 +579,12 @@ def test_career_19_snapshot_builds_an_apple_silicon_macos_release():
     )
     assert named_steps["Test Rust workspace"][1]["run"] == "cargo test -p ff-core -p freight-fate"
     assert (
-        "uv run python tools/build_release.py --rust --smoke --tag"
+        "uv run python tools/build_release.py --rust --macos-non-launch-verify --tag"
         in named_steps["Build the macOS release"][1]["run"]
     )
+    assert "--smoke" not in named_steps["Build the macOS release"][1]["run"]
+    assert "--skip-smoke" not in named_steps["Build the macOS release"][1]["run"]
+    assert "Contents/MacOS/FreightFate" not in named_steps["Build the macOS release"][1]["run"]
     assert all("build-release.ps1" not in step.get("run", "") for step in steps)
     upload = next(step for step in steps if step.get("uses") == "actions/upload-artifact@v7")
     assert upload["with"]["path"] == "dist/FreightFate-*-macos-arm64.zip"

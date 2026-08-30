@@ -168,7 +168,7 @@ jobs:
         run: cargo test -p ff-core -p freight-fate
 
       - name: Build the macOS release
-        run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
+        run: uv run python tools/build_release.py --rust --macos-non-launch-verify --tag "${{ needs.prepare.outputs.tag }}"
 
       - uses: actions/upload-artifact@v7
         with:

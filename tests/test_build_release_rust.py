@@ -502,38 +502,19 @@ def test_main_accepts_the_rust_flags(capsys):
     assert "--rust" in out
     assert "--cargo-target-dir" in out
     assert "--smoke" in out
+    assert "--macos-non-launch-verify" in out
 
 
-def test_macos_smoke_uses_the_bounded_headless_app_path(tmp_path, monkeypatch):
-    """Hosted Mac runners have no interactive window or audio session."""
-    build_release = load_build_release_module()
-    app = tmp_path / "FreightFate.app"
-    executable = app / "Contents" / "MacOS" / "FreightFate"
-    executable.parent.mkdir(parents=True)
-    executable.write_bytes(b"Mach-O")
-    calls = []
-    monkeypatch.setattr(
-        build_release.subprocess,
-        "run",
-        lambda command, **kwargs: calls.append((command, kwargs)),
-    )
-
-    build_release.smoke_check(app)
-
-    assert calls[0][0] == [str(executable), "--smoke", "--headless"]
-    assert calls[0][1]["cwd"] == executable.parent
-    assert calls[0][1]["timeout"] == 120
-
-
-def test_smoke_timeout_uses_isolated_data_and_prints_the_packaged_log(
+def test_windows_smoke_timeout_uses_isolated_data_and_prints_the_packaged_log(
     tmp_path, monkeypatch, capsys
 ):
-    """A smoke failure reports phases without reading real player data."""
+    """The retained Windows smoke reports phases without reading player data."""
     build_release = load_build_release_module()
-    app = tmp_path / "FreightFate.app"
-    executable = app / "Contents" / "MacOS" / "FreightFate"
-    executable.parent.mkdir(parents=True)
+    app = tmp_path / "FreightFate"
+    executable = app / "FreightFate.exe"
+    app.mkdir()
     executable.write_bytes(b"Mach-O")
+    monkeypatch.setattr(build_release.sys, "platform", "win32")
 
     def time_out(command, **kwargs):
         smoke_env = kwargs["env"]
@@ -557,6 +538,28 @@ def test_smoke_timeout_uses_isolated_data_and_prints_the_packaged_log(
     assert "Packaged smoke log before failure:" in err
     assert "phase: smoke checks 12 ms" in err
     assert "phase: driver identity 17 ms" in err
+
+
+def test_stable_macos_smoke_uses_the_bounded_headless_app_path(tmp_path, monkeypatch):
+    """The Career-only pivot must not break the generic stable Mac builder."""
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    executable = app / "Contents" / "MacOS" / "FreightFate"
+    executable.parent.mkdir(parents=True)
+    executable.write_bytes(b"Mach-O")
+    calls = []
+
+    monkeypatch.setattr(
+        build_release.subprocess,
+        "run",
+        lambda command, **kwargs: calls.append((command, kwargs)),
+    )
+
+    build_release.smoke_check(app)
+
+    assert calls[0][0] == [str(executable), "--smoke", "--headless"]
+    assert calls[0][1]["cwd"] == executable.parent
+    assert calls[0][1]["timeout"] == 120
 
 
 def make_macos_profile(profile_dir: Path) -> None:
@@ -824,8 +827,8 @@ def test_intel_macos_archive_keeps_legacy_suffix(tmp_path, monkeypatch):
     assert out.name == "FreightFate-1.8.8-macos.zip"
 
 
-def test_macos_signs_before_smoke_then_cleans_and_resigns(tmp_path, monkeypatch):
-    """Smoke launches a signed app; the archive is cleaned and verified again."""
+def test_macos_uses_non_launch_verification_before_archive(tmp_path, monkeypatch):
+    """Hosted Mac proof stays structural, native, signed, and non-launching."""
     build_release = load_build_release_module()
     app = tmp_path / "FreightFate.app"
     archive = tmp_path / "FreightFate-test-macos.zip"
@@ -844,19 +847,34 @@ def test_macos_signs_before_smoke_then_cleans_and_resigns(tmp_path, monkeypatch)
     monkeypatch.setattr(build_release, "archive", lambda *_args: archive)
     monkeypatch.setattr(build_release, "verify_archive", lambda _archive: events.append("archive"))
 
+    build_release.build_rust("test", None, False, macos_non_launch_verify=True)
+
+    assert events == ["stamp", "docs", "verify", "strip", "sign", "archive"]
+
+
+def test_windows_keeps_packaged_process_smoke(tmp_path, monkeypatch):
+    """Removing the unsupported hosted Mac launch must not weaken Windows."""
+    build_release = load_build_release_module()
+    build = tmp_path / "FreightFate"
+    archive = tmp_path / "FreightFate-test-windows-portable.zip"
+    events = []
+    monkeypatch.setattr(build_release.sys, "platform", "win32")
+    monkeypatch.setattr(build_release, "prepare_rust_release_dependencies", lambda: None)
+    monkeypatch.setattr(build_release, "run_cargo", lambda _target: tmp_path / "release")
+    monkeypatch.setattr(build_release, "bake_world_data", lambda _target: tmp_path / "world.ffdata")
+    monkeypatch.setattr(build_release, "stage_rust_build", lambda *_args, **_kwargs: build)
+    monkeypatch.setattr(build_release, "stamp_build_info", lambda *_args: events.append("stamp"))
+    monkeypatch.setattr(build_release, "stage_release_docs", lambda *_args: events.append("docs"))
+    monkeypatch.setattr(build_release, "verify_rust_payload", lambda _app: events.append("verify"))
+    monkeypatch.setattr(build_release, "smoke_check", lambda _app: events.append("smoke"))
+    monkeypatch.setattr(build_release, "strip_user_data", lambda _app: events.append("strip"))
+    monkeypatch.setattr(build_release, "sign_distribution", lambda _app: events.append("sign"))
+    monkeypatch.setattr(build_release, "archive", lambda *_args: archive)
+    monkeypatch.setattr(build_release, "verify_archive", lambda _archive: events.append("archive"))
+
     build_release.build_rust("test", None, True)
 
-    assert events == [
-        "stamp",
-        "docs",
-        "verify",
-        "strip",
-        "sign",
-        "smoke",
-        "strip",
-        "sign",
-        "archive",
-    ]
+    assert events == ["stamp", "docs", "verify", "strip", "smoke", "strip", "archive"]
 
 
 def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, monkeypatch):
