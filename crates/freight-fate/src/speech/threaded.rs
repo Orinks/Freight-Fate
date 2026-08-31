@@ -122,6 +122,13 @@ pub struct ThreadedSpeech {
     commands: mpsc::SyncSender<Command>,
     snapshot: Arc<Mutex<Snapshot>>,
     heartbeat: Arc<Mutex<Instant>>,
+    /// Set by [`shutdown`](SpeechSink::shutdown) BEFORE the shutdown
+    /// command is queued: the worker checks it per command and drops
+    /// queued sentences instead of speaking them. Without it, quitting
+    /// waited through every queued synchronous say before the release --
+    /// which read as the game "taking longer to hand the screen reader
+    /// back" than before the worker existed (Brandon, 2026-08-31).
+    shutting_down: Arc<std::sync::atomic::AtomicBool>,
     /// Watchdog latch: the wedge is reported once, and once more only if
     /// the worker recovers and wedges again.
     wedged: bool,
@@ -144,8 +151,10 @@ impl ThreadedSpeech {
         let (commands, rx) = mpsc::sync_channel::<Command>(QUEUE_DEPTH);
         let snapshot: Arc<Mutex<Snapshot>> = Arc::default();
         let heartbeat = Arc::new(Mutex::new(Instant::now()));
+        let shutting_down = Arc::new(std::sync::atomic::AtomicBool::new(false));
         let worker_snapshot = Arc::clone(&snapshot);
         let worker_heartbeat = Arc::clone(&heartbeat);
+        let worker_shutting_down = Arc::clone(&shutting_down);
         std::thread::Builder::new()
             .name("speech".to_string())
             .spawn(move || {
@@ -156,10 +165,21 @@ impl ThreadedSpeech {
                 };
                 loop {
                     beat();
+                    // Quitting: everything still queued is a sentence the
+                    // player chose not to wait for. Skip the says, keep
+                    // answering everything that carries a reply, and let
+                    // the Shutdown command through to the release.
+                    let draining = worker_shutting_down.load(std::sync::atomic::Ordering::Relaxed);
                     match rx.recv_timeout(IDLE_POLL) {
-                        Ok(Command::Say { text, interrupt }) => inner.say(&text, interrupt),
+                        Ok(Command::Say { text, interrupt }) => {
+                            if !draining {
+                                inner.say(&text, interrupt)
+                            }
+                        }
                         Ok(Command::SayEvent { text, interrupt }) => {
-                            inner.say_event(&text, interrupt)
+                            if !draining {
+                                inner.say_event(&text, interrupt)
+                            }
                         }
                         Ok(Command::StopMain) => inner.stop_main(),
                         Ok(Command::StopEvent) => inner.stop_event(),
@@ -216,6 +236,7 @@ impl ThreadedSpeech {
             commands,
             snapshot,
             heartbeat,
+            shutting_down,
             wedged: false,
             dropped_lines: 0,
         }
@@ -398,6 +419,11 @@ impl SpeechSink for ThreadedSpeech {
     }
 
     fn shutdown(&mut self) {
+        // The flag first, then the command: the worker skips every say
+        // still queued ahead of it, so the wait below covers one in-flight
+        // utterance at most, not the whole backlog.
+        self.shutting_down
+            .store(true, std::sync::atomic::Ordering::Relaxed);
         let (done_tx, done_rx) = mpsc::channel();
         if self
             .commands
@@ -539,6 +565,39 @@ mod tests {
         panic!(
             "worker never processed {count} call(s): {:?}",
             calls.lock().unwrap()
+        );
+    }
+
+    /// Quit must not wait through the say backlog: the shutdown flag makes
+    /// the worker DROP every sentence still queued, so the screen reader
+    /// gets the desk back after at most the in-flight utterance (Brandon,
+    /// 2026-08-31: closing the game took visibly longer than before the
+    /// speech worker existed).
+    #[test]
+    fn shutdown_skips_the_queued_backlog_instead_of_speaking_it() {
+        let Rig {
+            mut sink, calls, ..
+        } = rig();
+        // A backlog a player would otherwise sit through.
+        for i in 0..50 {
+            sink.say(&format!("queued {i}"), false);
+        }
+        let started = Instant::now();
+        sink.shutdown();
+        assert!(
+            started.elapsed() < Duration::from_secs(2),
+            "shutdown waited through the backlog: {:?}",
+            started.elapsed()
+        );
+        let spoken = calls.lock().unwrap();
+        let says = spoken.iter().filter(|c| c.starts_with("say ")).count();
+        assert!(
+            says < 50,
+            "every queued sentence was spoken before release ({says})"
+        );
+        assert!(
+            spoken.iter().any(|c| c == "shutdown"),
+            "the backend was never released: {spoken:?}"
         );
     }
 

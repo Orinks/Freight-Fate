@@ -1122,6 +1122,13 @@
   last stop. Quit anyway?" -- with Keep driving as the first choice.
   Quitting while parked is instant, the way it has always been.
 
+- **Closing the game hands your screen reader back right away.** Since the
+  voice moved onto its own track, quitting quietly waited for every
+  sentence still lined up to be spoken before letting go -- which read as
+  the game taking longer to close than it used to. Quitting now drops
+  whatever was left unsaid and releases the voice after at most the
+  sentence already being spoken.
+
 - **Losing a radio station lands on a live station, not on silence.** When
   the station you were listening to faded out of range, the radio used to
   drop to a silent satellite channel -- the music just stopped, with one
