@@ -1004,8 +1004,16 @@ fn test_streamer_safe_mode_still_hides_favorited_real_streams() {
 
 #[test]
 fn test_the_safety_fallback_cannot_be_favorited() {
+    // The SILENT satellite, by its flag -- fallback_station() now resolves
+    // to the audible Eagle first, and the Eagle is an ordinary station a
+    // player may favorite like any other.
     let mut radio = dallas_radio();
-    let fallback = radio.fallback_station();
+    let fallback = radio
+        .catalog
+        .iter()
+        .find(|s| s.fallback)
+        .expect("the catalog carries the silent satellite")
+        .clone();
     radio.station_id = fallback.id.clone();
     radio.update_position(None, None);
     // Force current onto the fallback by making nothing else receivable.
@@ -1015,6 +1023,29 @@ fn test_the_safety_fallback_cannot_be_favorited() {
         "The safety fallback is always on the dial."
     );
     assert!(radio.favorite_ids.is_empty());
+}
+
+/// Losing a station lands on the Eagle, not on silence (owner, 2026-08-31);
+/// streamer-safe mode still lands on the silent satellite, whose guarantee
+/// is exactly that nothing licensable plays.
+#[test]
+fn test_fallback_is_the_eagle_unless_streamer_safe() {
+    let mut radio = dallas_radio();
+    assert_eq!(radio.fallback_station().id, AUDIBLE_FALLBACK_STATION_ID);
+
+    radio.streamer_safe = true;
+    assert_eq!(radio.fallback_station().id, SAFE_FALLBACK_STATION_ID);
+}
+
+/// An Eagle that failed to open must not be re-tuned forever: once struck
+/// unplayable, the fallback moves on to the silent satellite.
+#[test]
+fn test_fallback_skips_an_unplayable_eagle() {
+    let mut radio = dallas_radio();
+    radio
+        .unplayable_ids
+        .insert(AUDIBLE_FALLBACK_STATION_ID.to_string());
+    assert_eq!(radio.fallback_station().id, SAFE_FALLBACK_STATION_ID);
 }
 
 #[test]
@@ -2028,9 +2059,16 @@ fn test_tune_category_wraps_and_never_lands_mid_category() {
         let action = state.tune_category(1, None);
         seen.push(action.station.id);
     }
-    // One full lap visits each category's first station exactly once.
+    // One full lap visits each category's first station exactly once --
+    // except the silent satellite's slot, which now plays (and reports)
+    // the audible fallback instead of silence.
     seen.sort();
     let mut expected: Vec<String> = first_by_group.values();
+    for id in &mut expected {
+        if id == SAFE_FALLBACK_STATION_ID {
+            *id = state.fallback_station().id;
+        }
+    }
     expected.sort();
     assert_eq!(seen, expected);
 }

@@ -34,6 +34,13 @@ pub use state::{RadioSettingsAccess, RadioState, FAVORITES_GROUP, TERRESTRIAL_GR
 
 pub const SAFE_ROUTE_PLAYLIST: &str = "route_playlist";
 pub const SAFE_FALLBACK_STATION_ID: &str = "ff-safety-satellite";
+/// Where the dial lands when a station is lost and a real stream is still
+/// allowed: AFN Humphreys The Eagle, the catalog's one Eagle station --
+/// always available, no range, so it is receivable anywhere on the map.
+/// Owner's call (2026-08-31): losing a station must not mean silence. The
+/// silent satellite above keeps its job for streamer-safe mode, and for
+/// the day the Eagle itself will not open.
+pub const AUDIBLE_FALLBACK_STATION_ID: &str = "afn-humphreys";
 pub const RADIO_CATALOG_RESOURCE: &str = "radio_catalog.json";
 /// How many search hits the Radio app lists. A screen reader walks a list one
 /// row at a time, so past this a search is a narrower search, not a longer

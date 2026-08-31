@@ -493,6 +493,19 @@ impl RadioState {
     }
 
     pub fn fallback_station(&self) -> RadioStation {
+        // The audible fallback first: losing a station must not mean
+        // silence (owner, 2026-08-31). `station_allowed` keeps this honest
+        // -- streamer-safe mode filters the real stream out, and an Eagle
+        // that failed to open sits in `unplayable_ids` -- so both of those
+        // still land on the silent satellite below, whose guarantee is
+        // exactly that it always "plays".
+        if let Some(station) = self
+            .catalog
+            .iter()
+            .find(|s| s.id == super::AUDIBLE_FALLBACK_STATION_ID && self.station_allowed(s))
+        {
+            return station.clone();
+        }
         if let Some(station) = self
             .catalog
             .iter()

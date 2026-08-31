@@ -1122,6 +1122,14 @@
   last stop. Quit anyway?" -- with Keep driving as the first choice.
   Quitting while parked is instant, the way it has always been.
 
+- **Losing a radio station lands on a live station, not on silence.** When
+  the station you were listening to faded out of range, the radio used to
+  drop to a silent satellite channel -- the music just stopped, with one
+  spoken line and nothing after it. The radio now retunes to AFN Humphreys
+  The Eagle, which is receivable everywhere, and says so. Streamer-safe
+  mode still lands on the silent channel, because its whole point is that
+  nothing with a music license ever reaches your broadcast.
+
 - **The drivers board names the truck you are actually in.** A company
   driver's board line used to show the truck their career file remembered
   -- usually the old yard mule -- instead of the tractor the carrier
