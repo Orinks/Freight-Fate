@@ -175,7 +175,13 @@ jobs:
         run: cargo test -p ff-core -p freight-fate
 
       - name: Build the macOS release
-        run: uv run python tools/build_release.py --rust --macos-non-launch-verify --tag "${{ needs.prepare.outputs.tag }}"
+        # --smoke boots the PACKAGED app for five frames with dummy drivers:
+        # real dylib loading, real data, real boot. The old non-launch mode
+        # existed because hosted runners hung before first log -- the boot
+        # probes (speech, audio device) that 2026-08-30 moved onto worker
+        # threads; with them gone the launch proof is back. Bounded at 120 s
+        # inside the builder, which dumps the game log on failure.
+        run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
 
       - uses: actions/upload-artifact@v7
         with:

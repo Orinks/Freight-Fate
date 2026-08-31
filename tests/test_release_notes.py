@@ -584,11 +584,14 @@ def test_career_19_snapshot_builds_an_apple_silicon_macos_release():
         == "cargo clippy --all-targets --locked -- -D warnings"
     )
     assert named_steps["Test Rust workspace"][1]["run"] == "cargo test -p ff-core -p freight-fate"
+    # The launch smoke is BACK on macOS: the hang that forced non-launch
+    # verification was the boot probes, moved off the boot path 2026-08-30.
+    # A packaged app that cannot boot must fail the build, not ship.
     assert (
-        "uv run python tools/build_release.py --rust --macos-non-launch-verify --tag"
+        "uv run python tools/build_release.py --rust --smoke --tag"
         in named_steps["Build the macOS release"][1]["run"]
     )
-    assert "--smoke" not in named_steps["Build the macOS release"][1]["run"]
+    assert "--macos-non-launch-verify" not in named_steps["Build the macOS release"][1]["run"]
     assert "--skip-smoke" not in named_steps["Build the macOS release"][1]["run"]
     assert "Contents/MacOS/FreightFate" not in named_steps["Build the macOS release"][1]["run"]
     assert all("build-release.ps1" not in step.get("run", "") for step in steps)
