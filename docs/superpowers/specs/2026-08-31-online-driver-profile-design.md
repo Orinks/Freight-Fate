@@ -69,13 +69,15 @@ Information is presented in this order, with one fact per spoken line:
 3. Employment or business identity: company driver and carrier, or the applicable owner-operator and leased-carrier status.
 4. Career level and title.
 5. Current owned tractor or carrier-assigned tractor.
-6. Career resume: lifetime deliveries and miles, on-time percentage, damage-free percentage, safety record, states and cities visited, longest haul, and lifetime career earnings.
+6. Career resume: lifetime deliveries and miles, on-time percentage, damage-free percentage, safety record, states and cities visited, longest haul, lifetime career earnings, and net worth appropriate to the career's business status.
 7. Account-wide achievement total and the two or three most recently earned account achievements.
 8. Recent road-journal activity.
 
 Every career-specific statistic is labeled as belonging to the current career. Achievements are labeled as account-wide.
 
-Current cash, net spendable balance, precise location, fatigue, hours-of-service state, active cargo details, and dispatcher standing remain private. Existing profile-sharing consent controls all newly public fields.
+Net worth is included automatically whenever Profile sharing is on. It is derived from cash and equipment value and labeled by business status where that context changes what the number means. The profile does not add repetitive disclaimers that these game statistics are fictional.
+
+Current cash and available credit remain private even though their contribution to net worth can be public. Precise live location, exact active cargo, customer, cargo value and destination, current fatigue, exact hours-of-service state, and internal dispatcher standing also remain private. Broad live route and cargo category may continue through the separately consented presence surface. Existing Profile sharing consent controls all newly public profile fields.
 
 ## Cloud career retention
 
@@ -127,7 +129,7 @@ Implementation verification must cover:
 - loading, browsing, and unchanged saves not switching it;
 - rejected and offline snapshots leaving the prior verified public career visible;
 - profile-sharing-off behavior for every new field and post path;
-- accurate company-driver, owner-operator, carrier, title, and rig rendering;
+- accurate company-driver, owner-operator, carrier, title, rig, and business-status-aware net-worth rendering;
 - percentages and minimum-data presentation for richer resume facts;
 - automatic eleventh-career eviction, protected-career behavior, failure rollback, and re-upload of an evicted local career;
 - account achievements surviving cloud-career eviction;
