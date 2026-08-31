@@ -40,6 +40,7 @@ impl Default for AccountAchievementFile {
 pub struct AccountAchievements {
     path: PathBuf,
     file: AccountAchievementFile,
+    writes_enabled: bool,
 }
 
 impl AccountAchievements {
@@ -47,34 +48,34 @@ impl AccountAchievements {
     /// and starting an empty in-memory collection for this run.
     pub fn load(data_dir: &Path) -> Self {
         let path = data_dir.join(FILE_NAME);
-        let file = match fs::read_to_string(&path) {
+        let (file, writes_enabled) = match fs::read_to_string(&path) {
             Ok(text) => match serde_json::from_str::<AccountAchievementFile>(&text) {
-                Ok(file) if file.version == FILE_VERSION => file,
+                Ok(file) if file.version == FILE_VERSION => (file, true),
                 Ok(file) => {
                     log::warn!(
-                        "Ignoring unsupported account achievement ledger version {} at {}",
+                        "Preserving unsupported account achievement ledger version {} at {}",
                         file.version,
                         path.display()
                     );
-                    AccountAchievementFile::default()
+                    (AccountAchievementFile::default(), false)
                 }
                 Err(error) => {
                     log::warn!(
-                        "Could not read account achievement ledger at {}: {error}",
+                        "Preserving unreadable account achievement ledger at {}: {error}",
                         path.display()
                     );
-                    AccountAchievementFile::default()
+                    (AccountAchievementFile::default(), false)
                 }
             },
             Err(error) if error.kind() == io::ErrorKind::NotFound => {
-                AccountAchievementFile::default()
+                (AccountAchievementFile::default(), true)
             }
             Err(error) => {
                 log::warn!(
-                    "Could not read account achievement ledger at {}: {error}",
+                    "Preserving unreadable account achievement ledger at {}: {error}",
                     path.display()
                 );
-                AccountAchievementFile::default()
+                (AccountAchievementFile::default(), false)
             }
         };
         let achievements = file
@@ -94,6 +95,7 @@ impl AccountAchievements {
                 achievements,
                 ..file
             },
+            writes_enabled,
         }
     }
 
@@ -102,6 +104,7 @@ impl AccountAchievements {
         Self {
             path: data_dir.join(FILE_NAME),
             file: AccountAchievementFile::default(),
+            writes_enabled: true,
         }
     }
 
@@ -129,8 +132,9 @@ impl AccountAchievements {
         }
 
         let earned_at_ms = trustworthy_time(earned_at_ms);
-        let is_new = !self.file.achievements.contains_key(achievement_id);
-        let changed = match self.file.achievements.get_mut(achievement_id) {
+        let mut candidate = self.file.clone();
+        let is_new = !candidate.achievements.contains_key(achievement_id);
+        let changed = match candidate.achievements.get_mut(achievement_id) {
             Some(existing) => {
                 let earliest = earliest_time(*existing, earned_at_ms);
                 if *existing == earliest {
@@ -141,71 +145,89 @@ impl AccountAchievements {
                 }
             }
             None => {
-                self.file
+                candidate
                     .achievements
                     .insert(achievement_id.to_string(), earned_at_ms);
                 true
             }
         };
         if changed {
-            self.save_atomic()?;
+            self.save_atomic(&candidate)?;
+            self.file = candidate;
         }
         Ok(is_new)
     }
 
     /// Merge one career's catalog achievements without changing that career.
     pub fn merge_profile(&mut self, profile: &Profile) -> io::Result<usize> {
-        let mut inserted = 0;
-        for achievement_id in &profile.achievements {
-            if achievement_by_id(achievement_id).is_none() {
-                log::warn!(
-                    "Ignoring unknown achievement id {achievement_id:?} in career {:?}",
-                    profile.name
-                );
-                continue;
-            }
-            if !self.file.achievements.contains_key(achievement_id) {
-                self.file.achievements.insert(achievement_id.clone(), None);
-                inserted += 1;
-            }
-        }
+        let mut candidate = self.file.clone();
+        let inserted = merge_profile_into(&mut candidate, profile);
         if inserted > 0 {
-            self.save_atomic()?;
+            self.save_atomic(&candidate)?;
+            self.file = candidate;
         }
         Ok(inserted)
     }
 
     /// Import the careers in the existing save directory once, quietly.
     pub fn migrate_local_profiles(&mut self) -> io::Result<usize> {
-        if self.file.local_profile_migration_version >= LOCAL_PROFILE_MIGRATION_VERSION {
+        if !self.writes_enabled
+            || self.file.local_profile_migration_version >= LOCAL_PROFILE_MIGRATION_VERSION
+        {
             return Ok(0);
         }
 
+        let mut candidate = self.file.clone();
         let mut inserted = 0;
         for path in Profile::list_saves() {
             match Profile::load(&path) {
-                Ok(profile) => inserted += self.merge_profile(&profile)?,
+                Ok(profile) => inserted += merge_profile_into(&mut candidate, &profile),
                 Err(error) => log::warn!(
                     "Skipping unreadable career {} while importing account achievements: {error}",
                     path.display()
                 ),
             }
         }
-        self.file.local_profile_migration_version = LOCAL_PROFILE_MIGRATION_VERSION;
-        self.save_atomic()?;
+        candidate.local_profile_migration_version = LOCAL_PROFILE_MIGRATION_VERSION;
+        self.save_atomic(&candidate)?;
+        self.file = candidate;
         Ok(inserted)
     }
 
-    fn save_atomic(&self) -> io::Result<()> {
+    fn save_atomic(&self, candidate: &AccountAchievementFile) -> io::Result<()> {
+        if !self.writes_enabled {
+            return Err(io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "account achievement ledger is preserved read-only for this run",
+            ));
+        }
         if let Some(parent) = self.path.parent() {
             fs::create_dir_all(parent)?;
         }
         let temp = self.path.with_extension("json.tmp");
-        let text = serde_json::to_string_pretty(&self.file)
+        let text = serde_json::to_string_pretty(candidate)
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
         fs::write(&temp, text)?;
         fs::rename(temp, &self.path)
     }
+}
+
+fn merge_profile_into(file: &mut AccountAchievementFile, profile: &Profile) -> usize {
+    let mut inserted = 0;
+    for achievement_id in &profile.achievements {
+        if achievement_by_id(achievement_id).is_none() {
+            log::warn!(
+                "Ignoring unknown achievement id {achievement_id:?} in career {:?}",
+                profile.name
+            );
+            continue;
+        }
+        if !file.achievements.contains_key(achievement_id) {
+            file.achievements.insert(achievement_id.clone(), None);
+            inserted += 1;
+        }
+    }
+    inserted
 }
 
 fn trustworthy_time(earned_at_ms: Option<i64>) -> Option<i64> {

@@ -60,7 +60,8 @@ fn duplicate_recording_keeps_the_earliest_known_time() {
 
     assert!(ledger.record("midnight_delivery", Some(200)).unwrap());
     assert!(!ledger.record("midnight_delivery", Some(100)).unwrap());
-    assert_eq!(ledger.earned_at("midnight_delivery"), Some(100));
+    let restored = AccountAchievements::load(temp.path());
+    assert_eq!(restored.earned_at("midnight_delivery"), Some(100));
 }
 
 #[test]
@@ -75,6 +76,80 @@ fn invalid_achievement_ids_are_rejected_without_being_retained() {
     assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
     assert!(ledger.ids().is_empty());
     assert!(!temp.path().join("account-achievements.json").exists());
+}
+
+#[test]
+fn loaded_ledger_discards_invented_achievement_ids() {
+    let temp = tempfile::tempdir().unwrap();
+    std::fs::write(
+        temp.path().join("account-achievements.json"),
+        r#"{"version":1,"achievements":{"first_delivery":100,"invented_achievement":200}}"#,
+    )
+    .unwrap();
+
+    let ledger = AccountAchievements::load(temp.path());
+
+    assert_eq!(ledger.ids(), vec!["first_delivery"]);
+}
+
+#[test]
+fn imported_career_discards_invented_achievement_ids() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut ledger = AccountAchievements::empty(temp.path());
+    let profile = profile_with_achievements(
+        "Invented Badge",
+        &["first_delivery", "invented_achievement"],
+    );
+
+    assert_eq!(ledger.merge_profile(&profile).unwrap(), 1);
+    assert_eq!(ledger.ids(), vec!["first_delivery"]);
+}
+
+#[test]
+fn failed_write_leaves_the_ledger_ready_for_a_successful_retry() {
+    let temp = tempfile::tempdir().unwrap();
+    let blocked_data_dir = temp.path().join("blocked-data-dir");
+    std::fs::write(&blocked_data_dir, b"this is a file, not a directory").unwrap();
+    let mut ledger = AccountAchievements::empty(&blocked_data_dir);
+
+    assert!(ledger.record("first_delivery", Some(100)).is_err());
+    assert!(ledger.ids().is_empty());
+
+    std::fs::remove_file(&blocked_data_dir).unwrap();
+    std::fs::create_dir(&blocked_data_dir).unwrap();
+    assert!(ledger.record("first_delivery", Some(100)).unwrap());
+    assert_eq!(
+        AccountAchievements::load(&blocked_data_dir).ids(),
+        vec!["first_delivery"]
+    );
+}
+
+#[test]
+fn startup_preserves_malformed_and_newer_ledger_files() {
+    for (name, bytes) in [
+        ("malformed", b"not JSON at all".as_slice()),
+        (
+            "newer",
+            br#"{"version":2,"local_profile_migration_version":0,"achievements":{"first_delivery":100}}"#
+                .as_slice(),
+        ),
+    ] {
+        let temp = TempDir::new(&format!("account-achievements-{name}"));
+        let data_dir = temp.path().join("data");
+        std::fs::create_dir_all(&data_dir).unwrap();
+        let ledger_path = data_dir.join("account-achievements.json");
+        std::fs::write(&ledger_path, bytes).unwrap();
+        let _data_dir = DataDirGuard::pin(data_dir);
+        let capture = Rc::new(RefCell::new(CaptureSpeech::new()));
+        let app = App::new_headless(Box::new(freight_fate::app::testing::SharedCapture(
+            Rc::clone(&capture),
+        )));
+
+        assert_eq!(std::fs::read(&ledger_path).unwrap(), bytes, "{name}");
+        assert!(app.ctx.account_achievements.ids().is_empty(), "{name}");
+        assert!(capture.borrow().main_lines().is_empty(), "{name}");
+        assert!(capture.borrow().event_lines().is_empty(), "{name}");
+    }
 }
 
 #[test]
