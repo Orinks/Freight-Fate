@@ -1628,6 +1628,34 @@ fn test_route_key_answers_with_the_gate_on_the_facility_approach() {
 }
 
 #[test]
+fn test_route_key_counts_the_ramp_down_after_the_destination_exit() {
+    // The mainline odometer freezes once the exit is taken (the ramp
+    // consumes the movement), and R used to keep speaking that frozen
+    // remainder: Tim heard "4 miles to go" four identical times over a
+    // minute, the last one three seconds after he was already at the gate,
+    // and braked hard for it (tester report, 2026-08-30). R must speak the
+    // ramp's own countdown, and the countdown must move.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.destination_exit_taken = true;
+    // The frozen mainline remainder Tim kept hearing.
+    d.trip.position_mi = d.trip.total_miles() - 4.0;
+    d.ramp_mi = Some(0.5);
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::R));
+    let far = last(&app);
+    assert!(far.to_lowercase().contains("half a mile to"), "{far}");
+    assert!(!far.contains("4 miles"), "{far}");
+
+    d.ramp_mi = Some(0.1);
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::R));
+    let near = last(&app);
+    assert!(near.contains("feet to"), "{near}");
+    assert_ne!(far, near, "the countdown must move as the truck does");
+}
+
+#[test]
 fn test_route_key_answers_with_the_gate_when_the_route_has_ended() {
     // Rolled past the gate: R agrees with the S key's gate override.
     let mut app = TestApp::new();

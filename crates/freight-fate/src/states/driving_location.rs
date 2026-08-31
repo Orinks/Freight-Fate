@@ -85,15 +85,18 @@ impl DrivingState {
         // Both approach shapes answer with the gate distance instead.
         if self.surface_chain {
             let target = format!("the gate at {}", self.approach_facility_text(ctx));
-            self.say_local_status(ctx, &target, None);
+            self.say_local_status(ctx, &target, None, None);
             return;
         }
         if self.destination_exit_taken {
             let target = self.approach_facility_text(ctx);
+            // The ramp's own countdown, never the frozen mainline remainder.
+            let ramp_left = self.ramp_mi;
             self.say_local_status(
                 ctx,
                 &target,
                 Some("off the highway, on the facility approach"),
+                ramp_left,
             );
             return;
         }
@@ -104,7 +107,7 @@ impl DrivingState {
         // What is actually ahead on that chain is the on-ramp.
         if self.departure_chain {
             let target = self.departure_ramp_text();
-            self.say_local_status(ctx, &target, None);
+            self.say_local_status(ctx, &target, None, None);
             return;
         }
         // The pickup drive is a local approach from end to end -- there is no
@@ -112,7 +115,7 @@ impl DrivingState {
         // one city, so "toward" it says nothing.
         if self.trip.is_facility_approach_route() {
             let target = format!("the gate at {}", self.approach_facility_text(ctx));
-            self.say_local_status(ctx, &target, None);
+            self.say_local_status(ctx, &target, None, None);
             return;
         }
         let (leg_index, leg_start) = self.trip.leg_at_mile(self.trip.position_mi);
@@ -386,7 +389,21 @@ impl DrivingState {
     /// street route -- where the truck is, what it is actually driving at, and
     /// the next maneuver if one is left. Sentences that come up empty are
     /// dropped rather than spoken as a gap.
-    pub fn say_local_status(&mut self, ctx: &mut GameContext, target: &str, where_: Option<&str>) {
+    ///
+    /// `distance_mi` overrides the spoken closing distance; `None` reads the
+    /// trip's remaining miles. The override exists because the mainline
+    /// odometer FREEZES once the destination exit is taken (the ramp
+    /// consumes the movement instead), so that branch must speak the ramp's
+    /// own countdown -- Tim heard "4 miles to go" four times over a minute,
+    /// the last one three seconds after he was already at the gate, and
+    /// braked hard for it (tester report, 2026-08-30).
+    pub fn say_local_status(
+        &mut self,
+        ctx: &mut GameContext,
+        target: &str,
+        where_: Option<&str>,
+        distance_mi: Option<f64>,
+    ) {
         // No next-maneuver clause. On streets the event voice announces every
         // turn as it arrives, so including it here meant R re-read, on the
         // screen reader, the line the event voice had just delivered (owner,
@@ -397,12 +414,10 @@ impl DrivingState {
             Some(where_) => where_.to_string(),
             None => self.local_where_text(ctx),
         };
+        let distance = distance_mi.unwrap_or_else(|| self.trip.remaining_miles());
         let parts = [
             format!("Route status: {where_text}."),
-            format!(
-                "{} to {target}.",
-                self.closing_text(self.trip.remaining_miles())
-            ),
+            format!("{} to {target}.", self.closing_text(distance.max(0.0))),
         ];
         let line = parts
             .iter()

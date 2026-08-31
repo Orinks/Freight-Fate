@@ -1113,6 +1113,22 @@
 
 ### Fixed
 
+- **Heavy-traffic jams now clear when the slow zone does.** The slow
+  vehicles that fill a heavy-traffic stretch used to keep their jam pace
+  forever: one tester's cruise sat locked behind a truck doing 44 on an
+  open 70-mile-per-hour interstate for over a hundred miles, because the
+  jam vehicle ahead never sped up and never left. Jam traffic now
+  disperses within a mile or two past the end of the zone that caused
+  it, and the road opens back up the way a real backup does.
+
+- **The approach countdown counts down again after you take your exit.**
+  Once you took the destination exit, pressing R kept repeating the
+  highway's leftover distance -- one tester heard "4 miles to go" four
+  times over a minute, the last one three seconds after he was already
+  at the gate, and had to brake hard. Off the highway, R now counts the
+  approach itself down -- half a mile, a quarter mile, then feet -- and
+  it moves as you do.
+
 - **A stuck screen reader can no longer freeze the whole game.** One
   tester's run ended with the game locked solid at a highway on-ramp,
   with nothing to do but close it. The cause: every spoken line made the
