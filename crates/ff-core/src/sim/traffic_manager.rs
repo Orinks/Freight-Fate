@@ -594,7 +594,13 @@ impl TrafficManager {
 
     /// Fill an activating congestion zone with slow vehicles ahead, in both
     /// lanes, so the jam is heard and felt through the lead-vehicle machinery.
-    pub fn inject_congestion(&mut self, zone_start_mi: f64, zone_limit_mph: f64, position_mi: f64) {
+    pub fn inject_congestion(
+        &mut self,
+        zone_start_mi: f64,
+        zone_end_mi: f64,
+        zone_limit_mph: f64,
+        position_mi: f64,
+    ) {
         let key_base = format!("congestion:{}", fmt_f(zone_start_mi, 1));
         if self.vehicles.iter().any(|v| v.key.starts_with(&key_base)) {
             return;
@@ -617,6 +623,14 @@ impl TrafficManager {
                 *rng.choice(&["following", "cruising"])
             };
             let vehicle_class = *rng.choice(&["car", "car", "semi", "box truck"]);
+            // A jam vehicle belongs to its jam: it keeps the injected crawl
+            // (no road-speed draw -- the posted limit under it is the OPEN
+            // road's, and a draw would dissolve the jam on the spot), and it
+            // disperses shortly past the zone's end. Without the exit these
+            // vehicles lived forever at jam pace, and adaptive cruise sat
+            // behind one at 44 on an open 70 interstate for a hundred game
+            // miles until a hazard broke the lock (Shane, 2026-08-30).
+            let exit_at = zone_end_mi.max(position) + rng.uniform(0.4, 1.5);
             added.push(
                 TrafficVehicle::new(
                     &format!("{key_base}:{i}"),
@@ -627,7 +641,8 @@ impl TrafficManager {
                     intent,
                     vehicle_class,
                 )
-                .with_lane(lane),
+                .with_lane(lane)
+                .with_exit_at(Some(exit_at)),
             );
         }
         self.vehicles.extend(added);
@@ -1342,6 +1357,66 @@ mod tests {
             vec!["A".to_string(), "B".to_string()],
             vec![Leg::new("A", "B", 100.0, "I-1", "flat", Vec::new())],
         )
+    }
+
+    #[test]
+    fn congestion_disperses_past_the_zone_instead_of_living_forever() {
+        // A heavy-traffic zone's jam vehicles used to be built with no exit:
+        // they kept jam pace for the rest of the run, and adaptive cruise
+        // sat behind one at 44 on an open 70-mph interstate for a hundred
+        // game miles until a hazard broke the lock (Shane, 2026-08-30).
+        // The jam must be real inside the zone and GONE shortly past it.
+        let route = long_test_route();
+        let mut manager = TrafficManager::new(
+            &route,
+            &[0.0],
+            Some(7),
+            12.0,
+            1.0,
+            true,
+            65.0,
+            effects(WeatherKind::Clear),
+        );
+        let (zone_start, zone_end) = (20.0, 24.0);
+        manager.inject_congestion(zone_start, zone_end, 45.0, 19.5);
+        let jam = |manager: &TrafficManager| {
+            manager
+                .vehicles
+                .iter()
+                .filter(|v| v.key.starts_with("congestion:"))
+                .count()
+        };
+        assert!(jam(&manager) >= 3, "the zone starts with a real jam");
+        // Every jam vehicle carries an exit at most a couple of miles past
+        // the zone's end -- the property whose absence pinned Shane.
+        for vehicle in manager
+            .vehicles
+            .iter()
+            .filter(|v| v.key.starts_with("congestion:"))
+        {
+            let exit = vehicle
+                .exit_at_mi
+                .expect("a jam vehicle without an exit lives forever");
+            assert!(
+                exit > zone_end && exit < zone_end + 3.0,
+                "exit {exit} should sit just past the zone end {zone_end}"
+            );
+        }
+        // Drive the sim with the player trailing the jam: within a few miles
+        // past the zone every jam vehicle has dispersed.
+        let mut position = 19.5;
+        for _ in 0..600 {
+            position += 0.05;
+            manager.update(1.0, position, 1.0, Some(12.0), Some(false));
+            if jam(&manager) == 0 {
+                break;
+            }
+        }
+        assert_eq!(
+            jam(&manager),
+            0,
+            "the jam must be gone once the road that caused it is"
+        );
     }
 
     #[test]

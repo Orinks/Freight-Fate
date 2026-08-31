@@ -226,9 +226,14 @@ impl Trip {
                     self.zone_entry_spoken = false;
                 }
                 if zone.reason == "heavy traffic" && zone.aadt.is_some() {
-                    // Fill the jam with slow metal.
-                    self.traffic_manager
-                        .inject_congestion(zone.start_mi, zone.limit_mph, pos);
+                    // Fill the jam with slow metal -- which disperses past
+                    // the zone's end rather than living at jam pace forever.
+                    self.traffic_manager.inject_congestion(
+                        zone.start_mi,
+                        zone.end_mi,
+                        zone.limit_mph,
+                        pos,
+                    );
                 }
             } else if let Some(previous) = self.entered_zone.clone() {
                 self.construction_zone_grace_start
