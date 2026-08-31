@@ -20,8 +20,19 @@ use ff_core::pyfmt::{fmt_f, fmt_grouped};
 
 use crate::app::GameContext;
 use crate::impl_state_for_menu;
+use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{Label, Menu, MenuCore, MenuItem};
 use crate::states::city::{profile, profile_mut, py_capitalize};
+
+fn save_business_change(ctx: &mut GameContext) {
+    ctx.mark_meaningful_play(MeaningfulPlayReason::BusinessChanged);
+    ctx.save_profile();
+}
+
+fn save_equipment_change(ctx: &mut GameContext) {
+    ctx.mark_meaningful_play(MeaningfulPlayReason::EquipmentChanged);
+    ctx.save_profile();
+}
 
 // -- Business status -----------------------------------------------------------------------
 
@@ -113,7 +124,7 @@ impl BusinessStatusState {
             p.dispatch_board_cache = None;
             p.money
         };
-        ctx.save_profile();
+        save_business_change(ctx);
         ctx.audio.play("ui/cash");
         ctx.say(&format!(
             "Leased-on owner-operator status unlocked. You paid \
@@ -144,7 +155,7 @@ impl BusinessStatusState {
             p.dispatch_board_cache = None;
             p.money
         };
-        ctx.save_profile();
+        save_business_change(ctx);
         ctx.audio.play("ui/cash");
         ctx.say(&format!(
             "Authority prep reserve set aside: \
@@ -175,7 +186,7 @@ impl BusinessStatusState {
             p.weigh_station_transponder = true;
             p.money
         };
-        ctx.save_profile();
+        save_business_change(ctx);
         ctx.audio.play("ui/cash");
         ctx.say(&format!(
             "Weigh station transponder subscription active. You paid \
@@ -204,7 +215,7 @@ impl BusinessStatusState {
             p.dispatch_board_cache = None;
             p.money
         };
-        ctx.save_profile();
+        save_business_change(ctx);
         ctx.audio.play("ui/cash");
         ctx.say(&format!(
             "Own authority active. Startup cost \
@@ -492,7 +503,7 @@ impl UpgradeShopState {
                 .all(|item| p.upgrades.get(item.key).copied().unwrap_or(0) >= item.max_tier());
             (p.money, all_owned)
         };
-        ctx.save_profile();
+        save_equipment_change(ctx);
         ctx.audio.play("ui/cash");
         let tier_part = if upgrade.max_tier() > 1 {
             format!(" tier {}", owned + 1)
@@ -695,7 +706,7 @@ impl TruckShopState {
             let fuel = p.truck_fuel_gal().min(p.truck_specs().fuel_tank_gal);
             p.set_truck_fuel_gal(fuel);
         }
-        ctx.save_profile();
+        save_equipment_change(ctx);
         self.refresh(ctx, true);
     }
 }
@@ -869,7 +880,7 @@ impl TrailerProgramState {
             p.dispatch_board_cache = None;
             p.money
         };
-        ctx.save_profile();
+        save_equipment_change(ctx);
         ctx.audio.play("ui/cash");
         ctx.say(&format!(
             "{} trailer program active for \
@@ -921,7 +932,7 @@ impl TrailerProgramState {
             p.dispatch_board_cache = None;
             p.money
         };
-        ctx.save_profile();
+        save_equipment_change(ctx);
         ctx.audio.play("ui/cash");
         ctx.say(&format!(
             "{} trailer purchased for \

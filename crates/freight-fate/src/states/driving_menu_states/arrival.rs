@@ -27,6 +27,7 @@ use serde_json::{json, Value};
 
 use crate::app::{GameContext, Say};
 use crate::impl_state_for_menu;
+use crate::meaningful_play::MeaningfulPlayReason;
 use crate::online_journal::{
     queue_career_milestones, queue_delivery, queue_mastodon_share, CareerFacts, DeliveryFacts,
 };
@@ -189,6 +190,7 @@ impl ArrivalState {
             };
             announcements.extend(cleared);
         }
+        ctx.mark_meaningful_play(MeaningfulPlayReason::DeliveryCompleted);
         ctx.save_profile();
         self.summary_parts.insert(
             0,
@@ -625,6 +627,7 @@ impl ArrivalState {
             };
             announcements.extend(cleared);
         }
+        ctx.mark_meaningful_play(MeaningfulPlayReason::DeliveryCompleted);
         ctx.save_profile();
         let occurred_at_ms = SystemTime::now()
             .duration_since(UNIX_EPOCH)

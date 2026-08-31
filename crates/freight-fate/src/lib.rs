@@ -9,6 +9,7 @@ pub mod browser;
 pub mod cloud_saves;
 pub mod controller;
 pub mod discord_presence;
+pub mod meaningful_play;
 pub mod net;
 pub mod online_activation;
 pub mod online_journal;

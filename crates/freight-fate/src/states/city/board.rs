@@ -34,6 +34,7 @@ use ff_core::sim::timezones::{appointment_text, city_zone};
 
 use crate::app::{GameContext, Say, SharedState};
 use crate::impl_state_for_menu;
+use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{InputEvent, Key, Menu, MenuCore, MenuItem};
 use crate::states::city::{
     base_menu_current_help, base_menu_handle_event, first_day_guidance_active, first_dispatch_done,
@@ -769,6 +770,7 @@ impl JobBoardState {
             route.highways().first().cloned().unwrap_or_default(),
             job.origin_facility_text()
         );
+        ctx.mark_meaningful_play(MeaningfulPlayReason::JobAccepted);
         launch_driving(
             ctx,
             DrivingLaunch::new(
@@ -819,6 +821,7 @@ impl JobBoardState {
             fmt_grouped(job.pay, 0),
             job.spoken_destination()
         );
+        ctx.mark_meaningful_play(MeaningfulPlayReason::JobAccepted);
         launch_driving(
             ctx,
             DrivingLaunch::new(

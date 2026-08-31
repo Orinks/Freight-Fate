@@ -19,6 +19,7 @@ use crate::app::{GameContext, Say};
 use crate::cloud_saves::{conflict_status, rejection_status, save_slot_name, AUTH_PAUSED_STATUS};
 use crate::discord_presence::PresenceState;
 use crate::impl_state_for_menu;
+use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{Label, Menu, MenuCore, MenuItem};
 use crate::states::career_setback::CareerSetbackNoticeState;
 use crate::states::career_stats::{fully_rested, CareerStatsState};
@@ -418,6 +419,7 @@ impl CityMenuState {
             }
         };
         if applied {
+            ctx.mark_meaningful_play(MeaningfulPlayReason::BusinessChanged);
             ctx.save_profile();
         }
         let notice = CareerSetbackNoticeState::new(ctx);
@@ -439,6 +441,7 @@ impl CityMenuState {
             p.dispatch_board_cache = None;
             former
         };
+        ctx.mark_meaningful_play(MeaningfulPlayReason::BusinessChanged);
         ctx.save_profile();
         ctx.audio.play("ui/error");
         ctx.say(&format!(

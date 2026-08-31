@@ -46,6 +46,7 @@ use std::time::Duration;
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
+use crate::meaningful_play::{MeaningfulPlayReason, MeaningfulPlayStamp, MeaningfulPlayTracker};
 use crate::net::{wait_seconds, Event, SharedTransport};
 use crate::online_journal::py_json_dumps;
 use crate::online_presence::{
@@ -216,6 +217,7 @@ impl Default for CloudSavesOptions {
 #[derive(Clone)]
 struct Pending {
     snapshot: Arc<Value>,
+    meaningful_play: Option<MeaningfulPlayStamp>,
     queued_at: f64,
     token: i64,
 }
@@ -253,6 +255,7 @@ struct Inner {
     transport: SharedTransport,
     threaded: bool,
     sync_state: Arc<SyncState>,
+    meaningful_play: MeaningfulPlayTracker,
     state: Mutex<State>,
     wake: Event,
     stop: Event,
@@ -281,6 +284,7 @@ pub struct CloudSaves {
 impl CloudSaves {
     pub fn new(options: CloudSavesOptions) -> Self {
         let enabled = options.enabled && options.identity.is_some();
+        let meaningful_play = MeaningfulPlayTracker::new(&options.data_dir);
         let sync_state = options
             .sync_state
             .unwrap_or_else(|| Arc::new(SyncState::new(&options.data_dir)));
@@ -294,6 +298,7 @@ impl CloudSaves {
                 transport: options.transport,
                 threaded: options.threaded,
                 sync_state,
+                meaningful_play,
                 state: Mutex::new(State {
                     status: "Cloud backup is ready.".to_string(),
                     ..State::default()
@@ -319,6 +324,18 @@ impl CloudSaves {
     /// The sync state this service reads and records.
     pub fn sync_state(&self) -> &Arc<SyncState> {
         &self.inner.sync_state
+    }
+
+    /// The pending meaningful-play intents shared with gameplay hooks.
+    pub fn meaningful_play_tracker(&self) -> &MeaningfulPlayTracker {
+        &self.inner.meaningful_play
+    }
+
+    /// Mark a profile-name event against the sanitized cloud slot.
+    pub fn mark_meaningful_play(&self, profile_name: &str, reason: MeaningfulPlayReason) {
+        self.inner
+            .meaningful_play
+            .mark(&save_slot_name(profile_name), reason);
     }
 
     /// The transport this service uploads through (the menus' worker threads
@@ -377,6 +394,7 @@ impl CloudSaves {
             return;
         }
         let name = save_slot_name(profile_name);
+        let meaningful_play = self.inner.meaningful_play.for_upload(&name);
         {
             let mut st = self.inner.state.lock().unwrap();
             // Token 0: a background save, which no manual watch ever matches.
@@ -384,6 +402,7 @@ impl CloudSaves {
                 name,
                 Pending {
                     snapshot: Arc::new(snapshot),
+                    meaningful_play,
                     queued_at: (self.inner.clock)(),
                     token: 0,
                 },
@@ -414,6 +433,7 @@ impl CloudSaves {
             return None;
         }
         let name = save_slot_name(profile_name);
+        let meaningful_play = self.inner.meaningful_play.for_upload(&name);
         let token = {
             let mut st = self.inner.state.lock().unwrap();
             let token = st.attempts.get(&name).copied().unwrap_or(0) + 1;
@@ -424,6 +444,7 @@ impl CloudSaves {
                 name,
                 Pending {
                     snapshot: Arc::new(snapshot),
+                    meaningful_play,
                     queued_at: (self.inner.clock)() - self.inner.debounce,
                     token,
                 },
@@ -547,12 +568,14 @@ impl CloudSaves {
         };
         let slot = self.inner.sync_state.slot(name);
         let parent = slot_conflict(&slot).and_then(|c| json_int(c.get("latestRevision")));
+        let meaningful_play = self.inner.meaningful_play.for_upload(name);
         let result = upload_save(
             &identity,
             name,
             profile_dict,
             parent,
             &backup_summary(profile_dict),
+            meaningful_play.as_ref(),
             self.inner.transport.as_ref(),
         );
         if truthy(result.get("ok")) {
@@ -565,6 +588,11 @@ impl CloudSaves {
                     .unwrap_or(""),
             );
             self.inner.sync_state.clear_conflict(name);
+            if let Some(stamp) = &meaningful_play {
+                self.inner
+                    .meaningful_play
+                    .clear_if_accepted(name, &stamp.operation_id);
+            }
             return "ok".to_string();
         }
         if reason_of(&result) == Some("conflict") {
@@ -790,7 +818,10 @@ revision {} is waiting in the Cloud backup menu",
 
     fn upload_slot(&self, name: &str, pending: Pending) {
         let Pending {
-            snapshot, token, ..
+            snapshot,
+            meaningful_play,
+            token,
+            ..
         } = pending;
         let mut slot = self.sync_state.slot(name);
         match slot_conflict(&slot) {
@@ -845,6 +876,7 @@ copy no longer exists; restarting the slot fresh"
             &snapshot,
             json_int(slot.get("revision")),
             &backup_summary(&snapshot),
+            meaningful_play.as_ref(),
             self.transport.as_ref(),
         );
         if truthy(result.get("ok")) {
@@ -858,6 +890,10 @@ copy no longer exists; restarting the slot fresh"
                     .unwrap_or(""),
             );
             self.done_with(name, &snapshot);
+            if let Some(stamp) = &meaningful_play {
+                self.meaningful_play
+                    .clear_if_accepted(name, &stamp.operation_id);
+            }
             self.state.lock().unwrap().retry_at = None;
             self.set_status("Latest backup accepted and server-verified.");
             self.note_outcome(name, token, "accepted");

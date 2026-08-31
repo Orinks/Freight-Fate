@@ -49,10 +49,11 @@ pub fn session_file() -> PathBuf {
 /// hangs off it. Copying one of these into a sandbox is exactly how a
 /// throwaway career would reach the real account, so the seeding step names
 /// them rather than hoping a glob never matches.
-pub const IDENTITY_NAMES: [&str; 5] = [
+pub const IDENTITY_NAMES: [&str; 6] = [
     "online.json",
     "online.token",
     "cloud_saves.json",
+    "meaningful_play.json",
     "online-outbox.json",
     "online-mastodon-outbox.json",
 ];

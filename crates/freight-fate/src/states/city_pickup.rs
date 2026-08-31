@@ -23,6 +23,7 @@ use crate::app::GameContext;
 use crate::audio::facility_ambient_key;
 use crate::discord_presence::PresenceState;
 use crate::impl_state_for_menu;
+use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{InputEvent, Key, Menu, MenuCore, MenuItem, TimedMessageState};
 use crate::states::city::{
     base_menu_enter, base_menu_handle_event, launch_driving, profile, profile_mut, CityMenuState,
@@ -167,6 +168,7 @@ pub fn start_loaded_drive(ctx: &mut GameContext, job: Job, route: Route, opts: L
         speed_control_target_mph: opts.speed_control_target_mph,
         trailer_refused: opts.trailer_refused,
     });
+    ctx.mark_meaningful_play(MeaningfulPlayReason::DriveStarted);
     launch_driving(ctx, launch);
 }
 

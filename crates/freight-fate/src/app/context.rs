@@ -44,6 +44,7 @@ use crate::audio::{Audio, VolumeUpdate};
 use crate::cloud_saves::CloudSaves;
 use crate::controller::ControllerManager;
 use crate::discord_presence::DiscordPresence;
+use crate::meaningful_play::MeaningfulPlayReason;
 use crate::net::UreqTransport;
 use crate::online_journal::{queue_achievement, JournalOutbox};
 use crate::online_presence::{OnlineIdentity, OnlinePresence};
@@ -549,9 +550,47 @@ impl GameContext {
             return;
         }
         if let Some(profile) = &self.profile {
+            let save_name = profile.name.clone();
+            let slot_name = crate::cloud_saves::save_slot_name(&save_name);
+            let already_marked = self
+                .services
+                .cloud
+                .meaningful_play_tracker()
+                .for_upload(&slot_name)
+                .is_some();
+            let changed = if already_marked || !profile.path().exists() {
+                false
+            } else {
+                Profile::load(&profile.path())
+                    .ok()
+                    .map(|saved| {
+                        let saved = serde_json::Value::Object(saved.to_dict());
+                        let current = serde_json::Value::Object(profile.to_dict());
+                        crate::cloud_saves::cloud_content(&saved).1
+                            != crate::cloud_saves::cloud_content(&current).1
+                    })
+                    .unwrap_or(false)
+            };
+            if changed {
+                self.services
+                    .cloud
+                    .mark_meaningful_play(&save_name, MeaningfulPlayReason::ChangedSave);
+            }
             if let Err(e) = profile.save() {
                 log::error!("Could not save the profile: {e}");
             }
+        }
+    }
+
+    /// Record a durable gameplay event for this career's next accepted upload.
+    pub fn mark_meaningful_play(&self, reason: MeaningfulPlayReason) {
+        if self.school_sandbox || self.playtest_sandbox {
+            return;
+        }
+        if let Some(profile) = &self.profile {
+            self.services
+                .cloud
+                .mark_meaningful_play(&profile.name, reason);
         }
     }
 

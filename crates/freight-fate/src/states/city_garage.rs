@@ -8,6 +8,7 @@ use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_n};
 
 use crate::app::GameContext;
 use crate::impl_state_for_menu;
+use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{Label, Menu, MenuCore, MenuItem};
 use crate::states::city::{profile, profile_mut};
 use crate::states::city_business::{TrailerProgramState, TruckShopState, UpgradeShopState};
@@ -39,6 +40,11 @@ fn record_terminal_duty(ctx: &mut GameContext, start_hour: f64, end_hour: f64, n
         &terminal.name,
         note,
     );
+}
+
+fn save_equipment_change(ctx: &mut GameContext) {
+    ctx.mark_meaningful_play(MeaningfulPlayReason::EquipmentChanged);
+    ctx.save_profile();
 }
 
 /// The two wear meters that share one service flow (`_service_wear_meter`).
@@ -251,7 +257,7 @@ impl GarageState {
                 p.game_hours += TERMINAL_REPAIR_MIN / 60.0;
                 p.hos.on_duty(TERMINAL_REPAIR_MIN);
             }
-            ctx.save_profile();
+            save_equipment_change(ctx);
             ctx.audio.play("ui/notify");
             ctx.say(&format!(
                 "Carrier shop repaired {} percent damage on the assigned tractor. \
@@ -282,7 +288,7 @@ impl GarageState {
         };
         record_terminal_duty(ctx, start, end, "terminal repair");
         profile_mut(ctx).hos.on_duty(TERMINAL_REPAIR_MIN);
-        ctx.save_profile();
+        save_equipment_change(ctx);
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
             "Truck repaired. {} dollars. You have {} dollars left.",
@@ -326,7 +332,7 @@ impl GarageState {
         };
         record_terminal_duty(ctx, start, end, "terminal repair");
         profile_mut(ctx).hos.on_duty(TERMINAL_REPAIR_MIN);
-        ctx.save_profile();
+        save_equipment_change(ctx);
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
             "Partial repairs fixed {} percent damage \
@@ -454,7 +460,7 @@ impl GarageState {
             };
             record_terminal_duty(ctx, start, end, "tire service");
             profile_mut(ctx).hos.on_duty(TERMINAL_TIRE_MIN);
-            ctx.save_profile();
+            save_equipment_change(ctx);
             ctx.audio.play("ui/notify");
             ctx.say(&format!(
                 "Carrier shop replaced tires with {} percent wear on \
@@ -486,7 +492,7 @@ impl GarageState {
             };
             record_terminal_duty(ctx, start, end, "tire service");
             profile_mut(ctx).hos.on_duty(TERMINAL_TIRE_MIN);
-            ctx.save_profile();
+            save_equipment_change(ctx);
             ctx.audio.play("ui/notify");
             ctx.say(&format!(
                 "Partial tire service fixed {} percent wear \
@@ -508,7 +514,7 @@ impl GarageState {
         };
         record_terminal_duty(ctx, start, end, "tire service");
         profile_mut(ctx).hos.on_duty(TERMINAL_TIRE_MIN);
-        ctx.save_profile();
+        save_equipment_change(ctx);
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
             "Tires replaced. {} dollars. You have {} dollars left.",
@@ -569,7 +575,7 @@ impl GarageState {
         };
         record_terminal_duty(ctx, start, end, "tire swap");
         profile_mut(ctx).hos.on_duty(TERMINAL_TIRE_MIN);
-        ctx.save_profile();
+        save_equipment_change(ctx);
         ctx.audio.play("ui/notify");
         let trade = if to_winter {
             "Better bite on snow and ice; the soft compound wears faster and \
@@ -637,7 +643,7 @@ impl GarageState {
             };
             record_terminal_duty(ctx, start, end, "chain set");
             profile_mut(ctx).hos.on_duty(TERMINAL_CHAINS_MIN);
-            ctx.save_profile();
+            save_equipment_change(ctx);
             ctx.audio.play("ui/notify");
             ctx.say(
                 "A fresh chain set from the carrier shop is stowed in the \
@@ -664,7 +670,7 @@ impl GarageState {
         };
         record_terminal_duty(ctx, start, end, "chain set");
         profile_mut(ctx).hos.on_duty(TERMINAL_CHAINS_MIN);
-        ctx.save_profile();
+        save_equipment_change(ctx);
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
             "A fresh chain set is stowed in the side box for \
@@ -728,7 +734,7 @@ impl GarageState {
             };
             record_terminal_duty(ctx, start, end, service.duty_note);
             profile_mut(ctx).hos.on_duty(service.minutes);
-            ctx.save_profile();
+            save_equipment_change(ctx);
             ctx.audio.play("ui/notify");
             ctx.say(&format!(
                 "Carrier shop {} at {} percent wear on \
@@ -762,7 +768,7 @@ impl GarageState {
             };
             record_terminal_duty(ctx, start, end, service.duty_note);
             profile_mut(ctx).hos.on_duty(service.minutes);
-            ctx.save_profile();
+            save_equipment_change(ctx);
             ctx.audio.play("ui/notify");
             ctx.say(&format!(
                 "Partial {} fixed {} percent wear \
@@ -785,7 +791,7 @@ impl GarageState {
         };
         record_terminal_duty(ctx, start, end, service.duty_note);
         profile_mut(ctx).hos.on_duty(service.minutes);
-        ctx.save_profile();
+        save_equipment_change(ctx);
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
             "{} {} dollars. You have {} dollars left.",

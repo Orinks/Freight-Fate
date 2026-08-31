@@ -159,6 +159,25 @@ fn test_the_audit_names_an_identity_that_got_in_somehow() {
 }
 
 #[test]
+fn test_the_audit_names_pending_meaningful_play_intent() {
+    let _guard = sandbox_env();
+    let root = TempDir::new("ff-sandbox");
+    let source = fake_real_saves(root.path());
+    let sandbox = root.path().join("sandbox");
+    sandbox::prepare(&sandbox, false, true, &source).unwrap();
+
+    write(&sandbox.join("meaningful_play.json"), "{}");
+
+    let problems = sandbox::audit(&sandbox);
+    assert!(
+        problems
+            .iter()
+            .any(|problem| problem.contains("meaningful_play.json")),
+        "{problems:?}"
+    );
+}
+
+#[test]
 fn test_the_audit_names_a_publishing_switch_turned_back_on() {
     let _guard = sandbox_env();
     let root = TempDir::new("ff-sandbox");

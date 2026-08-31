@@ -13,6 +13,7 @@ use super::sync_state::{json_int, SyncState};
 use super::{
     cloud_content, profile_dict_from_content, CloudAuthError, PublicKeys, MAX_UPLOAD_BYTES,
 };
+use crate::meaningful_play::MeaningfulPlayStamp;
 use crate::net::{NetError, Transport};
 use crate::online_presence::{base_url, py_str, truthy, OnlineIdentity};
 use ff_core::cloud_save_integrity::{verify_cloud_revision_with, CloudSaveIntegrityError};
@@ -66,6 +67,7 @@ pub fn upload_save(
     profile_dict: &Value,
     parent_revision: Option<i64>,
     summary: &str,
+    meaningful_play: Option<&MeaningfulPlayStamp>,
     transport: &dyn Transport,
 ) -> Map<String, Value> {
     let (content, content_hash) = cloud_content(profile_dict);
@@ -85,6 +87,7 @@ pub fn upload_save(
         "contentHash": content_hash,
         "content": base64::engine::general_purpose::STANDARD.encode(&content),
         "summary": summary,
+        "meaningfulPlay": meaningful_play,
     });
     let reply = match transport.call(&saves_url(), Some(&payload), &identity.auth_headers(), None) {
         Ok(reply) => reply,

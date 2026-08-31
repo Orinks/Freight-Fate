@@ -31,6 +31,7 @@ use freight_fate::cloud_saves::{
     RestoreHooks, SavesList, SyncState, AUTH_HELP, AUTH_PAUSED_STATUS, DEBOUNCE_S,
     RETRY_INTERVAL_S,
 };
+use freight_fate::meaningful_play::MeaningfulPlayReason;
 use freight_fate::net::testing::{ClosureTransport, FakeTransport, ManualClock};
 use freight_fate::net::{NetError, SharedTransport, Transport};
 use freight_fate::online_presence::{base_url, IdentityStore, MemoryStore, OnlineIdentity};
@@ -333,6 +334,129 @@ fn test_transient_failure_retries_later() {
     service.pump(false);
     assert_eq!(transport.posts().len(), 2);
     assert_eq!(revision_of(&service, "Road Star"), Some(1));
+}
+
+#[test]
+fn test_meaningful_play_stamp_is_identical_across_network_retry_then_clears() {
+    let transport = FakeTransport::revisions();
+    transport.set_error(Some(NetError::other("OSError", "no network")));
+    let clock = ManualClock::new();
+    let service = make_service(&transport, &clock);
+    service
+        .meaningful_play_tracker()
+        .mark("Road Star", MeaningfulPlayReason::JobAccepted);
+
+    service.queue_backup("Road Star", profile("Road Star", 5000.0));
+    drain(&service, &clock);
+    let first = transport.posts()[0]["meaningfulPlay"].clone();
+    assert_eq!(first["reason"], "job_accepted");
+    assert!(first["operationId"]
+        .as_str()
+        .is_some_and(|id| !id.is_empty()));
+    assert!(first["occurredAt"].as_i64().is_some());
+    assert!(service
+        .meaningful_play_tracker()
+        .for_upload("Road Star")
+        .is_some());
+
+    transport.set_error(None);
+    clock.advance(RETRY_INTERVAL_S + 0.1);
+    service.pump(false);
+
+    assert_eq!(transport.posts()[1]["meaningfulPlay"], first);
+    assert!(service
+        .meaningful_play_tracker()
+        .for_upload("Road Star")
+        .is_none());
+}
+
+#[test]
+fn test_upload_without_meaningful_play_sends_null_metadata() {
+    let transport = FakeTransport::revisions();
+    let clock = ManualClock::new();
+    let service = make_service(&transport, &clock);
+
+    service.queue_backup("Road Star", profile("Road Star", 5000.0));
+    drain(&service, &clock);
+
+    assert_eq!(transport.posts()[0]["meaningfulPlay"], Value::Null);
+}
+
+#[test]
+fn test_accepted_older_upload_cannot_clear_newer_meaningful_save() {
+    let clock = ManualClock::new();
+    let service_slot: Arc<Mutex<Option<CloudSaves>>> = Arc::new(Mutex::new(None));
+    let request_count = Arc::new(Mutex::new(0usize));
+    let transport: SharedTransport = {
+        let service_slot = Arc::clone(&service_slot);
+        let request_count = Arc::clone(&request_count);
+        Arc::new(ClosureTransport(
+            move |_url: &str,
+                  _payload: Option<&Value>,
+                  _headers: &[(String, String)],
+                  _method: Option<&str>| {
+                let mut count = request_count.lock().unwrap();
+                *count += 1;
+                let revision = *count as i64;
+                if *count == 1 {
+                    let service = service_slot.lock().unwrap().clone().unwrap();
+                    drop(count);
+                    service
+                        .meaningful_play_tracker()
+                        .mark("Road Star", MeaningfulPlayReason::BusinessChanged);
+                    service.queue_backup("Road Star", profile("Road Star", 6000.0));
+                }
+                Ok(json!({"ok": true, "revision": revision}))
+            },
+        ))
+    };
+    let service = make_service_with(transport, &clock, true, Some(identity()));
+    *service_slot.lock().unwrap() = Some(service.service.clone());
+    service
+        .meaningful_play_tracker()
+        .mark("Road Star", MeaningfulPlayReason::JobAccepted);
+
+    service.queue_backup("Road Star", profile("Road Star", 5000.0));
+    drain(&service, &clock);
+
+    let newer = service
+        .meaningful_play_tracker()
+        .for_upload("Road Star")
+        .expect("the newer event must survive the older acceptance");
+    assert_eq!(newer.reason, MeaningfulPlayReason::BusinessChanged);
+
+    clock.advance(DEBOUNCE_S + 0.1);
+    service.pump(false);
+    assert!(service
+        .meaningful_play_tracker()
+        .for_upload("Road Star")
+        .is_none());
+}
+
+#[test]
+fn test_conflict_and_auth_refusal_keep_meaningful_intent() {
+    for error in [
+        conflict_error(Some(5)),
+        auth_error(401, Some("unauthorized")),
+    ] {
+        let transport = FakeTransport::failing(error);
+        let clock = ManualClock::new();
+        let service = make_service_with(transport, &clock, true, Some(identity()));
+        service
+            .meaningful_play_tracker()
+            .mark("Road Star", MeaningfulPlayReason::DeliveryCompleted);
+
+        service.queue_backup("Road Star", profile("Road Star", 5000.0));
+        drain(&service, &clock);
+
+        assert_eq!(
+            service
+                .meaningful_play_tracker()
+                .for_upload("Road Star")
+                .map(|stamp| stamp.reason),
+            Some(MeaningfulPlayReason::DeliveryCompleted)
+        );
+    }
 }
 
 // -- the conflict guard -----------------------------------------------------------
@@ -990,6 +1114,7 @@ fn test_upload_rejects_oversized_content() {
         &huge,
         None,
         "too big",
+        None,
         FakeTransport::revisions().as_ref(),
     );
     assert_eq!(result["ok"], false);

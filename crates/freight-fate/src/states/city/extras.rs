@@ -6,6 +6,7 @@ use ff_core::models::solvency;
 
 use crate::app::GameContext;
 use crate::impl_state_for_menu;
+use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{Menu, MenuCore, MenuItem};
 use crate::states::city::{
     launch_driving, profile, profile_mut, DrivingLaunch, LaunchAnnouncement, DRIVE_PHASE_DELIVERY,
@@ -57,6 +58,7 @@ impl BobtailDestState {
             ctx.settings.distance_text(route.miles(), false),
             route.highways().first().cloned().unwrap_or_default()
         );
+        ctx.mark_meaningful_play(MeaningfulPlayReason::DriveStarted);
         launch_driving(
             ctx,
             DrivingLaunch::new(
