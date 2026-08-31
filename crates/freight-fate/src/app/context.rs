@@ -566,8 +566,8 @@ impl GameContext {
                     .map(|saved| {
                         let saved = serde_json::Value::Object(saved.to_dict());
                         let current = serde_json::Value::Object(profile.to_dict());
-                        crate::cloud_saves::cloud_content(&saved).1
-                            != crate::cloud_saves::cloud_content(&current).1
+                        crate::meaningful_play::meaningful_profile_hash(&saved)
+                            != crate::meaningful_play::meaningful_profile_hash(&current)
                     })
                     .unwrap_or(false)
             };

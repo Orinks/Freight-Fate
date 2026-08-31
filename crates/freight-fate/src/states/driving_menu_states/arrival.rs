@@ -190,7 +190,6 @@ impl ArrivalState {
             };
             announcements.extend(cleared);
         }
-        ctx.mark_meaningful_play(MeaningfulPlayReason::DeliveryCompleted);
         ctx.save_profile();
         self.summary_parts.insert(
             0,

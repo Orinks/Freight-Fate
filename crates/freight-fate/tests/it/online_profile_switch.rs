@@ -3,12 +3,12 @@ use ff_core::models::business::{
     OWNER_OPERATOR_REPUTATION, OWNER_OPERATOR_WORKING_CAPITAL,
 };
 use ff_core::models::career::LEVEL_XP;
-use ff_core::models::jobs::{Job, JobBoard, OfferOptions};
+use ff_core::models::jobs::{make_reposition_job, Job, JobBoard, OfferOptions};
 use ff_core::models::profile::Profile;
 
 use freight_fate::app::testing::TestApp;
 use freight_fate::meaningful_play::{MeaningfulPlayReason, MeaningfulPlayTracker};
-use freight_fate::states::city::{BusinessStatusState, GarageState, JobBoardState};
+use freight_fate::states::city::{BusinessStatusState, CityMenuState, GarageState, JobBoardState};
 use freight_fate::states::city_pickup::{start_loaded_drive, LoadedDriveOptions};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY;
@@ -70,6 +70,28 @@ fn loading_browsing_and_unchanged_save_do_not_mark_a_public_switch() {
         .meaningful_play_tracker()
         .for_upload("Road Star")
         .is_none());
+}
+
+#[test]
+fn opening_a_fresh_dispatch_board_does_not_mark_a_public_switch() {
+    let mut app = TestApp::new();
+    let profile = Profile::named_in("Road Star", "Chicago");
+    profile.save().unwrap();
+    app.ctx.profile = Some(profile);
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
+
+    select::<CityMenuState>(&mut app, "Dispatch board");
+
+    assert!(is::<JobBoardState>(&app));
+    assert!(app
+        .ctx
+        .profile
+        .as_ref()
+        .unwrap()
+        .dispatch_board_cache
+        .is_some());
+    assert_eq!(pending_reason(&app), None);
 }
 
 #[test]
@@ -149,6 +171,67 @@ fn pending_stamp_survives_restart_until_exact_acceptance() {
 }
 
 #[test]
+fn interrupted_temp_write_does_not_replace_the_last_durable_stamp() {
+    let dir = tempfile::tempdir().unwrap();
+    let tracker = MeaningfulPlayTracker::new(dir.path());
+    tracker.mark("Road Star", MeaningfulPlayReason::JobAccepted);
+    let durable = tracker.for_upload("Road Star").unwrap();
+    drop(tracker);
+
+    std::fs::write(
+        dir.path().join(".meaningful_play.json.interrupted.tmp"),
+        br#"{"version":1,"pending":{"Road Star":"#,
+    )
+    .unwrap();
+
+    let reloaded = MeaningfulPlayTracker::new(dir.path());
+    assert_eq!(reloaded.for_upload("Road Star"), Some(durable));
+}
+
+#[test]
+fn corrupt_ledger_is_preserved_read_only_instead_of_being_overwritten() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("meaningful_play.json");
+    let corrupt = b"not valid meaningful-play json";
+    std::fs::write(&path, corrupt).unwrap();
+
+    let tracker = MeaningfulPlayTracker::new(dir.path());
+    tracker.mark("Road Star", MeaningfulPlayReason::JobAccepted);
+
+    assert_eq!(std::fs::read(&path).unwrap(), corrupt);
+    assert_eq!(tracker.for_upload("Road Star"), None);
+    drop(tracker);
+    assert_eq!(
+        MeaningfulPlayTracker::new(dir.path()).for_upload("Road Star"),
+        None
+    );
+}
+
+#[cfg(windows)]
+#[test]
+fn interrupted_atomic_replacement_keeps_the_previous_stamp_in_memory_and_on_restart() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("meaningful_play.json");
+    let tracker = MeaningfulPlayTracker::new(dir.path());
+    tracker.mark("Road Star", MeaningfulPlayReason::JobAccepted);
+    let durable = tracker.for_upload("Road Star").unwrap();
+
+    let original_permissions = std::fs::metadata(&path).unwrap().permissions();
+    let mut permissions = original_permissions.clone();
+    permissions.set_readonly(true);
+    std::fs::set_permissions(&path, permissions).unwrap();
+    tracker.mark("Road Star", MeaningfulPlayReason::BusinessChanged);
+
+    assert_eq!(tracker.for_upload("Road Star"), Some(durable.clone()));
+    std::fs::set_permissions(&path, original_permissions).unwrap();
+    drop(tracker);
+    assert_eq!(
+        MeaningfulPlayTracker::new(dir.path()).for_upload("Road Star"),
+        Some(durable)
+    );
+}
+
+#[test]
 fn accepting_a_job_marks_job_accepted() {
     let mut app = TestApp::new();
     app.ctx.profile = Some(Profile::named_in("Road Star", "Chicago"));
@@ -203,12 +286,45 @@ fn completing_a_delivery_marks_delivery_completed() {
         DRIVE_PHASE_DELIVERY,
         None,
     );
+    app.ctx
+        .mark_meaningful_play(MeaningfulPlayReason::DriveStarted);
 
     ArrivalState::new(&mut app.ctx, &mut driving);
 
     assert_eq!(
         pending_reason(&app),
         Some(MeaningfulPlayReason::DeliveryCompleted)
+    );
+}
+
+#[test]
+fn finishing_an_empty_reposition_keeps_drive_started() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named_in("Road Star", "Denver"));
+    let job = make_reposition_job(app.ctx.world, "Denver", "Cheyenne", false, None)
+        .expect("a supported empty reposition");
+    let route = app
+        .ctx
+        .world
+        .supported_route(&job.origin, &job.destination, None)
+        .unwrap()
+        .unwrap();
+    let mut driving = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        Some(4),
+        DRIVE_PHASE_DELIVERY,
+        None,
+    );
+    app.ctx
+        .mark_meaningful_play(MeaningfulPlayReason::DriveStarted);
+
+    ArrivalState::new(&mut app.ctx, &mut driving);
+
+    assert_eq!(
+        pending_reason(&app),
+        Some(MeaningfulPlayReason::DriveStarted)
     );
 }
 
