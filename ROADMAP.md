@@ -120,6 +120,82 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+### Release gate -- what stands between here and a public 1.9.0
+
+Compiled 2026-08-30 from a full sweep of every open bullet in this
+section (199 open at the time; 137 of them are post-release polish that
+gates nothing and stays where it is). Each line here summarizes a full
+bullet that lives further down -- search its key words for the detail.
+Items fixed since the sweep are struck through the normal way: checked
+off at their own bullet. The four tester bugs fixed the same day
+(speech-freeze, jam traffic, frozen approach countdown, briefing map
+key) arrived after the sweep and are already done.
+
+**The cutover checklist -- mechanical, unforgiving, one sitting.**
+Half of these hide inside already-checked bullets:
+
+- [ ] Revert-the-revert on dev for the driving-assists withdrawal
+      BEFORE the release merge (merging career-1.9 alone will NOT
+      restore the assists; the bullet in the Realism and polish pass
+      section spells out the exact commits). Public career selection
+      re-lands the same way.
+- [ ] The invariants-export regen against PRODUCTION, now including the
+      credential ladder's rows ("STILL OWED AT THE DEV CUTOVER").
+- [ ] The cutover replay: freshly played 1.9 careers (company new hire,
+      slip-seat 4+, post-buy-in owner-operator) against the prod
+      validator, not just stored blobs.
+- [ ] Flip `DEFAULT_BASE_URL` back to production and drop the
+      2026-08-staging key (PRE-RELEASE MUST-DO bullet).
+- [ ] Convex deploys before any build with the no-transfer marker
+      ships; the radio stream sweep (`--recheck-dead`) runs before the
+      release; the place-callouts ladder rides the release merge to dev.
+- [ ] The physical-Mac VoiceOver listening pass on the Mac release
+      staging, and the owner voice pass over seven achievement titles.
+
+**Bugs that cost a player something -- the real distance.** The dozen
+that bite first, of the sweep's 49 gating items:
+
+- [ ] Quitting at speed discards the leg (the owner lost 67 miles).
+- [ ] Rust startup probes hold the input loop: menu deaf ~16 seconds.
+- [ ] No on-demand career backup (Brandon lost the upload control).
+- [ ] Lane centering assist is a settings promise with no feature:
+      implement or retire before 1.9 ships (owner decision).
+- [ ] Signal running always clips cross traffic and never draws a
+      citation -- backwards both ways.
+- [ ] The 2026-08-13 Dropbox tester findings are still untriaged.
+- [ ] Cruise destination-lane selection still brakes for the lane the
+      truck is leaving on held-wheel drift.
+- [ ] Emergency braking's warning budget disagrees with the stop the
+      truck actually makes.
+- [ ] Adaptive cruise's limit lookahead ignores time compression.
+- [ ] Speed keeper announces a number it then fails to hold (live
+      tester thread; not reproduced -- ask for the log first).
+- [ ] Testers hear sounds quieter at the quiet speech rung; three
+      suspects eliminated, still unexplained.
+- [ ] Departing straight into a hazard at route mile zero.
+
+**World-data debts that read as bugs on the road:**
+
+- [ ] ~250 legs' curves/limits/ramps still describe pre-repair
+      geometry (re-bake over the 210 repaired legs; finish the 250).
+- [ ] 33 legs a truck router would refuse.
+- [ ] 776 facility approach pins land too far out (the 35-mile
+      deadhead); blanket 25-mph approach streets for miles.
+- [ ] The Duff-shared sound cues flagged unlicensed by the provenance
+      audit -- cannot ship in a public build (separate from the
+      resolved Splice matter; owner may already know better).
+- [ ] Colorado's live traffic and construction are dead (CARS GraphQL
+      retired).
+
+**Decisions only the owner can make:** engine off at trip start;
+the per-aid assistance-mode assessment; the two CONFIRMATION lines
+silenced at quiet (2026-08-22 build); the two parked branches
+(honest-brake-decel; the speech-ladder branch predates the Rust cutover
+and needs triage before revival); public career following the opened
+career (Shane's design ask).
+
+Everything not listed here ships fine after 1.9.0.
+
 - [x] **Career 1.9 prerelease builds are complete portable releases
       (2026-08-29).** Each Career 1.9 prerelease build publishes a Windows zip
       and an Apple Silicon Mac app with music and the required audio libraries.
