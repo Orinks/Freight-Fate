@@ -158,6 +158,10 @@ pub struct PlayerInputFrame<'a> {
     app: &'a mut App,
 }
 
+fn staged_road_handoff(description: &str, start_mi: f64) -> String {
+    format!("Staged: {description}. You take the wheel {start_mi:.1} miles up the road.")
+}
+
 impl PlayerInputFrame<'_> {
     pub fn driving_observation(&self) -> Option<DrivingObservation> {
         self.app.driving_observation()
@@ -200,10 +204,7 @@ impl PlayerInputFrame<'_> {
         let description = hit.describe();
         let (driving, start_mi) = road::build_driving(&mut self.app.ctx, hit, opts);
         self.app.push_state(driving);
-        Ok(format!(
-            "Staged: {description}. You take the wheel {start_mi:.1} miles up the road, \
-             engine off, parking brake set."
-        ))
+        Ok(staged_road_handoff(&description, start_mi))
     }
 
     /// Keep a policy-held key held, without re-dispatching a key event.
@@ -924,5 +925,20 @@ fn run_game(options: &CliOptions) -> i32 {
             log::error!("Fatal error");
             1
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::staged_road_handoff;
+
+    #[test]
+    fn staged_handoff_does_not_invent_truck_state() {
+        let text = staged_road_handoff("Seattle departure", 0.0);
+
+        assert_eq!(
+            text,
+            "Staged: Seattle departure. You take the wheel 0.0 miles up the road."
+        );
     }
 }

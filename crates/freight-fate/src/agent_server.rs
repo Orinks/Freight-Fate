@@ -178,6 +178,7 @@ impl SpeechSink for TeeSpeech {
 struct TeeAudio {
     inner: Box<dyn Audio>,
     ears: SharedEars,
+    weather_key: Option<String>,
 }
 
 impl TeeAudio {
@@ -314,10 +315,13 @@ impl Audio for TeeAudio {
         self.inner.set_road_noise(speed_mps);
     }
     fn set_weather_with(&mut self, key: Option<&str>, intensity: f64) {
-        if let Some(key) = key {
-            if intensity > 0.0 {
-                self.hear(format!("[weather] {key}"));
+        let audible_key = key.filter(|_| intensity > 0.0);
+        if audible_key != self.weather_key.as_deref() {
+            match audible_key {
+                Some(key) => self.hear(format!("[weather] {key}")),
+                None => self.hear("[weather] stopped".to_string()),
             }
+            self.weather_key = audible_key.map(str::to_string);
         }
         self.inner.set_weather_with(key, intensity);
     }
@@ -347,6 +351,9 @@ impl Audio for TeeAudio {
         self.inner.reverse_stop();
     }
     fn stop_world(&mut self) {
+        if self.weather_key.take().is_some() {
+            self.hear("[weather] stopped".to_string());
+        }
         self.inner.stop_world();
     }
     fn play_music_with(&mut self, track: &str, fade_ms: u32) {
@@ -393,6 +400,7 @@ pub fn install_ears(app: &mut App) -> SharedEars {
     app.ctx.audio = Box::new(TeeAudio {
         inner: audio,
         ears: Rc::clone(&ears),
+        weather_key: None,
     });
     ears
 }
@@ -729,7 +737,7 @@ fn tools_list() -> Value {
              feature must be one of: downgrade, upgrade, zone, limit-drop, stop, \
              scale, curve, interchange, toll, chain-law, destination, departure. \
              Same seed, same road. pick chooses among multiple matches (1-based). \
-             Engine off and parking brake set on arrival, like any staged playtest.",
+             Listen after staging for the truck's actual starting condition.",
             json!({
                 "feature": {"type": "string"},
                 "origin": {"type": "string", "description": "search one corridor from this city (fast and thorough)"},
@@ -1093,4 +1101,72 @@ fn run_with_staged(
     guard.release();
     sandbox::close_session();
     code
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::audio::{AudioEngine, NullBackend};
+
+    fn tee_audio(ears: &SharedEars) -> TeeAudio {
+        TeeAudio {
+            inner: Box::new(AudioEngine::with_backend(Box::new(NullBackend::new()))),
+            ears: Rc::clone(ears),
+            weather_key: None,
+        }
+    }
+
+    #[test]
+    fn ears_report_a_continuing_weather_bed_once() {
+        let ears: SharedEars = Rc::new(RefCell::new(Ears::default()));
+        let mut audio = tee_audio(&ears);
+
+        audio.set_weather_with(Some("weather/rain_light"), 0.7);
+        audio.set_weather_with(Some("weather/rain_light"), 0.7);
+
+        assert_eq!(
+            drain_ears(&ears)
+                .lines()
+                .filter(|line| *line == "[weather] weather/rain_light")
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn ears_report_weather_stopping_and_restarting() {
+        let ears: SharedEars = Rc::new(RefCell::new(Ears::default()));
+        let mut audio = tee_audio(&ears);
+
+        audio.set_weather_with(Some("weather/rain_light"), 0.7);
+        audio.set_weather_with(None, 0.0);
+        audio.set_weather_with(Some("weather/rain_light"), 0.7);
+
+        assert_eq!(
+            drain_ears(&ears).lines().collect::<Vec<_>>(),
+            vec![
+                "[weather] weather/rain_light",
+                "[weather] stopped",
+                "[weather] weather/rain_light",
+            ]
+        );
+    }
+
+    #[test]
+    fn stopping_world_allows_the_same_weather_to_be_reported_again() {
+        let ears: SharedEars = Rc::new(RefCell::new(Ears::default()));
+        let mut audio = tee_audio(&ears);
+
+        audio.set_weather_with(Some("weather/rain_light"), 0.7);
+        audio.stop_world();
+        audio.set_weather_with(Some("weather/rain_light"), 0.7);
+
+        assert_eq!(
+            drain_ears(&ears)
+                .lines()
+                .filter(|line| *line == "[weather] weather/rain_light")
+                .count(),
+            2
+        );
+    }
 }
