@@ -169,6 +169,37 @@ impl BassBackend {
         Self::new_with_device(true)
     }
 
+    /// The blocking half of coming up: load the natives and open the output
+    /// device, without building a backend. BASS is process-global, so this
+    /// can run on a worker thread while the boot keeps reading input; a
+    /// later [`BassBackend::new`] / [`BassBackend::new_headless`] on the
+    /// game thread then finds the device already open (`BASS_ERROR_ALREADY`
+    /// is success in `init_device`) and returns immediately.
+    ///
+    /// `Ok(true)` means the default device refused and the no-sound device
+    /// stood in -- the caller must finish with `new_headless`, or the game
+    /// thread would probe the broken default device all over again.
+    pub fn preopen_device() -> Result<bool, BassError> {
+        if !bass_sys::native_available() {
+            return Err(BassError::NOT_LOADED);
+        }
+        let _ = safe::set_config(BASS_CONFIG_NET_TIMEOUT, RADIO_CONNECT_TIMEOUT_MS);
+        let _ = safe::set_config(BASS_CONFIG_NET_READTIMEOUT, RADIO_READ_TIMEOUT_MS);
+        let _ = safe::set_config(BASS_CONFIG_NET_BUFFER, RADIO_NET_BUFFER_MS);
+        let _ = safe::set_config(BASS_CONFIG_NET_PREBUF, RADIO_NET_PREBUF_PERCENT);
+        if Self::headless_requested() {
+            Self::init_device(BASS_NO_SOUND_DEVICE)?;
+            return Ok(false); // asked-for silence is not a fallback
+        }
+        let _ = safe::set_config(BASS_CONFIG_DEV_DEFAULT, 1);
+        if let Err(err) = Self::init_device(BASS_DEFAULT_DEVICE) {
+            log::warn!("No audio device ({err}); using the BASS no-sound device");
+            Self::init_device(BASS_NO_SOUND_DEVICE)?;
+            return Ok(true);
+        }
+        Ok(false)
+    }
+
     pub(super) fn headless_requested() -> bool {
         std::env::var("SDL_AUDIODRIVER")
             .map(|v| v.eq_ignore_ascii_case("dummy"))

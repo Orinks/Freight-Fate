@@ -1113,6 +1113,23 @@
 
 ### Fixed
 
+- **Quitting while the truck is moving now asks first, and tells you the
+  cost.** The game only saves at stops, and quitting to the main menu
+  mid-drive used to throw away everything since your last stop with a
+  warning that spoke while the quit was already happening -- too late to
+  change your mind. Now, if the truck is moving, quitting asks first and
+  says exactly what you would lose -- "You will lose 67 miles since your
+  last stop. Quit anyway?" -- with Keep driving as the first choice.
+  Quitting while parked is instant, the way it has always been.
+
+- **The game answers your keys the moment it starts.** On some computers,
+  opening the sound device takes a long time -- up to sixteen seconds was
+  reported -- and the game used to sit at the main menu ignoring every key
+  until it finished. The sound device now opens in the background while the
+  menu comes up and starts listening right away; the menu music and your
+  volume settings kick in the moment the device is ready. If sound cannot
+  start at all, the game still says so out loud at the main menu.
+
 - **Heavy-traffic jams now clear when the slow zone does.** The slow
   vehicles that fill a heavy-traffic stretch used to keep their jam pace
   forever: one tester's cruise sat locked behind a truck doing 44 on an

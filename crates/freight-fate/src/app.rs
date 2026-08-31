@@ -251,7 +251,9 @@ impl App {
         // froze the whole game at an I-77 merge -- Shane, 2026-08-30).
         let speech: Box<dyn SpeechSink> = Box::new(crate::speech::ThreadedSpeech::spawn());
         boot_timing::mark("speech");
-        let audio: Box<dyn Audio> = Box::new(AudioEngine::new());
+        // Deferred: the output-device open runs on a worker thread, so a
+        // machine where the probe hangs boots reading input instead of deaf.
+        let audio: Box<dyn Audio> = Box::new(AudioEngine::new_deferred());
         boot_timing::mark("audio");
         Ok(Self::build(Some(shell), speech, audio))
     }

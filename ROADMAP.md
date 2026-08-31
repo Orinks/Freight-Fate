@@ -155,14 +155,19 @@ Half of these hide inside already-checked bullets:
 **Bugs that cost a player something -- the real distance.** The dozen
 that bite first, of the sweep's 49 gating items:
 
-- [ ] Quit-to-menu while MOVING executes before its own warning finishes
-      speaking: ask first and name the miles that will be lost ("You
-      will lose 67 miles since your last stop. Quit anyway?"); parked
-      quits stay instant. (Owner lost 67 miles on I-80, 2026-07-27.)
-- [ ] Boot does not accept input until the device probes finish -- a
-      slow probe leaves the main menu ignoring keys with no explanation
-      (~16 s seen). Speech probe fixed 2026-08-30 via the speech
-      worker; the audio device probe still blocks.
+- [x] Quit-to-menu while MOVING executes before its own warning finishes
+      speaking -- FIXED 2026-08-30: a moving truck now gets a
+      confirmation first ("You will lose 67 miles since your last stop.
+      Quit anyway?", Keep driving is the first row); parked quits stay
+      instant. (Owner lost 67 miles on I-80, 2026-07-27.)
+- [x] Boot does not accept input until the device probes finish --
+      FIXED 2026-08-30 in two halves: the speech probe moved onto the
+      speech worker (a25d4236), and the audio device probe now runs on
+      its own worker thread while the game boots on the null backend;
+      the real backend swaps in when the probe lands, replaying the
+      menu music, volumes and voice setting. A device that never opens
+      arms the "no sound on this computer" notice, spoken at the menu
+      even when it lands after the greeting.
 - [ ] No on-demand career backup (Brandon lost the upload control).
 - [ ] Lane centering assist is a settings promise with no feature:
       implement or retire before 1.9 ships (owner decision).
@@ -489,16 +494,20 @@ Everything not listed here ships fine after 1.9.0.
       nightlies players are running are the Python build, so a Linux report
       cannot be reproduced or fixed on this line until the libraries and a
       runner exist.
-- [ ] **Rust port: startup work is not held off the input loop -- HALF
-      FIXED 2026-08-30.** The Linux report above also had the menu ignore
+- [x] **Rust port: startup work is not held off the input loop -- FIXED
+      2026-08-30.** The Linux report above also had the menu ignore
       arrow keys for the first sixteen seconds, because the speech-backend
       probe and the audio device probe both ran to completion before
-      anything pumped events. The speech half is gone: `ThreadedSpeech`
+      anything pumped events. The speech half went first: `ThreadedSpeech`
       (the Shane-freeze fix, a25d4236) spawns instantly and probes Prism on
-      its worker, so boot no longer waits on the speech backend at all.
-      STILL OPEN: `AudioEngine::new` (the audio device probe) runs before
-      the loop and would still stall input on a machine where it is slow.
-      Worth the same treatment or at least a spoken "starting up" first.
+      its worker. The audio half followed the same day:
+      `AudioEngine::new_deferred` opens the output device on a worker
+      thread (`BassBackend::preopen_device`; BASS is process-global, so
+      the game-thread build afterwards hits `BASS_ERROR_ALREADY` and is
+      instant) while boot runs on the null backend, then `update` swaps
+      the real backend in and replays music, volumes and the engine
+      voice. A probe that fails arms the silence notice, which the main
+      menu now also speaks from `update` when it lands late.
 - [x] **Rust port: drive-time frame cost is measured, and one bug found by
       measuring it (2026-08-24).** `crates/freight-fate/tests/it/frame_time.rs`
       drives a seeded, weather-pinned I-70 run out of Denver through the whole

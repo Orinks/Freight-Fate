@@ -441,29 +441,129 @@ impl PauseMenuState {
     }
 
     fn quit_to_menu(&mut self, ctx: &mut GameContext) {
-        // Saving happens only at stops, so a mid-drive quit writes nothing:
-        // the on-disk save still points at your last stop, and Continue
-        // resumes the leg from there. In-progress leg driving is
-        // intentionally not preserved.
-        self.driving
-            .with(ctx, |d, ctx| restore_checkpoint_driver_state(ctx, d));
-        let drive_label = self
+        // A quit while MOVING discards real progress -- saving happens only
+        // at stops -- and the old warning spoke WHILE the quit executed,
+        // too late to matter: the owner quit at 76 on I-80 and lost 67
+        // miles back to the trip start (2026-07-27). Moving quits now ask
+        // first and name the cost; parked quits stay instant.
+        let moving = self
             .driving
-            .read(|d| {
-                if d.phase == DRIVE_PHASE_PICKUP {
-                    "pickup drive"
-                } else {
-                    "delivery"
-                }
-            })
-            .unwrap_or("delivery");
-        ctx.say(&format!(
-            "Returning to the title. You can only save at a stop, so this {drive_label} will \
-             resume from your last stop, not from here."
-        ));
-        ctx.reset_to(MainMenuState::new());
+            .read(|d| d.trip.truck.speed_mph() > 1.0)
+            .unwrap_or(false);
+        if moving {
+            let state = QuitWhileMovingConfirmationState::new(self.driving.clone());
+            ctx.push_state(state);
+            return;
+        }
+        execute_quit_to_menu(ctx, &self.driving);
     }
 }
+
+/// The quit itself, shared by the parked path and the confirmed moving one.
+fn execute_quit_to_menu(ctx: &mut GameContext, driving: &DriveRef) {
+    // Saving happens only at stops, so a mid-drive quit writes nothing:
+    // the on-disk save still points at your last stop, and Continue
+    // resumes the leg from there. In-progress leg driving is
+    // intentionally not preserved.
+    driving.with(ctx, |d, ctx| restore_checkpoint_driver_state(ctx, d));
+    let drive_label = driving
+        .read(|d| {
+            if d.phase == DRIVE_PHASE_PICKUP {
+                "pickup drive"
+            } else {
+                "delivery"
+            }
+        })
+        .unwrap_or("delivery");
+    ctx.say(&format!(
+        "Returning to the title. You can only save at a stop, so this {drive_label} will \
+         resume from your last stop, not from here."
+    ));
+    ctx.reset_to(MainMenuState::new());
+}
+
+/// Miles this quit would throw away: how far the truck is past the position
+/// the on-disk save would resume from (the last stop's snapshot, or the
+/// trip start when no snapshot was ever written).
+fn miles_lost_on_quit(ctx: &GameContext, driving: &DriveRef) -> f64 {
+    let position = driving.read(|d| d.trip.position_mi).unwrap_or(0.0);
+    let saved = ctx
+        .profile
+        .as_ref()
+        .and_then(|p| p.active_trip.as_ref())
+        .and_then(|snapshot| snapshot.get("position_mi"))
+        .and_then(serde_json::Value::as_f64)
+        .unwrap_or(0.0);
+    (position - saved).max(0.0)
+}
+
+pub struct QuitWhileMovingConfirmationState {
+    menu: MenuCore<Self>,
+    driving: DriveRef,
+}
+
+impl QuitWhileMovingConfirmationState {
+    pub fn new(driving: DriveRef) -> Self {
+        QuitWhileMovingConfirmationState {
+            menu: MenuCore::new("Quit while driving?").with_intro_help(
+                "Use up and down arrows to navigate, Enter to select. \
+                 Escape cancels and returns to the pause menu.",
+            ),
+            driving,
+        }
+    }
+
+    fn lost_text(&self, ctx: &GameContext) -> String {
+        let lost = miles_lost_on_quit(ctx, &self.driving);
+        if lost < 1.0 {
+            "less than a mile".to_string()
+        } else {
+            ctx.settings.distance_text(lost, false)
+        }
+    }
+
+    fn confirm(&mut self, ctx: &mut GameContext) {
+        execute_quit_to_menu(ctx, &self.driving);
+    }
+}
+
+impl Menu for QuitWhileMovingConfirmationState {
+    fn menu(&self) -> &MenuCore<Self> {
+        &self.menu
+    }
+
+    fn menu_mut(&mut self) -> &mut MenuCore<Self> {
+        &mut self.menu
+    }
+
+    fn announce_entry(&mut self, ctx: &mut GameContext) {
+        ctx.audio.play("ui/warning");
+        let lost = self.lost_text(ctx);
+        let current = self.current_text(ctx);
+        ctx.say(&format!(
+            "You are still moving, and the game only saves at a stop. \
+             You will lose {lost} since your last stop. Quit anyway? {current}"
+        ));
+    }
+
+    fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
+        let lost = self.lost_text(ctx);
+        vec![
+            MenuItem::new("Keep driving", |s: &mut Self, ctx| s.go_back(ctx))
+                .help("Cancel the quit and go back to the pause menu."),
+            MenuItem::new(
+                format!("Quit anyway and lose {lost}"),
+                |s: &mut Self, ctx| s.confirm(ctx),
+            )
+            .help(
+                "Return to the title. The drive resumes from your last stop, \
+                 not from here.",
+            ),
+        ]
+    }
+}
+
+impl_state_for_menu!(QuitWhileMovingConfirmationState);
 
 pub fn mechanic_label(d: &DrivingState) -> String {
     let damage = d.trip.truck.damage_pct;

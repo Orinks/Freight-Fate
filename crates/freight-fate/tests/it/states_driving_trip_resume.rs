@@ -31,7 +31,9 @@ use freight_fate::states::base::{InputEvent, Key, State};
 use freight_fate::states::city::CityMenuState;
 use freight_fate::states::driving::{DrivingState, ACTIVE_TRIP_DEADLINE_MODEL};
 use freight_fate::states::driving_menu_states::{ArrivalState, FacilityArrivalState};
-use freight_fate::states::driving_pause_states::{AbandonJobConfirmationState, PauseMenuState};
+use freight_fate::states::driving_pause_states::{
+    AbandonJobConfirmationState, PauseMenuState, QuitWhileMovingConfirmationState,
+};
 use freight_fate::states::main_menu::{enter_world, MainMenuState};
 
 const DT: f64 = 1.0 / 60.0;
@@ -88,12 +90,65 @@ fn with_active_drive<R>(
     out
 }
 
-/// `quit_to_menu(app)`.
+/// `quit_to_menu(app)`. A moving truck gets the lose-your-progress
+/// confirmation first (owner loss, 2026-07-27); a parked one quits
+/// straight through.
 fn quit_to_menu(harness: &mut PlaytestHarness) {
     harness.key(InputEvent::key(Key::Escape));
     assert!(harness.state_is::<PauseMenuState>());
     harness.select_menu_item("Quit to main menu");
+    if harness.state_is::<QuitWhileMovingConfirmationState>() {
+        let row = harness
+            .menu_labels()
+            .into_iter()
+            .find(|label| label.starts_with("Quit anyway"))
+            .expect("the moving-quit confirmation offers Quit anyway");
+        harness.select_menu_item(&row);
+    }
     assert!(harness.state_is::<MainMenuState>());
+}
+
+#[test]
+fn quitting_while_moving_asks_first_and_names_the_miles() {
+    // The owner quit at 76 on I-80 and lost 67 miles: the old warning
+    // spoke WHILE the quit executed. Moving quits must ask first, name
+    // the cost, and let "Keep driving" cancel. Parked quits stay instant.
+    let mut harness = PlaytestHarness::new();
+    harness.start_delivery(StartDelivery::named("Quitter"));
+    harness.prepare_for_driving(60.0);
+    with_active_drive(&mut harness, |d, _| {
+        d.trip.position_mi += 10.0;
+    });
+    harness.clear_speech();
+
+    harness.key(InputEvent::key(Key::Escape));
+    assert!(harness.state_is::<PauseMenuState>());
+    harness.select_menu_item("Quit to main menu");
+    assert!(
+        harness.state_is::<QuitWhileMovingConfirmationState>(),
+        "a moving quit must confirm first"
+    );
+    let heard = harness.transcript_text();
+    assert!(
+        heard.contains("You will lose") && heard.contains("since your last stop"),
+        "{heard}"
+    );
+    // Keep driving cancels: back on the pause menu, nothing lost.
+    harness.select_menu_item("Keep driving");
+    assert!(harness.state_is::<PauseMenuState>());
+
+    // Parked, the quit stays instant -- no confirmation in the way.
+    harness.key(InputEvent::key(Key::Escape)); // back to the drive
+    with_active_drive(&mut harness, |d, _| {
+        d.trip.truck.velocity_mps = 0.0;
+    });
+    harness.key(InputEvent::key(Key::Escape));
+    assert!(harness.state_is::<PauseMenuState>());
+    harness.select_menu_item("Quit to main menu");
+    assert!(
+        harness.state_is::<MainMenuState>(),
+        "a parked quit goes straight through"
+    );
 }
 
 /// Continue the saved career from the main menu.

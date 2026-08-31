@@ -656,6 +656,17 @@ impl Menu for MainMenuState {
 
     fn update(&mut self, ctx: &mut GameContext, dt: f64) {
         ctx.update_music_rotation(dt);
+        // The sound device now opens on a worker thread, so its verdict can
+        // land a beat AFTER this menu's greeting already asked. Same rule
+        // as at entry: silence with no word is never allowed.
+        if ctx.audio.take_silence_notice() {
+            ctx.say(
+                "Game sounds could not start on this computer, so you will \
+                 hear the voice but no engine, traffic, or alert sounds. \
+                 Check that sound is working elsewhere, then start Freight \
+                 Fate again.",
+            );
+        }
         let info = {
             let mut guard = UPDATE_CHECK.lock().unwrap_or_else(|e| e.into_inner());
             let (checker, prompted) = &mut *guard;
