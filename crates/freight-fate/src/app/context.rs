@@ -107,6 +107,17 @@ pub struct Services {
     pub mastodon: JournalOutbox,
 }
 
+/// A career achievement and whether this installation can publish it publicly.
+///
+/// The award itself remains career-specific. `publicly_eligible` is true only
+/// after the account ledger has durably recorded the achievement for the first
+/// time, so callers building public event reasons cannot mistake a career-new
+/// award for an account-new one.
+pub struct AwardedAchievement {
+    pub award: AchievementAward,
+    pub publicly_eligible: bool,
+}
+
 /// Shared services handed to every state.
 pub struct GameContext {
     pub speech: Box<dyn SpeechSink>,
@@ -749,6 +760,7 @@ impl GameContext {
     /// `announce=True`).
     pub fn award_achievement(&mut self, achievement_id: &str) -> Option<AchievementAward> {
         self.award_achievement_with(achievement_id, false, true)
+            .map(|outcome| outcome.award)
     }
 
     pub fn award_achievement_with(
@@ -756,7 +768,7 @@ impl GameContext {
         achievement_id: &str,
         interrupt: bool,
         announce: bool,
-    ) -> Option<AchievementAward> {
+    ) -> Option<AwardedAchievement> {
         let result = award(self.profile.as_mut()?, achievement_id)?;
         // Through the guard: a sandboxed session's achievements evaporate
         // with the rest of the run instead of leaking to disk.
@@ -768,7 +780,7 @@ impl GameContext {
         let achievement = result.achievement;
         // Sandboxed sessions keep their throwaway career progress isolated
         // from both the installation ledger and public sharing.
-        let queue_public_event = if self.school_sandbox || self.playtest_sandbox {
+        let publicly_eligible = if self.school_sandbox || self.playtest_sandbox {
             false
         } else {
             match self
@@ -787,7 +799,7 @@ impl GameContext {
                 }
             }
         };
-        if queue_public_event
+        if publicly_eligible
             && queue_achievement(
                 &self.services.journal,
                 achievement.id,
@@ -801,7 +813,10 @@ impl GameContext {
         self.achievement_notice = result.message.normal.clone();
         self.achievement_notice_timer = 12.0;
         if !announce {
-            return Some(result);
+            return Some(AwardedAchievement {
+                award: result,
+                publicly_eligible,
+            });
         }
         self.audio.play_with("ui/level_up", 0.8, 0.0);
         // Live, an achievement is its earcon and its name; the flavor prose
@@ -814,7 +829,10 @@ impl GameContext {
         );
         self.message_log
             .add(&result.message.normal, MessageCategory::General);
-        Some(result)
+        Some(AwardedAchievement {
+            award: result,
+            publicly_eligible,
+        })
     }
 }
 

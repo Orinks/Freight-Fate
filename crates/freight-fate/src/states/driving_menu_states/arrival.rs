@@ -60,6 +60,7 @@ pub struct ArrivalState {
     pub summary_parts: Vec<String>,
     achievement_messages: Vec<String>,
     new_achievement_names: Vec<String>,
+    public_achievement_names: Vec<String>,
     announcements: Vec<String>,
     pub summary_lines: Vec<String>,
     pub terminal: HomeTerminal,
@@ -85,6 +86,7 @@ impl ArrivalState {
             summary_parts: Vec::new(),
             achievement_messages: Vec::new(),
             new_achievement_names: Vec::new(),
+            public_achievement_names: Vec::new(),
             announcements: Vec::new(),
             summary_lines: Vec::new(),
             terminal,
@@ -209,7 +211,7 @@ impl ArrivalState {
         }
         self.summary_parts.extend(announcements);
         if let Some(result) = ctx.award_achievement_with("bobtail_done", false, false) {
-            self.summary_parts.push(result.message.normal.clone());
+            self.summary_parts.push(result.award.message.normal.clone());
         }
         // The arrival screen and announcement read summary_lines, not parts.
         self.summary_lines = self.summary_parts.clone();
@@ -1047,10 +1049,11 @@ impl ArrivalState {
         }
         for badge in badges {
             if let Some(result) = ctx.award_achievement_with(badge, false, false) {
-                self.achievement_messages
-                    .push(result.message.normal.clone());
-                self.new_achievement_names
-                    .push(result.achievement.name.to_string());
+                self.record_badge(
+                    result.award.message.normal.clone(),
+                    result.award.achievement.name.to_string(),
+                    result.publicly_eligible,
+                );
             }
         }
         vec![fleet_upgrade_announcement(profile_of(ctx))]
@@ -1073,9 +1076,9 @@ impl ArrivalState {
         if level > previous_level {
             reasons.push(json!({"type": "level", "level": level}));
         }
-        if !self.new_achievement_names.is_empty() {
+        if !self.public_achievement_names.is_empty() {
             let names: Vec<&str> = self
-                .new_achievement_names
+                .public_achievement_names
                 .iter()
                 .take(10)
                 .map(String::as_str)
@@ -1132,8 +1135,11 @@ impl ArrivalState {
     }
 
     /// The badge sweep's two collectors, for `badges.rs`.
-    pub(crate) fn record_badge(&mut self, message: String, name: String) {
+    pub(crate) fn record_badge(&mut self, message: String, name: String, publicly_eligible: bool) {
         self.achievement_messages.push(message);
+        if publicly_eligible {
+            self.public_achievement_names.push(name.clone());
+        }
         self.new_achievement_names.push(name);
     }
 

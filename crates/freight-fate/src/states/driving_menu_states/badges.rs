@@ -510,8 +510,9 @@ pub(crate) fn award_arrival_achievements(
     for achievement_id in ids {
         if let Some(result) = ctx.award_achievement_with(&achievement_id, false, false) {
             state.record_badge(
-                result.message.normal.clone(),
-                result.achievement.name.to_string(),
+                result.award.message.normal.clone(),
+                result.award.achievement.name.to_string(),
+                result.publicly_eligible,
             );
         }
     }
