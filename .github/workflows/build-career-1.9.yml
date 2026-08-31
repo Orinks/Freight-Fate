@@ -96,6 +96,14 @@ jobs:
       - name: Install the pinned Rust toolchain
         run: rustup show
 
+      - name: Cache cargo registry and target directory
+        # Same shape as rust.yml: keyed on lockfile + rustc, target pruned
+        # to dependency artefacts before saving. This is what keeps the
+        # bundled SDL2 (and everything else) from recompiling every run.
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: career-19-snapshot-windows
+
       - name: Check Rust formatting
         run: cargo fmt --all --check
 
@@ -153,6 +161,14 @@ jobs:
 
       - name: Install the pinned Rust toolchain
         run: rustup show
+
+      - name: Cache cargo registry and target directory
+        # Same shape as rust.yml: keyed on lockfile + rustc, target pruned
+        # to dependency artefacts before saving. This is what keeps the
+        # bundled SDL2 (and everything else) from recompiling every run.
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: career-19-snapshot-macos
 
       # No brewed SDL: Homebrew's sdl2 is sdl2-compat, which loads SDL3 at
       # runtime and dies on player Macs without Homebrew. SDL2 is compiled
