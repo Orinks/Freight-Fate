@@ -340,7 +340,7 @@ fn test_canceling_a_plan_preserves_a_different_armed_exit_approach() {
 fn test_selected_stop_assist_does_nothing_without_t_and_x() {
     let mut harness = driving_app();
     let stop = sleep_stop(&mut harness, 0.2);
-    harness.app.ctx.settings.selected_stop_assist = true;
+    harness.app.ctx.settings.destination_approach_assist = true;
     rolling(&mut harness, 35.0);
 
     for _ in 0..20 {
@@ -364,7 +364,7 @@ fn test_selected_stop_assist_does_nothing_without_t_and_x() {
 fn test_x_cancel_clears_explicit_assist_but_keeps_route_plan() {
     let mut harness = driving_app();
     let stop = sleep_stop(&mut harness, 2.0);
-    harness.app.ctx.settings.selected_stop_assist = true;
+    harness.app.ctx.settings.destination_approach_assist = true;
     rolling(&mut harness, 35.0);
 
     press_t(&mut harness);
@@ -390,9 +390,10 @@ fn test_x_cancel_clears_explicit_assist_but_keeps_route_plan() {
         "{said}"
     );
     assert!(
-        said.to_lowercase().contains("stopping assistance disarmed"),
+        said.contains("Facility stopping assistance is still on"),
         "{said}"
     );
+    assert!(said.contains("disarmed for this exit"), "{said}");
 
     press_t(&mut harness);
     assert_eq!(
@@ -411,7 +412,7 @@ fn test_x_cancel_clears_explicit_assist_but_keeps_route_plan() {
 fn test_selected_stop_assist_reaches_full_stop_and_sleep_menu() {
     let mut harness = driving_app();
     let stop = sleep_stop(&mut harness, 1.0);
-    harness.app.ctx.settings.selected_stop_assist = true;
+    harness.app.ctx.settings.destination_approach_assist = true;
     harness.app.ctx.settings.lane_keeping = "full".to_string();
     // Python patched `hos.parking_is_full` to False. The rule is deterministic
     // and quiet outside the evening crunch, so the midday clock the fixture
@@ -476,7 +477,7 @@ fn test_selected_stop_assist_reaches_full_stop_and_sleep_menu() {
     assert!(harness.read_drive(|d| d.trip.planned_stop_key.is_none()));
     assert!(spoken(&harness)
         .iter()
-        .any(|line| line.contains("stopping assistance braking")));
+        .any(|line| line.contains("Facility stopping assistance taking the pedals")));
     assert!(spoken(&harness)
         .iter()
         .any(|line| line.contains("Stopped at public rest area: Prairie View Rest Area")));
@@ -511,7 +512,7 @@ fn test_selected_stop_assist_reaches_full_stop_and_sleep_menu() {
     };
     let selected_i = index_of("Planned sleep stop selected");
     let armed_i = index_of("stopping assistance armed");
-    let braking_i = index_of("stopping assistance braking");
+    let braking_i = index_of("Facility stopping assistance taking the pedals");
     let stopped_i = index_of("Stopped at public rest area");
     let menu_i = index_of("Sleep 2 hours in sleeper berth");
     assert!(
@@ -567,7 +568,7 @@ fn test_selected_stop_assist_reaches_full_stop_and_sleep_menu() {
 fn test_overshoot_clears_assist_then_stopped_t_recovers() {
     let mut harness = driving_app();
     let stop = sleep_stop(&mut harness, 1.0);
-    harness.app.ctx.settings.selected_stop_assist = true;
+    harness.app.ctx.settings.destination_approach_assist = true;
     rolling(&mut harness, 35.0);
     press_t(&mut harness);
     press_x(&mut harness);
@@ -627,7 +628,7 @@ fn test_rolling_t_without_sleep_stop_gives_recovery_guidance() {
 fn test_unselected_stop_passes_without_braking_or_menu() {
     let mut harness = driving_app();
     let stop = sleep_stop(&mut harness, 0.01);
-    harness.app.ctx.settings.selected_stop_assist = true;
+    harness.app.ctx.settings.destination_approach_assist = true;
     rolling(&mut harness, 35.0);
 
     let at_mi = stop.at_mi;
@@ -707,7 +708,7 @@ fn test_t_during_police_stop_names_the_trooper_action() {
 fn test_t_on_selected_ramp_reports_live_assist_state() {
     let mut harness = driving_app();
     let stop = sleep_stop(&mut harness, 2.0);
-    harness.app.ctx.settings.selected_stop_assist = true;
+    harness.app.ctx.settings.destination_approach_assist = true;
     let staged = stop.clone();
     harness.with_drive(move |d, _| {
         d.trip.planned_stop_key = Some(staged.key());
@@ -729,7 +730,7 @@ fn test_t_on_selected_ramp_reports_live_assist_state() {
         Some(stop.key())
     );
 
-    harness.app.ctx.settings.selected_stop_assist = false;
+    harness.app.ctx.settings.destination_approach_assist = false;
     press_t(&mut harness);
     let said = last(&harness);
     assert!(said.contains("assistance is off"), "{said}");
@@ -740,7 +741,7 @@ fn test_t_on_selected_ramp_reports_live_assist_state() {
 fn test_t_on_a_different_active_ramp_keeps_the_future_sleep_plan_selected() {
     let mut harness = driving_app();
     let planned = sleep_stop(&mut harness, 2.0);
-    harness.app.ctx.settings.selected_stop_assist = true;
+    harness.app.ctx.settings.destination_approach_assist = true;
     let mut active = planned.clone();
     active.name = "Riverbend Travel Center".to_string();
     active.stop_type = "travel_center".to_string();
@@ -768,7 +769,8 @@ fn test_t_on_a_different_active_ramp_keeps_the_future_sleep_plan_selected() {
         "{said}"
     );
     assert!(!said.contains("selected ramp"), "{said}");
-    assert!(said.contains("assistance is off"), "{said}");
+    assert!(said.contains("assistance is armed"), "{said}");
+    assert!(said.contains("will stop at the entrance"), "{said}");
     assert!(!said.contains("Planned stop canceled"), "{said}");
     assert_eq!(
         harness.read_drive(|d| d.trip.planned_stop_key.clone()),

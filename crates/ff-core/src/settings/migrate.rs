@@ -346,6 +346,12 @@ impl Settings {
             for (key, value) in data {
                 s.assign_raw(key, value);
             }
+            // The two old entrance-stopping toggles are now one player-facing
+            // facility assist. Preserve either opt-in, then retire the hidden
+            // rest-stop flag so turning the unified setting off stays off on
+            // the next load.
+            s.destination_approach_assist = s.destination_approach_assist || s.selected_stop_assist;
+            s.selected_stop_assist = false;
             // The former board-only opt-in covered less information. Never
             // silently expand it into public Profile sharing.
             if !value_is_int(

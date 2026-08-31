@@ -316,7 +316,7 @@ fn test_repeat_miss_appends_the_help_clause() {
         .expect("the repeat miss appends help");
     assert!(second.contains(&first)); // the core line stays identical, help is appended
     assert!(second.contains("Down arrow"));
-    assert!(second.contains("Destination approach assist"));
+    assert!(second.contains("Facility stopping assistance"));
 }
 
 #[test]
@@ -507,7 +507,7 @@ fn test_the_hold_prompt_does_not_come_back_once_the_menu_is_open() {
     let holds = |app: &TestApp| {
         app.event_lines()
             .into_iter()
-            .filter(|line| line.contains("stopped and holding"))
+            .filter(|line| line.contains("holding at the entrance"))
             .count()
     };
     assert_eq!(holds(&app), 1);

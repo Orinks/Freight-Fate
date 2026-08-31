@@ -44,6 +44,7 @@ pub struct RestStopState {
     pub stop: RoadStop,
     prefer_sleep: bool,
     fueled_here: bool,
+    inspection_complete: bool,
     confirm_sleep_rested: bool,
 }
 
@@ -55,6 +56,7 @@ impl RestStopState {
             stop,
             prefer_sleep,
             fueled_here: false,
+            inspection_complete: false,
             confirm_sleep_rested: false,
         }
     }
@@ -67,6 +69,7 @@ impl RestStopState {
             stop,
             prefer_sleep,
             fueled_here: false,
+            inspection_complete: false,
             confirm_sleep_rested: false,
         }
     }
@@ -358,7 +361,7 @@ impl RestStopState {
                 ),
             );
         }
-        if has("inspect") {
+        if has("inspect") && !self.inspection_complete {
             items.push(
                 MenuItem::new("Check in at inspection station", |s: &mut Self, ctx| {
                     s.inspect(ctx)
@@ -1064,7 +1067,10 @@ impl RestStopState {
         }) else {
             return;
         };
+        self.inspection_complete = true;
+        self.refresh(ctx, true);
         ctx.say(&text);
+        ctx.say_with(self.current_text(ctx), Say::queued().review(false));
         record_inspection(ctx);
     }
 }

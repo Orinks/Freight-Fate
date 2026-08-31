@@ -63,6 +63,20 @@ fn imperial() -> Settings {
     s
 }
 
+#[test]
+fn old_stopping_toggles_migrate_to_the_one_facility_assist() {
+    for old in [
+        json!({"driving_assistance_preset": "custom", "destination_approach_assist": true}),
+        json!({"driving_assistance_preset": "custom", "selected_stop_assist": true}),
+        json!({"destination_approach_assist": true}),
+        json!({"selected_stop_assist": true}),
+    ] {
+        let migrated = from_json(old);
+        assert!(migrated.destination_approach_assist);
+        assert!(!migrated.selected_stop_assist);
+    }
+}
+
 // -- the field table -----------------------------------------------------------
 
 #[test]

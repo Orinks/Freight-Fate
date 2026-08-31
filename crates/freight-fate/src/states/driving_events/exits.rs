@@ -101,7 +101,7 @@ impl DrivingState {
                 self.clear_selected_stop_intent();
             }
             let planned = if canceled_selected {
-                " Planned rest-stop stopping assistance disarmed. Your planned stop remains on \
+                " Facility stopping assistance is still on, but disarmed for this exit. Your planned stop remains on \
                  the route map."
             } else {
                 ""
@@ -194,7 +194,7 @@ impl DrivingState {
             )
         };
         if self.is_selected_stop(Some(&stop)) {
-            self.selected_stop_assist_armed = ctx.settings.selected_stop_assist;
+            self.selected_stop_assist_armed = ctx.settings.destination_approach_assist;
             if self.selected_stop_assist_armed {
                 let lane_action = if ctx.settings.lane_is_manual() {
                     "Set the exit lane; "
@@ -202,7 +202,7 @@ impl DrivingState {
                     ""
                 };
                 message.push_str(&format!(
-                    " Planned rest-stop stopping assistance armed. {lane_action}After the ramp \
+                    " Facility stopping assistance armed. {lane_action}After the ramp \
                      control is clear, it will stop at the entrance."
                 ));
             } else {

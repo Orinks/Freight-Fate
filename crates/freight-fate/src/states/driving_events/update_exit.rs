@@ -32,11 +32,14 @@ impl DrivingState {
         self.trip.controlled_ramp = self.departure_ramp_mi.is_some()
             || self.departure_merge_recovery
             || (self.ramp_mi.is_some()
-                && matches!(
-                    self.ramp_control.as_str(),
-                    "signal" | "stop" | "yield" | "roundabout"
-                )
-                && !self.ramp_terminal_done);
+                && (self
+                    .ramp_stop
+                    .as_ref()
+                    .is_some_and(|stop| stop.stop_type == "weigh_station")
+                    || (matches!(
+                        self.ramp_control.as_str(),
+                        "signal" | "stop" | "yield" | "roundabout"
+                    ) && !self.ramp_terminal_done)));
         // The run-in to the dock, which is the destination ramp AND the
         // facility's own streets where it has them. Both are real time.
         //
@@ -236,7 +239,7 @@ impl DrivingState {
             line.push_str(" Plan cancelled.");
         }
         line.push_str(&format!(
-            " Planned rest-stop stopping assistance is off. Continue safely and press {} to plan \
+            " Facility stopping assistance is no longer armed for that stop. Continue safely and press {} to plan \
              the next sleep-capable stop.",
             ctx.control_hint("rest")
         ));
@@ -606,7 +609,7 @@ impl DrivingState {
             self.say_route_confirmation(
                 ctx,
                 &format!(
-                    "Planned rest-stop stopping assistance braking for the entrance to {}.",
+                    "Facility stopping assistance handling the entrance to {}.",
                     stop.spoken_name()
                 ),
             );

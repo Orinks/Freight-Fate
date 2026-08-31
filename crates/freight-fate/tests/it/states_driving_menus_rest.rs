@@ -810,6 +810,19 @@ fn test_scale_wave_through_is_two_minutes_not_fifteen() {
 }
 
 #[test]
+fn test_scale_check_in_is_removed_after_one_completed_inspection() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = a_scale_stop(at);
+    let mut state = rest_stop_at(&mut app, &drive, stop);
+
+    activate(&mut state, &mut app.ctx, "Check in at inspection station");
+
+    assert_eq!(labels(&state, &app.ctx), vec!["Back to the road"]);
+}
+
+#[test]
 fn test_a_targeted_record_takes_the_inspection_lane() {
     let mut app = TestApp::new();
     let drive = a_wear_drive(&mut app, COMPANY_DRIVER);

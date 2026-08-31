@@ -185,7 +185,7 @@ impl DrivingState {
                 let mut opts = SayEvent::new().valid(|| !live::arrival_menu_open());
                 opts.category = Some(SpeechCategory::Navigation);
                 ctx.say_event_with(
-                    "Destination approach stopped and holding. Press Enter, or controller A, to \
+                    "Facility stopping assistance is holding at the entrance. Press Enter, or controller A, to \
                      continue into the facility.",
                     opts,
                 );

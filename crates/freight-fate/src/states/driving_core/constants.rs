@@ -220,6 +220,12 @@ pub const RAMP_ASSIST_RELEASE_BAND: f64 = 0.05;
 // hour sits inside the gate's own creep band (DELIVERY_PARK_MPH) and well
 // above docking speed, so the point still has something to stop.
 pub const ARRIVAL_CREEP_MPH: f64 = 2.0;
+// A facility lane is still road until the final truck-lengths. Hold a modest
+// roll there instead of either coasting to zero short of the entrance or
+// crawling the whole ramp at walking pace. The last 200 feet remain the
+// established two-mile-an-hour gate creep.
+pub const FACILITY_LANE_ROLL_MPH: f64 = 12.0;
+pub const ARRIVAL_FINAL_CREEP_MI: f64 = 200.0 / 5280.0;
 // The most pedal the creep may use to hold that walk against the road: enough
 // for a grossed-out rig on the steepest gate approach, never a lunge.
 pub const ARRIVAL_CREEP_THROTTLE_MAX: f64 = 0.35;

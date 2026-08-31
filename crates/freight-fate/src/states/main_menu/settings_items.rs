@@ -57,7 +57,7 @@ fn back_row() -> Row {
 }
 
 /// `(field, label, help)` for each driving assist row.
-pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 14] = [
+pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 13] = [
     (
         "automatic_emergency_braking",
         "Automatic emergency braking",
@@ -95,13 +95,8 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 14] = [
     ),
     (
         "destination_approach_assist",
-        "Destination approach assistance",
-        "Slows and stops at the selected facility arrival point; it never enters the yard or docks.",
-    ),
-    (
-        "selected_stop_assist",
-        "Planned rest-stop stopping assistance",
-        "After T plans a sleep-capable route stop and X signals for its exit, this assistance stops at the entrance so the rest-stop menu can open. You still set the exit lane. It never chooses, signals, takes, or cancels an exit. Presets never change it.",
+        "Facility stopping assistance",
+        "On the final approach, after any required exit, it controls throttle and brakes: rolling at up to 12 miles per hour through the facility lane, creeping through the last 200 feet, then stopping at pickup and delivery facilities, rest stops, and required weigh stations. It never chooses an exit, enters a yard, or docks. Presets never change it.",
     ),
     (
         "curve_speed_assist",
@@ -152,7 +147,6 @@ pub(super) fn assist_flag(s: &Settings, field: &str) -> bool {
         "lane_centering_assist" => s.lane_centering_assist,
         "exit_speed_assist" => s.exit_speed_assist,
         "destination_approach_assist" => s.destination_approach_assist,
-        "selected_stop_assist" => s.selected_stop_assist,
         "curve_speed_assist" => s.curve_speed_assist,
         "route_transition_assist" => s.route_transition_assist,
         "predictive_cruise" => s.predictive_cruise,

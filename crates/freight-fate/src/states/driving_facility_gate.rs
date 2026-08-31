@@ -247,8 +247,8 @@ impl DrivingState {
             );
             if !ctx.settings.destination_approach_assist {
                 message +=
-                    " Destination approach assist in Settings, Gameplay, can stop the truck for \
-                     you.";
+                    " Facility stopping assistance in Settings, Gameplay, Driving assistance, \
+                     can stop the truck for you.";
             }
         }
         ctx.audio.play("ui/warning");

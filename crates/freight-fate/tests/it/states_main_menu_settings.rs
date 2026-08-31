@@ -184,8 +184,7 @@ fn gameplay_subcategory_rows(category: &str) -> &'static [&'static str] {
             "Lane centering assistance",
             "Descent speed control",
             "Exit speed assistance",
-            "Destination approach assistance",
-            "Planned rest-stop stopping assistance",
+            "Facility stopping assistance",
             "Curve speed assistance",
             "Route-transition assistance",
             "Latching brake",
@@ -693,24 +692,32 @@ fn test_driving_assistance_preset_keyboard_path_and_custom_transition() {
 }
 
 #[test]
-fn test_selected_stop_assist_keyboard_toggle_persists_outside_presets() {
+fn test_one_facility_stopping_assist_row_controls_every_facility_stop() {
     let mut app = TestApp::new();
-    assert!(!app.ctx.settings.selected_stop_assist);
+    assert!(!app.ctx.settings.destination_approach_assist);
     open_settings_category(&mut app, "Driving assistance");
-    move_to::<Cat>(&mut app, "Planned rest-stop stopping assistance");
+    move_to::<Cat>(&mut app, "Facility stopping assistance");
     assert!(current_label::<Cat>(&app).ends_with(": off"));
     key(&mut app, Key::Return);
-    assert!(app.ctx.settings.selected_stop_assist);
+    assert!(app.ctx.settings.destination_approach_assist);
     assert!(current_label::<Cat>(&app).ends_with(": on"));
     assert!(app
         .main_lines()
-        .last()
-        .unwrap()
-        .contains("Planned rest-stop stopping assistance: on."));
-    assert!(Settings::load().selected_stop_assist);
-    key(&mut app, Key::Home);
-    key(&mut app, Key::Right);
-    assert!(app.ctx.settings.selected_stop_assist);
+        .iter()
+        .any(|line| line.contains("Facility stopping assistance: on.")));
+    assert!(Settings::load().destination_approach_assist);
+    let rows = cat_rows(&mut app, "assistance");
+    assert!(!rows
+        .iter()
+        .any(|(label, _)| label.starts_with("Planned rest-stop stopping assistance")));
+
+    for preset in ["realistic", "balanced", "all"] {
+        app.ctx.settings.apply_driving_assistance_preset(preset);
+        assert!(
+            app.ctx.settings.destination_approach_assist,
+            "{preset} changed the independent facility stopping assist"
+        );
+    }
 }
 
 #[test]

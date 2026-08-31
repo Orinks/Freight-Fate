@@ -96,23 +96,27 @@ impl DrivingState {
         // still a whole run away, and lost the pedals for the merge -- three
         // to four miles an hour off the taper even once the lane itself ran
         // on the real clock, and the spoken line untrue at every one.
-        let ramp_is_destination = self
+        // Every ramp stop is a facility entrance once its route control has
+        // cleared: pickups/deliveries, a planned rest stop, and a required
+        // scale all deserve the same progressive stop profile.
+        let ramp_is_facility = self.ramp_stop.is_some();
+        let ramp_continues_to_destination_streets = self
             .ramp_stop
             .as_ref()
-            .is_some_and(|stop| stop.stop_type == "delivery_destination");
-        let remaining_mi = if self.ramp_mi.is_some()
-            && ramp_is_destination
-            && !self.destination_street_chain_ahead(ctx)
-        {
-            self.ramp_mi
-        } else if !self.trip.finished
-            && self.trip.is_facility_approach_route()
-            && !self.trip.outbound
-        {
-            Some(self.trip.remaining_miles())
-        } else {
-            None
-        };
+            .is_some_and(|stop| stop.stop_type == "delivery_destination")
+            && self.destination_street_chain_ahead(ctx);
+        let remaining_mi =
+            if self.ramp_mi.is_some() && ramp_is_facility && !ramp_continues_to_destination_streets
+            {
+                self.ramp_mi
+            } else if !self.trip.finished
+                && self.trip.is_facility_approach_route()
+                && !self.trip.outbound
+            {
+                Some(self.trip.remaining_miles())
+            } else {
+                None
+            };
         let Some(remaining_mi) = remaining_mi else {
             self.destination_arrival_active = false;
             return;
@@ -153,7 +157,9 @@ impl DrivingState {
         let lag = APPROACH_ASSIST_REACTION_S;
         let cap_mps = -a * lag + ((a * lag).powi(2) + 2.0 * a * remaining_m).sqrt();
         if !self.destination_arrival_active {
-            if self.trip.truck.velocity_mps <= cap_mps {
+            let facility_final_approach =
+                self.ramp_mi.is_some() && ramp_is_facility && self.ramp_terminal_done;
+            if !facility_final_approach && self.trip.truck.velocity_mps <= cap_mps {
                 return;
             }
             // LATCHED from here to the gate. This used to re-decide every
@@ -176,7 +182,7 @@ impl DrivingState {
             // an assist that is not working, and is the likeliest reason it
             // was reported three times as "it did not stop me".
             ctx.say_event_with(
-                "Destination approach assistance slowing.",
+                "Facility stopping assistance taking the pedals to manage the final approach and stop at the entrance.",
                 SayEvent::queued()
                     .priority(EventPriority::Route)
                     .category(SpeechCategory::Confirmation),
@@ -215,7 +221,15 @@ impl DrivingState {
         // lengths are a creep the assist holds, throttle against the road if
         // it has to, until the point's own full-brake branch above stops it.
         let v = self.trip.truck.velocity_mps;
-        let creep = ARRIVAL_CREEP_MPH / 2.23694;
+        let target_mph = if self.ramp_mi.is_some()
+            && ramp_is_facility
+            && remaining_mi > ARRIVAL_FINAL_CREEP_MI
+        {
+            FACILITY_LANE_ROLL_MPH
+        } else {
+            ARRIVAL_CREEP_MPH
+        };
+        let creep = target_mph / 2.23694;
         // What the road takes off on its own, m/s2: positive when it slows
         // the truck, negative when gravity is pushing it down to the gate.
         let road = self.trip.truck.resistance_force() / self.trip.truck.gross_mass_kg();

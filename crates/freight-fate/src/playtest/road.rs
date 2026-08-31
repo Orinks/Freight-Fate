@@ -912,7 +912,7 @@ fn scale_hits(trip: &mut Trip, origin: &str, destination: &str) -> Vec<Hit> {
         .filter(|stop| stop.stop_type == "weigh_station")
         .map(|stop| {
             let (limit, _) = trip.speed_limit_at((stop.at_mi - DEFAULT_LEAD_MI).max(0.0));
-            let is_open = open_anchors.contains(&stop.name);
+            let is_open = open_anchors.contains(&stop.key());
             Hit {
                 origin: origin.to_string(),
                 destination: destination.to_string(),
@@ -1198,7 +1198,7 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
         // sandbox copies the player's real settings on every launch and must
         // never leak a playtest flag back into them.
         if let Some(on) = opts.planned_stop_assist {
-            s.selected_stop_assist = on;
+            s.destination_approach_assist = on;
         }
         if let Some(on) = opts.curve_assist {
             s.curve_speed_assist = on;

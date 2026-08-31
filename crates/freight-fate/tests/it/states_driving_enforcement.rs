@@ -1287,6 +1287,87 @@ fn test_the_scale_never_claims_its_own_exit_twice() {
 }
 
 #[test]
+fn test_a_signaled_speed_valid_open_scale_enters_its_ramp() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Scale Ramp");
+    let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
+    drive.trip.position_mi = scale.at_mi + 0.01;
+    drive.trip.truck.velocity_mps = mph_to_mps(33.0);
+    drive.exit_stop = Some(scale.clone());
+    drive.exit_signal_on = true;
+    drive.exit_lane_alignment = EXIT_LANE_READY;
+
+    drive.update_exit(&mut app.ctx, 0.02, 0.1);
+
+    assert_eq!(
+        drive.ramp_stop.as_ref().map(RoadStop::key),
+        Some(scale.key())
+    );
+    assert!(drive.ramp_mi.is_some());
+    assert!(!drive.exit_signal_on);
+}
+
+#[test]
+fn test_a_scale_ramp_uses_real_time_so_the_driver_can_stop_at_the_bar() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Scale Clock");
+    let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
+    drive.ramp_stop = Some(scale);
+    drive.ramp_mi = Some(RAMP_LENGTH_MI);
+    drive.ramp_control.clear();
+
+    drive.update_exit(&mut app.ctx, 0.0, 0.1);
+
+    assert!(drive.trip.controlled_ramp);
+}
+
+#[test]
+fn test_facility_stopping_assistance_brakes_for_a_scale_entrance() {
+    let mut app = TestApp::new();
+    app.ctx.settings.destination_approach_assist = true;
+    let mut drive = a_drive(&mut app, "Scale Assist");
+    let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
+    drive.ramp_stop = Some(scale);
+    drive.ramp_mi = Some(0.02);
+    drive.ramp_terminal_done = true;
+    drive.trip.truck.velocity_mps = mph_to_mps(20.0);
+
+    drive.update_destination_approach_assist(&mut app.ctx);
+
+    assert!(drive.destination_arrival_active);
+    assert!(drive.trip.truck.brake > 0.0);
+    assert!(app
+        .event_lines()
+        .iter()
+        .any(|line| line.contains("Facility stopping assistance taking the pedals")));
+}
+
+#[test]
+fn test_facility_stopping_assistance_does_not_coast_to_a_stop_short_of_the_scale() {
+    let mut app = TestApp::new();
+    app.ctx.settings.destination_approach_assist = true;
+    let mut drive = a_drive(&mut app, "Scale Creep");
+    let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
+    drive.ramp_stop = Some(scale);
+    drive.ramp_mi = Some(0.08);
+    drive.ramp_terminal_done = true;
+    drive.trip.truck.velocity_mps = mph_to_mps(1.0);
+    drive.trip.truck.brake = 0.0;
+    drive.trip.truck.parking_brake = false;
+
+    drive.update_destination_approach_assist(&mut app.ctx);
+
+    assert!(drive.destination_arrival_active);
+    assert!(drive.trip.truck.throttle > 0.0);
+    assert!(app
+        .event_lines()
+        .iter()
+        .any(|line| line.contains("Facility stopping assistance taking the pedals")));
+    const { assert!(FACILITY_LANE_ROLL_MPH == 12.0) };
+    const { assert!(ARRIVAL_FINAL_CREEP_MI == 200.0 / 5280.0) };
+}
+
+#[test]
 fn test_a_casual_hos_mode_never_lets_a_scale_claim_the_exit() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, "Jerry");

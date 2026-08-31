@@ -734,7 +734,7 @@ fn test_the_arrival_assist_never_takes_the_pedals_leaving_a_yard() {
                 origin.location, origin.city
             ));
         }
-        if run.said("Destination approach assistance slowing") {
+        if run.said("Facility stopping assistance taking the pedals") {
             failures.push(format!(
                 "{} ({}): was told the destination approach was slowing it with the delivery \
                  still a whole run away",

@@ -89,10 +89,7 @@ impl DrivingState {
 
         if let Some(active) = self.ramp_stop.clone() {
             let active_is_selected = self.is_selected_stop(Some(&active));
-            let assist = if active_is_selected
-                && self.selected_stop_assist_armed
-                && ctx.settings.selected_stop_assist
-            {
+            let assist = if ctx.settings.destination_approach_assist {
                 "assistance is armed and will stop at the entrance after the ramp control is clear"
             } else {
                 "assistance is off; brake to a complete stop at the entrance"
@@ -294,11 +291,11 @@ impl DrivingState {
         } else {
             format!(" at {}", stop.exit_label)
         };
-        let assist = if ctx.settings.selected_stop_assist {
-            "Planned rest-stop stopping assistance is on; after you signal and set the exit lane, \
+        let assist = if ctx.settings.destination_approach_assist {
+            "Facility stopping assistance is on; after you signal and set the exit lane, \
              it will stop at the entrance."
         } else {
-            "Planned rest-stop stopping assistance is off; brake to a complete stop at the \
+            "Facility stopping assistance is off; brake to a complete stop at the \
              entrance."
         };
         let prefix = if repeated {

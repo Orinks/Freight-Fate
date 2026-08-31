@@ -496,7 +496,7 @@ fn arrive_with(
         gate_grade_pct,
         assist_spoke: heard
             .iter()
-            .any(|line| line.contains("Destination approach assistance slowing")),
+            .any(|line| line.contains("Facility stopping assistance taking the pedals")),
         speed_mph,
         short_by_ft,
         on_chain,
@@ -568,7 +568,7 @@ pub fn what_went_wrong(destination: &Destination, arrival: &Arrival) -> Option<S
     //    opens it.
     if !arrival.docked
         && !arrival.said(
-            "Destination approach stopped and holding. Press Enter, or controller A, to continue \
+            "Facility stopping assistance is holding at the entrance. Press Enter, or controller A, to continue \
              into the facility.",
         )
     {
@@ -803,7 +803,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
         "Route-transition assistance braking for the light.",
         "Stopped at the red light. Assistance is holding the brakes for green.",
         "Green light. Pull ahead to the entrance.",
-        "Destination approach assistance slowing.",
+        "Facility stopping assistance taking the pedals",
         "Pulling into construction materials yard Great Falls Materials Yard",
         "At construction materials yard Great Falls Materials Yard in Great Falls.",
     ]);
@@ -865,7 +865,7 @@ fn test_shelby_cross_dock_approach_assist_reaches_the_arrival_gate() {
             arrival.report(&destination)
         );
         assert!(
-            arrival.said("Destination approach assistance slowing."),
+            arrival.said("Facility stopping assistance taking the pedals"),
             "level {level}: {}",
             arrival.report(&destination)
         );
@@ -876,7 +876,7 @@ fn test_shelby_cross_dock_approach_assist_reaches_the_arrival_gate() {
             arrival.report(&destination)
         );
         assert!(
-            !arrival.said("Destination approach stopped and holding."),
+            !arrival.said("Facility stopping assistance is holding at the entrance."),
             "level {level}: {}",
             arrival.report(&destination)
         );

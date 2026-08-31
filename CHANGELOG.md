@@ -1113,6 +1113,15 @@
 
 ### Fixed
 
+- **Stopping assistance now handles every facility entrance consistently.**
+  The former destination and planned-rest-stop options are one Facility
+  stopping assistance setting for pickups, deliveries, planned rest stops,
+  and required weigh stations. It stays independent of assistance presets,
+  preserves either old opt-in, holds a controlled roll through a facility
+  lane, and brakes at the entrance instead of coasting to a stop short. Open
+  scales now give you real time to use their lane, and checking in cannot be
+  repeated to advance the clock more than once.
+
 - **Freight Fate no longer repeatedly scans every speech backend while it is
   open.** The speech worker now checks backend health at the intended
   three-second interval, reducing competition with NVDA on lower-powered
