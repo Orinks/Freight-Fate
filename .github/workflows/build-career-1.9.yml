@@ -150,8 +150,11 @@ jobs:
       - name: Install the pinned Rust toolchain
         run: rustup show
 
-      - name: Install macOS dependencies
-        run: brew install sdl2 pkg-config
+      # No brewed SDL: Homebrew's sdl2 is sdl2-compat, which loads SDL3 at
+      # runtime and dies on player Macs without Homebrew. SDL2 is compiled
+      # from source into the executable (`bundled` + `static-link`) using
+      # the runner's preinstalled cmake; the staging step fails the build
+      # if the executable links any SDL dynamically.
 
       - name: Check Rust formatting
         run: cargo fmt --all --check

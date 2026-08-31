@@ -479,15 +479,19 @@ Everything not listed here ships fine after 1.9.0.
       `macos-x86_64` and `macos-aarch64` (one file, both slices). And SDL2
       linked with a bare `-lSDL2` that never looked in `/opt/homebrew/lib` or
       `/usr/local/lib`, so the link failed with Homebrew's SDL2 installed;
-      `freight-fate` now enables the `sdl2` crate's `use-pkgconfig` feature on
-      macOS only, which reads the prefix out of Homebrew's own `sdl2.pc`.
-      Prerequisite for a Mac developer: `brew install sdl2 pkg-config`.
+      `freight-fate` first used the `sdl2` crate's `use-pkgconfig` feature to
+      find Homebrew's SDL2 -- until 2026-08-30, when Homebrew's `sdl2` turned
+      out to be sdl2-compat (an SDL3 shim loaded at runtime) and the tester
+      zip died with "failed to load sdl3" on Macs without Homebrew. SDL2 is
+      now compiled in statically (`bundled` + `static-link`); a Mac developer
+      needs no brewed SDL at all, and the staging step fails any build whose
+      executable links SDL dynamically.
 - [x] **Rust port: a player-ready macOS app is packaged on a native runner
       (2026-08-29).** The release builder creates `FreightFate.app`, carries
-      BASS, Prism, and SDL2 inside it, rewrites SDL2's build-machine path to the
-      app's Frameworks folder, and ad-hoc signs the whole bundle. Building from
-      source still uses Homebrew SDL2 and pkg-config; players do not need them.
-      VoiceOver through Prism still needs a listening pass on a physical Mac.
+      BASS and Prism inside it (SDL2 is compiled into the executable since
+      2026-08-30), audits every bundled binary for dependencies a player's Mac
+      cannot satisfy, and ad-hoc signs the whole bundle. VoiceOver through
+      Prism still needs a listening pass on a physical Mac.
 - [ ] **Rust port: no Linux build.** `.github/workflows/rust.yml` vendors SDL2
       for windows-x86_64 only, and BASS has no pinned Linux build; there
       is no Linux runner and no vendored Linux native libraries. The Linux

@@ -277,7 +277,7 @@ def test_music_download_config_uses_public_defaults(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_MUSIC_SHA256", raising=False)
     assert build_release.music_download_config() == (
         "https://dev.orinks.net/downloads/music.pak",
-        "50f5440eb478f1e0e630e65081d83e6c308f48a6aa3ea5fe67c7dd1a7f50a8bb",
+        "7787d682c4c289f7c0f33bb1fc714fb54221e10086cc9415d87304fdeffadfb3",
     )
 
 
@@ -585,13 +585,10 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     (package_dir / "music.pak").write_bytes(b"FFPK1 music")
     profile_dir = tmp_path / "target" / "release"
     make_macos_profile(profile_dir)
-    sdl = tmp_path / "brew" / "libSDL2-2.0.0.dylib"
-    sdl.parent.mkdir()
-    sdl.write_bytes(b"SDL")
     baked = make_container(tmp_path / "world.ffdata", build_release)
     monkeypatch.setattr(build_release, "PACKAGE_DIR", package_dir)
     monkeypatch.setattr(build_release, "ADDON_LIB_DIR", tmp_path / "no-addons")
-    monkeypatch.setattr(build_release, "macos_sdl_library", lambda _exe: sdl)
+    monkeypatch.setattr(build_release, "macos_dynamic_sdl_dependency", lambda _exe: None)
     monkeypatch.setattr(build_release, "relocate_macos_libraries", lambda _app: None)
 
     app = build_release.stage_rust_build(
@@ -626,7 +623,6 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
         assert (resources / name).is_file()
     frameworks = app / "Contents" / "Frameworks"
     for name in (
-        "libSDL2-2.0.0.dylib",
         "libbass.dylib",
         "libbasshls.dylib",
         "libbassopus.dylib",
@@ -669,47 +665,52 @@ def test_macos_stage_refuses_missing_player_libraries(tmp_path, monkeypatch):
         )
 
 
-def test_macos_sdl_is_found_from_the_executables_install_names(tmp_path, monkeypatch):
-    """The packager copies the exact SDL dylib Cargo linked, not a guessed prefix."""
+def test_macos_dynamic_sdl_dependency_reads_the_install_names(tmp_path, monkeypatch):
+    """Any recorded SDL2 install name is reported; none at all is None."""
     build_release = load_build_release_module()
     exe = tmp_path / "freightfate"
     exe.write_bytes(b"Mach-O")
-    sdl = tmp_path / "Homebrew" / "lib" / "libSDL2-2.0.0.dylib"
-    sdl.parent.mkdir(parents=True)
-    sdl.write_bytes(b"SDL")
-    result = subprocess.CompletedProcess(
-        ["otool", "-L", str(exe)], 0, f"{exe}:\n\t{sdl} (compatibility version 1.0.0)\n", ""
-    )
+    sdl = "/opt/homebrew/opt/sdl2-compat/lib/libSDL2-2.0.0.dylib"
+    otool = f"{exe}:\n\t{sdl} (compatibility version 1.0.0)\n\t/usr/lib/libSystem.B.dylib\n"
+    result = subprocess.CompletedProcess(["otool", "-L", str(exe)], 0, otool, "")
     monkeypatch.setattr(build_release.subprocess, "run", lambda *_args, **_kwargs: result)
+    assert build_release.macos_dynamic_sdl_dependency(exe) == Path(sdl)
 
-    assert build_release.macos_sdl_library(exe) == sdl
+    static_otool = f"{exe}:\n\t/usr/lib/libSystem.B.dylib\n"
+    static_result = subprocess.CompletedProcess(["otool", "-L", str(exe)], 0, static_otool, "")
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *_args, **_kwargs: static_result)
+    assert build_release.macos_dynamic_sdl_dependency(exe) is None
 
 
-def test_macos_sdl_resolves_an_rpath_install_name_through_homebrew(tmp_path, monkeypatch):
-    """Homebrew may record SDL as @rpath; its own prefix supplies the real file."""
+def test_macos_stage_refuses_a_dynamically_linked_sdl(tmp_path, monkeypatch):
+    """Homebrew's sdl2 is sdl2-compat: it loads SDL3 at runtime, so a zip
+    built against it dies on every player Mac without Homebrew. Staging must
+    fail the build, not bundle the shim ("failed to load sdl3", 2026-08-30).
+    """
     build_release = load_build_release_module()
-    exe = tmp_path / "freightfate"
-    exe.write_bytes(b"Mach-O")
-    prefix = tmp_path / "homebrew" / "opt" / "sdl2"
-    sdl = prefix / "lib" / "libSDL2-2.0.0.dylib"
-    sdl.parent.mkdir(parents=True)
-    sdl.write_bytes(b"SDL")
+    package_dir = tmp_path / "src" / "freight_fate"
+    make_package_tree(package_dir, build_release)
+    track_everything(tmp_path)
+    (package_dir / "sounds.pak").write_bytes(b"FFPK1 sounds")
+    (package_dir / "music.pak").write_bytes(b"FFPK1 music")
+    profile_dir = tmp_path / "target" / "release"
+    make_macos_profile(profile_dir)
+    baked = make_container(tmp_path / "world.ffdata", build_release)
+    monkeypatch.setattr(build_release, "PACKAGE_DIR", package_dir)
+    monkeypatch.setattr(build_release, "ADDON_LIB_DIR", tmp_path / "no-addons")
+    monkeypatch.setattr(
+        build_release,
+        "macos_dynamic_sdl_dependency",
+        lambda _exe: Path("/opt/homebrew/opt/sdl2-compat/lib/libSDL2-2.0.0.dylib"),
+    )
 
-    def run(command, **_kwargs):
-        if command[:2] == ["otool", "-L"]:
-            return subprocess.CompletedProcess(
-                command,
-                0,
-                f"{exe}:\n\t@rpath/libSDL2-2.0.0.dylib (compatibility version 1.0.0)\n",
-                "",
-            )
-        if command == ["brew", "--prefix", "sdl2"]:
-            return subprocess.CompletedProcess(command, 0, f"{prefix}\n", "")
-        raise AssertionError(command)
-
-    monkeypatch.setattr(build_release.subprocess, "run", run)
-
-    assert build_release.macos_sdl_library(exe) == sdl
+    with pytest.raises(RuntimeError, match="links SDL2 dynamically"):
+        build_release.stage_rust_build(
+            profile_dir,
+            build_dir=tmp_path / "build" / "FreightFate",
+            baked_data=baked,
+            platform_name="darwin",
+        )
 
 
 def test_macos_linked_libraries_ignores_fat_macho_slice_headers(tmp_path, monkeypatch):
@@ -945,7 +946,6 @@ def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, mon
         ("libbasshls.dylib", "libbasshls.dylib"),
         ("libbassflac.dylib", "libbassflac.dylib"),
         ("libprism.dylib", "libprism.dylib"),
-        ("libSDL2-2.0.0.dylib", "libSDL2"),
     ],
 )
 def test_macos_staged_payload_rejects_each_missing_runtime_library(
@@ -961,7 +961,7 @@ def test_macos_staged_payload_rejects_each_missing_runtime_library(
     frameworks.mkdir(parents=True)
     executable.write_bytes(b"Mach-O")
     executable.chmod(0o755)
-    for name in (*build_release.MACOS_REQUIRED_LIBRARIES, "libSDL2-2.0.0.dylib"):
+    for name in build_release.MACOS_REQUIRED_LIBRARIES:
         if name != missing_name:
             (frameworks / name).write_bytes(b"dylib")
     required = (
@@ -1056,7 +1056,6 @@ def test_macos_archive_verifier_rejects_a_bundle_without_prism(tmp_path):
         ("libbassopus.dylib", "libbassopus.dylib"),
         ("libbasshls.dylib", "libbasshls.dylib"),
         ("libbassflac.dylib", "libbassflac.dylib"),
-        ("libSDL2-2.0.0.dylib", "libSDL2"),
     ],
 )
 def test_macos_archive_verifier_rejects_each_missing_runtime_library(

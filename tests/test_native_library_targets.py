@@ -63,17 +63,24 @@ def test_fetch_bass_refuses_a_platform_it_has_no_pins_for(monkeypatch):
     assert "FREIGHT_FATE_BASS_PATH" in str(excinfo.value)
 
 
-def test_macos_links_sdl2_through_pkg_config():
-    """Homebrew installs SDL2 outside the linker's default search path.
+def test_macos_carries_sdl2_statically():
+    """macOS compiles SDL2 in; it must never link a system SDL again.
 
-    Windows must NOT get the feature: there is no pkg-config there, and the
-    vendored import library is what the build script puts on the search path.
+    Homebrew's `sdl2` became sdl2-compat -- a shim that loads SDL3 at
+    RUNTIME, invisible to every install-name audit -- and the 2026-08-30
+    tester zip died with "failed to load sdl3" on Macs without Homebrew.
+    `bundled` + `static-link` builds the real SDL2 from source into the
+    executable, so the shipped app depends on no SDL library at all.
+    Windows must NOT get these features: the vendored import library is
+    what the build script puts on the search path there.
     """
     manifest = tomllib.loads(
         (REPO_ROOT / "crates" / "freight-fate" / "Cargo.toml").read_text(encoding="utf-8")
     )
     macos = manifest["target"]['cfg(target_os = "macos")']["dependencies"]["sdl2"]
-    assert "use-pkgconfig" in macos["features"]
+    assert "bundled" in macos["features"]
+    assert "static-link" in macos["features"]
+    assert "use-pkgconfig" not in macos["features"]
 
     windows = manifest["target"]["cfg(windows)"]["dependencies"]
     assert "sdl2" not in windows

@@ -569,7 +569,13 @@ def test_career_19_snapshot_builds_an_apple_silicon_macos_release():
     }
     assert any(step.get("uses") == "astral-sh/setup-uv@v8.2.0" for step in steps)
     assert named_steps["Install the pinned Rust toolchain"][1]["run"] == "rustup show"
-    assert "brew install sdl2 pkg-config" in named_steps["Install macOS dependencies"][1]["run"]
+    # No brewed SDL anywhere in the job: Homebrew's sdl2 is sdl2-compat,
+    # which loads SDL3 at runtime and dies on player Macs. SDL2 is compiled
+    # into the executable instead.
+    assert all(
+        "brew install" not in step.get("run", "") or "sdl" not in step.get("run", "")
+        for step in steps
+    )
     assert "uv run python tools/fetch_bass.py\n" in named_steps["Fetch BASS"][1]["run"]
     assert "uv run python tools/fetch_bass.py --check" in named_steps["Fetch BASS"][1]["run"]
     assert named_steps["Check Rust formatting"][1]["run"] == "cargo fmt --all --check"

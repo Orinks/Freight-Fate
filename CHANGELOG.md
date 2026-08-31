@@ -1122,6 +1122,12 @@
   last stop. Quit anyway?" -- with Keep driving as the first choice.
   Quitting while parked is instant, the way it has always been.
 
+- **The Mac build starts again.** The latest Mac download failed on launch
+  with an error about a missing sound library, because a piece the game
+  depended on quietly changed shape on the machines that build it. Everything
+  the game needs is now built directly into the app, so it no longer depends
+  on anything being installed on your Mac.
+
 - **The game answers your keys the moment it starts.** On some computers,
   opening the sound device takes a long time -- up to sixteen seconds was
   reported -- and the game used to sit at the main menu ignoring every key

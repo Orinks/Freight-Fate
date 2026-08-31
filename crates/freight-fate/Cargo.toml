@@ -49,14 +49,15 @@ webbrowser.workspace = true
 windows-sys.workspace = true
 
 # Windows links SDL2 against the prebuilt import library under `vendor/sdl2/`,
-# which build.rs puts on the linker's search path. macOS has no vendored SDL2
-# and gets it from Homebrew, which installs outside the default search path --
-# `/opt/homebrew/lib` on Apple silicon, `/usr/local/lib` on Intel. A bare
-# `-lSDL2` finds neither, so the link failed with SDL2 sitting right there.
-# pkg-config reads the prefix out of Homebrew's own `sdl2.pc` and hands the
-# linker the right path on both architectures.
+# which build.rs puts on the linker's search path. macOS builds SDL2 from
+# source and links it statically (`bundled` + `static-link`), so the shipped
+# app depends on no SDL dylib at all. It used to come from Homebrew via
+# `use-pkgconfig`, until Homebrew retired the real SDL2: `brew install sdl2`
+# now installs sdl2-compat, a shim that loads SDL3 at RUNTIME -- invisible to
+# any install-name audit -- so the bundled app died on every tester Mac
+# without Homebrew's SDL3 ("failed to load sdl3", 2026-08-30).
 [target.'cfg(target_os = "macos")'.dependencies]
-sdl2 = { workspace = true, features = ["use-pkgconfig"] }
+sdl2 = { workspace = true, features = ["bundled", "static-link"] }
 
 [dev-dependencies]
 tempfile.workspace = true

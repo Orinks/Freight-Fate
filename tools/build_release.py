@@ -803,12 +803,7 @@ def verify_archive(out: Path) -> None:
             *(f"{APP_NAME}.app/Contents/Frameworks/{name}" for name in MACOS_REQUIRED_LIBRARIES),
         )
         missing.extend(name for name in bundle_required if name not in entries)
-        frameworks = f"{APP_NAME}.app/Contents/Frameworks/"
-        if not any(
-            name.startswith(frameworks) and Path(name).name.startswith("libSDL2")
-            for name in entries
-        ):
-            missing.append(f"{frameworks}libSDL2*.dylib")
+        # No libSDL2 requirement: SDL2 ships compiled into the executable.
     if missing:
         raise RuntimeError(
             f"Release archive is missing payload files: {', '.join(missing)} in {out.name}"
@@ -1132,27 +1127,22 @@ def macos_linked_libraries(executable: Path) -> list[str]:
     return install_names
 
 
-def macos_sdl_library(executable: Path) -> Path:
-    """Locate the exact Homebrew SDL dylib Cargo linked into ``executable``."""
+def macos_dynamic_sdl_dependency(executable: Path) -> Path | None:
+    """The SDL2 install name recorded in ``executable``, or ``None``.
+
+    ``None`` is the only shippable answer: the `bundled` + `static-link`
+    build compiles SDL2 in, so nothing SDL is loaded at run time. Any
+    recorded SDL2 install name means Cargo linked a system SDL -- and since
+    Homebrew retired the real SDL2, that library is sdl2-compat, which
+    loads SDL3 dynamically where no install-name audit can see it and dies
+    on every player Mac without Homebrew ("failed to load sdl3",
+    2026-08-30). The staging step refuses to package such an executable.
+    """
     for install_name in macos_linked_libraries(executable):
         candidate = Path(install_name)
         if candidate.name.startswith("libSDL2") and candidate.name.endswith(".dylib"):
-            if candidate.is_file():
-                return candidate
-            if install_name.startswith("@rpath/"):
-                brew = subprocess.run(
-                    ["brew", "--prefix", "sdl2"],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                brewed = Path(brew.stdout.strip()) / "lib" / candidate.name
-                if brewed.is_file():
-                    return brewed
-            raise RuntimeError(
-                f"Rust executable links SDL2 at {candidate}, but that library was not found"
-            )
-    raise RuntimeError("Rust executable has no SDL2 dylib dependency to bundle")
+            return candidate
+    return None
 
 
 def macos_bundle_version(label: str) -> str:
@@ -1208,8 +1198,6 @@ def relocate_macos_libraries(app: Path) -> None:
     executable = app / "Contents" / "MacOS" / APP_NAME
     frameworks = app / "Contents" / "Frameworks"
     bundled = {path.name: path for path in frameworks.rglob("*.dylib")}
-    if not any(name.startswith("libSDL2") for name in bundled):
-        raise RuntimeError("macOS app is missing its bundled SDL2 library")
     for binary in macos_bundle_binaries(app):
         if binary.suffix == ".dylib":
             subprocess.run(
@@ -1243,12 +1231,23 @@ def relocate_macos_libraries(app: Path) -> None:
 
 
 def verify_macos_native_dependencies(app: Path) -> None:
-    """Reject any Mach-O dependency that still names the builder's disk."""
+    """Reject any Mach-O dependency the player's Mac cannot satisfy.
+
+    Two failure shapes: an absolute path into the builder's disk (the
+    classic Homebrew leak), and an ``@rpath`` name whose dylib was never
+    bundled -- statically clean, dead on arrival. Neither is allowed out.
+    """
+    frameworks = app / "Contents" / "Frameworks"
+    bundled = {path.name for path in frameworks.rglob("*.dylib")}
     forbidden: list[str] = []
     for binary in macos_bundle_binaries(app):
         for dependency in macos_linked_libraries(binary):
             if dependency.startswith("/") and not macos_system_install_name(dependency):
                 forbidden.append(f"{binary.name}: {dependency}")
+            elif dependency.startswith("@rpath/"):
+                leaf = Path(dependency).name
+                if leaf != binary.name and leaf not in bundled:
+                    forbidden.append(f"{binary.name}: {dependency} (not bundled)")
     if forbidden:
         raise RuntimeError("macOS app contains a builder-local dependency: " + "; ".join(forbidden))
 
@@ -1358,8 +1357,17 @@ def stage_rust_build(
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
     if platform_name == "darwin":
-        sdl = macos_sdl_library(profile_dir / cargo_exe_name(platform_name))
-        shutil.copy2(sdl, frameworks / sdl.name)
+        # Fail fast, before any packaging: a dynamically linked SDL2 can
+        # only be Homebrew's sdl2-compat, which needs an SDL3 the player
+        # does not have. The build must carry SDL2 statically.
+        sdl = macos_dynamic_sdl_dependency(profile_dir / cargo_exe_name(platform_name))
+        if sdl is not None:
+            raise RuntimeError(
+                f"macOS executable links SDL2 dynamically ({sdl}); Homebrew's "
+                "sdl2 is now sdl2-compat, which loads SDL3 at runtime and "
+                "fails on player Macs. Build with the crate's `bundled` + "
+                "`static-link` SDL2 features instead."
+            )
         write_macos_info_plist(build_dir, label or project_version())
         relocate_macos_libraries(build_dir)
     if platform_name != "win32":
@@ -1448,10 +1456,11 @@ def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> N
                 raise RuntimeError(f"Rust payload is missing the native library {name}.{hint}")
     elif platform_name == "darwin":
         frameworks = build_dir / "Contents" / "Frameworks"
-        required_macos = [*MACOS_REQUIRED_LIBRARIES]
-        if not any(path.name.startswith("libSDL2") for path in frameworks.glob("*.dylib")):
-            required_macos.append("libSDL2*.dylib")
-        missing_macos = [name for name in required_macos if not (frameworks / name).exists()]
+        # SDL2 is deliberately absent: it is compiled into the executable
+        # (`bundled` + `static-link`), and staging refuses a dynamic link.
+        missing_macos = [
+            name for name in MACOS_REQUIRED_LIBRARIES if not (frameworks / name).exists()
+        ]
         if missing_macos:
             raise RuntimeError(
                 "Rust macOS payload is missing native libraries: " + ", ".join(missing_macos)

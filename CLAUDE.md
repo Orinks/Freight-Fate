@@ -94,9 +94,10 @@ need depends on what you touched.
 - Rust CI (`.github/workflows/rust.yml`) is **Windows only**, deliberately:
   SDL2 is vendored for `windows-x86_64` alone. Linux is not covered at all.
   macOS builds from source (BASS is fetched for both Mac architectures, Prism
-  is vendored, SDL2 comes from `brew install sdl2 pkg-config` and is found
-  through the `use-pkgconfig` feature), but has no runner. Add a platform's
-  libraries before adding its runner.
+  is vendored, and SDL2 is compiled in statically via the crate's `bundled` +
+  `static-link` features -- NEVER Homebrew's sdl2, which is sdl2-compat and
+  loads SDL3 at runtime, dying on player Macs), but has no runner. Add a
+  platform's libraries before adding its runner.
 
 ### Python -- tools, data, packaging
 
