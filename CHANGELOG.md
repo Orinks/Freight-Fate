@@ -1118,6 +1118,10 @@
   three-second interval, reducing competition with NVDA on lower-powered
   computers while still checking immediately when the game regains focus.
 
+- **Closing Freight Fate now hands control back immediately on Windows.** The
+  game hides its window as soon as saves, sound, and speech finish instead of
+  waiting for Windows to synchronously dismantle the final SDL window.
+
 - **Quitting while the truck is moving now asks first, and tells you the
   cost.** The game only saves at stops, and quitting to the main menu
   mid-drive used to throw away everything since your last stop with a

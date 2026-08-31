@@ -791,7 +791,9 @@ impl App {
         boot_timing::mark("quit: audio");
         self.ctx.speech.shutdown();
         boot_timing::mark("quit: speech");
-        self.shell = None; // pygame.quit()
+        if let Some(shell) = self.shell.take() {
+            shell.shutdown_for_process_exit();
+        }
         boot_timing::mark("quit: window");
     }
 }

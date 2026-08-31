@@ -52,6 +52,20 @@ pub struct SdlShell {
     pump: EventPump,
 }
 
+#[cfg(target_os = "windows")]
+fn release_at_process_exit<T>(resource: T) {
+    // SDL_DestroyRenderer/SDL_DestroyWindow can synchronously wait in the
+    // Windows window stack after a long, frequently Alt-Tabbed session. The
+    // process is already exiting, so the OS is the faster and safer owner of
+    // final resource reclamation.
+    std::mem::forget(resource);
+}
+
+#[cfg(not(target_os = "windows"))]
+fn release_at_process_exit<T>(resource: T) {
+    drop(resource);
+}
+
 impl SdlShell {
     /// `pygame.init()` + `set_caption` + `set_mode(WINDOW_SIZE)`.
     pub fn new(title: &str) -> Result<Self, String> {
@@ -90,6 +104,13 @@ impl SdlShell {
     /// not need focus; the operator's keyboard must not have it.
     pub fn minimize(&mut self) {
         self.canvas.window_mut().minimize();
+    }
+
+    /// Hand desktop focus back immediately and finish SDL at process exit.
+    pub fn shutdown_for_process_exit(mut self) {
+        self.video.text_input().stop();
+        self.canvas.window_mut().hide();
+        release_at_process_exit(self);
     }
 
     /// Drain the event queue into game events. `None` when the batch was
@@ -341,5 +362,26 @@ mod tests {
         assert_eq!(mods_from(Mod::RCTRLMOD), Mods::CTRL);
         assert!(mods_from(Mod::LALTMOD | Mod::LSHIFTMOD).alt);
         assert_eq!(mods_from(Mod::NOMOD), Mods::NONE);
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn final_windows_shutdown_does_not_run_a_blocking_resource_destructor() {
+        use std::cell::Cell;
+        use std::rc::Rc;
+
+        struct DropNotice(Rc<Cell<bool>>);
+        impl Drop for DropNotice {
+            fn drop(&mut self) {
+                self.0.set(true);
+            }
+        }
+
+        let dropped = Rc::new(Cell::new(false));
+        release_at_process_exit(DropNotice(Rc::clone(&dropped)));
+        assert!(
+            !dropped.get(),
+            "Windows ran the synchronous SDL-style destructor during final exit"
+        );
     }
 }

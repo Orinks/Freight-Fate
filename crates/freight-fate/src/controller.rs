@@ -879,6 +879,10 @@ impl ControllerManager {
 
     pub fn shutdown(&mut self) {
         self.teardown_subsystem();
+        // The production factory captures an SDL handle so controller support
+        // can be enabled later. Final shutdown has no later: release that
+        // handle before the window begins its exit path.
+        self.factory = None;
     }
 }
 
@@ -896,6 +900,7 @@ pub fn mapping_keys(mapping: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::Cell;
 
     #[test]
     fn deadzone_rescales_to_full_range() {
@@ -942,5 +947,30 @@ mod tests {
         assert_eq!(to_motor(0.0), 0);
         assert_eq!(to_motor(1.0), 65535);
         assert_eq!(to_motor(2.0), 65535);
+    }
+
+    #[test]
+    fn shutdown_releases_the_sdl_factory_reference() {
+        struct DropNotice(Rc<Cell<bool>>);
+        impl Drop for DropNotice {
+            fn drop(&mut self) {
+                self.0.set(true);
+            }
+        }
+
+        let dropped = Rc::new(Cell::new(false));
+        let notice = DropNotice(Rc::clone(&dropped));
+        let factory: PadSubsystemFactory = Box::new(move || {
+            let _keep_alive = &notice;
+            None
+        });
+        let mut manager = ControllerManager::new(false, false, Some(factory));
+
+        manager.shutdown();
+
+        assert!(
+            dropped.get(),
+            "controller shutdown retained its SDL-owning factory"
+        );
     }
 }
