@@ -1113,6 +1113,11 @@
 
 ### Fixed
 
+- **Freight Fate no longer repeatedly scans every speech backend while it is
+  open.** The speech worker now checks backend health at the intended
+  three-second interval, reducing competition with NVDA on lower-powered
+  computers while still checking immediately when the game regains focus.
+
 - **Quitting while the truck is moving now asks first, and tells you the
   cost.** The game only saves at stops, and quitting to the main menu
   mid-drive used to throw away everything since your last stop with a

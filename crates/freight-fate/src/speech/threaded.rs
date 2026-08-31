@@ -45,8 +45,8 @@ use super::SpeechSink;
 const WEDGE_AFTER_S: f64 = 8.0;
 /// Command queue depth; beyond it, new say lines are dropped, not queued.
 const QUEUE_DEPTH: usize = 256;
-/// The worker's own poll cadence when idle.
-const IDLE_POLL: Duration = Duration::from_millis(200);
+/// How often the worker asks Prism to re-check the live speech backends.
+const HEALTH_POLL: Duration = Duration::from_secs(3);
 /// Bounded wait for the two calls that need an answer.
 const REPLY_WAIT: Duration = Duration::from_secs(2);
 
@@ -154,6 +154,30 @@ fn publish(snapshot: &Arc<Mutex<Snapshot>>, inner: &dyn SpeechSink) {
     *snapshot.lock().expect("speech snapshot lock") = fresh;
 }
 
+/// Refresh the answers that can change when a live utterance discovers a
+/// vanished backend, without enumerating backend options or installed voices.
+fn publish_status(snapshot: &Arc<Mutex<Snapshot>>, inner: &dyn SpeechSink) {
+    // Native backend queries stay outside the shared lock. Even if Prism is
+    // slow, the game thread can continue answering from the prior snapshot.
+    let available = inner.available();
+    let backend_name = inner.backend_name();
+    let event_backend_name = inner.event_backend_name();
+    let has_separate_event_voice = inner.has_separate_event_voice();
+    let supports_rate = inner.supports_rate();
+    let supports_pitch = inner.supports_pitch();
+    let supports_volume = inner.supports_volume();
+    let event_supports_rate = inner.event_supports_rate();
+    let mut current = snapshot.lock().expect("speech snapshot lock");
+    current.available = available;
+    current.backend_name = backend_name;
+    current.event_backend_name = event_backend_name;
+    current.has_separate_event_voice = has_separate_event_voice;
+    current.supports_rate = supports_rate;
+    current.supports_pitch = supports_pitch;
+    current.supports_volume = supports_volume;
+    current.event_supports_rate = event_supports_rate;
+}
+
 /// A [`SpeechSink`] whose Prism lives on a worker thread.
 pub struct ThreadedSpeech {
     commands: mpsc::SyncSender<Command>,
@@ -200,6 +224,7 @@ impl ThreadedSpeech {
                 let beat = || {
                     *worker_heartbeat.lock().expect("speech heartbeat lock") = Instant::now();
                 };
+                let mut last_health_poll = Instant::now();
                 loop {
                     beat();
                     // Quitting: everything still queued is a sentence the
@@ -207,14 +232,19 @@ impl ThreadedSpeech {
                     // answering everything that carries a reply, and let
                     // the Shutdown command through to the release.
                     let draining = worker_shutting_down.load(std::sync::atomic::Ordering::Relaxed);
-                    let first = match rx.recv_timeout(IDLE_POLL) {
+                    let until_health_poll = HEALTH_POLL.saturating_sub(last_health_poll.elapsed());
+                    let first = match rx.recv_timeout(until_health_poll) {
                         Ok(command) => command,
                         Err(RecvTimeoutError::Timeout) => {
-                            // The 3-second voice health poll, on the worker's
-                            // own cadence; a backend swap it performs changes
-                            // the answers the main thread hands out.
-                            inner.poll(IDLE_POLL.as_secs_f64());
+                            // Backend discovery can enumerate Prism voices
+                            // and cross COM boundaries. Do it at the promised
+                            // three-second cadence, not at a 200 ms wake-up
+                            // cadence that competes with NVDA on slower PCs.
+                            let elapsed = last_health_poll.elapsed();
+                            beat();
+                            inner.poll(elapsed.as_secs_f64());
                             publish(&worker_snapshot, inner.as_ref());
+                            last_health_poll = Instant::now();
                             continue;
                         }
                         Err(RecvTimeoutError::Disconnected) => {
@@ -242,18 +272,28 @@ impl ThreadedSpeech {
                         match command {
                             Command::Say { text, interrupt } => {
                                 if !draining {
-                                    inner.say(&text, interrupt)
+                                    inner.say(&text, interrupt);
+                                    publish_status(&worker_snapshot, inner.as_ref());
                                 }
                             }
                             Command::SayEvent { text, interrupt } => {
                                 if !draining {
-                                    inner.say_event(&text, interrupt)
+                                    inner.say_event(&text, interrupt);
+                                    publish_status(&worker_snapshot, inner.as_ref());
                                 }
                             }
                             Command::StopMain => inner.stop_main(),
                             Command::StopEvent => inner.stop_event(),
                             Command::Stop => inner.stop(),
-                            Command::RequestRefresh => inner.request_refresh(),
+                            Command::RequestRefresh => {
+                                // Focus returning is the one deliberate early
+                                // probe: the player may have changed screen
+                                // readers in the other window.
+                                inner.request_refresh();
+                                inner.poll(0.0);
+                                publish(&worker_snapshot, inner.as_ref());
+                                last_health_poll = Instant::now();
+                            }
                             Command::Refresh { announce, reply } => {
                                 let changed = inner.refresh(announce);
                                 publish(&worker_snapshot, inner.as_ref());
@@ -288,6 +328,15 @@ impl ThreadedSpeech {
                                 return;
                             }
                         }
+                    }
+                    // A steady stream of speech commands must not starve the
+                    // health check indefinitely.
+                    if last_health_poll.elapsed() >= HEALTH_POLL {
+                        let elapsed = last_health_poll.elapsed();
+                        beat();
+                        inner.poll(elapsed.as_secs_f64());
+                        publish(&worker_snapshot, inner.as_ref());
+                        last_health_poll = Instant::now();
                     }
                 }
             })
@@ -509,6 +558,7 @@ mod tests {
         wedge: Arc<AtomicBool>,
         slow: Arc<AtomicBool>,
         polls: Arc<AtomicUsize>,
+        available: Arc<AtomicBool>,
     }
 
     impl SpeechSink for StubSink {
@@ -539,7 +589,7 @@ mod tests {
         }
         fn request_refresh(&mut self) {}
         fn available(&self) -> bool {
-            true
+            self.available.load(Ordering::SeqCst)
         }
         fn backend_name(&self) -> String {
             "stub".to_string()
@@ -601,6 +651,7 @@ mod tests {
         wedge: Arc<AtomicBool>,
         slow: Arc<AtomicBool>,
         polls: Arc<AtomicUsize>,
+        available: Arc<AtomicBool>,
     }
 
     fn rig() -> Rig {
@@ -608,14 +659,21 @@ mod tests {
         let wedge = Arc::new(AtomicBool::new(false));
         let slow = Arc::new(AtomicBool::new(false));
         let polls = Arc::new(AtomicUsize::new(0));
-        let (calls2, wedge2, slow2, polls2) =
-            (calls.clone(), wedge.clone(), slow.clone(), polls.clone());
+        let available = Arc::new(AtomicBool::new(true));
+        let (calls2, wedge2, slow2, polls2, available2) = (
+            calls.clone(),
+            wedge.clone(),
+            slow.clone(),
+            polls.clone(),
+            available.clone(),
+        );
         let sink = ThreadedSpeech::spawn_with(move || {
             Box::new(StubSink {
                 calls: calls2,
                 wedge: wedge2,
                 slow: slow2,
                 polls: polls2,
+                available: available2,
             })
         });
         Rig {
@@ -624,6 +682,7 @@ mod tests {
             wedge,
             slow,
             polls,
+            available,
         }
     }
 
@@ -793,13 +852,80 @@ mod tests {
 
     #[test]
     fn the_worker_polls_the_backend_on_its_own_cadence() {
-        let Rig { sink, polls, .. } = rig();
+        let Rig {
+            mut sink, polls, ..
+        } = rig();
         std::thread::sleep(Duration::from_millis(900));
-        assert!(
-            polls.load(Ordering::SeqCst) >= 2,
-            "the idle worker drives the 3-second voice health poll"
+        assert_eq!(
+            polls.load(Ordering::SeqCst),
+            0,
+            "the idle worker must not probe Prism every 200 ms"
         );
-        drop(sink);
+
+        for _ in 0..300 {
+            if polls.load(Ordering::SeqCst) == 1 {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        assert_eq!(
+            polls.load(Ordering::SeqCst),
+            1,
+            "the autonomous three-second health probe never ran"
+        );
+
+        // Returning focus is the one reason to probe before the ordinary
+        // three-second health interval: the player may have switched screen
+        // readers while another window was active.
+        sink.request_refresh();
+        for _ in 0..100 {
+            if polls.load(Ordering::SeqCst) == 2 {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        assert_eq!(polls.load(Ordering::SeqCst), 2);
+        sink.shutdown();
+    }
+
+    #[test]
+    fn utterance_failure_status_is_immediate_and_idle_poll_recovers_it() {
+        let Rig {
+            mut sink,
+            calls,
+            available,
+            ..
+        } = rig();
+        for _ in 0..100 {
+            if sink.available() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+
+        // Stand in for a live utterance discovering that NVDA disappeared.
+        available.store(false, Ordering::SeqCst);
+        sink.say("backend failure", false);
+        wait_for(&calls, 1);
+        for _ in 0..100 {
+            if !sink.available() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        assert!(!sink.available());
+
+        // A backend that returns while the game stays focused is found by
+        // the ordinary autonomous health poll.
+        available.store(true, Ordering::SeqCst);
+        for _ in 0..350 {
+            if sink.available() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        assert!(sink.available());
+        sink.shutdown();
     }
 
     #[test]
