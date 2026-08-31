@@ -39,6 +39,7 @@ use ff_core::sim::truck_parking::TruckParkingProvider;
 use ff_core::speech_pacing::EventSpeechPacer;
 use ff_core::speech_text::achievement_announced;
 
+use crate::account_achievements::AccountAchievements;
 use crate::audio::{Audio, VolumeUpdate};
 use crate::cloud_saves::CloudSaves;
 use crate::controller::ControllerManager;
@@ -115,6 +116,9 @@ pub struct GameContext {
     pub world: &'static World,
     pub economy: Economy,
     pub profile: Option<Profile>,
+    /// Achievements known anywhere on this installation, distinct from the
+    /// active career's progress and reward state.
+    pub account_achievements: AccountAchievements,
     pub message_log: MessageLog,
     pub achievement_notice: String,
     pub achievement_notice_timer: f64,
@@ -178,6 +182,7 @@ pub struct ContextParts {
     pub settings: Settings,
     pub world: &'static World,
     pub economy: Economy,
+    pub account_achievements: AccountAchievements,
     pub message_log: MessageLog,
     pub clipboard: Box<dyn Clipboard>,
     pub services: Services,
@@ -202,6 +207,7 @@ impl GameContext {
             world: parts.world,
             economy: parts.economy,
             profile: None,
+            account_achievements: parts.account_achievements,
             message_log: parts.message_log,
             achievement_notice: String::new(),
             achievement_notice_timer: 0.0,

@@ -20,6 +20,7 @@ use ff_core::models::economy::Economy;
 use ff_core::models::profile::{self as profile_module, data_dir};
 use ff_core::settings::Settings;
 
+use crate::account_achievements::AccountAchievements;
 use crate::audio::{Audio, AudioEngine, BassBackend, NullBackend};
 use crate::cloud_saves::{CloudSaves, CloudSavesOptions};
 use crate::controller::ControllerManager;
@@ -294,6 +295,14 @@ impl App {
         // online setting off must still be able to turn one back on later
         // without re-pasting credentials.
         let data_dir = data_dir();
+        // Account-achievement migration is deliberately before service setup:
+        // importing existing careers must stay silent and cannot queue an
+        // online action. A completed version is persisted in the ledger so
+        // future starts only load it.
+        let mut account_achievements = AccountAchievements::load(&data_dir);
+        if let Err(error) = account_achievements.migrate_local_profiles() {
+            log::error!("Could not migrate local account achievements: {error}");
+        }
         let store = IdentityStore::platform(&data_dir);
         let identity = store.load();
         boot_timing::mark("driver identity");
@@ -352,6 +361,7 @@ impl App {
             settings,
             world,
             economy,
+            account_achievements,
             message_log,
             clipboard,
             services: Services {

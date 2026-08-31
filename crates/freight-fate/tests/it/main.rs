@@ -6,6 +6,7 @@
 //! file is the only target and the `mod` lines below are what includes
 //! them. A new test file needs a line here.
 
+mod account_achievements;
 mod audio_support;
 mod states_city_support;
 mod states_driving_menus_support;
