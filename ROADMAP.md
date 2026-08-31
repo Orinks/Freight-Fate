@@ -5373,6 +5373,29 @@ onto exit signalling.
       dump the input trace so a weird agent-found path can be replayed
       and frozen into a break-battery scenario (exploration finds, the
       battery pins).
+- [x] **Speech off the game loop -- the general thread-freeze fix
+      (Shane's I-77 hang, 2026-08-30).** Every spoken line was a
+      synchronous Prism/SAPI call on the main thread; Shane's crash log
+      ends on the transcript line written immediately before
+      `say_event`, the smoking gun for a wedged backend freezing the
+      game permanently. `ThreadedSpeech`
+      (`crates/freight-fate/src/speech/threaded.rs`) moves the one
+      Prism context to a dedicated worker (built there, never moved --
+      the one-context-one-thread invariant holds): the loop queues
+      commands in order and never waits, queries answer from a
+      worker-published snapshot, refresh/preview wait a bounded two to
+      four seconds, a full queue drops new say lines rather than
+      growing, and a watchdog logs the wedge once and marks speech
+      unavailable until the heartbeat returns. Headless and capture
+      test paths unchanged. Worker respawn after a long wedge is the
+      recorded follow-up below.
+- [ ] **Speech worker respawn.** Today a wedged backend costs speech
+      until the stuck call returns; a respawn (abandon the wedged
+      thread, build a fresh Prism context on a new one) would bring
+      speech back in seconds. Needs care with the one-context rule --
+      the abandoned thread still holds the old context, so respawn is
+      only safe when Prism tolerates a second context after the first
+      is idle-but-alive. Verify against Prism before building.
 - [ ] **The frame-time p99 budget test is load-sensitive (found
       2026-08-30, pre-existing).** `frame_time::a_driven_frame_stays_
       well_inside_the_sixty_hertz_budget` fails inside a full

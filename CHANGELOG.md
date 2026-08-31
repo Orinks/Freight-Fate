@@ -1113,6 +1113,16 @@
 
 ### Fixed
 
+- **A stuck screen reader can no longer freeze the whole game.** One
+  tester's run ended with the game locked solid at a highway on-ramp,
+  with nothing to do but close it. The cause: every spoken line made the
+  game wait for the screen reader or SAPI to finish taking it, and the
+  one time that call never returned, the truck, the sounds, and the
+  keyboard all froze with it. Speech now runs on its own track: if the
+  voice ever stops responding, you lose a few sentences -- the message
+  log still has them -- the sounds keep playing, the truck keeps
+  driving, and speech comes back on its own when the voice does.
+
 - **The first-day briefing says your city's name properly.** It used to
   say the map's internal name for your starting city -- "parked at
   Chicago Company Yard in the chicago underscore i l underscore u s

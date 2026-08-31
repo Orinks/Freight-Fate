@@ -26,7 +26,7 @@ use crate::controller::ControllerManager;
 use crate::discord_presence::{DiscordPresence, DiscordPresenceOptions};
 use crate::online_journal::JournalOutbox;
 use crate::online_presence::{IdentityStore, OnlinePresence, OnlinePresenceOptions};
-use crate::speech::{NullSpeech, Speech, SpeechSink};
+use crate::speech::{NullSpeech, SpeechSink};
 use crate::states::base::{InputEvent, Key, Mods, State};
 use crate::states::driving::DrivingState;
 use crate::states::main_menu::ConfirmQuitState;
@@ -246,7 +246,10 @@ impl App {
         prefetch_sound_pack();
         let shell = SdlShell::new(&format!("Freight Fate {}", version()))?;
         boot_timing::mark("window");
-        let speech: Box<dyn SpeechSink> = Box::new(Speech::new());
+        // Prism on its own worker thread: a wedged screen-reader or SAPI
+        // call costs sentences, never the drive (a synchronous call here
+        // froze the whole game at an I-77 merge -- Shane, 2026-08-30).
+        let speech: Box<dyn SpeechSink> = Box::new(crate::speech::ThreadedSpeech::spawn());
         boot_timing::mark("speech");
         let audio: Box<dyn Audio> = Box::new(AudioEngine::new());
         boot_timing::mark("audio");

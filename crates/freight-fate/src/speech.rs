@@ -28,16 +28,24 @@
 //!   (used by the headless test suite and CI), and forced to a specific backend
 //!   with `FREIGHT_FATE_SPEECH_BACKEND=<name>` (for example `SAPI`).
 //!
-//! # Threading: everything Prism runs on the main thread
+//! # Threading: everything Prism runs on ONE thread -- the speech worker
 //!
 //! Two Prism [`prism::Context`]s probing backends from different threads crash
 //! inside Prism (found while porting: the registry's runtime checks are not
 //! re-entrant across threads). So there is exactly one context per process,
-//! it is created on the main thread, and every call on it -- construction,
-//! the 3 s health poll, speaking, configuring, shutdown -- happens on the
-//! thread that runs the game loop. [`Speech`] is deliberately not `Send` or
-//! `Sync`; background threads hand text back to the main thread and let it
-//! speak, exactly as the Python game did.
+//! and every call on it -- construction, the 3 s health poll, speaking,
+//! configuring, shutdown -- happens on one thread. [`Speech`] is deliberately
+//! not `Send` or `Sync`.
+//!
+//! That one thread used to be the game loop's, which made every spoken line
+//! a synchronous screen-reader/SAPI call the game waited on -- and the one
+//! time such a call wedged (Shane, 2026-08-30, an event-voice interrupt at a
+//! merge), the whole game froze with it, permanently. The windowed game now
+//! builds [`ThreadedSpeech`] instead: the context lives on a dedicated
+//! worker thread (created there, never moved), the game loop only queues
+//! commands, and a wedged backend costs sentences, never the drive. The
+//! headless app and the tests keep their direct sinks; nothing about
+//! capture-based testing changed.
 //!
 //! # Shape of the port
 //!
@@ -56,6 +64,7 @@ pub mod backend;
 pub mod capture;
 pub mod fakes;
 pub mod live;
+pub mod threaded;
 
 // The event-voice pacer moved to its own module when it grew repeat
 // suppression and priority; re-exported here because it is part of what a
@@ -71,6 +80,7 @@ pub use capture::{
     CaptureProfile, CaptureSpeech, ConfigureCall, NullSpeech, SpeechChannel, SpokenEntry,
 };
 pub use live::{Speech, SpeechConfig};
+pub use threaded::ThreadedSpeech;
 
 /// Seconds between runtime health checks of the speech backend. Short enough
 /// that a player who switches screen readers hears the game again within a few
