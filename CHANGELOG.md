@@ -1122,6 +1122,15 @@
   last stop. Quit anyway?" -- with Keep driving as the first choice.
   Quitting while parked is instant, the way it has always been.
 
+- **The voice keeps up with the game again.** Since the voice moved onto
+  its own track, sentences that should have cut each other off were
+  instead spoken one after another in full -- the voice ran seconds
+  behind what the truck was doing and kept the speech engine busier than
+  it ever used to be, which could also make your screen reader feel
+  sluggish while the game was open. Newer announcements now silence the
+  stale ones still waiting in line, the way they always did before, so
+  the voice stays current and the speech engine gets its breath back.
+
 - **Closing the game hands your screen reader back right away.** Since the
   voice moved onto its own track, quitting quietly waited for every
   sentence still lined up to be spoken before letting go -- which read as

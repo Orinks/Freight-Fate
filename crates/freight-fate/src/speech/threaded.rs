@@ -101,6 +101,43 @@ struct Snapshot {
     voice_names: Vec<String>,
 }
 
+/// Apply the interrupt semantics to a drained batch, the way the direct
+/// backend applied them to live audio: an interrupting say purges the
+/// pending sentences on its own channel, and the stop commands purge
+/// everything theirs. Only says are ever dropped -- every other command
+/// (configure, refresh, previews, shutdown) keeps its place and order.
+fn coalesce(batch: &mut Vec<Command>) {
+    let mut cut_main: Option<usize> = None;
+    let mut cut_event: Option<usize> = None;
+    for (index, command) in batch.iter().enumerate() {
+        match command {
+            Command::Say {
+                interrupt: true, ..
+            }
+            | Command::StopMain => cut_main = Some(index),
+            Command::SayEvent {
+                interrupt: true, ..
+            }
+            | Command::StopEvent => cut_event = Some(index),
+            Command::Stop => {
+                cut_main = Some(index);
+                cut_event = Some(index);
+            }
+            _ => {}
+        }
+    }
+    let mut index = 0;
+    batch.retain(|command| {
+        let keep = match command {
+            Command::Say { .. } => cut_main.is_none_or(|cut| index >= cut),
+            Command::SayEvent { .. } => cut_event.is_none_or(|cut| index >= cut),
+            _ => true,
+        };
+        index += 1;
+        keep
+    });
+}
+
 fn publish(snapshot: &Arc<Mutex<Snapshot>>, inner: &dyn SpeechSink) {
     let fresh = Snapshot {
         available: inner.available(),
@@ -170,63 +207,86 @@ impl ThreadedSpeech {
                     // answering everything that carries a reply, and let
                     // the Shutdown command through to the release.
                     let draining = worker_shutting_down.load(std::sync::atomic::Ordering::Relaxed);
-                    match rx.recv_timeout(IDLE_POLL) {
-                        Ok(Command::Say { text, interrupt }) => {
-                            if !draining {
-                                inner.say(&text, interrupt)
-                            }
-                        }
-                        Ok(Command::SayEvent { text, interrupt }) => {
-                            if !draining {
-                                inner.say_event(&text, interrupt)
-                            }
-                        }
-                        Ok(Command::StopMain) => inner.stop_main(),
-                        Ok(Command::StopEvent) => inner.stop_event(),
-                        Ok(Command::Stop) => inner.stop(),
-                        Ok(Command::RequestRefresh) => inner.request_refresh(),
-                        Ok(Command::Refresh { announce, reply }) => {
-                            let changed = inner.refresh(announce);
-                            publish(&worker_snapshot, inner.as_ref());
-                            let _ = reply.send(changed);
-                        }
-                        Ok(Command::Configure {
-                            rate,
-                            pitch,
-                            volume,
-                            voice,
-                        }) => {
-                            inner.configure(rate, pitch, volume, voice.as_deref());
-                            publish(&worker_snapshot, inner.as_ref());
-                        }
-                        Ok(Command::SelectEventBackend(name)) => {
-                            inner.select_event_backend(name.as_deref());
-                            publish(&worker_snapshot, inner.as_ref());
-                        }
-                        Ok(Command::Preview {
-                            setting,
-                            text,
-                            interrupt,
-                            reply,
-                        }) => {
-                            let spoke = inner.say_adjustment_preview(&setting, &text, interrupt);
-                            let _ = reply.send(spoke);
-                        }
-                        Ok(Command::Shutdown { done }) => {
-                            inner.shutdown();
-                            let _ = done.send(());
-                            return;
-                        }
+                    let first = match rx.recv_timeout(IDLE_POLL) {
+                        Ok(command) => command,
                         Err(RecvTimeoutError::Timeout) => {
                             // The 3-second voice health poll, on the worker's
                             // own cadence; a backend swap it performs changes
                             // the answers the main thread hands out.
                             inner.poll(IDLE_POLL.as_secs_f64());
                             publish(&worker_snapshot, inner.as_ref());
+                            continue;
                         }
                         Err(RecvTimeoutError::Disconnected) => {
                             inner.shutdown();
                             return;
+                        }
+                    };
+                    // Drain whatever else is already queued and apply the
+                    // interrupt semantics BEFORE speaking. The direct
+                    // backend purged pending audio the instant an
+                    // interrupting say arrived; a queue that speaks every
+                    // sentence in arrival order instead runs the voice
+                    // seconds behind the game and keeps the synthesizer
+                    // busier than any pre-worker build -- which is what
+                    // "the screen reader got sluggish with the game open"
+                    // was (Brandon, 2026-08-31). A sentence dropped here is
+                    // one the purge would have cut off mid-word anyway.
+                    let mut batch = vec![first];
+                    while let Ok(command) = rx.try_recv() {
+                        batch.push(command);
+                    }
+                    coalesce(&mut batch);
+                    for command in batch {
+                        beat();
+                        match command {
+                            Command::Say { text, interrupt } => {
+                                if !draining {
+                                    inner.say(&text, interrupt)
+                                }
+                            }
+                            Command::SayEvent { text, interrupt } => {
+                                if !draining {
+                                    inner.say_event(&text, interrupt)
+                                }
+                            }
+                            Command::StopMain => inner.stop_main(),
+                            Command::StopEvent => inner.stop_event(),
+                            Command::Stop => inner.stop(),
+                            Command::RequestRefresh => inner.request_refresh(),
+                            Command::Refresh { announce, reply } => {
+                                let changed = inner.refresh(announce);
+                                publish(&worker_snapshot, inner.as_ref());
+                                let _ = reply.send(changed);
+                            }
+                            Command::Configure {
+                                rate,
+                                pitch,
+                                volume,
+                                voice,
+                            } => {
+                                inner.configure(rate, pitch, volume, voice.as_deref());
+                                publish(&worker_snapshot, inner.as_ref());
+                            }
+                            Command::SelectEventBackend(name) => {
+                                inner.select_event_backend(name.as_deref());
+                                publish(&worker_snapshot, inner.as_ref());
+                            }
+                            Command::Preview {
+                                setting,
+                                text,
+                                interrupt,
+                                reply,
+                            } => {
+                                let spoke =
+                                    inner.say_adjustment_preview(&setting, &text, interrupt);
+                                let _ = reply.send(spoke);
+                            }
+                            Command::Shutdown { done } => {
+                                inner.shutdown();
+                                let _ = done.send(());
+                                return;
+                            }
                         }
                     }
                 }
@@ -447,6 +507,7 @@ mod tests {
     struct StubSink {
         calls: Arc<Mutex<Vec<String>>>,
         wedge: Arc<AtomicBool>,
+        slow: Arc<AtomicBool>,
         polls: Arc<AtomicUsize>,
     }
 
@@ -456,6 +517,12 @@ mod tests {
                 // A wedged SAPI call: never returns (bounded here so the
                 // test process itself can exit).
                 std::thread::sleep(Duration::from_secs(600));
+            }
+            if self.slow.load(Ordering::SeqCst) {
+                // A realistic utterance: long enough that everything a
+                // test sends meanwhile is queued behind it, so the batch
+                // tests are deterministic instead of racing the worker.
+                std::thread::sleep(Duration::from_millis(200));
             }
             self.calls.lock().unwrap().push(format!("say {text}"));
         }
@@ -532,18 +599,22 @@ mod tests {
         sink: ThreadedSpeech,
         calls: CallLog,
         wedge: Arc<AtomicBool>,
+        slow: Arc<AtomicBool>,
         polls: Arc<AtomicUsize>,
     }
 
     fn rig() -> Rig {
         let calls: Arc<Mutex<Vec<String>>> = Arc::default();
         let wedge = Arc::new(AtomicBool::new(false));
+        let slow = Arc::new(AtomicBool::new(false));
         let polls = Arc::new(AtomicUsize::new(0));
-        let (calls2, wedge2, polls2) = (calls.clone(), wedge.clone(), polls.clone());
+        let (calls2, wedge2, slow2, polls2) =
+            (calls.clone(), wedge.clone(), slow.clone(), polls.clone());
         let sink = ThreadedSpeech::spawn_with(move || {
             Box::new(StubSink {
                 calls: calls2,
                 wedge: wedge2,
+                slow: slow2,
                 polls: polls2,
             })
         });
@@ -551,6 +622,7 @@ mod tests {
             sink,
             calls,
             wedge,
+            slow,
             polls,
         }
     }
@@ -576,9 +648,14 @@ mod tests {
     #[test]
     fn shutdown_skips_the_queued_backlog_instead_of_speaking_it() {
         let Rig {
-            mut sink, calls, ..
+            mut sink,
+            calls,
+            slow,
+            ..
         } = rig();
-        // A backlog a player would otherwise sit through.
+        // A slow utterance in flight, and a backlog a player would
+        // otherwise sit through queued behind it.
+        slow.store(true, Ordering::SeqCst);
         for i in 0..50 {
             sink.say(&format!("queued {i}"), false);
         }
@@ -607,15 +684,60 @@ mod tests {
             mut sink, calls, ..
         } = rig();
         sink.say("one", false);
-        sink.say_event("two", true);
-        sink.stop_main();
+        sink.say("two", false);
+        sink.say_event("three", false);
         wait_for(&calls, 3);
         assert_eq!(
             calls.lock().unwrap().as_slice(),
-            ["say one", "event two", "stop_main"]
+            ["say one", "say two", "event three"]
         );
         sink.shutdown();
         assert!(calls.lock().unwrap().iter().any(|c| c == "shutdown"));
+    }
+
+    /// The interrupt semantics apply to the QUEUE, not just the audio: an
+    /// interrupting say or a stop purges the sentences still waiting on
+    /// its channel, exactly as the direct backend purged their audio the
+    /// instant it was called. Without this the voice ran seconds behind
+    /// the game and kept the synthesizer busier than any pre-worker build
+    /// ("the screen reader got sluggish with the game open" -- Brandon,
+    /// 2026-08-31). The other channel's sentences are untouched.
+    #[test]
+    fn queued_says_are_purged_by_a_later_interrupt_before_they_speak() {
+        let Rig {
+            mut sink,
+            calls,
+            slow,
+            ..
+        } = rig();
+        // A slow first utterance holds the worker; once it is mid-say the
+        // rest of the sends are guaranteed to queue together behind it.
+        slow.store(true, Ordering::SeqCst);
+        sink.say("in flight", false);
+        std::thread::sleep(Duration::from_millis(50));
+        sink.say("stale", false);
+        sink.say_event("event stays", false);
+        sink.say("fresh", true);
+        wait_for(&calls, 3);
+        std::thread::sleep(Duration::from_millis(100));
+        let spoken = calls.lock().unwrap().clone();
+        assert!(
+            spoken.iter().any(|c| c == "say in flight"),
+            "the in-flight sentence was cut: {spoken:?}"
+        );
+        assert!(
+            !spoken.iter().any(|c| c == "say stale"),
+            "the purged sentence was spoken anyway: {spoken:?}"
+        );
+        assert!(
+            spoken.iter().any(|c| c == "event event stays"),
+            "the event channel was wrongly purged: {spoken:?}"
+        );
+        assert!(
+            spoken.iter().any(|c| c == "say fresh"),
+            "the interrupting say itself was lost: {spoken:?}"
+        );
+        sink.shutdown();
     }
 
     #[test]
