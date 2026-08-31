@@ -131,6 +131,22 @@ off at their own bullet. The four tester bugs fixed the same day
 (speech-freeze, jam traffic, frozen approach countdown, briefing map
 key) arrived after the sweep and are already done.
 
+- [x] **The auto-updater can actually finish AND install an update
+      (2026-08-31).** Testers reported an endless update loop on the first
+      real tester snapshot; driving the real updater over the MCP agent
+      server found TWO independent causes, either one enough for the loop.
+      One: the net layer's GitHub client carries a 15-second global
+      deadline (Python's socket timeout, mis-ported as a total one), so
+      the 294 MB asset died mid-transfer every time ("timeout: global";
+      and `timeout_recv_response` alone re-broke it at 25 percent -- ureq
+      charges body reads against that phase too). Downloads now stream off
+      a dedicated client with a connect timeout only; Escape still
+      cancels. Two: `fs::canonicalize` hands the apply script a Windows
+      verbatim path (`\\?\C:\...`), which robocopy refuses outright -- the
+      captured script proved both copies failed silently and the OLD build
+      relaunched. The verbatim prefix is stripped before the script is
+      written. Testers must hand-download the first fixed build: the
+      broken updater cannot deliver its own fix.
 - [x] **Every staged release payload is scanned for secret-shaped content
       (2026-08-30).** Prompted by a one-click decompile of a shipped
       build: the code and assets are public or lift-able by design, so

@@ -13,7 +13,7 @@ use super::{
     install_target_in, running_appimage_path, Platform, UpdateInfo, UpdaterEnv, APP_NAME,
     USER_AGENT,
 };
-use crate::net::{self, NetError, Tier};
+use crate::net::{self, NetError};
 
 /// Why a download stopped short.
 #[derive(Debug)]
@@ -63,7 +63,10 @@ pub fn download(
     // (the archive is streamed to disk, not buffered into memory), so it
     // carries the network capability itself.
     net::require_real_network("GET", &info.asset_url);
-    let mut response = net::agent(Tier::GitHub)
+    // The download client, not the GitHub tier: a 294 MB snapshot can never
+    // finish inside a total deadline, and failing here re-offers the same
+    // update forever.
+    let mut response = net::download_agent()
         .get(&info.asset_url)
         .header("User-Agent", USER_AGENT)
         .call()

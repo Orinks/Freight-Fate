@@ -825,7 +825,7 @@ fn test_install_target_is_bundle_root_on_macos() {
     let env = UpdaterEnv::fake(Platform::MacOs, &exe);
     assert_eq!(
         updater::install_target_in(&env),
-        fs::canonicalize(tmp.path().join("FreightFate.app")).unwrap()
+        plain_canonical(&tmp.path().join("FreightFate.app"))
     );
 }
 
@@ -881,13 +881,29 @@ fn test_build_info_none_when_not_frozen() {
 #[ignore = "Nuitka's __compiled__ marker has no Rust equivalent; is_frozen reads the install layout instead (see test_nuitka_standalone_folder_counts_as_packaged_build)"]
 fn test_is_frozen_detects_nuitka() {}
 
+/// `fs::canonicalize` output with the Windows verbatim prefix undone, the
+/// way the updater must hand paths to the apply script: robocopy refuses
+/// `\\?\` outright, and every Windows update silently copied nothing
+/// until the prefix was stripped (the tester "restart loop", 2026-08-31).
+fn plain_canonical(path: &std::path::Path) -> std::path::PathBuf {
+    let canonical = fs::canonicalize(path).unwrap();
+    let text = canonical.to_string_lossy();
+    if let Some(rest) = text.strip_prefix(r"\\?\UNC\") {
+        return std::path::PathBuf::from(format!(r"\\{rest}"));
+    }
+    match text.strip_prefix(r"\\?\") {
+        Some(rest) => std::path::PathBuf::from(rest.to_string()),
+        None => canonical,
+    }
+}
+
 #[test]
 fn test_install_root_is_executable_dir() {
     let exe = std::env::current_exe().unwrap();
-    assert_eq!(
-        updater::install_root(),
-        fs::canonicalize(&exe).unwrap().parent().unwrap()
-    );
+    let root = updater::install_root();
+    // Never the verbatim form: the apply script's robocopy refuses it.
+    assert!(!root.to_string_lossy().starts_with(r"\\?\"));
+    assert_eq!(root, plain_canonical(&exe).parent().unwrap());
 }
 
 // -- update states (app shell) ------------------------------------------------

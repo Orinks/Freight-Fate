@@ -77,6 +77,38 @@ static ORINKS_AGENT: Lazy<Agent> = Lazy::new(|| build_agent(Tier::Orinks.timeout
 static GITHUB_AGENT: Lazy<Agent> = Lazy::new(|| build_agent(Tier::GitHub.timeout_s()));
 static FEEDS_AGENT: Lazy<Agent> = Lazy::new(|| build_agent(Tier::Feeds.timeout_s()));
 
+/// The update-download client: same TLS and status policy as the GitHub
+/// tier, its 15 seconds kept on CONNECTING -- and no other deadline at
+/// all. A fixed total deadline can never fit a 294 MB tester snapshot on
+/// a real line: Python's `TIMEOUT = 15` was a per-operation socket timeout
+/// that never bounded the whole transfer, and porting it as
+/// `timeout_global` made every big update die mid-download ("timeout:
+/// global") and the updater re-offer forever -- the tester "restart loop"
+/// of 2026-08-31. Nor may `timeout_recv_response` stay: ureq charges the
+/// body reads that follow against that same phase timer, so a bounded
+/// response phase failed the retest at 25 percent ("timeout: receive
+/// response"). A stalled transfer is the player's call: the download
+/// screen speaks progress and Escape cancels.
+static DOWNLOAD_AGENT: Lazy<Agent> = Lazy::new(|| {
+    let timeout = Duration::from_secs_f64(Tier::GitHub.timeout_s());
+    let config = Agent::config_builder()
+        .timeout_connect(Some(timeout))
+        .http_status_as_error(false)
+        .tls_config(
+            TlsConfig::builder()
+                .root_certs(RootCerts::PlatformVerifier)
+                .build(),
+        )
+        .build();
+    Agent::new_with_config(config)
+});
+
+/// The client for streaming a release asset to disk. Everything else goes
+/// through [`agent`]; downloads alone must outlive any total deadline.
+pub fn download_agent() -> &'static Agent {
+    &DOWNLOAD_AGENT
+}
+
 /// The shared client for a tier. `ssl_context()` in Python was
 /// `lru_cache`d; these are built once per process the same way.
 ///
@@ -664,4 +696,38 @@ pub fn wait_seconds(event: &Event, seconds: f64) -> bool {
         0.0
     };
     event.wait(Duration::from_secs_f64(secs))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The download client must never carry a total deadline: one bounded
+    /// every update download at the same place regardless of connection
+    /// speed, so the 294 MB tester snapshot always died mid-transfer and
+    /// the updater re-offered it forever. Connecting and the response
+    /// headers keep the GitHub tier's timeout; the body must be unbounded.
+    #[test]
+    fn download_agent_has_no_total_deadline() {
+        let config = download_agent().config();
+        assert_eq!(config.timeouts().global, None);
+        // No response-phase deadline either: ureq charges body reads
+        // against it, which re-broke the download at 25 percent.
+        assert_eq!(config.timeouts().recv_response, None);
+        let expected = Some(Duration::from_secs_f64(Tier::GitHub.timeout_s()));
+        assert_eq!(config.timeouts().connect, expected);
+    }
+
+    /// The request tiers keep their deadlines: an API call that hangs must
+    /// still fail fast.
+    #[test]
+    fn request_tiers_keep_their_global_deadlines() {
+        for tier in [Tier::Orinks, Tier::GitHub, Tier::Feeds] {
+            assert_eq!(
+                agent(tier).config().timeouts().global,
+                Some(Duration::from_secs_f64(tier.timeout_s())),
+                "{tier:?}"
+            );
+        }
+    }
 }

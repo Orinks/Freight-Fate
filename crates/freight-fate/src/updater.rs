@@ -203,8 +203,30 @@ pub fn is_frozen() -> bool {
 }
 
 /// The folder holding the executable (and `_internal`).
+/// Undo `fs::canonicalize`'s Windows verbatim prefix (`\\?\C:\...`).
+///
+/// The apply script hands this path to robocopy, and robocopy refuses the
+/// `\\?\` form outright -- so on every Windows install both copies failed
+/// silently, the OLD build relaunched, and the same update was offered
+/// again: the other half of the tester "restart loop" (2026-08-31,
+/// reproduced over the MCP agent server with the copied script in hand).
+/// The drive form maps back to `C:\...`; a UNC share maps back to
+/// `\\server\share`.
+fn strip_verbatim(path: PathBuf) -> PathBuf {
+    let text = path.as_os_str().to_string_lossy();
+    if let Some(rest) = text.strip_prefix(r"\\?\UNC\") {
+        return PathBuf::from(format!(r"\\{rest}"));
+    }
+    if let Some(rest) = text.strip_prefix(r"\\?\") {
+        return PathBuf::from(rest.to_string());
+    }
+    path
+}
+
 pub fn install_root_in(env: &UpdaterEnv) -> PathBuf {
-    let exe = fs::canonicalize(&env.executable).unwrap_or_else(|_| env.executable.clone());
+    let exe = strip_verbatim(
+        fs::canonicalize(&env.executable).unwrap_or_else(|_| env.executable.clone()),
+    );
     exe.parent()
         .map(Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("."))
@@ -920,3 +942,31 @@ pub use apply::{
     apply_and_restart, apply_and_restart_with, can_auto_apply, download, extract, extracted_root,
     make_staging_dir, stage_update, stash_for_manual_install, write_apply_script, DownloadError,
 };
+
+#[cfg(test)]
+mod verbatim_tests {
+    use super::*;
+
+    /// robocopy refuses `\\?\` paths, so the verbatim prefix must never
+    /// reach the apply script. Both Windows forms map back; anything else
+    /// passes through untouched.
+    #[test]
+    fn verbatim_prefixes_are_stripped_for_the_apply_script() {
+        assert_eq!(
+            strip_verbatim(PathBuf::from(r"\\?\C:\Games\FreightFate\FreightFate.exe")),
+            PathBuf::from(r"C:\Games\FreightFate\FreightFate.exe")
+        );
+        assert_eq!(
+            strip_verbatim(PathBuf::from(r"\\?\UNC\server\share\FreightFate.exe")),
+            PathBuf::from(r"\\server\share\FreightFate.exe")
+        );
+        assert_eq!(
+            strip_verbatim(PathBuf::from(r"C:\Games\FreightFate.exe")),
+            PathBuf::from(r"C:\Games\FreightFate.exe")
+        );
+        assert_eq!(
+            strip_verbatim(PathBuf::from("/home/user/freightfate")),
+            PathBuf::from("/home/user/freightfate")
+        );
+    }
+}

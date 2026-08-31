@@ -1122,6 +1122,21 @@
   last stop. Quit anyway?" -- with Keep driving as the first choice.
   Quitting while parked is instant, the way it has always been.
 
+- **Updating the game actually works now.** Two things were broken, and
+  either one alone made the game offer you the same update over and over.
+  First, the download: the game put a hard time limit on the whole
+  download, and a full build can never fit through it, so accepting an
+  update failed partway every time. The time limit now applies only to
+  reaching the server -- as long as the download is making progress it
+  keeps going, the game announces every quarter, and Escape still
+  cancels. Second, the install: even a finished download was copied with
+  a folder address written in a form the copying tool refuses, so nothing
+  was actually replaced and the game came back up on the old version,
+  offering the same update again. The address is written plainly now.
+  Because the broken updater cannot install this fix on itself, please
+  download this build once by hand; updates after that take care of
+  themselves.
+
 - **The Mac build starts again.** The latest Mac download failed on launch
   with an error about a missing sound library, because a piece the game
   depended on quietly changed shape on the machines that build it. Everything
