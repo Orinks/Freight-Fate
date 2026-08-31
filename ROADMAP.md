@@ -131,6 +131,17 @@ off at their own bullet. The four tester bugs fixed the same day
 (speech-freeze, jam traffic, frozen approach countdown, briefing map
 key) arrived after the sweep and are already done.
 
+- [x] **Every staged release payload is scanned for secret-shaped content
+      (2026-08-30).** Prompted by a one-click decompile of a shipped
+      build: the code and assets are public or lift-able by design, so
+      the only absolute is that no credential ever ships. The payload
+      verifier now fails the build on secret-shaped file names (`.env*`,
+      `*.pem`, deploy keys) or content matching known token formats
+      (Convex deploy keys, Vercel blob tokens, GitHub tokens, private
+      key blocks, JWTs, AWS/Slack/OpenAI shapes). Binaries and media are
+      not scanned -- text credentials never belong there and false
+      positives would train everyone to ignore the gate.
+
 **The cutover checklist -- mechanical, unforgiving, one sitting.**
 Half of these hide inside already-checked bullets:
 

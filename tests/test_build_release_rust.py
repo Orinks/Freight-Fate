@@ -1115,3 +1115,38 @@ def test_macos_signing_verifies_the_final_bundle(tmp_path, monkeypatch):
             {"check": True},
         ),
     ]
+
+
+def test_secret_scan_rejects_planted_credentials(tmp_path):
+    """A payload carrying anything secret-shaped must never become a release."""
+    build_release = load_build_release_module()
+    staged = tmp_path / "FreightFate"
+    staged.mkdir()
+    (staged / "build_info.json").write_text(
+        '{"deploy": "prod:scrupulous-ferret-428|' + "a" * 40 + '"}', encoding="utf-8"
+    )
+    with pytest.raises(RuntimeError, match="Convex deploy key"):
+        build_release.verify_no_shipped_secrets(staged)
+
+    (staged / "build_info.json").write_text('{"channel": "dev"}', encoding="utf-8")
+    (staged / "notes.md").write_text("token ghp_" + "b" * 36, encoding="utf-8")
+    with pytest.raises(RuntimeError, match="GitHub token"):
+        build_release.verify_no_shipped_secrets(staged)
+
+    (staged / "notes.md").unlink()
+    (staged / ".env.local").write_text("VERCEL=1", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="secret-shaped file name"):
+        build_release.verify_no_shipped_secrets(staged)
+
+
+def test_secret_scan_passes_a_clean_payload_and_skips_binaries(tmp_path):
+    """Real payload text is clean, and media/binaries are not scanned at all."""
+    build_release = load_build_release_module()
+    staged = tmp_path / "FreightFate"
+    (staged / "freight_fate").mkdir(parents=True)
+    (staged / "build_info.json").write_text('{"channel": "dev"}', encoding="utf-8")
+    (staged / "CHANGELOG.md").write_text("- **Fixed** a thing.\n", encoding="utf-8")
+    # A token-shaped byte run inside a pack must not trip the scan: packs are
+    # opaque media, and false positives would train everyone to ignore it.
+    (staged / "freight_fate" / "sounds.pak").write_bytes(b"FFPK1 ghp_" + b"c" * 36)
+    build_release.verify_no_shipped_secrets(staged)

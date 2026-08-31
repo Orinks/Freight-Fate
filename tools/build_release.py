@@ -35,6 +35,7 @@ import json
 import os
 import platform
 import plistlib
+import re
 import shutil
 import subprocess
 import sys
@@ -1377,6 +1378,78 @@ def stage_rust_build(
     return build_dir
 
 
+# A player's machine is hostile territory: anything in the payload can and
+# will be read, so a leaked key is not a risk but a disclosure. The shapes
+# below cover every kind of credential this project touches (Convex deploy
+# keys, Vercel blob tokens, GitHub tokens, private key blocks) plus the
+# common cloud formats, matched against the payload's text files. Binaries
+# and media are skipped: the game's own code never embeds text credentials,
+# and scanning a 100 MB executable for 20-character patterns is pure noise.
+SECRET_CONTENT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    ("private key block", re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----")),
+    ("GitHub token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}")),
+    ("GitHub fine-grained token", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}")),
+    (
+        "Convex deploy key",
+        re.compile(r"\b(?:prod|preview|dev):[A-Za-z0-9-]+\|[A-Za-z0-9+/=_-]{20,}"),
+    ),
+    ("Vercel blob token", re.compile(r"\bvercel_blob_rw_[A-Za-z0-9_]{10,}")),
+    ("AWS access key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
+    ("Slack token", re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{10,}")),
+    ("OpenAI-style secret key", re.compile(r"\bsk-[A-Za-z0-9_-]{24,}")),
+    ("JWT", re.compile(r"\beyJ[A-Za-z0-9_-]{14,}\.eyJ[A-Za-z0-9_-]{14,}\.")),
+)
+
+SECRET_SCAN_SUFFIXES = {
+    ".cfg",
+    ".css",
+    ".html",
+    ".ini",
+    ".js",
+    ".json",
+    ".md",
+    ".plist",
+    ".toml",
+    ".txt",
+    ".xml",
+    ".yaml",
+    ".yml",
+}
+
+
+def verify_no_shipped_secrets(build_dir: Path) -> None:
+    """Fail the build if the staged payload carries anything secret-shaped.
+
+    Two checks: file NAMES that only ever hold credentials (`.env*`,
+    ``*.pem``, anything mentioning a deploy key), and file CONTENT matching
+    a known token format. Both fail fast and name the file, because the one
+    thing worse than a leaked key is a leaked key nobody noticed shipping.
+    """
+    findings: list[str] = []
+    for path in sorted(build_dir.rglob("*")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(build_dir).as_posix()
+        name = path.name.lower()
+        if name.startswith(".env") or name.endswith(".pem") or "deploy_key" in name:
+            findings.append(f"{relative}: secret-shaped file name")
+            continue
+        if path.suffix.lower() not in SECRET_SCAN_SUFFIXES:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for label, pattern in SECRET_CONTENT_PATTERNS:
+            if pattern.search(text):
+                findings.append(f"{relative}: looks like a {label}")
+    if findings:
+        raise RuntimeError(
+            "Release payload contains secret-shaped content and must not ship: "
+            + "; ".join(findings)
+        )
+
+
 def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> None:
     """Prove the staged Rust folder holds what the binary loads."""
     executable_root = runtime_root(build_dir)
@@ -1472,6 +1545,7 @@ def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> N
         )
 
     verify_sound_packs(build_dir)
+    verify_no_shipped_secrets(build_dir)
 
     if platform_name != "win32" and os.name != "nt" and not exe.stat().st_mode & 0o111:
         raise RuntimeError(f"Packaged executable is not runnable: {exe.relative_to(build_dir)}")
