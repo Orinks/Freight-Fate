@@ -226,12 +226,6 @@ pub fn route_pairs(world: &'static World, opts: &RoadOptions) -> Vec<(String, St
     if let (Some(origin), Some(destination)) = (&opts.origin, &opts.destination) {
         return vec![(origin.clone(), destination.clone())];
     }
-    let pairs = if opts.routes == RANDOM_ROUTES {
-        let seed = opts.seed.unwrap_or(DEPARTURE_TRIP_SEED);
-        random_pairs(world, opts.sample, opts.max_miles, seed)
-    } else {
-        all_world_pairs(world)
-    };
     let origin = opts
         .origin
         .as_deref()
@@ -240,17 +234,63 @@ pub fn route_pairs(world: &'static World, opts: &RoadOptions) -> Vec<(String, St
         .destination
         .as_deref()
         .map(|name| world.resolve_city_key(name));
-    pairs
-        .into_iter()
-        .filter(|(from, to)| {
+    if opts.routes == RANDOM_ROUTES {
+        let seed = opts.seed.unwrap_or(DEPARTURE_TRIP_SEED);
+        return random_pairs(world, opts.sample, opts.max_miles, seed)
+            .into_iter()
+            .filter(|(from, to)| {
+                origin
+                    .as_deref()
+                    .is_none_or(|wanted| world.resolve_city_key(from) == wanted)
+                    && destination
+                        .as_deref()
+                        .is_none_or(|wanted| world.resolve_city_key(to) == wanted)
+            })
+            .collect();
+    }
+    if origin.is_none() && destination.is_none() {
+        return all_world_pairs(world);
+    }
+    // One side is anchored, so filter BEFORE resolving routes, not after:
+    // `all_world_pairs` resolves every ordered pair -- 388,752 route lookups
+    // at 624 cities -- and filtering its result threw almost all of that
+    // work away. Anchoring one end leaves at most 623 lookups, which is the
+    // difference between the agent server's `start_at origin:"Denver"`
+    // answering in seconds and hanging for minutes with no progress.
+    let names = world.city_names();
+    let from_names: Vec<&String> = names
+        .iter()
+        .filter(|name| {
             origin
                 .as_deref()
-                .is_none_or(|wanted| world.resolve_city_key(from) == wanted)
-                && destination
-                    .as_deref()
-                    .is_none_or(|wanted| world.resolve_city_key(to) == wanted)
+                .is_none_or(|wanted| world.resolve_city_key(name) == wanted)
         })
-        .collect()
+        .collect();
+    let to_names: Vec<&String> = names
+        .iter()
+        .filter(|name| {
+            destination
+                .as_deref()
+                .is_none_or(|wanted| world.resolve_city_key(name) == wanted)
+        })
+        .collect();
+    let mut pairs = Vec::new();
+    for from in &from_names {
+        for to in &to_names {
+            if from == to {
+                continue;
+            }
+            if world
+                .supported_route(from, to, None)
+                .ok()
+                .flatten()
+                .is_some()
+            {
+                pairs.push((speakable(world, from), speakable(world, to)));
+            }
+        }
+    }
+    pairs
 }
 
 /// Candidate city pairs for a loaded departure search.

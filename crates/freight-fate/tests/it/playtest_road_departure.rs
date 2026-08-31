@@ -205,3 +205,49 @@ fn selected_departure_starts_loaded_on_its_real_facility_chain_with_speed_keeper
         );
     });
 }
+
+/// An origin with no destination must anchor the route enumeration, not
+/// filter it afterwards: `all_world_pairs` resolves every ordered city pair
+/// (388,752 route lookups at 624 cities), which is why the agent server's
+/// `start_at origin:"Denver"` hung for minutes with no progress. Anchored,
+/// the same call is at most one lookup per other city and answers in
+/// seconds -- and every pair it returns really starts at the anchor and is
+/// a supported route.
+#[test]
+fn origin_only_route_pairs_stay_anchored_and_answer_fast() {
+    let world = get_world();
+    let opts = RoadOptions {
+        feature: "departure".to_string(),
+        origin: Some("Denver".to_string()),
+        trip_seed: Some(TRIP_SEED),
+        ..Default::default()
+    };
+    let started = std::time::Instant::now();
+    let pairs = route_pairs(world, &opts);
+    let elapsed = started.elapsed();
+
+    assert!(!pairs.is_empty(), "Denver has no supported routes at all?");
+    let wanted = world.resolve_city_key("Denver");
+    for (from, to) in &pairs {
+        assert_eq!(
+            world.resolve_city_key(from),
+            wanted,
+            "a pair leaked in from another origin: {from} -> {to}"
+        );
+        assert!(
+            world
+                .supported_route(from, to, None)
+                .ok()
+                .flatten()
+                .is_some(),
+            "unsupported route returned: {from} -> {to}"
+        );
+    }
+    // Generous ceiling: the anchored path is a few hundred lookups. The
+    // quadratic path this guards against took minutes, so a bound this loose
+    // still fails it immediately without ever flaking on a slow machine.
+    assert!(
+        elapsed.as_secs() < 60,
+        "origin-anchored route_pairs took {elapsed:?}; the quadratic fan is back"
+    );
+}
