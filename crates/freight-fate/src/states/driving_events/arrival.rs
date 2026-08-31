@@ -375,6 +375,19 @@ impl DrivingState {
     }
 
     /// `presence()`: broad, privacy-safe activity for Discord Rich Presence.
+    /// The tractor named on the drivers board and in Discord presence: the
+    /// one the driver is IN. `active_truck_key`, never the raw
+    /// `profile.truck` field -- for a company driver that field is
+    /// save-compat storage, and reading it had the board naming Brandon's
+    /// old yard mule while he drove the fleet's presidential sleeper
+    /// (reported 2026-08-31).
+    pub fn presence_truck_label(profile: &ff_core::models::profile::Profile) -> &'static str {
+        TRUCK_CATALOG
+            .get(profile.active_truck_key().as_str())
+            .map(|truck| truck.label)
+            .unwrap_or("")
+    }
+
     pub fn presence_state(&self, ctx: &GameContext) -> Option<PresenceState> {
         let total = if self.trip.total_miles() == 0.0 {
             1.0
@@ -383,10 +396,11 @@ impl DrivingState {
         };
         let fraction = self.trip.position_mi / total;
         let moving = self.trip.truck.speed_mph() >= 1.0;
-        let truck = ctx
+        let truck_label = ctx
             .profile
             .as_ref()
-            .and_then(|profile| TRUCK_CATALOG.get(profile.truck.as_str()));
+            .map(Self::presence_truck_label)
+            .unwrap_or("");
         Some(driving_presence(
             self.phase,
             self.job.spoken_origin(),
@@ -394,7 +408,7 @@ impl DrivingState {
             self.job.cargo.label,
             fraction,
             moving,
-            truck.map(|truck| truck.label).unwrap_or(""),
+            truck_label,
         ))
     }
 

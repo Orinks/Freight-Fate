@@ -1122,6 +1122,13 @@
   last stop. Quit anyway?" -- with Keep driving as the first choice.
   Quitting while parked is instant, the way it has always been.
 
+- **The drivers board names the truck you are actually in.** A company
+  driver's board line used to show the truck their career file remembered
+  -- usually the old yard mule -- instead of the tractor the carrier
+  assigned them, so a driver in the presidential sleeper still read as
+  driving the yard mule to everyone online. The board and Discord now
+  name the assigned tractor, the same one every other screen reports.
+
 - **Updating the game actually works now.** Two things were broken, and
   either one alone made the game offer you the same update over and over.
   First, the download: the game put a hard time limit on the whole

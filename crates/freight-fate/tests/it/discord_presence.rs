@@ -608,3 +608,29 @@ fn test_a_late_handshake_never_shows_a_presence_after_switching_it_off() {
     assert!(!presence.connected());
     assert!(!presence.enabled());
 }
+
+/// The board and Discord must name the tractor the driver is IN. For a
+/// company driver that is the fleet assignment, not the profile's raw
+/// `truck` field -- which is save-compat storage and had the drivers board
+/// naming Brandon's old yard mule while he drove the presidential sleeper
+/// (reported 2026-08-31).
+#[test]
+fn test_presence_names_the_fleet_assignment_not_the_stored_truck() {
+    use ff_core::models::career::LEVEL_XP;
+    use ff_core::models::profile::Profile;
+    use freight_fate::states::driving::DrivingState;
+
+    let mut profile = Profile::new();
+    profile.career.xp = LEVEL_XP[16]; // level 17: "first pick of the yard"
+    profile.truck = "yard_mule".to_string();
+
+    let label = DrivingState::presence_truck_label(&profile);
+    assert_ne!(label, "yard mule", "the stored truck leaked into presence");
+    assert_ne!(label, "", "no tractor label resolved at all");
+    let assigned = profile.active_truck_key();
+    let expected = ff_core::models::trucks::TRUCK_CATALOG
+        .get(assigned.as_str())
+        .map(|t| t.label)
+        .unwrap();
+    assert_eq!(label, expected);
+}
