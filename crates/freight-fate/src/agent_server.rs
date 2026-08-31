@@ -33,6 +33,7 @@
 //! mode prints goes to stderr.
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::io::{BufRead, Write as _};
 use std::rc::Rc;
 use std::sync::mpsc;
@@ -179,6 +180,8 @@ struct TeeAudio {
     inner: Box<dyn Audio>,
     ears: SharedEars,
     weather_key: Option<String>,
+    ambient_key: Option<String>,
+    loop_keys: HashMap<u32, String>,
 }
 
 impl TeeAudio {
@@ -250,7 +253,10 @@ impl Audio for TeeAudio {
         self.inner.has_asset(key)
     }
     fn start_loop_with(&mut self, channel: u32, key: &str, volume: f64, fade_ms: u32) {
-        self.hear(format!("[sound bed] {key} starts"));
+        if self.loop_keys.get(&channel).map(String::as_str) != Some(key) {
+            self.hear(format!("[sound bed] {key} starts"));
+            self.loop_keys.insert(channel, key.to_string());
+        }
         self.inner.start_loop_with(channel, key, volume, fade_ms);
     }
     fn set_loop_volume(&mut self, channel: u32, volume: f64) {
@@ -260,6 +266,7 @@ impl Audio for TeeAudio {
         self.inner.set_loop_pan(channel, pan);
     }
     fn stop_loop_with(&mut self, channel: u32, fade_ms: u32) {
+        self.loop_keys.remove(&channel);
         self.inner.stop_loop_with(channel, fade_ms);
     }
     fn start_sustain_loop_with(
@@ -269,11 +276,15 @@ impl Audio for TeeAudio {
         spec: SustainLoopSpec,
         volume: f64,
     ) {
-        self.hear(format!("[sound bed] {key} starts"));
+        if self.loop_keys.get(&channel).map(String::as_str) != Some(key) {
+            self.hear(format!("[sound bed] {key} starts"));
+            self.loop_keys.insert(channel, key.to_string());
+        }
         self.inner
             .start_sustain_loop_with(channel, key, spec, volume);
     }
     fn release_sustain_loop_with(&mut self, channel: u32, fade_ms: u32) {
+        self.loop_keys.remove(&channel);
         self.inner.release_sustain_loop_with(channel, fade_ms);
     }
     fn hold_alert_with(&mut self, key: &str, volume: f64, fade_ms: u32) {
@@ -329,8 +340,13 @@ impl Audio for TeeAudio {
         self.inner.set_wind(intensity);
     }
     fn set_ambient_with(&mut self, key: Option<&str>, volume: f64) {
-        if let Some(key) = key {
-            self.hear(format!("[ambience] {key}"));
+        let audible_key = key.filter(|_| volume > 0.0);
+        if audible_key != self.ambient_key.as_deref() {
+            match audible_key {
+                Some(key) => self.hear(format!("[ambience] {key}")),
+                None => self.hear("[ambience] stopped".to_string()),
+            }
+            self.ambient_key = audible_key.map(str::to_string);
         }
         self.inner.set_ambient_with(key, volume);
     }
@@ -354,6 +370,10 @@ impl Audio for TeeAudio {
         if self.weather_key.take().is_some() {
             self.hear("[weather] stopped".to_string());
         }
+        if self.ambient_key.take().is_some() {
+            self.hear("[ambience] stopped".to_string());
+        }
+        self.loop_keys.clear();
         self.inner.stop_world();
     }
     fn play_music_with(&mut self, track: &str, fade_ms: u32) {
@@ -401,6 +421,8 @@ pub fn install_ears(app: &mut App) -> SharedEars {
         inner: audio,
         ears: Rc::clone(&ears),
         weather_key: None,
+        ambient_key: None,
+        loop_keys: HashMap::new(),
     });
     ears
 }
@@ -441,6 +463,7 @@ enum Command {
     Press {
         key: Key,
         text: Option<char>,
+        mods: Mods,
         times: i64,
     },
     Hold {
@@ -507,17 +530,15 @@ impl AgentPolicy {
         while let Ok(request) = self.requests.try_recv() {
             let reply = request.reply;
             match request.command {
-                Command::Press { key, text, times } => {
+                Command::Press {
+                    key,
+                    text,
+                    mods,
+                    times,
+                } => {
                     for _ in 0..times.clamp(1, 50) {
-                        input.queue_player_input(InputEvent::KeyDown {
-                            key,
-                            mods: Mods::NONE,
-                            text,
-                        });
-                        input.queue_player_input(InputEvent::KeyUp {
-                            key,
-                            mods: Mods::NONE,
-                        });
+                        input.queue_player_input(InputEvent::KeyDown { key, mods, text });
+                        input.queue_player_input(InputEvent::KeyUp { key, mods });
                     }
                     let _ = reply.send(Ok(
                         "pressed. Wait a moment (wait tool) then listen; the game \
@@ -657,6 +678,12 @@ fn parse_key(name: &str) -> Option<(Key, Option<char>)> {
         "end" => Key::End,
         "pageup" => Key::PageUp,
         "pagedown" => Key::PageDown,
+        "f1" => Key::F1,
+        "f2" => Key::F2,
+        "control" | "ctrl" => Key::LCtrl,
+        "shift" => Key::LShift,
+        "+" | "plus" => return Some((Key::Plus, Some('+'))),
+        "-" | "minus" => return Some((Key::Minus, Some('-'))),
         "comma" => Key::Comma,
         "period" => Key::Period,
         _ => return None,
@@ -676,19 +703,27 @@ fn tools_list() -> Value {
         tool(
             "press",
             "Tap a key, as a player would: letters a-z, digits, up, down, left, right, \
-             enter, escape, space, tab, backspace, home, end, comma, period. The game \
+             enter, escape, space, tab, backspace, home, end, pageup, pagedown, f1, f2, \
+             control, plus, minus, comma, period. Use modifiers for chords such as Alt+A, \
+             Shift+K, or Ctrl+Plus. The game \
              starts at its real title menu; menus use arrows and enter, and the drive \
              uses the game's own key bindings. After pressing, wait a beat and listen.",
             json!({
                 "key": {"type": "string"},
+                "modifiers": {
+                    "type": "array",
+                    "items": {"type": "string", "enum": ["shift", "ctrl", "alt"]},
+                    "uniqueItems": true,
+                    "description": "optional modifier keys held for this tap"
+                },
                 "times": {"type": "integer", "description": "repeat count, default 1, max 50"},
             }),
             &["key"],
         ),
         tool(
             "hold",
-            "Hold a key down (throttle, brake, steering are hold keys at the wheel). \
-             Pair with release.",
+            "Hold a key down (throttle, brake, steering, and the manual-transmission Shift \
+             clutch are hold keys at the wheel). Pair with release.",
             json!({"key": {"type": "string"}}),
             &["key"],
         ),
@@ -839,12 +874,32 @@ fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, Strin
         let name = args.get("key").and_then(Value::as_str).unwrap_or("");
         parse_key(name).ok_or_else(|| format!("{name:?} is not a key this server knows"))
     };
+    let modifiers = |args: &Map<String, Value>| -> Result<Mods, String> {
+        let mut mods = Mods::NONE;
+        let Some(values) = args.get("modifiers") else {
+            return Ok(mods);
+        };
+        let values = values
+            .as_array()
+            .ok_or_else(|| "modifiers must be an array".to_string())?;
+        for value in values {
+            let name = value.as_str().unwrap_or("").to_ascii_lowercase();
+            match name.as_str() {
+                "shift" => mods.shift = true,
+                "control" | "ctrl" => mods.ctrl = true,
+                "alt" => mods.alt = true,
+                _ => return Err(format!("{name:?} is not a modifier this server knows")),
+            }
+        }
+        Ok(mods)
+    };
     match name {
         "press" => {
             let (key, text) = key_arg(args)?;
             Ok(Command::Press {
                 key,
                 text,
+                mods: modifiers(args)?,
                 times: args.get("times").and_then(Value::as_i64).unwrap_or(1),
             })
         }
@@ -974,7 +1029,7 @@ fn discover(
         pairs.len()
     );
     let started = std::time::Instant::now();
-    let hits = road::find_feature(world, &pairs, feature, &opts, opts.seed);
+    let hits = road::find_feature_seeded(world, &pairs, feature, &opts);
     eprintln!(
         "[agent-server] search finished in {:.1}s: {} match(es)",
         started.elapsed().as_secs_f64(),
@@ -1113,7 +1168,141 @@ mod tests {
             inner: Box::new(AudioEngine::with_backend(Box::new(NullBackend::new()))),
             ears: Rc::clone(ears),
             weather_key: None,
+            ambient_key: None,
+            loop_keys: HashMap::new(),
         }
+    }
+
+    #[test]
+    fn press_parser_reaches_the_function_key_help_surface() {
+        assert_eq!(parse_key("f1"), Some((Key::F1, None)));
+        assert_eq!(parse_key("F2"), Some((Key::F2, None)));
+    }
+
+    #[test]
+    fn press_parser_reaches_speech_stop_and_speed_adjustment_keys() {
+        assert_eq!(parse_key("control"), Some((Key::LCtrl, None)));
+        assert_eq!(parse_key("ctrl"), Some((Key::LCtrl, None)));
+        assert_eq!(parse_key("shift"), Some((Key::LShift, None)));
+        assert_eq!(parse_key("plus"), Some((Key::Plus, Some('+'))));
+        assert_eq!(parse_key("minus"), Some((Key::Minus, Some('-'))));
+    }
+
+    #[test]
+    fn press_command_carries_modifier_chords_to_the_game() {
+        let args = serde_json::from_value(json!({
+            "key": "a",
+            "modifiers": ["alt", "shift"]
+        }))
+        .unwrap();
+
+        let command = build_command("press", &args).unwrap();
+
+        let Command::Press {
+            key,
+            text,
+            mods,
+            times,
+        } = command
+        else {
+            panic!("press tool did not build a press command");
+        };
+        assert_eq!(key, Key::A);
+        assert_eq!(text, Some('a'));
+        assert_eq!(
+            mods,
+            Mods {
+                shift: true,
+                ctrl: false,
+                alt: true,
+            }
+        );
+        assert_eq!(times, 1);
+    }
+
+    #[test]
+    fn press_command_rejects_unknown_modifiers() {
+        let args = serde_json::from_value(json!({
+            "key": "a",
+            "modifiers": ["meta"]
+        }))
+        .unwrap();
+
+        let error = match build_command("press", &args) {
+            Ok(_) => panic!("unknown modifier was accepted"),
+            Err(error) => error,
+        };
+        assert_eq!(error, "\"meta\" is not a modifier this server knows");
+    }
+
+    #[test]
+    fn scale_discovery_only_stages_scales_open_in_the_built_drive() {
+        let (hit, _opts, found, picked) = discover("scale", None, None, 83, usize::MAX).unwrap();
+
+        assert!(found > 0);
+        assert_eq!(picked, found);
+        assert!(hit.label.starts_with("OPEN scale:"), "{}", hit.label);
+    }
+
+    #[test]
+    fn ears_report_a_continuing_sound_bed_once_until_it_stops() {
+        let ears: SharedEars = Rc::new(RefCell::new(Ears::default()));
+        let mut audio = tee_audio(&ears);
+
+        audio.start_loop_with(4, "poi/weigh_station_lane", 0.5, 0);
+        audio.start_loop_with(4, "poi/weigh_station_lane", 0.6, 0);
+        assert_eq!(
+            drain_ears(&ears)
+                .lines()
+                .filter(|line| *line == "[sound bed] poi/weigh_station_lane starts")
+                .count(),
+            1
+        );
+
+        audio.stop_loop_with(4, 0);
+        audio.start_loop_with(4, "poi/weigh_station_lane", 0.5, 0);
+        assert_eq!(
+            drain_ears(&ears),
+            "[sound bed] poi/weigh_station_lane starts"
+        );
+    }
+
+    #[test]
+    fn ears_report_ambient_transitions_without_frame_by_frame_repeats() {
+        let ears: SharedEars = Rc::new(RefCell::new(Ears::default()));
+        let mut audio = tee_audio(&ears);
+
+        audio.set_ambient_with(Some("ambience/night"), 0.4);
+        audio.set_ambient_with(Some("ambience/night"), 0.5);
+        audio.set_ambient_with(None, 0.0);
+        audio.set_ambient_with(Some("ambience/night"), 0.4);
+
+        assert_eq!(
+            drain_ears(&ears).lines().collect::<Vec<_>>(),
+            vec![
+                "[ambience] ambience/night",
+                "[ambience] stopped",
+                "[ambience] ambience/night",
+            ]
+        );
+    }
+
+    #[test]
+    fn stopping_world_allows_the_same_sound_bed_to_be_reported_again() {
+        let ears: SharedEars = Rc::new(RefCell::new(Ears::default()));
+        let mut audio = tee_audio(&ears);
+
+        audio.start_loop_with(4, "poi/weigh_station_lane", 0.5, 0);
+        audio.stop_world();
+        audio.start_loop_with(4, "poi/weigh_station_lane", 0.5, 0);
+
+        assert_eq!(
+            drain_ears(&ears)
+                .lines()
+                .filter(|line| *line == "[sound bed] poi/weigh_station_lane starts")
+                .count(),
+            2
+        );
     }
 
     #[test]
