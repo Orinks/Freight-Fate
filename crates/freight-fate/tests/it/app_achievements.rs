@@ -6,16 +6,24 @@
 //! trackers at the wheel, and the main-menu achievements screens -- which
 //! `ff-core` cannot see, so these cases live on this side of the dependency.
 
+use std::path::Path;
+use std::sync::Arc;
+
 use ff_core::achievements::{achievement_by_id, achievements_in_category, categories};
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, JobBoard, OfferOptions};
 use ff_core::models::profile::Profile;
 use ff_core::radio::{effective_range_miles, RadioReception, RadioStation};
+use ff_core::sim::real_traffic::wall_clock;
 use ff_core::sim::trip_models::{NavigationCue, TripEvent, TripEventData, TripEventKind};
 use ff_core::speech_text::{achievement_announced, SpokenMessage};
-use serde_json::json;
+use serde_json::{json, Value};
 
 use freight_fate::app::testing::TestApp;
+use freight_fate::net::testing::ClosureTransport;
+use freight_fate::net::{NetError, SharedTransport};
+use freight_fate::online_journal::JournalOutbox;
+use freight_fate::online_presence::OnlineIdentity;
 
 use crate::states_main_menu_support::*;
 use freight_fate::app::share;
@@ -95,7 +103,81 @@ fn earned(app: &TestApp, id: &str) -> bool {
         .any(|a| a == id)
 }
 
+/// A journal that can queue safely in an app test without reaching the network.
+fn offline_journal(path: &Path) -> JournalOutbox {
+    let transport: SharedTransport = Arc::new(ClosureTransport(
+        |_url: &str,
+         _payload: Option<&Value>,
+         _headers: &[(String, String)],
+         _method: Option<&str>| { Err(NetError::other("OSError", "offline")) },
+    ));
+    JournalOutbox::with(
+        Some(OnlineIdentity::new(
+            "driver-1234",
+            &format!("ffd_{}", "a".repeat(64)),
+        )),
+        true,
+        path,
+        transport,
+        wall_clock(),
+    )
+}
+
 // -- GameContext::award_achievement -------------------------------------------------
+
+#[test]
+fn test_account_new_achievement_queues_once_across_two_careers() {
+    // The journals are deliberately separate so their own event-id dedupe
+    // cannot hide a missing account-ledger check.
+    let mut app = TestApp::new();
+    let first_journal = offline_journal(&app.data_dir.path().join("first-journal.json"));
+    app.ctx.services.journal = first_journal.clone();
+    app.ctx.profile = Some(Profile::named("First Career"));
+    let first_path = app.ctx.profile.as_ref().expect("a career").path();
+
+    assert!(app.ctx.award_achievement("first_delivery").is_some());
+
+    let second_journal = offline_journal(&app.data_dir.path().join("second-journal.json"));
+    app.ctx.services.journal = second_journal.clone();
+    app.ctx.profile = Some(Profile::named("Second Career"));
+    let second_path = app.ctx.profile.as_ref().expect("a career").path();
+
+    assert!(app.ctx.award_achievement("first_delivery").is_some());
+    assert_eq!(
+        first_journal.items().len() + second_journal.items().len(),
+        1
+    );
+    assert_eq!(
+        Profile::load(&first_path).unwrap().achievements,
+        ["first_delivery"]
+    );
+    assert_eq!(
+        Profile::load(&second_path).unwrap().achievements,
+        ["first_delivery"]
+    );
+}
+
+#[test]
+fn test_ledger_write_failure_keeps_career_award_but_suppresses_public_event() {
+    let mut app = TestApp::new();
+    app.ctx.services.journal = offline_journal(&app.data_dir.path().join("journal.json"));
+    let blocked_data_dir = app.data_dir.path().join("blocked-data-dir");
+    std::fs::write(&blocked_data_dir, b"a file, not a directory").unwrap();
+    app.ctx.account_achievements =
+        freight_fate::account_achievements::AccountAchievements::empty(&blocked_data_dir);
+    app.ctx.profile = Some(Profile::named("Ledger Failure"));
+    let audio = app.record_audio();
+    app.clear_speech();
+
+    assert!(app.ctx.award_achievement("first_delivery").is_some());
+    assert!(earned(&app, "first_delivery"));
+    assert_eq!(
+        app.main_lines(),
+        vec![achievement_announced("Signed, Sealed, Hauled").normal]
+    );
+    assert_eq!(audio.borrow().played.len(), 1);
+    assert!(app.ctx.services.journal.items().is_empty());
+}
 
 #[test]
 fn test_award_speaks_the_short_line_and_logs_the_flavor() {

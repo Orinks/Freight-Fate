@@ -766,13 +766,36 @@ impl GameContext {
             .map(|d| d.as_millis() as i64)
             .unwrap_or(0);
         let achievement = result.achievement;
-        if queue_achievement(
-            &self.services.journal,
-            achievement.id,
-            achievement.name,
-            achievement.description,
-            earned_at_ms,
-        ) {
+        // Sandboxed sessions keep their throwaway career progress isolated
+        // from both the installation ledger and public sharing.
+        let queue_public_event = if self.school_sandbox || self.playtest_sandbox {
+            false
+        } else {
+            match self
+                .account_achievements
+                .record(achievement.id, Some(earned_at_ms))
+            {
+                Ok(is_new_to_account) => is_new_to_account,
+                Err(error) => {
+                    // Do not post an achievement that failed to enter the
+                    // durable ledger: a later retry could duplicate it.
+                    log::error!(
+                        "Could not record account achievement {:?}: {error}",
+                        achievement.id
+                    );
+                    false
+                }
+            }
+        };
+        if queue_public_event
+            && queue_achievement(
+                &self.services.journal,
+                achievement.id,
+                achievement.name,
+                achievement.description,
+                earned_at_ms,
+            )
+        {
             self.services.journal.flush_async();
         }
         self.achievement_notice = result.message.normal.clone();
