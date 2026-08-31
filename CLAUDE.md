@@ -139,7 +139,12 @@ need depends on what you touched.
   process interaction to validate or control Freight Fate. These tools do not
   reliably control Pygame and can disrupt a player's active drive. Use the
   deterministic headless transcript/playtest harness, automated tests, and
-  user-provided manual validation instead.
+  user-provided manual validation instead. For agent-driven play against the
+  REAL game (real runtime, real audio, real menus), the sanctioned path is
+  `freightfate --agent-server`: an MCP server inside the game that gives an
+  agent a player's capabilities only -- keys in through the normal input
+  seam, ears out (both speech channels plus every earcon and cue) -- always
+  in the audited playtest sandbox, never against the owner's account.
 
 ## World and route data
 

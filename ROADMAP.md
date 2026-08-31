@@ -5335,6 +5335,32 @@ onto exit signalling.
       per-corridor (specific turnpikes, break-and-remake yards at the
       state line). When corridor-level LCV data exists, tighten the
       gate from state pairs to the actual turnpike legs.
+- [x] **An MCP server inside the real game, so an AI agent can play it --
+      landed 2026-08-30 (`freightfate --agent-server`).** Owner call,
+      seconded by bscross32's BeamNG experience: connect the agent to the
+      GAME, not to a harness -- the harness runs the game's states but not
+      its runtime (fake pacer clock, recorded audio, captured speech, no
+      real startup path, which is where the deaf-menu bug lives). The
+      server rides `run_with_player_input`, the same bounded per-frame
+      seam as the autonomous road observer, so an agent gets a player's
+      capabilities only: press/hold/release/wait in, and `listen` out --
+      BOTH channels of speech through the real verbosity ladder plus
+      every earcon, cue, sound bed, horn, radio and engine-pitch move,
+      because quiet mode's whole point is that sound carries what speech
+      does not. One `observe` inspector (the bounded
+      `DrivingObservation`) is labeled ground-truth-not-ears: an agent
+      that needs it to drive has found a spoken-surface gap, which is a
+      finding. Always in the audited playtest sandbox; speech stays
+      audible so the owner can listen to the agent play. Newline JSON-RPC
+      on stdio; smoke-tested live (title menu, earcons, menu focus,
+      quit).
+- [ ] **Agent playtest probes worth running now the server exists.** A
+      spoken-surface navigability probe: an agent at each verbosity rung
+      tries to complete a first delivery using ears alone; every place it
+      reaches for `observe` is a candidate gap. And a session recorder:
+      dump the input trace so a weird agent-found path can be replayed
+      and frozen into a break-battery scenario (exploration finds, the
+      battery pins).
 - [ ] **The frame-time p99 budget test is load-sensitive (found
       2026-08-30, pre-existing).** `frame_time::a_driven_frame_stays_
       well_inside_the_sixty_hertz_budget` fails inside a full

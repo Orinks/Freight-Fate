@@ -170,6 +170,16 @@ impl PlayerInputFrame<'_> {
     pub fn event_speech_busy(&mut self) -> bool {
         self.app.ctx.event_voice_busy()
     }
+
+    /// The rows of the menu on screen and which has focus, read the same
+    /// way the playtest harness reads them (off the rendered lines), or
+    /// `None` when the current screen is not a menu. A value snapshot, in
+    /// the same spirit as [`PlayerInputFrame::driving_observation`].
+    pub fn menu_rows(&self) -> Option<(Vec<String>, usize)> {
+        let state = self.app.state()?;
+        let state = state.borrow();
+        crate::playtest::menu::menu_rows(&*state, &self.app.ctx)
+    }
 }
 
 impl App {

@@ -177,6 +177,9 @@ fn run(args: &[String]) -> i32 {
     if has(args, "--playtest-road") {
         return playtest_road(args);
     }
+    if has(args, "--agent-server") {
+        return freight_fate::agent_server::run(has(args, "--reset"));
+    }
     app::main_with(CliOptions::parse(args.iter().cloned()))
 }
 
@@ -184,6 +187,7 @@ fn run(args: &[String]) -> i32 {
 /// A new switch must be added here or it will be refused -- deliberately: a
 /// silent fall-through is what made `--help` launch the game.
 const KNOWN_SWITCHES: &[&str] = &[
+    "--agent-server",
     "--ai",
     "--assists",
     "--at",
@@ -270,6 +274,9 @@ Drive tools:
   --list-break-scenarios            name every adversarial scenario
   --break-scenario NAME             run one, --transcript to hear it
   --break-battery                   run them all and print the verdicts
+  --agent-server                    the real game with an MCP server on stdio,
+                                    so an AI agent can play it (sandboxed;
+                                    --reset for a fresh sandbox)
   --log PATH                        session log for the watcher
 ";
 
