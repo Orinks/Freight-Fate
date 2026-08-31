@@ -517,7 +517,11 @@ Everything not listed here ships fine after 1.9.0.
       (2026-08-29).** The release builder creates `FreightFate.app`, carries
       BASS and Prism inside it (SDL2 is compiled into the executable since
       2026-08-30), audits every bundled binary for dependencies a player's Mac
-      cannot satisfy, and ad-hoc signs the whole bundle. VoiceOver through
+      cannot satisfy, and ad-hoc signs the whole bundle. Since 2026-08-31 the
+      runner also BOOTS the packaged app for five frames (--smoke, dummy
+      drivers) -- the hang that forced non-launch verification was the boot
+      probes, gone since they moved to worker threads -- so a Mac zip that
+      cannot start fails the build instead of shipping. VoiceOver through
       Prism still needs a listening pass on a physical Mac.
 - [ ] **Rust port: no Linux build.** `.github/workflows/rust.yml` vendors SDL2
       for windows-x86_64 only, and BASS has no pinned Linux build; there
