@@ -236,6 +236,42 @@ fn test_a_weigh_station_offers_no_bed_and_no_motel() {
 }
 
 #[test]
+fn test_only_hospitality_and_parking_stops_earn_the_truck_stop_achievement() {
+    for (stop_type, should_earn) in [
+        ("truck_stop", true),
+        ("travel_center", true),
+        ("fuel_station", true),
+        ("service_plaza", true),
+        ("public_rest_area", true),
+        ("truck_parking", true),
+        ("weigh_station", false),
+        ("repair_shop", false),
+    ] {
+        let mut app = TestApp::new();
+        let drive = a_wear_drive(&mut app, LEASED_OWNER_OPERATOR);
+        let at = with_drive(&drive, |d| {
+            d.trip.truck.velocity_mps = 0.0;
+            d.trip.position_mi
+        });
+        let mut stop = travel_center("Roadside facility", at);
+        stop.stop_type = stop_type.to_string();
+        drive_and_ctx(&drive, &mut app, |driving, ctx| {
+            driving.open_poi_stop(ctx, &stop, false, None);
+        });
+
+        let earned = app
+            .ctx
+            .profile
+            .as_ref()
+            .expect("a career")
+            .achievements
+            .iter()
+            .any(|id| id == "first_rest_stop");
+        assert_eq!(earned, should_earn, "unexpected result for {stop_type}");
+    }
+}
+
+#[test]
 fn test_a_motel_bed_is_not_five_by_two() {
     // The badge is ten hours in the bunk; a motel room is the night you
     // specifically did not spend in it. Every sleep path used to award it
@@ -287,6 +323,28 @@ fn test_a_motel_bed_is_not_five_by_two() {
             .iter()
             .any(|id| id == "slept_on_route"),
         "a motel bed is the night you did not spend in the bunk"
+    );
+
+    // The alternate motel offered when truck parking is full follows the
+    // same rule. It must not turn a paid room into sleeper-berth sleep.
+    {
+        let profile = app.ctx.profile.as_mut().expect("a career");
+        profile.hos.drive(600.0);
+        profile.fatigue = 80.0;
+        profile.achievements.retain(|id| id != "slept_on_route");
+    }
+    let mut full_lot =
+        ParkingFullState::with_drive(DriveRef::of(&drive), travel_center("Prairie Plaza", at));
+    activate(&mut full_lot, &mut app.ctx, "Motel room");
+    assert!(
+        !app.ctx
+            .profile
+            .as_ref()
+            .expect("a career")
+            .achievements
+            .iter()
+            .any(|id| id == "slept_on_route"),
+        "a full-lot motel bed is not the truck's bunk"
     );
 }
 

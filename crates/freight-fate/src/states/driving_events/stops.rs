@@ -411,6 +411,16 @@ impl DrivingState {
             return;
         }
         self.push_rest_stop_state(ctx, stop, prefer_sleep);
-        ctx.award_achievement("first_rest_stop");
+        if matches!(
+            stop.stop_type.as_str(),
+            "truck_stop"
+                | "travel_center"
+                | "fuel_station"
+                | "service_plaza"
+                | "public_rest_area"
+                | "truck_parking"
+        ) {
+            ctx.award_achievement("first_rest_stop");
+        }
     }
 }

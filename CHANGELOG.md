@@ -1113,6 +1113,10 @@
 
 ### Fixed
 
+- **Roadside achievements now match where you actually stopped.** Pulling into
+  a weigh station or repair shop no longer earns Sweetheart of the Truck Stop,
+  and taking a motel room never counts as sleeping in the truck's bunk.
+
 - **Stopping assistance now handles every facility entrance consistently.**
   The former destination and planned-rest-stop options are one Facility
   stopping assistance setting for pickups, deliveries, planned rest stops,
