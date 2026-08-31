@@ -1113,6 +1113,12 @@
 
 ### Fixed
 
+- **The first-day briefing says your city's name properly.** It used to
+  say the map's internal name for your starting city -- "parked at
+  Chicago Company Yard in the chicago underscore i l underscore u s
+  service area" -- instead of "the Chicago service area". It speaks the
+  city the way every other line does now.
+
 - **Real time driving no longer leaves the road empty for minutes at a time.**
   When its nearby traffic bubble is completely empty, the road now converts
   its normal route volume and time-of-day density into a real-time arrival
