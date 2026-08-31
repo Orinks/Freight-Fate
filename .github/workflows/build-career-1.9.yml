@@ -135,6 +135,10 @@ jobs:
       CARGO_TERM_COLOR: always
       RUST_BACKTRACE: "1"
       HOMEBREW_NO_AUTO_UPDATE: "1"
+      # The bundled SDL2 source declares a cmake_minimum_required older
+      # than CMake 4 accepts; this is CMake's own escape hatch for exactly
+      # that, and building SDL2 in is what keeps sdl2-compat/SDL3 out.
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5"
     steps:
       - uses: actions/checkout@v6
         with:
@@ -150,8 +154,11 @@ jobs:
       - name: Install the pinned Rust toolchain
         run: rustup show
 
-      - name: Install macOS dependencies
-        run: brew install sdl2 pkg-config
+      # No brewed SDL: Homebrew's sdl2 is sdl2-compat, which loads SDL3 at
+      # runtime and dies on player Macs without Homebrew. SDL2 is compiled
+      # from source into the executable (`bundled` + `static-link`) using
+      # the runner's preinstalled cmake; the staging step fails the build
+      # if the executable links any SDL dynamically.
 
       - name: Check Rust formatting
         run: cargo fmt --all --check
