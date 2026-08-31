@@ -18,7 +18,9 @@ use crate::states::driving_updates::live;
 impl DrivingState {
     /// `_handle_pickup_gate()`.
     pub fn handle_pickup_gate(&mut self, ctx: &mut GameContext) {
-        if self.trip.truck.speed_mph() <= DOCKING_MAX_MPH {
+        if self.trip.truck.speed_mph() <= DOCKING_MAX_MPH
+            && (ctx.settings.destination_approach_assist || self.trip.truck.parking_brake)
+        {
             self.open_pickup_arrival(ctx);
             return;
         }
@@ -66,8 +68,17 @@ impl DrivingState {
         ctx.audio.play_with("ui/notify", 0.7, 0.0);
         self.set_status("Pickup gate: stop to check in.");
         let facility = self.pickup_facility_text(ctx);
+        let message = if ctx.settings.destination_approach_assist {
+            format!("At {facility}. Stop to check in.")
+        } else {
+            format!(
+                "At {facility}. Stop completely and set the parking brake with {} to enter. Once stopped and parked, {} opens the facility.",
+                ctx.control_hint("parking_brake"),
+                ctx.control_hint("rest")
+            )
+        };
         ctx.say_event_with(
-            format!("At {facility}. Stop to check in."),
+            message,
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Navigation),

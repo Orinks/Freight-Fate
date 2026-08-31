@@ -807,6 +807,7 @@ impl PlaytestHarness {
         self.advance_frame_clock();
         self.with_drive(|drive, ctx| {
             drive.truck_mut().velocity_mps = 0.0;
+            drive.truck_mut().set_parking_brake();
             drive.update_frame(ctx, DT);
         });
         self.finish_timed_state();
@@ -963,6 +964,7 @@ impl PlaytestHarness {
             drive.trip.finished = true;
             drive.destination_exit_taken = true;
             drive.truck_mut().velocity_mps = 0.0;
+            drive.truck_mut().set_parking_brake();
             drive.handle_arrival_gate(ctx);
         });
         self.finish_timed_state();
@@ -1088,6 +1090,7 @@ impl PlaytestHarness {
             if self.read_drive(|d| d.trip.finished) {
                 let full_stop = self.with_drive(|drive, ctx| {
                     drive.truck_mut().velocity_mps = 0.0;
+                    drive.truck_mut().set_parking_brake();
                     drive.handle_arrival_gate(ctx);
                     drive.arrival_full_stop_said
                 });
@@ -1126,6 +1129,7 @@ impl PlaytestHarness {
             drive.trip.position_mi = drive.trip.total_miles();
             drive.trip.finished = true;
             drive.truck_mut().velocity_mps = 0.0;
+            drive.truck_mut().set_parking_brake();
             drive.handle_arrival_gate(ctx);
         });
         self.finish_timed_state();
@@ -1172,6 +1176,7 @@ impl PlaytestHarness {
             drive.trip.position_mi = drive.trip.total_miles();
             drive.trip.finished = true;
             drive.truck_mut().velocity_mps = 0.0;
+            drive.truck_mut().set_parking_brake();
             drive.update_frame(ctx, DT);
         });
         self.finish_timed_state();

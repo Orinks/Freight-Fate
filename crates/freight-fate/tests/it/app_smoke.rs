@@ -190,6 +190,7 @@ fn test_full_game_flow_headless() {
         d.trip.position_mi = d.trip.total_miles();
         d.trip.finished = true;
         d.trip.truck.velocity_mps = 0.0;
+        d.trip.truck.set_parking_brake();
         d.update_frame(ctx, 1.0 / 60.0);
     });
     finish_timed_state(&mut app);
@@ -305,6 +306,7 @@ fn test_full_game_flow_headless() {
         }
         if drive.trip.finished {
             drive.trip.truck.velocity_mps = 0.0;
+            drive.trip.truck.set_parking_brake();
             drive.handle_arrival_gate(ctx);
             drop(drive);
             app.ctx.run_deferred();
@@ -510,6 +512,7 @@ fn test_pause_and_abandon_returns_to_city() {
         d.trip.position_mi = d.trip.total_miles();
         d.trip.finished = true;
         d.trip.truck.velocity_mps = 0.0;
+        d.trip.truck.set_parking_brake();
         d.update_frame(ctx, 1.0 / 60.0);
     });
     finish_timed_state(&mut app);

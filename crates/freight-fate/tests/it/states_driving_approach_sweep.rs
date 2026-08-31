@@ -568,8 +568,7 @@ pub fn what_went_wrong(destination: &Destination, arrival: &Arrival) -> Option<S
     //    opens it.
     if !arrival.docked
         && !arrival.said(
-            "Facility stopping assistance is holding at the entrance. Press Enter, or controller A, to continue \
-             into the facility.",
+            "Facility stopping assistance is holding at the entrance. Press Enter to continue into the facility.",
         )
     {
         return fault("stopped without telling the driver how to pull in");

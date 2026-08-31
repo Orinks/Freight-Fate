@@ -976,12 +976,15 @@ fn test_pickup_facility_waits_for_full_stop() {
     assert!(is::<DrivingState>(&app));
     let events = app.event_lines();
     assert!(
-        events.iter().any(|line| line.contains("Stop to check in")),
+        events
+            .iter()
+            .any(|line| line.contains("Stop completely") && line.contains("parking brake with P")),
         "{events:?}"
     );
 
     with_state_mut::<DrivingState, _>(&mut app, |d, ctx| {
         d.trip.truck.velocity_mps = 0.0;
+        d.trip.truck.set_parking_brake();
         d.update_frame(ctx, 1.0 / 60.0);
     });
     app.ctx.run_deferred();

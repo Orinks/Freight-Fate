@@ -29,6 +29,7 @@ const HINTS: &[(&str, (&str, &str))] = &[
     ("neutral", ("N", "neutral")),
     ("engine", ("E", "right bumper plus A")),
     ("parking_brake", ("P", "right bumper plus Y")),
+    ("confirm", ("Enter", "controller A")),
     ("take_exit", ("X", "D-pad down")),
     ("rest", ("T", "right bumper plus D-pad down")),
     ("cruise_set", ("K", "the Y button")),
@@ -87,6 +88,8 @@ mod tests {
             control_hint("parking_brake", CONTROLLER),
             "right bumper plus Y"
         );
+        assert_eq!(control_hint("confirm", KEYBOARD), "Enter");
+        assert_eq!(control_hint("confirm", CONTROLLER), "controller A");
     }
 
     #[test]

@@ -1021,6 +1021,7 @@ fn take_destination_exit(harness: &mut PlaytestHarness) {
             drive.trip.position_mi = drive.trip.total_miles();
             drive.trip.finished = true;
             drive.truck_mut().velocity_mps = 0.0;
+            drive.truck_mut().set_parking_brake();
             drive.handle_arrival_gate(ctx);
         }
     });
@@ -1029,6 +1030,7 @@ fn take_destination_exit(harness: &mut PlaytestHarness) {
         harness.with_drive(|drive, ctx| {
             drive.trip.position_mi = drive.trip.total_miles();
             drive.trip.finished = true;
+            drive.truck_mut().set_parking_brake();
             drive.handle_arrival_gate(ctx);
         });
         harness.finish_timed_state();

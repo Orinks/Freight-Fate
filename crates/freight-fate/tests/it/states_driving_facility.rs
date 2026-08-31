@@ -344,10 +344,12 @@ fn test_reapproach_after_a_miss_arrives_normally() {
                                          // Back at the gate at a sane speed this time.
     d.trip.position_mi = d.trip.total_miles();
     d.trip.finished = true;
+    d.trip.truck.parking_brake = false;
     d.trip.truck.velocity_mps = 2.0 / 2.23694;
     d.handle_arrival_gate(&mut app.ctx);
-    assert!(!lines_with(&app, "Stop to dock").is_empty());
+    assert!(!lines_with(&app, "Stop completely").is_empty());
     d.trip.truck.velocity_mps = 0.3 / 2.23694;
+    d.trip.truck.set_parking_brake();
     d.handle_arrival_gate(&mut app.ctx);
     assert!(d.arrival_menu_open);
 }
@@ -511,12 +513,32 @@ fn test_the_hold_prompt_does_not_come_back_once_the_menu_is_open() {
             .count()
     };
     assert_eq!(holds(&app), 1);
+    let prompt = last_with(&app, "holding at the entrance");
+    assert!(prompt.contains("Press Enter"), "{prompt}");
+    assert!(!prompt.contains("controller A"), "{prompt}");
 
     // Said once and only once, however long the driver sits there.
     for _ in 0..50 {
         d.handle_arrival_gate(&mut app.ctx);
     }
     assert_eq!(holds(&app), 1);
+}
+
+#[test]
+fn test_manual_delivery_stop_names_parking_and_facility_controls() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.destination_approach_assist = false;
+    app.clear_speech();
+    at_gate(&mut d, 0.2, false);
+    d.arrival_full_stop_said = false;
+    d.trip.truck.parking_brake = false;
+
+    d.handle_arrival_gate(&mut app.ctx);
+
+    let prompt = last_with(&app, "Stop completely");
+    assert!(prompt.contains("parking brake with P"), "{prompt}");
+    assert!(prompt.contains("T opens the facility"), "{prompt}");
 }
 
 #[test]
@@ -761,8 +783,9 @@ fn test_the_pickup_gate_asks_for_a_complete_stop_then_a_check_in() {
     // Creeping in: the gate asks for the check-in rather than repeating.
     d.trip.truck.velocity_mps = 2.0 / 2.23694;
     d.handle_pickup_gate(&mut app.ctx);
-    let said = last_with(&app, "Stop to check in.");
+    let said = last_with(&app, "Stop completely");
     assert!(said.starts_with("At "));
+    assert!(said.contains("parking brake with P"), "{said}");
     assert!(d.arrival_full_stop_said);
 }
 

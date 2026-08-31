@@ -111,6 +111,8 @@ impl DrivingState {
                 // The AMT's manual-mode button: flips the transmission
                 // setting; the existing manual shift controls take over.
                 ctx.settings.automatic_transmission = !ctx.settings.automatic_transmission;
+            } else if self.manual_facility_arrival_ready(ctx) {
+                self.open_ready_facility_arrival(ctx);
             } else {
                 self.try_rest_stop(ctx);
             }
@@ -137,8 +139,8 @@ impl DrivingState {
         } else if key == Key::Space {
             self.speak_speed(ctx);
         } else if matches!(key, Key::Return | Key::KpEnter) {
-            if self.arrival_full_stop_said && self.trip.truck.speed_mph() <= 0.5 {
-                self.open_facility_arrival(ctx);
+            if self.assisted_facility_confirmation_ready(ctx) {
+                self.open_ready_facility_arrival(ctx);
             }
         } else if key == Key::Tab {
             self.push_driving_status(ctx);

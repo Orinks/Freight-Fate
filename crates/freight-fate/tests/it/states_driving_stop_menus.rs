@@ -23,8 +23,9 @@ use ff_core::sim::hos;
 use ff_core::sim::trip_models::RoadStop;
 use ff_core::sim::weather::WeatherKind;
 
+use freight_fate::controller::ControllerButton;
 use freight_fate::playtest::harness::{key_event, PlaytestHarness, StartDelivery};
-use freight_fate::states::base::{Key, Menu, State};
+use freight_fate::states::base::{InputEvent, Key, Menu, State};
 use freight_fate::states::career_stats::fully_rested;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_menu_states::{DriveRef, FacilityArrivalState};
@@ -155,7 +156,7 @@ fn test_facility_menu_waits_for_full_stop() {
             .app
             .event_lines()
             .iter()
-            .any(|line| line.contains("Stop to dock")),
+            .any(|line| line.contains("Stop completely") && line.contains("parking brake with P")),
         "{:#?}",
         harness.app.event_lines()
     );
@@ -170,7 +171,10 @@ fn test_facility_menu_waits_for_full_stop() {
         Some("ui/notify".to_string())
     );
 
-    harness.with_drive(|drive, _| drive.truck_mut().velocity_mps = 0.0);
+    harness.with_drive(|drive, _| {
+        drive.truck_mut().velocity_mps = 0.0;
+        drive.truck_mut().set_parking_brake();
+    });
     frame(&mut harness);
     let arriving = harness
         .app
@@ -286,6 +290,143 @@ fn test_facility_menu_waits_for_full_stop() {
         !played_keys.iter().any(|k| k == "ui/menu_open"),
         "{played_keys:#?}"
     );
+}
+
+fn press_pad(harness: &mut PlaytestHarness, button: ControllerButton) {
+    harness.with_drive(move |drive, ctx| {
+        drive.handle_controller_event(ctx, &InputEvent::button(button))
+    });
+}
+
+#[test]
+fn test_assist_off_facility_waits_for_the_players_parking_brake() {
+    let mut harness = a_drive("Manual Facility Stop");
+    harness.app.ctx.settings.destination_approach_assist = false;
+    harness.with_drive(|drive, _| {
+        mark_destination_exit_taken(drive);
+        drive.truck_mut().velocity_mps = 0.0;
+        drive.truck_mut().parking_brake = false;
+    });
+
+    frame(&mut harness);
+
+    assert!(harness.state_is::<DrivingState>());
+    assert!(!harness.read_drive(|d| d.arrival_menu_open));
+    assert!(!harness.read_drive(|d| d.truck().parking_brake));
+
+    harness.with_drive(|drive, _| drive.truck_mut().parking_brake = true);
+    frame(&mut harness);
+
+    assert!(harness.read_drive(|d| d.arrival_menu_open));
+}
+
+#[test]
+fn test_t_opens_an_assist_off_facility_only_when_stopped_and_parked() {
+    let mut harness = a_drive("Manual Facility T");
+    harness.app.ctx.settings.destination_approach_assist = false;
+    harness.with_drive(|drive, _| {
+        mark_destination_exit_taken(drive);
+        drive.truck_mut().velocity_mps = 0.0;
+        drive.truck_mut().parking_brake = true;
+    });
+
+    press(&mut harness, Key::T);
+
+    assert!(harness.read_drive(|d| d.arrival_menu_open));
+}
+
+#[test]
+fn test_t_does_not_open_an_assist_off_facility_while_rolling() {
+    let mut harness = a_drive("Rolling Facility T");
+    harness.app.ctx.settings.destination_approach_assist = false;
+    harness.with_drive(|drive, _| {
+        mark_destination_exit_taken(drive);
+        drive.truck_mut().velocity_mps = 2.0;
+        drive.truck_mut().parking_brake = true;
+    });
+
+    press(&mut harness, Key::T);
+
+    assert!(!harness.read_drive(|d| d.arrival_menu_open));
+}
+
+#[test]
+fn test_enter_and_controller_a_cannot_bypass_manual_facility_parking() {
+    for controller in [false, true] {
+        let mut harness = a_drive("Manual Facility Confirm");
+        harness.app.ctx.settings.destination_approach_assist = false;
+        harness.with_drive(|drive, _| {
+            mark_destination_exit_taken(drive);
+            drive.arrival_full_stop_said = true;
+            drive.truck_mut().velocity_mps = 0.0;
+            drive.truck_mut().parking_brake = false;
+        });
+
+        if controller {
+            press_pad(&mut harness, ControllerButton::A);
+        } else {
+            press(&mut harness, Key::Return);
+        }
+
+        assert!(!harness.read_drive(|d| d.arrival_menu_open));
+        assert!(!harness.read_drive(|d| d.truck().parking_brake));
+    }
+}
+
+#[test]
+fn test_controller_rest_control_opens_a_stopped_parked_manual_pickup() {
+    let mut harness = a_drive("Manual Pickup Controller");
+    harness.app.ctx.settings.destination_approach_assist = false;
+    harness.app.ctx.controller.modifier = true;
+    harness.with_drive(|drive, _| {
+        drive.phase = freight_fate::states::driving_core::DRIVE_PHASE_PICKUP;
+        mark_destination_exit_taken(drive);
+        drive.truck_mut().velocity_mps = 0.0;
+        drive.truck_mut().parking_brake = true;
+    });
+
+    press_pad(&mut harness, ControllerButton::DPadDown);
+
+    assert!(harness.read_drive(|d| d.arrival_menu_open));
+}
+
+#[test]
+fn test_t_opens_an_assist_off_pickup_only_when_stopped_and_parked() {
+    let mut harness = a_drive("Manual Pickup T");
+    harness.app.ctx.settings.destination_approach_assist = false;
+    harness.with_drive(|drive, _| {
+        drive.phase = freight_fate::states::driving_core::DRIVE_PHASE_PICKUP;
+        mark_destination_exit_taken(drive);
+        drive.truck_mut().velocity_mps = 0.0;
+        drive.truck_mut().parking_brake = true;
+    });
+
+    press(&mut harness, Key::T);
+
+    assert!(harness.read_drive(|d| d.arrival_menu_open));
+}
+
+#[test]
+fn test_assist_off_pickup_waits_for_the_players_parking_brake() {
+    let mut harness = a_drive("Manual Pickup Stop");
+    harness.app.ctx.settings.destination_approach_assist = false;
+    harness.with_drive(|drive, _| {
+        drive.phase = freight_fate::states::driving_core::DRIVE_PHASE_PICKUP;
+        mark_destination_exit_taken(drive);
+        drive.truck_mut().velocity_mps = 0.0;
+        drive.truck_mut().parking_brake = false;
+    });
+
+    frame(&mut harness);
+
+    assert!(harness.state_is::<DrivingState>());
+    assert!(!harness.read_drive(|d| d.arrival_menu_open));
+    assert!(!harness.read_drive(|d| d.truck().parking_brake));
+
+    harness.with_drive(|drive, _| drive.truck_mut().parking_brake = true);
+    frame(&mut harness);
+
+    assert!(harness.read_drive(|d| d.arrival_menu_open));
 }
 
 // -- the rest stop -------------------------------------------------------------------------

@@ -185,14 +185,16 @@ impl DrivingState {
                 let mut opts = SayEvent::new().valid(|| !live::arrival_menu_open());
                 opts.category = Some(SpeechCategory::Navigation);
                 ctx.say_event_with(
-                    "Facility stopping assistance is holding at the entrance. Press Enter, or controller A, to \
-                     continue into the facility.",
+                    format!(
+                        "Facility stopping assistance is holding at the entrance. Press {} to continue into the facility.",
+                        ctx.control_hint("confirm")
+                    ),
                     opts,
                 );
             }
             return;
         }
-        if self.trip.truck.speed_mph() <= DOCKING_MAX_MPH {
+        if self.trip.truck.speed_mph() <= DOCKING_MAX_MPH && self.trip.truck.parking_brake {
             self.open_facility_arrival(ctx);
             return;
         }
@@ -237,6 +239,32 @@ impl DrivingState {
         let mut opts = SayEvent::new();
         opts.category = Some(SpeechCategory::Navigation);
         ctx.say_event_with(message, opts);
+    }
+
+    /// Whether T means "enter this facility" instead of "plan a sleep stop".
+    pub fn manual_facility_arrival_ready(&self, ctx: &GameContext) -> bool {
+        !ctx.settings.destination_approach_assist
+            && self.trip.truck.speed_mph() <= DOCKING_MAX_MPH
+            && self.trip.truck.parking_brake
+            && self.arrival_gate_query_text(ctx).is_some()
+    }
+
+    /// Whether Enter or controller A may finish an assisted stop.
+    pub fn assisted_facility_confirmation_ready(&self, ctx: &GameContext) -> bool {
+        ctx.settings.destination_approach_assist
+            && self.arrival_full_stop_said
+            && self.trip.truck.speed_mph() <= DOCKING_MAX_MPH
+            && self.trip.truck.parking_brake
+            && self.arrival_gate_query_text(ctx).is_some()
+    }
+
+    /// Open the check-in or dock flow belonging to the current drive phase.
+    pub fn open_ready_facility_arrival(&mut self, ctx: &mut GameContext) {
+        if self.phase == DRIVE_PHASE_PICKUP {
+            self.open_pickup_arrival(ctx);
+        } else {
+            self.open_facility_arrival(ctx);
+        }
     }
 
     /// Repeat a gate's stop instruction while the truck rolls past it.
@@ -303,7 +331,16 @@ impl DrivingState {
         ctx.audio.play_with("ui/notify", 0.7, 0.0);
         self.set_status("Destination gate: stop to dock.");
         let facility = self.destination_facility_text(ctx);
-        self.say_route_navigation(ctx, &format!("At {facility}. Stop to dock."));
+        let message = if ctx.settings.destination_approach_assist {
+            format!("At {facility}. Stop to dock.")
+        } else {
+            format!(
+                "At {facility}. Stop completely and set the parking brake with {} to enter. Once stopped and parked, {} opens the facility.",
+                ctx.control_hint("parking_brake"),
+                ctx.control_hint("rest")
+            )
+        };
+        self.say_route_navigation(ctx, &message);
     }
 
     /// `_open_facility_arrival()`.

@@ -36,8 +36,8 @@ impl DrivingState {
         }
         match button {
             ControllerButton::A => {
-                if self.arrival_full_stop_said && self.trip.truck.speed_mph() <= 0.5 {
-                    self.open_facility_arrival(ctx);
+                if self.assisted_facility_confirmation_ready(ctx) {
+                    self.open_ready_facility_arrival(ctx);
                 } else {
                     self.shift_relative(ctx, 1);
                 }
@@ -101,7 +101,13 @@ impl DrivingState {
             // answer here rather than a dead button -- and so a pad driver is
             // not left with a binding the keyboard no longer has.
             ControllerButton::DPadUp => self.speak_route_status(ctx),
-            ControllerButton::DPadDown => self.try_rest_stop(ctx),
+            ControllerButton::DPadDown => {
+                if self.manual_facility_arrival_ready(ctx) {
+                    self.open_ready_facility_arrival(ctx);
+                } else {
+                    self.try_rest_stop(ctx);
+                }
+            }
             ControllerButton::DPadLeft => self.adjust_cruise(ctx, -1, false),
             ControllerButton::DPadRight => self.adjust_cruise(ctx, 1, false),
             ControllerButton::A => self.toggle_engine(ctx),

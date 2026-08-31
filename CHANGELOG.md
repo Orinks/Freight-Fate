@@ -1113,6 +1113,13 @@
 
 ### Fixed
 
+- **Manual facility arrivals now wait until you have secured the truck.**
+  With Facility stopping assistance off, pickup and delivery menus no longer
+  open merely because the truck has slowed to a crawl. Stop completely and
+  set the parking brake; you can then press T to enter the facility. With the
+  assistance on, its final prompt now names Enter or controller A according
+  to the controls you are using.
+
 - **Roadside achievements now match where you actually stopped.** Pulling into
   a weigh station or repair shop no longer earns Sweetheart of the Truck Stop,
   and taking a motel room never counts as sleeping in the truck's bunk.
