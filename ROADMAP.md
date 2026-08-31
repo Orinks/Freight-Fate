@@ -5353,7 +5353,19 @@ onto exit signalling.
       finding. Always in the audited playtest sandbox; speech stays
       audible so the owner can listen to the agent play. Newline JSON-RPC
       on stdio; smoke-tested live (title menu, earcons, menu focus,
-      quit).
+      quit), then hardened by the first real agent session, which found
+      and fixed four things the same day: the focus-lost wipe silently
+      releasing agent-held keys (holds now re-assert every frame), the
+      operator's own typing leaking into a focused game window (the
+      window now minimizes at launch), a road search running inside the
+      game loop's frame (froze the whole game; discovery now runs on the
+      serve thread, bounded to thirty nearest corridors -- 0.3 s on a
+      release build), and a raw city key spoken in the first-day
+      briefing. `start_at` stages a drive at any of the road finder's
+      twelve features mid-session, `--agent-server --find FEATURE` boots
+      straight into one with no menu ever existing, and `.mcp.json`
+      registers the server for Claude Code sessions in this repo. Run it
+      on a RELEASE build; debug pays a tenfold search tax.
 - [ ] **Agent playtest probes worth running now the server exists.** A
       spoken-surface navigability probe: an agent at each verbosity rung
       tries to complete a first delivery using ears alone; every place it

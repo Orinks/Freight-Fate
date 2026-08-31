@@ -448,6 +448,14 @@ enum Command {
     Listen,
     Menu,
     Observe,
+    /// The hit is discovered on the serve thread (world data only) so the
+    /// game loop never blocks on a search; the loop only builds the drive.
+    StageHit {
+        hit: Box<crate::playtest::road::Hit>,
+        opts: Box<crate::playtest::road::RoadOptions>,
+        found: usize,
+        picked: usize,
+    },
     Quit,
 }
 
@@ -461,6 +469,13 @@ pub struct AgentPolicy {
     requests: mpsc::Receiver<Request>,
     ears: SharedEars,
     waiting: Option<(f64, mpsc::Sender<Result<String, String>>)>,
+    /// Keys the agent is holding. Re-asserted every frame, because the
+    /// focus-lost safety wipe (built for real keyboards) otherwise drops
+    /// them whenever the operator's screen reader moves window focus --
+    /// which on a working desktop is constantly. Found live: the agent's
+    /// first throttle hold worked (window still focused from launch) and
+    /// every later one silently died.
+    held: Vec<Key>,
     quit: bool,
 }
 
@@ -469,6 +484,9 @@ impl AgentPolicy {
     pub fn step(&mut self, input: &mut PlayerInputFrame<'_>, dt: f64) -> bool {
         if self.quit {
             return false;
+        }
+        for key in &self.held {
+            input.assert_held(*key);
         }
         if let Some((remaining, reply)) = self.waiting.take() {
             let remaining = remaining - dt;
@@ -493,12 +511,16 @@ impl AgentPolicy {
                             mods: Mods::NONE,
                         });
                     }
-                    let _ = reply.send(Ok(format!(
+                    let _ = reply.send(Ok(
                         "pressed. Wait a moment (wait tool) then listen; the game \
                          speaks on its own time."
-                    )));
+                            .to_string(),
+                    ));
                 }
                 Command::Hold { key, text } => {
+                    if !self.held.contains(&key) {
+                        self.held.push(key);
+                    }
                     input.queue_player_input(InputEvent::KeyDown {
                         key,
                         mods: Mods::NONE,
@@ -507,6 +529,7 @@ impl AgentPolicy {
                     let _ = reply.send(Ok("held down.".to_string()));
                 }
                 Command::Release { key } => {
+                    self.held.retain(|held| *held != key);
                     input.queue_player_input(InputEvent::KeyUp {
                         key,
                         mods: Mods::NONE,
@@ -561,6 +584,21 @@ impl AgentPolicy {
                             "INSPECTOR: not at the wheel (a menu or stop screen is up).".to_string()
                         }
                     }));
+                }
+                Command::StageHit {
+                    hit,
+                    opts,
+                    found,
+                    picked,
+                } => {
+                    // Dropping into a fresh drive: whatever the agent was
+                    // holding belongs to the old screen.
+                    self.held.clear();
+                    let _ = reply.send(
+                        input
+                            .stage_road_hit(&hit, &opts)
+                            .map(|text| format!("({found} match(es), took {picked}) {text}")),
+                    );
                 }
                 Command::Quit => {
                     let _ = reply.send(Ok("Quitting the game.".to_string()));
@@ -685,6 +723,23 @@ fn tools_list() -> Value {
             &[],
         ),
         tool(
+            "start_at",
+            "Skip the menus: stage a drive at a discovered road feature and take the \
+             wheel right there -- the same finder --playtest-road --find uses. \
+             feature must be one of: downgrade, upgrade, zone, limit-drop, stop, \
+             scale, curve, interchange, toll, chain-law, destination, departure. \
+             Same seed, same road. pick chooses among multiple matches (1-based). \
+             Engine off and parking brake set on arrival, like any staged playtest.",
+            json!({
+                "feature": {"type": "string"},
+                "origin": {"type": "string", "description": "search one corridor from this city (fast and thorough)"},
+                "destination": {"type": "string", "description": "with origin: the corridor's far end"},
+                "seed": {"type": "integer", "description": "default 7"},
+                "pick": {"type": "integer", "description": "1-based match index, default 1"},
+            }),
+            &["feature"],
+        ),
+        tool(
             "quit_game",
             "Quit the game and end the session (the sandboxed career saves on the way \
              out, as a real quit does).",
@@ -803,9 +858,139 @@ fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, Strin
         "listen" => Ok(Command::Listen),
         "menu" => Ok(Command::Menu),
         "observe" => Ok(Command::Observe),
+        "start_at" => {
+            let feature = args
+                .get("feature")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string();
+            let seed = args.get("seed").and_then(Value::as_i64).unwrap_or(7);
+            let pick = args.get("pick").and_then(Value::as_u64).unwrap_or(1) as usize;
+            let origin = args
+                .get("origin")
+                .and_then(Value::as_str)
+                .map(str::to_string);
+            let destination = args
+                .get("destination")
+                .and_then(Value::as_str)
+                .map(str::to_string);
+            let (hit, opts, found, picked) = discover(&feature, origin, destination, seed, pick)?;
+            Ok(Command::StageHit {
+                hit: Box::new(hit),
+                found,
+                picked,
+                opts: Box::new(opts),
+            })
+        }
         "quit_game" => Ok(Command::Quit),
         other => Err(format!("unknown tool {other}")),
     }
+}
+
+/// Find one road feature, bounded so it answers in seconds. Runs against
+/// world data alone -- safe on any thread, never inside the game loop
+/// (an in-frame search froze the whole game, found live 2026-08-30).
+/// With no endpoints the sweep is sampled; with endpoints it is capped at
+/// thirty corridors, because an origin alone still fans out to every
+/// reachable city and a full fan is minutes of search (that is
+/// `--playtest-road --scan`'s job).
+fn discover(
+    feature: &str,
+    origin: Option<String>,
+    destination: Option<String>,
+    seed: i64,
+    pick: usize,
+) -> Result<
+    (
+        crate::playtest::road::Hit,
+        crate::playtest::road::RoadOptions,
+        usize,
+        usize,
+    ),
+    String,
+> {
+    use crate::playtest::road;
+    // An unknown term would "search" and find nothing every time; name the
+    // real vocabulary instead ("steep grade" cost a session to this).
+    if !road::FEATURES.contains(&feature) {
+        return Err(format!(
+            "{feature:?} is not a road feature the finder knows. The features are: {}.",
+            road::FEATURES.join(", ")
+        ));
+    }
+    let opts = road::RoadOptions {
+        feature: feature.to_string(),
+        origin: origin.clone(),
+        destination,
+        seed: Some(seed),
+        trip_seed: Some(seed),
+        pick,
+        sandbox: false, // the whole server already runs sandboxed
+        ..Default::default()
+    };
+    let world = ff_core::data::world::get_world();
+    let mut pairs = if opts.origin.is_some() || opts.destination.is_some() {
+        road::route_pairs(world, &opts)
+    } else {
+        road::sampled_world_pairs(world, 30)
+    };
+    // Nearest corridors first when an origin anchors the search: they are
+    // the likeliest to be wanted and the fastest to walk, so the cap keeps
+    // the search local instead of taking thirty alphabetical strangers.
+    if let Some(anchor) = opts
+        .origin
+        .as_deref()
+        .and_then(|name| world.cities.get(&world.resolve_city_key(name)))
+        .map(|c| (c.lat, c.lon))
+    {
+        let distance = |key: &str| -> f64 {
+            world
+                .cities
+                .get(&world.resolve_city_key(key))
+                .map_or(f64::MAX, |c| {
+                    ((c.lat - anchor.0).powi(2) + (c.lon - anchor.1).powi(2)).sqrt()
+                })
+        };
+        pairs.sort_by(|x, y| {
+            distance(&x.1)
+                .partial_cmp(&distance(&y.1))
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+    }
+    pairs.truncate(30);
+    if pairs.is_empty() {
+        return Err("No routes matched those options.".to_string());
+    }
+    eprintln!(
+        "[agent-server] searching {} corridor(s) for {feature:?}...",
+        pairs.len()
+    );
+    let started = std::time::Instant::now();
+    let hits = road::find_feature(world, &pairs, feature, &opts, opts.seed);
+    eprintln!(
+        "[agent-server] search finished in {:.1}s: {} match(es)",
+        started.elapsed().as_secs_f64(),
+        hits.len()
+    );
+    if hits.is_empty() {
+        return Err(format!(
+            "No road feature matching {feature:?} was found in the sampled \
+             routes; try another term, another seed, or name an origin \
+             city to search a specific corridor."
+        ));
+    }
+    let index = pick.saturating_sub(1).min(hits.len() - 1);
+    let hit = hits[index].clone();
+    let found = hits.len();
+    Ok((hit, opts, found, index + 1))
+}
+
+/// A drive to boot the session straight into, skipping every menu.
+pub struct LaunchAt {
+    pub feature: String,
+    pub origin: Option<String>,
+    pub destination: Option<String>,
+    pub seed: i64,
 }
 
 /// Build the policy and the sender its MCP thread feeds.
@@ -816,6 +1001,7 @@ pub fn policy(ears: SharedEars) -> (AgentPolicy, mpsc::Sender<Request>) {
             requests: rx,
             ears,
             waiting: None,
+            held: Vec::new(),
             quit: false,
         },
         tx,
@@ -823,7 +1009,34 @@ pub fn policy(ears: SharedEars) -> (AgentPolicy, mpsc::Sender<Request>) {
 }
 
 /// The whole `--agent-server` mode: sandbox, real game, MCP on stdio.
-pub fn run(reset: bool) -> i32 {
+/// With `launch`, the session boots straight into a staged drive at the
+/// found feature -- no menu ever exists.
+pub fn run(reset: bool, launch: Option<LaunchAt>) -> i32 {
+    // Discover BEFORE the window opens: pure world data, and a failed
+    // search should refuse cleanly rather than boot a game.
+    let staged = match launch {
+        None => None,
+        Some(at) => match discover(&at.feature, at.origin, at.destination, at.seed, 1) {
+            Ok((hit, opts, found, _)) => {
+                eprintln!("Launching at ({found} match(es)): {}", hit.describe());
+                Some((hit, opts))
+            }
+            Err(refusal) => {
+                eprintln!("{refusal}");
+                return 1;
+            }
+        },
+    };
+    run_with_staged(reset, staged)
+}
+
+fn run_with_staged(
+    reset: bool,
+    staged: Option<(
+        crate::playtest::road::Hit,
+        crate::playtest::road::RoadOptions,
+    )>,
+) -> i32 {
     use crate::playtest::sandbox;
     let dir = sandbox::default_sandbox();
     let source = sandbox::real_saves();
@@ -859,6 +1072,17 @@ pub fn run(reset: bool) -> i32 {
                 return 1;
             }
         };
+        // Never let the operator's keyboard land in the game: a focused
+        // game window turns their typing elsewhere into truck inputs.
+        app.minimize_window();
+        if let Some((hit, opts)) = staged {
+            // The staged drive IS the first screen, exactly as the road
+            // launcher does it; quitting reaches the real main menu.
+            app.set_initial_state(Box::new(move |ctx| {
+                let (driving, _start_mi) = crate::playtest::road::build_driving(ctx, &hit, &opts);
+                crate::app::share(driving)
+            }));
+        }
         let ears = install_ears(&mut app);
         let (mut policy, requests) = policy(ears);
         std::thread::spawn(move || serve(requests));

@@ -209,7 +209,11 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
         .map(|t| t.spoken_name())
         .unwrap_or_default();
     let option = option_for_profile(p);
-    let location = format!("{terminal} in the {} service area", p.current_city);
+    // Spoken city, never the map key (same fix as the states::city copy).
+    let location = format!(
+        "{terminal} in the {} service area",
+        ctx.world.spoken_city(&p.current_city, None)
+    );
     if option.is_owner_operator() {
         return format!(
             "{prefix}First-day briefing: you are leased to {} \

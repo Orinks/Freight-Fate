@@ -27,7 +27,7 @@ use crate::discord_presence::{DiscordPresence, DiscordPresenceOptions};
 use crate::online_journal::JournalOutbox;
 use crate::online_presence::{IdentityStore, OnlinePresence, OnlinePresenceOptions};
 use crate::speech::{NullSpeech, Speech, SpeechSink};
-use crate::states::base::{InputEvent, State};
+use crate::states::base::{InputEvent, Key, Mods, State};
 use crate::states::driving::DrivingState;
 use crate::states::main_menu::ConfirmQuitState;
 
@@ -179,6 +179,45 @@ impl PlayerInputFrame<'_> {
         let state = self.app.state()?;
         let state = state.borrow();
         crate::playtest::menu::menu_rows(&*state, &self.app.ctx)
+    }
+
+    /// Stage a drive at a discovered road feature -- the same lever
+    /// `--playtest-road --find` pulls, exposed so an agent session can
+    /// start where testing is needed instead of menuing its way there.
+    ///
+    /// This deliberately exceeds the "cannot mutate application state"
+    /// contract the observer policy lives under: it is scenario staging,
+    /// not play, and it swaps the screen for a freshly built drive the
+    /// same way the road launcher does at startup. The staged career is
+    /// whatever data dir the process runs in -- for the agent server,
+    /// always the audited sandbox.
+    pub fn stage_road_hit(
+        &mut self,
+        hit: &crate::playtest::road::Hit,
+        opts: &crate::playtest::road::RoadOptions,
+    ) -> Result<String, String> {
+        use crate::playtest::road;
+        let description = hit.describe();
+        let (driving, start_mi) = road::build_driving(&mut self.app.ctx, hit, opts);
+        self.app.push_state(driving);
+        Ok(format!(
+            "Staged: {description}. You take the wheel {start_mi:.1} miles up the road, \
+             engine off, parking brake set."
+        ))
+    }
+
+    /// Keep a policy-held key held, without re-dispatching a key event.
+    ///
+    /// The focus-lost handler wipes the held-key store as a safety measure
+    /// for real keyboards -- the OS stops delivering KeyUp to an unfocused
+    /// window, so a wipe beats a stuck pedal. A policy's holds arrive
+    /// through [`PlayerInputFrame::queue_player_input`], not the OS, so on
+    /// a desktop where focus bounces (a screen reader working other
+    /// windows) that same wipe silently released the agent's throttle.
+    /// The policy re-asserts its holds every frame with this; only the
+    /// held-state store is touched, so per-press handlers never re-fire.
+    pub fn assert_held(&mut self, key: Key) {
+        self.app.ctx.input.press(key, Mods::NONE);
     }
 }
 
@@ -346,6 +385,15 @@ impl App {
 
     pub fn states(&self) -> Vec<SharedState> {
         self.ctx.states()
+    }
+
+    /// Minimize the game window (see [`SdlShell::minimize`]); a no-op when
+    /// headless. The agent server calls this so the operator's keyboard can
+    /// never land in the game.
+    pub fn minimize_window(&mut self) {
+        if let Some(shell) = self.shell.as_mut() {
+            shell.minimize();
+        }
     }
 
     pub fn running(&self) -> bool {

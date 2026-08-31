@@ -81,6 +81,17 @@ impl SdlShell {
         }
     }
 
+    /// Minimize the window so it can never hold keyboard focus.
+    ///
+    /// The agent server calls this at launch: with the window focused, the
+    /// operator's own typing in other apps leaks into the game whenever
+    /// focus lands on it (found live -- the spaces in a chat message spoke
+    /// the speed readout, over and over). Agent input is injected and does
+    /// not need focus; the operator's keyboard must not have it.
+    pub fn minimize(&mut self) {
+        self.canvas.window_mut().minimize();
+    }
+
     /// Drain the event queue into game events. `None` when the batch was
     /// lost to a failure inside the pump (the Python loop's
     /// `pygame.event.get()` guard: a controller hot-plug, notably a Bluetooth

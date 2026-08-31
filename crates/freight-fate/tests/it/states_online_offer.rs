@@ -253,6 +253,13 @@ fn test_the_welcome_is_heard_in_full_and_then_the_offer() {
         lines[0].ends_with("building your record with dispatch."),
         "{lines:?}"
     );
+    // The parked-at location speaks the city's name, never the map key:
+    // "in the chicago_il_us service area" reached a driver's ears before
+    // the first agent-driven playtest caught it (2026-08-30).
+    assert!(
+        !lines[0].contains("_us") && lines[0].contains(" service area"),
+        "{lines:?}"
+    );
     assert!(lines[1].starts_with("Before you set off."), "{lines:?}");
     assert!(lines[1].ends_with("Not now. 1 of 2."), "{lines:?}");
     // The welcome opens the sequence, and every line after it queues, so both

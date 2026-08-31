@@ -178,7 +178,16 @@ fn run(args: &[String]) -> i32 {
         return playtest_road(args);
     }
     if has(args, "--agent-server") {
-        return freight_fate::agent_server::run(has(args, "--reset"));
+        let launch =
+            flag_value(args, "--find").map(|feature| freight_fate::agent_server::LaunchAt {
+                feature,
+                origin: flag_value(args, "--from"),
+                destination: flag_value(args, "--to"),
+                seed: flag_value(args, "--seed")
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(7),
+            });
+        return freight_fate::agent_server::run(has(args, "--reset"), launch);
     }
     app::main_with(CliOptions::parse(args.iter().cloned()))
 }
@@ -276,7 +285,9 @@ Drive tools:
   --break-battery                   run them all and print the verdicts
   --agent-server                    the real game with an MCP server on stdio,
                                     so an AI agent can play it (sandboxed;
-                                    --reset for a fresh sandbox)
+                                    --reset for a fresh sandbox; add
+                                    --find FEATURE [--from CITY] [--to CITY]
+                                    to boot straight into a staged drive)
   --log PATH                        session log for the watcher
 ";
 

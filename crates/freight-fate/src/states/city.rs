@@ -170,10 +170,13 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
     let p = profile(ctx);
     let terminal = home_terminal(ctx);
     let option = option_for_profile(p);
+    // Spoken city, never the map key: the raw key read "parked at Chicago
+    // Company Yard in the chicago_il_us service area" (found by the first
+    // agent-driven playtest, 2026-08-30).
     let location = format!(
         "{} in the {} service area",
         terminal.spoken_name(),
-        p.current_city
+        ctx.world.spoken_city(&p.current_city, None)
     );
     if option.is_owner_operator() {
         return format!(
