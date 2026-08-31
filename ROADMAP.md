@@ -155,8 +155,14 @@ Half of these hide inside already-checked bullets:
 **Bugs that cost a player something -- the real distance.** The dozen
 that bite first, of the sweep's 49 gating items:
 
-- [ ] Quitting at speed discards the leg (the owner lost 67 miles).
-- [ ] Rust startup probes hold the input loop: menu deaf ~16 seconds.
+- [ ] Quit-to-menu while MOVING executes before its own warning finishes
+      speaking: ask first and name the miles that will be lost ("You
+      will lose 67 miles since your last stop. Quit anyway?"); parked
+      quits stay instant. (Owner lost 67 miles on I-80, 2026-07-27.)
+- [ ] Boot does not accept input until the device probes finish -- a
+      slow probe leaves the main menu ignoring keys with no explanation
+      (~16 s seen). Speech probe fixed 2026-08-30 via the speech
+      worker; the audio device probe still blocks.
 - [ ] No on-demand career backup (Brandon lost the upload control).
 - [ ] Lane centering assist is a settings promise with no feature:
       implement or retire before 1.9 ships (owner decision).
@@ -483,14 +489,16 @@ Everything not listed here ships fine after 1.9.0.
       nightlies players are running are the Python build, so a Linux report
       cannot be reproduced or fixed on this line until the libraries and a
       runner exist.
-- [ ] **Rust port: startup work is not held off the input loop.** The Linux
-      report above also had the menu deaf to arrow keys for the first sixteen
-      seconds, because the speech-backend probe and the audio device probe both
-      ran to completion before anything pumped events. The Rust boot has the
-      same shape (`SdlShell::new`, then `Speech::new`, then `AudioEngine::new`,
-      all before the loop) and would stall the same way on a machine where a
-      probe is slow. Worth pumping the window and accepting keys while the
-      backends come up, or at least saying "starting up" before the wait.
+- [ ] **Rust port: startup work is not held off the input loop -- HALF
+      FIXED 2026-08-30.** The Linux report above also had the menu ignore
+      arrow keys for the first sixteen seconds, because the speech-backend
+      probe and the audio device probe both ran to completion before
+      anything pumped events. The speech half is gone: `ThreadedSpeech`
+      (the Shane-freeze fix, a25d4236) spawns instantly and probes Prism on
+      its worker, so boot no longer waits on the speech backend at all.
+      STILL OPEN: `AudioEngine::new` (the audio device probe) runs before
+      the loop and would still stall input on a machine where it is slow.
+      Worth the same treatment or at least a spoken "starting up" first.
 - [x] **Rust port: drive-time frame cost is measured, and one bug found by
       measuring it (2026-08-24).** `crates/freight-fate/tests/it/frame_time.rs`
       drives a seeded, weather-pinned I-70 run out of Denver through the whole
