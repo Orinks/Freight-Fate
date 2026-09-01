@@ -5,9 +5,10 @@
 ### Added
 
 - **Account achievements now have their own Online menu browser.** It lists
-  achievements earned across every career on this installation in stable
-  catalog order, while the existing Achievements menu continues to show one
-  career at a time. When the automatic ten-career cloud limit removes the
+  achievements earned across every career on this installation in seven
+  short categories, with each category kept in catalog order, while the
+  existing Achievements menu continues to show one career at a time. When
+  the automatic ten-career cloud limit removes the
   least recently played cloud backup, the game names it and confirms that
   the local career was not deleted.
 

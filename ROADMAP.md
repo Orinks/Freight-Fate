@@ -9506,7 +9506,7 @@ fit for an audio-first game.
 - [ ] Localization of all speech strings
 - [ ] Optional online leaderboards
 - [x] Opt-in Profile sharing for fictional road journals, achievements, and last-saved profile summaries
-- [x] Account-wide achievement collection with a read-only Online menu browser, plus spoken notice when automatic ten-career cloud retention removes the least recently played cloud backup without deleting the local career
+- [x] Account-wide achievement collection with a read-only, category-based Online menu browser, plus spoken notice when automatic ten-career cloud retention removes the least recently played cloud backup without deleting the local career
 - [x] Online posts carry the game's build identity (release tag or source checkout) so moderation can tell which version a driver runs
 - [x] Validated and server-signed private cloud revisions with verified public profile summaries
 - [ ] Richer verified driver profiles: identity headline (level title, business
