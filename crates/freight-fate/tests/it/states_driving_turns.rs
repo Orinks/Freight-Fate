@@ -22,8 +22,8 @@ use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
 use freight_fate::states::driving_turns::{
-    RAMP_GUIDE_DEMAND, TURN_CORNER_MAX_MPH, TURN_MISS_LOOP_MIN, TURN_WINDOW_MAX_MI,
-    TURN_WINDOW_MIN_MI,
+    RAMP_GUIDE_DEMAND, TURN_COMMIT_TAIL_MI, TURN_CORNER_MAX_MPH, TURN_MISS_LOOP_MIN,
+    TURN_WINDOW_MAX_MI, TURN_WINDOW_MIN_MI,
 };
 
 // -- rigging -------------------------------------------------------------------------
@@ -1148,6 +1148,158 @@ fn test_a_lone_curve_still_holds_only_its_own_speed() {
         d.cruise_curve_end_mi,
         Some(alone.start_mi.max(alone.end_mi))
     );
+}
+
+// -- a bend under cruise's floor pauses the session ------------------------------------
+
+/// The first open-road mile of the corridor: no zone, a real limit, so the
+/// resume path reaches for adaptive cruise rather than the speed keeper.
+fn open_road_mile(d: &mut DrivingState) -> f64 {
+    let total = d.trip.total_miles();
+    let mut mile = 5.0;
+    while mile < total - 5.0 {
+        let (limit, reason) = d.trip.speed_limit_at(mile);
+        if reason.is_none() && limit >= 45.0 {
+            return mile;
+        }
+        mile += 0.5;
+    }
+    panic!("this corridor has no open-road mile for the cruise cases to sit on");
+}
+
+/// Adaptive cruise armed at 60 on open road, meeting a bend advised at 15 --
+/// under the 20 cruise can hold at all, so the easing branch cannot take it.
+/// Returns the bend and the lines spoken for it.
+fn cruise_meets_a_bend_too_tight_to_ease(
+    app: &mut TestApp,
+    d: &mut DrivingState,
+) -> (RouteCurve, Vec<String>) {
+    app.ctx.settings.curve_speed_assist = true;
+    d.trip.position_mi = open_road_mile(d);
+    d.trip.truck.set_air_ready(false);
+    d.trip.truck.start_engine();
+    d.trip.truck.brake = 0.0;
+    d.trip.truck.velocity_mps = 60.0 * 0.44704;
+    d.engage_cruise(&mut app.ctx, 60.0, false);
+    assert!(d.speed_control_armed);
+    assert_eq!(d.cruise_mph, Some(60.0));
+    let tight = a_curve(d.trip.position_mi + 0.3, 'R', 15, 120, 120.0);
+    let spoken = spoken_pacenotes(app, d, vec![tight], 60.0);
+    (tight, spoken)
+}
+
+#[test]
+fn test_a_bend_under_cruises_floor_pauses_the_session_instead_of_dropping_it() {
+    // Owner ruling, 2026-09-01: on the highway a hazard or a curve must not
+    // switch adaptive cruise off; it pauses and comes back. The hazard cancels
+    // were converted that day; this was the last disarm left, and the truck
+    // coasted out of the bend with the session gone.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let (tight, spoken) = cruise_meets_a_bend_too_tight_to_ease(&mut app, &mut d);
+
+    assert!(!spoken.is_empty(), "a 15 mph bend at 60 demands a call");
+    assert!(
+        spoken[0].contains("Adaptive cruise paused for the bend"),
+        "{spoken:#?}"
+    );
+    assert!(
+        !spoken
+            .iter()
+            .any(|line| line.contains("Adaptive cruise off")),
+        "{spoken:#?}"
+    );
+    // Cruise is off the pedal for the bend, the session is not over, and the
+    // set speed is remembered for the resume.
+    assert!(d.cruise_mph.is_none());
+    assert!(d.speed_control_armed);
+    assert_eq!(d.speed_control_target_mph, Some(60.0));
+    // The pause lifts past the bend's end plus the commit tail, so a resume
+    // can never land mid-corner.
+    let end = tight.start_mi.max(tight.end_mi);
+    assert_eq!(d.cruise_resume_after_mi, Some(end + TURN_COMMIT_TAIL_MI));
+}
+
+#[test]
+fn test_the_curve_pause_does_not_resume_inside_the_bend() {
+    // Rolling, off the brakes, at road speed -- every other resume condition
+    // met -- but still short of the resume mile: nothing re-engages.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let (tight, _) = cruise_meets_a_bend_too_tight_to_ease(&mut app, &mut d);
+    app.clear_speech();
+
+    d.trip.position_mi = tight.apex_mi;
+    d.trip.truck.brake = 0.0;
+    d.trip.truck.velocity_mps = 60.0 * 0.44704;
+    d.resume_speed_control_if_ready(&mut app.ctx, false);
+
+    assert!(d.cruise_mph.is_none(), "cruise re-engaged mid-bend");
+    assert!(d.speed_control_armed);
+    assert!(d.cruise_resume_after_mi.is_some());
+    assert!(
+        app.speech().lines().is_empty(),
+        "{:#?}",
+        app.speech().lines()
+    );
+}
+
+#[test]
+fn test_the_curve_pause_resumes_at_the_remembered_target_past_the_bend() {
+    // Past the resume mile the existing resume re-engages on its own, at the
+    // target the driver set, and announces it the way it does after a hazard.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let (tight, _) = cruise_meets_a_bend_too_tight_to_ease(&mut app, &mut d);
+    app.clear_speech();
+
+    let resume_mi = d.cruise_resume_after_mi.expect("a resume mile");
+    assert!(resume_mi > tight.end_mi);
+    d.trip.position_mi = resume_mi + 0.01;
+    d.trip.truck.brake = 0.0;
+    d.trip.truck.velocity_mps = 45.0 * 0.44704;
+    d.resume_speed_control_if_ready(&mut app.ctx, false);
+
+    assert_eq!(d.cruise_mph, Some(60.0));
+    assert!(d.speed_control_armed);
+    assert!(d.cruise_resume_after_mi.is_none());
+    let lines = app.speech().lines();
+    assert!(
+        lines
+            .iter()
+            .any(|line| line.contains("Adaptive cruise resuming at 60 miles per hour")),
+        "{lines:#?}"
+    );
+}
+
+#[test]
+fn test_a_manual_k_during_the_curve_pause_disarms_and_forgets_the_resume_mile() {
+    // The driver's own K still means "off", exactly as today -- and it takes
+    // the pending resume with it, so nothing re-engages a session they just
+    // switched off.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    let (tight, _) = cruise_meets_a_bend_too_tight_to_ease(&mut app, &mut d);
+    app.clear_speech();
+
+    d.trip.position_mi = tight.apex_mi;
+    d.toggle_cruise(&mut app.ctx);
+
+    assert!(!d.speed_control_armed);
+    assert!(d.cruise_mph.is_none());
+    assert!(d.cruise_resume_after_mi.is_none());
+    assert!(app
+        .speech()
+        .lines()
+        .iter()
+        .any(|line| line.contains("Automatic speed control off.")));
+
+    // And with the session gone, the road past the bend brings nothing back.
+    d.trip.position_mi = tight.end_mi + TURN_COMMIT_TAIL_MI + 0.01;
+    d.trip.truck.velocity_mps = 45.0 * 0.44704;
+    d.resume_speed_control_if_ready(&mut app.ctx, false);
+    assert!(d.cruise_mph.is_none());
+    assert!(!d.speed_control_armed);
 }
 
 // -- the place keys (tests/test_driving_place_keys.py) --------------------------------

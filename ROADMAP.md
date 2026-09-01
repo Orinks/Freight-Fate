@@ -5579,12 +5579,14 @@ Everything not listed here ships fine after 1.9.0.
       clear, and on facility approaches the keeper manages the corners,
       so both now keep the session armed -- and, heard live the same
       evening, the announce-time "Brake!" hazard cancel too: it now pauses
-      and the resume path holds off while the hazard is live. Still a
-      disarm, deliberately: a curve too tight for cruise (`trip_events.rs`,
-      "cruise curve dropped") -- resuming there would re-engage mid-bend
-      at the old target, so it needs a resume keyed to the curve's end
-      before it can follow the ruling; and the driver's own emergency
-      brake, and a hazard that lapses into a collision. "Half a mile of
+      and the resume path holds off while the hazard is live. The last
+      highway cancel followed the same evening: a curve too tight for
+      cruise (`trip_events.rs`, the curve branch) now pauses too, with
+      the resume keyed to the bend's end -- the chain's end for a linked
+      pair -- plus the commit tail (`cruise_resume_after_mi`), so it
+      cannot re-engage mid-bend at the old target; the curve call says
+      "paused", not "off". Still a disarm, deliberately: the driver's own
+      emergency brake, and a hazard that lapses into a collision. "Half a mile of
       ramp" in a metric cab; the tutorial's timed air reminder (and the school
       lesson's) said "wait for air" after "Air ready", and now says press
       the brake once the gauge is up; the yard access road, a gate and an

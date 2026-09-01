@@ -9,13 +9,14 @@ use ff_core::sim::driving_modes::tuning_for_time_scale;
 use ff_core::sim::trip_models::{TripEvent, TripEventKind};
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::speech_text::{
-    cruise_curve_dropped, cruise_curve_easing, roadside_chatter, stop_callout, SpokenMessage,
+    cruise_curve_easing, cruise_curve_paused, roadside_chatter, stop_callout, SpokenMessage,
     StopCalloutParts,
 };
 
 use crate::app::{GameContext, Say, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+use crate::states::driving_turns::TURN_COMMIT_TAIL_MI;
 use crate::states::driving_updates::live;
 
 use super::ambient::Ambient;
@@ -498,25 +499,27 @@ impl DrivingState {
         if self.cruise_mph.is_some_and(|set| set > advisory + 5.0) {
             let assisted =
                 ctx.settings.curve_speed_assist && curve.is_some() && advisory >= CRUISE_MIN_MPH;
-            if assisted {
-                let curve = curve.as_ref().expect("checked above");
-                // The CHAIN's number, not just this bend's. A call that
-                // carries a linked follower ("then sharp left, advise 30")
-                // is the follower's only warning -- the trip suppresses
-                // its own call so the pair is one sentence -- so easing to
-                // the first bend's 40 and releasing at the first bend's
-                // end took the truck into the follower ten miles an hour
-                // too fast, with nothing left to warn it. Darren's load
-                // shifted 12 percent on exactly that pair on NY-12
-                // (2026-08-23), and the spoken line had named 30 the whole
-                // time: the words were right and the assist was not.
-                let linked = self.pacenote_linked(curve);
+            // The CHAIN's number and extent, not just this bend's. A call
+            // that carries a linked follower ("then sharp left, advise 30")
+            // is the follower's only warning -- the trip suppresses its own
+            // call so the pair is one sentence -- so easing to the first
+            // bend's 40 and releasing at the first bend's end took the truck
+            // into the follower ten miles an hour too fast, with nothing
+            // left to warn it. Darren's load shifted 12 percent on exactly
+            // that pair on NY-12 (2026-08-23), and the spoken line had named
+            // 30 the whole time: the words were right and the assist was
+            // not. The pause below keys its resume to the same extent.
+            let chain = curve.as_ref().map(|curve| {
                 let mut hold_mph = advisory;
                 let mut hold_to_mi = curve.start_mi.max(curve.end_mi);
-                if let Some(linked) = linked {
+                if let Some(linked) = self.pacenote_linked(curve) {
                     hold_mph = hold_mph.min(linked.advisory_mph as f64);
                     hold_to_mi = hold_to_mi.max(linked.start_mi).max(linked.end_mi);
                 }
+                (hold_mph, hold_to_mi)
+            });
+            if assisted {
+                let (hold_mph, hold_to_mi) = chain.expect("assisted needs a curve");
                 self.cruise_curve_mph = Some(hold_mph);
                 self.cruise_curve_end_mi = Some(hold_to_mi);
                 // Terse speaks the pacenote alone: its advisory number is
@@ -525,8 +528,24 @@ impl DrivingState {
                 let text = cruise_curve_easing(&message, &ctx.settings.speed_text(advisory));
                 say_curve(ctx, text, true);
             } else {
-                self.cancel_cruise(ctx, false);
-                let text = cruise_curve_dropped(&message);
+                // Under cruise's floor (or with the assist off): the bend is
+                // the driver's, but the SESSION is not over. This used to
+                // disarm, and the truck coasted out of the bend with cruise
+                // gone for good -- the same failure the hazard pause removed
+                // (owner ruling, 2026-09-01: on the highway a hazard or a
+                // curve pauses adaptive cruise and it comes back). Keep the
+                // session armed and name the mile the pause lifts at: the
+                // chain's end plus the commit tail, so the resume path cannot
+                // wind the truck back up mid-corner. The driver's own brake
+                // through the bend cancels nothing here -- cruise is already
+                // off the pedal -- and the resume waits for them to be off
+                // it again. A bare pacenote with no bend geometry has no end
+                // to key on; the bend's own start is the honest fallback.
+                let position = self.trip.position_mi;
+                let hold_to_mi = chain.map_or(position + ahead, |(_, end)| end);
+                self.cancel_cruise(ctx, true);
+                self.cruise_resume_after_mi = Some(hold_to_mi + TURN_COMMIT_TAIL_MI);
+                let text = cruise_curve_paused(&message);
                 say_curve(ctx, text, true);
             }
         } else {

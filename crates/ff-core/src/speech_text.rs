@@ -468,16 +468,27 @@ pub fn cruise_curve_easing(pacenote: &SpokenMessage, advisory_speed_text: &str) 
 
 /// The curve call plus the handback when the bend is under cruise's floor.
 ///
+/// A PAUSE, not a drop: the session stays armed and adaptive cruise comes
+/// back on its own past the bend, once the truck is rolling off the brakes
+/// at road speed (owner ruling, 2026-09-01 -- on the highway a hazard or a
+/// curve pauses cruise and it comes back). The line says so, because the
+/// old "Adaptive cruise off" told the driver to expect a session that had
+/// in fact survived.
+///
 /// Was a bare `message + " Adaptive cruise off; ..."`, and that plus sign is
 /// why the quiet rung still spoke full curve calls: concatenating a
 /// `SpokenMessage` yields a plain `str`, so the short form was thrown away
 /// before the delivery layer ever looked for it (owner playtest,
-/// 2026-08-17). Terse keeps the handback -- losing cruise is not a detail a
-/// driver can be left to infer -- and takes the pacenote's short form.
-pub fn cruise_curve_dropped(pacenote: &SpokenMessage) -> SpokenMessage {
+/// 2026-08-17). Terse keeps the handback -- cruise letting go of the pedal
+/// is not a detail a driver can be left to infer -- and takes the
+/// pacenote's short form.
+pub fn cruise_curve_paused(pacenote: &SpokenMessage) -> SpokenMessage {
     SpokenMessage::with_terse(
-        format!("{pacenote} Adaptive cruise off; you need manual speed control."),
-        format!("{} Cruise off.", pacenote_terse(pacenote)),
+        format!(
+            "{pacenote} Adaptive cruise paused for the bend; it resumes once you are through and \
+             back up to speed."
+        ),
+        format!("{} Cruise paused.", pacenote_terse(pacenote)),
     )
 }
 
@@ -1192,7 +1203,7 @@ mod tests {
             "Sharp right, 35 miles per hour.",
         );
         for wrapped in [
-            cruise_curve_dropped(&pacenote),
+            cruise_curve_paused(&pacenote),
             cruise_curve_easing(&pacenote, "35 miles per hour"),
         ] {
             let terse = wrapped
@@ -1205,9 +1216,17 @@ mod tests {
             );
             assert_ne!(terse, wrapped.to_string());
         }
+        // And the handback is a pause, in both rungs: the session survives
+        // the bend, so "off" would be a lie the driver plans around.
+        let paused = cruise_curve_paused(&pacenote);
         assert_eq!(
-            cruise_curve_dropped(&pacenote).terse.as_deref(),
-            Some("Sharp right, 35 miles per hour. Cruise off.")
+            paused.normal,
+            "Sharp right, half a mile. Advise 35 miles per hour. Adaptive cruise paused for the \
+             bend; it resumes once you are through and back up to speed."
+        );
+        assert_eq!(
+            paused.terse.as_deref(),
+            Some("Sharp right, 35 miles per hour. Cruise paused.")
         );
     }
 

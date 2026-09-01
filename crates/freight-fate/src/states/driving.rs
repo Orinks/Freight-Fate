@@ -497,6 +497,13 @@ pub struct DrivingState {
     pub cruise_exit_mph: Option<f64>,
     pub cruise_curve_mph: Option<f64>,
     pub cruise_curve_end_mi: Option<f64>,
+    // A bend too tight for cruise to ease into PAUSES the session rather
+    // than disarming it (owner ruling, 2026-09-01: on the highway a hazard
+    // or a curve pauses adaptive cruise and it comes back). This is the mile
+    // the pause lifts at -- the bend's end (the chain's, for a linked pair)
+    // plus the commit tail -- and the resume path holds off until the truck
+    // is past it. Cleared by any disarm.
+    pub cruise_resume_after_mi: Option<f64>,
     // Sign of the steep grade already announced, so each hill is called out
     // once rather than every frame, and where the road profile was last read.
     pub grade_warned_sign: i32,

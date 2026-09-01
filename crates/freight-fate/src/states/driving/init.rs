@@ -487,6 +487,7 @@ impl DrivingState {
             cruise_exit_mph: None,
             cruise_curve_mph: None,
             cruise_curve_end_mi: None,
+            cruise_resume_after_mi: None,
             grade_warned_sign: 0,
             grade_scan_mi: -1e9,
             speed_control_armed: false,

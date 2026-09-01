@@ -125,6 +125,11 @@ impl DrivingState {
         self.speed_control_armed = false;
         self.clear_stop_pause();
         self.speed_control_target_mph = None;
+        // A curve pause dies with the session it was holding open: a manual
+        // K, the driver's own emergency brake, or any other disarm during the
+        // bend must not leave a resume mile behind to re-engage a session
+        // the driver just switched off.
+        self.cruise_resume_after_mi = None;
     }
 
     /// `_speed_authority_engaged()`: whether an automatic speed system
@@ -248,6 +253,7 @@ impl DrivingState {
         self.speed_control_armed = armed;
         self.clear_stop_pause();
         self.speed_control_target_mph = if armed { target_mph } else { None };
+        self.cruise_resume_after_mi = None;
     }
 
     /// `_resume_speed_control_if_ready(*, braking)`: resume a paused
@@ -278,6 +284,20 @@ impl DrivingState {
             // into the very thing it is braking for. Cleared, the deadline
             // goes with it and the session comes back on its own.
             return;
+        }
+        if let Some(after_mi) = self.cruise_resume_after_mi {
+            // A bend too tight for cruise paused the session (the curve
+            // branch of `handle_curve_event`) and named the mile the pause
+            // lifts at: the bend's end plus the commit tail. Resuming before
+            // that would wind the truck back up to the remembered target in
+            // the middle of the very corner it was paused for -- the reason
+            // this used to be a disarm. Past it, the resume below re-engages
+            // at the remembered target and says so, exactly as after a
+            // hazard.
+            if self.trip.position_mi <= after_mi {
+                return;
+            }
+            self.cruise_resume_after_mi = None;
         }
         if self.ramp_mi.is_some() {
             // A ramp stop is in progress. Taking the exit hands the pedals
