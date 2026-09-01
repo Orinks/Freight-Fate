@@ -830,6 +830,10 @@ struct SignRelease {
     /// Stood still for ten seconds after the release, or after the brake.
     stood_still: bool,
     speed_mph: f64,
+    /// The fastest the truck went between moving off from the sign and
+    /// reaching the streets: the ramp roll runs up to the posted limit, not
+    /// a walk (owner, 2026-09-01).
+    ramp_top_mph: f64,
 }
 
 impl SignRelease {
@@ -935,6 +939,7 @@ fn arrive_from_the_sign(
     let mut braked = false;
     let mut brake_frames = 0;
     let mut still_frames = 0;
+    let mut ramp_top_mph: f64 = 0.0;
     for _ in 0..(60 * 600) {
         if !harness.has_drive() || harness.read_drive(|d| d.arrival_menu_open) {
             break;
@@ -953,6 +958,9 @@ fn arrive_from_the_sign(
         }
         if stopped_at_sign && speed > 5.0 {
             moved_off_alone = true;
+        }
+        if stopped_at_sign && !chain {
+            ramp_top_mph = ramp_top_mph.max(speed);
         }
         if full_stop_said && speed <= DOCKING_MAX_MPH {
             held_at_entrance = true;
@@ -993,6 +1001,7 @@ fn arrive_from_the_sign(
         held_at_entrance,
         stood_still,
         speed_mph,
+        ramp_top_mph,
     }
 }
 
@@ -1020,6 +1029,14 @@ fn test_the_assist_drives_from_the_clear_sign_to_the_entrance_hold_hands_off() {
         release.report(destination)
     );
     assert!(release.moved_off_alone, "{}", release.report(destination));
+    // Road, not a gate: the roll from the bar to the streets runs up past
+    // the old 12 mph facility-lane walk toward the ramp's posted limit.
+    assert!(
+        release.ramp_top_mph > 17.0,
+        "ramp top {:.1} mph: {}",
+        release.ramp_top_mph,
+        release.report(destination)
+    );
     assert!(release.on_chain, "{}", release.report(destination));
     assert!(
         release.said("Speed keeper holding"),

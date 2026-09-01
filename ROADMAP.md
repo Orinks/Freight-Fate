@@ -1201,8 +1201,11 @@ Everything not listed here ships fine after 1.9.0.
       entrance") and arms `approach_pull_ahead`. A plain ramp was already
       driven by the arrival latch from the bar; its "taking the pedals" line
       is skipped when the release named it. A street-chain ramp, which the
-      arrival assist refuses, now gets the 12 mph facility-lane roll from the
-      bar to the ramp's end, and `begin_surface_chain` hands the streets to
+      arrival assist refuses, now runs the truck up to the ramp's posted
+      limit from the bar to the ramp's end (owner, same day: "speed up to
+      the limit to get to that point as efficiently as it can" -- the first
+      cut walked it at the 12 mph facility-lane roll; the pedal ceiling is
+      `APPROACH_ROLL_THROTTLE_MAX`), and `begin_surface_chain` hands the streets to
       the speed keeper explicitly (announced, "K or braking cancels"), the
       way the acceleration lane is handed to it on the way out; the arrival
       latch at the gate and the "holding at the entrance, press Enter" hold

@@ -106,14 +106,22 @@ impl DrivingState {
             // truck to this assist (`terminal_release_text`), and on a chain
             // facility the streets are still ahead: the arrival is theirs, not
             // this ramp's, so nothing here latches or aims at a point. The
-            // assist holds the facility-lane roll to the ramp's end, where
-            // `begin_surface_chain` takes the truck at that speed and hands
-            // the streets to the speed keeper. Throttle only ever raised,
-            // never zeroed: a driver already on the pedal is not fought, and a
-            // foot on the brake wins outright.
+            // assist runs the truck up to the ramp's posted limit -- road,
+            // not a gate (owner, 2026-09-01: "speed up to the limit to get to
+            // that point as efficiently as it can") -- to the ramp's end,
+            // where `begin_surface_chain` takes the truck at that speed and
+            // hands the streets to the speed keeper. Throttle only ever
+            // raised, never zeroed: a driver already on the pedal is not
+            // fought, and a foot on the brake wins outright.
             self.destination_arrival_active = false;
             if let Some(ramp_mi) = self.ramp_mi.filter(|mi| *mi > 0.0) {
-                self.hold_approach_speed(ramp_mi * 1609.344, FACILITY_LANE_ROLL_MPH);
+                let (limit_mph, _) = self.trip.speed_limit_at(self.trip.position_mi);
+                let target_mph = limit_mph.max(FACILITY_LANE_ROLL_MPH);
+                self.hold_approach_speed_with(
+                    ramp_mi * 1609.344,
+                    target_mph,
+                    APPROACH_ROLL_THROTTLE_MAX,
+                );
             }
             return;
         }
@@ -261,6 +269,12 @@ impl DrivingState {
     /// streets. Nothing is added while anyone has a foot on the brake, and the
     /// throttle is only ever raised, so a driver's own pedal always wins.
     fn hold_approach_speed(&mut self, remaining_m: f64, target_mph: f64) {
+        self.hold_approach_speed_with(remaining_m, target_mph, ARRIVAL_CREEP_THROTTLE_MAX);
+    }
+
+    /// `hold_approach_speed` with the pedal ceiling chosen by the caller: a
+    /// creep to a point, or the chain ramp's run up to the posted limit.
+    fn hold_approach_speed_with(&mut self, remaining_m: f64, target_mph: f64, throttle_max: f64) {
         let remaining_m = remaining_m.max(0.5);
         let v = self.trip.truck.velocity_mps;
         let creep = target_mph / 2.23694;
@@ -291,7 +305,7 @@ impl DrivingState {
             .trip
             .truck
             .throttle
-            .max(ARRIVAL_CREEP_THROTTLE_MAX.min(pedal.max(0.0)));
+            .max(throttle_max.min(pedal.max(0.0)));
     }
 
     /// Whether this delivery's ramp hands off to a street chain rather than

@@ -492,8 +492,9 @@
   "Facility stopping assistance is taking you to the entrance" and the truck
   moves off on its own instead of waiting for you to pull ahead. Where the
   ramp ends at the gate it drives up and stops there; where the facility sits
-  at the end of city streets it rolls you onto them and the speed keeper takes
-  over, holding the posted speed and easing for each corner, until the assist
+  at the end of city streets it runs the truck up to the ramp's posted limit,
+  rolls you onto them, and the speed keeper takes over, holding the posted
+  speed and easing for each corner, until the assist
   stops you at the gate and waits for Enter as before. Your own brake cancels
   it and hands the truck back. With the assist off, nothing changes: the cab
   still says "Clear; pull ahead to the entrance" and the last stretch is

@@ -229,6 +229,12 @@ pub const ARRIVAL_FINAL_CREEP_MI: f64 = 200.0 / 5280.0;
 // The most pedal the creep may use to hold that walk against the road: enough
 // for a grossed-out rig on the steepest gate approach, never a lunge.
 pub const ARRIVAL_CREEP_THROTTLE_MAX: f64 = 0.35;
+/// The pedal the assist may use on a chain ramp's roll from the bar to the
+/// streets: road, not a gate, so it runs the truck up to the posted limit
+/// instead of walking it (owner, 2026-09-01: "speed up to the limit to get
+/// to that point as efficiently as it can"). Short of full so a loaded
+/// truck still shifts cleanly through the ramp.
+pub const APPROACH_ROLL_THROTTLE_MAX: f64 = 0.8;
 // Proportional gain from creep shortfall (m/s) to throttle, on top of the
 // feed-forward that balances the road (TruckState.hold_throttle).
 pub const ARRIVAL_CREEP_THROTTLE_GAIN: f64 = 0.5;
