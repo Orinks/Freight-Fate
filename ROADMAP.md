@@ -2216,6 +2216,29 @@ Everything not listed here ships fine after 1.9.0.
       including the retired wording, so data baked before this does not
       change speed on load.
 
+      WHAT THAT CHANGE DID NOT REACH (agent drive, 2026-09-01): only
+      `local_geometry.json` was re-baked. `facility_approaches.json` -- the
+      file every dock's street chain actually comes from -- was never re-run
+      and still carries the literal "unnamed public road" as a road name on
+      3,230 of its segments (989 of 5,037 records), with the cue sentence
+      baked around it; `local_approaches.json` has one such record. Heard as
+      "start on unnamed public road" out of Chicago Cross-Dock. The runtime
+      now reads the retired label as "a side street" wherever a stale bake
+      still carries it (`spoken_road_text`), on the arrival chain and the
+      reversed departure chain alike, so the truck never says it again
+      whatever the data holds.
+
+- [ ] **Re-run the facility approach bake so nameless lanes get their real
+      class.** The runtime stand-in above says "a side street" for every
+      stale record because the segments carry no highway class, and the
+      national measurement says about nine in ten of those lanes are really
+      service ways. `tools/build_facility_approaches.py --write` over the
+      49-state batch (and `tools/build_local_approaches.py` for the one
+      record there) with the same extracts, then the world container
+      re-bake. Until then the wording is honest but class-blind on facility
+      approaches; the builder's side of the promise is pinned by
+      `tests/test_facility_approaches.py::test_build_tool_says_what_an_unnamed_road_is`.
+
 - [ ] **Elevation: give the build box its own, and do not mix sources.**
       Two separate things, and they were briefly confused for each other.
 

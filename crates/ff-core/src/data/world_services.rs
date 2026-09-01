@@ -25,18 +25,42 @@ static ROAD_REF_LIST: Lazy<Regex> =
 /// top end until the placement audit re-geocodes the misplaced pins.
 pub const SYNTHETIC_APPROACH_CAP_MI: f64 = 9.0;
 
-/// Trim raw OSM ref lists out of player-facing street text.
+/// The label the local-road builders retired on 2026-08-25 for a road OSM
+/// holds no name for. It was baked into `facility_approaches.json` as if it
+/// were a name, and that file was never re-run after the builders changed,
+/// so 3,230 turn-level segments still carry it verbatim -- "Turn left onto
+/// unnamed public road" on the way into Gary Cross-Dock (agent drive,
+/// 2026-09-01). Read aloud it tells the driver nothing but the absence of
+/// a name, which is exactly what the builders stopped saying.
+const RETIRED_UNNAMED_ROAD: &str = "unnamed public road";
+
+/// What a road with no usable name is spoken as (`docs/ontology.md`, the
+/// same stand-in `tools/build_facility_approaches.py::clean_segment` picks
+/// for a segment that carried no road at all). A stale record cannot say
+/// whether the road is a service way or a residential street -- the class
+/// is not baked -- so this is the no-information wording; the re-baked
+/// data says which of the two it really is.
+pub const UNNAMED_STREET: &str = "a side street";
+
+/// Trim raw OSM ref lists out of player-facing street text, and retire the
+/// pre-2026-08-25 "unnamed public road" label wherever a stale bake still
+/// carries it.
 ///
 /// Source-backed street names sometimes carry the full multi-ref
 /// parenthetical straight from the map tags -- "North Michigan Street
 /// (SR 933;BUS US 31)". Read aloud, the semicolon list is tag soup, so
 /// keep the first ref only: "North Michigan Street (SR 933)".
 pub fn spoken_road_text(text: &str) -> String {
+    let text = if text.contains(RETIRED_UNNAMED_ROAD) {
+        text.replace(RETIRED_UNNAMED_ROAD, UNNAMED_STREET)
+    } else {
+        text.to_string()
+    };
     if text.is_empty() || !text.contains(';') {
-        return text.to_string();
+        return text;
     }
     ROAD_REF_LIST
-        .replace_all(text, |caps: &regex::Captures| {
+        .replace_all(&text, |caps: &regex::Captures| {
             let first = caps[1].split(';').next().unwrap_or("").trim().to_string();
             format!("({first})")
         })
@@ -337,7 +361,14 @@ impl World {
         // deadhead crawls half a county; real multi-leg street chains
         // above are never clamped.
         miles = miles.min(SYNTHETIC_APPROACH_CAP_MI);
-        let leg = Leg::new(&city, &city, miles, &road, "flat", Vec::new());
+        let leg = Leg::new(
+            &city,
+            &city,
+            miles,
+            &spoken_road_text(&road),
+            "flat",
+            Vec::new(),
+        );
         Ok(Route::from_legs(vec![city.clone(), city], vec![leg]))
     }
 }
@@ -376,6 +407,33 @@ mod tests {
         assert_eq!(
             spoken_road_text("no parens; still fine"),
             "no parens; still fine"
+        );
+    }
+
+    #[test]
+    fn test_spoken_road_text_retires_unnamed_public_road() {
+        // Heard on the 2026-09-01 agent drive into Gary Cross-Dock: the
+        // facility approach bake predates the builders' class labels and
+        // still carries the retired wording as a name, in both the road
+        // and the cue sentence around it.
+        assert_eq!(spoken_road_text("unnamed public road"), "a side street");
+        assert_eq!(
+            spoken_road_text("Turn left onto unnamed public road."),
+            "Turn left onto a side street."
+        );
+        assert_eq!(
+            spoken_road_text("Start on unnamed public road."),
+            "Start on a side street."
+        );
+        assert_eq!(
+            spoken_road_text("Use unnamed public road for the local approach."),
+            "Use a side street for the local approach."
+        );
+        // The class labels the builders write now pass through untouched.
+        assert_eq!(spoken_road_text("a service road"), "a service road");
+        assert_eq!(
+            spoken_road_text("Turn right onto a side street."),
+            "Turn right onto a side street."
         );
     }
 

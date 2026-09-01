@@ -191,6 +191,89 @@ def test_build_tool_routes_tiny_facility_fixture(tmp_path, monkeypatch):
     ]
 
 
+def test_build_tool_says_what_an_unnamed_road_is(tmp_path, monkeypatch):
+    """Agent drive 2026-09-01: "Turn left onto unnamed public road" into a
+    cross-dock. The builders retired that wording on 2026-08-25 (a nameless
+    way is spoken by its class), but the shipped facility file was baked
+    before that. This pins the builder's side of the promise, so a re-run
+    of the facility bake cannot bring the old wording back."""
+    tool = _load_tool()
+    osm_path = tmp_path / "facility.osm"
+    osm_path.write_text(
+        """<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="fixture">
+  <node id="1" lat="41.0000" lon="-87.0000" />
+  <node id="2" lat="41.0000" lon="-86.9950" />
+  <node id="3" lat="41.0000" lon="-86.9900" />
+  <node id="4" lat="41.0000" lon="-86.9850" />
+  <way id="10">
+    <nd ref="1" />
+    <nd ref="2" />
+    <tag k="highway" v="tertiary" />
+    <tag k="name" v="Terminal Road" />
+  </way>
+  <way id="20">
+    <nd ref="2" />
+    <nd ref="3" />
+    <tag k="highway" v="residential" />
+  </way>
+  <way id="30">
+    <nd ref="3" />
+    <nd ref="4" />
+    <tag k="highway" v="service" />
+  </way>
+</osm>
+""",
+        encoding="utf-8",
+    )
+    target = tool.FacilityTarget(
+        facility_id="fixture:cross_dock",
+        city="Fixture City",
+        state="Illinois",
+        facility_name="Fixture Cross-Dock",
+        facility_type="cross_dock",
+        endpoint_name="Real Cross-Dock",
+        lat=41.0000,
+        lon=-86.9850,
+        start_lat=41.0000,
+        start_lon=-87.0000,
+        endpoint_source_backed=True,
+        endpoint_fallback=False,
+        endpoint_source_note="fixture",
+        local_approach_miles=0.8,
+        local_approach_road="Terminal Road",
+    )
+    monkeypatch.setattr(tool, "collect_targets", lambda: [target])
+    monkeypatch.setattr(tool, "MIN_PLAYABLE_ROUTE_MI", 0.1)
+    local_geometry = tool._load_local_geometry_tool()
+    monkeypatch.setattr(local_geometry, "state_extract_path", lambda _cache, _state: osm_path)
+    monkeypatch.setattr(tool, "_load_local_geometry_tool", lambda: local_geometry)
+
+    payload = tool.build_facility_approaches(
+        tmp_path,
+        states=("Illinois",),
+        max_route_mi=2.0,
+    )
+    record = payload["approaches"]["fixture:cross_dock"]
+
+    assert record["turn_level"]
+    assert [segment["road"] for segment in record["segments"]] == [
+        "Terminal Road",
+        "a side street",
+        "a service road",
+    ]
+    spoken = " ".join(
+        [record["approach_road"]]
+        + [segment["road"] for segment in record["segments"]]
+        + [segment["cue"] for segment in record["segments"]]
+    )
+    assert "unnamed public road" not in spoken
+    assert "onto a service road" in spoken
+    # The generic labels keep the 15 mph zone a nameless way gets; the named
+    # street keeps its 25.
+    assert [segment["speed_mph"] for segment in record["segments"]] == [25.0, 15.0, 15.0]
+
+
 def test_facility_approach_status_names_the_dock_not_the_town():
     # Owner playtest 2026-07-19: 14 miles of "toward Camp Verde" while
     # pulling out of Camp Verde for its own warehouse read as a wrong turn.

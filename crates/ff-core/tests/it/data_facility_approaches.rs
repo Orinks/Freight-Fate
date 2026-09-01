@@ -178,3 +178,65 @@ fn test_facility_route_keeps_existing_fallback_when_no_source_geometry() {
     assert!((route.miles() - fallback_approach.approach_miles).abs() < 1e-9);
     assert_eq!(route.highways(), vec![fallback_approach.road.clone()]);
 }
+
+/// Agent drive, 2026-09-01: "start on unnamed public road" pulling out of
+/// Chicago Cross-Dock, "Turn left onto unnamed public road" on the way in.
+/// The builders retired that wording on 2026-08-25 for "a service road" /
+/// "a side street", but `facility_approaches.json` was baked before that
+/// and still carries the literal as a road name. Whatever the bake says,
+/// the truck never speaks it: a road with no name is said to be what it
+/// is, on the arrival chain and on the reversed departure chain alike.
+#[test]
+fn test_facility_chains_never_say_unnamed_public_road() {
+    let w = world();
+    let data = read_json("facility_approaches.json");
+    let mut checked = 0;
+    for (facility_id, record) in data["approaches"].as_object().expect("approaches") {
+        if !record["turn_level"].as_bool().unwrap_or(false) {
+            continue;
+        }
+        let Ok(facility) = w.facility_by_id(facility_id) else {
+            continue; // facility retired by map growth; record is inert
+        };
+        let city = record["city"].as_str().expect("city").to_string();
+        let name = facility.name.clone();
+        let arrival = w
+            .facility_approach_route(&city, &name)
+            .expect("approach route");
+        let departure = w
+            .facility_departure_route(&city, &name)
+            .expect("departure route");
+        let legs = arrival
+            .legs
+            .iter()
+            .chain(departure.iter().flat_map(|route| route.legs.iter()));
+        for leg in legs {
+            assert!(
+                !leg.highway.contains("unnamed public road"),
+                "{facility_id}: road {:?}",
+                leg.highway
+            );
+            assert!(
+                !leg.local_cue.contains("unnamed public road"),
+                "{facility_id}: cue {:?}",
+                leg.local_cue
+            );
+            checked += 1;
+        }
+    }
+    assert!(checked > 0);
+
+    // The reported chain, spoken end to end: the last turn in, and the
+    // outbound start on the same road.
+    let arrival = w
+        .facility_approach_route("chicago_il_us", "Chicago Cross-Dock")
+        .expect("approach route");
+    let last = arrival.legs.last().expect("a turn-level chain");
+    assert_eq!(last.highway, "a side street");
+    assert_eq!(last.local_cue, "Turn left onto a side street.");
+    let departure = w
+        .facility_departure_route("chicago_il_us", "Chicago Cross-Dock")
+        .expect("departure route")
+        .expect("a multi-leg chain");
+    assert_eq!(departure.legs[0].local_cue, "Start on a side street.");
+}

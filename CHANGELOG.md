@@ -1121,6 +1121,14 @@
 
 ### Fixed
 
+- **Facility approaches no longer say "unnamed public road".** Pulling out
+  of a dock or turning in for the last stretch, the cab used to announce
+  "start on unnamed public road" or "turn left onto unnamed public road"
+  wherever the map holds no name for that last lane. Those turns now say
+  "a side street", the same words every other nameless road already gets,
+  so the instruction tells you what you are turning onto instead of what it
+  is missing.
+
 - **An emergency stop or a missed turn no longer switches automatic speed
   control off for good.** Before, once the automatic braking cleared, the
   truck coasted down to a crawl on an open interstate, and after a corner
