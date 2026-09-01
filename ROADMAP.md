@@ -5504,7 +5504,15 @@ Everything not listed here ships fine after 1.9.0.
       twelve features mid-session, `--agent-server --find FEATURE` boots
       straight into one with no menu ever existing, and `.mcp.json`
       registers the server for Claude Code sessions in this repo. Run it
-      on a RELEASE build; debug pays a tenfold search tax.
+      on a RELEASE build; debug pays a tenfold search tax. The handshake
+      needs no game (fixed 2026-09-01): Claude Code spawns every
+      configured server at session start just to list its tools, and the
+      first server booted the real game before reading stdin, so enabling
+      it launched a game window into every session and held the
+      one-game-at-a-time lock against the owner. Now the game boots at the
+      first play tool call, a boot refusal (a human already playing) is
+      answered rather than fatal, and a client that hangs up quits the
+      game instead of orphaning it minimized behind the lock.
 - [ ] **Agent playtest probes worth running now the server exists.** A
       spoken-surface navigability probe: an agent at each verbosity rung
       tries to complete a first delivery using ears alone; every place it

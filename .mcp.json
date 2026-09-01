@@ -1,3 +1,9 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "freight-fate": {
+      "command": "cargo",
+      "args": ["run", "--release", "-p", "freight-fate", "--", "--agent-server"],
+      "env": {}
+    }
+  }
 }

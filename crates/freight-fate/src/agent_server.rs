@@ -31,10 +31,20 @@
 //! Transport: newline-delimited JSON-RPC 2.0 over stdio (the MCP stdio
 //! transport). Stdout carries protocol messages only; everything else this
 //! mode prints goes to stderr.
+//!
+//! The handshake needs no game. An MCP client spawns every server it knows
+//! at startup just to ask for the tool list -- Claude Code does it for each
+//! session in this repo -- and the first shipped server booted the real
+//! game before it read a byte of stdin, so enabling it launched a game
+//! window into every session and held the one-game-at-a-time lock against
+//! the owner (found live, 2026-09-01). Now `initialize`, `tools/list` and
+//! `ping` are answered from the serve thread alone; the sandbox, the lock,
+//! the window, audio and speech all wait for the first play request, and a
+//! client that hangs up takes the game down with it.
 
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::io::{BufRead, Write as _};
+use std::io::{BufRead, Write};
 use std::rc::Rc;
 use std::sync::mpsc;
 
@@ -67,6 +77,12 @@ pub struct Ears {
 }
 
 pub type SharedEars = Rc<RefCell<Ears>>;
+
+impl Ears {
+    pub fn shared() -> SharedEars {
+        Rc::new(RefCell::new(Ears::default()))
+    }
+}
 
 fn pan_text(pan: f64) -> &'static str {
     if pan < -0.15 {
@@ -407,7 +423,7 @@ impl Audio for TeeAudio {
 /// Wrap the app's live speech and audio in recording tees.
 pub fn install_ears(app: &mut App) -> SharedEars {
     use crate::audio::{AudioEngine, NullBackend};
-    let ears: SharedEars = Rc::new(RefCell::new(Ears::default()));
+    let ears = Ears::shared();
     let speech = std::mem::replace(&mut app.ctx.speech, Box::new(crate::speech::NullSpeech));
     app.ctx.speech = Box::new(TeeSpeech {
         inner: speech,
@@ -459,7 +475,7 @@ fn drain_ears(ears: &SharedEars) -> String {
 
 // -- commands between the MCP thread and the game loop --------------------------------
 
-enum Command {
+pub enum Command {
     Press {
         key: Key,
         text: Option<char>,
@@ -495,9 +511,39 @@ pub struct Request {
     reply: mpsc::Sender<Result<String, String>>,
 }
 
+impl Request {
+    pub fn command(&self) -> &Command {
+        &self.command
+    }
+
+    /// Answer the tool call this request carries.
+    pub fn answer(self, result: Result<String, String>) {
+        let _ = self.reply.send(result);
+    }
+}
+
+/// Block until the client asks for something only a running game can do,
+/// answering what needs no game on the way (a quit with nothing to quit).
+/// `None` when the client hangs up first: the handshake alone never boots a
+/// game, so a session that only asked for the tool list ends here, quietly.
+pub fn await_play_request(requests: &mpsc::Receiver<Request>) -> Option<Request> {
+    loop {
+        let request = requests.recv().ok()?;
+        match request.command {
+            Command::Quit => request.answer(Ok(
+                "The game is not running; nothing to quit. Any other tool call boots it."
+                    .to_string(),
+            )),
+            _ => return Some(request),
+        }
+    }
+}
+
 /// The per-frame policy servicing agent commands inside the real game loop.
 pub struct AgentPolicy {
     requests: mpsc::Receiver<Request>,
+    /// The request that woke the game, served on the first frame.
+    pending: Option<Request>,
     ears: SharedEars,
     waiting: Option<(f64, mpsc::Sender<Result<String, String>>)>,
     /// Keys the agent is holding. Re-asserted every frame, because the
@@ -511,6 +557,13 @@ pub struct AgentPolicy {
 }
 
 impl AgentPolicy {
+    fn next_request(&mut self) -> Result<Request, mpsc::TryRecvError> {
+        match self.pending.take() {
+            Some(request) => Ok(request),
+            None => self.requests.try_recv(),
+        }
+    }
+
     /// One frame. Returns false to end the game loop.
     pub fn step(&mut self, input: &mut PlayerInputFrame<'_>, dt: f64) -> bool {
         if self.quit {
@@ -527,7 +580,19 @@ impl AgentPolicy {
             }
             let _ = reply.send(Ok(drain_ears(&self.ears)));
         }
-        while let Ok(request) = self.requests.try_recv() {
+        loop {
+            let request = match self.next_request() {
+                Ok(request) => request,
+                Err(mpsc::TryRecvError::Empty) => break,
+                Err(mpsc::TryRecvError::Disconnected) => {
+                    // The client hung up (stdin closed): nobody is left to
+                    // play, and an idle game would hold the one-game-at-a-
+                    // time lock against the operator until they found it.
+                    eprintln!("The MCP client is gone; quitting the game.");
+                    self.quit = true;
+                    return false;
+                }
+            };
             let reply = request.reply;
             match request.command {
                 Command::Press {
@@ -642,8 +707,7 @@ impl AgentPolicy {
 
 // -- the MCP stdio thread -------------------------------------------------------------
 
-fn respond_raw(value: &Value) {
-    let mut out = std::io::stdout().lock();
+fn respond_raw(out: &mut dyn Write, value: &Value) {
     let _ = writeln!(out, "{value}");
     let _ = out.flush();
 }
@@ -796,16 +860,27 @@ fn tools_list() -> Value {
 /// Runs on its own thread; returns when stdin closes or the game quits.
 pub fn serve(requests: mpsc::Sender<Request>) {
     let stdin = std::io::stdin();
-    for line in stdin.lock().lines() {
+    let mut stdout = std::io::stdout().lock();
+    serve_lines(stdin.lock(), &mut stdout, &requests);
+}
+
+/// The MCP loop over any reader and writer: the handshake (`initialize`,
+/// `tools/list`, `ping`) is answered right here; only a `tools/call` goes
+/// through `requests` to the game loop, and the first one is what boots it.
+pub fn serve_lines<R: BufRead, W: Write>(reader: R, out: &mut W, requests: &mpsc::Sender<Request>) {
+    for line in reader.lines() {
         let Ok(line) = line else { break };
         if line.trim().is_empty() {
             continue;
         }
         let Ok(message) = serde_json::from_str::<Value>(&line) else {
-            respond_raw(&json!({
-                "jsonrpc": "2.0", "id": null,
-                "error": {"code": -32700, "message": "parse error"}
-            }));
+            respond_raw(
+                out,
+                &json!({
+                    "jsonrpc": "2.0", "id": null,
+                    "error": {"code": -32700, "message": "parse error"}
+                }),
+            );
             continue;
         };
         let method = message.get("method").and_then(Value::as_str).unwrap_or("");
@@ -821,6 +896,11 @@ pub fn serve(requests: mpsc::Sender<Request>) {
                     .unwrap_or(PROTOCOL_VERSION),
                 "capabilities": {"tools": {}},
                 "serverInfo": {"name": SERVER_NAME, "version": env!("CARGO_PKG_VERSION")},
+                "instructions": "Freight Fate, played by ear. No game is running yet: the \
+                    first tool call other than quit_game boots the real game in its \
+                    playtest sandbox (a few seconds), then answers. One game at a \
+                    time, so a human already playing makes that first call fail; \
+                    try again once they quit.",
             }),
             "ping" => json!({}),
             "tools/list" => tools_list(),
@@ -858,14 +938,17 @@ pub fn serve(requests: mpsc::Sender<Request>) {
                 }
             }
             _ => {
-                respond_raw(&json!({
-                    "jsonrpc": "2.0", "id": id,
-                    "error": {"code": -32601, "message": format!("unknown method {method}")}
-                }));
+                respond_raw(
+                    out,
+                    &json!({
+                        "jsonrpc": "2.0", "id": id,
+                        "error": {"code": -32601, "message": format!("unknown method {method}")}
+                    }),
+                );
                 continue;
             }
         };
-        respond_raw(&json!({"jsonrpc": "2.0", "id": id, "result": reply}));
+        respond_raw(out, &json!({"jsonrpc": "2.0", "id": id, "result": reply}));
     }
 }
 
@@ -1056,19 +1139,22 @@ pub struct LaunchAt {
     pub seed: i64,
 }
 
-/// Build the policy and the sender its MCP thread feeds.
-pub fn policy(ears: SharedEars) -> (AgentPolicy, mpsc::Sender<Request>) {
-    let (tx, rx) = mpsc::channel();
-    (
-        AgentPolicy {
-            requests: rx,
-            ears,
-            waiting: None,
-            held: Vec::new(),
-            quit: false,
-        },
-        tx,
-    )
+/// Build the policy over the receiver the MCP thread feeds. `first` is the
+/// request that woke the game; it is served on the first frame, once the
+/// title screen (or the staged drive) exists to receive it.
+pub fn policy(
+    ears: SharedEars,
+    requests: mpsc::Receiver<Request>,
+    first: Option<Request>,
+) -> AgentPolicy {
+    AgentPolicy {
+        requests,
+        pending: first,
+        ears,
+        waiting: None,
+        held: Vec::new(),
+        quit: false,
+    }
 }
 
 /// The whole `--agent-server` mode: sandbox, real game, MCP on stdio.
@@ -1101,44 +1187,30 @@ fn run_with_staged(
     )>,
 ) -> i32 {
     use crate::playtest::sandbox;
-    let dir = sandbox::default_sandbox();
-    let source = sandbox::real_saves();
-    if let Err(e) = sandbox::prepare(&dir, reset, true, &source) {
-        eprintln!("Could not prepare the agent sandbox: {e}");
-        return 1;
-    }
-    let problems = sandbox::audit(&dir);
-    if !problems.is_empty() {
-        for problem in &problems {
-            eprintln!("{problem}");
-        }
-        eprintln!("Refusing to serve: an agent must never reach the real account. Pass --reset.");
-        return 1;
-    }
-    eprintln!("Agent sandbox: {}", dir.display());
-    let mut guard = crate::single_instance::SingleInstanceGuard::new();
-    if !guard.acquire() {
-        eprintln!("Freight Fate is already running; one game at a time, agent or human.");
-        return 1;
-    }
-    let log_path = ff_core::settings::game_root()
-        .join("logs")
-        .join("agent-session.log");
-    sandbox::open_session(&dir, &log_path);
-    let code = {
-        let mut app = match App::new() {
-            Ok(app) => app,
-            Err(e) => {
-                eprintln!("Fatal error: {e}");
-                guard.release();
-                sandbox::close_session();
-                return 1;
+    let (requests, rx) = mpsc::channel();
+    std::thread::spawn(move || serve(requests));
+    eprintln!("MCP serving on stdio; the game boots at the first play request.");
+    let mut staged = staged;
+    loop {
+        // Only a play request boots anything. A client that asked for the
+        // tool list and hung up gets its answers and never a game window.
+        let Some(first) = await_play_request(&rx) else {
+            return 0;
+        };
+        let (mut app, mut guard) = match boot(reset) {
+            Ok(booted) => booted,
+            Err(text) => {
+                // Answered, not fatal: "already running" clears when the
+                // human quits, and the next call tries again.
+                eprintln!("{text}");
+                first.answer(Err(text));
+                continue;
             }
         };
         // Never let the operator's keyboard land in the game: a focused
         // game window turns their typing elsewhere into truck inputs.
         app.minimize_window();
-        if let Some((hit, opts)) = staged {
+        if let Some((hit, opts)) = staged.take() {
             // The staged drive IS the first screen, exactly as the road
             // launcher does it; quitting reaches the real main menu.
             app.set_initial_state(Box::new(move |ctx| {
@@ -1147,15 +1219,54 @@ fn run_with_staged(
             }));
         }
         let ears = install_ears(&mut app);
-        let (mut policy, requests) = policy(ears);
-        std::thread::spawn(move || serve(requests));
-        eprintln!("MCP serving on stdio; the game speaks aloud while the agent plays.");
+        let mut policy = policy(ears, rx, Some(first));
+        eprintln!("Game up; it speaks aloud while the agent plays.");
         app.run_with_player_input(None, |input, dt| policy.step(input, dt));
-        0
-    };
-    guard.release();
-    sandbox::close_session();
-    code
+        guard.release();
+        sandbox::close_session();
+        return 0;
+    }
+}
+
+/// Everything a running game needs, in the order it can be refused:
+/// the sandbox prepared and audited, the one-game-at-a-time lock, the
+/// session file for the watcher, then the real window, audio and speech.
+/// An error leaves nothing held, so the next play request can try again.
+fn boot(reset: bool) -> Result<(App, crate::single_instance::SingleInstanceGuard), String> {
+    use crate::playtest::sandbox;
+    let dir = sandbox::default_sandbox();
+    let source = sandbox::real_saves();
+    sandbox::prepare(&dir, reset, true, &source)
+        .map_err(|e| format!("Could not prepare the agent sandbox: {e}"))?;
+    let problems = sandbox::audit(&dir);
+    if !problems.is_empty() {
+        return Err(format!(
+            "{}\nRefusing to boot: an agent must never reach the real account. \
+             Restart the server with --reset.",
+            problems.join("\n")
+        ));
+    }
+    eprintln!("Agent sandbox: {}", dir.display());
+    let mut guard = crate::single_instance::SingleInstanceGuard::new();
+    if !guard.acquire() {
+        return Err(
+            "Freight Fate is already running; one game at a time, agent or human. \
+             Call again once it has quit."
+                .to_string(),
+        );
+    }
+    let log_path = ff_core::settings::game_root()
+        .join("logs")
+        .join("agent-session.log");
+    sandbox::open_session(&dir, &log_path);
+    match App::new() {
+        Ok(app) => Ok((app, guard)),
+        Err(e) => {
+            guard.release();
+            sandbox::close_session();
+            Err(format!("The game could not start: {e}"))
+        }
+    }
 }
 
 #[cfg(test)]

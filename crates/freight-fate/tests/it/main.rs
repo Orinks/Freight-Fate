@@ -15,6 +15,7 @@ mod states_online_support;
 mod transcript_cruise_support;
 
 mod adversarial;
+mod agent_server;
 mod app_achievements;
 mod app_controller;
 mod app_controls_reference;
