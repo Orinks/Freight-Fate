@@ -143,3 +143,40 @@ fn a_client_that_hangs_up_mid_game_quits_it() {
         "the game loop ends on the first frame after the client is gone"
     );
 }
+
+#[test]
+fn a_tap_lands_as_a_finger_tap_not_a_screen_reader_hold() {
+    use freight_fate::states::base::Key;
+    // Two frames, down then up. A press and release inside one frame is
+    // what JAWS re-injects for a held key, and the held-key tracker holds
+    // such a key for the repeat delay: a tapped brake read as the
+    // reverse-selection hold and a tapped P fought the approach assist
+    // (found live, 2026-09-01).
+    let mut app = TestApp::new();
+    let (tx, rx) = mpsc::channel();
+    let server_tx = tx.clone(); // the test keeps `tx` so the client never "hangs up"
+    let server = std::thread::spawn(move || {
+        let mut out = Vec::new();
+        serve_lines(
+            Cursor::new(call(1, "press", r#"{"key":"space"}"#)),
+            &mut out,
+            &server_tx,
+        );
+        out
+    });
+    let first = await_play_request(&rx).expect("the press wakes the game");
+    let mut agent = policy(Ears::shared(), rx, Some(first));
+    let mut readings = Vec::new();
+    app.run_with_player_input(Some(4), |input, dt| {
+        readings.push(input.key_reads_pressed(Key::Space));
+        agent.step(input, dt)
+    });
+    drop(tx);
+    let _ = server.join();
+    // Frame 1 reads the request, frame 2 sends the down, frame 3 the up.
+    assert_eq!(
+        readings,
+        [false, false, true, false],
+        "down for exactly one frame, then released for good (no half-second pulse)"
+    );
+}

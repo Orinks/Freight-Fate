@@ -153,6 +153,7 @@ pub fn prepare(sandbox: &Path, reset: bool, careers: bool, source: &Path) -> std
         std::fs::remove_dir_all(sandbox)?;
     }
     std::fs::create_dir_all(sandbox)?;
+    clear_session_leftovers(sandbox, source);
     if !sandbox.join("settings.json").exists() {
         seed_settings(sandbox, source);
     }
@@ -161,6 +162,25 @@ pub fn prepare(sandbox: &Path, reset: bool, careers: bool, source: &Path) -> std
     }
     std::env::set_var(DATA_DIR_ENV, sandbox);
     Ok(())
+}
+
+/// Drop identity-class files the LAST sandbox session's game wrote for
+/// itself -- the pending meaningful-play stamp lands on every accepted job,
+/// online or not -- so the audit that follows judges only what seeding
+/// did. Runs before seeding on purpose: a seeding leak still gets caught.
+/// Found live 2026-09-01, when every second agent session refused to boot
+/// over the stamp the first one left behind. Never touches the real saves.
+fn clear_session_leftovers(sandbox: &Path, source: &Path) {
+    if sandbox == source {
+        return;
+    }
+    let mut found = Vec::new();
+    walk(sandbox, &mut found);
+    for path in found {
+        if is_identity(&path) {
+            let _ = std::fs::remove_file(&path);
+        }
+    }
 }
 
 /// Every reason this sandbox could still reach the real account.

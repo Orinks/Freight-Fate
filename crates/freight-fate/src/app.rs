@@ -221,6 +221,13 @@ impl PlayerInputFrame<'_> {
     pub fn assert_held(&mut self, key: Key) {
         self.app.ctx.input.press(key, Mods::NONE);
     }
+
+    /// Whether the drive would read `key` as down this frame -- physically
+    /// or through the held-key tracker's screen-reader pulse. An inspector
+    /// for the agent server's tests, not a control.
+    pub fn key_reads_pressed(&self, key: Key) -> bool {
+        self.app.ctx.input.is_pressed(key)
+    }
 }
 
 impl App {

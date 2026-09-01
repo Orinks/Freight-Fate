@@ -159,6 +159,37 @@ fn test_the_audit_names_an_identity_that_got_in_somehow() {
 }
 
 #[test]
+fn test_prepare_clears_what_the_last_sandbox_session_wrote() {
+    // The sandboxed game stamps meaningful_play.json on every accepted job,
+    // online or not; the next session's audit named it and refused to boot
+    // (every second agent session, 2026-09-01). Preparing again clears the
+    // last session's own leftovers before seeding, and the audit that follows
+    // is clean -- the identity in the real saves still never gets in.
+    let _guard = sandbox_env();
+    let root = TempDir::new("ff-sandbox");
+    let source = fake_real_saves(root.path());
+    let sandbox = root.path().join("sandbox");
+    sandbox::prepare(&sandbox, false, true, &source).unwrap();
+    write(&sandbox.join("meaningful_play.json"), "{}");
+    write(&sandbox.join("online-outbox.json"), "[]");
+    let before = sandbox::audit(&sandbox);
+    assert!(
+        !before.is_empty(),
+        "the leftovers are what the audit refuses"
+    );
+
+    sandbox::prepare(&sandbox, false, true, &source).unwrap();
+
+    assert!(!sandbox.join("meaningful_play.json").exists());
+    assert!(!sandbox.join("online-outbox.json").exists());
+    assert!(sandbox::audit(&sandbox).is_empty());
+    assert!(
+        source.join("online.json").exists(),
+        "the real saves are never touched"
+    );
+}
+
+#[test]
 fn test_the_audit_names_pending_meaningful_play_intent() {
     let _guard = sandbox_env();
     let root = TempDir::new("ff-sandbox");

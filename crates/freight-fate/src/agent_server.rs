@@ -74,6 +74,8 @@ pub struct Ears {
     /// sixty samples a second of it. Cleared at each listen.
     engine_rpm: Vec<f64>,
     road_noise_mps: Option<f64>,
+    /// The alert currently held, so a per-frame re-assert is heard once.
+    held_alert: Option<String>,
 }
 
 pub type SharedEars = Rc<RefCell<Ears>>;
@@ -304,10 +306,17 @@ impl Audio for TeeAudio {
         self.inner.release_sustain_loop_with(channel, fade_ms);
     }
     fn hold_alert_with(&mut self, key: &str, volume: f64, fade_ms: u32) {
-        self.hear(format!("[alert] {key} holds"));
+        // Re-asserted every frame while it holds; an ear hears it start
+        // once (a ramp-end stop flooded a listen with a hundred of these).
+        let fresh = self.ears.borrow().held_alert.as_deref() != Some(key);
+        if fresh {
+            self.ears.borrow_mut().held_alert = Some(key.to_string());
+            self.hear(format!("[alert] {key} holds"));
+        }
         self.inner.hold_alert_with(key, volume, fade_ms);
     }
     fn release_alert_with(&mut self, fade_ms: u32) {
+        self.ears.borrow_mut().held_alert = None;
         self.hear("[alert] released".to_string());
         self.inner.release_alert_with(fade_ms);
     }
@@ -553,6 +562,14 @@ pub struct AgentPolicy {
     /// first throttle hold worked (window still focused from launch) and
     /// every later one silently died.
     held: Vec<Key>,
+    /// Key events scripted frame by frame, front first. A tap is two
+    /// frames -- down, then up -- because the held-key tracker reads a
+    /// press and release inside ONE frame as a screen reader's re-injected
+    /// pair and holds the key for the repeat delay (half a second): a
+    /// tapped brake became the reverse-selection hold and a tapped P
+    /// toggled the parking brake against the approach assist (found live,
+    /// 2026-09-01). No finger taps inside a frame, so the agent must not.
+    scripted: std::collections::VecDeque<Vec<InputEvent>>,
     quit: bool,
 }
 
@@ -571,6 +588,11 @@ impl AgentPolicy {
         }
         for key in &self.held {
             input.assert_held(*key);
+        }
+        if let Some(frame) = self.scripted.pop_front() {
+            for event in frame {
+                input.queue_player_input(event);
+            }
         }
         if let Some((remaining, reply)) = self.waiting.take() {
             let remaining = remaining - dt;
@@ -602,8 +624,10 @@ impl AgentPolicy {
                     times,
                 } => {
                     for _ in 0..times.clamp(1, 50) {
-                        input.queue_player_input(InputEvent::KeyDown { key, mods, text });
-                        input.queue_player_input(InputEvent::KeyUp { key, mods });
+                        self.scripted
+                            .push_back(vec![InputEvent::KeyDown { key, mods, text }]);
+                        self.scripted
+                            .push_back(vec![InputEvent::KeyUp { key, mods }]);
                     }
                     let _ = reply.send(Ok(
                         "pressed. Wait a moment (wait tool) then listen; the game \
@@ -1153,6 +1177,7 @@ pub fn policy(
         ears,
         waiting: None,
         held: Vec::new(),
+        scripted: std::collections::VecDeque::new(),
         quit: false,
     }
 }
@@ -1258,6 +1283,17 @@ fn boot(reset: bool) -> Result<(App, crate::single_instance::SingleInstanceGuard
     let log_path = ff_core::settings::game_root()
         .join("logs")
         .join("agent-session.log");
+    // The session file names this log for the watcher, so it has to exist:
+    // the other playtest modes configure logging in `main`, but this mode
+    // returns before that, and its first sessions wrote nothing at all.
+    if let Some(parent) = log_path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    std::env::set_var("FREIGHT_FATE_LOG_FILE", &log_path);
+    if std::env::var_os("FREIGHT_FATE_LOG").is_none() {
+        std::env::set_var("FREIGHT_FATE_LOG", "INFO");
+    }
+    crate::app::configure_logging();
     sandbox::open_session(&dir, &log_path);
     match App::new() {
         Ok(app) => Ok((app, guard)),
