@@ -346,15 +346,17 @@ impl App {
             },
         )));
         boot_timing::mark("online services");
+        let pads_allowed = crate::controller::pads_allowed(
+            settings.controller_enabled,
+            std::env::var_os(crate::controller::NO_CONTROLLER_ENV).as_deref(),
+        );
         let controller = match &shell {
             Some(shell) => ControllerManager::new(
-                settings.controller_enabled,
+                pads_allowed,
                 settings.haptics_enabled,
                 Some(crate::controller::sdl::sdl_factory(shell.sdl.clone())),
             ),
-            None => {
-                ControllerManager::detached(settings.controller_enabled, settings.haptics_enabled)
-            }
+            None => ControllerManager::detached(pads_allowed, settings.haptics_enabled),
         };
         boot_timing::mark("controller");
         let clipboard: Box<dyn Clipboard> = match &shell {

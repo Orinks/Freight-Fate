@@ -258,6 +258,19 @@ pub type PadSubsystemFactory = Box<dyn FnMut() -> Option<Box<dyn PadSubsystem>>>
 
 /// The bound pad and the two switches every device call is guarded by,
 /// shared between the manager and the rumble sink.
+/// Set (non-empty) to keep every gamepad out of the game for this process,
+/// whatever the controller setting says. The agent server sets it: an
+/// agent's capabilities are a player's KEYS, and the Xbox pad resting on
+/// the operator's desk spent a whole afternoon toggling the parking brake,
+/// stepping the cruise target and reading the speed into an agent's drive
+/// (2026-09-01) before anyone thought of it.
+pub const NO_CONTROLLER_ENV: &str = "FREIGHT_FATE_NO_CONTROLLER";
+
+/// Whether pads may drive, from the player's setting and the override.
+pub fn pads_allowed(setting_enabled: bool, override_value: Option<&std::ffi::OsStr>) -> bool {
+    setting_enabled && !override_value.is_some_and(|v| !v.is_empty())
+}
+
 struct PadSlot {
     device: Option<Box<dyn PadDevice>>,
     enabled: bool,
@@ -972,5 +985,17 @@ mod tests {
             dropped.get(),
             "controller shutdown retained its SDL-owning factory"
         );
+    }
+}
+
+#[cfg(test)]
+mod pads_allowed_tests {
+    #[test]
+    fn the_no_controller_override_wins_over_the_setting() {
+        use std::ffi::OsStr;
+        assert!(super::pads_allowed(true, None));
+        assert!(super::pads_allowed(true, Some(OsStr::new(""))));
+        assert!(!super::pads_allowed(true, Some(OsStr::new("1"))));
+        assert!(!super::pads_allowed(false, None));
     }
 }
