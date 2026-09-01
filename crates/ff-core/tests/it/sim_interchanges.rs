@@ -465,7 +465,7 @@ fn test_first_leg_has_onramp_cue() {
         "{text}"
     );
     assert!(
-        text.contains("Indianapolis") && text.contains("miles."),
+        text.contains("Indianapolis") && text.contains("miles on it."),
         "{text}"
     );
 }

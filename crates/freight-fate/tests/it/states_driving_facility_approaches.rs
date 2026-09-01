@@ -54,7 +54,20 @@ fn test_facility_route_prefers_turn_level_source_approach() {
 
     assert!(approach.turn_level);
     assert!((route.miles() - approach.total_miles).abs() < 1e-9);
-    let roads: Vec<String> = approach.segments.iter().map(|s| s.road.clone()).collect();
+    // The route speaks the source roads verbatim, except the retired
+    // "unnamed public road" literal still baked into stale records, which
+    // is spoken as the side-street stand-in (2026-09-01).
+    let roads: Vec<String> = approach
+        .segments
+        .iter()
+        .map(|s| {
+            if s.road == "unnamed public road" {
+                "a side street".to_string()
+            } else {
+                s.road.clone()
+            }
+        })
+        .collect();
     assert_eq!(route.highways(), roads);
 
     let trip = Trip::new(

@@ -93,4 +93,9 @@ def test_macos_carries_sdl2_statically():
 
     windows = manifest["target"]["cfg(windows)"]["dependencies"]
     assert "sdl2" not in windows
-    assert manifest["dependencies"]["sdl2"] == {"workspace": True}
+    # The base dependency may carry platform-neutral features (the window
+    # handle for the nonblocking Windows shutdown); the static-link set is
+    # what must stay macOS-only.
+    base = manifest["dependencies"]["sdl2"]
+    assert base["workspace"] is True
+    assert not {"bundled", "static-link", "use-pkgconfig"} & set(base.get("features", []))
