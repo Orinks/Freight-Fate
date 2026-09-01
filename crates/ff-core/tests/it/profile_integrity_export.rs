@@ -108,6 +108,10 @@ fn the_fixture_carries_the_live_catalog_figures() {
         "truckConditionFields",
         "sourceSaveVersion",
         "achievementIds",
+        "achievementLabels",
+        "careerTitles",
+        "carrierLabels",
+        "trailerCatalog",
         "truckPrices",
         "upgradePrices",
         "endorsements",
@@ -115,6 +119,45 @@ fn the_fixture_carries_the_live_catalog_figures() {
         "marketCargoKeys",
     ] {
         assert_eq!(fixture[key], live[key], "{key} moved");
+    }
+}
+
+#[test]
+fn the_public_profile_catalogs_are_derived_from_live_game_catalogs() {
+    use ff_core::achievements::ACHIEVEMENTS;
+    use ff_core::models::career_ladder::CAREER_RANKS;
+    use ff_core::models::start_options::all_start_options;
+    use ff_core::models::trailers::TRAILER_CATALOG;
+
+    let exported = ff_core::profile_integrity_invariants::current_invariant_data()
+        .expect("the shipped catalogs render");
+
+    let titles: Vec<&str> = CAREER_RANKS.iter().map(|rank| rank.title).collect();
+    assert_eq!(exported["careerTitles"], serde_json::json!(titles));
+
+    for option in all_start_options() {
+        assert_eq!(
+            exported["carrierLabels"][option.key], option.carrier_name,
+            "{} carrier label moved",
+            option.key
+        );
+    }
+    for trailer in TRAILER_CATALOG {
+        assert_eq!(
+            exported["trailerCatalog"][trailer.key]["label"],
+            trailer.label
+        );
+        assert_eq!(
+            exported["trailerCatalog"][trailer.key]["purchasePrice"],
+            trailer.purchase_price
+        );
+    }
+    for achievement in ACHIEVEMENTS {
+        assert_eq!(
+            exported["achievementLabels"][achievement.id], achievement.name,
+            "{} achievement label moved",
+            achievement.id
+        );
     }
 }
 

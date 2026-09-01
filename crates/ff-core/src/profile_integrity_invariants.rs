@@ -61,12 +61,28 @@ pub struct FleetTierRow {
     pub label: String,
 }
 
+/// One public trailer catalog row.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TrailerRow {
+    pub key: String,
+    pub label: String,
+    pub purchase_price: f64,
+}
+
 /// The economy and catalog figures the export carries, read off the models
 /// package. Field names follow the Python constants they come from.
 #[derive(Debug, Clone, PartialEq)]
 pub struct CatalogInputs {
     /// `achievement.id` for every entry of `ACHIEVEMENTS`.
     pub achievement_ids: Vec<String>,
+    /// Achievement key and player-facing title from `ACHIEVEMENTS`.
+    pub achievement_labels: Vec<(String, String)>,
+    /// Career titles from `CAREER_RANKS`, in exact level order.
+    pub career_titles: Vec<String>,
+    /// Career-start key and carrier name from `START_OPTIONS`.
+    pub carrier_labels: Vec<(String, String)>,
+    /// Public trailer details from `TRAILER_CATALOG`.
+    pub trailers: Vec<TrailerRow>,
     /// `STARTING_MONEY`.
     pub starting_money: f64,
     /// `max(option.starting_money for option in all_start_options())`.
@@ -120,6 +136,7 @@ impl CatalogInputs {
             Career, DELIVERY_COMPLETION_XP, LEVEL_XP, XP_CLEAN_BONUS, XP_PER_MILE_ON_TIME,
             XP_SPECIALTY_MULT, XP_STREAK_MAX_BONUS,
         };
+        use crate::models::career_ladder::CAREER_RANKS;
         use crate::models::carrier_fleet::FLEET_TIERS;
         use crate::models::credentials::CREDENTIALS;
         use crate::models::economy::PAY_ADVANCE_LIMIT;
@@ -128,6 +145,7 @@ impl CatalogInputs {
             fresh_condition, PROFILE_FIELDS, SAVE_VERSION, STARTING_MONEY,
         };
         use crate::models::start_options::all_start_options;
+        use crate::models::trailers::TRAILER_CATALOG;
         use crate::models::trucks::{TRUCK_CATALOG, UPGRADE_CATALOG};
 
         // `sorted(Career.__dataclass_fields__)`. The Rust dataclass is the
@@ -157,6 +175,26 @@ impl CatalogInputs {
             achievement_ids: ACHIEVEMENTS
                 .iter()
                 .map(|badge| badge.id.to_string())
+                .collect(),
+            achievement_labels: ACHIEVEMENTS
+                .iter()
+                .map(|badge| (badge.id.to_string(), badge.name.to_string()))
+                .collect(),
+            career_titles: CAREER_RANKS
+                .iter()
+                .map(|rank| rank.title.to_string())
+                .collect(),
+            carrier_labels: all_start_options()
+                .iter()
+                .map(|option| (option.key.to_string(), option.carrier_name.to_string()))
+                .collect(),
+            trailers: TRAILER_CATALOG
+                .iter()
+                .map(|trailer| TrailerRow {
+                    key: trailer.key.to_string(),
+                    label: trailer.label.to_string(),
+                    purchase_price: trailer.purchase_price,
+                })
                 .collect(),
             starting_money: STARTING_MONEY,
             starting_money_max: all_start_options()
@@ -311,6 +349,26 @@ pub fn city_labels(data_root: &Path) -> Result<BTreeMap<String, String>, String>
 pub fn invariant_data(data_root: &Path, inputs: &CatalogInputs) -> Result<Value, String> {
     let mut achievement_ids = inputs.achievement_ids.clone();
     achievement_ids.sort();
+    let achievement_labels: Map<String, Value> = inputs
+        .achievement_labels
+        .iter()
+        .map(|(key, label)| (key.clone(), Value::from(label.clone())))
+        .collect();
+    let carrier_labels: Map<String, Value> = inputs
+        .carrier_labels
+        .iter()
+        .map(|(key, label)| (key.clone(), Value::from(label.clone())))
+        .collect();
+    let trailer_catalog: Map<String, Value> = inputs
+        .trailers
+        .iter()
+        .map(|trailer| {
+            let mut row = Map::new();
+            row.insert("label".into(), Value::from(trailer.label.clone()));
+            row.insert("purchasePrice".into(), json_number(trailer.purchase_price));
+            (trailer.key.clone(), Value::Object(row))
+        })
+        .collect();
     let mut market_cargo_keys = inputs.market_cargo_keys.clone();
     market_cargo_keys.sort();
     let mut career_fields = inputs.career_fields.clone();
@@ -366,6 +424,15 @@ pub fn invariant_data(data_root: &Path, inputs: &CatalogInputs) -> Result<Value,
 
     let mut out = Map::new();
     out.insert("achievementIds".into(), Value::from(achievement_ids));
+    out.insert(
+        "achievementLabels".into(),
+        Value::Object(achievement_labels),
+    );
+    out.insert(
+        "careerTitles".into(),
+        Value::from(inputs.career_titles.clone()),
+    );
+    out.insert("carrierLabels".into(), Value::Object(carrier_labels));
     out.insert("cityLabels".into(), Value::Object(city_labels));
     // The economy terms the cloud-save validator needs to tell an edited
     // career from an honest one. They ship as data for the same reason the
@@ -416,6 +483,7 @@ pub fn invariant_data(data_root: &Path, inputs: &CatalogInputs) -> Result<Value,
     );
     out.insert("truckLabels".into(), Value::Object(truck_labels));
     out.insert("truckPrices".into(), Value::Object(truck_prices));
+    out.insert("trailerCatalog".into(), Value::Object(trailer_catalog));
     out.insert("upgradePrices".into(), Value::Object(upgrade_prices));
     Ok(Value::Object(out))
 }
@@ -522,6 +590,14 @@ mod tests {
     fn inputs() -> CatalogInputs {
         CatalogInputs {
             achievement_ids: vec!["first_delivery".into(), "antler_polisher".into()],
+            achievement_labels: vec![("first_delivery".into(), "First delivery".into())],
+            career_titles: vec!["Yard Trainee".into()],
+            carrier_labels: vec![("northstar".into(), "Northstar Freight Lines".into())],
+            trailers: vec![TrailerRow {
+                key: "dry_van".into(),
+                label: "Dry van".into(),
+                purchase_price: 42_000.0,
+            }],
             starting_money: 5000.0,
             starting_money_max: 18000.0,
             pay_advance_limit: 1500.0,
