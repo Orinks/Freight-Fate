@@ -392,7 +392,7 @@ fn test_a_missed_turn_keeps_the_speed_control_session_armed() {
     assert_eq!(d.turn_miss_count, 1);
     assert!(d.keeper_mph.is_none());
     assert!(d.speed_control_armed, "the session survives the miss");
-    assert!(!lines_with(&app, "Missed the turn").is_empty());
+    assert!(!lines_with(&app, "missed the turn").is_empty());
 }
 
 #[test]
