@@ -999,6 +999,12 @@ def music_download_config(env: Mapping[str, str] = os.environ) -> tuple[str, str
     return url, expected_sha256
 
 
+def download_to_path(request: urllib.request.Request, destination: Path) -> None:
+    """Stream one authenticated HTTP request to disk with bounded memory."""
+    with urllib.request.urlopen(request) as response, destination.open("wb") as output:
+        shutil.copyfileobj(response, output, length=1024 * 1024)
+
+
 def ensure_music_pack(path: Path = PACKAGE_DIR / "music.pak") -> None:
     """Download and verify the public music pack when it is not already present."""
     url, expected_sha256 = music_download_config()
@@ -1015,7 +1021,7 @@ def ensure_music_pack(path: Path = PACKAGE_DIR / "music.pak") -> None:
                 url,
                 headers={"User-Agent": "Freight-Fate-release-builder/1.9"},
             )
-            urllib.request.urlretrieve(request, temporary)
+            download_to_path(request, temporary)
         except urllib.error.HTTPError as exc:
             raise RuntimeError(
                 f"Music-pack download failed with HTTP status {exc.code}. "

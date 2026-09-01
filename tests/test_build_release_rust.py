@@ -8,6 +8,7 @@ package tree, so it proves what the staged ``FreightFate/`` folder would hold
 from __future__ import annotations
 
 import importlib.util
+import io
 import plistlib
 import subprocess
 import urllib.error
@@ -298,8 +299,8 @@ def test_ensure_music_pack_keeps_a_verified_existing_pack(tmp_path, monkeypatch)
     digest = build_release.hashlib.sha256(pack.read_bytes()).hexdigest()
     monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", digest)
     monkeypatch.setattr(
-        build_release.urllib.request,
-        "urlretrieve",
+        build_release,
+        "download_to_path",
         lambda *_: pytest.fail("downloaded"),
     )
     build_release.ensure_music_pack(pack)
@@ -315,6 +316,20 @@ def test_music_download_config_rejects_a_non_hex_digest(monkeypatch):
         build_release.music_download_config()
 
 
+def test_download_to_path_streams_the_response(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    destination = tmp_path / "music.pak"
+    response = io.BytesIO(b"streamed pack")
+    monkeypatch.setattr(build_release.urllib.request, "urlopen", lambda _request: response)
+
+    build_release.download_to_path(
+        urllib.request.Request("https://example.test/music.pak"), destination
+    )
+
+    assert destination.read_bytes() == b"streamed pack"
+    assert response.closed
+
+
 def test_ensure_music_pack_atomically_installs_a_verified_download(tmp_path, monkeypatch):
     build_release = load_build_release_module()
     pack = tmp_path / "music.pak"
@@ -327,7 +342,7 @@ def test_ensure_music_pack_atomically_installs_a_verified_download(tmp_path, mon
         assert url.full_url == "https://example.test/music.pak"
         Path(destination).write_bytes(payload)
 
-    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", download)
+    monkeypatch.setattr(build_release, "download_to_path", download)
     build_release.ensure_music_pack(pack)
 
     assert pack.read_bytes() == payload
@@ -348,7 +363,7 @@ def test_ensure_music_pack_identifies_the_release_downloader(tmp_path, monkeypat
         assert request.get_header("User-agent") == "Freight-Fate-release-builder/1.9"
         Path(destination).write_bytes(payload)
 
-    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", download)
+    monkeypatch.setattr(build_release, "download_to_path", download)
     build_release.ensure_music_pack(pack)
 
     assert pack.read_bytes() == payload
@@ -359,8 +374,8 @@ def test_ensure_music_pack_rejects_a_mismatched_download(tmp_path, monkeypatch):
     pack = tmp_path / "music.pak"
     monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", "a" * 64)
     monkeypatch.setattr(
-        build_release.urllib.request,
-        "urlretrieve",
+        build_release,
+        "download_to_path",
         lambda _url, destination: Path(destination).write_bytes(b"unapproved pack"),
     )
 
@@ -381,8 +396,8 @@ def test_ensure_music_pack_replaces_a_mismatched_existing_pack_after_verificatio
     digest = build_release.hashlib.sha256(payload).hexdigest()
     monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", digest)
     monkeypatch.setattr(
-        build_release.urllib.request,
-        "urlretrieve",
+        build_release,
+        "download_to_path",
         lambda _url, destination: Path(destination).write_bytes(payload),
     )
 
@@ -405,7 +420,7 @@ def test_ensure_music_pack_preserves_existing_pack_when_download_fails(tmp_path,
     def fail_download(_url, _destination):
         raise urllib.error.URLError("download unavailable")
 
-    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", fail_download)
+    monkeypatch.setattr(build_release, "download_to_path", fail_download)
     with pytest.raises(
         RuntimeError,
         match=(
@@ -428,7 +443,7 @@ def test_ensure_music_pack_reports_http_status_and_preserves_the_cause(tmp_path,
     def fail_download(url, _destination):
         raise urllib.error.HTTPError(url, 503, "Service Unavailable", None, None)
 
-    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", fail_download)
+    monkeypatch.setattr(build_release, "download_to_path", fail_download)
     with pytest.raises(
         RuntimeError,
         match=(
@@ -452,7 +467,7 @@ def test_ensure_music_pack_does_not_mislabel_local_io_failures(tmp_path, monkeyp
     def fail_download(_url, _destination):
         raise PermissionError("destination is read-only")
 
-    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", fail_download)
+    monkeypatch.setattr(build_release, "download_to_path", fail_download)
     with pytest.raises(PermissionError, match="destination is read-only"):
         build_release.ensure_music_pack(pack)
 
