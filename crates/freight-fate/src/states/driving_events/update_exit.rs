@@ -436,6 +436,16 @@ impl DrivingState {
             format!("You take {} for {}.", stop.exit_label, stop.spoken_name())
         };
         let scale_ramp = stop.stop_type == "weigh_station";
+        // In the driver's units: a metric cab heard "half a mile" here in
+        // an otherwise all-kilometer run (agent drive, 2026-09-01).
+        let ramp = {
+            let text = ctx.settings.short_distance_text(0.5);
+            let mut chars = text.chars();
+            match chars.next() {
+                Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+                None => text,
+            }
+        };
         let message = if self.terse_speech(ctx) {
             let mut terminal = match self.ramp_control.as_str() {
                 "signal" => " Traffic light at the end.",
@@ -445,7 +455,7 @@ impl DrivingState {
             if scale_ramp {
                 terminal = " The scale is at the end.";
             }
-            format!("{take} Half a mile of ramp.{terminal}")
+            format!("{take} {ramp} of ramp.{terminal}")
         } else {
             let mut ending = match self.ramp_control.as_str() {
                 "signal" => "traffic light at the end, then brake to a stop at the entrance",
@@ -455,7 +465,7 @@ impl DrivingState {
             if scale_ramp {
                 ending = "roll down to the scale and stop at the bar";
             }
-            format!("{take} Half a mile of ramp; {ending}.")
+            format!("{take} {ramp} of ramp; {ending}.")
         };
         let mut opts = SayEvent::new();
         opts.category = Some(SpeechCategory::Navigation);

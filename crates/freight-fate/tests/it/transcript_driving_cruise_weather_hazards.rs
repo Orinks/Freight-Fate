@@ -93,6 +93,7 @@ fn test_automatic_emergency_braking_engages_once_and_cancels_cruise() {
     harness.clear_speech();
     harness.with_drive(|d, _| {
         d.truck_mut().velocity_mps = 25.0;
+        d.speed_control_armed = true;
         d.cruise_mph = Some(55.0);
         d.hazard_deadline = Some(d.brake_budget_s(HAZARD_SAFE_MPH));
     });
@@ -109,6 +110,11 @@ fn test_automatic_emergency_braking_engages_once_and_cancels_cruise() {
         1
     );
     assert!(!said.iter().any(|s| s == "Emergency braking engaged."));
+    // Paused, not disarmed: the session survives the hazard so cruise
+    // resumes once the truck is rolling and off the brakes. Disarming left
+    // the truck coasting to 5 km/h on open I-90 with the driver believing
+    // cruise had it (owner ruling, 2026-09-01).
+    assert!(harness.read_drive(|d| d.speed_control_armed));
 }
 
 #[test]

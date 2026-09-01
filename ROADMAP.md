@@ -5512,7 +5512,47 @@ Everything not listed here ships fine after 1.9.0.
       one-game-at-a-time lock against the owner. Now the game boots at the
       first play tool call, a boot refusal (a human already playing) is
       answered rather than fatal, and a client that hangs up quits the
-      game instead of orphaning it minimized behind the lock.
+      game instead of orphaning it minimized behind the lock. The same
+      day's first two agent drives (Denver deadhead, then Chicago to Gary
+      end to end) hardened the tool again: a `press` now lands as a real
+      finger tap (key-down one frame, key-up the next -- inside one frame
+      the JAWS hold emulation read it as a half-second hold, so a tapped
+      brake became the reverse gesture), the session writes
+      `logs/agent-session.log` (it never had), the sandbox clears the
+      last session's own meaningful-play stamp before the audit (every
+      second session refused to boot over it), and a held alert is heard
+      once per hold instead of once per frame.
+- [ ] **Agent-drive findings, 2026-09-01 (Chicago to Gary, quiet rung,
+      metric).** Fixed the same day: the emergency-braking and
+      missed-turn paths DISARMED speed control, silently (the truck
+      coasted to 5 km/h on open I-90 with "no close traffic ahead") --
+      owner ruling: a highway hazard pauses cruise and it resumes when
+      clear, and on facility approaches the keeper manages the corners,
+      so both now keep the session armed; "half a mile of ramp" in a
+      metric cab. Still open, each needing a call or a
+      look: (a) the pacer requeues a cut ROUTE line in full after the
+      line that cut it, so every interrupt reads as a repeat -- "Start on
+      West 14th Avenue" twice, "Out of the gate" twice, the state
+      crossing twice in Brandon's log; by design per `speech_pacing`, but
+      an owner call whether a mostly-heard line should be re-said whole;
+      (b) the "; 1 kilometer" tail on a turn call is the NEXT street's
+      length (`surface_distance_tail(leg.miles)`) and lands right after a
+      "400 meters" countdown, so it reads as the distance to the turn
+      going backwards -- reword to say what it is; (c) at the quiet rung
+      the limit change is silenced but each cruise-target step is spoken
+      as a bare number ("56." "64." ...), context-free; (d) "unnamed
+      public road" is still spoken on Chicago and Gary streets despite
+      the 28 August note; (e) "Current grade 6.0 percent downhill" at the
+      flat Chicago Cross-Dock gate -- a data screen candidate; (f) the
+      first-run tutorial says "wait for air pressure to reach 100 psi"
+      AFTER "Air ready: 100 psi"; (g) a traffic-slowing cue plays at
+      every drive start with the engine still off; (h) unpausing replays
+      the engine-start sound; (i) the keeper refuses to arm under about 5
+      km/h, so a driver stalled at a crawl must throttle first; (j)
+      eleven cruise-target steps arrived mid-drive from no agent input --
+      only Plus/Minus or a pad D-pad reach that code, so an operator-side
+      key or controller may be landing in the minimized game window;
+      unresolved.
 - [ ] **Agent playtest probes worth running now the server exists.** A
       spoken-surface navigability probe: an agent at each verbosity rung
       tries to complete a first delivery using ears alone; every place it

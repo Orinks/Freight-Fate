@@ -1121,6 +1121,16 @@
 
 ### Fixed
 
+- **An emergency stop or a missed turn no longer switches automatic speed
+  control off for good.** Before, once the automatic braking cleared, the
+  truck coasted down to a crawl on an open interstate, and after a corner
+  the game turned for you it idled off the turn, with nothing said about
+  the cruise or the speed keeper being gone. Now the session stays on:
+  adaptive cruise comes back once you are rolling and off the brakes, and
+  on a facility approach the speed keeper takes the corners itself.
+- **The exit ramp length is read in your units.** Drivers using kilometers
+  heard "half a mile of ramp" on every exit; it is now 800 meters.
+
 - **Ramp traffic now yields instead of forcing its way in front of the
   truck.** A slower vehicle entering from an on-ramp waits beside the
   highway until the truck has passed, then joins behind it. A vehicle may

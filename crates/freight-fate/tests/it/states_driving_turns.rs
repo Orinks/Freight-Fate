@@ -377,6 +377,25 @@ fn test_no_miss_while_the_turns_own_cue_is_still_speaking() {
 }
 
 #[test]
+fn test_a_missed_turn_keeps_the_speed_control_session_armed() {
+    // The loop-back drops the keeper for the corner but keeps the session,
+    // so it resumes on its own afterwards. Disarming it left the truck
+    // idling off the corner with nothing said (agent drives, 2026-09-01;
+    // owner ruling: the keeper manages facility-approach corners).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    a_street_chain(&mut d);
+    d.speed_control_armed = true;
+    d.keeper_mph = Some(30.0);
+    app.clear_speech();
+    at_turn(&mut d, &mut app, 0.6, 40.0);
+    assert_eq!(d.turn_miss_count, 1);
+    assert!(d.keeper_mph.is_none());
+    assert!(d.speed_control_armed, "the session survives the miss");
+    assert!(!lines_with(&app, "Missed the turn").is_empty());
+}
+
+#[test]
 fn test_a_hazard_never_reads_as_a_missed_turn() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);

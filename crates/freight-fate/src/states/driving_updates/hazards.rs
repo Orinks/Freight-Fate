@@ -659,7 +659,13 @@ impl DrivingState {
                 );
             }
             if self.cruise_mph.is_some() {
-                self.cancel_cruise(ctx, false);
+                // The session stays armed: a hazard stop on the highway
+                // pauses cruise, and the resume path brings it back once
+                // the truck is rolling and off the brakes. Disarming here
+                // left the truck coasting to 5 km/h on open I-90 with the
+                // driver still believing cruise had it (owner ruling,
+                // 2026-09-01: a highway hazard must not disable cruise).
+                self.cancel_cruise(ctx, true);
             }
         }
         if self.hazard_deadline.unwrap_or(0.0) <= 0.0 {

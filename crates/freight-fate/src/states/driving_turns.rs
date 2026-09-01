@@ -417,7 +417,13 @@ impl DrivingState {
     pub fn handle_missed_turn(&mut self, ctx: &mut GameContext, cue: &NavigationCue) {
         self.turn_miss_count += 1;
         self.trip.game_minutes += TURN_MISS_LOOP_MIN;
-        self.cancel_cruise(ctx, false);
+        // The loop-back drops the controllers but keeps the session armed:
+        // on a facility approach the keeper manages the corners, and after
+        // the turnaround or the auto-turn it resumes on its own instead of
+        // leaving the truck idling off the corner (owner ruling, 2026-09-01;
+        // disarming here is what did that on the first agent drives).
+        self.cancel_cruise(ctx, true);
+        self.cancel_keeper(ctx, true);
         let terse = self.terse_speech(ctx);
         let street = self.turn_street_text(cue);
         let target = ctx.settings.speed_text(self.turn_speed_mph(cue));
