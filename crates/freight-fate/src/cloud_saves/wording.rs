@@ -215,3 +215,25 @@ pub fn backup_status(name: &str) -> String {
 pub fn recovery_status(name: &str) -> String {
     format!("{name} is backed up again.")
 }
+
+pub(crate) fn accepted_outcome(result: &serde_json::Map<String, serde_json::Value>) -> String {
+    let Some(raw_name) = result
+        .get("evictedSaveName")
+        .and_then(serde_json::Value::as_str)
+    else {
+        return "accepted".to_string();
+    };
+    let safe_name = super::save_slot_name(raw_name);
+    if raw_name != safe_name || safe_name.chars().count() > 64 {
+        log::warn!("Ignored malformed cloud eviction save name");
+        return "accepted".to_string();
+    }
+    format!("accepted:evicted:{safe_name}")
+}
+
+/// The exact line used after the server removes an old cloud career.
+pub fn eviction_status(name: &str) -> String {
+    format!(
+        "Cloud backup removed {name}, the least recently played cloud career. Your local career was not deleted."
+    )
+}

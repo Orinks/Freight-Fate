@@ -16,7 +16,9 @@ use ff_core::sim::hos::{clock_text, time_of_day};
 use ff_core::sim::timezones::{city_zone, to_local, TimeZone, EASTERN};
 
 use crate::app::{GameContext, Say};
-use crate::cloud_saves::{conflict_status, rejection_status, save_slot_name, AUTH_PAUSED_STATUS};
+use crate::cloud_saves::{
+    conflict_status, eviction_status, rejection_status, save_slot_name, AUTH_PAUSED_STATUS,
+};
 use crate::discord_presence::PresenceState;
 use crate::impl_state_for_menu;
 use crate::meaningful_play::MeaningfulPlayReason;
@@ -498,6 +500,9 @@ impl CityMenuState {
     fn backup_outcome_text(name: &str, outcome: &str) -> String {
         if outcome == "accepted" {
             return "Backed up to the cloud.".to_string();
+        }
+        if let Some(name) = outcome.strip_prefix("accepted:evicted:") {
+            return eviction_status(name);
         }
         if outcome == "unchanged" {
             // "Already backed up" alone reads as a refusal to a driver who

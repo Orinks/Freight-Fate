@@ -3,8 +3,10 @@
 
 use crate::states_main_menu_support as menus;
 use crate::states_online_support::*;
+use ff_core::achievements::ACHIEVEMENTS;
 use freight_fate::app::testing::TestApp;
 use freight_fate::net::testing::FakeTransport;
+use freight_fate::states::account_achievements::AccountAchievementsState;
 use freight_fate::states::base::Key;
 use freight_fate::states::main_menu::MainMenuState;
 use freight_fate::states::online_hub::OnlineHubState;
@@ -32,7 +34,8 @@ fn test_main_menu_online_item_opens_the_hub() {
     // online-enhancement master switch sits right under it.
     let rows = labels::<OnlineHubState>(&hub, &app.ctx);
     assert_eq!(rows[0], "Drivers on duty");
-    assert_eq!(rows[1], "Online services: on");
+    assert_eq!(rows[1], "Account achievements");
+    assert_eq!(rows[2], "Online services: on");
     let help = helps::<OnlineHubState>(&hub, &app.ctx);
     for (row, help) in rows.iter().zip(help.iter()).take(rows.len() - 1) {
         assert!(!help.is_empty(), "{row} has no help"); // every row but Back explains itself
@@ -52,13 +55,51 @@ fn test_hub_drivers_board_item_opens_the_board() {
     // online-enhancement master switch sits right under it.
     let rows = labels::<OnlineHubState>(&hub, &app.ctx);
     assert_eq!(rows[0], "Drivers on duty");
-    assert_eq!(rows[1], "Online services: on");
+    assert_eq!(rows[1], "Account achievements");
+    assert_eq!(rows[2], "Online services: on");
     let help = helps::<OnlineHubState>(&hub, &app.ctx);
     for (row, help) in rows.iter().zip(help.iter()).take(rows.len() - 1) {
         assert!(!help.is_empty(), "{row} has no help"); // every row but Back explains itself
     }
     press(&mut app, Key::Return);
     assert!(is_state::<DriversOnlineState>(&app.state().unwrap()));
+}
+
+#[test]
+fn test_hub_opens_account_achievements_in_catalog_order() {
+    assert!(OnlineHubState::INTRO_HELP.contains("work without connecting"));
+    let mut app = TestApp::new();
+    app.ctx.account_achievements =
+        freight_fate::account_achievements::AccountAchievements::empty(app.data_dir.path());
+    app.ctx
+        .account_achievements
+        .record(ACHIEVEMENTS[1].id, None)
+        .unwrap();
+    let ledger_path = app.data_dir.path().join("account-achievements.json");
+    let before = std::fs::read(&ledger_path).unwrap();
+    let hub = hub(&mut app);
+
+    move_to::<OnlineHubState>(&mut app, &hub, "Account achievements");
+    press(&mut app, Key::Return);
+    assert!(is_state::<AccountAchievementsState>(&app.state().unwrap()));
+
+    let account = app.state().unwrap();
+    let rows = labels::<AccountAchievementsState>(&account, &app.ctx);
+    assert!(rows[0].starts_with(&format!("Locked: {}", ACHIEVEMENTS[0].name)));
+    assert!(rows[1].starts_with(&format!("Earned: {}", ACHIEVEMENTS[1].name)));
+    assert_eq!(std::fs::read(&ledger_path).unwrap(), before);
+}
+
+#[test]
+fn test_account_achievements_escape_returns_to_online_hub() {
+    let mut app = TestApp::new();
+    let hub = hub(&mut app);
+    move_to::<OnlineHubState>(&mut app, &hub, "Account achievements");
+    press(&mut app, Key::Return);
+    assert!(is_state::<AccountAchievementsState>(&app.state().unwrap()));
+
+    press(&mut app, Key::Escape);
+    assert!(std::rc::Rc::ptr_eq(&app.state().unwrap(), &hub));
 }
 
 /// Right arrow on an action row does nothing; on a toggle row it flips that

@@ -120,6 +120,9 @@ pub fn upload_save(
             out.insert("ok".to_string(), Value::Bool(true));
             out.insert("revision".to_string(), Value::from(revision));
             out.insert("contentHash".to_string(), Value::from(content_hash));
+            if let Some(name) = reply.get("evictedSaveName").and_then(Value::as_str) {
+                out.insert("evictedSaveName".to_string(), Value::from(name));
+            }
             return out;
         }
     }

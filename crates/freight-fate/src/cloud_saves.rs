@@ -812,6 +812,20 @@ revision {} is waiting in the Cloud backup menu",
         }
     }
 
+    fn announce_eviction(&self, outcome: &str, token: i64) {
+        if token != 0 {
+            return;
+        }
+        let Some(name) = outcome.strip_prefix("accepted:evicted:") else {
+            return;
+        };
+        self.state
+            .lock()
+            .unwrap()
+            .announcements
+            .push(eviction_status(name));
+    }
+
     fn set_status(&self, message: &str) {
         self.state.lock().unwrap().status = message.to_string();
     }
@@ -896,8 +910,10 @@ copy no longer exists; restarting the slot fresh"
             }
             self.state.lock().unwrap().retry_at = None;
             self.set_status("Latest backup accepted and server-verified.");
-            self.note_outcome(name, token, "accepted");
+            let outcome = accepted_outcome(&result);
+            self.note_outcome(name, token, &outcome);
             self.announce_success(name, token, true);
+            self.announce_eviction(&outcome, token);
             log::info!("Cloud backup of {name} uploaded as revision {revision}");
             return;
         }

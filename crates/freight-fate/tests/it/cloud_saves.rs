@@ -1121,6 +1121,44 @@ fn test_upload_rejects_oversized_content() {
     assert_eq!(result["reason"], "too_large");
 }
 
+#[test]
+fn test_upload_preserves_the_optional_evicted_save_name() {
+    let transport = FakeTransport::replying(json!({
+        "ok": true,
+        "revision": 4,
+        "evictedSaveName": "Old Road"
+    }));
+    let result = upload_save(
+        &identity(),
+        "Road Star",
+        &profile("Road Star", 5000.0),
+        Some(3),
+        "Road Star",
+        None,
+        transport.as_ref(),
+    );
+
+    assert_eq!(result["ok"], true);
+    assert_eq!(result["evictedSaveName"], "Old Road");
+}
+
+#[test]
+fn test_upload_remains_compatible_when_the_server_omits_eviction() {
+    let transport = FakeTransport::replying(json!({"ok": true, "revision": 4}));
+    let result = upload_save(
+        &identity(),
+        "Road Star",
+        &profile("Road Star", 5000.0),
+        Some(3),
+        "Road Star",
+        None,
+        transport.as_ref(),
+    );
+
+    assert_eq!(result["ok"], true);
+    assert!(!result.contains_key("evictedSaveName"));
+}
+
 // -- settings menu (app shell) ----------------------------------------------------
 
 /// `IDENTITY.save()`: the test identity in a memory-backed identity store the
@@ -2191,6 +2229,67 @@ fn test_a_background_backup_says_it_was_backed_up() {
 }
 
 #[test]
+fn test_a_background_backup_speaks_the_cloud_career_eviction() {
+    let transport = FakeTransport::replying(json!({
+        "ok": true,
+        "revision": 1,
+        "evictedSaveName": "Old Road"
+    }));
+    let clock = ManualClock::new();
+    let service = make_service(&transport, &clock);
+
+    service.queue_backup("Road Star", profile("Road Star", 5000.0));
+    drain(&service, &clock);
+
+    assert_eq!(
+        service.take_announcements(),
+        vec![
+            "Road Star is backed up.",
+            "Cloud backup removed Old Road, the least recently played cloud career. Your local career was not deleted."
+        ]
+    );
+}
+
+#[test]
+fn test_an_untrusted_evicted_name_is_not_spoken() {
+    let transport = FakeTransport::replying(json!({
+        "ok": true,
+        "revision": 1,
+        "evictedSaveName": "Bad\nName"
+    }));
+    let clock = ManualClock::new();
+    let service = make_service(&transport, &clock);
+
+    service.queue_backup("Road Star", profile("Road Star", 5000.0));
+    drain(&service, &clock);
+
+    assert_eq!(
+        service.take_announcements(),
+        vec!["Road Star is backed up."]
+    );
+}
+
+#[test]
+fn test_a_manual_backup_carries_the_exact_eviction_outcome() {
+    let transport = FakeTransport::replying(json!({
+        "ok": true,
+        "revision": 1,
+        "evictedSaveName": "Old Road"
+    }));
+    let service = make_service(&transport, &ManualClock::new());
+
+    let token = service
+        .backup_now("Road Star", profile("Road Star", 5000.0))
+        .unwrap();
+
+    assert_eq!(
+        service.outcome_for("Road Star", token).as_deref(),
+        Some("accepted:evicted:Old Road")
+    );
+    assert!(service.take_announcements().is_empty());
+}
+
+#[test]
 fn test_a_manual_backup_stays_silent_so_the_menu_watch_can_speak() {
     // states/city.py waits on the result and says "Backed up to the cloud."
     // itself; a second line from the queue would say it twice for one save.
@@ -2489,6 +2588,28 @@ fn test_terminal_save_speaks_the_accepted_backup() {
 
     State::update(&mut menu, &mut app.ctx, 0.0);
     assert_eq!(last_line(&app), "Backed up to the cloud.");
+}
+
+#[test]
+fn test_terminal_save_speaks_the_exact_cloud_career_eviction() {
+    let mut app = TestApp::new();
+    let clock = ManualClock::new();
+    let transport = FakeTransport::replying(json!({
+        "ok": true,
+        "revision": 1,
+        "evictedSaveName": "Old Road"
+    }));
+    let service = make_service(&transport, &clock);
+    let mut menu = make_terminal_menu(&mut app, (*service).clone());
+    app.clear_speech();
+
+    menu.save(&mut app.ctx);
+    State::update(&mut menu, &mut app.ctx, 0.0);
+
+    assert_eq!(
+        last_line(&app),
+        "Cloud backup removed Old Road, the least recently played cloud career. Your local career was not deleted."
+    );
 }
 
 #[test]

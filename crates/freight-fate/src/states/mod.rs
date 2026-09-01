@@ -1,4 +1,5 @@
 //! Game screens (port of `freight_fate/states/`).
+pub mod account_achievements;
 pub mod base;
 pub mod career_setback;
 pub mod career_stats;

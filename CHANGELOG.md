@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Account achievements now have their own Online menu browser.** It lists
+  achievements earned across every career on this installation in stable
+  catalog order, while the existing Achievements menu continues to show one
+  career at a time. When the automatic ten-career cloud limit removes the
+  least recently played cloud backup, the game names it and confirms that
+  the local career was not deleted.
+
 - **Career 1.9 tester snapshots are ready to play.** The Windows portable zip
   and Apple Silicon Mac app for each Career 1.9 prerelease build now include
   the music and required audio libraries. Apple Silicon Mac players do not
