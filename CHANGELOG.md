@@ -1139,6 +1139,15 @@
   about traffic while the truck was still parked with the engine off. Those
   zone entries now use the plain notice sound; the traffic-slowing cue is
   kept for a real jam.
+- **No more phantom hills at flat city gates.** Leaving Chicago Cross-Dock,
+  the trip summary said "Current grade 6.0 percent downhill" on ground that
+  is level for miles in every direction. The elevation data had read the
+  rooftops of downtown Chicago as the road, and the game only trimmed that
+  climb down to a smaller one. Now, wherever two independent surveys agree
+  the ground is level, a slope that could not exist there is read as level,
+  so the grade line and the truck's pull at the gate match the real ground.
+  Genuine mountain climbs are untouched.
+
 - **An emergency stop or a missed turn no longer switches automatic speed
   control off for good.** Before, once the automatic braking cleared, the
   truck coasted down to a crawl on an open interstate, and after a corner

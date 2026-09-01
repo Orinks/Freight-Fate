@@ -35,6 +35,29 @@
 //! clamped segment records the adjustment in its own `source`, so a later
 //! reader can see that this value was derived here rather than read from the
 //! profile.
+//!
+//! WHERE THE CLAMP IS STILL WRONG: LEVEL GROUND. An agent drive on 2026-09-01
+//! heard "Current grade 6.0 percent downhill" at the Chicago Cross-Dock gate.
+//! Every leg into Chicago ends on the same artifact: the profile's last sample
+//! sits at 800 feet on ground the rest of the leg reads at 584 to 610, because
+//! SRTM is a SURFACE model and the city node is in the Loop, so the final 0.4
+//! mile "climbs" 216 feet onto the skyline (+8.6 percent). The screen caught
+//! it and capped it at the flat ceiling -- and a 6 percent hill in Chicago is
+//! still a 6 percent hill in Chicago. The clamp exists to keep a real climb
+//! under a noisy spike, and level ground has no climb to keep: FHWA's HPMS
+//! Field Manual defines level terrain as ground that "permits heavy vehicles
+//! to maintain approximately the same speed as passenger cars" and "generally
+//! includes short grades of no more than 1 to 2 percent", and the AASHTO Green
+//! Book caps freeway design grades on level terrain at 3 to 4 percent (Table
+//! 8-1, Maximum Grades for Rural and Urban Freeways). So where BOTH the HPMS
+//! class (read from FHWA) and the profile's own terrain label call the ground
+//! level, a segment past the ceiling is not a road grade under noise -- it is
+//! the structure or building the surface model read -- and it is REJECTED:
+//! set to level, with a source note that says the value is assumed. Where the
+//! two sources disagree (bake label `mountain`, HPMS `level`: Wolf Creek Pass,
+//! the I-5 grades at Grants Pass -- HPMS's class is the modal one over a
+//! leg's bounding box, and a long leg through a range can read level) the
+//! terrain is uncertain and the clamp stays, so no real climb is flattened.
 
 use super::world_models::GradeSegment;
 use crate::pyfmt::fmt_f;
@@ -108,6 +131,28 @@ fn clamp_note(raw: f64, capped: f64, ceiling: f64, road_class: &str, terrain: &s
     )
 }
 
+/// Level ground by two independent sources: the FHWA HPMS class (a reading)
+/// and the profile's own terrain label (derived from net elevation change).
+/// Only when both agree is there provably no climb for a clamp to preserve.
+fn level_by_both_sources(hpms_label: Option<&str>, bake_label: &str) -> bool {
+    hpms_label == Some("flat") && bake_label == "flat"
+}
+
+fn reject_note(raw: f64, ceiling: f64, road_class: &str) -> String {
+    format!(
+        " Slope rejected at load, assumed level, not read: {} percent on \
+         ground both FHWA HPMS and the profile's own label class as level, \
+         above the {} percent ceiling for {road_class} there. Level terrain \
+         holds short grades of no more than 1 to 2 percent (HPMS Field \
+         Manual, Terrain_Type) and freeways are designed to at most 3 to 4 \
+         percent on it (AASHTO Green Book Table 8-1), so this is a structure \
+         or building the elevation surface read, not the road \
+         (freight_fate.data.grades).",
+        signed(raw, 2),
+        fmt_f(ceiling, 0)
+    )
+}
+
 /// Python `f"{x:+.Nf}"`: always-signed fixed precision.
 fn signed(x: f64, prec: usize) -> String {
     let text = fmt_f(x, prec);
@@ -141,7 +186,9 @@ pub fn grade_ceiling_pct(highway: &str, terrain: &str) -> f64 {
     by_class.min(by_terrain)
 }
 
-/// Cap slopes the road cannot hold, leaving every plausible one untouched.
+/// Cap slopes the road cannot hold, leaving every plausible one untouched;
+/// on ground two sources agree is level, reject them as level instead (see
+/// the module doc for why a clamp is the wrong answer there).
 ///
 /// Returns equal segments where nothing was capped, so an unscreened world
 /// round-trips identically.
@@ -162,6 +209,17 @@ pub fn screen_grade_segments(
         let ceiling = grade_ceiling_pct(highway, terrain);
         if segment.avg_grade_pct.abs() <= ceiling {
             screened.push(segment.clone());
+            continue;
+        }
+        if level_by_both_sources(leg_terrain, &segment.terrain) {
+            let note = reject_note(segment.avg_grade_pct, ceiling, road_class(highway));
+            screened.push(GradeSegment {
+                start_mi: segment.start_mi,
+                end_mi: segment.end_mi,
+                avg_grade_pct: 0.0,
+                terrain: segment.terrain.clone(),
+                source: format!("{}{}", segment.source, note).trim().to_string(),
+            });
             continue;
         }
         let capped = if segment.avg_grade_pct > 0.0 {
@@ -371,5 +429,75 @@ mod tests {
             screen_grade_segments(std::slice::from_ref(&seg), "I-70", None),
             screen_grade_segments(&[seg], "I-70", None)
         );
+    }
+
+    #[test]
+    fn test_a_wall_on_ground_two_sources_call_level_is_rejected_as_level() {
+        // The Chicago gate, 2026-09-01: +8.61 percent over the last 0.4 mile
+        // of I-90 into the Loop, on a leg the profile labels flat and HPMS
+        // classes level. Clamping said "6.0 percent downhill" in Chicago.
+        let skyline = GradeSegment::new(32.6, 33.0, 8.61, "flat", "profile");
+        let screened = &screen_grade_segments(&[skyline], "I-90", Some(1))[0];
+        assert_eq!(screened.avg_grade_pct, 0.0);
+        assert_eq!((screened.start_mi, screened.end_mi), (32.6, 33.0));
+        assert!(screened.source.starts_with("profile"));
+        assert!(screened.source.contains("assumed level"));
+        assert!(screened.source.contains("+8.61"));
+    }
+
+    #[test]
+    fn test_a_flat_reading_the_bake_alone_calls_flat_is_still_clamped() {
+        // Without HPMS the terrain rests on the bake's derived label, which
+        // is wrong a third of the time -- not enough to say there is no
+        // climb under the spike, so the clamp stays.
+        let screened = &screen_grade_segments(
+            &[GradeSegment::new(32.6, 33.0, 8.61, "flat", "profile")],
+            "I-90",
+            None,
+        )[0];
+        assert_eq!(screened.avg_grade_pct, terrain_ceiling_pct("flat"));
+    }
+
+    #[test]
+    fn test_hpms_level_under_a_mountain_label_still_clamps_not_rejects() {
+        // Wolf Creek Pass: the bake says mountain, HPMS's modal class over
+        // the leg's bounding box says level. The terrain is in dispute, and
+        // rejecting would flatten a real 6.4 percent climb.
+        let screened = &screen_grade_segments(
+            &[GradeSegment::new(20.1, 23.5, 8.0, "mountain", "profile")],
+            "US-160",
+            Some(1),
+        )[0];
+        assert_eq!(screened.avg_grade_pct, terrain_ceiling_pct("flat"));
+        assert!(screened.source.contains("clamped"));
+    }
+
+    #[test]
+    fn test_the_baked_gary_leg_into_chicago_loads_level_at_the_city_node() {
+        let text = read_data_text("world_data/us/legs/IN.json").expect("IN shard");
+        let data: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let leg = data["legs"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|lg| lg["from"] == "gary_in_us" && lg["to"] == "chicago_il_us")
+            .expect("the I-90 Gary to Chicago leg");
+        let raw = leg["corridor"]["grade_segments"].as_array().unwrap();
+        let last_raw = raw.last().unwrap()["avg_grade_pct"].as_f64().unwrap();
+        assert!(last_raw > 8.0, "fixture no longer has the skyline artifact");
+        assert_eq!(leg["corridor"]["hpms_terrain"]["type"], 1);
+
+        let built = build_leg_corridor(
+            &leg["corridor"],
+            leg["miles"].as_f64().unwrap(),
+            "gary_in_us",
+            "chicago_il_us",
+            "IN",
+            leg["highway"].as_str().unwrap(),
+        )
+        .unwrap();
+        let last = built.grade_segments.last().unwrap();
+        assert_eq!(last.avg_grade_pct, 0.0);
+        assert!(last.source.contains("assumed level"));
     }
 }

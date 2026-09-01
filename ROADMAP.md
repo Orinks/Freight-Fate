@@ -5576,11 +5576,22 @@ Everything not listed here ships fine after 1.9.0.
       the limit change is silenced but each cruise-target step is spoken
       as a bare number ("56." "64." ...), context-free; (d) "unnamed
       public road" is still spoken on Chicago and Gary streets despite
-      the 28 August note; (e) "Current grade 6.0 percent downhill" at the
-      flat Chicago Cross-Dock gate -- a data screen candidate; (f) the
-      keeper refuses to arm under about 5 km/h, so a driver stalled at a
-      crawl must throttle first; (g) eleven cruise-target steps arrived
-      mid-drive from no agent input --
+      the 28 August note; (e) FIXED same day: "Current grade 6.0 percent
+      downhill" at the flat Chicago Cross-Dock gate was the grade screen
+      CLAMPING a read artifact -- every leg into Chicago ends on a +8.6
+      percent, 0.4-mile spike because the elevation surface (SRTM) reads
+      the Loop's roofs at the city node, 800 feet on 600-foot ground --
+      and 6 percent is still a hill in Chicago; the screen
+      (`ff-core/src/data/grades.rs`) now REJECTS a slope past the ceiling
+      as assumed level wherever both the read HPMS class and the profile's
+      own label say level (HPMS Field Manual: level terrain holds short
+      grades of 1 to 2 percent; AASHTO Green Book Table 8-1: freeways on
+      level terrain design to 3 to 4), and still clamps where the two
+      disagree so Wolf Creek and Grants Pass keep their climbs; 119
+      segments on 79 legs move, median span 0.3 mile; screened at load,
+      bake untouched; (f) the keeper refuses to arm under about 5
+      km/h, so a driver stalled at a crawl must throttle first; (g)
+      eleven cruise-target steps arrived mid-drive from no agent input --
       only Plus/Minus or a pad D-pad reach that code, so an operator-side
       key or controller may be landing in the minimized game window;
       unresolved.
