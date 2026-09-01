@@ -50,6 +50,24 @@ pub struct SdlShell {
     pub video: VideoSubsystem,
     canvas: WindowCanvas,
     pump: EventPump,
+    #[cfg(target_os = "windows")]
+    window_handle: Option<isize>,
+}
+
+#[cfg(target_os = "windows")]
+fn hide_windows_window_for_process_exit(handle: isize, hide: impl FnOnce(isize)) {
+    hide(handle);
+}
+
+#[cfg(target_os = "windows")]
+fn window_handle(window: &sdl2::video::Window) -> Option<isize> {
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+
+    let handle = window.window_handle().ok()?.as_raw();
+    match handle {
+        RawWindowHandle::Win32(handle) => Some(handle.hwnd.get()),
+        _ => None,
+    }
 }
 
 #[cfg(target_os = "windows")]
@@ -77,6 +95,8 @@ impl SdlShell {
             .build()
             .map_err(|e| e.to_string())?;
         let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+        #[cfg(target_os = "windows")]
+        let window_handle = window_handle(canvas.window());
         let pump = sdl.event_pump()?;
         // pygame delivered event.unicode for every key; SDL needs text
         // input running for TextInput events.
@@ -86,6 +106,8 @@ impl SdlShell {
             video,
             canvas,
             pump,
+            #[cfg(target_os = "windows")]
+            window_handle,
         })
     }
 
@@ -107,10 +129,26 @@ impl SdlShell {
     }
 
     /// Hand desktop focus back immediately and finish SDL at process exit.
-    pub fn shutdown_for_process_exit(mut self) {
-        self.video.text_input().stop();
-        self.canvas.window_mut().hide();
-        release_at_process_exit(self);
+    pub fn shutdown_for_process_exit(self) {
+        #[cfg(target_os = "windows")]
+        {
+            if let Some(handle) = self.window_handle {
+                hide_windows_window_for_process_exit(handle, |handle| unsafe {
+                    use windows_sys::Win32::UI::WindowsAndMessaging::{ShowWindowAsync, SW_HIDE};
+
+                    ShowWindowAsync(handle as _, SW_HIDE);
+                });
+            }
+            release_at_process_exit(self);
+        }
+
+        #[cfg(not(target_os = "windows"))]
+        {
+            let mut shell = self;
+            shell.video.text_input().stop();
+            shell.canvas.window_mut().hide();
+            release_at_process_exit(shell);
+        }
     }
 
     /// Drain the event queue into game events. `None` when the batch was
@@ -383,5 +421,19 @@ mod tests {
             !dropped.get(),
             "Windows ran the synchronous SDL-style destructor during final exit"
         );
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn final_windows_shutdown_uses_the_nonblocking_hide_path() {
+        use std::cell::Cell;
+
+        let async_hide_called = Cell::new(false);
+        hide_windows_window_for_process_exit(123, |handle| {
+            assert_eq!(handle, 123);
+            async_hide_called.set(true);
+        });
+
+        assert!(async_hide_called.get());
     }
 }

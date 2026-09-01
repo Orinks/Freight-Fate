@@ -59,6 +59,35 @@ need depends on what you touched.
 
 ### Rust -- gameplay, and what CI gates
 
+#### Rust engineering practices
+
+- Make ownership and lifetime boundaries explicit. Prefer borrowing over
+  cloning, model optional ownership with `Option`, and use RAII for ordinary
+  cleanup. Keep `unsafe` blocks small, explain the invariant they rely on, and
+  expose a safe wrapper rather than spreading raw handles or pointers.
+- Do not put network access, IPC, thread joins, window-manager calls, or other
+  potentially unbounded work in `Drop`. Give long-lived workers an explicit,
+  idempotent shutdown method: signal cancellation first, stop accepting work,
+  then wait only within a measured bound. Log each shutdown boundary so a
+  tester's timestamps identify the component that stalled.
+- Never block the game loop on speech, audio-device discovery, HTTP, cloud
+  saves, Discord, or operating-system UI. Move the work off-loop and return
+  results through bounded channels; define what is dropped, cancelled, or
+  retained when a queue fills or shutdown begins.
+- Treat `unwrap`, `expect`, indexing, and panics as assertions of an invariant,
+  not routine error handling. Player data, devices, network responses, and OS
+  services are fallible: return or log contextual errors and keep the game in a
+  usable state.
+- Follow the pinned toolchain and keep `cargo fmt`, Clippy with warnings denied,
+  focused tests, the full crate tests, and the adversarial battery as separate
+  gates. Do not enable Clippy's restriction group wholesale; justify individual
+  stricter lints where they fit this codebase.
+
+References: [The Rust Programming Language: graceful shutdown and
+cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.html),
+[Rust API Guidelines](https://rust-lang.github.io/api-guidelines/), and
+[Clippy documentation](https://doc.rust-lang.org/stable/clippy/).
+
 - Setup: install `rustup` (the pinned toolchain and its `rustfmt`/Clippy
   components come from `rust-toolchain.toml` via `rustup show`), then
   `uv sync` and `uv run python tools/fetch_bass.py` for the licensed BASS

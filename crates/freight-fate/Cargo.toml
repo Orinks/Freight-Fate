@@ -40,13 +40,14 @@ discord-rich-presence.workspace = true
 once_cell.workspace = true
 parking_lot.workspace = true
 regex.workspace = true
-sdl2.workspace = true
+sdl2 = { workspace = true, features = ["raw-window-handle"] }
 url.workspace = true
 form_urlencoded.workspace = true
 webbrowser.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 windows-sys.workspace = true
+raw-window-handle.workspace = true
 
 # Windows links SDL2 against the prebuilt import library under `vendor/sdl2/`,
 # which build.rs puts on the linker's search path. macOS builds SDL2 from

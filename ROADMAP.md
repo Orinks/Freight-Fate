@@ -871,6 +871,15 @@ Everything not listed here ships fine after 1.9.0.
       window and the controller subsystem are 380 ms of the 660, both genuinely
       needed before the first frame.
 
+- [x] **Windows shutdown never waits on the desktop window manager
+      (2026-09-01).** A tester log showed saves, services, controller, audio,
+      and speech all finishing promptly, followed by 22.3 seconds inside the
+      window phase. The earlier shutdown fix skipped SDL destruction but still
+      called SDL's synchronous hide operation first. Windows now receives an
+      asynchronous hide request through the native window handle, and the
+      process leaves final SDL cleanup to the operating system. Other platforms
+      retain normal SDL shutdown.
+
 - [x] **Rust port: a test run can no longer open a real web browser
       (2026-08-24).** The driver setup page opened in the owner's browser
       while the suite was running. Opening a page went through one seam whose
