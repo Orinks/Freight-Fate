@@ -1147,6 +1147,14 @@
 
 ### Fixed
 
+- **Curve speed assistance now slows for bends even with curve callouts
+  switched off.** Before, turning the bend announcements off also turned
+  the assist off without saying so: adaptive cruise carried the truck into
+  a sharp bend at full speed and the load shifted. With callouts off you
+  still hear nothing about the bend, but cruise eases for it, or pauses and
+  comes back after a bend too tight for cruise, exactly as it does with the
+  callouts on.
+
 - **An announcement cut off in its last words is no longer repeated from
   the start.** When a hazard call or another urgent line interrupted a
   route instruction, the cab finished the urgent line and then said the

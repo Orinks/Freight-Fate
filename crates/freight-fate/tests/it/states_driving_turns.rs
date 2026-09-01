@@ -1132,6 +1132,45 @@ fn test_curve_assist_holds_the_tightest_speed_in_a_linked_chain() {
 }
 
 #[test]
+fn test_curve_speed_assistance_still_acts_with_curve_callouts_off() {
+    // The owner drives with curve callouts off and curve speed assistance on.
+    // The handler used to return at the callout switch, before the cruise
+    // easing, so the assist never touched the truck: cruise carried it into a
+    // 35 mph bend at 90 km/h and the load shifted 31 percent over two bends
+    // (agent drive, 2026-09-01). Words off; assist on.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.curve_speed_assist = true;
+    app.ctx.settings.curve_callouts = false;
+    let pos = d.trip.position_mi;
+    let bend = a_curve(pos + 0.3, 'L', 40, 307, 60.0);
+    d.cruise_mph = Some(60.0);
+    let spoken = spoken_pacenotes(&mut app, &mut d, vec![bend], 60.0);
+    assert!(spoken.is_empty(), "callouts off means no words: {spoken:?}");
+    assert_eq!(d.cruise_curve_mph, Some(40.0), "but the assist still eases");
+}
+
+#[test]
+fn test_a_too_tight_bend_still_pauses_cruise_with_curve_callouts_off() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.curve_speed_assist = true;
+    app.ctx.settings.curve_callouts = false;
+    d.speed_control_armed = true;
+    let pos = d.trip.position_mi;
+    let bend = a_curve(pos + 0.3, 'L', 15, 197, 60.0);
+    d.cruise_mph = Some(60.0);
+    let spoken = spoken_pacenotes(&mut app, &mut d, vec![bend], 60.0);
+    assert!(spoken.is_empty(), "callouts off means no words: {spoken:?}");
+    assert!(d.cruise_mph.is_none(), "cruise let go for the bend");
+    assert!(d.speed_control_armed, "but the session survives");
+    assert!(
+        d.cruise_resume_after_mi.is_some(),
+        "and knows where to come back"
+    );
+}
+
+#[test]
 fn test_a_lone_curve_still_holds_only_its_own_speed() {
     // The chain rule must not make every bend the slowest bend nearby.
     let mut app = TestApp::new();

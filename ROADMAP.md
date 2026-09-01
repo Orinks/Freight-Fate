@@ -5587,7 +5587,13 @@ Everything not listed here ships fine after 1.9.0.
       cannot re-engage mid-bend at the old target; the curve call says
       "paused", not "off". Still a disarm, deliberately: the driver's own
       emergency brake, and a hazard that lapses into a collision. "Half a mile of
-      ramp" in a metric cab; the tutorial's timed air reminder (and the school
+      ramp" in a metric cab; and, driving a staged bend that evening with
+      the owner's own settings, curve speed assistance had NEVER acted for
+      him: the curve handler returned at the "curve callouts off" switch
+      before the cruise easing, so callouts off silently meant assist off
+      too (cruise into a 35 mph bend at 90 km/h, load shifted 31 percent
+      over two bends) -- the switch now silences the words and the cue
+      only, pinned by two harness tests; the tutorial's timed air reminder (and the school
       lesson's) said "wait for air" after "Air ready", and now says press
       the brake once the gauge is up; the yard access road, a gate and an
       approach zone played the traffic-slowing earcon on entry, so every

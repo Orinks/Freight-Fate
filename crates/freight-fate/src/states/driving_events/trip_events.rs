@@ -445,9 +445,13 @@ impl DrivingState {
         if self.hazard_deadline.is_some() || self.ramp_mi.is_some() {
             return;
         }
-        if !ctx.settings.curve_callouts {
-            return;
-        }
+        // Curve callouts off silences the WORDS and the cue, never the
+        // assist: this used to return here, so a driver with callouts off
+        // and curve speed assistance on got neither -- cruise carried the
+        // owner's truck into a 35 mph bend at 90 km/h and shifted the load
+        // 31 percent across two bends before anyone knew (agent drive,
+        // 2026-09-01, the owner's own settings).
+        let announce = ctx.settings.curve_callouts;
         let advisory = event.data.advisory_mph.unwrap_or(0.0);
         let curve = event.data.curve;
         let ahead = event.data.ahead_mi.unwrap_or(0.0);
@@ -473,7 +477,7 @@ impl DrivingState {
         // 2026-07-18). One-shot, not the continuous steering tone the
         // community ruled out. Placeholder sound until a dedicated cue
         // is auditioned (docs/sound-hunt-brief.md, need 1).
-        if let Some(curve) = curve.as_ref() {
+        if let Some(curve) = curve.as_ref().filter(|_| announce) {
             let pan = if curve.direction == 'L' {
                 -PACENOTE_CUE_PAN
             } else {
@@ -482,6 +486,9 @@ impl DrivingState {
             ctx.audio.play_with("vehicle/curve_bink", 0.9, pan);
         }
         let say_curve = |ctx: &mut GameContext, text: SpokenMessage, interrupt: bool| {
+            if !announce {
+                return;
+            }
             let mut opts = SayEvent::new().interrupt(interrupt);
             opts.category = category;
             if let Some(valid) = curve_valid {
