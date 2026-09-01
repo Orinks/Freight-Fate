@@ -126,6 +126,12 @@ pub struct App {
     // join the SDL batch in `frame`, so they retain the normal held-key,
     // controller, speech and state-dispatch behavior.
     queued_player_input: Vec<InputEvent>,
+    /// Agent sessions: the operator's keyboard never reaches the game. The
+    /// window is minimized at launch, and still the owner's typing in the
+    /// next window arrived as Space readouts and an S limit report mid-run
+    /// (2026-09-01); the agent's own keys come in through
+    /// `queue_player_input`, which this never touches.
+    operator_keys_ignored: bool,
 }
 
 /// Read-only driving facts available to a normal-input policy.
@@ -390,6 +396,7 @@ impl App {
             clock: FrameClock::new(true),
             initial_state: None,
             queued_player_input: Vec::new(),
+            operator_keys_ignored: false,
         }
     }
 
@@ -431,6 +438,13 @@ impl App {
 
     fn queue_player_input(&mut self, event: InputEvent) {
         self.queued_player_input.push(event);
+    }
+
+    /// Drop every key the operating system delivers from here on; only
+    /// [`PlayerInputFrame::queue_player_input`] can press a key. Focus and
+    /// quit events still pass.
+    pub fn ignore_operator_keys(&mut self) {
+        self.operator_keys_ignored = true;
     }
 
     fn driving_observation(&self) -> Option<DrivingObservation> {
@@ -726,6 +740,9 @@ impl App {
             },
             None => Vec::new(),
         };
+        if self.operator_keys_ignored {
+            events = without_operator_keys(events);
+        }
         events.append(&mut self.queued_player_input);
         // Clock the held-key tracker before this frame's events: a screen
         // reader's re-injected press-and-release pairs are told apart from a
@@ -961,5 +978,42 @@ mod tests {
             text,
             "Staged: Seattle departure. You take the wheel 0.0 miles up the road."
         );
+    }
+}
+
+/// The operating system's key events removed; everything else (focus, quit,
+/// controller) kept in order.
+pub fn without_operator_keys(events: Vec<InputEvent>) -> Vec<InputEvent> {
+    events
+        .into_iter()
+        .filter(|event| !matches!(event, InputEvent::KeyDown { .. } | InputEvent::KeyUp { .. }))
+        .collect()
+}
+
+#[cfg(test)]
+mod operator_keys_tests {
+    use super::without_operator_keys;
+    use crate::states::base::{InputEvent, Key, Mods};
+
+    #[test]
+    fn operator_keys_are_dropped_and_the_rest_kept_in_order() {
+        let events = vec![
+            InputEvent::WindowFocusGained,
+            InputEvent::KeyDown {
+                key: Key::Space,
+                mods: Mods::NONE,
+                text: Some(' '),
+            },
+            InputEvent::KeyUp {
+                key: Key::Space,
+                mods: Mods::NONE,
+            },
+            InputEvent::Quit,
+        ];
+        let kept = without_operator_keys(events);
+        assert!(matches!(
+            kept.as_slice(),
+            [InputEvent::WindowFocusGained, InputEvent::Quit]
+        ));
     }
 }

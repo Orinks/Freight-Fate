@@ -1246,8 +1246,12 @@ fn run_with_staged(
             }
         };
         // Never let the operator's keyboard land in the game: a focused
-        // game window turns their typing elsewhere into truck inputs.
+        // game window turns their typing elsewhere into truck inputs -- and
+        // minimizing alone did not hold (the owner's typing in the next
+        // window arrived as readouts mid-run, 2026-09-01), so the keys are
+        // dropped at the door as well.
         app.minimize_window();
+        app.ignore_operator_keys();
         if let Some((hit, opts)) = staged.take() {
             // The staged drive IS the first screen, exactly as the road
             // launcher does it; quitting reaches the real main menu.
