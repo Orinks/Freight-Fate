@@ -7,6 +7,10 @@ use crate::data::regions::classify_region;
 use crate::data::street_limits::load_street_limits;
 use crate::data::world_models::{lane_word, py_capitalize, Interchange, Stop};
 use crate::pyfmt::{fmt_f, round_py_int};
+use crate::sim::traffic_manager::{
+    TrafficVehicle, DODGE_CLEARANCE_AHEAD_MI, DODGE_CLEARANCE_BEHIND_MI, LANE_GAP_ACT_REAL_S,
+    LANE_GAP_MARGIN_MI,
+};
 use crate::sim::trip_models::*;
 use crate::sim::trip_route_helpers::{fallback_grade, stop_offset_for_direction};
 use crate::units::{distance_unit, spoken_distance, to_distance};
@@ -131,8 +135,11 @@ impl Trip {
         Some(if side == "right" { 0 } else { count - 1 })
     }
 
-    /// Whether there is anywhere on this side to swerve into right now: a
-    /// hazard warning must not offer a lane change nobody can make.
+    /// Whether the ROAD has anywhere on this side to swerve into: a second
+    /// lane, not coned off. Which of the truck's neighbours is actually open
+    /// -- traffic included -- is [`Trip::open_side_at`], and that is what a
+    /// hazard call reads; this is the road-only reading the lane-count
+    /// readouts still answer from.
     pub fn has_open_adjacent_lane_at(&self, mile: Option<f64>) -> bool {
         let mut count = self.lane_count_at(mile);
         if count < 2 {
@@ -142,6 +149,49 @@ impl Trip {
             count -= 1;
         }
         count >= 2
+    }
+
+    /// The vehicle holding `lane_index` beside the truck, or None.
+    ///
+    /// The window is the sideswipe test's, widened by `LANE_GAP_MARGIN_MI` at
+    /// both ends and swept `LANE_GAP_ACT_REAL_S` real seconds forward through
+    /// the traffic's relative motion: whatever this call misses, the collision
+    /// check misses too, so "open" can never be the more optimistic of the two
+    /// answers -- not now, and not by the time the driver acting on it arrives
+    /// in the lane. One reading for the lane-gap cue, the L key, and the
+    /// hazard call's named side.
+    pub fn lane_blocker_at(&self, mile: Option<f64>, lane_index: i64) -> Option<&TrafficVehicle> {
+        self.traffic_manager.vehicle_in_lane(
+            mile.unwrap_or(self.position_mi),
+            lane_index,
+            DODGE_CLEARANCE_AHEAD_MI + LANE_GAP_MARGIN_MI,
+            DODGE_CLEARANCE_BEHIND_MI + LANE_GAP_MARGIN_MI,
+            LANE_GAP_ACT_REAL_S * self.effective_time_scale() / 3600.0,
+            self.truck.speed_mph(),
+        )
+    }
+
+    /// Which of the truck's neighbouring lanes a dodge can go into right
+    /// now, so the hazard call can name it (owner, 2026-09-01).
+    ///
+    /// A side is open by exactly the rules a tap lane change and its arrival
+    /// apply: the lane exists in this stretch's count, it is not the one
+    /// roadwork has coned off, and nobody is holding it over the window the
+    /// change takes (`lane_blocker_at`). The truck's lane is the one the
+    /// driving state mirrors into the traffic manager every frame. On a road
+    /// with one lane this side, or with both neighbours held, the answer is
+    /// `Neither`, and the hazard is not dodgeable at all.
+    pub fn open_side_at(&self, mile: Option<f64>) -> OpenSide {
+        let count = self.lane_count_at(mile);
+        let lane = self.traffic_manager.player_lane;
+        let closed = self.closed_lane_at(mile, Some(count));
+        let open = |target: i64| {
+            (0..count).contains(&target)
+                && Some(target) != closed
+                && self.lane_blocker_at(mile, target).is_none()
+        };
+        // Lane 0 is the right lane; higher indexes are further left.
+        OpenSide::from_sides(open(lane + 1), open(lane - 1))
     }
 
     /// True when every mile of a work zone footprint -- taper included --

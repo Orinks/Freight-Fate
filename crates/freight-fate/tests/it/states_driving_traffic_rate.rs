@@ -1344,7 +1344,7 @@ fn every_forced_slow_down_is_one_the_road_explains() {
 /// `divided` is what `Trip::lanes_at` falls back to when a leg carries no
 /// baked lane segments, and it is the same answer the driving state steers
 /// by, so a leg marked undivided is a road with one lane your side.
-fn lane_bench(drive: &mut DrivingState, limit_mph: f64, lanes_your_side: i64) {
+pub fn lane_bench(drive: &mut DrivingState, limit_mph: f64, lanes_your_side: i64) {
     use ff_core::data::world_models::{CorridorDetail, GradeSegment, Leg, Route, SpeedLimitSample};
 
     let city = drive.trip.route.cities[0].clone();
@@ -1373,6 +1373,13 @@ fn lane_bench(drive: &mut DrivingState, limit_mph: f64, lanes_your_side: i64) {
     leg.lanes = lanes_your_side;
     let route = Route::from_legs(vec![city, far], vec![leg]);
     drive.trip.route = route;
+    // The traffic manager clamps every vehicle to the lanes ITS route has
+    // here; pointed at the old road it folded a left-lane vehicle into the
+    // right lane on the first frame.
+    drive
+        .trip
+        .traffic_manager
+        .set_route(&drive.trip.route, &drive.trip.leg_starts);
     drive.reset_turn_state_for_trip();
     drive.trip.zones.clear();
     drive.trip.curves.clear();

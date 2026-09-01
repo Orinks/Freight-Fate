@@ -350,7 +350,7 @@ fn test_traffic_context_and_warning_are_grounded_in_lead_vehicle() {
     // would mean the open-lane test had stopped seeing the road.
     assert_eq!(
         hazards[0].text(),
-        "Change lanes or brake! Brake lights right ahead."
+        "Change lanes or brake! Brake lights right ahead. Left lane open."
     );
     assert_eq!(hazards[0].data.dodgeable, Some(true));
     assert!(hazards[0].data.traffic.is_some());

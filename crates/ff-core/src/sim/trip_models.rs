@@ -20,7 +20,7 @@ use crate::speech_text::{typed_name, SpokenMessage};
 
 mod hazards;
 mod ramps;
-pub use hazards::{eligible_hazards, hazard_is_in_lane, hazard_name, HazardDef, HAZARDS};
+pub use hazards::{eligible_hazards, hazard_is_in_lane, hazard_name, HazardDef, OpenSide, HAZARDS};
 pub use ramps::{
     acceleration_lane_capability_mph, acceleration_lane_mi, deceleration_lane_mi,
     merge_traffic_target_mph, ramp_speed_mph, truck_merge_speed_mph, RampAdvisorySpeed,

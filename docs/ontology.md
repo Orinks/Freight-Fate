@@ -239,7 +239,7 @@ from the words, and synonyms cost them a re-read.
 | How much of the lane-holding work the truck does | lane keeping, always with its value clause ("full, the truck holds the lane and takes your exits") | lane drift (retired 1.9), steering assist, lane keeping assist (that is `lane_centering_assist`, a reserved row for steering help that is not implemented -- never describe it as working), the bare value word alone -- "off" here is the hardest mode, the opposite of "off" on the rows around it | `settings.lane_keeping` |
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
 | Room adaptive cruise leaves to the vehicle ahead | following gap, always with its seconds ("close, two and a half seconds") | following distance, headway, gap on its own (bare "gap" is the lane row below, and the two are different things) | `settings.acc_following_gap`, `ACC_GAP_CHOICES` |
-| Room to move into the next lane over | the lane is open ("right lane open"); held by somebody, it is blocked ("right lane blocked by a semi") | clear (that is what the truck is clear OF -- the vehicle passed), safe, free, gap | `LaneGapMixin`, `states/driving_lane_gap.py` |
+| Room to move into the next lane over | the lane is open ("right lane open"); held by somebody, it is blocked ("right lane blocked by a semi"); at a hazard call the same words name the side a dodge can go ("Left lane open.", "Either lane open.", "No lane open.") | clear (that is what the truck is clear OF -- the vehicle passed), safe, free, gap, "open lane on the left" | `Trip::open_side_at`, `Trip::lane_blocker_at`, `states/driving_lane_gap.rs` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
 | The trailer liquid bulk rides in | tank trailer | tanker (as a noun for the trailer), tank truck | `TRAILER_CATALOG["tank"]` |
@@ -573,16 +573,25 @@ the separate zone warning/entry lines. Exit traffic keeps its speed --
 the truck itself is slowing for the ramp, not reacting to someone else's
 merge.
 
-**The dodgeable hazard call is "Change lanes or brake!" in every mode.** The
-same phrase the help teaches, kept in full in terse because it carries what
-the hazard tone cannot: the hazard is dodgeable AND there is an open lane to
-send the dodge. "Brake or swerve!" was a terse-only synonym for the game's
-most safety-critical cue and is exactly what this table exists to prevent;
-the phrase is pinned against the help text by a copy test. The lane change
-leads the braking (owner, 2026-08-17): both actions stay on offer, because a
-driver who cannot see the gap may reasonably prefer to slow, but at a hazard
-the first word is the one that gets acted on and the call only fires where a
-lane is genuinely open.
+**The dodgeable hazard call is "Change lanes or brake!", and it ends by
+naming the open lane.** The same phrase the help teaches, followed by the
+lane answer in the L key's own words: "Left lane open.", "Right lane open.",
+or "Either lane open." (owner, 2026-09-01, on I-90 with adaptive cruise on:
+the bare call left a blind driver guessing whether a lane change was even
+possible, and the game already knew). The side is read the way a lane change
+is refused -- the lane exists, it is not coned off, and nobody is holding it
+over the window the change takes -- so the call never names a lane a tap
+would refuse. Where nothing is open, on a one-lane road or with both
+neighbours held, the call is "Brake!" and ends "No lane open.", and the
+hazard is not dodgeable at all. Terse keeps the thing and the lane answer
+and drops the opener ("Slow car right ahead. Left lane open."): the named
+lane says everything the opener did. "Brake or swerve!" was a terse-only
+synonym for the game's most safety-critical cue and is exactly what this
+table exists to prevent. The lane change leads the braking (owner,
+2026-08-17): both actions stay on offer, because a driver who cannot see the
+gap may reasonably prefer to slow, but at a hazard the first word is the one
+that gets acted on. Lane changes stay driver-initiated: one tap of the arrow
+the call named, with adaptive cruise riding through the dodge.
 
 ## Open naming decisions
 

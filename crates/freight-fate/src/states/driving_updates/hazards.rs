@@ -576,13 +576,19 @@ impl DrivingState {
             && self.trip.truck.speed_mph() <= HAZARD_SAFE_MPH
         {
             self.hazard_slow_hint_said = true;
-            // "Or change lanes" only names a maneuver this road offers; a
-            // one-lane stretch, or a two-lane one with the other lane coned
-            // off, gets nearly-stop as the whole answer.
-            let hint = if self.trip.has_open_adjacent_lane_at(None) {
-                "It is still in your lane. Nearly stop, or change lanes."
+            // "Or change lanes" only names a maneuver this road offers, and
+            // names the side it is open on -- the same reading as the call
+            // itself (owner, 2026-09-01). A one-lane stretch, a two-lane one
+            // with the other lane coned off, or both neighbours held by
+            // traffic, gets nearly-stop as the whole answer.
+            let side = self.trip.open_side_at(None);
+            let hint = if side.is_open() {
+                format!(
+                    "It is still in your lane. Nearly stop, or change lanes. {}",
+                    side.spoken()
+                )
             } else {
-                "It is still in your lane. Nearly stop."
+                "It is still in your lane. Nearly stop.".to_string()
             };
             // ROUTE: not interrupting (it follows the hazard call rather
             // than cutting it) but never droppable. A live hazard still in

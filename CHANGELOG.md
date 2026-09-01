@@ -486,6 +486,19 @@
 
 ### Changed
 
+- **The hazard warning now tells you which lane is open.** "Change lanes or
+  brake! Slow car right ahead." used to leave you guessing whether a lane
+  change was even possible. The call now ends with the answer, in the same
+  words the L key uses: "Left lane open", "Right lane open", or "Either lane
+  open". The lane it names has been checked -- it is there, it is not coned
+  off, and nothing is riding alongside in it -- so with lane keeping on full,
+  one tap of that arrow is the whole move, and adaptive cruise stays on
+  through it. Where there is nowhere to go, on a one-lane road or with
+  traffic holding both lanes beside you, you hear "Brake!" and "No lane
+  open" instead: brake, and do not reach for a lane change. On the quiet
+  speech setting the warning is shorter, "Slow car right ahead. Left lane
+  open.", and the "it is still in your lane" reminder names the open lane
+  the same way.
 - **Facility stopping assistance now drives you from the ramp-end stop to the
   entrance, hands off.** With the assist on, once the stop sign is clear or
   the light turns green at the end of the destination ramp, the cab says

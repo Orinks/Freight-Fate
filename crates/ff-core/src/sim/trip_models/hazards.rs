@@ -21,6 +21,51 @@ const WET: &[WeatherKind] = &[
 const HEAVY_WET: &[WeatherKind] = &[WeatherKind::HeavyRain, WeatherKind::Thunderstorm];
 const WILDLIFE_TIMES: [&str; 3] = ["dawn", "dusk", "night"];
 
+/// Where a dodge can go from the truck's own lane, as the hazard call names
+/// it (owner, 2026-09-01, on I-90 with adaptive cruise on: "Change lanes or
+/// brake!" left a blind driver guessing whether a lane change was even
+/// possible, and the game already knew).
+///
+/// Read by `Trip::open_side_at` against the same rules a lane change is
+/// refused by -- the lane exists, is not coned off, and no vehicle holds it
+/// over the window the tap change takes -- so the call never names a lane the
+/// dodge would refuse. A hazard with no open side is not dodgeable at all:
+/// same "Brake!" family, same window, as a one-lane road.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum OpenSide {
+    Left,
+    Right,
+    Either,
+    Neither,
+}
+
+impl OpenSide {
+    pub fn from_sides(left: bool, right: bool) -> OpenSide {
+        match (left, right) {
+            (true, true) => OpenSide::Either,
+            (true, false) => OpenSide::Left,
+            (false, true) => OpenSide::Right,
+            (false, false) => OpenSide::Neither,
+        }
+    }
+
+    /// Whether there is anywhere at all to send the dodge.
+    pub fn is_open(self) -> bool {
+        self != OpenSide::Neither
+    }
+
+    /// The lane answer, in the L key's own words ("left lane open", see
+    /// docs/ontology.md), so the call and the readout never disagree.
+    pub fn spoken(self) -> &'static str {
+        match self {
+            OpenSide::Left => "Left lane open.",
+            OpenSide::Right => "Right lane open.",
+            OpenSide::Either => "Either lane open.",
+            OpenSide::Neither => "No lane open.",
+        }
+    }
+}
+
 /// One grounded road hazard and the conditions under which it can occur.
 ///
 /// `None` on `regions`/`weather`/`terrain` means "no restriction on that
@@ -31,7 +76,8 @@ const WILDLIFE_TIMES: [&str; 3] = ["dawn", "dusk", "night"];
 /// on the pavement, a car stopped on the shoulder, a coned-off lane. It is a
 /// property of the THING, and it is deliberately not the same question as
 /// whether the hazard can be dodged -- that also needs a lane to dodge into,
-/// which is a property of the ROAD (`Trip::has_open_adjacent_lane_at`). Fog,
+/// which is a property of the ROAD and the traffic on it
+/// (`Trip::open_side_at`). Fog,
 /// ice, a crosswind and a deer that may bolt either way are not in-lane: they
 /// span the road, so no lane change answers them however many lanes there
 /// are. The two are combined once, at the emitter.

@@ -324,14 +324,15 @@ pub const LANE_SIGNAL_CLICK_S: f64 = 0.45; // turn-signal cadence during a tap c
 pub const MERGE_WINDOW_S: f64 = 8.0; // time to vacate a coned-off lane after the warning
 pub const MERGE_BARRELS_DAMAGE: f64 = 0.25; // collision severity for riding into the barrels
 pub const SIDESWIPE_DAMAGE: f64 = 0.35; // changing lanes into occupied space costs more
-pub const DODGE_CLEARANCE_AHEAD_MI: f64 = 0.35; // target lane must be clear this far ahead...
-pub const DODGE_CLEARANCE_BEHIND_MI: f64 = 0.15; // ...and this far behind your drive tires
-                                                 // The steering lane cue: the panned position tock, played on its own while a
-                                                 // lane move is underway rather than waiting for the I key, and clicked off
-                                                 // like a turn signal when the move is done. Owner request 2026-08-15: taking
-                                                 // an exit with the lane work yours means HOLDING a position at the right of
-                                                 // the lane, and that position was the one thing on the road a blind driver
-                                                 // could not hear.
+                                        // The mirror check's clearances live with the trip now, so the hazard call
+                                        // that names the open side reads the same numbers the dodge's arrival does.
+pub use ff_core::sim::traffic_manager::{DODGE_CLEARANCE_AHEAD_MI, DODGE_CLEARANCE_BEHIND_MI};
+// The steering lane cue: the panned position tock, played on its own while a
+// lane move is underway rather than waiting for the I key, and clicked off
+// like a turn signal when the move is done. Owner request 2026-08-15: taking
+// an exit with the lane work yours means HOLDING a position at the right of
+// the lane, and that position was the one thing on the road a blind driver
+// could not hear.
 pub const STEER_CUE_MIN_MPH: f64 = 2.0; // same floor as the lane locator: stopped tires steer nothing
 pub const STEER_CUE_ARM_S: f64 = 0.5; // a steering hold this long is a move, not a drift correction
 pub const STEER_CUE_TOCK_S: f64 = 0.9; // the locator's own beat, so the two are one sound

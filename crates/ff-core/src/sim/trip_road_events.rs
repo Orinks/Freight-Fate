@@ -10,7 +10,7 @@ use crate::sim::trip::Trip;
 use crate::sim::trip_models::*;
 use crate::sim::trip_route_helpers::stop_offset_for_direction;
 use crate::sim::weather::WeatherKind;
-use crate::speech_text::{hazard_call, toll_charged, SpokenMessage, HAZARD_DODGE_CALL};
+use crate::speech_text::{hazard_call, in_lane_hazard_call, toll_charged, SpokenMessage};
 
 impl Trip {
     pub fn traffic_pressure_intensity(&self, mile: f64, kind: &str) -> f64 {
@@ -319,8 +319,12 @@ impl Trip {
                 // is no going around, and calling the hazard dodgeable there
                 // handed the driver a lane-change allowance for a move they
                 // could not make, so the assist waited while the truck kept
-                // closing (owner, 2026-08-24).
-                let dodgeable = self.has_open_adjacent_lane_at(None);
+                // closing (owner, 2026-08-24). Which neighbour is open is
+                // read the way a lane change is refused -- count, cones,
+                // and the traffic holding it -- and the call names it, so
+                // one tap is the whole answer (owner, 2026-09-01).
+                let side = self.open_side_at(None);
+                let dodgeable = side.is_open();
                 let reason = context
                     .lead
                     .reason()
@@ -334,12 +338,8 @@ impl Trip {
                 };
                 // "Or change lanes" is only true advice where there is
                 // somewhere to send it (playtest report, US-285, 2026-08-12).
-                let call = if dodgeable {
-                    HAZARD_DODGE_CALL
-                } else {
-                    "Brake!"
-                };
-                let message = hazard_call(call, &format!("{} {where_}.", py_capitalize(&reason)));
+                let message =
+                    in_lane_hazard_call(&format!("{} {where_}.", py_capitalize(&reason)), side);
                 self.emit(
                     TripEventKind::Hazard,
                     message,
@@ -384,21 +384,19 @@ impl Trip {
             // way -- so it never loses its meaning to a road that merely
             // happens to be narrow here.
             let in_lane = hazard_is_in_lane(hazard);
-            let dodgeable = in_lane && self.has_open_adjacent_lane_at(None);
-            let call = if dodgeable {
-                HAZARD_DODGE_CALL
-            } else if in_lane {
-                "Brake!"
-            } else {
-                "Brake now!"
-            };
+            let side = self.open_side_at(None);
+            let dodgeable = in_lane && side.is_open();
             let mut chars = hazard.chars();
             let first: String = chars
                 .next()
                 .map(|c| c.to_uppercase().collect())
                 .unwrap_or_default();
             let body = format!("{first}{}.", chars.as_str());
-            let message = hazard_call(call, &body);
+            let message = if in_lane {
+                in_lane_hazard_call(&body, side)
+            } else {
+                hazard_call("Brake now!", &body)
+            };
             let deadline_s = self.rng.uniform(3.0, 4.5) * self.visibility_reaction_factor();
             self.emit(
                 TripEventKind::Hazard,

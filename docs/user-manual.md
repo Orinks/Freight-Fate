@@ -875,14 +875,21 @@ often than open-country stretches.
 Hazards can happen while moving. When a "Brake now" warning appears, slow below
 25 miles per hour quickly to avoid a collision. Some hazards are called out as
 "Change lanes or brake" -- those are fixed objects in your lane, like road
-debris or a stopped vehicle. A lane change dodges them at full speed if the
-lane beside you is clear; braking works too, but you cannot roll over a ladder
-at 25 -- an object in the lane takes braking nearly to a stop, and then you
-ease around it. Press L first if you are not sure which lane you are in, and
-listen for the nearby-vehicle callouts; changing lanes into a real vehicle
-risks a sideswipe. With automatic emergency braking on, the truck brakes for
-you at the last moment -- down to a crawl for an object in the lane.
-Fatigue shortens the reaction window.
+debris or a stopped vehicle, or a slow vehicle in your lane. The call ends by
+naming the lane that is open: "Change lanes or brake! Slow car right ahead.
+Left lane open." means one tap of Left (with lane keeping on full) is the
+whole move; "Right lane open" means tap Right; "Either lane open" means both
+are clear. The lane it names is one the truck has checked -- it exists, it is
+not coned off, and nothing is riding alongside in it -- so you never have to
+guess. Where there is nowhere to go, on a one-lane road or with traffic
+holding both lanes beside you, the call is "Brake!" and ends "No lane open":
+brake, and do not reach for a lane change. A lane change dodges the hazard at
+full speed, and adaptive cruise stays on through it; braking works too, but
+you cannot roll over a ladder at 25 -- an object in the lane takes braking
+nearly to a stop, and then you ease around it. Press L any time for which
+lane you are in and whether the lanes beside you are open. With automatic
+emergency braking on, the truck brakes for you at the last moment -- down to
+a crawl for an object in the lane. Fatigue shortens the reaction window.
 
 The road tells you how many lanes you have. Road status names the lanes on
 your side -- "divided, three lanes your side" -- and as the road widens or

@@ -29,6 +29,8 @@
 
 use std::fmt;
 
+use crate::sim::trip_models::OpenSide;
+
 /// The Python `_WORD_RE = [a-z0-9]+` over the lowercased text.
 fn words(text: &str) -> Vec<String> {
     text.to_lowercase()
@@ -186,8 +188,10 @@ pub fn terse_silent(normal: impl Into<String>) -> SpokenMessage {
 /// offered, because a driver who cannot see the gap may reasonably prefer to
 /// slow -- but the order is the recommendation, and at a hazard the first
 /// word is the one that gets acted on. This call is only ever used where a
-/// lane is genuinely open: has_open_adjacent_lane_at gates it, and a
-/// one-lane stretch gets a bare "Brake!" instead.
+/// lane is genuinely open: `Trip::open_side_at` gates it, and the line ends
+/// by NAMING that lane ("Left lane open.") so one tap is enough (owner,
+/// 2026-09-01). A stretch with nowhere to go gets a bare "Brake!" and "No
+/// lane open." instead. See [`in_lane_hazard_call`].
 pub const HAZARD_DODGE_CALL: &str = "Change lanes or brake!";
 
 // Calls the hazard warning tone already carries by itself. Terse drops them
@@ -208,10 +212,11 @@ const TONE_IMPLIED_CALLS: [&str; 1] = ["Brake now!"];
 /// The hazard warning: a call to action, then the thing and where.
 ///
 /// Terse keeps the call only when it carries information the hazard tone
-/// does not: [`HAZARD_DODGE_CALL`] means the hazard is dodgeable AND there
-/// is an open lane to send the dodge, so it survives in full. A bare
-/// "Brake!"/"Brake now!" is what the tone already said. Either way the terse
-/// call is the normal call or nothing -- never a rewording.
+/// does not. A bare "Brake now!" is what the tone already said; "Brake!" is
+/// the emitter's word for a thing in the lane with nowhere to go around it,
+/// and survives. Either way the terse call is the normal call or nothing --
+/// never a rewording. The in-lane family, which ends by naming the open
+/// side, is [`in_lane_hazard_call`].
 pub fn hazard_call(call: &str, body: &str) -> SpokenMessage {
     let normal = format!("{call} {body}");
     let terse = if TONE_IMPLIED_CALLS.contains(&call) {
@@ -220,6 +225,35 @@ pub fn hazard_call(call: &str, body: &str) -> SpokenMessage {
         normal.clone()
     };
     SpokenMessage::with_terse(normal, terse)
+}
+
+/// The warning for a thing sitting in the truck's lane: the call, the thing
+/// and where, then the lane answer -- which neighbouring lane is open, or
+/// that none is (owner, 2026-09-01).
+///
+/// "Change lanes or brake!" used to leave a blind driver guessing whether a
+/// lane change was even possible, and reaching for one on a road that had
+/// nowhere to go. Now the line ends with the side ("Left lane open."), in the
+/// L key's own words, so one tap of that arrow is the whole answer; where
+/// both neighbours are held or there is one lane this side it is "Brake!"
+/// and "No lane open.", so the driver brakes without reaching for a move
+/// they cannot make.
+///
+/// Terse drops [`HAZARD_DODGE_CALL`] and keeps the answer: "Slow car right
+/// ahead. Left lane open." says everything the opener did, in fewer words.
+/// "Brake!" stays in terse for the reason it always has (see
+/// `TONE_IMPLIED_CALLS`): quiet must not leave a noun phrase with no verb.
+pub fn in_lane_hazard_call(body: &str, side: OpenSide) -> SpokenMessage {
+    let answer = side.spoken();
+    if side.is_open() {
+        SpokenMessage::with_terse(
+            format!("{HAZARD_DODGE_CALL} {body} {answer}"),
+            format!("{body} {answer}"),
+        )
+    } else {
+        let normal = format!("Brake! {body} {answer}");
+        SpokenMessage::with_terse(normal.clone(), normal)
+    }
 }
 
 // -- traffic lead cues --------------------------------------------------------
@@ -606,10 +640,37 @@ mod tests {
     // -- the hazard call (R8) --------------------------------------------------
 
     #[test]
-    fn test_the_dodge_call_survives_terse_in_full_and_is_never_a_synonym() {
-        let pair = hazard_call(HAZARD_DODGE_CALL, "Slow car right ahead.");
-        assert_eq!(pair.normal, "Change lanes or brake! Slow car right ahead.");
+    fn test_the_dodge_call_names_the_open_side_and_terse_keeps_the_answer() {
+        // Owner, 2026-09-01: the call ends with the side a tap can go, in the
+        // L key's own words. Terse drops the opener -- the named lane says
+        // everything it did -- and is never a synonym for it.
+        let pair = in_lane_hazard_call("Slow car right ahead.", OpenSide::Left);
+        assert_eq!(
+            pair.normal,
+            "Change lanes or brake! Slow car right ahead. Left lane open."
+        );
+        assert_eq!(
+            pair.terse.as_deref(),
+            Some("Slow car right ahead. Left lane open.")
+        );
+        assert_eq!(
+            in_lane_hazard_call("Debris on the road.", OpenSide::Right).normal,
+            "Change lanes or brake! Debris on the road. Right lane open."
+        );
+        assert_eq!(
+            in_lane_hazard_call("Debris on the road.", OpenSide::Either).normal,
+            "Change lanes or brake! Debris on the road. Either lane open."
+        );
+    }
+
+    #[test]
+    fn test_with_no_lane_open_the_call_is_brake_and_says_so_in_both_modes() {
+        // Nowhere to go: the "Brake!" family, and the driver is told not to
+        // reach for a lane change. "Brake!" survives terse, as it always has.
+        let pair = in_lane_hazard_call("Slow car right ahead.", OpenSide::Neither);
+        assert_eq!(pair.normal, "Brake! Slow car right ahead. No lane open.");
         assert_eq!(pair.terse.as_deref(), Some(pair.normal.as_str()));
+        assert!(!pair.normal.contains("Change lanes"));
     }
 
     /// The Python half that reads `main_menu_help.py` stays with the help

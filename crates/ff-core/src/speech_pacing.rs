@@ -1567,7 +1567,8 @@ mod tests {
     /// destination exit already carry: a rescued line has to still be true.
     #[test]
     fn test_a_hazard_call_does_not_come_back_once_the_hazard_is_clear() {
-        let hazard_line = "Change lanes or brake! Retread debris from a blown tire.";
+        let hazard_line =
+            "Change lanes or brake! Retread debris from a blown tire. Left lane open.";
         let live = Rc::new(Cell::new(true));
         let (mut pacer, _) = make_pacer();
         flush_at(&mut pacer, hazard_line, EventPriority::Critical);

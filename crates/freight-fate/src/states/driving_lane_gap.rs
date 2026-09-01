@@ -42,18 +42,10 @@ use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
-/// How much wider than the sideswipe test this cue looks. Positional slack for
-/// what the look-ahead below cannot see -- a vehicle braking harder inside the
-/// horizon than its current speed says. Every mile of it makes the cue
-/// quieter, never more permissive.
-pub const LANE_GAP_MARGIN_MI: f64 = 0.12;
-/// The real seconds between hearing "open" and the truck being across: the
-/// line finishing, the reach for the wheel, and the timed drift over the
-/// painted line. The clearance read is swept this far forward through the
-/// traffic's own motion -- converted to game time through the trip's effective
-/// scale, because that is the clock the traffic actually moves on. Jerry's
-/// collisions ran readout-to-contact in about four and a half real seconds.
-pub const LANE_GAP_ACT_REAL_S: f64 = 6.0;
+/// The margin and the forward sweep live with the trip now
+/// (`Trip::lane_blocker_at`), because the hazard call that names the open
+/// side reads the same clearance this cue and the L key do.
+pub use ff_core::sim::traffic_manager::{LANE_GAP_ACT_REAL_S, LANE_GAP_MARGIN_MI};
 /// Real seconds between two of these lines. A queue of vehicles clearing one
 /// after another is a real sequence of facts, but read out back to back it is
 /// a chant over the top of whatever else the road is saying.
@@ -80,19 +72,10 @@ impl DrivingState {
     /// the traffic's relative motion: whatever this call misses, the collision
     /// check misses too, so "open" can never be the more optimistic of the two
     /// answers -- not now, and not by the time the driver acting on it arrives
-    /// in the lane.
+    /// in the lane. The reading is the trip's, shared with the hazard call
+    /// that names the open side, so the two can never disagree.
     pub fn lane_gap_blocker(&self, lane_index: i64) -> Option<TrafficVehicle> {
-        self.trip
-            .traffic_manager
-            .vehicle_in_lane(
-                self.trip.position_mi,
-                lane_index,
-                DODGE_CLEARANCE_AHEAD_MI + LANE_GAP_MARGIN_MI,
-                DODGE_CLEARANCE_BEHIND_MI + LANE_GAP_MARGIN_MI,
-                LANE_GAP_ACT_REAL_S * self.trip.effective_time_scale() / 3600.0,
-                self.trip.truck.speed_mph(),
-            )
-            .cloned()
+        self.trip.lane_blocker_at(None, lane_index).cloned()
     }
 
     /// Whether roadwork has this lane coned off where the truck is.

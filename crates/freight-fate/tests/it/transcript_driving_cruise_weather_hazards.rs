@@ -149,7 +149,9 @@ fn test_fixed_object_hazard_needs_nearly_a_stop_or_a_swerve() {
     assert_eq!(
         spoken(&harness)
             .iter()
-            .filter(|s| *s == "It is still in your lane. Nearly stop, or change lanes.")
+            .filter(|s| {
+                *s == "It is still in your lane. Nearly stop, or change lanes. Left lane open."
+            })
             .count(),
         1
     );
@@ -791,4 +793,214 @@ fn test_folding_a_fixed_obstacle_into_a_vehicle_hazard_takes_the_near_stop_back(
         harness.read_drive(|d| d.hazard_target_mph(None)),
         HAZARD_CREEP_MPH
     ));
+}
+
+// -- the call names the open side ---------------------------------------------------
+
+/// A slow car already inside the warning window, in the truck's own lane, on
+/// a road with `lanes` your side and the truck in `truck_lane`; `held` are the
+/// neighbouring lanes a semi is riding alongside in. Adaptive cruise is on at
+/// 65, so a case can also watch what the warning does to it. Returns the
+/// harness after the warning has spoken.
+///
+/// Owner, 2026-09-01, on I-90 with adaptive cruise on: "Change lanes or
+/// brake!" left a blind driver guessing whether a lane change was even
+/// possible. The game already knew, so the call names the side.
+fn meet_a_slow_car(
+    name: &str,
+    lanes: i64,
+    truck_lane: i64,
+    held: &[i64],
+    terse: bool,
+) -> PlaytestHarness {
+    use ff_core::sim::trip_models::TRAFFIC_WARNING_GAP_S;
+    use freight_fate::playtest::harness::RouteSetup;
+
+    use crate::states_driving_traffic_rate::lane_bench;
+
+    let mut harness = PlaytestHarness::new();
+    harness.app.ctx.settings.speed_keeper = false;
+    harness.app.ctx.settings.automatic_emergency_braking = true;
+    harness.app.ctx.settings.lane_keeping = "full".to_string();
+    harness.app.ctx.settings.time_scale = 1.0;
+    if terse {
+        harness.app.ctx.settings.driving_speech = "quiet".to_string();
+    }
+    harness.start_route(
+        "aberdeen_sd_us",
+        "pierre_sd_us",
+        RouteSetup::seeded(7).named(name),
+    );
+    let held = held.to_vec();
+    harness.with_drive(move |d, ctx| {
+        lane_bench(d, 65.0, lanes);
+        d.trip.time_scale = 1.0;
+        d.trip.hazard_check_mi = 1e9;
+        d.trip.inspection_check_mi = 1e9;
+        d.trip.posts.clear();
+        d.weather_mut().current = WeatherKind::Clear;
+        d.departure_checked = true;
+        d.truck_mut().start_engine();
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().set_air_ready(false);
+        d.trip.position_mi = 20.0;
+        d.truck_mut().velocity_mps = 65.0 / MPH_PER_MPS;
+        d.trip.traffic_manager.rolling_bubble = false;
+        d.lane.set_lane_count(lanes);
+        d.lane.lane = truck_lane;
+        d.trip.traffic_manager.player_lane = truck_lane;
+        d.speed_control_armed = true;
+        d.cruise_mph = Some(65.0);
+        if let Some(profile) = ctx.profile.as_mut() {
+            profile.tutorial_done = true;
+        }
+        d.tutorial = None;
+        let position = d.trip.position_mi;
+        let gap_mi = 45.0 * (TRAFFIC_WARNING_GAP_S - 0.4) / 3600.0;
+        let mut vehicles = vec![TrafficVehicle::new(
+            "bench:lead",
+            position + gap_mi,
+            45.0,
+            45.0,
+            0,
+            "following",
+            "car",
+        )
+        .with_lane(truck_lane)];
+        for lane in held {
+            vehicles.push(
+                TrafficVehicle::new(
+                    &format!("bench:held:{lane}"),
+                    position,
+                    65.0,
+                    65.0,
+                    truck_lane - lane,
+                    "cruising",
+                    "semi",
+                )
+                .with_lane(lane),
+            );
+        }
+        d.trip.set_npc_vehicles(vehicles);
+    });
+    harness.clear_speech();
+    release_keys(&mut harness);
+    for _ in 0..120 {
+        frame(&mut harness, DT);
+        if said_any(&harness, "Slow car right ahead") {
+            return harness;
+        }
+    }
+    panic!("no lead warning was spoken: {:#?}", spoken(&harness));
+}
+
+/// The warning the meeting produced.
+fn the_call(harness: &PlaytestHarness) -> String {
+    spoken(harness)
+        .into_iter()
+        .find(|line| line.contains("Slow car right ahead"))
+        .expect("a lead warning")
+}
+
+#[test]
+fn test_the_hazard_call_names_the_left_lane_when_that_is_the_open_one() {
+    // Right lane of two, nobody alongside: the only way around is left, and
+    // the call says so. Cruise is left armed for the dodge it just asked for.
+    let harness = meet_a_slow_car("Left Open", 2, 0, &[], false);
+    assert_eq!(
+        the_call(&harness),
+        "Change lanes or brake! Slow car right ahead. Left lane open."
+    );
+    assert!(harness.read_drive(|d| d.hazard_dodgeable));
+    assert!(harness.read_drive(|d| d.speed_control_armed));
+    assert!(harness.read_drive(|d| d.cruise_mph).is_some());
+}
+
+#[test]
+fn test_the_hazard_call_names_the_right_lane_when_that_is_the_open_one() {
+    // Left lane of two: the way around is right.
+    let harness = meet_a_slow_car("Right Open", 2, 1, &[], false);
+    assert_eq!(
+        the_call(&harness),
+        "Change lanes or brake! Slow car right ahead. Right lane open."
+    );
+    assert!(harness.read_drive(|d| d.hazard_dodgeable));
+}
+
+#[test]
+fn test_the_hazard_call_offers_either_side_from_the_middle_of_three() {
+    let harness = meet_a_slow_car("Either Open", 3, 1, &[], false);
+    assert_eq!(
+        the_call(&harness),
+        "Change lanes or brake! Slow car right ahead. Either lane open."
+    );
+    // A semi riding alongside on the left leaves only the right.
+    drop(harness);
+    let harness = meet_a_slow_car("Left Held", 3, 1, &[2], false);
+    assert_eq!(
+        the_call(&harness),
+        "Change lanes or brake! Slow car right ahead. Right lane open."
+    );
+}
+
+#[test]
+fn test_with_no_lane_open_the_call_is_brake_and_says_so() {
+    // Right lane of two with a semi alongside in the left: nowhere to go.
+    // Same family as a one-lane road -- not dodgeable, so no lane-tap
+    // allowance is added to the window, and cruise is paused for the braking
+    // the call asks for (still armed to resume, per the 2026-09-01 ruling).
+    let harness = meet_a_slow_car("Nowhere", 2, 0, &[1], false);
+    assert_eq!(
+        the_call(&harness),
+        "Brake! Slow car right ahead. No lane open. Automatic speed control paused."
+    );
+    assert!(!harness.read_drive(|d| d.hazard_dodgeable));
+    assert!(harness.read_drive(|d| d.cruise_mph).is_none());
+    assert!(harness.read_drive(|d| d.speed_control_armed));
+}
+
+#[test]
+fn test_the_terse_rung_keeps_the_thing_and_the_open_side() {
+    // Quiet drops the opener -- the named lane says everything it did -- and
+    // the one-tap answer survives in full.
+    let harness = meet_a_slow_car("Terse Left", 2, 0, &[], true);
+    assert_eq!(the_call(&harness), "Slow car right ahead. Left lane open.");
+}
+
+#[test]
+fn test_one_tap_toward_the_named_side_dodges_it_with_cruise_still_armed() {
+    // The decision (owner, 2026-09-01): lane changes stay driver-initiated,
+    // one tap of the arrow the call named, and adaptive cruise rides through
+    // the dodge rather than being cancelled by it.
+    let mut harness = meet_a_slow_car("One Tap", 2, 0, &[], false);
+    assert!(the_call(&harness).ends_with("Left lane open."));
+    press(&mut harness, Key::Left, None);
+    assert!(
+        said_any(&harness, "Changing to the left lane."),
+        "{:#?}",
+        spoken(&harness)
+    );
+    assert!(harness.read_drive(|d| d.lane_change_target).is_some());
+
+    let mut elapsed = 0.0;
+    while harness.read_drive(|d| d.hazard_deadline).is_some() && elapsed < LANE_TAP_CHANGE_S + 1.0 {
+        frame(&mut harness, DT);
+        elapsed += DT;
+        // The assist never takes the pedal from a dodge that is landing.
+        assert!(!harness.read_drive(|d| d.truck().emergency_brake));
+    }
+    assert!(
+        harness.read_drive(|d| d.hazard_deadline).is_none(),
+        "the tap change did not clear the hazard: {:#?}",
+        spoken(&harness)
+    );
+    assert_eq!(harness.read_drive(|d| d.lane.lane), 1);
+    assert!(said_any(
+        &harness,
+        "You swerve around the slow car. Well done."
+    ));
+    // Cruise rode through the dodge: still armed, still set.
+    assert!(harness.read_drive(|d| d.speed_control_armed));
+    assert_eq!(harness.read_drive(|d| d.cruise_mph), Some(65.0));
+    assert!(!said_any(&harness, "Automatic speed control"));
 }

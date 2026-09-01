@@ -50,6 +50,25 @@ pub const REAL_TIME_ARRIVAL_MIN_S: f64 = 8.0;
 pub const REAL_TIME_ARRIVAL_MAX_S: f64 = 90.0;
 /// The same seam `next_situation` uses for a spoken traffic warning.
 pub const TRAFFIC_SITUATION_AHEAD_MI: f64 = 2.2;
+// The mirror check before a lane change: the target lane must be clear this
+// far ahead of the truck and this far behind its drive tires, or the arrival
+// is a sideswipe. Read by the dodge's own arrival check, by the lane-gap cue,
+// by the L key, and by the hazard call that names the open side -- one
+// authority, so no two of them can answer differently.
+pub const DODGE_CLEARANCE_AHEAD_MI: f64 = 0.35;
+pub const DODGE_CLEARANCE_BEHIND_MI: f64 = 0.15;
+/// How much wider than the sideswipe test a spoken "open" looks. Positional
+/// slack for what the look-ahead below cannot see -- a vehicle braking harder
+/// inside the horizon than its current speed says. Every mile of it makes the
+/// cue quieter, never more permissive.
+pub const LANE_GAP_MARGIN_MI: f64 = 0.12;
+/// The real seconds between hearing "open" and the truck being across: the
+/// line finishing, the reach for the wheel, and the timed drift over the
+/// painted line. The clearance read is swept this far forward through the
+/// traffic's own motion -- converted to game time through the trip's effective
+/// scale, because that is the clock the traffic actually moves on. Jerry's
+/// collisions ran readout-to-contact in about four and a half real seconds.
+pub const LANE_GAP_ACT_REAL_S: f64 = 6.0;
 /// How far into a run the bubble withholds the "merging" intent.
 pub const MERGE_FREE_START_MI: f64 = 3.0;
 /// How far past an interchange a vehicle can still be merging into you.
@@ -283,6 +302,16 @@ impl TrafficManager {
             0.0,
             effects(WeatherKind::Clear),
         )
+    }
+
+    /// Re-point the manager at a route swapped in under it -- a test bench
+    /// replacing the drive's road -- so its own lane-count reads, which clamp
+    /// every vehicle to the lanes the road has, follow the road the truck is
+    /// actually on. Left on the old route, a bench's left-lane vehicle was
+    /// silently folded into the right lane on the first frame.
+    pub fn set_route(&mut self, route: &Route, leg_starts: &[f64]) {
+        self.route = route.clone();
+        self.leg_starts = leg_starts.to_vec();
     }
 
     /// Refresh the mirrored truck speed and weather before a call.

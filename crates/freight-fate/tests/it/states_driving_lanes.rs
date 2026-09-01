@@ -22,7 +22,9 @@ use ff_core::models::profile::Profile;
 use ff_core::sim::lane::lane_label;
 use ff_core::sim::traffic_manager::TrafficVehicle;
 use ff_core::sim::trip::{Trip, TripOptions};
-use ff_core::sim::trip_models::{hazard_is_in_lane, TripEvent, TripEventData, TripEventKind, Zone};
+use ff_core::sim::trip_models::{
+    hazard_is_in_lane, OpenSide, TripEvent, TripEventData, TripEventKind, Zone,
+};
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::{WeatherKind, WeatherSystem};
 
@@ -426,6 +428,54 @@ fn test_has_open_adjacent_lane_at_reads_lane_count_and_closures() {
     three_lane.zones =
         vec![Zone::new(90.0, 120.0, 45.0, "construction").with_closed_side(Some("right"))];
     assert!(three_lane.has_open_adjacent_lane_at(Some(100.0)));
+}
+
+/// The side the hazard call names (owner, 2026-09-01) answers to the truck's
+/// own lane, the same closure, and the same traffic clearance the L key and
+/// the dodge's arrival read -- so it never names a lane a tap would refuse or
+/// a sideswipe would punish.
+#[test]
+fn test_open_side_at_reads_the_trucks_lane_closures_and_traffic() {
+    // An empty road at mile 100: every closure and every vehicle below is
+    // one the case placed.
+    fn empty_at_100(mut trip: Trip) -> Trip {
+        trip.position_mi = 100.0;
+        trip.zones.clear();
+        trip.traffic_manager.rolling_bubble = false;
+        trip.set_npc_vehicles(Vec::new());
+        trip
+    }
+    let one_lane = empty_at_100(synthetic_trip(vec![undivided(0.0, 900.0, 2)], 900.0, 1));
+    assert_eq!(one_lane.open_side_at(None), OpenSide::Neither);
+
+    // Lane 0 is the right lane, so from there the only neighbour is left.
+    let mut two_lane = empty_at_100(synthetic_trip(vec![oneway(0.0, 900.0, 2)], 900.0, 2));
+    two_lane.traffic_manager.player_lane = 0;
+    assert_eq!(two_lane.open_side_at(None), OpenSide::Left);
+    two_lane.traffic_manager.player_lane = 1;
+    assert_eq!(two_lane.open_side_at(None), OpenSide::Right);
+
+    // A vehicle riding alongside in that lane holds it.
+    two_lane.traffic_manager.player_lane = 0;
+    two_lane.set_npc_vehicles(vec![npc(100.02, 1, 60.0)]);
+    assert_eq!(two_lane.open_side_at(None), OpenSide::Neither);
+    two_lane.set_npc_vehicles(Vec::new());
+
+    // The other lane coned off: nowhere to go, whichever lane the truck is in.
+    two_lane.zones =
+        vec![Zone::new(90.0, 120.0, 45.0, "construction").with_closed_side(Some("left"))];
+    assert_eq!(two_lane.open_side_at(None), OpenSide::Neither);
+
+    // The middle of three: both sides, until one is held or closed.
+    let mut three_lane = empty_at_100(synthetic_trip(vec![oneway(0.0, 900.0, 3)], 900.0, 3));
+    three_lane.traffic_manager.player_lane = 1;
+    assert_eq!(three_lane.open_side_at(None), OpenSide::Either);
+    three_lane.set_npc_vehicles(vec![npc(100.02, 2, 60.0)]);
+    assert_eq!(three_lane.open_side_at(None), OpenSide::Right);
+    three_lane.set_npc_vehicles(Vec::new());
+    three_lane.zones =
+        vec![Zone::new(90.0, 120.0, 45.0, "construction").with_closed_side(Some("right"))];
+    assert_eq!(three_lane.open_side_at(None), OpenSide::Left);
 }
 
 #[test]
@@ -1062,7 +1112,10 @@ fn test_traffic_pressure_hazard_says_brake_only_with_no_lane_to_swerve_into() {
         .filter(|e| e.kind == TripEventKind::Hazard)
         .collect();
     assert!(!events.is_empty());
-    assert_eq!(events[0].text(), "Brake! Brake lights right ahead.");
+    assert_eq!(
+        events[0].text(),
+        "Brake! Brake lights right ahead. No lane open."
+    );
     assert!(!events[0].text().contains("change lanes"));
     // And the physics is told the same thing the words were: there is
     // nowhere to go, so no lane-change allowance is added to the driver's
@@ -1094,7 +1147,7 @@ fn test_traffic_pressure_hazard_keeps_the_lane_offer_when_one_exists() {
     assert!(!events.is_empty());
     assert_eq!(
         events[0].text(),
-        "Change lanes or brake! Brake lights right ahead."
+        "Change lanes or brake! Brake lights right ahead. Left lane open."
     );
 }
 
@@ -1133,7 +1186,7 @@ fn test_random_dodgeable_hazard_says_brake_only_with_no_lane_to_swerve_into() {
         if !event.text().contains("Debris on the road") {
             continue;
         }
-        assert_eq!(event.text(), "Brake! Debris on the road.");
+        assert_eq!(event.text(), "Brake! Debris on the road. No lane open.");
         // Same rule for an object as for a vehicle: no lane, no dodge. The
         // debris is still in our lane, so brake alone still owes the near
         // stop -- that is `in_lane`, not `dodgeable`.

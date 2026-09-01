@@ -6816,6 +6816,28 @@ city service drives below.)
 
 ### Lanes and maneuvering
 
+- [x] **The hazard call names the open side (owner decision, 2026-09-01).**
+      Heard on I-90 with adaptive cruise on: "Change lanes or brake! Slow
+      car right ahead." left a blind driver guessing whether a lane change
+      was even possible, and the game already knew. Decision: lane changes
+      stay driver-initiated (one tap of Left or Right with lane keeping on
+      full; cruise stays armed through the dodge, which it already did),
+      and the call ends with the lane answer in the L key's own words --
+      "Left lane open.", "Right lane open.", "Either lane open." -- so one
+      tap is enough. The side is read by exactly the rules a tap change is
+      refused by and its arrival is judged by (lane count, the coned lane,
+      and the same traffic clearance the L key sweeps forward over the
+      change), through one trip-side authority the lane-gap cue, the L key
+      and the call all share, so the call never names a lane the dodge
+      would refuse. Nowhere to go -- one lane your side, or both neighbours
+      held by traffic -- is "Brake! ... No lane open." and the hazard is
+      not dodgeable (no lane-tap allowance, cruise pauses), the same family
+      as the 2026-08-24 one-lane rule. Terse drops the opener and keeps the
+      answer ("Slow car right ahead. Left lane open."); the low-speed "it
+      is still in your lane" reminder names the side the same way. Bench
+      finding fixed on the way: a test road swapped in under a drive left
+      the traffic manager reading the OLD road's lane count, which folded
+      every left-lane vehicle into the right lane on the first frame.
 - [x] **Exit-flow speech honesty (playtest transcript, 2026-07-16).** The
       drift-on exit slowdown said "confirm the exit" though no confirm
       action exists -- obeying it toggled the signal OFF and cost the exit.
