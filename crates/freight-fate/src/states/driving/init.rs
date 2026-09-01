@@ -444,6 +444,8 @@ impl DrivingState {
             bar_solid_on: false,
             ramp_assist_said: false,
             ramp_assist_brake: 0.0,
+            approach_pull_ahead: false,
+            approach_pull_ahead_canceled: false,
             critical_curve: None,
             critical_call_age_s: 0.0,
             critical_respeak_at: None,

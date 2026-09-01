@@ -486,6 +486,18 @@
 
 ### Changed
 
+- **Facility stopping assistance now drives you from the ramp-end stop to the
+  entrance, hands off.** With the assist on, once the stop sign is clear or
+  the light turns green at the end of the destination ramp, the cab says
+  "Facility stopping assistance is taking you to the entrance" and the truck
+  moves off on its own instead of waiting for you to pull ahead. Where the
+  ramp ends at the gate it drives up and stops there; where the facility sits
+  at the end of city streets it rolls you onto them and the speed keeper takes
+  over, holding the posted speed and easing for each corner, until the assist
+  stops you at the gate and waits for Enter as before. Your own brake cancels
+  it and hands the truck back. With the assist off, nothing changes: the cab
+  still says "Clear; pull ahead to the entrance" and the last stretch is
+  yours.
 - **Bulk fuel now requires the hazmat endorsement alongside tank vehicle.**
   Gasoline is placarded freight in the real world, so the fuel-tanker jobs
   now ask for the X combination. If you already haul fuel, book the hazmat

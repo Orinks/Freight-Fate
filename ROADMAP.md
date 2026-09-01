@@ -1191,6 +1191,29 @@ Everything not listed here ships fine after 1.9.0.
       "the truck stopped", because the latter passed with the truck parked
       32 metres short.
 
+- [x] **Facility stopping assistance goes from the ramp-end signal to the
+      entrance, hands off (owner ruling, 2026-09-01).** An agent drive from
+      Chicago to Gary found the gap: the ramp assist stopped the truck at the
+      sign, the cab said "Clear; pull ahead to the entrance", and the truck
+      sat at idle until the driver drove the last stretch to where the
+      arrival assist took the pedals again. The terminal release now names
+      the assist ("Facility stopping assistance is taking you to the
+      entrance") and arms `approach_pull_ahead`. A plain ramp was already
+      driven by the arrival latch from the bar; its "taking the pedals" line
+      is skipped when the release named it. A street-chain ramp, which the
+      arrival assist refuses, now gets the 12 mph facility-lane roll from the
+      bar to the ramp's end, and `begin_surface_chain` hands the streets to
+      the speed keeper explicitly (announced, "K or braking cancels"), the
+      way the acceleration lane is handed to it on the way out; the arrival
+      latch at the gate and the "holding at the entrance, press Enter" hold
+      are unchanged. The driver's brake (Down / B) cancels the pull-ahead
+      beside the cruise rule in the frame loop and holds the cancel for that
+      ramp; a driver on the throttle is never fought. With the keeper off, a
+      chain facility keeps the manual release, because the promise could not
+      be kept. Three harness drives pin it: hands off from the sign to the
+      entrance hold on a chain facility, the unchanged manual release with
+      the assist off, and the brake cancel on both facility shapes.
+
 - [ ] **There is no way to back a career up on demand (Brandon, 2026-08-15).**
       A career can only travel upward two ways: the background queue after a
       save, and "Keep this computer's save and back it up" -- which

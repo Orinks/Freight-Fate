@@ -263,6 +263,7 @@ from the words, and synonyms cost them a re-read.
 | A posted weight restriction on the corridor | weight limit | max weight, tonnage limit, weight restriction | `RouteRestriction.kind_label` |
 | The facility entrance where a drive ends | facility gate; "gate" in short cues | entrance (as the noun for the thing), dock gate | `_handle_arrival_gate` |
 | The highway exit for the delivery | destination exit | final exit, last exit, your exit | `_destination_exit_stop` |
+| The assist that brakes and creeps the truck to the facility entrance, and, from a cleared ramp-end stop, drives it there hands off | Facility stopping assistance (the settings row's own name) | destination approach assistance (the setting's code name only), arrival assist, approach assist | `destination_approach_assist`, `update_destination_approach_assist`, `terminal_release_text` |
 | A driveway, delivery lane or parking aisle OSM holds no name for | a service road | unnamed public road, access road, service way, private road | `build_local_geometry.UNNAMED_SERVICE` |
 | A residential or minor street OSM holds no name for | a side street | unnamed public road, unnamed street, local road, back road | `build_local_geometry.UNNAMED_STREET` |
 | A street maneuver the route asks for | turn | corner, junction, intersection, manoeuvre | `_is_judged_turn`, `local_turn` cues |

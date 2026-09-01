@@ -19,8 +19,9 @@ impl DrivingState {
     /// traffic in the trailer. With route-transition assistance on, the assist
     /// brakes for a red (or a yellow it cannot legally beat), holds the stop
     /// at the bar, and keeps a green crossing under the clean-roll speed. The
-    /// phases still speak, and pulling ahead when the light releases stays the
-    /// driver's move.
+    /// phases still speak. Pulling ahead when the light releases is the
+    /// driver's move unless facility stopping assistance is on, in which case
+    /// that assist takes it (`terminal_release_text`).
     pub fn update_ramp_terminal_assist(&mut self, ctx: &mut GameContext) {
         if !ctx.settings.route_transition_assist {
             return;
@@ -114,12 +115,13 @@ impl DrivingState {
                     return;
                 }
                 self.ramp_terminal_done = true;
-                let message = if self.ramp_waiting_at_sign {
-                    "Gap in traffic. Clear; pull ahead to the entrance.".to_string()
+                let lead = if self.ramp_waiting_at_sign {
+                    "Gap in traffic.".to_string()
                 } else {
-                    format!("Stopped at the {noun}. Clear; pull ahead to the entrance.")
+                    format!("Stopped at the {noun}.")
                 };
                 self.ramp_waiting_at_sign = false;
+                let message = self.terminal_release_text(ctx, &lead, true);
                 self.say_route_navigation(ctx, &message);
             } else if !self.ramp_waiting_at_light {
                 self.ramp_waiting_at_light = true;
@@ -342,13 +344,14 @@ impl DrivingState {
                 return;
             }
             self.ramp_terminal_done = true;
-            let message = if self.ramp_waiting_at_sign {
-                "Gap in traffic. Clear; pull ahead to the entrance."
+            let lead = if self.ramp_waiting_at_sign {
+                "Gap in traffic."
             } else {
-                "Stopped at the sign. Clear; pull ahead to the entrance."
+                "Stopped at the sign."
             };
             self.ramp_waiting_at_sign = false;
-            self.say_route_navigation(ctx, message);
+            let message = self.terminal_release_text(ctx, lead, true);
+            self.say_route_navigation(ctx, &message);
             return;
         }
         self.ramp_terminal_done = true;
@@ -444,7 +447,8 @@ impl DrivingState {
             }
             self.ramp_terminal_done = true;
             self.ramp_waiting_at_sign = false;
-            self.say_route_navigation(ctx, "Gap in traffic. Clear; pull ahead to the entrance.");
+            let message = self.terminal_release_text(ctx, "Gap in traffic.", true);
+            self.say_route_navigation(ctx, &message);
             return;
         }
         if !past_bar {
@@ -492,10 +496,41 @@ impl DrivingState {
                 &format!("Through the {noun}, but far too fast. Brake hard for the entrance."),
             );
         } else {
-            self.say_route_confirmation(
-                ctx,
-                &format!("Through the {noun} in a gap. Pull ahead to the entrance."),
+            let message =
+                self.terminal_release_text(ctx, &format!("Through the {noun} in a gap."), false);
+            self.say_route_confirmation(ctx, &message);
+        }
+    }
+
+    /// The terminal is honored and the way is clear: who pulls ahead.
+    ///
+    /// The old release handed the last stretch back to the driver even with
+    /// facility stopping assistance on, so the truck sat at idle at a clear
+    /// sign until the driver drove it up to the entrance, where the assist
+    /// took the pedals again (agent drive, Chicago to Gary, 2026-09-01). The
+    /// owner's ruling: the assist goes from the signal to the entrance, hands
+    /// off. With it on, the release names the assist and arms the pull-ahead;
+    /// with it off, the release is the driver's, exactly as before.
+    ///
+    /// `clear` is the stopped release ("Clear; pull ahead"); a green or a gap
+    /// rolled through says only what happened.
+    pub(crate) fn terminal_release_text(
+        &mut self,
+        ctx: &GameContext,
+        lead: &str,
+        clear: bool,
+    ) -> String {
+        if self.approach_pull_ahead_available(ctx) {
+            self.approach_pull_ahead = true;
+            let clear = if clear { " Clear." } else { "" };
+            return format!(
+                "{lead}{clear} Facility stopping assistance is taking you to the entrance."
             );
+        }
+        if clear {
+            format!("{lead} Clear; pull ahead to the entrance.")
+        } else {
+            format!("{lead} Pull ahead to the entrance.")
         }
     }
 

@@ -127,6 +127,8 @@ impl DrivingState {
         self.ramp_assist_said = false;
         self.ramp_assist_brake = 0.0;
         self.ramp_waiting_at_sign = false;
+        self.approach_pull_ahead = false;
+        self.approach_pull_ahead_canceled = false;
         // The cross bubble: a controlled terminal means a real crossroad, so
         // simulate it. Seeded like the control itself so the same terminal
         // always carries the same traffic day; the near-city split reuses the
@@ -209,7 +211,8 @@ impl DrivingState {
             self.ramp_waiting_at_light = false;
             self.ramp_terminal_done = true;
             ctx.audio.play_with("events/ramp_light_green", 0.8, 0.0);
-            self.say_route_navigation(ctx, "Green light. Pull ahead to the entrance.");
+            let message = self.terminal_release_text(ctx, "Green light.", false);
+            self.say_route_navigation(ctx, &message);
             return;
         }
         // Every phase change speaks. The light is an instruction, not

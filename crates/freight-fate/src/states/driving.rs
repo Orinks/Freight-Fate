@@ -420,6 +420,13 @@ pub struct DrivingState {
     // terminal, so it can follow the demand up without letting go and
     // re-making the application every few frames.
     pub ramp_assist_brake: f64,
+    // Facility stopping assistance is driving the truck on from the honored
+    // terminal -- to the entrance on a plain ramp, to the streets on a chain
+    // -- so nobody is asked to pull ahead (owner ruling, 2026-09-01). Set
+    // where the terminal releases; the driver's own brake cancels it, and a
+    // cancel holds for the rest of this ramp.
+    pub approach_pull_ahead: bool,
+    pub approach_pull_ahead_canceled: bool,
     // Safety-call re-arm window (curve calls vs the Ctrl reflex).
     pub critical_curve: Option<RouteCurve>,
     pub critical_call_age_s: f64,

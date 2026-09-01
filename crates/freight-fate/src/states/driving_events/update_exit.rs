@@ -523,6 +523,9 @@ impl DrivingState {
         // nothing left to aim at. The arrival line speaks fresh instead.
         self.ramp_end_said = false;
         self.ramp_arrival_grace_s = 0.0;
+        // A fresh approach: the arrival assist announces itself again when it
+        // takes the pedals, rather than riding the terminal's release line.
+        self.approach_pull_ahead = false;
         // Automatic speed control is what drove this miss, so the whole
         // session goes -- not just the active controller. Left armed, the
         // resume helper would wind the truck straight back up to speed on the

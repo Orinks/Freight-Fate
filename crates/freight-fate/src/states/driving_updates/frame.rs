@@ -302,6 +302,17 @@ impl DrivingState {
                     .category(SpeechCategory::Confirmation),
             );
         }
+        // The same rule for facility stopping assistance driving the truck on
+        // from a ramp terminal: the driver's own brake hands the pedals back.
+        // Only while the entrance is still ahead -- at the point the assist
+        // has already stopped the truck and the dock is opening.
+        if self.approach_pull_ahead
+            && (braking_key || emergency)
+            && !backing
+            && self.ramp_mi.is_some_and(|mi| mi > 0.0)
+        {
+            self.cancel_approach_pull_ahead(ctx);
+        }
         if emergency {
             // no ramp: slams to full application instantly, plus spring brakes
             if !self.trip.truck.emergency_brake && self.trip.truck.velocity_mps.abs() > 1.0 {

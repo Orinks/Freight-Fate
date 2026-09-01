@@ -34,7 +34,7 @@ use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
 use freight_fate::states::base::Key;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{
-    DOCKING_MAX_MPH, RAMP_ACCESS_MI, RAMP_LIGHT_GREEN_S, RAMP_LIGHT_RED_S,
+    DOCKING_MAX_MPH, RAMP_ACCESS_MI, RAMP_LIGHT_GREEN_S, RAMP_LIGHT_RED_S, RED_STOP_MPH,
 };
 use freight_fate::states::driving_menu_states::FacilityArrivalState;
 
@@ -635,9 +635,10 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
     // route-transition assist stopped the truck at red, and the destination
     // assist then held two mph after green until he disabled it. Recreate the
     // same route, facility, load, carrier tractor, automatic transmission and
-    // clear Montana weather. The player lifts for each assist, then pulls away
-    // on green until destination assistance truthfully takes the pedals near
-    // the entrance.
+    // clear Montana weather. The player lifts for each assist and never
+    // touches a pedal again: since the owner's 2026-09-01 ruling the green
+    // releases the truck to facility stopping assistance, which drives it
+    // from the bar to the entrance itself.
     let route_cities = [
         "eugene_or_us",
         "tri_cities_wa_us",
@@ -737,11 +738,10 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
             docked = harness.state_is::<FacilityArrivalState>();
             break;
         }
-        let (done, waiting, destination_active, speed) = harness.read_drive(|d| {
+        let (done, waiting, speed) = harness.read_drive(|d| {
             (
                 d.ramp_terminal_done,
                 d.ramp_waiting_at_light,
-                d.destination_arrival_active,
                 d.truck().speed_mph(),
             )
         });
@@ -762,11 +762,7 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
         if terminal_done {
             max_speed_after_green = max_speed_after_green.max(speed);
         }
-        if done && !destination_active && speed < 20.0 {
-            hold(&mut harness, &[Key::Up]);
-        } else {
-            release_keys(&mut harness);
-        }
+        release_keys(&mut harness); // hands off: the assist pulls ahead
         frame(&mut harness, DT);
         if !harness.has_drive() {
             continue;
@@ -801,11 +797,295 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
     harness.result().assert_ordered(&[
         "Route-transition assistance braking for the light.",
         "Stopped at the red light. Assistance is holding the brakes for green.",
-        "Green light. Pull ahead to the entrance.",
-        "Facility stopping assistance taking the pedals",
+        "Green light. Facility stopping assistance is taking you to the entrance.",
         "Pulling into construction materials yard Great Falls Materials Yard",
         "At construction materials yard Great Falls Materials Yard in Great Falls.",
     ]);
+    // One handoff, announced once: the release named the assist, so the
+    // latch a frame later does not announce it again.
+    let heard = harness.transcript();
+    assert!(
+        !heard
+            .iter()
+            .any(|line| line.contains("Pull ahead to the entrance")
+                || line.contains("taking the pedals")),
+        "{}",
+        harness.transcript_text()
+    );
+}
+
+// -- from the ramp-end sign to the entrance, hands off ----------------------------------
+
+/// What a drive from a ramp-end stop sign did once the sign was clear.
+struct SignRelease {
+    heard: Vec<String>,
+    /// The truck reached the sign and stopped there with the terminal done.
+    stopped_at_sign: bool,
+    /// After the stop it rolled off past walking pace with no throttle held.
+    moved_off_alone: bool,
+    /// It reached the facility's own streets.
+    on_chain: bool,
+    /// The assist stopped it at the gate with the hold prompt spoken.
+    held_at_entrance: bool,
+    /// Stood still for ten seconds after the release, or after the brake.
+    stood_still: bool,
+    speed_mph: f64,
+}
+
+impl SignRelease {
+    fn said(&self, needle: &str) -> bool {
+        self.heard.iter().any(|line| line.contains(needle))
+    }
+
+    fn report(&self, destination: &Destination) -> String {
+        format!(
+            "{} ({}, {}): stopped_at_sign={} moved_off_alone={} on_chain={} held_at_entrance={} \
+             stood_still={} speed={:.2}\nheard: {:#?}",
+            destination.location,
+            destination.city,
+            destination.kind(),
+            self.stopped_at_sign,
+            self.moved_off_alone,
+            self.on_chain,
+            self.held_at_entrance,
+            self.stood_still,
+            self.speed_mph,
+            self.heard
+        )
+    }
+}
+
+/// Down `destination`'s ramp to a stop sign at its end, with route-transition
+/// assistance making the stop and the crossroad empty, so the clear comes
+/// with the stop. Nobody ever holds the throttle; `brake_after_clear` holds
+/// the brake once the truck has moved off, the way a driver cancels an
+/// assist. Automatic speed control was never switched on by the driver.
+fn arrive_from_the_sign(
+    destination: &Destination,
+    approach_assist: bool,
+    brake_after_clear: bool,
+) -> SignRelease {
+    let world = get_world();
+    let origin = world.neighbors(&destination.city)[0]
+        .other(&destination.city)
+        .to_string();
+    let mut harness = PlaytestHarness::new();
+    harness.app.ctx.settings.destination_approach_assist = approach_assist;
+    harness.app.ctx.settings.route_transition_assist = true;
+    harness.app.ctx.settings.speed_keeper = true;
+    harness.app.ctx.settings.automatic_transmission = true;
+    let mut route_setup = RouteSetup::seeded(4242)
+        .named("Sign Release")
+        .destination_location(&destination.location);
+    route_setup.tons = 18.0;
+    harness.start_route(&origin, &destination.city, route_setup);
+    harness.with_drive(|d, ctx| {
+        quiet(&mut d.trip);
+        d.weather_mut().current = WeatherKind::Clear;
+        d.departure_checked = true;
+        if let Some(profile) = ctx.profile.as_mut() {
+            profile.tutorial_done = true;
+        }
+        d.tutorial = None;
+        d.truck_mut().start_engine();
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().transmission.gear = 9;
+        d.truck_mut().rpm = 1500.0;
+        d.truck_mut().set_air_ready(false);
+    });
+    let exit = harness.with_drive(|d, ctx| {
+        d.destination_exit_stop(ctx)
+            .expect("a delivery always has a destination exit")
+    });
+    let at = exit.at_mi;
+    harness.with_drive(move |d, ctx| {
+        d.exit_stop = Some(exit);
+        d.exit_lane_alignment = 1.0;
+        d.exit_signal_on = true;
+        d.trip.position_mi = at;
+        d.truck_mut().velocity_mps = 40.0 * MPS_PER_MPH;
+        d.update_exit(ctx, 0.0, 0.0);
+    });
+    assert!(
+        harness.read_drive(|d| d.ramp_mi.is_some()),
+        "{}: never got onto the destination ramp",
+        destination.city
+    );
+    harness.with_drive(|d, _| {
+        // A stop sign, announced, with an empty crossroad: the stop is the
+        // ramp assist's and the clear call lands with it.
+        d.ramp_control = "stop".to_string();
+        d.cross_bubble = None;
+        d.ramp_light_announced = true;
+        d.ramp_terminal_done = false;
+        d.ramp_waiting_at_sign = false;
+        d.ramp_assist_said = false;
+        d.ramp_assist_brake = 0.0;
+        d.ramp_mi = Some(RAMP_ACCESS_MI + 0.1);
+        d.truck_mut().velocity_mps = 25.0 * MPS_PER_MPH;
+    });
+    harness.clear_speech();
+    release_keys(&mut harness);
+
+    let mut stopped_at_sign = false;
+    let mut moved_off_alone = false;
+    let mut on_chain = false;
+    let mut held_at_entrance = false;
+    let mut stood_still = false;
+    let mut braked = false;
+    let mut brake_frames = 0;
+    let mut still_frames = 0;
+    for _ in 0..(60 * 600) {
+        if !harness.has_drive() || harness.read_drive(|d| d.arrival_menu_open) {
+            break;
+        }
+        let (done, speed, chain, full_stop_said) = harness.read_drive(|d| {
+            (
+                d.ramp_terminal_done,
+                d.truck().speed_mph(),
+                d.surface_chain,
+                d.arrival_full_stop_said,
+            )
+        });
+        on_chain |= chain;
+        if done && speed <= RED_STOP_MPH && !stopped_at_sign {
+            stopped_at_sign = true;
+        }
+        if stopped_at_sign && speed > 5.0 {
+            moved_off_alone = true;
+        }
+        if full_stop_said && speed <= DOCKING_MAX_MPH {
+            held_at_entrance = true;
+            break;
+        }
+        if brake_after_clear && moved_off_alone && !braked {
+            // The driver's foot on the brake, held until the truck is stopped
+            // and a moment more, then lifted.
+            hold(&mut harness, &[Key::Down]);
+            brake_frames += 1;
+            if speed <= DOCKING_MAX_MPH && brake_frames > 60 {
+                braked = true;
+                release_keys(&mut harness);
+            }
+        }
+        // Standing after the release (assist off), or after the brake: ten
+        // seconds with nobody touching anything.
+        if stopped_at_sign && (!approach_assist || braked) && speed <= RED_STOP_MPH {
+            still_frames += 1;
+            if still_frames >= 60 * 10 {
+                stood_still = true;
+                break;
+            }
+        }
+        frame(&mut harness, DT);
+    }
+    release_keys(&mut harness);
+    let speed_mph = if harness.has_drive() {
+        harness.read_drive(|d| d.truck().speed_mph())
+    } else {
+        0.0
+    };
+    SignRelease {
+        heard: harness.transcript(),
+        stopped_at_sign,
+        moved_off_alone,
+        on_chain,
+        held_at_entrance,
+        stood_still,
+        speed_mph,
+    }
+}
+
+#[test]
+fn test_the_assist_drives_from_the_clear_sign_to_the_entrance_hold_hands_off() {
+    // Owner ruling, 2026-09-01, after an agent drive from Chicago to Gary:
+    // "the approach assist should go from signal to approach entrance, hands
+    // off." With the assist on, the clear at the ramp-end sign is the assist's
+    // to act on: the truck moves off alone, takes the facility's streets on the
+    // speed keeper, and ends held at the entrance waiting for Enter -- with no
+    // key pressed after the ramp was taken.
+    let (chain, _) = destinations(get_world(), 1);
+    let destination = &chain[0];
+    let release = arrive_from_the_sign(destination, true, false);
+    println!("{}", release.report(destination));
+    assert!(release.stopped_at_sign, "{}", release.report(destination));
+    assert!(
+        release.said("Stopped at the sign. Clear. Facility stopping assistance is taking you to the entrance."),
+        "{}",
+        release.report(destination)
+    );
+    assert!(
+        !release.said("pull ahead to the entrance"),
+        "{}",
+        release.report(destination)
+    );
+    assert!(release.moved_off_alone, "{}", release.report(destination));
+    assert!(release.on_chain, "{}", release.report(destination));
+    assert!(
+        release.said("Speed keeper holding"),
+        "{}",
+        release.report(destination)
+    );
+    assert!(release.held_at_entrance, "{}", release.report(destination));
+    assert!(
+        release.said(
+            "Facility stopping assistance is holding at the entrance. Press Enter to continue into the facility."
+        ),
+        "{}",
+        release.report(destination)
+    );
+    for lie in ["Drove past", "You never stopped", "missed"] {
+        assert!(!release.said(lie), "{}", release.report(destination));
+    }
+}
+
+#[test]
+fn test_with_the_assist_off_the_clear_sign_still_hands_the_last_stretch_to_the_driver() {
+    let (chain, _) = destinations(get_world(), 1);
+    let destination = &chain[0];
+    let release = arrive_from_the_sign(destination, false, false);
+    assert!(release.stopped_at_sign, "{}", release.report(destination));
+    assert!(
+        release.said("Stopped at the sign. Clear; pull ahead to the entrance."),
+        "{}",
+        release.report(destination)
+    );
+    assert!(
+        !release.said("Facility stopping assistance"),
+        "{}",
+        release.report(destination)
+    );
+    // Nobody pulled ahead, so the truck is still at the bar.
+    assert!(release.stood_still, "{}", release.report(destination));
+    assert!(!release.moved_off_alone, "{}", release.report(destination));
+    assert!(!release.on_chain, "{}", release.report(destination));
+}
+
+#[test]
+fn test_the_drivers_brake_cancels_the_automatic_pull_ahead() {
+    // The rule every assist follows: the driver's own brake hands the pedals
+    // back. On both facility shapes -- the roll to the streets and the plain
+    // ramp's drive to the gate -- a brake after the truck has moved off stops
+    // it, says so, and leaves it stopped rather than creeping off again.
+    let (chain, plain) = destinations(get_world(), 1);
+    for destination in [&chain[0], &plain[0]] {
+        let release = arrive_from_the_sign(destination, true, true);
+        println!("{}", release.report(destination));
+        assert!(release.moved_off_alone, "{}", release.report(destination));
+        assert!(
+            release.said("Facility stopping assistance released; pull ahead to the entrance."),
+            "{}",
+            release.report(destination)
+        );
+        assert!(release.stood_still, "{}", release.report(destination));
+        assert!(!release.on_chain, "{}", release.report(destination));
+        assert!(!release.held_at_entrance, "{}", release.report(destination));
+        assert!(
+            release.speed_mph <= RED_STOP_MPH,
+            "{}",
+            release.report(destination)
+        );
+    }
 }
 
 #[test]

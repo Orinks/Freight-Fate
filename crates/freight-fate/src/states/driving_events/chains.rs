@@ -133,6 +133,27 @@ impl DrivingState {
         // through it; automatic speed control belongs to the street zones
         // from the first foot of them.
         self.clear_stop_pause();
+        // Facility stopping assistance drove the truck here from the terminal
+        // (owner ruling, 2026-09-01: signal to entrance, hands off). The
+        // streets are the speed keeper's job -- it holds the posted number,
+        // eases for each judged corner, and creeps behind a queue -- so it
+        // takes them explicitly, the way the acceleration lane is handed to it
+        // on the way out, rather than waiting a frame for the resume path.
+        // The arrival assist takes the pedals back at the gate as it always
+        // has. `approach_pull_ahead_available` refused the pull-ahead with the
+        // keeper off, so a chain reached this way always has it.
+        if self.approach_pull_ahead {
+            self.approach_pull_ahead = false;
+            if ctx.settings.speed_keeper {
+                let (limit, zone_reason) = self.trip.speed_limit_at(self.trip.position_mi);
+                if let Some(zone_reason) = zone_reason {
+                    if self.cruise_mph.is_some() {
+                        self.cancel_cruise(ctx, true);
+                    }
+                    self.engage_keeper(ctx, limit, &zone_reason, Some(limit), true);
+                }
+            }
+        }
         // The first corner, if the chain starts inside its own window: it is
         // spoken in THIS line, at this line's priority, or it is not heard at
         // all. Raised on its own a frame later it queued behind the

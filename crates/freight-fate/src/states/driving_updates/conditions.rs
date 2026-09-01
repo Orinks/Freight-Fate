@@ -100,11 +100,23 @@ impl DrivingState {
         // cleared: pickups/deliveries, a planned rest stop, and a required
         // scale all deserve the same progressive stop profile.
         let ramp_is_facility = self.ramp_stop.is_some();
-        let ramp_continues_to_destination_streets = self
-            .ramp_stop
-            .as_ref()
-            .is_some_and(|stop| stop.stop_type == "delivery_destination")
-            && self.destination_street_chain_ahead(ctx);
+        let ramp_continues_to_destination_streets = self.ramp_continues_to_destination_streets(ctx);
+        if ramp_continues_to_destination_streets && self.approach_pull_ahead {
+            // The bar to the streets, hands off. The terminal released the
+            // truck to this assist (`terminal_release_text`), and on a chain
+            // facility the streets are still ahead: the arrival is theirs, not
+            // this ramp's, so nothing here latches or aims at a point. The
+            // assist holds the facility-lane roll to the ramp's end, where
+            // `begin_surface_chain` takes the truck at that speed and hands
+            // the streets to the speed keeper. Throttle only ever raised,
+            // never zeroed: a driver already on the pedal is not fought, and a
+            // foot on the brake wins outright.
+            self.destination_arrival_active = false;
+            if let Some(ramp_mi) = self.ramp_mi.filter(|mi| *mi > 0.0) {
+                self.hold_approach_speed(ramp_mi * 1609.344, FACILITY_LANE_ROLL_MPH);
+            }
+            return;
+        }
         let remaining_mi =
             if self.ramp_mi.is_some() && ramp_is_facility && !ramp_continues_to_destination_streets
             {
@@ -157,8 +169,13 @@ impl DrivingState {
         let lag = APPROACH_ASSIST_REACTION_S;
         let cap_mps = -a * lag + ((a * lag).powi(2) + 2.0 * a * remaining_m).sqrt();
         if !self.destination_arrival_active {
-            let facility_final_approach =
-                self.ramp_mi.is_some() && ramp_is_facility && self.ramp_terminal_done;
+            // A driver who braked the pull-ahead off has the last stretch back
+            // for this ramp: the latch from standstill stays off, and only a
+            // truck over the curve is taken (the setting's core promise).
+            let facility_final_approach = self.ramp_mi.is_some()
+                && ramp_is_facility
+                && self.ramp_terminal_done
+                && !self.approach_pull_ahead_canceled;
             if !facility_final_approach && self.trip.truck.velocity_mps <= cap_mps {
                 return;
             }
@@ -181,12 +198,18 @@ impl DrivingState {
             // stopped -- which for a blind driver is indistinguishable from
             // an assist that is not working, and is the likeliest reason it
             // was reported three times as "it did not stop me".
-            ctx.say_event_with(
-                "Facility stopping assistance taking the pedals to manage the final approach and stop at the entrance.",
-                SayEvent::queued()
-                    .priority(EventPriority::Route)
-                    .category(SpeechCategory::Confirmation),
-            );
+            //
+            // Unless the terminal release already named it: "Facility stopping
+            // assistance is taking you to the entrance" a second earlier, then
+            // this, is the same handoff announced twice.
+            if !self.approach_pull_ahead {
+                ctx.say_event_with(
+                    "Facility stopping assistance taking the pedals to manage the final approach and stop at the entrance.",
+                    SayEvent::queued()
+                        .priority(EventPriority::Route)
+                        .category(SpeechCategory::Confirmation),
+                );
+            }
         }
         // The arrival owns the pedals: throttle off, and automatic speed
         // control paused the ARRIVAL way -- held until departure, never lifted
@@ -220,7 +243,6 @@ impl DrivingState {
         // on an upgrade. The dock opens only AT the point, so the last
         // lengths are a creep the assist holds, throttle against the road if
         // it has to, until the point's own full-brake branch above stops it.
-        let v = self.trip.truck.velocity_mps;
         let target_mph = if self.ramp_mi.is_some()
             && ramp_is_facility
             && remaining_mi > ARRIVAL_FINAL_CREEP_MI
@@ -229,6 +251,18 @@ impl DrivingState {
         } else {
             ARRIVAL_CREEP_MPH
         };
+        self.hold_approach_speed(remaining_m, target_mph);
+    }
+
+    /// The stop profile's pedal for this frame: brake down to `target_mph`
+    /// over `remaining_m`, or hold it with a capped throttle nudge.
+    ///
+    /// Shared by the arrival latch above and the chain ramp's roll to the
+    /// streets. Nothing is added while anyone has a foot on the brake, and the
+    /// throttle is only ever raised, so a driver's own pedal always wins.
+    fn hold_approach_speed(&mut self, remaining_m: f64, target_mph: f64) {
+        let remaining_m = remaining_m.max(0.5);
+        let v = self.trip.truck.velocity_mps;
         let creep = target_mph / 2.23694;
         // What the road takes off on its own, m/s2: positive when it slows
         // the truck, negative when gravity is pushing it down to the gate.
@@ -258,6 +292,50 @@ impl DrivingState {
             .truck
             .throttle
             .max(ARRIVAL_CREEP_THROTTLE_MAX.min(pedal.max(0.0)));
+    }
+
+    /// Whether this delivery's ramp hands off to a street chain rather than
+    /// ending at the gate (see `destination_street_chain_ahead`).
+    pub(crate) fn ramp_continues_to_destination_streets(&mut self, ctx: &GameContext) -> bool {
+        self.ramp_stop
+            .as_ref()
+            .is_some_and(|stop| stop.stop_type == "delivery_destination")
+            && self.destination_street_chain_ahead(ctx)
+    }
+
+    /// Whether facility stopping assistance can take the truck on from the
+    /// terminal it is at, hands off, all the way to the entrance hold.
+    ///
+    /// A plain ramp ends at the gate and this assist's own profile drives it.
+    /// A chain facility's streets are the speed keeper's, so with the keeper
+    /// off the promise "taking you to the entrance" could not be kept and the
+    /// release stays the driver's. A driver who braked the pull-ahead off has
+    /// said no for this ramp.
+    pub(crate) fn approach_pull_ahead_available(&mut self, ctx: &GameContext) -> bool {
+        if !ctx.settings.destination_approach_assist
+            || self.ramp_stop.is_none()
+            || self.approach_pull_ahead_canceled
+        {
+            return false;
+        }
+        ctx.settings.speed_keeper || !self.ramp_continues_to_destination_streets(ctx)
+    }
+
+    /// The driver's own brake during the pull-ahead: the pedals are theirs
+    /// again from here, said the way every other assist says it.
+    pub fn cancel_approach_pull_ahead(&mut self, ctx: &mut GameContext) {
+        self.approach_pull_ahead = false;
+        self.approach_pull_ahead_canceled = true;
+        self.destination_arrival_active = false;
+        self.destination_assist_brake = 0.0;
+        // ROUTE, not the ambient default: an automation just released the
+        // pedals (the automation-handoff rule, 2026-08-20).
+        ctx.say_event_with(
+            "Facility stopping assistance released; pull ahead to the entrance.",
+            SayEvent::queued()
+                .priority(EventPriority::Route)
+                .category(SpeechCategory::Confirmation),
+        );
     }
 
     /// Speak the physical traction states once, on the edge they begin.
