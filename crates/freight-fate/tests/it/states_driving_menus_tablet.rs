@@ -322,6 +322,37 @@ fn test_school_lesson_is_a_sandbox_and_restores_the_real_profile() {
 }
 
 #[test]
+fn test_school_air_reminder_matches_the_gauge() {
+    // The lesson's timed nudge used to say "wait for air pressure" even
+    // after the air was up (the first-run tutorial had the same fault,
+    // agent drive 2026-09-01). With air ready the reminder is just P.
+    let mut app = TestApp::new();
+    a_student(&mut app);
+    app.ctx.push_state(DrivingSchoolState::new());
+    with_top_ctx::<DrivingSchoolState, _>(&mut app, |school, ctx| {
+        activate(school, ctx, "Lesson 1")
+    });
+    lesson_step(&mut app, |lesson, app| lesson.begin(&mut app.ctx));
+    lesson_step(&mut app, |lesson, app| {
+        lesson.on_engine_started(&mut app.ctx)
+    });
+    app.clear_speech();
+    let mut parked = truck_at(&app, 0.0, true);
+    parked.set_air_ready(true);
+    // Past the lesson's hint delay in one step.
+    lesson_step(&mut app, |lesson, app| {
+        lesson.update(&mut app.ctx, 31.0, &parked)
+    });
+    let brake = app.ctx.control_hint("parking_brake");
+    assert_eq!(
+        app.main_lines(),
+        vec![format!(
+            "Reminder: air is ready. Press {brake} to release the parking brake."
+        )]
+    );
+}
+
+#[test]
 fn test_escaping_a_lesson_restores_the_profile_too() {
     let mut app = TestApp::new();
     a_student(&mut app);

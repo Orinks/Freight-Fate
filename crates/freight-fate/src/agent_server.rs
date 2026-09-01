@@ -332,7 +332,14 @@ impl Audio for TeeAudio {
         self.inner.release_cue(name);
     }
     fn engine_start_with(&mut self, play_start_sound: bool) {
-        self.hear("[engine] starting".to_string());
+        // A silent start is the loop coming back after a menu or a resumed
+        // trip: no crank plays, so the ear must not report one -- every
+        // unpause read as an engine start (agent drive, 2026-09-01).
+        if play_start_sound {
+            self.hear("[engine] starting".to_string());
+        } else {
+            self.hear("[engine] running again, no crank".to_string());
+        }
         self.inner.engine_start_with(play_start_sound);
     }
     fn engine_stop_with(&mut self, shutdown_sound: bool) {
@@ -392,6 +399,12 @@ impl Audio for TeeAudio {
         self.inner.reverse_stop();
     }
     fn stop_world(&mut self) {
+        // The engine loop drops silently with the rest of the road (a pause,
+        // an arrival) and comes back silently; say so, or the return reads
+        // as a start out of nowhere.
+        if self.inner.engine_running() {
+            self.hear("[engine] quiet while the road is paused".to_string());
+        }
         if self.weather_key.take().is_some() {
             self.hear("[weather] stopped".to_string());
         }
@@ -1389,6 +1402,26 @@ mod tests {
         assert!(found > 0);
         assert_eq!(picked, found);
         assert!(hit.label.starts_with("OPEN scale:"), "{}", hit.label);
+    }
+
+    #[test]
+    fn ears_tell_a_silent_engine_return_from_a_crank() {
+        // Unpausing brings the engine loop back without the ignition
+        // one-shot; the ear used to call both "[engine] starting".
+        let ears: SharedEars = Rc::new(RefCell::new(Ears::default()));
+        let mut audio = tee_audio(&ears);
+
+        audio.engine_start();
+        audio.stop_world();
+        audio.engine_start_with(false);
+
+        assert_eq!(
+            drain_ears(&ears)
+                .lines()
+                .filter(|line| line.starts_with("[engine]"))
+                .collect::<Vec<_>>(),
+            vec!["[engine] starting", "[engine] running again, no crank"]
+        );
     }
 
     #[test]

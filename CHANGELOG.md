@@ -1128,7 +1128,17 @@
   "a side street", the same words every other nameless road already gets,
   so the instruction tells you what you are turning onto instead of what it
   is missing.
-
+- **The first-run walkthrough no longer tells you to wait for air that is
+  already up.** Its timed reminder used to say "wait for air pressure to
+  reach 100 psi" right after the truck had announced air ready. Now, once
+  the air is ready, the reminder says so and tells you to press the parking
+  brake key. The driving school lesson got the same fix.
+- **A drive no longer opens with the traffic-slowing sound.** Entering the
+  yard's access road, a facility gate, or a destination approach played the
+  same cue as traffic backing up ahead, so every trip began with a warning
+  about traffic while the truck was still parked with the engine off. Those
+  zone entries now use the plain notice sound; the traffic-slowing cue is
+  kept for a real jam.
 - **An emergency stop or a missed turn no longer switches automatic speed
   control off for good.** Before, once the automatic braking cleared, the
   truck coasted down to a crawl on an open interstate, and after a corner

@@ -238,11 +238,20 @@ impl Instructor for RollingBasicsLesson {
                 );
                 self.say(ctx, text);
             } else if self.stage == 1 && truck.parking_brake {
-                let text = format!(
-                    "Reminder: wait for air pressure to reach one hundred psi, then press {} to \
-                     release the parking brake.",
-                    ctx.control_hint("parking_brake")
-                );
+                // Same contradiction the first-run tutorial had: once the air
+                // is up, "wait for air" is wrong and P is the whole reminder.
+                let text = if truck.air_ready() {
+                    format!(
+                        "Reminder: air is ready. Press {} to release the parking brake.",
+                        ctx.control_hint("parking_brake")
+                    )
+                } else {
+                    format!(
+                        "Reminder: wait for air pressure to reach one hundred psi, then press {} \
+                         to release the parking brake.",
+                        ctx.control_hint("parking_brake")
+                    )
+                };
                 self.say(ctx, text);
             } else if self.stage == 2 {
                 let text = format!(

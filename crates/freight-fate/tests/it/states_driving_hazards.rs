@@ -21,7 +21,9 @@ use ff_core::sim::weather::WeatherKind;
 use ff_core::speech_text::{hazard_call, SpokenMessage};
 
 use freight_fate::playtest::harness::{PlaytestHarness, StartDelivery};
-use freight_fate::states::driving_core::{route_event_sound, HAZARD_CREEP_MPH, HAZARD_SAFE_MPH};
+use freight_fate::states::driving_core::{
+    route_event_sound, DRIVE_PHASE_PICKUP, HAZARD_CREEP_MPH, HAZARD_SAFE_MPH,
+};
 
 const MPH_PER_MPS: f64 = 2.2369362920544;
 const DT: f64 = 1.0 / 60.0;
@@ -112,6 +114,29 @@ fn test_trip_event_sounds_use_contextual_cues() {
         route_event_sound(&zone_event),
         Some("events/construction_zone")
     );
+    // Only a jam is traffic slowing. The yard's access road, a facility
+    // gate or an approach zone is a speed limit, and gets the plain notice
+    // instead: every drive used to open on the traffic cue with the engine
+    // off (agent drive, 2026-09-01).
+    let zone_of = |reason: &str| TripEvent {
+        kind: TripEventKind::ZoneEnter,
+        message: SpokenMessage::new("zone"),
+        data: TripEventData {
+            zone: Some(Zone::new(0.0, 1.0, 15.0, reason)),
+            ..Default::default()
+        },
+    };
+    assert_eq!(
+        route_event_sound(&zone_of("heavy traffic")),
+        Some("events/traffic_slowing")
+    );
+    for reason in [
+        "facility access road",
+        "facility gate",
+        "destination approach",
+    ] {
+        assert_eq!(route_event_sound(&zone_of(reason)), None, "{reason}");
+    }
 
     let cb_event = TripEvent {
         kind: TripEventKind::GpsCue,
@@ -221,6 +246,40 @@ fn test_trip_event_sounds_use_contextual_cues() {
         route_event_sound(&cue_event(traffic_cue)),
         Some("events/traffic_slowing")
     );
+}
+
+#[test]
+fn test_entering_the_yard_access_road_is_a_notice_not_slowing_traffic() {
+    // A career's first drive is the pickup leg, and its first event is the
+    // access-road zone under the parked truck (on a delivery leg the same
+    // zone waits for the destination exit). It is handled like any zone
+    // entry: a soft notice, never the traffic-slowing earcon the sound
+    // catalog promises means a jam.
+    let mut harness = a_drive("Yard Zone");
+    harness.with_drive(|drive, _| drive.phase = DRIVE_PHASE_PICKUP);
+    let log = harness.app.record_audio();
+    arm(
+        &mut harness,
+        TripEvent {
+            kind: TripEventKind::ZoneEnter,
+            message: SpokenMessage::new("Facility access road. Speed limit 15."),
+            data: TripEventData {
+                zone: Some(Zone::new(0.0, 0.4, 15.0, "facility access road")),
+                ..Default::default()
+            },
+        },
+    );
+    let played: Vec<String> = log
+        .borrow()
+        .played
+        .iter()
+        .map(|(key, _, _)| key.clone())
+        .collect();
+    assert!(
+        !played.iter().any(|key| key == "events/traffic_slowing"),
+        "{played:?}"
+    );
+    assert!(played.iter().any(|key| key == "ui/notify"), "{played:?}");
 }
 
 // -- resolution -----------------------------------------------------------------------

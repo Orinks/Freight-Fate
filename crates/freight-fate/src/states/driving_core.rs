@@ -207,15 +207,16 @@ pub fn route_event_sound(event: &TripEvent) -> Option<&'static str> {
         // sound pack gains a dedicated one.
         TripEventKind::TimezoneCrossing => Some("events/state_crossing"),
         TripEventKind::ZoneEnter => {
-            if event
-                .data
-                .zone
-                .as_ref()
-                .is_some_and(|zone| zone.reason == "construction")
-            {
-                Some("events/construction_zone")
-            } else {
-                Some("events/traffic_slowing")
+            match event.data.zone.as_ref().map(|zone| zone.reason.as_str()) {
+                Some("construction") => Some("events/construction_zone"),
+                // The catalog says this earcon means the traffic in front of
+                // you is coming down in speed, so only a jam earns it. A
+                // yard access road, a gate or an approach is a limit, not
+                // traffic; the handler's plain notice covers those. Every
+                // drive used to open on the traffic cue with the engine off
+                // (agent drive, 2026-09-01).
+                Some("heavy traffic") => Some("events/traffic_slowing"),
+                _ => None,
             }
         }
         TripEventKind::GpsCue => {
@@ -650,6 +651,14 @@ impl Instructor for Tutorial {
                 format!(
                     "Reminder: press {} to start the engine.",
                     ctx.control_hint("engine")
+                )
+            } else if truck.parking_brake && truck.air_ready() {
+                // The timer does not know the compressor finished: "wait for
+                // air" right after "Air ready" contradicted the truck (agent
+                // drive, 2026-09-01). Air is up, so the only step left is P.
+                format!(
+                    "Reminder: air is ready. Press {} to release the parking brake.",
+                    ctx.control_hint("parking_brake")
                 )
             } else if truck.parking_brake {
                 format!(

@@ -5552,7 +5552,18 @@ Everything not listed here ships fine after 1.9.0.
       owner ruling: a highway hazard pauses cruise and it resumes when
       clear, and on facility approaches the keeper manages the corners,
       so both now keep the session armed; "half a mile of ramp" in a
-      metric cab. Still open, each needing a call or a
+      metric cab; the tutorial's timed air reminder (and the school
+      lesson's) said "wait for air" after "Air ready", and now says press
+      the brake once the gauge is up; the yard access road, a gate and an
+      approach zone played the traffic-slowing earcon on entry, so every
+      drive opened on it with the engine off -- only a heavy-traffic zone
+      earns it now, the rest get the plain notice; and "unpausing replays
+      the engine start" was the agent's ears, not the game: the engine
+      loop drops silently for the pause menu and comes back silently
+      (`stop_world` / the frame's catch-up `engine_start_with(false)`,
+      no crank), but the ear tee reported every silent return as
+      "[engine] starting" -- it now says "running again, no crank" and
+      notes the loop going quiet. Still open, each needing a call or a
       look: (a) the pacer requeues a cut ROUTE line in full after the
       line that cut it, so every interrupt reads as a repeat -- "Start on
       West 14th Avenue" twice, "Out of the gate" twice, the state
@@ -5567,12 +5578,9 @@ Everything not listed here ships fine after 1.9.0.
       public road" is still spoken on Chicago and Gary streets despite
       the 28 August note; (e) "Current grade 6.0 percent downhill" at the
       flat Chicago Cross-Dock gate -- a data screen candidate; (f) the
-      first-run tutorial says "wait for air pressure to reach 100 psi"
-      AFTER "Air ready: 100 psi"; (g) a traffic-slowing cue plays at
-      every drive start with the engine still off; (h) unpausing replays
-      the engine-start sound; (i) the keeper refuses to arm under about 5
-      km/h, so a driver stalled at a crawl must throttle first; (j)
-      eleven cruise-target steps arrived mid-drive from no agent input --
+      keeper refuses to arm under about 5 km/h, so a driver stalled at a
+      crawl must throttle first; (g) eleven cruise-target steps arrived
+      mid-drive from no agent input --
       only Plus/Minus or a pad D-pad reach that code, so an operator-side
       key or controller may be landing in the minimized game window;
       unresolved.

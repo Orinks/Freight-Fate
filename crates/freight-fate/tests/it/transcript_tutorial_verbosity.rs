@@ -128,6 +128,46 @@ fn test_reminders_speak_in_terse_too() {
 }
 
 #[test]
+fn test_the_air_reminder_matches_the_gauge() {
+    // The reminder is on a timer, and the compressor does not wait for it:
+    // a first drive heard "Air ready: 100 psi" and then "wait for air
+    // pressure to reach 100 psi" (agent drive, 2026-09-01). Air still
+    // building keeps the old line; air already up says the one step left.
+    let mut app = TestApp::new();
+    prepare(&mut app, true);
+    let brake = app.ctx.control_hint("parking_brake");
+
+    let mut tutorial = Tutorial::new();
+    tutorial.begin(&mut app.ctx);
+    tutorial.on_engine_started(&mut app.ctx);
+    app.clear_speech();
+    let mut building = truck_at(0.0, true);
+    building.set_cold_air_start();
+    tutorial.update(&mut app.ctx, 26.0, &building);
+    assert_eq!(
+        app.main_lines(),
+        vec![format!(
+            "Reminder: wait for air pressure to reach 100 psi, then press {brake} to release \
+             the parking brake."
+        )]
+    );
+
+    let mut tutorial = Tutorial::new();
+    tutorial.begin(&mut app.ctx);
+    tutorial.on_engine_started(&mut app.ctx);
+    app.clear_speech();
+    let mut ready = truck_at(0.0, true);
+    ready.set_air_ready(true);
+    tutorial.update(&mut app.ctx, 26.0, &ready);
+    assert_eq!(
+        app.main_lines(),
+        vec![format!(
+            "Reminder: air is ready. Press {brake} to release the parking brake."
+        )]
+    );
+}
+
+#[test]
 fn test_finishing_the_walkthrough_persists_the_gate() {
     let mut app = TestApp::new();
     prepare(&mut app, true);
