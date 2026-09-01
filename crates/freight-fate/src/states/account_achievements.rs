@@ -12,7 +12,8 @@ use crate::impl_state_for_menu;
 use crate::states::base::{Label, Menu, MenuCore, MenuItem};
 
 const CONTROLS: &str = "Up and down choose a category. Enter opens it. In a category, \
-Enter repeats the selected achievement. From this category list, Escape or Back returns to Online. This \
+Enter repeats the selected achievement. Inside a category, Escape or Back returns to account categories. \
+From this category list, Escape or Back returns to Online. This \
 read-only collection combines achievements earned across every career on this installation.";
 
 pub struct AccountAchievementsState {

@@ -131,6 +131,10 @@ fn test_account_achievement_browser_speaks_scope_controls_and_badge_states_witho
         controls.contains("Escape or Back returns to Online"),
         "{controls}"
     );
+    assert!(
+        controls.contains("Inside a category, Escape or Back returns to account categories"),
+        "{controls}"
+    );
 
     move_to::<AccountAchievementsState>(
         &mut app,
@@ -238,6 +242,25 @@ fn test_account_achievements_back_item_returns_to_online_hub_with_focus() {
 }
 
 #[test]
+fn test_account_achievements_escape_returns_to_online_hub_with_focus_and_speech() {
+    let mut app = TestApp::new();
+    let hub = hub(&mut app);
+    move_to::<OnlineHubState>(&mut app, &hub, "Account achievements");
+    press(&mut app, Key::Return);
+    assert!(is_state::<AccountAchievementsState>(&app.state().unwrap()));
+
+    app.clear_speech();
+    press(&mut app, Key::Escape);
+
+    assert!(std::rc::Rc::ptr_eq(&app.state().unwrap(), &hub));
+    assert_eq!(
+        current_label::<OnlineHubState>(&hub, &app.ctx),
+        "Account achievements"
+    );
+    assert!(said(&app).contains("Account achievements"));
+}
+
+#[test]
 fn test_account_categories_and_late_badges_are_controller_reachable() {
     let mut app = TestApp::new();
     let hub = hub(&mut app);
@@ -264,8 +287,9 @@ fn test_account_categories_and_late_badges_are_controller_reachable() {
     ));
 
     let category = app.state().unwrap();
-    let row_count = labels::<AccountAchievementCategoryState>(&category, &app.ctx).len();
-    for _ in 1..row_count {
+    let rows = labels::<AccountAchievementCategoryState>(&category, &app.ctx);
+    let final_achievement = rows[rows.len() - 2].clone();
+    for _ in 0..rows.len() - 2 {
         with_state::<AccountAchievementCategoryState, _>(&category, |state| {
             freight_fate::states::base::State::handle_controller(
                 state,
@@ -276,8 +300,51 @@ fn test_account_categories_and_late_badges_are_controller_reachable() {
     }
     assert_eq!(
         current_label::<AccountAchievementCategoryState>(&category, &app.ctx),
-        "Back to account categories"
+        final_achievement
     );
+
+    app.clear_speech();
+    with_state::<AccountAchievementCategoryState, _>(&category, |state| {
+        freight_fate::states::base::State::handle_controller(
+            state,
+            &mut app.ctx,
+            &InputEvent::button(ControllerButton::A),
+        )
+    });
+    assert!(said(&app).starts_with(&final_achievement));
+
+    app.clear_speech();
+    with_state::<AccountAchievementCategoryState, _>(&category, |state| {
+        freight_fate::states::base::State::handle_controller(
+            state,
+            &mut app.ctx,
+            &InputEvent::button(ControllerButton::B),
+        )
+    });
+    app.ctx.run_deferred();
+    assert!(is_state::<AccountAchievementsState>(&app.state().unwrap()));
+    let account = app.state().unwrap();
+    assert!(
+        current_label::<AccountAchievementsState>(&account, &app.ctx)
+            .starts_with(categories()[0].title)
+    );
+    assert!(said(&app).contains(categories()[0].title));
+
+    app.clear_speech();
+    with_state::<AccountAchievementsState, _>(&account, |state| {
+        freight_fate::states::base::State::handle_controller(
+            state,
+            &mut app.ctx,
+            &InputEvent::button(ControllerButton::B),
+        )
+    });
+    app.ctx.run_deferred();
+    assert!(std::rc::Rc::ptr_eq(&app.state().unwrap(), &hub));
+    assert_eq!(
+        current_label::<OnlineHubState>(&hub, &app.ctx),
+        "Account achievements"
+    );
+    assert!(said(&app).contains("Account achievements"));
 }
 
 /// Right arrow on an action row does nothing; on a toggle row it flips that
