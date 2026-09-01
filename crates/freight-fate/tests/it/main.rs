@@ -54,6 +54,7 @@ mod playtest_road_destination;
 mod playtest_sandbox;
 mod playtest_state_lines;
 mod save_dir_guard;
+mod sdl_shell;
 mod secret_store_guard;
 mod single_instance;
 mod speech;

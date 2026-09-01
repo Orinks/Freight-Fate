@@ -95,8 +95,16 @@ impl SdlShell {
             .build()
             .map_err(|e| e.to_string())?;
         let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+        // The dummy driver (every headless run: CI, the agent server under
+        // FREIGHT_FATE_NO_SPEECH, the playtest benches) has no native window,
+        // and the sdl2 crate PANICS rather than erring when asked for one --
+        // a windowed headless boot died here the day the handle arrived.
         #[cfg(target_os = "windows")]
-        let window_handle = window_handle(canvas.window());
+        let window_handle = if video.current_video_driver() == "dummy" {
+            None
+        } else {
+            window_handle(canvas.window())
+        };
         let pump = sdl.event_pump()?;
         // pygame delivered event.unicode for every key; SDL needs text
         // input running for TextInput events.
