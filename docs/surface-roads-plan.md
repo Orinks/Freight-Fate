@@ -86,7 +86,7 @@ side (falling chime left, rising chime right, steady tone ahead). The original g
 already return multi-leg routes. What is missing:
 
 - **Turn cues at leg boundaries.** At each segment boundary, speak the baked
-  cue ("Turn right onto Palm Street; half a mile") through `say_event`,
+  cue ("Turn right onto Palm Street, then half a mile on it") through `say_event`,
   reusing the local-turn sound cue support that shipped with the checked-in
   local direction data.
 - **Per-segment speed zones.** The builders bake `speed_mph` per segment

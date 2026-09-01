@@ -33,6 +33,38 @@ fn lower_first(text: &str) -> String {
     }
 }
 
+/// ", then {distance} on it" -- the length of the road just joined, said
+/// as time on it rather than as a bare trailing distance.
+fn on_it_tail(distance: &str) -> String {
+    format!(", then {distance} on it")
+}
+
+/// The spoken length of a surface segment (see `Trip::surface_distance_tail`):
+/// empty under a fifth of a mile, quarter-mile / half-mile (500 meters / 1
+/// kilometer) buckets below a mile, whole units above.
+fn surface_tail_text(miles: f64, imperial: bool) -> String {
+    if miles < 0.2 {
+        return String::new();
+    }
+    if imperial {
+        if miles < 0.4 {
+            return on_it_tail("a quarter mile");
+        }
+        if miles < 0.75 {
+            return on_it_tail("half a mile");
+        }
+        return on_it_tail(&spoken_distance(miles, "mile"));
+    }
+    let km = miles * 1.609344;
+    if km < 0.65 {
+        return on_it_tail("500 meters");
+    }
+    if km < 1.2 {
+        return on_it_tail("1 kilometer");
+    }
+    on_it_tail(&spoken_distance(km, "kilometer"))
+}
+
 impl Trip {
     pub fn place_stops(&self) -> Vec<RoadStop> {
         let mut out = Vec::new();
@@ -95,29 +127,13 @@ impl Trip {
         merged
     }
 
-    /// Distance phrase for a surface segment: city blocks never say
-    /// "0 miles"; longer streets read like the highway cues.
+    /// How far the truck stays on the street it is turning onto, worded so
+    /// it cannot be mistaken for the distance TO the turn: the countdown
+    /// before it already ran 400 meters, 300 meters, so a bare "; 1
+    /// kilometer" at the corner sounded like the turn moving away (agent
+    /// drive, 2026-09-01). City blocks under a fifth of a mile say nothing.
     pub fn surface_distance_tail(&self, miles: f64) -> String {
-        if miles < 0.2 {
-            return String::new();
-        }
-        if self.imperial() {
-            if miles < 0.4 {
-                return "; a quarter mile".to_string();
-            }
-            if miles < 0.75 {
-                return "; half a mile".to_string();
-            }
-            return format!("; {}", spoken_distance(miles, "mile"));
-        }
-        let km = miles * 1.609344;
-        if km < 0.65 {
-            return "; 500 meters".to_string();
-        }
-        if km < 1.2 {
-            return "; 1 kilometer".to_string();
-        }
-        format!("; {}", spoken_distance(km, "kilometer"))
+        surface_tail_text(miles, self.imperial())
     }
 
     pub fn build_navigation_cues(&self) -> Vec<NavigationCue> {
@@ -188,8 +204,8 @@ impl Trip {
                     start + 0.05,
                     &format!("merge onto {shield} toward {toward}"),
                     &format!(
-                        "Merge onto {shield} toward {toward}; {}.",
-                        self.distance_text(segment_miles)
+                        "Merge onto {shield} toward {toward}{}.",
+                        on_it_tail(&self.distance_text(segment_miles))
                     ),
                 ));
             } else if segment_miles >= 40.0 {
@@ -846,5 +862,44 @@ impl Trip {
 
     pub fn note_chatter_spoke(&mut self) {
         self.last_chatter_s = Some(self.sitting_s);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn surface_tail_says_it_is_the_road_ahead_not_the_turn() {
+        // Imperial buckets.
+        assert_eq!(surface_tail_text(0.3, true), ", then a quarter mile on it");
+        assert_eq!(surface_tail_text(0.5, true), ", then half a mile on it");
+        assert_eq!(surface_tail_text(1.0, true), ", then 1 mile on it");
+        assert_eq!(surface_tail_text(2.6, true), ", then 3 miles on it");
+        // Metric buckets.
+        assert_eq!(surface_tail_text(0.3, false), ", then 500 meters on it");
+        assert_eq!(surface_tail_text(0.6, false), ", then 1 kilometer on it");
+        assert_eq!(surface_tail_text(2.0, false), ", then 3 kilometers on it");
+        // A short city block says nothing in either unit.
+        assert_eq!(surface_tail_text(0.1, true), "");
+        assert_eq!(surface_tail_text(0.19, false), "");
+    }
+
+    #[test]
+    fn the_tail_reads_as_one_sentence_after_the_turn() {
+        assert_eq!(
+            format!(
+                "Turn right onto South Columbus Drive{}.",
+                surface_tail_text(0.6, false)
+            ),
+            "Turn right onto South Columbus Drive, then 1 kilometer on it."
+        );
+        assert_eq!(
+            format!(
+                "Merge onto I-90 East toward Gary{}.",
+                on_it_tail("53 kilometers")
+            ),
+            "Merge onto I-90 East toward Gary, then 53 kilometers on it."
+        );
     }
 }

@@ -1130,6 +1130,14 @@
   on a facility approach the speed keeper takes the corners itself.
 - **The exit ramp length is read in your units.** Drivers using kilometers
   heard "half a mile of ramp" on every exit; it is now 800 meters.
+- **Turn callouts no longer sound like the turn is getting farther away.**
+  The line spoken at a street turn or a highway merge ends with how far
+  you will be on the new road, but it came out as a bare number: "In 400
+  meters, turn right onto South Columbus Drive", "300 meters", then "Turn
+  right onto South Columbus Drive; 1 kilometer", as if the corner had moved
+  off. It now says what that number is: "Turn right onto South Columbus
+  Drive, then 1 kilometer on it", and "Merge onto I-90 toward Gary, then 53
+  kilometers on it". Short city blocks still add nothing.
 
 - **Ramp traffic now yields instead of forcing its way in front of the
   truck.** A slower vehicle entering from an on-ramp waits beside the

@@ -220,6 +220,7 @@ from the words, and synonyms cost them a re-read.
 | The vehicle | truck | rig (except as noted) | `TruckModel` |
 | One city-to-city stretch | leg | segment, hop | `Leg` |
 | The real highway a leg follows | corridor | -- | -- |
+| How far the truck stays on the road it just turned or merged onto | then «distance» on it ("Turn right onto Palm Street, then half a mile on it") | a bare trailing distance ("; half a mile" right after a countdown to the turn reads as the turn moving away), for, stretch, segment length | `Trip::surface_distance_tail` |
 | A populated place beside the corridor, spoken when the driver asks where they are | town ("In Pine", "Nearest town, Cicero") | village (that is the bake's category name, not a spoken word), settlement, locality, place | `Landmark.category == "village"`, `DrivingLocationMixin._speak_current_town` |
 | Which way the truck is travelling, worded the way the shields sign it | direction, spoken as "Eastbound" | heading, bearing, compass direction (the signed direction is not the geometry) | `_leg_heading`, `DrivingLocationMixin._speak_current_direction` |
 | One drive, start to finish | run | trip, haul | `Trip` |
