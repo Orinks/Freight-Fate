@@ -230,6 +230,28 @@ fn test_say_event_requeues_the_route_line_a_hazard_cut() {
 }
 
 #[test]
+fn test_say_event_drops_the_route_line_a_hazard_cut_in_its_last_words() {
+    // Owner ruling 2026-09-01: a line the player had mostly heard is not
+    // said again from the top -- the agent drives that day heard every such
+    // requeue as a stutter. The review log still holds it once.
+    let mut app = sapi_app();
+    let clock = app.fake_pacer_clock();
+
+    app.ctx
+        .say_event_with(STOP_LINE, SayEvent::queued().priority(EventPriority::Route));
+    clock.advance(4.0); // ~4.9 s estimated: cut in its last words
+    app.ctx.say_event(HAZARD);
+
+    assert_eq!(
+        app.event_calls(),
+        calls(&[(STOP_LINE, false), (HAZARD, true)]),
+        "a mostly-heard line was said again whole"
+    );
+    assert_eq!(logged(&app).iter().filter(|m| *m == STOP_LINE).count(), 1);
+    app.shutdown();
+}
+
+#[test]
 fn test_say_event_leaves_a_finished_route_line_alone() {
     let mut app = sapi_app();
     let clock = app.fake_pacer_clock();

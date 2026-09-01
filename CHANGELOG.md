@@ -1147,6 +1147,13 @@
 
 ### Fixed
 
+- **An announcement cut off in its last words is no longer repeated from
+  the start.** When a hazard call or another urgent line interrupted a
+  route instruction, the cab finished the urgent line and then said the
+  whole instruction again, so "Start on West 14th Avenue" or a state
+  welcome came out twice in a row. Now it only repeats an instruction that
+  was cut early, in its first half; one you had mostly heard is left
+  alone, and message review still holds it in full.
 - **Facility approaches no longer say "unnamed public road".** Pulling out
   of a dock or turning in for the last stretch, the cab used to announce
   "start on unnamed public road" or "turn left onto unnamed public road"

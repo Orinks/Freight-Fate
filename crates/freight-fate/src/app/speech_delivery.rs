@@ -352,6 +352,7 @@ impl GameContext {
             cut = self.event_pacer.note_channel_purged();
         }
         self.speech.say(&text, interrupt);
+        self.log_mostly_heard_cut();
         if let Some(cut) = cut {
             self.requeue_cut_event(cut);
         }
@@ -425,6 +426,18 @@ impl GameContext {
             self.speech.say_event(&text, false);
         } else {
             self.speech.say(&text, false);
+        }
+    }
+
+    /// Name the ROUTE or CRITICAL line the latest cut destroyed because the
+    /// player had already heard most of it (the pacer's ruling, not a
+    /// requeue: saying it again whole is the stutter the 1 September drives
+    /// were full of). Same audit value as the requeue line above -- grep the
+    /// drops, read each one, ask whether its last words mattered. The
+    /// message log still holds it.
+    fn log_mostly_heard_cut(&mut self) {
+        if let Some(text) = self.event_pacer.take_mostly_heard() {
+            transcript!("[pacer] cut line mostly heard, dropped: {}", text);
         }
     }
 
@@ -675,6 +688,7 @@ impl GameContext {
             self.speech.say(&text, false);
         }
         self.engage_speech_duck();
+        self.log_mostly_heard_cut();
         if let Some(cut) = cut {
             self.requeue_cut_event(cut);
         }

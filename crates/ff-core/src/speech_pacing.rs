@@ -42,7 +42,11 @@
 //! newest such line alongside its projected finish time, and an interrupt
 //! arriving before that moment hands the line back to the caller to queue
 //! right behind the interrupting one: safety line first, then the line it
-//! stepped on.
+//! stepped on. Only when the cut landed EARLY, though: a line the player had
+//! mostly heard is dropped rather than said again whole, because a repeat
+//! from the top reads as a stutter ("Start on West 14th Avenue" twice, a
+//! whole state-crossing welcome twice in a tester's log, 2026-09-01). See
+//! `MOSTLY_HEARD_FRACTION`.
 //!
 //! Durations are estimated from text length at a conservative default-voice
 //! speaking rate. A faster voice just flushes a little less eagerly than it
@@ -394,6 +398,10 @@ pub struct EventSpeechPacer {
     /// text -> until when further rescues of it are refused. See
     /// `take_protected`: one rescue per line per window.
     rescued_until: HashMap<String, f64>,
+    /// The line the latest cut destroyed because the player had already
+    /// heard most of it; collected once by `take_mostly_heard` so the
+    /// caller can name it in the transcript. See `MOSTLY_HEARD_FRACTION`.
+    mostly_heard: Option<String>,
 }
 
 impl Default for EventSpeechPacer {
@@ -428,6 +436,23 @@ impl EventSpeechPacer {
     /// its own rescue.
     pub const RESCUE_ONCE_WINDOW_S: f64 = 30.0;
 
+    /// How much of a cut line the player must already have heard for the
+    /// pacer to drop it rather than hand it back to be said again whole.
+    /// The fraction is elapsed speaking time over the line's estimated
+    /// duration, so it is only as exact as the duration model.
+    ///
+    /// A line cut in its first words still owes the player the whole
+    /// instruction; one cut in its last words has already delivered it, and
+    /// repeating it from the top reads as a stutter (the same day's agent
+    /// drives: "Start on West 14th Avenue", "Out of the gate and onto city
+    /// streets", "In 1.4 kilometers, the destination exit" each spoken
+    /// twice; a whole state-crossing welcome twice in a tester's log). The
+    /// message log still holds a dropped line.
+    ///
+    /// The owner set it at a half on 2026-09-01 as the starting point;
+    /// testers' ears move it.
+    pub const MOSTLY_HEARD_FRACTION: f64 = 0.5;
+
     /// How long a line of each priority will wait behind a backlog before it
     /// is better to purge the channel and speak now. Route announcements
     /// have almost no patience: a planned stop that arrives after its exit
@@ -457,6 +482,7 @@ impl EventSpeechPacer {
             protected: None,
             flush_cut: None,
             rescued_until: HashMap::new(),
+            mostly_heard: None,
         }
     }
 
@@ -638,12 +664,32 @@ impl EventSpeechPacer {
         self.flush_cut.take()
     }
 
+    /// The line the latest cut dropped as mostly heard, once, for the
+    /// transcript.
+    ///
+    /// The drop itself is the pacer's verdict (`MOSTLY_HEARD_FRACTION`);
+    /// this only lets the caller say which line it was, the way it names a
+    /// requeue, so a playtest log can be read for a drop that should not
+    /// have happened.
+    pub fn take_mostly_heard(&mut self) -> Option<String> {
+        self.mostly_heard.take()
+    }
+
     /// Hand over the protected line if it was plausibly cut mid-speech.
     ///
     /// The slot empties either way: a line is given back at most once per
     /// cut, and a line whose projected finish had already passed was heard
     /// in full, not destroyed. A line cutting itself is one line, not two,
     /// so it is never handed back behind its own delivery.
+    ///
+    /// A line still speaking is handed back only when the cut landed early
+    /// in it. Past `MOSTLY_HEARD_FRACTION` of its estimated duration the
+    /// player has the instruction and the tail is expendable; saying the
+    /// whole line again is the stutter the 1 September drives were full of.
+    /// A line that had not started speaking at all (queued behind a
+    /// backlog, its start still ahead) has a negative fraction and is
+    /// always handed back -- the never-dropped contract for a line the
+    /// player never heard a word of.
     ///
     /// And at most ONE rescue per line per window. A rescued line is
     /// re-queued and re-protected, so without this a CHAIN of urgent lines
@@ -677,6 +723,13 @@ impl EventSpeechPacer {
             }
         }
         let now = self.now();
+        let duration = Self::duration_s(&text);
+        let heard = (now - (done_at - duration)) / duration;
+        if heard >= Self::MOSTLY_HEARD_FRACTION {
+            // Most of it was heard; the message log holds the rest.
+            self.mostly_heard = Some(text);
+            return None;
+        }
         if now < self.rescued_until.get(&text).copied().unwrap_or(0.0) {
             return None;
         }
@@ -690,8 +743,9 @@ impl EventSpeechPacer {
     /// Returns the ROUTE or CRITICAL line the purge plausibly cut off
     /// mid-sentence -- its projected finish had not yet passed -- so the
     /// caller can queue it right back behind the interrupting line. Chatter,
-    /// lines already heard in full, and a line interrupting itself return
-    /// None: nothing worth giving back was destroyed.
+    /// lines already heard in full or mostly (`take_mostly_heard` names
+    /// those), and a line interrupting itself return None: nothing worth
+    /// giving back was destroyed.
     pub fn note_interrupt(
         &mut self,
         text: &str,
@@ -839,7 +893,9 @@ impl EventSpeechPacer {
             // to be queued behind the line that cut them -- the same
             // contract a CRITICAL cut has always had. `RESCUE_ONCE_WINDOW_S`
             // still caps it at one hand-back per line, so a run of urgent
-            // lines cannot replay it.
+            // lines cannot replay it, and `take_protected` still drops a
+            // safety call the player had mostly heard rather than restart
+            // it (`MOSTLY_HEARD_FRACTION`).
             let held_rescuable = self.protected.as_ref().is_some_and(|held| {
                 held.priority == EventPriority::Critical
                     || now - (held.done_at - Self::duration_s(&held.text)) < Self::BASE_UTTERANCE_S
@@ -1233,6 +1289,104 @@ mod tests {
         let (mut pacer, _) = make_pacer();
         flush_at(&mut pacer, STOP_LINE, EventPriority::Route);
         assert_eq!(interrupt(&mut pacer, STOP_LINE), None);
+    }
+
+    // -- how much of the cut line was heard (owner ruling, 2026-09-01) ------
+    //
+    // The agent drives that day heard every interrupt as a stutter: "Start
+    // on West 14th Avenue" twice, "Out of the gate and onto city streets"
+    // twice, a whole state-crossing welcome twice in a tester's log -- each
+    // a ROUTE line cut in its last words and then said again from the top.
+    // A cut early in the line still owes the player the instruction; past
+    // MOSTLY_HEARD_FRACTION of it the line is dropped and named in the
+    // transcript, and the message log keeps the words.
+
+    /// Advance the clock to this fraction of the line's estimated duration
+    /// after it started speaking (queued on a quiet channel, so it started
+    /// the moment it was submitted).
+    fn heard(clock: &FakeClock, text: &str, fraction: f64) {
+        clock.advance(EventSpeechPacer::duration_s(text) * fraction);
+    }
+
+    #[test]
+    fn test_a_route_line_cut_early_is_still_handed_back() {
+        let (mut pacer, clock) = make_pacer();
+        flush_at(&mut pacer, STOP_LINE, EventPriority::Route);
+        heard(&clock, STOP_LINE, 0.2);
+        assert_eq!(
+            interrupt(&mut pacer, HAZARD),
+            cut(STOP_LINE, EventPriority::Route)
+        );
+        assert_eq!(pacer.take_mostly_heard(), None);
+    }
+
+    #[test]
+    fn test_a_route_line_cut_in_its_last_words_is_dropped_and_named() {
+        let (mut pacer, clock) = make_pacer();
+        flush_at(&mut pacer, STOP_LINE, EventPriority::Route);
+        heard(&clock, STOP_LINE, 0.8);
+        assert_eq!(
+            interrupt(&mut pacer, HAZARD),
+            None,
+            "a line the player had mostly heard was said again from the top"
+        );
+        // Named once for the transcript, then the slot is empty.
+        assert_eq!(pacer.take_mostly_heard(), Some(STOP_LINE.to_string()));
+        assert_eq!(pacer.take_mostly_heard(), None);
+    }
+
+    #[test]
+    fn test_the_threshold_is_the_owner_set_half() {
+        assert_eq!(EventSpeechPacer::MOSTLY_HEARD_FRACTION, 0.5);
+        let (mut pacer, clock) = make_pacer();
+        flush_at(&mut pacer, STOP_LINE, EventPriority::Route);
+        heard(&clock, STOP_LINE, 0.45);
+        assert_eq!(
+            interrupt(&mut pacer, HAZARD),
+            cut(STOP_LINE, EventPriority::Route)
+        );
+        let (mut pacer, clock) = make_pacer();
+        flush_at(&mut pacer, STOP_LINE, EventPriority::Route);
+        heard(&clock, STOP_LINE, 0.55);
+        assert_eq!(interrupt(&mut pacer, HAZARD), None);
+        assert_eq!(pacer.take_mostly_heard(), Some(STOP_LINE.to_string()));
+    }
+
+    /// A line still waiting behind a backlog has been heard for no time at
+    /// all, however long ago it was submitted: never dropped.
+    #[test]
+    fn test_a_line_cut_before_it_started_is_handed_back_whatever_its_age() {
+        let (mut pacer, clock) = make_pacer();
+        flush(&mut pacer, LONG_LINE); // ~10 s of chatter at the voice
+        let warning = "Emergency vehicle approaching from behind. Move right.";
+        pacer.note_queued(warning, EventPriority::Critical, None, None);
+        clock.advance(8.0); // older than its own duration, and not yet begun
+        assert_eq!(
+            interrupt(&mut pacer, HAZARD),
+            cut(warning, EventPriority::Critical)
+        );
+        assert_eq!(pacer.take_mostly_heard(), None);
+    }
+
+    /// The stale-flush path drops a mostly-heard safety call the same way,
+    /// rather than restarting it behind the flush.
+    #[test]
+    fn test_a_stale_flush_drops_a_safety_call_in_its_last_words() {
+        let clock = FakeClock::at(0.0);
+        let mut pacer = EventSpeechPacer::with_clock(clock.clock());
+        let brake =
+            "Brake now! Stopped traffic ahead in both lanes, and a trooper on the shoulder.";
+        pacer.note_interrupt(brake, EventPriority::Critical, None, None);
+        heard(&clock, brake, 0.8);
+        // Still over a second from finishing by the projection, so a queued
+        // ROUTE line starting behind it is past its budget and flushes.
+        assert!(flush_at(
+            &mut pacer,
+            "Merge onto US-40 west toward Salt Lake City.",
+            EventPriority::Route
+        ));
+        assert_eq!(pacer.take_flush_cut(), None);
+        assert_eq!(pacer.take_mostly_heard(), Some(brake.to_string()));
     }
 
     #[test]

@@ -5597,11 +5597,17 @@ Everything not listed here ships fine after 1.9.0.
       no crank), but the ear tee reported every silent return as
       "[engine] starting" -- it now says "running again, no crank" and
       notes the loop going quiet. Still open, each needing a call or a
-      look: (a) the pacer requeues a cut ROUTE line in full after the
-      line that cut it, so every interrupt reads as a repeat -- "Start on
-      West 14th Avenue" twice, "Out of the gate" twice, the state
-      crossing twice in Brandon's log; by design per `speech_pacing`, but
-      an owner call whether a mostly-heard line should be re-said whole;
+      look: (a) FIXED same day: the pacer requeued a cut ROUTE line in
+      full after the line that cut it, so every interrupt read as a
+      repeat -- "Start on West 14th Avenue" twice, "Out of the gate"
+      twice, the state crossing twice in Brandon's log. Owner ruling: a
+      line is handed back only when the cut landed in its first half of
+      estimated speaking time (`MOSTLY_HEARD_FRACTION` in
+      `speech_pacing.rs`, 0.5 as the starting point, testers' ears move
+      it); past that it is dropped and the transcript says "[pacer] cut
+      line mostly heard, dropped: ..." so a drop that should not have
+      happened can be read off a playtest log. A line that had not started
+      speaking is still always handed back;
       (b) the "; 1 kilometer" tail on a turn call is the NEXT street's
       length (`surface_distance_tail(leg.miles)`) and lands right after a
       "400 meters" countdown, so it reads as the distance to the turn
