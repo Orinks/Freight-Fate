@@ -1168,10 +1168,9 @@
   stale ones still waiting in line, the way they always did before, so
   the voice stays current and the speech engine gets its breath back.
 
-- **Closing the game hands your screen reader back right away.** Since the
-  voice moved onto its own track, quitting quietly waited for every
-  sentence still lined up to be spoken before letting go -- which read as
-  the game taking longer to close than it used to. Quitting now drops
+- **Closing the game hands your screen reader back right away.** The same
+  speech backlog could also make shutdown drag on, because quitting waited
+  for every sentence still lined up before letting go. Quitting now drops
   whatever was left unsaid and releases the voice after at most the
   sentence already being spoken.
 
