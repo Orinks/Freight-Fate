@@ -556,6 +556,7 @@ mod tests {
     struct StubSink {
         calls: Arc<Mutex<Vec<String>>>,
         wedge: Arc<AtomicBool>,
+        entered_say: Arc<AtomicBool>,
         slow: Arc<AtomicBool>,
         polls: Arc<AtomicUsize>,
         available: Arc<AtomicBool>,
@@ -563,6 +564,7 @@ mod tests {
 
     impl SpeechSink for StubSink {
         fn say(&mut self, text: &str, _interrupt: bool) {
+            self.entered_say.store(true, Ordering::SeqCst);
             if self.wedge.load(Ordering::SeqCst) {
                 // A wedged SAPI call: never returns (bounded here so the
                 // test process itself can exit).
@@ -649,6 +651,7 @@ mod tests {
         sink: ThreadedSpeech,
         calls: CallLog,
         wedge: Arc<AtomicBool>,
+        entered_say: Arc<AtomicBool>,
         slow: Arc<AtomicBool>,
         polls: Arc<AtomicUsize>,
         available: Arc<AtomicBool>,
@@ -657,12 +660,14 @@ mod tests {
     fn rig() -> Rig {
         let calls: Arc<Mutex<Vec<String>>> = Arc::default();
         let wedge = Arc::new(AtomicBool::new(false));
+        let entered_say = Arc::new(AtomicBool::new(false));
         let slow = Arc::new(AtomicBool::new(false));
         let polls = Arc::new(AtomicUsize::new(0));
         let available = Arc::new(AtomicBool::new(true));
-        let (calls2, wedge2, slow2, polls2, available2) = (
+        let (calls2, wedge2, entered_say2, slow2, polls2, available2) = (
             calls.clone(),
             wedge.clone(),
+            entered_say.clone(),
             slow.clone(),
             polls.clone(),
             available.clone(),
@@ -671,6 +676,7 @@ mod tests {
             Box::new(StubSink {
                 calls: calls2,
                 wedge: wedge2,
+                entered_say: entered_say2,
                 slow: slow2,
                 polls: polls2,
                 available: available2,
@@ -680,6 +686,7 @@ mod tests {
             sink,
             calls,
             wedge,
+            entered_say,
             slow,
             polls,
             available,
@@ -820,10 +827,23 @@ mod tests {
     #[test]
     fn a_wedged_backend_never_blocks_a_say_and_the_watchdog_notices() {
         let Rig {
-            mut sink, wedge, ..
+            mut sink,
+            wedge,
+            entered_say,
+            ..
         } = rig();
         wedge.store(true, Ordering::SeqCst);
         sink.say("this one wedges the backend", false);
+        for _ in 0..200 {
+            if entered_say.load(Ordering::SeqCst) {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        assert!(
+            entered_say.load(Ordering::SeqCst),
+            "speech worker never entered the deliberately wedged call"
+        );
         // The whole point: further speech returns instantly while the
         // backend sits inside its stuck call.
         let started = Instant::now();

@@ -324,7 +324,7 @@ def test_ensure_music_pack_atomically_installs_a_verified_download(tmp_path, mon
     monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", digest)
 
     def download(url, destination):
-        assert url == "https://example.test/music.pak"
+        assert url.full_url == "https://example.test/music.pak"
         Path(destination).write_bytes(payload)
 
     monkeypatch.setattr(build_release.urllib.request, "urlretrieve", download)
@@ -332,6 +332,26 @@ def test_ensure_music_pack_atomically_installs_a_verified_download(tmp_path, mon
 
     assert pack.read_bytes() == payload
     assert list(tmp_path.glob("*.download")) == []
+
+
+def test_ensure_music_pack_identifies_the_release_downloader(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "music.pak"
+    payload = b"replacement pack"
+    digest = build_release.hashlib.sha256(payload).hexdigest()
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_URL", "https://example.test/music.pak")
+    monkeypatch.setenv("FREIGHT_FATE_MUSIC_SHA256", digest)
+
+    def download(request, destination):
+        assert isinstance(request, urllib.request.Request)
+        assert request.full_url == "https://example.test/music.pak"
+        assert request.get_header("User-agent") == "Freight-Fate-release-builder/1.9"
+        Path(destination).write_bytes(payload)
+
+    monkeypatch.setattr(build_release.urllib.request, "urlretrieve", download)
+    build_release.ensure_music_pack(pack)
+
+    assert pack.read_bytes() == payload
 
 
 def test_ensure_music_pack_rejects_a_mismatched_download(tmp_path, monkeypatch):

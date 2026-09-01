@@ -1011,7 +1011,11 @@ def ensure_music_pack(path: Path = PACKAGE_DIR / "music.pak") -> None:
         temporary = Path(temp.name)
     try:
         try:
-            urllib.request.urlretrieve(url, temporary)
+            request = urllib.request.Request(
+                url,
+                headers={"User-Agent": "Freight-Fate-release-builder/1.9"},
+            )
+            urllib.request.urlretrieve(request, temporary)
         except urllib.error.HTTPError as exc:
             raise RuntimeError(
                 f"Music-pack download failed with HTTP status {exc.code}. "
