@@ -61,7 +61,10 @@ fn test_cruise_control_requires_road_speed_and_cancels_on_hazard() {
 }
 
 #[test]
-fn test_hazard_announces_speed_control_cancellation_once() {
+fn test_hazard_announces_speed_control_pause_once() {
+    // Paused, not disarmed (owner ruling, 2026-09-01: a highway hazard must
+    // not disable cruise): the controllers drop so the driver brakes, the
+    // session stays armed, and the line says so once.
     let mut harness = bench_drive("Hazard Once", 200.0, 0.0);
     press(&mut harness, Key::E, None);
     harness.with_drive(|d, _| {
@@ -84,10 +87,12 @@ fn test_hazard_announces_speed_control_cancellation_once() {
         )
     });
 
-    assert!(!harness.read_drive(|d| d.speed_control_armed));
+    assert!(harness.read_drive(|d| d.speed_control_armed));
+    assert!(harness.read_drive(|d| d.cruise_mph).is_none());
     let said = last(&harness);
     assert!(said.starts_with("Brake now!"), "{said}");
-    assert_eq!(said.matches("Automatic speed control canceled.").count(), 1);
+    assert_eq!(said.matches("Automatic speed control paused.").count(), 1);
+    assert!(!said.contains("canceled"), "{said}");
 }
 
 #[test]

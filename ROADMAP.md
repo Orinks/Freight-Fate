@@ -5577,8 +5577,15 @@ Everything not listed here ships fine after 1.9.0.
       coasted to 5 km/h on open I-90 with "no close traffic ahead") --
       owner ruling: a highway hazard pauses cruise and it resumes when
       clear, and on facility approaches the keeper manages the corners,
-      so both now keep the session armed; "half a mile of ramp" in a
-      metric cab; the tutorial's timed air reminder (and the school
+      so both now keep the session armed -- and, heard live the same
+      evening, the announce-time "Brake!" hazard cancel too: it now pauses
+      and the resume path holds off while the hazard is live. Still a
+      disarm, deliberately: a curve too tight for cruise (`trip_events.rs`,
+      "cruise curve dropped") -- resuming there would re-engage mid-bend
+      at the old target, so it needs a resume keyed to the curve's end
+      before it can follow the ruling; and the driver's own emergency
+      brake, and a hazard that lapses into a collision. "Half a mile of
+      ramp" in a metric cab; the tutorial's timed air reminder (and the school
       lesson's) said "wait for air" after "Air ready", and now says press
       the brake once the gauge is up; the yard access road, a gate and an
       approach zone played the traffic-slowing earcon on entry, so every

@@ -344,12 +344,19 @@ impl DrivingState {
         let speed_control_was_active = !self.hazard_dodgeable
             && (self.speed_control_armed || self.cruise_mph.is_some() || self.keeper_mph.is_some());
         if speed_control_was_active {
-            self.disarm_speed_control(ctx); // hands back on the wheel to brake
+            // Hands back on the wheel to brake -- but the session stays
+            // armed: a highway hazard pauses cruise, and it resumes once the
+            // hazard is over and the truck is rolling off the brakes (owner
+            // ruling, 2026-09-01, heard live on I-90: "hazard disabled auto
+            // speed control"). The resume path holds off while the hazard
+            // is live, so this cannot re-engage into it.
+            self.cancel_cruise(ctx, true);
+            self.cancel_keeper(ctx, true);
         }
         // The normal/terse pair rides the event from the sim layer; the
         // delivery layer picks the rendering (R5), so no rewriting here.
         let message = if speed_control_was_active {
-            message.plus("Automatic speed control canceled.")
+            message.plus("Automatic speed control paused.")
         } else {
             message
         };

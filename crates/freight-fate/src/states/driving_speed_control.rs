@@ -272,6 +272,13 @@ impl DrivingState {
             );
             return;
         }
+        if self.hazard_deadline.is_some() {
+            // A hazard is live: the announce-time pause above hands the
+            // pedals back, and resuming here would wind the truck back up
+            // into the very thing it is braking for. Cleared, the deadline
+            // goes with it and the session comes back on its own.
+            return;
+        }
         if self.ramp_mi.is_some() {
             // A ramp stop is in progress. Taking the exit hands the pedals
             // back, and the stop at the end of the ramp is the driver's to
