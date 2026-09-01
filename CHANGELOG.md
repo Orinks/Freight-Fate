@@ -1121,6 +1121,13 @@
 
 ### Fixed
 
+- **Ramp traffic now yields instead of forcing its way in front of the
+  truck.** A slower vehicle entering from an on-ramp waits beside the
+  highway until the truck has passed, then joins behind it. A vehicle may
+  merge ahead only when it is already pulling away and has left a full
+  four-second gap, so "hold your lane" no longer turns into a game of
+  chicken with the merging driver.
+
 - **Mac contributors can build Career 1.9 from source without a private Cargo
   workaround.** The repository now supplies the compatibility setting needed
   by bundled SDL2 under current CMake releases.

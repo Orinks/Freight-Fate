@@ -56,6 +56,10 @@ pub const MERGE_FREE_START_MI: f64 = 3.0;
 /// Merging is POSITIONAL (owner, 2026-08-19): it happens at interchanges,
 /// and hard braking happens in congestion placed from real volumes.
 pub const MERGE_WINDOW_MI: f64 = 0.45;
+/// Minimum clear road around the truck before ramp traffic enters its lane.
+/// Four seconds is the commercial-driving following-gap baseline; the NPC's
+/// own modeled length is added so its rear clears the tractor too.
+const MERGE_SAFE_HEADWAY_S: f64 = 4.0;
 /// How far a bubble vehicle runs before it leaves the highway, drawn per
 /// vehicle: nobody shares a whole corridor with you.
 pub const EXIT_AFTER_MIN_MI: f64 = 2.5;
@@ -782,6 +786,13 @@ impl TrafficManager {
     /// in the left lane where the road has one, and in the only lane there is
     /// where it does not.
     pub fn intent_lane_at(&self, intent: &str, mile: f64) -> i64 {
+        if intent == "merging" {
+            // -1 is the ramp beside the right lane. It is deliberately not a
+            // drivable player lane: update() keeps the vehicle there until a
+            // real gap exists, instead of materializing it in front of the
+            // truck and making the player solve the NPC's yield sign.
+            return -1;
+        }
         if intent != "passing" {
             return 0;
         }
@@ -1128,15 +1139,36 @@ impl TrafficManager {
         let vehicles = std::mem::take(&mut self.vehicles);
         for mut vehicle in vehicles {
             let gap = vehicle.position_mi - position_mi;
+            if vehicle.intent == "merging" && vehicle.lane < 0 {
+                let safe_gap_mi = vehicle.length_mi
+                    + self.truck_speed_mph.abs().max(vehicle.speed_mph.abs())
+                        * MERGE_SAFE_HEADWAY_S
+                        / 3600.0;
+                if gap <= -safe_gap_mi {
+                    // The truck cleared the ramp first. Join behind it as
+                    // ordinary traffic; there is no lead hazard to announce.
+                    vehicle.lane = 0;
+                    vehicle.intent = "cruising".to_string();
+                } else if gap >= safe_gap_mi
+                    && vehicle.speed_mph + 1.0 >= self.truck_speed_mph.abs()
+                {
+                    // A vehicle already pulling away has enough pavement to
+                    // complete the merge ahead without stealing the truck's
+                    // following distance.
+                    vehicle.lane = 0;
+                }
+            }
             // The lane follows the road for the same reason the speed does:
             // a vehicle drawn in the left lane of a divided stretch drives on
             // into the two-lane US route beyond it, where there is no left
             // lane to be in. Held to the lanes the road has under it, the
             // same clamp `LaneKeeping::set_lane_count` puts on the player.
-            vehicle.lane = vehicle
-                .lane
-                .min(self.lane_count_at(vehicle.position_mi) - 1)
-                .max(0);
+            if vehicle.lane >= 0 {
+                vehicle.lane = vehicle
+                    .lane
+                    .min(self.lane_count_at(vehicle.position_mi) - 1)
+                    .max(0);
+            }
             vehicle.relative_lane = self.player_lane - vehicle.lane;
             // What this driver would be doing on the road UNDER THEM, which
             // is not what they were doing where they were drawn: a US route

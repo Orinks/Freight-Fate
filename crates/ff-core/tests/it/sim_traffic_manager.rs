@@ -222,9 +222,10 @@ fn test_roving_posts_add_state_trooper_traffic() {
 }
 
 #[test]
-fn test_merging_vehicle_moves_into_player_lane_and_creates_situation() {
+fn test_faster_merging_vehicle_with_a_safe_gap_moves_into_player_lane() {
     let mut manager = manager(1);
-    manager.vehicles = vec![v("merge", 0.8, 42.0, 1, "merging", "car")];
+    manager.sync_environment(42.0, weather("great_lakes", 1).effects());
+    manager.vehicles = vec![v("merge", 0.8, 45.0, 1, "merging", "car").with_lane(-1)];
 
     manager.update(0.0, 0.0, 20.0, None, None);
     let situation = manager.next_situation(0.0, 55.0).expect("a situation");
@@ -233,6 +234,64 @@ fn test_merging_vehicle_moves_into_player_lane_and_creates_situation() {
     assert_eq!(merging.relative_lane, 0);
     assert_eq!(situation.kind, "merging");
     assert!(situation.message.normal.contains("Merging"));
+}
+
+#[test]
+fn test_slower_merging_vehicle_yields_on_the_ramp_until_the_truck_passes() {
+    let mut manager = manager(1);
+    manager.sync_environment(55.0, weather("great_lakes", 1).effects());
+    manager.vehicles = vec![v("merge", 0.3, 42.0, 1, "merging", "car").with_lane(-1)];
+
+    manager.update(0.0, 0.0, 20.0, None, None);
+
+    let merging = manager.vehicles.iter().find(|v| v.key == "merge").unwrap();
+    assert_eq!(merging.lane, -1, "the slower car must remain on the ramp");
+    assert!(
+        manager.next_situation(0.0, 55.0).is_none(),
+        "ramp traffic must not become a lead hazard in the truck's lane"
+    );
+}
+
+#[test]
+fn test_yielding_merging_vehicle_joins_behind_after_the_truck_clears() {
+    let mut manager = manager(1);
+    manager.sync_environment(55.0, weather("great_lakes", 1).effects());
+    manager.vehicles = vec![v("merge", 0.0, 42.0, 1, "merging", "car").with_lane(-1)];
+
+    manager.update(0.0, 0.5, 20.0, None, None);
+
+    let merged = manager.vehicles.iter().find(|v| v.key == "merge").unwrap();
+    assert_eq!(merged.lane, 0);
+    assert_eq!(merged.intent, "cruising");
+    assert!(manager.next_situation(0.5, 55.0).is_none());
+}
+
+#[test]
+fn test_ramp_traffic_joins_the_right_lane_not_the_players_left_lane() {
+    let mut manager = manager(1);
+    manager.player_lane = 1;
+    manager.sync_environment(55.0, weather("great_lakes", 1).effects());
+    manager.vehicles = vec![v("merge", 0.0, 42.0, 1, "merging", "car").with_lane(-1)];
+
+    manager.update(0.0, 0.5, 20.0, None, None);
+
+    let merged = manager.vehicles.iter().find(|v| v.key == "merge").unwrap();
+    assert_eq!(merged.lane, 0);
+    assert!(manager.next_situation(0.5, 55.0).is_none());
+}
+
+#[test]
+fn test_yielding_ramp_traffic_does_not_block_a_lane_change_to_the_right() {
+    let mut manager = manager(1);
+    manager.player_lane = 1;
+    manager.player_lane_target = Some(0);
+    manager.sync_environment(55.0, weather("great_lakes", 1).effects());
+    manager.vehicles = vec![v("merge", 0.3, 42.0, 1, "merging", "car").with_lane(-1)];
+
+    manager.update(0.0, 0.0, 20.0, None, None);
+
+    assert_eq!(manager.vehicles[0].lane, -1);
+    assert!(manager.next_situation(0.0, 55.0).is_none());
 }
 
 #[test]

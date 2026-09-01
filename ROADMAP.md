@@ -4690,9 +4690,11 @@ Everything not listed here ships fine after 1.9.0.
       (the easing clause currently folds into the pacenote; the curve
       chime plus audible deceleration carry it), auditioned alongside the
       other sound-hunt needs and added to the learn-sounds screen.
-- [ ] **Remaining tester findings from the same document.** Merging
-      traffic does not yield to a loaded truck. At least one unexplained
-      sound (a whoosh on the left). Landed 2026-08-12: work-zone closures
+- [ ] **Remaining tester findings from the same document.** At least one
+      unexplained sound (a whoosh on the left). Landed 2026-09-01: slower
+      on-ramp traffic waits off the mainline and joins behind the truck;
+      only a vehicle already pulling away with a four-second gap may merge
+      ahead. Landed 2026-08-12: work-zone closures
       keep one authoritative side so the announced lane always matches
       the coned lane, and spoken-event dedup stops standing warnings
       re-reading themselves and stale speech replaying after a pause.

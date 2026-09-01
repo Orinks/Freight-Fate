@@ -153,6 +153,9 @@ impl TrafficVehicle {
         if class == "state trooper" {
             return class.to_string();
         }
+        if self.intent == "merging" && self.lane < 0 {
+            return format!("Merging {class} on the right ramp");
+        }
         match self.intent.as_str() {
             "cruising" => class.to_string(),
             "following" => format!("Slow {class}"),
@@ -178,6 +181,14 @@ mod tests {
         assert_eq!(label("braking"), "Brake lights, box truck");
         assert_eq!(label("cruising"), "box truck");
         assert_eq!(label("passing"), "box truck");
+    }
+
+    #[test]
+    fn yielding_merger_status_names_the_right_ramp() {
+        let vehicle =
+            TrafficVehicle::new("test", 0.3, 42.0, 42.0, 1, "merging", "car").with_lane(-1);
+
+        assert_eq!(vehicle.status_label(), "Merging car on the right ramp");
     }
 }
 

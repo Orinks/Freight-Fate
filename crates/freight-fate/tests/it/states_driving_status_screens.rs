@@ -324,6 +324,25 @@ fn test_status_traffic_line_falls_back_to_legacy_npc_vehicles() {
 }
 
 #[test]
+fn test_traffic_app_names_a_yielding_vehicle_as_being_on_the_right_ramp() {
+    let mut harness = a_drive("Yielding Ramp Traffic");
+    harness.with_drive(|drive, _| {
+        drive.trip.position_mi = 10.0;
+        let merger =
+            TrafficVehicle::new("ramp", 10.4, 42.0, 42.0, 1, "merging", "car").with_lane(-1);
+        drive.trip.set_npc_vehicles(vec![merger]);
+    });
+
+    let lines = app_lines(&mut harness, "traffic");
+
+    assert!(
+        lines.iter().any(|line| line
+            == "Traffic: Merging car on the right ramp, 0.4 miles ahead, 42 miles per hour."),
+        "{lines:#?}"
+    );
+}
+
+#[test]
 fn test_route_and_driver_traffic_name_box_truck_with_cruise_set() {
     let mut harness = a_drive("Named Cruise Traffic");
     harness.with_drive(|drive, _| {
