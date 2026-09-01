@@ -8,6 +8,11 @@
 #
 # Override for a one-off with `CARGO_BUILD_JOBS=28 cargo ...`; the
 # environment beats this file.
+[env]
+# Current CMake releases reject bundled SDL2's older policy declaration on
+# macOS. Keep explicit contributor overrides authoritative.
+CMAKE_POLICY_VERSION_MINIMUM = { value = "3.5", force = false }
+
 [build]
 jobs = 12
 

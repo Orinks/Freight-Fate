@@ -1121,6 +1121,10 @@
 
 ### Fixed
 
+- **Mac contributors can build Career 1.9 from source without a private Cargo
+  workaround.** The repository now supplies the compatibility setting needed
+  by bundled SDL2 under current CMake releases.
+
 - **Manual facility arrivals now wait until you have secured the truck.**
   With Facility stopping assistance off, pickup and delivery menus no longer
   open merely because the truck has slowed to a crawl. Stop completely and

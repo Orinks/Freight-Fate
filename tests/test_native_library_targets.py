@@ -21,6 +21,15 @@ import tomllib
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_cargo_supplies_current_cmake_compatibility_for_bundled_sdl2():
+    """Source builders should not need a private Cargo workaround on macOS."""
+    config = tomllib.loads((REPO_ROOT / ".cargo" / "config.toml").read_text(encoding="utf-8"))
+    assert config["env"]["CMAKE_POLICY_VERSION_MINIMUM"] == {
+        "value": "3.5",
+        "force": False,
+    }
+
+
 def load_fetch_bass():
     path = REPO_ROOT / "tools" / "fetch_bass.py"
     spec = importlib.util.spec_from_file_location("fetch_bass", path)

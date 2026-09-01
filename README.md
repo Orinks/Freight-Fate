@@ -129,6 +129,10 @@ source run needs this command because `cargo run` does not fetch BASS itself.
 The first Cargo build takes longer because it compiles the workspace. Later
 runs reuse `target/`.
 
+On macOS, the repository supplies the CMake compatibility setting needed to
+compile its bundled SDL2. Source builders do not need to add
+`CMAKE_POLICY_VERSION_MINIMUM` to a private `.cargo/config.toml`.
+
 ## Build a standalone copy
 
 After installing Git, Rust, and `uv`, run the release builder from PowerShell:
