@@ -702,11 +702,16 @@ impl AgentPolicy {
 
     /// Park a reply until the clock, a line, or a menu releases it.
     fn wait_until(&mut self, seconds: f64, until: Until, reports_timeout: bool, reply: Reply) {
-        let scanned = self.ears.borrow().lines.len();
+        // Scanned from the start of the unreported ears, not from the
+        // moment the call arrived: the line waited for is often spoken
+        // during the round trip that follows the key that caused it (a
+        // menu row after Enter), and a wait that began scanning after it
+        // ran its whole clock out and then reported the line anyway
+        // (first live use, 2026-09-02).
         self.waiting = Some(Waiting {
             remaining: seconds.clamp(0.05, MAX_WAIT_SECONDS),
             until,
-            scanned,
+            scanned: 0,
             reports_timeout,
             reply,
         });
@@ -782,15 +787,28 @@ impl AgentPolicy {
                 } else {
                     (Key::Minus, Some('-'))
                 };
+                // A plain tap walks the fives grid and a Ctrl tap one mile
+                // per hour, so a set point already on the grid takes the
+                // fives first: 30 to 55 was twenty-five spoken steps on the
+                // first live use, and is five this way.
                 let fine = Mods {
                     ctrl: true,
                     ..Mods::NONE
                 };
-                for _ in 0..steps.unsigned_abs() {
-                    self.tap(key, text, fine);
+                let mut taps = 0u32;
+                let mut left = steps.unsigned_abs();
+                if set.rem_euclid(5.0) < 0.01 {
+                    while left >= 5 {
+                        self.tap(key, text, Mods::NONE);
+                        left -= 5;
+                        taps += 1;
+                    }
                 }
-                plan.stage =
-                    CruiseStage::Trim(steps.unsigned_abs() as u32 * 2 + CRUISE_REPLY_FRAMES);
+                for _ in 0..left {
+                    self.tap(key, text, fine);
+                    taps += 1;
+                }
+                plan.stage = CruiseStage::Trim(taps * 2 + CRUISE_REPLY_FRAMES);
             }
             CruiseStage::Settle(frames) => plan.stage = CruiseStage::Settle(frames - 1),
             CruiseStage::Trim(0) => {
@@ -1203,8 +1221,9 @@ fn tools_list() -> Value {
             "Let the game run until something arrives: a spoken line or sound whose \
              text contains `text` (case-insensitive), or a menu on screen when `menu` \
              is true, or `seconds` of real time (max 300), whichever comes first. \
-             Replies with everything heard, and says if the clock ran out. Use it \
-             to drive to the next event instead of waiting blind.",
+             Anything heard since the last listen counts, so a line already spoken \
+             answers at once. Replies with everything heard, and says if the clock \
+             ran out. Use it to drive to the next event instead of waiting blind.",
             json!({
                 "text": {"type": "string", "description": "text to listen for"},
                 "menu": {"type": "boolean", "description": "return as soon as a menu is on screen"},

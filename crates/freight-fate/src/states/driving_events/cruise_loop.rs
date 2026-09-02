@@ -88,7 +88,23 @@ impl DrivingState {
             .trip
             .total_miles()
             .min(start + self.acc_limit_lookahead_max_mi());
-        let (mut lowest_limit, mut lowest_reason) = self.trip.speed_limit_at(start);
+        let (under_wheels, under_reason) = self.trip.speed_limit_at(start);
+        let (mut lowest_limit, mut lowest_reason) = (under_wheels, under_reason);
+        // Keep aiming at a drop already being slowed for. The window below
+        // is a braking distance sized from the truck's speed, so it
+        // retracts as cruise slows: without this the drop fell back out of
+        // sight, the cap lifted, and cruise wound the truck up again --
+        // then found the drop again a moment later (see `acc_limit_hold`).
+        let mut lowest_at = start;
+        match self.acc_limit_hold.clone() {
+            Some((at_mi, limit, reason)) if start < at_mi && limit < lowest_limit => {
+                lowest_limit = limit;
+                lowest_reason = reason;
+                lowest_at = at_mi;
+            }
+            Some(_) => self.acc_limit_hold = None,
+            None => {}
+        }
         let speed = self.trip.truck.speed_mph();
         let mut probe = start + ACC_LIMIT_LOOKAHEAD_STEP_MI;
         while probe <= end + 1e-6 {
@@ -98,8 +114,12 @@ impl DrivingState {
             if limit < lowest_limit && probe - start <= braking_mi {
                 lowest_limit = limit;
                 lowest_reason = reason;
+                lowest_at = probe;
             }
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI;
+        }
+        if lowest_limit < under_wheels {
+            self.acc_limit_hold = Some((lowest_at, lowest_limit, lowest_reason.clone()));
         }
         if let Some(restricted) = self.restricted_zone_limit_ahead(ctx) {
             if restricted.0 <= lowest_limit {

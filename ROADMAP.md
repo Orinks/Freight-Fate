@@ -5777,7 +5777,20 @@ Everything not listed here ships fine after 1.9.0.
       wrong weather (pool names; weather only seeds the order), cruise at
       posted plus five (`ACC_LIMIT_OFFSET_MPH`, by design), and the
       handoff burst at a ramp end (the pacer's ROUTE flush rescue,
-      designed).
+      designed). The second drive with the new tools (Worcester to
+      Providence) took the yard load straight to the shipping office and
+      ran the Pike-to-146 corridor on `cruise`, `status` and `wait_for`
+      alone, and fixed the tools' first live faults: `wait_for` scanned
+      only lines recorded after the call and so missed a menu row spoken
+      during the round trip (now anything unreported counts), and the
+      dial walked 30 to 55 one mile per hour at a time (fives first when
+      the set point is on the grid). Polish heard, not yet fixed: the
+      facility type label doubling a name that already carries it
+      ("grocery and retail distribution center Providence Grocery
+      Distribution Center"), a street spoken with its raw bracketed ref
+      ("Madison Street (MA 122)"), and a state-line checkpoint named
+      "Rhode Island-Massachusetts line" with MA-146 still the road's name
+      on the Rhode Island side.
 - [ ] **Exit sign text from the wrong carriageway.** Exit 96 on I-90 West
       (Boston to Worcester) is announced as "for I-90 East and Mass Pike
       East toward Framingham, Boston, and Millbury": the bake snapped the

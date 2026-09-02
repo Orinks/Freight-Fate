@@ -123,6 +123,7 @@ impl DrivingState {
         self.acc_weather_gap_said = false;
         self.acc_limit_capped = false;
         self.acc_limit_cap_said = None;
+        self.acc_limit_hold = None;
         self.acc_weather_cap_said = None;
         let gap = self.acc_gap_seconds(ctx);
         let mut effective_mph = match self.cruise_exit_mph {

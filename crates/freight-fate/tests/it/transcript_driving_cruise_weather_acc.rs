@@ -984,3 +984,38 @@ fn test_cruise_sees_a_limit_drop_further_out_under_time_compression() {
         (30.0, None)
     );
 }
+
+/// Once cruise has eased for a drop it keeps aiming at it. The scan's window
+/// is a braking distance sized from the truck's speed, so as cruise slowed
+/// the drop fell back out of sight, the cap lifted, the truck wound back up,
+/// and the drop was found again: four brake-and-surge cycles and four
+/// "Posted limit lower" lines on one approach (agent drive, RI-146,
+/// 2026-09-02).
+#[test]
+fn test_cruise_keeps_aiming_at_a_limit_drop_once_it_has_eased_for_it() {
+    let mut harness = bench_drive_with("Held Drop", &[(0.0, 70.0), (3.0, 30.0)], 0.0);
+    harness.app.ctx.settings.time_scale = 20.0;
+    harness.with_drive(|d, _| {
+        d.trip.time_scale = 20.0;
+        d.truck_mut().transmission.gear = 10;
+        d.truck_mut().velocity_mps = 31.3; // ~70 mph
+    });
+    assert_eq!(
+        harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
+        (30.0, None)
+    );
+    // Eased to 35: the braking window no longer reaches three miles out.
+    harness.with_drive(|d, _| d.truck_mut().velocity_mps = 15.6);
+    assert_eq!(
+        harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
+        (30.0, None),
+        "the drop is held, not rediscovered"
+    );
+    // Past the drop the hold is spent; the road under the wheels answers.
+    harness.with_drive(|d, _| d.trip.position_mi = 3.2);
+    assert_eq!(
+        harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
+        (30.0, None)
+    );
+    assert!(harness.read_drive(|d| d.acc_limit_hold.is_none()));
+}

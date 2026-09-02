@@ -1220,6 +1220,14 @@
   dollars more than the settlement then paid; it now uses the same wage
   figure the dispatch board quoted when you took the load.
 
+- **Adaptive cruise no longer surges on the way down to a lower limit.**
+  Once cruise had started easing for a lower speed limit ahead, slowing
+  made the limit drop out of the distance it was looking at, so it sped
+  back up, found the limit again, and eased again: four brake-and-surge
+  cycles and four "Posted limit lower" lines on one approach into
+  Providence. It now keeps aiming at a limit it has started slowing for
+  until it reaches it.
+
 - **"Pickup ahead" and "Destination ahead" are no longer repeated after you
   are at the gate.** When the gate's own "At the facility, stop" line cut
   one of them off, the cut line used to come back behind it and tell a

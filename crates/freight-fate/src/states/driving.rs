@@ -533,6 +533,15 @@ pub struct DrivingState {
     // (end mile, limit, reason) of a restricted zone cruise has begun
     // slowing for -- a work zone or heavy traffic.
     pub construction_slowdown: Option<(f64, f64, String)>,
+    /// A lower posted limit adaptive cruise is already easing for:
+    /// `(start_mi, limit_mph, reason)`, held until the truck reaches it.
+    /// The lookahead is a braking distance that shrinks as cruise slows,
+    /// so without this the drop slipped out of the window, the cap lifted,
+    /// the truck wound back up, and the drop came back -- four brake-and-
+    /// surge cycles and four "Posted limit lower" lines on one approach
+    /// (agent drive, RI-146, 2026-09-02). The construction hold above is
+    /// the same shape for the same reason.
+    pub acc_limit_hold: Option<(f64, f64, Option<String>)>,
     pub acc_follow_cue_s: f64, // quiet window between "Traffic ahead" cues
     pub descent_control_active: bool,
     pub descent_limit_state: String,
