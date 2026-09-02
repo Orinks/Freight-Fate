@@ -207,7 +207,10 @@ that bite first, of the sweep's 49 gating items:
       truck is leaving on held-wheel drift.
 - [ ] Emergency braking's warning budget disagrees with the stop the
       truck actually makes.
-- [ ] Adaptive cruise's limit lookahead ignores time compression.
+- [x] Adaptive cruise's limit lookahead ignores time compression -- FIXED
+      2026-09-01: the lookahead now covers the road the truck passes while
+      the setpoint walks down in real seconds, capped at the spoken
+      warning's own five miles.
 - [ ] Speed keeper announces a number it then fails to hold (live
       tester thread; not reproduced -- ask for the log first).
 - [ ] Testers hear sounds quieter at the quiet speech rung; three
@@ -4822,11 +4825,16 @@ Everything not listed here ships fine after 1.9.0.
       the same bands suit a 75 corridor and a 30 mph street. NPCs read the
       car limit, not the truck cap, so in a split-limit state the traffic
       going by a rig held to 55 is doing a legal 65.
-- [ ] **Adaptive cruise's own limit lookahead ignores time compression.**
-      `_acc_limit_lookahead_mi` sizes cruise's slow-down trigger with the
-      same uncompressed braking physics the limit pacenote just moved off
-      of, so at high pacing cruise can start easing later than a spoken
-      warning would like. Same real-seconds conversion, cruise's turn.
+- [x] **Adaptive cruise's own limit lookahead ignores time compression --
+      FIXED 2026-09-01.** The cause was two clocks: the truck sheds speed in
+      game seconds, but the working setpoint cruise chases walks down at
+      `CRUISE_ACCEL_MPH_PER_S` in REAL seconds, so at twenty times the truck
+      covered four miles of road during a 70-to-35 ease that the physics
+      sized at half a mile. `acc_limit_lookahead_mi` now takes the larger of
+      the physics distance and the ramp distance at the effective time
+      scale, and the scan horizon opens with compression up to the spoken
+      warning's `LIMIT_WARNING_MAX_LEAD_MI`, so cruise never eases for a
+      number the driver has not been told about. Real time is unchanged.
 - [x] **Adversarial battery findings, 2026-08-12 run (31 scenarios: 28
       clean, 3 odd) -- all three SHIPPED.** A gate-overshoot loop-back
       repositioned the truck on 20 minutes of free time with the HOS

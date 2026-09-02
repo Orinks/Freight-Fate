@@ -1178,6 +1178,13 @@
   following gap, the way a queue forms behind a slow truck on a two-lane
   highway.
 
+- **Adaptive cruise starts slowing for a lower speed limit early enough at
+  every time setting.** At the faster time settings the road passes under
+  the truck much quicker than cruise was allowing for, so it could still be
+  easing down when the lower limit arrived. Cruise now begins slowing far
+  enough out to be at the new number when it reaches the sign, the same way
+  the spoken warning already works.
+
 - **Quitting the game no longer pauses on the way out.** Choosing Quit
   used to save your career one more time and then wait for a fresh cloud
   backup of it, even though leaving the terminal had already saved. The

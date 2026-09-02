@@ -959,3 +959,28 @@ fn test_cruise_target_can_be_adjusted_while_keeper_is_active() {
     ));
     assert_eq!(last(&harness), "Open-road cruise target 25 miles per hour.");
 }
+
+/// The posted-limit scan sees a drop further out under time compression:
+/// the working setpoint walks down in REAL seconds, so at twenty times the
+/// truck covers twenty times the road while cruise eases.
+#[test]
+fn test_cruise_sees_a_limit_drop_further_out_under_time_compression() {
+    // 70 posted, dropping to 30 three miles out.
+    let mut harness = bench_drive_with("Compressed Drop", &[(0.0, 70.0), (3.0, 30.0)], 0.0);
+    harness.with_drive(|d, _| {
+        d.truck_mut().transmission.gear = 10;
+        d.truck_mut().velocity_mps = 31.3; // ~70 mph
+    });
+    // Real time: three miles is well past the physics lookahead.
+    assert_eq!(
+        harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
+        (70.0, None)
+    );
+    // Twenty times: the same drop is inside the window.
+    harness.app.ctx.settings.time_scale = 20.0;
+    harness.with_drive(|d, _| d.trip.time_scale = 20.0);
+    assert_eq!(
+        harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
+        (30.0, None)
+    );
+}

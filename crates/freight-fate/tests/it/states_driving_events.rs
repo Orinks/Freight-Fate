@@ -16,6 +16,7 @@ use ff_core::data::world::get_world;
 use ff_core::models::jobs::make_reposition_job;
 use ff_core::models::profile::Profile;
 use ff_core::models::trucks::truck_model_or_panic;
+use ff_core::sim::trip::LIMIT_WARNING_MAX_LEAD_MI;
 use ff_core::sim::trip_models::{
     NavigationCue, RoadStop, TrafficPressure, TripEvent, TripEventData, TripEventKind, Zone,
 };
@@ -1322,8 +1323,35 @@ fn test_the_limit_lookahead_grows_with_the_speed_to_shed() {
     let short = d.acc_limit_lookahead_mi(30.0, 25.0);
     let long = d.acc_limit_lookahead_mi(70.0, 25.0);
     assert!(long > short);
-    assert!(long <= ACC_LIMIT_LOOKAHEAD_MAX_MI);
+    assert!(long <= d.acc_limit_lookahead_max_mi());
     // Nothing to shed: the floor.
+    assert_eq!(
+        d.acc_limit_lookahead_mi(30.0, 45.0),
+        ACC_LIMIT_LOOKAHEAD_MIN_MI
+    );
+}
+
+/// The working setpoint walks down in REAL seconds, so under time
+/// compression the truck covers more road while cruise eases than the
+/// physics alone says (roadmap, "Adaptive cruise's own limit lookahead
+/// ignores time compression").
+#[test]
+fn test_the_limit_lookahead_opens_up_with_time_compression() {
+    let mut app = TestApp::new();
+    let mut d = a_real_drive(&mut app);
+    // At road speed, so the low-speed floor is not what the scale reads.
+    d.truck_mut().velocity_mps = 31.3; // ~70 mph
+    d.trip.time_scale = 1.0;
+    let real = d.acc_limit_lookahead_mi(70.0, 35.0);
+    assert!(real < 1.0, "{real}");
+    assert_eq!(d.acc_limit_lookahead_max_mi(), ACC_LIMIT_LOOKAHEAD_MAX_MI);
+    d.trip.time_scale = 20.0;
+    let compressed = d.acc_limit_lookahead_mi(70.0, 35.0);
+    assert!(compressed > 3.0, "{compressed}");
+    assert!(compressed <= d.acc_limit_lookahead_max_mi());
+    // The scan never reaches past the spoken warning's own ceiling.
+    assert_eq!(d.acc_limit_lookahead_max_mi(), LIMIT_WARNING_MAX_LEAD_MI);
+    // Nothing to shed: still the floor.
     assert_eq!(
         d.acc_limit_lookahead_mi(30.0, 45.0),
         ACC_LIMIT_LOOKAHEAD_MIN_MI

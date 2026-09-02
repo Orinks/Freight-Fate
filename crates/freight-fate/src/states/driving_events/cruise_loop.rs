@@ -1,6 +1,7 @@
 //! The adaptive-cruise loop itself: the gap, the posted-limit lookahead, the
 //! grade preview, and holding the target from above.
 
+use ff_core::sim::trip::LIMIT_WARNING_MAX_LEAD_MI;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent};
@@ -41,6 +42,17 @@ impl DrivingState {
     }
 
     /// Distance ACC needs to ease down to a specific lower limit.
+    ///
+    /// Two clocks are in play. The truck sheds speed in GAME seconds -- the
+    /// comfort deceleration is physics -- but the working setpoint it chases
+    /// only walks down at `CRUISE_ACCEL_MPH_PER_S` in REAL seconds
+    /// (`run_cruise_loop`), and under time compression the road passes
+    /// `effective_time_scale` times faster than that walk. At real time the
+    /// physics distance is the longer one; at ten and twenty times the ramp
+    /// is, by miles, and sizing the trigger on physics alone had cruise still
+    /// easing when the lower number arrived. The same real-seconds
+    /// conversion the "drops to X" pacenote uses
+    /// (`Trip::limit_drop_warning_lead_mi`).
     pub fn acc_limit_lookahead_mi(&self, speed_mph: f64, target_mph: f64) -> f64 {
         let speed_mps = 0.0f64.max(speed_mph * 0.44704);
         let target_mps = 0.0f64.max(target_mph * 0.44704);
@@ -50,7 +62,23 @@ impl DrivingState {
         let braking_m = (speed_mps * speed_mps - target_mps * target_mps)
             / (2.0 * ACC_LIMIT_COMFORT_DECEL_MPS2);
         let braking_mi = 0.0f64.max(braking_m / 1609.344);
-        ACC_LIMIT_LOOKAHEAD_MIN_MI.max(ACC_LIMIT_LOOKAHEAD_MAX_MI.min(braking_mi + 0.25))
+        let ramp_real_s = (speed_mph - target_mph) / CRUISE_ACCEL_MPH_PER_S;
+        let mean_mph = (speed_mph + target_mph) / 2.0;
+        let ramp_mi = ramp_real_s * mean_mph * self.trip.effective_time_scale() / 3600.0;
+        ACC_LIMIT_LOOKAHEAD_MIN_MI.max(
+            self.acc_limit_lookahead_max_mi()
+                .min(braking_mi.max(ramp_mi) + 0.25),
+        )
+    }
+
+    /// How far ahead the posted-limit scan looks.
+    ///
+    /// The real-time ceiling opens up with compression so the ramp distance
+    /// above can fit, but never past the spoken limit warning's own ceiling:
+    /// cruise must not ease for a number the driver has not been told about.
+    pub fn acc_limit_lookahead_max_mi(&self) -> f64 {
+        let scale = self.trip.effective_time_scale().max(1.0);
+        LIMIT_WARNING_MAX_LEAD_MI.min(ACC_LIMIT_LOOKAHEAD_MAX_MI * scale)
     }
 
     /// Lowest posted limit close enough that ACC should start slowing now.
@@ -59,7 +87,7 @@ impl DrivingState {
         let end = self
             .trip
             .total_miles()
-            .min(start + ACC_LIMIT_LOOKAHEAD_MAX_MI);
+            .min(start + self.acc_limit_lookahead_max_mi());
         let (mut lowest_limit, mut lowest_reason) = self.trip.speed_limit_at(start);
         let speed = self.trip.truck.speed_mph();
         let mut probe = start + ACC_LIMIT_LOOKAHEAD_STEP_MI;
