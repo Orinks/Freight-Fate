@@ -327,7 +327,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          # Full history, because the check walks base..HEAD for commit
+          # messages -- but without the blobs. The pack is 840 MB of world
+          # data churn, and this job needs commits, trees and one changelog
+          # blob per ref (`git show <ref>:CHANGELOG.md`), which a blobless
+          # clone fetches on demand. Three minutes of checkout became thirty
+          # seconds (2026-09-02).
           fetch-depth: 0
+          filter: blob:none
           lfs: false
 
       - name: Require a changelog entry for user-facing changes
