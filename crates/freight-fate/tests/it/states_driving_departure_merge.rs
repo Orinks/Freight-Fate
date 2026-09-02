@@ -6,6 +6,8 @@ use ff_core::sim::vehicle::{KG_PER_TON, MPS_TO_MPH};
 use ff_core::sim::weather::WeatherKind;
 
 use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
+use freight_fate::states::driving::DrivingState;
+use freight_fate::states::driving_turns::{TURN_COMMIT_TAIL_MI, TURN_CORNER_MAX_MPH};
 
 use crate::transcript_cruise_support::{frame, quiet, release_keys, DT};
 
@@ -55,6 +57,16 @@ fn lane_ending_mph(heard: &[String]) -> Option<f64> {
 /// Stage a real highway acceleration lane without spending several minutes
 /// driving its unrelated surface-street departure chain first.
 fn run_acceleration_lane_scenario(truck_key: &'static str, cargo_tons: f64) -> RampRun {
+    run_acceleration_lane_scenario_with(truck_key, cargo_tons, |_| {})
+}
+
+/// The same lane, with one last touch on the street trip before the ramp
+/// swap -- the frame Brandon's stale corner hold came from.
+fn run_acceleration_lane_scenario_with(
+    truck_key: &'static str,
+    cargo_tons: f64,
+    before_swap: impl FnOnce(&mut DrivingState),
+) -> RampRun {
     let mut harness = PlaytestHarness::new();
     assert!(harness
         .app
@@ -110,6 +122,7 @@ fn run_acceleration_lane_scenario(truck_key: &'static str, cargo_tons: f64) -> R
         d.truck_mut().transmission.gear_hold_timer = 999.0;
         d.truck_mut().rpm = RAMP_ENTRY_RPM;
     });
+    harness.with_drive(|d, _| before_swap(d));
     harness.clear_speech();
     harness.with_drive(|d, ctx| d.finish_departure_chain(ctx));
 
@@ -339,4 +352,40 @@ fn a_light_standard_rig_hands_off_at_the_traffic_relative_target() {
     assert!(light.peak_throttle >= 0.99, "{light:#?}");
     assert!(!light.ever_over_revving, "{light:#?}");
     assert!(light.engine_wear_gained < 0.05, "{light:#?}");
+}
+
+/// Brandon, Waco onto TX-31, 2026-09-01: "speed keeper didn't build up to
+/// traffic speed to hand off to cruise control". His log has the keeper
+/// "holding 20 miles per hour for the corner" from the top of the ramp to
+/// the end of the 350-foot lane, and the truck merging at 19 into 40 mph
+/// traffic. The corner was the street chain's last one: the keeper's memory
+/// of it is a milepost on the SURFACE trip, and it survived the swap to the
+/// highway trip, whose own mileposts start again from zero.
+#[test]
+fn the_last_street_corner_does_not_hold_the_keeper_through_the_acceleration_lane() {
+    let clean = run_acceleration_lane_scenario("rig", 0.0);
+    let held = run_acceleration_lane_scenario_with("rig", 0.0, |d| {
+        // The corner just taken onto the ramp, still inside its own tail.
+        let corner_mi = d.trip.position_mi - 0.02;
+        d.keeper_ease_target = Some((
+            corner_mi + TURN_COMMIT_TAIL_MI,
+            TURN_CORNER_MAX_MPH,
+            "turn".to_string(),
+        ));
+    });
+    assert!(
+        held.merge_mph > TURN_CORNER_MAX_MPH + 5.0,
+        "the keeper held the street corner's number down the lane: {held:#?}"
+    );
+    assert!(
+        (held.merge_mph - clean.merge_mph).abs() < 1.0,
+        "a corner behind the ramp changed the merge: held {:.1} vs clean {:.1}",
+        held.merge_mph,
+        clean.merge_mph
+    );
+    assert!(
+        !held.said("for the corner"),
+        "the lane was narrated as a corner hold: {:#?}",
+        held.heard
+    );
 }

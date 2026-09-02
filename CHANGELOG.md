@@ -1185,6 +1185,14 @@
   enough out to be at the new number when it reaches the sign, the same way
   the spoken warning already works.
 
+- **Pulling onto the highway, the speed keeper builds speed down the
+  acceleration lane again.** Coming up an on-ramp, the keeper could go on
+  holding the last street corner's slow speed for the whole acceleration
+  lane, so the truck reached the end of the lane at 19 miles per hour with
+  traffic running 40 and cruise had nothing to take over at. The corner is
+  now behind the truck the moment it is on the ramp, and the keeper builds
+  toward the merge from there.
+
 - **Quitting the game no longer pauses on the way out.** Choosing Quit
   used to save your career one more time and then wait for a fresh cloud
   backup of it, even though leaving the terminal had already saved. The

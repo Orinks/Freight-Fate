@@ -792,6 +792,14 @@ impl DrivingState {
     /// generation the turn latches compare against (`id(self.trip)`).
     pub fn replace_trip(&mut self, trip: Trip) -> Trip {
         self.trip_generation += 1;
+        // The keeper's "keep aiming at the corner already being slowed for"
+        // memory is a milepost on the OLD trip. Carried across the swap it
+        // held the street chain's last corner -- 20 mph, to a mile the new
+        // road reaches much later -- through the whole acceleration lane, so
+        // the truck merged at 19 into 40 mph traffic (Brandon, Waco onto
+        // TX-31, 2026-09-01: "speed keeper didn't build up to traffic
+        // speed"). The corner latches reset on the same generation bump.
+        self.keeper_ease_target = None;
         std::mem::replace(&mut self.trip, trip)
     }
 }

@@ -211,8 +211,14 @@ that bite first, of the sweep's 49 gating items:
       2026-09-01: the lookahead now covers the road the truck passes while
       the setpoint walks down in real seconds, capped at the spoken
       warning's own five miles.
-- [ ] Speed keeper announces a number it then fails to hold (live
-      tester thread; not reproduced -- ask for the log first).
+- [x] Speed keeper announces a number it then fails to hold (live
+      tester thread) -- FIXED 2026-09-01, from Brandon's log: "set 40",
+      "holding 20 for the corner" from the top of the on-ramp to the end
+      of a 350-foot acceleration lane, merged at 19 into 40 mph traffic.
+      The keeper's memory of the corner it was slowing for is a milepost
+      on the STREET trip, and it survived `replace_trip` into the highway
+      trip, whose mileposts start again from zero. Cleared on the swap,
+      with the corner latches.
 - [ ] Testers hear sounds quieter at the quiet speech rung; three
       suspects eliminated, still unexplained.
 - [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE:
