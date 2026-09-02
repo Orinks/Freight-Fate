@@ -625,8 +625,9 @@ Everything not listed here ships fine after 1.9.0.
       which answers "still ahead" for anyone who speeds up. Now on
       `live::position_mi()`, the same mechanism the red-light line beside it
       already used; `scale_bypass_to_the_end` is the regression gate.
-      `short_hop_streak_xp_farming` carries over as the one `KNOWN_OPEN`
-      entry, same finding and same reason as the Python list.
+      `short_hop_streak_xp_farming` carried over as the one `KNOWN_OPEN`
+      entry, same finding and same reason as the Python list, until
+      2026-09-02 (see the short-hop XP bullet in the current section).
 - [x] **Rust port: every `valid` gate asks the drive again, not the clock
       (2026-08-23).** All twelve were read against the Python line they came
       from. Four were wrong and are fixed; the hazard call was the one the
@@ -1304,6 +1305,20 @@ Everything not listed here ships fine after 1.9.0.
       tier, because a career silently stopping backing up is the failure the
       all-clear exists to rule out. Stored as `backup_announcements`, read by
       the cloud queue at startup and on every step of the row.
+- [x] **Short-hop XP: the battery's last known-open finding, closed
+      (2026-09-02).** `short_hop_streak_xp_farming` had reported 25-mile
+      hops at 4.6x a 500-mile haul's XP per mile since the Python line, and
+      sat in `KNOWN_OPEN` because the remaining gap is the flat completion
+      award, kept by design on 2026-08-12. The owner took the recommendation
+      to keep that design: the flat lesson is what lets a rookie's short
+      hauls move the career, the honest pacing model's shortest deal is 105
+      miles so the arc to level 30 is untouched, and the scenario's miles
+      proxy overstates the edge because every hop costs a full dispatch and
+      dock cycle of real time. The scenario now holds the bar the design
+      actually sets -- no hop earns more than its flat lesson plus twice its
+      road lesson, and ten hops' XP beyond their flat lessons stays within
+      twice a long haul's per mile (1.7x with the streak cap; removing the
+      cap puts it over 2x) -- and `KNOWN_OPEN` is empty for the first time.
 - [x] **Say when other drivers go on or off duty (Josh, 2026-09-02) -- DONE
       2026-09-02.** New Online menu row, off by default, stored as
       `duty_notifications`. A background watch (`duty_watch`) reads the

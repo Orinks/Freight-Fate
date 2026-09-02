@@ -20,7 +20,9 @@ use ff_core::models::business::{
     LEASED_OWNER_OPERATOR, OWNER_OPERATOR_BUY_IN, OWNER_OPERATOR_DELIVERIES, OWNER_OPERATOR_LEVEL,
     OWNER_OPERATOR_REPUTATION, OWNER_OPERATOR_WORKING_CAPITAL,
 };
-use ff_core::models::career::{Career, LEVEL_XP};
+use ff_core::models::career::{
+    Career, DELIVERY_COMPLETION_XP, LEVEL_XP, XP_CLEAN_BONUS, XP_PER_MILE_ON_TIME,
+};
 use ff_core::models::credentials::{credential, CREDENTIALS};
 use ff_core::models::economy::{pay_advance_grant, PAY_ADVANCE_LIMIT};
 use ff_core::models::jobs::MIN_JOB_DISTANCE_MI;
@@ -741,58 +743,85 @@ fn select_containing(app: &mut TestApp, needle: &str) {
     }
 }
 
-/// Chain trivial-distance on-time deliveries; XP-per-real-minute dwarfs an
-/// honest long haul.
+/// Chain board-minimum on-time deliveries and check the streak cannot mint XP
+/// off the flat completion award.
 ///
-/// `DELIVERY_COMPLETION_XP` is a flat 150 regardless of distance, and the
-/// on-time streak bonus multiplies the WHOLE gained XP -- completion plus
-/// per-mile.
+/// `DELIVERY_COMPLETION_XP` is a flat 150 whatever the distance, and that is
+/// by design (2026-08-12, reaffirmed 2026-09-02): every settled load teaches
+/// docks, paperwork and people, which is what lets a rookie's short early
+/// hauls move the career at all, and each hop costs a full dispatch and dock
+/// cycle of real playtime that miles do not show. What the design promises
+/// instead is that the on-time streak can at most double the ROAD lesson --
+/// `streak_bonus_xp` caps the bonus at the mileage XP -- so chaining trivial
+/// hops earns the flat lessons and nothing more on top of them.
+///
+/// Two bars, both derived from that promise rather than tuned: no single hop
+/// may earn more than its flat lesson plus twice its road lesson, and the XP
+/// ten hops earn BEYOND their flat lessons, per mile, may not exceed twice
+/// what one honest long haul earns beyond its own. Dropping the cap puts the
+/// second ratio over two; the first catches any per-hop leak.
 pub fn short_hop_streak_xp_farming() -> Outcome {
     let mut findings: Vec<String> = Vec::new();
     let short_miles = MIN_JOB_DISTANCE_MI; // the shortest a real dispatch board offers
     let long_miles = 500.0;
+    let hops = 10;
+
+    // A clean delivery: the flat award and the road lesson, each with the
+    // clean-cargo bonus on top, are the design's own arithmetic.
+    let flat_xp = DELIVERY_COMPLETION_XP * (1.0 + XP_CLEAN_BONUS);
+    let road_xp = |miles: f64| miles * XP_PER_MILE_ON_TIME * (1.0 + XP_CLEAN_BONUS);
 
     let mut short_career = Career::default();
-    for _ in 0..10 {
+    for hop in 1..=hops {
+        let before = short_career.xp;
         short_career.record_delivery(short_miles, 300.0, true, 0.0, 1.0, 1.0);
+        let gained = short_career.xp - before;
+        let ceiling = flat_xp + 2.0 * road_xp(short_miles);
+        if gained > ceiling + 1e-6 {
+            findings.push(format!(
+                "hop {hop} at streak {} earned {gained:.1} XP, more than its flat lesson plus \
+                 twice its road lesson ({ceiling:.1}): the streak is minting XP off the flat \
+                 completion award",
+                short_career.on_time_streak
+            ));
+        }
     }
     let short_xp = short_career.xp;
-    let short_real_miles = short_miles * 10.0;
+    let short_real_miles = short_miles * hops as f64;
 
     let mut long_career = Career::default();
     long_career.record_delivery(long_miles, 1800.0, true, 0.0, 1.0, 1.0);
     let long_xp = long_career.xp;
 
-    // Ten legal short hops still cover fewer real miles than one long haul,
-    // but a short haul plays out in a small fraction of the time a 500-mile
-    // haul takes at the wheel -- the real-world axis that matters to a player
-    // is playtime, not miles, and this harness cannot clock wall time, so
-    // miles is used as the visible proxy.
-    let xp_per_mile_short = short_xp / short_real_miles;
-    let xp_per_mile_long = long_xp / long_miles;
-    let ratio = if xp_per_mile_long != 0.0 {
-        xp_per_mile_short / xp_per_mile_long
+    // The edge beyond the flat lessons, per mile. With the cap the hops come
+    // in at about 1.7x the haul; without it, above 2x.
+    let short_beyond_flat = (short_xp - flat_xp * hops as f64) / short_real_miles;
+    let long_beyond_flat = (long_xp - flat_xp) / long_miles;
+    let ratio = if long_beyond_flat > 0.0 {
+        short_beyond_flat / long_beyond_flat
     } else {
         f64::INFINITY
     };
     if ratio > 2.0 {
         findings.push(format!(
-            "10 legal {short_miles:.0}-mile hops (streak-compounded) earn {short_xp:.0} XP over \
-             {short_real_miles:.0} real miles ({xp_per_mile_short:.2} XP/mi) versus one \
-             {long_miles:.0}-mile haul's {long_xp:.0} XP ({xp_per_mile_long:.2} XP/mi) -- \
-             {ratio:.1}x the XP efficiency for the shortest, fastest-to-drive loads on the \
-             board, and the streak bonus keeps growing with each trivial hop"
+            "{hops} legal {short_miles:.0}-mile hops earn {short_beyond_flat:.2} XP/mi beyond \
+             their flat lessons versus one {long_miles:.0}-mile haul's {long_beyond_flat:.2} \
+             XP/mi beyond its own -- {ratio:.1}x, more than the doubled road lesson the \
+             streak cap allows"
         ));
     }
-    if short_career.on_time_streak != 10 {
+    if short_career.on_time_streak != hops {
         findings.push(format!(
-            "streak should read 10 after 10 clean on-time hops, reads {}",
+            "streak should read {hops} after {hops} clean on-time hops, reads {}",
             short_career.on_time_streak
         ));
     }
+    let flat_ratio = (short_xp / short_real_miles) / (long_xp / long_miles);
     let note = format!(
-        "short-hop XP/mile ({xp_per_mile_short:.2}) stayed within 2x of long-haul XP/mile \
-         ({xp_per_mile_long:.2})"
+        "beyond the flat lessons, short hops earn {short_beyond_flat:.2} XP/mi to the long \
+         haul's {long_beyond_flat:.2} ({ratio:.1}x, within the doubled road lesson); counting \
+         the flat lessons the hops are {flat_ratio:.1}x per mile, which is the per-delivery \
+         award by design"
     );
     outcome_of("short_hop_streak_xp_farming", findings, &note)
 }

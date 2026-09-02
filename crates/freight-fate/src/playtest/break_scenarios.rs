@@ -191,8 +191,8 @@ pub static SCENARIOS: &[Scenario] = &[
     },
     Scenario {
         name: "short_hop_streak_xp_farming",
-        description: "Chain trivial-distance on-time deliveries; XP-per-real-minute dwarfs \
-                      an honest long haul.",
+        description: "Chain board-minimum on-time deliveries; the streak may double the \
+                      road lesson and never mint XP off the flat completion award.",
         run: career_economy::short_hop_streak_xp_farming,
     },
     Scenario {

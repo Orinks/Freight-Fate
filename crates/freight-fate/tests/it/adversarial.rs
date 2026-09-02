@@ -56,12 +56,11 @@ use freight_fate::playtest::breaker::{self, Verdict};
 
 /// Findings that are real, verified, and not yet fixed. Keyed by scenario
 /// name; the value is why it is still open, spoken plainly enough to act on.
-const KNOWN_OPEN: &[(&str, &str)] = &[(
-    "short_hop_streak_xp_farming",
-    "25-mile hops earn 4.6x the XP efficiency of a 500-mile haul, and short hauls are the \
-         faster ones to drive; the streak bonus is now capped at the mileage XP, so what \
-         remains is the flat completion XP by design",
-)];
+///
+/// Empty since 2026-09-02: `short_hop_streak_xp_farming` was the last entry,
+/// and it now measures the design it had been arguing with (the flat
+/// completion award is kept; the streak may at most double the road lesson).
+const KNOWN_OPEN: &[(&str, &str)] = &[];
 
 fn known_open(name: &str) -> Option<&'static str> {
     KNOWN_OPEN
