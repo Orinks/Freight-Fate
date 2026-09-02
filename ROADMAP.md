@@ -195,7 +195,9 @@ that bite first, of the sweep's 49 gating items:
       menu music, volumes and voice setting. A device that never opens
       arms the "no sound on this computer" notice, spoken at the menu
       even when it lands after the greeting.
-- [ ] No on-demand career backup (Brandon lost the upload control).
+- [x] No on-demand career backup (Brandon lost the upload control) --
+      FIXED 2026-09-01: "Back up this career now" on each career's Cloud
+      backup screen.
 - [ ] Lane centering assist is a settings promise with no feature:
       implement or retire before 1.9 ships (owner decision).
 - [ ] Signal running always clips cross traffic and never draws a
@@ -1230,7 +1232,20 @@ Everything not listed here ships fine after 1.9.0.
       entrance hold on a chain facility, the unchanged manual release with
       the assist off, and the brake cancel on both facility shapes.
 
-- [ ] **There is no way to back a career up on demand (Brandon, 2026-08-15).**
+- [x] **There is no way to back a career up on demand (Brandon, 2026-08-15)
+      -- FIXED 2026-09-01.** "Back up this career now" is the first action
+      on each career's Cloud backup screen whenever a save for it exists on
+      this computer and no conflict is recorded (under a conflict the two
+      keep-this-copy rows own the upload). It runs the queue's own
+      `backup_now` and speaks the result in the Save game wording: backed
+      up, already backed up, the conflict rows, reconnect needed, the
+      career-named rejection story, or "has not gone through yet" with the
+      queue still trying. Not added to the Online menu: that menu is
+      switches and account state, and one place to do a thing is what a
+      screen-reader player can remember. The row is named in
+      `docs/ontology.md`. Name, placement and wording are the recommended
+      calls of 2026-09-01, applied so the nightly carries the row; easy to
+      rename before the next build if the owner wants different words.
       A career can only travel upward two ways: the background queue after a
       save, and "Keep this computer's save and back it up" -- which
       `CloudSlotState.build_items` only offers while a conflict is RECORDED.

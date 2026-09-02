@@ -9,10 +9,12 @@ use serde_json::{Map, Value};
 
 use crate::app::{GameContext, SharedState};
 use crate::cloud_saves::{
-    self, rejection_status, save_slot_name, DownloadError, RestoreError, RestoreHooks, AUTH_HELP,
+    self, eviction_status, rejection_status, save_slot_name, DownloadError, RestoreError,
+    RestoreHooks, AUTH_HELP,
 };
 use crate::impl_state_for_menu;
 use crate::states::base::{Label, Menu, MenuCore, MenuItem};
+use crate::states::city::BACKUP_RESULT_WAIT_S;
 use crate::states::online_states::{load_identity, menu_default_go_back, run_worker, Mailbox};
 
 use super::{
@@ -78,6 +80,10 @@ pub struct CloudSlotState {
     pub restored_path: Option<PathBuf>,
     /// worker -> update() for the restore path, beside the outcome tag.
     restored: Mailbox<PathBuf>,
+    /// A "Back up this career now" attempt in flight: the slot it went up
+    /// under, the queue's attempt token, and the real seconds left to wait
+    /// for a result before the player is told it is still trying.
+    backup_watch: Option<(String, i64, f64)>,
     pub status: String,
     pub threaded: bool,
 }
@@ -102,6 +108,7 @@ impl CloudSlotState {
             outcome: Mailbox::new(),
             restored_path: None,
             restored: Mailbox::new(),
+            backup_watch: None,
             status: "Ready. No restore has run in this menu.".to_string(),
             threaded: true,
         }
@@ -403,6 +410,123 @@ impl CloudSlotState {
         });
     }
 
+    /// The always-present upload (Brandon, 2026-08-15). A career used to
+    /// travel upward two ways only: the queue after a save, and the
+    /// conflict screen's "Keep this computer's save and back it up" -- which
+    /// vanished with the conflict that summoned it, so a stuck queue left no
+    /// way to send a career by hand and he lost a level to the cloud's older
+    /// copy. Same upload as the background queue, asked for now, with the
+    /// result spoken here; `update` watches for it the way the terminal's
+    /// Save game does.
+    pub fn start_backup_now(&mut self, ctx: &mut GameContext) {
+        if self.busy {
+            Self::say_busy(ctx);
+            return;
+        }
+        let service = ctx.cloud_saves_service().clone();
+        if load_identity().is_none() {
+            ctx.say("Cloud backup is not set up on this computer.");
+            return;
+        }
+        if !service.enabled() {
+            // An account, but backups switched off: the standing line says
+            // where the switch is.
+            ctx.say(&service.status());
+            return;
+        }
+        let loaded = match find_save_path(&self.save_name) {
+            None => Err(None),
+            Some(path) => Profile::load(&path).map_err(Some),
+        };
+        let profile = match loaded {
+            Ok(profile) => profile,
+            Err(Some(LoadError::LegacyCareer(_))) => {
+                ctx.say(
+                    "This computer's save for that career is from an earlier \
+                     version of Freight Fate, so it cannot be backed up. The \
+                     save stays as it is.",
+                );
+                return;
+            }
+            Err(_) => {
+                ctx.say(
+                    "This computer's save for that career could not be read, so \
+                     it cannot be backed up.",
+                );
+                return;
+            }
+        };
+        let snapshot = Value::Object(profile.to_dict());
+        let Some(token) = service.backup_now(&profile.name, snapshot) else {
+            ctx.say("Cloud backup is not set up on this computer.");
+            return;
+        };
+        self.busy = true;
+        self.backup_watch = Some((save_slot_name(&profile.name), token, BACKUP_RESULT_WAIT_S));
+        self.status = "Backing up this career.".to_string();
+        self.refresh(ctx, true);
+        ctx.say("Backing up this career.");
+    }
+
+    /// One spoken line per outcome of a by-hand backup, in the same words
+    /// the terminal's Save game and the background queue use for the same
+    /// outcome. "Nothing was changed" every time it did not go through: the
+    /// row's whole promise is that pressing it can never cost the career.
+    fn speak_backup_outcome(&mut self, ctx: &mut GameContext, outcome: &str) {
+        let name = self.save_name.clone();
+        match outcome {
+            "accepted" => {
+                self.status = "Backed up. The cloud copy matches this computer's save.".to_string();
+                ctx.audio.play("ui/menu_select");
+                ctx.say("Backed up. The cloud copy now matches this computer's save.");
+            }
+            evicted if evicted.starts_with("accepted:evicted:") => {
+                let gone = evicted
+                    .strip_prefix("accepted:evicted:")
+                    .unwrap_or_default();
+                self.status = "Backed up. The cloud copy matches this computer's save.".to_string();
+                ctx.audio.play("ui/menu_select");
+                ctx.say(&format!(
+                    "Backed up. The cloud copy now matches this computer's save. {}",
+                    eviction_status(gone)
+                ));
+            }
+            "unchanged" => {
+                self.status =
+                    "Already backed up. The cloud copy matches this computer's save.".to_string();
+                ctx.say("Already backed up. The cloud copy matches this computer's save.");
+            }
+            "conflict" => {
+                self.status =
+                    "The cloud copy changed on another computer. Nothing was changed.".to_string();
+                ctx.say(
+                    "The cloud copy changed on another computer, so nothing was \
+                     changed. Choose which copy to keep from the rows below.",
+                );
+            }
+            "auth" => {
+                self.status = "Reconnect needed. Nothing was changed.".to_string();
+                ctx.say(&format!("{AUTH_HELP} Nothing was changed."));
+            }
+            rejected if rejected.starts_with("rejected:") => {
+                let reason = rejected.strip_prefix("rejected:").unwrap_or_default();
+                let message = rejection_status(&name, Some(reason));
+                self.status = format!("{name}: backup not accepted. Nothing was changed.");
+                ctx.say(&format!("{message} Nothing was changed."));
+            }
+            _ => {
+                self.status =
+                    "The backup has not gone through yet. Still trying in the background."
+                        .to_string();
+                ctx.say(
+                    "The backup has not gone through yet. Check your connection; the \
+                     game keeps trying in the background, and the cloud copy was \
+                     not changed.",
+                );
+            }
+        }
+    }
+
     /// If the restored career is the one currently loaded, re-read it so
     /// a later save cannot overwrite the restore with stale memory.
     fn reload_active_profile(&mut self, ctx: &mut GameContext) {
@@ -659,6 +783,24 @@ impl Menu for CloudSlotState {
                 );
             }
             None => {
+                if self.has_local_save() {
+                    // First action on the screen, present whenever there is
+                    // a save here to send: the one row that can never cost
+                    // the career, so it is the one a worried player reaches
+                    // first. Under a conflict the two rows above replace it,
+                    // because then the upload IS a choice between copies.
+                    items.push(
+                        MenuItem::new("Back up this career now", |s: &mut Self, ctx| {
+                            s.start_backup_now(ctx)
+                        })
+                        .help(
+                            "Sends this computer's save of this career to your \
+                             orinks.net account right now, without waiting for \
+                             the next automatic backup, and tells you the result. \
+                             Nothing on this computer changes.",
+                        ),
+                    );
+                }
                 items.push(
                     MenuItem::new(
                         Label::dynamic(|s: &Self, _| s.restore_label()),
@@ -736,6 +878,26 @@ impl Menu for CloudSlotState {
 
     fn update(&mut self, ctx: &mut GameContext, dt: f64) {
         ctx.update_music_rotation(dt);
+        if let Some((name, token, remaining)) = self.backup_watch.clone() {
+            let outcome = match ctx.cloud_saves_service().outcome_for(&name, token) {
+                Some(outcome) => outcome,
+                None => {
+                    let remaining = remaining - dt;
+                    if remaining > 0.0 {
+                        self.backup_watch = Some((name, token, remaining));
+                        return;
+                    }
+                    // Still in flight after the bounded wait: the queue keeps
+                    // retrying on its own, and the player is told so once.
+                    "network".to_string()
+                }
+            };
+            self.backup_watch = None;
+            self.busy = false;
+            self.speak_backup_outcome(ctx, &outcome);
+            self.refresh(ctx, false);
+            return;
+        }
         let Some(outcome) = self.outcome.take() else {
             return;
         };

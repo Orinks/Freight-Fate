@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Back up this career now.** Each career's screen on the Cloud backup
+  menu now has a row that sends this computer's save to your orinks.net
+  account straight away and tells you the result: backed up, already backed
+  up, or why not. Before, a career could only go up on its own after a save,
+  or from the screen that appears when the cloud copy has changed on
+  another computer, so a backup that got stuck left no way to send your
+  career by hand.
+
 - **Account achievements now have their own Online menu browser.** It lists
   achievements earned across every career on this installation in seven
   short categories, with each category kept in catalog order, while the

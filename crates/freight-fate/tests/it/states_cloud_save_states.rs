@@ -10,6 +10,7 @@ use crate::states_online_support::*;
 use freight_fate::app::testing::TestApp;
 use freight_fate::app::{share, SharedState};
 use freight_fate::net::testing::FakeTransport;
+use freight_fate::net::NetError;
 use freight_fate::states::base::{Key, State};
 use freight_fate::states::cloud_save_states::{
     CloudBackupState, CloudSlotState, ConfirmDeleteCloudState, ConfirmKeepMineState,
@@ -128,6 +129,117 @@ fn test_the_public_career_shows_status_not_an_action() {
 
 fn a_revision() -> Value {
     json!({"revision": 4, "createdAt": wall_time() * 1000.0})
+}
+
+/// A slot screen for `name` over `transport`, with a real save for the
+/// career on this computer.
+fn slot_with_local_save(
+    app: &mut TestApp,
+    name: &str,
+    transport: std::sync::Arc<FakeTransport>,
+) -> (SharedState, IdentityGuard) {
+    let guard = install_identity(app, Some(&identity()));
+    install_cloud(app, transport, true);
+    let mut profile = ff_core::models::profile::Profile::named(name);
+    profile.money = 3294.0;
+    profile.save().unwrap();
+    let state = CloudSlotState::new(&mut app.ctx, name, vec![a_revision()], None, None);
+    (push(app, state), guard)
+}
+
+/// Brandon (armstrong445), 2026-08-15. A career could only travel upward
+/// through the queue after a save, or through the conflict screen's "Keep
+/// this computer's save" -- which vanished with the conflict that summoned
+/// it, so once the queue stuck there was no way to send his newer career up
+/// and he lost a level to the cloud's older copy. The row is always there
+/// now, first under the status line, and it uses the queue's own upload.
+#[test]
+fn test_a_career_can_be_backed_up_by_hand_without_a_conflict() {
+    let mut app = TestApp::new();
+    let transport = FakeTransport::revisions();
+    let (slot, _guard) = slot_with_local_save(&mut app, "armstrong45", transport.clone());
+    let texts = labels::<CloudSlotState>(&slot, &app.ctx);
+    assert!(texts[0].starts_with("Status:"));
+    assert_eq!(texts[1], "Back up this career now");
+
+    move_to::<CloudSlotState>(&mut app, &slot, "Back up this career now");
+    press(&mut app, Key::Return);
+    assert_eq!(transport.posts().len(), 1, "the upload went out at once");
+    settle(&mut app, &slot);
+
+    let spoken = said(&app);
+    assert!(spoken.contains("Backing up this career."), "{spoken}");
+    assert!(
+        spoken.contains("Backed up. The cloud copy now matches this computer's save."),
+        "{spoken}"
+    );
+    assert!(!with_state::<CloudSlotState, _>(&slot, |s| s.busy));
+    let texts = labels::<CloudSlotState>(&slot, &app.ctx);
+    assert!(texts[0].contains("Backed up"), "{}", texts[0]);
+}
+
+/// Pressing the row can never cost the career: a failed attempt says so,
+/// says the cloud copy was not changed, and hands the screen back.
+#[test]
+fn test_a_backup_by_hand_that_does_not_go_through_says_so_and_changes_nothing() {
+    let mut app = TestApp::new();
+    let transport = FakeTransport::failing(NetError::Connection("refused".to_string()));
+    let (slot, _guard) = slot_with_local_save(&mut app, "armstrong45", transport);
+    move_to::<CloudSlotState>(&mut app, &slot, "Back up this career now");
+    press(&mut app, Key::Return);
+    settle(&mut app, &slot);
+    let spoken = said(&app);
+    assert!(spoken.contains("has not gone through yet"), "{spoken}");
+    assert!(
+        spoken.contains("the cloud copy was not changed"),
+        "{spoken}"
+    );
+    assert!(!with_state::<CloudSlotState, _>(&slot, |s| s.busy));
+}
+
+/// Under a recorded conflict the upload is a choice between two copies, so
+/// the conflict rows own it and the plain row steps aside; with no save on
+/// this computer there is nothing to send and the row is not offered.
+#[test]
+fn test_the_backup_row_steps_aside_for_a_conflict_or_no_local_save() {
+    let mut app = TestApp::new();
+    let (slot, _guard) = slot_with_local_save(&mut app, "armstrong45", FakeTransport::revisions());
+    record_conflict(
+        &app,
+        "armstrong45",
+        Some("armstrong45, level 7, 9,100 dollars"),
+    );
+    // Rebuilt after the conflict landed: the rows on the stack were built
+    // when the screen was pushed.
+    let texts: Vec<String> =
+        with_state::<CloudSlotState, _>(&slot, |s| built_rows(s, &mut app.ctx))
+            .into_iter()
+            .map(|(t, _)| t)
+            .collect();
+    assert!(
+        !texts.iter().any(|t| t == "Back up this career now"),
+        "{texts:?}"
+    );
+    assert!(texts
+        .iter()
+        .any(|t| t.starts_with("Keep this computer's save")));
+    drop(slot);
+    drop(_guard);
+    drop(app);
+
+    let mut app = TestApp::new();
+    let _guard = install_identity(&app, Some(&identity()));
+    install_cloud(&mut app, FakeTransport::revisions(), true);
+    let mut state =
+        CloudSlotState::new(&mut app.ctx, "nobody-here", vec![a_revision()], None, None);
+    let texts: Vec<String> = built_rows(&mut state, &mut app.ctx)
+        .into_iter()
+        .map(|(t, _)| t)
+        .collect();
+    assert!(
+        !texts.iter().any(|t| t == "Back up this career now"),
+        "{texts:?}"
+    );
 }
 
 fn record_conflict(app: &TestApp, name: &str, summary: Option<&str>) {
