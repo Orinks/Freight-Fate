@@ -1,14 +1,22 @@
-"""Package the staged Nuitka Linux build as a cross-distro AppImage.
+"""Package the staged Linux build as a cross-distro AppImage.
 
-Runs after ``tools/build_release.py`` and expects ``dist/FreightFate`` to
-exist. linuxdeploy bundles the shared libraries the Ubuntu build links
-against (Ubuntu-specific sonames do not exist on Fedora/Arch/openSUSE,
-and the SDL/X11 chain pygame needs is not installed everywhere), while
-the host-integration stacks below stay excluded so the game keeps using
-the target system's GLib, D-Bus, AT-SPI/speech stack, and OpenSSL.
+Runs after ``tools/build_release.py`` and expects the staged folder to
+exist: ``dist/FreightFate`` for the Nuitka build, ``build/FreightFate`` for
+the Rust one (``--rust``). linuxdeploy bundles the shared libraries the
+Ubuntu build links against (Ubuntu-specific sonames do not exist on
+Fedora/Arch/openSUSE, and the SDL/X11 chain pygame needs is not installed
+everywhere), while the host-integration stacks below stay excluded so the
+game keeps using the target system's GLib, D-Bus, AT-SPI/speech stack, and
+OpenSSL.
+
+The Rust build needs almost none of that -- SDL2 is compiled in, BASS and
+Prism carry their own dependencies beside the executable -- so for it the
+AppImage is mostly the launcher, the desktop entry and the self-update
+path the tarball cannot offer.
 
 Run from the repository root:
 ``uv run python tools/build_appimage.py --tag <label>``
+``uv run python tools/build_appimage.py --rust --tag <label>``
 """
 
 from __future__ import annotations
@@ -28,6 +36,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DIST_DIR = ROOT / "dist"
 APP_NAME = "FreightFate"
 STAGED_DIR = DIST_DIR / APP_NAME
+RUST_STAGED_DIR = ROOT / "build" / APP_NAME
 WORK_DIR = ROOT / "build" / "appimage"
 TOOLS_DIR = WORK_DIR / "tools"
 APPDIR = WORK_DIR / "AppDir"
@@ -160,13 +169,13 @@ def download(url: str, target: Path, attempts: int = 4) -> Path:
     raise AssertionError("unreachable")
 
 
-def assemble_appdir() -> None:
-    """Build the AppDir skeleton from the staged Nuitka distribution."""
+def assemble_appdir(staged_dir: Path = STAGED_DIR) -> None:
+    """Build the AppDir skeleton from the staged distribution."""
     if APPDIR.exists():
         shutil.rmtree(APPDIR)
     (APPDIR / "opt").mkdir(parents=True)
-    print(f"Copying {STAGED_DIR} into AppDir")
-    shutil.copytree(STAGED_DIR, APPDIR / "opt" / "freightfate")
+    print(f"Copying {staged_dir} into AppDir")
+    shutil.copytree(staged_dir, APPDIR / "opt" / "freightfate")
 
 
 def run_linuxdeploy(linuxdeploy: Path, runtime: Path, label: str) -> Path:
@@ -199,7 +208,7 @@ def run_linuxdeploy(linuxdeploy: Path, runtime: Path, label: str) -> Path:
     return produced[-1]
 
 
-def verify_bundled_libraries() -> None:
+def verify_bundled_libraries(nuitka: bool = True) -> None:
     """Fail the build when usr/lib bundles host stacks or misses portability libs."""
     lib_dir = APPDIR / "usr" / "lib"
     bundled = {path.name for path in lib_dir.iterdir()} if lib_dir.exists() else set()
@@ -211,7 +220,9 @@ def verify_bundled_libraries() -> None:
             f"(GLib/GTK/OpenSSL stay on the target system): {forbidden}"
         )
 
-    missing = sorted(set(REQUIRED_BUNDLED_SONAMES) - bundled)
+    # The Rust executable links nothing but libc, so there is nothing for
+    # linuxdeploy to add and the Nuitka list would only fail it.
+    missing = sorted(set(REQUIRED_BUNDLED_SONAMES) - bundled) if nuitka else []
     if missing:
         raise RuntimeError(f"AppImage is missing libraries needed on non-Debian distros: {missing}")
     print(f"Verified {len(bundled)} bundled libraries in usr/lib")
@@ -225,13 +236,20 @@ def main() -> int:
         action="store_true",
         help="Keep build/appimage for debugging instead of reusing it clean.",
     )
+    parser.add_argument(
+        "--rust",
+        action="store_true",
+        help=f"package the Rust build tools/build_release.py --rust staged under {RUST_STAGED_DIR}",
+    )
     args = parser.parse_args()
 
     if platform.system() != "Linux":
         print("AppImage packaging only runs on Linux.")
         return 1
-    if not (STAGED_DIR / APP_NAME).exists():
-        print(f"Staged build not found at {STAGED_DIR}; run tools/build_release.py first.")
+    staged_dir = RUST_STAGED_DIR if args.rust else STAGED_DIR
+    if not (staged_dir / APP_NAME).exists():
+        hint = "tools/build_release.py --rust" if args.rust else "tools/build_release.py"
+        print(f"Staged build not found at {staged_dir}; run {hint} first.")
         return 1
 
     label = args.tag or project_version()
@@ -245,9 +263,9 @@ def main() -> int:
     linuxdeploy.chmod(0o755)
     runtime = download(APPIMAGE_RUNTIME_URL, TOOLS_DIR / "runtime-x86_64")
 
-    assemble_appdir()
+    assemble_appdir(staged_dir)
     produced = run_linuxdeploy(linuxdeploy, runtime, label)
-    verify_bundled_libraries()
+    verify_bundled_libraries(nuitka=not args.rust)
 
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     target = DIST_DIR / f"{APP_NAME}-{label}-linux-x86_64.AppImage"

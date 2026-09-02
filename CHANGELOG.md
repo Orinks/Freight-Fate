@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Career 1.9 now has a Linux download.** Each tester snapshot ships a
+  Linux tarball and an AppImage alongside the Windows and Mac builds, and
+  every one is started on Ubuntu, Debian, Fedora, Arch and openSUSE before
+  it is published. Speech comes through Speech Dispatcher, the same way
+  Orca speaks, and sound plays through your desktop's PulseAudio or
+  PipeWire. If the game says at the main menu that it started without
+  sound, see the Linux note under Troubleshooting in the manual.
+
 - **Hear when other drivers go on or off duty.** A new row on the Online
   menu, Say when drivers go on or off duty, off by default. Turn it on and
   the game says when another driver sets off or signs off, like Road Star

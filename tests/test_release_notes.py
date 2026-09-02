@@ -537,7 +537,8 @@ def test_career_19_snapshot_workflow_contract():
     assert "tag=1.9-tester-$(date -u +%Y%m%d)" in workflow
     assert "commit_sha: ${{ steps.check.outputs.commit_sha }}" in workflow
     assert 'echo "commit_sha=$(git rev-parse HEAD)"' in workflow
-    assert workflow.count("ref: ${{ needs.prepare.outputs.commit_sha }}") == 3
+    # Windows, macOS, Linux build, the Linux distro smoke, and the release.
+    assert workflow.count("ref: ${{ needs.prepare.outputs.commit_sha }}") == 5
     assert 'git tag --list "1.9-tester-*"' in workflow
     assert "tools/release_notes.py should-build-nightly" in workflow
     assert "tools/release_notes.py nightly" in workflow
@@ -552,6 +553,46 @@ def test_career_19_snapshot_workflow_contract():
     assert '--target "$CAREER_BRANCH"' not in workflow
     assert "needs.build_windows.result == 'success'" in workflow
     assert "needs.build_macos.result == 'success'" in workflow
+    assert "needs.build_linux.result == 'success'" in workflow
+    assert "needs.smoke_linux.result == 'success'" in workflow
+
+
+def test_career_19_snapshot_builds_and_boots_a_linux_release():
+    """The Linux tarball and AppImage ship only after both boot untouched on
+    the popular distributions, from a build whose glibc floor is 22.04's."""
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    ).read_text(encoding="utf-8")
+    assert "runs-on: ubuntu-22.04" in workflow
+    assert "tools/build_release.py --rust --smoke" in workflow
+    assert "tools/build_appimage.py --rust" in workflow
+    assert "linux-x64.tar.gz" in workflow
+    assert "linux-x86_64.AppImage" in workflow
+    assert "bash /work/tools/linux_smoke.sh" in workflow
+    for image in (
+        "ubuntu:22.04",
+        "ubuntu:24.04",
+        "debian:12",
+        "debian:13",
+        "fedora:latest",
+        "archlinux:latest",
+        "opensuse/tumbleweed:latest",
+    ):
+        assert f"- {image}\n" in workflow, image
+    assert (
+        "FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage > checksums.txt"
+        in workflow
+    )
+
+    smoke = (Path(__file__).resolve().parents[1] / "tools" / "linux_smoke.sh").read_text(
+        encoding="utf-8"
+    )
+    # Speech is not disabled in the container boot: libprism.so and its
+    # bundled glib are really opened, which is where a loader would object.
+    assert "FREIGHT_FATE_NO_SPEECH" not in smoke
+    assert "prism: loaded from" in smoke
+    assert "--appimage-extract-and-run --smoke" in smoke
+    assert "xvfb-run" in smoke
 
 
 def test_career_19_snapshot_builds_an_apple_silicon_macos_release():
@@ -599,35 +640,49 @@ def test_career_19_snapshot_builds_an_apple_silicon_macos_release():
     assert upload["with"]["path"] == "dist/FreightFate-*-macos-arm64.zip"
 
 
-def test_career_19_release_requires_and_verifies_both_platform_archives():
+def test_career_19_release_requires_and_verifies_every_platform_archive():
     workflow_path = (
         Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
     )
     workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
     release = workflow["jobs"]["release"]
 
-    assert release["needs"] == ["prepare", "build_windows", "build_macos"]
+    assert release["needs"] == [
+        "prepare",
+        "build_windows",
+        "build_macos",
+        "build_linux",
+        "smoke_linux",
+    ]
     assert "needs.build_windows.result == 'success'" in release["if"]
     assert "needs.build_macos.result == 'success'" in release["if"]
+    assert "needs.build_linux.result == 'success'" in release["if"]
+    assert "needs.smoke_linux.result == 'success'" in release["if"]
     downloads = [
         step for step in release["steps"] if step.get("uses") == "actions/download-artifact@v7"
     ]
-    assert {step["with"]["name"] for step in downloads} == {"Windows", "macOS-arm64"}
+    assert {step["with"]["name"] for step in downloads} == {
+        "Windows",
+        "macOS-arm64",
+        "Linux-x86_64",
+    }
     assert all(step["with"]["path"] == "assets" for step in downloads)
     verify = next(
         step for step in release["steps"] if step.get("name") == "Verify release archives"
     )
     assert "assets/FreightFate-*-windows-portable.zip" in verify["run"]
     assert "assets/FreightFate-*-macos-arm64.zip" in verify["run"]
-    assert verify["run"].count('"${#') == 2
+    assert "assets/FreightFate-*-linux-x64.tar.gz" in verify["run"]
+    assert "assets/FreightFate-*-linux-x86_64.AppImage" in verify["run"]
+    assert verify["run"].count('"${#') == 4
     checksum = next(
         step
         for step in release["steps"]
         if step.get("name") == "Prepare and verify release notes and checksums"
     )
     assert (
-        "sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip"
-        in checksum["run"]
+        "sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip "
+        "FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage" in checksum["run"]
     )
 
 

@@ -48,7 +48,12 @@ fn every_platform_directory_holds_its_library() {
 fn the_platforms_we_ship_are_vendored() {
     // Named explicitly rather than derived from the directory listing: the
     // point is to fail when one goes missing, which a listing cannot catch.
-    for platform in ["windows-x86_64", "macos-x86_64", "macos-aarch64"] {
+    for platform in [
+        "windows-x86_64",
+        "macos-x86_64",
+        "macos-aarch64",
+        "linux-x86_64",
+    ] {
         let library = expected_library(platform).expect("a known platform");
         assert!(
             vendor_dir().join(platform).join(library).is_file(),
@@ -70,24 +75,28 @@ fn the_licence_travels_with_the_binaries() {
 }
 
 #[test]
-fn linux_ships_no_speech_library() {
-    // Prism's Linux build carries its own glib. The app links GTK, which uses
-    // the system's. Two GObject type systems in one process abort on start-up:
-    //
-    //   GLib-GObject:ERROR gtype.c:1245: assertion failed: NODE_REFCOUNT > 0
-    //
-    // Established by launching the shipped tarball under WSLg: it aborts with
-    // the speech libraries present and runs with them moved aside. No test can
-    // catch this, because no test loads GTK -- which is how it survived a
-    // green suite and a green CI run.
-    //
-    // Orca reads the interface through AT-SPI regardless; what Linux gives up
-    // is the app's own announcements. Vendoring the library again means
-    // solving the glib conflict first, not adding the file back.
-    assert!(
-        !vendor_dir().join("linux-x86_64").exists(),
-        "a Linux library is vendored again; see the comment on this test"
-    );
+fn the_linux_library_travels_with_its_bundled_dependencies() {
+    // Prism's Linux build is the manylinux wheel's: `libprism.so` plus
+    // auditwheel-renamed copies of glib, gio, glibmm, giomm and
+    // speech-dispatcher, found through a RUNPATH of `$ORIGIN`. The game
+    // process has no other glib in it -- SDL2 is compiled in and opens X11,
+    // Wayland and the audio servers directly -- so unlike a GTK app
+    // (PortkeyDrop had to drop the library for exactly that duplicate-GType
+    // abort) two copies never meet. What must hold instead is that the
+    // renamed dependencies ship beside the library: a stray `libprism.so`
+    // on its own fails to load, and the game then starts mute.
+    let dir = vendor_dir().join("linux-x86_64");
+    for prefix in ["libspeechd-", "libglib-2-", "libgio-2-", "libgobject-2-"] {
+        let present = std::fs::read_dir(&dir)
+            .expect("a linux-x86_64 vendor directory")
+            .flatten()
+            .any(|entry| entry.file_name().to_string_lossy().starts_with(prefix));
+        assert!(
+            present,
+            "vendor/linux-x86_64 has no {prefix}* library beside libprism.so; \
+             the Linux build would start without speech"
+        );
+    }
 }
 
 #[cfg(windows)]

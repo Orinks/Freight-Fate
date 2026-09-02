@@ -68,10 +68,10 @@ DEFAULT_MUSIC_URL = "https://dev.orinks.net/downloads/music.pak"
 DEFAULT_MUSIC_SHA256 = "7787d682c4c289f7c0f33bb1fc714fb54221e10086cc9415d87304fdeffadfb3"
 
 
-def platform_native_exts() -> set[str]:
-    if sys.platform == "win32":
+def platform_native_exts(platform_name: str = sys.platform) -> set[str]:
+    if platform_name == "win32":
         return {".dll"}
-    if sys.platform == "darwin":
+    if platform_name == "darwin":
         return {".dylib"}
     return {".so"}
 
@@ -805,6 +805,12 @@ def verify_archive(out: Path) -> None:
         )
         missing.extend(name for name in bundle_required if name not in entries)
         # No libSDL2 requirement: SDL2 ships compiled into the executable.
+    elif out.name.endswith("-linux-x64.tar.gz") and f"{root}/{RUST_BAKED_FILE_ENTRY}" in entries:
+        # A Rust tarball (the Nuitka one has no baked container). Same
+        # libraries as the Mac bundle, flat beside the executable.
+        missing.extend(
+            f"{root}/{name}" for name in LINUX_REQUIRED_LIBRARIES if f"{root}/{name}" not in entries
+        )
     if missing:
         raise RuntimeError(
             f"Release archive is missing payload files: {', '.join(missing)} in {out.name}"
@@ -857,6 +863,8 @@ RUST_STAGE_DIR = BUILD / APP_NAME
 # than parsing 94 MB of leg shards before the menu. See
 # ``ff_core::data::baked``.
 RUST_BAKED_FILE = "world.ffdata"
+# Where the container sits inside the staged payload, relative to its root.
+RUST_BAKED_FILE_ENTRY = f"freight_fate/data/{RUST_BAKED_FILE}"
 # The container's first eight bytes (``ff_core::data::baked::MAGIC``). Checked
 # in the staged payload so a wrong or truncated file fails the build.
 BAKED_MAGIC = b"FFDATA\x00\x00"
@@ -903,6 +911,17 @@ MACOS_REQUIRED_LIBRARIES = (
     "libbasshls.dylib",
     "libbassflac.dylib",
     "libprism.dylib",
+)
+# The Linux tarball's equivalents, flat beside the executable. Prism's
+# renamed glib and speech-dispatcher copies travel with it (see
+# ``rust_native_libraries``) but are not listed: their names carry a hash
+# that changes with every prismatoid release.
+LINUX_REQUIRED_LIBRARIES = (
+    "libbass.so",
+    "libbassopus.so",
+    "libbasshls.so",
+    "libbassflac.so",
+    "libprism.so",
 )
 
 
@@ -1108,12 +1127,21 @@ def rust_native_libraries(profile_dir: Path, exts: set[str] | None = None) -> li
     artifacts, not runtime libraries.
     """
     suffixes = exts or platform_native_exts()
+
+    def is_runtime_library(path: Path) -> bool:
+        suffix = path.suffix.lower()
+        if suffix in CARGO_NON_RUNTIME_SUFFIXES:
+            return False
+        if suffix in suffixes:
+            return True
+        # Prism's Linux dependencies are versioned sonames
+        # (``libglib-2-<hash>.so.0.8800.1``), so their suffix is a number.
+        # They are shared libraries all the same, and libprism.so does not
+        # load without them.
+        return ".so" in suffixes and ".so." in path.name
+
     return sorted(
-        path
-        for path in profile_dir.iterdir()
-        if path.is_file()
-        and path.suffix.lower() in suffixes
-        and path.suffix.lower() not in CARGO_NON_RUNTIME_SUFFIXES
+        path for path in profile_dir.iterdir() if path.is_file() and is_runtime_library(path)
     )
 
 
@@ -1153,6 +1181,40 @@ def macos_dynamic_sdl_dependency(executable: Path) -> Path | None:
         candidate = Path(install_name)
         if candidate.name.startswith("libSDL2") and candidate.name.endswith(".dylib"):
             return candidate
+    return None
+
+
+def linux_needed_libraries(executable: Path) -> list[str]:
+    """The sonames an ELF executable declares it needs (``readelf -d``)."""
+    result = subprocess.run(
+        ["readelf", "-d", str(executable)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    needed: list[str] = []
+    for line in result.stdout.splitlines():
+        if "(NEEDED)" not in line:
+            continue
+        # ``0x0000000000000001 (NEEDED)  Shared library: [libc.so.6]``
+        soname = line.rsplit("[", 1)[-1].rstrip("]").strip()
+        if soname and soname not in needed:
+            needed.append(soname)
+    return needed
+
+
+def linux_dynamic_sdl_dependency(executable: Path) -> str | None:
+    """The SDL2 soname recorded in ``executable``, or ``None``.
+
+    ``None`` is the only shippable answer, for the reason the macOS audit
+    gives and one more: every distribution ships a different
+    ``libSDL2-2.0.so.0``, and a tarball that has to start on Fedora, Arch
+    and Debian alike cannot link against any one of them. The `bundled` +
+    `static-link` build compiles SDL2 in, and staging refuses anything else.
+    """
+    for soname in linux_needed_libraries(executable):
+        if soname.startswith("libSDL2"):
+            return soname
     return None
 
 
@@ -1298,7 +1360,7 @@ def plan_rust_layout(
     # the copy beside bass.dll is what normally loads, this one covers a
     # player who swaps in their own BASS.
     if ADDON_LIB_DIR.is_dir():
-        suffixes = native_exts or platform_native_exts()
+        suffixes = native_exts or platform_native_exts(platform_name)
         for path in sorted(ADDON_LIB_DIR.iterdir()):
             if path.is_file() and path.suffix.lower() in suffixes:
                 plan.append((path, package / "lib" / path.name))
@@ -1334,12 +1396,21 @@ def stage_rust_build(
         for name in MACOS_REQUIRED_LIBRARIES:
             if not (profile_dir / name).is_file():
                 raise RuntimeError(f"Rust build is missing macOS player library {name}")
+    elif platform_name == "linux":
+        for name in LINUX_REQUIRED_LIBRARIES:
+            if not (profile_dir / name).is_file():
+                hint = (
+                    " Run `uv run python tools/fetch_bass.py` and build again."
+                    if name.startswith("libbass")
+                    else ""
+                )
+                raise RuntimeError(f"Rust build is missing Linux player library {name}.{hint}")
     require_real_pack(PACKAGE_DIR / "sounds.pak")
     require_real_pack(PACKAGE_DIR / "music.pak")
     plan = plan_rust_layout(
         profile_dir,
         platform_name=platform_name,
-        native_exts={".dylib"} if platform_name == "darwin" else None,
+        native_exts=platform_native_exts(platform_name),
         baked_data=baked_data,
     )
     if platform_name == "darwin":
@@ -1381,6 +1452,17 @@ def stage_rust_build(
             )
         write_macos_info_plist(build_dir, label or project_version())
         relocate_macos_libraries(build_dir)
+    elif platform_name == "linux":
+        # The same refusal for the same reason, plus one: a system SDL2 is a
+        # different file on every distribution, and the tarball has to start
+        # on all of them.
+        sdl = linux_dynamic_sdl_dependency(profile_dir / cargo_exe_name(platform_name))
+        if sdl is not None:
+            raise RuntimeError(
+                f"Linux executable links SDL2 dynamically ({sdl}); the tarball "
+                "has to run on every distribution, so build with the crate's "
+                "`bundled` + `static-link` SDL2 features instead."
+            )
     if platform_name != "win32":
         exe = executable_root / rust_exe_name(platform_name)
         exe.chmod(exe.stat().st_mode | 0o755)
@@ -1547,6 +1629,19 @@ def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> N
         if missing_macos:
             raise RuntimeError(
                 "Rust macOS payload is missing native libraries: " + ", ".join(missing_macos)
+            )
+    elif platform_name == "linux":
+        # SDL2 is compiled in here too; what must be beside the executable is
+        # BASS with its decoders and Prism with its bundled dependencies.
+        missing_linux = [name for name in LINUX_REQUIRED_LIBRARIES if not (root / name).exists()]
+        if missing_linux:
+            raise RuntimeError(
+                "Rust Linux payload is missing native libraries: " + ", ".join(missing_linux)
+            )
+        if not [path for path in root.iterdir() if path.name.startswith("libspeechd-")]:
+            raise RuntimeError(
+                "Rust Linux payload ships libprism.so without its bundled "
+                "speech-dispatcher library; the game would start without speech"
             )
     elif not native_files(root):
         print(

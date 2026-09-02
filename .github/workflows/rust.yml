@@ -153,25 +153,21 @@ jobs:
     # `crates/prism-sys/vendor/<os>-<arch>/`. Today the tree carries:
     #
     #   vendor/sdl2/            windows-x86_64 only
-    #   crates/bass-sys/vendor/ windows-x86_64 (fetched), macos-* (fetched)
-    #   crates/prism-sys/vendor/windows-x86_64, macos-x86_64, macos-aarch64
+    #   crates/bass-sys/vendor/ windows-x86_64, macos-*, linux-x86_64 (all fetched)
+    #   crates/prism-sys/vendor/windows-x86_64, macos-x86_64, macos-aarch64,
+    #                           linux-x86_64
     #
-    # So an ubuntu-latest job would have no vendored SDL2 to link against --
-    # `crates/freight-fate/build.rs` would print its "expecting a system SDL2"
-    # warning and the link would then fail on the runner -- and no BASS at
-    # all. Installing `libsdl2-dev` there would get it to link, but it would
-    # be testing a configuration nobody ships and nobody has ever run, and the
-    # audio and speech loaders would silently fall back to their null
-    # backends.
+    # macOS and Linux both build from source -- BASS fetched, Prism vendored,
+    # SDL2 compiled in statically -- and the nightly snapshot workflow
+    # (build-career-1.9.yml) builds, tests and packages both, then boots the
+    # Linux tarball and AppImage on seven distributions. This per-push
+    # workflow does not repeat that: the Mac runner is the slow one, and the
+    # Linux job's value is in the packaged boot on other distributions,
+    # which is a nightly's worth of work rather than a push's.
     #
-    # macOS is a different gap: it builds from source (BASS is fetched for
-    # both architectures, Prism is vendored, SDL2 is compiled in statically),
-    # and the nightly snapshot workflow does test it there; this per-push
-    # workflow does not, because the Mac runner is the slow one.
-    #
-    # Windows is the primary target and the only fully vendored one, so this
+    # Windows is the primary target and the only vendored one, so this
     # matrix is honest about the gap instead of papering over it: Linux and
-    # macOS are NOT covered by this workflow.
+    # macOS are NOT covered by this workflow, only by the nightly.
     name: Test (Windows)
     runs-on: windows-latest
     timeout-minutes: 45

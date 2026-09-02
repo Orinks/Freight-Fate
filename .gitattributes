@@ -14,3 +14,4 @@ src/freight_fate/sounds.pak -text
 # Rust exporter's output, which is LF on every platform. A CRLF checkout
 # would make the fixture disagree with the file it is pinning.
 crates/ff-core/tests/profile_integrity_invariants.json text eol=lf
+tools/linux_smoke.sh text eol=lf

@@ -544,12 +544,39 @@ Everything not listed here ships fine after 1.9.0.
       probes, gone since they moved to worker threads -- so a Mac zip that
       cannot start fails the build instead of shipping. VoiceOver through
       Prism still needs a listening pass on a physical Mac.
-- [ ] **Rust port: no Linux build.** `.github/workflows/rust.yml` vendors SDL2
-      for windows-x86_64 only, and BASS has no pinned Linux build; there
-      is no Linux runner and no vendored Linux native libraries. The Linux
-      nightlies players are running are the Python build, so a Linux report
-      cannot be reproduced or fixed on this line until the libraries and a
-      runner exist.
+- [x] **Rust port: Linux builds, boots on seven distributions, and ships in
+      the nightly (2026-09-02).** `tools/fetch_bass.py` now pins un4seen's
+      `-linux` x86_64 builds (no AAC add-on exists upstream, as on macOS);
+      Prism's Linux library is vendored from the prismatoid 0.17.3
+      manylinux wheel with its renamed glib and speech-dispatcher copies
+      beside it and a `$ORIGIN` RUNPATH; SDL2 is compiled in statically as
+      on macOS, so the executable links nothing but libc, libm, libgcc and
+      libdbus-1, and opens X11, Wayland, PulseAudio, PipeWire and ALSA by
+      dlopen. The port skeleton's `linux_ships_no_speech_library` test was
+      PortkeyDrop's GTK finding copied over; there is no GTK and no second
+      glib in this process, and the library loads and picks Speech
+      Dispatcher under WSLg with no abort. The release builder stages the
+      versioned sonames, refuses a dynamic SDL2 or a payload missing BASS,
+      its decoders, or Prism, and the AppImage tool packages the Rust
+      staging with `--rust`. `build-career-1.9.yml` gained a
+      `build_linux` job on `ubuntu-22.04` (glibc 2.35 floor; fmt, clippy,
+      the full suite, `--smoke`, tarball and AppImage) and a `smoke_linux`
+      matrix that boots both downloads untouched in bare Ubuntu 22.04 and
+      24.04, Debian 12 and 13, Fedora, Arch and openSUSE Tumbleweed
+      containers, with Prism really opened and, on Fedora, the tarball
+      under Xvfb on SDL's X11 driver. The release requires all of it.
+      * Follow-up: **Linux sound needs a usable ALSA default device.** BASS
+        on Linux is ALSA-only. On a desktop with PulseAudio or PipeWire the
+        `default` PCM is the pulse/pipewire plugin and BASS opens it; where
+        that plugin is missing (issue #166's log shows exactly this fallback
+        on the Python nightly, and WSLg shows it until `libasound2-plugins`
+        and a two-line `~/.asoundrc` route ALSA to Pulse) the game says at
+        the main menu that it started without sound. The manual now names
+        the package. Worth an in-game hint naming it on Linux specifically.
+      * Follow-up: the Linux executable links `libdbus-1.so.3` for the
+        Secret Service keyring. Every desktop has it, and the smoke installs
+        it into the bare containers; `keyring`'s `vendored` feature would
+        compile it in if a player ever turns up without it.
 - [x] **Rust port: startup work is not held off the input loop -- FIXED
       2026-08-30.** The Linux report above also had the menu ignore
       arrow keys for the first sixteen seconds, because the speech-backend
@@ -1045,10 +1072,9 @@ Everything not listed here ships fine after 1.9.0.
       --locked -D warnings`, `cargo test -p ff-core` and
       `cargo test -p freight-fate` on Windows, with the same headless trio
       the Python jobs use. Windows only: SDL2 is vendored for windows-x86_64
-      alone and BASS has no pinned Linux build, so a Linux runner has nothing
-      to link against and nothing to load. macOS can build (Homebrew SDL2 via
-      pkg-config, fetched BASS, vendored Prism) but has no runner yet. Sort
-      out each platform's libraries before adding its runner.
+      alone. macOS (since 2026-08-29) and Linux (since 2026-09-02) build from
+      source with BASS fetched and Prism vendored, and are covered by the
+      nightly snapshot workflow rather than this per-push one.
 
       **The Rust job follows the same LFS rule as the Python one, and must
       keep following it (2026-08-23).** It first checked out with `lfs: true`,

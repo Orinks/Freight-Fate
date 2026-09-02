@@ -102,9 +102,11 @@ Release archives are named by platform when that platform is available:
 
 On Linux you can pick either download. The tarball extracts to a portable
 folder, exactly like Windows. The AppImage is a single file: mark it
-executable (`chmod +x`) and run it, no extraction needed. It bundles the
-libraries the Ubuntu build depends on, so it also works on distributions
-such as Fedora, Arch, and openSUSE. An AppImage cannot write into itself,
+executable (`chmod +x`) and run it, no extraction needed. Both work on any
+current 64-bit distribution: every Career 1.9 snapshot is started on
+Ubuntu, Debian, Fedora, Arch, and openSUSE before it is published. Speech
+comes through Speech Dispatcher, which your screen reader already uses, and
+sound plays through PulseAudio or PipeWire. An AppImage cannot write into itself,
 so its saves live in `~/.local/share/FreightFate` instead of a `saves`
 folder beside the game. The in-game updater handles the AppImage by
 downloading the new version and replacing the `.AppImage` file itself,
@@ -1705,6 +1707,13 @@ help when reporting update or startup problems. That log also records every
 line the game spoke, so it is the most useful thing to attach to any bug
 report. Settings, Problem reports, Where the game log is saved reads out its
 exact location; the previous session is kept beside it as `logs/game.prev.log`.
+
+If the game says at the main menu that it started without sound on Linux,
+your sound system's ALSA default device is not reachable. On a desktop with
+PulseAudio or PipeWire that means the ALSA plugin for it is not installed:
+`libasound2-plugins` on Debian and Ubuntu, `alsa-plugins-pulseaudio` or
+`pipewire-alsa` on Fedora, `pipewire-alsa` on Arch. Install it and start the
+game again. Speech is separate and keeps working either way.
 
 If your save is missing after extracting or updating, look for another nearby
 `saves` folder and copy or move the whole `saves` folder into the active

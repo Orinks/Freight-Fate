@@ -748,6 +748,194 @@ def test_macos_stage_refuses_a_dynamically_linked_sdl(tmp_path, monkeypatch):
         )
 
 
+def make_linux_profile(profile_dir: Path) -> None:
+    """What ``cargo build --release`` leaves behind on Linux: the executable,
+    BASS and its decoders, and Prism with one of its renamed dependencies."""
+    profile_dir.mkdir(parents=True)
+    (profile_dir / "freightfate").write_bytes(b"ELF")
+    for name in (
+        "libbass.so",
+        "libbassopus.so",
+        "libbasshls.so",
+        "libbassflac.so",
+        "libprism.so",
+        "libspeechd-900e1c56.so.2.6.0",
+        "libglib-2-1eb48d3f.so.0.8800.1",
+    ):
+        (profile_dir / name).write_bytes(b"so")
+    (profile_dir / "freightfate.d").write_text("deps", encoding="utf-8")
+    (profile_dir / "libfreight_fate.rlib").write_bytes(b"rlib")
+
+
+def test_linux_stage_ships_bass_and_prism_with_its_renamed_dependencies(tmp_path, monkeypatch):
+    """Prism's Linux build finds glib and speech-dispatcher beside itself, so
+    the versioned sonames must be staged even though their suffix is a number."""
+    build_release = load_build_release_module()
+    package_dir = tmp_path / "src" / "freight_fate"
+    make_package_tree(package_dir, build_release)
+    track_everything(tmp_path)
+    (package_dir / "sounds.pak").write_bytes(b"FFPK1 sounds")
+    (package_dir / "music.pak").write_bytes(b"FFPK1 music")
+    profile_dir = tmp_path / "target" / "release"
+    make_linux_profile(profile_dir)
+    baked = make_container(tmp_path / "world.ffdata", build_release)
+    monkeypatch.setattr(build_release, "PACKAGE_DIR", package_dir)
+    monkeypatch.setattr(build_release, "ADDON_LIB_DIR", tmp_path / "no-addons")
+    monkeypatch.setattr(build_release, "linux_dynamic_sdl_dependency", lambda _exe: None)
+
+    build_dir = build_release.stage_rust_build(
+        profile_dir,
+        build_dir=tmp_path / "build" / "FreightFate",
+        baked_data=baked,
+        platform_name="linux",
+        label="1.9-tester-20260902",
+    )
+
+    assert build_dir == tmp_path / "build" / "FreightFate"
+    assert (build_dir / "FreightFate").is_file()
+    for name in (
+        *build_release.LINUX_REQUIRED_LIBRARIES,
+        "libspeechd-900e1c56.so.2.6.0",
+        "libglib-2-1eb48d3f.so.0.8800.1",
+    ):
+        assert (build_dir / name).is_file(), name
+    assert not (build_dir / "freightfate.d").exists()
+    assert not (build_dir / "libfreight_fate.rlib").exists()
+    assert (build_dir / "freight_fate" / "data" / "world.ffdata").is_file()
+
+
+@pytest.mark.parametrize("missing_name", ["libbass.so", "libprism.so"])
+def test_linux_stage_refuses_missing_player_libraries(tmp_path, monkeypatch, missing_name):
+    """A mute or speechless tarball must never become a release."""
+    build_release = load_build_release_module()
+    package_dir = tmp_path / "src" / "freight_fate"
+    make_package_tree(package_dir, build_release)
+    track_everything(tmp_path)
+    profile_dir = tmp_path / "target" / "release"
+    make_linux_profile(profile_dir)
+    (profile_dir / missing_name).unlink()
+    baked = make_container(tmp_path / "world.ffdata", build_release)
+    monkeypatch.setattr(build_release, "PACKAGE_DIR", package_dir)
+    monkeypatch.setattr(build_release, "ADDON_LIB_DIR", tmp_path / "no-addons")
+
+    with pytest.raises(RuntimeError, match=f"missing Linux player library {missing_name}"):
+        build_release.stage_rust_build(
+            profile_dir,
+            build_dir=tmp_path / "build" / "FreightFate",
+            baked_data=baked,
+            platform_name="linux",
+        )
+
+
+def test_linux_dynamic_sdl_dependency_reads_the_needed_sonames(tmp_path, monkeypatch):
+    """Any NEEDED libSDL2 soname is reported; a static build reports none."""
+    build_release = load_build_release_module()
+    exe = tmp_path / "freightfate"
+    exe.write_bytes(b"ELF")
+    dynamic = (
+        "Dynamic section at offset 0x1000 contains 30 entries:\n"
+        "  Tag        Type                         Name/Value\n"
+        " 0x0000000000000001 (NEEDED)             Shared library: [libSDL2-2.0.so.0]\n"
+        " 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n"
+        " 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN]\n"
+    )
+    result = subprocess.CompletedProcess(["readelf", "-d", str(exe)], 0, dynamic, "")
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *_args, **_kwargs: result)
+    assert build_release.linux_needed_libraries(exe) == ["libSDL2-2.0.so.0", "libc.so.6"]
+    assert build_release.linux_dynamic_sdl_dependency(exe) == "libSDL2-2.0.so.0"
+
+    static = (
+        " 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]\n"
+        " 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n"
+    )
+    static_result = subprocess.CompletedProcess(["readelf", "-d", str(exe)], 0, static, "")
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *_args, **_kwargs: static_result)
+    assert build_release.linux_dynamic_sdl_dependency(exe) is None
+
+
+def test_linux_stage_refuses_a_dynamically_linked_sdl(tmp_path, monkeypatch):
+    """Every distribution ships a different libSDL2-2.0.so.0; a tarball
+    linked against the builder's would not start on the others."""
+    build_release = load_build_release_module()
+    package_dir = tmp_path / "src" / "freight_fate"
+    make_package_tree(package_dir, build_release)
+    track_everything(tmp_path)
+    (package_dir / "sounds.pak").write_bytes(b"FFPK1 sounds")
+    (package_dir / "music.pak").write_bytes(b"FFPK1 music")
+    profile_dir = tmp_path / "target" / "release"
+    make_linux_profile(profile_dir)
+    baked = make_container(tmp_path / "world.ffdata", build_release)
+    monkeypatch.setattr(build_release, "PACKAGE_DIR", package_dir)
+    monkeypatch.setattr(build_release, "ADDON_LIB_DIR", tmp_path / "no-addons")
+    monkeypatch.setattr(
+        build_release, "linux_dynamic_sdl_dependency", lambda _exe: "libSDL2-2.0.so.0"
+    )
+
+    with pytest.raises(RuntimeError, match="links SDL2 dynamically"):
+        build_release.stage_rust_build(
+            profile_dir,
+            build_dir=tmp_path / "build" / "FreightFate",
+            baked_data=baked,
+            platform_name="linux",
+        )
+
+
+def write_linux_tarball(path: Path, names: list[str], build_release) -> None:
+    import tarfile
+
+    with tarfile.open(path, "w:gz") as tar:
+        for name in names:
+            data = (
+                build_release.BAKED_MAGIC + bytes(8)
+                if name.endswith(build_release.RUST_BAKED_FILE)
+                else b"payload"
+            )
+            info = tarfile.TarInfo(f"FreightFate/{name}")
+            info.size = len(data)
+            info.mode = 0o755 if name == "FreightFate" else 0o644
+            tar.addfile(info, io.BytesIO(data))
+
+
+@pytest.mark.parametrize("missing_name", ["libbass.so", "libbassopus.so", "libprism.so"])
+def test_linux_archive_verifier_rejects_a_rust_tarball_missing_a_library(tmp_path, missing_name):
+    build_release = load_build_release_module()
+    names = [
+        "FreightFate",
+        "build_info.json",
+        "LICENSE.txt",
+        "USER_MANUAL.md",
+        "freight_fate/sounds.pak",
+        "freight_fate/music.pak",
+        build_release.RUST_BAKED_FILE_ENTRY,
+        *(name for name in build_release.LINUX_REQUIRED_LIBRARIES if name != missing_name),
+    ]
+    out = tmp_path / "FreightFate-1.9-tester-20260902-linux-x64.tar.gz"
+    write_linux_tarball(out, names, build_release)
+
+    with pytest.raises(RuntimeError, match=f"FreightFate/{missing_name}"):
+        build_release.verify_archive(out)
+
+    write_linux_tarball(out, [*names, missing_name], build_release)
+    build_release.verify_archive(out)
+
+
+def test_linux_archive_verifier_leaves_the_nuitka_tarball_alone(tmp_path):
+    """The Python build's tarball has no baked container and no flat BASS;
+    the Rust library list must not be demanded of it."""
+    build_release = load_build_release_module()
+    names = [
+        "FreightFate",
+        "build_info.json",
+        "LICENSE.txt",
+        "USER_MANUAL.md",
+        "freight_fate/sounds.pak",
+        "freight_fate/music.pak",
+    ]
+    out = tmp_path / "FreightFate-nightly-20260902-linux-x64.tar.gz"
+    write_linux_tarball(out, names, build_release)
+    build_release.verify_archive(out)
+
+
 def test_macos_linked_libraries_ignores_fat_macho_slice_headers(tmp_path, monkeypatch):
     """Every fat-binary architecture header names the file, not a dependency."""
     build_release = load_build_release_module()

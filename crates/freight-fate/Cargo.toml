@@ -63,5 +63,14 @@ raw-window-handle.workspace = true
 [target.'cfg(target_os = "macos")'.dependencies]
 sdl2 = { workspace = true, features = ["bundled", "static-link"] }
 
+# Linux compiles SDL2 in the same way, for a different reason: every distro
+# ships a libSDL2-2.0.so.0, but not the same one, and a tarball that has to
+# run on Fedora, Arch and Debian alike cannot pick which. The static build
+# still opens X11, Wayland, PulseAudio, PipeWire and ALSA through dlopen at
+# run time, so what the player's machine lacks is skipped rather than fatal,
+# and the executable itself depends on nothing but libc.
+[target.'cfg(target_os = "linux")'.dependencies]
+sdl2 = { workspace = true, features = ["bundled", "static-link"] }
+
 [dev-dependencies]
 tempfile.workspace = true

@@ -191,12 +191,18 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   SDL drivers, no speech, a throwaway `FREIGHT_FATE_DATA_DIR` -- so it never
   touches the operator's real settings, saves or keyring.
 - Rust CI (`.github/workflows/rust.yml`) is **Windows only**, deliberately:
-  SDL2 is vendored for `windows-x86_64` alone. Linux is not covered at all.
-  macOS builds from source (BASS is fetched for both Mac architectures, Prism
-  is vendored, and SDL2 is compiled in statically via the crate's `bundled` +
-  `static-link` features -- NEVER Homebrew's sdl2, which is sdl2-compat and
-  loads SDL3 at runtime, dying on player Macs), but has no runner. Add a
-  platform's libraries before adding its runner.
+  SDL2 is vendored for `windows-x86_64` alone. macOS and Linux build from
+  source (BASS is fetched for both, Prism is vendored, and SDL2 is compiled
+  in statically via the crate's `bundled` + `static-link` features -- NEVER
+  Homebrew's sdl2, which is sdl2-compat and loads SDL3 at runtime, dying on
+  player Macs; on Linux a system libSDL2 differs per distro) and are built,
+  tested and packaged by the nightly Career 1.9 snapshot workflow instead,
+  which also boots the Linux tarball and AppImage on seven distributions
+  through `tools/linux_smoke.sh`. The Linux build runs on `ubuntu-22.04`
+  on purpose: the executable's glibc floor is its build host's. Locally,
+  build Linux under WSL (`sudo apt install` the SDL2 -dev set the workflow
+  lists, then the same commands); a run there with `~/.asoundrc` routing
+  ALSA's default device to PulseAudio has real sound and speech.
 
 ### Python -- tools, data, packaging
 

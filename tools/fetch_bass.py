@@ -10,10 +10,11 @@ Where they land is what `crates/bass-sys` looks for:
 the test and game binaries. `FREIGHT_FATE_BASS_PATH` overrides the lot if a
 developer keeps BASS somewhere else.
 
-Windows and macOS are both pinned. The macOS downloads are universal
+Windows, macOS and Linux are all pinned. The macOS downloads are universal
 binaries -- one file carrying the Intel and Apple silicon slices -- so the
 same bytes are written into `macos-x86_64` and `macos-aarch64`, and a build
-targeting either architecture finds its library.
+targeting either architecture finds its library. Linux takes the x86_64
+slice of un4seen's `-linux` packages.
 
 Every file is checked against a pinned sha256. A silent change upstream --
 un4seen ship rolling updates behind stable URLs -- would otherwise walk into
@@ -30,6 +31,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import io
+import platform
 import shutil
 import sys
 import urllib.error
@@ -119,10 +121,44 @@ MACOS_UNIVERSAL = {
     ),
 }
 
+# Linux, from un4seen's `-linux` packages, which carry one slice per
+# architecture under `libs/`. Verified against upstream on 2026-09-02, the
+# day the Rust Linux build first existed; like macOS there is no older build
+# the game was played against first.
+#
+# No AAC add-on: `bass_aac24-linux.zip` does not exist upstream (it 404s),
+# and the Python Linux build has always shipped without it too.
+#
+# These depend on nothing beyond libc, so the same files run on every glibc
+# distribution; they are what the Linux tarball and AppImage ship.
+LINUX_X86_64 = {
+    "libbass.so": (
+        "https://www.un4seen.com/files/bass24-linux.zip",
+        "libs/x86_64/libbass.so",
+        "bd0841d0c14f25065a16192be07c20b045e384199a86a00892cc3864474dbc51",
+    ),
+    "libbassflac.so": (
+        "https://www.un4seen.com/files/bassflac24-linux.zip",
+        "libs/x86_64/libbassflac.so",
+        "fe7b929ea75636d3a6082f2f741ca616b6cad038d23e3cda56e6bbb66d8eae8e",
+    ),
+    "libbassopus.so": (
+        "https://www.un4seen.com/files/bassopus24-linux.zip",
+        "libs/x86_64/libbassopus.so",
+        "662bc3131bd6c2a1d8241bcb31b8d728ee82b6436cd9e7a742c16a60dc5ecdda",
+    ),
+    "libbasshls.so": (
+        "https://www.un4seen.com/files/basshls24-linux.zip",
+        "libs/x86_64/libbasshls.so",
+        "102bb7bad93199257348cfdb3280f51bdd003c0b6b7ea3ec7f04a7d68147defd",
+    ),
+}
+
 TARGETS = {
     "windows-x86_64": WINDOWS_X64,
     "macos-x86_64": MACOS_UNIVERSAL,
     "macos-aarch64": MACOS_UNIVERSAL,
+    "linux-x86_64": LINUX_X86_64,
 }
 
 
@@ -154,10 +190,12 @@ def target_keys() -> list[str]:
         return ["windows-x86_64"]
     if sys.platform == "darwin":
         return ["macos-x86_64", "macos-aarch64"]
-    # Linux has no pinned build yet, and guessing a URL for it would be worse
-    # than saying so.
+    if sys.platform.startswith("linux") and platform.machine() in ("x86_64", "AMD64"):
+        return ["linux-x86_64"]
+    # Anything else has no pinned build, and guessing a URL for it would be
+    # worse than saying so.
     raise SystemExit(
-        f"fetch_bass: no pinned BASS build for {sys.platform}. "
+        f"fetch_bass: no pinned BASS build for {sys.platform} {platform.machine()}. "
         "Install BASS yourself and point FREIGHT_FATE_BASS_PATH at it."
     )
 

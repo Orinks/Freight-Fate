@@ -56,7 +56,12 @@ def test_fetch_bass_covers_the_platforms_the_game_ships_on(monkeypatch, platform
 
 def test_every_fetch_bass_target_has_a_pinned_table():
     fetch_bass = load_fetch_bass()
-    assert set(fetch_bass.TARGETS) == {"windows-x86_64", "macos-x86_64", "macos-aarch64"}
+    assert set(fetch_bass.TARGETS) == {
+        "windows-x86_64",
+        "macos-x86_64",
+        "macos-aarch64",
+        "linux-x86_64",
+    }
     for key, files in fetch_bass.TARGETS.items():
         assert files, f"{key} has no pinned files"
         for name, (_url, member, want) in files.items():
@@ -64,12 +69,35 @@ def test_every_fetch_bass_target_has_a_pinned_table():
             assert member, f"{key}/{name} names no archive member"
 
 
-def test_fetch_bass_refuses_a_platform_it_has_no_pins_for(monkeypatch):
+def test_fetch_bass_fills_the_linux_directory_on_x86_64(monkeypatch):
     fetch_bass = load_fetch_bass()
     monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.setattr(fetch_bass.platform, "machine", lambda: "x86_64")
+    assert fetch_bass.target_keys() == ["linux-x86_64"]
+
+
+def test_fetch_bass_refuses_a_platform_it_has_no_pins_for(monkeypatch):
+    """A Linux machine that is not x86_64 has no pinned build; guessing an
+    un4seen URL for it would be worse than saying so."""
+    fetch_bass = load_fetch_bass()
+    monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.setattr(fetch_bass.platform, "machine", lambda: "aarch64")
     with pytest.raises(SystemExit) as excinfo:
         fetch_bass.target_keys()
     assert "FREIGHT_FATE_BASS_PATH" in str(excinfo.value)
+
+
+def test_linux_carries_sdl2_statically():
+    """Linux compiles SDL2 in too: every distribution ships a different
+    libSDL2-2.0.so.0, and a tarball that has to start on all of them cannot
+    link against any one. The static build still opens X11, Wayland and the
+    audio servers by dlopen, so nothing is lost but the dependency."""
+    manifest = tomllib.loads(
+        (REPO_ROOT / "crates" / "freight-fate" / "Cargo.toml").read_text(encoding="utf-8")
+    )
+    linux = manifest["target"]['cfg(target_os = "linux")']["dependencies"]["sdl2"]
+    assert "bundled" in linux["features"]
+    assert "static-link" in linux["features"]
 
 
 def test_macos_carries_sdl2_statically():
