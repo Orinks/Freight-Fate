@@ -229,22 +229,30 @@ jobs:
         # public repository (see crates/bass-sys/vendor/licenses/README.md).
         # The fetch tool pins every file by sha256, so the tool's own hash is
         # the right cache key: bump a pin and the cache misses.
+        id: bass
         uses: actions/cache@v4
         with:
           path: crates/bass-sys/vendor/windows-x86_64/*.dll
           key: bass-windows-${{ hashFiles('tools/fetch_bass.py') }}
 
       - name: Fetch BASS
-        # Without BASS bass-sys still builds and every audio test skips
-        # itself, which reads as a green run that proved nothing about the
-        # audio backend -- so --check fails the job rather than letting that
-        # pass. The tool is standard-library Python, so the runner's own
-        # interpreter runs it: no uv, no venv, no dependency sync. On a cache
-        # hit the first call prints "ok" for each file and downloads nothing.
+        # Only on a cache miss. The AAC add-on has no public download: the
+        # fetch tool lifts it out of the sound_lib package in the project
+        # venv, which is why this needs uv and a dependency sync (about
+        # twenty seconds) rather than the runner's bare interpreter.
+        if: steps.bass.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          python tools/fetch_bass.py
-          python tools/fetch_bass.py --check
+          python -m pip install --quiet uv
+          uv run python tools/fetch_bass.py
+
+      - name: Check BASS
+        # Every run, hit or miss. Without BASS bass-sys still builds and
+        # every audio test skips itself, which reads as a green run that
+        # proved nothing about the audio backend -- so --check fails the job
+        # rather than letting that pass. The check is standard-library
+        # Python, so the runner's own interpreter is enough.
+        run: python tools/fetch_bass.py --check
 
       - name: Install sccache
         uses: mozilla-actions/sccache-action@v0.0.9
