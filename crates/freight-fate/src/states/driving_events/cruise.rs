@@ -400,7 +400,10 @@ impl DrivingState {
                 let fresh = self
                     .keeper_ease_said
                     .is_none_or(|said| *ahead_mph < said - 0.5);
-                if ahead_reason != "turn" && fresh {
+                // A mapped bend is the curve call's to name, like a corner
+                // is the approach call's: the pacenote already carried the
+                // number and the assist clause.
+                if !matches!(ahead_reason.as_str(), "turn" | "curve") && fresh {
                     self.keeper_ease_said = Some(*ahead_mph);
                     let reason = match ahead_reason.as_str() {
                         "construction" => "Construction zone ahead",

@@ -486,6 +486,22 @@
 
 ### Changed
 
+- **Curve speed assistance now slows the truck for a bend before you reach
+  it, in every driving mode.** It used to act only once you were already in
+  the bend and too fast, or leave the bend to adaptive cruise; with the pedals
+  in your hands or the speed keeper holding a street limit it only ever spoke.
+  Now the curve call arms the brakes: the truck comes down to the advisory by
+  the start of the bend, holds it through the bend (the tightest number when
+  two bends are called together), and lets go on the far side. With curve
+  callouts on, the call says so in the same breath: "Sharp left, half a mile.
+  Advise 35 miles per hour. Curve speed assistance slowing." A bend too tight
+  for adaptive cruise to hold still pauses cruise, and the call now says the
+  assist is slowing for it and that cruise resumes once you are through and
+  back up to speed. Your own brake cancels it for that bend, and the assist
+  says "Curve speed assistance released." With curve callouts off nothing is
+  said and the slowing is what you hear. Loads start shifting a little over
+  fifteen percent above a bend's advisory, which is why the truck aims at the
+  advisory itself.
 - **The hazard warning now tells you which lane is open.** "Change lanes or
   brake! Slow car right ahead." used to leave you guessing whether a lane
   change was even possible. The call now ends with the answer, in the same

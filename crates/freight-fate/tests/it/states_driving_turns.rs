@@ -882,6 +882,9 @@ fn test_pacenote_respects_the_setting() {
 fn test_curve_event_uses_the_documented_short_pacenote_wording() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
+    // The bare call: with curve speed assistance on (the default) the
+    // approach servo appends its own clause, pinned by its own cases below.
+    app.ctx.settings.curve_speed_assist = false;
     let pos = d.trip.position_mi;
     let spoken = spoken_pacenotes(
         &mut app,
@@ -899,6 +902,8 @@ fn test_curve_event_uses_the_documented_short_pacenote_wording() {
 fn test_upcoming_curve_remains_eligible_after_resume() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
+    // The bare call, as above.
+    app.ctx.settings.curve_speed_assist = false;
     app.clear_speech();
     let pos = d.trip.position_mi;
     let curve = a_curve(pos + 0.3, 'L', 30, 307, 60.0);
@@ -1560,4 +1565,369 @@ fn test_a_closing_distance_is_never_spoken_as_zero() {
     assert!(spoken_closing_distance(0.02, true).contains("feet"));
     assert_eq!(spoken_closing_distance(0.5, true), "half a mile");
     assert!(spoken_closing_distance(0.02, false).contains("meters"));
+}
+
+// -- the approach servo: curve speed assistance in every driving mode ------------------
+//
+// Owner ruling, 2026-09-01: "assists should handle curves better to avoid
+// load/cargo shifting damage." Live that night, every assist on, adaptive
+// cruise at 90 km/h carried the truck into a 35 mph left bend on US-83 near
+// Junction, Texas -- "Sharp left: too fast, drifting to the outside" -- and
+// the load shifted 12, then 31 percent over two bends. These drive REAL
+// frames through a staged bend and read the speed the truck actually carries
+// across its start, the drift line, and the cargo.
+
+const DT: f64 = 1.0 / 60.0;
+
+/// What a drive through one bend measured.
+struct BendRun {
+    /// The speed the truck crossed the bend's start at, mph.
+    speed_at_start_mph: f64,
+    /// The worst the load got, percent.
+    cargo_damage_pct: f64,
+    /// Every event line spoken from the call to the far side of the bend.
+    lines: Vec<String>,
+}
+
+/// The engine running, air up, rolling at `speed_mph` on the corridor's first
+/// open-road mile, curve speed assistance on, with a bend of `advisory` and
+/// `radius` set `ahead_mi` up the road.
+fn a_hot_bend_ahead(
+    app: &mut TestApp,
+    d: &mut DrivingState,
+    speed_mph: f64,
+    advisory: i64,
+    radius: i64,
+    ahead_mi: f64,
+) -> RouteCurve {
+    app.ctx.settings.curve_speed_assist = true;
+    d.trip.position_mi = open_road_mile(d);
+    d.trip.truck.set_air_ready(false);
+    d.trip.truck.start_engine();
+    d.trip.truck.brake = 0.0;
+    d.trip.truck.velocity_mps = speed_mph * 0.44704;
+    let bend = a_curve(d.trip.position_mi + ahead_mi, 'L', advisory, radius, 60.0);
+    d.trip.curves = vec![bend];
+    d.trip.announced_curves.clear();
+    app.clear_speech();
+    bend
+}
+
+/// Roll real frames from here to past the bend's commit tail, `each_frame`
+/// getting a turn before every frame for the driver's own pedals.
+fn drive_through_the_bend(
+    app: &mut TestApp,
+    d: &mut DrivingState,
+    bend: &RouteCurve,
+    clock: &freight_fate::app::testing::FakeClock,
+    mut each_frame: impl FnMut(&mut TestApp, &mut DrivingState),
+) -> BendRun {
+    let mut speed_at_start_mph = None;
+    let mut cargo_damage_pct: f64 = 0.0;
+    let until_mi = bend.end_mi + TURN_COMMIT_TAIL_MI + 0.05;
+    // Two real minutes is far longer than half a mile at road speed takes;
+    // a run that needs more of the clock has stalled and the loop says so.
+    for _ in 0..(120.0 / DT) as usize {
+        if d.trip.position_mi >= until_mi {
+            break;
+        }
+        each_frame(app, d);
+        app.ctx.input.begin_frame(DT);
+        d.update_frame(&mut app.ctx, DT);
+        clock.advance(DT);
+        if speed_at_start_mph.is_none() && d.trip.position_mi >= bend.start_mi {
+            speed_at_start_mph = Some(d.trip.truck.speed_mph());
+        }
+        cargo_damage_pct = cargo_damage_pct.max(d.trip.truck.cargo_damage_pct);
+    }
+    BendRun {
+        speed_at_start_mph: speed_at_start_mph.expect("the truck never reached the bend"),
+        cargo_damage_pct,
+        lines: app.event_lines(),
+    }
+}
+
+fn drifted(run: &BendRun) -> bool {
+    run.lines
+        .iter()
+        .any(|line| line.contains("drifting to the outside"))
+}
+
+#[test]
+fn test_cruise_into_a_hot_bend_arrives_at_the_advisory() {
+    // (a) Adaptive cruise at 60, a 35 mph bend half a mile out -- the owner's
+    // US-83 case in the harness. The truck is at the advisory by the bend's
+    // start, never drifts, and the load never moves.
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    let bend = a_hot_bend_ahead(&mut app, &mut d, 60.0, 35, 307, 0.5);
+    d.engage_cruise(&mut app.ctx, 60.0, false);
+    assert_eq!(d.cruise_mph, Some(60.0));
+    app.clear_speech();
+
+    // Cruise's own closing brake does nearly all of this shed (measured
+    // 2026-09-01: 60 to 38 in the first tenth of a mile on its cap alone);
+    // the servo behind it is a backstop, and reads as one.
+    let mut servo_max: f64 = 0.0;
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+        servo_max = servo_max.max(d.curve_servo.as_ref().map_or(0.0, |s| s.brake));
+    });
+    assert!(
+        servo_max < 0.15,
+        "cruise makes the bend on its own; the servo should barely touch the pedal: {servo_max:.2}"
+    );
+
+    assert!(
+        run.speed_at_start_mph <= 35.0 + 2.0,
+        "crossed the bend's start at {:.1} mph: {:#?}",
+        run.speed_at_start_mph,
+        run.lines
+    );
+    assert!(!drifted(&run), "{:#?}", run.lines);
+    assert_eq!(
+        run.cargo_damage_pct, 0.0,
+        "the load moved: {:#?}",
+        run.lines
+    );
+    // Cruise's easing line is the one call; the assist rides it silently and
+    // says nothing on its own.
+    assert!(
+        run.lines
+            .iter()
+            .any(|line| line.contains("Adaptive cruise easing to 35 miles per hour for the bend")),
+        "{:#?}",
+        run.lines
+    );
+    assert!(
+        !run.lines
+            .iter()
+            .any(|line| line.contains("Curve speed assistance")),
+        "cruise's line covers the bend; the assist must not speak twice: {:#?}",
+        run.lines
+    );
+    // And the servo let go past the tail.
+    assert!(d.curve_servo.is_none());
+}
+
+#[test]
+fn test_a_manual_driver_off_the_pedals_is_braked_to_the_advisory() {
+    // (b) The same bend with cruise OFF and no pedals: a manual driver who
+    // heard the call and did nothing. Before tonight nothing proactive
+    // happened at all; now the assist takes the brakes on the approach, and
+    // the call says so in the same breath.
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    let bend = a_hot_bend_ahead(&mut app, &mut d, 60.0, 35, 307, 0.5);
+    assert!(d.cruise_mph.is_none());
+
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, _| {});
+
+    assert!(
+        run.speed_at_start_mph <= 35.0 + 2.0,
+        "crossed the bend's start at {:.1} mph: {:#?}",
+        run.speed_at_start_mph,
+        run.lines
+    );
+    assert!(!drifted(&run), "{:#?}", run.lines);
+    assert_eq!(run.cargo_damage_pct, 0.0);
+    let call = run
+        .lines
+        .iter()
+        .find(|line| line.contains("left, half a mile"))
+        .unwrap_or_else(|| panic!("a curve call: {:#?}", run.lines));
+    assert!(
+        call.ends_with("Advise 35 miles per hour. Curve speed assistance slowing."),
+        "one utterance, the pacenote plus the assist clause: {call:?}"
+    );
+    // The reactive line inside the bend is the bare sentence; the servo owns
+    // this bend, so it never fires on top of the approach clause.
+    assert!(
+        !run.lines
+            .iter()
+            .any(|line| line == "Curve speed assistance slowing."),
+        "the reactive line must not double the approach line: {:#?}",
+        run.lines
+    );
+    assert!(d.curve_servo.is_none());
+}
+
+#[test]
+fn test_a_bend_under_cruises_floor_is_braked_down_and_cruise_comes_back() {
+    // (c) Advisory 15, under the 20 cruise can hold: cruise pauses as it did
+    // tonight, but the servo now brings the truck down to 15 instead of
+    // leaving the bend to the driver, and the existing resume brings cruise
+    // back past it.
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    let bend = a_hot_bend_ahead(&mut app, &mut d, 60.0, 15, 120, 0.9);
+    d.engage_cruise(&mut app.ctx, 60.0, false);
+    app.clear_speech();
+
+    let mut paused_in_the_bend = false;
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+        if d.trip.position_mi >= d.trip.curves[0].start_mi
+            && d.trip.position_mi <= d.trip.curves[0].end_mi
+            && d.cruise_mph.is_none()
+        {
+            paused_in_the_bend = true;
+        }
+    });
+
+    assert!(
+        run.speed_at_start_mph <= 15.0 + 2.0,
+        "crossed the bend's start at {:.1} mph: {:#?}",
+        run.speed_at_start_mph,
+        run.lines
+    );
+    assert!(!drifted(&run), "{:#?}", run.lines);
+    assert_eq!(run.cargo_damage_pct, 0.0);
+    assert!(paused_in_the_bend, "cruise stayed on through the bend");
+    let call = run
+        .lines
+        .iter()
+        .find(|line| line.contains("Adaptive cruise paused for the bend"))
+        .expect("the pause line");
+    assert!(
+        call.contains(
+            "curve speed assistance slowing, and cruise resumes once you are through and back \
+             up to speed"
+        ),
+        "{call:?}"
+    );
+    // Past the tail the pause is spent, and once the driver has the truck
+    // back up to road speed the session comes back on its own, at the set
+    // speed -- the line's promise.
+    assert!(d.cruise_resume_after_mi.is_none(), "{:#?}", run.lines);
+    assert!(d.speed_control_armed, "{:#?}", run.lines);
+    app.ctx.input.press(Key::Up, Mods::NONE);
+    for _ in 0..(60.0 / DT) as usize {
+        if d.cruise_mph.is_some() {
+            break;
+        }
+        app.ctx.input.begin_frame(DT);
+        d.update_frame(&mut app.ctx, DT);
+        clock.advance(DT);
+    }
+    let lines = app.event_lines();
+    assert_eq!(d.cruise_mph, Some(60.0), "{lines:#?}");
+    assert!(
+        lines
+            .iter()
+            .any(|line| line.contains("Adaptive cruise resuming at 60 miles per hour")),
+        "{lines:#?}"
+    );
+}
+
+#[test]
+fn test_the_drivers_own_brake_takes_the_bend_back_from_the_servo() {
+    // (d) A driver holding the brake harder than the servo is not fought:
+    // their key cancels the servo for the bend, the assist says it let go,
+    // and the pedal the truck feels is theirs.
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    let bend = a_hot_bend_ahead(&mut app, &mut d, 60.0, 35, 307, 0.5);
+
+    // One frame arms the servo off the call.
+    app.ctx.input.begin_frame(DT);
+    d.update_frame(&mut app.ctx, DT);
+    clock.advance(DT);
+    assert!(d.curve_servo.is_some(), "{:#?}", app.event_lines());
+
+    // Then the driver stands on the brake for two seconds and lets go.
+    app.ctx.input.press(Key::Down, Mods::NONE);
+    let mut brake_seen: f64 = 0.0;
+    for _ in 0..(2.0 / DT) as usize {
+        app.ctx.input.begin_frame(DT);
+        d.update_frame(&mut app.ctx, DT);
+        clock.advance(DT);
+        brake_seen = brake_seen.max(d.trip.truck.brake);
+    }
+    app.ctx.input.release(Key::Down, Mods::NONE);
+    assert!(
+        brake_seen >= 0.9,
+        "the driver's pedal never reached full: {brake_seen}"
+    );
+    assert!(
+        d.curve_servo.is_none(),
+        "the servo survived the driver's own brake"
+    );
+    // The bend is theirs for the rest of it: nothing re-arms on the way in.
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+        assert!(
+            d.curve_servo.is_none(),
+            "the servo re-armed after the cancel"
+        );
+    });
+    assert!(
+        run.lines
+            .iter()
+            .any(|line| line == "Curve speed assistance released."),
+        "{:#?}",
+        run.lines
+    );
+}
+
+#[test]
+fn test_with_the_assist_off_a_hot_bend_still_drifts() {
+    // (e) The setting means something: with curve speed assistance off, a
+    // driver holding the throttle into the same bend gets the old drift
+    // line, and nothing brakes for them.
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    let bend = a_hot_bend_ahead(&mut app, &mut d, 60.0, 35, 307, 0.5);
+    app.ctx.settings.curve_speed_assist = false;
+    app.ctx.input.press(Key::Up, Mods::NONE);
+
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, d| {
+        assert!(
+            d.curve_servo.is_none(),
+            "the servo armed with the assist off"
+        );
+    });
+
+    assert!(
+        run.speed_at_start_mph > 35.0 + 15.0,
+        "the throttle-held truck should still be hot: {:.1}",
+        run.speed_at_start_mph
+    );
+    assert!(drifted(&run), "{:#?}", run.lines);
+    assert!(
+        !run.lines
+            .iter()
+            .any(|line| line.contains("Curve speed assistance")),
+        "{:#?}",
+        run.lines
+    );
+}
+
+#[test]
+fn test_the_approach_servo_says_nothing_with_curve_callouts_off() {
+    // Callouts off silences the words, never the assist (tonight's earlier
+    // fix): the truck is still braked to the advisory, and nothing is said.
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    let bend = a_hot_bend_ahead(&mut app, &mut d, 60.0, 35, 307, 0.5);
+    app.ctx.settings.curve_callouts = false;
+
+    let run = drive_through_the_bend(&mut app, &mut d, &bend, &clock, |_, _| {});
+
+    assert!(
+        run.speed_at_start_mph <= 35.0 + 2.0,
+        "crossed the bend's start at {:.1} mph",
+        run.speed_at_start_mph
+    );
+    assert!(!drifted(&run), "{:#?}", run.lines);
+    assert!(
+        !run.lines
+            .iter()
+            .any(|line| line.contains("Curve") || line.contains("curve")),
+        "callouts off means no words: {:#?}",
+        run.lines
+    );
 }

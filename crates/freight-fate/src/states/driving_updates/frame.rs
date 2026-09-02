@@ -313,6 +313,11 @@ impl DrivingState {
         {
             self.cancel_approach_pull_ahead(ctx);
         }
+        // And for curve speed assistance's approach servo: the driver's own
+        // brake takes the bend back for the rest of it.
+        if self.curve_servo.is_some() && (braking_key || emergency) && !backing {
+            self.cancel_curve_servo(ctx);
+        }
         if emergency {
             // no ramp: slams to full application instantly, plus spring brakes
             if !self.trip.truck.emergency_brake && self.trip.truck.velocity_mps.abs() > 1.0 {
@@ -434,6 +439,10 @@ impl DrivingState {
         // while the assist's own bookkeeping said 0.40. Every earlier fix to
         // this assist tuned a number against a pedal the truck never felt.
         self.update_destination_approach_assist(ctx);
+        // Curve speed assistance's approach servo, for the same reason: its
+        // pedal has to be set where the physics will see it, and after cruise
+        // and the keeper so the max it applies is the one that stands.
+        self.update_curve_speed_servo(ctx);
         self.update_horn_protection(ctx);
 
         self.update_auto_jake(ctx, dt);

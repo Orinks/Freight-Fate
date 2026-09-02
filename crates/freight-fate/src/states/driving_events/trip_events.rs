@@ -9,8 +9,8 @@ use ff_core::sim::driving_modes::tuning_for_time_scale;
 use ff_core::sim::trip_models::{TripEvent, TripEventKind};
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::speech_text::{
-    cruise_curve_easing, cruise_curve_paused, roadside_chatter, stop_callout, SpokenMessage,
-    StopCalloutParts,
+    cruise_curve_easing, cruise_curve_paused, cruise_curve_paused_assisted, curve_assist_slowing,
+    roadside_chatter, stop_callout, SpokenMessage, StopCalloutParts,
 };
 
 use crate::app::{GameContext, Say, SayEvent};
@@ -496,6 +496,53 @@ impl DrivingState {
             }
             ctx.say_event_with(text, opts);
         };
+        // The CHAIN's number and extent, not just this bend's. A call
+        // that carries a linked follower ("then sharp left, advise 30")
+        // is the follower's only warning -- the trip suppresses its own
+        // call so the pair is one sentence -- so easing to the first
+        // bend's 40 and releasing at the first bend's end took the truck
+        // into the follower ten miles an hour too fast, with nothing
+        // left to warn it. Darren's load shifted 12 percent on exactly
+        // that pair on NY-12 (2026-08-23), and the spoken line had named
+        // 30 the whole time: the words were right and the assist was
+        // not. The cruise pause below keys its resume to the same extent,
+        // and the approach servo holds to it.
+        let chain = curve.as_ref().map(|curve| {
+            let mut hold_mph = advisory;
+            let mut hold_to_mi = curve.start_mi.max(curve.end_mi);
+            if let Some(linked) = self.pacenote_linked(curve) {
+                hold_mph = hold_mph.min(linked.advisory_mph as f64);
+                hold_to_mi = hold_to_mi.max(linked.start_mi).max(linked.end_mi);
+            }
+            (hold_mph, hold_to_mi)
+        });
+        // THE APPROACH SERVO, in every driving mode. With curve speed
+        // assistance on and the truck over the chain's number, the assist
+        // takes the brakes from here: down to the advisory by the bend's
+        // start, held through the chain and its commit tail, then released.
+        // Until tonight the only proactive move was cruise's easing cap, so
+        // a manual driver or the speed keeper got the words and nothing
+        // else, and cruise's own bounded ramp could still arrive hot -- the
+        // owner's US-83 bend, 35 mph at 90 km/h with every assist on, load
+        // shifted 31 percent (2026-09-01). The driver's own brake cancels it
+        // for the bend, as everywhere. `spoke` is whether THIS call names the
+        // assist, so a release can be paired to it; cruise's easing line
+        // below names cruise instead, and the servo stays its silent backstop.
+        let servo =
+            chain.filter(|(hold_mph, _)| ctx.settings.curve_speed_assist && speed > *hold_mph);
+        let cruise_above = self.cruise_mph.is_some_and(|set| set > advisory + 5.0);
+        let cruise_easing = cruise_above && advisory >= CRUISE_MIN_MPH;
+        if let Some((hold_mph, hold_to_mi)) = servo {
+            let start_mi = curve
+                .as_ref()
+                .map_or(self.trip.position_mi + ahead, |c| c.start_mi);
+            self.arm_curve_servo(
+                hold_mph,
+                start_mi,
+                hold_to_mi + TURN_COMMIT_TAIL_MI,
+                announce && !cruise_easing,
+            );
+        }
         // A curve well above the cruise set point: with curve speed
         // assistance on, the bend is cruise's job -- cap the working
         // target to the advisory the way an armed exit caps for its
@@ -503,28 +550,8 @@ impl DrivingState {
         // only when the advisory sits below what cruise can hold at all
         // (owner direction, 2026-07-22 playtest: all-assists drivers
         // must not be dropped to the pedals for an ordinary bend).
-        if self.cruise_mph.is_some_and(|set| set > advisory + 5.0) {
-            let assisted =
-                ctx.settings.curve_speed_assist && curve.is_some() && advisory >= CRUISE_MIN_MPH;
-            // The CHAIN's number and extent, not just this bend's. A call
-            // that carries a linked follower ("then sharp left, advise 30")
-            // is the follower's only warning -- the trip suppresses its own
-            // call so the pair is one sentence -- so easing to the first
-            // bend's 40 and releasing at the first bend's end took the truck
-            // into the follower ten miles an hour too fast, with nothing
-            // left to warn it. Darren's load shifted 12 percent on exactly
-            // that pair on NY-12 (2026-08-23), and the spoken line had named
-            // 30 the whole time: the words were right and the assist was
-            // not. The pause below keys its resume to the same extent.
-            let chain = curve.as_ref().map(|curve| {
-                let mut hold_mph = advisory;
-                let mut hold_to_mi = curve.start_mi.max(curve.end_mi);
-                if let Some(linked) = self.pacenote_linked(curve) {
-                    hold_mph = hold_mph.min(linked.advisory_mph as f64);
-                    hold_to_mi = hold_to_mi.max(linked.start_mi).max(linked.end_mi);
-                }
-                (hold_mph, hold_to_mi)
-            });
+        if cruise_above {
+            let assisted = ctx.settings.curve_speed_assist && curve.is_some() && cruise_easing;
             if assisted {
                 let (hold_mph, hold_to_mi) = chain.expect("assisted needs a curve");
                 self.cruise_curve_mph = Some(hold_mph);
@@ -552,7 +579,14 @@ impl DrivingState {
                 let hold_to_mi = chain.map_or(position + ahead, |(_, end)| end);
                 self.cancel_cruise(ctx, true);
                 self.cruise_resume_after_mi = Some(hold_to_mi + TURN_COMMIT_TAIL_MI);
-                let text = cruise_curve_paused(&message);
+                // With the servo armed the bend is not the driver's after
+                // all: the assist brings the truck down and cruise comes back
+                // past it. Say that, not the handback.
+                let text = if servo.is_some() {
+                    cruise_curve_paused_assisted(&message)
+                } else {
+                    cruise_curve_paused(&message)
+                };
                 say_curve(ctx, text, true);
             }
         } else {
@@ -561,7 +595,15 @@ impl DrivingState {
             // quarter mile (owner's AZ-260 log, 2026-07-19 -- the words
             // were honest when emitted and stale when finally spoken).
             // Ambient lines can wait; the road cannot.
-            say_curve(ctx, message, true);
+            //
+            // Manual pedals or the speed keeper: the pacenote carries the
+            // assist clause in the same breath, never as a second line.
+            let text = if servo.is_some() {
+                curve_assist_slowing(&message)
+            } else {
+                message
+            };
+            say_curve(ctx, text, true);
         }
         // Open the re-arm window: if Ctrl silences this call before it
         // finishes, it gets one refreshed re-speak (owner worry,

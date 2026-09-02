@@ -5642,6 +5642,44 @@ Everything not listed here ships fine after 1.9.0.
       only Plus/Minus or a pad D-pad reach that code, so an operator-side
       key or controller may be landing in the minimized game window;
       unresolved.
+- [x] **Curve speed assistance brakes for the bend on the approach, in
+      every driving mode (2026-09-01).** Owner ruling that night, after
+      the US-83 drive near Junction, Texas -- every assist on, adaptive
+      cruise at 90 km/h into a 35 mph left bend of 197 ft radius, "Sharp
+      left: too fast, drifting to the outside", load shifted 12 then 31
+      percent over two bends: "assists should handle curves better to
+      avoid load/cargo shifting damage." Until then the only proactive
+      move was cruise's easing cap; with the pedals in the driver's hands
+      or the speed keeper on a street the assist braked only once the
+      truck was already inside the bend and over the number. Shipped: a
+      curve servo (`driving_updates/curve_servo.rs`) armed by the curve
+      call at its lead distance whenever the truck is over the chain's
+      tightest advisory -- the arrival assist's own shed profile
+      (`(v^2 - t^2) / 2d` net of the road, through `arrival_servo_brake`)
+      down to the advisory by the bend's start, held through the chain
+      plus the commit tail, released silently; brake by `max`, throttle
+      never touched, the driver's own brake cancels it. Cruise above its
+      floor keeps the easing cap and the servo stays a backstop (measured
+      in the harness: cruise's closing brake takes 60 to 38 in the first
+      tenth of a mile and the servo added at most 0.07 of pedal); under
+      the floor the pause stays and the servo does the slowing; the speed
+      keeper folds the servo's number into its look-ahead so it stops
+      pushing. One utterance on the approach -- the pacenote plus "Curve
+      speed assistance slowing." (or, under cruise's floor, "Adaptive
+      cruise paused for the bend; curve speed assistance slowing, and
+      cruise resumes once you are through and back up to speed"); curve
+      callouts off says nothing. THE LOAD-SHIFT LINE, from the physics:
+      freight moves past 0.40 g of lateral pull, geometric from the
+      bend's radius (`CARGO_CORNER_LAT_G`, 12 percent per g-second), and
+      the baked advisories sit near 0.30 g, so a load starts moving about
+      15 percent over a typical advisory (35 becomes 40) -- and on a bend
+      tighter than its sign, like the owner's (0.42 g at 35), the
+      advisory itself is the line, which is why the servo aims at the
+      advisory with no margin. Six harness drives pin it: cruise, manual
+      pedals, the under-floor pause and resume, the driver's brake
+      cancelling, callouts off, and the assist off still drifting.
+      Follow-up worth a drive: the servo is not persisted, so a save
+      mid-approach resumes without it (cruise's cap has the same gap).
 - [ ] **Agent playtest probes worth running now the server exists.** A
       spoken-surface navigability probe: an agent at each verbosity rung
       tries to complete a first delivery using ears alone; every place it

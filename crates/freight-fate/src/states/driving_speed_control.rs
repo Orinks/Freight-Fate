@@ -591,6 +591,21 @@ impl DrivingState {
                 }
             }
         }
+        // A mapped bend curve speed assistance is braking for. The servo
+        // owns the profile; folding its number in here is what stops the
+        // keeper holding the street limit against the servo's brake and
+        // winding the truck back up the moment the pedal eases. Held to the
+        // servo's own end (the chain's, plus the commit tail), the same shape
+        // as a corner's hold above, and the keeper's ease line stays quiet
+        // for it because the curve call already named the number.
+        if let Some(servo) = self.curve_servo.as_ref() {
+            if position < servo.hold_to_mi {
+                let lower = demand.as_ref().is_none_or(|d| servo.target_mph < d.1);
+                if lower {
+                    demand = Some((servo.hold_to_mi, servo.target_mph, "curve".to_string()));
+                }
+            }
+        }
         let (limit, _) = self.trip.speed_limit_at(position);
         let horizon = self.trip.total_miles().min(position + KEEPER_EASE_MAX_MI);
         let mut probe = position + KEEPER_LIMIT_PROBE_MI;

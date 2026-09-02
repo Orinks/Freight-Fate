@@ -34,6 +34,7 @@
 pub mod air;
 pub mod conditions;
 pub mod cues;
+pub mod curve_servo;
 pub mod enforcement;
 pub mod engine_audio;
 pub mod fatigue;

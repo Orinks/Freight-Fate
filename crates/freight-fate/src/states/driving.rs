@@ -58,6 +58,7 @@ use crate::states::base::{InputEvent, State};
 use crate::states::driving_core::{
     CbChatterRecall, CurveRun, Instructor, PendingAmbient, PendingSound, RigBuffs, SirenLoop,
 };
+use crate::states::driving_updates::curve_servo::CurveServo;
 
 pub use snapshot::ACTIVE_TRIP_DEADLINE_MODEL;
 
@@ -555,6 +556,11 @@ pub struct DrivingState {
     // (see the ramp case in driving_updates) never leaves a lone
     // "released" hanging with nothing before it.
     pub curve_assist_spoke: bool,
+    // The proactive half of curve speed assistance: armed by the curve call,
+    // it brakes the truck to the chain's tightest advisory on the approach
+    // and holds it through the bend (see driving_updates::curve_servo). The
+    // fields above are the reactive half, inside the bend.
+    pub curve_servo: Option<CurveServo>,
     pub transition_assist_active: bool,
     pub keeper_mph: Option<f64>,
     pub keeper_throttle: f64,

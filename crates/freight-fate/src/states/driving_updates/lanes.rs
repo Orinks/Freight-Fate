@@ -248,8 +248,19 @@ impl DrivingState {
         // service applications fight over the same descent (Joshua's ramp
         // drive, 2026-08-28).
         let on_ramp = self.ramp_mi.is_some();
+        // AND A BEND THE APPROACH SERVO OWNS. The curve call armed the servo
+        // and, with callouts on, already said "Curve speed assistance
+        // slowing" for this bend on the approach -- and with callouts off
+        // the deceleration is meant to be the only word. Either way the
+        // words here are spoken for; the reactive brake above still applies
+        // as the backstop it always was.
+        let servo_owns_bend = self.curve_servo.is_some();
         if curve_assisting {
-            if !self.curve_assist_active && self.curve_assist_cue_s <= 0.0 && !on_ramp {
+            if !self.curve_assist_active
+                && self.curve_assist_cue_s <= 0.0
+                && !on_ramp
+                && !servo_owns_bend
+            {
                 self.curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S;
                 self.curve_assist_spoke = true;
                 // ROUTE, not the ambient default: names an automation taking
