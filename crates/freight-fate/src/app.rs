@@ -25,6 +25,7 @@ use crate::audio::{Audio, AudioEngine, BassBackend, NullBackend};
 use crate::cloud_saves::{BackupAnnouncements, CloudSaves, CloudSavesOptions};
 use crate::controller::ControllerManager;
 use crate::discord_presence::{DiscordPresence, DiscordPresenceOptions};
+use crate::duty_watch::{DutyWatch, DutyWatchOptions};
 use crate::online_journal::JournalOutbox;
 use crate::online_presence::{IdentityStore, OnlinePresence, OnlinePresenceOptions};
 use crate::speech::{NullSpeech, SpeechSink};
@@ -324,6 +325,11 @@ impl App {
             identity: identity.clone(),
             ..Default::default()
         });
+        let duty = DutyWatch::new(DutyWatchOptions {
+            enabled: settings.online_services && settings.duty_notifications,
+            own_driver_id: identity.as_ref().map(|i| i.driver_id.clone()),
+            ..Default::default()
+        });
         let cloud = CloudSaves::new(CloudSavesOptions {
             enabled: settings.cloud_saves,
             identity: identity.clone(),
@@ -383,6 +389,7 @@ impl App {
             services: Services {
                 presence,
                 online,
+                duty,
                 cloud,
                 journal,
                 mastodon,
@@ -676,6 +683,11 @@ impl App {
         for line in self.ctx.services.cloud.take_announcements() {
             self.ctx.say_with(line, Say::queued());
         }
+        // Another driver setting off or signing off, when the player asked
+        // to hear it: same channel, same reason.
+        for line in self.ctx.services.duty.take_announcements() {
+            self.ctx.say_with(line, Say::queued());
+        }
         self.ctx.audio.update(dt); // advance time-based audio fades
         self.ctx.update_speech_duck(); // restore the mix after speech
         if let Some(state) = self.ctx.state() {
@@ -780,6 +792,7 @@ impl App {
         boot_timing::mark("first screen");
         self.ctx.services.presence.start(); // after init; never blocks if Discord is absent
         self.ctx.services.online.start(); // opt-in drivers board; dormant unless confirmed
+        self.ctx.services.duty.start(); // opt-in on/off duty notices; dormant unless on
         self.ctx.services.cloud.start(); // opt-in save backup; dormant unless confirmed
         boot_timing::mark("background services started");
         let mut frames = 0u32;
@@ -825,6 +838,8 @@ impl App {
         boot_timing::mark("quit: rich presence");
         self.ctx.services.online.shutdown();
         boot_timing::mark("quit: drivers board");
+        self.ctx.services.duty.shutdown();
+        boot_timing::mark("quit: duty watch");
         self.ctx.services.cloud.shutdown(); // flushes the final save's backup, bounded
         boot_timing::mark("quit: cloud backup");
         profile_module::set_save_listener(None);

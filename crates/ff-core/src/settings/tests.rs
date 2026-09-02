@@ -80,14 +80,14 @@ fn old_stopping_toggles_migrate_to_the_one_facility_assist() {
 // -- the field table -----------------------------------------------------------
 
 #[test]
-fn the_struct_carries_the_seventy_four_persisted_fields_in_python_order() {
-    // 73 came over from the Python dataclass; backup_announcements
-    // (2026-09-02) is the first field added on the Rust side.
-    assert_eq!(Settings::FIELD_NAMES.len(), 74);
+fn the_struct_carries_the_seventy_five_persisted_fields_in_python_order() {
+    // 73 came over from the Python dataclass; backup_announcements and
+    // duty_notifications (2026-09-02) were added on the Rust side.
+    assert_eq!(Settings::FIELD_NAMES.len(), 75);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
-    assert_eq!(Settings::FIELD_NAMES[73], "settings_layout_notice_from");
+    assert_eq!(Settings::FIELD_NAMES[74], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 74);
+    assert_eq!(pairs.len(), 75);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -127,7 +127,8 @@ fn the_defaults_match_the_python_dataclass() {
         "sapi_events": true, "event_backend": "SAPI",
         "speech_rate": 0.5, "speech_pitch": 0.5, "speech_volume": 1.0, "speech_voice": "",
         "update_channel": "", "skipped_update": "", "discord_presence": true,
-        "online_presence": false, "profile_sharing_consent_version": 0,
+        "online_presence": false, "duty_notifications": false,
+        "profile_sharing_consent_version": 0,
         "profile_sharing_pending_off": false, "cloud_saves": false,
         "mastodon_sharing": false, "mastodon_linked": false, "mastodon_linked_handle": "",
         "controller_enabled": true, "haptics_enabled": true, "online_offer_seen": false,
@@ -138,7 +139,7 @@ fn the_defaults_match_the_python_dataclass() {
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 74);
+    assert_eq!(expected.len(), 75);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }

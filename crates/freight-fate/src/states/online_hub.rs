@@ -40,7 +40,7 @@ impl OnlineHubState {
         "Use up and down arrows to pick an item. Enter opens an item or \
          changes a setting forward, Right arrow also changes a setting \
          forward, and Left arrow changes it backward. Escape goes back. \
-         Drivers on duty and Account achievements work without connecting. \
+         Drivers on duty, the on and off duty notices, and Account          achievements work without connecting. \
          Account-backed services wait until you connect an orinks.net account, \
          and everything you share can be turned off again.";
 
@@ -64,11 +64,12 @@ impl OnlineHubState {
         // build_items has to be added here at the same index, or every toggle
         // below it starts answering for its neighbour.
         match self.menu.index {
-            2 => self.toggle_online_services(ctx, direction),
-            5 => self.toggle_online_presence(ctx, direction),
-            6 => self.toggle_cloud_saves(ctx, direction),
-            8 => self.toggle_mastodon_sharing(ctx, direction),
-            10 => self.toggle_discord_presence(ctx, direction),
+            1 => self.toggle_duty_notifications(ctx, direction),
+            3 => self.toggle_online_services(ctx, direction),
+            6 => self.toggle_online_presence(ctx, direction),
+            7 => self.toggle_cloud_saves(ctx, direction),
+            9 => self.toggle_mastodon_sharing(ctx, direction),
+            11 => self.toggle_discord_presence(ctx, direction),
             _ => {}
         }
     }
@@ -85,6 +86,13 @@ impl OnlineHubState {
     fn drivers_board(&mut self, ctx: &mut GameContext) {
         let board = DriversOnlineState::new(ctx);
         ctx.push_state(board);
+    }
+
+    /// Toggle the spoken notice when another driver goes on or off duty.
+    fn toggle_duty_notifications(&mut self, ctx: &mut GameContext, _direction: i64) {
+        ctx.settings.duty_notifications = !ctx.settings.duty_notifications;
+        ctx.apply_duty_notifications();
+        self.announce(ctx);
     }
 
     fn account_achievements(&mut self, ctx: &mut GameContext) {
@@ -105,6 +113,7 @@ impl OnlineHubState {
         // master switch and stands down or reconnects to match.
         ctx.apply_presence();
         ctx.apply_online_presence();
+        ctx.apply_duty_notifications();
         ctx.apply_cloud_saves();
         ctx.apply_mastodon_sharing();
         self.announce(ctx);
@@ -316,6 +325,22 @@ impl Menu for OnlineHubState {
             MenuItem::new("Drivers on duty", |s: &mut Self, ctx| s.drivers_board(ctx)).help(
                 "Hear who is hauling right now on the public orinks.net \
                  drivers board. Viewing the board shares nothing about you.",
+            ),
+            // Right under the list it watches. Off by default: a line that
+            // arrives unasked while the player is driving is theirs to turn
+            // on, and each player who does costs the site one cached read of
+            // the list a minute.
+            MenuItem::new(
+                Label::dynamic(|_: &Self, ctx| {
+                    format!(
+                        "Say when drivers go on or off duty: {}",
+                        Self::on_off(ctx.settings.duty_notifications)
+                    )
+                }),
+                |s: &mut Self, ctx| s.toggle_duty_notifications(ctx, 1),
+            )
+            .help(
+                "When on, the game says when another driver sets off or signs                  off, like Road Star is on duty, wherever you are in the game.                  It checks the public drivers list about once a minute, the                  same way the Drivers on duty screen does, and never mentions                  you. Works without an orinks.net account and shares nothing                  about you. Off keeps it quiet; the Drivers on duty screen                  still shows who is out.",
             ),
             MenuItem::new("Account achievements", |s: &mut Self, ctx| {
                 s.account_achievements(ctx)

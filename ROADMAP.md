@@ -1304,6 +1304,17 @@ Everything not listed here ships fine after 1.9.0.
       tier, because a career silently stopping backing up is the failure the
       all-clear exists to rule out. Stored as `backup_announcements`, read by
       the cloud queue at startup and on every step of the row.
+- [x] **Say when other drivers go on or off duty (Josh, 2026-09-02) -- DONE
+      2026-09-02.** New Online menu row, off by default, stored as
+      `duty_notifications`. A background watch (`duty_watch`) reads the
+      public drivers list once a minute (the site's cache period) while the
+      row and online services are on, seeds silently on its first answer,
+      skips the player's own id, and queues one line per read ("Night Owl is
+      on duty. Road Star went off duty.") that the loop speaks queued, never
+      interrupting. An unreachable read keeps the last known set. The
+      Drivers on duty screen lost its Refresh row in the same change: it
+      already re-checked itself every minute, and a failed answer retries
+      on the same clock.
 - [ ] **A staged limit drop should be taken in stages (Shane, 2026-08-15).**
       Approaching roadwork the truck hears "speed limit 55 miles per hour,
       then construction zone 45" and then sheds straight to 45, never

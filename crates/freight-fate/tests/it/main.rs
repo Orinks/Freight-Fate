@@ -41,6 +41,7 @@ mod bench_drive;
 mod browser_guard;
 mod cloud_saves;
 mod discord_presence;
+mod duty_watch;
 mod frame_time;
 mod net;
 mod network_guard;

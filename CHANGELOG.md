@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Hear when other drivers go on or off duty.** A new row on the Online
+  menu, Say when drivers go on or off duty, off by default. Turn it on and
+  the game says when another driver sets off or signs off, like Road Star
+  is on duty, wherever you are, including while driving; the line waits its
+  turn behind anything urgent and never mentions you. It works without an
+  orinks.net account and shares nothing about you.
+
 - **Choose how often you hear that a career is backed up.** A new row in
   Settings, Speech, called Say when a career is backed up, sets whether the
   short all-clear after a save is spoken every time, once a session for each
@@ -500,6 +507,13 @@
   turns the same tock on and off whenever you want it.
 
 ### Changed
+
+- **The Drivers on duty list no longer has a Refresh row.** It keeps itself
+  up to date about once a minute while it is open, the same way the list on
+  orinks.net does, so there was nothing for the row to do that waiting a
+  moment did not. If orinks.net could not be reached, the list tries again
+  by itself.
+
 
 - **Curve speed assistance now slows the truck for a bend before you reach
   it, in every driving mode.** It used to act only once you were already in

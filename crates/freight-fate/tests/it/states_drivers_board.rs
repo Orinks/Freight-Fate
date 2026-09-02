@@ -190,30 +190,6 @@ fn test_a_driver_signing_off_under_the_cursor_is_kept_until_the_player_moves() {
 }
 
 #[test]
-fn test_a_player_parked_on_refresh_is_not_slid_onto_back() {
-    let mut app = TestApp::new();
-    let transport = FakeTransport::replying(json!({"drivers": [
-        driver("Alpha Hauler", "Driving"),
-        driver("Zeta Hauler", "Driving"),
-    ]}));
-    let _guard = install_transport(transport.clone());
-    let shared = open_board(&mut app);
-    tick(&mut app, &shared);
-
-    move_to::<DriversOnlineState>(&mut app, &shared, "Refresh");
-
-    // Both drivers sign off, so the list loses two rows from above the cursor.
-    transport.set_reply(Some(json!({"drivers": []})));
-    tick(&mut app, &shared);
-    tick(&mut app, &shared);
-
-    // Refresh is keyed like the drivers are, so the cursor is still on it.
-    // Going by row number would have put the player on Back -- and Enter on
-    // Back leaves the screen, which is not what they were about to press.
-    assert_eq!(selected(&app, &shared), "Refresh");
-}
-
-#[test]
 fn test_a_failed_quiet_check_leaves_the_drivers_on_screen() {
     let mut app = TestApp::new();
     let transport = FakeTransport::replying(json!({"drivers": [driver("Road Star", "Driving")]}));
@@ -240,24 +216,51 @@ fn test_a_failed_quiet_check_leaves_the_drivers_on_screen() {
 }
 
 #[test]
-fn test_refresh_still_answers_the_player_out_loud() {
+fn test_there_is_no_refresh_row_and_a_player_parked_on_back_stays_on_back() {
     let mut app = TestApp::new();
-    let transport = FakeTransport::replying(json!({"drivers": [driver("Road Star", "Driving")]}));
-    let _guard = install_transport(transport);
+    let transport = FakeTransport::replying(json!({"drivers": [
+        driver("Alpha Hauler", "Driving"),
+        driver("Zeta Hauler", "Driving"),
+    ]}));
+    let _guard = install_transport(transport.clone());
     let shared = open_board(&mut app);
     tick(&mut app, &shared);
 
-    move_to::<DriversOnlineState>(&mut app, &shared, "Refresh");
-    app.clear_speech();
-    press(&mut app, Key::Return);
+    // The list keeps itself current, so there is nothing for a Refresh row
+    // to do that waiting a minute does not (Josh, 2026-09-02).
+    let listed = rows(&app, &shared);
+    assert!(!listed.iter().any(|r| r == "Refresh"), "{listed:?}");
+    assert_eq!(listed.last().map(String::as_str), Some("Back"));
 
-    // A check the player DID ask for still says so -- silence is only right
-    // for the ones they did not.
+    move_to::<DriversOnlineState>(&mut app, &shared, "Back");
+    transport.set_reply(Some(json!({"drivers": []})));
+    tick(&mut app, &shared);
+    tick(&mut app, &shared);
+    assert_eq!(selected(&app, &shared), "Back");
+}
+
+#[test]
+fn test_an_unreachable_list_tries_again_by_itself() {
+    let mut app = TestApp::new();
+    let transport = FakeTransport::failing(NetError::other("OSError", ""));
+    let _guard = install_transport(transport.clone());
+    let shared = open_board(&mut app);
+    tick(&mut app, &shared);
+    let listed = rows(&app, &shared);
     assert!(
-        app.main_lines()
-            .iter()
-            .any(|line| line.contains("Checking the drivers list")),
-        "{:?}",
-        app.main_lines()
+        listed.iter().any(|r| r.contains("could not be reached")),
+        "{listed:?}"
+    );
+
+    // No row to press: the site comes back, and so does the list.
+    transport.set_error(None);
+    transport.set_reply(Some(json!({"drivers": [driver("Road Star", "Driving")]})));
+    tick(&mut app, &shared);
+    tick(&mut app, &shared);
+    let listed = rows(&app, &shared);
+    assert!(listed.iter().any(|r| r.contains("Road Star")), "{listed:?}");
+    assert!(
+        !listed.iter().any(|r| r.contains("could not be reached")),
+        "{listed:?}"
     );
 }

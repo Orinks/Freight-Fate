@@ -6,7 +6,9 @@ use crate::states_online_support::*;
 use ff_core::achievements::{achievements_in_category, categories, ACHIEVEMENTS, HIDDEN_NAME};
 use freight_fate::app::testing::TestApp;
 use freight_fate::controller::ControllerButton;
+use freight_fate::duty_watch::{DutyWatch, DutyWatchOptions, POLL_INTERVAL_S};
 use freight_fate::net::testing::FakeTransport;
+use freight_fate::net::testing::ManualClock;
 use freight_fate::states::account_achievements::{
     AccountAchievementCategoryState, AccountAchievementsState,
 };
@@ -37,8 +39,9 @@ fn test_main_menu_online_item_opens_the_hub() {
     // online-enhancement master switch sits right under it.
     let rows = labels::<OnlineHubState>(&hub, &app.ctx);
     assert_eq!(rows[0], "Drivers on duty");
-    assert_eq!(rows[1], "Account achievements");
-    assert_eq!(rows[2], "Online services: on");
+    assert_eq!(rows[1], "Say when drivers go on or off duty: off");
+    assert_eq!(rows[2], "Account achievements");
+    assert_eq!(rows[3], "Online services: on");
     let help = helps::<OnlineHubState>(&hub, &app.ctx);
     for (row, help) in rows.iter().zip(help.iter()).take(rows.len() - 1) {
         assert!(!help.is_empty(), "{row} has no help"); // every row but Back explains itself
@@ -58,8 +61,9 @@ fn test_hub_drivers_board_item_opens_the_board() {
     // online-enhancement master switch sits right under it.
     let rows = labels::<OnlineHubState>(&hub, &app.ctx);
     assert_eq!(rows[0], "Drivers on duty");
-    assert_eq!(rows[1], "Account achievements");
-    assert_eq!(rows[2], "Online services: on");
+    assert_eq!(rows[1], "Say when drivers go on or off duty: off");
+    assert_eq!(rows[2], "Account achievements");
+    assert_eq!(rows[3], "Online services: on");
     let help = helps::<OnlineHubState>(&hub, &app.ctx);
     for (row, help) in rows.iter().zip(help.iter()).take(rows.len() - 1) {
         assert!(!help.is_empty(), "{row} has no help"); // every row but Back explains itself
@@ -372,6 +376,78 @@ fn test_hub_left_right_adjust_rows_align_with_items() {
     assert_ne!(app.ctx.settings.discord_presence, before);
     press(&mut app, Key::Left);
     assert_eq!(app.ctx.settings.discord_presence, before);
+}
+
+/// The on/off duty notice row: off by default, flips on Enter, and the
+/// background watch follows it -- and follows the master switch too.
+#[test]
+fn test_hub_duty_notice_row_turns_the_watch_on_and_off() {
+    let mut app = TestApp::new();
+    // A watch that reads a fake list, so turning it on never touches the
+    // network the test sandbox refuses.
+    app.ctx.services.duty = DutyWatch::new(DutyWatchOptions {
+        transport: FakeTransport::replying(json!({"drivers": []})),
+        threaded: false,
+        ..DutyWatchOptions::default()
+    });
+    let hub = hub(&mut app);
+    assert!(!app.ctx.settings.duty_notifications);
+    assert!(!app.ctx.services.duty.enabled());
+
+    move_to::<OnlineHubState>(&mut app, &hub, "Say when drivers go on or off duty");
+    app.clear_speech();
+    press(&mut app, Key::Return);
+    assert!(app.ctx.settings.duty_notifications);
+    assert!(app.ctx.services.duty.enabled());
+    assert!(
+        said(&app).contains("Say when drivers go on or off duty: on"),
+        "{}",
+        said(&app)
+    );
+    // The choice is on disk, not just in memory.
+    assert!(ff_core::settings::Settings::load().duty_notifications);
+
+    // The master switch stands it down without losing the choice.
+    move_to::<OnlineHubState>(&mut app, &hub, "Online services");
+    press(&mut app, Key::Return);
+    assert!(!app.ctx.services.duty.enabled());
+    assert!(app.ctx.settings.duty_notifications);
+    press(&mut app, Key::Return);
+    assert!(app.ctx.services.duty.enabled());
+
+    move_to::<OnlineHubState>(&mut app, &hub, "Say when drivers go on or off duty");
+    press(&mut app, Key::Left);
+    assert!(!app.ctx.settings.duty_notifications);
+    assert!(!app.ctx.services.duty.enabled());
+}
+
+/// A watched arrival reaches the player through the game loop, queued on the
+/// normal channel so it never cuts urgent speech.
+#[test]
+fn test_a_duty_notice_is_spoken_by_the_game_loop() {
+    let mut app = TestApp::new();
+    let transport = FakeTransport::replying(json!({"drivers": []}));
+    let clock = ManualClock::new();
+    app.ctx.services.duty = DutyWatch::new(DutyWatchOptions {
+        enabled: true,
+        transport: transport.clone(),
+        clock: clock.clock(),
+        threaded: false,
+        ..DutyWatchOptions::default()
+    });
+    app.ctx.services.duty.start();
+    transport.set_reply(Some(json!({"drivers": [{
+        "driverId": "road-star-1234", "displayName": "Road Star",
+        "activity": "Driving", "detail": "", "updatedAt": 0,
+    }]})));
+    clock.advance(POLL_INTERVAL_S);
+    app.ctx.services.duty.pump();
+    app.clear_speech();
+    app.tick(0.016);
+    assert_eq!(
+        app.main_calls(),
+        vec![("Road Star is on duty.".to_string(), false)]
+    );
 }
 
 /// The path is not something anyone should have to remember.

@@ -81,7 +81,6 @@ enum RowKey {
     Driver(String),
     /// "Checking", "could not be reached", or "no drivers on duty".
     Status,
-    Refresh,
     Back,
 }
 
@@ -117,10 +116,9 @@ pub struct DriversOnlineState {
     /// so this is what lets a re-check put the cursor back on the same thing
     /// rather than the same row number.
     ///
-    /// Refresh and Back are keyed too, not just the drivers. A player parked
-    /// on Refresh while the list shortens under them would otherwise be slid
-    /// onto Back by the row number alone -- the same silent move, one row
-    /// further down.
+    /// Back is keyed too, not just the drivers, so the fixed row under the
+    /// list is found by what it is rather than by a row number that moves
+    /// every time the list shortens.
     row_keys: Vec<RowKey>,
     /// A driver the player is sitting on who has since gone off duty. Kept on
     /// the list, marked, until they move off it: taking the row away would
@@ -282,12 +280,6 @@ impl DriversOnlineState {
         by_name(&mut rows);
         Some(rows)
     }
-
-    fn refresh_board(&mut self, ctx: &mut GameContext) {
-        self.start_fetch();
-        self.refresh(ctx, false);
-        ctx.say("Checking the drivers list.");
-    }
 }
 
 impl Menu for DriversOnlineState {
@@ -326,7 +318,7 @@ impl Menu for DriversOnlineState {
                         "The drivers list could not be reached",
                         |s: &mut Self, ctx| s.speak_current(ctx),
                     )
-                    .help("orinks.net did not answer. Refresh to try again."),
+                    .help("orinks.net did not answer. The list tries again by itself about once a minute."),
                 );
                 self.row_keys.push(RowKey::Status);
             }
@@ -370,11 +362,11 @@ impl Menu for DriversOnlineState {
                 }
             }
         }
-        items.push(
-            MenuItem::new("Refresh", |s: &mut Self, ctx| s.refresh_board(ctx))
-                .help("Check the list again. It also checks by itself while it is open."),
-        );
-        self.row_keys.push(RowKey::Refresh);
+        // No Refresh row: the list checks by itself about once a minute
+        // while it is open, the way the site's copy does, and a re-check
+        // sooner than that gets the same cached answer back. Back is keyed
+        // like the drivers are, so a player parked on it while the list
+        // shortens above them stays on it.
         items.push(MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)));
         self.row_keys.push(RowKey::Back);
         items

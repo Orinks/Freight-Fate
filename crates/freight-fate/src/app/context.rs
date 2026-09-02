@@ -44,6 +44,7 @@ use crate::audio::{Audio, VolumeUpdate};
 use crate::cloud_saves::{BackupAnnouncements, CloudSaves};
 use crate::controller::ControllerManager;
 use crate::discord_presence::DiscordPresence;
+use crate::duty_watch::DutyWatch;
 use crate::meaningful_play::MeaningfulPlayReason;
 use crate::net::UreqTransport;
 use crate::online_journal::{queue_achievement, JournalOutbox};
@@ -103,6 +104,9 @@ enum Deferred {
 pub struct Services {
     pub presence: DiscordPresence,
     pub online: OnlinePresence,
+    /// The background watch on the drivers list (the "Say when drivers go
+    /// on or off duty" row).
+    pub duty: DutyWatch,
     pub cloud: CloudSaves,
     pub journal: JournalOutbox,
     pub mastodon: JournalOutbox,
@@ -623,6 +627,13 @@ impl GameContext {
         self.services.journal.set_enabled(enabled);
     }
 
+    /// Reflect the on/off duty notice setting (e.g. after a settings change).
+    /// The list is public, so this needs online services on and nothing else.
+    pub fn apply_duty_notifications(&mut self) {
+        let enabled = self.online_enabled(self.settings.duty_notifications);
+        self.services.duty.set_enabled(enabled);
+    }
+
     /// Reflect the cloud backup setting (e.g. after a settings change).
     pub fn apply_cloud_saves(&mut self) {
         let enabled = self.online_enabled(self.settings.cloud_saves);
@@ -649,6 +660,7 @@ impl GameContext {
     /// board and cloud backup share them.
     pub fn adopt_online_identity(&mut self, identity: Option<OnlineIdentity>) {
         self.services.online.set_identity(identity.clone());
+        self.services.duty.set_identity(identity.as_ref());
         self.services.cloud.set_identity(identity.clone());
         self.services.journal.set_identity(identity.clone());
         self.services.mastodon.set_identity(identity);
