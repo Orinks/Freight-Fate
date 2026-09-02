@@ -49,6 +49,9 @@ pub struct Speech {
     override_name: Option<String>,
     event_pref: Option<String>,
     config: SpeechConfig,
+    /// Settings > Speech, "Output: braille only". Kept on the object rather
+    /// than the backend so it survives a backend swap the way `config` does.
+    braille_only: bool,
     refresh_timer: f64,
     /// The Narrator probe `pick_backend` gates the UIA backend on; the real
     /// process scan in the game, swappable so a test can stand Narrator up.
@@ -98,6 +101,7 @@ impl Speech {
             override_name,
             event_pref: None,
             config: SpeechConfig::default(),
+            braille_only: false,
             refresh_timer: 0.0,
             narrator_probe: narrator_running,
         }
@@ -146,6 +150,7 @@ impl Speech {
             override_name: None,
             event_pref: None,
             config: SpeechConfig::default(),
+            braille_only: false,
             refresh_timer: 0.0,
             narrator_probe: narrator_running,
         }
@@ -243,6 +248,26 @@ impl Speech {
         if let Err(err) = result {
             log::warn!("Could not set speech voice on {name}: {err}");
         }
+    }
+
+    /// Deliver `text` the way the player asked for: to the braille display
+    /// alone when braille-only is on and this voice has one, otherwise
+    /// spoken. A display call that fails is spoken instead -- the game
+    /// must never go quiet because a display unplugged -- and logged, so a
+    /// session log explains why a braille-only player suddenly heard it.
+    fn deliver_with_backend(
+        backend: &mut dyn VoiceBackend,
+        text: &str,
+        interrupt: bool,
+        braille_only: bool,
+    ) -> bool {
+        if braille_only && backend.features().supports_braille {
+            match backend.braille(text) {
+                Ok(()) => return true,
+                Err(err) => log::warn!("Braille output failed; speaking instead: {err}"),
+            }
+        }
+        Self::speak_with_backend(backend, text, interrupt)
     }
 
     fn speak_with_backend(backend: &mut dyn VoiceBackend, text: &str, interrupt: bool) -> bool {
@@ -434,7 +459,9 @@ impl SpeechSink for Speech {
         let Some(backend) = self.backend.as_mut() else {
             return;
         };
-        let mut spoken = Self::speak_with_backend(backend.as_mut(), text, interrupt);
+        let braille_only = self.braille_only;
+        let mut spoken =
+            Self::deliver_with_backend(backend.as_mut(), text, interrupt, braille_only);
         if !spoken {
             // The utterance failed: the screen reader probably just quit or was
             // switched. Re-detect immediately and retry once so this line is not
@@ -442,7 +469,8 @@ impl SpeechSink for Speech {
             self.backend = None;
             if self.refresh(false) {
                 if let Some(backend) = self.backend.as_mut() {
-                    spoken = Self::speak_with_backend(backend.as_mut(), text, interrupt);
+                    spoken =
+                        Self::deliver_with_backend(backend.as_mut(), text, interrupt, braille_only);
                     if !spoken {
                         self.backend = None;
                     }
@@ -456,6 +484,14 @@ impl SpeechSink for Speech {
 
     fn say_event(&mut self, text: &str, interrupt: bool) {
         if text.is_empty() {
+            return;
+        }
+        if self.braille_only && self.supports_braille() {
+            // The display is the one place the player reads, so the event
+            // voice has nothing to add: the line goes where the menus go.
+            // No stop_main: there is no speech in progress to cut, and a
+            // display shows one line at a time regardless.
+            self.say(text, interrupt);
             return;
         }
         let Some(backend) = self.event_backend.as_mut() else {
@@ -564,6 +600,19 @@ impl SpeechSink for Speech {
         // happens outside the game, so that is the moment a change most
         // likely just occurred.
         self.refresh_timer = REFRESH_INTERVAL_S;
+    }
+
+    fn set_braille_only(&mut self, on: bool) {
+        if self.braille_only != on {
+            log::info!("Braille-only output {}", if on { "on" } else { "off" });
+        }
+        self.braille_only = on;
+    }
+
+    fn supports_braille(&self) -> bool {
+        self.backend
+            .as_ref()
+            .is_some_and(|backend| backend.features().supports_braille)
     }
 
     fn say_adjustment_preview(&mut self, setting: &str, text: &str, interrupt: bool) -> bool {

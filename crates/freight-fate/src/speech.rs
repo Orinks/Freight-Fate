@@ -23,7 +23,9 @@
 //! * keeps watching while the game runs: if the player switches screen readers
 //!   mid-session (NVDA off, Narrator on, back to NVDA), a periodic health check
 //!   re-detects the running one and reconnects speech instead of going silent,
-//! * prefers `output` (speech + braille) and falls back to `speak`,
+//! * prefers `output` (speech + braille) and falls back to `speak`; with
+//!   the braille-only setting on it sends every line, driving events
+//!   included, to the main voice's `braille` instead and speaks nothing,
 //! * can be disabled with the `FREIGHT_FATE_NO_SPEECH=1` environment variable
 //!   (used by the headless test suite and CI), and forced to a specific backend
 //!   with `FREIGHT_FATE_SPEECH_BACKEND=<name>` (for example `SAPI`).
@@ -237,6 +239,18 @@ pub trait SpeechSink {
         voice: Option<&str>,
     );
 
+    /// Send every line to the main voice's braille display and speak nothing
+    /// (Settings > Speech, "Output: braille only"): menus, readouts, and the
+    /// driving events that would otherwise go to the separate event voice.
+    /// Honoured only while the bound main voice can braille
+    /// (`supports_braille`); with any other voice speech carries on
+    /// unchanged, so the switch can never leave a player with nothing.
+    fn set_braille_only(&mut self, on: bool);
+
+    /// Whether the main voice can put text on a braille display by itself
+    /// (NVDA and JAWS can; SAPI, OneCore and Narrator cannot).
+    fn supports_braille(&self) -> bool;
+
     /// Speak a settings preview through the voice affected by `setting`
     /// (`"speech_rate"`, `"speech_pitch"`, `"speech_volume"`,
     /// `"speech_voice"`). `false` when no bound voice can be adjusted that way
@@ -288,4 +302,5 @@ pub fn apply_speech_settings(sink: &mut dyn SpeechSink, settings: &mut Settings)
         Some(settings.speech_volume),
         voice.as_deref(),
     );
+    sink.set_braille_only(settings.braille_only);
 }

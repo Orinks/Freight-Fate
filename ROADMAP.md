@@ -1406,6 +1406,29 @@ Everything not listed here ships fine after 1.9.0.
       tier, because a career silently stopping backing up is the failure the
       all-clear exists to rule out. Stored as `backup_announcements`, read by
       the cloud queue at startup and on every step of the row.
+- [x] **Playing from a braille display with speech off (AppleVis ask,
+      2026-09-02) -- DONE 2026-09-02.** Prism already had the primitive
+      (a `supports_braille` feature bit and a braille-only entry point on
+      NVDA and JAWS) and the main channel already used `output`, speech
+      plus braille, so menus reached a display; but nothing ever called
+      braille alone, and driving events went to SAPI, which has no display.
+      New Speech row, "Output: speech and braille / braille only", stored as
+      `braille_only` and pushed through `apply_speech_settings`. With it on,
+      `Speech::say` calls the main voice's `braille` instead of `output`,
+      and `say_event` routes to the same display instead of the event
+      voice. Honoured only while the bound voice can braille: any other
+      voice keeps speaking and the row says so after the announcement; a
+      display call that fails is spoken and logged; a screen reader that
+      quits mid-drive hands speech to SAPI and the display comes back with
+      it (the flag lives on the `Speech` object, not the backend, like the
+      rate and voice config). Pinned in `tests/it/speech.rs`.
+      - [ ] Pacing on a display: NVDA shows a braille message for its
+            configured timeout and the next one replaces it, so a burst of
+            road cues leaves only the last readable. The event pacer still
+            governs braille-only delivery with its speech timing model,
+            which is roughly right but not tuned for a display; a
+            braille-only playtest by a display user is what settles whether
+            the timing needs its own rung.
 - [x] **Short-hop XP: the battery's last known-open finding, closed
       (2026-09-02).** `short_hop_streak_xp_farming` had reported 25-mile
       hops at 4.6x a 500-mile haul's XP per mile since the Python line, and

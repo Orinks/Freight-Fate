@@ -1551,6 +1551,7 @@ Speech settings include:
 | Place callouts | How much the co-driver says about places along the road. Sparse, the default, speaks only the town names that explain a speed limit change, like Entering Strawberry right before its 35. All adds the towns the route passes through or skirts. Off silences place names entirely. Speed limit announcements themselves are never affected, and no tier ever reads out every place on the map. |
 | Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |
 | Driving event voice | Routes road events through the main voice or a separate software voice when available. |
+| Output | Speech and braille, the default, speaks every line and, with NVDA or JAWS, shows it on your braille display as well. Braille only puts every line on the display and speaks nothing, so you can play from the display with speech off: menus, readouts, and road events alike, including the ones the driving event voice would otherwise speak. It needs NVDA or JAWS. With any other voice the game keeps speaking and the row says so, and if your screen reader quits mid-drive, speech comes back until it returns. |
 | Speech rate | Appears only when the current voice source supports rate changes. |
 | Speech pitch | Appears only when the current voice source supports pitch changes. |
 | Speech volume | Appears only when the current voice source supports volume changes. |

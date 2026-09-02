@@ -394,6 +394,12 @@ impl SpeechSink for SharedCapture {
     fn select_event_backend(&mut self, name: Option<&str>) {
         self.0.borrow_mut().select_event_backend(name)
     }
+    fn set_braille_only(&mut self, on: bool) {
+        self.0.borrow_mut().set_braille_only(on)
+    }
+    fn supports_braille(&self) -> bool {
+        self.0.borrow().supports_braille()
+    }
     fn voice_names(&self) -> Vec<String> {
         self.0.borrow().voice_names()
     }

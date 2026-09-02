@@ -429,6 +429,15 @@ impl SpeechSink for CaptureSpeech {
         self.event_pref = name.filter(|name| !name.is_empty()).map(str::to_string);
     }
 
+    fn set_braille_only(&mut self, _on: bool) {
+        // A transcript reads the same whichever way the line reached the
+        // player; the routing itself is pinned against the fake registry.
+    }
+
+    fn supports_braille(&self) -> bool {
+        false
+    }
+
     fn voice_names(&self) -> Vec<String> {
         self.profile.voice_names.clone()
     }
@@ -504,6 +513,10 @@ impl SpeechSink for NullSpeech {
         Vec::new()
     }
     fn select_event_backend(&mut self, _name: Option<&str>) {}
+    fn set_braille_only(&mut self, _on: bool) {}
+    fn supports_braille(&self) -> bool {
+        false
+    }
     fn voice_names(&self) -> Vec<String> {
         Vec::new()
     }

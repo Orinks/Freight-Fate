@@ -130,6 +130,15 @@ pub(super) fn event_voice_label(s: &Settings) -> String {
     }
 }
 
+/// The spoken value of the "Output" row.
+pub(super) fn output_label(s: &Settings) -> &'static str {
+    if s.braille_only {
+        "braille only"
+    } else {
+        "speech and braille"
+    }
+}
+
 /// The spoken value of the "Say when a career is backed up" row.
 pub(super) fn backup_announcements_label(s: &Settings) -> &'static str {
     match s.backup_announcements.as_str() {
@@ -478,6 +487,24 @@ impl SettingsCategoryState {
         save_settings(&ctx.settings);
         ctx.apply_speech();
         self.announce(ctx);
+    }
+
+    pub(super) fn toggle_braille_only(&mut self, ctx: &mut GameContext, _d: i64) {
+        ctx.settings.braille_only = !ctx.settings.braille_only;
+        save_settings(&ctx.settings);
+        ctx.apply_speech();
+        self.announce(ctx);
+        if ctx.settings.braille_only && !ctx.speech.supports_braille() {
+            // The switch took, but nothing on this machine can act on it.
+            // Said after the row, queued, so the player hears both and is
+            // never left guessing why speech carried on.
+            ctx.say_with(
+                "Only NVDA and JAWS can send the game to a braille display. \
+                 The voice speaking now cannot, so speech stays on until one \
+                 of them is running.",
+                Say::queued(),
+            );
+        }
     }
 
     pub(super) fn adjust_speech(&mut self, ctx: &mut GameContext, attr: &str, delta: f64) {

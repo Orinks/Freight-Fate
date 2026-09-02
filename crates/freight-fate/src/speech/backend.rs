@@ -23,6 +23,9 @@ pub struct VoiceFeatures {
     pub is_supported_at_runtime: bool,
     pub supports_output: bool,
     pub supports_speak: bool,
+    /// Can put text on a braille display by itself (NVDA and JAWS; a
+    /// software voice such as SAPI cannot).
+    pub supports_braille: bool,
     pub supports_stop: bool,
     pub supports_set_rate: bool,
     pub supports_set_pitch: bool,
@@ -39,6 +42,7 @@ impl VoiceFeatures {
         is_supported_at_runtime: true,
         supports_output: true,
         supports_speak: true,
+        supports_braille: false,
         supports_stop: false,
         supports_set_rate: false,
         supports_set_pitch: false,
@@ -61,6 +65,13 @@ impl VoiceFeatures {
         ..VoiceFeatures::SPEAKING
     };
 
+    /// A running screen reader with a braille display (NVDA, JAWS): speaks,
+    /// brailles, owns its own rate and voice.
+    pub const BRAILLING: VoiceFeatures = VoiceFeatures {
+        supports_braille: true,
+        ..VoiceFeatures::SPEAKING
+    };
+
     /// Whether voice selection is fully supported: pick, count and name.
     pub const fn selects_voices(self) -> bool {
         self.supports_set_voice && self.supports_count_voices && self.supports_get_voice_name
@@ -73,6 +84,7 @@ impl From<prism::Features> for VoiceFeatures {
             is_supported_at_runtime: features.is_supported_at_runtime(),
             supports_output: features.supports_output(),
             supports_speak: features.supports_speak(),
+            supports_braille: features.supports_braille(),
             supports_stop: features.supports_stop(),
             supports_set_rate: features.supports_set_rate(),
             supports_set_pitch: features.supports_set_pitch(),
@@ -96,6 +108,9 @@ pub trait VoiceBackend {
     fn output(&mut self, text: &str, interrupt: bool) -> Result<(), prism::Error>;
     /// Speech only.
     fn speak(&mut self, text: &str, interrupt: bool) -> Result<(), prism::Error>;
+    /// Braille display only, no speech. Only meaningful when
+    /// `features().supports_braille`; a backend without it answers `Err`.
+    fn braille(&mut self, text: &str) -> Result<(), prism::Error>;
     fn stop(&mut self) -> Result<(), prism::Error>;
     fn set_rate(&mut self, rate: f64) -> Result<(), prism::Error>;
     fn set_pitch(&mut self, pitch: f64) -> Result<(), prism::Error>;
@@ -199,6 +214,10 @@ impl VoiceBackend for PrismVoice {
 
     fn speak(&mut self, text: &str, interrupt: bool) -> Result<(), prism::Error> {
         self.backend.speak(text, interrupt)
+    }
+
+    fn braille(&mut self, text: &str) -> Result<(), prism::Error> {
+        self.backend.braille(text)
     }
 
     fn stop(&mut self) -> Result<(), prism::Error> {

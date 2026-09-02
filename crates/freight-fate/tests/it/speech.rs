@@ -890,3 +890,131 @@ fn null_speech_swallows_everything() {
     assert!(!null.refresh(true));
     null.shutdown();
 }
+
+// -- braille only (Settings > Speech, "Output: braille only") -------------------
+//
+// Asked for on AppleVis, 2026-09-02: a player who reads a braille display
+// wants the game's speech off. Prism's NVDA and JAWS backends can braille
+// on their own; nothing else can, and the game must never go quiet.
+
+/// NVDA with a display, and the SAPI event voice alongside it.
+fn braille_speech() -> (Speech, FakeVoice, FakeVoice) {
+    let nvda = FakeVoice::new("NVDA", 103, VoiceFeatures::BRAILLING);
+    let sapi = FakeVoice::new("SAPI", 97, ADJUSTABLE);
+    let ctx = FakeRegistry::new(vec![nvda.clone(), sapi.clone()]);
+    let speech = Speech::with_registry(Box::new(ctx), None);
+    assert_eq!(speech.backend_name(), "NVDA");
+    assert!(speech.has_separate_event_voice());
+    (speech, nvda, sapi)
+}
+
+#[test]
+fn braille_only_puts_menu_lines_on_the_display_and_speaks_nothing() {
+    let (mut speech, nvda, _sapi) = braille_speech();
+    assert!(speech.supports_braille());
+    speech.set_braille_only(true);
+    speech.say("Main menu", true);
+    assert_eq!(nvda.brailled(), vec!["Main menu".to_string()]);
+    assert!(nvda.spoken().is_empty());
+
+    // Off again: back to speech plus braille through `output`.
+    speech.set_braille_only(false);
+    speech.say("Back", true);
+    assert_eq!(nvda.spoken(), spoken(&[("Back", true)]));
+    assert_eq!(nvda.brailled().len(), 1);
+}
+
+#[test]
+fn braille_only_routes_driving_events_to_the_display_instead_of_the_event_voice() {
+    let (mut speech, nvda, sapi) = braille_speech();
+    speech.set_braille_only(true);
+    speech.say_event("Exit 12 in one mile.", true);
+    speech.say_event("Speed limit 55.", false);
+    assert_eq!(
+        nvda.brailled(),
+        vec![
+            "Exit 12 in one mile.".to_string(),
+            "Speed limit 55.".to_string()
+        ]
+    );
+    assert!(sapi.spoken().is_empty());
+    assert!(nvda.spoken().is_empty());
+    // Nothing was speaking, so nothing was cut.
+    assert_eq!(nvda.stop_calls(), 0);
+}
+
+#[test]
+fn braille_only_keeps_speaking_when_the_voice_cannot_braille() {
+    let sapi = FakeVoice::new("SAPI", 97, ADJUSTABLE);
+    let ctx = FakeRegistry::new(vec![sapi.clone()]);
+    let mut speech = Speech::with_registry(Box::new(ctx), None);
+    assert!(!speech.supports_braille());
+    speech.set_braille_only(true);
+    speech.say("Main menu", true);
+    speech.say_event("Exit 12 in one mile.", false);
+    assert_eq!(
+        sapi.spoken(),
+        spoken(&[("Main menu", true), ("Exit 12 in one mile.", false)])
+    );
+    assert!(sapi.brailled().is_empty());
+}
+
+#[test]
+fn braille_only_falls_back_to_speech_when_the_display_call_fails() {
+    let (mut speech, nvda, _sapi) = braille_speech();
+    speech.set_braille_only(true);
+    nvda.set_fail_braille(true);
+    speech.say("Main menu", true);
+    assert!(nvda.brailled().is_empty());
+    assert_eq!(nvda.spoken(), spoken(&[("Main menu", true)]));
+    assert_eq!(speech.backend_name(), "NVDA"); // not treated as a dead voice
+}
+
+#[test]
+fn braille_only_survives_a_voice_switch_and_returns_with_the_screen_reader() {
+    let (mut speech, nvda, sapi) = braille_speech();
+    speech.set_braille_only(true);
+
+    // NVDA quits: the next line is spoken by SAPI, which has no display.
+    nvda.set_runtime_supported(false);
+    nvda.set_fail_output(true);
+    nvda.set_fail_braille(true);
+    speech.say("Route planner", true);
+    assert_eq!(speech.backend_name(), "SAPI");
+    assert!(!speech.supports_braille());
+    assert_eq!(sapi.spoken(), spoken(&[("Route planner", true)]));
+
+    // NVDA is back: braille only resumes without the player touching the row.
+    nvda.set_runtime_supported(true);
+    nvda.set_fail_output(false);
+    nvda.set_fail_braille(false);
+    speech.poll(REFRESH_INTERVAL_S);
+    assert_eq!(speech.backend_name(), "NVDA");
+    assert!(speech.supports_braille());
+    // The "Speech is now using NVDA." switch notice went to the display too.
+    assert_eq!(
+        nvda.brailled(),
+        vec!["Speech is now using NVDA.".to_string()]
+    );
+    speech.say("Route planner", true);
+    assert_eq!(nvda.brailled().len(), 2);
+    assert!(nvda.spoken().is_empty());
+}
+
+#[test]
+fn apply_speech_settings_pushes_braille_only() {
+    let (mut speech, nvda, _sapi) = braille_speech();
+    let mut settings = ff_core::settings::Settings {
+        braille_only: true,
+        ..Default::default()
+    };
+    apply_speech_settings(&mut speech, &mut settings);
+    speech.say("Main menu", true);
+    assert_eq!(nvda.brailled(), vec!["Main menu".to_string()]);
+    assert!(nvda.spoken().is_empty());
+
+    settings.braille_only = false;
+    apply_speech_settings(&mut speech, &mut settings);
+    speech.say("Main menu", true);
+    assert_eq!(nvda.spoken(), spoken(&[("Main menu", true)]));
+}

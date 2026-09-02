@@ -252,7 +252,7 @@ pub fn driving_assist_preset(name: &str) -> Option<&'static [AssistValue; 9]> {
         .map(|(_, values)| values)
 }
 
-/// The 73 persisted fields, in the Python dataclass's declaration order
+/// The 76 persisted fields, in the Python dataclass's declaration order
 /// (which is the order `save` writes them in). Each row is
 /// `name: type = default => coercion`, the coercion naming how a raw JSON
 /// value lands on the typed field (see `migrate::coerce`).
@@ -517,6 +517,14 @@ settings_fields! {
     sapi_events: bool = true => bool_truthy,
     /// which voice that is (e.g. SAPI/OneCore)
     event_backend: String = "SAPI" => str_checked,
+    /// Send every line to the screen reader's braille display and speak
+    /// nothing: menus, readouts, and the driving events that would otherwise
+    /// go to the separate event voice. Asked for on AppleVis (2026-09-02) by
+    /// a player who plays from the display. Only NVDA and JAWS can braille
+    /// through Prism; with any other voice bound the game keeps speaking, and
+    /// the Settings row says so, because a silent game is the one outcome
+    /// this must never produce.
+    braille_only: bool = false => bool_strict,
     /// voice speed, 0..1 (backend default ~0.5)
     speech_rate: f64 = 0.5 => level,
     /// voice pitch, 0..1 (backend default ~0.5)

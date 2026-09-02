@@ -4,6 +4,16 @@
 
 ### Added
 
+- **You can play from a braille display with speech off.** A new row in
+  Settings, Speech, called Output, switches between speech and braille and
+  braille only. Braille only sends every line the game would have spoken to
+  your screen reader's braille display and says nothing: menus, readouts,
+  and the road events that would otherwise come through the separate
+  driving event voice. It works with NVDA and JAWS, the two screen readers
+  that can show a braille display through the game. With any other voice
+  the game keeps speaking and the row tells you so, and if your screen
+  reader quits mid-drive, speech comes back on its own until it returns.
+  Asked for on AppleVis.
 - **Career 1.9 now has a Linux download.** Each tester snapshot ships a
   Linux tarball and an AppImage alongside the Windows and Mac builds, and
   every one is started on Ubuntu, Debian, Fedora, Arch and openSUSE before

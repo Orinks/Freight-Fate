@@ -74,6 +74,7 @@ enum Command {
         voice: Option<String>,
     },
     SelectEventBackend(Option<String>),
+    SetBrailleOnly(bool),
     Preview {
         setting: String,
         text: String,
@@ -97,6 +98,7 @@ struct Snapshot {
     supports_pitch: bool,
     supports_volume: bool,
     event_supports_rate: bool,
+    supports_braille: bool,
     event_backend_options: Vec<String>,
     voice_names: Vec<String>,
 }
@@ -148,6 +150,7 @@ fn publish(snapshot: &Arc<Mutex<Snapshot>>, inner: &dyn SpeechSink) {
         supports_pitch: inner.supports_pitch(),
         supports_volume: inner.supports_volume(),
         event_supports_rate: inner.event_supports_rate(),
+        supports_braille: inner.supports_braille(),
         event_backend_options: inner.event_backend_options(),
         voice_names: inner.voice_names(),
     };
@@ -167,6 +170,7 @@ fn publish_status(snapshot: &Arc<Mutex<Snapshot>>, inner: &dyn SpeechSink) {
     let supports_pitch = inner.supports_pitch();
     let supports_volume = inner.supports_volume();
     let event_supports_rate = inner.event_supports_rate();
+    let supports_braille = inner.supports_braille();
     let mut current = snapshot.lock().expect("speech snapshot lock");
     current.available = available;
     current.backend_name = backend_name;
@@ -176,6 +180,7 @@ fn publish_status(snapshot: &Arc<Mutex<Snapshot>>, inner: &dyn SpeechSink) {
     current.supports_pitch = supports_pitch;
     current.supports_volume = supports_volume;
     current.event_supports_rate = event_supports_rate;
+    current.supports_braille = supports_braille;
 }
 
 /// A [`SpeechSink`] whose Prism lives on a worker thread.
@@ -316,6 +321,7 @@ impl ThreadedSpeech {
                                 inner.select_event_backend(name.as_deref());
                                 publish(&worker_snapshot, inner.as_ref());
                             }
+                            Command::SetBrailleOnly(on) => inner.set_braille_only(on),
                             Command::Preview {
                                 setting,
                                 text,
@@ -497,6 +503,14 @@ impl SpeechSink for ThreadedSpeech {
         self.send_lossy(Command::SelectEventBackend(name.map(str::to_string)));
     }
 
+    fn set_braille_only(&mut self, on: bool) {
+        self.send_lossy(Command::SetBrailleOnly(on));
+    }
+
+    fn supports_braille(&self) -> bool {
+        self.snapshot().supports_braille
+    }
+
     fn voice_names(&self) -> Vec<String> {
         self.snapshot().voice_names
     }
@@ -631,6 +645,15 @@ mod tests {
             vec!["stub-event".to_string()]
         }
         fn select_event_backend(&mut self, _name: Option<&str>) {}
+        fn set_braille_only(&mut self, on: bool) {
+            self.calls
+                .lock()
+                .unwrap()
+                .push(format!("braille_only {on}"));
+        }
+        fn supports_braille(&self) -> bool {
+            false
+        }
         fn voice_names(&self) -> Vec<String> {
             vec!["Stub Voice".to_string()]
         }

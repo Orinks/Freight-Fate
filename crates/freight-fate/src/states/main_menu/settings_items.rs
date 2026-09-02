@@ -10,8 +10,8 @@ use ff_core::settings::Settings;
 use super::settings::{Adjust, SettingsCategoryState};
 use super::settings_actions::{
     acc_gap_label, assist_preset_label, backup_announcements_label, cue_loudness_label,
-    descent_level_label, event_voice_label, hos_label, lane_keeping_label, pace_label,
-    update_channel,
+    descent_level_label, event_voice_label, hos_label, lane_keeping_label, output_label,
+    pace_label, update_channel,
 };
 use crate::app::GameContext;
 use crate::states::base::{Label, Menu, MenuItem};
@@ -283,6 +283,17 @@ impl SettingsCategoryState {
                        pitch, volume, and voice rows below appear in this category only \
                        when the voice speaking to you supports them; with a screen \
                        reader running, those four are set in the screen reader itself.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| format!("Output: {}", output_label(s))),
+                action: adjust(|s, ctx, d| s.toggle_braille_only(ctx, d)),
+                help: "Speech and braille speaks every line and, with NVDA or JAWS, \
+                       shows it on your braille display as well. Braille only puts \
+                       every line on the display and speaks nothing, so you can play \
+                       from the display with speech off: menus, readouts, and road \
+                       events alike, including the ones the driving event voice would \
+                       otherwise speak. It needs NVDA or JAWS; with any other voice \
+                       the game keeps speaking and this row says so.",
             },
         ];
         if speech.supports_rate() {

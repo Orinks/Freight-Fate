@@ -183,6 +183,12 @@ impl SpeechSink for TeeSpeech {
     fn select_event_backend(&mut self, name: Option<&str>) {
         self.inner.select_event_backend(name);
     }
+    fn set_braille_only(&mut self, on: bool) {
+        self.inner.set_braille_only(on);
+    }
+    fn supports_braille(&self) -> bool {
+        self.inner.supports_braille()
+    }
     fn voice_names(&self) -> Vec<String> {
         self.inner.voice_names()
     }

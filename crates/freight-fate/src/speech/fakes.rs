@@ -26,10 +26,16 @@ pub struct FakeVoiceState {
     pub voice: Option<usize>,
     /// `(text, interrupt)` in the order spoken, `output` and `speak` alike.
     pub spoken: Vec<(String, bool)>,
+    /// Text sent to the braille display only, in order. Never overlaps
+    /// `spoken`: a line goes one way or the other.
+    pub brailled: Vec<String>,
     pub stop_calls: u32,
     /// When set, every `output`/`speak` fails the way a quit screen reader
     /// fails.
     pub fail_output: bool,
+    /// When set, `braille` fails while speech still works: a screen reader
+    /// whose display just unplugged.
+    pub fail_braille: bool,
 }
 
 /// A recording voice: `RecordingBackend` in the Python tests. Cloning the
@@ -82,9 +88,18 @@ impl FakeVoice {
         self.state.borrow_mut().fail_output = fail;
     }
 
+    pub fn set_fail_braille(&self, fail: bool) {
+        self.state.borrow_mut().fail_braille = fail;
+    }
+
     /// `(text, interrupt)` pairs spoken so far.
     pub fn spoken(&self) -> Vec<(String, bool)> {
         self.state.borrow().spoken.clone()
+    }
+
+    /// Lines sent to the braille display so far.
+    pub fn brailled(&self) -> Vec<String> {
+        self.state.borrow().brailled.clone()
     }
 
     pub fn stop_calls(&self) -> u32 {
@@ -128,6 +143,15 @@ impl VoiceBackend for FakeVoice {
 
     fn speak(&mut self, text: &str, interrupt: bool) -> Result<(), prism::Error> {
         self.output(text, interrupt)
+    }
+
+    fn braille(&mut self, text: &str) -> Result<(), prism::Error> {
+        let mut state = self.state.borrow_mut();
+        if !state.features.supports_braille || state.fail_braille {
+            return Err(Self::failure());
+        }
+        state.brailled.push(text.to_string());
+        Ok(())
     }
 
     fn stop(&mut self) -> Result<(), prism::Error> {

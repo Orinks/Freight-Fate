@@ -80,14 +80,15 @@ fn old_stopping_toggles_migrate_to_the_one_facility_assist() {
 // -- the field table -----------------------------------------------------------
 
 #[test]
-fn the_struct_carries_the_seventy_five_persisted_fields_in_python_order() {
-    // 73 came over from the Python dataclass; backup_announcements and
-    // duty_notifications (2026-09-02) were added on the Rust side.
-    assert_eq!(Settings::FIELD_NAMES.len(), 75);
+fn the_struct_carries_the_seventy_six_persisted_fields_in_python_order() {
+    // 73 came over from the Python dataclass; backup_announcements,
+    // duty_notifications and braille_only (2026-09-02) were added on the
+    // Rust side.
+    assert_eq!(Settings::FIELD_NAMES.len(), 76);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
-    assert_eq!(Settings::FIELD_NAMES[74], "settings_layout_notice_from");
+    assert_eq!(Settings::FIELD_NAMES[75], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 75);
+    assert_eq!(pairs.len(), 76);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -124,7 +125,7 @@ fn the_defaults_match_the_python_dataclass() {
         "chatter_rivers": true, "chatter_passes": true, "chatter_museums": true,
         "chatter_billboards": true, "place_callouts": "sparse",
         "announce_menu_position": true, "backup_announcements": "every",
-        "sapi_events": true, "event_backend": "SAPI",
+        "sapi_events": true, "event_backend": "SAPI", "braille_only": false,
         "speech_rate": 0.5, "speech_pitch": 0.5, "speech_volume": 1.0, "speech_voice": "",
         "update_channel": "", "skipped_update": "", "discord_presence": true,
         "online_presence": false, "duty_notifications": false,
@@ -139,7 +140,7 @@ fn the_defaults_match_the_python_dataclass() {
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 75);
+    assert_eq!(expected.len(), 76);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }
