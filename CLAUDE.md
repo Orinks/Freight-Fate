@@ -14,6 +14,59 @@ gameplay changes in Rust. The `dev` line is still Python-only, so a fix that
 must reach both lines has to be written twice -- ask before assuming it
 should be.
 
+## How the code fits together
+
+Read this before opening files; the rest is discoverable from `lib.rs` docs.
+
+- **`ff-core` is everything headless**: no window, audio device, screen
+  reader or network, and the crate has no such dependencies, so the boundary
+  is enforced by Cargo rather than convention. `data/` is the world (cities,
+  legs, a Dijkstra graph; alternatives come from re-running the search with
+  used legs penalised). `models/` is the career (profile, jobs, economy,
+  trucks, credentials). `sim/` is the drive: one `Trip` struct owns the
+  `TruckState`, `WeatherSystem` and `TrafficManager`, with the former Python
+  mixins as extra `impl Trip` blocks in sibling files. The spoken-text rules
+  (`speech_text`, `spoken_advice`, `speech_pacing`) live here too, so a
+  transcript can be asserted without a game.
+- **Every `ff-core` module keeps the name of the Python module it replaced**,
+  and the port is line for line. When a Rust module's intent is unclear, the
+  `src/freight_fate/` file of the same name is the reference. `pyrandom` and
+  `pyfmt` exist because the tests pin spoken strings byte for byte to what
+  Python produced; do not "fix" their rounding or RNG.
+- **World data has two shapes.** The JSON tree under `src/freight_fate/data/`
+  (`FREIGHT_FATE_DATA_ROOT` overrides it) and the baked, memory-mapped
+  `world.ffdata` container (`data/baked/`) that the shipped game reads. A loose
+  JSON path that is missing on disk falls through to the container's copy, so
+  a release with no tree still answers. Heavy per-leg data is decoded on first
+  touch either way.
+- **`freight-fate` is the game**: `app/` holds `GameContext`, the shared
+  services every state receives, plus the state stack it owns
+  (`Vec<Rc<RefCell<dyn State>>>`; a lifecycle call runs immediately unless it
+  targets the state currently in its own handler, which is deferred until that
+  handler returns). `states/` is one `State` per screen; menus embed a
+  `MenuCore`, implement `Menu`, and get their `State` impl from
+  `impl_state_for_menu!`. `DrivingState` is one struct with one `impl` block
+  per `driving_*.rs` file, the way the Python mixins were split.
+- **Two speech channels, never interchangeable.** `ctx.say` is the menu and
+  screen-reader channel. `ctx.say_event` is the driving channel: it goes
+  through the priority ladder, the anti-backlog pacer and the audio duck, and
+  can be silenced or cut, so a driving cue on `say` bypasses every one of
+  those protections. Both land in the `freight_fate.transcript` log target,
+  which is what a session log with `FREIGHT_FATE_LOG_FILE` set reads as.
+- **Speech and audio are pluggable and optional.** `speech/` has the live
+  Prism backend on its own worker thread, a capture sink the tests read
+  transcripts from, and fakes. `audio/` is BASS behind a backend trait with a
+  null fallback. `prism`/`prism-sys` wrap the Prism screen-reader and TTS
+  library; `bass-sys` declares the BASS C ABI by hand and loads the DLL at
+  run time, so a machine without either still starts the game.
+- **Environment variables are two different roots.** `FREIGHT_FATE_DATA_ROOT`
+  is where world data comes from; `FREIGHT_FATE_DATA_DIR` is where settings,
+  saves and the keyring-backed token go. The playtest harness redirects the
+  second, never the first.
+- **Off-loop work** (cloud saves, presence, the updater, Discord, the agent
+  server) lives in its own module under `freight-fate` and talks to the loop
+  through channels; see the Rust engineering practices below for the rules.
+
 ## Branches and PRs
 
 - Open all feature, fix, data, and documentation PRs against `dev`.
@@ -97,18 +150,25 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
 - Format: `cargo fmt --all --check`
 - Lint: `cargo clippy --all-targets --locked -- -D warnings`. Warnings are
   errors, and `--all-targets` means test and bench code is linted too.
-- Tests: `cargo test -p ff-core` and `cargo test -p freight-fate`.
-  Integration tests live in `crates/ff-core/tests/it/*.rs`, wired in through
-  `main.rs` -- one test binary per crate, deliberately, so add a module there
-  rather than a new top-level file.
+- Tests: `cargo test -p ff-core` and `cargo test -p freight-fate` (CI runs
+  both in ONE invocation, `cargo test -p ff-core -p freight-fate`, so the
+  build is shared). Integration tests live in `crates/<crate>/tests/it/*.rs`,
+  wired in through that directory's `main.rs` -- one test binary named `it`
+  per crate, deliberately, so add a `mod` line there rather than a new
+  top-level file. The two exceptions, `crates/ff-core/tests/data_baked.rs`
+  and `data_map_correction.rs`, each point the process at a different data
+  root and so keep their own binary.
+- One test: `cargo test -p freight-fate --test it <name_filter> -- --nocapture`
+  (`--test it` skips the unit-test and doc-test binaries; the filter is a
+  substring of the test path).
 - **Focused tests while you iterate, the full run once before you push.**
   `cargo test -p ff-core <name_filter>` while the change is in motion. The
   full pair at the end, exactly once, because that is where the surprises
   live: a change to spoken text can strand an assertion in a file three
   directories from anything obviously related.
 - Adversarial battery: `cargo run -p freight-fate --bin freightfate --
-  --break-battery`. All 45 scenarios, deliberately unreasonable play against
-  the real driving state. `--list-break-scenarios` names them,
+  --break-battery`. Every registered scenario, deliberately unreasonable play
+  against the real driving state. `--list-break-scenarios` names them,
   `--break-scenario NAME --transcript` runs one and prints what was said.
   **The battery is NOT part of `cargo test`**, so a green test run says
   nothing about whether floor-it-through-town still behaves -- which is
@@ -132,6 +192,9 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
 
 - Setup: `uv sync --group dev`
 - Tests: `uv run pytest` -- about six seconds now, so just run all of it.
+  `pyproject.toml` already sets `-n auto` and a 120 s per-test timeout, so
+  a bare `pytest` is a full-CPU xdist run; that is why only one may be in
+  flight. A single file is `uv run pytest tests/test_build_release.py`.
   **The suite covers the Python that still ships and nothing else**: the
   build, bake, indexing and release tooling under `tools/`, plus the workflow
   and sound-pack guards. The ~220 files that mirrored gameplay in
