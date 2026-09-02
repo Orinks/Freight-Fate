@@ -14,10 +14,16 @@
 # disabled here, so libprism.so and its bundled glib are really opened,
 # which is where a distribution's loader would object if it were going to.
 #
+# Every log is also required to hold no error-level line at all: a boot
+# that reaches the menu while something inside it failed is not a pass.
+#
 # On Fedora the tarball is booted a second time under Xvfb with SDL's real
 # X11 driver, to prove the statically linked SDL2 finds the system's X
-# libraries at run time. The other distributions run the dummy driver only;
-# that is the loader and glibc check, which is what differs between them.
+# libraries at run time, and Speech Dispatcher is installed and started
+# first so the log has to show Prism choosing it on its own -- the same
+# line a player's desktop produces. The other distributions run the dummy
+# driver with no speech daemon; that is the loader and glibc check, which
+# is what differs between them.
 #
 # What each container is given is what every desktop install already has:
 # libdbus-1 (the executable links it for the Secret Service keyring) and
@@ -35,7 +41,8 @@ case "${ID:-}" in
   fedora)
     dnf install -y -q dbus-libs libstdc++ xorg-x11-server-Xvfb \
       libX11 libXext libXrandr libXcursor libXi libXfixes libXScrnSaver libxkbcommon \
-      mesa-libGL mesa-libEGL >/dev/null
+      mesa-libGL mesa-libEGL speech-dispatcher >/dev/null
+    speech-dispatcher -d
     ;;
   arch)
     pacman -Sy --noconfirm --quiet dbus gcc-libs >/dev/null
@@ -58,14 +65,23 @@ check_log() {
     echo "$1: the game wrote no session log." >&2
     exit 1
   fi
-  for line in "bass: loaded from" "prism: loaded from" "Audio backend: bass"; do
+  required=("bass: loaded from" "prism: loaded from" "Audio backend: bass")
+  if [ "${ID:-}" = "fedora" ]; then
+    required+=("Speech backend: Speech Dispatcher")
+  fi
+  for line in "${required[@]}"; do
     if ! grep -q "$line" "$2"; then
       echo "$1: the session log never says '$line':" >&2
       cat "$2" >&2
       exit 1
     fi
   done
-  echo "$1: booted; BASS and Prism loaded from beside the executable."
+  if grep -q " ERROR " "$2"; then
+    echo "$1: the session log has error lines:" >&2
+    grep " ERROR " "$2" >&2
+    exit 1
+  fi
+  echo "$1: booted with no errors; BASS and Prism loaded from beside the executable."
 }
 
 # Shell globs, not find: a bare openSUSE image has no findutils.

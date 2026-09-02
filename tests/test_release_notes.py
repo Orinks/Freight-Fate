@@ -591,6 +591,8 @@ def test_career_19_snapshot_builds_and_boots_a_linux_release():
     # bundled glib are really opened, which is where a loader would object.
     assert "FREIGHT_FATE_NO_SPEECH" not in smoke
     assert "prism: loaded from" in smoke
+    assert "Speech backend: Speech Dispatcher" in smoke
+    assert 'grep -q " ERROR "' in smoke
     assert "--appimage-extract-and-run --smoke" in smoke
     assert "xvfb-run" in smoke
 
