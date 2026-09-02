@@ -254,18 +254,31 @@ pub trait SpeechSink {
 /// `GameContext.apply_speech`: reflect the speech settings on the sink.
 ///
 /// Selects the event voice the player chose (or the main voice when
-/// `sapi_events` is off), records the voice actually bound when the saved
-/// one was not on this machine (a Windows save's SAPI opened on macOS) so
-/// the menu and later sessions reflect reality, and pushes rate, pitch,
-/// volume and voice. Lives here rather than in the app shell so the settings
-/// side of speech has one definition.
+/// `sapi_events` is off), records the voice the sink binds in its place when
+/// the saved one is not on this machine (a Windows save's SAPI opened on
+/// macOS) so the menu and later sessions reflect reality, and pushes rate,
+/// pitch, volume and voice. Lives here rather than in the app shell so the
+/// settings side of speech has one definition.
+///
+/// The substitute is decided from the option list, never read back from the
+/// sink: the threaded sink queues the switch and answers `event_backend_name`
+/// from a snapshot that still names the voice bound BEFORE it, and writing
+/// that stale name over the setting is how a freshly chosen OneCore turned
+/// back into SAPI in memory and then on disk at the quit-time save
+/// (MariahL, 2026-09-02). The fallback mirrors `select_event_backend`: a
+/// preference missing from a non-empty option list becomes the first option.
 pub fn apply_speech_settings(sink: &mut dyn SpeechSink, settings: &mut Settings) {
     let preference = settings.sapi_events.then(|| settings.event_backend.clone());
     sink.select_event_backend(preference.as_deref());
     if settings.sapi_events {
-        let actual = sink.event_backend_name();
-        if actual != "none" && actual != "unknown" && actual != settings.event_backend {
-            settings.event_backend = actual;
+        let options = sink.event_backend_options();
+        if !options.is_empty() && !options.contains(&settings.event_backend) {
+            log::info!(
+                "Event speech backend {} is not on this machine; using {}",
+                settings.event_backend,
+                options[0]
+            );
+            settings.event_backend = options[0].clone();
         }
     }
     let voice = (!settings.speech_voice.is_empty()).then(|| settings.speech_voice.clone());

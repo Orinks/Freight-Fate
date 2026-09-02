@@ -1171,6 +1171,14 @@
 
 ### Fixed
 
+- **Your choice of driving event voice now survives closing the game.**
+  Picking Windows OneCore, or any other separate voice, on the Driving event
+  voice row used to come back as the previous voice the next time you
+  started the game, unless you changed it again and then touched another
+  setting. The game was reading back which voice was speaking before the
+  switch had finished and writing that older answer over your choice. It now
+  keeps what you picked. Reported by MariahL.
+
 - **On a road with one lane your side, traffic behind you stays behind
   you.** A faster car, truck or state trooper coming up behind used to drive
   straight through the cab and go by with a whoosh, on a road where there

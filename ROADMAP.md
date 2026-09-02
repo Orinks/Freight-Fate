@@ -1281,6 +1281,20 @@ Everything not listed here ships fine after 1.9.0.
       shipping menu and wants a canonical name in `docs/ontology.md`, a
       decision about whether it appears on the Online menu too, and its own
       spoken result.
+- [x] **The driving event voice did not survive a restart (MariahL via
+      Mastodon, 2026-09-02) -- FIXED 2026-09-02.** Choosing Windows OneCore
+      on the Driving event voice row saved to disk, then came back as SAPI
+      next launch; the tester's workaround was to choose it again and touch
+      another setting. `apply_speech_settings` re-read "which event voice is
+      bound" straight after queueing the switch, and the threaded sink
+      answers that from a snapshot still describing the voice bound BEFORE
+      the switch, so the stale name overwrote the fresh choice in memory and
+      the quit-time settings save put it on disk. The substitute for a voice
+      that is not on this machine is now decided from the option list (the
+      same fallback `select_event_backend` makes) and the sink's read-back is
+      never written to settings. Pinned by a test that uses the full-voice
+      capture, which offers OneCore but reports SAPI, exactly the lagging
+      answer.
 - [ ] **A staged limit drop should be taken in stages (Shane, 2026-08-15).**
       Approaching roadwork the truck hears "speed limit 55 miles per hour,
       then construction zone 45" and then sheds straight to 45, never

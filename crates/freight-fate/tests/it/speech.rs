@@ -843,10 +843,37 @@ fn capture_apply_speech_settings_keeps_the_saved_voice_name() {
     apply_speech_settings(&mut capture, &mut settings);
     assert_eq!(settings.event_backend, "OneCore");
     assert_eq!(capture.configure_calls().len(), 1);
-    // And the full-voice capture claims every asked-for voice exists.
+    // And the full-voice capture offers OneCore as an option, so the choice
+    // stands even though the capture still reports SAPI as bound.
     let mut full = CaptureSpeech::full_voice();
     apply_speech_settings(&mut full, &mut settings);
-    assert_eq!(settings.event_backend, "SAPI");
+    assert_eq!(settings.event_backend, "OneCore");
+}
+
+#[test]
+fn apply_speech_settings_keeps_a_chosen_voice_the_sink_has_not_bound_yet() {
+    // MariahL, 2026-09-02: "Windows OneCore" for driving events never
+    // survived a restart. The threaded sink queues the switch and answers
+    // event_backend_name() from a snapshot that still names the voice bound
+    // BEFORE the switch, so the read-back wrote SAPI over the fresh choice in
+    // memory and the quit-time settings save put it on disk. The full-voice
+    // capture is exactly that lagging sink: OneCore is on offer, SAPI is
+    // what it reports.
+    let mut lagging = CaptureSpeech::full_voice();
+    let mut settings = ff_core::settings::Settings {
+        sapi_events: true,
+        event_backend: "OneCore".to_string(),
+        ..Default::default()
+    };
+    apply_speech_settings(&mut lagging, &mut settings);
+    assert_eq!(lagging.event_backend_name(), "SAPI"); // the stale answer
+    assert_eq!(settings.event_backend, "OneCore"); // the choice survives it
+
+    // A voice that is not on this machine at all still resolves to what the
+    // sink will bind in its place, so the menu and later sessions read true.
+    settings.event_backend = "AVSpeech".to_string();
+    apply_speech_settings(&mut lagging, &mut settings);
+    assert_eq!(settings.event_backend, "OneCore");
 }
 
 #[test]
