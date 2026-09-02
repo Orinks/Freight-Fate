@@ -43,6 +43,9 @@ pub const MAX_BUBBLE_VEHICLES: usize = 28;
 /// Clear air around the truck where nothing is created: a vehicle drawn
 /// into being a few hundred feet ahead appeared out of nowhere.
 pub const NO_SPAWN_AHEAD_MI: f64 = 1.1;
+/// The gap a vehicle stuck behind the truck on a one-lane road holds, in
+/// seconds of the truck's own speed, on top of its length.
+pub const HOLD_BEHIND_HEADWAY_S: f64 = 2.0;
 pub const NO_SPAWN_BEHIND_MI: f64 = 0.6;
 /// Bounds for converting the road's existing spatial density into a temporal
 /// arrival interval while a 1x bubble is empty.
@@ -1307,6 +1310,24 @@ impl TrafficManager {
             let delta = target - vehicle.speed_mph;
             vehicle.speed_mph += (-6.0 * dt).max((4.0 * dt).min(delta));
             vehicle.position_mi += vehicle.speed_mph.max(0.0) * game_hours;
+            // One lane your side: nothing behind the truck can get past it.
+            // The bubble draws "passing" traffic behind the truck, and where
+            // the road has no passing lane `intent_lane_at` folds it into the
+            // truck's own lane -- and it then drove straight through the
+            // truck, whoosh and all (Shane, 2026-08-13: a cop passing him on
+            // a one-lane road). Held to a following gap at the truck's pace
+            // instead, the way a queue forms behind a slow truck on a
+            // two-lane highway.
+            if gap < 0.0 && vehicle.lane == self.player_lane && self.lane_count_at(position_mi) <= 1
+            {
+                let truck_mph = self.truck_speed_mph.abs();
+                let hold_at =
+                    position_mi - vehicle.length_mi - truck_mph * HOLD_BEHIND_HEADWAY_S / 3600.0;
+                if vehicle.position_mi > hold_at {
+                    vehicle.position_mi = hold_at;
+                    vehicle.speed_mph = vehicle.speed_mph.min(truck_mph);
+                }
+            }
             if vehicle
                 .exit_at_mi
                 .is_some_and(|exit_at| vehicle.position_mi >= exit_at)
@@ -1418,6 +1439,55 @@ mod tests {
             vec!["A".to_string(), "B".to_string()],
             vec![Leg::new("A", "B", 100.0, "I-1", "flat", Vec::new())],
         )
+    }
+
+    /// One lane your side: a faster vehicle drawn behind the truck holds
+    /// station behind it instead of driving through it (Shane, 2026-08-13:
+    /// a cop "passing" him on a one-lane road).
+    #[test]
+    fn traffic_behind_the_truck_holds_station_where_there_is_no_passing_lane() {
+        let mut leg = Leg::new("A", "B", 100.0, "US-1", "flat", Vec::new());
+        leg.divided = Some(false);
+        let route = Route::from_legs(vec!["A".to_string(), "B".to_string()], vec![leg]);
+        let mut manager = TrafficManager::new(
+            &route,
+            &[0.0],
+            Some(7),
+            12.0,
+            1.0,
+            true,
+            45.0,
+            effects(WeatherKind::Clear),
+        );
+        manager.rolling_bubble = false; // only the unit placed here
+        assert_eq!(manager.lane_count_at(20.0), 1);
+        manager.vehicles.push(TrafficVehicle::new(
+            "trooper:test",
+            18.0,
+            65.0,
+            65.0,
+            0,
+            "patrolling",
+            "state trooper",
+        ));
+        let mut position_mi = 20.0;
+        for _ in 0..600 {
+            manager.update(1.0, position_mi, 1.0, Some(12.0), Some(false));
+            position_mi += 45.0 / 3600.0;
+            let unit = &manager.vehicles[0];
+            assert!(
+                unit.position_mi < position_mi,
+                "the unit went through the truck at mile {:.2}",
+                unit.position_mi
+            );
+        }
+        let unit = &manager.vehicles[0];
+        assert!(unit.speed_mph <= 45.5, "still doing {:.1}", unit.speed_mph);
+        assert!(
+            position_mi - unit.position_mi < 1.0,
+            "held {:.2} miles back",
+            position_mi - unit.position_mi
+        );
     }
 
     #[test]

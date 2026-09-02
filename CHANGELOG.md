@@ -1171,6 +1171,13 @@
 
 ### Fixed
 
+- **On a road with one lane your side, traffic behind you stays behind
+  you.** A faster car, truck or state trooper coming up behind used to drive
+  straight through the cab and go by with a whoosh, on a road where there
+  is no lane to pass in. It now falls in behind at your speed and holds a
+  following gap, the way a queue forms behind a slow truck on a two-lane
+  highway.
+
 - **Quitting the game no longer pauses on the way out.** Choosing Quit
   used to save your career one more time and then wait for a fresh cloud
   backup of it, even though leaving the terminal had already saved. The

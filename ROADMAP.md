@@ -1558,19 +1558,24 @@ Everything not listed here ships fine after 1.9.0.
       expression that let them drift apart. Testers who already earned a
       date badge out of season keep it -- revoking earned badges would be
       the worse call.
-- [ ] **New Dropbox tester findings, reported 2026-08-13 -- not yet
-      triaged.** (1) Sarah: on a road with more than three lanes the
+- [ ] **New Dropbox tester findings, reported 2026-08-13 -- triaged
+      2026-09-01.** (1) Sarah: on a road with more than three lanes the
       lane-change callout says "middle lane" for both the middle and the
       left, and there is no way to tell the far-right lane on a five-lane
       road; she also heard a contradictory "right lane open, left lane
-      open" once (Indio to Riverside) -- the baked lane counts feed speech
-      but the naming does not distinguish beyond left/middle/right.
+      open" once (Indio to Riverside). The double "middle" was FIXED
+      2026-08-19 as a side effect of `MAX_DRIVABLE_LANES`: the driver is
+      never placed on more than three lanes your side, so every lane has
+      its own name again. STILL OPEN, by design for now: a four- or
+      five-lane road is driven as three, so the far-right lane of a
+      five-lane freeway does not exist to the truck. Lifting the cap needs
+      a fourth and fifth spoken name ("the second lane from the right") in
+      every lane sentence, and a row in `docs/ontology.md`.
       (2) Shane: enforcement and passing-cop sounds cut off the in-cab
       radio -- a game-SFX-over-radio mix issue, distinct from the
-      speech-over-engine ducking setting shipped this round. (3) Shane: on
-      a one-lane road a cop still tries to pass, which it cannot do -- the
-      overtake logic does not check that a passing lane exists. Owner has
-      not decided a disposition; recorded so they are not lost.
+      speech-over-engine ducking setting shipped this round. OPEN.
+      (3) Shane: on a one-lane road a cop still tries to pass -- FIXED
+      2026-09-01, see the one-lane bullet under Radio and traffic.
 - [x] **"Lane open" survives time compression -- landed 2026-08-13**
       (Jerry: "it said the right lane was open... I move over and I hit a
       vehicle"). The clearance read behind the lane-open cue and the L
@@ -1871,8 +1876,12 @@ Everything not listed here ships fine after 1.9.0.
 - [ ] **Game sounds duck under the in-cab radio.** Enforcement markers and
       pass-bys currently talk over the radio instead of alongside it
       (Shane).
-- [ ] **One-lane roads: a cop cannot pass you, so it should not try**
-      (Shane).
+- [x] **One-lane roads: a cop cannot pass you, so it should not try**
+      (Shane) -- FIXED 2026-09-01. The bubble folds "passing" traffic into
+      the truck's own lane where the road has no passing lane, and let it
+      drive through the truck; a vehicle behind the truck on a one-lane
+      road now holds a following gap at the truck's pace
+      (`HOLD_BEHIND_HEADWAY_S`), so nothing goes by and no whoosh plays.
 - [ ] **Merging AI yields to a truck** instead of racing it for the gap
       (Shane, long-standing).
 - [ ] **Should the engine start off at trip start?** Design question from
