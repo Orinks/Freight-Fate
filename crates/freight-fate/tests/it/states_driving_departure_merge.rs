@@ -325,14 +325,10 @@ fn loaded_low_power_tractor_uses_the_full_acceleration_lane_safely() {
                 .spoken_merge_mph
                 .expect("the slow-merge warning must state the measured taper speed");
             assert!((spoken_merge - run.merge_mph).abs() <= 1.0, "{run:#?}");
-            assert!(run.said("take a big gap"), "{:#?}", run.heard);
+            assert!(run.said("Take a big gap"), "{:#?}", run.heard);
         }
     }
-    assert!(
-        run.said("of acceleration lane; build your speed and look for a gap."),
-        "{:#?}",
-        run.heard
-    );
+    assert!(run.said("of acceleration lane."), "{:#?}", run.heard);
     assert!(run.said("Lane ending"), "{:#?}", run.heard);
 }
 

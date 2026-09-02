@@ -228,7 +228,7 @@ fn test_an_empty_favourites_list_says_how_to_fill_it() {
     let rows = build_labels(&mut list, &mut app.ctx);
     assert_eq!(
         rows[0],
-        "No favorites saved yet. Enter on a tuned station's row in the Radio app saves it."
+        "No favorites saved yet. The Radio app saves the tuned station."
     );
     assert_eq!(rows[1], "Back");
 }

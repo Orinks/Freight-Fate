@@ -99,8 +99,7 @@ impl DrivingState {
             self.fatigue_cue_gm = 0.0;
             ctx.audio.play_with("vehicle/rumble_strip", 0.8, 0.0);
             ctx.say_event_with(
-                "You are dangerously drowsy and drifting out of your lane. Sleep at the next rest \
-                 stop.",
+                "Dangerously drowsy and drifting out of your lane.",
                 SayEvent::new().category(SpeechCategory::Safety),
             );
         } else if fatigue >= hos::FATIGUE_DROWSY && !self.drowsy_said && alerts_clear {
@@ -110,7 +109,7 @@ impl DrivingState {
             // An instruction to act, not roadside colour: ROUTE keeps it out
             // from behind chatter and brings it back if it gets talked over.
             ctx.say_event_with(
-                "You are getting drowsy. Take a break or sleep at a rest stop.",
+                "Getting drowsy.",
                 SayEvent::queued()
                     .priority(EventPriority::Route)
                     .category(SpeechCategory::Safety),
@@ -182,7 +181,7 @@ impl DrivingState {
         ctx.audio.play_with("vehicle/rumble_strip", 1.0, 0.0);
         ctx.controller.rumble.alert();
         ctx.say_event_with(
-            "You are nodding off. Steer or brake now to stay awake!",
+            "Nodding off. Steer or brake now!",
             SayEvent::new().category(SpeechCategory::Safety),
         );
     }
@@ -231,7 +230,7 @@ impl DrivingState {
             // precedent (automation-handoff sweep, 2026-08-20, the deferred
             // 2026-08-15 audit).
             ctx.say_event_with(
-                "You caught it. Pull over and sleep before the next one.",
+                "You caught it.",
                 SayEvent::queued()
                     .priority(EventPriority::Route)
                     .category(SpeechCategory::Confirmation),
@@ -265,8 +264,8 @@ impl DrivingState {
             let damage = self.trip.truck.damage_pct;
             ctx.say_event_with(
                 format!(
-                    "You nodded off and drifted onto the rumble strip. The truck took damage, now \
-                     {damage:.0} percent. {standing} Pull over and sleep."
+                    "You nodded off and drifted onto the rumble strip. Truck damage {damage:.0} \
+                     percent. {standing}"
                 ),
                 SayEvent::new().category(SpeechCategory::Safety),
             );
@@ -301,9 +300,8 @@ impl DrivingState {
         self.trip.truck.set_parking_brake();
         self.place_out_of_service(ctx);
         format!(
-            "You are out of service for fatigue: {:.0} hours off duty before you may roll. It is \
-             now {}, your hours of service are reset, and the delivery deadline kept counting the \
-             whole time.",
+            "Out of service for fatigue, {:.0} hours off duty. It is now {}. Hours of service \
+             reset, and the delivery deadline kept counting.",
             enforcement::FATIGUE_OUT_OF_SERVICE_HOURS,
             clock_text(self.trip.local_hour())
         )

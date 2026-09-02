@@ -6,8 +6,7 @@ use crate::states::base::{Menu, MenuCore, MenuItem};
 use crate::states::driving_core::{perform_shoulder_sleep, secure_truck_for_stopped_menu};
 use crate::states::driving_menu_states::DriveRef;
 
-const SHOULDER_INTRO_HELP: &str = "Use up and down arrows to navigate, Enter to select. \
-                                   Escape cancels and returns to the previous screen.";
+const SHOULDER_INTRO_HELP: &str = "Enter selects, Escape cancels.";
 
 pub struct ShoulderSleepConfirmationState {
     menu: MenuCore<Self>,
@@ -47,10 +46,7 @@ impl ShoulderSleepConfirmationState {
             .with(ctx, secure_truck_for_stopped_menu)
             .unwrap_or(false);
         if !secured {
-            ctx.say(
-                "Come to a complete stop first. Cancel, finish stopping, then try Emergency \
-                 shoulder sleep again.",
-            );
+            ctx.say("Come to a complete stop first.");
             return;
         }
         let anchor = match self.anchor_mi {
@@ -87,13 +83,13 @@ impl Menu for ShoulderSleepConfirmationState {
                 "Cancel and keep looking for a safe stop",
                 |s: &mut Self, ctx| s.go_back(ctx),
             )
-            .help("Return to the previous screen without resting here."),
+            .help("Back without resting here."),
             MenuItem::new("Sleep on the shoulder anyway", |s: &mut Self, ctx| {
                 s.sleep(ctx)
             })
             .help(
-                "Accept poor emergency rest, possible ticket, possible minor truck damage, and \
-                 deadline time loss.",
+                "Poor rest, possible ticket, possible minor truck damage, and deadline time \
+                 lost.",
             ),
         ]
     }
@@ -103,10 +99,9 @@ impl Menu for ShoulderSleepConfirmationState {
         let reason = self.reason.clone();
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "{title}. {reason} Shoulder sleep is emergency-only. It advances ten hours and gives \
-             you poor rest: you will not wake fully rested. If hours of service are enforced, \
-             your ELD clock will reset. You may be ticketed for illegal parking, minor truck \
-             damage can happen, and the delivery deadline keeps counting. {current}"
+            "{title}. {reason} Shoulder sleep is emergency-only. Ten hours of poor rest. Hours \
+             of service reset if enforced. Possible parking ticket, possible minor truck damage, and the \
+             deadline keeps counting. {current}"
         ));
     }
 
@@ -121,8 +116,8 @@ impl Menu for ShoulderSleepConfirmationState {
         let hint = ctx.control_hint("parking_brake");
         ctx.say_with(
             format!(
-                "Shoulder sleep canceled. Back on the road. The parking brake is set; press \
-                 {hint} to release it when ready."
+                "Shoulder sleep canceled. Back on the road. Parking brake set, {hint} releases \
+                 it."
             ),
             Say::new(),
         );

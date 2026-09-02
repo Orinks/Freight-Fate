@@ -187,8 +187,7 @@ impl DrivingState {
                 );
             }
             return format!(
-                "Air pressure {psi:.0} psi. Wait for 100 psi, then press {brake_hint} to release \
-                 the parking brake."
+                "Air pressure {psi:.0} psi. At 100 psi, {brake_hint} releases the parking brake."
             );
         }
         format!(
@@ -225,8 +224,8 @@ impl DrivingState {
                     );
                 } else {
                     ctx.say(&format!(
-                        "Parking brake stays set. Air pressure {psi:.0} psi; wait for 100 psi \
-                         with the engine running."
+                        "Parking brake stays set. Air pressure {psi:.0} psi. It releases at 100 \
+                         psi with the engine running."
                     ));
                 }
             }
@@ -253,7 +252,7 @@ impl DrivingState {
             let spoken = ctx.settings.speed_text(speed);
             ctx.say(&format!(
                 "You dynamited the parking brake at {spoken}! The spring brakes slam the drive \
-                 axle and the tires grind flat spots into the tread. Save it for emergencies."
+                 axle and the tires grind flat spots into the tread."
             ));
             return;
         }
@@ -297,7 +296,7 @@ impl DrivingState {
             ctx.audio.play("vehicle/gear_grind");
             let damage = self.trip.truck.damage_pct;
             ctx.say(&format!(
-                "{} That crash of gears cost the driveline: damage {damage:.0} percent.",
+                "{} That crash of gears cost the driveline, damage {damage:.0} percent.",
                 result.message
             ));
         } else if result.grind {

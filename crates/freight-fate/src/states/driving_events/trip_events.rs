@@ -1091,8 +1091,8 @@ impl DrivingState {
                 event.text()
             );
             let lights = format!(
-                "Lights and siren behind you for a log check. Signal with {} and brake to a \
-                 stop on the shoulder.",
+                "Lights and siren behind you for a log check. Signal with {} and stop on the \
+                 shoulder.",
                 ctx.control_hint("take_exit")
             );
             self.begin_enforcement_pull_over(

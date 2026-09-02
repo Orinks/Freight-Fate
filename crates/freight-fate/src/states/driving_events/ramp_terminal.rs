@@ -231,23 +231,21 @@ impl DrivingState {
         let short = self.ramp_mi.unwrap_or(0.0) > RAMP_ACCESS_MI;
         if phase == "red" {
             ctx.audio.play_with("events/ramp_light_red", 0.7, 0.0);
-            self.say_route_navigation(ctx, "The light ahead turns red. Be ready to stop.");
+            self.say_route_navigation(ctx, "Light ahead turns red.");
         } else if phase == "yellow" {
             ctx.audio.play_with("ui/notify", 0.7, 0.0);
             let message = if short {
-                "The light ahead turns yellow. You are short of it: stop, then creep up to the \
-                 bar on the red."
+                "Light ahead turns yellow. Red by the time you reach it."
             } else {
-                "The light turns yellow at the bar. Continuing through is legal."
+                "Light turns yellow at the bar."
             };
             self.say_route_navigation(ctx, message);
         } else {
             ctx.audio.play_with("events/ramp_light_green", 0.7, 0.0);
             let message = if short {
-                "The light ahead turns green. Roll toward it; if it changes before you are \
-                 there, stop and creep up on the red."
+                "Light ahead turns green."
             } else {
-                "The light ahead turns green."
+                "Light turns green at the bar."
             };
             self.say_route_navigation(ctx, message);
         }
@@ -438,18 +436,11 @@ impl DrivingState {
                 "yield" => "the yield line",
                 _ => "the roundabout entry",
             };
-            // A stop sign demands the stop at the bar; a yield only asks for
-            // the gap there.
-            let tail = if self.ramp_control == "stop" {
-                "stop again at the bar"
-            } else {
-                "take your gap at the bar"
-            };
             let message = if gap_mi > RAMP_CREEP_MI {
                 let gap = self.short_distance_text(ctx, gap_mi);
-                format!("You are stopped about {gap} short of {noun}. Drive up and {tail}.")
+                format!("Stopped {gap} short of {noun}.")
             } else {
-                format!("You are stopped short of {noun}. Creep ahead and {tail}.")
+                format!("Stopped short of {noun}.")
             };
             // ROUTE, not the ambient default. This is an instruction about a
             // STANDING condition -- the truck is stopped short of the bar and
@@ -467,21 +458,14 @@ impl DrivingState {
         let message = if gap_mi > RAMP_CREEP_MI {
             let gap = self.short_distance_text(ctx, gap_mi);
             if on_green {
-                format!(
-                    "You are stopped about {gap} short of the light, and it is green. Drive up \
-                     now; stop at the bar if it changes."
-                )
+                format!("Stopped {gap} short of the light. It is green.")
             } else {
-                format!(
-                    "You are stopped about {gap} short of the light. Drive up and stop at the \
-                     bar; the red is the time to close the gap."
-                )
+                format!("Stopped {gap} short of the light.")
             }
         } else if on_green {
-            "You are stopped short of the light and it is green. Roll ahead now.".to_string()
+            "Stopped short of the light. It is green.".to_string()
         } else {
-            "You are stopped short of the light. Creep ahead and hold at the stop bar for green."
-                .to_string()
+            "Stopped short of the light.".to_string()
         };
         // ROUTE, not the ambient default. This is an instruction about a
         // STANDING condition -- the truck is stopped short of the bar and
@@ -635,7 +619,7 @@ impl DrivingState {
         let gap_mi = ramp_mi - RAMP_ACCESS_MI;
         if self.ramp_control == "stop" {
             if gap_mi <= 0.0 {
-                return Some("At the stop bar. Stop sign; brake to a full stop.".to_string());
+                return Some("At the stop bar. Stop sign.".to_string());
             }
             let limit_text = self.approach_limit_text(ctx);
             let limit_clause = if limit_text.is_empty() {
@@ -650,7 +634,7 @@ impl DrivingState {
         }
         let phase = self.ramp_light_phase();
         if gap_mi <= 0.0 {
-            return Some(format!("At the stop bar. The light is {phase}."));
+            return Some(format!("At the stop bar. Light {phase}."));
         }
         let limit_text = self.approach_limit_text(ctx);
         let limit_clause = if limit_text.is_empty() {
@@ -744,13 +728,11 @@ impl DrivingState {
             // "Brake to a stop" alone invites stopping right here, a quarter
             // mile short of the bar; the stop belongs at the light.
             let message = if phase == "red" {
-                "Traffic light at the end of the ramp, currently red. Roll down and stop at the \
-                 light."
+                "Traffic light at the end of the ramp, red."
             } else if phase == "yellow" {
-                "Traffic light at the end of the ramp, currently yellow -- it will be red when \
-                 you reach it. Roll down and stop at the light."
+                "Traffic light at the end of the ramp, yellow. Red by the time you reach it."
             } else {
-                "Traffic light at the end of the ramp, currently green."
+                "Traffic light at the end of the ramp, green."
             };
             let approach_clause = if limit_text.is_empty() {
                 String::new()
@@ -776,9 +758,7 @@ impl DrivingState {
             };
             self.say_route_navigation(
                 ctx,
-                &format!(
-                    "Stop sign at the end of the ramp. Brake to a full stop there.{approach_clause}"
-                ),
+                &format!("Stop sign at the end of the ramp.{approach_clause}"),
             );
         } else if matches!(self.ramp_control.as_str(), "yield" | "roundabout") {
             ctx.audio.play_with("ui/notify", 0.7, 0.0);
@@ -801,11 +781,9 @@ impl DrivingState {
             // stop" here would teach the stop-sign habit at a sign whose
             // whole point is that a clear road never demands it.
             let message = if self.ramp_control == "roundabout" {
-                "Roundabout at the end of the ramp. Yield to traffic in the circle: slow, listen \
-                 for your gap, and stop only if it is not clear."
+                "Roundabout at the end of the ramp."
             } else {
-                "Yield sign at the end of the ramp. Slow, listen for your gap, and stop only if \
-                 the road is not clear."
+                "Yield sign at the end of the ramp."
             };
             let approach_clause = if limit_text.is_empty() {
                 String::new()

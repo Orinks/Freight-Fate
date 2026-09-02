@@ -28,8 +28,8 @@ use crate::states::driving_rest_states::fuel_pump::FuelPump;
 use crate::states::driving_rest_states::loyalty::LoyaltyRewardsState;
 
 const REST_STOP_INTRO_HELP: &str =
-    "Use up and down arrows to navigate, Enter to select. Escape returns to the road. Breaks and \
-     sleep advance the clock, and your delivery deadline keeps counting.";
+    "Enter selects, Escape returns to the road. Breaks and sleep advance the clock and the \
+     deadline.";
 
 /// Which wear meter a road shop is selling a job on.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -118,9 +118,8 @@ impl RestStopState {
             self.confirm_sleep_rested = true;
             ctx.audio.play("ui/warning");
             ctx.say(
-                "You are already rested: fresh hours of service and no more rest to gain here. \
-                 Sleeping now would only move the clock and your deadline forward. Press Enter \
-                 again to sleep anyway.",
+                "You are already rested: fresh hours of service and nothing to gain here. \
+                 Sleeping only moves the clock and the deadline. Enter again to sleep anyway.",
             );
             return true;
         }
@@ -178,10 +177,7 @@ impl RestStopState {
                     format!("Loyalty program: {summary}"),
                     |s: &mut Self, ctx| s.loyalty_menu(ctx),
                 )
-                .help(
-                    "Check your loyalty points, shower credits, and redeem rewards at this truck \
-                     stop.",
-                ),
+                .help("Loyalty points, shower credits, and rewards."),
             );
         }
 
@@ -189,8 +185,8 @@ impl RestStopState {
             let label = self.fuel_label(ctx, d);
             items.push(
                 MenuItem::new(label, |s: &mut Self, ctx| s.refuel(ctx)).help(
-                    "Fill the tank at this region's diesel price, plus a 35 dollar service fee. \
-                     If cash is short, buy as many gallons as you can afford.",
+                    "Fills the tank at the regional diesel price plus a 35 dollar service fee. \
+                     Short on cash, it buys what you can afford.",
                 ),
             );
         }
@@ -200,8 +196,7 @@ impl RestStopState {
                     s.food_break(ctx)
                 })
                 .help(
-                    "A short off-duty break for food or coffee. The clock and your deadline \
-                     advance fifteen minutes. Coffee eases fatigue a little, but does not \
+                    "Fifteen minutes off duty. Coffee eases fatigue a little, but does not \
                      satisfy the 30-minute break rule.",
                 ),
             );
@@ -212,8 +207,8 @@ impl RestStopState {
                     s.take_break(ctx)
                 })
                 .help(
-                    "Satisfies the 30-minute break rule and eases fatigue. The clock and your \
-                     deadline advance half an hour.",
+                    "Satisfies the 30-minute break rule and eases fatigue. Clock and deadline \
+                     advance half an hour.",
                 ),
             );
         }
@@ -229,8 +224,8 @@ impl RestStopState {
             }
             items.push(
                 MenuItem::new("Sleep 10 hours", |s: &mut Self, ctx| s.sleep(ctx)).help(
-                    "A full reset: fresh hours of service and zero fatigue. The clock and your \
-                     deadline advance 10 hours.",
+                    "Full reset, fresh hours of service and zero fatigue. Clock and deadline \
+                     advance 10 hours.",
                 ),
             );
         } else if !is_scale {
@@ -245,9 +240,8 @@ impl RestStopState {
                     s.emergency_lot_sleep(ctx)
                 })
                 .help(
-                    "No sleeper facility here, but you can sleep in the lot for a legal 10-hour \
-                     reset. The rest is poor, so you wake still tired, and the clock advances 10 \
-                     hours.",
+                    "A legal 10-hour reset with poor rest, you wake still tired. Clock and \
+                     deadline advance 10 hours.",
                 ),
             );
             items.push(
@@ -259,16 +253,15 @@ impl RestStopState {
                     |s: &mut Self, ctx| s.motel_sleep(ctx),
                 )
                 .help(
-                    "A real bed near the lot. Costs money out of your own pocket, but gives the \
-                     same legal reset with full-quality rest: you wake fresh. The clock advances \
-                     10 hours.",
+                    "A real bed, paid from your own pocket. Legal reset, you wake fresh. Clock \
+                     and deadline advance 10 hours.",
                 ),
             );
         }
         if has("repair") {
             items.push(
                 MenuItem::new("Use repair service", |s: &mut Self, ctx| s.repair(ctx))
-                    .help("Pay the shop to repair truck damage before returning to the road."),
+                    .help("Shop repair of truck damage."),
             );
         }
         if !solvency::out_of_pocket_options(profile_of(ctx)).is_empty() {
@@ -281,7 +274,7 @@ impl RestStopState {
                         ctx.push_state(state);
                     },
                 )
-                .help("Put your own cash toward the balance you owe, right from this stop."),
+                .help("Your own cash toward the balance you owe."),
             );
         }
         let brand = classify_brand(&self.stop.name);
@@ -289,16 +282,14 @@ impl RestStopState {
             if brand.tier == "travel_center" {
                 let tire_help = if brand.signature.contains(&"tires") {
                     format!(
-                        "{} runs a dedicated tire bay: road tire service close to the terminal \
-                         garage price, done fast. Company drivers bill the carrier; \
-                         owner-operators pay.",
+                        "{} has a tire bay, close to the terminal garage price and fast. \
+                         Company drivers bill the carrier, owner-operators pay.",
                         brand.spoken
                     )
                 } else {
                     format!(
-                        "{} can mount tires on the road, at a markup over the terminal garage. \
-                         Tire specialists like Love's and Speedco do the same work cheaper and \
-                         faster.",
+                        "{} mounts tires at a markup over the terminal garage. Love's and \
+                         Speedco do it cheaper and faster.",
                         brand.spoken
                     )
                 };
@@ -314,9 +305,8 @@ impl RestStopState {
                             s.service_wear(ctx, WearMeter::Brake)
                         })
                         .help(format!(
-                            "{} runs a full truck service shop and can reline worn brake shoes \
-                             on the road, at a markup over the terminal garage. Company drivers \
-                             bill the carrier; owner-operators pay.",
+                            "{} relines brake shoes at a markup over the terminal garage. \
+                             Company drivers bill the carrier, owner-operators pay.",
                             brand.spoken
                         )),
                     );
@@ -344,10 +334,7 @@ impl RestStopState {
                 MenuItem::new("Call roadside assistance", |s: &mut Self, ctx| {
                     s.roadside_assistance(ctx)
                 })
-                .help(
-                    "Use the listed roadside assistance service for a field repair before \
-                     returning to the road.",
-                ),
+                .help("A field repair from the listed roadside service."),
             );
         }
         if has("towing") {
@@ -355,10 +342,7 @@ impl RestStopState {
                 MenuItem::new("Request towing service", |s: &mut Self, ctx| {
                     s.roadside_assistance(ctx)
                 })
-                .help(
-                    "Use the listed towing service for roadside help before returning to the \
-                     road.",
-                ),
+                .help("Roadside help from the listed towing service."),
             );
         }
         if has("inspect") && !self.inspection_complete {
@@ -366,7 +350,7 @@ impl RestStopState {
                 MenuItem::new("Check in at inspection station", |s: &mut Self, ctx| {
                     s.inspect(ctx)
                 })
-                .help("Stop and record the inspection check-in before continuing."),
+                .help("Records the inspection check-in."),
             );
         }
         if has("save") {
@@ -374,7 +358,7 @@ impl RestStopState {
                 MenuItem::new("Save at this stop", |s: &mut Self, ctx| {
                     s.save_here(ctx, false)
                 })
-                .help("Save the active drive at this route POI without leaving the road."),
+                .help("Saves the drive at this stop."),
             );
         }
         if self.pay_advance_available(ctx) {
@@ -382,10 +366,7 @@ impl RestStopState {
                 MenuItem::new(self.pay_advance_label(ctx), |s: &mut Self, ctx| {
                     s.request_pay_advance(ctx)
                 })
-                .help(
-                    "Draw cash against this load when you are broke and cannot afford fuel. \
-                     Repaid automatically out of your delivery settlement.",
-                ),
+                .help("Cash against this load, repaid from the delivery settlement."),
             );
         }
         items.push(
@@ -436,9 +417,8 @@ impl RestStopState {
             .read(|d| d.job.destination.clone())
             .unwrap_or_default();
         ctx.say(&format!(
-            "Pay advance approved: {} dollars against your {destination} load. It will be \
-             deducted at delivery. You have {} dollars, with {} dollars of advance still to \
-             repay.",
+            "Pay advance approved: {} dollars against your {destination} load, repaid at \
+             delivery. You have {} dollars, {} dollars of advance to repay.",
             fmt_grouped(grant, 0),
             fmt_grouped(money, 0),
             fmt_grouped(advance, 0)
@@ -461,8 +441,7 @@ impl RestStopState {
                 p.fatigue = hos::rest_break(p.fatigue);
             }
             format!(
-                "You took a 30-minute break. It is {}. Your break requirement is reset and you \
-                 feel a little fresher. {}",
+                "You took a 30-minute break. It is {}. Break requirement reset. {}",
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx)
             )
@@ -484,9 +463,8 @@ impl RestStopState {
                 p.fatigue = hos::rest_coffee_break(p.fatigue);
             }
             format!(
-                "You took a short food and coffee break. It is {}. The coffee helps you stay \
-                 alert a little longer, but this short stop does not reset your 30-minute break \
-                 requirement. {}",
+                "You took a food and coffee break. It is {}. Coffee eases fatigue a little, but \
+                 does not reset your 30-minute break requirement. {}",
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx)
             )
@@ -533,8 +511,7 @@ impl RestStopState {
                     let duty_left_h = (duty_limit - hos_of(ctx).duty_min).max(0.0) / 60.0;
                     let window = if duty_left_h <= 0.0 {
                         "Warning: this sleep did NOT reset your hours, and your duty window has \
-                         already closed. Do not drive: finish the split or take a full 10-hour \
-                         reset first. "
+                         closed. Finish the split or take a full 10-hour reset before driving. "
                             .to_string()
                     } else {
                         let closes = clock_text((d.trip.local_hour() + duty_left_h) % 24.0);
@@ -658,8 +635,8 @@ impl RestStopState {
                 p.fatigue = hos::rest_shoulder(p.fatigue);
             }
             format!(
-                "{engine_off}You bed down in the cramped lot, off to the side. It is {}. Hours \
-                 of service reset, but the rest was poor and you wake still tired. {}{}",
+                "{engine_off}You slept 10 hours in the lot. It is {}. Hours of service reset, \
+                 but the rest was poor and you wake still tired. {}{}",
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx),
                 wake_air_instruction(d, ctx, true)
@@ -790,7 +767,7 @@ impl RestStopState {
     fn tire_label(&self, ctx: &GameContext, d: &DrivingState) -> String {
         let wear = d.trip.truck.tire_wear_pct;
         if wear < 1.0 {
-            return "Tires: tread is in top shape".to_string();
+            return "Tires: top shape".to_string();
         }
         if !player_pays_operating_costs(&profile_of(ctx).business_status) {
             return format!(
@@ -1087,7 +1064,7 @@ fn check_parking_availability(d: &mut DrivingState) -> Option<String> {
     let (latitude, longitude) = d.trip.latlon_at(None);
     let locations = provider.get_available_locations_near(&state, latitude, longitude, 25.0);
     if locations.is_empty() {
-        return Some("No real-time parking data available nearby.".to_string());
+        return Some("No real-time parking data nearby.".to_string());
     }
     // Find the closest location with available spaces
     let total_available: i64 = locations.iter().map(|loc| loc.available.unwrap_or(0)).sum();
@@ -1102,18 +1079,18 @@ fn check_parking_availability(d: &mut DrivingState) -> Option<String> {
 
 fn sleeper_split_help(hours: i64) -> String {
     let pair = match hours {
-        2 => "Can pair with 8 hours in the sleeper berth.",
-        3 => "Can pair with 7 hours in the sleeper berth.",
-        7 => "Can pair with 3 more hours at sleep-capable parking.",
-        _ => "Can pair with 2 more hours at sleep-capable parking.",
+        2 => "Pairs with 8 hours in the sleeper berth.",
+        3 => "Pairs with 7 hours in the sleeper berth.",
+        7 => "Pairs with 3 more hours at sleep-capable parking.",
+        _ => "Pairs with 2 more hours at sleep-capable parking.",
     };
-    format!("{pair} The clock and your deadline advance {hours} hours.")
+    format!("{pair} Clock and deadline advance {hours} hours.")
 }
 
 fn brake_label(ctx: &GameContext, d: &DrivingState) -> String {
     let wear = d.trip.truck.brake_wear_pct;
     if wear < 1.0 {
-        return "Brakes: shoes are in top shape".to_string();
+        return "Brakes: top shape".to_string();
     }
     if !player_pays_operating_costs(&profile_of(ctx).business_status) {
         return format!("Brake job: {} percent wear, carrier billed", fmt_f(wear, 0));
@@ -1228,8 +1205,8 @@ impl Menu for RestStopState {
         let brake = ctx.control_hint("parking_brake");
         ctx.say_with(
             format!(
-                "Back on the road. The parking brake is set. Press {engine} to start the engine \
-                 if needed, then {brake} to release the brake and drive on."
+                "Back on the road. Parking brake set. {engine} starts the engine, {brake} \
+                 releases the brake."
             ),
             Say::new(),
         );

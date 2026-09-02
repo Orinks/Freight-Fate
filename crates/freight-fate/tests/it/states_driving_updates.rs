@@ -808,8 +808,8 @@ fn test_the_dash_still_warns_even_though_nothing_is_charged() {
     app.clear_speech();
     speed_on_an_empty_road(&mut d, &mut app, 15.0, 2.0);
     let spoken = app.event_lines();
-    assert!(spoken.iter().any(|line| line.contains("Watch your speed")));
-    assert!(spoken.iter().any(|line| line.contains("The limit is")));
+    assert!(spoken.iter().any(|line| line.contains("Over the limit of")));
+    assert!(spoken.iter().any(|line| line.contains("miles per hour")));
 }
 
 #[test]
@@ -829,7 +829,7 @@ fn test_the_dash_still_warns_while_looping_back_to_a_missed_destination_exit() {
     let limit = speed_on_an_empty_road(&mut d, &mut app, 24.0, 2.0);
     let spoken = app.event_lines();
     assert!(
-        spoken.iter().any(|line| line.contains("Watch your speed")),
+        spoken.iter().any(|line| line.contains("Over the limit of")),
         "24 over a {limit:.0} on the loop-back said nothing: {spoken:?}"
     );
 }
@@ -976,7 +976,7 @@ fn test_the_air_brake_lockout_says_why_the_truck_will_not_roll() {
     d.maybe_say_air_brake_lockout(&mut app.ctx);
     let said = app.event_lines();
     assert_eq!(said.len(), 1);
-    assert!(said[0].starts_with("Start the engine first"));
+    assert!(said[0].starts_with("Engine off. Start the engine first"));
     // The cue timer holds it off for four seconds, however hard the driver
     // leans on the accelerator.
     d.maybe_say_air_brake_lockout(&mut app.ctx);
@@ -1488,8 +1488,7 @@ fn test_the_descent_advisory_names_controls_the_driver_actually_has() {
     d.trip.truck.transmission.automatic = true;
     let said = d.descend_advice(&app.ctx);
     assert!(!said.to_lowercase().contains("pick your gear"));
-    assert!(said.contains("brake down to speed"));
-    assert!(said.contains("hold a lower gear"));
+    assert!(said.starts_with("Set the engine brake with"));
 
     // The manual box keeps the gear advice, because it can act on it.
     d.trip.truck.transmission.automatic = false;

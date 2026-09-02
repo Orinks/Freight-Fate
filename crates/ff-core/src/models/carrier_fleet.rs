@@ -259,8 +259,7 @@ pub fn equipment_hold_text<P: CareerProfile + ?Sized>(profile: &P, terse: bool) 
         return format!("Held back from the {}: {reason}.", earned.label);
     }
     format!(
-        "Your level earns a tractor from the {}, but the yard \
-         keeps its best iron for drivers in good standing, and {reason}. \
+        "Your level earns a tractor from the {}, but {reason}. \
          {clears} and the {} comes back to you.",
         earned.label, earned.label
     )
@@ -515,9 +514,8 @@ pub fn fleet_upgrade_announcement<P: CareerProfile + ?Sized>(profile: &P) -> Str
     let key = assigned_truck_key::<P, NoJob>(profile, None);
     let model = truck_model_or_panic(key);
     format!(
-        "Dispatch upgraded your assigned tractor. You are now running a \
-         {}: {} The yard handed it over \
-         fueled, serviced, and washed.",
+        "Dispatch upgraded your assigned tractor. Now running a \
+         {}: {} Handed over fueled, serviced, and washed.",
         model.label, model.description
     )
 }

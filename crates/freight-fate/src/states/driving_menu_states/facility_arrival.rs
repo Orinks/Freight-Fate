@@ -31,7 +31,7 @@ pub struct FacilityArrivalState {
 }
 
 const FACILITY_INTRO_HELP: &str =
-    "Use arrows to navigate, Enter to select. Dock and deliver completes the job.";
+    "Arrows navigate, Enter selects. Dock and deliver completes the job.";
 
 impl FacilityArrivalState {
     pub fn new(ctx: &GameContext) -> Self {
@@ -114,13 +114,12 @@ impl FacilityArrivalState {
                 |s: &mut Self, ctx| s.dock(ctx),
             )
             .help(
-                "The receiver takes the whole trailer. Drop it in their yard, hook an empty, \
-                 and go -- quicker than a dock, and it is how you hand off a trailer with a \
-                 write-up on it.",
+                "The receiver takes the whole trailer. Quicker than a dock, and a write-up \
+                 leaves with the trailer.",
             )
         } else {
             MenuItem::new("Dock and deliver", |s: &mut Self, ctx| s.dock(ctx))
-                .help("Back into the dock and complete this delivery.")
+                .help("Completes this delivery.")
         };
         vec![
             primary,
@@ -140,19 +139,13 @@ impl FacilityArrivalState {
                 crate::states::driving_core::FACILITY_ENGINE_SHUT_DOWN_ITEM,
                 |s: &mut Self, ctx| s.toggle_facility_engine(ctx),
             )
-            .help(
-                "Shut it down while you sit here. No fuel burned and no idle noise; you start \
-                 it again before you pull out.",
-            )
+            .help("No fuel burned and no idle noise while parked.")
         } else {
             MenuItem::new(
                 crate::states::driving_core::FACILITY_ENGINE_START_ITEM,
                 |s: &mut Self, ctx| s.toggle_facility_engine(ctx),
             )
-            .help(
-                "Bring the engine back up. Air pressure has to reach 100 psi before the parking \
-                 brake will release.",
-            )
+            .help("Starts the engine. The parking brake needs 100 psi of air.")
         }
     }
 
@@ -222,22 +215,20 @@ impl FacilityArrivalState {
             (
                 "Dropping the trailer",
                 format!(
-                    "Backing into the yard at {facility} and dropping the loaded trailer with \
-                     {} tons of {cargo_label} still in it. Gear down, lines off, hooking a clean \
-                     empty for the next run.",
+                    "Dropping the loaded trailer at {facility}, {} tons of {cargo_label}. \
+                     Hooking an empty.",
                     fmt_f(weight_tons, 0)
                 ),
-                "Dropping the trailer. Please wait.",
+                "Dropping the trailer.",
             )
         } else {
             (
                 "Unloading cargo",
                 format!(
-                    "Docked at {facility}. Unloading {} tons of {cargo_label}; paperwork is \
-                     being signed.",
+                    "Docked at {facility}. Unloading {} tons of {cargo_label}.",
                     fmt_f(weight_tons, 0)
                 ),
-                "Unloading cargo. Please wait.",
+                "Unloading cargo.",
             )
         };
         ctx.replace_state(
@@ -309,21 +300,20 @@ impl FacilityArrivalState {
             net_estimated_pay = round_py_n(net_estimated_pay - advance_due, 2);
             let advance_note = if advance_due > 0.0 {
                 format!(
-                    " A pay advance of {} dollars will be repaid from this settlement.",
+                    " Pay advance of {} dollars repaid from this settlement.",
                     fmt_grouped(advance_due, 0)
                 )
             } else {
                 String::new()
             };
             let timing = if remaining >= 0.0 {
-                format!("{} hours remain before the deadline", fmt_f(remaining, 1))
+                format!("{} hours to the deadline", fmt_f(remaining, 1))
             } else {
                 format!("{} hours past the deadline", fmt_f(-remaining, 1))
             };
             let cargo_condition = if trip_damage > 1.0 {
                 format!(
-                    "Damage consideration: this run added {} percent truck damage, which may \
-                     reduce final pay.",
+                    "Truck damage this run {} percent, may reduce pay.",
                     fmt_f(trip_damage, 0)
                 )
             } else {
@@ -335,12 +325,11 @@ impl FacilityArrivalState {
                 "Those charges do not reduce driver pay."
             };
             format!(
-                "Paperwork for {facility}: {} tons of {}. Rate sheet lists {} dollars; \
-                 current gross payout is {} dollars. Carrier-paid or reimbursed charges \
-                 recorded so far are {} dollars, including tolls {} and accessorials {}. \
-                 {charge_fate} Fines carried over from earlier loads \
-                 are {} dollars, for estimated net driver pay {}.{advance_note} {timing}. \
-                 {cargo_condition} {finish} to settle.",
+                "Paperwork for {facility}: {} tons of {}. Rate sheet {} dollars, current gross \
+                 {} dollars. Carrier-paid or reimbursed charges so far {} dollars, tolls {}, \
+                 accessorials {}. {charge_fate} Fines carried over {} dollars. Estimated net \
+                 driver pay {} dollars.{advance_note} {timing}. {cargo_condition} {finish} to \
+                 settle.",
                 fmt_f(job.weight_tons, 0),
                 job.cargo.label,
                 fmt_grouped(job.pay, 0),
@@ -362,7 +351,7 @@ impl FacilityArrivalState {
         let finish = self.finish_instruction(ctx);
         let Some(text) = self.driving.with(ctx, |d, ctx| {
             format!(
-                "At {facility}. Hauling {} tons of {}. Current speed {}. {}. Stop, then {finish}.",
+                "At {facility}. {} tons of {}. Speed {}. {}. Stop, then {finish}.",
                 fmt_f(d.job.weight_tons, 0),
                 d.job.cargo.label,
                 ctx.settings.speed_text(d.trip.truck.speed_mph()),

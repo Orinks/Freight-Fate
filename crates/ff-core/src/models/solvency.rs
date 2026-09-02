@@ -298,10 +298,9 @@ pub fn advance_refused_reason<P: StandingProfile + ?Sized>(profile: &P) -> Strin
         return String::new();
     }
     format!(
-        "Dispatch will not front you cash while a share of every settlement is \
-         already going to what you owe. You have {} \
-         outstanding, and three quarters of every settlement still reaches you. \
-         Run a load and it comes down.",
+        "Dispatch will not front you cash while settlements are paying down what \
+         you owe. You have {} outstanding, and three quarters of each settlement \
+         still reaches you.",
         money_text(debt_owed(profile))
     )
 }
@@ -598,8 +597,7 @@ pub fn debt_warning_line<P: StandingProfile + ?Sized>(profile: &P, terse: bool) 
         }
         return format!(
             "You owe {owed}. Your carrier holds it there and writes off anything \
-             past it, so it cannot grow. A quarter of each settlement goes to it \
-             and three quarters always reaches you. \
+             past it. A quarter of each settlement goes to it. \
              You can also pay it down from cash at any terminal or truck stop."
         );
     }
@@ -610,9 +608,8 @@ pub fn debt_warning_line<P: StandingProfile + ?Sized>(profile: &P, terse: bool) 
             return format!("Owed {owed}. Ceiling {ceiling}.");
         }
         return format!(
-            "You owe {owed}. A quarter of every settlement now goes to it, and \
-             three quarters always reaches you, so you will never finish a run \
-             with nothing. The ceiling on this is {ceiling}. \
+            "You owe {owed}. A quarter of every settlement goes to it. \
+             The ceiling is {ceiling}. \
              You can also pay it down from cash at any terminal or truck stop."
         );
     }
@@ -621,9 +618,8 @@ pub fn debt_warning_line<P: StandingProfile + ?Sized>(profile: &P, terse: bool) 
             return format!("Owed {owed}, over halfway to a ceiling of {ceiling}.");
         }
         return format!(
-            "You owe {owed}, which is over halfway to a ceiling of {ceiling}. \
-             A quarter of every settlement is paying it down; running clean and \
-             on time keeps new charges off it. \
+            "You owe {owed}, over halfway to a ceiling of {ceiling}. \
+             A quarter of every settlement is paying it down. \
              You can also pay it down from cash at any terminal or truck stop."
         );
     }
@@ -631,10 +627,9 @@ pub fn debt_warning_line<P: StandingProfile + ?Sized>(profile: &P, terse: bool) 
         return format!("Owed {owed}. At {ceiling}, {consequence}.");
     }
     format!(
-        "You owe {owed}, against a ceiling of {ceiling}. This is the last \
-         warning before it: at {ceiling}, {consequence}. You have room for a \
-         couple more settlements at what your runs pay, and a quarter of each \
-         one is paying it down."
+        "You owe {owed}, against a ceiling of {ceiling}. Last warning. At \
+         {ceiling}, {consequence}. Room for a couple more settlements, and a \
+         quarter of each one is paying it down."
     )
 }
 

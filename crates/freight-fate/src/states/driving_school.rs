@@ -139,9 +139,8 @@ impl Default for RollingBasicsLesson {
 impl Instructor for RollingBasicsLesson {
     fn begin(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "Welcome to the driving school. This is the practice road: flat, empty, and none of \
-             it counts. Nothing you do here touches your career, your truck, or your money. \
-             Lesson one, rolling basics. First: press {} to start the engine.",
+            "Driving school. The practice road: flat, empty, and none of it counts toward your \
+             career, truck, or money. Lesson one, rolling basics. Press {} to start the engine.",
             ctx.control_hint("engine")
         );
         self.say(ctx, text);
@@ -154,17 +153,15 @@ impl Instructor for RollingBasicsLesson {
         self.advance(1);
         let text = if ctx.settings.automatic_transmission {
             format!(
-                "Engine running. Let the air pressure build. When you hear air ready, press {} \
-                 to release the parking brake, then hold {} to accelerate. The transmission \
-                 shifts for you.",
+                "Engine running. When you hear air ready, press {} to release the parking \
+                 brake, then hold {} to accelerate. The transmission shifts for you.",
                 ctx.control_hint("parking_brake"),
                 ctx.control_hint("accelerate")
             )
         } else {
             format!(
-                "Engine running. Let the air pressure build. When you hear air ready, press {} \
-                 to release the parking brake, hold {}, select {} for first gear, and release \
-                 the clutch.",
+                "Engine running. When you hear air ready, press {} to release the parking \
+                 brake, hold {}, select {} for first gear, and release the clutch.",
                 ctx.control_hint("parking_brake"),
                 ctx.control_hint("clutch"),
                 ctx.control_hint("gear_first")
@@ -180,8 +177,7 @@ impl Instructor for RollingBasicsLesson {
         if ctx.settings.automatic_transmission {
             self.advance(2);
             let text = format!(
-                "Parking brake released. Now hold {} and take it up to thirty. I will tell you \
-                 when you are there.",
+                "Parking brake released. Hold {} up to thirty.",
                 ctx.control_hint("accelerate")
             );
             self.say(ctx, text);
@@ -189,7 +185,7 @@ impl Instructor for RollingBasicsLesson {
             self.timer = 0.0;
             self.say(
                 ctx,
-                "Parking brake released. Now shift into first gear.".to_string(),
+                "Parking brake released. Shift into first gear.".to_string(),
             );
         }
     }
@@ -200,7 +196,7 @@ impl Instructor for RollingBasicsLesson {
         }
         self.advance(2);
         let text = format!(
-            "In gear. Now hold {} and take it up to thirty. I will tell you when you are there.",
+            "In gear. Hold {} up to thirty.",
             ctx.control_hint("accelerate")
         );
         self.say(ctx, text);
@@ -214,8 +210,7 @@ impl Instructor for RollingBasicsLesson {
         if self.stage == 2 && truck.speed_mph() >= Self::ROLL_MPH {
             self.advance(3);
             let text = format!(
-                "Thirty. Nicely done. Now ease off and brake gently with {} to a full stop. \
-                 Smooth is the goal; your freight never wants to meet the cab.",
+                "Thirty. Ease off and brake gently with {} to a full stop.",
                 ctx.control_hint("brake")
             );
             self.say(ctx, text);
@@ -223,9 +218,7 @@ impl Instructor for RollingBasicsLesson {
             self.done = true;
             self.say(
                 ctx,
-                "Full stop. That is the whole rhythm of the job: build it up smooth, bring it \
-                 down smooth. Lesson one complete. Returning you to the school."
-                    .to_string(),
+                "Full stop. Lesson one complete. Back to the school.".to_string(),
             );
             // `finish_lesson`: the practice drive comes off the stack, once.
             ctx.pop_state();
@@ -380,8 +373,8 @@ pub struct DrivingSchoolState {
 }
 
 const SCHOOL_INTRO_HELP: &str =
-    "Pick a lesson. Lessons run on a practice road where nothing counts: no money, no wear, no \
-     hours. Escape returns to the terminal.";
+    "Lessons run on a practice road where nothing counts: no money, no wear, no hours. Escape \
+     returns to the terminal.";
 
 impl DrivingSchoolState {
     pub fn new() -> Self {

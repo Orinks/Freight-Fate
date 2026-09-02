@@ -435,8 +435,8 @@ fn test_over_the_turn_speed_loops_back_and_charges_time() {
         .any(|(line, interrupt)| *line == text && *interrupt));
     assert_eq!(
         text,
-        "You missed the turn onto North Michigan Street. You continue to the next safe \
-         turnaround and loop back onto the approach. The turn is ahead again."
+        "You missed the turn onto North Michigan Street. Next safe turnaround, back onto the \
+         approach. The turn is ahead again."
     );
 }
 
@@ -1695,7 +1695,7 @@ fn test_cruise_into_a_hot_bend_arrives_at_the_advisory() {
     assert!(
         run.lines
             .iter()
-            .any(|line| line.contains("Adaptive cruise easing to 35 miles per hour for the bend")),
+            .any(|line| line.contains("Adaptive cruise easing to 35 miles per hour.")),
         "{:#?}",
         run.lines
     );
@@ -1791,10 +1791,7 @@ fn test_a_bend_under_cruises_floor_is_braked_down_and_cruise_comes_back() {
         .find(|line| line.contains("Adaptive cruise paused for the bend"))
         .expect("the pause line");
     assert!(
-        call.contains(
-            "curve speed assistance slowing, and cruise resumes once you are through and back \
-             up to speed"
-        ),
+        call.contains("curve speed assistance slowing. Cruise resumes past the bend"),
         "{call:?}"
     );
     // Past the tail the pause is spent, and once the driver has the truck

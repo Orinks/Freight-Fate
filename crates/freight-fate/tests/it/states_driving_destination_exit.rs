@@ -586,7 +586,10 @@ fn test_destination_exit_keeps_cruise_and_eases_for_ramp() {
     assert!(message.contains("exit "), "{message}");
     assert!(message.contains("toward"), "{message}");
     assert!(message.contains("destination exit"), "{message}");
-    assert!(message.to_lowercase().contains("slow down"), "{message}");
+    assert!(
+        message.contains("Move right for the exit lane"),
+        "{message}"
+    );
     assert!(!message.contains("Press X"), "{message}");
     assert!(!message.contains("X takes"), "{message}");
     assert!(
@@ -938,7 +941,7 @@ fn test_the_loop_back_still_asks_a_manual_driver_for_the_signal() {
 
         let missed = miss_the_destination_exit(&mut harness);
 
-        assert!(missed.contains("press X"), "lane keeping {mode}: {missed}");
+        assert!(missed.contains("Press X"), "lane keeping {mode}: {missed}");
         drop(harness);
     }
 }

@@ -334,7 +334,7 @@ fn audit(harness: &mut PlaytestHarness) -> Vec<String> {
                 t.position_mi, t.limit_mph
             ));
         }
-        if let Some(over) = number_after(&limit_line, r"about (\d+) miles per hour over") {
+        if let Some(over) = number_after(&limit_line, r"(?i)about (\d+) miles per hour over") {
             let real = t.speed_mph - t.limit_mph;
             if (over - real).abs() > 1.0 {
                 out.push(format!(

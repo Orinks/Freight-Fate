@@ -250,7 +250,7 @@ fn test_full_game_flow_headless() {
     // rather than claiming a departure the truck cannot make -- it names the
     // very key the drive below presses next.
     assert!(!departure.contains("Departing now"), "{departure}");
-    assert!(departure.contains("The engine is off."), "{departure}");
+    assert!(departure.contains("Engine off."), "{departure}");
     assert!(!departure.contains("Legal HOS plan"), "{departure}");
     assert!(!departure.contains("Fuel-capable stops"), "{departure}");
     assert!(!departure.contains("Parking notes"), "{departure}");

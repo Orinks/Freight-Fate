@@ -173,14 +173,14 @@ impl DrivingState {
                 if terse {
                     format!("At {place}. Stop now.")
                 } else {
-                    format!("You are at {place}. Come to a complete stop.")
+                    format!("At {place}. Come to a stop.")
                 }
             } else {
                 let place = &stop.name;
                 if terse {
                     format!("At {place}.")
                 } else {
-                    format!("You are at {place}. Come to a complete stop.")
+                    format!("At {place}. Come to a stop.")
                 }
             };
             // Both kinds of ramp stop open the same real-time reaction
@@ -233,14 +233,14 @@ impl DrivingState {
         let mut line = if self.terse_speech(ctx) {
             format!("Drove past {}; you never stopped.", stop.spoken_name())
         } else {
-            format!("You never stopped and drove past {exit_ref}.")
+            format!("Drove past {exit_ref} without stopping.")
         };
         if planned {
             line.push_str(" Plan cancelled.");
         }
         line.push_str(&format!(
-            " Facility stopping assistance is no longer armed for that stop. Continue safely and press {} to plan \
-             the next sleep-capable stop.",
+            " Facility stopping assistance disarmed for that stop. Press {} to plan the next \
+             sleep-capable stop.",
             ctx.control_hint("rest")
         ));
         self.say_confirmation_interrupt(ctx, &line);
@@ -258,7 +258,7 @@ impl DrivingState {
     /// Rodick, Hattiesburg, 2026-08-26: "it never rerouted me").
     fn missed_exit_recovery(stop: &RoadStop) -> &'static str {
         if stop.stop_type == "delivery_destination" {
-            "Stay on the highway: you loop back through the safe turnaround and the destination \
+            "Stay on the highway. You loop back through the safe turnaround and the destination \
              exit comes around again."
         } else {
             "Stay on the highway and recover at the next safe exit."
@@ -297,7 +297,7 @@ impl DrivingState {
             let mut opts = SayEvent::new();
             opts.category = Some(SpeechCategory::Confirmation);
             ctx.say_event_with(
-                "Exit signal was canceled, so you stayed on the highway.".to_string(),
+                "Exit signal canceled. You stayed on the highway.".to_string(),
                 opts,
             );
             return;
@@ -329,7 +329,7 @@ impl DrivingState {
             let recovery = Self::missed_exit_recovery(&stop);
             self.say_confirmation_event(
                 ctx,
-                &format!("You missed {place}: the turn signal was not set. {recovery}"),
+                &format!("You missed {place}. The turn signal was not set. {recovery}"),
             );
             return;
         }
@@ -353,7 +353,7 @@ impl DrivingState {
             } else {
                 self.say_confirmation_event(
                     ctx,
-                    &format!("You missed {missed}: you were not in the exit lane. {recovery}"),
+                    &format!("You missed {missed}. You were not in the exit lane. {recovery}"),
                 );
             }
             return;
@@ -458,14 +458,14 @@ impl DrivingState {
             format!("{take} {ramp} of ramp.{terminal}")
         } else {
             let mut ending = match self.ramp_control.as_str() {
-                "signal" => "traffic light at the end, then brake to a stop at the entrance",
-                "stop" => "stop sign at the end, then brake to a stop at the entrance",
-                _ => "brake to a stop at the end",
+                "signal" => "traffic light at the end",
+                "stop" => "stop sign at the end",
+                _ => "stop at the end",
             };
             if scale_ramp {
-                ending = "roll down to the scale and stop at the bar";
+                ending = "the scale at the end, stop at the bar";
             }
-            format!("{take} {ramp} of ramp; {ending}.")
+            format!("{take} {ramp} of ramp, {ending}.")
         };
         let mut opts = SayEvent::new();
         opts.category = Some(SpeechCategory::Navigation);
@@ -540,9 +540,8 @@ impl DrivingState {
             )
         } else {
             format!(
-                "You drove past {place} without stopping. You continue to the next safe \
-                 turnaround and loop back onto the approach. {place} is ahead again; slow to a \
-                 stop this time. The clock is still running."
+                "Drove past {place} without stopping. You loop back through the next safe \
+                 turnaround. {place} is ahead again, stop this time. The clock is still running."
             )
         };
         if self.ramp_terminal_miss_count >= 2 {

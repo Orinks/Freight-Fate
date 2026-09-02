@@ -44,9 +44,9 @@ impl Trip {
         if zone.reason == "construction" {
             let merge_part = if zone.closed_side.is_some() {
                 let (shut, keep) = Self::closure_phrases(zone);
-                format!("The {shut} lane is closed; merge {keep} at the taper. ")
+                format!("The {shut} lane is closed, merge {keep} at the taper. ")
             } else {
-                "All lanes stay open through the work; hold your lane. ".to_string()
+                "All lanes open through the work. ".to_string()
             };
             // NOT "Brake now!". This is an advance warning that fires up to
             // eight miles out, and "Brake now" is the emergency hazard
@@ -100,12 +100,12 @@ impl Trip {
             if zone.closed_side.is_some() {
                 let (shut, keep) = Self::closure_phrases(zone);
                 return format!(
-                    "Construction merge taper. The {shut} lane closes ahead; merge {keep} now. Speed limit {}.",
+                    "Construction merge taper. The {shut} lane closes ahead, merge {keep}. Speed limit {}.",
                     self.speed_value(zone.limit_mph)
                 );
             }
             return format!(
-                "Construction merge taper. Follow the flagger through the cones. Speed limit {}.",
+                "Construction merge taper. Flagger ahead. Speed limit {}.",
                 self.speed_value(zone.limit_mph)
             );
         }
@@ -115,18 +115,18 @@ impl Trip {
                 // "Keep left" is the same instruction on a two-lane stretch
                 // and still true on a wider one.
                 return format!(
-                    "Work zone active. The {shut} lane is closed; keep {keep} and watch the barrels. Speed limit {}.",
+                    "Work zone active. The {shut} lane is closed, keep {keep}. Speed limit {}.",
                     self.speed_value(zone.limit_mph)
                 );
             }
             return format!(
-                "Work zone active. Stay in the lane and watch the barrels. Speed limit {}.",
+                "Work zone active. Speed limit {}.",
                 self.speed_value(zone.limit_mph)
             );
         }
         if zone.reason == "heavy traffic" && zone.aadt.is_some() {
             return format!(
-                "{}. Traffic slowing to {}; hold your gap.",
+                "{}. Traffic slowing to {}.",
                 crate::data::world_models::py_capitalize(self.congestion_phrase()),
                 self.speed_value(zone.limit_mph)
             );
@@ -134,7 +134,7 @@ impl Trip {
         // Say you are *in* it, not that it is ahead; pairs with the "End of
         // ... zone" exit.
         format!(
-            "Entering {} zone. Speed limit {} now.",
+            "Entering {} zone. Speed limit {}.",
             zone.reason,
             self.speed_value(zone.limit_mph)
         )

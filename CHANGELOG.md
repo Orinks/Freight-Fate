@@ -535,6 +535,16 @@
 
 ### Changed
 
+- **Spoken lines are shorter everywhere.** Road cues, menus, readouts, the
+  help screens and every settings description now say the fact and stop.
+  A ramp cue says traffic light at the end, red, and no longer tells you
+  to roll down and stop at it; the light, stop sign and stop bar lines,
+  the exit and arrival cues, the rest stop and city menus and the hours
+  reports all lose the coaching that followed the fact. Every distance,
+  speed, price, exit number and go or no-go word is still there, in the
+  same order as before. Asked for by braille display readers, for whom
+  every extra word was another cell to read.
+
 - **The Drivers on duty list no longer has a Refresh row.** It keeps itself
   up to date about once a minute while it is open, the same way the list on
   orinks.net does, so there was nothing for the row to do that waiting a

@@ -152,11 +152,10 @@ fn test_facility_menu_waits_for_full_stop() {
     // speeding warning, depending on the posted limit of the route dispatch
     // drew.
     assert!(
-        harness
-            .app
-            .event_lines()
-            .iter()
-            .any(|line| line.contains("Stop completely") && line.contains("parking brake with P")),
+        harness.app.event_lines().iter().any(|line| {
+            line.contains("Stop, set the parking brake with P")
+                && line.contains("T opens the facility")
+        }),
         "{:#?}",
         harness.app.event_lines()
     );
@@ -231,11 +230,11 @@ fn test_facility_menu_waits_for_full_stop() {
     let paperwork = last_main(&harness);
     for phrase in [
         "Paperwork for",
-        "current gross payout",
-        "Carrier-paid or reimbursed charges recorded so far",
+        "current gross",
+        "Carrier-paid or reimbursed charges so far",
         "Those charges do not reduce driver pay",
-        "estimated net driver pay",
-        "hours remain before the deadline",
+        "Estimated net driver pay",
+        "hours to the deadline",
         "Cargo condition",
         "Dock and deliver to settle",
     ] {
@@ -244,8 +243,8 @@ fn test_facility_menu_waits_for_full_stop() {
     // A company driver's estimate is wages, not the carrier's gross: the
     // board quoted 224 dollars for a load this line then called 330 of
     // "net driver pay" (agent playtest, 2026-09-02).
-    let gross = dollars_after(&paperwork, "current gross payout is ");
-    let net = dollars_after(&paperwork, "estimated net driver pay ");
+    let gross = dollars_after(&paperwork, "current gross ");
+    let net = dollars_after(&paperwork, "Estimated net driver pay ");
     assert!(net > 0.0 && net < gross, "{paperwork}");
 
     let minutes_before_unloading = harness.read_drive(|d| d.trip.game_minutes);

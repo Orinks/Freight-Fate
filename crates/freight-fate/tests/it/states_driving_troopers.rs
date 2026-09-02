@@ -480,7 +480,7 @@ fn test_failure_to_stop_warning_acknowledges_signal() {
     }
 
     assert!(
-        said(&app).contains("You signaled for the stop"),
+        said(&app).contains("Signaled, but still moving with lights behind you"),
         "{:#?}",
         spoken(&app)
     );
@@ -703,7 +703,7 @@ fn test_weigh_station_warning_is_spoken_before_bypass() {
         notices[0]
     );
     assert!(
-        notices[0].contains("Once you are stopped at the scale, press T to check in"),
+        notices[0].contains("Stopped at the scale, press T to check in"),
         "{}",
         notices[0]
     );
@@ -994,7 +994,14 @@ fn test_f1_help_names_non_speed_enforcement_pullovers() {
     let last = lines
         .last()
         .unwrap_or_else(|| panic!("F1 said nothing at all"));
-    assert!(last.contains("scale bypass, or unsafe equipment"), "{last}");
+    assert!(
+        last.contains("X also signals a pull-over when a trooper lights you up"),
+        "{last}"
+    );
+    assert!(
+        last.contains("a scale bypass, or unsafe equipment"),
+        "{last}"
+    );
     assert!(last.contains("signal, then brake to a stop"), "{last}");
 }
 
@@ -1050,7 +1057,7 @@ fn test_clean_stop_can_waive_a_ticket_to_a_warning() {
         money_before
     ));
     let text = with_top::<TrafficStopState, _>(&mut app, |stop, _| stop.outcome_text().to_string());
-    assert!(text.contains("let it go"), "{text}");
+    assert!(text.contains("lets it go with a warning"), "{text}");
 }
 
 #[test]

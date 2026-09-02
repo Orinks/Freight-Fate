@@ -144,7 +144,7 @@ impl Trip {
                     self.emit(
                         TripEventKind::GpsCue,
                         SpokenMessage::new(format!(
-                            "{} entry recorded at {}; toll will be billed at carrier settlement.",
+                            "{} entry recorded at {}. Toll billed at carrier settlement.",
                             toll.method_label(),
                             toll.name
                         )),
@@ -425,15 +425,15 @@ impl Trip {
     pub fn conditions_incident_text(&self) -> &'static str {
         let kind = self.weather.current;
         if self.truck.hydroplaning() {
-            return "Hydroplaning, the tires are riding the water film.";
+            return "Hydroplaning.";
         }
         match kind {
-            WeatherKind::Ice => "The trailer is sliding on the ice.",
-            WeatherKind::Snow => "The trailer is sliding on the snow, too fast for the conditions.",
+            WeatherKind::Ice => "Trailer sliding on the ice.",
+            WeatherKind::Snow => "Trailer sliding on the snow.",
             WeatherKind::Rain | WeatherKind::HeavyRain | WeatherKind::Thunderstorm => {
-                "Hydroplaning on the wet road, too fast for the conditions."
+                "Hydroplaning on the wet road."
             }
-            _ => "Losing traction, too fast for the conditions.",
+            _ => "Losing traction.",
         }
     }
 

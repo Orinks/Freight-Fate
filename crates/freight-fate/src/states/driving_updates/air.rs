@@ -43,7 +43,7 @@ impl DrivingState {
             let message = if terse {
                 "Engine off.".to_string()
             } else {
-                "Start the engine first; air pressure cannot build with the engine off.".to_string()
+                "Engine off. Start the engine first.".to_string()
             };
             ctx.say_event_with(message, opts());
         } else if !self.trip.truck.air_ready() {
@@ -53,8 +53,7 @@ impl DrivingState {
                 format!("Air pressure {psi:.0} psi.")
             } else {
                 format!(
-                    "Air pressure {psi:.0} psi. Wait for 100 psi, then press {} to release the \
-                     parking brake.",
+                    "Air pressure {psi:.0} psi. At 100 psi, {} releases the parking brake.",
                     ctx.control_hint("parking_brake")
                 )
             };
@@ -102,15 +101,15 @@ impl DrivingState {
             // do it for them at 40 psi wherever they happen to be.
             let rolling = self.trip.truck.velocity_mps.abs() > 0.3;
             let advice = if rolling {
-                "Get stopped and let the compressor build; the spring brakes set at 40 psi."
+                "The spring brakes set on their own at 40 psi."
             } else {
-                "Keep the parking brake set until pressure builds."
+                "The parking brake stays set until pressure builds."
             };
             let psi = self.trip.truck.air_pressure_psi();
             let message = if terse {
                 format!("Low air: {psi:.0} psi.")
             } else {
-                format!("Low air warning: {psi:.0} psi. {advice}")
+                format!("Low air warning, {psi:.0} psi. {advice}")
             };
             // Parked, this is a band readout; rolling, it is the last warning
             // before the spring brakes set on their own -- the same
@@ -139,8 +138,7 @@ impl DrivingState {
             let message = if terse {
                 "Spring brakes applied."
             } else {
-                "Spring brakes applied from low air pressure. Stop and let the compressor rebuild \
-                 air before moving."
+                "Spring brakes applied from low air pressure."
             };
             // The low-air band is a STATUS readout; the spring brakes actually
             // setting is the emergency the band was warning about -- SAFETY.
@@ -321,10 +319,7 @@ impl DrivingState {
         let message = if self.terse_speech(ctx) {
             format!("Redline. Engine wear {wear:.0} percent.{band_clause}")
         } else {
-            format!(
-                "The engine is screaming at redline and wearing itself out, now {wear:.0} percent \
-                 engine wear.{band_clause} Ease off and slow down."
-            )
+            format!("Engine at redline. Engine wear {wear:.0} percent.{band_clause}")
         };
         // A standing condition: the engine is still at redline and the driver
         // already knows. Repeating it earns the voice only when the wear
@@ -346,8 +341,7 @@ impl DrivingState {
             ctx.audio.horn_stop();
             self.trip.truck.horn_on = false;
             ctx.say_event_with(
-                "The horn cut out: air pressure is low, and the protection valve saves what is \
-                 left for the brakes.",
+                "Horn cut out, low air pressure.",
                 SayEvent::queued()
                     .priority(EventPriority::Route)
                     .category(SpeechCategory::Status),

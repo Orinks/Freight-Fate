@@ -244,7 +244,7 @@ impl DrivingState {
             return; // the held-key wake-up check owns the arrows right now
         }
         if self.ramp_mi.is_some() {
-            ctx.say("You are on the exit ramp. No lanes to change.");
+            ctx.say("On the exit ramp. No lanes to change.");
             return;
         }
         if self.lane_change_target.is_some() {
@@ -265,7 +265,7 @@ impl DrivingState {
             // is already in ("you are already in the right lane") is no answer
             // at all to someone asking to go left.
             let side = if direction > 0 { "left" } else { "right" };
-            ctx.say(&format!("There is no lane to your {side} here."));
+            ctx.say(&format!("No lane to your {side} here."));
             return;
         }
         // The taper counts: that is where the lane is closing, and letting a

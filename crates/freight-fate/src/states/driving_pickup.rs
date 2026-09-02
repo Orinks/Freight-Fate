@@ -33,7 +33,7 @@ impl DrivingState {
             self.remind_arrival_gate(
                 ctx,
                 "Pickup gate: stop to check in.",
-                &format!("Still at {facility}. Slow down and stop to check in."),
+                &format!("Still at {facility}. Stop to check in."),
                 true,
             );
             return;
@@ -42,12 +42,12 @@ impl DrivingState {
         self.gate_reminder_s = GATE_REMINDER_INTERVAL_S;
         let speed_control_paused = self.pause_speed_control(ctx, false);
         ctx.audio.play("ui/warning");
-        self.set_status("Pickup ahead: slow down and come to a complete stop.");
+        self.set_status("Pickup ahead: stop at the gate.");
         let facility = self.pickup_facility_text(ctx);
         let message = if self.terse_speech(ctx) {
             format!("Pickup ahead: {facility}.")
         } else {
-            format!("Pickup ahead: {facility}. Slow down and come to a complete stop at the gate.")
+            format!("Pickup ahead: {facility}. Stop at the gate.")
         };
         // Rescued only until the gate's own stop line has landed: cut by
         // "At <facility>. Stop completely...", it came back behind it and
@@ -80,7 +80,7 @@ impl DrivingState {
             format!("At {facility}. Stop to check in.")
         } else {
             format!(
-                "At {facility}. Stop completely and set the parking brake with {} to enter. Once stopped and parked, {} opens the facility.",
+                "At {facility}. Stop, set the parking brake with {}, then {} opens the facility.",
                 ctx.control_hint("parking_brake"),
                 ctx.control_hint("rest")
             )
@@ -102,8 +102,7 @@ impl DrivingState {
         // throttle (automation-handoff sweep, 2026-08-20, the deferred
         // 2026-08-15 audit).
         ctx.say_event_with(
-            "Automatic speed control paused for pickup. It will resume after you depart with the \
-             load.",
+            "Automatic speed control paused for pickup. It resumes when you depart.",
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Confirmation),
@@ -171,9 +170,7 @@ impl DrivingState {
         ctx.replace_state(
             TimedMessageState::new(
                 "Pulling into pickup",
-                &format!(
-                    "Pulling into {facility}. Setting the brakes and rolling to the check-in lane."
-                ),
+                &format!("Pulling into {facility}."),
                 "Pulling into the pickup facility. Please wait.",
                 STOP_PULL_IN_WAIT_S,
                 move |ctx: &mut GameContext| {

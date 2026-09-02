@@ -264,10 +264,8 @@ fn test_the_suspended_stop_says_the_run_is_over_and_why() {
     stop.announce_entry(&mut app.ctx);
 
     let said = said(&app);
-    assert!(
-        said.contains("cannot drive") || said.contains("may not drive"),
-        "{said}"
-    );
+    assert!(said.contains("CDL is suspended"), "{said}");
+    assert!(said.contains("off the dispatch board"), "{said}");
     assert!(said.contains("load"), "{said}"); // what happens to the freight is stated
 }
 
@@ -695,7 +693,7 @@ fn test_the_fatigue_out_of_service_actually_holds_the_truck() {
     assert!(
         spoken(&app)
             .iter()
-            .any(|line| line.contains("out of service")),
+            .any(|line| line.contains("Out of service for fatigue")),
         "{:#?}",
         spoken(&app)
     );

@@ -188,8 +188,8 @@ impl DrivingState {
             };
             ctx.audio.play_with("ui/notify", 0.7, 0.0);
             let message = format!(
-                "Off the ramp and onto city streets: {}.{first_corner} {} to the facility gate.",
-                lower_first(&street),
+                "Off the ramp and onto city streets. {street}.{first_corner} {} to the facility \
+                 gate.",
                 self.trip.distance_text(route.miles())
             );
             if !first_corner.is_empty() {
@@ -282,9 +282,8 @@ impl DrivingState {
             opts.category = Some(SpeechCategory::Navigation);
             ctx.say_event_with(
                 format!(
-                    "Out of the gate and onto city streets: {}. {distance} to the \
-                     {merge_highway} on-ramp.",
-                    lower_first(&street)
+                    "Out of the gate and onto city streets. {street}. {distance} to the \
+                     {merge_highway} on-ramp."
                 ),
                 opts,
             );
@@ -368,10 +367,7 @@ impl DrivingState {
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
         opts.category = Some(SpeechCategory::Navigation);
         ctx.say_event_with(
-            format!(
-                "Up the ramp onto {merge_highway}. {lane_text} of acceleration lane; build your \
-                 speed and look for a gap."
-            ),
+            format!("Up the ramp onto {merge_highway}. {lane_text} of acceleration lane."),
             opts,
         );
     }
@@ -419,13 +415,12 @@ impl DrivingState {
             // sudden highway-speed transition.
             self.departure_merge_recovery = true;
             format!(
-                "Lane ending at {}. You are under the {} traffic is running, so take a big gap \
-                 and keep building speed once you are in.",
+                "Lane ending at {}, under the {} traffic is running. Take a big gap.",
                 ctx.settings.speed_text(speed),
                 ctx.settings.speed_text(limit)
             )
         } else {
-            "Lane ending. Merge left when clear.".to_string()
+            "Lane ending. Merge left.".to_string()
         };
         ctx.audio.play_with("vehicle/signal_tone", 0.6, -0.6);
         let mut opts = SayEvent::queued().priority(EventPriority::Route);

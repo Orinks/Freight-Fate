@@ -145,8 +145,7 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: false,
         announcement: "You earned the flatbed securement certificate. Steel and lumber \
-             jobs are now available. Open-deck freight is only as good as its \
-             tie-downs: chains, straps, and working-load limits are now your job.",
+             jobs are now available.",
     },
     Credential {
         key: "heavy_haul",
@@ -191,10 +190,9 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 0.0,
         needs_clean_record: false,
-        announcement: "You passed the written test for the doubles endorsement -- the letter \
-             T on a real license. Twin-trailer parcel freight is now available: \
-             two short trailers, legal nationwide, and the rear one wanders. \
-             Smooth steering and early brakes keep the set in line.",
+        announcement: "You passed the written test for the doubles endorsement, the letter \
+             T on a real license. Twin-trailer parcel freight is now available. \
+             Two short trailers, legal nationwide, and the rear one wanders.",
     },
     Credential {
         key: "tank",
@@ -208,11 +206,9 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 0.0,
         needs_clean_record: false,
-        announcement: "You earned the tank vehicle endorsement -- the letter N on a real \
-             license. Liquid bulk opens from here: bulk fuel once the hazmat \
-             endorsement joins it, and liquid food at level 21. \
-             A tank load keeps moving after you do: brake early, brake once, and \
-             listen for the wave coming back.",
+        announcement: "You earned the tank vehicle endorsement, the letter N on a real \
+             license. Liquid bulk opens from here, bulk fuel once the hazmat \
+             endorsement joins it, and liquid food at level 21.",
     },
     Credential {
         key: "hazmat",
@@ -229,10 +225,9 @@ pub const CREDENTIALS: &[Credential] = &[
         // wait real without stalling an act-two career.
         wait_days: 30.0,
         needs_clean_record: false,
-        announcement: "Your hazmat background check cleared, and the hazmat endorsement -- \
-             the letter H -- is on your license. Placarded chemical freight is now \
-             available. Hazmat pays for care, not speed: placards mean every \
-             scale is watching.",
+        announcement: "Your hazmat background check cleared, and the hazmat endorsement, \
+             the letter H, is on your license. Placarded chemical freight is now \
+             available. Placards mean every scale is watching.",
     },
     // -- Specialist credentials --------------------------------------------
     Credential {
@@ -247,9 +242,8 @@ pub const CREDENTIALS: &[Credential] = &[
         prereqs: &[],
         wait_days: 20.0,
         needs_clean_record: false,
-        announcement: "Your TWIC enrollment cleared. The port card opens the secure side of \
-             the waterfront: container freight out of the port terminals is now \
-             available.",
+        announcement: "Your TWIC enrollment cleared. Container freight out of the port \
+             terminals is now available.",
     },
     Credential {
         key: "lcv",
@@ -264,9 +258,8 @@ pub const CREDENTIALS: &[Credential] = &[
         wait_days: 0.0,
         needs_clean_record: true,
         announcement: "You finished LCV training and hold the longer-combination-vehicle \
-             certificate. Turnpike doubles are now available -- but only between \
-             the states whose networks allow them, so watch where the freight \
-             starts and ends.",
+             certificate. Turnpike doubles are now available, only between the \
+             states whose networks allow them.",
     },
 ];
 
@@ -319,7 +312,7 @@ pub fn course_eligibility(
     }
     if pending.iter().any(|k| k == cred.key) {
         reasons.push(format!(
-            "Your {} is already in the works; the background check has not \
+            "Your {} is already in the works. The background check has not \
              cleared yet.",
             cred.gate_label
         ));
@@ -339,7 +332,7 @@ pub fn course_eligibility(
     }
     if cred.needs_clean_record && !clean_record {
         reasons.push(
-            "Requires a clean recent driving record -- no recent serious \
+            "Requires a clean recent driving record, no recent serious \
              violations and no live suspension."
                 .to_string(),
         );

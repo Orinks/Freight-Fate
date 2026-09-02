@@ -133,16 +133,14 @@ impl DrivingState {
         }
         self.pull_over_warning_level = level;
         let message = if final_warning {
-            "Final failure-to-stop warning. Brake to a full stop now or troopers will end the \
-             stop with spike strips and felony charges."
+            "Final failure-to-stop warning. Stop now or troopers end it with spike strips and \
+             felony charges."
                 .to_string()
         } else if self.pull_over_signaled {
-            "You signaled for the stop, but you are still moving with lights behind you. Brake to \
-             a full stop on the shoulder."
-                .to_string()
+            "Signaled, but still moving with lights behind you. Stop on the shoulder.".to_string()
         } else {
             format!(
-                "Failure-to-stop warning. Signal with {} and brake to a full stop on the shoulder.",
+                "Failure-to-stop warning. Signal with {} and stop on the shoulder.",
                 ctx.control_hint("take_exit")
             )
         };
@@ -261,7 +259,7 @@ impl DrivingState {
             if self.pursuit_hold_s > 0.0 {
                 self.pursuit_hold_s = 0.0;
                 ctx.say_event_with(
-                    "Not running. Brake to a stop on the shoulder.",
+                    "Not running. Stop on the shoulder.",
                     SayEvent::new().category(SpeechCategory::Confirmation),
                 );
             }
@@ -272,8 +270,8 @@ impl DrivingState {
             let hint = ctx.control_hint("take_exit");
             let major_count = profile_of(ctx).driving_record.major_count();
             let cost = if major_count >= 1 {
-                "This is your second major offense: it disqualifies your CDL for life, and this \
-                 career will not drive again."
+                "A second major offense disqualifies your CDL for life, and this career will not \
+                 drive again."
             } else {
                 "It is a felony, it cancels this load, and it disqualifies your CDL for a year."
             };
@@ -318,9 +316,8 @@ impl DrivingState {
             ctx,
             EnforcementStopParams {
                 title: "Failure-to-stop stop".to_string(),
-                summary: "Troopers boxed you in and brought the truck to a stop. Failing to pull \
-                          over promptly for an officer is a serious violation, and the citation \
-                          says so."
+                summary: "Troopers boxed you in and stopped the truck. Failing to pull over \
+                          promptly for an officer is a serious violation."
                     .to_string(),
                 fine: FAILURE_TO_STOP_CITATION_FINE,
                 reputation_hit: hos::HOS_REPUTATION_HIT * 2.0,

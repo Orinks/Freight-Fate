@@ -53,8 +53,8 @@ pub fn settlement_hours(driving: &DrivingState) -> f64 {
     driven_hours.max(minimum_hours)
 }
 
-const ARRIVAL_INTRO_HELP: &str = "Use up and down arrows to review the delivery summary. Enter \
-                                  repeats the current line. Escape continues.";
+const ARRIVAL_INTRO_HELP: &str =
+    "Up and down review the summary. Enter repeats the line. Escape continues.";
 
 pub struct ArrivalState {
     menu: MenuCore<Self>,
@@ -133,7 +133,7 @@ impl ArrivalState {
                 p.money -= driver_charges;
                 p.fines_owed = 0.0;
                 self.summary_parts.push(format!(
-                    "Fines carried over from earlier loads: {} dollars, now settled.",
+                    "Fines carried over from earlier loads: {} dollars, settled.",
                     fmt_grouped(driver_charges, 0)
                 ));
             }
@@ -159,8 +159,7 @@ impl ArrivalState {
             let promotion = self.handle_fleet_promotion(ctx, previous_level, &mut announcements);
             announcements.extend(promotion);
             format!(
-                "Dispatch paid the reposition at the reduced empty-mile rate: {} dollars. \
-                 You now have {} dollars. ",
+                "Reposition pay at the empty-mile rate: {} dollars. You now have {} dollars. ",
                 fmt_grouped(job.pay, 0),
                 fmt_grouped(money, 0)
             )
@@ -194,8 +193,8 @@ impl ArrivalState {
         self.summary_parts.insert(
             0,
             format!(
-                "Bobtailed empty to {} in {} hours. It is {}. {pay_clause}You are parked at {} \
-                 and can open the {} dispatch board. Fuel {} percent.",
+                "Bobtailed empty to {} in {} hours. It is {}. {pay_clause}Parked at {}. \
+                 {} dispatch board available. Fuel {} percent.",
                 job.spoken_destination(),
                 fmt_f(hours, 1),
                 clock_text(to_local(game_hours, destination_timezone)),
@@ -206,7 +205,7 @@ impl ArrivalState {
         );
         if trip_damage > 1.0 {
             self.summary_parts.push(format!(
-                "The empty run added {} percent truck damage. Visit the garage when you can.",
+                "The empty run added {} percent truck damage.",
                 fmt_f(trip_damage, 0)
             ));
         }
@@ -232,9 +231,9 @@ impl ArrivalState {
     ) -> String {
         let owner_op = is_owner_operator(&profile_of(ctx).business_status);
         let claim_holder = if owner_op {
-            "The claim is against your own authority"
+            "Claim against your own authority"
         } else {
-            "The carrier carries the claim, and it is on your record"
+            "Carrier carries the claim, on your record"
         };
         if d.terse_speech(ctx) {
             let head = match cargo.outcome.as_str() {
@@ -256,10 +255,8 @@ impl ArrivalState {
         }
         if cargo.rejected() {
             return format!(
-                "The receiver refused the load. It came off the trailer {} at {} percent, and a \
-                 dock will not sign for freight in that state. You are paid nothing for the \
-                 haul: {} dollars gone, and a claim of about {} dollars for the freight itself. \
-                 {claim_holder}.",
+                "The receiver refused the load, {} at {} percent. No pay for the haul, {} \
+                 dollars gone, and a freight claim of about {} dollars. {claim_holder}.",
                 cargo_condition_text(cargo.condition_pct, liquid),
                 fmt_f(cargo.condition_pct, 0),
                 fmt_grouped(cargo.pay_loss, 0),
@@ -268,9 +265,8 @@ impl ArrivalState {
         }
         if cargo.outcome == "claim" {
             return format!(
-                "The receiver took the load but wrote it up. It arrived {} at {} percent, which \
-                 is a freight claim of about {} dollars. {} dollars comes off this settlement. \
-                 {claim_holder}.",
+                "The receiver took the load but wrote it up, {} at {} percent. Freight claim \
+                 about {} dollars. {} dollars comes off this settlement. {claim_holder}.",
                 cargo_condition_text(cargo.condition_pct, liquid),
                 fmt_f(cargo.condition_pct, 0),
                 fmt_grouped(cargo.claim_value, 0),
@@ -278,9 +274,8 @@ impl ArrivalState {
             );
         }
         format!(
-            "The receiver noted an exception on the bill of lading: the load arrived {} at {} \
-             percent. That holds back {} dollars of the haul. Brake and corner gently and the \
-             bill stays clean.",
+            "Exception on the bill of lading, load arrived {} at {} percent. {} dollars held \
+             back.",
             cargo_condition_text(cargo.condition_pct, liquid),
             fmt_f(cargo.condition_pct, 0),
             fmt_grouped(cargo.pay_loss, 0)
@@ -406,9 +401,9 @@ impl ArrivalState {
                 "preventable_equipment_damage",
             );
             self.summary_parts.push(format!(
-                "Driver-responsibility charges: safety ruled the damage preventable, \
-                 {damage_reason}. The carrier covers the repair; your deductible is {} dollars \
-                 and the safety bonus is void. Reputation down {}, and it is on your record.",
+                "Driver-responsibility charges: damage ruled preventable, {damage_reason}. \
+                 Carrier covers the repair. Deductible {} dollars, safety bonus void. \
+                 Reputation down {}, on your record.",
                 fmt_grouped(damage_deductible, 0),
                 fmt_f(damage_reputation_hit, 0)
             ));
@@ -416,8 +411,8 @@ impl ArrivalState {
         if business.uncollected_charges > 0.0 {
             let paid_now = driver_charges - business.uncollected_charges;
             self.summary_parts.push(format!(
-                "This load only covered {} dollars of those charges, so {} dollars stays owed. \
-                 A quarter of each settlement from here goes to it, never more.",
+                "This load covered {} dollars of those charges. {} dollars stays owed, paid \
+                 down at a quarter of each settlement at most.",
                 fmt_grouped(paid_now, 0),
                 fmt_grouped(business.uncollected_charges, 0)
             ));
@@ -476,7 +471,7 @@ impl ArrivalState {
             if manual_bonus >= 1.0 {
                 net_pay = round_py_n(net_pay + manual_bonus, 2);
                 self.summary_parts.push(format!(
-                    "Manual-spec differential: {} dollars for running the manual gearbox.",
+                    "Manual-spec differential: {} dollars.",
                     fmt_grouped(manual_bonus, 0)
                 ));
             }
@@ -498,9 +493,7 @@ impl ArrivalState {
         if collected > 0.0 {
             net_pay = round_py_n(net_pay - collected, 2);
             self.summary_parts.push(format!(
-                "Balance owed: {} dollars of this settlement went to paying it down. A quarter \
-                 of a settlement is the most that ever goes to it, so three quarters always \
-                 reaches you.",
+                "Balance owed: {} dollars of this settlement paid it down, a quarter at most.",
                 fmt_grouped(collected, 0)
             ));
         }
@@ -684,7 +677,7 @@ impl ArrivalState {
         let accessorial_clause = if is_owner_operator(&business_status) {
             "These came off this settlement."
         } else {
-            "These are billed to carrier settlement and not deducted from driver pay."
+            "Billed to the carrier, not deducted from driver pay."
         };
         self.summary_parts.insert(
             0,
@@ -693,8 +686,8 @@ impl ArrivalState {
                  Carrier-paid or reimbursed charges {} dollars: tolls {}, accessorials {}. \
                  {accessorial_clause} \
                  Business status: {}. Business costs {} dollars. Fines carried over {} dollars. \
-                 Net driver pay {} dollars, and you now have {}. After unloading, dispatch has \
-                 you parked at {} for the {} service area.",
+                 Net driver pay {} dollars, you now have {}. Parked at {} for the {} service \
+                 area.",
                 fmt_f(job.weight_tons, 0),
                 job.cargo.label,
                 job.spoken_destination(),
@@ -717,7 +710,7 @@ impl ArrivalState {
         );
         if on_time_bonus_paid >= 1.0 {
             self.summary_parts.push(format!(
-                "On-time delivery bonus: {} dollars for hitting the delivery window.",
+                "On-time delivery bonus: {} dollars.",
                 fmt_grouped(on_time_bonus_paid, 0)
             ));
         }
@@ -960,8 +953,7 @@ impl ArrivalState {
         let written_off = solvency::apply_hard_cap(profile_mut_of(ctx));
         if written_off >= 1.0 {
             self.summary_parts.push(format!(
-                "{} wrote off {} dollars of what you owe. They hold the balance where it is \
-                 rather than let it climb, because they would rather keep you working.",
+                "{} wrote off {} dollars of what you owe. The balance holds where it is.",
                 profile_of(ctx).carrier_name,
                 fmt_grouped(written_off, 0)
             ));
@@ -975,8 +967,8 @@ impl ArrivalState {
         if rung == 0 {
             if was > 0 {
                 self.summary_parts.push(
-                    "You are square with your carrier again. Nothing is owed, and every \
-                     settlement reaches you whole from here."
+                    "Square with your carrier again. Nothing owed, every settlement reaches \
+                     you whole."
                         .to_string(),
                 );
             }
@@ -1157,11 +1149,7 @@ impl ArrivalState {
             );
         } else {
             ctx.audio.play("ui/error");
-            ctx.say_with(
-                "I could not copy to the clipboard. The summary lines above can still be read \
-                 one at a time.",
-                Say::new().review(false),
-            );
+            ctx.say_with("Could not copy to the clipboard.", Say::new().review(false));
         }
     }
 
@@ -1196,10 +1184,7 @@ impl Menu for ArrivalState {
             MenuItem::new("Copy delivery summary to clipboard", |s: &mut Self, ctx| {
                 s.copy_summary(ctx)
             })
-            .help(
-                "Copies the settlement lines above as plain text, so you can paste them into a \
-                 post or message.",
-            )
+            .help("Copies the settlement lines as plain text.")
             .select_sound(None),
         );
         items.push(MenuItem::new(

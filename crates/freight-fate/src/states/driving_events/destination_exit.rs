@@ -126,7 +126,7 @@ impl DrivingState {
             if self.terse_speech(ctx) {
                 return core;
             }
-            return format!("{core} Move right for the exit lane and slow down.");
+            return format!("{core} Move right for the exit lane.");
         }
         // Lane keeping takes this exit with no signal and no lane work, so
         // the one thing the driver must not have to infer is that it is

@@ -16,9 +16,8 @@ use crate::states::driving_menu_states::DriveRef;
 pub const FALLBACK_MPH: f64 = 55.0;
 
 const STOP_DETAIL_INTRO_HELP: &str =
-    "Use up and down arrows to review each detail line; Home and End jump to the first and last \
-     row. Enter repeats detail lines or activates the planning buttons. Escape returns to the map \
-     screen.";
+    "Up and down arrows review each line; Home and End jump to the first and last. Enter repeats \
+     a line or activates a button. Escape returns to the map.";
 
 /// Full details for one upcoming route stop, opened from the Map screen.
 ///
@@ -117,9 +116,7 @@ impl StopDetailState {
         ctx.audio.play("ui/notify");
         self.refresh(ctx, true);
         let name = self.stop.spoken_name();
-        ctx.say(&format!(
-            "Planned stop set: {name}. You will hear it called your planned stop as you approach."
-        ));
+        ctx.say(&format!("Planned stop set, {name}."));
     }
 
     fn cancel(&mut self, ctx: &mut GameContext) {
@@ -163,7 +160,7 @@ impl Menu for StopDetailState {
                 MenuItem::new(line, move |_s: &mut Self, ctx: &mut GameContext| {
                     ctx.say(&spoken)
                 })
-                .help("This is a stop detail line. Press Enter to repeat it.")
+                .help("Enter repeats this line.")
             })
             .collect();
         let stop = self.stop.clone();
@@ -181,11 +178,11 @@ impl Menu for StopDetailState {
                     format!("Cancel planned stop at {}", self.stop.name),
                     |s: &mut Self, ctx| s.cancel(ctx),
                 )
-                .help("Forget this planned stop. Announcements go back to normal."),
+                .help("Forgets this planned stop."),
             );
         } else {
             let move_note = if planned.is_some() {
-                " You already have a planned stop; you'll be asked to confirm moving it here."
+                " A planned stop already exists; you confirm moving it here."
             } else {
                 ""
             };
@@ -195,8 +192,7 @@ impl Menu for StopDetailState {
                     |s: &mut Self, ctx| s.plan(ctx),
                 )
                 .help(format!(
-                    "Remember this stop. Announcements will call it your planned stop so you \
-                     know when to take the exit.{move_note}"
+                    "Plans this stop; announcements call it your planned stop.{move_note}"
                 ))
                 // `plan` (or the move confirmation) plays its own chime.
                 .select_sound(None),
@@ -279,10 +275,7 @@ impl ConfirmMovePlanState {
         ctx.audio.play("ui/notify");
         let name = self.stop.spoken_name();
         ctx.say_with(
-            format!(
-                "Planned stop moved to {name}. You will hear it called your planned stop as you \
-                 approach."
-            ),
+            format!("Planned stop moved to {name}."),
             // interrupt: cut the detail screen's re-entry announcement
             Say::new(),
         );

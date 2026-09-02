@@ -478,7 +478,7 @@ fn the_spoken_standing_lines_match_the_python_f_strings() {
     );
     assert_eq!(
         suspension_board_line(&p),
-        format!("Dispatch board. Your CDL is disqualified; driving jobs return {clears}.")
+        format!("Dispatch board. Your CDL is disqualified. Driving jobs return {clears}.")
     );
     assert_eq!(
         suspension_refusal_line(&p),

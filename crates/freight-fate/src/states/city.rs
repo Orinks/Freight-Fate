@@ -180,28 +180,21 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
     );
     if option.is_owner_operator() {
         return format!(
-            "{prefix}First-day briefing: you are leased to {} \
-             and parked at {location}. You own a brand-new truck with a full \
-             tank, have {} dollars of working capital, and \
-             fuel, repairs, truck wear, trailer programs, and business \
-             reserves come out of \
-             your cash. Your first objective is to open the dispatch board, \
-             choose an unlocked load with a deadline you can protect, and get \
-             to the shipper without burning your cushion.",
+            "{prefix}First-day briefing: leased to {}, parked at {location}. You own a new \
+             truck with a full tank and {} dollars of working capital. Fuel, repairs, truck \
+             wear, trailer programs, and business reserves come out of your cash. First \
+             objective: open the dispatch board and choose an unlocked load with a deadline \
+             you can protect.",
             option.carrier_name,
             fmt_grouped(p.money, 0)
         );
     }
     format!(
-        "{prefix}First-day briefing: welcome aboard {}. \
-         Your assigned company tractor is parked at {location}; the carrier \
-         covers normal fuel, repairs, insurance, and trailer support. Your \
-         starter dispatch style is {}. As a new \
-         hire, dispatch assigns your load and your route; you earn load \
-         choice with seniority, and refusing an assignment goes on your \
-         service record. Your first objective is to open the dispatch \
-         board, accept the assigned load, deadhead to the shipper, and \
-         deliver cleanly to start building your record with dispatch.",
+        "{prefix}First-day briefing: welcome aboard {}. Your assigned truck is parked at \
+         {location}. The carrier covers fuel, repairs, insurance, and trailer support. \
+         Dispatch style: {}. As a new hire, dispatch assigns your load and route, and \
+         refusing an assignment goes on your service record. First objective: open the \
+         dispatch board, accept the assigned load, and deliver it cleanly.",
         option.carrier_name,
         option.dispatch.summary()
     )
@@ -218,16 +211,14 @@ pub(crate) fn terminal_objective_clause(p: &Profile) -> String {
         };
         if let Some(guidance) = guidance.filter(|g| g.stage == TrainingStage::FirstDispatch) {
             return format!(
-                " First-day objective: open the dispatch board and accept \
-                 your assigned {} load. \
-                 Dispatch assigns both load and route while you are a \
-                 new hire.",
+                " First-day objective: open the dispatch board and accept your assigned {} \
+                 load.",
                 guidance.recommendation_label
             );
         }
         if !is_company_training_profile(p) {
-            return " First-day objective: open the dispatch board and choose \
-                    an unlocked load without burning your cash cushion."
+            return " First-day objective: open the dispatch board and choose an unlocked load \
+                    that keeps your cash cushion."
                 .to_string();
         }
         let objective = career_objective(p);
@@ -719,9 +710,7 @@ pub fn loaded_departure_line(
         "Departing now.".to_string()
     } else {
         format!(
-            "The engine is off. Press {} to start it, \
-             wait for air pressure, then press {} \
-             to release the parking brake.",
+            "Engine off. {} starts it, {} releases the parking brake once air is up.",
             ctx.control_hint("engine"),
             ctx.control_hint("parking_brake")
         )

@@ -16,13 +16,10 @@
 // file is still on disk (which it is, in this failure): the Online hub says
 // "orinks.net account: connected", not "Set up orinks.net account".
 pub const AUTH_HELP: &str = "orinks.net no longer accepts this computer's sign-in. Usually this \
-computer was signed out from the computer list on your orinks.net \
-driver setup page. To connect it again, open the Online menu, choose \
-orinks.net account, then Set up this computer with orinks.net: the \
-game gives you an activation code to enter in your browser. If your \
-driver is not on that page at all, the account itself is gone rather \
-than this computer's sign-in, which can happen after the site is \
-rebuilt; make a new account and connect it the same way.";
+computer was signed out from the computer list on your driver setup page. To connect it \
+again, open the Online menu, choose orinks.net account, then Set up this computer with \
+orinks.net, and enter the activation code in your browser. If your driver is not on that \
+page at all, the account itself is gone. Make a new account and connect it the same way.";
 
 // -- upload failure classification ---------------------------------------------
 //
@@ -143,7 +140,7 @@ document."
     if SCHEMA_REJECTION_REASONS.contains(&reason) {
         return format!(
             "{name}: backup not accepted. Your game and the server \
-disagree about this save's shape -- usually a build mismatch, \
+disagree about this save's shape, usually a build mismatch, \
 not something you did. Your local career is safe."
         );
     }

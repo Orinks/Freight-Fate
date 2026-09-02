@@ -555,7 +555,7 @@ fn test_arming_on_the_ramp_is_refused() {
     d.toggle_exit_signal(&mut app.ctx);
 
     let spoken = app.main_lines().join(" ");
-    assert!(spoken.contains("already on the exit ramp"), "{spoken}");
+    assert!(spoken.contains("Already on the exit ramp"), "{spoken}");
 }
 
 #[test]
@@ -1198,7 +1198,7 @@ fn test_the_dial_with_cruise_off_says_where_the_switch_is() {
     d.adjust_cruise(&mut app.ctx, 1, false);
 
     let spoken = app.main_lines().join(" ");
-    assert!(spoken.contains("Adaptive cruise is off"), "{spoken}");
+    assert!(spoken.contains("Adaptive cruise off. Press K"), "{spoken}");
 }
 
 #[test]
@@ -1213,7 +1213,7 @@ fn test_the_keeper_refuses_politely_when_it_is_switched_off() {
 
     let spoken = app.main_lines().join(" ");
     assert!(
-        spoken.contains("The speed keeper holds your speed here"),
+        spoken.contains("The speed keeper holds speed here; turn it on in Settings"),
         "{spoken}"
     );
     assert!(d.keeper_mph.is_none());
@@ -1430,7 +1430,7 @@ fn test_the_acceleration_lane_closes_with_a_merge_line() {
     assert!(d.departure_ramp_mi.is_none());
     let spoken = app.event_lines().join(" ");
     assert!(spoken.contains("Lane ending"), "{spoken}");
-    assert!(spoken.contains("take a big gap"), "{spoken}");
+    assert!(spoken.contains("Take a big gap"), "{spoken}");
 }
 
 #[test]
@@ -1476,7 +1476,7 @@ fn test_a_loaded_yard_mule_keeps_the_merge_handoff_on_the_real_clock() {
     assert!(d.departure_ramp_mi.is_none());
     assert!(d.departure_merge_recovery);
     assert!(d.trip.controlled_ramp);
-    assert!(app.event_lines().join(" ").contains("take a big gap"));
+    assert!(app.event_lines().join(" ").contains("Take a big gap"));
 
     // A truck already within the established merge band returns to ordinary
     // highway pacing instead of needlessly slowing every departure.
@@ -1502,10 +1502,7 @@ fn test_a_truck_up_to_speed_gets_the_plain_merge_line() {
     d.update_departure_ramp(&mut app.ctx, 0.10);
 
     let spoken = app.event_lines().join(" ");
-    assert!(
-        spoken.contains("Lane ending. Merge left when clear."),
-        "{spoken}"
-    );
+    assert!(spoken.contains("Lane ending. Merge left."), "{spoken}");
 }
 
 // -- arrival and the gate (test_facility_overshoot.py) --------------------------------
@@ -1553,8 +1550,8 @@ fn test_running_out_of_fuel_brings_a_bill_and_an_instruction() {
     d.handle_out_of_fuel(&mut app.ctx);
 
     let spoken = app.event_lines().join(" ");
-    assert!(spoken.contains("You ran out of fuel"), "{spoken}");
-    assert!(spoken.contains("plan your fuel stops"), "{spoken}");
+    assert!(spoken.contains("Out of fuel"), "{spoken}");
+    assert!(spoken.contains("to restart the engine"), "{spoken}");
     assert!(d.trip.truck.fuel_gal > 0.0);
 }
 

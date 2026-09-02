@@ -642,11 +642,11 @@ impl HosClock {
                 .map(|s| s.kind)
                 .collect();
             if blown == ["break"] {
-                return "Hours of service: you are past your break limit. \
+                return "Hours of service: past your break limit. \
                         Take a 30-minute break at a rest stop."
                     .to_string();
             }
-            return "Hours of service: you are past your limit. Sleep 10 hours at a rest stop to reset."
+            return "Hours of service: past your limit. Sleep 10 hours at a rest stop to reset."
                 .to_string();
         }
         let status = self.status.replace('_', " ");
@@ -734,7 +734,7 @@ impl HosClock {
         let note = if limits(mode).is_none() {
             ENFORCEMENT_OFF
         } else if self.shift_over_kind(mode).is_some() {
-            "You are out of hours."
+            "Out of hours."
         } else if self.hours_left(mode).2 <= 0.0 {
             "Your 30-minute break is overdue."
         } else {

@@ -19,9 +19,8 @@ impl TruckStatusState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Truck status").with_intro_help(
-                "Use up and down arrows to review assignment, eligibility, fuel, condition, \
-                 wear, grime, and snow chains one line at a time. Enter repeats the current \
-                 line. Escape returns to the terminal.",
+                "Up and down review the lines. Enter repeats a line. Escape returns to the \
+                 terminal.",
             ),
         }
     }
@@ -64,8 +63,7 @@ impl TruckStatusState {
         let mut lines = if p.owns_equipment() {
             vec![
                 format!("Assignment: owned tractor, {}.", truck.label),
-                "Eligibility: you own this tractor; carrier fleet eligibility does not apply."
-                    .to_string(),
+                "Eligibility: owned tractor, carrier fleet rules do not apply.".to_string(),
             ]
         } else {
             let mut assignment = format!(
@@ -75,9 +73,8 @@ impl TruckStatusState {
             );
             if slip_seats(p) {
                 assignment.push_str(
-                    " You slip-seat: dispatch matches one of the yard's spare tractors to each \
-                     load, and each spare keeps its own fuel and wear between draws. A dedicated \
-                     seat comes at level 9.",
+                    " Slip-seating: dispatch matches a yard spare to each load, and each spare \
+                     keeps its own fuel and wear. A dedicated seat comes at level 9.",
                 );
             }
             let mut lines = vec![assignment];

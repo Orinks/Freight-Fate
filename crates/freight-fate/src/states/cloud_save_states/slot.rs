@@ -109,7 +109,7 @@ impl CloudSlotState {
             restored_path: None,
             restored: Mailbox::new(),
             backup_watch: None,
-            status: "Ready. No restore has run in this menu.".to_string(),
+            status: "Ready.".to_string(),
             threaded: true,
         }
     }
@@ -372,16 +372,15 @@ impl CloudSlotState {
             Ok(profile) => Value::Object(profile.to_dict()),
             Err(Some(LoadError::LegacyCareer(_))) => {
                 ctx.say(
-                    "This computer's save for that career is from an earlier \
-                     version of Freight Fate, so it cannot be uploaded. The save \
-                     stays as it is, and you can still use the cloud copy.",
+                    "This computer's save is from an earlier version of Freight Fate and \
+                     cannot be uploaded. The cloud copy can still be used.",
                 );
                 return;
             }
             Err(_) => {
                 ctx.say(
-                    "This computer's save for that career could not be read, so \
-                     it cannot be uploaded. You can still use the cloud copy.",
+                    "This computer's save could not be read, so it cannot be uploaded. The \
+                     cloud copy can still be used.",
                 );
                 return;
             }
@@ -442,17 +441,13 @@ impl CloudSlotState {
             Ok(profile) => profile,
             Err(Some(LoadError::LegacyCareer(_))) => {
                 ctx.say(
-                    "This computer's save for that career is from an earlier \
-                     version of Freight Fate, so it cannot be backed up. The \
-                     save stays as it is.",
+                    "This computer's save is from an earlier version of Freight Fate and \
+                     cannot be backed up. The save stays as it is.",
                 );
                 return;
             }
             Err(_) => {
-                ctx.say(
-                    "This computer's save for that career could not be read, so \
-                     it cannot be backed up.",
-                );
+                ctx.say("This computer's save could not be read, so it cannot be backed up.");
                 return;
             }
         };
@@ -519,9 +514,8 @@ impl CloudSlotState {
                     "The backup has not gone through yet. Still trying in the background."
                         .to_string();
                 ctx.say(
-                    "The backup has not gone through yet. Check your connection; the \
-                     game keeps trying in the background, and the cloud copy was \
-                     not changed.",
+                    "The backup has not gone through yet. The game keeps trying in the \
+                     background, and the cloud copy was not changed.",
                 );
             }
         }
@@ -578,10 +572,7 @@ impl CloudSlotState {
             }
             "delete_failed" => {
                 self.status = "Delete failed. The cloud backups were not changed.".to_string();
-                ctx.say(
-                    "The delete did not go through. Check your connection and \
-                     try again; the cloud backups were not changed.",
-                );
+                ctx.say("The delete did not go through. The cloud backups were not changed.");
             }
             "delete_auth_failed" => {
                 self.status = "Reconnect needed. Nothing was deleted.".to_string();
@@ -602,9 +593,7 @@ impl CloudSlotState {
                 self.status = "This is now your public career.".to_string();
                 ctx.audio.play("ui/menu_select");
                 ctx.say(&format!(
-                    "Done. {} is now your public career. When \
-                     Profile sharing is on, your public profile shows this \
-                     career's accepted backups; your other careers stay private \
+                    "Done. {} is now your public career. Your other careers stay private \
                      cloud backups.",
                     self.save_name
                 ));
@@ -612,10 +601,7 @@ impl CloudSlotState {
             "public_failed" => {
                 self.status =
                     "The public career choice did not go through. Nothing changed.".to_string();
-                ctx.say(
-                    "The choice did not go through. Check your connection and \
-                     try again; your public career is unchanged.",
-                );
+                ctx.say("The choice did not go through. Your public career is unchanged.");
             }
             "public_auth_failed" => {
                 self.status = "Reconnect needed. Your public career is unchanged.".to_string();
@@ -624,8 +610,7 @@ impl CloudSlotState {
             "keep_mine_failed_network" => {
                 self.status = "Cloud overwrite failed. Nothing was changed.".to_string();
                 ctx.say(
-                    "The upload did not go through. Check your connection and \
-                     try again; nothing was changed.",
+                    "The upload did not go through. Check your connection. Nothing was changed.",
                 );
             }
             "keep_mine_failed_auth" => {
@@ -653,9 +638,8 @@ impl CloudSlotState {
             "keep_mine_failed_conflict" => {
                 self.status = "The cloud copy changed again. Nothing was changed.".to_string();
                 ctx.say(
-                    "The cloud copy changed again since this conflict was \
-                     recorded. Nothing was changed; open this career again to \
-                     see the current conflict.",
+                    "The cloud copy changed again since this conflict was recorded. Nothing \
+                     was changed. Open this career again for the current conflict.",
                 );
             }
             "unverified" => {
@@ -700,10 +684,7 @@ impl CloudSlotState {
             }
             _ => {
                 self.status = "Backup download failed. Local save unchanged.".to_string();
-                ctx.say(
-                    "The backup could not be downloaded. Check your connection \
-                     and try again; your local save was not touched.",
-                );
+                ctx.say("The backup could not be downloaded. Your local save was not touched.");
             }
         }
     }
@@ -724,7 +705,7 @@ impl Menu for CloudSlotState {
                 MenuItem::new(format!("Status: {}", self.status), |s: &mut Self, ctx| {
                     s.speak_current(ctx)
                 })
-                .help("This status remains visible after restore and conflict actions."),
+                .help("The latest restore or conflict result."),
             ];
         match self.conflict(ctx) {
             Some(conflict) => {
@@ -733,9 +714,8 @@ impl Menu for CloudSlotState {
                         s.speak_current(ctx)
                     })
                     .help(
-                        "Backups for this career stopped because the cloud \
-                             copy changed on another computer. Pick which copy to \
-                             keep below; nothing changes until you choose.",
+                        "Backups stopped because the cloud copy changed on another computer. \
+                         Nothing changes until you choose.",
                     ),
                 );
                 let mine = self.local_summary();
@@ -794,10 +774,8 @@ impl Menu for CloudSlotState {
                             s.start_backup_now(ctx)
                         })
                         .help(
-                            "Sends this computer's save of this career to your \
-                             orinks.net account right now, without waiting for \
-                             the next automatic backup, and tells you the result. \
-                             Nothing on this computer changes.",
+                            "Sends this computer's save to your orinks.net account now and \
+                             says the result. Nothing on this computer changes.",
                         ),
                     );
                 }
@@ -854,10 +832,8 @@ impl Menu for CloudSlotState {
                         s.confirm_public(ctx)
                     })
                     .help(
-                        "Your public profile shows one career. Choosing \
-                             this one makes its accepted backups the ones that \
-                             front your profile; your other careers stay private \
-                             cloud backups.",
+                        "Your public profile shows one career. The others stay private cloud \
+                         backups.",
                     ),
                 );
             }

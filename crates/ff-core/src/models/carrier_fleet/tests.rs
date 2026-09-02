@@ -391,9 +391,8 @@ fn test_a_dedicated_driver_hears_why_the_yard_held_their_truck_back() {
     assert!(spoken.contains("comes back to you"));
     assert_eq!(
         spoken,
-        "Your level earns a tractor from the long-haul fleet, but the yard keeps its best \
-         iron for drivers in good standing, and your dispatch trust is down. Bring it back up \
-         with clean on-time runs and the long-haul fleet comes back to you."
+        "Your level earns a tractor from the long-haul fleet, but your dispatch trust is down. \
+         Bring it back up with clean on-time runs and the long-haul fleet comes back to you."
     );
     assert_eq!(
         equipment_hold_text(&profile, true),
@@ -431,8 +430,8 @@ fn test_fleet_upgrade_announcement_hands_the_truck_over_serviced() {
     assert_eq!(
         text,
         format!(
-            "Dispatch upgraded your assigned tractor. You are now running a {}: {} The yard \
-             handed it over fueled, serviced, and washed.",
+            "Dispatch upgraded your assigned tractor. Now running a {}: {} Handed over \
+             fueled, serviced, and washed.",
             model.label, model.description
         )
     );

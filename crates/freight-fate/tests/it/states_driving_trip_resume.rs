@@ -130,7 +130,7 @@ fn quitting_while_moving_asks_first_and_names_the_miles() {
     );
     let heard = harness.transcript_text();
     assert!(
-        heard.contains("You will lose") && heard.contains("since your last stop"),
+        heard.contains("Quitting loses 10 miles") && heard.contains("since your last stop"),
         "{heard}"
     );
     // Keep driving cancels: back on the pause menu, nothing lost.

@@ -112,7 +112,7 @@ impl DrivingState {
                 .settings
                 .distance_text(self.trip.remaining_miles(), false);
             ctx.say(&format!(
-                "{now} Pickup at {facility}: {remaining} to go, {hours_used:.1} hours used.{tail}"
+                "{now} Pickup at {facility}, {remaining} to go, {hours_used:.1} hours used.{tail}"
             ));
             return;
         }
@@ -120,8 +120,7 @@ impl DrivingState {
         let eta = self.trip.eta_game_hours(self.trip.truck.speed_mph());
         if remaining <= 0.0 {
             ctx.say(&format!(
-                "{now} {:.1} hours past the deadline. The pay is shrinking, but finish the \
-                 delivery.{tail}",
+                "{now} {:.1} hours past the deadline. The pay is shrinking.{tail}",
                 -remaining
             ));
             return;
@@ -142,15 +141,10 @@ impl DrivingState {
         } else {
             "at a typical highway pace"
         };
-        let push = if verdict == "Running behind" {
-            " Keep your speed up."
-        } else {
-            ""
-        };
         let appointment = deadline_appointment(self, ctx);
         ctx.say(&format!(
             "{now} {verdict}: arrival in {eta:.1} hours {basis}, deadline in {remaining:.1}, due \
-             {appointment}.{push} {hours_used:.1} hours on the road.{tail}"
+             {appointment}. {hours_used:.1} hours on the road.{tail}"
         ));
     }
 
@@ -237,8 +231,7 @@ impl DrivingState {
             return String::new();
         };
         if limit.remaining_min <= 0.0 {
-            return "Nearest legal action: stop for a compliant break or 10-hour reset."
-                .to_string();
+            return "Next legal action is a compliant break or 10-hour reset.".to_string();
         }
         let legal_miles = self.legal_miles_for_hos(limit.remaining_min);
         let next_stop = self.trip.upcoming_stop((legal_miles + 5.0).max(5.0));
@@ -249,9 +242,8 @@ impl DrivingState {
         };
         let Some(next_stop) = next_stop else {
             return format!(
-                "No route stop is currently visible before the next {action} limit, due in {:.1} \
-                 hours. If you cannot reach a stop, come to a stop and you can sleep on the \
-                 shoulder: poor rest, and a possible parking ticket.",
+                "No route stop before the next {action} limit, due in {:.1} hours. Stopped, you \
+                 can sleep on the shoulder, with poor rest and a possible parking ticket.",
                 limit.remaining_min / 60.0
             );
         };

@@ -308,7 +308,7 @@ fn test_cruise_refuses_to_engage_in_a_facility_zone() {
     assert!(
         spoken(&harness)
             .iter()
-            .any(|s| s.contains("not available") && s.contains("facility access road")),
+            .any(|s| s.contains("No adaptive cruise") && s.contains("facility access road")),
         "{:?}",
         spoken(&harness)
     );

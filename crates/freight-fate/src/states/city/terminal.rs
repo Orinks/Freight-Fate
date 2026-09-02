@@ -225,9 +225,8 @@ impl CityMenuState {
         ctx.save_profile();
         ctx.audio.play("ui/notify");
         ctx.say(&format!(
-            "Pay advance approved: {} dollars against your next load. \
-             It will be deducted at delivery. You have {} dollars, \
-             with {} dollars of advance still to repay.",
+            "Pay advance approved: {} dollars against your next load, repaid at delivery. You \
+             have {} dollars, {} dollars of advance to repay.",
             fmt_grouped(grant, 0),
             fmt_grouped(money, 0),
             fmt_grouped(advance, 0)
@@ -254,9 +253,8 @@ impl CityMenuState {
             self.confirm_sleep_rested = true;
             ctx.audio.play("ui/warning");
             ctx.say(
-                "You are already rested: fresh hours of service and no fatigue. \
-                 Sleeping now would only move the clock forward 10 hours. \
-                 Press Enter again to sleep anyway.",
+                "You are already rested: fresh hours of service and no fatigue. Sleeping only \
+                 moves the clock forward 10 hours. Enter again to sleep anyway.",
             );
             return;
         }
@@ -307,7 +305,7 @@ impl CityMenuState {
             )
         };
         if hours <= 0.0 {
-            ctx.say("Your CDL is clear. There is nothing to wait out.");
+            ctx.say("Your CDL is clear. Nothing to wait out.");
             return;
         }
         let (start, end) = {
@@ -331,9 +329,8 @@ impl CityMenuState {
         let zone = local_zone(ctx);
         let hour = to_local(profile(ctx).game_hours, zone).rem_euclid(24.0);
         ctx.say(&format!(
-            "You sat out the {days} of your suspension. Your CDL is clear \
-             again and driving jobs are back on the dispatch board. It is \
-             {}, {}, and you are rested.",
+            "You sat out the {days} of your suspension. Your CDL is clear and the dispatch \
+             board is open again. It is {}, {}, and you are rested.",
             clock_text(hour),
             time_of_day(hour)
         ));
@@ -447,12 +444,10 @@ impl CityMenuState {
         ctx.save_profile();
         ctx.audio.play("ui/error");
         ctx.say(&format!(
-            "{former} has ended your employment. Your safety record put you past what \
-             their insurance will carry, so your seat and your assigned truck \
-             go back to the yard. {} will \
-             take you on: lower pay, shorter freight, and a fresh start with a \
-             dispatcher who does not know you yet. Your money, your levels, and \
-             everything you own stay exactly as they are.",
+            "{former} has ended your employment. Your safety record is past what their \
+             insurance will carry, so your seat and your assigned truck go back to the yard. \
+             {} will take you on: lower pay, shorter freight, and a fresh start. Your money, \
+             your levels, and everything you own stay as they are.",
             enforcement::LAST_CHANCE_CARRIER_NAME
         ));
     }
@@ -669,18 +664,14 @@ impl Menu for CityMenuState {
         let mut items: Vec<MenuItem<Self>> =
             vec![
                 MenuItem::new("Dispatch board", |s: &mut Self, ctx| s.job_board(ctx)).help(
-                    "Open terminal dispatches from local freight \
-             facilities, including ports, warehouses, food \
-             terminals, intermodal yards, and distribution hubs. \
-             New company hires get dispatch's assigned load; load \
-             choice from the board opens with seniority.",
+                    "Loads from local freight facilities. New company hires get an assigned \
+                     load, load choice opens with seniority.",
                 ),
             ];
         items.push(
             MenuItem::new("Truck dealer", |s: &mut Self, ctx| s.truck_dealer(ctx)).help(
-                "Browse tractors at the local dealer. Owner-operators buy \
-                 and switch here; company drivers can look at what the fleet \
-                 may assign next.",
+                "Tractors at the local dealer. Owner-operators buy and switch here, company \
+                 drivers can look.",
             ),
         );
         // Owner-operators only (owner ruling, 2026-08-20): a company
@@ -694,9 +685,8 @@ impl Menu for CityMenuState {
                     s.bobtail(ctx)
                 })
                 .help(
-                    "Drive empty to a nearby city to see its dispatch \
-                         board. Costs fuel and hours of service; no load, no \
-                         pay. Use it when local freight is thin.",
+                    "Drive empty to a nearby city for its dispatch board. Costs fuel and hours \
+                     of service, no load, no pay.",
                 ),
             );
         }
@@ -706,26 +696,20 @@ impl Menu for CityMenuState {
                 |s: &mut Self, ctx| s.garage(ctx),
             )
             .help(
-                "Refuel and repair the active tractor at the terminal garage. \
-                 Company drivers use carrier-assigned equipment and the carrier account. \
-                 Owner-operators pay their own fuel and repairs.",
+                "Fuel and repairs. Company drivers bill the carrier account, owner-operators \
+                 pay their own.",
             ),
         );
         items.push(
             MenuItem::new("Business status", |s: &mut Self, ctx| {
                 s.business_status(ctx)
             })
-            .help(
-                "Review your carrier, rank, next business unlock, \
-                 and owner-operator buy-in when qualified.",
-            ),
+            .help("Carrier, rank, next business unlock, and owner-operator buy-in."),
         );
         items.push(
             MenuItem::new("Career stats", |s: &mut Self, ctx| s.stats(ctx)).help(
-                "Review your level, reputation, dispatch trust, driving \
-                 record and CDL, your balance and anything you owe, \
-                 endorsements, lifetime numbers, and rest status, one line \
-                 at a time.",
+                "Level, reputation, dispatch trust, driving record and CDL, balance and debt, \
+                 endorsements, lifetime numbers, and rest.",
             ),
         );
         items.push(
@@ -733,51 +717,41 @@ impl Menu for CityMenuState {
                 s.endorsement_courses(ctx)
             })
             .help(
-                "The credential ladder: carrier certificates, CDL \
-                 endorsements like doubles, tank, and hazmat, and the \
-                 late-career port card and LCV certificate. Courses cost \
-                 money and game time; some add a background-check wait.",
+                "Carrier certificates, CDL endorsements, the TWIC port card and the LCV \
+                 certificate. Courses cost money and game time, some add a background check \
+                 wait.",
             ),
         );
         if DRIVING_SCHOOL_ENABLED {
             items.push(
                 MenuItem::new("Driving school", |s: &mut Self, ctx| s.driving_school(ctx)).help(
-                    "Spoken lessons on a practice road where nothing \
-                     counts: no money, no wear, no hours. Learn the \
-                     controls or test new equipment consequence-free.",
+                    "Spoken lessons on a practice road where nothing counts: no money, no \
+                     wear, no hours.",
                 ),
             );
         }
         items.push(
-            MenuItem::new("Truck status", |s: &mut Self, ctx| s.truck_status(ctx)).help(
-                "Review assignment, eligibility, fuel, condition, wear, grime, and snow chains \
-                 one line at a time.",
-            ),
+            MenuItem::new("Truck status", |s: &mut Self, ctx| s.truck_status(ctx))
+                .help("Assignment, eligibility, fuel, condition, wear, grime, and snow chains."),
         );
         items.push(
             MenuItem::new("Time and weather", |s: &mut Self, ctx| s.time_weather(ctx))
-                .help("Hear the clock, the day of your career, and the conditions outside."),
+                .help("Clock, career day, and the conditions outside."),
         );
         items.push(
             MenuItem::new("Logbook", |s: &mut Self, ctx| s.logbook(ctx))
-                .help("Review your recent Record of Duty Status entries."),
+                .help("Recent Record of Duty Status entries."),
         );
         items.push(
-            MenuItem::new("Sleep 10 hours", |s: &mut Self, ctx| s.sleep(ctx)).help(
-                "A full night in the terminal bunk room: fresh hours of \
-                 service and zero fatigue. The clock advances \
-                 10 hours.",
-            ),
+            MenuItem::new("Sleep 10 hours", |s: &mut Self, ctx| s.sleep(ctx))
+                .help("Fresh hours of service and zero fatigue. Clock advances 10 hours."),
         );
         items.push(
-            MenuItem::new("Save game", |s: &mut Self, ctx| s.save(ctx))
-                .help("Write your career save to disk."),
+            MenuItem::new("Save game", |s: &mut Self, ctx| s.save(ctx)).help("Saves the career."),
         );
         items.push(
-            MenuItem::new("Settings", |s: &mut Self, ctx| s.settings(ctx)).help(
-                "Change units, transmission, volumes, weather, \
-                 voices, update channel, and trip pacing.",
-            ),
+            MenuItem::new("Settings", |s: &mut Self, ctx| s.settings(ctx))
+                .help("Units, transmission, volumes, weather, voices, update channel, and pacing."),
         );
         items.push(
             MenuItem::new("Quit to main menu", |s: &mut Self, ctx| {
@@ -791,18 +765,13 @@ impl Menu for CityMenuState {
                 MenuItem::new("First-day briefing", |s: &mut Self, ctx| {
                     s.first_day_briefing(ctx)
                 })
-                .help(
-                    "Repeat your starter carrier, terminal, business costs, \
-                     and first dispatch objective.",
-                ),
+                .help("Repeats the carrier, terminal, business costs, and first objective."),
             );
         } else {
             items.insert(
                 1,
-                MenuItem::new("Career plan", |s: &mut Self, ctx| s.career_plan(ctx)).help(
-                    "Review the next practical career objective and how it \
-                     should shape dispatch choices.",
-                ),
+                MenuItem::new("Career plan", |s: &mut Self, ctx| s.career_plan(ctx))
+                    .help("The next career objective and the dispatch it suggests."),
             );
         }
         let record = &p.driving_record;
@@ -813,9 +782,8 @@ impl Menu for CityMenuState {
                     s.wait_out_suspension(ctx)
                 })
                 .help(
-                    "Sit out the rest of the suspension in one go. The \
-                     career clock jumps to the day it clears; your money, \
-                     truck, and record are untouched.",
+                    "Sits out the suspension in one go. The clock jumps to the day it clears, \
+                     money, truck, and record untouched.",
                 ),
             );
         }
@@ -826,11 +794,7 @@ impl Menu for CityMenuState {
                     Label::dynamic(|_s: &Self, ctx| Self::pay_advance_label(ctx)),
                     |s: &mut Self, ctx| s.request_pay_advance(ctx),
                 )
-                .help(
-                    "Draw cash against your next load when you are broke \
-                     and cannot afford fuel. Repaid automatically out of \
-                     your next delivery settlement.",
-                ),
+                .help("Cash against your next load, repaid from the next delivery settlement."),
             );
         }
         if !solvency::out_of_pocket_options(p).is_empty() {
@@ -845,11 +809,7 @@ impl Menu for CityMenuState {
                     Label::dynamic(|_s: &Self, ctx| Self::pay_debt_label(ctx)),
                     |s: &mut Self, ctx| s.pay_debt(ctx),
                 )
-                .help(
-                    "Put your own cash toward the balance you owe, instead \
-                     of waiting for settlement collection. You choose how much; \
-                     cash never goes below zero.",
-                ),
+                .help("Your own cash toward the balance you owe. Cash never goes below zero."),
             );
         }
         items

@@ -330,10 +330,7 @@ impl Menu for CloudBackupState {
                     "Cloud backup needs your orinks.net driver account",
                     |s: &mut Self, ctx| s.speak_current(ctx),
                 )
-                .help(
-                    "Set up your orinks.net account on the Online menu \
-                     first; cloud backup uses the same sign-in.",
-                ),
+                .help("Set up your orinks.net account on the Online menu first."),
                 MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)),
             ];
         }
@@ -360,12 +357,12 @@ impl Menu for CloudBackupState {
                 MenuItem::new(format!("Status: {}", self.status), |s: &mut Self, ctx| {
                     s.speak_current(ctx)
                 })
-                .help("This stays here so you can review the latest Cloud backup result."),
+                .help("The latest Cloud backup result."),
             ];
         if !service.enabled() {
             items.push(
                 MenuItem::new("Turn Cloud backup on", |s: &mut Self, ctx| s.turn_on(ctx))
-                    .help("Hear how cloud backup works, then choose whether to turn it on."),
+                    .help("Explains cloud backup, then asks."),
             );
         }
         let slots = self.slots();
@@ -548,10 +545,9 @@ impl Menu for ConfirmRestoreState {
                 |s: &mut Self, ctx| s.go_back(ctx),
             )
             .help(
-                "Goes back without downloading anything. This \
-                 computer's save is left exactly as it is. To send this \
-                 computer's save UP to the server instead, go back and \
-                 choose Keep this computer's save and back it up.",
+                "Goes back without downloading, this computer's save left as it is. To send \
+                 this computer's save up instead, choose Keep this computer's save and back \
+                 it up.",
             ),
             MenuItem::new("Yes, restore this backup", |s: &mut Self, ctx| s.yes(ctx)),
         ]
@@ -590,7 +586,7 @@ impl CloudBackupConsentState {
         }
         ctx.apply_cloud_saves();
         ctx.pop_state();
-        ctx.say("Cloud backup is on. The next accepted save will be private and server-verified.");
+        ctx.say("Cloud backup is on. The next save backs up privately.");
     }
 }
 
@@ -656,8 +652,7 @@ impl Menu for ConfirmDeleteCloudState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let local = if find_save_path(&self.slot.save_name).is_some() {
-            "Your save on this computer is not touched. While cloud \
-             backup stays on, its next save will start a fresh backup."
+            "Your save on this computer is not touched. Its next save starts a fresh backup."
         } else {
             "This career has no save on this computer."
         };
@@ -679,10 +674,7 @@ impl Menu for ConfirmDeleteCloudState {
                 "No, cancel and change nothing",
                 |s: &mut Self, ctx| s.go_back(ctx),
             )
-            .help(
-                "Goes back without deleting anything. Your cloud \
-                 backups for this career are left exactly as they are.",
-            ),
+            .help("Goes back without deleting anything."),
             MenuItem::new(
                 "Yes, delete every cloud backup of this career",
                 |s: &mut Self, ctx| s.yes(ctx),
@@ -730,11 +722,8 @@ impl Menu for ConfirmPublicCareerState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "Make {} your public career? Your \
-             public profile shows one career. When Profile sharing is on, \
-             this career's accepted backups become the ones your profile \
-             shows, and your other careers stay private cloud backups. \
-             {current}",
+            "Make {} your public career? Your public profile shows one career, and the \
+             others stay private cloud backups. {current}",
             self.slot.save_name
         ));
     }
@@ -807,9 +796,8 @@ impl Menu for ConfirmKeepMineState {
                 |s: &mut Self, ctx| s.go_back(ctx),
             )
             .help(
-                "Goes back without uploading. The career stays as it \
-                 is on this computer, and stays unbacked up until you \
-                 choose which copy to keep.",
+                "Goes back without uploading. The career stays unbacked up until you choose \
+                 which copy to keep.",
             ),
             MenuItem::new(
                 "Yes, validate and replace the cloud backup",

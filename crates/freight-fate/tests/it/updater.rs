@@ -936,7 +936,7 @@ fn test_manual_update_check_explains_source_builds() {
     assert!(message.contains("This copy runs from source; update it with git."));
     assert_eq!(
         app.main_lines(),
-        vec![format!("{message} Press Escape to go back.")]
+        vec![format!("{message} Escape goes back.")]
     );
     app.shutdown();
 }

@@ -1264,7 +1264,7 @@ fn test_cloud_toggle_requires_the_account_setup_first() {
     assert!(app
         .main_lines()
         .iter()
-        .any(|t| t.contains("same orinks.net sign-in")));
+        .any(|t| t.contains("needs your orinks.net account")));
 }
 
 #[test]

@@ -958,10 +958,7 @@ fn test_pickup_facility_waits_for_full_stop() {
     assert!(is::<DrivingState>(&app));
     let last = app.event_lines().last().cloned().unwrap_or_default();
     assert!(last.contains("Pickup ahead"), "{last}");
-    assert!(
-        last.to_lowercase().contains("come to a complete stop"),
-        "{last}"
-    );
+    assert!(last.to_lowercase().contains("stop at the gate"), "{last}");
 
     // Inside the creep band (DELIVERY_PARK_MPH) but not stopped. The creep
     // cue is queued rather than spoken over the one before it, so give the
@@ -978,7 +975,7 @@ fn test_pickup_facility_waits_for_full_stop() {
     assert!(
         events
             .iter()
-            .any(|line| line.contains("Stop completely") && line.contains("parking brake with P")),
+            .any(|line| line.contains("Stop, set the parking brake with P")),
         "{events:?}"
     );
 

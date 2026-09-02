@@ -452,9 +452,7 @@ impl DrivingState {
             let tail = if terse {
                 "Safe turnaround. Turn ahead again.".to_string()
             } else {
-                "You continue to the next safe turnaround and loop back onto the approach. The \
-                 turn is ahead again."
-                    .to_string()
+                "Next safe turnaround, back onto the approach. The turn is ahead again.".to_string()
             };
             (tail, "Missed the turn. Use the next safe turnaround.")
         };

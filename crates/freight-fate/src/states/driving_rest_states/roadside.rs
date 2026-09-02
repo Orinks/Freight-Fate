@@ -50,10 +50,7 @@ pub trait RoadsideExit: Menu {
             return MenuItem::new("Return to terminal", |s: &mut Self, ctx| {
                 s.end_run_suspended(ctx)
             })
-            .help(
-                "Your licence is pulled, so the truck stays put. Dispatch takes the load back \
-                 and you continue from the terminal.",
-            );
+            .help("Licence pulled, so the truck stays put. Dispatch takes the load back.");
         }
         MenuItem::new("Pull back onto the highway", |s: &mut Self, ctx| {
             s.go_back(ctx)
@@ -86,14 +83,14 @@ pub trait RoadsideExit: Menu {
             .unwrap_or_else(|_| "the terminal".to_string());
         if profile.driving_record.lifetime_disqualified {
             return format!(
-                " You cannot drive this truck away: the licence is gone for good. {load}, and a \
-                 relief driver takes the truck in. You are released to {terminal}."
+                " The licence is gone for good, so the truck stays here. {load}, and a relief \
+                 driver takes the truck in. You are released to {terminal}."
             );
         }
         format!(
-            " You cannot drive this truck away from here -- the licence is pulled as of now. \
-             {load}, and a relief driver takes the truck in. You are released to {terminal}, \
-             where you can wait the suspension out."
+            " The licence is pulled as of now, so the truck stays here. {load}, and a relief \
+             driver takes the truck in. You are released to {terminal} to wait the suspension \
+             out."
         )
     }
 
@@ -120,9 +117,7 @@ pub trait RoadsideExit: Menu {
 
 // -- TrafficStopState ---------------------------------------------------------------------
 
-const TRAFFIC_STOP_INTRO_HELP: &str =
-    "The trooper has already decided. Press Enter or Escape to pull back onto the highway when \
-     you are ready.";
+const TRAFFIC_STOP_INTRO_HELP: &str = "Enter or Escape pulls back onto the highway.";
 
 /// A roadside traffic stop after a speeding pull-over: a spoken license and
 /// logbook check, an on-the-spot ticket or a warning, then back to the road.
@@ -192,8 +187,8 @@ impl TrafficStopState {
         let limit_text = ctx.settings.speed_text(self.limit);
         if warning {
             self.outcome_text = format!(
-                "You were {over_text} over the {limit_text} limit. The trooper lets you off with \
-                 a warning this time. Keep it down."
+                "{over_text} over the {limit_text} limit. The trooper lets you off with a \
+                 warning."
             );
             return;
         }
@@ -209,9 +204,8 @@ impl TrafficStopState {
         let waiver_roll = PyRandom::new_from_str(&waiver_key).random();
         if self.clean_stop && waiver_roll < PULL_OVER_CLEAN_STOP_WARN_CHANCE {
             self.outcome_text = format!(
-                "You were {over_text} over the {limit_text} limit. I was gonna give you a \
-                 ticket, but since you pulled over promptly, I'll let it go this time. Keep it \
-                 down."
+                "{over_text} over the {limit_text} limit. You pulled over promptly, so the \
+                 trooper lets it go with a warning."
             );
             return;
         }
@@ -235,8 +229,8 @@ impl TrafficStopState {
         let serious = enforcement::is_serious_speed(self.over) || self.warned;
         let ladder = d.log_enforcement(ctx, fine, serious, false);
         self.outcome_text = format!(
-            "You were {over_text} over the {limit_text} limit. Speeding ticket: {} dollars, paid \
-             on the spot, and a reputation hit.{}",
+            "{over_text} over the {limit_text} limit. Speeding ticket: {} dollars, paid on the \
+             spot, and a reputation hit.{}",
             fmt_grouped(fine, 0),
             construction_zone_fine_clause(self.construction_zone)
         );
@@ -266,10 +260,7 @@ impl Menu for TrafficStopState {
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        vec![self.roadside_exit_item(
-            ctx,
-            "Signal, check your mirror, and merge back up to speed.",
-        )]
+        vec![self.roadside_exit_item(ctx, "Merge back up to speed.")]
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
@@ -282,8 +273,8 @@ impl Menu for TrafficStopState {
         let current = self.current_text(ctx);
         ctx.say_with(
             format!(
-                "You stop on the shoulder and the trooper walks up for a license and logbook \
-                 check.{polite} {outcome} {current}"
+                "You stop on the shoulder for a license and logbook check.{polite} {outcome} \
+                 {current}"
             ),
             Say::new(),
         );
@@ -307,8 +298,7 @@ impl_state_for_menu!(TrafficStopState);
 
 // -- EnforcementStopState -----------------------------------------------------------------
 
-const ENFORCEMENT_STOP_INTRO_HELP: &str =
-    "Press Enter or Escape to pull back onto the highway when you are ready.";
+const ENFORCEMENT_STOP_INTRO_HELP: &str = "Enter or Escape pulls back onto the highway.";
 
 /// Roadside enforcement stop for non-speeding violations.
 pub struct EnforcementStopState {
@@ -429,13 +419,17 @@ impl EnforcementStopState {
             };
             let oos_line = if break_only {
                 format!(
-                    "{lead}{why} Out of service: thirty minutes pass parked on the shoulder before you may roll. It is now {}, the 30-minute break is satisfied -- but the delivery deadline kept counting the whole time.{}",
+                    "{lead}{why} Out of service: thirty minutes parked on the shoulder. It is \
+                     {}, the 30-minute break is satisfied, and the delivery deadline kept \
+                     counting.{}",
                     clock_text(d.trip.local_hour()),
                     wake_air_instruction(d, ctx, false)
                 )
             } else {
                 format!(
-                    "{lead}{why} Out of service: ten hours pass parked on the shoulder before you may roll. It is now {}, your hours of service are reset, and you wake rested -- but the delivery deadline kept counting the whole time.{}",
+                    "{lead}{why} Out of service: ten hours parked on the shoulder. It is {}, \
+                     hours of service reset, you wake rested, and the delivery deadline kept \
+                     counting.{}",
                     clock_text(d.trip.local_hour()),
                     wake_air_instruction(d, ctx, false)
                 )
@@ -454,8 +448,7 @@ impl EnforcementStopState {
             );
             hos_mut_of(ctx).on_duty(INSPECTION_MIN);
             self.outcome_text.push_str(&format!(
-                " Since you didn't stop at the scale, they run the full inspection right here on \
-                 the shoulder: {} minutes on the clock.",
+                " The skipped scale's full inspection runs here on the shoulder: {} minutes.",
                 fmt_f(INSPECTION_MIN, 0)
             ));
         }
@@ -482,10 +475,7 @@ impl Menu for EnforcementStopState {
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        vec![self.roadside_exit_item(
-            ctx,
-            "Signal, check your mirror, and merge back up to speed.",
-        )]
+        vec![self.roadside_exit_item(ctx, "Merge back up to speed.")]
     }
 
     /// The stop, said once as it happens and afterwards as history.
@@ -511,9 +501,7 @@ impl Menu for EnforcementStopState {
         let current = self.current_text(ctx);
         if self.stop_announced {
             ctx.say_with(
-                format!(
-                    "Reading back the stop you have already settled. {summary} {outcome} {current}"
-                ),
+                format!("Stop already settled. {summary} {outcome} {current}"),
                 Say::new(),
             );
             return;
@@ -543,8 +531,7 @@ impl_state_for_menu!(EnforcementStopState);
 
 // -- FelonyStopState ----------------------------------------------------------------------
 
-const FELONY_INTRO_HELP: &str =
-    "Press Enter or Escape to continue from the terminal after the enforcement stop.";
+const FELONY_INTRO_HELP: &str = "Enter or Escape continues from the terminal.";
 
 /// Failure-to-stop outcome after the player ignores an active siren.
 pub struct FelonyStopState {
@@ -624,12 +611,11 @@ impl FelonyStopState {
 
         let load_text = if self.load_lost {
             format!(
-                "Dispatch cancels the {} load; there is no pay for this run.",
+                "Dispatch cancels the {} load. No pay for this run.",
                 d.job.cargo.label
             )
         } else {
-            "There was no loaded trailer to lose, but the active assignment is canceled."
-                .to_string()
+            "No loaded trailer to lose, but the assignment is canceled.".to_string()
         };
         let terminal = ctx
             .world
@@ -639,7 +625,7 @@ impl FelonyStopState {
         self.summary = format!(
             "Troopers laid spike strips across the lane after you kept driving with lights and \
              siren behind you. Felony failure-to-stop fine: {} dollars, paid on the spot, with a \
-             major reputation hit.{} Spike strips added {} percent truck damage, and processing \
+             major reputation hit.{} Spike strips added {} percent truck damage, processing \
              took {} hours. {load_text} You are released back to {terminal}.",
             fmt_grouped(fine, 0),
             construction_zone_fine_clause(zone),
@@ -664,7 +650,7 @@ impl Menu for FelonyStopState {
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         vec![
             MenuItem::new("Return to terminal", |s: &mut Self, ctx| s.go_back(ctx))
-                .help("End the canceled run and continue from the city terminal."),
+                .help("Continue from the city terminal."),
         ]
     }
 

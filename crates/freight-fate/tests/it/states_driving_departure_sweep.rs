@@ -689,7 +689,7 @@ fn test_the_acceleration_lane_out_of_a_yard_is_not_outrun_by_the_clock() {
         // 3. The lane is announced, and the closing line tells the truth
         //    about the speed the driver actually has to merge with. A number
         //    that is not the truck's is worse than no number.
-        if !run.said("of acceleration lane; build your speed and look for a gap.") {
+        if !run.said("of acceleration lane.") {
             failures.push(fault(
                 "was handed an acceleration lane in silence".to_string(),
             ));

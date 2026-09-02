@@ -381,7 +381,7 @@ fn test_overspeed_warning_speaks_then_chimes_until_compliant() {
     });
 
     speeding_step(&mut harness, 0.1, false);
-    assert!(said_any(&harness, "Watch your speed"));
+    assert!(said_any(&harness, "Over the limit of"));
     assert_eq!(chimes(&log), 1);
 
     for _ in 0..52 {
@@ -392,7 +392,7 @@ fn test_overspeed_warning_speaks_then_chimes_until_compliant() {
     assert_eq!(
         spoken(&harness)
             .iter()
-            .filter(|e| e.contains("Watch your speed"))
+            .filter(|e| e.contains("Over the limit of"))
             .count(),
         1
     ); // spoken once
@@ -405,7 +405,7 @@ fn test_overspeed_warning_speaks_then_chimes_until_compliant() {
     assert_eq!(
         spoken(&harness)
             .iter()
-            .filter(|e| e.contains("Watch your speed"))
+            .filter(|e| e.contains("Over the limit of"))
             .count(),
         2
     );
@@ -459,7 +459,7 @@ fn test_overspeed_warning_stops_dinging_once_back_under_its_own_threshold() {
     assert_eq!(
         spoken(&harness)
             .iter()
-            .filter(|e| e.contains("Watch your speed"))
+            .filter(|e| e.contains("Over the limit of"))
             .count(),
         2
     );
@@ -497,7 +497,7 @@ fn test_adaptive_cruise_at_its_own_pace_never_arms_the_overspeed_warning() {
         speeding_step(&mut harness, 0.1, false);
     }
     assert_eq!(chimes(&log), 0);
-    assert!(!said_any(&harness, "Watch your speed"));
+    assert!(!said_any(&harness, "Over the limit of"));
 }
 
 // -- the V readout and the weather tablet ---------------------------------------

@@ -439,7 +439,7 @@ fn test_the_loyalty_row_opens_the_rewards_desk() {
     assert_eq!(
         desk_rows,
         vec![
-            "No rewards available - need more points",
+            "No rewards available, more points needed",
             "Back to truck stop",
         ]
     );

@@ -158,8 +158,8 @@ impl DrivingState {
         };
         let distance = ctx.settings.distance_text(ahead, true);
         let text = format!(
-            "Weigh station first: {}, {distance} ahead. All trucks must stop. Signal for the \
-             scale exit with {}. Rest planning can wait until you are past the scale.",
+            "Weigh station first, {}, {distance} ahead. All trucks must stop. Signal for the \
+             scale exit with {}. Rest planning waits until you are past the scale.",
             stop.name,
             ctx.control_hint("take_exit")
         );

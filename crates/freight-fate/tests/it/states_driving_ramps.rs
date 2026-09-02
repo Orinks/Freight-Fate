@@ -428,7 +428,11 @@ fn test_stopped_short_of_the_light_gets_creep_guidance() {
         "{:?}",
         spoken(&app)
     );
-    assert!(said_any(&app, "Drive up"), "{:?}", spoken(&app));
+    assert!(
+        !said_any(&app, "Stopped short of the light"),
+        "{:?}",
+        spoken(&app)
+    );
 
     // Once per stop, not every frame.
     settle(&clock);
@@ -450,7 +454,11 @@ fn test_stopped_short_of_the_light_gets_creep_guidance() {
         "{:?}",
         spoken(&app)
     );
-    assert!(said_any(&app, "Creep ahead"), "{:?}", spoken(&app));
+    assert!(
+        said_any(&app, "Stopped short of the light."),
+        "{:?}",
+        spoken(&app)
+    );
 
     // At the bar the prompt stays quiet: the waiting handshake owns it.
     settle(&clock);
@@ -458,7 +466,7 @@ fn test_stopped_short_of_the_light_gets_creep_guidance() {
     d.ramp_creep_prompt_said = false;
     d.ramp_mi = Some(RAMP_ACCESS_MI);
     d.update_ramp_light(&mut app.ctx, 0.1);
-    assert!(!said_any(&app, "stopped short"), "{:?}", spoken(&app));
+    assert!(!said_any(&app, "short of the light"), "{:?}", spoken(&app));
 }
 
 #[test]
@@ -470,14 +478,18 @@ fn test_yellow_and_green_wording_track_distance_to_the_bar() {
     d.ramp_mi = Some(RAMP_ACCESS_MI + 0.15);
     app.clear_speech();
     d.update_ramp_light(&mut app.ctx, RAMP_LIGHT_GREEN_S + 0.5); // into yellow
-    assert!(said_any(&app, "creep up to the bar"), "{:?}", spoken(&app));
+    assert!(
+        said_any(&app, "Red by the time you reach it"),
+        "{:?}",
+        spoken(&app)
+    );
 
-    // At the bar: yellow says continuing through is legal.
+    // At the bar: yellow says so at the bar.
     app.clear_speech();
     on_ramp(&mut d, "signal", false, 20.0);
     d.update_ramp_light(&mut app.ctx, RAMP_LIGHT_GREEN_S + 0.5);
     assert!(
-        said_any(&app, "Continuing through is legal"),
+        said_any(&app, "turns yellow at the bar"),
         "{:?}",
         spoken(&app)
     );
@@ -857,7 +869,7 @@ fn test_signal_on_names_the_ramp_ending() {
 
     assert!(d.exit_signal_on);
     let last = spoken(&app).last().cloned().unwrap_or_default();
-    assert!(last.contains("The ramp ends at a stop sign."), "{last}");
+    assert!(last.contains("Ramp ends at a stop sign."), "{last}");
 }
 
 #[test]

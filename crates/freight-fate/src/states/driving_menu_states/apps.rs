@@ -21,38 +21,32 @@ const APPS: [(&str, &str, &str); 7] = [
     (
         "Navigation",
         "navigation",
-        "Open GPS guidance, route progress, and exit context.",
+        "GPS guidance, route progress, and exit context.",
     ),
     (
         "Weather",
         "weather",
-        "Open conditions, forecast, and safe-speed guidance.",
+        "Conditions, forecast, and safe-speed guidance.",
     ),
     (
         "Traffic",
         "traffic",
-        "Open traffic pace and reported slowdowns ahead.",
+        "Traffic pace and reported slowdowns ahead.",
     ),
     (
         "Truck stops",
         "truck_stops",
-        "Open upcoming route stops and available services.",
+        "Upcoming route stops and their services.",
     ),
     (
         "Road chatter",
         "road_chatter",
-        "Open local driver reports and general road chatter.",
+        "Local driver reports and road chatter.",
     ),
-    (
-        "ELD",
-        "eld",
-        "Open hours-of-service and legal-stop guidance.",
-    ),
+    ("ELD", "eld", "Hours of service and legal-stop guidance."),
 ];
 
-const APPS_INTRO_HELP: &str =
-    "Choose an app on the driver tablet. Enter opens the app, and Escape \
-                               returns to the status screens.";
+const APPS_INTRO_HELP: &str = "Enter opens the app. Escape returns to the status screens.";
 
 impl DriverAppsState {
     pub fn new(driving: DriveRef) -> Self {
@@ -114,8 +108,7 @@ pub struct DriverAppScreenState {
 }
 
 const APP_INTRO_HELP: &str =
-    "Use up and down arrows to review app lines. Enter repeats the current \
-                              line. Escape returns to Driver apps.";
+    "Up and down review the lines. Enter repeats a line. Escape returns to Driver apps.";
 
 fn app_title(app_key: &str) -> &'static str {
     match app_key {
@@ -208,7 +201,7 @@ impl DriverAppScreenState {
                         .collect();
                     lines.push(format!("Forecast ahead: {}.", forecast.join(", then ")));
                 } else {
-                    lines.push("Forecast ahead: unavailable for this weather source.".to_string());
+                    lines.push("Forecast ahead: unavailable.".to_string());
                 }
                 lines
             })
@@ -273,7 +266,7 @@ impl DriverAppScreenState {
                 let mut lines = vec![format!("ELD: {}", summary.trim_end_matches('.'))];
                 let context = d.hos_route_context(ctx);
                 if context.is_empty() {
-                    lines.push("ELD route note: no legal stop warning right now.".to_string());
+                    lines.push("ELD route note: no legal stop warning.".to_string());
                 } else {
                     lines.push(format!("ELD route note: {context}"));
                 }
@@ -321,9 +314,7 @@ impl DriverAppScreenState {
                     }
                     let ahead = (patrol.watch_start_mi() - pos).max(0.0);
                     if ahead <= 25.0 {
-                        return "Road chatter: drivers are talking about enforcement somewhere \
-                                ahead. Keep it legal."
-                            .to_string();
+                        return "Road chatter: enforcement reported somewhere ahead.".to_string();
                     }
                 }
                 "Road chatter: no enforcement reports nearby.".to_string()

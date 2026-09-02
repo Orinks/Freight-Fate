@@ -27,8 +27,8 @@ impl CareerStatsState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Career stats").with_intro_help(
-                "Use up and down arrows to review each line. Enter repeats the current \
-                 line. Escape returns to the terminal.",
+                "Up and down review the lines. Enter repeats a line. Escape returns to the \
+                 terminal.",
             ),
         }
     }
@@ -73,7 +73,7 @@ impl CareerStatsState {
         let certificates = tier_line(CredentialTier::Certificate, "Certificates", "none yet");
         let endorsements = if held.contains("tank") && held.contains("hazmat") {
             let line = tier_line(CredentialTier::Endorsement, "Endorsements", "none yet");
-            format!("{line} -- the X combination")
+            format!("{line}, the X combination")
         } else {
             tier_line(CredentialTier::Endorsement, "Endorsements", "none yet")
         };

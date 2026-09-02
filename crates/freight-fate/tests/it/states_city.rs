@@ -318,7 +318,7 @@ fn test_assigned_board_help_describes_accept_and_decline() {
     assert!(help.contains("Dispatch assigned this load"));
     assert!(help.contains("refusals cost reputation"));
     // the browsable class-level help is untouched for senior boards
-    assert!(JOB_BOARD_INTRO_HELP.contains("Each entry is one dispatch"));
+    assert!(JOB_BOARD_INTRO_HELP.contains("Enter accepts a dispatch"));
 }
 
 #[test]
@@ -437,9 +437,9 @@ fn test_job_detail_exposes_review_instructions() {
     key(&mut app, Key::F1);
     let help = app.main_lines().last().cloned().unwrap();
 
-    assert!(entry_speech.contains("Use up and down arrows to review each job detail line"));
+    assert!(entry_speech.contains("Up and down review the lines"));
     assert!(help.contains("Home and End jump"));
-    assert!(help.contains("Press Enter to repeat it"));
+    assert!(help.contains("Enter repeats this line"));
 }
 
 #[test]
@@ -598,7 +598,7 @@ fn test_accepting_a_retired_pickup_says_so_instead_of_crashing() {
 
     let said = app.main_lines().join(" ").to_lowercase();
     assert!(said.contains("no longer on the network"));
-    assert!(said.contains("refresh"));
+    assert!(said.contains("dispatch pulled the offer"));
     // Plain player language: nothing about facilities, keys, or saves.
     for jargon in ["keyerror", "facility_location", "world data", "cache"] {
         assert!(!said.contains(jargon), "spoke maintainer jargon: {said}");
@@ -616,7 +616,7 @@ fn test_accepting_a_retired_pickup_says_so_instead_of_crashing() {
 
 #[test]
 fn test_job_board_help_names_drivable_pickup_before_route_planning() {
-    assert!(JOB_BOARD_INTRO_HELP.contains("local deadhead pickup drive from your terminal"));
+    assert!(JOB_BOARD_INTRO_HELP.contains("deadhead from your terminal"));
     assert!(!JOB_BOARD_INTRO_HELP.contains("route planning"));
 }
 
@@ -1194,7 +1194,7 @@ fn test_waiting_out_the_suspension_gives_the_licence_back() {
     assert!(app
         .main_lines()
         .iter()
-        .any(|line| line.contains("clear again")));
+        .any(|line| line.contains("Your CDL is clear and the dispatch board is open again")));
 }
 
 #[test]
@@ -1502,7 +1502,7 @@ fn test_the_close_gate_names_the_leg_it_would_cost() {
     assert!(app.running());
     let said = app.main_lines().last().cloned().expect("the gate speaks");
     assert!(said.contains("part way through a drive"), "{said}");
-    assert!(said.contains("only save at a stop"), "{said}");
+    assert!(said.contains("only at a stop"), "{said}");
 }
 
 // -- tests/test_business_arc.py (the terminal's truck status) -------------------------

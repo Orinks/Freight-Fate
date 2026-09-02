@@ -38,8 +38,7 @@ const SCREENS: [(&str, &str); 5] = [
 ];
 
 const STATUS_INTRO_HELP: &str =
-    "Use up and down arrows to pick a status screen, Enter to open it, and \
-     Escape to return to driving. Each screen lists its status lines.";
+    "Up and down pick a screen, Enter opens it, Escape returns to driving.";
 
 impl DrivingStatusState {
     pub fn new(ctx: &GameContext) -> Self {
@@ -115,12 +114,10 @@ pub struct DrivingStatusScreenState {
 /// Map screen can mention opening a stop's details. The radio screen stays.
 fn screen_intro_help(screen: &str) -> &'static str {
     if screen == "map" {
-        return "Use up and down arrows to review each line. Enter repeats the \
-                current line, or opens full details on a stop line. Escape \
-                goes back to the status screens.";
+        return "Up and down review the lines. Enter repeats a line, or opens details on a \
+                stop line. Escape goes back.";
     }
-    "Use up and down arrows to review each line. Enter repeats the current \
-     line. Escape goes back to the status screens."
+    "Up and down review the lines. Enter repeats a line. Escape goes back."
 }
 
 fn screen_title(screen: &str) -> &'static str {
@@ -291,7 +288,7 @@ impl DrivingStatusScreenState {
                     .collect();
                 if upcoming.is_empty() {
                     rows.push(MapRow::Say(
-                        "Stops: no more listed route stops before destination.".to_string(),
+                        "Stops: none listed before the destination.".to_string(),
                     ));
                 } else {
                     for stop in upcoming {
@@ -328,7 +325,7 @@ impl DrivingStatusScreenState {
                 }
                 if d.route.estimated_tolls() > 0.0 {
                     rows.push(MapRow::Say(format!(
-                        "Estimated carrier-paid toll exposure: {} dollars.",
+                        "Estimated tolls, carrier-paid: {} dollars.",
                         fmt_grouped(d.route.estimated_tolls(), 0)
                     )));
                 }
@@ -346,10 +343,7 @@ impl DrivingStatusScreenState {
                     MenuItem::new(label, move |s: &mut Self, ctx: &mut GameContext| {
                         s.open_stop(ctx, &stop)
                     })
-                    .help(
-                        "Press Enter for full details, distance, estimated arrival, \
-                     and stop planning.",
-                    )
+                    .help("Enter opens details, distance, estimated arrival, and stop planning.")
                 }
             })
             .collect();
@@ -359,7 +353,7 @@ impl DrivingStatusScreenState {
                     format!("Cancel planned stop at {planned}"),
                     |s: &mut Self, ctx| s.cancel_planned_stop(ctx),
                 )
-                .help("Forget your planned stop. Announcements go back to normal."),
+                .help("Forgets the planned stop."),
             );
         }
         items
@@ -385,35 +379,31 @@ impl DrivingStatusScreenState {
                 // before the radio would look at the folder again, and this
                 // screen is where a player goes to find out why their
                 // playlist is not on the dial.
-                d.radio
-                    .reload_personal_playlists(&personal_playlists_dir());
+                d.radio.reload_personal_playlists(&personal_playlists_dir());
                 d.sync_radio_settings(ctx);
                 let position = d.radio.position;
                 let engine_on = d.trip.truck.engine_on;
                 let radio_enabled = d.radio.enabled;
                 let mut lines = vec![d.radio.status_text()];
                 if !engine_on {
-                    lines.push(
-                        "The engine is off, so the radio has no power right now.".to_string(),
-                    );
+                    lines.push("The engine is off. The radio has no power.".to_string());
                 }
                 if engine_on && radio_enabled {
                     lines.push(d.radio_now_playing_text(ctx));
                 }
                 lines.push(if !ctx.settings.radio_streamer_safe {
-                    "Streamer-safe mode is off: real public streams and personal playlists are on the dial."
+                    "Streamer-safe mode off. Real public streams and personal playlists are on \
+                     the dial."
                         .to_string()
                 } else {
-                    "Streamer-safe mode is on: real public streams and personal playlists are hidden."
+                    "Streamer-safe mode on. Real public streams and personal playlists are \
+                     hidden."
                         .to_string()
                 });
                 lines.push(
-                    "Page Down tunes to the next station and Page Up to the previous; \
-                     the semicolon and apostrophe keys still work. Jump categories \
-                     with Control held, or change the radio volume in 10 percent \
-                     steps with Shift held, whether the radio is on or off. Press O \
-                     to save the current station as a favorite. Press M to toggle \
-                     radio from the cab."
+                    "Page Down and Page Up tune stations, or semicolon and apostrophe. With \
+                     Control they jump categories. With Shift they change radio volume by 10 \
+                     percent. O saves the station as a favorite. M toggles the radio."
                         .to_string(),
                 );
                 if !d.radio.favorite_ids.is_empty() {

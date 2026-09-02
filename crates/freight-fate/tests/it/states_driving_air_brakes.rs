@@ -153,7 +153,7 @@ fn test_air_brake_startup_blocks_movement_until_ready_and_released() {
     assert!(
         event_calls(&harness)
             .iter()
-            .any(|(t, _)| t.contains("Wait for 100 psi")),
+            .any(|(t, _)| t.contains("At 100 psi")),
         "{:#?}",
         event_calls(&harness)
     );
@@ -297,13 +297,7 @@ fn test_lane_departure_warning_flushes_event_voice() {
         .last()
         .cloned()
         .expect("going off the pavement speaks");
-    assert_eq!(
-        last,
-        (
-            "Off the road on the right! Steer back toward the lane center.".to_string(),
-            true
-        )
-    );
+    assert_eq!(last, ("Off the road on the right!".to_string(), true));
 }
 
 // -- the pull-over --------------------------------------------------------------------

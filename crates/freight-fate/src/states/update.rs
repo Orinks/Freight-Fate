@@ -125,7 +125,7 @@ impl State for UpdateCheckState {
             self.message = "Updates are only available in the packaged game. \
                             This copy runs from source; update it with git."
                 .to_string();
-            ctx.say(&format!("{} Press Escape to go back.", self.message));
+            ctx.say(&format!("{} Escape goes back.", self.message));
             return;
         }
         if self.checker.is_none() {
@@ -143,7 +143,7 @@ impl State for UpdateCheckState {
             return;
         }
         if let Some(error) = c.error() {
-            self.message = format!("{error} Try again in a little while.");
+            self.message = format!("{error} Try again later.");
         } else if let Some(info) = c.result() {
             ctx.replace_state(UpdatePromptState::new(info));
             return;
@@ -153,7 +153,7 @@ impl State for UpdateCheckState {
                 updater::spoken_version(version())
             );
         }
-        ctx.say(&format!("{} Press Escape to go back.", self.message));
+        ctx.say(&format!("{} Escape goes back.", self.message));
     }
 
     fn handle_event(&mut self, ctx: &mut GameContext, event: &InputEvent) {
@@ -186,10 +186,8 @@ impl UpdatePromptState {
     pub fn new(info: UpdateInfo) -> Self {
         Self {
             menu: MenuCore::new("Update available").with_intro_help(
-                "A new version of the game is available. Download and \
-                 restart installs it now. What's new reads the list of \
-                 changes. Skip this version stops asking about this \
-                 particular update.",
+                "Download and restart installs it now. What's new reads the \
+                 changes. Skip this version stops asking about this update.",
             ),
             info,
         }
@@ -215,7 +213,7 @@ impl UpdatePromptState {
             log::warn!("Could not save settings: {e}");
         }
         ctx.say(&format!(
-            "Skipping {}. You will be asked again when the next update comes out.",
+            "Skipping {}. The next update will still be offered.",
             self.info.title
         ));
         ctx.pop_state();
@@ -239,10 +237,10 @@ impl Menu for UpdatePromptState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let size = megabytes(&self.info)
-            .map(|mb| format!(" The download is {mb} megabytes."))
+            .map(|mb| format!(" {mb} megabytes."))
             .unwrap_or_default();
         let text = format!(
-            "Update available. {} is ready to install. You are running version {}.{size} {}",
+            "Update available. {} is ready to install. You are on version {}.{size} {}",
             self.info.title,
             updater::spoken_version(version()),
             self.current_text(ctx)
@@ -252,17 +250,15 @@ impl Menu for UpdatePromptState {
 
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         vec![
-            MenuItem::new("Download and restart", |s: &mut Self, ctx| s.download(ctx)).help(
-                "Download the update, then restart the game with the new version in place.",
-            ),
+            MenuItem::new("Download and restart", |s: &mut Self, ctx| s.download(ctx))
+                .help("Download, then restart into the new version."),
             MenuItem::new("What's new", |s: &mut Self, ctx| s.whats_new(ctx))
-                .help("Read the changes in this update, line by line."),
+                .help("The changes in this update, line by line."),
             MenuItem::new("Remind me later", |s: &mut Self, ctx| s.go_back(ctx)).help(
-                "Dismiss this prompt. Ask again after returning to the main menu from a terminal or pickup facility, or the next time the game starts.",
+                "Ask again on returning to the main menu from a terminal or pickup facility, or the next time the game starts.",
             ),
-            MenuItem::new("Skip this version", |s: &mut Self, ctx| s.skip(ctx)).help(
-                "Do not ask about this update again. Later updates will still be offered.",
-            ),
+            MenuItem::new("Skip this version", |s: &mut Self, ctx| s.skip(ctx))
+                .help("Never ask about this update again. Later updates are still offered."),
         ]
     }
 }
@@ -488,8 +484,8 @@ impl State for UpdateDownloadState {
             .map(|mb| format!(", {mb} megabytes"))
             .unwrap_or_default();
         ctx.say(&format!(
-            "Downloading {}{size}. The game will \
-             restart when the download finishes. Press Escape to cancel.",
+            "Downloading {}{size}. The game restarts when the download \
+             finishes. Escape cancels.",
             self.info.title
         ));
         self.started = true;
@@ -542,17 +538,15 @@ impl State for UpdateDownloadState {
             // findable and say where instead of dead-ending on restart.
             let dest = (self.stash_for_manual_install)(&new_root);
             ctx.say(&format!(
-                "Download complete, but this install cannot update itself \
-                 automatically. The new version was saved to {}. \
-                 Install it yourself, then restart the game.",
+                "Download complete, but this install cannot update itself. \
+                 The new version is saved at {}. Install it yourself, then \
+                 restart the game.",
                 dest.display()
             ));
             ctx.pop_state();
             return;
         }
-        ctx.say(
-            "Download complete. Restarting the game to finish the update. See you in a moment.",
-        );
+        ctx.say("Download complete. Restarting to finish the update.");
         let staging = staging.unwrap_or_else(|| new_root.clone());
         if let Err(e) = updater::apply_and_restart(&new_root, &staging) {
             log::warn!("Could not spawn the update apply script: {e}");
@@ -593,7 +587,7 @@ impl State for UpdateDownloadState {
             format!("Downloading {}", self.info.title),
             String::new(),
             format!("{} percent", fmt_f(self.progress() * 100.0, 0)),
-            "Press Escape to cancel, Tab for progress.".to_string(),
+            "Escape cancels, Tab reads progress.".to_string(),
         ]
     }
 }

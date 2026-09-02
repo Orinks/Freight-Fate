@@ -37,11 +37,9 @@ impl Default for OnlineHubState {
 impl OnlineHubState {
     pub const TITLE: &'static str = "Online";
     pub const INTRO_HELP: &'static str =
-        "Use up and down arrows to pick an item. Enter opens an item or \
-         changes a setting forward, Right arrow also changes a setting \
-         forward, and Left arrow changes it backward. Escape goes back. \
-         Drivers on duty, the on and off duty notices, and Account          achievements work without connecting. \
-         Account-backed services wait until you connect an orinks.net account, \
+        "Enter opens an item or changes a setting forward, Right also forward, Left \
+         backward. Escape goes back. Drivers on duty, the duty notices, and Account \
+         achievements work without connecting. The rest waits for an orinks.net account, \
          and everything you share can be turned off again.";
 
     /// `OnlineHubState(ctx)`.
@@ -135,10 +133,7 @@ impl OnlineHubState {
         let copied = ctx.write_clipboard_text(&url);
         if !open_url(&url) {
             if copied {
-                ctx.say(
-                    "The browser could not be opened. The address is on your \
-                     clipboard. Paste it into your browser's address bar.",
-                );
+                ctx.say("The browser could not be opened. The address is on your clipboard.");
             } else {
                 // Spelled the way a player has to type it, since neither the
                 // browser nor the clipboard is going to carry it for them.
@@ -150,14 +145,12 @@ impl OnlineHubState {
             return;
         }
         let clipboard_note = if copied {
-            " The address is also on your clipboard in case the browser did not open."
+            " The address is also on your clipboard."
         } else {
             ""
         };
         ctx.say(&format!(
-            "Opening your driver setup page in your browser. Sign in there \
-             with your orinks.net account to change your driver name, your \
-             profile sharing, or the computers signed in to your account.{clipboard_note}"
+            "Opening your driver setup page in your browser.{clipboard_note}"
         ));
     }
 
@@ -185,9 +178,8 @@ impl OnlineHubState {
             // without them the setting would be inert, so point at the setup
             // item instead of flipping a switch that does nothing.
             ctx.say(
-                "Cloud backup uses the same orinks.net sign-in as your driver \
-                 profile. Choose Set up orinks.net account on this menu first, \
-                 then turn cloud backup on.",
+                "Cloud backup needs your orinks.net account. Choose Set up orinks.net account \
+                 first.",
             );
             return;
         }
@@ -235,8 +227,8 @@ impl OnlineHubState {
     }
 
     fn cloud_backup_help(ctx: &GameContext) -> String {
-        let base = "List the careers backed up to your orinks.net account and bring \
-             one onto this computer.";
+        let base = "The careers backed up to your orinks.net account, to bring one onto this \
+                    computer.";
         if Self::waiting_conflicts(ctx).is_empty() {
             return base.to_string();
         }
@@ -260,9 +252,8 @@ impl OnlineHubState {
     fn toggle_mastodon_sharing(&mut self, ctx: &mut GameContext, _direction: i64) {
         if load_identity().is_none() {
             ctx.say(
-                "Sharing to Mastodon uses your orinks.net account. Choose \
-                 Set up orinks.net account on this menu first, then link a \
-                 Mastodon account.",
+                "Sharing to Mastodon needs your orinks.net account. Choose Set up orinks.net \
+                 account first.",
             );
             return;
         }
@@ -270,9 +261,8 @@ impl OnlineHubState {
             // No known link: the switch would be inert, so point at the link
             // item instead of flipping it (same shape as cloud backup).
             ctx.say(
-                "Sharing to Mastodon needs a linked Mastodon account. Choose \
-                 Link a Mastodon account on this menu first, then turn \
-                 sharing on.",
+                "Sharing to Mastodon needs a linked Mastodon account. Choose Link a Mastodon \
+                 account first.",
             );
             return;
         }
@@ -295,8 +285,8 @@ impl OnlineHubState {
     fn mastodon_account(&mut self, ctx: &mut GameContext) {
         if load_identity().is_none() {
             ctx.say(
-                "Linking Mastodon uses your orinks.net sign-in. Choose Set \
-                 up orinks.net account on this menu first.",
+                "Linking Mastodon needs your orinks.net account. Choose Set up orinks.net \
+                 account first.",
             );
             return;
         }
@@ -323,8 +313,8 @@ impl Menu for OnlineHubState {
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         vec![
             MenuItem::new("Drivers on duty", |s: &mut Self, ctx| s.drivers_board(ctx)).help(
-                "Hear who is hauling right now on the public orinks.net \
-                 drivers board. Viewing the board shares nothing about you.",
+                "Who is hauling right now on orinks.net. Viewing the list shares nothing \
+                 about you.",
             ),
             // Right under the list it watches. Off by default: a line that
             // arrives unasked while the player is driving is theirs to turn
@@ -340,15 +330,16 @@ impl Menu for OnlineHubState {
                 |s: &mut Self, ctx| s.toggle_duty_notifications(ctx, 1),
             )
             .help(
-                "When on, the game says when another driver sets off or signs                  off, like Road Star is on duty, wherever you are in the game.                  It checks the public drivers list about once a minute, the                  same way the Drivers on duty screen does, and never mentions                  you. Works without an orinks.net account and shares nothing                  about you. Off keeps it quiet; the Drivers on duty screen                  still shows who is out.",
+                "Says when another driver goes on or off duty, like Road Star is on duty, \
+                 anywhere in the game. Checks the public drivers list about once a minute, \
+                 needs no account, and shares nothing about you.",
             ),
             MenuItem::new("Account achievements", |s: &mut Self, ctx| {
                 s.account_achievements(ctx)
             })
             .help(
-                "Review achievements earned across every career on this installation. \
-                 This account collection does not replace the career-specific \
-                 Achievements menu on the main menu.",
+                "Achievements earned across every career on this installation. The main \
+                 menu's Achievements is per career.",
             ),
             // This line's master switch survives the move into the hub: one
             // row that stands every orinks.net and sharing service down (or
@@ -363,12 +354,10 @@ impl Menu for OnlineHubState {
                 |s: &mut Self, ctx| s.toggle_online_services(ctx, 1),
             )
             .help(
-                "Master switch for the orinks.net and sharing services. \
-                 When off, the drivers board, profile sharing, cloud backup, \
-                 Mastodon sharing, and Discord presence all behave as \
-                 disabled without losing their individual settings. Live \
-                 weather, traffic, and parking are separate: they follow \
-                 their own toggles under Settings.",
+                "Master switch for the orinks.net and sharing services. Off stops the drivers \
+                 list, profile sharing, cloud backup, Mastodon sharing, and Discord presence \
+                 without losing their settings. Live weather, traffic, and parking have their \
+                 own toggles under Settings.",
             ),
             MenuItem::new(
                 Label::dynamic(|_: &Self, _| {
@@ -381,11 +370,9 @@ impl Menu for OnlineHubState {
                 |s: &mut Self, ctx| s.online_account_setup(ctx),
             )
             .help(
-                "Connect the game to your orinks.net account. Connecting turns \
-                 Profile sharing on and starts backing your careers up to that \
-                 account; both are single items on this menu if you want either off. \
-                 To change your driver name or sign a computer out afterwards, use \
-                 Open my driver setup page below.",
+                "Connects the game to your orinks.net account, which turns Profile sharing on \
+                 and starts backing your careers up. Both are single items on this menu. \
+                 Driver name and signed-in computers are on Open my driver setup page below.",
             ),
             // Deliberately its own row rather than a job the account row does
             // once connected: that row is also the way back in when
@@ -398,11 +385,8 @@ impl Menu for OnlineHubState {
                 s.open_setup_page(ctx)
             })
             .help(
-                "Opens your orinks.net driver setup page in a browser. \
-                 That page is where you change your driver name, turn profile \
-                 sharing on or off, see the computers signed in to your \
-                 account, and sign any of them out. Nothing about it has to \
-                 be typed or remembered: the game knows the address.",
+                "Opens your orinks.net driver setup page in a browser, for your driver name, \
+                 profile sharing, and the computers signed in to your account.",
             ),
             MenuItem::new(
                 // The identity check lives INSIDE the label so it is
@@ -425,13 +409,10 @@ impl Menu for OnlineHubState {
                 |s: &mut Self, ctx| s.toggle_online_presence(ctx, 1),
             )
             .help(
-                "Profile sharing is one optional public setting for your driver profile, \
-                 official achievements, automatic road-journal posts, updates feed, \
-                 and on-duty board activity. Career statistics on the public profile \
-                 include lifetime career earnings; the money you currently have is \
-                 never published. Nothing is shared until you set it up: \
-                 Set up the orinks.net account first, which turns this on. \
-                 Cloud saves remain private and separate.",
+                "One public setting for your driver profile, official achievements, automatic \
+                 road-journal posts, the updates feed, and on-duty activity. Public statistics \
+                 include lifetime earnings, never the money you currently have. Nothing is \
+                 shared until an account is set up. Cloud backups stay private.",
             ),
             MenuItem::new(
                 Label::dynamic(|_: &Self, ctx| {
@@ -447,13 +428,10 @@ impl Menu for OnlineHubState {
                 |s: &mut Self, ctx| s.toggle_cloud_saves(ctx, 1),
             )
             .help(
-                "After each game save, upload that career to your \
-                 own orinks.net account so you can restore it on another \
-                 computer. Backups are private to your account and never \
-                 appear as public downloads. Uses the same orinks.net account \
-                 sign-in, and comes on when you connect that account. The \
-                 career statistics on your public profile are read from these \
-                 backups, so turning this off empties them.",
+                "Uploads each saved career to your orinks.net account, to restore on another \
+                 computer. Backups are private and never public downloads. Comes on when you \
+                 connect the account. Public profile statistics are read from these backups, \
+                 so turning this off empties them.",
             ),
             MenuItem::new(
                 // Dynamic like the Mastodon row below, and for a sharper
@@ -490,13 +468,10 @@ impl Menu for OnlineHubState {
                 |s: &mut Self, ctx| s.toggle_mastodon_sharing(ctx, 1),
             )
             .help(
-                "When on, finishing a delivery that earns an achievement, a \
-                 level, or a perfect streak posts a short public summary \
-                 to your own Mastodon account with the Freight Fate Runs \
-                 hashtag, which is separate from the Freight Fate tag \
-                 players use to talk about the game. Routine deliveries \
-                 are never posted. Link a \
-                 Mastodon account first with the Mastodon account item.",
+                "A delivery that earns an achievement, a level, or a perfect streak posts a \
+                 short public summary to your Mastodon account with the Freight Fate Runs \
+                 hashtag. Routine deliveries are never posted. Needs a linked Mastodon \
+                 account.",
             ),
             MenuItem::new(
                 Label::dynamic(|_: &Self, ctx| {
@@ -514,9 +489,8 @@ impl Menu for OnlineHubState {
                 |s: &mut Self, ctx| s.mastodon_account(ctx),
             )
             .help(
-                "Opens a page on orinks.net where you authorize your \
-                 own Mastodon server, using the same orinks.net sign-in \
-                 as driver setup. Unlinking also happens there.",
+                "Opens the orinks.net page that authorizes your Mastodon server. Unlinking \
+                 happens there too.",
             ),
             MenuItem::new(
                 Label::dynamic(|_: &Self, ctx| {
@@ -528,11 +502,8 @@ impl Menu for OnlineHubState {
                 |s: &mut Self, ctx| s.toggle_discord_presence(ctx, 1),
             )
             .help(
-                "Show broad activity in Discord, like the main menu, \
-                 driving a route, or resting. Only general game status \
-                 is shared, never your save files or personal details. \
-                 Has no effect if Discord is not running. Works without \
-                 a driver profile.",
+                "Shows broad activity in Discord, like driving or resting, never saves or \
+                 personal details. Needs Discord running, no driver profile needed.",
             ),
             MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)),
         ]

@@ -17,9 +17,7 @@ use crate::states::driving_menu_states::{keep_rows, DriveRef};
 use crate::states::driving_rest_states::fuel_pump::FuelPump;
 use crate::states::driving_rest_states::shoulder::ShoulderSleepConfirmationState;
 
-const PARKING_FULL_INTRO_HELP: &str =
-    "The truck parking here is full, but the pumps are open. Use up and down arrows and Enter to \
-     choose. Escape returns to the road to find another stop.";
+const PARKING_FULL_INTRO_HELP: &str = "Enter selects. Escape returns to the road.";
 
 pub struct ParkingFullState {
     menu: MenuCore<Self>,
@@ -87,9 +85,7 @@ impl ParkingFullState {
             let label = self.fuel_label(ctx, d);
             items.push(
                 MenuItem::new(label, |s: &mut Self, ctx| s.refuel(ctx)).help(
-                    "The lot is full, but the pumps are open. Fill the tank at this region's \
-                     diesel price, plus a 35 dollar service fee, then choose where to spend the \
-                     night.",
+                    "Fills the tank at the regional diesel price plus a 35 dollar service fee.",
                 ),
             );
         }
@@ -97,7 +93,7 @@ impl ParkingFullState {
             MenuItem::new("Drive on to the next stop", |s: &mut Self, ctx| {
                 s.drive_on(ctx)
             })
-            .help("Return to the road and try the next rest stop."),
+            .help("Back to the road for the next rest stop."),
         );
         items.push(
             MenuItem::new(
@@ -108,8 +104,8 @@ impl ParkingFullState {
                 |s: &mut Self, ctx| s.motel(ctx),
             )
             .help(
-                "The lot is full, but a motel near the exit has a bed. Costs your own money; \
-                 full-quality rest and a legal 10-hour reset.",
+                "A motel near the exit, paid from your own pocket. Legal 10-hour reset, you \
+                 wake fresh.",
             ),
         );
         items.push(
@@ -117,8 +113,8 @@ impl ParkingFullState {
                 s.shoulder(ctx)
             })
             .help(
-                "Ten hours of poor sleep. Resets your hours of service, but you will not wake \
-                 fresh, and you risk a fine for illegal parking or minor truck damage.",
+                "Ten hours of poor sleep. Resets hours of service. Risks a parking fine or minor \
+                 truck damage.",
             ),
         );
         items
@@ -133,9 +129,8 @@ impl ParkingFullState {
         let brake = ctx.control_hint("parking_brake");
         ctx.say_with(
             format!(
-                "Back on the road. The next stop is announced as you approach it. The parking \
-                 brake is set. Press {engine} to start the engine if needed, then {brake} to \
-                 release the brake and drive on."
+                "Back on the road. Parking brake set. {engine} starts the engine, {brake} \
+                 releases the brake."
             ),
             Say::new(),
         );
@@ -170,8 +165,8 @@ impl ParkingFullState {
             let money = profile_of(ctx).money;
             format!(
                 "{engine_off}You took a motel room for {} dollars and slept a full ten hours. It \
-                 is {}. Hours of service reset and you wake fresh. You have {} dollars. Press {} \
-                 to start the engine.",
+                 is {}. Hours of service reset and you wake fresh. You have {} dollars. {} \
+                 starts the engine.",
                 fmt_grouped(MOTEL_COST, 0),
                 clock_text(d.trip.current_hour()),
                 fmt_grouped(money, 0),

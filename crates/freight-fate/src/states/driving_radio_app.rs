@@ -58,9 +58,7 @@ pub struct RadioAppState {
     driving: DriveRef,
 }
 
-const RADIO_APP_INTRO_HELP: &str =
-    "Radio app. Enter on a station tunes it. Search stations asks for a name, call sign, or \
-     format and lists every match on the dial. Escape returns to Driver apps.";
+const RADIO_APP_INTRO_HELP: &str = "Enter on a station tunes it. Escape returns to Driver apps.";
 
 impl RadioAppState {
     pub fn new(driving: DriveRef) -> Self {
@@ -156,7 +154,7 @@ impl Menu for RadioAppState {
             MenuItem::new(now_playing, move |_s: &mut Self, ctx: &mut GameContext| {
                 ctx.say(&repeat)
             })
-            .help("What the tuned station says it is playing. Enter asks again."),
+            .help("Now playing on the tuned station. Enter asks again."),
             MenuItem::new(
                 format!(
                     "Radio: {}, tuned to {tuned}",
@@ -166,25 +164,22 @@ impl Menu for RadioAppState {
             )
             .help("Enter switches the radio on or off."),
             MenuItem::new(favorite_label, |s: &mut Self, ctx| s.toggle_favorite(ctx))
-                .help("Enter saves the tuned station to your favorites, or removes it."),
+                .help("Saves or removes the tuned station in favorites."),
             MenuItem::new(
                 format!("Favorites: {favorites} saved"),
                 |s: &mut Self, ctx| s.open_list(ctx, "favorites"),
             )
-            .help("Open your saved stations. Enter on one tunes it."),
+            .help("Your saved stations. Enter on one tunes it."),
             MenuItem::new("Search stations", |s: &mut Self, ctx| {
                 let state = RadioSearchEntryState::new(s.driving.clone());
                 ctx.push_state(state);
             })
-            .help(
-                "Type part of a station name, call sign, or format; every match on the dial is \
-                 listed, nearest signal first.",
-            ),
+            .help("Type part of a name, call sign, or format. Matches list nearest signal first."),
             MenuItem::new(
                 format!("Stations in range: {in_range}"),
                 |s: &mut Self, ctx| s.open_list(ctx, "range"),
             )
-            .help("Open every station that comes in here. Enter on one tunes it."),
+            .help("Every station that comes in here. Enter on one tunes it."),
             MenuItem::new("Back to Driver apps", |s: &mut Self, ctx| s.go_back(ctx))
                 .help("Return to the driver tablet app list."),
         ]
@@ -203,9 +198,7 @@ pub struct RadioStationListState {
     total: usize,
 }
 
-const STATION_LIST_INTRO_HELP: &str =
-    "Use up and down arrows to move through the stations. Enter tunes the current one. Escape \
-     goes back.";
+const STATION_LIST_INTRO_HELP: &str = "Enter tunes the station. Escape goes back.";
 
 fn list_title(kind: &str, query: &str) -> String {
     match kind {
@@ -311,7 +304,7 @@ impl Menu for RadioStationListState {
             let label = if self.kind != "favorites" {
                 "No stations here yet."
             } else {
-                "No favorites saved yet. Enter on a tuned station's row in the Radio app saves it."
+                "No favorites saved yet. The Radio app saves the tuned station."
             };
             items.push(
                 MenuItem::new(label, |s: &mut Self, ctx: &mut GameContext| {
@@ -332,8 +325,7 @@ impl Menu for RadioStationListState {
             // Capped, and said so: a list that quietly stops at forty reads
             // as "that is everything" to someone who cannot see a scrollbar.
             ctx.say(&format!(
-                "{title}. {} matches; the first {} are listed. Search for something more \
-                 specific to narrow it.",
+                "{title}. {} matches, the first {} listed.",
                 self.total,
                 rows.len()
             ));
@@ -374,9 +366,8 @@ impl TextEntry for RadioSearchEntryState {
 
     fn enter(&mut self, ctx: &mut GameContext) {
         ctx.say(
-            "Search stations. Type part of a station name, call sign, or format, \
-             then press Enter. Left and right arrows review the letters you have \
-             typed, Home and End jump to the start or end. Press Escape to cancel.",
+            "Search stations. Type part of a name, call sign, or format, then Enter. Left and \
+             Right review the letters, Home and End jump to the ends. Escape cancels.",
         );
     }
 
@@ -404,7 +395,7 @@ impl TextEntry for RadioSearchEntryState {
         if hits.is_empty() {
             ctx.audio.play("ui/error");
             ctx.say_with(
-                format!("No stations match {query}. Try a shorter word."),
+                format!("No stations match {query}."),
                 Say::new().review(false),
             );
             return;

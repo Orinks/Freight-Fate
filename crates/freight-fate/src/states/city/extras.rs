@@ -22,8 +22,7 @@ impl BobtailDestState {
     pub fn new(cities: Vec<String>) -> Self {
         BobtailDestState {
             menu: MenuCore::new("Bobtail to a nearby city").with_intro_help(
-                "Pick a nearby city to drive to empty. You will see its \
-                 dispatch board on arrival. No load and no pay; this costs \
+                "Drive empty to a nearby city for its dispatch board. No load and no pay, costs \
                  fuel and hours of service. Escape returns to the terminal.",
             ),
             cities,
@@ -44,17 +43,14 @@ impl BobtailDestState {
         };
         let (Some(job), Some(route)) = (job, route) else {
             ctx.audio.play("ui/error");
-            ctx.say("No route to that city right now.");
+            ctx.say("No route to that city.");
             return;
         };
         profile_mut(ctx).dispatch_board_cache = None;
         let spoken_dest = job.spoken_destination().to_string();
         let line = format!(
-            "Bobtailing empty to {spoken_dest}, \
-             {} on \
-             {}. No load and no pay -- you will see the \
-             {spoken_dest} dispatch board on arrival. Check in at the city \
-             terminal when you get there.",
+            "Bobtailing empty to {spoken_dest}, {} on {}. No load and no pay. The \
+             {spoken_dest} dispatch board opens on arrival.",
             ctx.settings.distance_text(route.miles(), false),
             route.highways().first().cloned().unwrap_or_default()
         );
@@ -96,7 +92,7 @@ impl Menu for BobtailDestState {
                 .map(|c| (c.name.clone(), c.state.clone()))
                 .unwrap_or_else(|_| (name.clone(), String::new()));
             let label = format!(
-                "{city_name}, {state} -- {} empty",
+                "{city_name}, {state}, {} empty",
                 ctx.settings.distance_text(miles, false)
             );
             let dest = name.clone();
@@ -130,10 +126,8 @@ impl Default for PayDebtState {
 impl PayDebtState {
     pub fn new() -> Self {
         PayDebtState {
-            menu: MenuCore::new("Pay down what you owe").with_intro_help(
-                "Choose how much of your own cash to put toward the balance. \
-                 Escape backs out without paying.",
-            ),
+            menu: MenuCore::new("Pay down what you owe")
+                .with_intro_help("Your own cash toward the balance. Escape backs out."),
         }
     }
 
@@ -149,7 +143,7 @@ impl PayDebtState {
         let paid = solvency::pay_out_of_pocket(profile_mut(ctx), amount);
         if paid < 0.01 {
             ctx.audio.play("ui/error");
-            ctx.say("That amount is no longer payable. Check the options again.");
+            ctx.say("That amount is no longer payable.");
             self.refresh(ctx, true);
             return;
         }
@@ -166,18 +160,15 @@ impl PayDebtState {
             // driving_rest_states.py.
             ctx.pop_state();
             ctx.say(&format!(
-                "Paid {} and your account is clear. \
-                 Every settlement reaches you in full again. You have \
-                 {}.",
+                "Paid {} and your account is clear. Every settlement reaches you whole. You \
+                 have {}.",
                 solvency::money_text(paid),
                 solvency::money_text(money)
             ));
             return;
         }
         ctx.say(&format!(
-            "Paid {} toward what you owed. You have \
-             {}, and \
-             {} still owed.",
+            "Paid {} toward what you owed. You have {}, {} still owed.",
             solvency::money_text(paid),
             solvency::money_text(money),
             solvency::money_text(owed)

@@ -292,19 +292,19 @@ fn test_closure_messages_name_the_closed_side() {
     let open_zone = Zone::new(5.0, 8.0, 45.0, "construction");
     assert!(trip
         .zone_warning_message(&closed_right, 2.0)
-        .contains("right lane is closed; merge left"));
+        .contains("right lane is closed, merge left"));
     assert!(trip
         .zone_warning_message(&closed_left, 2.0)
-        .contains("left lane is closed; merge right"));
+        .contains("left lane is closed, merge right"));
     assert!(trip
         .zone_warning_message(&open_zone, 2.0)
-        .contains("hold your lane"));
+        .contains("All lanes open"));
     assert!(trip
         .zone_entry_message(&closed_left)
-        .contains("left lane is closed; keep right"));
+        .contains("left lane is closed, keep right"));
     assert!(trip
         .zone_entry_message(&closed_right)
-        .contains("right lane is closed; keep left"));
+        .contains("right lane is closed, keep left"));
 }
 
 /// Shane's report: told the right lane was closed, then found the closure on
@@ -964,17 +964,11 @@ fn test_asking_for_a_lane_the_road_does_not_have_names_that_side() {
 
     d.tap_lane_change(&mut app.ctx, 1);
     assert_eq!(d.lane_change_target, None);
-    assert_eq!(
-        app.main_lines(),
-        vec!["There is no lane to your left here."]
-    );
+    assert_eq!(app.main_lines(), vec!["No lane to your left here."]);
 
     app.clear_speech();
     d.tap_lane_change(&mut app.ctx, -1);
-    assert_eq!(
-        app.main_lines(),
-        vec!["There is no lane to your right here."]
-    );
+    assert_eq!(app.main_lines(), vec!["No lane to your right here."]);
 }
 
 // -- Hazard dodges and sideswipes ------------------------------------------------------

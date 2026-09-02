@@ -433,10 +433,7 @@ impl DrivingState {
         let spoken = ctx.world.spoken_city(&city, Some(false));
         ctx.audio.play_with("ui/notify", 0.6, 0.0);
         ctx.say_event_with(
-            format!(
-                "No engine brake zone in {distance}, coming into {spoken}. Switch the engine \
-                 brake off before the zone."
-            ),
+            format!("No engine brake zone in {distance}, coming into {spoken}."),
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Navigation),
@@ -453,8 +450,7 @@ impl DrivingState {
             let spoken = ctx.world.spoken_city(city, Some(false));
             let hint = ctx.control_hint("engine_brake");
             format!(
-                "No engine brakes in {spoken}; local noise rules. Switch the engine brake off \
-                 with {hint} or you will be fined."
+                "No engine brake zone in {spoken}. Switch it off with {hint} or you will be fined."
             )
         };
         ctx.say_event_with(
@@ -485,8 +481,8 @@ impl DrivingState {
         } else {
             let spoken = ctx.world.spoken_city(city, Some(false));
             format!(
-                "A local officer cites you for engine braking in {spoken}: a {} dollar fine under \
-                 the town noise rules, paid on the spot.",
+                "A local officer cites you for engine braking in {spoken}, {} dollars under the \
+                 town noise rules, paid on the spot.",
                 fmt_grouped(fine, 0)
             )
         };

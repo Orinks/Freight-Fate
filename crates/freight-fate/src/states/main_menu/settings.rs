@@ -37,11 +37,8 @@ impl SettingsState {
 
     pub fn new() -> Self {
         Self {
-            menu: MenuCore::new("Settings").with_intro_help(
-                "Settings are grouped into categories. Use up and down arrows to pick a \
-                 category, Enter to open it, and Escape to go back. Each category opens \
-                 its own list of settings.",
-            ),
+            menu: MenuCore::new("Settings")
+                .with_intro_help("Up and Down pick a category, Enter opens it, Escape goes back."),
         }
     }
 
@@ -89,7 +86,7 @@ impl Menu for SettingsState {
             3,
             MenuItem::new("Online", |s: &mut Self, ctx| s.open_online_hub(ctx)).help(
                 "Online options have moved to the Online menu on the \
-                 main menu. This opens that menu.",
+                 main menu; this opens it.",
             ),
         );
         items.push(MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)));
@@ -125,33 +122,26 @@ pub const SETTINGS_LAYOUT_NOTICES: [(i64, &str); 3] = [
         1,
         "Gameplay is now a category with its own submenu: Driving assistance, \
          Difficulty and hours of service, World and traffic, and Controls. \
-         Weather, traffic, and parking sources moved into World and traffic, \
-         from what used to be Speech and weather. Nothing about your settings \
-         changed; this is just where to find them now.",
+         Weather, traffic, and parking sources moved into World and traffic \
+         from Speech and weather. Nothing about your settings changed.",
     ),
     (
         2,
-        "Two rows moved. Speed keeper is now in Driving assistance, with the \
-         rest of the driving help, instead of Controls. Lane and edge cue \
-         prominence is now called Lane and edge cue volume and lives in Audio, \
-         right under Gameplay cues volume, because that is the volume it \
-         layers on. Your choices came with them. Overspeed warning no longer \
-         has a row at all: it used to chime at the speed cruise itself holds, \
-         and now it stays quiet until you are genuinely heading for a ticket.",
+        "Two rows moved. Speed keeper is now in Driving assistance instead of \
+         Controls. Lane and edge cue prominence is now Lane and edge cue \
+         volume, in Audio under Gameplay cues volume. Your choices came with \
+         them. Overspeed warning no longer has a row: it stays quiet until you \
+         are heading for a ticket.",
     ),
     (
         3,
-        "Speech verbosity is now called Driving speech, in the Speech \
-         category, and it has two more steps than before. What used to be \
-         normal is now called standard, and what used to be terse is now \
-         called quiet -- your choice came with you. Standard and quiet both \
-         still speak every safety call, route instruction, and money \
-         consequence; quiet only trades confirmations and status updates for \
-         short sounds instead of words. A third choice sits below them: \
-         urgent only, which speaks the safety calls, what things cost, and \
-         the directions you cannot take back -- the turn itself, the exit, \
-         the stop you are pulling into -- while a heads-up about a bend or a \
-         town coming up becomes a short sound.",
+        "Speech verbosity is now Driving speech, in the Speech category, with \
+         two more steps. Normal is now standard and terse is now quiet; your \
+         choice came with you. Both still speak every safety call, route \
+         instruction, and money consequence; quiet trades confirmations and \
+         status for short sounds. Urgent only, below them, speaks safety \
+         calls, costs, and the directions you cannot take back, while a \
+         heads-up about a bend or a town becomes a short sound.",
     ),
 ];
 
@@ -175,9 +165,7 @@ impl GameplaySettingsState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Gameplay").with_intro_help(
-                "Gameplay settings are grouped into four screens. Use up and down \
-                 arrows to pick one, Enter to open it, and Escape to go back. Each \
-                 screen opens its own list of settings.",
+                "Four screens. Up and Down pick one, Enter opens it, Escape goes back.",
             ),
         }
     }
@@ -319,9 +307,8 @@ impl SettingsCategoryState {
             .unwrap_or("Settings");
         Self {
             menu: MenuCore::new(title).with_intro_help(
-                "Use up and down arrows to pick a setting. Right arrow or Enter changes \
-                 the selected setting forward, and Left arrow changes it backward. \
-                 Escape goes back to the settings categories.",
+                "Up and Down pick a setting. Right arrow or Enter changes it forward, \
+                 Left arrow backward. Escape goes back.",
             ),
             category: category.to_string(),
         }
@@ -365,10 +352,9 @@ impl SettingsCategoryState {
         save_settings(&ctx.settings);
         ctx.say_with(
             "This row used to offer Realistic, and yours was set to it. \
-             It has been retired: it was the fastest setting here, not the \
-             most true to life, and the name said the opposite of what it \
-             did. You are on Standard now, so the game clock runs at half \
-             the speed it did and a driving day takes twice the real time.",
+             That setting is retired: it was the fastest here, not the most \
+             true to life. You are on Standard now, so the game clock runs \
+             at half the speed it did.",
             Say::queued(),
         );
     }
@@ -437,15 +423,15 @@ impl SettingsCategoryState {
     /// honestly instead of naming a file that is not there.
     pub fn log_location_lines(&self) -> Vec<String> {
         let Some(path) = active_log_path() else {
-            return vec!["This copy of the game is not writing a log file. Packaged \
-                 downloads always write one; a copy run from the source code \
-                 prints to its console window instead."
+            return vec!["This copy is not writing a log file. Packaged downloads \
+                 always write one; a copy run from source prints to its console \
+                 instead."
                 .to_string()];
         };
         let mut out = vec![
             format!("The game log is saved as {}.", path.display()),
-            "It records this session, including everything the game said out loud, \
-             so attaching it to a bug report shows exactly what you heard."
+            "It records this session, including everything the game said out loud. \
+             Attach it to a bug report."
                 .to_string(),
         ];
         let stem = path
@@ -460,14 +446,11 @@ impl SettingsCategoryState {
         let previous = path.with_file_name(&previous_name);
         if previous.exists() {
             out.push(format!(
-                "The session before this one was kept beside it as {previous_name}, \
-                 so restarting the game to check something does not lose it."
+                "The session before this one is kept beside it as {previous_name}."
             ));
         }
         out.push(
-            "Both files stay on this computer. The game never sends them anywhere, \
-             so attach one yourself when you report a problem."
-                .to_string(),
+            "Both files stay on this computer; the game never sends them anywhere.".to_string(),
         );
         out
     }

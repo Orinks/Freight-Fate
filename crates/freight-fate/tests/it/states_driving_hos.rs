@@ -254,10 +254,7 @@ fn test_severe_fatigue_drift_warning_is_urgent() {
         .last()
         .cloned()
         .expect("the drowsiness warning is spoken");
-    assert!(
-        warning.0.starts_with("You are dangerously drowsy"),
-        "{warning:?}"
-    );
+    assert!(warning.0.starts_with("Dangerously drowsy"), "{warning:?}");
     assert!(warning.1, "dangerous drowsiness interrupts");
 }
 
@@ -391,10 +388,7 @@ fn test_food_and_coffee_break_boosts_alertness_without_resetting_break_rule() {
         assert!(approx(p.fatigue, 47.0), "{}", p.fatigue);
     }
     let said = last(&harness);
-    assert!(
-        said.contains("coffee helps you stay alert a little longer"),
-        "{said}"
-    );
+    assert!(said.contains("Coffee eases fatigue a little"), "{said}");
     assert!(
         said.contains("does not reset your 30-minute break requirement"),
         "{said}"
@@ -544,11 +538,8 @@ fn test_sleeping_shuts_down_a_running_engine() {
         wake.contains("Choose Back to the road, then press E to start the engine"),
         "{wake}"
     );
-    assert!(wake.contains("Wait for air pressure ready"), "{wake}");
-    assert!(
-        wake.contains("press P to release the parking brake"),
-        "{wake}"
-    );
+    assert!(wake.contains("At air ready"), "{wake}");
+    assert!(wake.contains("P releases the parking brake"), "{wake}");
 
     harness.clear_speech();
     harness.select_menu_item("Sleep 10 hours");
@@ -803,8 +794,15 @@ fn test_emergency_shoulder_sleep_pause_menu_constraints() {
     harness.clear_speech();
     harness.select_menu_item("Emergency shoulder sleep");
     assert!(harness.state_is::<ShoulderSleepConfirmationState>());
-    let said = last(&harness);
-    assert!(said.contains("If hours of service are enforced"), "{said}");
+    let said = spoken(&harness)
+        .into_iter()
+        .find(|line| line.contains("Shoulder sleep is emergency-only"))
+        .unwrap_or_default();
+    assert!(
+        said.contains("Hours of service reset if enforced"),
+        "{:?}",
+        spoken(&harness)
+    );
     assert!(said.contains("minor truck damage"), "{said}");
     assert_eq!(
         harness.focused_label().expect("a focused row"),
@@ -813,8 +811,8 @@ fn test_emergency_shoulder_sleep_pause_menu_constraints() {
     let intro = harness.with_state::<ShoulderSleepConfirmationState, _>(|state, _| {
         Menu::menu(state).intro_help.clone()
     });
-    assert!(intro.contains("previous screen"), "{intro}");
-    assert!(!intro.contains("returns to the road"), "{intro}");
+    assert!(intro.contains("Escape cancels"), "{intro}");
+    assert!(!intro.contains("road"), "{intro}");
 }
 
 #[test]
@@ -864,8 +862,8 @@ fn test_t_opens_roadside_sleep_confirmation_at_safe_stop() {
             said.starts_with("Shoulder sleep canceled. Back on the road."),
             "{said}"
         );
-        assert!(said.contains("parking brake is set"), "{said}");
-        assert!(said.contains("press P to release it"), "{said}");
+        assert!(said.contains("Parking brake set"), "{said}");
+        assert!(said.contains("P releases it"), "{said}");
         drop(harness);
     }
 }
@@ -895,7 +893,7 @@ fn test_t_plans_rest_instead_of_opening_roadside_sleep_while_moving() {
             "{said}"
         );
         assert!(
-            said.contains("stop safely away from a route point"),
+            said.contains("Away from a route point, emergency shoulder sleep is available"),
             "{said}"
         );
         assert_eq!(harness.read_drive(|d| d.trip.game_minutes), minutes_before);
@@ -1061,7 +1059,10 @@ fn test_hos_off_still_allows_fatigue_emergency_shoulder_sleep() {
     assert!(harness.state_is::<ShoulderSleepConfirmationState>());
     let said = last(&harness);
     assert!(said.contains("poor rest"), "{said}");
-    assert!(said.contains("If hours of service are enforced"), "{said}");
+    assert!(
+        said.contains("Hours of service reset if enforced"),
+        "{said}"
+    );
 
     let minutes_before = harness.read_drive(|d| d.trip.game_minutes);
     harness.key(InputEvent::key(Key::Return)); // the focused Cancel row

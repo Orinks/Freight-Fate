@@ -87,7 +87,7 @@ impl DrivingState {
     /// `_engine_entry_instruction()`.
     pub fn engine_entry_instruction(&self, ctx: &mut GameContext) -> String {
         if self.trip.truck.engine_on {
-            return "Engine idling; build air pressure if needed.".to_string();
+            return "Engine idling.".to_string();
         }
         // Once the player has started the engine a few times, the key prompt
         // is noise -- the state alone is enough, and the help key still names
@@ -96,10 +96,7 @@ impl DrivingState {
         if self.instruction_retired(ctx, "engine") {
             return "Engine off.".to_string();
         }
-        format!(
-            "Press {} to start the engine and build air pressure.",
-            ctx.control_hint("engine")
-        )
+        format!("Press {} to start the engine.", ctx.control_hint("engine"))
     }
 
     /// The "F1 lists the controls" pointer, retired once the player has
@@ -231,8 +228,8 @@ impl DrivingState {
                 let text = format!(
                     "Resuming your {drive_name}: {:.0} tons of {} to {destination}. {progress} \
                      {hours_used:.1} hours used of {:.0}. It is {now}. Transmission is {mode}. \
-                     Weather: {report_lead}. You are parked. {speed_control}{engine} When air \
-                     pressure is ready, press {} to release the parking brake.",
+                     Weather: {report_lead}. Parked. {speed_control}{engine} At air ready, {} \
+                     releases the parking brake.",
                     self.job.weight_tons,
                     self.job.cargo.label,
                     self.job.deadline_game_h,
@@ -262,7 +259,7 @@ impl DrivingState {
                 let engine = self.engine_entry_instruction(ctx);
                 let help = self.help_hint_tail(ctx);
                 let text = format!(
-                    "You are at the wheel. {objective}It is {now}. Transmission is {mode}. \
+                    "At the wheel. {objective}It is {now}. Transmission is {mode}. \
                      Weather: {report_lead}. {engine} {help}"
                 );
                 ctx.say_with(text.trim_end().to_string(), Say::queued());

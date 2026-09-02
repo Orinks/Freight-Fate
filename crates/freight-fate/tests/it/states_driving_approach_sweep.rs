@@ -583,7 +583,7 @@ pub fn what_went_wrong(destination: &Destination, arrival: &Arrival) -> Option<S
         if !arrival.said("Off the ramp and onto city streets") {
             return fault("was handed city streets without being told");
         }
-        if arrival.said("Come to a complete stop.") && !arrival.docked {
+        if arrival.said("Come to a stop.") && !arrival.docked {
             return fault("was told it had arrived while the gate was still a mile of streets on");
         }
     }

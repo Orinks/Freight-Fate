@@ -267,10 +267,7 @@ impl DrivingState {
     pub fn descend_advice(&self, ctx: &GameContext) -> String {
         let jake = ctx.control_hint("engine_brake");
         if self.trip.truck.transmission.automatic {
-            return format!(
-                "Set the engine brake with {jake} and brake down to speed before it starts; the \
-                 transmission will hold a lower gear."
-            );
+            return format!("Set the engine brake with {jake} before it starts.");
         }
         format!("Pick your gear and set the engine brake with {jake} before it starts.")
     }
@@ -435,7 +432,7 @@ impl DrivingState {
             return;
         }
         let text = format!(
-            "The horn does it: {} clears the road. Well done.",
+            "The horn does it, {} clears the road. Well done.",
             self.hazard_names_text()
         );
         self.finish_hazard_clear(ctx, &text);

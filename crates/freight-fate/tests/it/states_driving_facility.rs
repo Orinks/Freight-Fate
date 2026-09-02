@@ -221,7 +221,7 @@ fn test_the_speed_keeper_hands_off_at_the_gate_instead_of_missing_it() {
     assert!(d.keeper_mph.is_none(), "the gate hands the pedals back");
     assert!(d.gate_grace_s > 0.0, "with a reaction window of its own");
     let line = last_with(&app, "Destination ahead");
-    assert!(line.contains("Speed keeper handing off"), "{line}");
+    assert!(line.contains("Speed keeper off"), "{line}");
     // Inside that window the next frame is still an arrival.
     d.handle_arrival_gate(&mut app.ctx);
     assert_eq!(d.gate_miss_count, 0);
@@ -292,7 +292,7 @@ fn test_the_rest_key_short_of_the_gate_names_the_gate() {
         .gate_short_hint(&app.ctx)
         .expect("a gate is a truck length ahead");
     assert!(hint.starts_with("The gate at "), "{hint}");
-    assert!(hint.contains(" ahead. Roll up to it"), "{hint}");
+    assert!(hint.contains(" ahead. Stop there"), "{hint}");
     let parked_before = d.trip.truck.parking_brake;
     d.try_rest_stop(&mut app.ctx);
     let said = app.main_lines().join(" ");
@@ -474,7 +474,7 @@ fn test_reapproach_after_a_miss_arrives_normally() {
     d.trip.truck.parking_brake = false;
     d.trip.truck.velocity_mps = 2.0 / 2.23694;
     d.handle_arrival_gate(&mut app.ctx);
-    assert!(!lines_with(&app, "Stop completely").is_empty());
+    assert!(!lines_with(&app, "Stop, set the parking brake").is_empty());
     d.trip.truck.velocity_mps = 0.3 / 2.23694;
     d.trip.truck.set_parking_brake();
     d.handle_arrival_gate(&mut app.ctx);
@@ -663,7 +663,7 @@ fn test_manual_delivery_stop_names_parking_and_facility_controls() {
 
     d.handle_arrival_gate(&mut app.ctx);
 
-    let prompt = last_with(&app, "Stop completely");
+    let prompt = last_with(&app, "Stop, set the parking brake");
     assert!(prompt.contains("parking brake with P"), "{prompt}");
     assert!(prompt.contains("T opens the facility"), "{prompt}");
 }
@@ -783,7 +783,7 @@ fn test_the_approach_assist_delivers_the_truck_to_the_dock() {
     // own brake lands it; the ramp must not bark "come to a complete stop" at
     // a driver whose truck is already doing exactly that.
     assert!(
-        !arrival.said("Come to a complete stop."),
+        !arrival.said("Come to a stop."),
         "{}",
         arrival.report(destination)
     );
@@ -904,13 +904,13 @@ fn test_the_pickup_gate_asks_for_a_complete_stop_then_a_check_in() {
     d.trip.truck.velocity_mps = 20.0 / 2.23694;
     d.handle_pickup_gate(&mut app.ctx);
     let said = last_with(&app, "Pickup ahead: ");
-    assert!(said.contains("come to a complete stop at the gate"));
+    assert!(said.contains("Stop at the gate"));
     assert!(d.arrival_stop_said);
 
     // Creeping in: the gate asks for the check-in rather than repeating.
     d.trip.truck.velocity_mps = 2.0 / 2.23694;
     d.handle_pickup_gate(&mut app.ctx);
-    let said = last_with(&app, "Stop completely");
+    let said = last_with(&app, "Stop, set the parking brake");
     assert!(said.starts_with("At "));
     assert!(said.contains("parking brake with P"), "{said}");
     assert!(d.arrival_full_stop_said);

@@ -216,17 +216,14 @@ impl Trip {
                 {
                     let message = match source_status {
                         "live" => format!(
-                            "Live weather is ready for your current route position. {}.",
+                            "Live weather ready. {}.",
                             self.weather.live_observation_notice()
                         ),
                         "last_known" => format!(
-                            "{}. Last-known conditions remain in use.",
+                            "{}. Last-known conditions in use.",
                             self.weather.last_known_notice()
                         ),
-                        _ => {
-                            "Live weather is unavailable. Simulated fallback weather is now in use."
-                                .to_string()
-                        }
+                        _ => "Live weather unavailable. Simulated weather in use.".to_string(),
                     };
                     let current = self.weather.current;
                     self.emit(
@@ -389,9 +386,7 @@ impl Trip {
                 self.planned_stop_key = None;
                 self.emit(
                     TripEventKind::GpsCue,
-                    SpokenMessage::new(format!(
-                        "You drove past your planned stop, {name}. Plan cancelled."
-                    )),
+                    SpokenMessage::new(format!("Past your planned stop, {name}. Plan cancelled.")),
                     TripEventData {
                         planned: Some(true),
                         ..Default::default()
@@ -597,25 +592,23 @@ impl Trip {
         match pressure.kind.as_str() {
             "exit" => SpokenMessage::with_terse(
                 format!(
-                    "Exit traffic building in {distance}. Signal early, hold the {side} exit lane, and be ready to slow near {speed}."
+                    "Exit traffic building in {distance}. Hold the {side} exit lane, near {speed}."
                 ),
                 format!("Exit traffic, {distance}. Hold {side}, {speed}."),
             ),
             // No target speed: the taper's posted limit is spoken separately.
             "construction_merge" => SpokenMessage::with_terse(
                 format!(
-                    "Traffic squeezing at the construction taper in {distance}. Merge {side} early and leave a gap."
+                    "Traffic squeezing at the construction taper in {distance}. Merge {side} early."
                 ),
                 format!("Taper squeezing, {distance}. Merge {side}."),
             ),
             "route_merge" => SpokenMessage::with_terse(
-                format!("Merging traffic in {distance}. Keep {side} and leave a gap."),
+                format!("Merging traffic in {distance}. Keep {side}."),
                 format!("Merging traffic, {distance}. Keep {side}."),
             ),
             _ => SpokenMessage::with_terse(
-                format!(
-                    "Traffic pack in {distance}. Leave extra following room and be ready for {speed}."
-                ),
+                format!("Traffic pack in {distance}, near {speed}."),
                 format!("Traffic pack, {distance}. {speed}."),
             ),
         }

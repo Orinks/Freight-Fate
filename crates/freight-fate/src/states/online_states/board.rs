@@ -494,10 +494,7 @@ impl MastodonLinkState {
         let copied = ctx.write_clipboard_text(&url);
         if !open_url(&url) {
             if copied {
-                ctx.say(
-                    "The browser could not be opened. The link is on your \
-                     clipboard. Paste it into your browser's address bar.",
-                );
+                ctx.say("The browser could not be opened. The link is on your clipboard.");
             } else {
                 ctx.say(
                     "The browser could not be opened and the clipboard did \
@@ -512,12 +509,12 @@ impl MastodonLinkState {
         }
         self.opened_browser = true;
         let clipboard_note = if copied {
-            " The link is also on your clipboard in case the browser did not open."
+            " The link is also on your clipboard."
         } else {
             ""
         };
         ctx.say(&format!(
-            "Opening the Mastodon link page in your browser.{clipboard_note} Authorize there, then come back here."
+            "Opening the Mastodon link page in your browser.{clipboard_note}"
         ));
     }
 
@@ -528,8 +525,8 @@ impl MastodonLinkState {
         }
         let Some(identity) = load_identity() else {
             ctx.say(
-                "This needs your orinks.net account first. Choose Set up \
-                 orinks.net account on the Online menu.",
+                "This needs your orinks.net account. Choose Set up orinks.net account on the \
+                 Online menu.",
             );
             return;
         };
@@ -569,9 +566,8 @@ impl Menu for MastodonLinkState {
                 |s: &mut Self, ctx| s.open_page(ctx),
             )
             .help(
-                "Sign in on orinks.net if asked, enter your Mastodon \
-                 server, and authorize Freight Fate there. Then come back \
-                 here and check the link status.",
+                "Sign in on orinks.net, enter your Mastodon server, and authorize Freight Fate \
+                 there.",
             ),
             MenuItem::new(
                 Label::dynamic(|s: &Self, ctx| s.status_label(ctx)),
@@ -592,13 +588,11 @@ impl Menu for MastodonLinkState {
             };
             format!("Last I checked, {spoken} was linked.")
         } else {
-            "No Mastodon account is linked yet, as far as this computer knows.".to_string()
+            "No Mastodon account linked yet.".to_string()
         };
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "{}. Linking happens in your browser on orinks.net, \
-             using the same sign-in as driver setup. {known} \
-             {current}",
+            "{}. Linking happens in your browser on orinks.net. {known} {current}",
             Self::TITLE
         ));
     }
@@ -632,9 +626,7 @@ impl Menu for MastodonLinkState {
         let status = match outcome {
             MastodonOutcome::Error => {
                 self.refresh(ctx, true);
-                ctx.say(
-                    "I could not reach orinks.net to check the Mastodon link. Try again in a moment.",
-                );
+                ctx.say("Could not reach orinks.net to check the Mastodon link.");
                 return;
             }
             MastodonOutcome::Status(status) => status,
@@ -657,13 +649,13 @@ impl Menu for MastodonLinkState {
                 ctx.settings.mastodon_linked_handle.clone()
             };
             ctx.say(&format!(
-                "Linked: {spoken}. You can now turn on Share notable \
-                 deliveries to Mastodon on the Online menu."
+                "Linked: {spoken}. Share notable deliveries to Mastodon can go on from the \
+                 Online menu."
             ));
         } else {
             ctx.say(
-                "No Mastodon account is linked yet. Open the link page in \
-                 your browser, authorize there, then check again.",
+                "No Mastodon account linked yet. Open the link page, authorize there, then \
+                 check again.",
             );
         }
     }

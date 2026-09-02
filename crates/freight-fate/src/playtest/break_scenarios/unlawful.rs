@@ -320,7 +320,7 @@ pub fn honk_the_air_down_to_the_valve() -> Outcome {
             "with no compressor the horn still never reached the valve ({:.0} psi)",
             rig.drive.truck().primary_air_psi
         ));
-    } else if rig.said("protection valve") == 0 {
+    } else if rig.said("Horn cut out") == 0 {
         findings.push("the horn cut out with no spoken reason; it just stopped".to_string());
     }
     if floor < TruckState::HORN_PROTECTION_PSI - 1.0 {
@@ -376,7 +376,7 @@ pub fn prepass_green_is_not_a_bypass_charge() -> Outcome {
              verdict at an open scale"
         )),
         Some("green") => {
-            let spoke = rig.said("keep rolling");
+            let spoke = rig.said("Cleared past the scale");
             if spoke == 0 {
                 findings.push("a green verdict never told the driver to keep rolling".to_string());
             } else if spoke > 1 {

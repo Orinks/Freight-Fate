@@ -228,10 +228,7 @@ impl DrivingState {
             if speed <= RED_STOP_MPH {
                 if !self.ramp_waiting_at_light {
                     self.ramp_waiting_at_light = true;
-                    self.say_route_navigation(
-                        ctx,
-                        "Stopped at the red light. Hold the brakes for green.",
-                    );
+                    self.say_route_navigation(ctx, "Stopped at the red light.");
                 }
                 return;
             }
@@ -285,8 +282,7 @@ impl DrivingState {
                     CrossMeeting::Empty => {
                         self.say_confirmation_interrupt(
                             ctx,
-                            "You ran the red light at the ramp end. Nothing was crossing; nothing \
-                             will be next time.",
+                            "You ran the red light at the ramp end. Nothing was crossing.",
                         );
                     }
                 }
@@ -309,11 +305,11 @@ impl DrivingState {
         ctx.audio.play_with("events/ramp_light_green", 0.7, 0.0);
         let on_yellow = self.ramp_light_phase() == "yellow";
         let message = if speed > GREEN_ROLL_MPH {
-            "Through the light, but far too fast. Brake hard for the entrance."
+            "Through the light, far too fast. Stop at the entrance."
         } else if on_yellow {
-            "Through on the yellow; brake for the entrance."
+            "Through on the yellow. Stop at the entrance."
         } else {
-            "Green light. Through the intersection; brake for the entrance."
+            "Green light. Through the intersection. Stop at the entrance."
         };
         self.say_route_confirmation(ctx, message);
     }
@@ -399,8 +395,7 @@ impl DrivingState {
                 CrossMeeting::Empty => {
                     self.say_confirmation_interrupt(
                         ctx,
-                        "You blew the stop sign at the ramp end. The crossroad was empty; it will \
-                         not always be.",
+                        "You blew the stop sign at the ramp end. The crossroad was empty.",
                     );
                 }
             }
@@ -493,7 +488,7 @@ impl DrivingState {
         } else if speed > YIELD_ROLL_MPH {
             self.say_route_confirmation(
                 ctx,
-                &format!("Through the {noun}, but far too fast. Brake hard for the entrance."),
+                &format!("Through the {noun}, far too fast. Stop at the entrance."),
             );
         } else {
             let message =

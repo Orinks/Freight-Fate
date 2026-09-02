@@ -169,8 +169,7 @@ impl DrivingState {
         }
         ctx.audio.play_with("ui/notify", 0.5, 0.0);
         let message = format!(
-            "Adaptive cruise {} at {}{exit_note}. Following gap {gap:.0} seconds. K or braking \
-             cancels.",
+            "Adaptive cruise {} at {}{exit_note}. Following gap {gap:.0} seconds.",
             if transition_label.is_some() {
                 "resuming"
             } else {
@@ -211,7 +210,7 @@ impl DrivingState {
             }
         }
         if self.cruise_mph.is_none() && self.keeper_mph.is_none() {
-            self.say_plain(ctx, "Adaptive cruise is off. Press K to set it first.");
+            self.say_plain(ctx, "Adaptive cruise off. Press K to set it.");
             return;
         }
         let base = match self.speed_control_target_mph {
@@ -300,8 +299,8 @@ impl DrivingState {
             self.say_plain(
                 ctx,
                 format!(
-                    "Adaptive cruise is not available in a {zone_reason} zone. The speed keeper \
-                     holds your speed here instead; turn it on in Settings, Controls."
+                    "No adaptive cruise in a {zone_reason} zone. The speed keeper holds speed \
+                     here; turn it on in Settings, Controls."
                 ),
             );
             return;
@@ -329,10 +328,7 @@ impl DrivingState {
             let held = ctx.settings.speed_text(self.keeper_mph.unwrap_or(0.0));
             self.say_plain(
                 ctx,
-                format!(
-                    "Automatic speed control on. Speed keeper holding {held} through the \
-                     {zone_reason} zone. K or braking cancels."
-                ),
+                format!("Speed keeper holding {held} through the {zone_reason} zone."),
             );
         }
     }

@@ -200,7 +200,7 @@ fn test_playtest_harness_can_exercise_npc_traffic() {
 
     let text = harness.transcript_text();
     assert!(text.contains("[event] Merging vehicle"), "{text}");
-    assert!(text.contains("leave a gap"), "{text}");
+    assert!(text.contains("ahead."), "{text}");
 }
 
 #[test]
@@ -924,7 +924,7 @@ fn test_speed_control_follows_job_from_deadhead_to_loaded_trip() {
     });
 
     let transcript = harness.transcript_text();
-    assert!(transcript.contains("Automatic speed control on"));
+    assert!(transcript.contains("Speed keeper holding"));
     assert_eq!(
         announcements_of(
             &harness.result(),

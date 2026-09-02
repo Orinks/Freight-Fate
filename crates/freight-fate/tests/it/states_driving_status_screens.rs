@@ -95,7 +95,7 @@ fn test_air_brake_help_and_status_are_spoken() {
     let help = last_main(&harness);
     assert!(help.contains("Air pressure must build"), "{help}");
     assert!(
-        help.contains("Press P to release or set the parking brake"),
+        help.contains("P sets or releases the parking brake"),
         "{help}"
     );
 
@@ -286,7 +286,7 @@ fn test_driver_apps_screen_uses_keyboard_and_vague_road_chatter() {
         .find(|line| line.starts_with("Road chatter:"))
         .unwrap_or_else(|| panic!("no chatter row: {lines:#?}"));
     assert!(
-        road_chatter.contains("enforcement somewhere ahead"),
+        road_chatter.contains("enforcement reported somewhere ahead"),
         "{road_chatter}"
     );
     let lower = road_chatter.to_lowercase();

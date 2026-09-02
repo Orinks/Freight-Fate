@@ -328,7 +328,7 @@ fn test_radio_keys_speak_the_no_power_line_with_the_engine_off() {
     d.speak_radio_status(&mut app.ctx);
     let said = last(&app);
     assert!(said.starts_with("Radio on."));
-    assert!(said.ends_with("The engine is off, so the radio has no power right now."));
+    assert!(said.ends_with("The engine is off. The radio has no power."));
 }
 
 #[test]

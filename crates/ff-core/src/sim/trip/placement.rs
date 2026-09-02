@@ -227,7 +227,7 @@ impl Trip {
                     "maneuver",
                     start,
                     &format!("keep right for {shield} toward {toward}"),
-                    &format!("Keep right now for {shield} toward {toward}."),
+                    &format!("Keep right for {shield} toward {toward}."),
                 ));
             }
             for crossing in leg.state_crossings() {
@@ -275,12 +275,12 @@ impl Trip {
                 let toll_text = if toll.amount > 0.0 {
                     let estimate = if toll.estimated { "Estimated " } else { "" };
                     format!(
-                        "{estimate}{}oll {} dollars will be billed to carrier settlement.",
+                        "{estimate}{}oll {} dollars, billed to carrier settlement.",
                         if toll.estimated { "t" } else { "T" },
                         fmt_f(toll.amount, 0)
                     )
                 } else {
-                    "Entry will be recorded for carrier settlement.".to_string()
+                    "Entry recorded for carrier settlement.".to_string()
                 };
                 cues.push(NavigationCue::new(
                     &format!("toll:{i}:{}:{}", py_str_float(toll.at_mi), toll.name),
@@ -288,7 +288,7 @@ impl Trip {
                     start + offset,
                     &format!("toll road ahead: {}", toll.road),
                     &format!(
-                        "{} toll point ahead: {}. {toll_text}",
+                        "{} toll point ahead, {}. {toll_text}",
                         toll.method_label(),
                         toll.name
                     ),

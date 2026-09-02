@@ -212,7 +212,7 @@ impl DrivingState {
             // this, is the same handoff announced twice.
             if !self.approach_pull_ahead {
                 ctx.say_event_with(
-                    "Facility stopping assistance taking the pedals to manage the final approach and stop at the entrance.",
+                    "Facility stopping assistance taking the pedals to the entrance.",
                     SayEvent::queued()
                         .priority(EventPriority::Route)
                         .category(SpeechCategory::Confirmation),
@@ -362,7 +362,7 @@ impl DrivingState {
         let planing = self.trip.truck.hydroplaning();
         if planing && !self.hydro_active {
             ctx.say_event_with(
-                "Hydroplaning. The steering has gone light; ease off the speed.",
+                "Hydroplaning. The steering has gone light.",
                 SayEvent::new().category(SpeechCategory::Safety),
             );
         }
@@ -370,7 +370,7 @@ impl DrivingState {
         let slipping = self.trip.truck.jake_slipping() && self.trip.truck.speed_mph() > 5.0;
         if slipping && !self.jake_slip_active {
             ctx.say_event_with(
-                "The drive wheels are sliding under the engine brake. Ease off the jake.",
+                "The drive wheels are sliding under the engine brake.",
                 SayEvent::new().category(SpeechCategory::Safety),
             );
         }
@@ -378,8 +378,7 @@ impl DrivingState {
         if self.trip.truck.chains_just_snapped {
             self.trip.truck.chains_just_snapped = false;
             ctx.say_event_with(
-                "A tire chain let go and hammered the fender on its way off. The set is scrap; \
-                 you are running on rubber again.",
+                "A tire chain let go. The set is scrap; you are running on rubber again.",
                 SayEvent::new().category(SpeechCategory::Money),
             );
         }
@@ -389,7 +388,7 @@ impl DrivingState {
             ctx.say_event_with(
                 format!(
                     "The chains are hammering the pavement at this speed. Keep it under \
-                     {CHAIN_SAFE_MPH:.0} or they will not last."
+                     {CHAIN_SAFE_MPH:.0}."
                 ),
                 SayEvent::new().category(SpeechCategory::Coaching),
             );
@@ -426,10 +425,7 @@ impl DrivingState {
                 "winter-rated tires or chains"
             };
             ctx.say_event_with(
-                format!(
-                    "You are rolling into an active chain law without {need}. Stop and chain up, \
-                     or hope the checkpoint is unstaffed."
-                ),
+                format!("Rolling into an active chain law without {need}."),
                 SayEvent::new().category(SpeechCategory::Navigation),
             );
         }
@@ -462,7 +458,7 @@ impl DrivingState {
         ctx.say_event_with(
             format!(
                 "Chain checkpoint. An officer waves you onto the scale apron and writes a \
-                 chain-law citation: {} dollars.{} You have {} dollars.",
+                 chain-law citation, {} dollars.{} You have {} dollars.",
                 fmt_grouped(fine, 0),
                 construction_zone_fine_clause(zone),
                 fmt_grouped(money, 0)

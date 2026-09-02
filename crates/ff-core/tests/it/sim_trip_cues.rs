@@ -239,8 +239,8 @@ fn test_toll_cues_and_charges_deduplicate() {
     assert_eq!(
         gps_messages(&advance),
         vec![
-            "ticket system toll point ahead: New Jersey Turnpike ticket entry. \
-             Estimated toll 18 dollars will be billed to carrier settlement."
+            "ticket system toll point ahead, New Jersey Turnpike ticket entry. \
+             Estimated toll 18 dollars, billed to carrier settlement."
         ]
     );
     assert!(gps_events(&repeat).is_empty());
@@ -252,8 +252,8 @@ fn test_toll_cues_and_charges_deduplicate() {
     assert_eq!(
         messages_of(&charged, TripEventKind::TollCharged),
         vec![
-            "ticket system toll charged at New Jersey Turnpike ticket entry: \
-             Estimated 18 dollars, billed to carrier settlement."
+            "ticket system toll at New Jersey Turnpike ticket entry, \
+             estimated 18 dollars, billed to carrier settlement."
         ]
     );
     assert_eq!(trip.toll_expense(), 18.0);
@@ -280,8 +280,8 @@ fn test_zero_amount_toll_entry_marker_does_not_record_expense() {
     assert_eq!(
         gps_messages(&advance),
         vec![
-            "ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. \
-             Entry will be recorded for carrier settlement."
+            "ticket system toll point ahead, Pennsylvania Turnpike eastern ticket entry. \
+             Entry recorded for carrier settlement."
         ]
     );
 
@@ -290,8 +290,8 @@ fn test_zero_amount_toll_entry_marker_does_not_record_expense() {
     assert_eq!(
         gps_messages(&entry),
         vec![
-            "ticket system entry recorded at Pennsylvania Turnpike eastern ticket entry; \
-             toll will be billed at carrier settlement."
+            "ticket system entry recorded at Pennsylvania Turnpike eastern ticket entry. \
+             Toll billed at carrier settlement."
         ]
     );
     assert_eq!(trip.toll_expense(), 0.0);

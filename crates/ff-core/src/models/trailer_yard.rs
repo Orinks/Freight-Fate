@@ -147,7 +147,7 @@ impl TrailerUnit {
 
     pub fn describe(&self) -> String {
         let mut text = format!(
-            "You are hooked to {}, {}.",
+            "Hooked to {}, {}.",
             self.spoken_name(),
             self.condition_text()
         );

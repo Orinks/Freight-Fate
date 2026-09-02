@@ -9,8 +9,7 @@ use crate::states::base::{Menu, MenuCore, MenuItem};
 use crate::states::driving_core::{profile_mut_of, profile_of};
 use crate::states::driving_menu_states::DriveRef;
 
-const LOYALTY_INTRO_HELP: &str = "Use up and down arrows to navigate, Enter to select. \
-                                  Escape cancels and returns to the previous menu.";
+const LOYALTY_INTRO_HELP: &str = "Enter selects, Escape goes back.";
 
 pub struct LoyaltyRewardsState {
     menu: MenuCore<Self>,
@@ -31,7 +30,7 @@ impl LoyaltyRewardsState {
     fn use_shower_credit(&mut self, ctx: &mut GameContext) {
         if profile_mut_of(ctx).loyalty.use_shower_credit() {
             ctx.audio.play("ui/notify");
-            ctx.say("Shower credit used. You can now use the shower at no cost.");
+            ctx.say("Shower credit used. The shower is free.");
             self.refresh(ctx, true);
         } else {
             ctx.audio.play("ui/error");
@@ -44,7 +43,7 @@ impl LoyaltyRewardsState {
         if result.success {
             ctx.audio.play("ui/notify");
             ctx.say(&format!(
-                "{label} redeemed! {} points spent. You have {} points remaining.",
+                "{label} redeemed. {} points spent, {} points remaining.",
                 result.points_spent.unwrap_or(0),
                 ff_core::pyfmt::fmt_f(result.points_remaining, 0)
             ));
@@ -81,7 +80,7 @@ impl Menu for LoyaltyRewardsState {
                     format!("Use shower credit ({shower_credits} available)"),
                     |s: &mut Self, ctx| s.use_shower_credit(ctx),
                 )
-                .help("Use a shower credit earned from fueling 50+ gallons."),
+                .help("A shower credit from fueling 50 gallons or more."),
             );
         }
 
@@ -91,15 +90,10 @@ impl Menu for LoyaltyRewardsState {
                 MenuItem::new(
                     format!("Redeem {}", reward_cost_text("shower")),
                     |s: &mut Self, ctx| {
-                        s.redeem(
-                            ctx,
-                            "shower",
-                            "Shower",
-                            "Unable to redeem shower. Insufficient points.",
-                        )
+                        s.redeem(ctx, "shower", "Shower", "Not enough points for a shower.")
                     },
                 )
-                .help("Redeem loyalty points for a free shower."),
+                .help("Loyalty points for a free shower."),
             );
         }
         if can_parking {
@@ -111,11 +105,11 @@ impl Menu for LoyaltyRewardsState {
                             ctx,
                             "parking",
                             "Parking discount",
-                            "Unable to redeem parking discount. Insufficient points.",
+                            "Not enough points for a parking discount.",
                         )
                     },
                 )
-                .help("Redeem loyalty points for a parking discount."),
+                .help("Loyalty points for a parking discount."),
             );
         }
         if can_food {
@@ -127,11 +121,11 @@ impl Menu for LoyaltyRewardsState {
                             ctx,
                             "food",
                             "Food discount",
-                            "Unable to redeem food discount. Insufficient points.",
+                            "Not enough points for a food discount.",
                         )
                     },
                 )
-                .help("Redeem loyalty points for a food discount."),
+                .help("Loyalty points for a food discount."),
             );
         }
         if can_laundry {
@@ -143,17 +137,17 @@ impl Menu for LoyaltyRewardsState {
                             ctx,
                             "laundry",
                             "Laundry discount",
-                            "Unable to redeem laundry discount. Insufficient points.",
+                            "Not enough points for a laundry discount.",
                         )
                     },
                 )
-                .help("Redeem loyalty points for a laundry discount."),
+                .help("Loyalty points for a laundry discount."),
             );
         }
 
         if items.is_empty() {
             items.push(
-                MenuItem::inert("No rewards available - need more points")
+                MenuItem::inert("No rewards available, more points needed")
                     .help("Fuel at truck stops to earn loyalty points."),
             );
         }
@@ -169,9 +163,7 @@ impl Menu for LoyaltyRewardsState {
         let summary = profile_of(ctx).loyalty.summary();
         let title = self.menu.title.clone();
         let name = self.stop.spoken_name();
-        ctx.say(&format!(
-            "{title}. {summary} You are at {name}. Choose a reward to redeem or go back."
-        ));
+        ctx.say(&format!("{title}. {summary} At {name}."));
     }
 }
 

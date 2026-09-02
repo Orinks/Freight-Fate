@@ -25,10 +25,8 @@ pub struct LoadDriverState {
 impl LoadDriverState {
     pub fn new() -> Self {
         Self {
-            menu: MenuCore::new("Choose career").with_intro_help(
-                "Use up and down arrows to choose a saved career. Enter loads \
-                 the selected career. Escape goes back.",
-            ),
+            menu: MenuCore::new("Choose career")
+                .with_intro_help("Up and Down pick a career, Enter loads it, Escape goes back."),
         }
     }
 
@@ -88,8 +86,7 @@ impl Menu for LoadDriverState {
                 )
                 .help(
                     "This career cannot continue in version 1.9. Enter \
-                     explains why and offers a new career; the save itself \
-                     is not touched.",
+                     explains and offers a new career; the save is not touched.",
                 ),
             );
         }
@@ -108,8 +105,7 @@ impl ManageCareersState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Manage careers").with_intro_help(
-                "Use up and down arrows to choose a saved career. Enter opens \
-                 reset and delete actions. Escape goes back.",
+                "Up and Down pick a career, Enter opens reset and delete, Escape goes back.",
             ),
         }
     }
@@ -178,10 +174,8 @@ pub struct CareerActionsState {
 impl CareerActionsState {
     pub fn new(path: PathBuf, profile: Profile) -> Self {
         Self {
-            menu: MenuCore::new("Career actions").with_intro_help(
-                "Choose an action for this saved career. Reset and delete both \
-                 ask for confirmation. Escape goes back.",
-            ),
+            menu: MenuCore::new("Career actions")
+                .with_intro_help("Reset and delete both ask for confirmation. Escape goes back."),
             path,
             profile,
         }
@@ -220,13 +214,13 @@ impl Menu for CareerActionsState {
                 s.confirm(ctx, CareerAction::Reset)
             })
             .help(
-                "Start this driver over with a fresh truck, money, \
-                 career stats, market, and hours of service clock.",
+                "Starts over with a fresh truck, money, career stats, market, \
+                 and hours clock.",
             ),
             MenuItem::new("Delete this career", |s: &mut Self, ctx| {
                 s.confirm(ctx, CareerAction::Delete)
             })
-            .help("Permanently remove this saved career file."),
+            .help("Removes this saved career for good."),
             MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)),
         ]
     }
@@ -246,9 +240,7 @@ impl ConfirmCareerActionState {
         Self {
             menu: MenuCore::new("Confirm career action")
                 .with_open_sound(Some("ui/error"))
-                .with_intro_help(
-                    "Use up and down arrows. Enter confirms the selected option. Escape cancels.",
-                ),
+                .with_intro_help("Enter confirms, Escape cancels."),
             path,
             profile,
             action,
@@ -296,11 +288,11 @@ impl Menu for ConfirmCareerActionState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let detail = match self.action {
             CareerAction::Reset => format!(
-                "Resetting starts this driver over at {} with a fresh truck, \
-                 starting money, no active trip, and no delivery history.",
+                "Reset starts over at {} with a fresh truck, starting money, \
+                 no active trip, and no delivery history.",
                 ctx.world.spoken_city(&self.profile.current_city, None)
             ),
-            CareerAction::Delete => "Deleting permanently removes this saved career.".to_string(),
+            CareerAction::Delete => "Delete removes this saved career for good.".to_string(),
         };
         let text = format!(
             "Confirm {} for {}. {detail} {}",
@@ -320,7 +312,7 @@ impl Menu for ConfirmCareerActionState {
             )
             .help(format!("Confirm and {label} this saved career.")),
             MenuItem::new("No, keep this career", |s: &mut Self, ctx| s.go_back(ctx))
-                .help("Cancel and return to career actions."),
+                .help("Back to career actions, nothing changed."),
         ]
     }
 }

@@ -92,8 +92,8 @@ pub fn wake_air_instruction(
         "Press"
     };
     format!(
-        " Air pressure {:.0} psi. {road_step} {} to start the engine. Wait for air pressure ready, \
-         then press {} to release the parking brake.",
+        " Air pressure {:.0} psi. {road_step} {} to start the engine. At air ready, {} releases \
+         the parking brake.",
         truck.air_pressure_psi(),
         ctx.control_hint("engine"),
         ctx.control_hint("parking_brake")
@@ -162,7 +162,7 @@ pub fn perform_shoulder_sleep(
         };
         ctx.audio.play("ui/error");
         parts.push(format!(
-            "A trooper ticketed you for illegal parking: {} dollars.{} You have {} dollars.",
+            "A trooper ticketed you for illegal parking, {} dollars.{} You have {} dollars.",
             fmt_grouped(fine, 0),
             construction_zone_fine_clause(zone),
             fmt_grouped(money, 0)

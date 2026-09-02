@@ -138,8 +138,7 @@ pub struct MenuCore<S> {
 }
 
 pub const DEFAULT_INTRO_HELP: &str =
-    "Use up and down arrows to navigate, Enter to select, Escape to go back. \
-     Left or Right Control stops the current speech.";
+    "Enter selects, Escape goes back. Control stops the current speech.";
 
 impl<S> MenuCore<S> {
     pub fn new(title: &str) -> Self {

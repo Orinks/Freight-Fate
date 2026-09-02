@@ -932,7 +932,7 @@ fn test_the_tap_answers_the_side_that_was_asked_for() {
     d.lane.lane = 0; // right lane
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &key(Key::Right));
-    assert_eq!(last(&app), "There is no lane to your right here.");
+    assert_eq!(last(&app), "No lane to your right here.");
 }
 
 #[test]

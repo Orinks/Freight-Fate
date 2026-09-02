@@ -49,20 +49,15 @@ use crate::states::city_pickup::{
 /// The board's class-level `intro_help` (the browsable board; an assigned
 /// board swaps in its own on construction).
 pub const JOB_BOARD_INTRO_HELP: &str =
-    "Each entry is one dispatch. Enter accepts the dispatch and \
-     creates a local deadhead pickup drive from your terminal to \
-     the named origin facility. Jobs name their origin and \
-     destination facilities, and cargo depends on the facility \
-     type. Tab repeats the freight market watch. Escape returns to \
-     the terminal.";
+    "Enter accepts a dispatch and starts the deadhead from your terminal to its origin \
+     facility. F1 reads the job details. Tab repeats the freight market watch. Escape returns \
+     to the terminal.";
 
-const ASSIGNED_INTRO_HELP: &str = "Dispatch assigned this load. Enter on the assignment accepts \
-     it and creates a local deadhead pickup drive from your \
-     terminal to the named origin facility. Declining draws \
-     another load, but refusals cost reputation from a small \
-     budget that refills at your next promotion. Press F1 on the \
-     assignment to review the job details line by line. Escape \
-     returns to the terminal.";
+const ASSIGNED_INTRO_HELP: &str =
+    "Dispatch assigned this load. Enter accepts it and starts the deadhead from your terminal \
+     to its origin facility. Declining draws another load, but refusals cost reputation from a \
+     budget that refills at your next promotion. F1 reads the job details. Escape returns to \
+     the terminal.";
 
 // -- shared job wording ----------------------------------------------------------------
 
@@ -125,15 +120,13 @@ pub fn trailer_note(p: &Profile, job: &Job) -> String {
     if p.business_status == INDEPENDENT_AUTHORITY {
         if let Some(owned) = owned_trailer_for_cargo(cargo_key, p.visible_owned_trailers()) {
             return format!(
-                "Owned trailer: {}. Direct freight gross; \
-                 owned-trailer reserve at settlement.",
+                "Owned trailer: {}. Direct freight gross, owned-trailer reserve at settlement.",
                 owned.label
             );
         }
         if compatible_with_programs(cargo_key, p.active_trailer_programs()) {
             return format!(
-                "Trailer program: {}. \
-                 Direct freight gross; program charge at settlement.",
+                "Trailer program: {}. Direct freight gross, program charge at settlement.",
                 required_program_text(cargo_key)
             );
         }
@@ -181,11 +174,8 @@ fn describe_reposition(ctx: &GameContext, total: usize, job: &Job, index: Option
         None => String::new(),
     };
     format!(
-        "{prefix}Carrier-assigned reposition: drive empty to \
-         {}, \
-         {}. No cargo. \
-         Pays {} dollars, the reduced empty-mile rate. \
-         You will see the {} dispatch board on arrival.",
+        "{prefix}Carrier-assigned reposition: drive empty to {}, {}. No cargo. Pays {} \
+         dollars, the empty-mile rate. The {} dispatch board opens on arrival.",
         job.spoken_destination(),
         ctx.settings.distance_text(job.distance_mi, false),
         fmt_grouped(job.pay, 0),
@@ -287,37 +277,28 @@ impl JobBoardState {
             "No alternative freight is available to request.".to_string()
         } else if remaining > 0 {
             format!(
-                "You can decline {remaining} more assigned \
-                 load{} before your next \
-                 promotion, but refusals cost dispatch trust.",
+                "{remaining} decline{} left before your next promotion, each costing dispatch \
+                 trust.",
                 if remaining != 1 { "s" } else { "" }
             )
         } else {
-            "You are out of declines until your next promotion, so \
-             dispatch expects you to run this load."
-                .to_string()
+            "No declines left until your next promotion.".to_string()
         };
         let objective_text = match self.training_recommendation_label(ctx) {
-            Some(label) => format!(
-                "First-day objective: run this {label} load \
-                 cleanly to start building your record with dispatch. "
-            ),
+            Some(label) => format!("First-day objective: run this {label} load cleanly. "),
             None => format!("Career objective: {}. ", career_objective(p).title),
         };
         let hos_note = if self.job_exceeds_current_hos(ctx, self.assigned_job()) {
-            "This assignment may need a legal rest before delivery; you will \
-             get an hours warning at accept. "
+            "This assignment may need a legal rest before delivery. "
         } else {
             ""
         };
         let market = p.market.summary();
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "Dispatch board. Dispatch assigns your load and route while you \
-             are a new company hire; load choice opens at level \
-             {SENIOR_LOAD_CHOICE_LEVEL}. Listed amounts are carrier gross; \
-             your settlement pays driver wages. {objective_text}\
-             {decline_note} {hos_note}{market} {current}"
+            "Dispatch board. Dispatch assigns your load and route until level \
+             {SENIOR_LOAD_CHOICE_LEVEL}. Listed amounts are carrier gross, your settlement \
+             pays driver wages. {objective_text}{decline_note} {hos_note}{market} {current}"
         ));
     }
 
@@ -325,16 +306,13 @@ impl JobBoardState {
         let index = self.assigned_queue[0];
         let job = &self.jobs[index];
         let assignment_help = if job.bobtail {
-            "Dispatch assigned this reposition; it is an empty deadhead, \
-             not a load. Accepting starts that drive directly -- no pickup \
-             facility to stop at. Route inspection after accepting covers \
-             rest, fuel, toll, weather, and restrictions."
+            "Dispatch assigned this reposition, an empty deadhead with no pickup facility. \
+             Route inspection after accepting covers rest, fuel, toll, weather, and \
+             restrictions."
         } else {
-            "Dispatch assigned this load; new hires run the load and \
-             lane dispatch picks. Accepting creates a local deadhead \
-             pickup drive from your terminal to the named origin \
-             facility. Route inspection after pickup covers rest, fuel, \
-             toll, weather, and restrictions."
+            "Dispatch assigned this load. Accepting starts the deadhead from your terminal to \
+             its origin facility. Route inspection after pickup covers rest, fuel, toll, \
+             weather, and restrictions."
         };
         let mut items = vec![MenuItem::new(
             format!(
@@ -356,9 +334,8 @@ impl JobBoardState {
                     |s: &mut Self, ctx| s.decline_assignment(ctx),
                 )
                 .help(
-                    "Turn the assigned load down and let dispatch draw \
-                     another. Refusals cost reputation, and the decline \
-                     budget only refills when you reach the next level.",
+                    "Dispatch draws another load. Costs reputation from a budget that refills \
+                     at the next level.",
                 ),
             );
         }
@@ -368,9 +345,8 @@ impl JobBoardState {
                     s.review_locked_board(ctx)
                 })
                 .help(format!(
-                    "Hear the other loads dispatch posted today. They are \
-                     flavor for now: assigned loads only until load choice \
-                     unlocks at level {SENIOR_LOAD_CHOICE_LEVEL}."
+                    "The other loads dispatch posted today. Assigned loads only until level \
+                     {SENIOR_LOAD_CHOICE_LEVEL}."
                 )),
             );
         }
@@ -408,10 +384,8 @@ impl JobBoardState {
             })
             .collect();
         ctx.say(&format!(
-            "Dispatch also posted today: {}. \
-             Declining your assignment draws the first of these next. \
-             Postings change with each market day; load choice unlocks \
-             at level {SENIOR_LOAD_CHOICE_LEVEL}.",
+            "Dispatch also posted today: {}. Declining draws the first of these next. Load \
+             choice unlocks at level {SENIOR_LOAD_CHOICE_LEVEL}.",
             lines.join("; ")
         ));
     }
@@ -463,10 +437,7 @@ impl JobBoardState {
     pub fn decline_assignment(&mut self, ctx: &mut GameContext) {
         if declines_remaining(profile(ctx)) <= 0 {
             ctx.audio.play("ui/error");
-            ctx.say(
-                "Dispatch has no patience left for refusals. Run this load; \
-                 declines refill at your next promotion.",
-            );
+            ctx.say("No declines left until your next promotion.");
             return;
         }
         {
@@ -491,9 +462,7 @@ impl JobBoardState {
         };
         let described = self.describe(ctx, self.assigned_job(), None);
         ctx.say(&format!(
-            "Load declined. The refusal goes on your service record with \
-             dispatch. {note} New assignment: \
-             {described}"
+            "Load declined, on your service record. {note} New assignment: {described}"
         ));
     }
 
@@ -682,8 +651,8 @@ impl JobBoardState {
             .filter(|job| self.job_exceeds_current_hos(ctx, job))
             .count();
         if risky == self.jobs.len() {
-            return "On your current hours, every listed dispatch would need an \
-                    extra legal rest; sleeping first would clear that. "
+            return "On your current hours, every listed dispatch needs an extra legal rest. \
+                    Sleeping first clears that. "
                 .to_string();
         }
         if risky > 0 {
@@ -740,8 +709,7 @@ impl JobBoardState {
                 }
             } else {
                 ctx.say(&format!(
-                    "{locked} Keep delivering to level up, or open Licenses \
-                     and training at the terminal to book the course."
+                    "{locked} Courses are under Licenses and training at the terminal."
                 ));
             }
             return;
@@ -751,11 +719,8 @@ impl JobBoardState {
             ctx.audio.play("ui/warning");
             let summary = profile(ctx).hos.summary(&ctx.settings.hos_mode);
             ctx.say(&format!(
-                "Hours warning. The hours you have already used this shift mean \
-                 this dispatch needs an extra legal rest that fresh hours would \
-                 avoid. {summary} \
-                 Press Enter again to accept it anyway, or sleep first to clear \
-                 the warning."
+                "Hours warning. On this shift's hours, this dispatch needs an extra legal \
+                 rest. {summary} Enter again accepts anyway, or sleep first."
             ));
             return;
         }
@@ -772,10 +737,7 @@ impl JobBoardState {
             // retire one, e.g. a template gated out by geography). Drop the
             // dead offer instead of crashing; the next board visit rebuilds.
             self.drop_dead_offer(ctx, index);
-            ctx.say(
-                "That load's facility is no longer on the network. Dispatch \
-                 pulled the offer; the board will refresh with new loads.",
-            );
+            ctx.say("That load's facility is no longer on the network. Dispatch pulled the offer.");
             return;
         };
         let terminal = home_terminal(ctx);
@@ -795,11 +757,7 @@ impl JobBoardState {
         let equipment_note = slip_seat_note(ctx, &job);
         profile_mut(ctx).dispatch_board_cache = None;
         let line = format!(
-            "Dispatch accepted from {}.{equipment_note} Deadhead \
-             {} on \
-             {} to pickup at \
-             {}. \
-             Check in with the shipper when you arrive.",
+            "Dispatch accepted from {}.{equipment_note} Deadhead {} on {} to pickup at {}.",
             terminal.name,
             ctx.settings.distance_text(route.miles(), true),
             route.highways().first().cloned().unwrap_or_default(),
@@ -832,8 +790,8 @@ impl JobBoardState {
         ctx.save_profile();
         ctx.mark_meaningful_play(MeaningfulPlayReason::JobAccepted);
         ctx.say(&format!(
-            "Dispatch accepted from {terminal_name}.{equipment_note} Your load is staged \
-             here in the yard: check in with the shipping office."
+            "Dispatch accepted from {terminal_name}.{equipment_note} The load is staged here \
+             in the yard. Check in with the shipping office."
         ));
         let state = PickupFacilityState::new(ctx, job, PickupOptions::default());
         ctx.push_state(state);
@@ -856,19 +814,13 @@ impl JobBoardState {
             // A cached board can outlive the world it was built from, same
             // as the facility case above.
             self.drop_dead_offer(ctx, index);
-            ctx.say(
-                "That route is no longer on the network. Dispatch pulled the \
-                 offer; the board will refresh with new loads.",
-            );
+            ctx.say("That route is no longer on the network. Dispatch pulled the offer.");
             return;
         };
         profile_mut(ctx).dispatch_board_cache = None;
         let line = format!(
-            "Dispatch assignment accepted: reposition to {}, \
-             {} on \
-             {}. No cargo, and pay is the reduced empty-mile \
-             rate: {} dollars. You will see the \
-             {} dispatch board on arrival.",
+            "Dispatch assignment accepted: reposition to {}, {} on {}. No cargo, pay {} \
+             dollars at the empty-mile rate. The {} dispatch board opens on arrival.",
             job.spoken_destination(),
             ctx.settings.distance_text(route.miles(), true),
             route.highways().first().cloned().unwrap_or_default(),
@@ -964,7 +916,7 @@ impl Menu for JobBoardState {
             }
         }
         if n == 0 {
-            ctx.say("Dispatch board. No jobs available right now. Press Escape to go back.");
+            ctx.say("Dispatch board. No jobs available.");
         } else if self.assigned_mode() {
             self.announce_assignment(ctx);
         } else {
@@ -978,10 +930,8 @@ impl Menu for JobBoardState {
                 "Listed amounts are owner-operator gross revenue. Trailer \
                  program needs are listed on each job. "
             } else {
-                "Listed amounts are carrier gross; your settlement pays \
-                 driver wages. Dispatch trusts you to pick your own \
-                 loads now; routing is still assigned until you run \
-                 your own truck. "
+                "Listed amounts are carrier gross, your settlement pays driver wages. You pick \
+                 your own loads, routing is still assigned until you run your own truck. "
             };
             let objective_text =
                 if let Some(training_label) = self.training_recommendation_label(ctx) {
@@ -991,9 +941,8 @@ impl Menu for JobBoardState {
                         guidance.dispatch_text
                     )
                 } else if first_day_guidance_active(p) && !is_company_training_profile(p) {
-                    "First-day objective: pick an unlocked load with a \
-                 deadline you can protect. Keep fuel, repairs, and \
-                 your cash cushion in mind. "
+                    "First-day objective: pick an unlocked load with a deadline you can \
+                     protect and keep your cash cushion. "
                         .to_string()
                 } else {
                     let objective = career_objective(p);
@@ -1085,10 +1034,8 @@ impl_state_for_menu!(JobBoardState);
 // -- JobDetailState -----------------------------------------------------------------------
 
 const JOB_DETAIL_INTRO_HELP: &str =
-    "Use up and down arrows to review each job detail line; Home and End \
-     jump to the first and last row. Enter repeats detail lines, accepts \
-     when Accept this dispatch is selected, or returns when Back to \
-     dispatch board is selected. Escape also returns to the dispatch board.";
+    "Up and down review the lines, Home and End jump to the ends. Enter repeats a line, or \
+     accepts on Accept this dispatch. Escape returns to the dispatch board.";
 
 pub struct JobDetailState {
     menu: MenuCore<Self>,
@@ -1166,8 +1113,7 @@ impl JobDetailState {
             // dispatch quotes it. "About" because the clock starts at pickup
             // departure, after check-in and loading.
             format!(
-                "Deadline: {} hours; deliver by about \
-                 {}.",
+                "Deadline: {} hours, deliver by about {}.",
                 fmt_f(job.deadline_game_h, 0),
                 appointment_text(p.game_hours, job.deadline_game_h, zone)
             ),
@@ -1192,8 +1138,7 @@ impl JobDetailState {
     fn reposition_detail_lines(&self, ctx: &GameContext) -> Vec<String> {
         let job = &self.job;
         vec![
-            "This is a carrier-assigned reposition: dispatch is sending you \
-             empty to a nearby city where freight is thicker, not a loaded haul."
+            "Carrier-assigned reposition: empty to a nearby city where freight is thicker."
                 .to_string(),
             format!(
                 "Destination: {}.",
@@ -1204,7 +1149,7 @@ impl JobDetailState {
                 ctx.settings.distance_text(job.distance_mi, false)
             ),
             format!(
-                "Pay: {} dollars, the reduced empty-mile rate for deadhead miles.",
+                "Pay: {} dollars, the empty-mile rate.",
                 fmt_grouped(job.pay, 0)
             ),
             "No cargo, no trailer program, no endorsement needed.".to_string(),
@@ -1242,7 +1187,7 @@ impl Menu for JobDetailState {
             .map(|line| {
                 let spoken = line.clone();
                 MenuItem::new(line, move |_s: &mut Self, ctx| ctx.say(&spoken))
-                    .help("This is a job detail line. Press Enter to repeat it.")
+                    .help("Enter repeats this line.")
             })
             .collect();
         let locked = locked_reason(profile(ctx), &self.job);
@@ -1258,12 +1203,12 @@ impl Menu for JobDetailState {
         } else {
             items.push(
                 MenuItem::new("Accept this dispatch", |s: &mut Self, ctx| s.accept(ctx))
-                    .help("Accept this dispatch and begin the pickup drive."),
+                    .help("Accepts and begins the pickup drive."),
             );
         }
         items.push(
             MenuItem::new("Back to dispatch board", |s: &mut Self, ctx| s.go_back(ctx))
-                .help("Return to the dispatch board without accepting this job."),
+                .help("Back without accepting."),
         );
         items
     }

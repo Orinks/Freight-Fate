@@ -718,7 +718,7 @@ pub fn suspension_board_line<P: StandingProfile + ?Sized>(profile: &P) -> String
             .to_string();
     }
     format!(
-        "Dispatch board. Your CDL is {}; driving jobs return {}.",
+        "Dispatch board. Your CDL is {}. Driving jobs return {}.",
         status_verb(record),
         clears_text(profile)
     )

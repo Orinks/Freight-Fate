@@ -514,10 +514,10 @@ fn test_wheel_time_flags_being_out_of_hours() {
 
     assert!(c
         .wheel_time_summary("realistic", false)
-        .contains("You are out of hours."));
+        .contains("Out of hours."));
     assert!(c
         .wheel_time_summary("realistic", true)
-        .contains("You are out of hours."));
+        .contains("Out of hours."));
 }
 
 #[test]

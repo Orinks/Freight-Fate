@@ -172,10 +172,7 @@ fn at_the_terminal(app: &mut TestApp, shared: &SharedState, mph: f64) -> RoadSto
 
 /// `_arrival_line(stop)`.
 fn arrival_line(stop: &RoadStop) -> (String, bool) {
-    (
-        format!("You are at {}. Come to a complete stop.", stop.name),
-        true,
-    )
+    (format!("At {}. Come to a stop.", stop.name), true)
 }
 
 #[test]

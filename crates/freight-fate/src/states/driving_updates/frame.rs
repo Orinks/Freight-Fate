@@ -471,7 +471,7 @@ impl DrivingState {
             ctx.audio.engine_stop();
             if self.trip.truck.stalled {
                 let text = format!(
-                    "The engine stalled. Press {} to restart, and use a lower gear at low speed.",
+                    "Engine stalled. Press {} to restart.",
                     ctx.control_hint("engine")
                 );
                 ctx.say_event_with(text, SayEvent::new().category(SpeechCategory::Safety));

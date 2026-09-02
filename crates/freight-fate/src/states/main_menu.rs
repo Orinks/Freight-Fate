@@ -216,28 +216,21 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
     );
     if option.is_owner_operator() {
         return format!(
-            "{prefix}First-day briefing: you are leased to {} \
-             and parked at {location}. You own a brand-new truck with a full \
-             tank, have {} dollars of working capital, and \
-             fuel, repairs, truck wear, trailer programs, and business \
-             reserves come out of \
-             your cash. Your first objective is to open the dispatch board, \
-             choose an unlocked load with a deadline you can protect, and get \
-             to the shipper without burning your cushion.",
+            "{prefix}First-day briefing: leased to {}, parked at {location}. You own a new \
+             truck with a full tank and {} dollars of working capital. Fuel, repairs, truck \
+             wear, trailer programs, and business reserves come out of your cash. First \
+             objective: open the dispatch board and choose an unlocked load with a deadline \
+             you can protect.",
             option.carrier_name,
             fmt_grouped(p.money, 0)
         );
     }
     format!(
-        "{prefix}First-day briefing: welcome aboard {}. \
-         Your assigned company tractor is parked at {location}; the carrier \
-         covers normal fuel, repairs, insurance, and trailer support. Your \
-         starter dispatch style is {}. As a new \
-         hire, dispatch assigns your load and your route; you earn load \
-         choice with seniority, and refusing an assignment goes on your \
-         service record. Your first objective is to open the dispatch \
-         board, accept the assigned load, deadhead to the shipper, and \
-         deliver cleanly to start building your record with dispatch.",
+        "{prefix}First-day briefing: welcome aboard {}. Your assigned truck is parked at \
+         {location}. The carrier covers fuel, repairs, insurance, and trailer support. \
+         Dispatch style: {}. As a new hire, dispatch assigns your load and route, and \
+         refusing an assignment goes on your service record. First objective: open the \
+         dispatch board, accept the assigned load, and deliver it cleanly.",
         option.carrier_name,
         option.dispatch.summary()
     )
@@ -593,17 +586,16 @@ impl MainMenuState {
         let opened = open_url(&url);
         if !opened {
             ctx.say(&format!(
-                "Could not open a web browser. You can report problems at github.com/{}/issues.",
+                "Could not open a web browser. Report problems at github.com/{}/issues.",
                 updater::REPO
             ));
             return;
         }
         ctx.say(
-            "Opening the bug report page in your web browser. \
-             Please attach your game log to the report: it is the file game.log \
-             inside the logs folder, next to the game itself. If you restarted \
-             the game after the problem happened, attach game.prev.log instead. \
-             That is the log from the previous run.",
+            "Opening the bug report page in your web browser. Attach your game \
+             log: game.log in the logs folder next to the game. If you restarted \
+             the game after the problem, attach game.prev.log, the previous \
+             run's log.",
         );
     }
 }
@@ -661,10 +653,9 @@ impl Menu for MainMenuState {
         // as at entry: silence with no word is never allowed.
         if ctx.audio.take_silence_notice() {
             ctx.say(
-                "Game sounds could not start on this computer, so you will \
-                 hear the voice but no engine, traffic, or alert sounds. \
-                 Check that sound is working elsewhere, then start Freight \
-                 Fate again.",
+                "Game sounds could not start on this computer: the voice, but \
+                 no engine, traffic, or alert sounds. Check that sound works \
+                 elsewhere, then start Freight Fate again.",
             );
         }
         let info = {
@@ -717,10 +708,9 @@ impl Menu for MainMenuState {
             // game. Reported on Linux, where the device open failed and the
             // whole drive ran silent without a word.
             warning.push_str(
-                "Game sounds could not start on this computer, so you will \
-                 hear the voice but no engine, traffic, or alert sounds. \
-                 Check that sound is working elsewhere, then start Freight \
-                 Fate again. ",
+                "Game sounds could not start on this computer: the voice, but \
+                 no engine, traffic, or alert sounds. Check that sound works \
+                 elsewhere, then start Freight Fate again. ",
             );
         }
         if loadable_saves().is_empty() && !legacy_saves().is_empty() {
@@ -765,7 +755,7 @@ impl Menu for MainMenuState {
                 MenuItem::new("Choose career", |_s: &mut Self, ctx| {
                     ctx.push_state(LoadDriverState::new())
                 })
-                .help("Choose any saved career instead of only the newest one."),
+                .help("Any saved career, not only the newest."),
             );
         }
         if !saves.is_empty() {
@@ -780,13 +770,13 @@ impl Menu for MainMenuState {
             MenuItem::new("New career", |_s: &mut Self, ctx| {
                 ctx.push_state(NameEntryState::new())
             })
-            .help("Start a fresh trucking career."),
+            .help("Start a fresh career."),
         );
         items.push(
             MenuItem::new("Achievements", |_s: &mut Self, ctx| {
                 ctx.push_state(AchievementCareerState::new())
             })
-            .help("Review earned and locked achievements for a saved career."),
+            .help("Earned and locked achievements for a saved career."),
         );
         items.push(
             MenuItem::new("Online", |_s: &mut Self, ctx| {
@@ -794,25 +784,21 @@ impl Menu for MainMenuState {
                 ctx.push_state(hub)
             })
             .help(
-                "The public drivers board, your orinks.net account, \
-                 cloud backup and restore, and sharing choices like \
-                 Mastodon and Discord, all in one place.",
+                "Drivers on duty, your orinks.net account, cloud backup \
+                 and restore, and sharing choices like Mastodon and Discord.",
             ),
         );
         items.push(
             MenuItem::new("How to play", |_s: &mut Self, ctx| {
                 ctx.push_state(HelpState::new())
             })
-            .help("Learn the controls and the goal of the game."),
+            .help("The controls and the goal of the game."),
         );
         items.push(
             MenuItem::new("Learn game sounds", |_s: &mut Self, ctx| {
                 ctx.push_state(LearnSoundsState::new())
             })
-            .help(
-                "Play any sound the road uses and hear what it means, \
-                 before you meet it at speed.",
-            ),
+            .help("Any sound the road uses, and what it means."),
         );
         items.push(
             MenuItem::new("Settings", |_s: &mut Self, ctx| {
@@ -825,7 +811,7 @@ impl Menu for MainMenuState {
         );
         items.push(
             MenuItem::new("Report a problem", |s: &mut Self, ctx| s.report_issue(ctx))
-                .help("Open the Freight Fate bug report page on GitHub in your web browser."),
+                .help("The bug report page on GitHub, in your web browser."),
         );
         items.push(MenuItem::new("Quit", |_s: &mut Self, ctx| ctx.quit()).help("Exit the game."));
         items
@@ -876,9 +862,9 @@ impl ConfirmQuitState {
         }
         // The same bargain the pause menu's quit already explains, in the
         // same words: you can only save at a stop.
-        "Quit Freight Fate? You are part way through a drive. You can \
-         only save at a stop, so this drive will resume from your last \
-         stop, not from here."
+        "Quit Freight Fate? You are part way through a drive. Saves happen \
+         only at a stop, so this drive resumes from your last stop, not \
+         from here."
     }
 }
 
@@ -969,9 +955,9 @@ impl TextEntry for NameEntryState {
 
     fn enter(&mut self, ctx: &mut GameContext) {
         ctx.say(
-            "New career. Type your driver name, then press Enter. \
-             Left and right arrows review the letters you have typed, \
-             Home and End jump to the start or end. Press Escape to cancel.",
+            "New career. Type your driver name, then Enter. Left and Right \
+             arrows review the letters, Home and End jump to the start or \
+             end. Escape cancels.",
         );
     }
 

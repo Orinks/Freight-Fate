@@ -508,12 +508,11 @@ impl DrivingState {
             let mut limit_message = String::new();
             if !self.trip.truck.transmission.automatic && self.trip.truck.rpm < 1100.0 {
                 limit_state = "gear".to_string();
-                limit_message = "Descent control needs a lower gear. Downshift now.".to_string();
+                limit_message = "Descent control needs a lower gear.".to_string();
                 self.descent_beaten_s = 0.0; // a different limit; not this count
             } else if self.trip.truck.grip < 0.55 {
                 limit_state = "traction".to_string();
-                limit_message =
-                    "Low traction limits descent control. Apply brakes carefully.".to_string();
+                limit_message = "Low traction limits descent control.".to_string();
                 self.descent_beaten_s = 0.0;
             } else {
                 // The retarder is staged against the overspeed further down,

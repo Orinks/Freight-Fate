@@ -134,9 +134,7 @@ pub trait FuelPump: Menu {
         if !silent {
             ctx.audio.play("ui/notify");
             let name = self.stop().spoken_name();
-            ctx.say(&format!(
-                "Saved at {name}. Your drive will resume from this rest stop."
-            ));
+            ctx.say(&format!("Saved at {name}."));
         }
     }
 }

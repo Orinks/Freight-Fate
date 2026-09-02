@@ -129,7 +129,7 @@ pub(crate) fn speak_time_and_weather(ctx: &mut GameContext) {
         desc = Some(parts.join(", "));
     }
     let desc = if loading {
-        "still loading; try Time and weather again in a moment".to_string()
+        "still loading, try again in a moment".to_string()
     } else {
         match desc {
             Some(desc) => desc,

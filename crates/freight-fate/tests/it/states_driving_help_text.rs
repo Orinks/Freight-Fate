@@ -229,9 +229,6 @@ fn test_how_to_play_documents_new_gameplay_systems() {
         "cb chatter passes on what other drivers have seen",
         "never claims the road is clear",
         "review that chatter",
-        // The presence control has to promise, in the help, what it does not do.
-        "enforcement presence control",
-        "getting caught is",
         // The speed keeper takes low-speed local roads and hands back to cruise.
         "speed keeper handles low-speed local roads",
         "in-cab radio",
@@ -295,7 +292,7 @@ fn test_dispatch_board_keeps_route_planning_out_of_load_offer() {
     assert!(summary.contains("Legal HOS plan"), "{summary}");
     assert!(summary.contains("Fuel-capable stops:"), "{summary}");
     assert!(
-        summary.contains("Estimated carrier-paid toll exposure"),
+        summary.contains("Estimated tolls, carrier-paid"),
         "{summary}"
     );
     assert!(summary.contains("not a guaranteed open space"), "{summary}");

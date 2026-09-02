@@ -24,8 +24,7 @@ impl AchievementCareerState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Achievements").with_intro_help(
-                "Choose a saved career to review achievements. Enter opens \
-                 that driver's earned and locked achievements. Escape goes back.",
+                "Pick a saved career. Enter opens its achievements, Escape goes back.",
             ),
         }
     }
@@ -49,10 +48,7 @@ impl Menu for AchievementCareerState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let first = self.menu.items.first().map(|item| item.text(self, ctx));
         if first.as_deref().is_none_or(|text| text == "Back") {
-            ctx.say(
-                "Achievements. No saved careers yet. Start a career, \
-                 then come back after the road has opinions.",
-            );
+            ctx.say("Achievements. No saved careers yet.");
             return;
         }
         let text = format!("Achievements. {}", self.current_text(ctx));
@@ -72,7 +68,7 @@ impl Menu for AchievementCareerState {
                         ctx.push_state(AchievementsState::new(profile.clone()))
                     },
                 )
-                .help(format!("Review achievements for {name}.")),
+                .help(format!("Achievements for {name}.")),
             );
         }
         items.push(MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx)));
@@ -91,10 +87,8 @@ pub struct AchievementsState {
 impl AchievementsState {
     pub fn new(profile: Profile) -> Self {
         Self {
-            menu: MenuCore::new(&format!("Achievements for {}", profile.name)).with_intro_help(
-                "Use up and down arrows to choose a category. Enter opens it \
-                 and lists its achievements. Escape goes back.",
-            ),
+            menu: MenuCore::new(&format!("Achievements for {}", profile.name))
+                .with_intro_help("Up and Down pick a category, Enter opens it, Escape goes back."),
             profile,
         }
     }
@@ -128,7 +122,7 @@ impl Menu for AchievementsState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "Achievements for {}. {} of {} earned. Enter a category to browse it. {}",
+            "Achievements for {}. {} of {} earned. {}",
             self.profile.name,
             earned_count(&self.profile),
             ACHIEVEMENTS.len(),
@@ -143,7 +137,7 @@ impl Menu for AchievementsState {
             Label::dynamic(|s: &Self, _ctx| s.summary_label()),
             |s: &mut Self, ctx| s.summary(ctx),
         )
-        .help("Hear the total earned achievement count.")];
+        .help("The total earned.")];
         for category in categories() {
             let achs = achievements_in_category(category.id);
             let done = achs.iter().filter(|a| earned.contains(a.id)).count();
@@ -186,11 +180,8 @@ impl AchievementCategoryState {
         achs: Vec<&'static Achievement>,
     ) -> Self {
         Self {
-            menu: MenuCore::new(category.title).with_intro_help(
-                "Use up and down arrows to review this category's achievements. \
-                 Enter repeats the selected entry. Escape goes back to the \
-                 category list.",
-            ),
+            menu: MenuCore::new(category.title)
+                .with_intro_help("Up and Down move, Enter repeats the entry, Escape goes back."),
             profile,
             category,
             achs,

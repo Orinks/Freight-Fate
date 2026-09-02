@@ -1429,6 +1429,19 @@ Everything not listed here ships fine after 1.9.0.
             which is roughly right but not tuned for a display; a
             braille-only playtest by a display user is what settles whether
             the timing needs its own rung.
+- [x] **The verbosity pass over every spoken line (owner, 2026-09-02) --
+      DONE 2026-09-02.** Asked for by braille display readers: the help
+      screens, settings descriptions, ramp and exit cues, arrival and rest
+      stop menus, city screens and the ff-core message pairs all said the
+      fact and then coached the driver through it. The pass keeps the WHERE
+      (at the bar, at the end of the ramp, at the entrance: the lines that
+      grew because a playtester stopped a quarter mile short) and every
+      value and decision-changing qualifier, and drops the HOW and the
+      explanation. Terse renderings and their slot grammar are untouched.
+      Pinned expectations moved with the text.
+      - [ ] A display reader's playtest is what settles whether the
+            standard rung is now short enough, or whether braille only
+            should default to the quiet rung.
 - [x] **Short-hop XP: the battery's last known-open finding, closed
       (2026-09-02).** `short_hop_streak_xp_farming` had reported 25-mile
       hops at 4.6x a 500-mile haul's XP per mile since the Python line, and

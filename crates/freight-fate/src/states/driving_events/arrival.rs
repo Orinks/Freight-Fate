@@ -49,8 +49,8 @@ impl DrivingState {
         opts.category = Some(SpeechCategory::Money);
         ctx.say_event_with(
             format!(
-                "You ran out of fuel. Roadside rescue brought thirty gallons {billing}. Press \
-                 {engine} to restart the engine, and plan your fuel stops."
+                "Out of fuel. Roadside rescue brought thirty gallons {billing}. Press {engine} \
+                 to restart the engine."
             ),
             opts,
         );
@@ -124,14 +124,13 @@ impl DrivingState {
             // instruction to take it themselves -- which is what "I was about
             // to hit X when the truck took the exit" is describing. Never
             // name a control the driver's own settings have taken off them.
-            "You continue to the next safe turnaround and loop back onto the approach. The \
-             destination exit is ahead again, and lane keeping will take it, so hold the right \
-             lane and slow down for the ramp."
+            "You loop back through the next safe turnaround. The destination exit is ahead \
+             again, and lane keeping will take it."
                 .to_string()
         } else {
             format!(
-                "You continue to the next safe turnaround and loop back onto the approach. The \
-                 destination exit is ahead again; press {} when you are close enough to take it.",
+                "You loop back through the next safe turnaround. The destination exit is ahead \
+                 again. Press {} to signal for it.",
                 ctx.control_hint("take_exit")
             )
         };
@@ -215,10 +214,7 @@ impl DrivingState {
             let message = if self.terse_speech(ctx) {
                 format!("At {facility}. Stop to dock.")
             } else {
-                format!(
-                    "Still at {facility}. The delivery is here, not ahead: slow down and stop to \
-                     dock."
-                )
+                format!("Still at {facility}. The delivery is here, not ahead. Stop to dock.")
             };
             self.remind_arrival_gate(ctx, "Destination gate: stop to dock.", &message, false);
             return;
@@ -234,19 +230,17 @@ impl DrivingState {
         let keeper_held = self.keeper_mph.is_some();
         self.cancel_cruise(ctx, false);
         ctx.audio.play("ui/warning");
-        self.set_status("Destination ahead: slow down and come to a complete stop.");
+        self.set_status("Destination ahead. Stop at the gate.");
         let mut message = if self.terse_speech(ctx) {
             format!("Destination ahead: {facility}.")
         } else {
-            format!(
-                "Destination ahead: {facility}. Slow down and come to a complete stop at the gate."
-            )
+            format!("Destination ahead, {facility}. Stop at the gate.")
         };
         if keeper_held {
             message.push_str(if self.terse_speech(ctx) {
                 " Speed keeper off."
             } else {
-                " Speed keeper handing off; the pedals are yours."
+                " Speed keeper off. The pedals are yours."
             });
         }
         self.seed_gate_grace_at_gate(ctx, &message);
@@ -362,7 +356,7 @@ impl DrivingState {
             format!("At {facility}. Stop to dock.")
         } else {
             format!(
-                "At {facility}. Stop completely and set the parking brake with {} to enter. Once stopped and parked, {} opens the facility.",
+                "At {facility}. Stop, set the parking brake with {}, then {} opens the facility.",
                 ctx.control_hint("parking_brake"),
                 ctx.control_hint("rest")
             )
@@ -406,7 +400,7 @@ impl DrivingState {
             TimedMessageState::new(
                 "Pulling into destination",
                 &format!("Pulling into {facility}. Brakes set; dock menu opening in a moment."),
-                "Pulling into the destination facility. Please wait.",
+                "Pulling into the destination facility.",
                 STOP_PULL_IN_WAIT_S,
                 move |ctx: &mut GameContext| {
                     let handle = drive.clone();

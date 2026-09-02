@@ -202,7 +202,7 @@ impl DrivingState {
         let signal_hint = ctx.control_hint("take_exit");
         let message = format!(
             "Lights and siren behind you. A trooper on this {where_} clocked you at {} in a {} \
-             zone. Signal with {signal_hint} and brake to a stop on the shoulder.",
+             zone. Signal with {signal_hint} and stop on the shoulder.",
             ctx.settings.speed_text(self.trip.truck.speed_mph()),
             ctx.settings.speed_text(limit)
         );
@@ -348,9 +348,8 @@ impl DrivingState {
                     "Your transponder answers it at road speed.".to_string()
                 } else {
                     format!(
-                        "All trucks must pull in. Signal for the scale exit with {}; the ramp \
-                         brings you down to the scale. Once you are stopped at the scale, press \
-                         {} to check in.",
+                        "All trucks must pull in. Signal for the scale exit with {}. Stopped at \
+                         the scale, press {} to check in.",
                         ctx.control_hint("take_exit"),
                         ctx.control_hint("rest")
                     )
@@ -383,7 +382,7 @@ impl DrivingState {
                     // needed it -- taking the scale's exit is what counts --
                     // and the ramp glide owns the slowing.
                     format!(
-                        "Open weigh station ahead in {announced}: {}. {instruction}",
+                        "Open weigh station ahead in {announced}, {}. {instruction}",
                         stop.name
                     ),
                     SayEvent::queued()
@@ -520,7 +519,7 @@ impl DrivingState {
             // clearance speak twice, and the scale_green tone already
             // carried the verdict; the status keys can re-answer.
             ctx.say_event_with(
-                "Green light. You are cleared past the scale; keep rolling.",
+                "Green light. Cleared past the scale.",
                 SayEvent::queued()
                     .priority(EventPriority::Route)
                     .category(SpeechCategory::Navigation)
@@ -596,8 +595,8 @@ impl DrivingState {
             return;
         }
         let lights_message = format!(
-            "Scale bypass enforcement. Lights and siren behind you: signal with {} and brake to a \
-             stop on the shoulder.",
+            "Scale bypass enforcement. Lights and siren behind you. Signal with {} and stop on \
+             the shoulder.",
             ctx.control_hint("take_exit")
         );
         self.begin_enforcement_pull_over(
@@ -643,8 +642,8 @@ impl DrivingState {
             self.trip.truck.damage_pct
         );
         let lights_message = format!(
-            "Unsafe equipment stop. Lights and siren behind you: signal with {} and brake to a \
-             stop on the shoulder.",
+            "Unsafe equipment stop. Lights and siren behind you. Signal with {} and stop on the \
+             shoulder.",
             ctx.control_hint("take_exit")
         );
         self.begin_enforcement_pull_over(
@@ -705,9 +704,9 @@ impl DrivingState {
                     1.0f64.min(self.pull_over_compliance + PULL_OVER_SIGNAL_BOOST);
             }
             ctx.audio.play_with("vehicle/signal_tone", 0.7, 0.6);
-            ctx.say("Signaling and easing onto the shoulder. Brake to a full stop.");
+            ctx.say("Signaling onto the shoulder.");
         } else {
-            ctx.say("Pulling over. Brake to a full stop on the shoulder.");
+            ctx.say("Pulling over to the shoulder.");
         }
     }
 }

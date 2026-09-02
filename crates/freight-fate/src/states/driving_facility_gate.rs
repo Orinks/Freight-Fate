@@ -140,7 +140,7 @@ impl DrivingState {
         let message = if self.terse_speech(ctx) {
             format!("Gate in {distance}. Slow to {target}.")
         } else {
-            format!("Facility gate in {distance}. Slow to {target} to make the entrance.")
+            format!("Facility gate in {distance}. Slow to {target}.")
         };
         self.gate_grace_s = self.gate_miss_grace_seconds(ctx, &message);
         ctx.audio.play("ui/warning");
@@ -204,7 +204,7 @@ impl DrivingState {
         }
         let facility = self.approach_facility_text(ctx);
         Some(format!(
-            "The gate at {facility} is {} ahead. Roll up to it and stop there to check in.",
+            "The gate at {facility} is {} ahead. Stop there to check in.",
             self.closing_text(remaining)
         ))
     }
@@ -277,9 +277,9 @@ impl DrivingState {
             )
         } else {
             format!(
-                "You carried past the gate at {}, too fast to make the entrance. You continue to \
-                 the next safe turnaround and loop back onto the approach. The gate is ahead \
-                 again; slow to {target} this time. The clock is still running.",
+                "You carried past the gate at {}, too fast for the entrance. You loop back \
+                 through the next safe turnaround. The gate is ahead again; slow to {target} this \
+                 time. The clock is still running.",
                 self.destination_facility_text(ctx)
             )
         };

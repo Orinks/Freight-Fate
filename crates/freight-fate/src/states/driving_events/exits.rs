@@ -21,7 +21,7 @@ impl DrivingState {
     /// `_toggle_exit_signal()`: arm, confirm, or cancel the exit signal.
     pub fn toggle_exit_signal(&mut self, ctx: &mut GameContext) {
         if self.ramp_mi.is_some() {
-            self.say_plain(ctx, "You are already on the exit ramp. Brake to a stop.");
+            self.say_plain(ctx, "Already on the exit ramp.");
             return;
         }
         let selected = self.selected_sleep_stop();
@@ -55,8 +55,7 @@ impl DrivingState {
             self.say_plain(
                 ctx,
                 format!(
-                    "No route exit to signal for yet. Press {} to plan an upcoming sleep-capable \
-                     stop, or wait for an exit announcement.",
+                    "No route exit to signal for yet. Press {} to plan a sleep-capable stop.",
                     ctx.control_hint("rest")
                 ),
             );
@@ -82,8 +81,7 @@ impl DrivingState {
                 self.say_plain(
                     ctx,
                     format!(
-                        "Signal stays on. Hold the exit lane and keep slowing. Press {} again to \
-                         cancel the exit.",
+                        "Signal stays on. Press {} again to cancel the exit.",
                         ctx.control_hint("take_exit")
                     ),
                 );
@@ -101,12 +99,12 @@ impl DrivingState {
                 self.clear_selected_stop_intent();
             }
             let planned = if canceled_selected {
-                " Facility stopping assistance is still on, but disarmed for this exit. Your planned stop remains on \
-                 the route map."
+                " Facility stopping assistance disarmed for this exit. Your planned stop remains \
+                 on the route map."
             } else {
                 ""
             };
-            let message = format!("Signal canceled. Keep following the highway.{planned}");
+            let message = format!("Signal canceled.{planned}");
             self.set_status(message.clone());
             self.say_plain(ctx, message);
             return;
@@ -157,14 +155,14 @@ impl DrivingState {
         let lane_hint = if self.lane.lane == 0 {
             ""
         } else {
-            " Get into the right lane."
+            " Right lane."
         };
         // Name the ramp's ending now, while there is still a mile of
         // mainline to plan the braking on: a stop sign heard only on the
         // ramp cost real playtesters real cross-traffic damage.
         let ending = match self.ramp_control_for(ctx, &stop, None).as_str() {
-            "signal" => " The ramp ends at a traffic light.",
-            "stop" => " The ramp ends at a stop sign.",
+            "signal" => " Ramp ends at a traffic light.",
+            "stop" => " Ramp ends at a stop sign.",
             _ => "",
         };
         let ahead_text = ctx.settings.distance_text(ahead, true);
@@ -184,12 +182,12 @@ impl DrivingState {
                 "Exit lane set for you by lane keeping."
             };
             format!(
-                "{head} {ahead_text} ahead. {granted}{lane_hint} Slow to {ramp_text} or less for \
-                 the ramp.{ending}{cap}"
+                "{head} {ahead_text} ahead. {granted}{lane_hint} {ramp_text} or less for the \
+                 ramp.{ending}{cap}"
             )
         } else {
             format!(
-                "{head} {ahead_text} ahead.{lane_hint} Move right for the exit lane, then slow to \
+                "{head} {ahead_text} ahead.{lane_hint} Move right for the exit lane, then \
                  {ramp_text} or less for the ramp.{ending}{cap}"
             )
         };
@@ -197,16 +195,16 @@ impl DrivingState {
             self.selected_stop_assist_armed = ctx.settings.destination_approach_assist;
             if self.selected_stop_assist_armed {
                 let lane_action = if ctx.settings.lane_is_manual() {
-                    "Set the exit lane; "
+                    "Set the exit lane. "
                 } else {
                     ""
                 };
                 message.push_str(&format!(
-                    " Facility stopping assistance armed. {lane_action}After the ramp \
-                     control is clear, it will stop at the entrance."
+                    " Facility stopping assistance armed. {lane_action}It stops at the entrance \
+                     once the ramp control is clear."
                 ));
             } else {
-                message.push_str(" Brake to a complete stop at the entrance.");
+                message.push_str(" Stop at the entrance.");
             }
         }
         if scale_claimed.is_some() {
@@ -567,8 +565,7 @@ impl DrivingState {
             self.exit_tap_hint_said = true;
             self.say_plain(
                 ctx,
-                "You are holding the lane yourself, so taps only nudge the wheel. Hold Right to \
-                 steer into the exit lane.",
+                "Taps only nudge the wheel. Hold Right to steer into the exit lane.",
             );
         }
         if right {
@@ -593,7 +590,7 @@ impl DrivingState {
             self.exit_lane_prompt_said = true;
             let pressure = self.active_exit_pressure(&stop);
             let pressure_text = if pressure.is_some_and(|p| p.intensity >= 0.35) {
-                " Traffic is tight, so hold the lane and let the gap open."
+                " Traffic is tight."
             } else {
                 ""
             };
@@ -603,8 +600,8 @@ impl DrivingState {
             opts.category = Some(SpeechCategory::Navigation);
             ctx.say_event_with(
                 format!(
-                    "Exit lane in {distance}. Signal is on; steer right for the exit lane and \
-                     slow to {ramp:.0}.{pressure_text}"
+                    "Exit lane in {distance}. Steer right for the exit lane and slow to \
+                     {ramp:.0}.{pressure_text}"
                 ),
                 opts,
             );
@@ -616,17 +613,14 @@ impl DrivingState {
         {
             self.exit_lane_ready_said = true;
             ctx.audio.play_with("ui/notify", 0.6, 0.0);
-            self.say_plain(ctx, "Exit lane set. Hold this lane and keep slowing.");
+            self.say_plain(ctx, "Exit lane set.");
         }
         if (0.0..=EXIT_COMMIT_WINDOW_MI).contains(&ahead) && !self.exit_commit_said {
             self.exit_commit_said = true;
             let ramp = self.armed_ramp_mph(None);
             let mut opts = SayEvent::queued().priority(EventPriority::Route);
             opts.category = Some(SpeechCategory::Navigation);
-            ctx.say_event_with(
-                format!("At the exit gore. Hold the exit lane and stay under {ramp:.0}."),
-                opts,
-            );
+            ctx.say_event_with(format!("At the exit gore. Stay under {ramp:.0}."), opts);
         }
     }
 
@@ -687,9 +681,9 @@ impl DrivingState {
         // Never name a key this driver's settings do not give them: with lane
         // drift off a tap changes lanes, and holding Right does nothing.
         let lane_text = if ctx.settings.lane_is_automated() {
-            "Tap Right to the right lane and keep slowing."
+            "Tap Right to the right lane."
         } else {
-            "Hold Right for the exit lane and keep slowing."
+            "Hold Right for the exit lane."
         };
         // Never "confirm": there is no confirm action, and an X pressed to
         // obey it cancels the signal instead.

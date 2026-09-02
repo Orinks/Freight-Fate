@@ -565,7 +565,7 @@ impl Tutorial {
 impl Instructor for Tutorial {
     fn begin(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "This is your first run, so let's walk through it. First: press {} to start the engine.",
+            "Your first run. Press {} to start the engine.",
             ctx.control_hint("engine")
         );
         ctx.say_with(text, Say::queued());
@@ -578,15 +578,15 @@ impl Instructor for Tutorial {
             self.hinted = false;
             let text = if ctx.settings.automatic_transmission {
                 format!(
-                    "Now let air pressure build. When you hear air ready, press {} to release \
-                     the parking brake, then hold {} to accelerate. The transmission shifts for you.",
+                    "At air ready, press {} to release the parking brake, then hold {} to \
+                     accelerate. The transmission shifts for you.",
                     ctx.control_hint("parking_brake"),
                     ctx.control_hint("accelerate")
                 )
             } else {
                 format!(
-                    "Now let air pressure build. When you hear air ready, press {} to release \
-                     the parking brake, then hold {}, select {} for first gear, and release the clutch.",
+                    "At air ready, press {} to release the parking brake, then hold {}, select \
+                     {} for first gear, and release the clutch.",
                     ctx.control_hint("parking_brake"),
                     ctx.control_hint("clutch"),
                     ctx.control_hint("gear_first")
@@ -602,7 +602,7 @@ impl Instructor for Tutorial {
             self.timer = 0.0;
             self.hinted = false;
             let text = format!(
-                "Parking brake released. Now hold {} to accelerate.",
+                "Parking brake released. Hold {} to accelerate.",
                 ctx.control_hint("accelerate")
             );
             ctx.say_with(text, Say::queued());
@@ -610,7 +610,7 @@ impl Instructor for Tutorial {
             self.timer = 0.0;
             self.hinted = false;
             ctx.say_with(
-                "Parking brake released. Now shift into first gear.",
+                "Parking brake released. Shift into first gear.",
                 Say::queued(),
             );
         }
@@ -622,7 +622,7 @@ impl Instructor for Tutorial {
             self.timer = 0.0;
             self.hinted = false;
             let text = format!(
-                "In gear. Now hold {} to accelerate.",
+                "In gear. Hold {} to accelerate.",
                 ctx.control_hint("accelerate")
             );
             ctx.say_with(text, Say::queued());
@@ -634,9 +634,8 @@ impl Instructor for Tutorial {
         if self.stage == 2 && truck.speed_mph() > 20.0 {
             self.stage = 3;
             let text = format!(
-                "You are rolling. Press {} anytime for your speed, {} for a full report, and {} \
-                 to hear all the controls. Watch for hazard warnings, and brake hard when you hear \
-                 them. Press {} when you need to stop fast. Safe travels.",
+                "Rolling. {} for your speed, {} for a full report, {} for all the controls. Brake \
+                 hard at a hazard warning; {} stops fast. Safe travels.",
                 ctx.control_hint("speed"),
                 ctx.control_hint("status_menu"),
                 ctx.control_hint("help"),
@@ -824,18 +823,12 @@ pub trait FacilityEngine: Menu {
             MenuItem::new(FACILITY_ENGINE_SHUT_DOWN_ITEM, |s: &mut Self, ctx| {
                 s.toggle_facility_engine(ctx)
             })
-            .help(
-                "Shut it down while you sit here. No fuel burned and no idle noise; you start it \
-                 again before you pull out.",
-            )
+            .help("Engine off while parked, no fuel burned. Start it again before pulling out.")
         } else {
             MenuItem::new(FACILITY_ENGINE_START_ITEM, |s: &mut Self, ctx| {
                 s.toggle_facility_engine(ctx)
             })
-            .help(
-                "Bring the engine back up. Air pressure has to reach 100 psi before the parking \
-                 brake will release.",
-            )
+            .help("Starts the engine. The parking brake releases at 100 psi.")
         }
     }
 

@@ -194,10 +194,8 @@ impl OnlineSetupState {
                 format!("Waiting for code {} to be entered", activation.user_code)
             }
             (SetupPhase::Sharing, _) => "Finishing setup with orinks.net".to_string(),
-            (SetupPhase::Expired, _) => {
-                "Activation code expired — choose to get a new one".to_string()
-            }
-            (SetupPhase::Error, _) => "Setup could not continue — choose to start over".to_string(),
+            (SetupPhase::Expired, _) => "Activation code expired, choose for a new one".to_string(),
+            (SetupPhase::Error, _) => "Setup could not continue, choose to start over".to_string(),
             _ => "Set up this computer with orinks.net".to_string(),
         }
     }
@@ -222,8 +220,7 @@ impl OnlineSetupState {
             match &self.activation {
                 Some(activation) => {
                     ctx.say(&format!(
-                        "Still waiting for you to enter the code. Your \
-                         activation code is {}.",
+                        "Still waiting for the code. Your activation code is {}.",
                         activation.user_code
                     ));
                 }
@@ -271,9 +268,8 @@ impl OnlineSetupState {
         let opened = open_url(&activation.verification_uri_complete);
         if opened {
             ctx.say(&format!(
-                "Your activation code is {code}. I opened your browser to \
-                 {} with the code filled in. \
-                 Sign in there to finish setup.",
+                "Your activation code is {code}. Your browser is open at {} with the code \
+                 filled in. Sign in there.",
                 activation.verification_uri
             ));
         } else {
@@ -283,11 +279,9 @@ impl OnlineSetupState {
             // is the one moment the game knows for certain that opening
             // failed, so it is worth naming them here.
             ctx.say(&format!(
-                "The browser could not be opened. Your activation code is \
-                 {code}. In any browser, go to {} \
-                 and enter it. Choose Say my activation code again to hear \
-                 it spelled out, or Copy my activation code to put it on \
-                 the clipboard.",
+                "The browser could not be opened. Your activation code is {code}. In any \
+                 browser, go to {} and enter it. Say my activation code again spells it, Copy \
+                 my activation code puts it on the clipboard.",
                 activation.verification_uri
             ));
         }
@@ -297,10 +291,7 @@ impl OnlineSetupState {
 
     pub fn repeat_code(&mut self, ctx: &mut GameContext) {
         let Some(activation) = &self.activation else {
-            ctx.say(
-                "There is no activation code right now. Choose Set up this \
-                 computer with orinks.net first.",
-            );
+            ctx.say("No activation code yet. Choose Set up this computer with orinks.net first.");
             return;
         };
         ctx.say(&format!(
@@ -311,10 +302,7 @@ impl OnlineSetupState {
 
     pub fn copy_code(&mut self, ctx: &mut GameContext) {
         let Some(activation) = &self.activation else {
-            ctx.say(
-                "There is no activation code right now. Choose Set up this \
-                 computer with orinks.net first.",
-            );
+            ctx.say("No activation code yet. Choose Set up this computer with orinks.net first.");
             return;
         };
         // Never claim a copy that failed -- the clipboard reports whether
@@ -324,9 +312,8 @@ impl OnlineSetupState {
             ctx.say("Activation code copied to the clipboard.");
         } else {
             ctx.say(
-                "I could not copy the activation code to the clipboard. \
-                 Choose Say my activation code again to hear it spelled \
-                 out instead.",
+                "Could not copy to the clipboard. Say my activation code again spells it \
+                 instead.",
             );
         }
     }
@@ -344,10 +331,9 @@ impl OnlineSetupState {
         if save_identity(&identity).is_err() {
             ctx.audio.play("ui/error");
             ctx.say(
-                "Your activation code was accepted, but this computer could \
-                 not save the driver token securely. Nothing was changed. \
-                 Check that your password store is available, then choose \
-                 Set up this computer with orinks.net to try again.",
+                "The code was accepted, but this computer could not save the driver token \
+                 securely. Nothing was changed. Check your password store, then try Set up \
+                 this computer with orinks.net again.",
             );
             return;
         }
@@ -408,16 +394,14 @@ impl OnlineSetupState {
             }
             ctx.apply_online_presence();
             ctx.say(
-                "Profile sharing is on. Your driver profile on orinks.net fills \
-                 in as you drive. Both this and cloud backup are single items \
-                 on the Online menu if you want either off.",
+                "Profile sharing is on. Your driver profile fills in as you drive. Both this \
+                 and cloud backup are single items on the Online menu.",
             );
         } else {
             ctx.say(
-                "Your account is connected and your careers are backing up, but \
-                 orinks.net could not turn Profile sharing on, so your profile \
-                 stays private for now. Choose Profile sharing on the Online \
-                 menu to try again.",
+                "Your account is connected and backing up, but orinks.net could not turn \
+                 Profile sharing on, so your profile stays private. Profile sharing on the \
+                 Online menu tries again.",
             );
         }
         ctx.pop_state();
@@ -505,17 +489,11 @@ impl Menu for OnlineSetupState {
             MenuItem::new("Say my activation code again", |s: &mut Self, ctx| {
                 s.repeat_code(ctx)
             })
-            .help(
-                "Spells out the activation code letter by letter, so \
-                 you can copy it by ear as many times as you need.",
-            ),
+            .help("Spells the activation code letter by letter."),
             MenuItem::new("Copy my activation code", |s: &mut Self, ctx| {
                 s.copy_code(ctx)
             })
-            .help(
-                "Puts the activation code on the clipboard, for when \
-                 the browser did not open on its own.",
-            ),
+            .help("Puts the activation code on the clipboard."),
             MenuItem::new("Hear what gets shared", |s: &mut Self, ctx| {
                 s.speak_disclosure(ctx)
             }),
@@ -542,11 +520,8 @@ impl Menu for OnlineSetupState {
         }
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "{}. This connects the game to your orinks.net account, \
-             which turns Profile sharing on and starts backing your careers up \
-             to that account. Choose Hear what gets shared for the details, or \
-             turn either one off afterwards from the Online menu. The first \
-             item asks orinks.net for an activation code. {current}",
+            "{}. Connects the game to your orinks.net account, turning Profile sharing on \
+             and backing your careers up. Hear what gets shared has the details. {current}",
             Self::TITLE
         ));
     }
@@ -706,7 +681,8 @@ impl ProfileSharingSyncState {
         ctx.say(if self.enabled {
             "Turning Profile sharing on."
         } else {
-            "Turning Profile sharing off. Local posting has stopped; public information may remain visible until orinks.net confirms the change."
+            "Turning Profile sharing off. Posting has stopped. Public information may stay \
+             visible until orinks.net confirms."
         });
         let enabled = self.enabled;
         let outcome = self.outcome.clone();
@@ -774,7 +750,8 @@ impl Menu for ProfileSharingSyncState {
         ctx.say(if self.enabled {
             "Profile sharing is still off. orinks.net could not confirm the change. Try again."
         } else {
-            "Profile sharing may still be public. Local posting is stopped, but orinks.net could not confirm the request. Choose Turn Profile sharing off to retry."
+            "Profile sharing may still be public. Posting is stopped, but orinks.net could not \
+             confirm. Turn Profile sharing off retries."
         });
     }
 

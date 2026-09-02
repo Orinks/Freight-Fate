@@ -872,7 +872,7 @@ fn test_zone_violation_warns_before_any_fine() {
     assert_eq!(drive.jake_zone_fines, 0);
     assert_eq!(profile_of(&app.ctx).money, money);
     let spoken = app.event_lines().join(" ");
-    assert!(spoken.contains("No engine brakes"), "{spoken}");
+    assert!(spoken.contains("No engine brake zone"), "{spoken}");
     assert!(spoken.contains("Buffalo"), "{spoken}");
 }
 

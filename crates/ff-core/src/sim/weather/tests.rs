@@ -406,8 +406,7 @@ fn test_live_report_lines_read_the_station_back() {
     assert_eq!(ws.source_conditions(false), "rain, 18 degrees Celsius");
     assert_eq!(
         ws.report_lead(true),
-        "Live weather: rain, 64 degrees, near your current route position. \
-         The observation is 12 minutes old"
+        "Live weather: rain, 64 degrees. The observation is 12 minutes old"
     );
     assert_eq!(ws.observation_age_value(), "12 minutes old");
     assert_eq!(ws.event_source_label(), "Live weather");
@@ -476,7 +475,7 @@ fn test_observation_age_text_rounds_down_to_whole_minutes() {
     assert_eq!(
         ws.report_lead(true),
         "Live weather is loading for your current route position. \
-         Temporary neutral driving conditions are in use"
+         Temporary neutral driving conditions in use"
     );
 }
 
@@ -818,7 +817,7 @@ fn test_live_change_omits_modeled_temperature_and_does_not_hide_later_stale_stat
         "{}",
         delayed[0]
     );
-    assert!(delayed[0].contains("Last-known conditions remain in use"));
+    assert!(delayed[0].contains("Last-known conditions in use"));
     assert!(!delayed[0].to_lowercase().contains("updat"));
 }
 
@@ -1103,14 +1102,14 @@ fn brake_until_speed(
 /// The lane-closure sentence the construction warning carries, if any.
 fn closure_part(zone: &crate::sim::trip_models::Zone) -> String {
     match zone.closed_lane {
-        None => "All lanes stay open through the work; hold your lane. ".to_string(),
+        None => "All lanes open through the work. ".to_string(),
         Some(lane) => {
             let (shut, keep) = if lane == 0 {
                 ("right", "left")
             } else {
                 ("left", "right")
             };
-            format!("The {shut} lane is closed; merge {keep} at the taper. ")
+            format!("The {shut} lane is closed, merge {keep} at the taper. ")
         }
     }
 }
@@ -1374,8 +1373,7 @@ fn test_too_fast_for_conditions_risks_traction_loss() {
         }
     }
     assert!(
-        hits.iter()
-            .any(|m| m.contains("too fast for the conditions")),
+        hits.iter().any(|m| m.contains("sliding on the snow")),
         "{hits:?}"
     );
 
@@ -1395,9 +1393,7 @@ fn test_too_fast_for_conditions_risks_traction_loss() {
             }
         }
     }
-    assert!(!safe_hits
-        .iter()
-        .any(|m| m.contains("too fast for the conditions")));
+    assert!(!safe_hits.iter().any(|m| m.contains("sliding on the snow")));
 }
 
 #[test]
@@ -1782,7 +1778,7 @@ fn test_signaling_for_a_namesake_does_not_pass_as_taking_the_planned_exit() {
     assert!(trip
         .events
         .iter()
-        .any(|e| e.text().contains("drove past your planned stop")));
+        .any(|e| e.text().contains("your planned stop")));
 
     // Signaling for the planned one itself still stays quiet.
     trip.planned_stop_key = Some(planned.key());
@@ -1792,7 +1788,7 @@ fn test_signaling_for_a_namesake_does_not_pass_as_taking_the_planned_exit() {
     assert!(!trip
         .events
         .iter()
-        .any(|e| e.text().contains("drove past your planned stop")));
+        .any(|e| e.text().contains("your planned stop")));
     assert_eq!(trip.planned_stop_key, Some(planned.key()));
 }
 
@@ -1846,7 +1842,7 @@ fn test_a_plan_survives_passing_a_stop_that_shares_its_name() {
     assert!(trip
         .events
         .iter()
-        .any(|e| e.text().contains("drove past your planned stop")));
+        .any(|e| e.text().contains("your planned stop")));
     assert!(trip.planned_stop_key.is_none());
 }
 
@@ -1954,7 +1950,7 @@ fn test_zone_entry_is_worded_apart_from_its_advance_warning() {
     trip.position_mi = gate.start_mi + 0.05;
     let entries = kind_messages(&trip.update(0.0), TripEventKind::ZoneEnter);
     let entry = entries.last().expect("a zone entry").clone();
-    assert_eq!(entry, "Entering facility gate zone. Speed limit 15 now.");
+    assert_eq!(entry, "Entering facility gate zone. Speed limit 15.");
     assert_ne!(entry, warning.split_once(", ").unwrap().1);
     let pos = trip.position_mi;
     assert_eq!(
@@ -2388,11 +2384,11 @@ fn test_merge_traffic_pressures_drop_the_speed_advisory() {
 
     assert_eq!(
         route_merge_msg.normal,
-        format!("Merging traffic in {distance}. Keep right and leave a gap.")
+        format!("Merging traffic in {distance}. Keep right.")
     );
     assert_eq!(
         construction_merge_msg.normal,
-        format!("Traffic squeezing at the construction taper in {distance}. Merge left early and leave a gap.")
+        format!("Traffic squeezing at the construction taper in {distance}. Merge left early.")
     );
     assert!(!route_merge_msg.normal.contains("35"));
     assert!(!construction_merge_msg.normal.contains("35"));
@@ -2439,7 +2435,7 @@ fn test_traffic_pressure_gps_cue_deduplicates() {
     let cues: Vec<_> = first.iter().filter(|e| is_ours(e)).collect();
     assert_eq!(cues.len(), 1);
     assert!(cues[0].text().contains("Exit traffic building"));
-    assert!(cues[0].text().contains("Signal early"));
+    assert!(cues[0].text().contains("Hold the right exit lane"));
     assert!(!second.iter().any(is_ours));
 }
 
@@ -2474,7 +2470,7 @@ fn test_npc_traffic_cue_and_status_are_reviewable() {
         .collect();
     assert_eq!(npc_cues.len(), 1);
     assert!(npc_cues[0].text().contains("Merging vehicle"));
-    assert!(npc_cues[0].text().contains("leave a gap"));
+    assert!(npc_cues[0].text().contains("ahead."));
     let status = trip.npc_traffic_status();
     assert_eq!(
         status,
@@ -3006,7 +3002,7 @@ fn test_toll_cues_and_charges_deduplicate() {
     let repeat = trip.update(0.0);
     assert_eq!(
         gps_messages(&advance),
-        vec!["ticket system toll point ahead: New Jersey Turnpike ticket entry. Estimated toll 18 dollars will be billed to carrier settlement."]
+        vec!["ticket system toll point ahead, New Jersey Turnpike ticket entry. Estimated toll 18 dollars, billed to carrier settlement."]
     );
     assert!(gps_events(&repeat).is_empty());
 
@@ -3015,7 +3011,7 @@ fn test_toll_cues_and_charges_deduplicate() {
     let charged_again = trip.update(0.0);
     assert_eq!(
         kind_messages(&charged, TripEventKind::TollCharged),
-        vec!["ticket system toll charged at New Jersey Turnpike ticket entry: Estimated 18 dollars, billed to carrier settlement."]
+        vec!["ticket system toll at New Jersey Turnpike ticket entry, estimated 18 dollars, billed to carrier settlement."]
     );
     assert_eq!(trip.toll_expense(), 18.0);
     assert!(kind_messages(&charged_again, TripEventKind::TollCharged).is_empty());
@@ -3040,13 +3036,13 @@ fn test_zero_amount_toll_entry_marker_does_not_record_expense() {
     trip.position_mi = 16.1;
     assert_eq!(
         gps_messages(&trip.update(0.0)),
-        vec!["ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. Entry will be recorded for carrier settlement."]
+        vec!["ticket system toll point ahead, Pennsylvania Turnpike eastern ticket entry. Entry recorded for carrier settlement."]
     );
     trip.position_mi = 18.0;
     let entry = trip.update(0.0);
     assert_eq!(
         gps_messages(&entry),
-        vec!["ticket system entry recorded at Pennsylvania Turnpike eastern ticket entry; toll will be billed at carrier settlement."]
+        vec!["ticket system entry recorded at Pennsylvania Turnpike eastern ticket entry. Toll billed at carrier settlement."]
     );
     assert_eq!(trip.toll_expense(), 0.0);
     assert!(kind_messages(&entry, TripEventKind::TollCharged).is_empty());

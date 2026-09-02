@@ -131,7 +131,7 @@ impl DrivingState {
             return SpokenMessage::new(TABLEAU_INTRO_LINE);
         }
         let reason = *rng.choice(&TABLEAU_INTRO_REASONS);
-        let normal = format!("A trooper has somebody stopped on the shoulder {reason} -- not you.");
+        let normal = format!("A trooper has somebody stopped on the shoulder {reason}, not you.");
         SpokenMessage::with_terse(normal, TABLEAU_INTRO_LINE)
     }
 

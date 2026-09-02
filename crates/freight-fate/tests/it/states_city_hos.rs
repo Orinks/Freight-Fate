@@ -176,7 +176,7 @@ fn test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos() {
     assert!(
         app.main_lines()
             .iter()
-            .any(|line| line.contains("every listed dispatch would need an extra legal rest")),
+            .any(|line| line.contains("every listed dispatch needs an extra legal rest")),
         "{:?}",
         app.main_lines()
     );

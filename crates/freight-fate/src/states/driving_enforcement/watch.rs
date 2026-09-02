@@ -402,7 +402,7 @@ impl DrivingState {
         let (summary, fine, return_message) = self.observed_stop_terms(observation);
         let lights_message = format!(
             "Lights and siren behind you. A trooper on this {reason} saw {}. Signal with {} and \
-             brake to a stop on the shoulder.",
+             stop on the shoulder.",
             observation.what,
             ctx.control_hint("take_exit")
         );

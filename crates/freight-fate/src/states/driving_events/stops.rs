@@ -23,8 +23,7 @@ impl DrivingState {
             self.say_plain(
                 ctx,
                 format!(
-                    "Resolve the police stop before planning a rest stop. Press {exit_hint} to \
-                     signal the trooper stop."
+                    "Resolve the police stop first. Press {exit_hint} to signal the trooper stop."
                 ),
             );
             return;
@@ -58,8 +57,8 @@ impl DrivingState {
             self.say_plain(
                 ctx,
                 format!(
-                    "On the ramp for {name}. Come to a full stop at the scale, then press \
-                     {rest_hint} to check in."
+                    "On the ramp for {name}. Stop at the scale, then press {rest_hint} to check \
+                     in."
                 ),
             );
             return;
@@ -78,8 +77,7 @@ impl DrivingState {
                 let Some(reason) = self.emergency_shoulder_sleep_reason(ctx) else {
                     self.say_plain(
                         ctx,
-                        "Emergency shoulder sleep is not available here. Use a route stop for \
-                         normal breaks and sleep.",
+                        "Emergency shoulder sleep is not available here. Use a route stop.",
                     );
                     return;
                 };
@@ -94,17 +92,18 @@ impl DrivingState {
         if let Some(active) = self.ramp_stop.clone() {
             let active_is_selected = self.is_selected_stop(Some(&active));
             let assist = if ctx.settings.destination_approach_assist {
-                "assistance is armed and will stop at the entrance after the ramp control is clear"
+                "Facility stopping assistance armed. It stops at the entrance once the ramp \
+                 control is clear."
             } else {
-                "assistance is off; brake to a complete stop at the entrance"
+                "Facility stopping assistance off. Stop at the entrance."
             };
             let message = if active_is_selected {
                 format!(
-                    "On the selected ramp for {}; {assist}.",
+                    "On the selected ramp for {}. {assist}",
                     active.spoken_name()
                 )
             } else {
-                format!("On the ramp for {}; {assist}.", active.spoken_name())
+                format!("On the ramp for {}. {assist}", active.spoken_name())
             };
             self.set_status(message.clone());
             // The cab confirming a control the player just worked. At the
@@ -140,8 +139,7 @@ impl DrivingState {
                 self.reset_exit_lane_state();
             }
             let message = if signal_was_on {
-                "Planned stop canceled. Exit signal canceled. Keep following the highway."
-                    .to_string()
+                "Planned stop canceled. Exit signal canceled.".to_string()
             } else if self.exit_signal_on {
                 active_exit.as_ref().map_or_else(
                     || "Planned stop canceled.".to_string(),
@@ -166,9 +164,8 @@ impl DrivingState {
                 self.say_plain(
                     ctx,
                     format!(
-                        "{} is behind you. Assistance is off. Continue safely and plan the next \
-                         sleep-capable stop with {rest_hint}. If you are already safely stopped \
-                         at this route point, press {rest_hint} to open its menu.",
+                        "{} is behind you. Assistance off. Press {rest_hint} to plan the next \
+                         sleep-capable stop, or, stopped at this route point, to open its menu.",
                         selected.spoken_name()
                     ),
                 );
@@ -183,9 +180,8 @@ impl DrivingState {
                 self.say_plain(
                     ctx,
                     format!(
-                        "{} is behind you. Continue safely and plan the next sleep-capable stop \
-                         with {rest_hint}. If you are already safely stopped at this route point, \
-                         press {rest_hint} to open its menu.",
+                        "{} is behind you. Press {rest_hint} to plan the next sleep-capable stop, \
+                         or, stopped at this route point, to open its menu.",
                         stop.spoken_name()
                     ),
                 );
@@ -199,8 +195,7 @@ impl DrivingState {
                 self.say_plain(
                     ctx,
                     format!(
-                        "The exit for {} is already selected. Press {exit_hint} to cancel it \
-                         before planning a different sleep stop.",
+                        "The exit for {} is already selected. Press {exit_hint} to cancel it.",
                         active.spoken_name()
                     ),
                 );
@@ -234,9 +229,9 @@ impl DrivingState {
             self.say_plain(
                 ctx,
                 format!(
-                    "No sleep-capable route stop is ahead on this route. Open the driving status \
-                     menu with {status_hint} and review upcoming route points. If you must rest, \
-                     stop safely away from a route point and use emergency shoulder sleep."
+                    "No sleep-capable route stop is ahead on this route. Press {status_hint} for \
+                     the upcoming route points. Away from a route point, emergency shoulder \
+                     sleep is available."
                 ),
             );
             return;
@@ -247,8 +242,8 @@ impl DrivingState {
                 self.say_plain(
                     ctx,
                     format!(
-                        "Your planned stop remains {}. {} is also ahead. Open the stop details \
-                         from the route map to move the plan before selecting it.",
+                        "Your planned stop remains {}. {} is also ahead. Move the plan from its \
+                         stop details on the route map.",
                         current.spoken_name(),
                         candidate.spoken_name()
                     ),
@@ -296,11 +291,10 @@ impl DrivingState {
             format!(" at {}", stop.exit_label)
         };
         let assist = if ctx.settings.destination_approach_assist {
-            "Facility stopping assistance is on; after you signal and set the exit lane, \
-             it will stop at the entrance."
+            "Facility stopping assistance on. Once you signal and set the exit lane, it stops \
+             at the entrance."
         } else {
-            "Facility stopping assistance is off; brake to a complete stop at the \
-             entrance."
+            "Facility stopping assistance off. Stop at the entrance."
         };
         let prefix = if repeated {
             "Still selected"
@@ -317,12 +311,12 @@ impl DrivingState {
             )
         } else {
             format!(
-                "You will be told when its exit comes up; press {} to signal then.",
+                "Its exit will be announced. Press {} to signal then.",
                 ctx.control_hint("take_exit")
             )
         };
         let message = format!(
-            "{prefix}: {}, {distance} ahead{exit_text}. {next_step} {assist}",
+            "{prefix}, {}, {distance} ahead{exit_text}. {next_step} {assist}",
             stop.spoken_name()
         );
         self.set_status(message.clone());
@@ -388,7 +382,7 @@ impl DrivingState {
                 TimedMessageState::new(
                     "Pulling into stop",
                     &format!("Stopped at {name}. Brakes set; menu opening in a moment."),
-                    &format!("Stopped at {name}; menu opening. Please wait."),
+                    &format!("Stopped at {name}. Menu opening."),
                     STOP_PULL_IN_WAIT_S,
                     move |ctx: &mut GameContext| {
                         ctx.pop_state();

@@ -94,17 +94,15 @@ pub fn pay_advance_grant(money: f64, outstanding: f64, used_for_load: bool) -> f
 pub fn pay_advance_unavailable_reason(money: f64, outstanding: f64, used_for_load: bool) -> String {
     let _ = outstanding;
     if used_for_load {
-        return "You have already taken a pay advance for this load. Deliver it before drawing another."
-            .to_string();
+        return "Pay advance already taken for this load. Deliver it first.".to_string();
     }
     if money >= PAY_ADVANCE_ELIGIBLE_BELOW {
         return format!(
-            "A pay advance is only for getting unstuck when cash is low. You have {} dollars.",
+            "Pay advances are for low cash only. You have {} dollars.",
             fmt_grouped(money, 0)
         );
     }
-    "You have reached your pay-advance limit. Deliver a load to pay it down before drawing more."
-        .to_string()
+    "Pay-advance limit reached. Deliver a load to pay it down.".to_string()
 }
 
 /// The per-session fuel market: one wobble per region, drawn once.
@@ -207,7 +205,7 @@ mod tests {
 
     #[test]
     fn test_unavailable_reason_distinguishes_healthy_cash_from_the_limit() {
-        assert!(pay_advance_unavailable_reason(5000.0, 0.0, false).contains("cash is low"));
+        assert!(pay_advance_unavailable_reason(5000.0, 0.0, false).contains("low cash"));
         assert!(pay_advance_unavailable_reason(-50.0, PAY_ADVANCE_LIMIT, false).contains("limit"));
     }
 
@@ -215,7 +213,7 @@ mod tests {
     fn healthy_cash_reason_spells_the_money_grouped() {
         assert_eq!(
             pay_advance_unavailable_reason(5000.0, 0.0, false),
-            "A pay advance is only for getting unstuck when cash is low. You have 5,000 dollars."
+            "Pay advances are for low cash only. You have 5,000 dollars."
         );
     }
 

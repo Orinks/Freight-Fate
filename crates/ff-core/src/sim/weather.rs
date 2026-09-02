@@ -562,11 +562,11 @@ impl WeatherSystem {
         let conditions = self.source_conditions(imperial);
         match status {
             "loading" => format!(
-                "{}. Temporary neutral driving conditions are in use",
+                "{}. Temporary neutral driving conditions in use",
                 self.source_label()
             ),
             "live" => format!(
-                "Live weather: {conditions}, near your current route position. {}",
+                "Live weather: {conditions}. {}",
                 self.live_observation_notice()
             ),
             "last_known" => format!(

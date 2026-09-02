@@ -61,7 +61,7 @@ impl DrivingState {
         }
         self.road_position_band = Some(band);
         let boundary = self.edge_boundary();
-        let mut message = if boundary == "oncoming" {
+        let message = if boundary == "oncoming" {
             // Past an undivided centerline is not a shoulder: say the
             // real danger, on the side it lives.
             "Across the centerline, in the oncoming lane!".to_string()
@@ -70,9 +70,6 @@ impl DrivingState {
         } else {
             self.lane.describe()
         };
-        if !self.terse_speech(ctx) {
-            message += " Steer back toward the lane center.";
-        }
         // Position (the standing off-pavement condition) is STATUS; this
         // function only ever speaks on entry or worsening -- the transition
         // itself is the warning, so every line it emits is SAFETY.

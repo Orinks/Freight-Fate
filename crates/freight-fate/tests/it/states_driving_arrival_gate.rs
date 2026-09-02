@@ -102,14 +102,11 @@ fn test_delivery_requires_parking_at_destination() {
     // route dispatch drew, sixty may be over it, and the speeding warning
     // that earns lands in the same frame.
     let said = an_event_containing(&harness, "Destination ahead");
-    assert!(
-        said.to_lowercase().contains("come to a complete stop"),
-        "{said}"
-    );
+    assert!(said.to_lowercase().contains("stop at the gate"), "{said}");
     let hud = harness.with_drive(|d, ctx| d.lines(ctx));
     assert!(
         hud.last()
-            .is_some_and(|line| line.to_lowercase().contains("complete stop")),
+            .is_some_and(|line| line.to_lowercase().contains("stop at the gate")),
         "{hud:#?}"
     );
 

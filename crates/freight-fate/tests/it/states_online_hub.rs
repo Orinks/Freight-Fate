@@ -127,16 +127,14 @@ fn test_account_achievement_browser_speaks_scope_controls_and_badge_states_witho
     app.clear_speech();
     press(&mut app, Key::Return);
     let controls = said(&app);
+    assert!(controls.contains("Enter opens a category"), "{controls}");
+    assert!(controls.contains("Escape returns to Online"), "{controls}");
     assert!(
-        controls.contains("Up and down choose a category"),
+        controls.contains("Inside one, Enter repeats the achievement"),
         "{controls}"
     );
     assert!(
-        controls.contains("Escape or Back returns to Online"),
-        "{controls}"
-    );
-    assert!(
-        controls.contains("Inside a category, Escape or Back returns to account categories"),
+        controls.contains("Escape returns to the categories"),
         "{controls}"
     );
 
@@ -472,8 +470,7 @@ fn test_hub_opens_the_driver_setup_page_in_a_browser() {
     // It stays on the hub: nothing to come back to in the game.
     assert!(std::rc::Rc::ptr_eq(&app.state().unwrap(), &hub));
     let said = said(&app);
-    assert!(said.contains("driver setup page"));
-    assert!(said.contains("computers signed in to your account"));
+    assert!(said.contains("Opening your driver setup page in your browser"));
     std::env::remove_var("FREIGHT_FATE_ONLINE_URL");
 }
 

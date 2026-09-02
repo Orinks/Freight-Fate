@@ -221,13 +221,10 @@ impl DrivingState {
                      of the pay."
                 }
                 "claim" => {
-                    "This is claim territory now: the receiver will take it, and the carrier will \
-                     pay for what you broke."
+                    "Claim territory now. The receiver will take it, and the carrier pays for \
+                     what you broke."
                 }
-                _ => {
-                    "The dock will refuse a load in this state. You would arrive with nothing to \
-                     deliver and a claim for the whole of it."
-                }
+                _ => "The dock will refuse a load in this state.",
             };
             // The coaching tail teaches the driver how to save what is left;
             // once taught it is not news, so it rides the first report of the
@@ -314,7 +311,7 @@ impl DrivingState {
                 } else {
                     format!(
                         "Reduced power. Damage is past {DAMAGE_DERATE_PCT:.0} percent; the engine \
-                         is holding back and burning more fuel. Get it repaired."
+                         is holding back and burning more fuel."
                     )
                 };
             } else if band == DAMAGE_BAND_LIMP {
@@ -323,7 +320,7 @@ impl DrivingState {
                 } else {
                     format!(
                         "Limp mode. Damage is past {DAMAGE_LIMP_PCT:.0} percent; the engine is \
-                         winding down to a {cap} cap. Find a stop and repair."
+                         winding down to a {cap} cap."
                     )
                 };
             } else if band == DAMAGE_BAND_LAST_CALL {
@@ -338,7 +335,7 @@ impl DrivingState {
                     format!(
                         "Damage is past {DAMAGE_LAST_CALL_PCT:.0} percent. At \
                          {DAMAGE_OUT_OF_SERVICE_PCT:.0} percent the truck goes out of service and \
-                         cannot be driven at all. Stop and repair now."
+                         cannot be driven at all."
                     )
                 };
             } else {
@@ -393,9 +390,9 @@ impl DrivingState {
             );
         }
         format!(
-            "Out of service. Damage is past {DAMAGE_OUT_OF_SERVICE_PCT:.0} percent, and a truck \
-             in this state may not be driven. You have {creep} left to get clear of the lane; \
-             brake to a stop on the shoulder and road service will come to you. {}.",
+            "Out of service. Damage is past {DAMAGE_OUT_OF_SERVICE_PCT:.0} percent; the truck may \
+             not be driven. {creep} to clear the lane, then stop on the shoulder for road \
+             service. {}.",
             self.recovery_cost_text(ctx)
         )
     }
@@ -568,8 +565,7 @@ impl DrivingState {
             format!(
                 "Roadside repair got the truck moving for {} dollars; damage is down to \
                  {damage_pct:.0} percent, still in reduced power. It took {:.0} hours and it is \
-                 now {}. You have {} dollars. Press {} to restart the engine, and repair it \
-                 properly at the next stop.",
+                 now {}. You have {} dollars. Press {} to restart the engine.",
                 fmt_grouped(cost, 0),
                 BREAKDOWN_REPAIR_MIN / 60.0,
                 clock_text(self.trip.local_hour()),
@@ -630,12 +626,11 @@ impl DrivingState {
             )
         } else {
             format!(
-                "Dispatch has taken the {grounded} out of service; a truck in this state is not \
-                 yours to keep driving and the carrier will not have it on the road. The carrier \
-                 covers the bill. {handover}. That cost {:.0} hours and it is now {}. Damage on \
-                 the truck you are in is {damage_pct:.0} percent. Dispatch logged preventable \
-                 equipment damage against your record; a pattern of it costs the seat. Press {} \
-                 to restart the engine.",
+                "Dispatch has taken the {grounded} out of service. The carrier covers the bill. \
+                 {handover}. That cost {:.0} hours and it is now {}. Damage on the truck you are \
+                 in is {damage_pct:.0} percent. Dispatch logged preventable equipment damage \
+                 against your record; a pattern of it costs the seat. Press {} to restart the \
+                 engine.",
                 GROUNDED_SWAP_MIN / 60.0,
                 clock_text(self.trip.local_hour()),
                 ctx.control_hint("engine")

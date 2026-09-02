@@ -232,10 +232,7 @@ fn test_an_enforcement_stop_charges_once_and_reads_back_as_history() {
     app.clear_speech();
     state.announce_entry(&mut app.ctx);
     let second = last(&app);
-    assert!(
-        second.starts_with("Reading back the stop you have already settled."),
-        "{second}"
-    );
+    assert!(second.starts_with("Stop already settled."), "{second}");
     assert_eq!(
         app.ctx.profile.as_ref().expect("a career").money,
         money_before - expected,
@@ -261,7 +258,7 @@ fn test_an_out_of_service_order_passes_the_ten_hours_on_the_shoulder() {
     assert!(
         state
             .outcome_text()
-            .contains("Out of service: ten hours pass"),
+            .contains("Out of service: ten hours parked on the shoulder"),
         "{}",
         state.outcome_text()
     );
@@ -287,7 +284,7 @@ fn test_a_missed_break_is_thirty_minutes_out_of_service() {
     assert!(
         state
             .outcome_text()
-            .contains("Out of service: thirty minutes pass"),
+            .contains("Out of service: thirty minutes parked on the shoulder"),
         "{}",
         state.outcome_text()
     );
@@ -326,7 +323,7 @@ fn test_a_scale_bypass_is_inspected_on_the_shoulder_instead() {
     assert!(
         state
             .outcome_text()
-            .contains("they run the full inspection right here on the shoulder"),
+            .contains("full inspection runs here on the shoulder"),
         "{}",
         state.outcome_text()
     );

@@ -106,37 +106,30 @@ impl PauseMenuState {
             MenuItem::new("Resume driving", |s: &mut Self, ctx| s.resume(ctx))
                 .help(format!("Return to the active {drive_label}.")),
             MenuItem::new("Trip status", |s: &mut Self, ctx| s.status(ctx))
-                .help("Hear cargo, objective, route progress, and time used."),
+                .help("Cargo, objective, route progress, and time used."),
             MenuItem::new("Controls and help", |_s: &mut Self, ctx: &mut GameContext| {
                 let page = controls_help_page();
                 let state = HelpState::at_page(page);
                 ctx.push_state(state);
             })
             .help(
-                "Open the how-to-play reference at the driving keys. Left and Right arrows \
-                 change pages, Up and Down read line by line, Escape returns here.",
+                "The how-to-play reference at the driving keys. Left and Right change pages, Up \
+                 and Down read lines.",
             ),
             MenuItem::new("Learn game sounds", |_s: &mut Self, ctx: &mut GameContext| {
                 let state = LearnSoundsState::new();
                 ctx.push_state(state);
             })
-            .help(
-                "Play any sound the road uses and hear what it means. The drive is paused while \
-                 you listen.",
-            ),
+            .help("Plays any sound the road uses and says what it means."),
             MenuItem::new(mechanic_label(d), |s: &mut Self, ctx| s.mechanic(ctx)).help(
-                "A mobile mechanic patches the truck up enough to drive on. Costs much more \
-                 than a garage repair, takes an hour and a half, and the bill is due even if it \
-                 puts you in debt.",
+                "A mobile mechanic patches the truck up enough to drive on. Far dearer than a \
+                 garage, an hour and a half, and billed even into debt.",
             ),
             MenuItem::new("Settings", |_s: &mut Self, ctx: &mut GameContext| {
                 let state = SettingsState::new();
                 ctx.push_state(state);
             })
-            .help(
-                "Change units, transmission, volumes, weather, voices, update channel, and trip \
-                 pacing.",
-            ),
+            .help("Units, transmission, volumes, weather, voices, update channel, and pacing."),
         ];
         if d.trip.truck.chains_on {
             items.push(
@@ -147,10 +140,7 @@ impl PauseMenuState {
                     ),
                     |s: &mut Self, ctx| s.remove_chains(ctx),
                 )
-                .help(
-                    "Pull the chains off the drives and stow them. Do it as soon as the road is \
-                     bare again; chains grind apart fast on pavement.",
-                ),
+                .help("Chains grind apart fast on bare pavement."),
             );
         } else if profile_of(ctx).chains_owned() && profile_of(ctx).chain_wear_pct() < 100.0 {
             items.push(
@@ -158,10 +148,9 @@ impl PauseMenuState {
                     s.install_chains(ctx)
                 })
                 .help(
-                    "Stop, kneel on the shoulder, and hang the chain set on the drives. Chains \
-                     bite snow and glare ice like nothing else. Keep it near chain speed, about \
-                     thirty miles per hour, and pull them the moment the road is bare. \
-                     Installing in the dark takes longer and takes more out of you.",
+                    "Chains bite snow and ice. Chain speed is about thirty miles per hour. Pull \
+                     them once the road is bare. In the dark, installing takes longer and more \
+                     out of you.",
                 ),
             );
         }
@@ -171,21 +160,19 @@ impl PauseMenuState {
                 ctx.push_state(state);
             })
             .help(
-                "Hear who is hauling right now on the public orinks.net drivers board. Viewing \
-                 the board shares nothing about you.",
+                "Who is hauling right now on orinks.net. Viewing the list shares nothing about \
+                 you.",
             ),
         );
         items.push(
             MenuItem::new("Abandon job", |s: &mut Self, ctx| s.abandon(ctx)).help(
-                "Give up this job. Costs five hundred dollars and reputation, and returns you \
-                 to the origin city.",
+                "Costs five hundred dollars and reputation, and returns you to the origin city.",
             ),
         );
         items.push(
             MenuItem::new("Quit to main menu", |s: &mut Self, ctx| s.quit_to_menu(ctx)).help(
-                "You can only save at a stop, so this drive is not saved in progress. It \
-                 resumes from your last stop when you continue. Use Abandon job to drop the \
-                 load.",
+                "Saves happen only at a stop. The drive resumes from the last stop. Abandon job \
+                 drops the load.",
             ),
         );
         if d.emergency_shoulder_sleep_reason(ctx).is_some() {
@@ -195,9 +182,9 @@ impl PauseMenuState {
                     s.emergency_shoulder_sleep(ctx)
                 })
                 .help(
-                    "Emergency-only poor sleep on the shoulder. Resets hours of service, but \
-                     fatigue remains, you may be ticketed, minor truck damage can happen, and \
-                     the deadline keeps running.",
+                    "Poor sleep on the shoulder. Resets hours of service. Fatigue remains, \
+                     possible ticket, possible minor truck damage, and the deadline keeps \
+                     running.",
                 ),
             );
         }
@@ -209,8 +196,7 @@ impl PauseMenuState {
             let damage = d.trip.truck.damage_pct;
             if damage <= FIELD_REPAIR_DAMAGE_PCT {
                 ctx.say(&format!(
-                    "The truck is running well enough. A roadside mechanic can help once damage \
-                     is past {} percent.",
+                    "A roadside mechanic helps once damage is past {} percent.",
                     fmt_f(FIELD_REPAIR_DAMAGE_PCT, 0)
                 ));
                 return None;
@@ -240,8 +226,8 @@ impl PauseMenuState {
                 )
             };
             let text = format!(
-                "A mobile mechanic patched the truck up to {} percent damage {billing}. The \
-                 repair took an hour and a half: it is {}. {}",
+                "A mobile mechanic patched the truck up to {} percent damage {billing}. Repair \
+                 took an hour and a half. It is {}. {}",
                 fmt_f(FIELD_REPAIR_DAMAGE_PCT, 0),
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx)
@@ -284,19 +270,17 @@ impl PauseMenuState {
             d.chains_fast_active = false;
             ctx.audio.play("ui/notify");
             let effort = if night {
-                "Kneeling on a dark shoulder by headlamp, it takes everything your gloves have \
-                 got. "
+                "In the dark, it took more out of you. "
             } else {
                 ""
             };
             let bare = if d.trip.truck.surface != "snow" && d.trip.truck.surface != "ice" {
-                " The road here is bare; they will grind apart fast until you reach the snow."
+                " The road here is bare, they grind fast until the snow."
             } else {
                 ""
             };
             let text = format!(
-                "Chains hung on the drives in {} minutes. {effort}Keep it near {}, and pull them \
-                 when the road turns bare.{bare} It is {}. {}",
+                "Chains on in {} minutes. {effort}Chain speed {}.{bare} It is {}. {}",
                 fmt_f(minutes, 0),
                 ctx.settings.speed_text(CHAIN_SAFE_MPH),
                 clock_text(d.trip.local_hour()),
@@ -334,14 +318,14 @@ impl PauseMenuState {
             ctx.audio.play("ui/notify");
             let wear = d.trip.truck.chain_wear_pct;
             let state_word = if wear >= 75.0 {
-                "They are about done; pick up a fresh set at a garage.".to_string()
+                "The set is about done.".to_string()
             } else if wear >= 1.0 {
                 format!("The set is {} percent worn.", fmt_f(wear, 0))
             } else {
                 "The set is still fresh.".to_string()
             };
             let text = format!(
-                "Chains off and stowed in {} minutes. {state_word} It is {}. {}",
+                "Chains off in {} minutes. {state_word} It is {}. {}",
                 fmt_f(CHAIN_REMOVE_MIN, 0),
                 clock_text(d.trip.local_hour()),
                 deadline_text(d, ctx)
@@ -361,10 +345,7 @@ impl PauseMenuState {
             .with(ctx, |d, ctx| d.emergency_shoulder_sleep_reason(ctx))
             .flatten();
         let Some(reason) = reason else {
-            ctx.say(
-                "Emergency shoulder sleep is not available right now. Use a route stop for \
-                 normal breaks and sleep.",
-            );
+            ctx.say("Emergency shoulder sleep is not available.");
             self.refresh(ctx, true);
             return;
         };
@@ -373,10 +354,7 @@ impl PauseMenuState {
             .with(ctx, secure_truck_for_stopped_menu)
             .unwrap_or(false);
         if !secured {
-            ctx.say(
-                "Come to a complete stop first. Resume driving, finish stopping, then reopen \
-                 the pause menu.",
-            );
+            ctx.say("Come to a complete stop first.");
             self.refresh(ctx, true);
             return;
         }
@@ -476,8 +454,7 @@ fn execute_quit_to_menu(ctx: &mut GameContext, driving: &DriveRef) {
         })
         .unwrap_or("delivery");
     ctx.say(&format!(
-        "Returning to the title. You can only save at a stop, so this {drive_label} will \
-         resume from your last stop, not from here."
+        "Returning to the title. This {drive_label} resumes from your last stop, not from here."
     ));
     ctx.reset_to(MainMenuState::new());
 }
@@ -505,10 +482,8 @@ pub struct QuitWhileMovingConfirmationState {
 impl QuitWhileMovingConfirmationState {
     pub fn new(driving: DriveRef) -> Self {
         QuitWhileMovingConfirmationState {
-            menu: MenuCore::new("Quit while driving?").with_intro_help(
-                "Use up and down arrows to navigate, Enter to select. \
-                 Escape cancels and returns to the pause menu.",
-            ),
+            menu: MenuCore::new("Quit while driving?")
+                .with_intro_help("Enter selects, Escape cancels."),
             driving,
         }
     }
@@ -541,8 +516,8 @@ impl Menu for QuitWhileMovingConfirmationState {
         let lost = self.lost_text(ctx);
         let current = self.current_text(ctx);
         ctx.say(&format!(
-            "You are still moving, and the game only saves at a stop. \
-             You will lose {lost} since your last stop. Quit anyway? {current}"
+            "Still moving, and the game saves only at a stop. Quitting loses {lost} since your \
+             last stop. {current}"
         ));
     }
 
@@ -550,7 +525,7 @@ impl Menu for QuitWhileMovingConfirmationState {
         let lost = self.lost_text(ctx);
         vec![
             MenuItem::new("Keep driving", |s: &mut Self, ctx| s.go_back(ctx))
-                .help("Cancel the quit and go back to the pause menu."),
+                .help("Back to the pause menu."),
             MenuItem::new(
                 format!("Quit anyway and lose {lost}"),
                 |s: &mut Self, ctx| s.confirm(ctx),
@@ -695,8 +670,7 @@ pub struct AbandonJobConfirmationState {
 /// was abandoned.
 pub const ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY: f64 = 3.0;
 
-const ABANDON_INTRO_HELP: &str = "Use up and down arrows to navigate, Enter to select. \
-                                  Escape cancels and returns to the pause menu.";
+const ABANDON_INTRO_HELP: &str = "Enter selects, Escape cancels.";
 
 impl AbandonJobConfirmationState {
     pub fn new(driving: DriveRef) -> Self {
@@ -722,15 +696,12 @@ impl AbandonJobConfirmationState {
 
     fn abandon_help_text(&self) -> &'static str {
         if self.is_assigned_reposition() {
-            return "Walk away from this dispatch assignment. Costs reputation, no money, and \
-                    returns you to the origin city.";
+            return "Costs reputation, no money, and returns you to the origin city.";
         }
         if self.is_bobtail() {
-            return "Give up this empty run. No freight, no penalty, returns you to the origin \
-                    city.";
+            return "No freight, no penalty, returns you to the origin city.";
         }
-        "Give up this job. Costs five hundred dollars and reputation, and returns you to the \
-         origin city."
+        "Costs five hundred dollars and reputation, and returns you to the origin city."
     }
 
     fn confirm(&mut self, ctx: &mut GameContext) {
@@ -771,17 +742,16 @@ impl AbandonJobConfirmationState {
         // interrupt so this overrides any menu re-announcement during unwind
         if assigned_reposition {
             ctx.say(&format!(
-                "Dispatch assignment abandoned. Walking away from a dispatch assignment costs \
-                 standing, not money: reputation down, no fine. Back in {where_}."
+                "Dispatch assignment abandoned. Reputation down, no fine. Back in {where_}."
             ));
         } else if bobtail {
             ctx.say(&format!(
-                "Reposition called off. No freight, no penalty; the hours still count. Back in \
+                "Reposition called off. No freight, no penalty, the hours still count. Back in \
                  {where_}."
             ));
         } else {
             ctx.say(&format!(
-                "Job abandoned. You paid a five hundred dollar penalty and returned to {where_}."
+                "Job abandoned. Penalty of five hundred dollars paid. Back in {where_}."
             ));
         }
     }
@@ -813,22 +783,20 @@ impl Menu for AbandonJobConfirmationState {
         let current = self.current_text(ctx);
         if self.is_assigned_reposition() {
             ctx.say(&format!(
-                "{title} Walking away from a dispatch assignment costs standing, not money: no \
-                 freight, no fine, but reputation takes a hit. You will return to {city}. \
+                "{title} No freight, no fine, but reputation takes a hit. Back to {city}. \
                  {current}"
             ));
             return;
         }
         if self.is_bobtail() {
             ctx.say(&format!(
-                "{title} You are running empty, so turning back costs nothing but the time \
-                 already spent. You will return to {city}. {current}"
+                "{title} Running empty, turning back costs only the time already spent. Back to \
+                 {city}. {current}"
             ));
             return;
         }
         ctx.say(&format!(
-            "{title} Abandoning gives up this load. You will pay a five hundred dollar penalty, \
-             take a reputation hit, and return to {city}. {current}"
+            "{title} Penalty of five hundred dollars, a reputation hit, and back to {city}. {current}"
         ));
     }
 }

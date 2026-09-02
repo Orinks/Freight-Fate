@@ -22,7 +22,7 @@ impl SaveModifiedNoticeState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Save file changed outside the game")
-                .with_intro_help("Press Enter on OK to continue to your career."),
+                .with_intro_help("Enter continues to your career."),
         }
     }
 
@@ -54,10 +54,10 @@ impl Menu for SaveModifiedNoticeState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "Heads up. This save was changed outside the game, or copied from \
-             another computer, so it is now marked as modified. Your career \
-             still works normally on this computer, but shared features such \
-             as profile sharing may not accept a modified profile. {}",
+            "This save was changed outside the game, or copied from another \
+             computer, so it is marked as modified. Your career still works on \
+             this computer, but profile sharing may not accept a modified \
+             profile. {}",
             self.current_text(ctx)
         );
         ctx.say(&text);
@@ -91,8 +91,8 @@ impl LegacyCareerNoticeState {
     pub fn new(driver_name: &str) -> Self {
         Self {
             menu: MenuCore::new("Career from an earlier version").with_intro_help(
-                "This career cannot continue in version 1.9. Enter on Start a new \
-                 career begins a fresh one; Escape goes back to the career list.",
+                "This career cannot continue in version 1.9. Escape goes back to \
+                 the career list.",
             ),
             driver_name: driver_name.to_string(),
         }
@@ -114,13 +114,11 @@ impl Menu for LegacyCareerNoticeState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "{} was made in an earlier version of Freight \
-             Fate. Version 1.9 rebalances the whole career, from pay to \
-             trucks to levels, so every driver starts fresh, and careers \
-             from earlier versions stay where they are. Nothing was lost: \
-             the save is still on this computer, untouched, and it still \
-             works in Freight Fate 1.8. Whenever you are ready, start a new \
-             career and try the new road. {}",
+            "{} was made in an earlier version of Freight Fate. Version 1.9 \
+             rebalances the whole career, from pay to trucks to levels, so \
+             every driver starts fresh. Nothing was lost: the save is still \
+             on this computer, untouched, and it still works in Freight Fate \
+             1.8. {}",
             self.driver_name,
             self.current_text(ctx)
         );
@@ -130,11 +128,11 @@ impl Menu for LegacyCareerNoticeState {
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         vec![
             MenuItem::new("Start a new career", |s: &mut Self, ctx| s.new_career(ctx))
-                .help("Begin a fresh 1.9 career with a new driver name."),
+                .help("A fresh 1.9 career with a new driver name."),
             MenuItem::new("Back to the career list", |s: &mut Self, ctx| {
                 s.go_back(ctx)
             })
-            .help("Return to the saved careers without changing anything."),
+            .help("Back to the saved careers, nothing changed."),
         ]
     }
 }
@@ -155,7 +153,7 @@ impl DrivingRecordNoticeState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Your driving record")
-                .with_intro_help("Press Enter on OK to continue to your career."),
+                .with_intro_help("Enter continues to your career."),
         }
     }
 
@@ -194,14 +192,13 @@ impl Menu for DrivingRecordNoticeState {
             None => (String::new(), String::new()),
         };
         let text = format!(
-            "Something new. Freight Fate now keeps a driving record for your \
-             career: citations, serious violations, and whether your CDL is \
-             clear. Two serious violations in three years suspend it, and \
-             running from a police stop is a major offense that disqualifies \
-             it for a year. Your reputation now also decides how much freight \
-             dispatch will show you and how much choice you get. Nothing was \
-             reset and nothing was taken: this is where your career already \
-             stands. {standing} {trust} {}",
+            "Freight Fate now keeps a driving record for your career: \
+             citations, serious violations, and whether your CDL is clear. \
+             Two serious violations in three years suspend it; running from a \
+             police stop is a major offense that disqualifies it for a year. \
+             Reputation also decides how much freight dispatch shows you and \
+             how much choice you get. Nothing was reset or taken. {standing} \
+             {trust} {}",
             self.current_text(ctx)
         );
         ctx.say(&text);
@@ -228,7 +225,7 @@ impl SaveMigrationNoticeState {
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Save file updated")
-                .with_intro_help("Press Enter on OK to continue to your career."),
+                .with_intro_help("Enter continues to your career."),
         }
     }
 
@@ -260,12 +257,11 @@ impl Menu for SaveMigrationNoticeState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let text = format!(
-            "Save file updated. This career was created by an older version of \
-             Freight Fate and has been converted, so every truck you own now \
-             keeps its own fuel, damage, tire wear, and road grime. The truck \
-             you were driving keeps its current condition; your other trucks \
-             start fueled up and fresh. The updated save can no longer be \
-             opened by older versions of the game. {}",
+            "Save file updated. This career was converted from an older \
+             version: every truck you own now keeps its own fuel, damage, tire \
+             wear, and road grime. The truck you were driving keeps its \
+             condition; your other trucks start fueled and fresh. The updated \
+             save no longer opens in older versions of the game. {}",
             self.current_text(ctx)
         );
         ctx.say(&text);

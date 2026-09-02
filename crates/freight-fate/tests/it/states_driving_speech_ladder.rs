@@ -1462,12 +1462,12 @@ fn test_a_drive_gets_quieter_as_the_rung_tightens() {
     // quiet and urgent_only cut to EARCON, or a tie further down the ladder
     // would pass for the wrong reason (nothing left to cut).
     assert!(
-        standard.join("\n").contains("screaming at redline"),
+        standard.join("\n").contains("Engine at redline"),
         "{standard:#?}"
     );
     // And that it is really cut, not merely present at the top.
     assert!(
-        !quiet.join("\n").contains("screaming at redline"),
+        !quiet.join("\n").contains("Engine at redline"),
         "{quiet:#?}"
     );
 

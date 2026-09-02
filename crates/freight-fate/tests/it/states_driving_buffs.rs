@@ -133,7 +133,7 @@ fn test_shower_is_free_after_fueling_at_pilot() {
 
     let priced = row(&mut state, &mut app.ctx, "Shower").text(&state, &app.ctx);
     assert_eq!(priced, "Shower: 15 dollars", "{priced}");
-    activate_by_help(&mut state, &mut app.ctx, "Fill the tank");
+    activate_by_help(&mut state, &mut app.ctx, "Fills the tank");
     let free = row(&mut state, &mut app.ctx, "Shower").text(&state, &app.ctx);
     assert!(free.contains("free with your fuel purchase"), "{free}");
 

@@ -107,7 +107,7 @@ fn test_the_walkthrough_still_teaches_the_pull_keys_in_terse() {
             "{action} ({hint:?}) missing from {keys_line:?}"
         );
     }
-    assert!(keys_line.contains("hazard warnings"));
+    assert!(keys_line.contains("hazard warning"));
 }
 
 #[test]

@@ -724,7 +724,7 @@ impl DrivingState {
         if powered {
             ctx.say_event_with(
                 format!(
-                    "{} left the dial: streamer-safe mode is on. Tuned to {}.",
+                    "{} left the dial, streamer-safe mode is on. Tuned to {}.",
                     before.display_name(),
                     action.station.display_name()
                 ),
@@ -878,7 +878,7 @@ impl DrivingState {
         if !self.trip.truck.engine_on {
             // "Radio on" over a silent cab contradicts the player's ears;
             // the same explanation the Tab radio screen gives goes here too.
-            status = format!("{status} The engine is off, so the radio has no power right now.");
+            status = format!("{status} The engine is off. The radio has no power.");
         }
         ctx.say(&status);
     }
@@ -891,7 +891,7 @@ impl DrivingState {
             return "The radio is off.".to_string();
         }
         if !self.trip.truck.engine_on {
-            return "The engine is off, so the radio has no power right now.".to_string();
+            return "The engine is off. The radio has no power.".to_string();
         }
         let station = self.radio.current_station();
         if !station.real_stream {

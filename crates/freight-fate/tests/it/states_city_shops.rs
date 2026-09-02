@@ -439,7 +439,7 @@ fn test_company_driver_shops_hide_owned_truck_language() {
         .main_lines()
         .last()
         .unwrap()
-        .contains("carrier-assigned"));
+        .contains("owner-operator buy-in"));
 
     app.pop_state();
     app.push_state(UpgradeShopState::new());
@@ -454,7 +454,7 @@ fn test_company_driver_shops_hide_owned_truck_language() {
         .main_lines()
         .last()
         .unwrap()
-        .contains("carrier-assigned"));
+        .contains("owner-operator buy-in"));
 }
 
 #[test]

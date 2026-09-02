@@ -79,7 +79,7 @@ impl DrivingState {
                     self.curve_slip_active = true;
                     let phrase = self.pacenote_phrase(bend);
                     ctx.say_event_with(
-                        format!("{phrase}: too fast, drifting to the outside."),
+                        format!("{phrase}, too fast, drifting to the outside."),
                         SayEvent::new().category(SpeechCategory::Safety),
                     );
                 }
@@ -466,8 +466,7 @@ impl DrivingState {
                 ctx.controller.rumble.impact(SIDESWIPE_DAMAGE);
                 self.trip.truck.apply_collision(SIDESWIPE_DAMAGE, true);
                 let text = format!(
-                    "You sideswiped a {vehicle_class} in the {} lane! The truck took damage, now \
-                     {:.0} percent. Check your mirrors before moving over.",
+                    "You sideswiped a {vehicle_class} in the {} lane! Truck damage {:.0} percent.",
                     self.lane.lane_name(),
                     self.trip.truck.damage_pct
                 );
@@ -743,7 +742,7 @@ impl DrivingState {
             // No doubled-for-the-zone clause: this citation is not doubled,
             // because its amount is already the roadwork penalty.
             format!(
-                "{saw_it}. Driving through the barrels is a citation: {} dollars, and it goes on \
+                "{saw_it}. Driving through the barrels is a citation, {} dollars, and it goes on \
                  your safety record. You have {} dollars.{tail}",
                 fmt_grouped(fine, 0),
                 fmt_grouped(money, 0)
@@ -815,10 +814,7 @@ impl DrivingState {
             ctx.audio.play_with("traffic/car_pass", 0.9, 0.5);
             self.speak_ambient_event(
                 ctx,
-                SpokenMessage::new(
-                    "Traffic is stacking up and passing you on the right. Move back to the right \
-                     lane.",
-                ),
+                SpokenMessage::new("Traffic is stacking up and passing you on the right."),
                 Ambient::new().sound(Some("events/cb_radio_chatter")),
             );
         }

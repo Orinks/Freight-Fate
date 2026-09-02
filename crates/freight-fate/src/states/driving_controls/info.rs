@@ -138,7 +138,7 @@ impl DrivingState {
         };
         let over = self.trip.truck.speed_mph() - limit;
         let comparison = if over >= 1.0 {
-            format!(" You are about {} over.", ctx.settings.speed_text(over))
+            format!(" About {} over.", ctx.settings.speed_text(over))
         } else {
             String::new()
         };

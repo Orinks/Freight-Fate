@@ -269,7 +269,7 @@ pub fn in_lane_hazard_call(body: &str, side: OpenSide) -> SpokenMessage {
 
 pub fn merging_traffic_cue(vehicle_class: &str, gap: &str) -> SpokenMessage {
     SpokenMessage::with_terse(
-        format!("Merging {vehicle_class} {gap} ahead. Hold your lane and leave a gap."),
+        format!("Merging {vehicle_class} {gap} ahead."),
         format!("Merging {vehicle_class}, {gap}."),
     )
 }
@@ -290,9 +290,7 @@ pub fn brake_lights_cue(
         format!(" {cause}")
     };
     SpokenMessage::with_terse(
-        format!(
-            "Brake lights {gap} ahead.{cause_clause} Ease down and leave room for {speed_text}."
-        ),
+        format!("Brake lights {gap} ahead.{cause_clause} Traffic at {speed_text}."),
         format!("Brake lights, {gap}, {speed_value}."),
     )
 }
@@ -304,7 +302,7 @@ pub fn slow_lead_cue(
     speed_value: &str,
 ) -> SpokenMessage {
     SpokenMessage::with_terse(
-        format!("Slow {vehicle_class} {gap} ahead. Be ready near {speed_text}."),
+        format!("Slow {vehicle_class} {gap} ahead, at {speed_text}."),
         format!("Slow {vehicle_class}, {gap}, {speed_value}."),
     )
 }
@@ -421,10 +419,10 @@ pub fn toll_charged(
     amount_text: &str,
     estimated: bool,
 ) -> SpokenMessage {
-    let estimate = if estimated { "Estimated " } else { "" };
+    let estimate = if estimated { "estimated " } else { "" };
     SpokenMessage::with_terse(
         format!(
-            "{method_label} toll charged at {name}: {estimate}{amount_text} dollars, billed to carrier settlement."
+            "{method_label} toll at {name}, {estimate}{amount_text} dollars, billed to carrier settlement."
         ),
         format!("Toll, {amount_text} dollars, carrier."),
     )
@@ -435,7 +433,7 @@ pub fn toll_charged(
 /// The over-the-limit warning that rides the overspeed chime.
 pub fn overspeed_nag(limit_speed_text: &str, limit_value: &str) -> SpokenMessage {
     SpokenMessage::with_terse(
-        format!("Watch your speed. The limit is {limit_speed_text}."),
+        format!("Over the limit of {limit_speed_text}."),
         format!("Limit {limit_value}."),
     )
 }
@@ -461,7 +459,7 @@ fn pacenote_terse(pacenote: &SpokenMessage) -> &str {
 /// pacenote carry the moment.)
 pub fn cruise_curve_easing(pacenote: &SpokenMessage, advisory_speed_text: &str) -> SpokenMessage {
     SpokenMessage::with_terse(
-        format!("{pacenote} Adaptive cruise easing to {advisory_speed_text} for the bend."),
+        format!("{pacenote} Adaptive cruise easing to {advisory_speed_text}."),
         pacenote_terse(pacenote),
     )
 }
@@ -495,8 +493,8 @@ pub fn curve_assist_slowing(pacenote: &SpokenMessage) -> SpokenMessage {
 pub fn cruise_curve_paused_assisted(pacenote: &SpokenMessage) -> SpokenMessage {
     SpokenMessage::with_terse(
         format!(
-            "{pacenote} Adaptive cruise paused for the bend; curve speed assistance slowing, and \
-             cruise resumes once you are through and back up to speed."
+            "{pacenote} Adaptive cruise paused for the bend, curve speed assistance slowing. \
+             Cruise resumes past the bend."
         ),
         format!(
             "{} Cruise paused; assistance slowing.",
@@ -523,10 +521,7 @@ pub fn cruise_curve_paused_assisted(pacenote: &SpokenMessage) -> SpokenMessage {
 /// pacenote's short form.
 pub fn cruise_curve_paused(pacenote: &SpokenMessage) -> SpokenMessage {
     SpokenMessage::with_terse(
-        format!(
-            "{pacenote} Adaptive cruise paused for the bend; it resumes once you are through and \
-             back up to speed."
-        ),
+        format!("{pacenote} Adaptive cruise paused for the bend. Resumes past it."),
         format!("{} Cruise paused.", pacenote_terse(pacenote)),
     )
 }
@@ -824,11 +819,11 @@ mod tests {
     fn test_hazard_family_cues_keep_their_normal_coaching() {
         assert_eq!(
             brake_lights_cue("2.1 miles", "38 miles per hour", "38", "").normal,
-            "Brake lights 2.1 miles ahead. Ease down and leave room for 38 miles per hour."
+            "Brake lights 2.1 miles ahead. Traffic at 38 miles per hour."
         );
         assert_eq!(
             slow_lead_cue("car", "1.2 miles", "40 miles per hour", "40").normal,
-            "Slow car 1.2 miles ahead. Be ready near 40 miles per hour."
+            "Slow car 1.2 miles ahead, at 40 miles per hour."
         );
     }
 
@@ -837,7 +832,7 @@ mod tests {
         let pair = brake_lights_cue("2.1 miles", "38 miles per hour", "38", "Merge ahead.");
         assert_eq!(
             pair.normal,
-            "Brake lights 2.1 miles ahead. Merge ahead. Ease down and leave room for 38 miles per hour."
+            "Brake lights 2.1 miles ahead. Merge ahead. Traffic at 38 miles per hour."
         );
         assert_eq!(pair.terse.as_deref(), Some("Brake lights, 2.1 miles, 38."));
     }
@@ -850,10 +845,7 @@ mod tests {
     fn test_merging_cue_drops_the_speed_advisory() {
         let pair = merging_traffic_cue("box truck", "0.4 miles");
         assert_eq!(pair.terse.as_deref(), Some("Merging box truck, 0.4 miles."));
-        assert_eq!(
-            pair.normal,
-            "Merging box truck 0.4 miles ahead. Hold your lane and leave a gap."
-        );
+        assert_eq!(pair.normal, "Merging box truck 0.4 miles ahead.");
         assert!(!pair.normal.contains("be ready for"));
         assert!(!pair.terse.as_deref().unwrap().contains("be ready for"));
     }
@@ -961,8 +953,8 @@ mod tests {
         let pair = toll_charged("E-ZPass", "New York State Thruway settlement", "15", true);
         assert_eq!(
             pair.normal,
-            "E-ZPass toll charged at New York State Thruway settlement: \
-             Estimated 15 dollars, billed to carrier settlement."
+            "E-ZPass toll at New York State Thruway settlement, \
+             estimated 15 dollars, billed to carrier settlement."
         );
         assert_eq!(pair.terse.as_deref(), Some("Toll, 15 dollars, carrier."));
     }
@@ -970,10 +962,7 @@ mod tests {
     #[test]
     fn test_the_speed_nag_compresses_to_the_limit() {
         let pair = overspeed_nag("65 miles per hour", "65");
-        assert_eq!(
-            pair.normal,
-            "Watch your speed. The limit is 65 miles per hour."
-        );
+        assert_eq!(pair.normal, "Over the limit of 65 miles per hour.");
         assert_eq!(pair.terse.as_deref(), Some("Limit 65."));
     }
 
@@ -986,7 +975,7 @@ mod tests {
         assert_eq!(
             pair.normal,
             "Sharp left, half a mile. Advise 35 miles per hour. \
-             Adaptive cruise easing to 35 miles per hour for the bend."
+             Adaptive cruise easing to 35 miles per hour."
         );
         assert_eq!(
             pair.terse.as_deref(),
@@ -1261,7 +1250,7 @@ mod tests {
         assert_eq!(
             paused.normal,
             "Sharp right, half a mile. Advise 35 miles per hour. Adaptive cruise paused for the \
-             bend; it resumes once you are through and back up to speed."
+             bend. Resumes past it."
         );
         assert_eq!(
             paused.terse.as_deref(),

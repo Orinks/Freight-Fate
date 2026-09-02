@@ -898,7 +898,7 @@ fn test_exit_traffic_still_speaks_once_you_signal_for_that_exit() {
     assert!(
         heard
             .iter()
-            .any(|line| line.contains("hold the right exit lane")),
+            .any(|line| line.contains("Hold the right exit lane")),
         "{heard:?}"
     );
 }

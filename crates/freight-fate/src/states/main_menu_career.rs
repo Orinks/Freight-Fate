@@ -36,11 +36,10 @@ impl CareerStartState {
     pub fn new(driver_name: &str) -> Self {
         Self {
             menu: MenuCore::new("Career start").with_intro_help(
-                "Pick how this career begins. Company starts use assigned carrier \
-                 equipment. The carrier pays normal fuel, repairs, insurance, and \
-                 trailer support. The owner-operator start is higher risk: you own a \
-                 brand-new truck and pay business costs from day one. Enter \
-                 selects; Escape goes back to name entry.",
+                "Company starts use assigned carrier equipment; the carrier pays \
+                 fuel, repairs, insurance, and trailer support. The owner-operator \
+                 start is higher risk: you own a brand-new truck and pay business \
+                 costs from day one. Enter selects, Escape goes back.",
             ),
             driver_name: driver_name.to_string(),
         }
@@ -67,7 +66,7 @@ impl Menu for CareerStartState {
     }
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
-        ctx.say("Career start. Pick a carrier or owner-operator start.");
+        ctx.say("Career start.");
         let current = self.current_text(ctx);
         ctx.say_with(current, Say::queued().review(false));
     }
@@ -131,10 +130,8 @@ impl HomeTerminalState {
             .get(&default_city)
             .map(|c| c.region.clone());
         let mut menu = MenuCore::new("Home region").with_intro_help(
-            "Pick the part of the country where your trucking career \
-             begins. Use up and down arrows, Home and End, or type a \
-             letter to jump to a region. Enter opens that region's cities. \
-             Escape goes back to name entry.",
+            "Up and Down, Home and End, or a typed letter pick a region. \
+             Enter opens its cities, Escape goes back.",
         );
         if let Some(index) = default.and_then(|d| regions.iter().position(|r| *r == d)) {
             menu.index = index;
@@ -176,7 +173,7 @@ impl Menu for HomeTerminalState {
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let option = start_option(Some(&self.start_key));
         ctx.say(&format!(
-            "Home region. Pick the part of the country where your {} career starts.",
+            "Home region for your {} career.",
             option.carrier_name
         ));
         let current = self.current_text(ctx);
@@ -195,9 +192,7 @@ impl Menu for HomeTerminalState {
                     format!("{name} ({count} {noun})"),
                     move |s: &mut Self, ctx| s.pick_region(ctx, &r),
                 )
-                .help(format!(
-                    "Open {name} to choose a starting city. {count} {noun} available."
-                )),
+                .help(format!("{name}, {count} {noun}.")),
             );
         }
         items
@@ -227,10 +222,8 @@ impl HomeCityState {
         let option = start_option(Some(start_key));
         let option_default = ctx.world.resolve_city_key(option.default_city);
         let mut menu = MenuCore::new("Home terminal").with_intro_help(
-            "Pick the city where your trucking career begins. Use up and \
-             down arrows, Home and End, or type a letter to jump to a \
-             city. Enter confirms your home terminal. Escape goes back to \
-             the region list.",
+            "Up and Down, Home and End, or a typed letter pick a city. Enter \
+             confirms your home terminal, Escape goes back.",
         );
         if let Some(index) = cities.iter().position(|c| *c == option_default) {
             menu.index = index;
@@ -258,8 +251,8 @@ impl HomeCityState {
                 ctx.say(&format!(
                     "There is already a career named {name} from an earlier \
                      version of Freight Fate. That save stays as it is, so this \
-                     new career needs a different driver name. Press Escape to \
-                     go back and change the name."
+                     career needs a different driver name. Escape goes back to \
+                     change it."
                 ));
                 return;
             }
@@ -310,9 +303,7 @@ impl Menu for HomeCityState {
 
     fn announce_entry(&mut self, ctx: &mut GameContext) {
         let region = region_menu_name(&self.region);
-        ctx.say(&format!(
-            "{region} terminals. Pick the city where your career starts."
-        ));
+        ctx.say(&format!("{region} terminals."));
         let current = self.current_text(ctx);
         ctx.say_with(current, Say::queued().review(false));
     }

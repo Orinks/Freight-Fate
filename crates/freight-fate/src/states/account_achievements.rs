@@ -11,10 +11,9 @@ use crate::app::GameContext;
 use crate::impl_state_for_menu;
 use crate::states::base::{Label, Menu, MenuCore, MenuItem};
 
-const CONTROLS: &str = "Up and down choose a category. Enter opens it. In a category, \
-Enter repeats the selected achievement. Inside a category, Escape or Back returns to account categories. \
-From this category list, Escape or Back returns to Online. This \
-read-only collection combines achievements earned across every career on this installation.";
+const CONTROLS: &str = "Enter opens a category. Inside one, Enter repeats the achievement \
+and Escape returns to the categories. From the categories, Escape returns to Online. This \
+read-only collection combines every career on this installation.";
 
 pub struct AccountAchievementsState {
     menu: MenuCore<Self>,
@@ -75,7 +74,7 @@ impl Menu for AccountAchievementsState {
                 Label::dynamic(|_s: &Self, ctx| Self::summary_label(ctx)),
                 |_s: &mut Self, ctx| ctx.say(&Self::summary_label(ctx)),
             )
-            .help("Hear the account-wide earned achievement count."),
+            .help("The account-wide earned count."),
         ];
         for category in categories() {
             let achievements = achievements_in_category(category.id);
@@ -120,8 +119,7 @@ impl AccountAchievementCategoryState {
     ) -> Self {
         Self {
             menu: MenuCore::new(category.title).with_intro_help(
-                "Use up and down to review this category. Enter repeats the selected \
-                 achievement. Escape or Back returns to the account categories.",
+                "Enter repeats the achievement. Escape returns to the account categories.",
             ),
             category,
             achievements,
@@ -164,7 +162,7 @@ impl Menu for AccountAchievementCategoryState {
             let unlocked = earned.contains(achievement.id);
             let (name, description) = entry_text(achievement, unlocked);
             let (label, help) = if unlocked {
-                (format!("Earned: {name} - {description}"), description)
+                (format!("Earned: {name}. {description}"), description)
             } else if achievement.hidden {
                 (format!("Locked: {name}"), description)
             } else {

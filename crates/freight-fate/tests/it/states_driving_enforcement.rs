@@ -496,7 +496,7 @@ fn test_the_tableau_intro_terse_form_keeps_the_bare_fact() {
         let message = drive.tableau_intro_message(&post);
         assert_eq!(
             message.render(true),
-            "A trooper has somebody stopped on the shoulder -- not you."
+            "A trooper has somebody stopped on the shoulder, not you."
         );
         if message.normal == message.render(true) {
             bare_seen = true;
@@ -505,7 +505,7 @@ fn test_the_tableau_intro_terse_form_keeps_the_bare_fact() {
             assert!(message
                 .normal
                 .starts_with("A trooper has somebody stopped on the shoulder "));
-            assert!(message.normal.ends_with("-- not you."));
+            assert!(message.normal.ends_with(", not you."));
         }
     }
     assert!(bare_seen && flavored_seen);
@@ -829,11 +829,10 @@ fn test_scale_notice_lookahead_sample_covers_the_real_sentence() {
     // The spoken lead is sized from a sample; it must not undershoot the real
     // wording with a long stop name and the longest control phrases.
     let real = concat!(
-        "Open weigh station ahead in two miles: Northbound Platte River ",
+        "Open weigh station ahead in two miles, Northbound Platte River ",
         "Port of Entry. All trucks must pull in. Signal for the scale ",
-        "exit with right bumper plus D-pad down; the ramp brings you down ",
-        "to the scale. Once you are stopped at the scale, press right ",
-        "bumper plus D-pad down to check in."
+        "exit with right bumper plus D-pad down. Stopped at the scale, ",
+        "press right bumper plus D-pad down to check in."
     );
     assert!(
         ramp_arrival_grace_seconds(SCALE_NOTICE_SAMPLE, 0.0)
@@ -1124,7 +1123,7 @@ fn test_rest_key_at_speed_defers_to_the_open_scale() {
     assert!(spoken.contains("Weigh station first"), "{spoken}");
     assert!(spoken.contains("All trucks must stop"), "{spoken}");
     assert!(
-        spoken.contains("Rest planning can wait until you are past the scale"),
+        spoken.contains("Rest planning waits until you are past the scale"),
         "{spoken}"
     );
     assert_eq!(
