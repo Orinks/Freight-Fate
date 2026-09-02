@@ -774,7 +774,7 @@ impl PlaytestHarness {
         if assigned {
             // New company hires are assigned a load: job_rank spends declines
             // to reach an alternative instead of browsing the board.
-            self.accept_assigned_job(setup.job_rank);
+            self.accept_assigned_job(setup.job_rank, setup.arm_speed_control_on_deadhead);
         } else {
             self.choose_unlocked_job(setup.job_rank);
         }
@@ -1175,21 +1175,25 @@ impl PlaytestHarness {
         assert!(self.state_is::<JobBoardState>());
         let assigned = self.with_state::<JobBoardState, _>(|board, _| board.assigned_mode());
         if assigned {
-            self.accept_assigned_job(job_rank);
+            self.accept_assigned_job(job_rank, true);
         } else {
             self.choose_unlocked_job(job_rank);
         }
-        assert!(self.state_is::<DrivingState>());
-        self.driving = self.app.state();
-        self.advance_frame_clock();
-        self.with_drive(|drive, ctx| {
-            drive.trip.position_mi = drive.trip.total_miles();
-            drive.trip.finished = true;
-            drive.truck_mut().velocity_mps = 0.0;
-            drive.truck_mut().set_parking_brake();
-            drive.update_frame(ctx, DT);
-        });
-        self.finish_timed_state();
+        if self.state_is::<DrivingState>() {
+            // The deadhead: jump it to the shipper's gate.
+            self.driving = self.app.state();
+            self.advance_frame_clock();
+            self.with_drive(|drive, ctx| {
+                drive.trip.position_mi = drive.trip.total_miles();
+                drive.trip.finished = true;
+                drive.truck_mut().velocity_mps = 0.0;
+                drive.truck_mut().set_parking_brake();
+                drive.update_frame(ctx, DT);
+            });
+            self.finish_timed_state();
+        }
+        // Otherwise the load was staged in the home yard (and no decline
+        // was left to reach another): the shipping office opened in place.
         assert!(self.state_is::<PickupFacilityState>());
         self.key(key_event(Key::Return, None));
         self.key(key_event(Key::Return, None));
@@ -1482,17 +1486,21 @@ impl PlaytestHarness {
         panic!("Job index {target_index} not keyboard reachable");
     }
 
-    fn accept_assigned_job(&mut self, rank: usize) {
+    fn accept_assigned_job(&mut self, rank: usize, need_deadhead: bool) {
         use crate::states::city::JobBoardState;
 
         // The harness stages FREIGHT runs: if dispatch's assignment is a
         // reposition (the feature working -- dispatch's call, not yours),
-        // spend a decline to reach freight instead.
+        // spend a decline to reach freight instead. The same when the
+        // scenario is about the deadhead and the load is staged in the
+        // home yard, which opens the shipping office in place of one.
         loop {
-            let bobtail = self.with_state::<JobBoardState, _>(|board, _| {
-                !board.jobs.is_empty() && board.assigned_job().bobtail
+            let skip = self.with_state::<JobBoardState, _>(|board, ctx| {
+                !board.jobs.is_empty()
+                    && (board.assigned_job().bobtail
+                        || (need_deadhead && board.assigned_load_is_staged_here(ctx)))
             });
-            if !bobtail || !self.move_to_decline() {
+            if !skip || !self.move_to_decline() {
                 break;
             }
             self.key(key_event(Key::Return, None));

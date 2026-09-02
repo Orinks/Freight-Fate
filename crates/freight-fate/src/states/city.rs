@@ -353,7 +353,11 @@ pub fn open_freight_market(ctx: &mut GameContext) -> Vec<Job> {
         };
         (key, cache, p.hos.clone())
     };
-    let mut board = JobBoard::new(world, None, Some(&hos));
+    let seed = ctx.dispatch_board_seed;
+    if let Some(seed) = seed {
+        ctx.dispatch_board_seed = Some(seed.wrapping_add(1));
+    }
+    let mut board = JobBoard::new(world, seed, Some(&hos));
     let mut lever_note = String::new();
     let mut jobs: Option<Vec<Job>> = None;
     if let Some(cache) = cache.as_ref().and_then(Value::as_object) {

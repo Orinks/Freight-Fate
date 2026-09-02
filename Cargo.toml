@@ -63,6 +63,13 @@ memmap2 = "0.9"
 bincode = { version = "2", features = ["serde"] }
 zstd = "0.13"
 
+[workspace.lints.rust]
+# `--cfg ci_quick` is what the per-push CI passes so the whole-map sweeps
+# (`#[cfg_attr(ci_quick, ignore = "sweep: ...")]`) are left to the nightly
+# snapshot build and to full local runs; see .github/workflows/rust.yml.
+# Declared here so `unexpected_cfgs` stays quiet under `-D warnings`.
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(ci_quick)"] }
+
 [profile.release]
 opt-level = 3
 lto = "thin"

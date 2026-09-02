@@ -40,9 +40,32 @@ fn new_career_to_city(app: &mut TestApp) {
 fn new_career_to_pickup_drive(app: &mut TestApp) {
     new_career_to_city(app);
     key(app, Key::Return); // job board
+    accept_assigned_freight_with_deadhead(app);
+}
+
+/// Accept dispatch's assignment, declining a load staged in the home yard
+/// while declines last: that one opens the shipping office in place, and
+/// these flows are about the deadhead. The board is seeded under test, so
+/// this is a fixed sequence of presses rather than a retry.
+fn accept_assigned_freight_with_deadhead(app: &mut TestApp) {
     assert!(with_state::<JobBoardState, _>(app, |b, _| b.assigned_mode()));
-    key(app, Key::Return); // accept assigned job
-    assert!(is::<DrivingState>(app));
+    while with_state::<JobBoardState, _>(app, |b, ctx| b.assigned_load_is_staged_here(ctx)) {
+        if !labels::<JobBoardState>(app)
+            .iter()
+            .any(|row| row.starts_with("Decline"))
+        {
+            break; // out of declines; the accept below says what happened
+        }
+        select::<JobBoardState>(app, "Decline and request another load");
+        assert!(is::<JobBoardState>(app));
+    }
+    key(app, Key::Home);
+    assert!(labels::<JobBoardState>(app)[0].starts_with("Accept assigned dispatch:"));
+    key(app, Key::Return);
+    assert!(
+        is::<DrivingState>(app),
+        "accepting the assignment did not start the deadhead"
+    );
 }
 
 #[test]
@@ -178,10 +201,7 @@ fn test_full_game_flow_headless() {
     assert!(with_state::<JobBoardState, _>(&app, |b, _| !b
         .jobs
         .is_empty()));
-    assert!(with_state::<JobBoardState, _>(&app, |b, _| b.assigned_mode()));
-    assert!(labels::<JobBoardState>(&app)[0].starts_with("Accept assigned dispatch:"));
-    key(&mut app, Key::Return);
-    assert!(is::<DrivingState>(&app));
+    accept_assigned_freight_with_deadhead(&mut app);
     assert_eq!(
         with_state::<DrivingState, _>(&app, |d, _| d.phase.to_string()),
         DRIVE_PHASE_PICKUP

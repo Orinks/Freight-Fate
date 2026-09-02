@@ -995,6 +995,35 @@ Everything not listed here ships fine after 1.9.0.
       only if that bites: a second console-subsystem binary in the workspace
       for the drive tools.
 
+- [x] **Rust CI trimmed to the per-push set (2026-09-02).** A push took
+      twelve minutes: six compiling the workspace crates on the hosted
+      Windows runner, four running tests, the rest clippy and setup, in
+      one job. Now clippy is a parallel job with its own cache; the test
+      job passes `--cfg ci_quick`, which ignores the sixteen whole-map
+      sweeps in the game crate (state lines, facility exits, destination
+      kinds, traffic rate, retarder benches) and the twelve job-board
+      shards in ff-core -- as much run time as the other 2,400 tests
+      together; sccache keeps an unchanged ff-core from recompiling;
+      Defender is excluded from the build tree; BASS comes from the
+      Actions cache; and the build's `cargo-timing.html` is uploaded on
+      every run. The sweeps still run nightly on the Career 1.9 snapshot,
+      on a manual dispatch, and in every local `cargo test`.
+      * Found on the way: the smoke test and the deadhead speed-control
+        case failed two runs in three since the yard load landed
+        (2026-09-02), because the dispatch board rolled from OS entropy and
+        a load staged in the home yard opens the shipping office instead of
+        the deadhead those two need. The test app now seeds every board it
+        builds (`GameContext::dispatch_board_seed`, `None` in the game), and
+        a rig whose subject is the deadhead declines a yard load the way it
+        already declined a reposition.
+      * Follow-up: read the uploaded timing report from the runner and
+        decide whether `codegen-units` or a smaller test-binary set buys
+        the next minute; the local build is front-end bound, the runner's
+        may not be.
+      * Follow-up: run the ff-core and freight-fate test binaries
+        concurrently once the build is done (cargo runs them one after
+        another), worth about half a minute on the runner.
+
 - [x] **Rust port: CI (`.github/workflows/rust.yml`, 2026-08-22).**
       `cargo fmt --all --check` on Linux, then `cargo clippy --all-targets
       --locked -D warnings`, `cargo test -p ff-core` and

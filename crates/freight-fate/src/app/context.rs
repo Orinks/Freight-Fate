@@ -141,6 +141,15 @@ pub struct GameContext {
     /// True while a playtest-lever scenario runs unsaved (see
     /// `playtest_levers::apply_continue_levers`); `save_profile` honors it.
     pub playtest_sandbox: bool,
+    /// Seed for the next dispatch board; `None` in the shipped game, where
+    /// the board rolls from OS entropy. The test app sets it so that which
+    /// load dispatch assigns -- and whether it is staged in the home yard,
+    /// which opens the shipping office instead of a deadhead -- is the same
+    /// on every run instead of a coin toss (the smoke test failed two runs
+    /// in three once yard loads existed, 2026-09-02). Each board built
+    /// advances it by one, so a career that comes back to the board is not
+    /// offered the identical set again.
+    pub dispatch_board_seed: Option<i64>,
     /// Driving-school sandbox: the profile is a throwaway copy and must
     /// never reach disk; the real save is restored when school ends.
     pub school_sandbox: bool,
@@ -228,6 +237,7 @@ impl GameContext {
             achievement_notice: String::new(),
             achievement_notice_timer: 0.0,
             playtest_sandbox: false,
+            dispatch_board_seed: None,
             school_sandbox: false,
             school_real_profile: None,
             event_pacer: EventSpeechPacer::new(),

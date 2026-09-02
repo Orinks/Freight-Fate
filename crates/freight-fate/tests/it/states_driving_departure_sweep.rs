@@ -643,6 +643,10 @@ fn lane_ending_mph(heard: &[String]) -> Option<f64> {
 }
 
 #[test]
+#[cfg_attr(
+    ci_quick,
+    ignore = "sweep: driven out of every facility exit on the map -- left to the nightly by --cfg ci_quick"
+)]
 fn test_the_acceleration_lane_out_of_a_yard_is_not_outrun_by_the_clock() {
     let mut failures: Vec<String> = Vec::new();
     for origin in origins() {
@@ -718,6 +722,10 @@ fn test_the_acceleration_lane_out_of_a_yard_is_not_outrun_by_the_clock() {
 }
 
 #[test]
+#[cfg_attr(
+    ci_quick,
+    ignore = "sweep: driven out of every facility exit on the map -- left to the nightly by --cfg ci_quick"
+)]
 fn test_the_arrival_assist_never_takes_the_pedals_leaving_a_yard() {
     let mut failures: Vec<String> = Vec::new();
     for origin in origins() {
@@ -751,6 +759,10 @@ fn test_the_arrival_assist_never_takes_the_pedals_leaving_a_yard() {
 }
 
 #[test]
+#[cfg_attr(
+    ci_quick,
+    ignore = "sweep: driven out of every facility exit on the map -- left to the nightly by --cfg ci_quick"
+)]
 fn test_a_departure_corner_is_never_approached_at_compressed_pace() {
     // THE VERDICT this file was written to reach, pinned so that it stays
     // true.

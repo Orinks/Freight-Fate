@@ -119,6 +119,10 @@ fn assert_state_line_is_authoritative(
 }
 
 #[test]
+#[cfg_attr(
+    ci_quick,
+    ignore = "sweep: a whole 500-mile delivery, 10-40 s -- left to the nightly by --cfg ci_quick"
+)]
 fn test_mapped_state_lines_are_authoritative_northbound_to_atlanta() {
     assert_state_line_is_authoritative(
         vec!["Indianapolis", "Nashville", "Atlanta"],
@@ -129,6 +133,10 @@ fn test_mapped_state_lines_are_authoritative_northbound_to_atlanta() {
 }
 
 #[test]
+#[cfg_attr(
+    ci_quick,
+    ignore = "sweep: a whole 500-mile delivery, 10-40 s -- left to the nightly by --cfg ci_quick"
+)]
 fn test_mapped_state_lines_are_authoritative_southbound_to_indianapolis() {
     assert_state_line_is_authoritative(
         vec!["Atlanta", "Nashville", "Indianapolis"],
@@ -139,6 +147,10 @@ fn test_mapped_state_lines_are_authoritative_southbound_to_indianapolis() {
 }
 
 #[test]
+#[cfg_attr(
+    ci_quick,
+    ignore = "sweep: a whole 500-mile delivery, 10-40 s -- left to the nightly by --cfg ci_quick"
+)]
 fn test_mapped_state_lines_are_authoritative_westbound_to_albuquerque() {
     assert_state_line_is_authoritative(
         vec!["Shreveport", "Dallas", "Albuquerque"],
@@ -151,6 +163,10 @@ fn test_mapped_state_lines_are_authoritative_westbound_to_albuquerque() {
 /// No mapped boundary on this route, so nothing is lost and the fallback is
 /// the only announcement either way.
 #[test]
+#[cfg_attr(
+    ci_quick,
+    ignore = "sweep: a whole 500-mile delivery, 10-40 s -- left to the nightly by --cfg ci_quick"
+)]
 fn test_mapped_state_lines_are_authoritative_within_one_state() {
     assert_state_line_is_authoritative(
         vec!["Dallas", "San Antonio", "Houston"],

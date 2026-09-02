@@ -224,6 +224,11 @@ impl std::ops::DerefMut for TestApp {
     }
 }
 
+/// The first dispatch board every test app rolls (see
+/// `GameContext::dispatch_board_seed`). Any value works; this one is the
+/// date the game stopped rolling the test boards from OS entropy.
+const DISPATCH_BOARD_SEED: i64 = 20_260_902;
+
 impl TestApp {
     /// `App()` under the conftest fixtures, speech captured.
     pub fn new() -> TestApp {
@@ -254,7 +259,8 @@ impl TestApp {
         };
         let _ = settings.save();
         let capture = Rc::new(RefCell::new(speech));
-        let app = App::new_headless(Box::new(SharedCapture(Rc::clone(&capture))));
+        let mut app = App::new_headless(Box::new(SharedCapture(Rc::clone(&capture))));
+        app.ctx.dispatch_board_seed = Some(DISPATCH_BOARD_SEED);
         TestApp {
             app,
             data_dir,

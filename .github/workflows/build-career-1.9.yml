@@ -119,6 +119,8 @@ jobs:
         run: cargo clippy --all-targets --locked -- -D warnings
 
       - name: Test Rust workspace
+        # The FULL suite: no `--cfg ci_quick`, so the whole-map sweeps the
+        # per-push workflow (rust.yml) leaves out run here every night.
         run: cargo test -p ff-core -p freight-fate
 
       - name: Build the portable release

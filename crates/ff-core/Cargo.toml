@@ -12,6 +12,9 @@ authors.workspace = true
 name = "ff_core"
 path = "src/lib.rs"
 
+[lints]
+workspace = true
+
 [dependencies]
 anyhow.workspace = true
 thiserror.workspace = true

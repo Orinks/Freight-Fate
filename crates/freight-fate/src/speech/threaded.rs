@@ -193,6 +193,10 @@ pub struct ThreadedSpeech {
     /// Watchdog latch: the wedge is reported once, and once more only if
     /// the worker recovers and wedges again.
     wedged: bool,
+    /// [`WEDGE_AFTER_S`], except in the one test that wedges the worker on
+    /// purpose and should not have to sit through eight real seconds to
+    /// watch the watchdog notice.
+    wedge_after_s: f64,
     dropped_lines: u64,
 }
 
@@ -347,8 +351,17 @@ impl ThreadedSpeech {
             heartbeat,
             shutting_down,
             wedged: false,
+            wedge_after_s: WEDGE_AFTER_S,
             dropped_lines: 0,
         }
+    }
+
+    /// Shorten the watchdog's patience. Test-only: the production value is
+    /// [`WEDGE_AFTER_S`], and it must stay longer than [`HEALTH_POLL`] or an
+    /// idle, healthy worker reads as wedged between two heartbeats.
+    #[cfg(test)]
+    fn set_wedge_after_s(&mut self, seconds: f64) {
+        self.wedge_after_s = seconds;
     }
 
     fn snapshot(&self) -> Snapshot {
@@ -421,13 +434,13 @@ impl SpeechSink for ThreadedSpeech {
             .expect("speech heartbeat lock")
             .elapsed()
             .as_secs_f64();
-        if stale > WEDGE_AFTER_S && !self.wedged {
+        if stale > self.wedge_after_s && !self.wedged {
             self.wedged = true;
             log::error!(
                 "speech backend stopped responding {stale:.0}s ago (a wedged screen reader \
                  or SAPI call); the game continues without speech until it returns"
             );
-        } else if stale <= WEDGE_AFTER_S && self.wedged {
+        } else if stale <= self.wedge_after_s && self.wedged {
             self.wedged = false;
             log::warn!("speech backend recovered");
         }
@@ -445,7 +458,7 @@ impl SpeechSink for ThreadedSpeech {
             .expect("speech heartbeat lock")
             .elapsed()
             .as_secs_f64();
-        self.snapshot().available && stale <= WEDGE_AFTER_S
+        self.snapshot().available && stale <= self.wedge_after_s
     }
 
     fn backend_name(&self) -> String {
@@ -832,6 +845,10 @@ mod tests {
             entered_say,
             ..
         } = rig();
+        // One second of patience instead of eight: the test is about what
+        // the watchdog does once the heartbeat is stale, not about how long
+        // the shipped value gives a slow screen reader.
+        sink.set_wedge_after_s(1.0);
         wedge.store(true, Ordering::SeqCst);
         sink.say("this one wedges the backend", false);
         for _ in 0..200 {
@@ -857,7 +874,7 @@ mod tests {
         );
         // The watchdog reads the stale heartbeat as unavailable well before
         // it logs the wedge.
-        std::thread::sleep(Duration::from_secs_f64(WEDGE_AFTER_S + 1.0));
+        std::thread::sleep(Duration::from_secs(2));
         sink.poll(0.016);
         assert!(!sink.available());
         // Bounded replies answer pessimistically instead of hanging.

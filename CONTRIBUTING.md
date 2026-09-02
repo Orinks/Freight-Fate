@@ -29,7 +29,9 @@ snapshots begin.
   files into cohesive modules instead of adding more to an oversized file.
 - Run `uv sync --group dev` before tests in a fresh checkout or worktree.
 - Gameplay is Rust on Career 1.9: run `cargo test -p ff-core` and
-  `cargo test -p freight-fate` for anything the player can hear or do.
+  `cargo test -p freight-fate` for anything the player can hear or do. That
+  local run is the full suite; the per-push CI skips the whole-map sweeps
+  (`#[cfg_attr(ci_quick, ignore = ...)]`) and the nightly snapshot runs them.
 - `uv run pytest` covers only the Python that still ships -- the build, bake,
   indexing and release tooling under `tools/`, plus the workflow and
   sound-pack guards. It takes a few seconds, so just run all of it. The

@@ -16,6 +16,30 @@
 # will ever run these checks. Anything that must run on a push needs its own
 # push trigger, which is what this file has for main, dev, and the direct-push
 # Rust release lines.
+#
+# What a push runs, and what it leaves to the nightly (2026-09-02). A push
+# used to take twelve minutes: six of them compiling the workspace crates on
+# the hosted Windows runner, four running the tests, and the rest clippy and
+# setup, all in one job. Now:
+#
+#   * Clippy is its own job, in parallel with the tests, with its own cache.
+#   * The test job passes `--cfg ci_quick`, which turns every
+#     `#[cfg_attr(ci_quick, ignore = "sweep: ...")]` test into an ignored one.
+#     Those are the whole-map sweeps -- a 500-mile delivery per state line,
+#     every facility exit, every kind of destination, ~96 job origins --
+#     and the sixteen of them in the game crate cost as much as the other
+#     2,400 tests together. They still run in full on the nightly Career 1.9
+#     snapshot (`build-career-1.9.yml`, which sets no cfg), on a manual
+#     `workflow_dispatch` of this workflow, and in any local `cargo test`.
+#   * sccache caches the workspace crates' own compilation by content, so a
+#     commit that leaves ff-core alone (most of them) does not rebuild it.
+#   * Windows Defender is told not to scan the build tree; real-time scanning
+#     of a few thousand object files is a known multiple on a Windows runner.
+#   * BASS is restored from the Actions cache instead of un4seen's site.
+#
+# The build's own timing report is uploaded as an artifact on every run, so
+# the next person who asks "where do the minutes go" can open
+# cargo-timing.html instead of guessing.
 
 name: Rust
 
@@ -36,12 +60,13 @@ on:
       - "Cargo.lock"
       - "rust-toolchain.toml"
       - ".github/workflows/rust.yml"
+  # A manual run is the FULL suite: no `--cfg ci_quick`, sweeps included.
   workflow_dispatch:
 
-# The pull-request path filter keeps a 30-plus-minute Windows build off PRs
-# that only touch Python, docs or world data. A *required* check that is path
-# filtered stays "expected -- waiting for status" forever on a skipped PR, so
-# do not make it required unless the filter is dropped.
+# The pull-request path filter keeps the Windows build off PRs that only
+# touch Python, docs or world data. A *required* check that is path filtered
+# stays "expected -- waiting for status" forever on a skipped PR, so do not
+# make it required unless the filter is dropped.
 
 concurrency:
   group: rust-${{ github.ref }}
@@ -67,6 +92,58 @@ jobs:
       - name: cargo fmt --check
         run: cargo fmt --all --check
 
+  clippy:
+    # Windows, like the tests, so the `#[cfg(windows)]` half of the game
+    # (single-instance guard, console, keyring) is linted too. Its own job
+    # rather than a step ahead of the tests: clippy's check artefacts share
+    # nothing with a test build, so the minute it took was pure critical
+    # path. It needs no BASS -- bass-sys builds without the DLL and only
+    # warns -- and keeps its own cache line, because a rust-cache entry holds
+    # one job's artefacts and two jobs saving under one key would take turns
+    # evicting each other.
+    name: Clippy (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: false
+
+      - name: Install the pinned toolchain
+        run: rustup show
+
+      - name: Keep Defender off the build tree
+        # Real-time scanning on the hosted Windows image inspects every
+        # object file rustc writes and every one the linker reads back. The
+        # image runs as an administrator, so an exclusion is one cmdlet; if
+        # the image ever ships without Defender the try/catch keeps this a
+        # note in the log rather than a failed job.
+        shell: pwsh
+        run: |
+          try {
+            Add-MpPreference -ExclusionPath "${{ github.workspace }}", "$env:USERPROFILE\.cargo", "$env:USERPROFILE\.rustup" -ErrorAction Stop
+            Write-Host "Defender exclusions added for the workspace, cargo and rustup."
+          } catch {
+            Write-Host "Could not add Defender exclusions ($_); building without them."
+          }
+
+      - name: Cache cargo registry and target directory
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-windows-clippy
+          cache-on-failure: true
+
+      - name: cargo clippy
+        # Workspace-wide and every target, so test and bench code is linted
+        # too; warnings are errors, as the port plan requires.
+        #
+        # `--locked`: Cargo.lock is committed, so a dependency bump that was
+        # not locked in should fail here loudly rather than silently resolve
+        # to something no developer has run.
+        run: cargo clippy --all-targets --locked -- -D warnings
+
   test:
     # Windows only, deliberately.
     #
@@ -88,10 +165,9 @@ jobs:
     # backends.
     #
     # macOS is a different gap: it builds from source (BASS is fetched for
-    # both architectures, Prism is vendored, SDL2 comes from Homebrew and is
-    # found through the `use-pkgconfig` feature), so a macos-latest job would
-    # work after a `brew install sdl2 pkg-config` step -- nobody has added one
-    # yet, and nobody has driven the Mac build with speech on.
+    # both architectures, Prism is vendored, SDL2 is compiled in statically),
+    # and the nightly snapshot workflow does test it there; this per-push
+    # workflow does not, because the Mac runner is the slow one.
     #
     # Windows is the primary target and the only fully vendored one, so this
     # matrix is honest about the gap instead of papering over it: Linux and
@@ -107,9 +183,25 @@ jobs:
       SDL_AUDIODRIVER: dummy
       # Keep cargo's own diagnostics legible in the Actions log viewer.
       CARGO_TERM_COLOR: always
-      # Backtraces cost nothing here and turn a bare "assertion failed" in a
-      # 40-minute run into something diagnosable without a re-run.
+      # Backtraces cost nothing here and turn a bare "assertion failed" into
+      # something diagnosable without a re-run.
       RUST_BACKTRACE: "1"
+      # Pushes and PRs run the quick set (see the header); a manual dispatch
+      # runs everything. The expression reads: when this is a push or a PR,
+      # the flag; otherwise the empty string. (`cond && a || b` is the
+      # Actions idiom for a conditional -- it works here because the flag is
+      # never empty, so `&&` cannot fall through to `||` by accident.)
+      RUSTFLAGS: ${{ (github.event_name == 'push' || github.event_name == 'pull_request') && '--cfg ci_quick' || '' }}
+      # sccache in front of rustc, backed by the Actions cache. rust-cache
+      # below restores the DEPENDENCIES' artefacts and deliberately drops the
+      # workspace crates' own, which cargo would rebuild anyway (a fresh
+      # checkout stamps every source newer than the cache). sccache keys on
+      # content instead, so an ff-core that did not change is a hit even
+      # though its files are new. Incremental compilation is already off on
+      # CI (rust-cache sets CARGO_INCREMENTAL=0), which is what sccache
+      # needs to cache a crate at all.
+      RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       # Keep LFS disabled: the large music pack is not needed for Rust CI.
       # sounds.pak is a regular tracked file, so checkout already provides it
@@ -121,38 +213,62 @@ jobs:
       - name: Install the pinned toolchain
         run: rustup show
 
-      - name: Fetch BASS
+      - name: Keep Defender off the build tree
+        # See the clippy job for why.
+        shell: pwsh
+        run: |
+          try {
+            Add-MpPreference -ExclusionPath "${{ github.workspace }}", "$env:USERPROFILE\.cargo", "$env:USERPROFILE\.rustup" -ErrorAction Stop
+            Write-Host "Defender exclusions added for the workspace, cargo and rustup."
+          } catch {
+            Write-Host "Could not add Defender exclusions ($_); building without them."
+          }
+
+      - name: Restore BASS from the cache
         # BASS is un4seen's and proprietary, so it is not committed to this
         # public repository (see crates/bass-sys/vendor/licenses/README.md).
-        # Without it bass-sys still builds and every audio test skips itself,
-        # which reads as a green run that proved nothing about the audio
-        # backend -- so --check fails the job rather than letting that pass.
+        # The fetch tool pins every file by sha256, so the tool's own hash is
+        # the right cache key: bump a pin and the cache misses.
+        uses: actions/cache@v4
+        with:
+          path: crates/bass-sys/vendor/windows-x86_64/*.dll
+          key: bass-windows-${{ hashFiles('tools/fetch_bass.py') }}
+
+      - name: Fetch BASS
+        # Without BASS bass-sys still builds and every audio test skips
+        # itself, which reads as a green run that proved nothing about the
+        # audio backend -- so --check fails the job rather than letting that
+        # pass. The tool is standard-library Python, so the runner's own
+        # interpreter runs it: no uv, no venv, no dependency sync. On a cache
+        # hit the first call prints "ok" for each file and downloads nothing.
+        shell: bash
         run: |
-          python -m pip install --quiet uv
-          uv run python tools/fetch_bass.py
-          uv run python tools/fetch_bass.py --check
+          python tools/fetch_bass.py
+          python tools/fetch_bass.py --check
+
+      - name: Install sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Cache cargo registry and target directory
         # Swatinem/rust-cache rather than a raw actions/cache on target/: it
-        # keys on the lockfile plus the rustc version, and prunes the target
-        # directory to the dependency artefacts before saving. An unpruned
-        # target/ for this workspace is several GB -- well past the 10 GB
-        # repository cache budget after a couple of branches.
+        # keys on the lockfile plus the rustc version (and RUSTFLAGS), and
+        # prunes the target directory to the dependency artefacts before
+        # saving. An unpruned target/ for this workspace is several GB --
+        # well past the 10 GB repository cache budget after a couple of
+        # branches.
         uses: Swatinem/rust-cache@v2
         with:
-          # One cache line per workspace member set; the job builds them all.
           shared-key: rust-windows
+          cache-on-failure: true
 
-      - name: cargo clippy
-        # Workspace-wide and every target, so test and bench code is linted
-        # too; warnings are errors, as the port plan requires. This is also
-        # the first cargo invocation that runs the build scripts, so the
-        # vendored libraries are staged by the time the next step looks.
-        #
-        # `--locked` on the first cargo call: Cargo.lock is committed, so a
-        # dependency bump that was not locked in should fail here loudly
-        # rather than silently resolve to something no developer has run.
-        run: cargo clippy --all-targets --locked -- -D warnings
+      - name: Build the test binaries
+        # The build on its own so the timing report below covers exactly the
+        # compile, and so a compile failure reads as one. `--locked`: see the
+        # clippy job. ONE invocation for both crates, not one per crate:
+        # split, cargo compiled ff-core twice (once as its own test target,
+        # once as freight-fate's dependency) in two sequential builds with
+        # separate link phases (2026-08-29).
+        run: cargo test -p ff-core -p freight-fate --no-run --locked --timings
 
       - name: Show the staged native libraries
         # The build scripts (crates/bass-sys/build.rs, crates/prism-sys/
@@ -172,16 +288,23 @@ jobs:
         shell: bash
         run: ls -l target/debug/*.dll
 
-      # ONE invocation, not one per crate. Split, cargo ran two sequential
-      # builds with separate link phases and compiled ff-core twice -- once as
-      # its own test target, once as freight-fate's dependency -- costing 241s
-      # and 378s against roughly 25s and 31s of actual test time (2026-08-29,
-      # the first green run after the suite could finish at all). Asking for
-      # both in one dependency graph lets cargo build them together across the
-      # runner's cores. Each test binary still reports separately, so a
-      # failure still names which crate it came from.
       - name: cargo test
-        run: cargo test -p ff-core -p freight-fate
+        # Everything is fresh from the step above, so this is the run alone.
+        # Each test binary still reports separately, so a failure names which
+        # crate it came from.
+        run: cargo test -p ff-core -p freight-fate --locked
+
+      - name: Compiler cache statistics
+        if: always()
+        run: sccache --show-stats
+
+      - name: Upload the build timing report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cargo-timing
+          path: target/cargo-timings/cargo-timing.html
+          if-no-files-found: ignore
 
   changelog:
     # The changelog gate runs locally as a pre-push hook, which not every

@@ -17,6 +17,9 @@ path = "src/lib.rs"
 name = "freightfate"
 path = "src/main.rs"
 
+[lints]
+workspace = true
+
 [dependencies]
 ff-core = { path = "../ff-core" }
 prism = { path = "../prism" }

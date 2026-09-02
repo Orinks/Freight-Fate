@@ -264,6 +264,13 @@ impl JobBoardState {
         &self.jobs[self.assigned_queue[0]]
     }
 
+    /// Whether the load dispatch is offering is staged in the home yard --
+    /// the case `accept` answers with the shipping office in place of a
+    /// deadhead. For the test rigs whose subject is the deadhead itself.
+    pub fn assigned_load_is_staged_here(&self, ctx: &GameContext) -> bool {
+        job_origin_is_this_yard(ctx, self.assigned_job(), &home_terminal(ctx).name)
+    }
+
     /// `_assigned_queue`: the order dispatch will offer the board in.
     pub fn assigned_queue(&self) -> &[usize] {
         &self.assigned_queue

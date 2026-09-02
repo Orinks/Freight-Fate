@@ -228,6 +228,10 @@ macro_rules! sweep_shard_tests {
     ($check:ident, $($name:ident = $shard:expr),+ $(,)?) => {
         $(
             #[test]
+            #[cfg_attr(
+                ci_quick,
+                ignore = "sweep: about 96 origins across the whole network -- left to the nightly by --cfg ci_quick"
+            )]
             fn $name() {
                 $check($shard);
             }
