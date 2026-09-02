@@ -1016,10 +1016,21 @@ Everything not listed here ships fine after 1.9.0.
         builds (`GameContext::dispatch_board_seed`, `None` in the game), and
         a rig whose subject is the deadhead declines a yard load the way it
         already declined a reposition.
-      * Follow-up: read the uploaded timing report from the runner and
-        decide whether `codegen-units` or a smaller test-binary set buys
-        the next minute; the local build is front-end bound, the runner's
-        may not be.
+      * Measured on the runner, warm (run 33654550607): 6 m 44 s end to
+        end against 12 m before. Clippy 1 m 45 s in parallel; the test job
+        3 m 56 s of build and 1 m 47 s of tests. sccache hit all five
+        library compiles and refuses every `--test` binary (crate type),
+        so the build is now bounded by two units that compile the whole
+        crate a second time with `cfg(test)`: ff-core's unit-test binary
+        (216 s) and the game crate's `it` binary (183 s), with the game
+        crate's own unit-test binary (102 s, for 80 tests) alongside.
+      * Follow-up: the game crate's 80 unit tests cost a full second
+        compile of an 89k-line crate on every push; the ones that do not
+        need private items belong in `tests/it/`, and the rest could sit
+        behind one small `#[cfg(test)]` seam, so that unit exists no more.
+      * Follow-up: `codegen-units` for the test profile has not been
+        measured on the runner; the timing report is uploaded on every
+        run, so the next person can try 16 against the default 256.
       * Follow-up: run the ff-core and freight-fate test binaries
         concurrently once the build is done (cargo runs them one after
         another), worth about half a minute on the runner.

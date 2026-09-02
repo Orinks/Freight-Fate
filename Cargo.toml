@@ -91,8 +91,12 @@ debug = 0
 # which is true and does not carry over here: the suite drives whole
 # simulated trips, and at opt-level 0 one playtest binary took 105 seconds
 # and ff-core alone took 100. Tests are compiled once and run over and over,
-# so the trade runs the other way from the game build.
-opt-level = 2
+# so the trade runs the other way from the game build. Level 1, not 2: at
+# four threads the game crate's suite ran in 60 s at level 1 against 58 s
+# at level 2 (2026-09-02), and the hosted Windows runner spends four
+# minutes compiling the two big test binaries, which is where the LLVM
+# time saved by the lower level goes.
+opt-level = 1
 
 [profile.dev.package."*"]
 # Dependencies are compiled once and never edited, so optimising them costs
