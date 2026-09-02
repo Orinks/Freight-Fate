@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Choose how often you hear that a career is backed up.** A new row in
+  Settings, Speech, called Say when a career is backed up, sets whether the
+  short all-clear after a save is spoken every time, once a session for each
+  career, or never. Backups keep going whatever you choose, and a backup that
+  is refused is always spoken. Every time is still the default. Asked for by
+  MariahL, who heard the line a lot on a long run.
+
 - **Back up this career now.** Each career's screen on the Cloud backup
   menu now has a row that sends this computer's save to your orinks.net
   account straight away and tells you the result: backed up, already backed

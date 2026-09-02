@@ -22,7 +22,7 @@ use ff_core::settings::Settings;
 
 use crate::account_achievements::AccountAchievements;
 use crate::audio::{Audio, AudioEngine, BassBackend, NullBackend};
-use crate::cloud_saves::{CloudSaves, CloudSavesOptions};
+use crate::cloud_saves::{BackupAnnouncements, CloudSaves, CloudSavesOptions};
 use crate::controller::ControllerManager;
 use crate::discord_presence::{DiscordPresence, DiscordPresenceOptions};
 use crate::online_journal::JournalOutbox;
@@ -328,6 +328,7 @@ impl App {
             enabled: settings.cloud_saves,
             identity: identity.clone(),
             data_dir: data_dir.clone(),
+            backup_announcements: BackupAnnouncements::from_setting(&settings.backup_announcements),
             ..Default::default()
         });
         let journal = JournalOutbox::new(

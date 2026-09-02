@@ -34,7 +34,7 @@
 //! `Profile` lives outside this crate: the service takes profile snapshots as
 //! JSON values, and [`restore_to_disk`] writes through the caller's hooks.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
 use std::io::{Read, Write};
 use std::path::PathBuf;
@@ -196,6 +196,37 @@ pub struct CloudSavesOptions {
     pub sync_state: Option<Arc<SyncState>>,
     /// Where the sync state lives when `sync_state` is `None`.
     pub data_dir: PathBuf,
+    /// How often the background all-clear is spoken; see [`BackupAnnouncements`].
+    pub backup_announcements: BackupAnnouncements,
+}
+
+/// How often a background backup's all-clear ("<career> is backed up.") is
+/// spoken. The `backup_announcements` setting, as the service reads it.
+///
+/// Every accepted upload was the owner's 2026-08-15 call (silence read as
+/// failure to a driver who cannot see the status line), and stays the
+/// default. A tester who saves often hears it a lot (MariahL, 2026-09-02),
+/// so the other two tiers thin it: once per career per session, or never.
+/// Refusals and the "backed up again" recovery line are not part of the
+/// quiet at any tier -- a career silently stopping backing up is the very
+/// failure the all-clear was added to rule out.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum BackupAnnouncements {
+    #[default]
+    Every,
+    Once,
+    Off,
+}
+
+impl BackupAnnouncements {
+    /// The setting's stored word; anything unrecognised is the default.
+    pub fn from_setting(value: &str) -> Self {
+        match value {
+            "once" => Self::Once,
+            "off" => Self::Off,
+            _ => Self::Every,
+        }
+    }
 }
 
 impl Default for CloudSavesOptions {
@@ -210,6 +241,7 @@ impl Default for CloudSavesOptions {
             threaded: true,
             sync_state: None,
             data_dir: PathBuf::from("."),
+            backup_announcements: BackupAnnouncements::Every,
         }
     }
 }
@@ -243,6 +275,10 @@ struct State {
     // drains.
     announcements: Vec<String>,
     announced_causes: HashMap<String, String>,
+    // How often the all-clear speaks, and the careers whose all-clear has
+    // been spoken this session (the "once" tier's memory).
+    backup_announcements: BackupAnnouncements,
+    all_clear_spoken: HashSet<String>,
     status: String,
 }
 
@@ -301,6 +337,7 @@ impl CloudSaves {
                 meaningful_play,
                 state: Mutex::new(State {
                     status: "Cloud backup is ready.".to_string(),
+                    backup_announcements: options.backup_announcements,
                     ..State::default()
                 }),
                 wake: Event::new(),
@@ -366,6 +403,14 @@ impl CloudSaves {
             self.inner.stop_worker();
             self.inner.state.lock().unwrap().pending.clear();
         }
+    }
+
+    /// How often the background all-clear speaks (from the settings menu).
+    /// Takes effect on the next accepted upload; the "once" tier's memory of
+    /// which careers were already announced this session is kept, so
+    /// stepping through the tiers never repeats an all-clear.
+    pub fn set_backup_announcements(&self, mode: BackupAnnouncements) {
+        self.inner.state.lock().unwrap().backup_announcements = mode;
     }
 
     /// Begin the worker after app initialisation. Safe when disabled.
@@ -806,9 +851,19 @@ revision {} is waiting in the Cloud backup menu",
             return;
         }
         if recovered {
+            // Answers a refusal the driver heard: never thinned by the
+            // cadence setting.
             st.announcements.push(recovery_status(name));
         } else if uploaded {
-            st.announcements.push(backup_status(name));
+            let first_this_session = st.all_clear_spoken.insert(name.to_string());
+            let speak = match st.backup_announcements {
+                BackupAnnouncements::Every => true,
+                BackupAnnouncements::Once => first_this_session,
+                BackupAnnouncements::Off => false,
+            };
+            if speak {
+                st.announcements.push(backup_status(name));
+            }
         }
     }
 

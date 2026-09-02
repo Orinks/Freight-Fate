@@ -102,6 +102,13 @@ pub const CHATTER_FIELDS: [&str; 5] = [
 /// village layer on another -- the player never needs to know which).
 pub const PLACE_CALLOUT_MODES: [&str; 3] = ["off", "sparse", "all"];
 
+/// How often a background cloud backup's all-clear ("<career> is backed
+/// up.") is spoken: at every accepted upload, once per career per session,
+/// or never. Refusals and the "backed up again" recovery line speak at
+/// every tier -- a career silently stopping backing up is the failure the
+/// all-clear exists to rule out.
+pub const BACKUP_ANNOUNCEMENT_MODES: [&str; 3] = ["every", "once", "off"];
+
 /// How much of the lane-holding work the truck does for the driver. The
 /// setting used to be called ``steering_assist`` and its values read exactly
 /// backwards: "off" meant the truck held the lane FOR you and took your
@@ -503,6 +510,9 @@ settings_fields! {
     place_callouts: String = "sparse" => str_checked,
     /// speak "N of M" position in menus
     announce_menu_position: bool = true => bool_truthy,
+    /// how often "<career> is backed up." is spoken after a background
+    /// cloud backup: "every" upload, "once" per career per session, "off"
+    backup_announcements: String = "every" => str_checked,
     /// driving events on a separate voice
     sapi_events: bool = true => bool_truthy,
     /// which voice that is (e.g. SAPI/OneCore)

@@ -9,8 +9,8 @@ use serde_json::{Map, Value};
 
 use super::{
     data_dir, lane_keeping_from_legacy, lane_keeping_to_legacy, Settings, ACC_GAP_CHOICES,
-    ACC_GAP_DEFAULT, DESCENT_SPEED_CONTROL_MODES, DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS,
-    LANE_CUE_LOUDNESS_MODES, LANE_KEEPING_FALLBACK, LANE_KEEPING_MODES,
+    ACC_GAP_DEFAULT, BACKUP_ANNOUNCEMENT_MODES, DESCENT_SPEED_CONTROL_MODES, DRIVING_ASSIST_FIELDS,
+    DRIVING_ASSIST_PRESETS, LANE_CUE_LOUDNESS_MODES, LANE_KEEPING_FALLBACK, LANE_KEEPING_MODES,
     LANE_KEEPING_RENAME_NOTICES, PACE_RETIRED_NOTICES, PEDAL_LATCH_MODES, PLACE_CALLOUT_MODES,
     PROFILE_SHARING_CONSENT_VERSION, RETIRED_TIME_SCALE, SETTINGS_VERSION, TIME_SCALE_FALLBACK,
     UPDATE_CHANNELS,
@@ -520,6 +520,9 @@ impl Settings {
         }
         if !PLACE_CALLOUT_MODES.contains(&s.place_callouts.as_str()) {
             s.place_callouts = "sparse".to_string();
+        }
+        if !BACKUP_ANNOUNCEMENT_MODES.contains(&s.backup_announcements.as_str()) {
+            s.backup_announcements = "every".to_string();
         }
         // (cloud_saves, the mastodon fields, live_weather_controls_calendar
         // and duck_audio_for_speech were type-checked in the raw copy.)

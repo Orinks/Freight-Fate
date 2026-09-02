@@ -41,7 +41,7 @@ use ff_core::speech_text::achievement_announced;
 
 use crate::account_achievements::AccountAchievements;
 use crate::audio::{Audio, VolumeUpdate};
-use crate::cloud_saves::CloudSaves;
+use crate::cloud_saves::{BackupAnnouncements, CloudSaves};
 use crate::controller::ControllerManager;
 use crate::discord_presence::DiscordPresence;
 use crate::meaningful_play::MeaningfulPlayReason;
@@ -627,6 +627,11 @@ impl GameContext {
     pub fn apply_cloud_saves(&mut self) {
         let enabled = self.online_enabled(self.settings.cloud_saves);
         self.services.cloud.set_enabled(enabled);
+        self.services
+            .cloud
+            .set_backup_announcements(BackupAnnouncements::from_setting(
+                &self.settings.backup_announcements,
+            ));
     }
 
     /// Reflect the Mastodon sharing setting (e.g. after a settings change).

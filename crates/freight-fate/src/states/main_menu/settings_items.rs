@@ -9,8 +9,9 @@ use ff_core::settings::Settings;
 
 use super::settings::{Adjust, SettingsCategoryState};
 use super::settings_actions::{
-    acc_gap_label, assist_preset_label, cue_loudness_label, descent_level_label, event_voice_label,
-    hos_label, lane_keeping_label, pace_label, update_channel,
+    acc_gap_label, assist_preset_label, backup_announcements_label, cue_loudness_label,
+    descent_level_label, event_voice_label, hos_label, lane_keeping_label, pace_label,
+    update_channel,
 };
 use crate::app::GameContext;
 use crate::states::base::{Label, Menu, MenuItem};
@@ -258,6 +259,21 @@ impl SettingsCategoryState {
                 action: adjust(|s, ctx, d| s.toggle_menu_position(ctx, d)),
                 help: "When on, menus say the position, like 3 of 10, after each option. \
                        Turn off to hear only the option.",
+            },
+            SpeechSpec {
+                label: dyn_label(|s| {
+                    format!(
+                        "Say when a career is backed up: {}",
+                        backup_announcements_label(s)
+                    )
+                }),
+                action: adjust(|s, ctx, d| s.cycle_backup_announcements(ctx, d)),
+                help: "How often you hear that a career is backed up to your \
+                       orinks.net account after a save. Every time says it after \
+                       each save. Once a session says it the first time each career \
+                       is backed up after the game starts. Never keeps it quiet. \
+                       Backups keep going whatever you choose, and a backup that \
+                       is refused is always spoken.",
             },
             SpeechSpec {
                 label: dyn_label(|s| format!("Driving event voice: {}", event_voice_label(s))),

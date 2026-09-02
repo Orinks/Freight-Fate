@@ -4,8 +4,9 @@
 
 use ff_core::pyfmt::{py_str_float, round_py_n};
 use ff_core::settings::{
-    acc_gap_seconds, Settings, ACC_GAP_CHOICES, ACC_GAP_DEFAULT, DRIVING_ASSIST_FIELDS,
-    DRIVING_ASSIST_PRESETS, LANE_KEEPING_MODES, PLACE_CALLOUT_MODES, TIME_SCALES,
+    acc_gap_seconds, Settings, ACC_GAP_CHOICES, ACC_GAP_DEFAULT, BACKUP_ANNOUNCEMENT_MODES,
+    DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS, LANE_KEEPING_MODES, PLACE_CALLOUT_MODES,
+    TIME_SCALES,
 };
 use ff_core::sim::hos::clock_text;
 use ff_core::sim::season::{date_text, real_clock_game_hours};
@@ -126,6 +127,15 @@ pub(super) fn event_voice_label(s: &Settings) -> String {
     match s.event_backend.as_str() {
         "OneCore" => "Windows OneCore".to_string(),
         other => other.to_string(),
+    }
+}
+
+/// The spoken value of the "Say when a career is backed up" row.
+pub(super) fn backup_announcements_label(s: &Settings) -> &'static str {
+    match s.backup_announcements.as_str() {
+        "once" => "once a session",
+        "off" => "never",
+        _ => "every time",
     }
 }
 
@@ -431,6 +441,19 @@ impl SettingsCategoryState {
 
     pub(super) fn toggle_menu_position(&mut self, ctx: &mut GameContext, _d: i64) {
         ctx.settings.announce_menu_position = !ctx.settings.announce_menu_position;
+        self.announce(ctx);
+    }
+
+    pub(super) fn cycle_backup_announcements(&mut self, ctx: &mut GameContext, d: i64) {
+        let i = cycle_index(
+            &BACKUP_ANNOUNCEMENT_MODES,
+            &ctx.settings.backup_announcements,
+            d,
+            0,
+        );
+        ctx.settings.backup_announcements = BACKUP_ANNOUNCEMENT_MODES[i].to_string();
+        save_settings(&ctx.settings);
+        ctx.apply_cloud_saves();
         self.announce(ctx);
     }
 

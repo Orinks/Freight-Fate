@@ -1295,6 +1295,15 @@ Everything not listed here ships fine after 1.9.0.
       never written to settings. Pinned by a test that uses the full-voice
       capture, which offers OneCore but reports SAPI, exactly the lagging
       answer.
+- [x] **"<career> is backed up" every save is a lot on a long run (MariahL,
+      2026-09-02) -- DONE 2026-09-02.** New Speech row, "Say when a career
+      is backed up: every time / once a session / never". The owner's
+      2026-08-15 default (every accepted upload speaks) is unchanged; once
+      a session speaks each career's first all-clear after launch; never is
+      silent. Refusals and the "backed up again" recovery line speak at every
+      tier, because a career silently stopping backing up is the failure the
+      all-clear exists to rule out. Stored as `backup_announcements`, read by
+      the cloud queue at startup and on every step of the row.
 - [ ] **A staged limit drop should be taken in stages (Shane, 2026-08-15).**
       Approaching roadwork the truck hears "speed limit 55 miles per hour,
       then construction zone 45" and then sheds straight to 45, never

@@ -80,12 +80,14 @@ fn old_stopping_toggles_migrate_to_the_one_facility_assist() {
 // -- the field table -----------------------------------------------------------
 
 #[test]
-fn the_struct_carries_the_seventy_three_persisted_fields_in_python_order() {
-    assert_eq!(Settings::FIELD_NAMES.len(), 73);
+fn the_struct_carries_the_seventy_four_persisted_fields_in_python_order() {
+    // 73 came over from the Python dataclass; backup_announcements
+    // (2026-09-02) is the first field added on the Rust side.
+    assert_eq!(Settings::FIELD_NAMES.len(), 74);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
-    assert_eq!(Settings::FIELD_NAMES[72], "settings_layout_notice_from");
+    assert_eq!(Settings::FIELD_NAMES[73], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 73);
+    assert_eq!(pairs.len(), 74);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -121,7 +123,8 @@ fn the_defaults_match_the_python_dataclass() {
         "duck_audio_for_speech": false, "driving_speech": "standard", "chatter_parks": true,
         "chatter_rivers": true, "chatter_passes": true, "chatter_museums": true,
         "chatter_billboards": true, "place_callouts": "sparse",
-        "announce_menu_position": true, "sapi_events": true, "event_backend": "SAPI",
+        "announce_menu_position": true, "backup_announcements": "every",
+        "sapi_events": true, "event_backend": "SAPI",
         "speech_rate": 0.5, "speech_pitch": 0.5, "speech_volume": 1.0, "speech_voice": "",
         "update_channel": "", "skipped_update": "", "discord_presence": true,
         "online_presence": false, "profile_sharing_consent_version": 0,
@@ -135,7 +138,7 @@ fn the_defaults_match_the_python_dataclass() {
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 73);
+    assert_eq!(expected.len(), 74);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }
@@ -1060,6 +1063,24 @@ fn test_one_alpha_day_village_bool_migrates() {
         assert_eq!(Settings::load().place_callouts, "sparse");
         write_settings_file(r#"{"chatter_villages": false, "place_callouts": "all"}"#);
         assert_eq!(Settings::load().place_callouts, "all");
+    });
+}
+
+#[test]
+fn test_backup_announcements_screens_to_every_time() {
+    // MariahL, 2026-09-02: the all-clear cadence row. A missing or junk
+    // value keeps the owner's default of speaking after every save.
+    with_data_dir(|_| {
+        write_settings_file(r#"{}"#);
+        assert_eq!(Settings::load().backup_announcements, "every");
+        write_settings_file(r#"{"backup_announcements": "once"}"#);
+        assert_eq!(Settings::load().backup_announcements, "once");
+        write_settings_file(r#"{"backup_announcements": "off"}"#);
+        assert_eq!(Settings::load().backup_announcements, "off");
+        write_settings_file(r#"{"backup_announcements": "loud"}"#);
+        assert_eq!(Settings::load().backup_announcements, "every");
+        write_settings_file(r#"{"backup_announcements": 3}"#);
+        assert_eq!(Settings::load().backup_announcements, "every");
     });
 }
 

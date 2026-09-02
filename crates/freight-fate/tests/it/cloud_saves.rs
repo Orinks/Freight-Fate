@@ -27,8 +27,8 @@ use freight_fate::cloud_saves::{
     backup_status, backup_summary, classify_upload_failure, cloud_content, conflict_status,
     delete_save, download_save, list_saves, profile_dict_from_content, recovery_status,
     rejection_status, restore_to_disk, save_slot_name, set_public_save, upload_save, url_quote,
-    CloudAuthError, CloudSaves, CloudSavesOptions, DownloadError, PublicKeys, RestoreError,
-    RestoreHooks, SavesList, SyncState, AUTH_HELP, AUTH_PAUSED_STATUS, DEBOUNCE_S,
+    BackupAnnouncements, CloudAuthError, CloudSaves, CloudSavesOptions, DownloadError, PublicKeys,
+    RestoreError, RestoreHooks, SavesList, SyncState, AUTH_HELP, AUTH_PAUSED_STATUS, DEBOUNCE_S,
     RETRY_INTERVAL_S,
 };
 use freight_fate::meaningful_play::MeaningfulPlayReason;
@@ -2225,6 +2225,128 @@ fn test_a_background_backup_says_it_was_backed_up() {
     assert_eq!(
         recovery_status("Road Star"),
         "Road Star is backed up again."
+    );
+}
+
+// -- how often the all-clear speaks (MariahL, 2026-09-02: "you hear a lot that --
+// -- your character is backed up ... maybe only say it every so often")
+
+fn make_service_announcing(
+    transport: &Arc<FakeTransport>,
+    clock: &Arc<ManualClock>,
+    mode: BackupAnnouncements,
+) -> Service {
+    let dir = tempfile::tempdir().unwrap();
+    let service = CloudSaves::new(CloudSavesOptions {
+        enabled: true,
+        identity: Some(identity()),
+        clock: clock.clock(),
+        transport: transport.clone(),
+        threaded: false,
+        data_dir: dir.path().to_path_buf(),
+        backup_announcements: mode,
+        ..CloudSavesOptions::default()
+    });
+    Service { service, _dir: dir }
+}
+
+#[test]
+fn test_once_a_session_speaks_each_career_first_backup_only() {
+    let transport = FakeTransport::revisions();
+    let clock = ManualClock::new();
+    let service = make_service_announcing(&transport, &clock, BackupAnnouncements::Once);
+
+    service.queue_backup("Road Star", profile("Road Star", 5000.0));
+    drain(&service, &clock);
+    assert_eq!(
+        service.take_announcements(),
+        vec!["Road Star is backed up."]
+    );
+
+    // Every later accepted upload of that career this session is silent.
+    for i in 1..=3 {
+        service.queue_backup("Road Star", profile("Road Star", 5000.0 + i as f64));
+        drain(&service, &clock);
+    }
+    assert!(service.take_announcements().is_empty());
+
+    // Another career still gets its first all-clear.
+    service.queue_backup("Night Owl", profile("Night Owl", 6000.0));
+    drain(&service, &clock);
+    assert_eq!(
+        service.take_announcements(),
+        vec!["Night Owl is backed up."]
+    );
+}
+
+#[test]
+fn test_all_clear_off_stays_silent_but_still_answers_a_spoken_refusal() {
+    let transport = FakeTransport::revisions();
+    let clock = ManualClock::new();
+    let service = make_service_announcing(&transport, &clock, BackupAnnouncements::Off);
+
+    service.queue_backup("Road Star", profile("Road Star", 5000.0));
+    drain(&service, &clock);
+    assert!(service.take_announcements().is_empty());
+
+    // Refusals are never part of the quiet: the driver must hear a career
+    // stop backing up, and then hear it recover.
+    transport.set_error(Some(rejected_error("impossible_money")));
+    service.queue_backup("Road Star", profile("Road Star", 5001.0));
+    drain(&service, &clock);
+    assert_eq!(service.take_announcements().len(), 1);
+
+    transport.set_error(None);
+    service.queue_backup("Road Star", profile("Road Star", 5002.0));
+    drain(&service, &clock);
+    assert_eq!(
+        service.take_announcements(),
+        vec!["Road Star is backed up again."]
+    );
+}
+
+#[test]
+fn test_all_clear_cadence_can_change_mid_session() {
+    let transport = FakeTransport::revisions();
+    let clock = ManualClock::new();
+    let service = make_service(&transport, &clock); // "every" by default
+
+    service.queue_backup("Road Star", profile("Road Star", 5000.0));
+    drain(&service, &clock);
+    assert_eq!(service.take_announcements().len(), 1);
+
+    service.set_backup_announcements(BackupAnnouncements::Off);
+    service.queue_backup("Road Star", profile("Road Star", 5001.0));
+    drain(&service, &clock);
+    assert!(service.take_announcements().is_empty());
+
+    service.set_backup_announcements(BackupAnnouncements::Every);
+    service.queue_backup("Road Star", profile("Road Star", 5002.0));
+    drain(&service, &clock);
+    assert_eq!(
+        service.take_announcements(),
+        vec!["Road Star is backed up."]
+    );
+}
+
+#[test]
+fn test_backup_announcement_modes_read_from_the_setting() {
+    assert_eq!(
+        BackupAnnouncements::from_setting("every"),
+        BackupAnnouncements::Every
+    );
+    assert_eq!(
+        BackupAnnouncements::from_setting("once"),
+        BackupAnnouncements::Once
+    );
+    assert_eq!(
+        BackupAnnouncements::from_setting("off"),
+        BackupAnnouncements::Off
+    );
+    // Anything else keeps the owner's 2026-08-15 default: say it every time.
+    assert_eq!(
+        BackupAnnouncements::from_setting("loud"),
+        BackupAnnouncements::Every
     );
 }
 
