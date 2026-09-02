@@ -1024,6 +1024,11 @@ Everything not listed here ships fine after 1.9.0.
         crate a second time with `cfg(test)`: ff-core's unit-test binary
         (216 s) and the game crate's `it` binary (183 s), with the game
         crate's own unit-test binary (102 s, for 80 tests) alongside.
+        Test profile at opt-level 1 (run 33655640563, warm rerun): 6 m 23 s
+        end to end, build 3 m 30 s, tests 1 m 52 s. That is the hosted
+        Windows floor for this shape of suite; the next real step is either
+        the unit-test move below or a self-hosted runner, where the same
+        build takes under a minute on a desktop.
       * Follow-up: the game crate's 80 unit tests cost a full second
         compile of an 89k-line crate on every push; the ones that do not
         need private items belong in `tests/it/`, and the rest could sit
