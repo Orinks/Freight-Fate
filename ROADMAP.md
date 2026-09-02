@@ -215,7 +215,10 @@ that bite first, of the sweep's 49 gating items:
       tester thread; not reproduced -- ask for the log first).
 - [ ] Testers hear sounds quieter at the quiet speech rung; three
       suspects eliminated, still unexplained.
-- [ ] Departing straight into a hazard at route mile zero.
+- [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE:
+      the real-zone floor and the merge-free opening miles landed
+      2026-08-16; what remains is departure chains for the other 72
+      percent of facilities, a data project.
 
 **World-data debts that read as bugs on the road:**
 
