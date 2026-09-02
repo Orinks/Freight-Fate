@@ -907,7 +907,23 @@ impl Menu for ConfirmQuitState {
             MenuItem::new("No, stay in Freight Fate", |s: &mut Self, ctx| {
                 s.go_back(ctx)
             }),
-            MenuItem::new("Yes, quit Freight Fate", |_s: &mut Self, ctx| ctx.quit()),
+            MenuItem::new("Yes, quit Freight Fate", |_s: &mut Self, ctx| {
+                // The close button is the one exit that skips the terminal's
+                // own save, so it saves the way Escape there does. Nowhere
+                // else has anything to write: a drive saves only at a stop,
+                // and the title is already saved.
+                // `try_borrow`: this menu is the top state and is borrowed
+                // for the duration of its own callback.
+                let at_terminal = ctx.states().iter().any(|state| {
+                    state
+                        .try_borrow()
+                        .is_ok_and(|state| state.as_any().is::<CityMenuState>())
+                });
+                if at_terminal {
+                    ctx.save_profile();
+                }
+                ctx.quit()
+            }),
         ]
     }
 }

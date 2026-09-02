@@ -810,11 +810,12 @@ impl App {
         // a player actually waits on reads as hours (Jessie's log, 2026-09-01:
         // "quit: saved 13292556 ms" for a save that took 700).
         boot_timing::mark("quit: requested");
-        // Through the guard, not straight to disk: the quit-time save is how
-        // a sandboxed playtest session leaked its whole run onto the real
-        // career (owner-found live: the Denver snow run persisted at quit
-        // despite the sandbox holding for the entire drive).
-        self.ctx.save_profile();
+        // No career save here. Every exit from the terminal (Escape, "Quit to
+        // main menu", the close button's confirmation) saves on its way out,
+        // a drive can only be saved at a stop, and the title has nothing new.
+        // The quit-time save only rewrote a matching file -- and each rewrite
+        // queued a cloud backup that quit then waited up to five seconds on
+        // (Jessie's log, 2026-09-01). Only the settings are written here.
         if let Err(e) = self.ctx.settings.save() {
             log::warn!("Could not save settings: {e}");
         }

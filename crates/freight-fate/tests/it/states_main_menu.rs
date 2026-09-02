@@ -502,3 +502,53 @@ fn a_headless_run_on_the_no_sound_device_arms_no_notice() {
     let mut engine = AudioEngine::from_preference("");
     assert!(!engine.take_silence_notice());
 }
+
+/// Quitting writes nothing: every way out of the terminal already saved.
+///
+/// Escape and "Quit to main menu" both save and say so, and every terminal
+/// action that changes the career saves on the spot, so the quit-time save
+/// only rewrote a file that already matched -- and each rewrite queued a
+/// fresh cloud backup that quit then waited on. Jessie's log, 2026-09-01:
+/// 0.7 seconds on the save and 2.3 on the upload it caused, for nothing.
+#[test]
+fn test_quitting_from_the_title_leaves_the_save_alone() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named_in("Quit Writes Nothing", DEFAULT_CITY));
+    let path = app.ctx.profile.as_ref().expect("a career").path();
+    assert!(!path.exists(), "the career starts unsaved");
+    app.push_state(MainMenuState::new());
+    app.set_running(true);
+
+    app.handle_close_request();
+    select::<ConfirmQuitState>(&mut app, "Yes");
+    assert!(!app.running());
+    assert!(
+        !path.exists(),
+        "confirming quit from the title wrote a save"
+    );
+
+    app.shutdown();
+    assert!(!path.exists(), "shutdown wrote a save");
+}
+
+/// The window's close button at the terminal is the one exit that skipped
+/// the terminal's own save, so its confirmation saves the way Escape does.
+#[test]
+fn test_closing_the_window_at_the_terminal_saves_before_quitting() {
+    let mut app = TestApp::new();
+    app.ctx.profile = Some(Profile::named_in("Close At Terminal", DEFAULT_CITY));
+    let path = app.ctx.profile.as_ref().expect("a career").path();
+    assert!(!path.exists(), "the career starts unsaved");
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
+    app.set_running(true);
+
+    app.handle_close_request();
+    assert!(is::<ConfirmQuitState>(&app));
+    select::<ConfirmQuitState>(&mut app, "Yes");
+    assert!(!app.running());
+    assert!(
+        path.exists(),
+        "closing the window at the terminal must save before it quits"
+    );
+}

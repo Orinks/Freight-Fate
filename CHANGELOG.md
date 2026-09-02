@@ -1163,6 +1163,12 @@
 
 ### Fixed
 
+- **Quitting the game no longer pauses on the way out.** Choosing Quit
+  used to save your career one more time and then wait for a fresh cloud
+  backup of it, even though leaving the terminal had already saved. The
+  game now closes as soon as you choose Quit. Escape and Quit to main menu
+  at the terminal still save, and so does closing the window from there.
+
 - **Curve speed assistance now slows for bends even with curve callouts
   switched off.** Before, turning the bend announcements off also turned
   the assist off without saying so: adaptive cruise carried the truck into

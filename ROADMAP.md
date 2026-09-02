@@ -880,6 +880,19 @@ Everything not listed here ships fine after 1.9.0.
       process leaves final SDL cleanup to the operating system. Other platforms
       retain normal SDL shutdown.
 
+- [x] **Rust port: quitting writes no career save and waits on no cloud
+      backup (2026-09-01).** Jessie's log put 0.7 seconds in the quit-time
+      save and 2.3 more in the cloud upload it queued, then quit waited on
+      that upload. Every exit from the terminal (Escape, "Quit to main menu")
+      already saves and says so, a drive saves only at a stop, and the title
+      has nothing new, so the quit save only rewrote a matching file. Removed:
+      quit now writes settings alone. The window's close button at the
+      terminal was the one exit that skipped the terminal's own save, so its
+      confirmation now saves the way Escape does. Pinned by two tests in
+      `tests/it/states_main_menu.rs`: quitting from the title leaves the save
+      file alone through shutdown, and closing the window at the terminal
+      saves before it quits.
+
 - [x] **Rust port: a test run can no longer open a real web browser
       (2026-08-24).** The driver setup page opened in the owner's browser
       while the suite was running. Opening a page went through one seam whose
