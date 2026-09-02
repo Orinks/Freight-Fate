@@ -805,6 +805,11 @@ impl App {
     }
 
     pub fn shutdown(&mut self) {
+        // Close the phase clock on the session first, or the save below is
+        // charged with every millisecond since launch and the one quit phase
+        // a player actually waits on reads as hours (Jessie's log, 2026-09-01:
+        // "quit: saved 13292556 ms" for a save that took 700).
+        boot_timing::mark("quit: requested");
         // Through the guard, not straight to disk: the quit-time save is how
         // a sandboxed playtest session leaked its whole run onto the real
         // career (owner-found live: the Denver snow run persisted at quit
