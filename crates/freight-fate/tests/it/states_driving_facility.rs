@@ -203,6 +203,133 @@ fn test_fast_crossing_misses_the_gate_and_loops_back() {
 }
 
 #[test]
+fn test_the_speed_keeper_hands_off_at_the_gate_instead_of_missing_it() {
+    // The keeper held the gate zone's own 15 to the gate and the miss rule
+    // read its 15.4 as "too fast": four loop-backs on one delivery (agent
+    // playtest, 2026-09-02). An assist holding the number it was given is
+    // handed off at the gate with a fresh window, never looped.
+    let mut app = TestApp::new();
+    app.ctx.settings.speed_keeper = true;
+    let mut d = a_drive(&mut app);
+    app.clear_speech();
+    at_gate(&mut d, FACILITY_GATE_LIMIT_MPH + 0.4, true);
+    d.speed_control_armed = true;
+    d.keeper_mph = Some(FACILITY_GATE_LIMIT_MPH);
+    d.handle_arrival_gate(&mut app.ctx);
+    assert!(d.trip.finished, "arrived, not looped");
+    assert_eq!(d.gate_miss_count, 0);
+    assert!(d.keeper_mph.is_none(), "the gate hands the pedals back");
+    assert!(d.gate_grace_s > 0.0, "with a reaction window of its own");
+    let line = last_with(&app, "Destination ahead");
+    assert!(line.contains("Speed keeper handing off"), "{line}");
+    // Inside that window the next frame is still an arrival.
+    d.handle_arrival_gate(&mut app.ctx);
+    assert_eq!(d.gate_miss_count, 0);
+}
+
+#[test]
+fn test_slowing_on_the_warning_earns_a_fresh_window_at_the_gate() {
+    // Braked to a stop short of the gate on the pre-gate warning, as told;
+    // the window ran out while parked; the last fifty feet rolled in a few
+    // over -- and that was an instant loop-back (agent playtest,
+    // 2026-09-02). Obeying the warning retires it; a gate reached over the
+    // number afterwards gets the gate's own line and window.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.clear_speech();
+    d.destination_exit_taken = true;
+    d.trip.position_mi = d.trip.total_miles() - 0.3;
+    d.trip.truck.engine_on = true;
+    d.trip.truck.velocity_mps = 40.0 / 2.23694;
+    d.check_gate_approach_warning(&mut app.ctx, 0.016);
+    let grace = d.gate_grace_s;
+    assert!(grace > 0.0);
+    // Stopped short, window spent.
+    d.trip.truck.velocity_mps = 0.0;
+    d.check_gate_approach_warning(&mut app.ctx, grace + 1.0);
+    assert!(!d.gate_speed_warned, "the obeyed warning is retired");
+    // Rolls the last stretch a few over.
+    at_gate(&mut d, FACILITY_GATE_LIMIT_MPH + 5.0, false);
+    d.handle_arrival_gate(&mut app.ctx);
+    assert!(d.trip.finished, "first contact is never a miss");
+    assert_eq!(d.gate_miss_count, 0);
+    assert!(d.gate_grace_s > 0.0);
+    assert!(!lines_with(&app, "Destination ahead").is_empty());
+}
+
+#[test]
+fn test_a_truck_that_never_slowed_keeps_its_spent_window() {
+    // The complement: at 40 the whole way, the warning's window runs out and
+    // stays out, so the gate at 40 is the miss it always was.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.destination_exit_taken = true;
+    d.trip.position_mi = d.trip.total_miles() - 0.3;
+    d.trip.truck.engine_on = true;
+    d.trip.truck.velocity_mps = 40.0 / 2.23694;
+    d.check_gate_approach_warning(&mut app.ctx, 0.016);
+    let grace = d.gate_grace_s;
+    d.check_gate_approach_warning(&mut app.ctx, grace + 1.0);
+    assert!(d.gate_speed_warned);
+    at_gate(&mut d, 40.0, true);
+    d.handle_arrival_gate(&mut app.ctx);
+    assert_eq!(d.gate_miss_count, 1);
+}
+
+#[test]
+fn test_the_rest_key_short_of_the_gate_names_the_gate() {
+    // Stopped and parked fifty feet short of the gate, T opened the
+    // emergency shoulder-sleep dialog (agent playtest, 2026-09-02, twice).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.destination_exit_taken = true;
+    d.trip.position_mi = d.trip.total_miles() - 0.01;
+    d.trip.truck.engine_on = true;
+    d.trip.truck.velocity_mps = 0.0;
+    d.trip.stops.clear();
+    app.clear_speech();
+    let hint = d
+        .gate_short_hint(&app.ctx)
+        .expect("a gate is a truck length ahead");
+    assert!(hint.starts_with("The gate at "), "{hint}");
+    assert!(hint.contains(" ahead. Roll up to it"), "{hint}");
+    let parked_before = d.trip.truck.parking_brake;
+    d.try_rest_stop(&mut app.ctx);
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("The gate at"), "{said}");
+    assert!(!said.contains("shoulder sleep"), "{said}");
+    assert_eq!(
+        d.trip.truck.parking_brake, parked_before,
+        "no dialog opened, so the truck was not secured for one"
+    );
+    // A mile out it is the ordinary rest key.
+    d.trip.position_mi = d.trip.total_miles() - 1.0;
+    assert!(d.gate_short_hint(&app.ctx).is_none());
+}
+
+#[test]
+fn test_the_gate_stop_line_retires_the_ahead_line() {
+    // "Destination ahead ... slow down" cut by "At <facility>. Stop
+    // completely..." came back BEHIND it, telling a truck at the gate to
+    // slow down for the gate (agent playtest, 2026-09-02). The stop line
+    // stamps the live fact the ahead line's rescue gate reads.
+    use freight_fate::states::driving_updates::live;
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    at_gate(&mut d, 10.0, false);
+    live::set_gate_stop_prompted(false);
+    d.handle_arrival_gate(&mut app.ctx);
+    assert!(
+        !live::gate_stop_prompted(),
+        "the ahead line is still worth rescuing"
+    );
+    d.trip.truck.velocity_mps = 2.0 / 2.23694;
+    d.handle_arrival_gate(&mut app.ctx);
+    assert!(d.arrival_full_stop_said);
+    assert!(live::gate_stop_prompted(), "and now it is not");
+}
+
+#[test]
 fn test_slow_crossing_arrives_normally() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);

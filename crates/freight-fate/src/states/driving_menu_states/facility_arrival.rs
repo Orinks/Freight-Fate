@@ -6,6 +6,7 @@
 //! ARE the mixin: the same one row that changes face, worded the same way,
 //! shared with the pickup side.
 
+use ff_core::models::business::{build_business_settlement, SettlementTerms};
 use ff_core::models::trailer_yard::{delivery_plan, pickup_plan, DeliveryPlan};
 use ff_core::music::{select_menu_music_sequence, MenuMusicProfile};
 use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_n};
@@ -18,8 +19,9 @@ use crate::impl_state_for_menu;
 use crate::states::base::{Menu, MenuCore, MenuItem, TimedMessageState};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::{
-    advance_rest_clock, carrier_accessorial_charges, charge_summary, charge_total, hos_mut_of,
-    is_owner_operator, profile_of, wallet_delta, FacilityEngine, DOCKING_MAX_MPH, UNLOADING_WAIT_S,
+    advance_rest_clock, carrier_accessorial_charges, charge_summary, charge_total,
+    has_weigh_station_transponder, hos_mut_of, is_owner_operator, profile_of, wallet_delta,
+    FacilityEngine, DOCKING_MAX_MPH, UNLOADING_WAIT_S,
 };
 use crate::states::driving_menu_states::{keep_rows, settlement_hours, DriveRef};
 
@@ -274,7 +276,31 @@ impl FacilityArrivalState {
             // not at all.
             let driver_charges = profile.fines_owed;
             let owner_op = is_owner_operator(&profile.business_status);
-            let mut net_estimated_pay = (estimated_pay - driver_charges).max(0.0);
+            // A company driver's settlement pays wages, not the carrier's
+            // gross: the board quoted 224 dollars for a load this line then
+            // called 330 of "net driver pay" (agent playtest, 2026-09-02).
+            // The same builder the board's estimate and the settlement use.
+            let driver_gross = if owner_op {
+                estimated_pay
+            } else {
+                let owned: Vec<String> = profile.visible_owned_trailers();
+                let owned_refs: Vec<&str> = owned.iter().map(String::as_str).collect();
+                build_business_settlement(
+                    &profile.business_status,
+                    job,
+                    estimated_pay,
+                    remaining >= 0.0,
+                    0.0,
+                    &SettlementTerms {
+                        carrier_key: Some(&profile.carrier_key),
+                        owned_trailers: &owned_refs,
+                        reputation: Some(profile.career.reputation),
+                        transponder: has_weigh_station_transponder(profile),
+                    },
+                )
+                .net_before_advance
+            };
+            let mut net_estimated_pay = (driver_gross - driver_charges).max(0.0);
             if owner_op {
                 net_estimated_pay =
                     (net_estimated_pay + wallet_delta(&accessorials, tolls)).max(0.0);

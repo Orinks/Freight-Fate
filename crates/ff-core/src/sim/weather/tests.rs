@@ -3006,7 +3006,7 @@ fn test_toll_cues_and_charges_deduplicate() {
     let repeat = trip.update(0.0);
     assert_eq!(
         gps_messages(&advance),
-        vec!["ticket system toll point ahead: New Jersey Turnpike ticket entry. estimated toll 18 dollars will be billed to carrier settlement."]
+        vec!["ticket system toll point ahead: New Jersey Turnpike ticket entry. Estimated toll 18 dollars will be billed to carrier settlement."]
     );
     assert!(gps_events(&repeat).is_empty());
 
@@ -3040,7 +3040,7 @@ fn test_zero_amount_toll_entry_marker_does_not_record_expense() {
     trip.position_mi = 16.1;
     assert_eq!(
         gps_messages(&trip.update(0.0)),
-        vec!["ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. entry will be recorded for carrier settlement."]
+        vec!["ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. Entry will be recorded for carrier settlement."]
     );
     trip.position_mi = 18.0;
     let entry = trip.update(0.0);

@@ -241,6 +241,12 @@ fn test_facility_menu_waits_for_full_stop() {
     ] {
         assert!(paperwork.contains(phrase), "{paperwork}");
     }
+    // A company driver's estimate is wages, not the carrier's gross: the
+    // board quoted 224 dollars for a load this line then called 330 of
+    // "net driver pay" (agent playtest, 2026-09-02).
+    let gross = dollars_after(&paperwork, "current gross payout is ");
+    let net = dollars_after(&paperwork, "estimated net driver pay ");
+    assert!(net > 0.0 && net < gross, "{paperwork}");
 
     let minutes_before_unloading = harness.read_drive(|d| d.trip.game_minutes);
     log.borrow_mut().played.clear();
@@ -661,4 +667,20 @@ fn rest_the_driver(harness: &mut PlaytestHarness, fatigue: f64) {
     profile.hos.driving_min = 0.0;
     profile.hos.duty_min = 0.0;
     profile.fatigue = fatigue;
+}
+
+/// The number (commas allowed) that follows `marker` in `text`.
+fn dollars_after(text: &str, marker: &str) -> f64 {
+    let start = text
+        .find(marker)
+        .unwrap_or_else(|| panic!("{marker:?} in {text:?}"))
+        + marker.len();
+    let digits: String = text[start..]
+        .chars()
+        .take_while(|c| c.is_ascii_digit() || *c == ',' || *c == '.')
+        .filter(|c| *c != ',')
+        .collect();
+    digits
+        .parse()
+        .unwrap_or_else(|_| panic!("a number after {marker:?}: {digits:?}"))
 }

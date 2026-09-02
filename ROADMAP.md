@@ -5752,6 +5752,58 @@ Everything not listed here ships fine after 1.9.0.
       only Plus/Minus or a pad D-pad reach that code, so an operator-side
       key or controller may be landing in the minimized game window;
       unresolved.
+- [x] **Agent-drive findings, 2026-09-02 (Boston to Worcester, the
+      first-day load, standard pacing).** Fixed the same day: the assigned
+      load shipped from the very yard the truck was parked in, and the
+      board launched a two-mile deadhead from the terminal to the terminal
+      (every assigned load did; the pickup now opens in place); the speed
+      keeper held the gate zone's 15 into the gate and the miss rule read
+      its 15.4 as "too fast" -- four loop-backs on one delivery -- so the
+      gate now hands off the keeper with a fresh window and a driver who
+      obeyed the pre-gate warning gets a fresh window too; T fifty feet
+      short of the gate opened the shoulder-sleep dialog; the paperwork
+      quoted the carrier's gross as a company driver's net pay; "Pickup
+      ahead" and "Destination ahead" were rescued behind the gate's own
+      stop line; two sentence-start fragments. And the agent server grew
+      the tools the drive showed it lacked: `pedal` (a bounded hold the
+      loop itself releases -- a hold-then-release round trip is a second
+      or more, twenty seconds of road at standard pacing, and it overshot
+      every limit), `wait_for` (run until a line is heard or a menu opens),
+      `select` (a menu row by label), `cruise` (K and the Ctrl dial to a
+      number, the posted limit, or off) and `status` (the readouts in one
+      call); `observe` now carries speed, the enforced limit and the set
+      points. Verified not bugs: coasting "speed gain" after a release
+      (round-trip latency under compression), music bed names under the
+      wrong weather (pool names; weather only seeds the order), cruise at
+      posted plus five (`ACC_LIMIT_OFFSET_MPH`, by design), and the
+      handoff burst at a ramp end (the pacer's ROUTE flush rescue,
+      designed).
+- [ ] **Exit sign text from the wrong carriageway.** Exit 96 on I-90 West
+      (Boston to Worcester) is announced as "for I-90 East and Mass Pike
+      East toward Framingham, Boston, and Millbury": the bake snapped the
+      eastbound junction's `destination` tags onto the westbound leg
+      (`legs/MA.json`, corridor interchanges, `at_mi` 38.6). Only Millbury
+      is right for a westbound driver; the real sign is I-290 and MA-122
+      toward Worcester. Re-sweep exit destination signs with the junction
+      node filtered to the leg's own direction of travel, and screen for
+      a `via` that names the leg's own highway in the opposite direction
+      (a self-contradiction, per the provenance rules).
+- [ ] **Real time mode's career clock does not follow the wall clock.**
+      A sandbox seeded with `time_scale` 1.0 spoke the computer's time at
+      the wheel (9:41, 9:52) while the career's own clock sat hours
+      behind, so switching to standard mid-trip arrived "at 10:07 AM"
+      after a 2.4-hour trip. `cycle_pace` syncs the calendar only when
+      the player switches INTO real time; a career that starts there, or
+      a copied settings file, never syncs. Decide whether the career
+      calendar should track the wall clock while in real time (and at
+      each departure), then make the yard clock and the driving clock one
+      clock.
+- [ ] **Toll points named for their billing, not their place.** "E-ZPass
+      toll point ahead: Massachusetts Turnpike settlement" reads a ledger
+      word as a place name, and the Pike has been all-electronic since
+      2016 (no ticket settlement). Name toll events for the gantry or
+      plaza they stand at, and re-check ticket-system corridors against
+      current tolling.
 - [x] **Curve speed assistance brakes for the bend on the approach, in
       every driving mode (2026-09-01).** Owner ruling that night, after
       the US-83 drive near Junction, Texas -- every assist on, adaptive

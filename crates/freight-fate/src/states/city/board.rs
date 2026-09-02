@@ -42,6 +42,9 @@ use crate::states::city::{
     LaunchAnnouncement, DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP, PICKUP_CHECK_IN_MIN,
     PICKUP_LOADING_MIN,
 };
+use crate::states::city_pickup::{
+    pickup_snapshot, PickupFacilityState, PickupOptions, PickupSnapshotOptions,
+};
 
 /// The board's class-level `intro_help` (the browsable board; an assigned
 /// board swaps in its own on construction).
@@ -83,6 +86,21 @@ fn settlement_for(p: &Profile, job: &Job, with_reputation: bool) -> BusinessSett
             transponder: has_weigh_station_transponder(p),
         },
     )
+}
+
+/// Whether the job's origin facility is the yard the truck is parked in.
+///
+/// The home terminal is a real facility in the city's list (a template
+/// company yard where the data has none), so the board can hand out loads
+/// that ship from it. Name and city both have to match: a same-named yard
+/// in another city is a drive away.
+pub fn job_origin_is_this_yard(ctx: &GameContext, job: &Job, terminal_name: &str) -> bool {
+    if job.bobtail {
+        return false;
+    }
+    let here = ctx.world.resolve_city_key(&profile(ctx).current_city);
+    ctx.world.resolve_city_key(&job.origin) == here
+        && job.origin_location.trim() == terminal_name.trim()
 }
 
 /// `JobBoardState._locked_reason`: why this driver cannot take the job, or "".
@@ -754,6 +772,16 @@ impl JobBoardState {
             return;
         };
         let terminal = home_terminal(ctx);
+        // The load is staged in the very yard the truck is parked in --
+        // which is where a new hire's assigned loads are. Driving a
+        // two-mile "deadhead from the terminal to the terminal" was the
+        // first thing the agent playtest did on 2026-09-02, on every
+        // assigned load. The shipping office is a walk across the yard, so
+        // the pickup opens right here.
+        if job_origin_is_this_yard(ctx, &job, &terminal.name) {
+            self.accept_at_home_yard(ctx, job, &terminal.name);
+            return;
+        }
         // Junior drivers slip-seat: the yard picks the tractor for the load
         // before the keys change hands, so the truck is decided before the
         // trip snapshot is taken.
@@ -783,6 +811,25 @@ impl JobBoardState {
         // first_dispatch is retired as an award (folded into "first_day" at
         // pickup completion, see city_pickup.py); the catalog entry and id
         // stay so the cloud validator's allow-list never sees a removed id.
+    }
+
+    /// Accept a load staged at the home yard: no deadhead, the shipping
+    /// office is here. Same bookkeeping as the deadhead launch (the slip-seat
+    /// draw, the board cache, a trip snapshot so a save resumes at the
+    /// pickup), then the pickup facility itself instead of a drive to it.
+    fn accept_at_home_yard(&mut self, ctx: &mut GameContext, job: Job, terminal_name: &str) {
+        let equipment_note = slip_seat_note(ctx, &job);
+        profile_mut(ctx).dispatch_board_cache = None;
+        let snapshot = pickup_snapshot(&job, &PickupSnapshotOptions::default());
+        profile_mut(ctx).active_trip = Some(Value::Object(snapshot));
+        ctx.save_profile();
+        ctx.mark_meaningful_play(MeaningfulPlayReason::JobAccepted);
+        ctx.say(&format!(
+            "Dispatch accepted from {terminal_name}.{equipment_note} Your load is staged \
+             here in the yard: check in with the shipping office."
+        ));
+        let state = PickupFacilityState::new(ctx, job, PickupOptions::default());
+        ctx.push_state(state);
     }
 
     /// Accept a carrier-ASSIGNED reposition straight off the board.

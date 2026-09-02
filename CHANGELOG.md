@@ -1192,6 +1192,43 @@
 
 ### Fixed
 
+- **A load staged at your own yard no longer sends you on a drive to it.**
+  When dispatch hands a new hire a load that ships from the very company
+  yard the truck is parked in, accepting it used to start a two-mile
+  deadhead from the terminal to the terminal. The shipping office is a walk
+  across the yard, so the pickup now opens straight away and you check in
+  from there.
+
+- **The speed keeper hands the pedals back at a facility gate instead of
+  the gate calling its speed a miss.** Letting the keeper hold the gate
+  zone's 15 all the way to the entrance used to end in "you carried past
+  the gate, too fast to make the entrance" and a loop through the next
+  turnaround, because the keeper sat a hair over the number it was holding.
+  The gate now says the keeper is handing off, gives you the usual moment
+  to brake, and only a truck still over the limit after that is looped.
+  In the same spirit, a driver who braked to a stop short of the gate when
+  told to, then rolled the last stretch a little quick, gets the gate's own
+  warning and a moment to stop instead of an instant loop-back.
+
+- **The rest key a truck length short of a gate now names the gate.**
+  Pressing T while stopped and parked just short of a pickup or delivery
+  entrance used to open the emergency shoulder-sleep question. It now says
+  how far ahead the gate is and to roll up to it and stop there.
+
+- **The paperwork at a delivery quotes a company driver's wages.** The
+  "estimated net driver pay" line read the carrier's full rate, hundreds of
+  dollars more than the settlement then paid; it now uses the same wage
+  figure the dispatch board quoted when you took the load.
+
+- **"Pickup ahead" and "Destination ahead" are no longer repeated after you
+  are at the gate.** When the gate's own "At the facility, stop" line cut
+  one of them off, the cut line used to come back behind it and tell a
+  stopped truck to slow down for the gate it was sitting at.
+
+- **Two spoken lines that ran into their neighbour now read as their own
+  sentence.** The distance in a route status report ("Half a mile to the
+  gate") and the toll estimate after a toll point's name.
+
 - **Your choice of driving event voice now survives closing the game.**
   Picking Windows OneCore, or any other separate voice, on the Driving event
   voice row used to come back as the previous voice the next time you

@@ -598,5 +598,6 @@ impl DrivingState {
         live::set_speed_mph(self.trip.truck.speed_mph());
         live::set_hazard_active(self.hazard_deadline.is_some());
         live::set_arrival_menu_open(self.arrival_menu_open);
+        live::set_gate_stop_prompted(self.arrival_full_stop_said);
     }
 }

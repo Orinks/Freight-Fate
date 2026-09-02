@@ -778,39 +778,49 @@ impl PlaytestHarness {
         } else {
             self.choose_unlocked_job(setup.job_rank);
         }
-        assert!(self.state_is::<DrivingState>(), "the board did not drive");
-        self.driving = self.app.state();
-        assert_eq!(self.read_drive(|d| d.phase), "pickup");
+        if self.state_is::<PickupFacilityState>() {
+            // A load staged at the home yard opens the shipping office in
+            // place: there is no deadhead to drive, so the truck is already
+            // where the drive below would have taken it.
+            assert!(
+                !setup.arm_speed_control_on_deadhead,
+                "this career's assigned load is staged at the yard; there is no                  deadhead to arm speed control on"
+            );
+        } else {
+            assert!(self.state_is::<DrivingState>(), "the board did not drive");
+            self.driving = self.app.state();
+            assert_eq!(self.read_drive(|d| d.phase), "pickup");
 
-        if setup.arm_speed_control_on_deadhead {
-            self.with_drive(|drive, ctx| {
-                drive.truck_mut().start_engine();
-                drive.truck_mut().set_air_ready(false);
-                drive.truck_mut().velocity_mps = 5.0;
-                drive.handle_key_event(ctx, &key_event(Key::K, None));
-                assert!(drive.speed_control_armed);
+            if setup.arm_speed_control_on_deadhead {
+                self.with_drive(|drive, ctx| {
+                    drive.truck_mut().start_engine();
+                    drive.truck_mut().set_air_ready(false);
+                    drive.truck_mut().velocity_mps = 5.0;
+                    drive.handle_key_event(ctx, &key_event(Key::K, None));
+                    assert!(drive.speed_control_armed);
+                });
+            }
+
+            self.with_drive(|drive, _| {
+                drive.trip.position_mi = drive.trip.total_miles();
+                drive.trip.finished = true;
             });
-        }
-
-        self.with_drive(|drive, _| {
-            drive.trip.position_mi = drive.trip.total_miles();
-            drive.trip.finished = true;
-        });
-        if setup.arm_speed_control_on_deadhead {
+            if setup.arm_speed_control_on_deadhead {
+                self.advance_frame_clock();
+                self.with_drive(|drive, ctx| {
+                    drive.truck_mut().velocity_mps = 26.8;
+                    drive.update_frame(ctx, DT);
+                });
+                assert!(self.state_is::<DrivingState>());
+            }
             self.advance_frame_clock();
             self.with_drive(|drive, ctx| {
-                drive.truck_mut().velocity_mps = 26.8;
+                drive.truck_mut().velocity_mps = 0.0;
+                drive.truck_mut().set_parking_brake();
                 drive.update_frame(ctx, DT);
             });
-            assert!(self.state_is::<DrivingState>());
+            self.finish_timed_state();
         }
-        self.advance_frame_clock();
-        self.with_drive(|drive, ctx| {
-            drive.truck_mut().velocity_mps = 0.0;
-            drive.truck_mut().set_parking_brake();
-            drive.update_frame(ctx, DT);
-        });
-        self.finish_timed_state();
         assert!(
             self.state_is::<PickupFacilityState>(),
             "stopping at the shipper opened no pickup menu"

@@ -243,6 +243,7 @@ pub mod live {
         static SPEED_MPH: Cell<f64> = const { Cell::new(0.0) };
         static HAZARD_ACTIVE: Cell<bool> = const { Cell::new(false) };
         static ARRIVAL_MENU_OPEN: Cell<bool> = const { Cell::new(false) };
+        static GATE_STOP_PROMPTED: Cell<bool> = const { Cell::new(false) };
     }
 
     pub fn set_overspeed_active(value: bool) {
@@ -303,6 +304,21 @@ pub mod live {
 
     pub fn arrival_menu_open() -> bool {
         ARRIVAL_MENU_OPEN.with(|cell| cell.get())
+    }
+
+    /// Whether the gate's own "At <facility>. Stop..." line has been
+    /// spoken -- the mirror of `arrival_full_stop_said`. The "ahead" line
+    /// that precedes it is only worth rescuing while this is still false:
+    /// handed back after the stop line it told a truck already at the gate
+    /// to slow down for it (agent playtest, 2026-09-02, both gates).
+    /// Stamped where the flag moves as well as per frame, because the
+    /// rescue is offered in the same frame the stop line lands.
+    pub fn set_gate_stop_prompted(value: bool) {
+        GATE_STOP_PROMPTED.with(|cell| cell.set(value));
+    }
+
+    pub fn gate_stop_prompted() -> bool {
+        GATE_STOP_PROMPTED.with(|cell| cell.get())
     }
 }
 

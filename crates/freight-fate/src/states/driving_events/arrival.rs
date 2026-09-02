@@ -225,18 +225,44 @@ impl DrivingState {
         }
         self.arrival_stop_said = true;
         self.gate_reminder_s = GATE_REMINDER_INTERVAL_S;
+        // The speed keeper holds a facility gate zone's own 15 right up to
+        // the gate, and the gate is a stop: it hands the pedals back here,
+        // and the line says so, or the driver who trusted it through the
+        // streets hears "slow down" from a truck that was doing exactly
+        // what they had told it to (agent playtest, 2026-09-02, four
+        // loop-backs on one delivery).
+        let keeper_held = self.keeper_mph.is_some();
         self.cancel_cruise(ctx, false);
         ctx.audio.play("ui/warning");
         self.set_status("Destination ahead: slow down and come to a complete stop.");
-        let message = if self.terse_speech(ctx) {
+        let mut message = if self.terse_speech(ctx) {
             format!("Destination ahead: {facility}.")
         } else {
             format!(
                 "Destination ahead: {facility}. Slow down and come to a complete stop at the gate."
             )
         };
+        if keeper_held {
+            message.push_str(if self.terse_speech(ctx) {
+                " Speed keeper off."
+            } else {
+                " Speed keeper handing off; the pedals are yours."
+            });
+        }
         self.seed_gate_grace_at_gate(ctx, &message);
-        let mut opts = SayEvent::new();
+        if keeper_held {
+            // The pedals were the assist's until this very line: the
+            // reaction window starts here, whatever the pre-gate warning's
+            // window did while the keeper was driving.
+            self.gate_speed_warned = true;
+            self.gate_grace_s = self
+                .gate_grace_s
+                .max(self.gate_miss_grace_seconds(ctx, &message));
+        }
+        // Rescued only until the gate's own stop line has landed (see the
+        // pickup gate's twin): rescued behind it, this told a truck at the
+        // gate to slow down for the gate.
+        let mut opts = SayEvent::new().valid(|| !live::gate_stop_prompted());
         opts.category = Some(SpeechCategory::Navigation);
         ctx.say_event_with(message, opts);
     }
@@ -327,6 +353,7 @@ impl DrivingState {
             return;
         }
         self.arrival_full_stop_said = true;
+        live::set_gate_stop_prompted(true);
         self.cancel_cruise(ctx, false);
         ctx.audio.play_with("ui/notify", 0.7, 0.0);
         self.set_status("Destination gate: stop to dock.");

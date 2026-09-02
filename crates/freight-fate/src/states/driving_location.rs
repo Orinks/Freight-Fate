@@ -415,9 +415,15 @@ impl DrivingState {
             None => self.local_where_text(ctx),
         };
         let distance = distance_mi.unwrap_or_else(|| self.trip.remaining_miles());
+        // The distance opens a sentence of its own ("Half a mile to the
+        // gate"), so it starts like one; "half a mile" after the full stop
+        // read as a run-on (agent playtest, 2026-09-02).
         let parts = [
             format!("Route status: {where_text}."),
-            format!("{} to {target}.", self.closing_text(distance.max(0.0))),
+            format!(
+                "{} to {target}.",
+                crate::states::city::py_capitalize(&self.closing_text(distance.max(0.0)))
+            ),
         ];
         let line = parts
             .iter()

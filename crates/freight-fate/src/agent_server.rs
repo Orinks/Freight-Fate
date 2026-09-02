@@ -63,6 +63,22 @@ const MAX_WAIT_SECONDS: f64 = 300.0;
 const MAX_SOUND_LINES: usize = 150;
 /// A tool call must be answered by the game loop within this budget.
 const REPLY_TIMEOUT_SECONDS: u64 = 330;
+/// A `pedal` hold may last at most this long: a pedal is a gesture, and a
+/// held throttle for a minute is what `hold` is for.
+const MAX_PEDAL_SECONDS: f64 = 30.0;
+/// How long after a pedal lifts before its reply is written, so the ears
+/// carry what the truck did with the input, not only the input.
+const PEDAL_SETTLE_SECONDS: f64 = 0.5;
+/// How long `status` waits for the readouts it asked for before replying.
+const STATUS_SETTLE_SECONDS: f64 = 3.0;
+/// Frames between a K tap and reading what cruise captured, and after the
+/// last dial tap before the reply: a tap is two frames, the drive answers
+/// on the next.
+const CRUISE_SETTLE_FRAMES: u32 = 8;
+const CRUISE_REPLY_FRAMES: u32 = 30;
+/// The dial is walked one mile per hour at a time (Ctrl with plus or
+/// minus); no target is ever this far from what K captured.
+const MAX_CRUISE_TAPS: i64 = 60;
 
 // -- ears -----------------------------------------------------------------------------
 
@@ -514,6 +530,35 @@ pub enum Command {
     Wait {
         seconds: f64,
     },
+    /// Hold a key for a bounded stretch and let the LOOP release it. A
+    /// hold-then-release through the client is a second or more of round
+    /// trip, and at standard pacing that is twenty seconds of road: every
+    /// throttle tap overshot the limit and every brake landed late (agent
+    /// drive, 2026-09-02). Replies after the release with what was heard.
+    Pedal {
+        key: Key,
+        text: Option<char>,
+        seconds: f64,
+    },
+    /// Run until a line carrying `text` is heard, or a menu opens, or the
+    /// clock runs out -- whichever first. Replies with what was heard.
+    WaitFor {
+        text: Option<String>,
+        menu: bool,
+        seconds: f64,
+    },
+    /// Choose a menu row by (part of) its label: Home, Down to it, Enter.
+    Select {
+        label: String,
+    },
+    /// Engage adaptive cruise and walk the dial to a number, the posted
+    /// limit, or off -- K and the Ctrl plus/minus taps a player would use.
+    Cruise {
+        target: CruiseTarget,
+    },
+    /// The wheel's readouts in one call: speed, limit, grade, what is ahead,
+    /// the route, the clock, fuel.
+    Status,
     Listen,
     Menu,
     Observe,
@@ -528,9 +573,56 @@ pub enum Command {
     Quit,
 }
 
+/// Where the cruise tool is asked to put the dial.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum CruiseTarget {
+    Mph(f64),
+    /// The limit enforcement is holding the truck to right now.
+    Limit,
+    Off,
+}
+
+type Reply = mpsc::Sender<Result<String, String>>;
+
+/// What a deferred reply is waiting on.
+enum Until {
+    /// The clock alone.
+    Elapsed,
+    /// Any ear line carrying this (lower-cased) text, or the clock.
+    Heard(String),
+    /// A menu on screen, or the clock.
+    Menu,
+}
+
+struct Waiting {
+    remaining: f64,
+    until: Until,
+    /// Where in the ears the scan for `Heard` resumes.
+    scanned: usize,
+    /// False for a plain `wait`; true for the tools whose reply should say
+    /// when the clock, not the thing waited for, ended the wait.
+    reports_timeout: bool,
+    reply: Reply,
+}
+
+enum CruiseStage {
+    /// Tap K if nothing is holding speed, then settle.
+    Engage,
+    /// Frames until the captured set point is read and the dial walked.
+    Settle(u32),
+    /// Frames until the reply, once the dial taps are scripted.
+    Trim(u32),
+}
+
+struct CruisePlan {
+    target: CruiseTarget,
+    stage: CruiseStage,
+    reply: Reply,
+}
+
 pub struct Request {
     command: Command,
-    reply: mpsc::Sender<Result<String, String>>,
+    reply: Reply,
 }
 
 impl Request {
@@ -567,7 +659,7 @@ pub struct AgentPolicy {
     /// The request that woke the game, served on the first frame.
     pending: Option<Request>,
     ears: SharedEars,
-    waiting: Option<(f64, mpsc::Sender<Result<String, String>>)>,
+    waiting: Option<Waiting>,
     /// Keys the agent is holding. Re-asserted every frame, because the
     /// focus-lost safety wipe (built for real keyboards) otherwise drops
     /// them whenever the operator's screen reader moves window focus --
@@ -575,6 +667,12 @@ pub struct AgentPolicy {
     /// first throttle hold worked (window still focused from launch) and
     /// every later one silently died.
     held: Vec<Key>,
+    /// A `pedal`: the key and the real seconds left before the loop lifts
+    /// it. Asserted every frame like a hold; released here, never by the
+    /// client.
+    timed_hold: Option<(Key, f64)>,
+    /// A `cruise` call in progress across frames.
+    cruise_plan: Option<CruisePlan>,
     /// Key events scripted frame by frame, front first. A tap is two
     /// frames -- down, then up -- because the held-key tracker reads a
     /// press and release inside ONE frame as a screen reader's re-injected
@@ -594,6 +692,116 @@ impl AgentPolicy {
         }
     }
 
+    /// Script a finger tap: down on one frame, up on the next.
+    fn tap(&mut self, key: Key, text: Option<char>, mods: Mods) {
+        self.scripted
+            .push_back(vec![InputEvent::KeyDown { key, mods, text }]);
+        self.scripted
+            .push_back(vec![InputEvent::KeyUp { key, mods }]);
+    }
+
+    /// Park a reply until the clock, a line, or a menu releases it.
+    fn wait_until(&mut self, seconds: f64, until: Until, reports_timeout: bool, reply: Reply) {
+        let scanned = self.ears.borrow().lines.len();
+        self.waiting = Some(Waiting {
+            remaining: seconds.clamp(0.05, MAX_WAIT_SECONDS),
+            until,
+            scanned,
+            reports_timeout,
+            reply,
+        });
+    }
+
+    /// The cruise tool's frame: K, then read what it captured, then walk
+    /// the dial, then answer with what was heard.
+    fn advance_cruise_plan(&mut self, input: &mut PlayerInputFrame<'_>) {
+        let Some(mut plan) = self.cruise_plan.take() else {
+            return;
+        };
+        let Some(observed) = input.driving_observation() else {
+            let _ = plan.reply.send(Err(
+                "Not at the wheel: cruise needs the drive on screen.".to_string()
+            ));
+            return;
+        };
+        let holding = observed.cruise_set_mph.is_some() || observed.keeper_mph.is_some();
+        match plan.stage {
+            CruiseStage::Engage => {
+                if plan.target == CruiseTarget::Off {
+                    if holding {
+                        self.tap(Key::K, Some('k'), Mods::NONE);
+                    }
+                    let _ = plan.reply.send(Ok(if holding {
+                        "Cancelling with K. Wait a moment, then listen.".to_string()
+                    } else {
+                        "Nothing was holding speed; cruise is already off.".to_string()
+                    }));
+                    return;
+                }
+                if !holding {
+                    self.tap(Key::K, Some('k'), Mods::NONE);
+                    plan.stage = CruiseStage::Settle(CRUISE_SETTLE_FRAMES);
+                } else {
+                    plan.stage = CruiseStage::Settle(0);
+                }
+            }
+            CruiseStage::Settle(0) => {
+                let Some(set) = observed.cruise_set_mph else {
+                    let _ = plan.reply.send(Ok(if observed.keeper_mph.is_some() {
+                        format!(
+                            "The speed keeper has this zone, so adaptive cruise is not \
+                             available here; the dial is not walked.\n{}",
+                            drain_ears(&self.ears)
+                        )
+                    } else {
+                        format!(
+                            "Adaptive cruise did not engage; listen for why (engine, air, \
+                             speed, or the zone).\n{}",
+                            drain_ears(&self.ears)
+                        )
+                    }));
+                    return;
+                };
+                let wanted = match plan.target {
+                    CruiseTarget::Mph(mph) => Some(mph),
+                    CruiseTarget::Limit => observed.speed_limit_mph,
+                    CruiseTarget::Off => None,
+                };
+                let Some(wanted) = wanted else {
+                    let _ = plan.reply.send(Ok(format!(
+                        "Cruise is set at {set:.0}; no posted limit has been read yet, so \
+                         the dial was left there.\n{}",
+                        drain_ears(&self.ears)
+                    )));
+                    return;
+                };
+                let steps =
+                    ((wanted - set).round() as i64).clamp(-MAX_CRUISE_TAPS, MAX_CRUISE_TAPS);
+                let (key, text) = if steps > 0 {
+                    (Key::Plus, Some('+'))
+                } else {
+                    (Key::Minus, Some('-'))
+                };
+                let fine = Mods {
+                    ctrl: true,
+                    ..Mods::NONE
+                };
+                for _ in 0..steps.unsigned_abs() {
+                    self.tap(key, text, fine);
+                }
+                plan.stage =
+                    CruiseStage::Trim(steps.unsigned_abs() as u32 * 2 + CRUISE_REPLY_FRAMES);
+            }
+            CruiseStage::Settle(frames) => plan.stage = CruiseStage::Settle(frames - 1),
+            CruiseStage::Trim(0) => {
+                let _ = plan.reply.send(Ok(drain_ears(&self.ears)));
+                return;
+            }
+            CruiseStage::Trim(frames) => plan.stage = CruiseStage::Trim(frames - 1),
+        }
+        self.cruise_plan = Some(plan);
+    }
+
     /// One frame. Returns false to end the game loop.
     pub fn step(&mut self, input: &mut PlayerInputFrame<'_>, dt: f64) -> bool {
         if self.quit {
@@ -602,18 +810,49 @@ impl AgentPolicy {
         for key in &self.held {
             input.assert_held(*key);
         }
+        if let Some((key, remaining)) = self.timed_hold.take() {
+            let remaining = remaining - dt;
+            if remaining > 0.0 {
+                input.assert_held(key);
+                self.timed_hold = Some((key, remaining));
+            } else {
+                input.queue_player_input(InputEvent::KeyUp {
+                    key,
+                    mods: Mods::NONE,
+                });
+            }
+        }
         if let Some(frame) = self.scripted.pop_front() {
             for event in frame {
                 input.queue_player_input(event);
             }
         }
-        if let Some((remaining, reply)) = self.waiting.take() {
-            let remaining = remaining - dt;
-            if remaining > 0.0 {
-                self.waiting = Some((remaining, reply));
+        self.advance_cruise_plan(input);
+        if let Some(mut waiting) = self.waiting.take() {
+            waiting.remaining -= dt;
+            let out_of_time = waiting.remaining <= 0.0;
+            let released = match &waiting.until {
+                Until::Elapsed => out_of_time,
+                Until::Heard(needle) => {
+                    let ears = self.ears.borrow();
+                    let from = waiting.scanned.min(ears.lines.len());
+                    let heard = ears.lines[from..]
+                        .iter()
+                        .any(|line| line.to_lowercase().contains(needle.as_str()));
+                    waiting.scanned = ears.lines.len();
+                    heard || out_of_time
+                }
+                Until::Menu => input.menu_rows().is_some() || out_of_time,
+            };
+            if !released {
+                self.waiting = Some(waiting);
                 return true;
             }
-            let _ = reply.send(Ok(drain_ears(&self.ears)));
+            let mut text = drain_ears(&self.ears);
+            if out_of_time && waiting.reports_timeout && !matches!(waiting.until, Until::Elapsed) {
+                text.push_str("\n(the clock ran out before that arrived)");
+            }
+            let _ = waiting.reply.send(Ok(text));
         }
         loop {
             let request = match self.next_request() {
@@ -670,7 +909,105 @@ impl AgentPolicy {
                 Command::Wait { seconds } => {
                     // Replied when the time has really passed; only one wait
                     // can be in flight because the MCP thread blocks on it.
-                    self.waiting = Some((seconds.clamp(0.05, MAX_WAIT_SECONDS), reply));
+                    self.wait_until(seconds, Until::Elapsed, false, reply);
+                    break;
+                }
+                Command::Pedal { key, text, seconds } => {
+                    if self.timed_hold.is_some() {
+                        let _ = reply.send(Err(
+                            "A pedal is already down; its reply arrives when it lifts.".to_string(),
+                        ));
+                        continue;
+                    }
+                    // A client hold of the same key would fight the release.
+                    self.held.retain(|held| *held != key);
+                    input.queue_player_input(InputEvent::KeyDown {
+                        key,
+                        mods: Mods::NONE,
+                        text,
+                    });
+                    let seconds = seconds.clamp(0.05, MAX_PEDAL_SECONDS);
+                    self.timed_hold = Some((key, seconds));
+                    self.wait_until(seconds + PEDAL_SETTLE_SECONDS, Until::Elapsed, false, reply);
+                    break;
+                }
+                Command::WaitFor {
+                    text,
+                    menu,
+                    seconds,
+                } => {
+                    let until = if menu {
+                        Until::Menu
+                    } else {
+                        match text {
+                            Some(text) => Until::Heard(text.to_lowercase()),
+                            None => Until::Elapsed,
+                        }
+                    };
+                    self.wait_until(seconds, until, true, reply);
+                    break;
+                }
+                Command::Select { label } => {
+                    let _ = reply.send(match input.menu_rows() {
+                        None => Err("No menu is on screen right now.".to_string()),
+                        Some((labels, _focus)) => {
+                            let needle = label.to_lowercase();
+                            match labels
+                                .iter()
+                                .position(|row| row.to_lowercase().contains(&needle))
+                            {
+                                None => Err(format!(
+                                    "No row carries {label:?}. The rows are:\n{}",
+                                    labels
+                                        .iter()
+                                        .enumerate()
+                                        .map(|(i, row)| format!("{}. {row}", i + 1))
+                                        .collect::<Vec<_>>()
+                                        .join("\n")
+                                )),
+                                Some(index) => {
+                                    // Home first, so the focus row never matters.
+                                    self.tap(Key::Home, None, Mods::NONE);
+                                    for _ in 0..index {
+                                        self.tap(Key::Down, None, Mods::NONE);
+                                    }
+                                    self.tap(Key::Return, None, Mods::NONE);
+                                    Ok(format!(
+                                        "Selecting row {}: {}. Wait a moment, then listen.",
+                                        index + 1,
+                                        labels[index]
+                                    ))
+                                }
+                            }
+                        }
+                    });
+                }
+                Command::Cruise { target } => {
+                    if self.cruise_plan.is_some() {
+                        let _ =
+                            reply.send(Err("A cruise call is still walking the dial.".to_string()));
+                        continue;
+                    }
+                    self.cruise_plan = Some(CruisePlan {
+                        target,
+                        stage: CruiseStage::Engage,
+                        reply,
+                    });
+                    break;
+                }
+                Command::Status => {
+                    for (key, text) in [
+                        (Key::Space, None),
+                        (Key::S, Some('s')),
+                        (Key::G, Some('g')),
+                        (Key::U, Some('u')),
+                        (Key::R, Some('r')),
+                        (Key::C, Some('c')),
+                        (Key::F, Some('f')),
+                    ] {
+                        self.tap(key, text, Mods::NONE);
+                    }
+                    self.wait_until(STATUS_SETTLE_SECONDS, Until::Elapsed, false, reply);
                     break;
                 }
                 Command::Listen => {
@@ -695,16 +1032,21 @@ impl AgentPolicy {
                 Command::Observe => {
                     let _ = reply.send(Ok(match input.driving_observation() {
                         Some(o) => format!(
-                            "INSPECTOR (ground truth, not ears): mile {:.2}. Air ready: {}. \
-                             Parking brake: {}. Speed control armed: {}. Keeper: {}. \
-                             Cruise: {}. Hazard active: {}. Pull-over active: {}. \
-                             Off pavement: {}. Truck damage: {:.0}%. Cargo damage: {:.0}%.",
+                            "INSPECTOR (ground truth, not ears): mile {:.2}. Speed {:.0} mph, \
+                             limit {}. Air ready: {}. Parking brake: {}. Speed control armed: \
+                             {}. Keeper: {}. Cruise: {}. Hazard active: {}. Pull-over active: \
+                             {}. Off pavement: {}. Truck damage: {:.0}%. Cargo damage: {:.0}%.",
                             o.position_mi,
+                            o.speed_mph,
+                            o.speed_limit_mph
+                                .map_or("not read yet".to_string(), |mph| format!("{mph:.0}")),
                             o.air_ready,
                             o.parking_brake,
                             o.speed_control_armed,
-                            o.keeper_active,
-                            o.cruise_active,
+                            o.keeper_mph
+                                .map_or("off".to_string(), |mph| format!("holding {mph:.0}")),
+                            o.cruise_set_mph
+                                .map_or("off".to_string(), |mph| format!("set {mph:.0}")),
                             o.hazard_active,
                             o.pull_over_active,
                             o.off_pavement,
@@ -725,6 +1067,7 @@ impl AgentPolicy {
                     // Dropping into a fresh drive: whatever the agent was
                     // holding belongs to the old screen.
                     self.held.clear();
+                    self.timed_hold = None;
                     let _ = reply.send(
                         input
                             .stage_road_hit(&hit, &opts)
@@ -843,6 +1186,59 @@ fn tools_list() -> Value {
             &["seconds"],
         ),
         tool(
+            "pedal",
+            "Hold a key for a bounded number of real seconds and let the game itself \
+             lift it -- the throttle (up) or brake (down) for a measured tap. Use this \
+             instead of hold and release for pedals: the round trip between the two \
+             is a second or more, and at standard pacing that is twenty seconds of \
+             road. Replies once the key has lifted, with everything heard meanwhile.",
+            json!({
+                "key": {"type": "string", "description": "up (throttle), down (brake), or any key"},
+                "seconds": {"type": "number", "description": "real seconds down, 0.05 to 30"},
+            }),
+            &["key", "seconds"],
+        ),
+        tool(
+            "wait_for",
+            "Let the game run until something arrives: a spoken line or sound whose \
+             text contains `text` (case-insensitive), or a menu on screen when `menu` \
+             is true, or `seconds` of real time (max 300), whichever comes first. \
+             Replies with everything heard, and says if the clock ran out. Use it \
+             to drive to the next event instead of waiting blind.",
+            json!({
+                "text": {"type": "string", "description": "text to listen for"},
+                "menu": {"type": "boolean", "description": "return as soon as a menu is on screen"},
+                "seconds": {"type": "number", "description": "give up after this many real seconds"},
+            }),
+            &["seconds"],
+        ),
+        tool(
+            "select",
+            "Choose a menu row by part of its label (case-insensitive): the same \
+             Home, Down and Enter a player presses. Errors with the rows when no row \
+             matches or no menu is up. Wait a moment, then listen.",
+            json!({"label": {"type": "string"}}),
+            &["label"],
+        ),
+        tool(
+            "cruise",
+            "Adaptive cruise, the way a player sets it: K to engage if nothing is \
+             holding speed, then the dial walked one mile per hour at a time to the \
+             target -- a number, \"limit\" for the posted limit enforcement is \
+             reading, or \"off\". Replies with what was heard once the dial settles. \
+             In a zone the speed keeper holds instead, and the reply says so.",
+            json!({"target": {"description": "a number in miles per hour, \"limit\", or \"off\""}}),
+            &["target"],
+        ),
+        tool(
+            "status",
+            "The wheel's readouts in one call -- speed, speed limit, grade, what is \
+             coming up, route status, the clock, fuel -- pressed as a player would \
+             and returned together with anything else heard meanwhile.",
+            json!({}),
+            &[],
+        ),
+        tool(
             "listen",
             "Everything audible since the last listen: spoken lines on both channels \
              (exactly what the verbosity setting allowed), earcons and cues with their \
@@ -937,7 +1333,11 @@ pub fn serve_lines<R: BufRead, W: Write>(reader: R, out: &mut W, requests: &mpsc
                     first tool call other than quit_game boots the real game in its \
                     playtest sandbox (a few seconds), then answers. One game at a \
                     time, so a human already playing makes that first call fail; \
-                    try again once they quit.",
+                    try again once they quit. At the wheel, drive with pedal (a \
+                    measured tap the game itself lifts), cruise (K and the dial to \
+                    a number, the posted limit, or off) and wait_for (run until a \
+                    line is heard or a menu opens); menus take select by label. \
+                    Raw press, hold and release remain for everything else.",
             }),
             "ping" => json!({}),
             "tools/list" => tools_list(),
@@ -989,7 +1389,8 @@ pub fn serve_lines<R: BufRead, W: Write>(reader: R, out: &mut W, requests: &mpsc
     }
 }
 
-fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, String> {
+/// One tool call as the game loop will see it, or why it cannot be.
+pub fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, String> {
     let key_arg = |args: &Map<String, Value>| -> Result<(Key, Option<char>), String> {
         let name = args.get("key").and_then(Value::as_str).unwrap_or("");
         parse_key(name).ok_or_else(|| format!("{name:?} is not a key this server knows"))
@@ -1038,6 +1439,71 @@ fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, Strin
             }
             Ok(Command::Wait { seconds })
         }
+        "pedal" => {
+            let (key, text) = key_arg(args)?;
+            let seconds = args.get("seconds").and_then(Value::as_f64).unwrap_or(0.0);
+            if seconds <= 0.0 {
+                return Err("pedal needs a positive number of seconds".to_string());
+            }
+            Ok(Command::Pedal { key, text, seconds })
+        }
+        "wait_for" => {
+            let seconds = args.get("seconds").and_then(Value::as_f64).unwrap_or(0.0);
+            if seconds <= 0.0 {
+                return Err("wait_for needs a positive number of seconds".to_string());
+            }
+            let text = args
+                .get("text")
+                .and_then(Value::as_str)
+                .map(str::trim)
+                .filter(|text| !text.is_empty())
+                .map(str::to_string);
+            let menu = args.get("menu").and_then(Value::as_bool).unwrap_or(false);
+            Ok(Command::WaitFor {
+                text,
+                menu,
+                seconds,
+            })
+        }
+        "select" => {
+            let label = args
+                .get("label")
+                .and_then(Value::as_str)
+                .map(str::trim)
+                .unwrap_or("");
+            if label.is_empty() {
+                return Err("select needs part of a row's label".to_string());
+            }
+            Ok(Command::Select {
+                label: label.to_string(),
+            })
+        }
+        "cruise" => {
+            let target = match args.get("target") {
+                Some(Value::Number(number)) => number
+                    .as_f64()
+                    .filter(|mph| *mph > 0.0)
+                    .map(CruiseTarget::Mph)
+                    .ok_or_else(|| "cruise needs a speed above zero".to_string())?,
+                Some(Value::String(word)) => match word.trim().to_ascii_lowercase().as_str() {
+                    "limit" | "posted" => CruiseTarget::Limit,
+                    "off" | "cancel" => CruiseTarget::Off,
+                    other => match other.parse::<f64>() {
+                        Ok(mph) if mph > 0.0 => CruiseTarget::Mph(mph),
+                        _ => {
+                            return Err(format!(
+                            "{other:?} is not a cruise target; use a number, \"limit\", or \"off\""
+                        ))
+                        }
+                    },
+                },
+                _ => {
+                    return Err("cruise needs a target: a number, \"limit\", or \"off\"".to_string())
+                }
+            };
+            Ok(Command::Cruise { target })
+        }
+        "status" => Ok(Command::Status),
         "listen" => Ok(Command::Listen),
         "menu" => Ok(Command::Menu),
         "observe" => Ok(Command::Observe),
@@ -1190,6 +1656,8 @@ pub fn policy(
         ears,
         waiting: None,
         held: Vec::new(),
+        timed_hold: None,
+        cruise_plan: None,
         scripted: std::collections::VecDeque::new(),
         quit: false,
     }

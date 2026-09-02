@@ -155,6 +155,14 @@ pub struct DrivingObservation {
     pub off_pavement: bool,
     pub truck_damage_pct: f64,
     pub cargo_damage_pct: f64,
+    pub speed_mph: f64,
+    /// The limit enforcement is holding the truck to, once one has been
+    /// read off the road (None on a drive's first frames).
+    pub speed_limit_mph: Option<f64>,
+    /// Adaptive cruise's set point, when it is engaged.
+    pub cruise_set_mph: Option<f64>,
+    /// The speed keeper's hold, when it has the zone.
+    pub keeper_mph: Option<f64>,
 }
 
 /// The only capability a windowed input policy receives for one frame.
@@ -475,6 +483,10 @@ impl App {
             off_pavement: drive.off_pavement(),
             truck_damage_pct: drive.trip.truck.damage_pct,
             cargo_damage_pct: drive.trip.truck.cargo_damage_pct,
+            speed_mph: drive.trip.truck.speed_mph(),
+            speed_limit_mph: drive.enforced_limit_prev,
+            cruise_set_mph: drive.cruise_mph,
+            keeper_mph: drive.keeper_mph,
         })
     }
 

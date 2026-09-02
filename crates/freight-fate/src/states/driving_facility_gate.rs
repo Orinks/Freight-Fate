@@ -27,6 +27,7 @@ use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+use crate::states::driving_updates::live;
 
 /// Game minutes one loop through the safe turnaround costs -- the same charge
 /// as the missed-destination-exit loop, which is the same maneuver a road up.
@@ -109,9 +110,24 @@ impl DrivingState {
             || !self.destination_exit_taken
             || self.ramp_mi.is_some()
             || self.trip.finished
-            || self.gate_speed_warned
-            || self.trip.truck.speed_mph() <= FACILITY_GATE_LIMIT_MPH
         {
+            return;
+        }
+        // The warning has been obeyed: the truck is at or under the gate
+        // speed with the window spent. That warning is done; if the truck
+        // speeds up again before the gate, a fresh one opens a fresh window.
+        // Without this a driver who braked to a stop short of the gate (as
+        // told) and then rolled the last fifty feet a few miles per hour
+        // over was looped back on contact, with no window at all (agent
+        // playtest, 2026-09-02). A truck that never slowed keeps its spent
+        // window: blowing the gate at 70 is a miss on contact.
+        if self.gate_speed_warned
+            && self.gate_grace_s <= 0.0
+            && self.trip.truck.speed_mph() <= FACILITY_GATE_LIMIT_MPH
+        {
+            self.gate_speed_warned = false;
+        }
+        if self.gate_speed_warned || self.trip.truck.speed_mph() <= FACILITY_GATE_LIMIT_MPH {
             return;
         }
         let remaining = self.trip.total_miles() - self.trip.position_mi;
@@ -155,14 +171,42 @@ impl DrivingState {
     /// no assist or emergency owns the speed. The destination approach assist
     /// is checked by the caller (its branch brakes the truck itself and
     /// returns first), so the game's own braking curve can never trigger a
-    /// miss.
+    /// miss. The speed keeper is an assist too: holding the gate zone's own
+    /// limit is what it was asked to do, and the gate hands the pedals back
+    /// from it with a fresh window (`handle_arrival_gate`) rather than
+    /// calling its 15.4 a miss.
     pub fn gate_miss_pending(&self) -> bool {
         self.trip.truck.speed_mph() > FACILITY_GATE_LIMIT_MPH
             && self.gate_speed_warned
             && self.gate_grace_s <= 0.0
             && self.hazard_deadline.is_none()
             && self.pull_over.is_none()
+            && self.keeper_mph.is_none()
             && !self.arrival_menu_open
+    }
+
+    /// The rest key pressed a truck length short of a facility gate. The
+    /// driver has stopped where the pre-gate warning told them to brake, and
+    /// the emergency shoulder-sleep dialog is the wrong answer there (agent
+    /// playtest, 2026-09-02: fifty feet from the gate, twice). Names the
+    /// gate and the distance instead; None anywhere else.
+    pub fn gate_short_hint(&self, ctx: &GameContext) -> Option<String> {
+        let approaching_gate = self.phase == DRIVE_PHASE_PICKUP
+            || self.destination_exit_taken
+            || self.surface_chain
+            || self.trip.is_facility_approach_route();
+        if !approaching_gate || self.trip.finished {
+            return None;
+        }
+        let remaining = self.trip.remaining_miles();
+        if remaining > FACILITY_GATE_ZONE_MI {
+            return None;
+        }
+        let facility = self.approach_facility_text(ctx);
+        Some(format!(
+            "The gate at {facility} is {} ahead. Roll up to it and stop there to check in.",
+            self.closing_text(remaining)
+        ))
     }
 
     /// `_charge_scripted_loop(minutes)`: HOS, fatigue, and idle fuel for a
@@ -221,6 +265,7 @@ impl DrivingState {
         // at the gate again.
         self.arrival_stop_said = false;
         self.arrival_full_stop_said = false;
+        live::set_gate_stop_prompted(false);
         self.gate_reminder_s = 0.0;
         self.gate_speed_warned = false;
         self.gate_grace_s = 0.0;

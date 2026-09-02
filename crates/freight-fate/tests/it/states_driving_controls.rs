@@ -1724,7 +1724,7 @@ fn test_route_key_never_says_zero_miles_closing_on_the_gate() {
         "{second_last}"
     );
     assert!(final_line.contains("50 feet to the gate"), "{final_line}");
-    assert!(heard[0].contains("half a mile to the gate"), "{}", heard[0]);
+    assert!(heard[0].contains("Half a mile to the gate"), "{}", heard[0]);
 }
 
 #[test]

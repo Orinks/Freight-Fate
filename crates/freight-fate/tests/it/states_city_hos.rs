@@ -15,6 +15,7 @@ use ff_core::sim::hos::limits;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, Menu};
 use freight_fate::states::city::{CityMenuState, JobBoardState};
+use freight_fate::states::city_pickup::PickupFacilityState;
 
 fn approx(a: f64, b: f64) -> bool {
     (a - b).abs() <= 1e-6 * b.abs().max(1.0)
@@ -245,4 +246,47 @@ fn test_dispatch_does_not_warn_after_hours_reset() {
         app.main_lines()
     );
     assert!(profile(&app).active_trip.is_some());
+}
+
+// -- a load staged at the home yard ----------------------------------------------------
+
+#[test]
+fn test_a_load_staged_at_the_home_yard_opens_the_pickup_without_a_deadhead() {
+    // The home terminal is a facility in the city's own list, so dispatch
+    // can hand out a load that ships from it -- and the first agent
+    // playtest (2026-09-02) then drove a two-mile "deadhead from the
+    // terminal to the terminal" on every assigned load. The shipping office
+    // is a walk across the yard: the pickup opens here.
+    let mut app = TestApp::new();
+    app.record_audio();
+    app.ctx.profile = Some(Profile::named_in("Yard Load", "Austin"));
+    let terminal = app
+        .ctx
+        .world
+        .home_terminal("Austin")
+        .expect("Austin has a yard");
+    let jobs = austin_offers(&app);
+    let mut job = job_with_supported_route(&app, "Austin", 2, &jobs);
+    job.origin_location = terminal.name.clone();
+    let mut board = JobBoardState::new(&app.ctx, vec![job]);
+
+    app.clear_speech();
+    board.accept(&mut app.ctx, 0);
+    app.ctx.run_deferred();
+
+    let top = app.ctx.state().expect("a state");
+    assert!(
+        top.borrow().as_any().is::<PickupFacilityState>(),
+        "the shipping office, not a drive to it"
+    );
+    assert!(
+        profile(&app)
+            .active_trip
+            .as_ref()
+            .is_some_and(|trip| trip["kind"] == "pickup"),
+        "a save resumes at the pickup"
+    );
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("staged here in the yard"), "{said}");
+    assert!(!said.contains("Deadhead"), "{said}");
 }

@@ -67,6 +67,10 @@ impl DrivingState {
         let stop = self.trip.nearest_stop_within(1.5).cloned();
         if self.trip.truck.speed_mph() <= DOCKING_MAX_MPH {
             let Some(stop) = stop else {
+                if let Some(hint) = self.gate_short_hint(ctx) {
+                    self.say_plain(ctx, hint);
+                    return;
+                }
                 if !secure_truck_for_stopped_menu(self, ctx) {
                     self.say_plain(ctx, "Come to a complete stop first.");
                     return;

@@ -240,7 +240,7 @@ fn test_toll_cues_and_charges_deduplicate() {
         gps_messages(&advance),
         vec![
             "ticket system toll point ahead: New Jersey Turnpike ticket entry. \
-             estimated toll 18 dollars will be billed to carrier settlement."
+             Estimated toll 18 dollars will be billed to carrier settlement."
         ]
     );
     assert!(gps_events(&repeat).is_empty());
@@ -281,7 +281,7 @@ fn test_zero_amount_toll_entry_marker_does_not_record_expense() {
         gps_messages(&advance),
         vec![
             "ticket system toll point ahead: Pennsylvania Turnpike eastern ticket entry. \
-             entry will be recorded for carrier settlement."
+             Entry will be recorded for carrier settlement."
         ]
     );
 

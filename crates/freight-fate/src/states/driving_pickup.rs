@@ -49,9 +49,16 @@ impl DrivingState {
         } else {
             format!("Pickup ahead: {facility}. Slow down and come to a complete stop at the gate.")
         };
+        // Rescued only until the gate's own stop line has landed: cut by
+        // "At <facility>. Stop completely...", it came back behind it and
+        // told a truck already at the gate to slow down for the gate
+        // (agent playtest, 2026-09-02). Same family as the scale exit and
+        // the dock hold prompt.
         ctx.say_event_with(
             message,
-            SayEvent::new().category(SpeechCategory::Navigation),
+            SayEvent::new()
+                .valid(|| !live::gate_stop_prompted())
+                .category(SpeechCategory::Navigation),
         );
         if speed_control_paused {
             self.announce_pickup_speed_control_pause(ctx);
@@ -64,6 +71,7 @@ impl DrivingState {
             return;
         }
         self.arrival_full_stop_said = true;
+        live::set_gate_stop_prompted(true);
         let speed_control_paused = self.pause_speed_control(ctx, false);
         ctx.audio.play_with("ui/notify", 0.7, 0.0);
         self.set_status("Pickup gate: stop to check in.");
