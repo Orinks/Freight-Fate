@@ -919,6 +919,80 @@ def test_linux_archive_verifier_rejects_a_rust_tarball_missing_a_library(tmp_pat
     build_release.verify_archive(out)
 
 
+@pytest.mark.parametrize(
+    "machine, suffix",
+    [
+        ("x86_64", "linux-x64"),
+        ("AMD64", "linux-x64"),
+        # The Blazie BT Speak and BT Braille, Raspberry Pi, and GitHub's ARM
+        # runner all report aarch64; the Mac spelling is accepted too.
+        ("aarch64", "linux-arm64"),
+        ("arm64", "linux-arm64"),
+    ],
+)
+def test_linux_tarball_is_named_for_its_architecture(machine, suffix):
+    build_release = load_build_release_module()
+    assert build_release.linux_archive_suffix(machine) == suffix
+    assert f"-{suffix}.tar.gz" in build_release.LINUX_TARBALL_SUFFIXES
+
+
+def test_linux_tarball_has_no_name_for_an_architecture_nobody_builds():
+    build_release = load_build_release_module()
+    with pytest.raises(RuntimeError, match="riscv64"):
+        build_release.linux_archive_suffix("riscv64")
+
+
+def test_linux_archive_verifier_checks_the_arm64_rust_tarball_too(tmp_path):
+    """The ARM64 tarball is the same layout under a different name; the
+    verifier must recognise it rather than reject the name outright, and
+    must demand the same libraries of it."""
+    build_release = load_build_release_module()
+    names = [
+        "FreightFate",
+        "build_info.json",
+        "LICENSE.txt",
+        "USER_MANUAL.md",
+        "freight_fate/sounds.pak",
+        "freight_fate/music.pak",
+        build_release.RUST_BAKED_FILE_ENTRY,
+        *(name for name in build_release.LINUX_REQUIRED_LIBRARIES if name != "libprism.so"),
+    ]
+    out = tmp_path / "FreightFate-1.9-tester-20260902-linux-arm64.tar.gz"
+    write_linux_tarball(out, names, build_release)
+    with pytest.raises(RuntimeError, match="FreightFate/libprism.so"):
+        build_release.verify_archive(out)
+    write_linux_tarball(out, [*names, "libprism.so"], build_release)
+    build_release.verify_archive(out)
+
+
+def load_build_appimage_module():
+    path = Path(__file__).resolve().parents[1] / "tools" / "build_appimage.py"
+    spec = importlib.util.spec_from_file_location("build_appimage", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize(
+    "machine, arch", [("x86_64", "x86_64"), ("aarch64", "aarch64"), ("arm64", "aarch64")]
+)
+def test_appimage_tooling_and_name_follow_the_architecture(machine, arch):
+    """linuxdeploy and the AppImage runtime are published per `uname -m`
+    under one release; the output file is named the same way."""
+    build_appimage = load_build_appimage_module()
+    assert build_appimage.appimage_architecture(machine) == arch
+    assert build_appimage.LINUXDEPLOY_URL.format(arch=arch).endswith(f"linuxdeploy-{arch}.AppImage")
+    assert build_appimage.APPIMAGE_RUNTIME_URL.format(arch=arch).endswith(f"runtime-{arch}")
+    assert arch in build_appimage.SUPPORTED_ARCHITECTURES
+
+
+def test_appimage_tooling_refuses_an_architecture_it_has_no_tools_for():
+    build_appimage = load_build_appimage_module()
+    with pytest.raises(RuntimeError, match="riscv64"):
+        build_appimage.appimage_architecture("riscv64")
+
+
 def test_linux_archive_verifier_leaves_the_nuitka_tarball_alone(tmp_path):
     """The Python build's tarball has no baked container and no flat BASS;
     the Rust library list must not be demanded of it."""

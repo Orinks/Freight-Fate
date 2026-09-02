@@ -12,6 +12,15 @@
   PipeWire. If the game says at the main menu that it started without
   sound, see the Linux note under Troubleshooting in the manual.
 
+- **Career 1.9 runs on the Blazie BT Speak and BT Braille, and other ARM
+  Linux computers.** Each tester snapshot now also ships a Linux tarball
+  and an AppImage built for 64-bit ARM, the processor in the BT Speak, the
+  BT Braille and the Raspberry Pi, alongside the PC ones. They are named
+  `linux-arm64` and `linux-aarch64`, they are started on Ubuntu, Debian,
+  Fedora and openSUSE on an ARM machine before they are published, and the
+  in-game updater only ever offers the kind of Linux build you are
+  running. The manual's download table says which file to pick.
+
 - **Hear when other drivers go on or off duty.** A new row on the Online
   menu, Say when drivers go on or off duty, off by default. Turn it on and
   the game says when another driver sets off or signs off, like Road Star

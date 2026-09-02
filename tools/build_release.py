@@ -4,7 +4,9 @@ Produces a standalone build (fast startup, antivirus-friendly) and
 archives it for release:
 
 * Windows: ``dist/FreightFate-<label>-windows-portable.zip``
-* Linux:   ``dist/FreightFate-<label>-linux-x64.tar.gz``
+* Linux:   ``dist/FreightFate-<label>-linux-x64.tar.gz`` on x86_64, and
+  ``dist/FreightFate-<label>-linux-arm64.tar.gz`` on aarch64 (the Blazie
+  BT Speak and BT Braille, Raspberry Pi and other ARM64 Linux machines)
 * macOS Apple Silicon: ``dist/FreightFate-<label>-macos-arm64.zip``
 * macOS Intel: ``dist/FreightFate-<label>-macos.zip``
 
@@ -750,6 +752,26 @@ def _archive_entries(out: Path) -> dict[str, tuple[int, int]]:
         }
 
 
+LINUX_TARBALL_SUFFIXES = ("-linux-x64.tar.gz", "-linux-arm64.tar.gz")
+
+
+def linux_archive_suffix(machine: str | None = None) -> str:
+    """The ``linux-<arch>`` label a Linux tarball is named with.
+
+    ``x64`` for the PC build and ``arm64`` for the aarch64 one -- the Blazie
+    BT Speak and BT Braille notetakers, Raspberry Pi, and other ARM64 Linux
+    machines -- matching the Mac archive's ``arm64`` rather than the
+    AppImage's ``aarch64`` because the tarball predates the AppImage and the
+    in-game updater picks by this suffix. Anything else has no build.
+    """
+    machine = (machine or platform.machine()).lower()
+    if machine in {"x86_64", "amd64"}:
+        return "linux-x64"
+    if machine in {"aarch64", "arm64"}:
+        return "linux-arm64"
+    raise RuntimeError(f"No Linux release archive name for machine {machine!r}.")
+
+
 def verify_archive(out: Path) -> None:
     """Re-open the finished archive and prove the payload survived archiving.
 
@@ -764,7 +786,7 @@ def verify_archive(out: Path) -> None:
         root = f"{APP_NAME}.app/Contents/MacOS"
         exe_entry = f"{root}/{APP_NAME}"
         needs_exec = True
-    elif out.name.endswith("-linux-x64.tar.gz"):
+    elif out.name.endswith(LINUX_TARBALL_SUFFIXES):
         root = APP_NAME
         exe_entry = f"{root}/{APP_NAME}"
         needs_exec = True
@@ -805,7 +827,7 @@ def verify_archive(out: Path) -> None:
         )
         missing.extend(name for name in bundle_required if name not in entries)
         # No libSDL2 requirement: SDL2 ships compiled into the executable.
-    elif out.name.endswith("-linux-x64.tar.gz") and f"{root}/{RUST_BAKED_FILE_ENTRY}" in entries:
+    elif out.name.endswith(LINUX_TARBALL_SUFFIXES) and f"{root}/{RUST_BAKED_FILE_ENTRY}" in entries:
         # A Rust tarball (the Nuitka one has no baked container). Same
         # libraries as the Mac bundle, flat beside the executable.
         missing.extend(
@@ -830,7 +852,7 @@ def archive(build_dir: Path, label: str) -> Path:
         out = DIST / f"{APP_NAME}-{label}-{mac_suffix}.zip"
         subprocess.run(["ditto", "-c", "-k", "--keepParent", str(build_dir), str(out)], check=True)
     else:
-        out = DIST / f"{APP_NAME}-{label}-linux-x64.tar.gz"
+        out = DIST / f"{APP_NAME}-{label}-{linux_archive_suffix()}.tar.gz"
         with tarfile.open(out, "w:gz") as tar:
             tar.add(build_dir, arcname=APP_NAME)
     return out

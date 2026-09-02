@@ -153,9 +153,9 @@ jobs:
     # `crates/prism-sys/vendor/<os>-<arch>/`. Today the tree carries:
     #
     #   vendor/sdl2/            windows-x86_64 only
-    #   crates/bass-sys/vendor/ windows-x86_64, macos-*, linux-x86_64 (all fetched)
+    #   crates/bass-sys/vendor/ windows-x86_64, macos-*, linux-* (all fetched)
     #   crates/prism-sys/vendor/windows-x86_64, macos-x86_64, macos-aarch64,
-    #                           linux-x86_64
+    #                           linux-x86_64, linux-aarch64
     #
     # macOS and Linux both build from source -- BASS fetched, Prism vendored,
     # SDL2 compiled in statically -- and the nightly snapshot workflow

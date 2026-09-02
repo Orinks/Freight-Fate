@@ -208,7 +208,7 @@ jobs:
           if-no-files-found: error
 
   build_linux:
-    name: Build (Linux x86_64)
+    name: Build (Linux ${{ matrix.arch }})
     needs: prepare
     if: needs.prepare.outputs.should_build == 'true'
     # 22.04, not latest: the executable carries its build host's glibc as a
@@ -216,8 +216,25 @@ jobs:
     # distribution still shipping an older release, with no useful error.
     # SDL2 is compiled in, so nothing else of the host is linked; Prism's
     # own floor is 2.34 (a manylinux_2_34 wheel).
-    runs-on: ubuntu-22.04
+    #
+    # Two native builds, one per CPU: x86_64 for PCs and aarch64 for the
+    # Blazie BT Speak and BT Braille (Debian on a Raspberry Pi Compute
+    # Module 4 and 5), Raspberry Pi desktops and other ARM64 Linux. The ARM
+    # runner is GitHub's hosted `ubuntu-22.04-arm`, same glibc floor. The
+    # steps are identical: fetch_bass.py, build_release.py and
+    # build_appimage.py each pick their architecture from `uname -m`.
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-22.04
+            tarball: linux-x64
+          - arch: aarch64
+            runner: ubuntu-22.04-arm
+            tarball: linux-arm64
     env:
       FREIGHT_FATE_NO_SPEECH: "1"
       SDL_VIDEODRIVER: dummy
@@ -246,7 +263,7 @@ jobs:
       - name: Cache cargo registry and target directory
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: career-19-snapshot-linux
+          shared-key: career-19-snapshot-linux-${{ matrix.arch }}
 
       # SDL2 is compiled from source into the executable (`bundled` +
       # `static-link`), and what it can open at run time is decided by the
@@ -296,14 +313,14 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: Linux-x86_64
+          name: Linux-${{ matrix.arch }}
           path: |
-            dist/FreightFate-*-linux-x64.tar.gz
-            dist/FreightFate-*-linux-x86_64.AppImage
+            dist/FreightFate-*-${{ matrix.tarball }}.tar.gz
+            dist/FreightFate-*-linux-${{ matrix.arch }}.AppImage
           if-no-files-found: error
 
   smoke_linux:
-    name: Smoke (${{ matrix.image }})
+    name: Smoke (${{ matrix.image }}, ${{ matrix.arch }})
     needs: [prepare, build_linux]
     # The build host proves one distribution. Players run the others, and
     # what differs between them -- glibc, the dynamic loader, which
@@ -311,11 +328,18 @@ jobs:
     # Ubuntu cannot see. So the tarball and the AppImage are both booted,
     # untouched, on each of the popular families, in a bare container that
     # has less than any desktop does.
-    runs-on: ubuntu-latest
+    #
+    # The same matrix runs again on an ARM64 runner against the aarch64
+    # downloads, minus Arch: Docker Hub's archlinux image is amd64 only
+    # (Arch Linux ARM is a separate project with no official image). The
+    # Debian containers there are the nearest stand-in for the BT Speak and
+    # BT Braille, which are Debian on a Raspberry Pi Compute Module.
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
+        arch: [x86_64, aarch64]
         image:
           - ubuntu:22.04
           - ubuntu:24.04
@@ -324,6 +348,9 @@ jobs:
           - fedora:latest
           - archlinux:latest
           - opensuse/tumbleweed:latest
+        exclude:
+          - arch: aarch64
+            image: archlinux:latest
     steps:
       - uses: actions/checkout@v6
         with:
@@ -333,7 +360,7 @@ jobs:
 
       - uses: actions/download-artifact@v7
         with:
-          name: Linux-x86_64
+          name: Linux-${{ matrix.arch }}
           path: dist
 
       - name: Boot the tarball and the AppImage
@@ -365,6 +392,11 @@ jobs:
           name: Linux-x86_64
           path: assets
 
+      - uses: actions/download-artifact@v7
+        with:
+          name: Linux-aarch64
+          path: assets
+
       - name: Verify release archives
         shell: bash
         run: |
@@ -389,6 +421,16 @@ jobs:
             echo "Expected exactly one Linux AppImage; found ${#linux_appimages[@]}." >&2
             exit 1
           fi
+          linux_arm64_archives=(assets/FreightFate-*-linux-arm64.tar.gz)
+          if [ "${#linux_arm64_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux ARM64 tarball; found ${#linux_arm64_archives[@]}." >&2
+            exit 1
+          fi
+          linux_arm64_appimages=(assets/FreightFate-*-linux-aarch64.AppImage)
+          if [ "${#linux_arm64_appimages[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux ARM64 AppImage; found ${#linux_arm64_appimages[@]}." >&2
+            exit 1
+          fi
 
       - name: Prepare and verify release notes and checksums
         env:
@@ -397,7 +439,7 @@ jobs:
           COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
-          (cd assets && sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage > checksums.txt)
+          (cd assets && sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage > checksums.txt)
           (cd assets && sha256sum -c checksums.txt)
 
           LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)

@@ -29,10 +29,25 @@
 # libdbus-1 (the executable links it for the Secret Service keyring) and
 # libstdc++ (Prism). Nothing else is installed -- a distribution that needs
 # more is a finding, not something to paper over here.
+#
+# The container's own architecture decides which pair of downloads is
+# booted: the x64 tarball and x86_64 AppImage on a PC runner, the arm64
+# tarball and aarch64 AppImage on an ARM64 one (the Blazie BT Speak and BT
+# Braille are Debian on a Raspberry Pi Compute Module, so the debian
+# containers on the ARM runner are the closest stand-in the nightly has).
 set -euo pipefail
 
+case "$(uname -m)" in
+  x86_64) tarball_arch=x64; appimage_arch=x86_64 ;;
+  aarch64) tarball_arch=arm64; appimage_arch=aarch64 ;;
+  *)
+    echo "No Linux release is built for $(uname -m)." >&2
+    exit 1
+    ;;
+esac
+
 . /etc/os-release
-echo "== $PRETTY_NAME"
+echo "== $PRETTY_NAME ($(uname -m))"
 case "${ID:-}" in
   ubuntu|debian)
     apt-get update -qq >/dev/null
@@ -85,10 +100,10 @@ check_log() {
 }
 
 # Shell globs, not find: a bare openSUSE image has no findutils.
-tarballs=(/work/dist/FreightFate-*-linux-x64.tar.gz)
+tarballs=(/work/dist/FreightFate-*-linux-"$tarball_arch".tar.gz)
 tarball="${tarballs[0]}"
 if [ ! -f "$tarball" ]; then
-  echo "No Linux tarball under /work/dist." >&2
+  echo "No Linux $tarball_arch tarball under /work/dist." >&2
   exit 1
 fi
 rm -rf /tmp/ff-tarball && mkdir -p /tmp/ff-tarball
@@ -96,10 +111,10 @@ tar -xzf "$tarball" -C /tmp/ff-tarball
 FREIGHT_FATE_LOG_FILE=/tmp/ff-tarball.log timeout 120 /tmp/ff-tarball/FreightFate/FreightFate --smoke
 check_log "tarball" /tmp/ff-tarball.log
 
-appimages=(/work/dist/FreightFate-*-linux-x86_64.AppImage)
+appimages=(/work/dist/FreightFate-*-linux-"$appimage_arch".AppImage)
 appimage="${appimages[0]}"
 if [ ! -f "$appimage" ]; then
-  echo "No Linux AppImage under /work/dist." >&2
+  echo "No Linux $appimage_arch AppImage under /work/dist." >&2
   exit 1
 fi
 cp "$appimage" /tmp/FreightFate.AppImage
@@ -112,4 +127,4 @@ if [ "${ID:-}" = "fedora" ]; then
   FREIGHT_FATE_LOG_FILE=/tmp/ff-x11.log timeout 120 xvfb-run -a /tmp/ff-tarball/FreightFate/FreightFate --smoke
   check_log "tarball under Xvfb (X11 driver)" /tmp/ff-x11.log
 fi
-echo "Linux smoke passed on $PRETTY_NAME."
+echo "Linux smoke passed on $PRETTY_NAME ($(uname -m))."

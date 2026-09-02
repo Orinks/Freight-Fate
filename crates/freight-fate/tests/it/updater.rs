@@ -16,7 +16,7 @@ use freight_fate::updater::{
     self, build_info_from_dict, check_for_update_with, dev_update_from, flatten_markdown,
     parse_version, pick_asset, resolve_channel, snapshot_update_from, stable_update_from,
     write_apply_script, Architecture, BuildInfo, Platform, UpdateInfo, UpdaterEnv, APPIMAGE_SUFFIX,
-    TARBALL_SUFFIX,
+    APPIMAGE_SUFFIX_AARCH64, TARBALL_SUFFIX, TARBALL_SUFFIX_AARCH64,
 };
 
 fn release_with(
@@ -87,7 +87,15 @@ fn fake_appimage(dir: &Path) -> std::path::PathBuf {
 }
 
 fn linux_appimage_env(appimage: Option<&Path>) -> UpdaterEnv {
-    let mut env = env_on(Platform::Linux);
+    linux_appimage_env_on(Architecture::X86_64, appimage)
+}
+
+fn linux_appimage_env_on(architecture: Architecture, appimage: Option<&Path>) -> UpdaterEnv {
+    let mut env = UpdaterEnv::fake_with_architecture(
+        Platform::Linux,
+        architecture,
+        Path::new("/tmp/not-frozen/python"),
+    );
     env.appimage = appimage.map(|p| p.display().to_string());
     env
 }
@@ -1069,6 +1077,101 @@ fn test_platform_suffix_prefers_appimage_when_running_as_one() {
     assert_eq!(
         updater::platform_suffix(&linux_appimage_env(Some(&appimage))),
         APPIMAGE_SUFFIX
+    );
+}
+
+#[test]
+fn test_linux_suffixes_follow_the_process_architecture() {
+    // The Blazie BT Speak and BT Braille are ARM64 Linux. Offered the x86_64
+    // tarball, the updater would install a game that cannot start there,
+    // and an x86_64 desktop offered the ARM64 one likewise.
+    let tmp = tempfile::tempdir().unwrap();
+    assert_eq!(
+        updater::platform_suffix(&linux_appimage_env_on(Architecture::Aarch64, None)),
+        TARBALL_SUFFIX_AARCH64
+    );
+    assert_eq!(TARBALL_SUFFIX_AARCH64, "-linux-arm64.tar.gz");
+    let appimage = tmp
+        .path()
+        .join("FreightFate-1.9-tester-20260902-linux-aarch64.AppImage");
+    fs::write(&appimage, b"old").unwrap();
+    assert_eq!(
+        updater::platform_suffix(&linux_appimage_env_on(
+            Architecture::Aarch64,
+            Some(&appimage)
+        )),
+        APPIMAGE_SUFFIX_AARCH64
+    );
+    assert_eq!(APPIMAGE_SUFFIX_AARCH64, "-linux-aarch64.AppImage");
+    assert_eq!(
+        updater::tarball_suffix(Architecture::X86_64),
+        TARBALL_SUFFIX
+    );
+    assert_eq!(
+        updater::appimage_suffix(Architecture::X86_64),
+        APPIMAGE_SUFFIX
+    );
+}
+
+#[test]
+fn test_arm64_linux_picks_the_arm64_tarball_and_never_the_x64_one() {
+    let both = release_with(
+        "1.9-tester-20260902",
+        true,
+        "",
+        "",
+        &[
+            TARBALL_SUFFIX,
+            APPIMAGE_SUFFIX,
+            TARBALL_SUFFIX_AARCH64,
+            APPIMAGE_SUFFIX_AARCH64,
+        ],
+    );
+    let arm = linux_appimage_env_on(Architecture::Aarch64, None);
+    let (name, _, _) = pick_asset(&both, None, &arm).unwrap();
+    assert_eq!(name, "FreightFate-1.9-tester-20260902-linux-arm64.tar.gz");
+    let pc = linux_appimage_env_on(Architecture::X86_64, None);
+    let (name, _, _) = pick_asset(&both, None, &pc).unwrap();
+    assert_eq!(name, "FreightFate-1.9-tester-20260902-linux-x64.tar.gz");
+
+    // A release from before the ARM64 build existed has nothing for an
+    // ARM64 process: no update rather than the wrong one.
+    let x64_only = release_with(
+        "1.9-tester-20260901",
+        true,
+        "",
+        "",
+        &[TARBALL_SUFFIX, APPIMAGE_SUFFIX],
+    );
+    assert!(pick_asset(&x64_only, None, &arm).is_none());
+    let (name, _, _) = pick_asset(&x64_only, None, &pc).unwrap();
+    assert!(name.ends_with(TARBALL_SUFFIX));
+}
+
+#[test]
+fn test_arm64_appimage_run_picks_the_arm64_appimage_asset() {
+    let tmp = tempfile::tempdir().unwrap();
+    let appimage = tmp
+        .path()
+        .join("FreightFate-1.9-tester-20260901-linux-aarch64.AppImage");
+    fs::write(&appimage, b"old").unwrap();
+    let env = linux_appimage_env_on(Architecture::Aarch64, Some(&appimage));
+    let both = release_with(
+        "1.9-tester-20260902",
+        true,
+        "",
+        "",
+        &[
+            TARBALL_SUFFIX,
+            APPIMAGE_SUFFIX,
+            TARBALL_SUFFIX_AARCH64,
+            APPIMAGE_SUFFIX_AARCH64,
+        ],
+    );
+    let (name, _, _) = pick_asset(&both, None, &env).unwrap();
+    assert_eq!(
+        name,
+        "FreightFate-1.9-tester-20260902-linux-aarch64.AppImage"
     );
 }
 

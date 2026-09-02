@@ -577,6 +577,36 @@ Everything not listed here ships fine after 1.9.0.
         Secret Service keyring. Every desktop has it, and the smoke installs
         it into the bare containers; `keyring`'s `vendored` feature would
         compile it in if a player ever turns up without it.
+- [x] **Rust port: an ARM64 Linux build for the Blazie BT Speak and BT
+      Braille (2026-09-02).** Both notetakers are Linux on a Raspberry Pi
+      Compute Module (BT Speak: CM4, Cortex-A72; BT Braille: CM5), so
+      aarch64, with a self-voiced text UI and an optional MATE desktop with
+      Orca -- Speech Dispatcher either way, which is what Prism speaks
+      through on Linux. Nothing new had to be built: un4seen's `-linux`
+      archives already carry an `aarch64` slice (now pinned in
+      `fetch_bass.py` beside the x86_64 one) and prismatoid 0.17.3
+      publishes a `manylinux_2_34_aarch64` wheel, vendored into
+      `prism-sys/vendor/linux-aarch64` the same way (RUNPATH repointed to
+      `$ORIGIN`, the renamed glib and speech-dispatcher copies beside it);
+      SDL2 was already compiled from source. `build_release.py` names the
+      tarball `linux-arm64` (matching the Mac archive), `build_appimage.py`
+      fetches the aarch64 linuxdeploy and runtime and names the AppImage
+      `linux-aarch64` (the AppImage convention), and the updater picks by
+      `Architecture` so an ARM64 process is never offered the x86_64
+      download or the reverse. `build_linux` is now a two-leg matrix
+      (`ubuntu-22.04` and GitHub's hosted `ubuntu-22.04-arm`, the same
+      glibc 2.35 floor) and `smoke_linux` boots the ARM64 pair in the same
+      containers on `ubuntu-24.04-arm`, minus Arch (no arm64 image on
+      Docker Hub). The release requires all four Linux files.
+      * Follow-up: **nobody has heard it on a BT Speak yet.** The Debian
+        containers on the ARM runner are the nearest stand-in the nightly
+        has. Open questions only a device answers: whether the BT Speak's
+        ALSA default device is reachable for BASS (the same PulseAudio or
+        PipeWire plugin question as any desktop), how the game is launched
+        from the self-voiced text UI rather than the MATE desktop, and
+        whether Prism finds the device's own Speech Dispatcher or the
+        notetaker's self-voicing has to be paused first. Ask a BT Speak
+        owner for a session log.
 - [x] **Rust port: startup work is not held off the input loop -- FIXED
       2026-08-30.** The Linux report above also had the menu ignore
       arrow keys for the first sixteen seconds, because the speech-backend

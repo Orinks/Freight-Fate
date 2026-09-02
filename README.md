@@ -88,7 +88,12 @@ visual display mirrors all speech for sighted players and helpers.
 3. Under Assets, Windows players should download the file ending in
    `-windows-portable.zip`. Career 1.9 testers using an Apple Silicon Mac
    should download the file ending in `-macos-arm64.zip`. The Career 1.9 Mac
-   build does not support Intel Macs.
+   build does not support Intel Macs. Career 1.9 testers on Linux have a
+   tarball and an AppImage each for PCs (`-linux-x64.tar.gz`,
+   `-linux-x86_64.AppImage`) and for ARM64 machines such as the Blazie BT
+   Speak and BT Braille or a Raspberry Pi (`-linux-arm64.tar.gz`,
+   `-linux-aarch64.AppImage`); the player manual says how to tell which
+   you need.
 4. Extract the zip file. On Windows, open the extracted `FreightFate` folder
    and run `FreightFate.exe`. On an Apple Silicon Mac, move `FreightFate.app`
    to Applications and follow the first-launch instructions in the player

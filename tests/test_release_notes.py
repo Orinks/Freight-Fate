@@ -563,12 +563,31 @@ def test_career_19_snapshot_builds_and_boots_a_linux_release():
     workflow = (
         Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
     ).read_text(encoding="utf-8")
-    assert "runs-on: ubuntu-22.04" in workflow
     assert "tools/build_release.py --rust --smoke" in workflow
     assert "tools/build_appimage.py --rust" in workflow
-    assert "linux-x64.tar.gz" in workflow
-    assert "linux-x86_64.AppImage" in workflow
     assert "bash /work/tools/linux_smoke.sh" in workflow
+    # One build job, two native legs: the PC one on 22.04 and the ARM64 one
+    # (the Blazie BT Speak and BT Braille, Raspberry Pi) on GitHub's
+    # hosted ARM runner of the same release, so both carry the same glibc
+    # floor. Each leg uploads its own pair of downloads.
+    assert "            runner: ubuntu-22.04\n" in workflow
+    assert "            runner: ubuntu-22.04-arm\n" in workflow
+    assert "            tarball: linux-x64\n" in workflow
+    assert "            tarball: linux-arm64\n" in workflow
+    assert "name: Linux-${{ matrix.arch }}" in workflow
+    assert "dist/FreightFate-*-${{ matrix.tarball }}.tar.gz" in workflow
+    assert "dist/FreightFate-*-linux-${{ matrix.arch }}.AppImage" in workflow
+    # The smoke matrix runs on both architectures, minus Arch on ARM64
+    # (Docker Hub's archlinux image is amd64 only).
+    assert "arch: [x86_64, aarch64]" in workflow
+    assert (
+        "runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}"
+        in workflow
+    )
+    assert (
+        "        exclude:\n          - arch: aarch64\n            image: archlinux:latest\n"
+        in workflow
+    )
     for image in (
         "ubuntu:22.04",
         "ubuntu:24.04",
@@ -580,7 +599,8 @@ def test_career_19_snapshot_builds_and_boots_a_linux_release():
     ):
         assert f"- {image}\n" in workflow, image
     assert (
-        "FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage > checksums.txt"
+        "FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage "
+        "FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage > checksums.txt"
         in workflow
     )
 
@@ -595,6 +615,12 @@ def test_career_19_snapshot_builds_and_boots_a_linux_release():
     assert 'grep -q " ERROR "' in smoke
     assert "--appimage-extract-and-run --smoke" in smoke
     assert "xvfb-run" in smoke
+    # The script boots whichever pair matches the container it runs in.
+    assert 'case "$(uname -m)"' in smoke
+    assert "x86_64) tarball_arch=x64; appimage_arch=x86_64 ;;" in smoke
+    assert "aarch64) tarball_arch=arm64; appimage_arch=aarch64 ;;" in smoke
+    assert '/work/dist/FreightFate-*-linux-"$tarball_arch".tar.gz' in smoke
+    assert '/work/dist/FreightFate-*-linux-"$appimage_arch".AppImage' in smoke
 
 
 def test_career_19_snapshot_builds_an_apple_silicon_macos_release():
@@ -667,6 +693,7 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
         "Windows",
         "macOS-arm64",
         "Linux-x86_64",
+        "Linux-aarch64",
     }
     assert all(step["with"]["path"] == "assets" for step in downloads)
     verify = next(
@@ -676,7 +703,9 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
     assert "assets/FreightFate-*-macos-arm64.zip" in verify["run"]
     assert "assets/FreightFate-*-linux-x64.tar.gz" in verify["run"]
     assert "assets/FreightFate-*-linux-x86_64.AppImage" in verify["run"]
-    assert verify["run"].count('"${#') == 4
+    assert "assets/FreightFate-*-linux-arm64.tar.gz" in verify["run"]
+    assert "assets/FreightFate-*-linux-aarch64.AppImage" in verify["run"]
+    assert verify["run"].count('"${#') == 6
     checksum = next(
         step
         for step in release["steps"]
@@ -684,7 +713,8 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
     )
     assert (
         "sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip "
-        "FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage" in checksum["run"]
+        "FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage "
+        "FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage" in checksum["run"]
     )
 
 
@@ -698,6 +728,17 @@ def test_player_manual_distinguishes_stable_and_career_19_mac_archives():
         "| Career 1.9 macOS, Apple Silicon | `FreightFate-<version>-macos-arm64.zip` |"
     ) in manual
     assert "On an Intel Mac, the in-game updater will not offer" in manual
+
+
+def test_player_manual_names_both_linux_architectures():
+    manual = (Path(__file__).resolve().parents[1] / "docs" / "user-manual.md").read_text(
+        encoding="utf-8"
+    )
+    assert "| Linux | `FreightFate-<version>-linux-x64.tar.gz` |" in manual
+    assert "| Linux (AppImage) | `FreightFate-<version>-linux-x86_64.AppImage` |" in manual
+    assert "| Linux ARM64 | `FreightFate-<version>-linux-arm64.tar.gz` |" in manual
+    assert "| Linux ARM64 (AppImage) | `FreightFate-<version>-linux-aarch64.AppImage` |" in manual
+    assert "BT Speak" in manual
 
 
 def test_career_19_snapshot_prepares_bass_before_rust_validation():

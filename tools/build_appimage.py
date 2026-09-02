@@ -43,13 +43,30 @@ APPDIR = WORK_DIR / "AppDir"
 APPIMAGE_ASSETS_DIR = ROOT / "tools" / "appimage"
 ICON_SOURCE = APPIMAGE_ASSETS_DIR / "freightfate.png"
 
+# Both tools are published per architecture under the same release, named
+# by `uname -m`: x86_64 for the PC build, aarch64 for the ARM64 one (the
+# Blazie BT Speak and BT Braille, Raspberry Pi). The AppImage is named the
+# same way, which is the AppImage convention; the tarball's `arm64` label is
+# build_release.py's.
 LINUXDEPLOY_URL = (
     "https://github.com/linuxdeploy/linuxdeploy/releases/download/"
-    "1-alpha-20251107-1/linuxdeploy-x86_64.AppImage"
+    "1-alpha-20251107-1/linuxdeploy-{arch}.AppImage"
 )
 APPIMAGE_RUNTIME_URL = (
-    "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64"
+    "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-{arch}"
 )
+SUPPORTED_ARCHITECTURES = ("x86_64", "aarch64")
+
+
+def appimage_architecture(machine: str | None = None) -> str:
+    """The `uname -m` name the AppImage tools and the output file use."""
+    machine = (machine or platform.machine()).lower()
+    if machine in {"x86_64", "amd64"}:
+        return "x86_64"
+    if machine in {"aarch64", "arm64"}:
+        return "aarch64"
+    raise RuntimeError(f"No AppImage tooling pinned for machine {machine!r}.")
+
 
 # Libraries that must come from the target system, not the AppImage.
 # Grouped by why bundling them would break users:
@@ -259,16 +276,19 @@ def main() -> int:
         shutil.rmtree(WORK_DIR)
     WORK_DIR.mkdir(parents=True, exist_ok=True)
 
-    linuxdeploy = download(LINUXDEPLOY_URL, TOOLS_DIR / "linuxdeploy-x86_64.AppImage")
+    arch = appimage_architecture()
+    linuxdeploy = download(
+        LINUXDEPLOY_URL.format(arch=arch), TOOLS_DIR / f"linuxdeploy-{arch}.AppImage"
+    )
     linuxdeploy.chmod(0o755)
-    runtime = download(APPIMAGE_RUNTIME_URL, TOOLS_DIR / "runtime-x86_64")
+    runtime = download(APPIMAGE_RUNTIME_URL.format(arch=arch), TOOLS_DIR / f"runtime-{arch}")
 
     assemble_appdir(staged_dir)
     produced = run_linuxdeploy(linuxdeploy, runtime, label)
     verify_bundled_libraries(nuitka=not args.rust)
 
     DIST_DIR.mkdir(parents=True, exist_ok=True)
-    target = DIST_DIR / f"{APP_NAME}-{label}-linux-x86_64.AppImage"
+    target = DIST_DIR / f"{APP_NAME}-{label}-linux-{arch}.AppImage"
     if target.exists():
         target.unlink()
     shutil.move(produced, target)

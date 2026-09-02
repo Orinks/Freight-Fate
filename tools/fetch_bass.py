@@ -13,8 +13,10 @@ developer keeps BASS somewhere else.
 Windows, macOS and Linux are all pinned. The macOS downloads are universal
 binaries -- one file carrying the Intel and Apple silicon slices -- so the
 same bytes are written into `macos-x86_64` and `macos-aarch64`, and a build
-targeting either architecture finds its library. Linux takes the x86_64
-slice of un4seen's `-linux` packages.
+targeting either architecture finds its library. Linux takes the x86_64 or
+the aarch64 slice of un4seen's `-linux` packages, whichever the machine is;
+the aarch64 one is what the Blazie BT Speak and BT Braille (Raspberry Pi
+Compute Module 4 and 5) run.
 
 Every file is checked against a pinned sha256. A silent change upstream --
 un4seen ship rolling updates behind stable URLs -- would otherwise walk into
@@ -130,7 +132,9 @@ MACOS_UNIVERSAL = {
 # and the Python Linux build has always shipped without it too.
 #
 # These depend on nothing beyond libc, so the same files run on every glibc
-# distribution; they are what the Linux tarball and AppImage ship.
+# distribution; they are what the Linux tarball and AppImage ship. The same
+# archives carry an `aarch64` slice (and `armhf` and `x86`, which nothing
+# here builds for), pinned below from the same 2026-09-02 download.
 LINUX_X86_64 = {
     "libbass.so": (
         "https://www.un4seen.com/files/bass24-linux.zip",
@@ -154,11 +158,35 @@ LINUX_X86_64 = {
     ),
 }
 
+LINUX_AARCH64 = {
+    "libbass.so": (
+        "https://www.un4seen.com/files/bass24-linux.zip",
+        "libs/aarch64/libbass.so",
+        "a05ba3afc880b03f36db8dea50fd1d912cacf2a2c85d785fbaef020f5a93adb2",
+    ),
+    "libbassflac.so": (
+        "https://www.un4seen.com/files/bassflac24-linux.zip",
+        "libs/aarch64/libbassflac.so",
+        "f1860674dd841b297105ca16a1feb916d89458e8aa81c6c9556d085f306dffa4",
+    ),
+    "libbassopus.so": (
+        "https://www.un4seen.com/files/bassopus24-linux.zip",
+        "libs/aarch64/libbassopus.so",
+        "b1fd77829909776c491a50a6330f2f0dd680de0bf56c45f9278bac680caef5bb",
+    ),
+    "libbasshls.so": (
+        "https://www.un4seen.com/files/basshls24-linux.zip",
+        "libs/aarch64/libbasshls.so",
+        "bb4f035eb70021408de7c9dd0c5ada37fc885eb65779afb84de970444a8e00c2",
+    ),
+}
+
 TARGETS = {
     "windows-x86_64": WINDOWS_X64,
     "macos-x86_64": MACOS_UNIVERSAL,
     "macos-aarch64": MACOS_UNIVERSAL,
     "linux-x86_64": LINUX_X86_64,
+    "linux-aarch64": LINUX_AARCH64,
 }
 
 
@@ -190,8 +218,12 @@ def target_keys() -> list[str]:
         return ["windows-x86_64"]
     if sys.platform == "darwin":
         return ["macos-x86_64", "macos-aarch64"]
-    if sys.platform.startswith("linux") and platform.machine() in ("x86_64", "AMD64"):
-        return ["linux-x86_64"]
+    if sys.platform.startswith("linux"):
+        machine = platform.machine()
+        if machine in ("x86_64", "AMD64"):
+            return ["linux-x86_64"]
+        if machine in ("aarch64", "arm64"):
+            return ["linux-aarch64"]
     # Anything else has no pinned build, and guessing a URL for it would be
     # worse than saying so.
     raise SystemExit(

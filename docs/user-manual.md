@@ -99,12 +99,22 @@ Release archives are named by platform when that platform is available:
 | Career 1.9 macOS, Apple Silicon | `FreightFate-<version>-macos-arm64.zip` |
 | Linux | `FreightFate-<version>-linux-x64.tar.gz` |
 | Linux (AppImage) | `FreightFate-<version>-linux-x86_64.AppImage` |
+| Linux ARM64 | `FreightFate-<version>-linux-arm64.tar.gz` |
+| Linux ARM64 (AppImage) | `FreightFate-<version>-linux-aarch64.AppImage` |
 
 On Linux you can pick either download. The tarball extracts to a portable
 folder, exactly like Windows. The AppImage is a single file: mark it
 executable (`chmod +x`) and run it, no extraction needed. Both work on any
 current 64-bit distribution: every Career 1.9 snapshot is started on
-Ubuntu, Debian, Fedora, Arch, and openSUSE before it is published. Speech
+Ubuntu, Debian, Fedora, Arch, and openSUSE before it is published.
+
+The Linux downloads come in two kinds of processor. The `x64` and `x86_64`
+files are for ordinary PCs. The `arm64` and `aarch64` files are for ARM
+computers: the Blazie BT Speak and BT Braille notetakers, a Raspberry Pi,
+and other ARM64 Linux machines. If you are not sure which you have, run
+`uname -m` in a terminal: `x86_64` means the PC files, `aarch64` means the
+ARM64 files. The in-game updater only ever offers the kind you are
+running. Speech
 comes through Speech Dispatcher, which your screen reader already uses, and
 sound plays through PulseAudio or PipeWire. An AppImage cannot write into itself,
 so its saves live in `~/.local/share/FreightFate` instead of a `saves`

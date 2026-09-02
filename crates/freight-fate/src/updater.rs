@@ -428,8 +428,34 @@ pub fn spoken_version(version: &str) -> String {
     }
 }
 
+/// The x86_64 Linux archives. The AppImage carries `uname -m`, the AppImage
+/// convention; the tarball's `x64` predates it and is what every release so
+/// far has been named, so it stays.
 pub const APPIMAGE_SUFFIX: &str = "-linux-x86_64.AppImage";
 pub const TARBALL_SUFFIX: &str = "-linux-x64.tar.gz";
+/// The ARM64 Linux archives: the Blazie BT Speak and BT Braille (Debian on a
+/// Raspberry Pi Compute Module), Raspberry Pi desktops, and the like. The
+/// tarball says `arm64` to match the Mac archive, the AppImage `aarch64`.
+pub const APPIMAGE_SUFFIX_AARCH64: &str = "-linux-aarch64.AppImage";
+pub const TARBALL_SUFFIX_AARCH64: &str = "-linux-arm64.tar.gz";
+
+/// The Linux tarball suffix for this process's architecture. An ARM64
+/// process must never be offered the x86_64 download, or the reverse: the
+/// updater would install a game that cannot start.
+pub fn tarball_suffix(architecture: Architecture) -> &'static str {
+    match architecture {
+        Architecture::Aarch64 => TARBALL_SUFFIX_AARCH64,
+        Architecture::X86_64 | Architecture::Other => TARBALL_SUFFIX,
+    }
+}
+
+/// The Linux AppImage suffix for this process's architecture.
+pub fn appimage_suffix(architecture: Architecture) -> &'static str {
+    match architecture {
+        Architecture::Aarch64 => APPIMAGE_SUFFIX_AARCH64,
+        Architecture::X86_64 | Architecture::Other => APPIMAGE_SUFFIX,
+    }
+}
 
 /// The .AppImage file this process is running from, or `None`.
 ///
@@ -458,9 +484,9 @@ pub fn platform_suffix(env: &UpdaterEnv) -> &'static str {
         Platform::MacOs => "-macos.zip",
         _ => {
             if running_appimage_path(env.appimage.as_deref()).is_some() {
-                APPIMAGE_SUFFIX
+                appimage_suffix(env.architecture)
             } else {
-                TARBALL_SUFFIX
+                tarball_suffix(env.architecture)
             }
         }
     }
@@ -597,7 +623,7 @@ fn pick_update_asset(release: &Value, env: &UpdaterEnv) -> Option<(String, Strin
         // Releases published before the AppImage existed ship only the
         // tarball; still offer the update. The download flow parks it for
         // a manual install (can_auto_apply is False) instead of hiding it.
-        asset = pick_asset(release, Some(TARBALL_SUFFIX), env);
+        asset = pick_asset(release, Some(tarball_suffix(env.architecture)), env);
     }
     asset
 }

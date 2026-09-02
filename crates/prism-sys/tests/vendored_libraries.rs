@@ -53,6 +53,9 @@ fn the_platforms_we_ship_are_vendored() {
         "macos-x86_64",
         "macos-aarch64",
         "linux-x86_64",
+        // The Blazie BT Speak and BT Braille: Debian on a Raspberry Pi
+        // Compute Module, so the game's first ARM64 Linux target.
+        "linux-aarch64",
     ] {
         let library = expected_library(platform).expect("a known platform");
         assert!(
@@ -84,18 +87,52 @@ fn the_linux_library_travels_with_its_bundled_dependencies() {
     // (PortkeyDrop had to drop the library for exactly that duplicate-GType
     // abort) two copies never meet. What must hold instead is that the
     // renamed dependencies ship beside the library: a stray `libprism.so`
-    // on its own fails to load, and the game then starts mute.
-    let dir = vendor_dir().join("linux-x86_64");
-    for prefix in ["libspeechd-", "libglib-2-", "libgio-2-", "libgobject-2-"] {
-        let present = std::fs::read_dir(&dir)
-            .expect("a linux-x86_64 vendor directory")
+    // on its own fails to load, and the game then starts mute. The aarch64
+    // wheel is laid out the same way, with its own hashes in the names.
+    for platform in ["linux-x86_64", "linux-aarch64"] {
+        let dir = vendor_dir().join(platform);
+        for prefix in ["libspeechd-", "libglib-2-", "libgio-2-", "libgobject-2-"] {
+            let present = std::fs::read_dir(&dir)
+                .unwrap_or_else(|err| panic!("a {platform} vendor directory: {err}"))
+                .flatten()
+                .any(|entry| entry.file_name().to_string_lossy().starts_with(prefix));
+            assert!(
+                present,
+                "vendor/{platform} has no {prefix}* library beside libprism.so; \
+                 the Linux build would start without speech"
+            );
+        }
+    }
+}
+
+#[test]
+fn the_linux_libraries_are_built_for_the_architecture_their_directory_names() {
+    // An ELF header's e_machine: 0x3E is x86-64, 0xB7 is AArch64. The
+    // directories are filled by hand from two different wheels, and a copy
+    // dropped into the wrong one would load on no machine at all.
+    for (platform, machine) in [("linux-x86_64", 0x3Eu16), ("linux-aarch64", 0xB7u16)] {
+        let dir = vendor_dir().join(platform);
+        for entry in std::fs::read_dir(&dir)
+            .unwrap_or_else(|err| panic!("a {platform} vendor directory: {err}"))
             .flatten()
-            .any(|entry| entry.file_name().to_string_lossy().starts_with(prefix));
-        assert!(
-            present,
-            "vendor/linux-x86_64 has no {prefix}* library beside libprism.so; \
-             the Linux build would start without speech"
-        );
+        {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            if !name.contains(".so") {
+                continue;
+            }
+            let bytes = std::fs::read(entry.path()).expect("a readable vendored library");
+            assert_eq!(
+                &bytes[..4],
+                b"\x7fELF",
+                "vendor/{platform}/{name} is not an ELF file"
+            );
+            let e_machine = u16::from_le_bytes([bytes[18], bytes[19]]);
+            assert_eq!(
+                e_machine, machine,
+                "vendor/{platform}/{name} is built for e_machine {e_machine:#x}, \
+                 not this directory's"
+            );
+        }
     }
 }
 
