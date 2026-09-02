@@ -707,7 +707,18 @@ impl Trip {
         let mut sample_mile = (leg_start + cell as f64 * 20.0).min(leg_start + leg.miles);
         let state = self.state_at(Some(self.position_mi));
         if !state.is_empty() && self.state_at(Some(sample_mile)) != state {
-            sample_mile = self.position_mi;
+            // The cell straddles a state line: sample the first stretch of
+            // it that is in the truck's state, not the truck itself. Sampling
+            // the live position moved the station key a few hundred yards at
+            // a time for the rest of the cell, and each move was a fresh NWS
+            // fetch -- 29 in one minute crossing into Louisiana on I-20
+            // (Brandon's log, 2026-09-01). The key must not churn inside one
+            // state; neither may the point it is looked up at.
+            let mut probe = sample_mile;
+            while probe < self.position_mi && self.state_at(Some(probe)) != state {
+                probe += 0.25;
+            }
+            sample_mile = probe.min(self.position_mi);
         }
         let (lat, lon) = self.latlon_at(Some(sample_mile));
         let from = self.route.cities.get(leg_i)?;

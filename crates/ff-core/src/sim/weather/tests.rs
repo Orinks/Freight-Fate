@@ -3300,13 +3300,30 @@ fn test_weather_is_asked_again_at_a_state_line() {
     // And the coordinate moved with us rather than staying at the cell start.
     assert_ne!(lat_before, lat_after);
 
-    // Inside one state the key must still be STABLE.
+    // Inside one state the key must still be STABLE -- and so must the
+    // point it is looked up at. The coordinate used to follow the truck for
+    // the rest of a straddling cell, and every few hundred yards of it was
+    // a new station key and a fresh fetch (29 in a minute, Brandon's
+    // Louisiana line, 2026-09-01).
     trip.position_mi = at_mi + 1.0;
-    let (steady_a, _, _) = trip.weather_location().unwrap();
+    let (steady_a, lat_a, lon_a) = trip.weather_location().unwrap();
     trip.position_mi = at_mi + 1.5;
-    let (steady_b, _, _) = trip.weather_location().unwrap();
+    let (steady_b, lat_b, lon_b) = trip.weather_location().unwrap();
     assert_eq!(
         steady_a, steady_b,
         "the key now churns within a single state"
+    );
+    assert_eq!(
+        (lat_a, lon_a),
+        (lat_b, lon_b),
+        "the lookup point now follows the truck within a single state"
+    );
+    assert_eq!(
+        (lat_a, lon_a),
+        (lat_after, {
+            trip.position_mi = at_mi + 0.25;
+            trip.weather_location().unwrap().2
+        }),
+        "the lookup point must be the same from the crossing onward"
     );
 }

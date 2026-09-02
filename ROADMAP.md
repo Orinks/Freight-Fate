@@ -219,6 +219,13 @@ that bite first, of the sweep's 49 gating items:
       on the STREET trip, and it survived `replace_trip` into the highway
       trip, whose mileposts start again from zero. Cleared on the swap,
       with the corner latches.
+- [x] A cell of the live-weather lookup that straddles a state line
+      sampled the truck's live position, so the station key moved a few
+      hundred yards at a time and each move was a fresh NWS fetch: 29 in
+      one minute crossing into Louisiana on I-20 (Brandon's log,
+      2026-09-01). FIXED 2026-09-01: the sample is the first quarter mile
+      of the cell inside the truck's state. The `real_weather` log line
+      per fetch stays, so a repeat of this shape is visible in any log.
 - [ ] Testers hear sounds quieter at the quiet speech rung; three
       suspects eliminated, still unexplained.
 - [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE:

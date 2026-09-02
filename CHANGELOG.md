@@ -1193,6 +1193,12 @@
   now behind the truck the moment it is on the ramp, and the keeper builds
   toward the merge from there.
 
+- **Crossing a state line no longer asks the weather service over and
+  over.** For the stretch after a state line the game was looking up the
+  weather again every few hundred yards, dozens of times in a minute, all
+  for the same reading. It now asks once for the stretch, as it does
+  everywhere else.
+
 - **Quitting the game no longer pauses on the way out.** Choosing Quit
   used to save your career one more time and then wait for a fresh cloud
   backup of it, even though leaving the terminal had already saved. The
