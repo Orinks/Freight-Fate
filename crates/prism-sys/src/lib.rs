@@ -6,7 +6,7 @@
 //!
 //! The declarations follow the cffi `cdef` that ships in the `prismatoid`
 //! Python package, which is what Freight Fate's Python speech layer was
-//! written against; the vendored binaries are prismatoid 0.17.3.
+//! written against; the vendored binaries are prismatoid 0.18.2.
 //!
 //! The library is opened at run time rather than linked, so a machine without
 //! Prism still starts the application — it just loses speech output. See
@@ -93,7 +93,10 @@ pub const PRISM_ERROR_UNKNOWN: PrismError = 17;
 pub const PRISM_ERROR_INVALID_AUDIO_FORMAT: PrismError = 18;
 pub const PRISM_ERROR_INTERNAL_BACKEND_LIMIT_EXCEEDED: PrismError = 19;
 pub const PRISM_ERROR_BACKEND_ENTERED_UNDEFINED_STATE: PrismError = 20;
-pub const PRISM_ERROR_COUNT: PrismError = 21;
+pub const PRISM_ERROR_LIBRARY_LOAD_FAILED: PrismError = 21;
+pub const PRISM_ERROR_LIBRARY_INVALID: PrismError = 22;
+pub const PRISM_ERROR_INCOMPATIBLE_ABI: PrismError = 23;
+pub const PRISM_ERROR_COUNT: PrismError = 24;
 
 /// Well-known backend identifiers, matching Prism's own registry hashes.
 pub mod backend_id {
@@ -255,7 +258,8 @@ mod tests {
         assert_eq!(PRISM_ERROR_NOT_INITIALIZED, 1);
         assert_eq!(PRISM_ERROR_INVALID_AUDIO_FORMAT, 18);
         assert_eq!(PRISM_ERROR_BACKEND_ENTERED_UNDEFINED_STATE, 20);
-        assert_eq!(PRISM_ERROR_COUNT, 21);
+        assert_eq!(PRISM_ERROR_INCOMPATIBLE_ABI, 23);
+        assert_eq!(PRISM_ERROR_COUNT, 24);
     }
 
     #[test]

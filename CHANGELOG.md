@@ -548,6 +548,15 @@
 
 ### Changed
 
+- **The speech library behind every voice in the game is updated.** Prism,
+  which carries the game's lines to NVDA, JAWS, SAPI and the other voices,
+  moves from July's release to the current one on every platform. Its own
+  fixes since then: a plain-text line that starts with a less-than sign is
+  no longer swallowed by SAPI, Microsoft Speech Platform voices now appear
+  in the SAPI voice list, running two voices at once no longer trips the
+  NVDA connection, and a rare crash inside the library's own logging at
+  shutdown is closed. Nothing changes in what the game says.
+
 - **Spoken lines are shorter everywhere.** Road cues, menus, readouts, the
   help screens and every settings description now say the fact and stop.
   A ramp cue says traffic light at the end, red, and no longer tells you

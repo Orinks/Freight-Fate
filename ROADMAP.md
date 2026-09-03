@@ -6086,6 +6086,19 @@ Everything not listed here ships fine after 1.9.0.
       unavailable until the heartbeat returns. Headless and capture
       test paths unchanged. Worker respawn after a long wedge is the
       recorded follow-up below.
+- [x] **Prism 0.18.2 vendored on every platform (2026-09-03).** Up from
+      the 0.17.3 wheels: Windows, both Mac slices and both Linux slices
+      (RUNPATH repointed to `$ORIGIN` again, now pinned by a test that
+      reads the ELF dynamic section, since a raw wheel copy passes every
+      other check and boots mute). The ABI only grew: 17 new exports,
+      none removed, three new error codes (21..=23) added to `prism-sys`.
+      Upstream fixes taken: SAPI plain text tagged not-XML (a leading
+      `<` was dropped), Speech Platform voices enumerated, two backends
+      at once no longer breaking the NVDA connection, the logger
+      teardown crash, exception handling in OneCore. None of them
+      describes the owner's "both voices stop mid-drive" report; that is
+      the worker-thread case below, and the watchdog line 8 s in is what
+      a log from the next episode will show.
 - [ ] **Speech worker respawn.** Today a wedged backend costs speech
       until the stuck call returns; a respawn (abandon the wedged
       thread, build a fresh Prism context on a new one) would bring
