@@ -104,8 +104,17 @@ impl SolvencyProfile for Profile {
     fn set_authority_readiness(&mut self, ready: bool) {
         self.authority_readiness = ready;
     }
+    fn set_weigh_station_transponder(&mut self, on: bool) {
+        self.weigh_station_transponder = on;
+    }
     fn set_truck(&mut self, key: &str) {
         self.truck = key.to_string();
+    }
+    fn owned_trucks(&self) -> Vec<String> {
+        self.owned_trucks.clone()
+    }
+    fn owned_trailers(&self) -> Vec<String> {
+        self.owned_trailers.clone()
     }
     fn active_truck_key(&self) -> String {
         Profile::active_truck_key(self)
@@ -164,6 +173,9 @@ impl CareerProfile for Profile {
     }
     fn authority_activation_eligible(&self) -> bool {
         authority_activation_eligibility(self).0
+    }
+    fn owner_operator_declined(&self) -> bool {
+        self.owner_operator_declined
     }
 }
 

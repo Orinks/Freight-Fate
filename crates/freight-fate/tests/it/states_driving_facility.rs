@@ -763,6 +763,32 @@ fn test_the_ramp_is_not_the_arrival_when_a_street_chain_follows_it() {
 }
 
 #[test]
+fn test_a_blown_gate_loop_back_lets_the_arrival_latch_go() {
+    // The loop-back promised "a fresh approach: the assist announces itself
+    // again", but left the latch set -- so it never did, and held the retry
+    // at the facility-lane walk from the turnaround on (owner, 2026-09-03).
+    let mut app = TestApp::new();
+    app.ctx.settings.destination_approach_assist = true;
+    let mut d = a_drive(&mut app);
+    d.destination_chain_ahead = Some(false);
+    let destination = d
+        .destination_exit_stop(&mut app.ctx)
+        .expect("a destination exit");
+    d.ramp_stop = Some(destination.clone());
+    d.ramp_mi = Some(0.0);
+    d.ramp_terminal_done = true;
+    d.destination_arrival_active = true;
+    d.destination_assist_brake = 0.6;
+
+    d.loop_back_to_destination_terminal(&mut app.ctx, &destination);
+
+    assert!(!d.destination_arrival_active);
+    assert_eq!(d.destination_assist_brake, 0.0);
+    assert!(!d.approach_pull_ahead);
+    assert!(d.ramp_mi.is_some_and(|mi| mi > 0.0));
+}
+
+#[test]
 fn test_the_approach_assist_delivers_the_truck_to_the_dock() {
     // Jerry, Hobbs Food Processing Plant, 2026-08-22: through the ramp light
     // on green, "Destination approach assistance slowing", 8 miles per hour,

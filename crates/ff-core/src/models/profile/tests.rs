@@ -223,6 +223,22 @@ fn test_old_save_without_start_choice_fields_uses_northstar_company_start() {
 }
 
 #[test]
+fn test_old_save_without_the_stay_company_choice_loads_as_not_declined() {
+    with_data_dir(|_| {
+        let p = Profile::named("Old Choice");
+        let mut data = p.to_dict();
+        data.remove("owner_operator_declined");
+        data.remove(SIGNATURE_FIELD);
+        let path = p.path();
+        write_text(&path, &data);
+
+        let loaded = load(&path);
+
+        assert!(!loaded.owner_operator_declined);
+    });
+}
+
+#[test]
 fn test_old_save_without_authority_readiness_loads_with_default() {
     with_data_dir(|_| {
         let p = Profile::named("Old Authority");

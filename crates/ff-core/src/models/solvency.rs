@@ -72,11 +72,13 @@ pub(crate) mod test_profile;
 #[cfg(test)]
 mod tests;
 
+use crate::models::business::OWNER_OPERATOR_BUY_IN;
 use crate::models::business_constants::{is_owner_operator, COMPANY_DRIVER};
 use crate::models::enforcement::{
     DrivingRecord, StandingProfile, LAST_CHANCE_CARRIER_KEY, LAST_CHANCE_CARRIER_NAME,
     REPUTATION_TERMINATION,
 };
+use crate::models::trailers::trailer_type;
 use crate::pyfmt::{fmt_grouped, round_py_n};
 
 // -- what a settlement may take ---------------------------------------------
@@ -135,7 +137,14 @@ pub trait SolvencyProfile: StandingProfile {
     fn set_owned_trailers(&mut self, trailers: Vec<String>);
     fn set_business_status(&mut self, status: &str);
     fn set_authority_readiness(&mut self, ready: bool);
+    /// `profile.weigh_station_transponder = on` (the owner-operator
+    /// subscription; a company driver's is the fleet's).
+    fn set_weigh_station_transponder(&mut self, on: bool);
     fn set_truck(&mut self, key: &str);
+    /// `profile.owned_trucks`.
+    fn owned_trucks(&self) -> Vec<String>;
+    /// `profile.owned_trailers`.
+    fn owned_trailers(&self) -> Vec<String>;
     /// `profile.active_truck_key()`: the tractor being driven right now.
     // TODO(lead): wire to Profile.active_truck_key.
     fn active_truck_key(&self) -> String;
@@ -564,6 +573,77 @@ pub fn apply_repossession<P: SolvencyProfile + ?Sized>(profile: &mut P) -> Vec<S
     record.setback_notice_kind = "repossession".to_string();
     record.setback_notice_lines = lines.clone();
     lines
+}
+
+// -- the way back by choice --------------------------------------------------
+
+/// What the carrier pays to take an owner-operator's equipment back when the
+/// driver chooses a company seat again.
+///
+/// The tractor the buy-in bought goes back for the used-sale share of its
+/// catalog price, capped at the buy-in itself: the same figure both ways, so
+/// leaving is neither a sale nor a loss on a carrier tractor worth far more
+/// than the buy-in. Anything bought at the dealer since -- tractors and
+/// trailers alike -- goes at the used-sale share, the ratio the lender's sale
+/// already uses. Nothing here is a penalty; the difference between catalog
+/// and used is what the equipment was worth.
+pub fn company_return_buy_back<P: SolvencyProfile + ?Sized>(profile: &P) -> f64 {
+    let mut total = 0.0;
+    for (i, key) in profile.owned_trucks().iter().enumerate() {
+        let used = profile.truck_catalog_price(key) * REPOSSESSION_EQUITY_SHARE;
+        total += if i == 0 {
+            used.min(OWNER_OPERATOR_BUY_IN)
+        } else {
+            used
+        };
+    }
+    for key in profile.owned_trailers() {
+        if let Some(trailer) = trailer_type(&key) {
+            total += trailer.purchase_price * REPOSSESSION_EQUITY_SHARE;
+        }
+    }
+    round_py_n(total, 2)
+}
+
+/// An owner-operator hands the equipment back and takes a company seat again,
+/// by choice. Every owned tractor and trailer goes, for the same reason the
+/// repossession takes them all: a spare left behind would leave the driver
+/// still an owner-operator. Nothing is written to the driving record, no
+/// balance is touched, and the carrier that had the lease keeps the driver.
+pub fn apply_return_to_company_driving<P: SolvencyProfile + ?Sized>(
+    profile: &mut P,
+) -> Vec<String> {
+    let label = profile.truck_catalog_label(&profile.active_truck_key());
+    let others = profile.owned_trucks().len().saturating_sub(1) + profile.owned_trailers().len();
+    let buy_back = company_return_buy_back(profile);
+    profile.set_money(round_py_n(profile.money() + buy_back, 2));
+    profile.set_owned_trucks(Vec::new());
+    profile.set_owned_trailers(Vec::new());
+    profile.set_business_status(COMPANY_DRIVER);
+    profile.set_authority_readiness(false);
+    profile.set_weigh_station_transponder(false);
+    let carrier = match profile.carrier_name() {
+        "" => "your carrier".to_string(),
+        name => name.to_string(),
+    };
+    let assigned = profile.assigned_truck_key();
+    profile.set_truck(&assigned);
+    profile.clear_dispatch_board_cache();
+    let more = match others {
+        0 => String::new(),
+        1 => " and one more piece of equipment".to_string(),
+        n => format!(" and {n} more pieces of equipment"),
+    };
+    vec![
+        format!(
+            "{carrier} takes the {label}{more} back for {}. You are a company driver again, \
+             in a carrier tractor, and the carrier pays fuel, repairs, and the trailer.",
+            money_text(buy_back)
+        ),
+        "Settlements are driver wages and bonuses from here. The owner-operator buy-in \
+         stays open under Business status, and the gates are the ones you already cleared."
+            .to_string(),
+    ]
 }
 
 pub fn setback_pending<P: StandingProfile + ?Sized>(profile: &P) -> bool {

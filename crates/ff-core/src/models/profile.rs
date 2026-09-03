@@ -152,6 +152,7 @@ pub const PROFILE_FIELDS: &[&str] = &[
     "weigh_station_transponder",
     "trailer_programs",
     "owned_trailers",
+    "owner_operator_declined",
     "career",
     "driving_record",
     "selection_score",
@@ -416,6 +417,11 @@ pub struct Profile {
     pub weigh_station_transponder: bool,
     pub trailer_programs: Vec<String>,
     pub owned_trailers: Vec<String>,
+    /// The driver chose to stay a company driver with the buy-in open
+    /// (Business status, "Stay a company driver"): the buy-in row stays,
+    /// the nudges toward it stop. Cleared by buying in or by reopening the
+    /// plan from the same screen.
+    pub owner_operator_declined: bool,
     pub career: Career,
     // Citations, serious violations, and CDL standing. Enforcement outlives a
     // trip: the old build kept the felony count on the trip snapshot and then
@@ -490,6 +496,7 @@ impl Default for Profile {
             weigh_station_transponder: false,
             trailer_programs: Vec::new(),
             owned_trailers: Vec::new(),
+            owner_operator_declined: false,
             career: Career::new(),
             driving_record: DrivingRecord::new(),
             selection_score: SAFETY_RECORD_BASELINE,

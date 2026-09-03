@@ -34,7 +34,8 @@ use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup};
 use freight_fate::states::base::Key;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{
-    DOCKING_MAX_MPH, RAMP_ACCESS_MI, RAMP_LIGHT_GREEN_S, RAMP_LIGHT_RED_S, RED_STOP_MPH,
+    DOCKING_MAX_MPH, FACILITY_LANE_ROLL_MPH, RAMP_ACCESS_MI, RAMP_LIGHT_GREEN_S, RAMP_LIGHT_RED_S,
+    RED_STOP_MPH,
 };
 use freight_fate::states::driving_menu_states::FacilityArrivalState;
 
@@ -838,6 +839,10 @@ struct SignRelease {
     /// reaching the streets: the ramp roll runs up to the posted limit, not
     /// a walk (owner, 2026-09-01).
     ramp_top_mph: f64,
+    /// The lane's own number from the sign to the entrance: the posted
+    /// limit, never above the ramp's advisory speed. What a plain ramp's
+    /// hands-off drive runs up to, floored at the facility-lane roll.
+    lane_mph: f64,
 }
 
 impl SignRelease {
@@ -932,6 +937,10 @@ fn arrive_from_the_sign(
         d.ramp_mi = Some(RAMP_ACCESS_MI + 0.1);
         d.truck_mut().velocity_mps = 25.0 * MPS_PER_MPH;
     });
+    let lane_mph = harness.with_drive(|d, _| {
+        let (posted_mph, _) = d.trip.speed_limit_at(d.trip.position_mi);
+        posted_mph.min(d.armed_ramp_mph(None))
+    });
     harness.clear_speech();
     release_keys(&mut harness);
 
@@ -1006,6 +1015,7 @@ fn arrive_from_the_sign(
         stood_still,
         speed_mph,
         ramp_top_mph,
+        lane_mph,
     }
 }
 
@@ -1052,6 +1062,42 @@ fn test_the_assist_drives_from_the_clear_sign_to_the_entrance_hold_hands_off() {
         release.said(
             "Facility stopping assistance is holding at the entrance. Press Enter to continue into the facility."
         ),
+        "{}",
+        release.report(destination)
+    );
+    for lie in ["Drove past", "You never stopped", "missed"] {
+        assert!(!release.said(lie), "{}", release.report(destination));
+    }
+}
+
+#[test]
+fn test_the_assist_drives_a_plain_ramp_from_the_sign_at_the_lane_speed() {
+    // The same hands-off release on a facility whose ramp ends at the gate.
+    // The stretch from the sign to the entrance is road until the final
+    // lengths, so the truck runs up to the lane's own number -- or to the
+    // facility-lane roll where the lane's number is under it -- rather than
+    // walking whatever the lane allows at 12 (owner, 2026-09-03: "crawling
+    // at 12"), then sheds to the gate creep and the dock opens.
+    let (_, plain) = destinations(get_world(), 1);
+    let destination = &plain[0];
+    let release = arrive_from_the_sign(destination, true, false);
+    println!("{}", release.report(destination));
+    assert!(release.stopped_at_sign, "{}", release.report(destination));
+    assert!(release.moved_off_alone, "{}", release.report(destination));
+    // From the bar the stop profile is already under the lane's number and
+    // falling, so the truck meets it on the way up rather than reaching the
+    // number itself; what matters is that it is driven well past the walk.
+    assert!(
+        release.ramp_top_mph > FACILITY_LANE_ROLL_MPH + 5.0,
+        "ramp top {:.1} mph against a lane number of {:.1}: {}",
+        release.ramp_top_mph,
+        release.lane_mph,
+        release.report(destination)
+    );
+    // A plain ramp ends at the gate: the dock opens, there is no entrance
+    // hold to press Enter at.
+    assert!(
+        release.said("Pulling into"),
         "{}",
         release.report(destination)
     );

@@ -14,6 +14,7 @@ use ff_core::models::credentials::{
     course_eligibility, course_offer_text, credential, Credential, CREDENTIALS,
 };
 use ff_core::models::enforcement::HOURS_PER_DAY;
+use ff_core::models::solvency::{apply_return_to_company_driving, company_return_buy_back};
 use ff_core::models::trailers::{TrailerType, DEFAULT_TRAILER_PROGRAMS, TRAILER_CATALOG};
 use ff_core::models::trucks::{TruckModel, Upgrade, TRUCK_CATALOG, UPGRADE_CATALOG};
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
@@ -38,6 +39,9 @@ fn save_equipment_change(ctx: &mut GameContext) {
 
 pub struct BusinessStatusState {
     menu: MenuCore<Self>,
+    /// "Go back to company driving" was pressed once; the next press on it
+    /// does it. Hands back every tractor, so it is never a single Enter.
+    return_armed: bool,
 }
 
 impl Default for BusinessStatusState {
@@ -53,6 +57,7 @@ impl BusinessStatusState {
                 "Enter repeats a line, or buys in when qualified. Escape returns to the \
                  terminal.",
             ),
+            return_armed: false,
         }
     }
 
@@ -64,18 +69,79 @@ impl BusinessStatusState {
     }
 
     fn summary(&mut self, ctx: &mut GameContext) {
+        self.return_armed = false;
         let text = business_status_summary(profile(ctx));
         ctx.say(&text);
     }
 
     fn rank_status(&mut self, ctx: &mut GameContext) {
+        self.return_armed = false;
         let text = business_path_label(profile(ctx));
         ctx.say(&text);
     }
 
     fn next_unlock(&mut self, ctx: &mut GameContext) {
+        self.return_armed = false;
         let text = next_business_unlock(profile(ctx));
         ctx.say(&text);
+    }
+
+    /// The driver says no to the buy-in and means it: the row stays, the
+    /// three reminders that repeat the offer -- next unlock, the summary,
+    /// the career plan -- stop, and the plan reads on down the company
+    /// ladder. Reversible from the same screen.
+    fn stay_company_driver(&mut self, ctx: &mut GameContext) {
+        {
+            let p = profile_mut(ctx);
+            p.owner_operator_declined = true;
+            p.dispatch_board_cache = None;
+        }
+        save_business_change(ctx);
+        let carrier = ff_core::models::career::carrier_name_of(profile(ctx));
+        ctx.say(&format!(
+            "Staying a company driver with {carrier}. The career plan stops pointing you at \
+             the buy-in. It stays open here under Business status if you change your mind."
+        ));
+        self.refresh(ctx, true);
+    }
+
+    fn reopen_owner_operator_plan(&mut self, ctx: &mut GameContext) {
+        {
+            let p = profile_mut(ctx);
+            p.owner_operator_declined = false;
+            p.dispatch_board_cache = None;
+        }
+        save_business_change(ctx);
+        ctx.say(&format!(
+            "Owner-operator plan reopened. {}",
+            next_business_unlock(profile(ctx))
+        ));
+        self.refresh(ctx, true);
+    }
+
+    /// Hands every tractor and trailer back and takes a company seat again.
+    /// Two presses: the first says what goes and for how much, the second
+    /// does it.
+    fn return_to_company_driving(&mut self, ctx: &mut GameContext) {
+        if !self.return_armed {
+            self.return_armed = true;
+            let carrier = ff_core::models::career::carrier_name_of(profile(ctx));
+            let buy_back = company_return_buy_back(profile(ctx));
+            ctx.say(&format!(
+                "Going back to company driving hands every tractor and trailer you own back \
+                 to {carrier} for {} dollars, and puts you in a carrier tractor on company \
+                 wages. Press Enter again to do it.",
+                fmt_grouped(buy_back, 0)
+            ));
+            self.refresh(ctx, true);
+            return;
+        }
+        self.return_armed = false;
+        let lines = apply_return_to_company_driving(profile_mut(ctx));
+        save_business_change(ctx);
+        ctx.audio.play("ui/cash");
+        ctx.say(&lines.join(" "));
+        self.refresh(ctx, true);
     }
 
     /// What the transponder subscription is still waiting on.
@@ -95,6 +161,7 @@ impl BusinessStatusState {
     }
 
     fn become_owner_operator(&mut self, ctx: &mut GameContext) {
+        self.return_armed = false;
         let (ok, reasons) = owner_operator_eligibility(profile(ctx));
         if !ok {
             ctx.audio.play("ui/error");
@@ -110,6 +177,7 @@ impl BusinessStatusState {
             p.money -= OWNER_OPERATOR_BUY_IN;
             let assigned = p.active_truck_key();
             p.business_status = LEASED_OWNER_OPERATOR.to_string();
+            p.owner_operator_declined = false;
             if !p.owned_trucks.contains(&assigned) {
                 p.owned_trucks.push(assigned.clone());
             }
@@ -267,6 +335,24 @@ impl Menu for BusinessStatusState {
                     )
                     .help("Higher revenue, but your business pays operating costs."),
                 );
+                if p.owner_operator_declined {
+                    items.push(
+                        MenuItem::new("Reopen the owner-operator plan", |s: &mut Self, ctx| {
+                            s.reopen_owner_operator_plan(ctx)
+                        })
+                        .help("The career plan points at the buy-in again."),
+                    );
+                } else {
+                    items.push(
+                        MenuItem::new("Stay a company driver", |s: &mut Self, ctx| {
+                            s.stay_company_driver(ctx)
+                        })
+                        .help(
+                            "Keep the carrier's tractor and wages. The reminders about the \
+                             buy-in stop; the buy-in itself stays open here.",
+                        ),
+                    );
+                }
             } else {
                 items.push(
                     MenuItem::new("Owner-operator path locked", |s: &mut Self, ctx| {
@@ -276,6 +362,22 @@ impl Menu for BusinessStatusState {
                 );
             }
         } else {
+            items.push(
+                MenuItem::new(
+                    Label::dynamic(|s: &Self, _ctx| {
+                        if s.return_armed {
+                            "Go back to company driving: press Enter again to confirm".to_string()
+                        } else {
+                            "Go back to company driving".to_string()
+                        }
+                    }),
+                    |s: &mut Self, ctx| s.return_to_company_driving(ctx),
+                )
+                .help(
+                    "The carrier takes your tractors and trailers back and pays you for them. \
+                     Company wages again, in a carrier tractor. Asks twice.",
+                ),
+            );
             if p.business_status == INDEPENDENT_AUTHORITY {
                 items.push(
                     MenuItem::new("Own authority active", |s: &mut Self, ctx| s.summary(ctx)).help(

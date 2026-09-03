@@ -725,6 +725,10 @@ class Profile:
     weigh_station_transponder: bool = False
     trailer_programs: list[str] = field(default_factory=list)
     owned_trailers: list[str] = field(default_factory=list)
+    # The driver chose to stay a company driver with the buy-in open (Career
+    # 1.9, Business status "Stay a company driver"). Carried here so the two
+    # lines agree on the save's field list; the dev line never sets it.
+    owner_operator_declined: bool = False
     career: Career = field(default_factory=Career)
     # Citations, serious violations, and CDL standing. Enforcement outlives a
     # trip: the old build kept the felony count on the trip snapshot and then

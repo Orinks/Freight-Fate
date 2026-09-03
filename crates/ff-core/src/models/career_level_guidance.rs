@@ -1,6 +1,7 @@
 //! Save-compatible level-band guidance for the 30-level career ladder (port
 //! of `freight_fate/models/career_level_guidance.py`).
 
+use crate::models::business::OWNER_OPERATOR_LEVEL;
 use crate::models::business_constants::{is_owner_operator, INDEPENDENT_AUTHORITY};
 use crate::models::career::CareerProfile;
 use crate::models::dispatch_policy::SENIOR_LOAD_CHOICE_LEVEL;
@@ -98,6 +99,16 @@ pub fn career_level_guidance<P: CareerProfile + ?Sized>(profile: &P) -> CareerLe
             "Favor freight with clear take-home and enough reserve after settlement.",
             "reserve-safe owner-operator freight",
             "Owner-operator progress depends on margin discipline.",
+        );
+    }
+    if level >= OWNER_OPERATOR_LEVEL && profile.owner_operator_declined() {
+        return CareerLevelGuidance::new(
+            "Company driver by choice",
+            "You chose to stay on carrier equipment; the buy-in stays open under Business \
+             status if you ever want it.",
+            "Run the premium freight your record earned; nothing on the board is above your standing.",
+            "top-seniority company lane",
+            "A company career past the buy-in gate is the safest version of the ladder.",
         );
     }
     if level >= 30 {

@@ -1367,6 +1367,56 @@ fn test_facility_stopping_assistance_does_not_coast_to_a_stop_short_of_the_scale
 }
 
 #[test]
+fn test_facility_stopping_assistance_runs_a_scale_ramp_at_the_lane_speed_not_a_walk() {
+    // Owner, 2026-09-03: on a ramp with no terminal control -- a scale's
+    // always is -- the assist latched at the top and walked the whole half
+    // mile at 12 mph. A lane is road until the final lengths: at 20 mph with
+    // 0.4 miles of ramp left there is nothing to shed yet, so the assist's
+    // pedal is the throttle, not the brake.
+    let mut app = TestApp::new();
+    app.ctx.settings.destination_approach_assist = true;
+    let mut drive = a_drive(&mut app, "Scale Lane");
+    let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
+    drive.ramp_stop = Some(scale);
+    drive.ramp_mi = Some(0.4);
+    drive.ramp_terminal_done = true;
+    // The lane's own number here: the posted limit, never above the ramp's
+    // advisory speed. The hold is that number this far from the bar.
+    let (posted_mph, _) = drive.trip.speed_limit_at(drive.trip.position_mi);
+    let lane_mph = posted_mph.min(drive.armed_ramp_mph(None));
+    assert!(
+        lane_mph > FACILITY_LANE_ROLL_MPH + 3.0,
+        "this ramp's lane number is {lane_mph:.1} mph; the case needs one above the old walk"
+    );
+    drive.trip.truck.velocity_mps = mph_to_mps(lane_mph - 3.0);
+    drive.trip.truck.brake = 0.0;
+    drive.trip.truck.parking_brake = false;
+
+    drive.update_destination_approach_assist(&mut app.ctx);
+
+    assert!(drive.destination_arrival_active);
+    assert_eq!(
+        drive.trip.truck.brake, 0.0,
+        "braked under the lane number {lane_mph:.1}"
+    );
+    assert_eq!(drive.destination_assist_brake, 0.0);
+    assert!(
+        drive.trip.truck.throttle > 0.0,
+        "no throttle toward the lane number {lane_mph:.1}"
+    );
+
+    // Well over the lane's number the stop profile to the bar asks for real
+    // brake, and the throttle stays off. (Just over it, the truck is lifted
+    // and left to drag: a service floor held down a ramp costs the air the
+    // gate needs.)
+    drive.trip.truck.throttle = 0.0;
+    drive.trip.truck.velocity_mps = mph_to_mps(lane_mph + 30.0);
+    drive.update_destination_approach_assist(&mut app.ctx);
+    assert!(drive.trip.truck.brake > 0.0);
+    assert_eq!(drive.trip.truck.throttle, 0.0);
+}
+
+#[test]
 fn test_a_casual_hos_mode_never_lets_a_scale_claim_the_exit() {
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, "Jerry");

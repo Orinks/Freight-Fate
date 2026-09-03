@@ -4,6 +4,19 @@
 
 ### Added
 
+- **You can stay a company driver, and an owner-operator can go back to
+  one.** Once the owner-operator buy-in opens, Business status has a new
+  row, Stay a company driver. Choose it and the game stops steering you at
+  the buy-in: the career plan, the next business unlock and the status
+  summary read as a company career instead, and the buy-in row simply stays
+  there for later. Reopen the owner-operator plan puts the reminders back.
+  If you have already bought in and want out, Business status also has Go
+  back to company driving. It asks twice. The carrier takes every tractor
+  and trailer you own, pays you for them, the buy-in tractor for what you
+  paid, anything bought since at its used value, and puts you back in a
+  carrier tractor on company wages with the same carrier. Nothing goes on
+  your record, and the buy-in stays open if you change your mind again.
+
 - **You can play from a braille display with speech off.** A new row in
   Settings, Speech, called Output, switches between speech and braille and
   braille only. Braille only sends every line the game would have spoken to
@@ -1228,6 +1241,17 @@
   The status readout still has the words if you ask for it.
 
 ### Fixed
+
+- **Facility stopping assistance no longer crawls the whole ramp at 12 miles
+  per hour.** On a ramp with nothing at its end to stop for, a scale ramp or
+  a ramp that runs straight into the facility, the assist took the pedals
+  at the top of the ramp and walked the truck the entire half mile at 12,
+  under the lane's own limit. The same walk held the retry after you carried
+  past a gate and looped back, and the assist never announced itself again.
+  The lane is road until the last two hundred feet, so the assist now drives
+  it at the lane's own speed, brings the truck down on the same gentle curve
+  it uses everywhere else, and creeps only the final lengths to the entrance.
+  The loop-back starts a fresh approach and says so.
 
 - **A load staged at your own yard no longer sends you on a drive to it.**
   When dispatch hands a new hire a load that ships from the very company

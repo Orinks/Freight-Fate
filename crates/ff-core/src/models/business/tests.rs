@@ -415,3 +415,30 @@ fn company_pay_uses_the_wage_floor_share_and_trust_bonus() {
     );
     assert_eq!(independent_authority_charges(&job, 1000.0).len(), 6);
 }
+
+#[test]
+fn test_a_company_driver_who_chose_to_stay_is_not_nudged_toward_the_buy_in() {
+    // Owner, 2026-09-03: a driver who does not want the lease had no way to
+    // say so, and every terminal visit, board and level-up repeated the
+    // offer. With the choice recorded the buy-in is a door, not the plan.
+    let mut p = Profile::named("Company By Choice");
+    p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
+    p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
+    p.career.reputation = OWNER_OPERATOR_REPUTATION;
+    p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL;
+    assert!(owner_operator_eligibility(&p).0);
+    assert!(next_business_unlock(&p).contains("buy into"));
+    assert!(business_status_summary(&p).contains("You qualify to buy"));
+
+    p.owner_operator_declined = true;
+
+    // Still eligible: the choice hides nothing, it only stops the nudging.
+    assert!(owner_operator_eligibility(&p).0);
+    let unlock = next_business_unlock(&p);
+    assert!(unlock.starts_with("Company driver by choice."), "{unlock}");
+    assert!(!unlock.contains("buy into"), "{unlock}");
+    let summary = business_status_summary(&p);
+    assert!(summary.contains("by choice"), "{summary}");
+    assert!(summary.contains("stays open here"), "{summary}");
+    assert!(!summary.contains("You qualify"), "{summary}");
+}

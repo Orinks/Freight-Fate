@@ -410,6 +410,11 @@ pub fn next_business_unlock<P: BusinessProfile + ?Sized>(profile: &P) -> String 
     }
 
     let (ok, reasons) = owner_operator_eligibility(profile);
+    if ok && profile.owner_operator_declined() {
+        // The driver said no. The plan reads on down the ladder, and the
+        // buy-in is mentioned as a door, never as the next step.
+        return format!("Company driver by choice. {}", company_ladder_next(level));
+    }
     if ok {
         return "Next: buy into a leased-on owner-operator tractor position from Business status."
             .to_string();
@@ -426,6 +431,19 @@ pub fn next_business_unlock<P: BusinessProfile + ?Sized>(profile: &P) -> String 
         };
     }
     format!("Owner-operator gate locked: {}", reasons.join(" "))
+}
+
+/// The next rung of the ladder read as a company career: what a driver who
+/// turned the buy-in down hears in place of the offer.
+fn company_ladder_next(level: i64) -> String {
+    match next_rank_for_level(level) {
+        None => "You are at the top career rank. The owner-operator buy-in stays open under                  Business status if you ever want it."
+            .to_string(),
+        Some(next_rank) => format!(
+            "Next: level {}, {}. {}",
+            next_rank.level, next_rank.title, next_rank.unlock
+        ),
+    }
 }
 
 pub fn business_status_summary<P: BusinessProfile + ?Sized>(profile: &P) -> String {
@@ -477,6 +495,15 @@ fn business_status_summary_inner<P: BusinessProfile + ?Sized>(profile: &P) -> St
         );
     }
     let (ok, _reasons) = owner_operator_eligibility(profile);
+    if ok && profile.owner_operator_declined() {
+        return format!(
+            "You are a company driver for {} by choice, level {} {}. The carrier supplies the tractor, fuel, repairs, trailer, authority, and insurance. Settlements are driver wages and bonuses. The owner-operator buy-in stays open here if you change your mind. {}",
+            carrier_name(profile),
+            rank.level,
+            rank.title,
+            company_ladder_next(profile.career().level())
+        );
+    }
     if ok {
         return format!(
             "You are a company driver for {}, level {} {}. You qualify to buy your first leased-on tractor position. Owner-operator buy-in costs {} dollars and keeps {} dollars of working capital in the bank.",

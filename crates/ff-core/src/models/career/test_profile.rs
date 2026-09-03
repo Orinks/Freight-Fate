@@ -50,6 +50,7 @@ pub(crate) struct FakeProfile {
     pub pay_advance: f64,
     pub pay_advance_used_for_load: bool,
     pub authority_readiness: bool,
+    pub owner_operator_declined: bool,
     pub has_active_trip: bool,
     pub dispatch_board_cached: bool,
     pub achievements: Vec<String>,
@@ -78,6 +79,7 @@ impl Default for FakeProfile {
             pay_advance: 0.0,
             pay_advance_used_for_load: false,
             authority_readiness: false,
+            owner_operator_declined: false,
             has_active_trip: false,
             dispatch_board_cached: false,
             achievements: Vec::new(),
@@ -285,6 +287,9 @@ impl CareerProfile for FakeProfile {
     }
     fn authority_activation_eligible(&self) -> bool {
         self.authority_activation_eligibility()
+    }
+    fn owner_operator_declined(&self) -> bool {
+        self.owner_operator_declined
     }
 }
 

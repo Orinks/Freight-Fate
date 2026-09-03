@@ -139,6 +139,10 @@ impl Profile {
         d.insert("trailer_programs".into(), strings(&self.trailer_programs));
         d.insert("owned_trailers".into(), strings(&self.owned_trailers));
         d.insert(
+            "owner_operator_declined".into(),
+            Value::from(self.owner_operator_declined),
+        );
+        d.insert(
             "career".into(),
             serde_json::to_value(&self.career).expect("a career serialises"),
         );
@@ -287,6 +291,7 @@ impl Profile {
             weigh_station_transponder: b("weigh_station_transponder", false),
             trailer_programs: list("trailer_programs"),
             owned_trailers: list("owned_trailers"),
+            owner_operator_declined: b("owner_operator_declined", false),
             career,
             driving_record,
             selection_score: f("selection_score", SAFETY_RECORD_BASELINE),

@@ -209,3 +209,24 @@ fn test_independent_authority_objective_grows_then_follows_the_level_band() {
     assert_eq!(band.title, "Grow a freight business");
     assert_eq!(band.recommendation, "direct freight with margin");
 }
+
+#[test]
+fn test_a_company_driver_who_chose_to_stay_gets_a_company_plan() {
+    let mut profile = profile("Stay Company");
+    profile.achievements.push("first_dispatch".to_string());
+    profile.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
+    profile.career.deliveries = 35;
+    profile.career.reputation = 82.0;
+    profile.money = 60_000.0;
+    assert_eq!(
+        career_objective(&profile).title,
+        "Owner-operator buy-in ready"
+    );
+
+    profile.owner_operator_declined = true;
+
+    let objective = career_objective(&profile);
+    assert_eq!(objective.title, "Company driver by choice");
+    assert!(objective.terminal_text.contains("stays open"));
+    assert!(!objective.spoken_summary().contains("buy-in ready"));
+}

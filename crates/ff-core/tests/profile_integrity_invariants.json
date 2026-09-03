@@ -1190,6 +1190,7 @@
     "out_of_service_events",
     "owned_trailers",
     "owned_trucks",
+    "owner_operator_declined",
     "pay_advance",
     "pay_advance_used_for_load",
     "radio_favorites",

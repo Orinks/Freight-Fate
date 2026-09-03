@@ -11,6 +11,16 @@ use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_stops::arrival_servo_brake;
 
+/// Which number a facility-lane hold is keeping: see
+/// `DrivingState::facility_lane_hold_mph`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum LaneHold {
+    /// The lane's own posted number, with the stop still far enough off.
+    Lane,
+    /// The comfort-rate shed to the gate creep, now under the lane's number.
+    Shed,
+}
+
 impl DrivingState {
     /// Squeal when hot brakes are worked past their fade temperature.
     pub fn update_brake_heat_cue(&mut self, ctx: &mut GameContext, dt: f64) {
@@ -251,15 +261,54 @@ impl DrivingState {
         // on an upgrade. The dock opens only AT the point, so the last
         // lengths are a creep the assist holds, throttle against the road if
         // it has to, until the point's own full-brake branch above stops it.
-        let target_mph = if self.ramp_mi.is_some()
-            && ramp_is_facility
-            && remaining_mi > ARRIVAL_FINAL_CREEP_MI
-        {
-            FACILITY_LANE_ROLL_MPH
+        //
+        // A facility lane is road until the final truck-lengths, so on one the
+        // pace is the road's own number brought down on the comfort profile
+        // (`facility_lane_hold_mph`), not a flat walk. The flat 12 mph walk
+        // held from wherever the latch fired: on a ramp with no terminal
+        // control -- a scale, a freeway-to-freeway ramp, or the dice -- that
+        // is the top of the ramp, and the truck crawled the whole half mile
+        // at 12 with the lane posted at 15 or more (owner, 2026-09-03).
+        if self.ramp_mi.is_some() && ramp_is_facility && remaining_mi > ARRIVAL_FINAL_CREEP_MI {
+            let (hold_mph, lane) = self.facility_lane_hold_mph(remaining_m);
+            // Road, not a gate: the pedal that runs a chain ramp up to its
+            // limit, unless the hold is down at the walk anyway.
+            let throttle_max = if hold_mph > FACILITY_LANE_ROLL_MPH {
+                APPROACH_ROLL_THROTTLE_MAX
+            } else {
+                ARRIVAL_CREEP_THROTTLE_MAX
+            };
+            self.hold_approach_speed_profile(
+                remaining_m,
+                hold_mph,
+                ARRIVAL_CREEP_MPH,
+                Some(lane),
+                throttle_max,
+            );
+            return;
+        }
+        self.hold_approach_speed(remaining_m, ARRIVAL_CREEP_MPH);
+    }
+
+    /// The pace the arrival keeps on a facility lane `remaining_m` short of
+    /// the gate: the lane's own number -- the posted limit here, and never
+    /// more than the ramp's advisory speed -- or the comfort-rate shed that
+    /// reaches the gate creep exactly at the entrance, whichever is lower.
+    /// Never below the facility-lane roll, so a lane with no posted number
+    /// still moves. The final creep stretch is the caller's. The second
+    /// half says which of the two the hold is.
+    fn facility_lane_hold_mph(&mut self, remaining_m: f64) -> (f64, LaneHold) {
+        let (posted_mph, _) = self.trip.speed_limit_at(self.trip.position_mi);
+        let lane_mph = posted_mph.min(self.armed_ramp_mph(None));
+        let creep = ARRIVAL_CREEP_MPH / 2.23694;
+        let profile_mph =
+            (creep * creep + 2.0 * APPROACH_DECEL_MPS2 * remaining_m.max(0.0)).sqrt() * 2.23694;
+        let kind = if profile_mph < lane_mph {
+            LaneHold::Shed
         } else {
-            ARRIVAL_CREEP_MPH
+            LaneHold::Lane
         };
-        self.hold_approach_speed(remaining_m, target_mph);
+        (profile_mph.min(lane_mph).max(FACILITY_LANE_ROLL_MPH), kind)
     }
 
     /// The stop profile's pedal for this frame: brake down to `target_mph`
@@ -275,13 +324,41 @@ impl DrivingState {
     /// `hold_approach_speed` with the pedal ceiling chosen by the caller: a
     /// creep to a point, or the chain ramp's run up to the posted limit.
     fn hold_approach_speed_with(&mut self, remaining_m: f64, target_mph: f64, throttle_max: f64) {
+        self.hold_approach_speed_profile(remaining_m, target_mph, target_mph, None, throttle_max);
+    }
+
+    /// The general form: keep `hold_mph`, and once over it brake only as
+    /// hard as the profile that reaches `end_mph` at the point asks -- which
+    /// a long lane out is next to nothing. A truck over the lane's number
+    /// far from the gate is lifted and left to drag, the rule the ramp cap
+    /// already follows: a service floor held down a whole ramp spent the air
+    /// the gate needed (Shelby, on the bench, with the tanks still building).
+    ///
+    /// `lane` is what a facility-lane hold is: the lane's number, kept on a
+    /// downgrade by the brake that balances the grade; or the shed itself,
+    /// under which the brake eases off with the shortfall rather than letting
+    /// go outright, so the pedal is continuous across the hold. Treating the
+    /// two sides of a shed differently -- the profile's rate a hair over,
+    /// nothing a hair under -- put a step in the pedal at the hold and the
+    /// servo climbed that step every few frames down the shed. `None` is the
+    /// gate creep and the chain ramp's roll, whose hold is the throttle's
+    /// alone.
+    fn hold_approach_speed_profile(
+        &mut self,
+        remaining_m: f64,
+        hold_mph: f64,
+        end_mph: f64,
+        lane: Option<LaneHold>,
+        throttle_max: f64,
+    ) {
         let remaining_m = remaining_m.max(0.5);
         let v = self.trip.truck.velocity_mps;
-        let creep = target_mph / 2.23694;
+        let creep = hold_mph / 2.23694;
+        let end = end_mph / 2.23694;
         // What the road takes off on its own, m/s2: positive when it slows
         // the truck, negative when gravity is pushing it down to the gate.
         let road = self.trip.truck.resistance_force() / self.trip.truck.gross_mass_kg();
-        let needed = 0.0f64.max(v * v - creep * creep) / (2.0 * remaining_m);
+        let needed = 0.0f64.max(v * v - end * end) / (2.0 * remaining_m);
         if v > creep {
             self.destination_assist_brake = arrival_servo_brake(
                 self.destination_assist_brake,
@@ -291,12 +368,47 @@ impl DrivingState {
             self.trip.truck.brake = self.trip.truck.brake.max(self.destination_assist_brake);
             return;
         }
-        // At the walk, short of the point: the brake is off and the throttle
-        // holds the pace -- the road's balancing pedal plus a nudge for the
-        // shortfall, capped so it is a creep and never a launch. Nothing is
-        // added while anyone else has a foot on the brake: a driver braking
-        // at the gate, the hazard assist, a stop ahead all win.
-        self.destination_assist_brake = 0.0;
+        // At the hold, short of the point. On a downgrade that is pushing
+        // the truck, keeping the pace is the BRAKE's job: the pedal that
+        // balances the grade, eased off as the truck falls under the hold
+        // and never dropped outright. Dropping it re-applied the pedal every
+        // other frame -- gravity took the truck back over the hold, the
+        // brake came on, the truck fell under, the brake let go -- 7 psi a
+        // half-second down Shelby's ramp until the spring brakes set a third
+        // of a mile short (bench, 2026-09-03).
+        let balance = match lane {
+            // Eases in proportion to the shortfall and reaches zero a little
+            // under the profile, so a truck well under it is driven up to it
+            // on the throttle. Keeping the rate that still reached the gate
+            // from the current speed instead held a hair of brake the moment
+            // the coast alone could not make the gate -- at 12 mph, from the
+            // bar, which is the crawl this change is for.
+            Some(LaneHold::Shed) => {
+                Some(APPROACH_DECEL_MPS2 - ARRIVAL_CREEP_THROTTLE_GAIN * (creep - v) - road)
+            }
+            Some(LaneHold::Lane) if road < 0.0 => {
+                Some(-road - ARRIVAL_CREEP_THROTTLE_GAIN * (creep - v))
+            }
+            _ => None,
+        };
+        if let Some(balance) = balance {
+            self.destination_assist_brake = if balance > 0.0 {
+                arrival_servo_brake(self.destination_assist_brake, balance, &self.trip.truck)
+            } else {
+                0.0
+            };
+            self.trip.truck.brake = self.trip.truck.brake.max(self.destination_assist_brake);
+            if self.destination_assist_brake > 0.0 {
+                return;
+            }
+        } else {
+            self.destination_assist_brake = 0.0;
+        }
+        // Otherwise the brake is off and the throttle holds the pace -- the
+        // road's balancing pedal plus a nudge for the shortfall, capped so it
+        // is a creep and never a launch. Nothing is added while anyone else
+        // has a foot on the brake: a driver braking at the gate, the hazard
+        // assist, a stop ahead all win.
         if self.trip.truck.brake > 0.0 || self.trip.truck.parking_brake {
             return;
         }

@@ -548,3 +548,57 @@ fn the_spoken_lines_match_the_python_f_strings() {
     assert_eq!(take_home_floor(1_000.0), 750.0);
     assert_eq!(sale_proceeds(&owner), 49_200.0);
 }
+
+// --- the way back by choice --------------------------------------------------
+
+#[test]
+fn test_going_back_to_company_driving_returns_the_equipment_for_the_buy_in() {
+    // Owner, 2026-09-03: the only way out of the lease was to owe more than
+    // the tractor was worth. Choosing the company seat hands everything back
+    // and is not a setback: no record entry, no notice, the same carrier.
+    let mut p = owner_operator("highline_sleeper");
+    p.carrier_name = "Great Plains Freight".to_string();
+    p.carrier_key = "great_plains".to_string();
+    p.money = 4_000.0;
+    // A tractor worth 82,000 would bring 49,200 used; the carrier's price for
+    // the one the buy-in bought is the buy-in itself.
+    assert_eq!(company_return_buy_back(&p), OWNER_OPERATOR_BUY_IN);
+
+    let lines = apply_return_to_company_driving(&mut p);
+    let joined = lines.join(" ");
+    assert_eq!(p.business_status, COMPANY_DRIVER);
+    assert_eq!(p.money, 4_000.0 + OWNER_OPERATOR_BUY_IN);
+    assert!(p.owned_trucks.is_empty());
+    assert!(p.owned_trailers.is_empty());
+    assert!(!p.authority_readiness);
+    assert_eq!(p.carrier_key, "great_plains");
+    assert_eq!(p.record().repossessions, 0);
+    assert_eq!(p.record().setback_notice_kind, "");
+    // In a carrier tractor, not an empty key.
+    let key = p.active_truck_key();
+    assert!(super::test_profile::FAKE_TRUCK_CATALOG
+        .iter()
+        .any(|(k, _, _)| *k == key));
+    assert!(joined.contains("Great Plains Freight takes the highline sleeper back"));
+    assert!(joined.contains("company driver again"));
+    assert!(joined.contains("buy-in stays open"));
+    for banned in BANNED_ENDINGS {
+        assert!(!joined.to_lowercase().contains(banned));
+    }
+}
+
+#[test]
+fn test_a_second_tractor_goes_back_at_the_used_share() {
+    // The buy-in cap is for the tractor the buy-in bought. One bought at the
+    // dealer since sells the way the lender's sale prices it.
+    let mut p = owner_operator("hand_me_down_sleeper");
+    p.owned_trucks.push("presidential_sleeper".to_string());
+    let expected = round_py_n(
+        (31_000.0 * REPOSSESSION_EQUITY_SHARE).min(OWNER_OPERATOR_BUY_IN)
+            + 185_000.0 * REPOSSESSION_EQUITY_SHARE,
+        2,
+    );
+    assert_eq!(company_return_buy_back(&p), expected);
+    let lines = apply_return_to_company_driving(&mut p);
+    assert!(lines[0].contains("and one more piece of equipment"));
+}

@@ -513,6 +513,11 @@ pub trait CareerProfile: StandingProfile {
     fn authority_activation_eligible(&self) -> bool {
         false
     }
+    /// `profile.owner_operator_declined`: the driver chose to stay a company
+    /// driver with the buy-in open, so nothing steers them toward it.
+    fn owner_operator_declined(&self) -> bool {
+        false
+    }
 }
 
 /// `business.carrier_name(profile)`: the carrier on the profile, or the

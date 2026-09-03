@@ -1353,6 +1353,33 @@ Everything not listed here ships fine after 1.9.0.
       entrance hold on a chain facility, the unchanged manual release with
       the assist off, and the brake cancel on both facility shapes.
 
+- [x] **Facility stopping assistance walked a whole ramp at 12 mph (owner,
+      2026-09-03) -- FIXED same day.** The arrival latch held a flat
+      `FACILITY_LANE_ROLL_MPH` from wherever it fired to the final creep
+      stretch. On a ramp with no terminal control (`ramp_control == "none"`:
+      every scale ramp, a freeway-to-freeway ramp, or the dice) the
+      `facility_final_approach` bypass latches at the TOP of the ramp, so the
+      truck crawled the entire `RAMP_LENGTH_MI` at 12 with the lane posted
+      at 15 or more. Second edge: `loop_back_to_destination_terminal` reset
+      the pull-ahead but not `destination_arrival_active`, so the retry after
+      a blown gate was held at the walk from the turnaround on and the
+      "announces itself again" the comment promised never happened. The
+      hold is now `facility_lane_hold_mph`: the lane's own number (posted
+      limit, never above the ramp advisory) brought down on the comfort
+      profile to the gate creep, floored at 12; a truck over the lane number
+      is lifted and left to drag the way the ramp cap already does. Two
+      bench lessons from Shelby's downgrade ramp on the way: a lane hold on
+      a grade that pushes the truck is kept on the brake that balances the
+      grade, eased with the shortfall and never dropped outright (dropped,
+      it re-applied every other frame, 7 psi a half-second, spring brakes a
+      third of a mile short); and under the shed the brake eases to zero a
+      little under the profile instead of letting go at it, so the pedal is
+      continuous and a truck well under the profile is driven up to it. The
+      loop-back lets the latch go. Pinned by a scale-ramp unit test (throttle, not
+      brake, 3 mph under the lane number with 0.4 mi left; brake 30 over),
+      a loop-back latch test, and a plain-ramp sign release on the harness
+      reaching past the old walk before the dock opens.
+
 - [x] **There is no way to back a career up on demand (Brandon, 2026-08-15)
       -- FIXED 2026-09-01.** "Back up this career now" is the first action
       on each career's Cloud backup screen whenever a save for it exists on
@@ -7597,6 +7624,23 @@ section below and the Unreleased changelog; the release-line view:
       unlock: extra decline at 5, board depth at 6/10/12, specialized
       freight weighting at 11, premium long-haul lanes at 12, the
       owner-operator checklist read from 14, and fleet tractors below.
+- [x] **Staying a company driver, and going back to one (owner,
+      2026-09-03).** The buy-in was one-way and nag-forever: nothing
+      recorded a refusal, and the next-unlock line, the status summary and
+      the career plan repeated the offer at every terminal, board and
+      level-up; the only way out of the lease was owing more than the
+      tractor was worth. `Profile.owner_operator_declined` (saved; old saves
+      load false) is set by "Stay a company driver" on Business status,
+      which flips those three readers to the company ladder
+      (`career_level_guidance` gains a "Company driver by choice" band past
+      level 18) while the buy-in row stays; "Reopen the owner-operator plan"
+      clears it, as does buying in. "Go back to company driving" (owner-
+      operators, two presses) runs `solvency::apply_return_to_company_driving`
+      beside the repossession: every owned tractor and trailer goes, for
+      `company_return_buy_back` -- the used-sale share of catalog capped at
+      the buy-in for the first tractor, the used share for the rest -- with
+      no record entry, no setback notice, the same carrier, and a carrier
+      tractor assigned. Rust only; the Python `dev` line still has neither.
 - [x] **Dispatch-assigned company tractors.** A carrier fleet
       (`models/carrier_fleet.py`) assigns every company driver a tractor by
       level band -- yard standard, regional at 4, long-haul at 9, premium at

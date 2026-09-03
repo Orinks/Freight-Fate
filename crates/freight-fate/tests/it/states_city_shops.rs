@@ -804,3 +804,118 @@ fn endorsement_courses_price_each_unearned_endorsement() {
         .iter()
         .any(|t| t.contains("earned, self-paid course")));
 }
+
+#[test]
+fn test_business_status_lets_a_qualified_driver_stay_a_company_driver() {
+    // Owner, 2026-09-03: a player who does not want the lease needs a way
+    // to say so, and a way back if they change their mind.
+    let mut app = TestApp::new();
+    career(&mut app, "Stay Company", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
+        p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
+        p.career.reputation = OWNER_OPERATOR_REPUTATION;
+        p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL + 500.0;
+    }
+
+    app.push_state(BusinessStatusState::new());
+    let rows = labels::<BusinessStatusState>(&app);
+    assert!(
+        rows.iter().any(|t| t == "Stay a company driver"),
+        "{rows:?}"
+    );
+    app.clear_speech();
+    select::<BusinessStatusState>(&mut app, "Stay a company driver");
+
+    assert!(profile(&app).owner_operator_declined);
+    assert_eq!(profile(&app).business_status, COMPANY_DRIVER);
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("Staying a company driver"), "{said}");
+    let rows = labels::<BusinessStatusState>(&app);
+    assert!(
+        rows.iter()
+            .any(|t| t.contains("Buy into leased-on owner-operator")),
+        "the buy-in row must stay: {rows:?}"
+    );
+    assert!(
+        rows.iter().any(|t| t == "Reopen the owner-operator plan"),
+        "{rows:?}"
+    );
+    assert!(
+        !rows.iter().any(|t| t == "Stay a company driver"),
+        "{rows:?}"
+    );
+
+    select::<BusinessStatusState>(&mut app, "Reopen the owner-operator plan");
+    assert!(!profile(&app).owner_operator_declined);
+    let rows = labels::<BusinessStatusState>(&app);
+    assert!(
+        rows.iter().any(|t| t == "Stay a company driver"),
+        "{rows:?}"
+    );
+
+    // And buying in after all clears the choice with the status.
+    select::<BusinessStatusState>(&mut app, "Stay a company driver");
+    select::<BusinessStatusState>(&mut app, "Buy into leased-on owner-operator");
+    assert_eq!(profile(&app).business_status, LEASED_OWNER_OPERATOR);
+    assert!(!profile(&app).owner_operator_declined);
+}
+
+#[test]
+fn test_business_status_lets_an_owner_operator_go_back_to_company_driving() {
+    let mut app = TestApp::new();
+    career(&mut app, "Back To Company", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.career.xp = LEVEL_XP[(OWNER_OPERATOR_LEVEL - 1) as usize];
+        p.career.deliveries = OWNER_OPERATOR_DELIVERIES;
+        p.career.reputation = OWNER_OPERATOR_REPUTATION;
+        p.money = OWNER_OPERATOR_BUY_IN + OWNER_OPERATOR_WORKING_CAPITAL;
+    }
+    app.push_state(BusinessStatusState::new());
+    select::<BusinessStatusState>(&mut app, "Buy into leased-on owner-operator");
+    assert_eq!(profile(&app).business_status, LEASED_OWNER_OPERATOR);
+    let owned = profile(&app).owned_trucks.clone();
+    assert_eq!(owned.len(), 1);
+    let money_after_buy_in = profile(&app).money;
+    let expected_back = (truck_model_or_panic(&owned[0]).price
+        * ff_core::models::solvency::REPOSSESSION_EQUITY_SHARE)
+        .min(OWNER_OPERATOR_BUY_IN);
+
+    // One press explains and asks again; nothing moves.
+    app.clear_speech();
+    select::<BusinessStatusState>(&mut app, "Go back to company driving");
+    assert_eq!(profile(&app).business_status, LEASED_OWNER_OPERATOR);
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("Press Enter again"), "{said}");
+    let rows = labels::<BusinessStatusState>(&app);
+    assert!(
+        rows.iter()
+            .any(|t| t == "Go back to company driving: press Enter again to confirm"),
+        "{rows:?}"
+    );
+
+    app.clear_speech();
+    select::<BusinessStatusState>(&mut app, "Go back to company driving");
+
+    assert_eq!(profile(&app).business_status, COMPANY_DRIVER);
+    assert!(profile(&app).owned_trucks.is_empty());
+    assert!(profile(&app).visible_owned_trucks().is_empty());
+    approx(profile(&app).money, money_after_buy_in + expected_back);
+    assert_eq!(profile(&app).driving_record.repossessions, 0);
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("company driver again"), "{said}");
+    let rows = labels::<BusinessStatusState>(&app);
+    assert!(
+        !rows
+            .iter()
+            .any(|t| t.contains("Go back to company driving")),
+        "{rows:?}"
+    );
+    assert!(
+        rows.iter()
+            .any(|t| t.contains("Buy into leased-on owner-operator")),
+        "{rows:?}"
+    );
+}

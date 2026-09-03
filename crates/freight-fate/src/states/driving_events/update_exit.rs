@@ -525,7 +525,12 @@ impl DrivingState {
         self.ramp_arrival_grace_s = 0.0;
         // A fresh approach: the arrival assist announces itself again when it
         // takes the pedals, rather than riding the terminal's release line.
+        // That needs the latch itself let go too -- left set, the assist
+        // never re-announced and held the retry at the facility-lane walk
+        // from the turnaround on, with nothing to shed for.
         self.approach_pull_ahead = false;
+        self.destination_arrival_active = false;
+        self.destination_assist_brake = 0.0;
         // Automatic speed control is what drove this miss, so the whole
         // session goes -- not just the active controller. Left armed, the
         // resume helper would wind the truck straight back up to speed on the

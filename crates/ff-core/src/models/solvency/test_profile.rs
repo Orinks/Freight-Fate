@@ -37,6 +37,7 @@ pub(crate) struct FakeProfile {
     pub pay_advance: f64,
     pub pay_advance_used_for_load: bool,
     pub authority_readiness: bool,
+    pub weigh_station_transponder: bool,
     pub dispatch_board_cached: bool,
     /// What `carrier_fleet.equipment_hold_clause` would say.
     pub hold_clause: String,
@@ -62,6 +63,7 @@ impl Default for FakeProfile {
             pay_advance: 0.0,
             pay_advance_used_for_load: false,
             authority_readiness: false,
+            weigh_station_transponder: false,
             dispatch_board_cached: true,
             hold_clause: String::new(),
         }
@@ -167,8 +169,17 @@ impl SolvencyProfile for FakeProfile {
     fn set_authority_readiness(&mut self, ready: bool) {
         self.authority_readiness = ready;
     }
+    fn set_weigh_station_transponder(&mut self, on: bool) {
+        self.weigh_station_transponder = on;
+    }
     fn set_truck(&mut self, key: &str) {
         self.truck = key.to_string();
+    }
+    fn owned_trucks(&self) -> Vec<String> {
+        self.owned_trucks.clone()
+    }
+    fn owned_trailers(&self) -> Vec<String> {
+        self.owned_trailers.clone()
     }
     fn active_truck_key(&self) -> String {
         // Profile.active_truck_key: an owner-operator drives their own truck;

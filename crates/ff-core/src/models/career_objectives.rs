@@ -88,6 +88,11 @@ fn company_driver_objective<P: CareerProfile + ?Sized>(profile: &P) -> CareerObj
             "reliable unlocked lane",
         );
     }
+    if profile.owner_operator_declined() {
+        // The buy-in was offered and turned down: the plan is the company
+        // career, and nothing here points back at the truck.
+        return level_guidance_objective(profile);
+    }
     if profile.owner_operator_eligible() {
         return CareerObjective::new(
             "Owner-operator buy-in ready",
