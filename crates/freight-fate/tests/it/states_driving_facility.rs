@@ -1517,3 +1517,128 @@ fn test_pull_in_beat_opens_the_check_in_menu_over_the_live_drive() {
         .expect("the drive outlived the wait screen");
     assert_eq!(d.status_text, "Parked at pickup. Check in and load.");
 }
+
+// -- the pre-gate warning on a street chain -------------------------------------------
+
+/// A delivery to `city` / `location_name` from Dallas, the Tyler run's origin.
+fn a_drive_to_facility(app: &mut TestApp, city: &str, location_name: &str) -> DrivingState {
+    use ff_core::models::jobs::make_reposition_job;
+    let world = get_world();
+    let mut profile = Profile::named_in("Gates", "Dallas");
+    profile.tutorial_done = true;
+    app.ctx.profile = Some(profile);
+    let route = world
+        .shortest_route("dallas_tx_us", city, None, false)
+        .expect("the world routes")
+        .expect("Dallas has a route there");
+    let mut job = make_reposition_job(world, "dallas_tx_us", city, false, None)
+        .expect("a reposition job exists");
+    job.destination_location = location_name.to_string();
+    let mut drive = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        Some(0),
+        DRIVE_PHASE_DELIVERY,
+        Some(12.0),
+    );
+    drive.trip.set_npc_vehicles(Vec::new());
+    drive
+}
+
+#[test]
+fn test_the_gate_warning_speaks_once_on_the_last_street_of_a_chain() {
+    // Tyler Cross-Dock by ear (agent playtest, 2026-09-03): "Gate in 0.8
+    // kilometers" four corners before the yard, because the warning still
+    // measured a fixed half mile back from the end while the gate zone had
+    // become the chain's LAST STREET (2026-08-18). Then every corner's
+    // slowdown retired the warning and the first straight at 30 fired it
+    // again, inside the zone this time. The warning now waits for the gate
+    // zone plus the braking a loaded truck needs to reach the gate speed by
+    // it, and it speaks once per approach; obeying it still earns the gate's
+    // own window at contact (the 2026-09-02 rule).
+    let mut app = TestApp::new();
+    let mut d = a_drive_to_facility(&mut app, "tyler_tx_us", "Tyler Company Yard");
+    d.destination_exit_taken = true;
+    assert!(d.begin_surface_chain(&mut app.ctx, false));
+    let gate = d
+        .trip
+        .zones
+        .iter()
+        .find(|zone| zone.reason == "facility gate")
+        .expect("a chain posts its own gate zone")
+        .clone();
+    let total = d.trip.total_miles();
+    let zone_mi = gate.end_mi - gate.start_mi;
+    assert!(
+        zone_mi < 0.4,
+        "the case needs a last street shorter than the old fixed window: {zone_mi}"
+    );
+    d.trip.truck.engine_on = true;
+    d.trip.truck.velocity_mps = 30.0 / 2.23694;
+    app.clear_speech();
+
+    // Half a mile out at 30: streets and corners still to come.
+    d.trip.position_mi = total - 0.5;
+    d.check_gate_approach_warning(&mut app.ctx, 0.016);
+    assert!(
+        lines_with(&app, "ate in").is_empty(),
+        "warned four corners out: {:?}",
+        app.event_lines()
+    );
+
+    // Coming up on the last street: a loaded truck braking at its normal
+    // rate from 30 reaches 15 by the zone within a tenth of a mile.
+    d.trip.position_mi = gate.start_mi - 0.05;
+    d.check_gate_approach_warning(&mut app.ctx, 0.016);
+    assert_eq!(
+        lines_with(&app, "ate in").len(),
+        1,
+        "{:?}",
+        app.event_lines()
+    );
+    assert!(d.gate_speed_warned);
+    let grace = d.gate_grace_s;
+    assert!(grace > 0.0);
+
+    // The corner onto the last street: slow, window spent, warning obeyed.
+    d.trip.position_mi = gate.start_mi + 0.01;
+    d.trip.truck.velocity_mps = 8.0 / 2.23694;
+    d.check_gate_approach_warning(&mut app.ctx, grace + 1.0);
+    assert!(
+        !d.gate_speed_warned,
+        "obeying the warning retires its window"
+    );
+
+    // Back up to 30 on the last street: no second line...
+    d.trip.position_mi = total - zone_mi * 0.5;
+    d.trip.truck.velocity_mps = 30.0 / 2.23694;
+    d.check_gate_approach_warning(&mut app.ctx, 0.016);
+    assert_eq!(
+        lines_with(&app, "ate in").len(),
+        1,
+        "{:?}",
+        app.event_lines()
+    );
+    // ...and the gate itself still opens a fresh window on contact.
+    assert!(!d.gate_speed_warned);
+}
+
+#[test]
+fn test_the_gate_warning_window_is_the_zone_plus_braking_room() {
+    // On a synthetic approach the gate zone is the signed half mile, so the
+    // warning lands where it always did at gate speed, and a faster truck
+    // hears it earlier by exactly the distance its brakes need.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.destination_exit_taken = true;
+    d.post_gate_zone(&app.ctx);
+    d.trip.truck.engine_on = true;
+    d.trip.truck.velocity_mps = FACILITY_GATE_LIMIT_MPH / 2.23694;
+    let at_gate_speed = d.gate_warning_window_mi();
+    assert!((at_gate_speed - 0.5).abs() < 1e-6, "{at_gate_speed}");
+    d.trip.truck.velocity_mps = 55.0 / 2.23694;
+    let at_55 = d.gate_warning_window_mi();
+    // (24.6 m/s)^2 - (6.7 m/s)^2 over twice 0.4 m/s^2 is about 700 meters.
+    assert!(at_55 > 0.5 + 0.4 && at_55 < 0.5 + 0.5, "{at_55}");
+}

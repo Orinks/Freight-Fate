@@ -5987,6 +5987,18 @@ Everything not listed here ships fine after 1.9.0.
       ("Madison Street (MA 122)"), and a state-line checkpoint named
       "Rhode Island-Massachusetts line" with MA-146 still the road's name
       on the Rhode Island side.
+- [x] **Agent-drive findings, 2026-09-03 (Dallas to Tyler, the Company
+      Yard chain).** The pre-gate speed warning fired twice on the streets:
+      "gate in half a mile" on South Fannin, four corners before the yard,
+      because it still measured twenty-five real seconds of travel with a
+      fixed half-mile floor while the gate zone itself had become the
+      chain's last street (2026-08-18); then each corner's slowdown obeyed
+      it, and the first straight at 30 heard it again inside the zone. The
+      window is now the gate zone plus the braking a loaded truck needs
+      from its current speed to the gate speed, and the line speaks once
+      per approach (`gate_warning_spoken`); obeying it still opens the
+      gate's own window at contact. Same drive: route-transition
+      assistance, the rev-match and the shift gap all behaved as shipped.
 - [ ] **Exit sign text from the wrong carriageway.** Exit 96 on I-90 West
       (Boston to Worcester) is announced as "for I-90 East and Mass Pike
       East toward Framingham, Boston, and Millbury": the bake snapped the

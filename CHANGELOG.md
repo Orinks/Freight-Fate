@@ -1257,6 +1257,14 @@
   that silence for a full second. The engine now only eases off through
   the shift, the way a real truck goes quiet-but-running while the gearbox
   is between gears, then picks the load back up with the clunk.
+- **The "slow down for the gate" warning comes once, on the last street.**
+  On a delivery that finishes on city streets, the warning fired half a
+  mile from the yard, several corners early, and then again inside the gate
+  zone after the corners had slowed you down. It now waits until you are
+  coming up on the street the gate is on, plus the braking a loaded truck
+  needs to be at gate speed by then, and it speaks once per approach.
+  Slowing down when told still earns you a fresh reaction window at the
+  gate itself.
 - **Route-transition assistance says so every time it brakes for the light
   at the end of a ramp.** When the light went red, then green, then red
   again before you reached it, the assist braked hard the second time

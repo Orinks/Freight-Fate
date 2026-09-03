@@ -603,6 +603,10 @@ pub struct DrivingState {
     // warning latch, the real-time reaction window it opens, and how many
     // loop-backs this trip has cost -- the count escalates the spoken help.
     pub gate_speed_warned: bool,
+    /// The pre-gate warning has spoken on this approach. Obeying it clears
+    /// `gate_speed_warned` so the gate opens a fresh window at contact; this
+    /// stays set so the line itself is never repeated. A miss resets both.
+    pub gate_warning_spoken: bool,
     pub gate_grace_s: f64,
     pub gate_miss_count: i64,
 

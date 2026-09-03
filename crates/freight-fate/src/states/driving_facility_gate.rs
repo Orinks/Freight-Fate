@@ -20,7 +20,8 @@
 //! running through every loop; the lost time is the consequence, never a fine.
 
 use ff_core::sim::trip_models::{
-    FACILITY_ACCESS_TAIL_MI, FACILITY_GATE_LIMIT_MPH, FACILITY_GATE_ZONE_MI,
+    APPROACH_DECEL_MPS2, FACILITY_ACCESS_TAIL_MI, FACILITY_GATE_LIMIT_MPH, FACILITY_GATE_ZONE_MI,
+    METERS_PER_MILE, MPH_PER_MPS,
 };
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
@@ -32,11 +33,8 @@ use crate::states::driving_updates::live;
 /// Game minutes one loop through the safe turnaround costs -- the same charge
 /// as the missed-destination-exit loop, which is the same maneuver a road up.
 pub const GATE_MISS_LOOP_MIN: f64 = 20.0;
-/// The pre-gate warning window, scaled for real reaction time like the exit
-/// window (`EXIT_WARNING_REAL_S` of hearing-and-braking time at the current
-/// pace), bounded by the road it lives on: never less than the signed gate
-/// zone, never more than the facility access-road tail.
-pub const GATE_WARNING_MIN_MI: f64 = FACILITY_GATE_ZONE_MI;
+/// The pre-gate warning window can never reach past the road it lives on:
+/// the facility access-road tail.
 pub const GATE_WARNING_MAX_MI: f64 = FACILITY_ACCESS_TAIL_MI;
 
 impl DrivingState {
@@ -78,10 +76,39 @@ impl DrivingState {
     /// `_gate_warning_window_mi()`: how far out the pre-gate speed warning
     /// fires, and how far back a miss repositions -- a full spoken window, so
     /// the retry is winnable.
+    ///
+    /// The signed gate zone, plus the road a loaded truck braking at its
+    /// normal rate needs to be down to the gate speed by the time it enters
+    /// it. The zone is the road that carries the gate's 15: the last street
+    /// of a facility chain, the signed half mile of a synthetic approach.
+    /// This used to be twenty-five real seconds of travel at the current
+    /// pace, never less than a fixed half mile back from the end -- the
+    /// ramp callout's lead, which on city streets at compressed time fired
+    /// "gate in half a mile" four corners before the yard while the zone
+    /// itself did not begin until the last street (agent playtest, Tyler,
+    /// 2026-09-03). Hearing time is the reaction window's job, not the
+    /// distance's: the window runs on the real clock from the line, and the
+    /// gate holds the truck while it runs.
     pub fn gate_warning_window_mi(&self) -> f64 {
-        let speed = self.trip.truck.speed_mph().max(FACILITY_GATE_LIMIT_MPH);
-        let miles = EXIT_WARNING_REAL_S * speed * self.trip.effective_time_scale() / 3600.0;
-        GATE_WARNING_MIN_MI.max(miles.min(GATE_WARNING_MAX_MI))
+        let zone_mi = self.gate_zone_length_mi().min(GATE_WARNING_MAX_MI);
+        let speed = self.trip.truck.speed_mph().max(FACILITY_GATE_LIMIT_MPH) / MPH_PER_MPS;
+        let gate = FACILITY_GATE_LIMIT_MPH / MPH_PER_MPS;
+        let braking_mi = ((speed * speed - gate * gate) / (2.0 * APPROACH_DECEL_MPS2)).max(0.0)
+            / METERS_PER_MILE;
+        (zone_mi + braking_mi).min(GATE_WARNING_MAX_MI)
+    }
+
+    /// The length of the road signed at the gate speed: the trip's own gate
+    /// zone once posted, else the one the run would post.
+    fn gate_zone_length_mi(&self) -> f64 {
+        let zone = self
+            .trip
+            .zones
+            .iter()
+            .find(|zone| zone.reason == "facility gate")
+            .cloned()
+            .unwrap_or_else(|| self.trip.facility_gate_zone());
+        (zone.end_mi - zone.start_mi).max(0.0)
     }
 
     /// `_gate_miss_grace_seconds(message)`: real reaction seconds after
@@ -127,7 +154,15 @@ impl DrivingState {
         {
             self.gate_speed_warned = false;
         }
-        if self.gate_speed_warned || self.trip.truck.speed_mph() <= FACILITY_GATE_LIMIT_MPH {
+        // Once per approach. Retiring an obeyed warning re-opens the gate's
+        // own window at contact (above); it does not earn a second line. On
+        // a street chain every corner's slowdown obeyed it, and the first
+        // straight at 30 heard "gate in 0.2 kilometers" again inside the
+        // zone (agent playtest, Tyler, 2026-09-03).
+        if self.gate_speed_warned
+            || self.gate_warning_spoken
+            || self.trip.truck.speed_mph() <= FACILITY_GATE_LIMIT_MPH
+        {
             return;
         }
         let remaining = self.trip.total_miles() - self.trip.position_mi;
@@ -135,6 +170,7 @@ impl DrivingState {
             return;
         }
         self.gate_speed_warned = true;
+        self.gate_warning_spoken = true;
         let target = ctx.settings.speed_text(FACILITY_GATE_LIMIT_MPH);
         let distance = ctx.settings.distance_text(remaining, true);
         let message = if self.terse_speech(ctx) {
@@ -268,6 +304,7 @@ impl DrivingState {
         live::set_gate_stop_prompted(false);
         self.gate_reminder_s = 0.0;
         self.gate_speed_warned = false;
+        self.gate_warning_spoken = false;
         self.gate_grace_s = 0.0;
         self.cancel_cruise(ctx, false);
         let target = ctx.settings.speed_text(FACILITY_GATE_LIMIT_MPH);

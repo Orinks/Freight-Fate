@@ -532,6 +532,7 @@ impl DrivingState {
             arrival_menu_open: false,
             gate_reminder_s: 0.0,
             gate_speed_warned: false,
+            gate_warning_spoken: false,
             gate_grace_s: 0.0,
             gate_miss_count: 0,
             wrong_way_mi: 0.0,
