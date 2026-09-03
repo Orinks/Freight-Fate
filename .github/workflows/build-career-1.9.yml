@@ -1,5 +1,10 @@
 name: Career 1.9 snapshot
 
+# A scheduled run executes the copy of this file on the DEFAULT branch
+# (main), whatever the checked-out code is, so after changing it here push
+# the same file to main or the nightly quietly keeps the old job list. The
+# Prepare job fails a scheduled run whose file differs from this branch's.
+
 on:
   schedule:
     - cron: "37 2 * * *"
@@ -35,6 +40,24 @@ jobs:
         with:
           ref: ${{ env.CAREER_BRANCH }}
           fetch-depth: 0
+
+      - name: Refuse to run a stale copy of this workflow
+        # GITHUB_WORKFLOW_SHA is the commit the running workflow file came
+        # from: main on a schedule, the dispatched ref otherwise. HEAD is the
+        # career branch. A scheduled run on a stale main file must fail here
+        # rather than ship a snapshot missing whole platforms; a dispatch only
+        # warns, so the file can be iterated on the branch first.
+        run: |
+          git fetch --quiet origin "$GITHUB_WORKFLOW_SHA"
+          if git diff --quiet "$GITHUB_WORKFLOW_SHA" HEAD -- .github/workflows/build-career-1.9.yml; then
+            exit 0
+          fi
+          msg="main's .github/workflows/build-career-1.9.yml differs from $CAREER_BRANCH's; push the branch's copy to main."
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            echo "::error::$msg"
+            exit 1
+          fi
+          echo "::warning::$msg"
 
       - name: Check snapshot conditions
         id: check
@@ -119,6 +142,8 @@ jobs:
         run: cargo clippy --all-targets --locked -- -D warnings
 
       - name: Test Rust workspace
+        # The FULL suite: no `--cfg ci_quick`, so the whole-map sweeps the
+        # per-push workflow (rust.yml) leaves out run here every night.
         run: cargo test -p ff-core -p freight-fate
 
       - name: Build the portable release
@@ -205,10 +230,169 @@ jobs:
           path: dist/FreightFate-*-macos-arm64.zip
           if-no-files-found: error
 
+  build_linux:
+    name: Build (Linux ${{ matrix.arch }})
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    # 22.04, not latest: the executable carries its build host's glibc as a
+    # floor (2.35 here), and one built on 24.04 would refuse to start on any
+    # distribution still shipping an older release, with no useful error.
+    # SDL2 is compiled in, so nothing else of the host is linked; Prism's
+    # own floor is 2.34 (a manylinux_2_34 wheel).
+    #
+    # Two native builds, one per CPU: x86_64 for PCs and aarch64 for the
+    # Blazie BT Speak and BT Braille (Debian on a Raspberry Pi Compute
+    # Module 4 and 5), Raspberry Pi desktops and other ARM64 Linux. The ARM
+    # runner is GitHub's hosted `ubuntu-22.04-arm`, same glibc floor. The
+    # steps are identical: fetch_bass.py, build_release.py and
+    # build_appimage.py each pick their architecture from `uname -m`.
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-22.04
+            tarball: linux-x64
+          - arch: aarch64
+            runner: ubuntu-22.04-arm
+            tarball: linux-arm64
+    env:
+      FREIGHT_FATE_NO_SPEECH: "1"
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: "1"
+      # Same escape hatch as the Mac job: the bundled SDL2 declares a
+      # cmake_minimum_required older than CMake 4 accepts. 22.04 ships
+      # CMake 3.22, where this is a no-op, but the image updates.
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+          lfs: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+
+      - name: Cache cargo registry and target directory
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: career-19-snapshot-linux-${{ matrix.arch }}
+
+      # SDL2 is compiled from source into the executable (`bundled` +
+      # `static-link`), and what it can open at run time is decided by the
+      # headers present now: a video or audio backend whose development
+      # package is missing here is compiled out for every player. So the
+      # whole desktop set goes in -- X11, Wayland with libdecor, PulseAudio,
+      # PipeWire, ALSA, D-Bus for IBus -- although the runner uses none of
+      # it. libdbus-1-dev is also what `keyring` links for the Secret
+      # Service; desktop-file-utils validates the AppImage's launcher entry.
+      - name: Install SDL2 build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake pkg-config \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev \
+            libxinerama-dev libxss-dev libxfixes-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols libdecor-0-dev \
+            libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libdrm-dev libgbm-dev \
+            libasound2-dev libpulse-dev libpipewire-0.3-dev \
+            libdbus-1-dev libudev-dev libibus-1.0-dev \
+            file desktop-file-utils
+
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+
+      - name: Fetch BASS
+        run: |
+          uv run python tools/fetch_bass.py
+          uv run python tools/fetch_bass.py --check
+
+      - name: Lint Rust targets
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test Rust workspace
+        run: cargo test -p ff-core -p freight-fate
+
+      - name: Build the Linux release
+        # --smoke boots the staged tarball payload for five frames with dummy
+        # drivers, the same proof the Mac job gets. Staging refuses an
+        # executable that links SDL2 dynamically and a payload missing BASS,
+        # its decoders, or Prism with its bundled speech-dispatcher.
+        run: uv run python tools/build_release.py --rust --smoke --tag "${{ needs.prepare.outputs.tag }}"
+
+      - name: Package the AppImage
+        timeout-minutes: 15
+        run: uv run python tools/build_appimage.py --rust --tag "${{ needs.prepare.outputs.tag }}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Linux-${{ matrix.arch }}
+          path: |
+            dist/FreightFate-*-${{ matrix.tarball }}.tar.gz
+            dist/FreightFate-*-linux-${{ matrix.arch }}.AppImage
+          if-no-files-found: error
+
+  smoke_linux:
+    name: Smoke (${{ matrix.image }}, ${{ matrix.arch }})
+    needs: [prepare, build_linux]
+    # The build host proves one distribution. Players run the others, and
+    # what differs between them -- glibc, the dynamic loader, which
+    # libraries a desktop install carries -- is exactly what a build on
+    # Ubuntu cannot see. So the tarball and the AppImage are both booted,
+    # untouched, on each of the popular families, in a bare container that
+    # has less than any desktop does.
+    #
+    # The same matrix runs again on an ARM64 runner against the aarch64
+    # downloads, minus Arch: Docker Hub's archlinux image is amd64 only
+    # (Arch Linux ARM is a separate project with no official image). The
+    # Debian containers there are the nearest stand-in for the BT Speak and
+    # BT Braille, which are Debian on a Raspberry Pi Compute Module.
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, aarch64]
+        image:
+          - ubuntu:22.04
+          - ubuntu:24.04
+          - debian:12
+          - debian:13
+          - fedora:latest
+          - archlinux:latest
+          - opensuse/tumbleweed:latest
+        exclude:
+          - arch: aarch64
+            image: archlinux:latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          sparse-checkout: tools/linux_smoke.sh
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: Linux-${{ matrix.arch }}
+          path: dist
+
+      - name: Boot the tarball and the AppImage
+        run: docker run --rm -v "$PWD:/work" "${{ matrix.image }}" bash /work/tools/linux_smoke.sh
+
   release:
     name: Release
-    needs: [prepare, build_windows, build_macos]
-    if: always() && needs.prepare.outputs.should_build == 'true' && needs.build_windows.result == 'success' && needs.build_macos.result == 'success'
+    needs: [prepare, build_windows, build_macos, build_linux, smoke_linux]
+    if: always() && needs.prepare.outputs.should_build == 'true' && needs.build_windows.result == 'success' && needs.build_macos.result == 'success' && needs.build_linux.result == 'success' && needs.smoke_linux.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -226,6 +410,16 @@ jobs:
           name: macOS-arm64
           path: assets
 
+      - uses: actions/download-artifact@v7
+        with:
+          name: Linux-x86_64
+          path: assets
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: Linux-aarch64
+          path: assets
+
       - name: Verify release archives
         shell: bash
         run: |
@@ -240,6 +434,26 @@ jobs:
             echo "Expected exactly one Apple Silicon macOS archive; found ${#macos_archives[@]}." >&2
             exit 1
           fi
+          linux_archives=(assets/FreightFate-*-linux-x64.tar.gz)
+          if [ "${#linux_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux tarball; found ${#linux_archives[@]}." >&2
+            exit 1
+          fi
+          linux_appimages=(assets/FreightFate-*-linux-x86_64.AppImage)
+          if [ "${#linux_appimages[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux AppImage; found ${#linux_appimages[@]}." >&2
+            exit 1
+          fi
+          linux_arm64_archives=(assets/FreightFate-*-linux-arm64.tar.gz)
+          if [ "${#linux_arm64_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux ARM64 tarball; found ${#linux_arm64_archives[@]}." >&2
+            exit 1
+          fi
+          linux_arm64_appimages=(assets/FreightFate-*-linux-aarch64.AppImage)
+          if [ "${#linux_arm64_appimages[@]}" -ne 1 ]; then
+            echo "Expected exactly one Linux ARM64 AppImage; found ${#linux_arm64_appimages[@]}." >&2
+            exit 1
+          fi
 
       - name: Prepare and verify release notes and checksums
         env:
@@ -248,7 +462,7 @@ jobs:
           COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
-          (cd assets && sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip > checksums.txt)
+          (cd assets && sha256sum FreightFate-*-windows-portable.zip FreightFate-*-macos-arm64.zip FreightFate-*-linux-x64.tar.gz FreightFate-*-linux-x86_64.AppImage FreightFate-*-linux-arm64.tar.gz FreightFate-*-linux-aarch64.AppImage > checksums.txt)
           (cd assets && sha256sum -c checksums.txt)
 
           LAST_TAG=$(git tag --list "1.9-tester-*" --sort=-version:refname | grep -v "^$TAG$" | head -1)
