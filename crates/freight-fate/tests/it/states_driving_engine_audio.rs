@@ -48,6 +48,8 @@ struct Calls {
     loops: Vec<LoopCall>,
     reverse: Vec<&'static str>,
     engine_rpm: Vec<(f64, f64)>,
+    /// `set_engine_duck(duck)`: the shift-gap disengage, in order.
+    ducks: Vec<f64>,
     engine_running: bool,
     /// The ignition crank still playing: settable, because that is exactly
     /// what the cold-start buzzer case has to hold the buzzer behind.
@@ -109,7 +111,9 @@ impl Audio for TrackingAudio {
     fn play_bank_with(&mut self, base: &str, _fallback: &str, volume: f64, _pan: f64) {
         self.log.borrow_mut().banks.push((base.to_string(), volume));
     }
-    fn set_engine_duck(&mut self, _duck: f64) {}
+    fn set_engine_duck(&mut self, duck: f64) {
+        self.log.borrow_mut().ducks.push(duck);
+    }
     fn set_speech_duck(&mut self, _duck: f64) {}
     fn set_engine_voice(&mut self, _classic: bool) {}
     fn set_jake_voice(&mut self, _classic: bool) {}
@@ -250,6 +254,44 @@ fn close(a: f64, b: f64) -> bool {
 }
 
 // -- the engine voice through a shift ------------------------------------------------
+
+#[test]
+fn test_shift_gap_bed_stays_within_earshot_of_the_coasting_bed() {
+    // A torque interrupt is an UNLOADED engine, not a silent one. The
+    // game's own off-throttle bed is engine_load_gain(0.0); the shift gap
+    // (load cap times the disengage duck) may sit a little under it -- the
+    // fuel is off and the note falls -- but not a cliff below it. At 0.35
+    // the gap sat 7.5 dB under coasting and 11 dB under full load, and on a
+    // one-second downshift that is "the engine cuts out when it shifts"
+    // (testers, 2026-09-03).
+    let (mut harness, log) = a_drive("Shift Gap Level");
+    harness.with_drive(|drive, _| {
+        let truck = drive.truck_mut();
+        truck.throttle = 1.0;
+        truck.rpm = 1700.0;
+        truck.transmission.automatic = true;
+        truck.transmission.gear = 6;
+        truck.transmission.shift_timer = 0.4; // mid-interrupt
+    });
+    log.borrow_mut().ducks.clear();
+    log.borrow_mut().engine_rpm.clear();
+
+    update_audio(&mut harness, 0.0);
+
+    let duck = *log.borrow().ducks.last().expect("the duck was set");
+    let (_, load) = last_rpm(&log);
+    let gap_bed = engine_load_gain(load) * duck;
+    let coasting_bed = engine_load_gain(0.0);
+    let db_under_coasting = 20.0 * (gap_bed / coasting_bed).log10();
+    assert!(
+        db_under_coasting <= 0.0,
+        "the gap must still read as unloaded, not louder than coasting: {db_under_coasting:.1} dB"
+    );
+    assert!(
+        db_under_coasting >= -3.0,
+        "the shift gap is a cliff: {db_under_coasting:.1} dB under the coasting bed (duck {duck}, load {load})"
+    );
+}
 
 #[test]
 fn test_engine_audio_load_eases_without_dropping_out_during_automatic_shift() {

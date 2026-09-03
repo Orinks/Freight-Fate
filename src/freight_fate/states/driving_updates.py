@@ -117,7 +117,12 @@ SHIFT_LOAD_CAP = 0.45
 # shift. The disengage duck drops the whole bed below that floor through
 # the torque interrupt, then rides the same recovery curve back up: the
 # engine genuinely falls away and returns, like a clutch actually opening.
-SHIFT_DISENGAGE_DUCK = 0.35
+# How far it falls is bounded by the game's own model: a torque interrupt
+# is an UNLOADED engine, so the gap sits a little under the off-throttle
+# bed (cap x duck = 0.54 of full, 2 dB under coasting), never a cliff
+# below it. 0.35 put the gap 7.5 dB under coasting, which testers heard as
+# the engine cutting out on every shift (2026-09-03).
+SHIFT_DISENGAGE_DUCK = 0.65
 # The gear taking at the end of an auto shift: a soft pick from the shift
 # bank, quieter than the interrupt clunk (0.65) that opened the shift.
 SHIFT_END_CLUNK_VOLUME = 0.4

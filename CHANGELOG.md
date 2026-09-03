@@ -1242,6 +1242,12 @@
 
 ### Fixed
 
+- **The engine no longer sounds like it cuts out on every gear change.**
+  Between the clunk that opens a shift and the one that closes it, the
+  engine dropped so far that it read as stalling, and a downshift held
+  that silence for a full second. The engine now only eases off through
+  the shift, the way a real truck goes quiet-but-running while the gearbox
+  is between gears, then picks the load back up with the clunk.
 - **Route-transition assistance says so every time it brakes for the light
   at the end of a ramp.** When the light went red, then green, then red
   again before you reached it, the assist braked hard the second time

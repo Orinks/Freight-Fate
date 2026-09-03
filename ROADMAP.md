@@ -1861,6 +1861,22 @@ Everything not listed here ships fine after 1.9.0.
       lowpass, +5 dB body, 63 Hz boom, 1.7/3.3 ms early reflections,
       RMS-matched, circular so loops stay seamless. Classic voice and
       jake deliberately untouched this round.
+- [x] **Shift gap no longer reads as the engine cutting out -- 2026-09-03.**
+      Testers heard the engine die on every gear change. The shift itself
+      was already the licensed clunk bank at both ends; the cut-out was the
+      bed between them: the disengage duck stacked on the load cap put the
+      gap 11 dB under full load and 7.5 dB under plain coasting, and a
+      downshift held that for its full one-second interrupt. Bounded by the
+      game's own model now (a torque interrupt is an unloaded engine, so the
+      gap sits 2 dB under the off-throttle bed); the test pins the gap
+      within 3 dB of coasting. Owner's ear still rules on the exact level.
+- [ ] **Downshift voice holds the old rpm, then jumps.** Through an
+      automatic downshift the physics rpm target is the lower of current
+      and the new gear's road rpm, so on a downshift it never rises: the
+      voice sits at the old note for the whole one-second interrupt and
+      snaps up 25 ms when the gear takes. A real box rev-matches UP into
+      the lower gear. Ease the rpm toward the new gear's road speed during
+      the interrupt in both directions, so the blip is audible.
 - [ ] **Cabin-state intensities for the cab transfer.** The moderate
       variant from the same auditions is the natural "window cracked"
       setting; wire intensity selection to the doors/windows mechanic

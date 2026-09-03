@@ -142,7 +142,14 @@ pub const SHIFT_LOAD_CAP: f64 = 0.45;
 // shift. The disengage duck drops the whole bed below that floor through
 // the torque interrupt, then rides the same recovery curve back up: the
 // engine genuinely falls away and returns, like a clutch actually opening.
-pub const SHIFT_DISENGAGE_DUCK: f64 = 0.35;
+// How far it falls is bounded by the game's own model: a torque interrupt
+// is an UNLOADED engine, so the gap sits a little under the off-throttle
+// bed (cap x duck = 0.54 of full, 2 dB under coasting), never a cliff
+// below it. The 0.35 it shipped with put the gap 7.5 dB under coasting and
+// 11 dB under full load -- more than the whole full-to-idle span -- and a
+// one-second downshift at that level was "the engine cuts out when it
+// shifts" (testers, 2026-09-03).
+pub const SHIFT_DISENGAGE_DUCK: f64 = 0.65;
 // The gear taking at the end of an auto shift: a soft pick from the shift
 // bank, quieter than the interrupt clunk (0.65) that opened the shift.
 pub const SHIFT_END_CLUNK_VOLUME: f64 = 0.4;
