@@ -1624,3 +1624,68 @@ fn test_route_transition_assistance_does_not_chatter_at_the_ramp_cap() {
         .count();
     assert!(released <= 1, "{:?}", spoken(&harness.app));
 }
+
+#[test]
+fn test_route_transition_assistance_brakes_for_a_yellow_it_cannot_beat() {
+    // Jessie's Tyler ramp (2026-09-03): rolling a green at 33 mph, "500 feet
+    // to the bar", the light turned yellow at roughly 360 feet and red four
+    // seconds later, and the truck ran it with the assist on and silent.
+    let mut harness = approaching_a_terminal("Ramps", "signal", 33.0);
+    harness.with_drive(|d, _| {
+        let gap_mi = 600.0 / 5280.0;
+        d.ramp_mi = Some(RAMP_ACCESS_MI + gap_mi);
+        d.ramp_stop = Some(RoadStop::new(
+            "Tyler Cross-Dock",
+            d.trip.position_mi + RAMP_ACCESS_MI + gap_mi,
+            "delivery_destination",
+        ));
+        // Green, with five seconds of it left.
+        d.ramp_light_offset_s = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S - 5.0;
+        d.ramp_light_last_phase = "green".to_string();
+    });
+
+    let mut lowest_gap_ft = f64::MAX;
+    for _ in 0..(60 * 90) {
+        if !harness.has_drive() {
+            break;
+        }
+        frame(&mut harness, DT);
+        if !harness.has_drive() {
+            break;
+        }
+        let (gap_ft, done, waiting) = harness.read_drive(|d| {
+            (
+                (d.ramp_mi.unwrap_or(0.0) - RAMP_ACCESS_MI) * 5280.0,
+                d.ramp_terminal_done,
+                d.ramp_waiting_at_light,
+            )
+        });
+        lowest_gap_ft = lowest_gap_ft.min(gap_ft);
+        if done || waiting {
+            break;
+        }
+    }
+
+    let lines = spoken(&harness.app);
+    assert!(
+        lines
+            .iter()
+            .any(|line| line == "Route-transition assistance braking for the light."),
+        "{lines:?}"
+    );
+    assert!(
+        !lines.iter().any(|line| line.contains("ran the red light")),
+        "{lines:?}"
+    );
+    harness.read_drive(|d| {
+        assert!(
+            d.ramp_waiting_at_light,
+            "never stopped at the bar; lowest gap {lowest_gap_ft:.0} ft"
+        );
+        assert!(
+            d.truck().speed_mph() <= RED_STOP_MPH,
+            "{}",
+            d.truck().speed_mph()
+        );
+    });
+}
