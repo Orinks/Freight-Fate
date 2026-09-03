@@ -1242,6 +1242,12 @@
 
 ### Fixed
 
+- **Route-transition assistance says so every time it brakes for the light
+  at the end of a ramp.** When the light went red, then green, then red
+  again before you reached it, the assist braked hard the second time
+  without a word, because it had already announced itself on the first
+  red. Each time it takes the brakes for a red or a yellow it cannot beat,
+  you now hear "braking for the light".
 - **Facility stopping assistance no longer crawls the whole ramp at 12 miles
   per hour.** On a ramp with nothing at its end to stop for, a scale ramp or
   a ramp that runs straight into the facility, the assist took the pedals

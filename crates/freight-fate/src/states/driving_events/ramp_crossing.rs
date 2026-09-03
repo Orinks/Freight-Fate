@@ -51,6 +51,14 @@ impl DrivingState {
             let phase = self.ramp_light_phase();
             let must_stop = phase == "red" || (phase == "yellow" && gap_mi > 0.0);
             if !must_stop {
+                // The green stands the servo down, and the NEXT red is a new
+                // take: it has to announce itself again. Left latched, a
+                // light that went red, green, then red again on the approach
+                // braked the truck hard from ramp speed without a word --
+                // "braking for the light" had been spent on the first red
+                // (Tyler Cross-Dock replay, 2026-09-03).
+                self.ramp_assist_said = false;
+                self.ramp_assist_brake = 0.0;
                 // A green (or a yellow already at the bar) is legal to roll,
                 // but not at speed: lift for the clean-roll threshold with
                 // room to spare. This is a roll, not a stop; a held service

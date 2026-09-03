@@ -186,6 +186,7 @@ impl DrivingState {
             return;
         }
         self.entered_once = true;
+        self.log_assist_configuration(ctx);
         self.refresh_exit_hint(ctx);
         ctx.clear_music_rotation();
         ctx.audio.stop_music_with(800);
@@ -297,5 +298,34 @@ impl DrivingState {
     /// the music rotation.
     pub fn night_now(&self) -> bool {
         is_night(self.trip.local_hour())
+    }
+
+    /// The driving-assist configuration, written to the session log once
+    /// per drive. Not spoken. A tester's "the assist ran the light" is
+    /// unanswerable from a log that never says which assists were on: the
+    /// Tyler report of 2026-09-03 replayed clean on the bench with every
+    /// assist on, and the log could not say whether the player's were.
+    fn log_assist_configuration(&self, ctx: &GameContext) {
+        let s = &ctx.settings;
+        let fields: Vec<String> = ff_core::settings::DRIVING_ASSIST_FIELDS
+            .iter()
+            .zip(s.assist_values().iter())
+            .map(|(field, value)| match value {
+                ff_core::settings::AssistValue::Flag(on) => {
+                    format!("{field}={}", if *on { "on" } else { "off" })
+                }
+                ff_core::settings::AssistValue::Mode(mode) => format!("{field}={mode}"),
+            })
+            .collect();
+        log::info!(
+            "driving assists: preset {}, {}, destination_approach_assist={},              selected_stop_assist={}, speed_keeper={}, predictive_cruise={},              driving_speech={}",
+            s.driving_assistance_preset,
+            fields.join(", "),
+            if s.destination_approach_assist { "on" } else { "off" },
+            if s.selected_stop_assist { "on" } else { "off" },
+            if s.speed_keeper { "on" } else { "off" },
+            if s.predictive_cruise { "on" } else { "off" },
+            s.driving_speech,
+        );
     }
 }

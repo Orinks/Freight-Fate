@@ -1689,3 +1689,202 @@ fn test_route_transition_assistance_brakes_for_a_yellow_it_cannot_beat() {
         );
     });
 }
+
+#[test]
+fn test_route_transition_assistance_brakes_for_a_yellow_on_the_all_assists_preset() {
+    // The same approach, driven the way Jessie's log says she drives: the
+    // "all assists" preset, facility stopping assistance on, the speed keeper
+    // on, and adaptive cruise paused for the exit the way taking it pauses it.
+    let mut harness = approaching_a_terminal("Ramps", "signal", 33.0);
+    assert!(harness
+        .app
+        .ctx
+        .settings
+        .apply_driving_assistance_preset("all"));
+    harness.app.ctx.settings.destination_approach_assist = true;
+    harness.app.ctx.settings.speed_keeper = true;
+    harness.app.ctx.settings.automatic_transmission = true;
+    harness.with_drive(|d, ctx| {
+        let gap_mi = 600.0 / 5280.0;
+        d.ramp_mi = Some(RAMP_ACCESS_MI + gap_mi);
+        d.ramp_stop = Some(RoadStop::new(
+            "Tyler Cross-Dock",
+            d.trip.position_mi + RAMP_ACCESS_MI + gap_mi,
+            "delivery_destination",
+        ));
+        d.truck_mut().transmission.automatic = true;
+        d.engage_cruise(ctx, 47.0, false);
+        d.pause_speed_control(ctx, true);
+        d.ramp_light_offset_s = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S - 5.0;
+        d.ramp_light_last_phase = "green".to_string();
+    });
+    harness.clear_speech();
+
+    let mut lowest_gap_ft = f64::MAX;
+    let mut trace: Vec<String> = Vec::new();
+    let mut n = 0;
+    for _ in 0..(60 * 90) {
+        if !harness.has_drive() {
+            break;
+        }
+        frame(&mut harness, DT);
+        if !harness.has_drive() {
+            break;
+        }
+        let (gap_ft, done, waiting, mph, brake, throttle, phase) = harness.read_drive(|d| {
+            (
+                (d.ramp_mi.unwrap_or(0.0) - RAMP_ACCESS_MI) * 5280.0,
+                d.ramp_terminal_done,
+                d.ramp_waiting_at_light,
+                d.truck().speed_mph(),
+                d.truck().brake,
+                d.truck().throttle,
+                d.ramp_light_phase(),
+            )
+        });
+        n += 1;
+        if n % 30 == 0 {
+            trace.push(format!(
+                "{phase} gap {gap_ft:.0} ft, {mph:.1} mph, brake {brake:.2}, throttle {throttle:.2}"
+            ));
+        }
+        lowest_gap_ft = lowest_gap_ft.min(gap_ft);
+        if done || waiting {
+            break;
+        }
+    }
+
+    let lines = spoken(&harness.app);
+    assert!(
+        lines
+            .iter()
+            .any(|line| line == "Route-transition assistance braking for the light."),
+        "{lines:?}\n{}",
+        trace.join("\n")
+    );
+    assert!(
+        !lines.iter().any(|line| line.contains("ran the red light")),
+        "{lines:?}\n{}",
+        trace.join("\n")
+    );
+    harness.read_drive(|d| {
+        assert!(
+            d.ramp_waiting_at_light,
+            "never stopped at the bar; lowest gap {lowest_gap_ft:.0} ft\n{}",
+            trace.join("\n")
+        );
+    });
+}
+
+#[test]
+fn test_route_transition_assistance_brakes_for_a_late_yellow_on_the_tyler_ramp() {
+    // Jessie's run on the real road: Dallas to Tyler Cross-Dock, exit 556,
+    // the all-assists preset, adaptive cruise set before the exit, facility
+    // stopping assistance and the speed keeper on.
+    use freight_fate::playtest::harness::RouteSetup;
+    let mut harness = PlaytestHarness::new();
+    assert!(harness
+        .app
+        .ctx
+        .settings
+        .apply_driving_assistance_preset("all"));
+    harness.app.ctx.settings.destination_approach_assist = true;
+    harness.app.ctx.settings.speed_keeper = true;
+    harness.app.ctx.settings.automatic_transmission = true;
+    let mut route_setup = RouteSetup::seeded(4242)
+        .named("Tyler Ramp")
+        .destination_location("Tyler Cross-Dock");
+    route_setup.tons = 7.0;
+    harness.start_route("dallas_tx_us", "tyler_tx_us", route_setup);
+    harness.with_drive(|d, ctx| {
+        quiet(&mut d.trip);
+        d.weather_mut().current = WeatherKind::Rain;
+        d.departure_checked = true;
+        if let Some(profile) = ctx.profile.as_mut() {
+            profile.tutorial_done = true;
+        }
+        d.tutorial = None;
+        d.truck_mut().start_engine();
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().transmission.gear = 10;
+        d.truck_mut().rpm = 1500.0;
+        d.truck_mut().set_air_ready(false);
+    });
+    let exit = harness.with_drive(|d, ctx| {
+        d.destination_exit_stop(ctx)
+            .expect("a delivery always has a destination exit")
+    });
+    let at = exit.at_mi;
+    harness.with_drive(move |d, ctx| {
+        d.trip.position_mi = at - 0.05;
+        d.truck_mut().velocity_mps = 60.0 * MPS_PER_MPH;
+        d.engage_cruise(ctx, 65.0, false);
+        d.exit_stop = Some(exit);
+        d.exit_lane_alignment = 1.0;
+        d.exit_signal_on = true;
+    });
+    let mut forced = false;
+    let mut trace: Vec<String> = Vec::new();
+    let mut n = 0;
+    for _ in 0..(60 * 180) {
+        if !harness.has_drive() {
+            break;
+        }
+        frame(&mut harness, DT);
+        if !harness.has_drive() {
+            break;
+        }
+        let (ramp_mi, announced, control, done, waiting, mph, brake, throttle, phase, paused) =
+            harness.read_drive(|d| {
+                (
+                    d.ramp_mi,
+                    d.ramp_light_announced,
+                    d.ramp_control.clone(),
+                    d.ramp_terminal_done,
+                    d.ramp_waiting_at_light,
+                    d.truck().speed_mph(),
+                    d.truck().brake,
+                    d.truck().throttle,
+                    d.ramp_light_phase(),
+                    d.speed_control_paused_at_stop,
+                )
+            });
+        let Some(ramp_mi) = ramp_mi else {
+            continue;
+        };
+        let gap_ft = (ramp_mi - RAMP_ACCESS_MI) * 5280.0;
+        if !forced && announced && gap_ft <= 600.0 {
+            forced = true;
+            harness.with_drive(|d, _| {
+                d.ramp_control = "signal".to_string();
+                let cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S;
+                d.ramp_light_offset_s =
+                    (RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S - 5.0 - d.ramp_light_timer)
+                        .rem_euclid(cycle);
+                d.ramp_light_last_phase = "green".to_string();
+            });
+        }
+        n += 1;
+        if n % 30 == 0 {
+            trace.push(format!(
+                "{control} {phase} gap {gap_ft:.0} ft, {mph:.1} mph, brake {brake:.2}, throttle {throttle:.2}, paused {paused}, done {done}"
+            ));
+        }
+        if forced && (done || waiting) {
+            break;
+        }
+    }
+    let lines = spoken(&harness.app);
+    eprintln!("{}", trace.join("\n"));
+    eprintln!("{lines:#?}");
+    assert!(forced, "never reached the ramp light");
+    // Twice: the seeded red on the way down, and again for the yellow after
+    // the green stood the assist down. The second take used to be silent.
+    let announced = lines
+        .iter()
+        .filter(|line| *line == "Route-transition assistance braking for the light.")
+        .count();
+    assert_eq!(announced, 2, "{lines:?}");
+    assert!(!lines.iter().any(|line| line.contains("ran the red light")));
+    harness.read_drive(|d| assert!(d.ramp_waiting_at_light, "never stopped at the bar"));
+}
