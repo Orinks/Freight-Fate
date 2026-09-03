@@ -1,5 +1,10 @@
 name: Career 1.9 snapshot
 
+# A scheduled run executes the copy of this file on the DEFAULT branch
+# (main), whatever the checked-out code is, so after changing it here push
+# the same file to main or the nightly quietly keeps the old job list. The
+# Prepare job fails a scheduled run whose file differs from this branch's.
+
 on:
   schedule:
     - cron: "37 2 * * *"
@@ -35,6 +40,24 @@ jobs:
         with:
           ref: ${{ env.CAREER_BRANCH }}
           fetch-depth: 0
+
+      - name: Refuse to run a stale copy of this workflow
+        # GITHUB_WORKFLOW_SHA is the commit the running workflow file came
+        # from: main on a schedule, the dispatched ref otherwise. HEAD is the
+        # career branch. A scheduled run on a stale main file must fail here
+        # rather than ship a snapshot missing whole platforms; a dispatch only
+        # warns, so the file can be iterated on the branch first.
+        run: |
+          git fetch --quiet origin "$GITHUB_WORKFLOW_SHA"
+          if git diff --quiet "$GITHUB_WORKFLOW_SHA" HEAD -- .github/workflows/build-career-1.9.yml; then
+            exit 0
+          fi
+          msg="main's .github/workflows/build-career-1.9.yml differs from $CAREER_BRANCH's; push the branch's copy to main."
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            echo "::error::$msg"
+            exit 1
+          fi
+          echo "::warning::$msg"
 
       - name: Check snapshot conditions
         id: check
