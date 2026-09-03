@@ -497,11 +497,16 @@ fn test_highway_cruise_rpm_keeps_engine_audio_believable() {
 
 #[test]
 fn test_automatic_shift_does_not_flare_engine_rpm() {
+    // Full throttle through an upshift: the unloaded engine must fall to the
+    // taller gear's speed, never rev up. (The fixture used to sit third gear
+    // at 20 m/s -- nine thousand rpm on the road -- which the rev-match
+    // rightly reads as "sync is above you"; 4.4 m/s is 2000 rpm in third,
+    // just past the full-throttle upshift point.)
     let mut t = make_auto_truck();
     t.throttle = 1.0;
     t.transmission.gear = 3;
-    t.velocity_mps = 20.0;
-    t.rpm = 1700.0;
+    t.velocity_mps = 4.4;
+    t.rpm = t.coupled_rpm(Some(3));
 
     assert_eq!(t.auto_shift(), Some(4));
     let rpm_before = t.rpm;
@@ -1803,4 +1808,118 @@ fn test_legal_gvw_is_tractor_trailer_and_cargo_not_fuel() {
     assert!(!t.is_over_legal_gvw());
     t.cargo_kg += 1.0;
     assert!(t.is_over_legal_gvw());
+}
+
+// -- rev-matching through the torque interrupt ------------------------------------
+
+/// A rolling automatic mid-shift: `from` was the gear before, `to` is the
+/// gear the box is taking, the engine still at `from`'s coupled speed.
+fn mid_shift(v_mps: f64, from: i32, to: i32) -> TruckState {
+    use crate::sim::transmission::{shift_time_for, DOWNSHIFT_TIME};
+    let mut t = make_auto_truck();
+    t.set_air_ready(false);
+    t.velocity_mps = v_mps;
+    t.transmission.gear = from;
+    t.rpm = t.coupled_rpm(Some(from));
+    t.transmission.gear = to;
+    t.transmission.shift_timer = if to < from {
+        DOWNSHIFT_TIME
+    } else {
+        shift_time_for(to)
+    };
+    t.throttle = 0.5;
+    t
+}
+
+#[test]
+fn test_auto_downshift_blips_the_engine_up_toward_the_lower_gears_speed() {
+    // A real automated box fuels the unloaded engine UP to the lower gear's
+    // synchronous speed before it re-engages. The voice used to sit at the
+    // old note for the whole second and jump when the gear took.
+    let mut t = mid_shift(15.0, 8, 7);
+    let start = t.rpm;
+    let sync = t.coupled_rpm(None);
+    assert!(
+        sync > start + 400.0,
+        "the case needs a real step: {start} -> {sync}"
+    );
+    drive_dt(&mut t, 0.2, DT);
+    assert!(t.transmission.shifting(), "still in the interrupt");
+    assert!(
+        t.rpm > start + 150.0,
+        "the blip must be under way at 0.2 s: {start} -> {}",
+        t.rpm
+    );
+}
+
+#[test]
+fn test_auto_shift_lands_on_the_new_gears_speed_at_engagement() {
+    // Both directions: by the time the interrupt ends the engine is at the
+    // new gear's road speed, so engagement is a clunk, not a jump.
+    for (from, to) in [(8, 7), (7, 8)] {
+        let mut t = mid_shift(15.0, from, to);
+        let timer = t.transmission.shift_timer;
+        drive_dt(&mut t, timer - DT, DT);
+        assert!(
+            t.transmission.shifting(),
+            "{from}->{to}: last frame of the interrupt"
+        );
+        let sync = t.coupled_rpm(None);
+        assert!(
+            approx_rel(t.rpm, sync, 0.03),
+            "{from}->{to}: engine {:.0} vs sync {sync:.0} at engagement",
+            t.rpm
+        );
+        let before = t.rpm;
+        drive_dt(&mut t, 2.0 * DT, DT);
+        assert!(!t.transmission.shifting());
+        assert!(
+            (t.rpm - before).abs() < 100.0,
+            "{from}->{to}: the gear taking must not jump the engine: {before:.0} -> {:.0}",
+            t.rpm
+        );
+    }
+}
+
+#[test]
+fn test_shift_rev_match_rate_is_bounded_by_engine_inertia() {
+    // The engine cannot teleport to sync: one frame moves it by what its
+    // spare torque over its rotating inertia allows, in either direction.
+    let mut down = mid_shift(15.0, 8, 7);
+    let start = down.rpm;
+    down.update(DT);
+    let rise = down.rpm - start;
+    assert!(rise > 0.0, "a downshift rises");
+    assert!(
+        rise < 80.0,
+        "one frame rose {rise:.0} rpm: not inertia-limited"
+    );
+
+    let mut up = mid_shift(15.0, 7, 8);
+    let start = up.rpm;
+    up.update(DT);
+    let fall = start - up.rpm;
+    assert!(fall > 0.0, "an upshift falls");
+    assert!(
+        fall < 120.0,
+        "one frame fell {fall:.0} rpm: not inertia-limited"
+    );
+}
+
+#[test]
+fn test_a_stronger_engine_rev_matches_faster() {
+    // Across the yard: the blip rate comes from each truck's own torque,
+    // not a shared timer, so a big-torque tractor matches sooner.
+    let mut base = mid_shift(15.0, 8, 7);
+    let mut strong = mid_shift(15.0, 8, 7);
+    strong.specs.max_torque_nm = base.specs.max_torque_nm * 1.5;
+    let start = base.rpm;
+    drive_dt(&mut base, 0.15, DT);
+    drive_dt(&mut strong, 0.15, DT);
+    assert!(
+        strong.rpm - start > (base.rpm - start) * 1.2,
+        "strong {:.0} vs base {:.0} from {start:.0}",
+        strong.rpm,
+        base.rpm
+    );
 }

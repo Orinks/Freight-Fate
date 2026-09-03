@@ -256,6 +256,32 @@ pub const ROAD_OVERSPEED_RPM_MULT: f64 = 1.15;
 /// Abuse wear begins past this multiple of governed speed.
 pub const OVER_REV_RPM_MULT: f64 = 1.02;
 
+// -- rev-matching through an automated shift ----------------------------------------
+// An automated box cuts torque, goes to neutral, brings the engine to the NEW
+// gear's synchronous speed, then re-engages: an upshift is a fall (the
+// engine brake helps, which is why modern upshifts are quick), a downshift
+// is a fueled blip UP. How fast the engine crosses the gap is its spare
+// torque over its rotating inertia, so the blip scales with each truck's
+// own engine. The interrupt LENGTH stays the transmission's owner-tuned
+// timer; the engine simply arrives at sync inside it and holds there.
+//
+// Provenance: all three figures are ASSUMED. Engine makers do not publish
+// rotating inertia; 3 kg m^2 is the order of a heavy-duty inline-six with
+// its flywheel and clutch pack. Motoring drag of 12 percent of rated torque
+// and rev-match fueling at 35 percent of the curve give a 500 rpm downshift
+// blip in about 0.3 s and an upshift fall in about 0.15 s, the durations
+// heard on I-Shift, DT12 and Endurant demonstrations. Replace with a
+// measured figure if one ever surfaces; these are not readings.
+/// Engine plus flywheel plus clutch, kg m^2.
+pub const ENGINE_ROTATING_INERTIA_KG_M2: f64 = 3.0;
+/// Closed-throttle friction and pumping, as a fraction of rated torque.
+pub const ENGINE_MOTORING_DRAG_FRACTION: f64 = 0.12;
+/// Rev-match fueling during a downshift, as a fraction of the torque curve.
+pub const SHIFT_SYNC_FUEL_FRACTION: f64 = 0.35;
+/// The share of the engine brake an automated upshift uses to pull the revs
+/// down to sync.
+pub const SHIFT_SYNC_BRAKE_FRACTION: f64 = 0.5;
+
 // -- brake heat -------------------------------------------------------------------
 // Heating is the real dissipated power (service brake force times speed)
 // soaked into the drums' thermal mass, so faded shoes that grip less also

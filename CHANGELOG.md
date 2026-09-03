@@ -1242,6 +1242,15 @@
 
 ### Fixed
 
+- **The automatic now rev-matches its downshifts.** Between gears a real
+  automated box brings the engine to the speed the next gear needs before
+  it re-engages: down through the gears that is a blip up, up through them
+  a quick fall. The truck only did the fall. On a downshift the engine sat
+  at the old note for the whole change and then jumped when the gear took.
+  Now you hear it blip up to meet the lower gear, and in both directions
+  the gear takes on an engine already at the right speed. How fast it
+  blips comes from each truck's own engine, so a big-torque tractor
+  matches quicker than a light one.
 - **The engine no longer sounds like it cuts out on every gear change.**
   Between the clunk that opens a shift and the one that closes it, the
   engine dropped so far that it read as stalling, and a downshift held

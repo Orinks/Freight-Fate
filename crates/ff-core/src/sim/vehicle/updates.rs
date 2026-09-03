@@ -7,11 +7,13 @@ use super::{
     TruckState, AMBIENT_C, BRAKE_COOL_BASE_PER_S, BRAKE_COOL_SPEED_PER_S, BRAKE_WEAR_HOT_MULT,
     BRAKE_WEAR_PCT_PER_MJ, CARGO_BRAKE_PCT_PER_G_S, CARGO_CORNER_LAT_G, CARGO_CORNER_PCT_PER_G_S,
     CARGO_HARD_BRAKE_G, CHAIN_SAFE_MPH, CHAIN_SNAP_DAMAGE_PCT, CHAIN_WEAR_BARE_MULT,
-    CHAIN_WEAR_OVERSPEED_MULT, CHAIN_WEAR_PCT_PER_MILE, ENGINE_WEAR_FUEL_PENALTY,
-    ENGINE_WEAR_LUG_PCT_PER_S, ENGINE_WEAR_OVER_REV_PCT_PER_S, ENGINE_WEAR_PCT_PER_H_FULL_LOAD,
-    ENGINE_WEAR_PCT_PER_H_IDLE, G, LUG_RPM_FRACTION, LUG_THROTTLE, MAX_REVERSE_MPS,
-    OVER_REV_RPM_MULT, ROAD_OVERSPEED_RPM_MULT, RUNAWAY_DAMAGE_PCT_PER_S, RUNAWAY_SPEED_MPH,
-    TIRE_WEAR_BRAKING_PCT, TIRE_WEAR_PCT_PER_MILE, TIRE_WINTER, WINTER_TREAD_WEAR_MULT,
+    CHAIN_WEAR_OVERSPEED_MULT, CHAIN_WEAR_PCT_PER_MILE, ENGINE_MOTORING_DRAG_FRACTION,
+    ENGINE_ROTATING_INERTIA_KG_M2, ENGINE_WEAR_FUEL_PENALTY, ENGINE_WEAR_LUG_PCT_PER_S,
+    ENGINE_WEAR_OVER_REV_PCT_PER_S, ENGINE_WEAR_PCT_PER_H_FULL_LOAD, ENGINE_WEAR_PCT_PER_H_IDLE, G,
+    LUG_RPM_FRACTION, LUG_THROTTLE, MAX_REVERSE_MPS, OVER_REV_RPM_MULT, ROAD_OVERSPEED_RPM_MULT,
+    RUNAWAY_DAMAGE_PCT_PER_S, RUNAWAY_SPEED_MPH, SHIFT_SYNC_BRAKE_FRACTION,
+    SHIFT_SYNC_FUEL_FRACTION, TIRE_WEAR_BRAKING_PCT, TIRE_WEAR_PCT_PER_MILE, TIRE_WINTER,
+    WINTER_TREAD_WEAR_MULT,
 };
 
 impl TruckState {
@@ -81,10 +83,33 @@ impl TruckState {
         };
         let coupled = ratio != 0.0 && tr.clutch <= 0.5 && !tr.shifting();
         if tr.automatic && tr.shifting() && ratio != 0.0 {
+            // Rev-match through the torque interrupt: head for the NEW
+            // gear's synchronous speed in both directions, at the rate the
+            // engine's spare torque over its inertia allows, and hold there
+            // once reached so engagement is a clunk, not a jump. The old
+            // target was the LOWER of current and road rpm, so a downshift
+            // sat at the old note for its whole second and then leapt.
             let wheel_rps = self.velocity_mps.abs() / (2.0 * PI * s.wheel_radius_m);
             let road_rpm = wheel_rps * 60.0 * ratio.abs();
-            let target = s.idle_rpm.max(self.rpm.min(road_rpm));
-            self.rpm += (target - self.rpm) * (5.0 * dt).min(1.0);
+            let sync = s
+                .idle_rpm
+                .max(road_rpm.min(s.max_rpm * ROAD_OVERSPEED_RPM_MULT));
+            let drag_nm = ENGINE_MOTORING_DRAG_FRACTION * s.max_torque_nm;
+            let rpm_per_s = |net_torque_nm: f64| {
+                net_torque_nm.max(0.0) / ENGINE_ROTATING_INERTIA_KG_M2 * 60.0 / (2.0 * PI)
+            };
+            if self.rpm < sync {
+                // The blip: fueled up, unloaded, against its own friction.
+                let fuel_nm =
+                    SHIFT_SYNC_FUEL_FRACTION * self.torque_at(self.rpm).max(drag_nm * 2.0);
+                let rate = rpm_per_s(fuel_nm - drag_nm);
+                self.rpm = sync.min(self.rpm + rate * dt);
+            } else {
+                // The fall: throttle closed, the engine brake pulling it down.
+                let brake_nm = SHIFT_SYNC_BRAKE_FRACTION * s.engine_brake_torque_nm;
+                let rate = rpm_per_s(drag_nm + brake_nm);
+                self.rpm = sync.max(self.rpm - rate * dt);
+            }
             return;
         }
         if coupled {

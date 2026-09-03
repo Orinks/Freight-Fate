@@ -1870,13 +1870,29 @@ Everything not listed here ships fine after 1.9.0.
       game's own model now (a torque interrupt is an unloaded engine, so the
       gap sits 2 dB under the off-throttle bed); the test pins the gap
       within 3 dB of coasting. Owner's ear still rules on the exact level.
-- [ ] **Downshift voice holds the old rpm, then jumps.** Through an
-      automatic downshift the physics rpm target is the lower of current
-      and the new gear's road rpm, so on a downshift it never rises: the
-      voice sits at the old note for the whole one-second interrupt and
-      snaps up 25 ms when the gear takes. A real box rev-matches UP into
-      the lower gear. Ease the rpm toward the new gear's road speed during
-      the interrupt in both directions, so the blip is audible.
+- [x] **Automated shifts rev-match in both directions -- 2026-09-03.**
+      Through the interrupt the engine now heads for the NEW gear's
+      synchronous speed (a fueled blip up on a downshift, an engine-brake
+      assisted fall on an upshift) at the rate its spare torque over its
+      rotating inertia allows, and holds there, so the gear takes on a
+      matched engine instead of jumping. The blip rate is each truck's own
+      (torque, engine brake); the interrupt LENGTH is still the
+      transmission's owner-tuned timer, deliberately: the one-second
+      downshift is what keeps a jake descent from cycling the retarder
+      fast enough to break a chained truck loose (physics bench). Inertia,
+      motoring drag and rev-match fueling are ASSUMED figures, labelled so
+      in `sim/vehicle.rs`.
+- [ ] **Shift length from the engine, not a timer.** With the trajectory
+      in place, the interrupt could end when the engine reaches sync plus
+      an actuator floor, capped by today's timers. Needs the jake-descent
+      bench re-run first: shorter downshifts double the preselect cycle.
+- [ ] **Per-truck gearboxes.** Every model drives one ten-speed ratio set
+      and one final drive. Realistic shifting across the yard means each
+      model carrying its own box: gear count and ratios, final drive, and
+      type (automated manual versus torque-converter automatic, which has
+      no torque gap at all). Touches the truck catalog, saves, the
+      ten-speed auto-shift thresholds, manual gear keys and spoken gear
+      names. Owner chose the rev-match first, this deferred (2026-09-03).
 - [ ] **Cabin-state intensities for the cab transfer.** The moderate
       variant from the same auditions is the natural "window cracked"
       setting; wire intensity selection to the doors/windows mechanic
