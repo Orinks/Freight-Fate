@@ -39,11 +39,15 @@ fn release_with(
     })
 }
 
-const ALL_ASSETS: [&str; 4] = [
+/// Every archive a release carries, one per platform and CPU, so a test
+/// that runs with the host's own architecture finds its download on any
+/// runner. The AppImages are added by the tests that need them.
+const ALL_ASSETS: [&str; 5] = [
     "-windows-portable.zip",
     "-macos.zip",
     "-macos-arm64.zip",
     "-linux-x64.tar.gz",
+    "-linux-arm64.tar.gz",
 ];
 
 fn release(tag: &str) -> Value {
@@ -497,6 +501,27 @@ fn test_19_snapshot_channel_picks_newest_19_tester() {
         .expect("an update");
     assert_eq!(info.tag, "1.9-tester-20260825");
     assert!(info.title.contains("1.9 tester snapshot 2026-08-25"));
+}
+
+#[test]
+fn test_19_snapshot_offers_the_arm64_linux_tarball_to_an_arm64_process() {
+    // The snapshot ships a native ARM64 Linux tarball (the Blazie BT Speak
+    // and BT Braille, Raspberry Pi). A tester build running on aarch64 Linux
+    // must be offered that archive, never the x86_64 one and never "no
+    // update": the shared fixture has to carry it, or every snapshot test
+    // that runs with the host's architecture fails on an ARM64 runner.
+    let stable = stable_at("v1.8.6", "2026-08-28T18:00:00Z");
+    let releases = vec![tester("1.9-tester-20260820"), tester("1.9-tester-20260825")];
+    let build = BuildInfo::new("1.9-tester-20260820", "dev", "2026-08-20");
+    let env = UpdaterEnv::fake_with_architecture(
+        Platform::Linux,
+        Architecture::Aarch64,
+        Path::new("/tmp/not-frozen/python"),
+    );
+    let info = snapshot_update_from(&releases, Some(&build), "1.9.0", Some(&stable), &env)
+        .expect("an update");
+    assert_eq!(info.tag, "1.9-tester-20260825");
+    assert!(info.asset_name.ends_with("-linux-arm64.tar.gz"));
 }
 
 #[test]
