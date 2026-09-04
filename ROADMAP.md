@@ -6099,13 +6099,30 @@ Everything not listed here ships fine after 1.9.0.
       describes the owner's "both voices stop mid-drive" report; that is
       the worker-thread case below, and the watchdog line 8 s in is what
       a log from the next episode will show.
-- [ ] **Speech worker respawn.** Today a wedged backend costs speech
-      until the stuck call returns; a respawn (abandon the wedged
-      thread, build a fresh Prism context on a new one) would bring
-      speech back in seconds. Needs care with the one-context rule --
-      the abandoned thread still holds the old context, so respawn is
-      only safe when Prism tolerates a second context after the first
-      is idle-but-alive. Verify against Prism before building.
+- [x] **Speech worker respawn (2026-09-03).** Chris's log settled the
+      "Prism crashes, both voices stop" report: NVDA spoke the game's
+      last menu line at 18:29:22.4, he pressed Control (the driving
+      state's "event voice stopped", a SAPI purge) at 18:29:23.68, the
+      worker's last heartbeat is that same frame, and nothing came back
+      for the remaining half hour -- including after he restarted NVDA,
+      which was never the stuck party. No panic; a native call that
+      never returned. Verified against Prism 0.18.2 with two probes
+      (`crates/prism/examples/`): a second context on a second thread
+      speaks while the first is alive and mid-utterance; `acquire`
+      hands the second context the SAME cached SAPI instance (so a
+      naive respawn would block on the stuck voice) while
+      `registry_create` gives a fresh, idle, usable one; and the
+      replacement outlives the abandoned context's shutdown. Shipped:
+      after 20 s stale the watchdog abandons the worker, builds one on
+      `Speech::new_after_wedge` (a `PrismRegistry::new_fresh` whose
+      `acquire` creates instances until the start-up selection has
+      settled, then uses the cache again), replays event voice,
+      rate/pitch/volume/voice and braille-only in the game's order, and
+      logs abandoned/recovered; capped at three per session. The stop-
+      while-speaking probe (150 cycles, with and without NVDA cancel
+      and the 3 s re-probe interleaved) does NOT reproduce the hang on
+      the owner's machine, so the purge deadlock itself is unfixed and
+      voice- or timing-specific; Chris's SAPI voice is worth asking.
 - [ ] **The frame-time p99 budget test is load-sensitive (found
       2026-08-30, pre-existing).** `frame_time::a_driven_frame_stays_
       well_inside_the_sixty_hertz_budget` fails inside a full

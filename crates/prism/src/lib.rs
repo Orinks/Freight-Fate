@@ -342,6 +342,17 @@ impl Context {
         self.wrap_backend(raw)
     }
 
+    /// Build a NEW instance of backend `id`, bypassing Prism's per-id cache.
+    ///
+    /// [`Context::acquire`] hands every caller the one cached instance, so a
+    /// backend wedged inside a native call (a SAPI purge that never returns)
+    /// is the same wedged instance the next acquirer gets. A fresh instance
+    /// has its own state, and for SAPI its own apartment thread and voice.
+    pub fn create(&self, id: PrismBackendId) -> Result<Backend, Error> {
+        let raw = unsafe { (self.api.registry_create)(self.raw, id) };
+        self.wrap_backend(raw)
+    }
+
     fn wrap_backend(&self, raw: *mut prism_sys::PrismBackend) -> Result<Backend, Error> {
         if raw.is_null() {
             return Err(Error::NoBackend);

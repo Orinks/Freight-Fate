@@ -133,6 +133,9 @@ pub trait VoiceRegistry {
     fn priority_of(&self, id: BackendId) -> i32;
     /// Acquire (or re-acquire: Prism caches instances) the backend.
     fn acquire(&self, id: BackendId) -> Result<Box<dyn VoiceBackend>, prism::Error>;
+    /// End a fresh-instance start (see [`PrismRegistry::new_fresh`]): from
+    /// here on `acquire` hands out Prism's cached instances again.
+    fn settle(&self) {}
 }
 
 impl fmt::Debug for dyn VoiceBackend {
@@ -149,20 +152,41 @@ impl fmt::Debug for dyn VoiceBackend {
 /// module docs of [`crate::speech`]).
 pub struct PrismRegistry {
     ctx: prism::Context,
+    /// While set, `acquire` builds a NEW backend instance instead of taking
+    /// Prism's cached one. Cleared by [`VoiceRegistry::settle`].
+    fresh: std::cell::Cell<bool>,
 }
 
 impl PrismRegistry {
     /// Initialise Prism. `Err` when the native library is missing or refuses
     /// to start; the game then runs mute, as it does today.
     pub fn new() -> Result<Self, prism::Error> {
-        Ok(Self {
-            ctx: prism::Context::new()?,
-        })
+        Ok(Self::from_context(prism::Context::new()?))
+    }
+
+    /// Initialise Prism for a replacement speech worker.
+    ///
+    /// Prism caches one instance per backend id across contexts, so after a
+    /// worker wedges inside a native call (Chris, 2026-09-03: a SAPI purge
+    /// that never returned took both voices for the rest of the session), a
+    /// replacement that merely re-acquired SAPI would inherit the very
+    /// instance still stuck in that call. Until `settle`, every `acquire`
+    /// here creates a fresh instance -- for SAPI, its own apartment thread
+    /// and voice -- and the start-up selection runs on those. Afterwards
+    /// the three-second re-probe uses the cache again: creating and tearing
+    /// down a SAPI voice per probe is not a cost to pay forever.
+    pub fn new_fresh() -> Result<Self, prism::Error> {
+        let registry = Self::from_context(prism::Context::new()?);
+        registry.fresh.set(true);
+        Ok(registry)
     }
 
     /// Wrap a context the caller already created.
     pub fn from_context(ctx: prism::Context) -> Self {
-        Self { ctx }
+        Self {
+            ctx,
+            fresh: std::cell::Cell::new(false),
+        }
     }
 }
 
@@ -188,9 +212,16 @@ impl VoiceRegistry for PrismRegistry {
     }
 
     fn acquire(&self, id: BackendId) -> Result<Box<dyn VoiceBackend>, prism::Error> {
-        Ok(Box::new(PrismVoice {
-            backend: self.ctx.acquire(id)?,
-        }))
+        let backend = if self.fresh.get() {
+            self.ctx.create(id)?
+        } else {
+            self.ctx.acquire(id)?
+        };
+        Ok(Box::new(PrismVoice { backend }))
+    }
+
+    fn settle(&self) {
+        self.fresh.set(false);
     }
 }
 

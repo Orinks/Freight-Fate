@@ -1251,6 +1251,16 @@
 
 ### Fixed
 
+- **Speech comes back on its own when a voice locks up mid-drive.** A
+  tester's log caught the "both voices stop" report: pressing Control to
+  cut the road voice off mid-sentence, the Windows voice never finished
+  stopping, and because every spoken line waits its turn behind that one,
+  the menu voice went with it for the rest of the drive. The game now
+  gives a stuck voice twenty seconds, then abandons it and starts a fresh
+  one with your speech settings already applied. You hear the road again
+  within about half a minute instead of restarting the game, and the log
+  says when it happened.
+
 - **The automatic now rev-matches its downshifts.** Between gears a real
   automated box brings the engine to the speed the next gear needs before
   it re-engages: down through the gears that is a blip up, up through them

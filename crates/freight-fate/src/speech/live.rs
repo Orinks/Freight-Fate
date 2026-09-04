@@ -71,6 +71,18 @@ impl Speech {
     /// right now. Never fails: with no Prism, no backend, or an error during
     /// start-up the game continues silently.
     pub fn new() -> Self {
+        Self::start(false)
+    }
+
+    /// Start speech for a replacement worker after the previous one wedged:
+    /// the same selection as [`Speech::new`], on freshly created backend
+    /// instances rather than the cached ones the stuck worker still holds
+    /// (see [`PrismRegistry::new_fresh`]).
+    pub fn new_after_wedge() -> Self {
+        Self::start(true)
+    }
+
+    fn start(after_wedge: bool) -> Self {
         let override_name = env::var(super::SPEECH_BACKEND_ENV)
             .ok()
             .filter(|name| !name.is_empty());
@@ -78,8 +90,19 @@ impl Speech {
             log::info!("Speech disabled via FREIGHT_FATE_NO_SPEECH");
             return Self::disabled_with_override(override_name);
         }
-        match PrismRegistry::new() {
-            Ok(registry) => Self::with_registry(Box::new(registry), override_name),
+        let registry = if after_wedge {
+            PrismRegistry::new_fresh()
+        } else {
+            PrismRegistry::new()
+        };
+        match registry {
+            Ok(registry) => {
+                let speech = Self::with_registry(Box::new(registry), override_name);
+                if let Some(ctx) = &speech.ctx {
+                    ctx.settle();
+                }
+                speech
+            }
             Err(err) => {
                 log::error!("Speech unavailable; continuing silently: {err}");
                 Self::disabled_with_override(override_name)
