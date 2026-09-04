@@ -66,6 +66,7 @@ mod states_city_pickup;
 mod states_city_route_planning;
 mod states_city_shops;
 mod states_cloud_save_states;
+mod states_driver_profile;
 mod states_drivers_board;
 mod states_driving_air_brakes;
 mod states_driving_approach_sweep;

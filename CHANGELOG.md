@@ -4,6 +4,16 @@
 
 ### Added
 
+- **You can read another driver's profile without leaving the game.** On
+  the Drivers on duty list, press Enter on a driver to open their public
+  profile: their name and whether they are on duty, then their current
+  career, employment and carrier, level and title, truck, and a career
+  resume, one fact per row, followed by their achievements across every
+  career and their latest road journal lines. It is the same profile the
+  orinks.net page shows. The Online menu also has a new row, Your profile,
+  which reads your own profile the way other players hear it. A driver whose
+  profile is not public says so, and yours tells you which setting to turn
+  on.
 - **You can stay a company driver, and an owner-operator can go back to
   one.** Once the owner-operator buy-in opens, Business status has a new
   row, Stay a company driver. Choose it and the game stops steering you at

@@ -366,6 +366,52 @@ pub fn fetch_board(transport: &dyn Transport) -> Option<Vec<Value>> {
     }
 }
 
+/// The site's answer when asked for one driver's public profile.
+#[derive(Debug, Clone, PartialEq)]
+pub enum ProfileFetch {
+    /// The profile as the site sent it: `driver`, `snapshot`, `presence`,
+    /// `achievementCount`, `recentAchievements`, `events`.
+    Profile(Value),
+    /// The site answered, and this driver has no public profile: unknown,
+    /// private, or held back. The site does not say which, and neither
+    /// does the game.
+    NotPublic,
+    /// No usable answer.
+    Unreachable,
+}
+
+/// One driver's public profile, as the in-game profile screen reads it.
+///
+/// Public data over the same unauthenticated door as the drivers list, so
+/// it works with or without the player's own account. Called from a
+/// background thread; never on the game loop.
+pub fn fetch_driver_profile(driver_id: &str, transport: &dyn Transport) -> ProfileFetch {
+    // Driver ids are slugs (letters, digits, dash, underscore). Anything else
+    // has no business in a path, so it is dropped rather than encoded.
+    let slug: String = driver_id
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '_')
+        .collect();
+    if slug.is_empty() {
+        return ProfileFetch::NotPublic;
+    }
+    let url = format!("{}/api/freight-fate/drivers/{slug}", base_url());
+    match transport.call(&url, None, &[], None) {
+        Ok(reply) if reply.get("driver").is_some_and(Value::is_object) => {
+            ProfileFetch::Profile(reply)
+        }
+        Ok(other) => {
+            log::debug!("Driver profile fetch for {slug} answered without a driver: {other}");
+            ProfileFetch::Unreachable
+        }
+        Err(e) if e.http_code() == Some(404) => ProfileFetch::NotPublic,
+        Err(e) => {
+            log::debug!("Driver profile fetch for {slug} failed: {e}");
+            ProfileFetch::Unreachable
+        }
+    }
+}
+
 /// Python truthiness of a JSON value (`bool(reply.get("ok"))`).
 pub(crate) fn truthy(value: Option<&Value>) -> bool {
     match value {

@@ -13,6 +13,7 @@ use crate::impl_state_for_menu;
 use crate::online_presence::{self, MastodonStatus};
 use crate::states::base::{InputEvent, Label, Menu, MenuCore, MenuItem};
 
+use super::profile::DriverProfileState;
 use super::support::{
     load_identity, menu_default_enter, menu_default_handle_event, online_transport, open_url,
     run_worker, wall_time, Mailbox,
@@ -256,6 +257,24 @@ impl DriversOnlineState {
         }
     }
 
+    /// Enter on a driver: open their public profile.
+    ///
+    /// Seeded with the row under the cursor, so the name is on the new
+    /// screen before the site answers. A held row opens too: the profile is
+    /// durable, and the driver going off duty is one of the things it says.
+    fn open_selected_profile(&mut self, ctx: &mut GameContext) {
+        let Some(driver_id) = self.selected_driver() else {
+            self.speak_current(ctx);
+            return;
+        };
+        let seed = self
+            .rows_to_show()
+            .and_then(|rows| rows.into_iter().find(|row| row_driver_id(row) == driver_id));
+        let mut profile = DriverProfileState::new(ctx, &driver_id, seed, false);
+        profile.threaded = self.threaded;
+        ctx.push_state(profile);
+    }
+
     /// Let go of a held row once the player has moved off it.
     fn release_held(&mut self, ctx: &mut GameContext) {
         let Some(held_id) = self.held.as_ref().map(row_driver_id) else {
@@ -355,9 +374,10 @@ impl Menu for DriversOnlineState {
                         .filter(|bit| !bit.is_empty())
                         .collect::<Vec<_>>()
                         .join(". ");
-                    items.push(MenuItem::new(label, |s: &mut Self, ctx| {
-                        s.speak_current(ctx)
-                    }));
+                    items.push(
+                        MenuItem::new(label, |s: &mut Self, ctx| s.open_selected_profile(ctx))
+                            .help("Opens this driver's public profile."),
+                    );
                     self.row_keys.push(RowKey::Driver(driver_id));
                 }
             }

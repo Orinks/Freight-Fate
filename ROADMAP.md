@@ -293,6 +293,21 @@ Everything not listed here ships fine after 1.9.0.
         status, which the game only ever speaks in its qualified form.
       * Not done on the `dev` (Python) line, by owner ruling 2026-08-29:
         1.9 only for now.
+- [x] **Driver profiles are readable in the game (2026-09-03).** Enter on
+      a driver in Drivers on duty opens `DriverProfileState`: the public
+      profile as a spoken list in the online-profile design's order
+      (identity, current career, resume, account achievements, road
+      journal), one fact per row. The Online hub's new "Your profile" row
+      opens the player's own through the same screen. Fed by a new public
+      `GET /api/freight-fate/drivers/<driverId>` on orinks.net that wraps
+      `getDriverProfile` in the same sixty-second cache as the drivers list
+      and trims it to the spoken sections; a hidden profile is a 404 the
+      game words as "no public profile", separate from "could not be
+      reached". Server side is on orinks-net `dev` (staging); prod gets it
+      with the 1.9 cutover, until which the row answers "could not be
+      reached" against prod.
+      * The stats read are the career fronting that driver's public profile,
+        which is the deferred per-career question above, not a new one.
 - [x] **The Python gameplay tests are retired; the suite now covers the
       tooling only (2026-08-29)** 223 files mirroring `src/freight_fate/`
       gameplay went, along with the Python adversarial battery the Rust

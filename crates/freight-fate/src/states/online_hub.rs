@@ -18,8 +18,8 @@ use crate::states::account_achievements::AccountAchievementsState;
 use crate::states::base::{InputEvent, Key, Label, Menu, MenuCore, MenuItem};
 use crate::states::cloud_save_states::{CloudBackupConsentState, CloudBackupState};
 use crate::states::online_states::{
-    load_identity, menu_default_handle_event, open_url, DriversOnlineState, MastodonLinkState,
-    OnlineSetupState, ProfileSharingSyncState,
+    load_identity, menu_default_handle_event, open_url, DriverProfileState, DriversOnlineState,
+    MastodonLinkState, OnlineSetupState, ProfileSharingSyncState,
 };
 
 pub struct OnlineHubState {
@@ -56,18 +56,19 @@ impl OnlineHubState {
     }
 
     fn adjust_row(&mut self, ctx: &mut GameContext, direction: i64) {
-        // The board, achievements, account setup, setup page, restore, and Mastodon link
-        // rows are actions, so left/right does nothing there instead of
-        // changing a nearby toggle. This list is positional: a row added to
-        // build_items has to be added here at the same index, or every toggle
-        // below it starts answering for its neighbour.
+        // The board, achievements, your profile, account setup, setup page,
+        // restore, and Mastodon link rows are actions, so left/right does
+        // nothing there instead of changing a nearby toggle. This list is
+        // positional: a row added to build_items has to be added here at the
+        // same index, or every toggle below it starts answering for its
+        // neighbour.
         match self.menu.index {
             1 => self.toggle_duty_notifications(ctx, direction),
-            3 => self.toggle_online_services(ctx, direction),
-            6 => self.toggle_online_presence(ctx, direction),
-            7 => self.toggle_cloud_saves(ctx, direction),
-            9 => self.toggle_mastodon_sharing(ctx, direction),
-            11 => self.toggle_discord_presence(ctx, direction),
+            4 => self.toggle_online_services(ctx, direction),
+            7 => self.toggle_online_presence(ctx, direction),
+            8 => self.toggle_cloud_saves(ctx, direction),
+            10 => self.toggle_mastodon_sharing(ctx, direction),
+            12 => self.toggle_discord_presence(ctx, direction),
             _ => {}
         }
     }
@@ -95,6 +96,20 @@ impl OnlineHubState {
 
     fn account_achievements(&mut self, ctx: &mut GameContext) {
         ctx.push_state(AccountAchievementsState::new());
+    }
+
+    /// The player's own public profile, through the same screen a driver on
+    /// the drivers list opens: what other players hear about them.
+    fn your_profile(&mut self, ctx: &mut GameContext) {
+        let Some(identity) = load_identity() else {
+            ctx.say(
+                "Your profile needs your orinks.net account. Choose Set up orinks.net account \
+                 first.",
+            );
+            return;
+        };
+        let profile = DriverProfileState::new(ctx, &identity.driver_id, None, true);
+        ctx.push_state(profile);
     }
 
     /// Toggle the master online services switch.
@@ -340,6 +355,10 @@ impl Menu for OnlineHubState {
             .help(
                 "Achievements earned across every career on this installation. The main \
                  menu's Achievements is per career.",
+            ),
+            MenuItem::new("Your profile", |s: &mut Self, ctx| s.your_profile(ctx)).help(
+                "Your public driver profile, read the way any player hears it from the \
+                 drivers list. Needs your orinks.net account and Profile sharing on.",
             ),
             // This line's master switch survives the move into the hub: one
             // row that stands every orinks.net and sharing service down (or
