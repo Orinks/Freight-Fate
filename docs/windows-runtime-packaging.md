@@ -35,7 +35,8 @@ $env:PYTHONPATH = "tools"
 uv run python -m unittest discover -s tests -p test_windows_runtime.py -v
 ```
 
-The snapshot workflow runs these before packaging. The existing packaged smoke
+The Windows runtime CI workflow runs these and audits the runner's installed
+Visual Studio CRT. The existing packaged smoke
 test still runs on the Windows builder. Release verification should also
 extract the resulting archive into a fresh supported Windows installation
 without the Visual C++ redistributable installed, start the game through its
