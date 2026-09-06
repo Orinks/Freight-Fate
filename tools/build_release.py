@@ -51,6 +51,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import tomllib
+from windows_runtime import REQUIRED_CRT, stage_windows_runtime, verify_windows_runtime
 
 ROOT = Path(__file__).resolve().parent.parent
 TOOLS = ROOT / "tools"
@@ -833,6 +834,14 @@ def verify_archive(out: Path) -> None:
         missing.extend(
             f"{root}/{name}" for name in LINUX_REQUIRED_LIBRARIES if f"{root}/{name}" not in entries
         )
+    if out.name.endswith("-windows-portable.zip") and f"{root}/{RUST_BAKED_FILE_ENTRY}" in entries:
+        # The delivered Rust ZIP, not only the build runner, must carry the CRT.
+        folded = {name.lower(): metadata for name, metadata in entries.items()}
+        missing.extend(
+            f"{root}/{name}"
+            for name in REQUIRED_CRT
+            if folded.get(f"{root}/{name}".lower(), (0, 0))[0] == 0
+        )
     if missing:
         raise RuntimeError(
             f"Release archive is missing payload files: {', '.join(missing)} in {out.name}"
@@ -1485,6 +1494,8 @@ def stage_rust_build(
                 "has to run on every distribution, so build with the crate's "
                 "`bundled` + `static-link` SDL2 features instead."
             )
+    if platform_name == "win32":
+        stage_windows_runtime(executable_root)
     if platform_name != "win32":
         exe = executable_root / rust_exe_name(platform_name)
         exe.chmod(exe.stat().st_mode | 0o755)
@@ -1630,6 +1641,7 @@ def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> N
         )
 
     if platform_name == "win32":
+        verify_windows_runtime(executable_root)
         for name in ("SDL2.dll", "bass.dll", "prism.dll"):
             if not (root / name).exists():
                 # BASS is fetched rather than committed, so a checkout that

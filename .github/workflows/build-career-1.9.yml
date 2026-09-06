@@ -146,6 +146,11 @@ jobs:
         # per-push workflow (rust.yml) leaves out run here every night.
         run: cargo test -p ff-core -p freight-fate
 
+      - name: Test Windows runtime packaging
+        env:
+          PYTHONPATH: tools
+        run: uv run python -m unittest discover -s tests -p test_windows_runtime.py -v
+
       - name: Build the portable release
         run: ./build-release.ps1 --tag "${{ needs.prepare.outputs.tag }}"
 

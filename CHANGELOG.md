@@ -1261,6 +1261,10 @@
 
 ### Fixed
 
+- **Windows downloads include the files needed to start the game.** You
+  no longer need to install the Visual C++ runtime separately when Windows
+  reports that VCRUNTIME140.dll or a related file is missing.
+
 - **Speech comes back on its own when a voice locks up mid-drive.** A
   tester's log caught the "both voices stop" report: pressing Control to
   cut the road voice off mid-sentence, the Windows voice never finished

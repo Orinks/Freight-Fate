@@ -120,6 +120,13 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Portable Windows runtime (2026-09-06).** Include the official x64
+      Visual C++ redistributable DLLs beside the game, and refuse to package
+      missing runtime dependencies in the game or its bundled libraries.
+- [ ] Validate the Windows portable snapshot on a clean Windows installation
+      without a separately installed Visual C++ redistributable; the build
+      runner's smoke test alone cannot establish this.
+
 ### Release gate -- what stands between here and a public 1.9.0
 
 Compiled 2026-08-30 from a full sweep of every open bullet in this
