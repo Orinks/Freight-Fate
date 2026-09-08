@@ -65,8 +65,8 @@ proptest! {
 
 #[test]
 fn test_generated_slow_zones_never_nest_or_touch() {
-    // Construction and traffic zones must be separated by open road
-    // (player-reported on the 2026-07-09 snapshot).
+    // Simulated construction keeps its open-road clearance. Adjacent local
+    // traffic sections may touch but must never overlap.
     let w = world();
     let route = supported(w, "Chicago", "St. Louis");
     let region = w.cities[&route.cities[0]].region.clone();
@@ -90,8 +90,13 @@ fn test_generated_slow_zones_never_nest_or_touch() {
         zones.sort_by(|a, b| a.start_mi.partial_cmp(&b.start_mi).unwrap());
         for pair in zones.windows(2) {
             let (a, b) = (&pair[0], &pair[1]);
+            let required_gap = if a.reason == "heavy traffic" && b.reason == "heavy traffic" {
+                0.0
+            } else {
+                ZONE_MIN_GAP_MI
+            };
             assert!(
-                b.start_mi - a.end_mi >= ZONE_MIN_GAP_MI,
+                b.start_mi - a.end_mi >= required_gap,
                 "seed {seed}: {} {:.1}-{:.1} and {} {:.1}-{:.1} overlap or touch",
                 a.reason,
                 a.start_mi,

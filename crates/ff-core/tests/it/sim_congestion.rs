@@ -8,8 +8,8 @@ use ff_core::sim::season::{day_of_week, is_weekend};
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::{
     congestion_limit_mph, congestion_ratio, daily_volume_factor, heuristic_aadt, leg_aadt_at,
-    leg_lane_count, Zone, CONGESTION_JOIN_GAP_MI, DAILY_VOLUME_CV, DAILY_VOLUME_MAX,
-    DAILY_VOLUME_MIN, HOURLY_SHARE_WEEKDAY, HOURLY_SHARE_WEEKEND, URBAN_RADIUS_MI, ZONE_MIN_GAP_MI,
+    leg_lane_count, Zone, DAILY_VOLUME_CV, DAILY_VOLUME_MAX, DAILY_VOLUME_MIN,
+    HOURLY_SHARE_WEEKDAY, HOURLY_SHARE_WEEKEND, URBAN_RADIUS_MI, ZONE_MIN_GAP_MI,
 };
 use ff_core::sim::vehicle::TruckState;
 
@@ -347,11 +347,18 @@ fn two_stretch_trip(seed: i64) -> Trip {
 }
 
 fn jam_layout(trip: &Trip) -> Vec<(i64, i64)> {
-    trip.zones
-        .iter()
-        .filter(|z| z.reason == "heavy traffic")
-        .map(|z| (z.start_mi.round() as i64, z.end_mi.round() as i64))
-        .collect()
+    // Compare busy footprints, allowing local speed sections within each one.
+    let mut spans: Vec<(i64, i64)> = Vec::new();
+    for zone in trip.zones.iter().filter(|z| z.reason == "heavy traffic") {
+        let start = zone.start_mi.round() as i64;
+        let end = zone.end_mi.round() as i64;
+        if let Some(previous) = spans.last_mut().filter(|previous| previous.1 == start) {
+            previous.1 = end;
+        } else {
+            spans.push((start, end));
+        }
+    }
+    spans
 }
 
 /// The draw is CPython's `random.Random(seed ^ 0x7A4FF1C).gauss(1.0, 0.10)`,
@@ -498,11 +505,7 @@ fn test_the_jam_layout_varies_but_the_oversaturated_stretch_always_backs_up() {
 }
 
 #[test]
-fn test_two_busy_stretches_inside_the_open_road_rule_are_one_jam() {
-    // DERIVED, not chosen: two busy stretches closer together than the open
-    // road guaranteed between zones cannot both stand, or the driver is told
-    // to get back up to speed for four miles and then to slow again.
-    assert_eq!(CONGESTION_JOIN_GAP_MI, ZONE_MIN_GAP_MI);
+fn test_two_busy_stretches_preserve_the_clear_road_between_them() {
     let cached = first_route_option(world(), "Chicago", "Indianapolis");
     // Two loaded stretches with a five-mile breather between them.
     let leg = with_corridor(&cached.legs[0], |d| {
@@ -516,27 +519,27 @@ fn test_two_busy_stretches_inside_the_open_road_rule_are_one_jam() {
     let route = replace_leg(&cached, 0, leg);
     let mut truck = TruckState::default();
     truck.transmission.automatic = true;
-    let trip = Trip::new(
+    let mut trip = Trip::new(
         route,
         truck,
         weather("great_lakes", 1),
         TripOptions {
             seed: Some(2),
+            start_hour: 17.0,
             world: Some(world()),
             ..Default::default()
         },
     );
-    let jams: Vec<_> = trip
-        .zones
-        .iter()
-        .filter(|z| z.reason == "heavy traffic")
-        .collect();
+    assert_eq!(jam_layout(&trip), vec![(0, 10), (15, 25)]);
+    assert_eq!(trip.speed_limit_at(5.0).1.as_deref(), Some("heavy traffic"));
     assert_eq!(
-        jams.len(),
-        1,
-        "a five-mile breather is shorter than the guaranteed open road, so it is one jam"
+        trip.speed_limit_at(12.5),
+        (trip.corridor_limit_at(12.5), None)
     );
-    assert!(jams[0].start_mi <= 1.0 && jams[0].end_mi >= 25.0);
+    assert_eq!(
+        trip.speed_limit_at(20.0).1.as_deref(),
+        Some("heavy traffic")
+    );
 }
 
 #[test]
@@ -671,4 +674,125 @@ fn test_jam_layouts_match_cpython_seed_for_seed() {
             .collect();
         assert_eq!(placed, works.to_vec(), "seed {seed}: roadworks");
     }
+}
+
+#[test]
+fn test_congestion_preserves_local_volume_and_lane_capacity() {
+    let cached = first_route_option(world(), "Chicago", "Indianapolis");
+    let leg = with_corridor(&cached.legs[0], |d| {
+        d.traffic_volumes = vec![
+            sample(0.0, 150000.0, 3),
+            sample(10.0, 90000.0, 2),
+            sample(20.0, 150000.0, 4),
+            sample(30.0, 22000.0, 2),
+        ];
+    });
+    let mut trip = Trip::new(
+        replace_leg(&cached, 0, leg),
+        TruckState::default(),
+        weather("great_lakes", 1),
+        TripOptions {
+            seed: Some(2),
+            start_hour: 17.0,
+            world: Some(world()),
+            ..Default::default()
+        },
+    );
+    let mut speeds = Vec::new();
+    for mile in [5.0, 15.0, 25.0] {
+        let zone = trip.active_zone_at(mile).expect("busy at the evening peak");
+        speeds.push(zone.limit_mph);
+    }
+    assert_eq!(speeds[0], 26.0);
+    assert_eq!(speeds[1], 38.0);
+    assert!(
+        speeds[2] > speeds[1],
+        "extra lanes should relieve the bottleneck"
+    );
+}
+
+#[test]
+fn test_southern_california_congestion_keeps_local_inputs() {
+    for (origin, destination) in [
+        ("Lancaster", "Los Angeles"),
+        ("Victorville", "Los Angeles"),
+        ("Los Angeles", "Riverside"),
+    ] {
+        let route = first_route_option(world(), origin, destination);
+        let trip = Trip::new(
+            route,
+            TruckState::default(),
+            weather("southwest", 1),
+            TripOptions {
+                seed: Some(2),
+                start_hour: 17.0,
+                world: Some(world()),
+                ..Default::default()
+            },
+        );
+        let mut checked = 0;
+        for zone in trip.zones.iter().filter(|z| z.reason == "heavy traffic") {
+            let mut mile = zone.start_mi;
+            while mile < zone.end_mi {
+                assert_eq!(
+                    (zone.aadt.unwrap(), zone.lanes),
+                    trip.route_aadt_at(mile),
+                    "{origin} to {destination} at mile {mile} must use local capacity"
+                );
+                checked += 1;
+                mile += 1.0;
+            }
+        }
+        assert!(
+            checked > 0,
+            "{origin} to {destination}: check must cover traffic"
+        );
+    }
+}
+
+#[test]
+fn test_equal_speed_traffic_sections_do_not_repeat_announcements() {
+    let mut trip = synthetic_trip(TripOptions {
+        start_hour: 17.0,
+        ..Default::default()
+    });
+    trip.zones = vec![
+        Zone::new(0.0, 10.0, 26.0, "heavy traffic").with_congestion(Some(150000.0), 3),
+        Zone::new(10.0, 20.0, 26.0, "heavy traffic").with_congestion(Some(160000.0), 3),
+    ];
+    trip.entered_zone = Some(trip.zones[0].clone());
+    trip.zone_entry_spoken = true;
+    trip.events.clear();
+    trip.position_mi = 8.0;
+    trip.check_zones();
+    assert!(
+        trip.events.is_empty(),
+        "unchanged traffic speed needs no advance warning: {:?}",
+        trip.events
+    );
+    trip.position_mi = 10.1;
+    trip.check_zones();
+    assert!(
+        trip.events.is_empty(),
+        "unchanged traffic speed needs no repeated entry: {:?}",
+        trip.events
+    );
+    assert_eq!(trip.entered_zone.as_ref().unwrap().start_mi, 10.0);
+
+    // A real change in pace must still be announced before and at the boundary.
+    trip.zones[1].aadt = Some(90000.0);
+    trip.entered_zone = Some(trip.zones[0].clone());
+    trip.position_mi = 8.0;
+    trip.check_zones();
+    assert!(trip.events.iter().any(|event| {
+        event.kind == ff_core::sim::trip_models::TripEventKind::GpsCue
+            && event.message.normal.contains("38")
+    }));
+    trip.events.clear();
+    trip.position_mi = 10.1;
+    trip.check_zones();
+    assert!(trip.events.iter().any(|event| {
+        event.kind == ff_core::sim::trip_models::TripEventKind::ZoneEnter
+            && event.message.normal.contains("38")
+    }));
 }

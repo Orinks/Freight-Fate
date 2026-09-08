@@ -2726,6 +2726,14 @@ Everything not listed here ships fine after 1.9.0.
       tester who knows an area is the only source we have for them (see
       Brandon's demolished planetarium).
 
+- [x] **Career 1.9 congestion preserves local conditions.** Keep each sampled
+      volume paired with its own lane count and road limit. Coalesce only
+      contiguous matching samples; preserve clear gaps instead of extending
+      the worse restriction across them. Rust regressions cover local speed
+      variation and a clear stretch between two busy sections. Adjacent active
+      sections with equal speeds share their spoken warning; actual changes
+      in pace still receive advance and entry announcements.
+
 - [x] **FHWA HPMS AADT baked onto the world -- SHIPPED 2026-08-19.** 1,284 of
       1,290 legs, 10,686 volume samples. Congestion had been falling back to a
       class/metro heuristic that "rarely jams on its own": a sweep of 12 seeds

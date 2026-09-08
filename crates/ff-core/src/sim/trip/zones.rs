@@ -143,71 +143,39 @@ impl Trip {
         // of its own so that adding it does not shift where the work zones
         // land for a given seed -- those come off `self.rng`.
         let day = daily_volume_factor(&mut self.traffic_rng);
-        let mut prone: Vec<Zone> = Vec::new();
-        let mut run_start: Option<f64> = None;
-        let mut run_samples: Vec<(f64, i64)> = Vec::new();
-
-        let flush = |end_mile: f64,
-                     run_start: &mut Option<f64>,
-                     run_samples: &mut Vec<(f64, i64)>,
-                     prone: &mut Vec<Zone>| {
-            if let Some(start) = *run_start {
-                if end_mile - start >= CONGESTION_MIN_ZONE_MI {
-                    let mut aadts: Vec<f64> = run_samples.iter().map(|s| s.0).collect();
-                    aadts.sort_by(|a, b| a.partial_cmp(b).expect("finite volumes"));
-                    let lanes = run_samples.iter().map(|s| s.1).min().unwrap_or(2);
-                    prone.push(
-                        // 50.0 is a placeholder; refreshed from the clock when active
-                        Zone::new(start, end_mile, 50.0, "heavy traffic")
-                            .with_congestion(Some(aadts[aadts.len() / 2]), lanes)
-                            .with_day_factor(day),
-                    );
-                }
-            }
-            *run_start = None;
-            run_samples.clear();
-        };
-
+        let mut zones: Vec<Zone> = Vec::new();
         let mut mile = 0.0;
-        while mile <= total {
+        while mile < total {
+            let end = (mile + CONGESTION_SAMPLE_MI).min(total);
             let (aadt, lanes) = self.route_aadt_at(mile);
             let peak_ratio = aadt * day * peak_share * DIRECTIONAL_SPLIT
                 / (lanes.max(1) as f64 * LANE_CAPACITY_VPH);
             if peak_ratio >= CONGESTION_MIN_RATIO {
-                if run_start.is_none() {
-                    run_start = Some(mile);
-                }
-                run_samples.push((aadt, lanes));
-            } else {
-                flush(mile, &mut run_start, &mut run_samples, &mut prone);
-            }
-            mile += CONGESTION_SAMPLE_MI;
-        }
-        flush(
-            mile.min(total),
-            &mut run_start,
-            &mut run_samples,
-            &mut prone,
-        );
-
-        let mut merged: Vec<Zone> = Vec::new();
-        for zone in prone {
-            if let Some(prev) = merged.last() {
-                if zone.start_mi - prev.end_mi <= CONGESTION_JOIN_GAP_MI {
-                    let prev_aadt = prev.aadt.unwrap_or(0.0);
-                    let joined = Zone::new(prev.start_mi, zone.end_mi, 50.0, "heavy traffic")
-                        .with_congestion(
-                            Some(prev_aadt.max(zone.aadt.unwrap_or(0.0))),
-                            prev.lanes.min(zone.lanes),
-                        )
-                        .with_day_factor(day);
-                    *merged.last_mut().expect("just checked") = joined;
-                    continue;
+                // Only coalesce contiguous samples with the same local inputs.
+                // A median volume and minimum lane count can invent a bottleneck
+                // that exists nowhere on the road. Joining across a clear gap
+                // likewise turns uncongested miles into a speed restriction.
+                let posted = self.corridor_limit_at(mile);
+                if let Some(previous) = zones.last_mut().filter(|previous| {
+                    previous.end_mi == mile
+                        && previous.aadt == Some(aadt)
+                        && previous.lanes == lanes
+                        && self.corridor_limit_at(previous.start_mi) == posted
+                }) {
+                    previous.end_mi = end;
+                } else {
+                    zones.push(
+                        // Refreshed from the clock when active.
+                        Zone::new(mile, end, 50.0, "heavy traffic")
+                            .with_congestion(Some(aadt), lanes)
+                            .with_day_factor(day),
+                    );
                 }
             }
-            merged.push(zone);
+            mile = end;
         }
-        merged
+        zones.retain(|zone| zone.end_mi - zone.start_mi >= CONGESTION_MIN_ZONE_MI);
+        zones
     }
 
     pub fn facility_speed_zones(&self) -> Vec<Zone> {

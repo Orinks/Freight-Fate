@@ -140,6 +140,22 @@ impl Trip {
         )
     }
 
+    /// Adjacent local sections can be one audible queue even though their
+    /// inputs must stay separate for changes in the commuter clock.
+    fn same_traffic_pace(&self, previous: &Zone, next: &Zone) -> bool {
+        if previous.reason != "heavy traffic"
+            || next.reason != "heavy traffic"
+            || previous.end_mi != next.start_mi
+        {
+            return false;
+        }
+        let mut previous = previous.clone();
+        let mut next = next.clone();
+        self.zone_is_active(&mut previous)
+            && self.zone_is_active(&mut next)
+            && previous.limit_mph == next.limit_mph
+    }
+
     pub fn check_zones(&mut self) {
         let lookahead = self.zone_warning_lookahead_mi();
         let pos = self.position_mi;
@@ -161,6 +177,13 @@ impl Trip {
                 continue;
             }
             if !self.zone_is_active_index(i) {
+                continue;
+            }
+            if self
+                .zones
+                .iter()
+                .any(|previous| self.same_traffic_pace(previous, &self.zones[i]))
+            {
                 continue;
             }
             due.push((ahead, i));
@@ -218,8 +241,16 @@ impl Trip {
                     }
                     None => self.announced_speed_limit,
                 };
+                let already_spoken = self.zone_entry_spoken
+                    && self
+                        .entered_zone
+                        .as_ref()
+                        .is_some_and(|previous| self.same_traffic_pace(previous, &zone));
                 let urgent = old_limit.is_some_and(|old| zone.limit_mph < old);
-                if urgent || self.event_breather.ready("zone") {
+                if already_spoken {
+                    // Keep the local section and its queue lifecycle, without
+                    // repeating the speed the driver is already following.
+                } else if urgent || self.event_breather.ready("zone") {
                     self.speak_zone_entry(&zone);
                 } else {
                     // Gated, not dropped.

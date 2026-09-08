@@ -314,16 +314,6 @@ pub const CONGESTION_HEAVY_RATIO: f64 = 0.9;
 pub const CONGESTION_JAM_RATIO: f64 = 1.05;
 pub const CONGESTION_SAMPLE_MI: f64 = 1.0;
 pub const CONGESTION_MIN_ZONE_MI: f64 = 1.0;
-/// Merge prone stretches separated by less. DERIVED from `ZONE_MIN_GAP_MI`
-/// rather than chosen: two busy stretches closer than the guaranteed open
-/// road between zones cannot both stand, and the invariant is the one that
-/// speaks for the driver -- "back up to speed" for four miles and then "slow
-/// again" is the chaining that rule exists to prevent. At 2.0 the two numbers
-/// disagreed, and any gap landing between them satisfied neither. Latent
-/// until a rebuilt HPMS profile on Chicago to St Louis produced a five-mile
-/// one.
-pub const CONGESTION_JOIN_GAP_MI: f64 = ZONE_MIN_GAP_MI;
-
 /// Hourly share of daily traffic (indexed by clock hour). Sums to ~1.0.
 pub const HOURLY_SHARE_WEEKDAY: [f64; 24] = [
     0.008, 0.005, 0.004, 0.005, 0.010, 0.025, // 0-5

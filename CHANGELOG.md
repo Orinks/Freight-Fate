@@ -1261,6 +1261,12 @@
 
 ### Fixed
 
+- **Heavy traffic follows local road conditions.** Clear stretches between
+  busy sections stay clear, and a narrow bottleneck no longer holds the
+  surrounding wider road at the same slow speed. Rush-hour traffic still
+  follows the time of day and the traffic volume along your route. Moving
+  between equally slow sections does not repeat the same traffic warning.
+
 - **Windows downloads include the files needed to start the game.** You
   no longer need to install the Visual C++ runtime separately when Windows
   reports that VCRUNTIME140.dll or a related file is missing.
