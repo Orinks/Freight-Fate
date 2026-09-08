@@ -781,6 +781,7 @@ fn test_equal_speed_traffic_sections_do_not_repeat_announcements() {
 
     // A real change in pace must still be announced before and at the boundary.
     trip.zones[1].aadt = Some(90000.0);
+    trip.zones[1].lanes = 2;
     trip.entered_zone = Some(trip.zones[0].clone());
     trip.position_mi = 8.0;
     trip.check_zones();
