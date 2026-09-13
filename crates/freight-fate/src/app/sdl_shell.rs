@@ -94,7 +94,16 @@ impl SdlShell {
             .position_centered()
             .build()
             .map_err(|e| e.to_string())?;
-        let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+        // A dummy window has no GPU surface. Automatic renderer selection can
+        // still enter native graphics drivers before falling back to software;
+        // AMD's driver fail-fasts there in restricted Windows environments.
+        let canvas = window.into_canvas();
+        let canvas = if video.current_video_driver() == "dummy" {
+            canvas.software()
+        } else {
+            canvas
+        };
+        let canvas = canvas.build().map_err(|e| e.to_string())?;
         // The dummy driver (every headless run: CI, the agent server under
         // FREIGHT_FATE_NO_SPEECH, the playtest benches) has no native window,
         // and the sdl2 crate PANICS rather than erring when asked for one --

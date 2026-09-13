@@ -481,48 +481,41 @@ impl DrivingState {
         let scanned = 0.0f64.max(GRADE_WARN_SCAN_MI.min(self.trip.total_miles() - position));
         // "Nothing steep ahead" in the same breath as a six percent grade
         // under the wheels reads as the game contradicting itself.
-        let mut nothing = if here.abs() >= GRADE_WARN_PCT {
+        let nothing = if here.abs() >= GRADE_WARN_PCT {
             "Nothing else steep".to_string()
         } else {
             "Nothing steep".to_string()
         };
-        let (clause, sustained) = self.mild_grade_clause(ctx, here);
-        // A short punchy pull can be over the steep number and still fall
-        // under the run filter this scan uses. Saying "nothing steep" and then
-        // naming a 3.7 percent grade in the same sentence is the same
-        // contradiction in miniature, so the lead says what the scan means.
-        if !clause.is_empty() && !sustained {
-            nothing.push_str(" for long");
+        let upcoming = self.mild_grade_text(ctx, here);
+        if !upcoming.is_empty() {
+            return upcoming;
         }
         format!(
-            "{nothing} in the next {}{clause}.",
+            "{nothing} in the next {}.",
             self.trip.distance_text(scanned)
         )
     }
 
-    /// `_mild_grade_clause(here_pct)`: the grade the preview is planning for,
-    /// when none is steep enough to call out, and whether it is under the
-    /// steep number.
+    /// The grade the preview is planning for,
+    /// announced directly when none passes the sustained
+    /// steep scan.
     ///
     /// Automatic speed control banks momentum for a two percent pull and says
     /// so; with nothing steep in fifteen miles, G had nothing to say back and
     /// the two answers looked like a bug (tester report, 2026-08-15). Read off
     /// the preview's own scan so both describe the same hill.
-    pub fn mild_grade_clause(&self, ctx: &GameContext, here_pct: f64) -> (String, bool) {
+    pub fn mild_grade_text(&self, ctx: &GameContext, here_pct: f64) -> String {
         let Some((grade, ahead_mi)) = self.preview_grade_ahead() else {
-            return (String::new(), true);
+            return String::new();
         };
         // A grade already under the wheels is the first sentence's job.
         if here_pct.abs() >= PCC_GRADE_MIN * 100.0 && (grade > 0.0) == (here_pct > 0.0) {
-            return (String::new(), true);
+            return String::new();
         }
         let pct = grade.abs() * 100.0;
         let direction = if grade > 0.0 { "upgrade" } else { "downgrade" };
         let where_text = ctx.settings.short_distance_text(ahead_mi);
-        (
-            format!(", but a {pct:.1} percent {direction} starts in {where_text}"),
-            pct < GRADE_WARN_PCT,
-        )
+        format!("Next, a {pct:.1} percent {direction} starts in {where_text}.")
     }
 
     /// `_speak_upcoming(within_mi=15.0)`: U -- the road ahead that no other

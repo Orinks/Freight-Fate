@@ -667,6 +667,10 @@
   officer's ten-hour or thirty-minute order parked you and reset the clock
   but was never remembered afterwards, so the scale house never looked harder
   at a driver who had been shut down before.
+- **Headless Windows runs avoid unnecessary graphics-driver startup.** Dummy windows use software rendering, preventing a native graphics-driver crash seen in restricted test environments.
+
+- **G announces an upcoming grade directly.** When a gentler hill or short steep stretch is ahead, the terrain report names it without first saying there is nothing steep ahead.
+
 - **Running the light or the sign at a ramp end is a gamble now, and it can
   cost you a ticket.** Before, blowing the red or the stop sign always clipped
   cross traffic and never drew a citation. Now the crossroad decides: some

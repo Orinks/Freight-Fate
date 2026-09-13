@@ -11,6 +11,8 @@ use freight_fate::app::sdl_shell::SdlShell;
 fn the_shell_boots_on_the_dummy_video_driver() {
     std::env::set_var("SDL_VIDEODRIVER", "dummy");
     std::env::set_var("SDL_AUDIODRIVER", "dummy");
-    let shell = SdlShell::new("Freight Fate headless").expect("the dummy driver hosts a window");
+    let mut shell =
+        SdlShell::new("Freight Fate headless").expect("the dummy driver hosts a window");
     assert_eq!(shell.video.current_video_driver(), "dummy");
+    shell.render(&[]);
 }

@@ -629,3 +629,30 @@ fn test_the_status_readout_names_the_grade_cap_and_leaves_the_set_speed_alone() 
         65.0
     ));
 }
+
+#[test]
+fn test_g_announces_upcoming_grade_without_nothing_steep() {
+    for grade in [0.015, -0.015, 0.037, -0.037] {
+        let mut harness = cruising("G Upcoming Grade", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+        hill_road(&mut harness, 1.0, grade, 0.5);
+        harness.with_drive(|d, _| d.truck_mut().grade = -0.014);
+        harness.clear_speech();
+        harness.with_drive(|d, ctx| d.speak_grade(ctx));
+        let direction = if grade > 0.0 { "upgrade" } else { "downgrade" };
+        assert!(said_any(&harness, direction), "{:?}", spoken(&harness));
+        assert!(said_any(&harness, "Grade 1.4 percent downhill"));
+        assert!(!said_any(&harness, "Nothing"), "{:?}", spoken(&harness));
+    }
+}
+
+#[test]
+fn test_g_keeps_clear_road_report_when_no_grade_is_ahead() {
+    let mut harness = cruising("G Clear Road", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    harness.clear_speech();
+    harness.with_drive(|d, ctx| d.speak_grade(ctx));
+    assert!(
+        said_any(&harness, "Nothing steep in the next"),
+        "{:?}",
+        spoken(&harness)
+    );
+}
