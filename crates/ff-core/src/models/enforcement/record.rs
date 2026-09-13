@@ -31,6 +31,14 @@ pub struct DrivingRecord {
     /// A citation from before this field existed has no time and is never
     /// inside any window.
     pub citation_times: Vec<f64>,
+    /// Career hour the carrier's review and the insurer's surcharge started
+    /// counting from. Zero for a career that started under them. A career
+    /// saved before they existed gets the hour it was first loaded under
+    /// them, so a serious violation it already carried -- served through the
+    /// 383.51 ladder the driver was told about at the time -- cannot fire a
+    /// hold or a termination the driver was never warned of on the first
+    /// boot of a new build. The licence ladder itself is not affected.
+    pub review_started_h: f64,
     /// Lifetime enforcement money, all sources.
     pub fines_paid: f64,
     /// Times this driver ran off the road asleep.
@@ -81,10 +89,28 @@ impl DrivingRecord {
         self.major_offenses.len() as i64
     }
 
+    /// The start of the carrier's review window: three years back, or the
+    /// hour the review began for this career, whichever is later.
+    fn review_cutoff(&self, game_hours: f64) -> f64 {
+        (game_hours - SERIOUS_WINDOW_DAYS as f64 * HOURS_PER_DAY).max(self.review_started_h)
+    }
+
     /// Citations still inside the three-year window a carrier reviews.
     pub fn citations_in_window(&self, game_hours: f64) -> i64 {
-        let cutoff = game_hours - SERIOUS_WINDOW_DAYS as f64 * HOURS_PER_DAY;
+        let cutoff = self.review_cutoff(game_hours);
         self.citation_times
+            .iter()
+            .filter(|&&at| at >= cutoff)
+            .count() as i64
+    }
+
+    /// Serious violations the carrier's review and the insurer count: inside
+    /// the three-year window AND since the review began. Distinct from
+    /// [`Self::serious_in_window`], which is the 383.51 licence ladder and
+    /// counts every one.
+    pub fn serious_in_review_window(&self, game_hours: f64) -> i64 {
+        let cutoff = self.review_cutoff(game_hours);
+        self.serious_violations
             .iter()
             .filter(|&&at| at >= cutoff)
             .count() as i64
@@ -95,7 +121,7 @@ impl DrivingRecord {
     /// This is the date a record-based hold can honestly promise.
     pub fn window_ages_out_at(&self, game_hours: f64) -> Option<f64> {
         let window = SERIOUS_WINDOW_DAYS as f64 * HOURS_PER_DAY;
-        let cutoff = game_hours - window;
+        let cutoff = self.review_cutoff(game_hours);
         self.citation_times
             .iter()
             .chain(self.serious_violations.iter())

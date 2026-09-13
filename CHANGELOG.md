@@ -29,7 +29,11 @@
   never more than double, read out on its own line. The record line on the
   career stats and status screens counts recent citations and says what is
   being done about them, and the terminal greeting says the same when it
-  applies. Citations from before this build have no date and never count.
+  applies. Nothing from before this build counts toward the review or the
+  surcharge: an older career's citations and serious violations stay on
+  the licence ladder exactly as they were, and the carrier and the
+  insurer start counting from the first time the career is opened in this
+  build.
 - **Your public profile now says what each achievement was for.** On the
   orinks.net profile page and in the in-game driver profile, every badge
   carries the same description you hear in the achievements menu, and the

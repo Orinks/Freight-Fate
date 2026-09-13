@@ -984,3 +984,62 @@ fn the_record_line_counts_recent_citations_and_says_what_they_cost() {
         "{line}"
     );
 }
+
+#[test]
+fn a_career_saved_before_the_review_existed_starts_it_from_the_first_load() {
+    // Staging, 2026-09-12: two testers carry serious violations inside the
+    // window, one of them six. Under the review as first written, both were
+    // due for termination on their first terminal visit of the new build,
+    // over offenses they served through the licence ladder at the time.
+    use crate::models::profile::Profile;
+    // The round trip reads the save directory for the signing key; pin a
+    // throwaway one for this thread, the way the profile tests do.
+    let tmp = tempfile::tempdir().expect("a temp dir");
+    let previous = crate::settings::paths::set_thread_data_dir(Some(tmp.path().join("data")));
+    let mut p = real_profile();
+    p.game_hours = 400.0 * DAY;
+    p.driving_record.record_serious_violation(390.0 * DAY);
+    p.driving_record.record_serious_violation(395.0 * DAY);
+    p.driving_record.record_citation_at(200.0, 396.0 * DAY);
+    let mut saved = p.to_dict();
+    let record = saved
+        .get_mut("driving_record")
+        .and_then(serde_json::Value::as_object_mut)
+        .expect("a record");
+    record.remove("review_started_h");
+    record.remove("citation_times");
+
+    let loaded = Profile::from_dict(&saved);
+    assert_eq!(loaded.driving_record.review_started_h, 400.0 * DAY);
+    // The licence ladder still sees both: the CDL is suspended as before.
+    assert_eq!(
+        loaded.driving_record.serious_in_window(loaded.game_hours),
+        2
+    );
+    assert!(loaded.driving_record.suspended(loaded.game_hours));
+    // The carrier's review and the insurer see none of it.
+    assert_eq!(
+        loaded
+            .driving_record
+            .serious_in_review_window(loaded.game_hours),
+        0
+    );
+    assert_eq!(record_band(&loaded), TRUST_FULL);
+    assert!(!record_past_termination_floor(
+        &loaded.driving_record,
+        loaded.game_hours
+    ));
+    assert_eq!(record_insurance_surcharge(&loaded), 1.0);
+
+    // From here on, everything counts: the next serious violation is the
+    // first the review knows about.
+    let mut on = loaded;
+    on.game_hours += 10.0 * DAY;
+    on.driving_record.record_serious_violation(on.game_hours);
+    assert_eq!(on.driving_record.serious_in_review_window(on.game_hours), 1);
+    assert_eq!(record_band(&on), TRUST_GUARDED);
+    // And a save that carries the field keeps it through a round trip.
+    let again = Profile::from_dict(&on.to_dict());
+    assert_eq!(again.driving_record.review_started_h, 400.0 * DAY);
+    crate::settings::paths::set_thread_data_dir(previous);
+}

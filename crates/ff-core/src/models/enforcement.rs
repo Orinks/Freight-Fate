@@ -552,13 +552,13 @@ pub fn solvency_band<P: StandingProfile + ?Sized>(profile: &P) -> &'static str {
 /// Whether the record is past the carrier's review floor.
 pub fn record_over_review_floor(record: &DrivingRecord, game_hours: f64) -> bool {
     record.citations_in_window(game_hours) > CARRIER_REVIEW_CITATIONS
-        || record.serious_in_window(game_hours) >= CARRIER_REVIEW_SERIOUS
+        || record.serious_in_review_window(game_hours) >= CARRIER_REVIEW_SERIOUS
 }
 
 /// Whether the record is past what the carrier's insurer will carry.
 pub fn record_past_termination_floor(record: &DrivingRecord, game_hours: f64) -> bool {
     record.citations_in_window(game_hours) >= CARRIER_TERMINATION_CITATIONS
-        || record.serious_in_window(game_hours) >= CARRIER_TERMINATION_SERIOUS
+        || record.serious_in_review_window(game_hours) >= CARRIER_TERMINATION_SERIOUS
 }
 
 /// Whether the carrier's record review applies to this driver at all.
@@ -625,7 +625,7 @@ pub fn standing_cause<P: StandingProfile + ?Sized>(profile: &P) -> &'static str 
 /// "three citations and one serious violation in the last three years".
 pub fn record_window_phrase(record: &DrivingRecord, game_hours: f64) -> String {
     let citations = record.citations_in_window(game_hours);
-    let serious = record.serious_in_window(game_hours);
+    let serious = record.serious_in_review_window(game_hours);
     let mut parts = Vec::new();
     if citations > 0 {
         let noun = if citations == 1 {
@@ -673,7 +673,7 @@ pub fn record_insurance_surcharge<P: StandingProfile + ?Sized>(profile: &P) -> f
     let game_hours = profile.game_hours();
     let raw = 1.0
         + INSURANCE_SURCHARGE_PER_CITATION * record.citations_in_window(game_hours) as f64
-        + INSURANCE_SURCHARGE_PER_SERIOUS * record.serious_in_window(game_hours) as f64;
+        + INSURANCE_SURCHARGE_PER_SERIOUS * record.serious_in_review_window(game_hours) as f64;
     round_py_n(raw.min(INSURANCE_SURCHARGE_MAX), 2)
 }
 
@@ -715,7 +715,7 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
     }
     if record_over_review_floor(record, game_hours) {
         let citations = record.citations_in_window(game_hours);
-        let serious = record.serious_in_window(game_hours);
+        let serious = record.serious_in_review_window(game_hours);
         let next = if serious + 1 >= CARRIER_TERMINATION_SERIOUS {
             "One more serious violation and the carrier lets you go.".to_string()
         } else {
