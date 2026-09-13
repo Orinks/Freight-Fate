@@ -243,6 +243,23 @@ its status or release decision.
       time-weighted 24 months, and driving under an out-of-service order is
       a disqualifying offense (383.51 Table 4) the game does not model.
 
+### September 12 long sessions and speech
+
+- [x] The three-second voice health probe re-published the whole speech
+      snapshot each time, and the snapshot's event-voice options are built by
+      acquiring every Prism backend. Prism 0.18.2's OneCore acquire leaks one
+      USER object, two handles and about 30 KiB per call (measured with
+      `cargo run -p prism --example handle_leak_probe`; NVDA, SAPI and the
+      rest are clean after first use), so the game gained 1,200 USER objects
+      and 2,400 handles an hour: the 10,000-object process limit and the
+      desktop heap, which is the tester's low-memory warning and NVDA failing
+      to restart beside the game. The probe now enumerates only when a voice
+      changed. 1.8 never enumerated outside the settings menu.
+- [ ] Report the OneCore acquire leak to Prism (prismatoid) upstream with
+      the probe as the reproduction. Until it is fixed every enumeration
+      still costs one object: opening the speech settings, or a real voice
+      switch.
+
 ## 1.10 planned -- the working week and home
 
 Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily

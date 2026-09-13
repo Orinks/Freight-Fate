@@ -9,6 +9,10 @@ struct StubSink {
     slow: Arc<AtomicBool>,
     polls: Arc<AtomicUsize>,
     available: Arc<AtomicBool>,
+    /// How many times the worker enumerated the event-voice options.
+    enumerations: Arc<AtomicUsize>,
+    /// Flipped by a test to make the main voice read as a different one.
+    renamed: Arc<AtomicBool>,
 }
 
 impl SpeechSink for StubSink {
@@ -43,7 +47,11 @@ impl SpeechSink for StubSink {
         self.available.load(Ordering::SeqCst)
     }
     fn backend_name(&self) -> String {
-        "stub".to_string()
+        if self.renamed.load(Ordering::SeqCst) {
+            "stub-two".to_string()
+        } else {
+            "stub".to_string()
+        }
     }
     fn has_separate_event_voice(&self) -> bool {
         true
@@ -64,6 +72,7 @@ impl SpeechSink for StubSink {
         false
     }
     fn event_backend_options(&self) -> Vec<String> {
+        self.enumerations.fetch_add(1, Ordering::SeqCst);
         vec!["stub-event".to_string()]
     }
     fn select_event_backend(&mut self, name: Option<&str>) {
@@ -124,6 +133,8 @@ struct Rig {
     available: Arc<AtomicBool>,
     /// How many sinks the factory has built: one, plus one per respawn.
     spawns: Arc<AtomicUsize>,
+    enumerations: Arc<AtomicUsize>,
+    renamed: Arc<AtomicBool>,
 }
 
 fn rig() -> Rig {
@@ -134,6 +145,9 @@ fn rig() -> Rig {
     let polls = Arc::new(AtomicUsize::new(0));
     let available = Arc::new(AtomicBool::new(true));
     let spawns = Arc::new(AtomicUsize::new(0));
+    let enumerations = Arc::new(AtomicUsize::new(0));
+    let renamed = Arc::new(AtomicBool::new(false));
+    let (enumerations2, renamed2) = (enumerations.clone(), renamed.clone());
     let (calls2, wedge2, entered_say2, slow2, polls2, available2, spawns2) = (
         calls.clone(),
         wedge.clone(),
@@ -160,6 +174,8 @@ fn rig() -> Rig {
             slow: slow2.clone(),
             polls: polls2.clone(),
             available: available2.clone(),
+            enumerations: enumerations2.clone(),
+            renamed: renamed2.clone(),
         })
     });
     Rig {
@@ -171,7 +187,61 @@ fn rig() -> Rig {
         polls,
         available,
         spawns,
+        enumerations,
+        renamed,
     }
+}
+
+fn wait_for_polls(polls: &Arc<AtomicUsize>, count: usize) {
+    for _ in 0..800 {
+        if polls.load(Ordering::SeqCst) >= count {
+            return;
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    panic!(
+        "the health probe never reached {count} poll(s): {}",
+        polls.load(Ordering::SeqCst)
+    );
+}
+
+/// The three-second health probe must not enumerate the event-voice
+/// options unless the probe switched a voice. Enumerating acquires every
+/// Prism backend, and Prism's OneCore backend leaks a USER object, two
+/// handles and about 30 KiB per acquire (measured 2026-09-12), so a probe
+/// that enumerated every 3 s drained the desktop heap over a long session
+/// until NVDA could no longer restart beside the game.
+#[test]
+fn the_health_probe_enumerates_voices_only_when_one_changed() {
+    let Rig {
+        sink,
+        polls,
+        enumerations,
+        renamed,
+        ..
+    } = rig();
+    wait_for_polls(&polls, 2);
+    assert_eq!(
+        enumerations.load(Ordering::SeqCst),
+        1,
+        "two idle health probes re-enumerated the event voices"
+    );
+
+    renamed.store(true, Ordering::SeqCst);
+    let seen = polls.load(Ordering::SeqCst);
+    wait_for_polls(&polls, seen + 1);
+    for _ in 0..50 {
+        if enumerations.load(Ordering::SeqCst) == 2 {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    assert_eq!(
+        enumerations.load(Ordering::SeqCst),
+        2,
+        "a probe that found a different main voice must refresh the options"
+    );
+    drop(sink);
 }
 
 fn wait_for(calls: &Arc<Mutex<Vec<String>>>, count: usize) {

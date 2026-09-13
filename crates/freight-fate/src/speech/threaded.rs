@@ -236,6 +236,44 @@ fn publish_status(
     true
 }
 
+/// What a health probe publishes: the cheap status always, the
+/// enumerations (event-voice options, installed voices) only when the probe
+/// switched a voice, because that is the only time they can differ.
+///
+/// Enumerating acquires every Prism backend, and Prism's OneCore backend
+/// leaks one USER object, two handles and about 30 KiB per acquire
+/// (measured 2026-09-12 with `prism --example handle_leak_probe`). Published
+/// on every 3 s probe that was 1,200 USER objects an hour: an evening's
+/// session walked into the 10,000-object process limit and drained the
+/// desktop heap, and NVDA could no longer restart beside the game.
+fn publish_after_probe(
+    snapshot: &Arc<Mutex<Snapshot>>,
+    inner: &dyn SpeechSink,
+    abandoned: &AtomicBool,
+) -> bool {
+    let voices_before = {
+        let current = snapshot.lock().expect("speech snapshot lock");
+        (
+            current.backend_name.clone(),
+            current.event_backend_name.clone(),
+        )
+    };
+    if !publish_status(snapshot, inner, abandoned) {
+        return false;
+    }
+    let voices_after = {
+        let current = snapshot.lock().expect("speech snapshot lock");
+        (
+            current.backend_name.clone(),
+            current.event_backend_name.clone(),
+        )
+    };
+    if voices_before == voices_after {
+        return true;
+    }
+    publish(snapshot, inner, abandoned)
+}
+
 /// Builds the sink a worker drives. The argument is true for a replacement
 /// worker started after a wedge, which the production factory answers with
 /// fresh backend instances.
@@ -405,7 +443,11 @@ impl ThreadedSpeech {
                             let elapsed = last_health_poll.elapsed();
                             beat();
                             call!(inner.poll(elapsed.as_secs_f64()));
-                            call!(publish(&worker_snapshot, inner.as_ref(), &worker_abandoned));
+                            call!(publish_after_probe(
+                                &worker_snapshot,
+                                inner.as_ref(),
+                                &worker_abandoned
+                            ));
                             last_health_poll = Instant::now();
                             continue;
                         }
@@ -464,7 +506,11 @@ impl ThreadedSpeech {
                                 // readers in the other window.
                                 call!(inner.request_refresh());
                                 call!(inner.poll(0.0));
-                                call!(publish(&worker_snapshot, inner.as_ref(), &worker_abandoned));
+                                call!(publish_after_probe(
+                                    &worker_snapshot,
+                                    inner.as_ref(),
+                                    &worker_abandoned
+                                ));
                                 last_health_poll = Instant::now();
                             }
                             Command::Refresh { announce, reply } => {
@@ -509,7 +555,11 @@ impl ThreadedSpeech {
                         let elapsed = last_health_poll.elapsed();
                         beat();
                         call!(inner.poll(elapsed.as_secs_f64()));
-                        call!(publish(&worker_snapshot, inner.as_ref(), &worker_abandoned));
+                        call!(publish_after_probe(
+                            &worker_snapshot,
+                            inner.as_ref(),
+                            &worker_abandoned
+                        ));
                         last_health_poll = Instant::now();
                     }
                 }
