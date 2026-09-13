@@ -254,7 +254,11 @@ its status or release decision.
       and 2,400 handles an hour: the 10,000-object process limit and the
       desktop heap, which is the tester's low-memory warning and NVDA failing
       to restart beside the game. The probe now enumerates only when a voice
-      changed. 1.8 never enumerated outside the settings menu.
+      changed, and the game's registry holds each Prism backend it acquires
+      for the session instead of re-acquiring per request, which also covers
+      a session with no screen reader running, where OneCore is the automatic
+      main voice and the probe re-acquired it on every pass. 1.8 never
+      enumerated outside the settings menu.
 - [ ] Report the OneCore acquire leak to Prism (prismatoid) upstream with
       the probe as the reproduction. Until it is fixed every enumeration
       still costs one object: opening the speech settings, or a real voice

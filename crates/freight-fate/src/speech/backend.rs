@@ -177,19 +177,34 @@ impl<T> BackendInstances<T> {
         }
     }
 
+    /// One native instance per backend id for this registry's lifetime: the
+    /// first request goes to Prism (`acquire` for an ordinary worker, `create`
+    /// for a replacement one) and every later request reuses it.
+    ///
+    /// Re-acquiring on every request is what leaked: Prism 0.18.2's OneCore
+    /// backend loses a USER object, two handles and about 30 KiB on each
+    /// acquire-and-free cycle, and the 3 s health probe re-acquires whatever
+    /// it inspects -- the main voice itself when no screen reader is running
+    /// and OneCore is the automatic choice, and every option when the event
+    /// voices are enumerated. Prism hands out the same cached instance on each
+    /// acquire anyway, so holding it changes nothing about what speaks. A
+    /// failed acquire is not remembered: a screen reader that starts later is
+    /// found on the next probe.
     fn acquire(
         &self,
         id: BackendId,
         create: impl FnOnce(BackendId) -> Result<T, prism::Error>,
         acquire: impl FnOnce(BackendId) -> Result<T, prism::Error>,
     ) -> Result<Rc<RefCell<T>>, prism::Error> {
-        if !self.fresh.get() {
-            return acquire(id).map(|backend| Rc::new(RefCell::new(backend)));
-        }
         if let Some(backend) = self.private.borrow().get(&id) {
             return Ok(Rc::clone(backend));
         }
-        let backend = Rc::new(RefCell::new(create(id)?));
+        let backend = if self.fresh.get() {
+            create(id)?
+        } else {
+            acquire(id)?
+        };
+        let backend = Rc::new(RefCell::new(backend));
         self.private.borrow_mut().insert(id, Rc::clone(&backend));
         Ok(backend)
     }
@@ -214,6 +229,9 @@ impl PrismRegistry {
     /// instance -- for SAPI, its own apartment thread and voice. Startup,
     /// settings replay and later probes reuse those private instances for
     /// this registry's entire lifetime, without returning to the shared cache.
+    /// (An ordinary registry also holds each instance for its lifetime; the
+    /// difference is only whether the first one comes from Prism's shared
+    /// cache or is created privately.)
     pub fn new_fresh() -> Result<Self, prism::Error> {
         let registry = Self::from_context(prism::Context::new()?);
         registry.instances.fresh.set(true);

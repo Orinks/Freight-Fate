@@ -665,8 +665,10 @@
   itself each time and never gave it back. Over an evening the game had
   claimed thousands of window handles, so NVDA could take minutes to restart
   beside it, Windows could warn about low memory, and a long enough session
-  could take the whole desktop down. The check now runs only when a voice
-  changes, and a session that runs all day stays the size it started at.
+  could take the whole desktop down. The game now opens each voice once and
+  keeps it for the session, and the check re-reads the voice list only when
+  a voice changes, so a session that runs all day stays the size it started
+  at.
 - **A chain-law ticket now goes on your safety record.** The checkpoint at
   the bottom of the grade charged the fine and said so, but never wrote it
   down, so a driver with a string of them still heard that the safety record

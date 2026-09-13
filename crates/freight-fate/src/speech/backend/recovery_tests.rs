@@ -81,3 +81,48 @@ fn ordinary_startup_retains_native_shared_acquisition() {
         instances.settle();
     }
 }
+
+/// An ordinary registry asks Prism for a backend once and then hands out
+/// that instance for the rest of the session. Every acquire-and-free cycle
+/// of Prism's OneCore backend leaks a USER object and two handles (measured
+/// 2026-09-12), and the 3 s health probe re-acquires the main voice on every
+/// pass when no screen reader is running.
+#[test]
+fn ordinary_registry_acquires_each_backend_once_per_session() {
+    let instances = BackendInstances::new(false);
+    let acquires = std::cell::Cell::new(0);
+    for _ in 0..3 {
+        let backend = instances
+            .acquire(
+                7,
+                |_| panic!("ordinary worker created a private voice"),
+                |_| {
+                    acquires.set(acquires.get() + 1);
+                    Ok(70)
+                },
+            )
+            .unwrap();
+        assert_eq!(*backend.borrow(), 70);
+    }
+    assert_eq!(
+        acquires.get(),
+        1,
+        "the main voice was re-acquired on a later probe"
+    );
+
+    // A backend that is not there is asked for again next time: a screen
+    // reader started mid-session must still be found.
+    let misses = std::cell::Cell::new(0);
+    for _ in 0..2 {
+        let missing = instances.acquire(
+            8,
+            |_| panic!("ordinary worker created a private voice"),
+            |_| {
+                misses.set(misses.get() + 1);
+                Err(prism::Error::NoBackend)
+            },
+        );
+        assert!(missing.is_err());
+    }
+    assert_eq!(misses.get(), 2);
+}
