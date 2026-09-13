@@ -259,8 +259,9 @@ its status or release decision.
       a session with no screen reader running, where OneCore is the automatic
       main voice and the probe re-acquired it on every pass. 1.8 never
       enumerated outside the settings menu.
-- [ ] Report the OneCore leak to Prism (prismatoid) upstream with the probe
-      as the reproduction. Pinned 2026-09-12: the leak is in FREEING an
+- [ ] Owner verifies the OneCore leak with Prism's author before anything
+      goes upstream; no issue or PR from this side (owner rule 2026-09-12).
+      Hand-off is the probe. Pinned 2026-09-12: the leak is in FREEING an
       acquired (registry-cached) OneCore instance, not in acquiring it
       (acquire-and-never-free is flat); prismatoid 0.16.7, which 1.8 runs,
       frees the same way and is clean, while 0.17.3 and 0.18.2 both leak
