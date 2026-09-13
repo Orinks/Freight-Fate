@@ -259,10 +259,14 @@ its status or release decision.
       a session with no screen reader running, where OneCore is the automatic
       main voice and the probe re-acquired it on every pass. 1.8 never
       enumerated outside the settings menu.
-- [ ] Report the OneCore acquire leak to Prism (prismatoid) upstream with
-      the probe as the reproduction. Until it is fixed every enumeration
-      still costs one object: opening the speech settings, or a real voice
-      switch.
+- [ ] Report the OneCore leak to Prism (prismatoid) upstream with the probe
+      as the reproduction. Pinned 2026-09-12: the leak is in FREEING an
+      acquired (registry-cached) OneCore instance, not in acquiring it
+      (acquire-and-never-free is flat); prismatoid 0.16.7, which 1.8 runs,
+      frees the same way and is clean, while 0.17.3 and 0.18.2 both leak
+      (`FREIGHT_FATE_PRISM_PATH` points the probe at any build). The Rust
+      game enumerates exactly as 1.8 does; the library under it changed.
+      Holding each instance for the session sidesteps it on every version.
 
 ## 1.10 planned -- the working week and home
 

@@ -10,7 +10,16 @@
 //! `cargo run -p prism --example handle_leak_probe` -- all backends, in
 //! registry priority order, stopping at the first usable one (the game's
 //! loop). Env: `PROBE_BACKEND=NAME` restricts to one backend,
-//! `PROBE_MODE=acquire|features|create|both` (default both), `PROBE_ITERS`.
+//! `PROBE_MODE=acquire|features|create|acquire_forget|both` (default both),
+//! `PROBE_ITERS`, and `FREIGHT_FATE_PRISM_PATH` points it at another Prism
+//! build.
+//!
+//! Findings, 2026-09-12: `PROBE_BACKEND=OneCore PROBE_MODE=acquire` leaks
+//! one USER object, two handles and about 30 KiB per iteration on
+//! prismatoid 0.17.3 and 0.18.2; `acquire_forget` is flat, so the leak is
+//! in freeing an acquired instance. prismatoid 0.16.7 (the Python 1.8
+//! line) frees the same way and is clean. NVDA, SAPI and the rest are
+//! clean after first use on every build.
 use std::time::Duration;
 
 #[cfg(windows)]
@@ -101,6 +110,15 @@ fn main() {
             let usable = match mode.as_str() {
                 "acquire" => ctx.acquire(*id).is_ok(),
                 "create" => ctx.create(*id).is_ok(),
+                // Acquire and never free: tells whether the leak is in
+                // the acquire or in the release half of the cycle.
+                "acquire_forget" => match ctx.acquire(*id) {
+                    Ok(b) => {
+                        std::mem::forget(b);
+                        true
+                    }
+                    Err(_) => false,
+                },
                 "features" => ctx
                     .acquire(*id)
                     .map(|b| b.features().is_supported_at_runtime())
