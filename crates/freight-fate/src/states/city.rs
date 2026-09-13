@@ -51,6 +51,7 @@ use crate::states::base::{InputEvent, Key, Menu, MenuItem, SimpleMenuState};
 use crate::states::driving::DrivingState;
 
 mod board;
+mod close_out;
 mod extras;
 mod terminal;
 mod truck_status;
@@ -59,6 +60,7 @@ mod weather;
 pub use board::{
     describe_job, locked_reason, trailer_note, JobBoardState, JobDetailState, JOB_BOARD_INTRO_HELP,
 };
+pub use close_out::CloseOutCareerState;
 pub use extras::{BobtailDestState, PayDebtState};
 pub use terminal::CityMenuState;
 pub use truck_status::TruckStatusState;

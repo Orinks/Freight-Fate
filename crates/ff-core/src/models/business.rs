@@ -84,6 +84,12 @@ pub trait BusinessProfile: CareerProfile {
     fn start_mode(&self) -> &str;
     /// `profile.active_trailer_programs()`.
     fn active_trailer_programs(&self) -> Vec<String>;
+    /// Whether the CDL is valid right now: no live suspension, no lifetime
+    /// disqualification. A lessor does not put a driver who cannot legally
+    /// drive into a truck, so the buy-in waits for it.
+    fn cdl_clear(&self) -> bool {
+        true
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -333,6 +339,12 @@ pub fn owner_operator_eligibility<P: BusinessProfile + ?Sized>(profile: &P) -> (
     }
     let career = profile.career();
     let mut reasons: Vec<String> = Vec::new();
+    if !profile.cdl_clear() {
+        reasons.push(
+            "Hold a clear CDL: no lessor puts a suspended or disqualified driver in a truck."
+                .to_string(),
+        );
+    }
     if career.level() < OWNER_OPERATOR_LEVEL {
         let rank = rank_for_level(OWNER_OPERATOR_LEVEL);
         reasons.push(format!(

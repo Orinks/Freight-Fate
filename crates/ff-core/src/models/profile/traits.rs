@@ -195,6 +195,9 @@ impl BusinessProfile for Profile {
     fn active_trailer_programs(&self) -> Vec<String> {
         Profile::active_trailer_programs(self)
     }
+    fn cdl_clear(&self) -> bool {
+        !self.driving_record.suspended(self.game_hours)
+    }
 }
 
 impl TrailerOwner for Profile {

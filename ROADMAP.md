@@ -230,6 +230,18 @@ its status or release decision.
       reserve carries a surcharge (a tenth per citation, a third per serious,
       capped at double, ASSUMED); the record line and the terminal greeting
       read the live consequence.
+- [x] A career that is over stays readable (owner ruling 2026-09-12, over
+      automatic deletion): the second major offense lands as a terminal
+      notice, the greeting says the career is over, the buy-in waits for a
+      clear CDL, the public profile carries a Career ended row with the last
+      verified career behind it, and Close out this career (terminal menu,
+      last row, confirmed) is the only thing that removes the save and its
+      cloud backups. Real-life basis: 49 CFR 383.51 Table 1 lifetime
+      disqualification, 49 CFR 384.225 55-year record retention.
+- [ ] Two record gaps from the same research: the scale-house safety
+      record scores lifetime counts where the real carrier score is a
+      time-weighted 24 months, and driving under an out-of-service order is
+      a disqualifying offense (383.51 Table 4) the game does not model.
 
 ## 1.10 planned -- the working week and home
 

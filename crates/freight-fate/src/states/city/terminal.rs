@@ -37,6 +37,7 @@ use crate::states::driving_school::DrivingSchoolState;
 use crate::states::logbook::LogbookState;
 use crate::states::main_menu::{MainMenuState, SettingsState};
 
+use super::close_out::CloseOutCareerState;
 use super::truck_status::TruckStatusState;
 
 /// The hub screen while parked at a company terminal or yard.
@@ -530,6 +531,11 @@ impl CityMenuState {
         ctx.push_state(SettingsState::new());
     }
 
+    fn close_out(&mut self, ctx: &mut GameContext) {
+        let state = CloseOutCareerState::new(ctx);
+        ctx.push_state(state);
+    }
+
     fn quit_to_main_menu(&mut self, ctx: &mut GameContext) {
         ctx.save_profile();
         ctx.say("Progress saved.");
@@ -627,8 +633,12 @@ impl Menu for CityMenuState {
             let rank = p.career.rank();
             let first_day = terminal_objective_clause(p);
             // A licence that is not clear is said here, every time, because it
-            // decides what the rest of this screen can do.
-            let cdl = if p.driving_record.suspended(p.game_hours) {
+            // decides what the rest of this screen can do. A career that is
+            // over says so in full: what stopped, what stays, and the one
+            // way to remove it.
+            let cdl = if enforcement::career_ended(p) {
+                format!(" {}", enforcement::career_ended_text())
+            } else if p.driving_record.suspended(p.game_hours) {
                 format!(" {}.", enforcement::career_menu_status(p))
             } else {
                 String::new()
@@ -799,6 +809,19 @@ impl Menu for CityMenuState {
                 .help(
                     "Sits out the suspension in one go. The clock jumps to the day it clears, \
                      money, truck, and record untouched.",
+                ),
+            );
+        }
+        if record.lifetime_disqualified {
+            // Last on the list, after Quit: the one destructive act on this
+            // screen, never where a driver arrowing for the board lands on it.
+            items.push(
+                MenuItem::new("Close out this career", |s: &mut Self, ctx| {
+                    s.close_out(ctx)
+                })
+                .help(
+                    "Removes this career's save from this computer and its cloud backups from \
+                     your account, for good. A confirmation follows.",
                 ),
             );
         }

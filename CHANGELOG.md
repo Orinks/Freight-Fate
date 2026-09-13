@@ -4,6 +4,18 @@
 
 ### Added
 
+- **A lifetime disqualification ends the career, and only you can remove
+  it.** The second major offense on your CDL now lands as a notice at the
+  terminal, read once and re-readable like a termination: no carrier will
+  seat you, the board is closed, the owner-operator buy-in is off the table,
+  and nothing is taken away. Your money, levels, achievements, road journal
+  and record stay, the career can be opened and read any time, and your
+  public profile shows the career as ended with the last verified career
+  behind it. A new last row on the terminal menu, Close out this career,
+  removes the save from this computer and every cloud backup of it from
+  your account, after a confirmation that says exactly what goes and what
+  stays. The game never does that on its own. The buy-in also now waits
+  for a clear CDL, so a suspended driver cannot buy in mid-suspension.
 - **Your driving record now costs you with the carrier and the insurer, and
   the game says so.** A company driver with more than three citations or a
   serious violation in the last three years is over the carrier's record

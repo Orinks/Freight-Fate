@@ -22,6 +22,7 @@ fn setback_title(kind: &str) -> &'static str {
     match kind {
         "termination" => "Your carrier has ended your employment",
         "repossession" => "The lender has taken the truck back",
+        "disqualification" => "Your driving career is over",
         _ => "A change to your career",
     }
 }

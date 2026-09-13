@@ -306,7 +306,9 @@ from the words, and synonyms cost them a re-read.
 | The carrier deciding, from the driving record, whether to keep a company driver and on what equipment | the carrier's record review | MVR check, annual review, insurance screening | `enforcement.record_band`, 49 CFR 391.25 |
 | What an owner-operator's insurer adds to the reserve for the driving record | insurance surcharge; "surcharged for your driving record" on the settlement line | rate hike, premium bump, points surcharge | `enforcement.record_insurance_surcharge` |
 | The CDL being off the road for a set time | CDL suspension; "suspended" in short status | ban, revocation, lockout | `DrivingRecord.suspended` |
-| The permanent version of it, after a second major offense | lifetime disqualification | permaban, career over, blacklist | `DrivingRecord.lifetime_disqualified` |
+| The permanent version of it, after a second major offense | lifetime disqualification | permaban, blacklist | `DrivingRecord.lifetime_disqualified` |
+| What a lifetime disqualification does to the career: the driving stops, the save stays readable | the career is over; "Career ended" on the public profile | game over, permadeath, deleted, wiped | `enforcement.career_ended`, `careerEnded` |
+| The player's own removal of an ended career's save and cloud backups | close out this career | delete career (that is the title-menu action for any career), wipe, purge | `CloseOutCareerState` |
 | An offense heavy enough to disqualify a CDL outright | major offense | felony (as the game's own noun), big one | `DrivingRecord.record_major_offense` |
 | Running off the road asleep | fatigue event | microsleep (that is the warning, not the event), nod-off | `DrivingRecord.record_fatigue_event` |
 | How far dispatch will work with you right now | dispatch trust | standing, rep level, tier | `enforcement.standing_band` |

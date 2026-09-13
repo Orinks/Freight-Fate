@@ -735,6 +735,60 @@ pub fn record_consequence_text<P: StandingProfile + ?Sized>(profile: &P) -> Stri
     String::new()
 }
 
+// -- the career that is over ------------------------------------------------
+//
+// A second major offense disqualifies the CDL for life (49 CFR 383.51 Table
+// 1), and the conviction stays on the state record for 55 years (49 CFR
+// 384.225). So the career ends the way a real one does: the driving stops and
+// the record stays. Nothing is deleted by the game. The save can be opened
+// and read, its stats, journal and achievements stand, and its cloud backup
+// keeps the last verified career on the public profile. Removing all of that
+// is the player's own act, "Close out this career", and nothing else.
+
+/// The setback-notice kind for the lifetime disqualification, read once at
+/// the terminal like a termination or a repossession.
+pub const SETBACK_DISQUALIFICATION: &str = "disqualification";
+
+/// Whether this career can never drive again.
+pub fn career_ended<P: StandingProfile + ?Sized>(profile: &P) -> bool {
+    profile
+        .driving_record()
+        .is_some_and(|record| record.lifetime_disqualified)
+}
+
+/// The terminal greeting's sentence for a career that is over.
+pub fn career_ended_text() -> &'static str {
+    "Your driving career is over: the CDL is disqualified for life. There is no dispatch, no \
+     board and no buy-in. Your money, levels, achievements, road journal and record stay as \
+     they are, and Close out this career on this menu removes the save and its cloud backups \
+     when you want them gone."
+}
+
+/// The notice the terminal reads once, the first time the driver comes in
+/// after the disqualification. Long on purpose, like the termination and
+/// repossession notices: the most consequential thing the game ever says
+/// should not be a line gone to the first keypress.
+pub fn disqualification_notice_lines() -> Vec<String> {
+    vec![
+        "That was the second major offense on your CDL. Under the federal rules a second \
+         major offense disqualifies a commercial licence for life, and there is no waiting \
+         it out."
+            .to_string(),
+        "No carrier can put you in a seat, the dispatch board is closed to you, and the \
+         owner-operator buy-in is off the table. Rest, the garage, the truck dealer, the \
+         logbook and your stats still work here."
+            .to_string(),
+        "Nothing is taken away. Your money, your levels, your achievements, your road journal \
+         and your whole record stay, and this career can be opened and read any time."
+            .to_string(),
+        "When you are done with it, Close out this career on the terminal menu removes the \
+         save from this computer and every cloud backup of it from your account. Nothing \
+         does that for you. When you want the road again, start a new career from the title \
+         menu."
+            .to_string(),
+    ]
+}
+
 fn py_capitalize_word(word: &str) -> String {
     let mut chars = word.chars();
     match chars.next() {

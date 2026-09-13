@@ -140,6 +140,14 @@ impl DrivingState {
             let kind = profile_mut_of(ctx)
                 .driving_record
                 .record_major_offense(hours);
+            if kind == enforcement::SUSPENSION_LIFETIME {
+                // The career is over. The roadside line says so now; the
+                // terminal reads the full notice once, re-readable, the way
+                // it reads a termination or a repossession.
+                let record = &mut profile_mut_of(ctx).driving_record;
+                record.setback_notice_kind = enforcement::SETBACK_DISQUALIFICATION.to_string();
+                record.setback_notice_lines = enforcement::disqualification_notice_lines();
+            }
             major_offense_text(ctx, kind, hours)
         } else if serious {
             let count = profile_mut_of(ctx)

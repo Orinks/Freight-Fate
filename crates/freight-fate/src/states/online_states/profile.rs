@@ -133,6 +133,14 @@ pub fn profile_rows(profile: &Value) -> Vec<String> {
     if let Some(name) = text(snapshot, "saveName") {
         rows.push(format!("Current career: {name}"));
     }
+    // A career that is over says so before the employment it no longer has.
+    if snapshot
+        .get("careerEnded")
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
+    {
+        rows.push("Career ended: CDL disqualified for life".to_string());
+    }
     if let Some(employment) =
         text(snapshot, "businessIdentity").or_else(|| text(snapshot, "employmentStatus"))
     {
