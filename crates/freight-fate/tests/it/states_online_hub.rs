@@ -39,10 +39,11 @@ fn test_main_menu_online_item_opens_the_hub() {
     // online-enhancement master switch sits right under it.
     let rows = labels::<OnlineHubState>(&hub, &app.ctx);
     assert_eq!(rows[0], "Drivers on duty");
-    assert_eq!(rows[1], "Say when drivers go on or off duty: off");
-    assert_eq!(rows[2], "Account achievements");
-    assert_eq!(rows[3], "Your profile");
-    assert_eq!(rows[4], "Online services: on");
+    assert_eq!(rows[1], "Driver directory");
+    assert_eq!(rows[2], "Say when drivers go on or off duty: off");
+    assert_eq!(rows[3], "Account achievements");
+    assert_eq!(rows[4], "Your profile");
+    assert_eq!(rows[5], "Online services: on");
     let help = helps::<OnlineHubState>(&hub, &app.ctx);
     for (row, help) in rows.iter().zip(help.iter()).take(rows.len() - 1) {
         assert!(!help.is_empty(), "{row} has no help"); // every row but Back explains itself
@@ -62,10 +63,11 @@ fn test_hub_drivers_board_item_opens_the_board() {
     // online-enhancement master switch sits right under it.
     let rows = labels::<OnlineHubState>(&hub, &app.ctx);
     assert_eq!(rows[0], "Drivers on duty");
-    assert_eq!(rows[1], "Say when drivers go on or off duty: off");
-    assert_eq!(rows[2], "Account achievements");
-    assert_eq!(rows[3], "Your profile");
-    assert_eq!(rows[4], "Online services: on");
+    assert_eq!(rows[1], "Driver directory");
+    assert_eq!(rows[2], "Say when drivers go on or off duty: off");
+    assert_eq!(rows[3], "Account achievements");
+    assert_eq!(rows[4], "Your profile");
+    assert_eq!(rows[5], "Online services: on");
     let help = helps::<OnlineHubState>(&hub, &app.ctx);
     for (row, help) in rows.iter().zip(help.iter()).take(rows.len() - 1) {
         assert!(!help.is_empty(), "{row} has no help"); // every row but Back explains itself
@@ -360,6 +362,7 @@ fn test_hub_left_right_adjust_rows_align_with_items() {
     let hub = hub(&mut app);
     for label in [
         "Drivers on duty",
+        "Driver directory",
         "Your profile",
         "Open my driver setup page",
         "Restore a cloud backup",

@@ -18,8 +18,8 @@ use crate::states::account_achievements::AccountAchievementsState;
 use crate::states::base::{InputEvent, Key, Label, Menu, MenuCore, MenuItem};
 use crate::states::cloud_save_states::{CloudBackupConsentState, CloudBackupState};
 use crate::states::online_states::{
-    load_identity, menu_default_handle_event, open_url, DriverProfileState, DriversOnlineState,
-    MastodonLinkState, OnlineSetupState, ProfileSharingSyncState,
+    load_identity, menu_default_handle_event, open_url, DriverDirectoryState, DriverProfileState,
+    DriversOnlineState, MastodonLinkState, OnlineSetupState, ProfileSharingSyncState,
 };
 
 pub struct OnlineHubState {
@@ -38,9 +38,9 @@ impl OnlineHubState {
     pub const TITLE: &'static str = "Online";
     pub const INTRO_HELP: &'static str =
         "Enter opens an item or changes a setting forward, Right also forward, Left \
-         backward. Escape goes back. Drivers on duty, the duty notices, and Account \
-         achievements work without connecting. The rest waits for an orinks.net account, \
-         and everything you share can be turned off again.";
+         backward. Escape goes back. Drivers on duty, the Driver directory, the duty \
+         notices, and Account achievements work without connecting. The rest waits for an \
+         orinks.net account, and everything you share can be turned off again.";
 
     /// `OnlineHubState(ctx)`.
     pub fn new(_ctx: &mut GameContext) -> Self {
@@ -56,19 +56,19 @@ impl OnlineHubState {
     }
 
     fn adjust_row(&mut self, ctx: &mut GameContext, direction: i64) {
-        // The board, achievements, your profile, account setup, setup page,
+        // The board, directory, achievements, your profile, account setup, setup page,
         // restore, and Mastodon link rows are actions, so left/right does
         // nothing there instead of changing a nearby toggle. This list is
         // positional: a row added to build_items has to be added here at the
         // same index, or every toggle below it starts answering for its
         // neighbour.
         match self.menu.index {
-            1 => self.toggle_duty_notifications(ctx, direction),
-            4 => self.toggle_online_services(ctx, direction),
-            7 => self.toggle_online_presence(ctx, direction),
-            8 => self.toggle_cloud_saves(ctx, direction),
-            10 => self.toggle_mastodon_sharing(ctx, direction),
-            12 => self.toggle_discord_presence(ctx, direction),
+            2 => self.toggle_duty_notifications(ctx, direction),
+            5 => self.toggle_online_services(ctx, direction),
+            8 => self.toggle_online_presence(ctx, direction),
+            9 => self.toggle_cloud_saves(ctx, direction),
+            11 => self.toggle_mastodon_sharing(ctx, direction),
+            13 => self.toggle_discord_presence(ctx, direction),
             _ => {}
         }
     }
@@ -85,6 +85,11 @@ impl OnlineHubState {
     fn drivers_board(&mut self, ctx: &mut GameContext) {
         let board = DriversOnlineState::new(ctx);
         ctx.push_state(board);
+    }
+
+    fn driver_directory(&mut self, ctx: &mut GameContext) {
+        let directory = DriverDirectoryState::new(ctx);
+        ctx.push_state(directory);
     }
 
     /// Toggle the spoken notice when another driver goes on or off duty.
@@ -330,6 +335,15 @@ impl Menu for OnlineHubState {
             MenuItem::new("Drivers on duty", |s: &mut Self, ctx| s.drivers_board(ctx)).help(
                 "Who is hauling right now on orinks.net. Viewing the list shares nothing \
                  about you.",
+            ),
+            // Right under the list of who is out now: everyone who could be.
+            MenuItem::new("Driver directory", |s: &mut Self, ctx| {
+                s.driver_directory(ctx)
+            })
+            .help(
+                "Every driver with a public profile, on duty or not, and when each was \
+                     last on duty. Enter on a driver reads their profile. Viewing it shares \
+                     nothing about you.",
             ),
             // Right under the list it watches. Off by default: a line that
             // arrives unasked while the player is driving is theirs to turn

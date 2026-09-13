@@ -243,6 +243,18 @@ its status or release decision.
       time-weighted 24 months, and driving under an out-of-service order is
       a disqualifying offense (383.51 Table 4) the game does not model.
 
+### September 13 driver directory
+
+- [x] A driver directory beside Drivers on duty, in the game and on
+      orinks.net: every driver with a public profile, on duty first, then by
+      when they were last on duty in round figures. The server stamps a
+      driver's last-on-duty time once per session end (the sweep that ages
+      a silent game off the board, or the game's own sign-off), never per
+      heartbeat, so the live board stays as cheap as it was. Same audience
+      as the board: public, consented, unflagged. Drivers whose last session
+      ended before the stamp existed read as not seen on duty yet until
+      their next one ends.
+
 ### September 12 long sessions and speech
 
 - [x] The three-second voice health probe re-published the whole speech

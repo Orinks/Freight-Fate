@@ -28,10 +28,14 @@ use crate::online_presence::{self, OnlineIdentity};
 use crate::states::base::{InputEvent, Label, Menu, MenuCore, MenuItem};
 
 mod board;
+mod directory;
 mod profile;
 mod support;
 
 pub use board::{updated_text, DriversOnlineState, MastodonLinkState, MastodonOutcome};
+pub use directory::{
+    directory_row_text, last_on_duty_text, last_on_duty_text_at, DriverDirectoryState,
+};
 pub use profile::{profile_rows, DriverProfileState};
 pub use support::{
     identity_store, load_identity, menu_default_enter, menu_default_go_back,

@@ -4,6 +4,15 @@
 
 ### Added
 
+- **A driver directory, under Online next to Drivers on duty.** It lists
+  every driver with a public profile, not only the ones out right now:
+  drivers on duty first with what they are doing, then everyone else by
+  when they were last on duty, in round figures like three days ago or two
+  weeks ago. Enter on a driver reads their profile, the same screen the
+  drivers list opens. The same directory is a page on orinks.net, linked
+  under the drivers list there. Viewing it shares nothing about you, and
+  your own last-on-duty time shows only if your profile is public, the
+  same rule as the drivers list.
 - **A lifetime disqualification ends the career, and only you can remove
   it.** The second major offense on your CDL now lands as a notice at the
   terminal, read once and re-readable like a termination: no carrier will

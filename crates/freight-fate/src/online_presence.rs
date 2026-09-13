@@ -366,6 +366,25 @@ pub fn fetch_board(transport: &dyn Transport) -> Option<Vec<Value>> {
     }
 }
 
+/// Every driver with a public profile, on duty or not, in the order the site
+/// reads them: on duty first, then by when they were last on duty. `None`
+/// when the site could not be reached.
+pub fn fetch_directory(transport: &dyn Transport) -> Option<Vec<Value>> {
+    let reply = transport
+        .call(
+            &format!("{}/api/freight-fate/directory", base_url()),
+            None,
+            &[],
+            None,
+        )
+        .map_err(|e| log::debug!("Driver directory fetch failed: {e}"))
+        .ok()?;
+    match reply.get("drivers") {
+        Some(Value::Array(items)) => Some(items.clone()),
+        _ => None,
+    }
+}
+
 /// The site's answer when asked for one driver's public profile.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ProfileFetch {
