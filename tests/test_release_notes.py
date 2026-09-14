@@ -156,6 +156,56 @@ def test_later_snapshot_notes_are_bounded_too(tmp_path, monkeypatch):
     assert "**Old wording.**" not in notes
 
 
+def test_republished_entries_are_not_new_but_listed_leads_still_are(tmp_path, monkeypatch):
+    # A rewrite reworded every bullet after the previous snapshot; the
+    # republished file names that commit, and the one bullet that was added
+    # between the tag and the rewrite, so the snapshot lists only that one
+    # plus anything added after the rewrite.
+    release_notes = load_release_notes_module()
+    repo = make_repo(
+        tmp_path,
+        changelog("### Added\n- **Old wording.** A long story about the feature.\n"),
+    )
+    git(repo, "tag", "nightly-20260615")
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Added\n- **Old wording.** A long story about the feature.\n"
+            "- **Pausing no longer takes you off duty.** Long story.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "fix: pause stays on duty")
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Added\n- **New wording.** Short.\n"
+            "- **Pausing no longer takes you off duty.** Short.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "docs(changelog): rewrite")
+    rewrite = git(repo, "rev-parse", "HEAD")
+    (repo / "tools").mkdir()
+    (repo / "tools" / "release_notes_republished.txt").write_text(
+        f"# rewrite\nref = {rewrite}\nnew = Pausing no longer takes you off duty.\n",
+        encoding="utf-8",
+    )
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "### Added\n- **Tonight's change.** Short.\n- **New wording.** Short.\n"
+            "- **Pausing no longer takes you off duty.** Short.\n"
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "feat: tonight")
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(previous_tag="nightly-20260615")
+
+    assert "**Tonight's change.**" in notes
+    assert "**Pausing no longer takes you off duty.**" in notes
+    assert "**New wording.**" not in notes
+
+
 def test_release_notes_size_check_rejects_oversized_input(tmp_path, capsys):
     release_notes = load_release_notes_module()
     notes = tmp_path / "notes.md"
