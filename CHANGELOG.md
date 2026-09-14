@@ -110,6 +110,13 @@
   on your career stats and public profile all read the adjusted figure,
   and the points come back as the record ages out. A driver who runs a
   clean record notices nothing.
+- **The carrier's record review and the insurer look back one game year,
+  not three.** A citation or serious violation now holds your equipment
+  back, or surcharges an owner-operator's insurance, for a year of game
+  time and then lets go, the same year your reputation carries it. The
+  age-out date the hold names is a date you can actually drive to. The CDL
+  suspension ladder itself still counts serious violations over three
+  years.
 - **The Jake brake now follows your revs.** Its growl rises and falls in
   pitch with the engine instead of holding one note, so on a manual you
   can hear a gear running down toward the shift point and hear the

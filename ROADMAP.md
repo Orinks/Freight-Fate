@@ -256,13 +256,15 @@ its status or release decision.
       out of the penalty. The window is a year, not the review's three,
       because the clock only moves on the road: staging shows about a game
       day per delivery, so three years outlasts every career played.
-- [ ] Audit of every wait keyed to game time (2026-09-14): the 383.51 CDL
-      ladder and the 391.25 carrier review and insurer surcharge still use a
-      three-year window, which at a day per delivery never ages out; the
-      hazmat (30 days) and TWIC (20 days) background checks and the 60/120
-      day suspensions are reachable and the suspension can be waited out at
-      the terminal. Decide whether the review and insurer windows follow the
-      reputation window to a game year.
+- [x] Audit of every wait keyed to game time (2026-09-14): the hazmat (30
+      days) and TWIC (20 days) background checks and the 60/120 day
+      suspensions are reachable, and a suspension can be waited out at the
+      terminal. The 391.25 carrier review and the insurer surcharge moved to
+      the same one-game-year window as reputation (REVIEW_WINDOW_DAYS), so
+      the equipment hold's age-out date is one a driver can reach; the 383.51
+      licence ladder keeps its three years because it is the law, not the
+      carrier. Lifetime counts (claims, terminations, repossessions, fatigue,
+      out-of-service) stay lifetime by design.
 
 ### September 13 driver directory
 

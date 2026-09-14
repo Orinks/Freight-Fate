@@ -837,7 +837,7 @@ fn a_record_over_the_review_floor_holds_a_company_driver_at_guarded() {
         "{way_back}"
     );
     assert!(
-        way_back.contains("four citations in the last three years"),
+        way_back.contains("four citations in the last year"),
         "{way_back}"
     );
     assert!(way_back.contains("ages out"), "{way_back}");
@@ -889,7 +889,7 @@ fn the_window_empties_and_the_hold_lets_go() {
         .unwrap()
         .window_ages_out_at(p.game_hours)
         .expect("something is in the window");
-    assert!((ages_out - (380.0 + SERIOUS_WINDOW_DAYS as f64) * DAY).abs() < 1e-6);
+    assert!((ages_out - (380.0 + REVIEW_WINDOW_DAYS as f64) * DAY).abs() < 1e-6);
     p.game_hours = ages_out + 1.0;
     assert_eq!(record_band(&p), TRUST_FULL);
     assert_eq!(standing_text(&p), "Record: clean.");
@@ -958,14 +958,11 @@ fn the_record_line_counts_recent_citations_and_says_what_they_cost() {
     p.game_hours = 400.0 * DAY;
     cite(&mut p, 2, 380.0 * DAY);
     // Under the floor: counted, nothing more.
-    assert_eq!(
-        standing_text(&p),
-        "Record: two citations in the last three years."
-    );
+    assert_eq!(standing_text(&p), "Record: two citations in the last year.");
     cite(&mut p, 2, 390.0 * DAY);
     let line = standing_text(&p);
     assert!(
-        line.starts_with("Record: four citations in the last three years."),
+        line.starts_with("Record: four citations in the last year."),
         "{line}"
     );
     assert!(
@@ -976,7 +973,7 @@ fn the_record_line_counts_recent_citations_and_says_what_they_cost() {
     p.record_mut().record_serious_violation(395.0 * DAY);
     let line = standing_text(&p);
     assert!(
-        line.contains("four citations in the last three years, one serious violation."),
+        line.contains("four citations in the last year, one serious violation."),
         "{line}"
     );
     assert!(

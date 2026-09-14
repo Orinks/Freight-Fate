@@ -55,8 +55,15 @@ pub const HOURS_PER_DAY: f64 = 24.0;
 /// Speeding this far over the posted limit is a serious traffic violation, not
 /// an expensive inconvenience.
 pub const SERIOUS_SPEED_MPH_OVER: f64 = 15.0;
-/// Convictions count against each other for three years.
+/// Convictions count against each other for three years (the 383.51 licence
+/// ladder; this is the law, not the carrier).
 pub const SERIOUS_WINDOW_DAYS: i64 = 3 * 365;
+/// How far back the carrier's record review, the insurer's surcharge and the
+/// reputation weight look: one game year. 391.25 says three, and that is
+/// what the licence ladder above keeps, but the clock only moves on the road
+/// -- a game day per delivery, in practice -- so a three-year hold on
+/// equipment and money was one no career ever drove off (owner, 2026-09-14).
+pub const REVIEW_WINDOW_DAYS: i64 = 365;
 pub const SERIOUS_SECOND_SUSPENSION_DAYS: i64 = 60;
 pub const SERIOUS_THIRD_SUSPENSION_DAYS: i64 = 120;
 
@@ -82,7 +89,7 @@ pub const SUSPENSION_MAJOR: &str = "major";
 // Company drivers only. A leased owner-operator answers to an insurer through
 // the surcharge below; an independent has no carrier to review them.
 
-/// More than this many citations in the three-year window and the carrier
+/// More than this many citations in the review window and the carrier
 /// holds the driver below the equipment their level earns.
 pub const CARRIER_REVIEW_CITATIONS: i64 = 3;
 /// This many serious violations in the window does the same.
@@ -100,7 +107,7 @@ pub const CARRIER_TERMINATION_SERIOUS: i64 = 2;
 // Commercial auto underwriters rate a policy on the driver's record, and the
 // surcharge schedules are proprietary. These steps are ASSUMED: a tenth of
 // the reserve per citation and a third per serious violation, both inside
-// the same three-year window, and never past double the clean rate.
+// the same review window, and never past double the clean rate.
 
 pub const INSURANCE_SURCHARGE_PER_CITATION: f64 = 0.10;
 pub const INSURANCE_SURCHARGE_PER_SERIOUS: f64 = 0.35;
@@ -273,12 +280,13 @@ pub const REPUTATION_TERMINATION: f64 = 8.0;
 // been spent too -- and the ledger itself is never written down for it, so a
 // record that ages out gives the points back.
 //
-// The window is ONE game year, not the review's three: the clock only moves
-// while the truck rolls or rests, so a delivery is about a game day and a
-// three-year window is longer than any career yet played -- a weight that
-// never lifts is a lifetime mark by another name. A year is long enough to
-// outlast a bad month and short enough to be driven off (owner, 2026-09-14).
-pub const REPUTATION_WINDOW_DAYS: i64 = 365;
+// The window is the review's one game year (REVIEW_WINDOW_DAYS): the clock
+// only moves while the truck rolls or rests, so a delivery is about a game
+// day and a three-year window is longer than any career yet played -- a
+// weight that never lifts is a lifetime mark by another name. A year is long
+// enough to outlast a bad month and short enough to be driven off (owner,
+// 2026-09-14).
+pub const REPUTATION_WINDOW_DAYS: i64 = REVIEW_WINDOW_DAYS;
 pub const RECORD_CITATION_REPUTATION: f64 = 4.0;
 pub const RECORD_SERIOUS_REPUTATION: f64 = 10.0;
 pub const RECORD_MAJOR_REPUTATION: f64 = 20.0;
@@ -613,7 +621,7 @@ fn under_carrier_review<P: StandingProfile + ?Sized>(profile: &P) -> bool {
 /// What the carrier's annual record review makes of this driver.
 ///
 /// Unlike the licence band, a violation on its own DOES count here -- but
-/// only inside the three-year window, and the hold names the day the window
+/// only inside the review window, and the hold names the day the window
 /// empties, so it is never a hold no amount of good driving can clear. A
 /// driver already at the fleet of last resort cannot be let go again, so the
 /// termination floor reads as poor trust there instead of full.
@@ -666,7 +674,7 @@ pub fn standing_cause<P: StandingProfile + ?Sized>(profile: &P) -> &'static str 
     CAUSE_SERVICE
 }
 
-/// "three citations and one serious violation in the last three years".
+/// "three citations and one serious violation in the last year".
 pub fn record_window_phrase(record: &DrivingRecord, game_hours: f64) -> String {
     let citations = record.citations_in_window(game_hours);
     let serious = record.serious_in_review_window(game_hours);
@@ -690,7 +698,7 @@ pub fn record_window_phrase(record: &DrivingRecord, game_hours: f64) -> String {
     if parts.is_empty() {
         return String::new();
     }
-    format!("{} in the last three years", parts.join(" and "))
+    format!("{} in the last year", parts.join(" and "))
 }
 
 /// The spoken calendar day the oldest counted violation leaves the window.
@@ -1019,10 +1027,7 @@ pub fn standing_text<P: StandingProfile + ?Sized>(profile: &P) -> String {
         } else {
             "citations"
         };
-        parts.push(format!(
-            "{} {noun} in the last three years",
-            count_word(citations)
-        ));
+        parts.push(format!("{} {noun} in the last year", count_word(citations)));
     }
     if serious != 0 {
         let noun = if serious == 1 {

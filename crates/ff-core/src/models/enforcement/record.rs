@@ -6,8 +6,9 @@ use serde_json::{Map, Value};
 
 use super::{
     FATIGUE_EVENTS_BEFORE_SERIOUS, HOURS_PER_DAY, MAJOR_FIRST_DISQUALIFICATION_DAYS,
-    REPUTATION_FULL_BOARD, SERIOUS_SECOND_SUSPENSION_DAYS, SERIOUS_THIRD_SUSPENSION_DAYS,
-    SERIOUS_WINDOW_DAYS, SUSPENSION_LIFETIME, SUSPENSION_MAJOR, SUSPENSION_SERIOUS,
+    REPUTATION_FULL_BOARD, REVIEW_WINDOW_DAYS, SERIOUS_SECOND_SUSPENSION_DAYS,
+    SERIOUS_THIRD_SUSPENSION_DAYS, SERIOUS_WINDOW_DAYS, SUSPENSION_LIFETIME, SUSPENSION_MAJOR,
+    SUSPENSION_SERIOUS,
 };
 use crate::models::save_migration::{json_f64, json_i64};
 
@@ -89,10 +90,10 @@ impl DrivingRecord {
         self.major_offenses.len() as i64
     }
 
-    /// The start of the carrier's review window: three years back, or the
+    /// The start of the carrier's review window: a game year back, or the
     /// hour the review began for this career, whichever is later.
     fn review_cutoff(&self, game_hours: f64) -> f64 {
-        self.cutoff_days_back(game_hours, SERIOUS_WINDOW_DAYS)
+        self.cutoff_days_back(game_hours, REVIEW_WINDOW_DAYS)
     }
 
     /// `days` back from now, floored at the hour the review began, so a
@@ -120,24 +121,24 @@ impl DrivingRecord {
             .count() as i64
     }
 
-    /// Citations still inside the three-year window a carrier reviews.
+    /// Citations still inside the window a carrier reviews.
     pub fn citations_in_window(&self, game_hours: f64) -> i64 {
-        self.citations_within(game_hours, SERIOUS_WINDOW_DAYS)
+        self.citations_within(game_hours, REVIEW_WINDOW_DAYS)
     }
 
     /// Serious violations the carrier's review and the insurer count: inside
-    /// the three-year window AND since the review began. Distinct from
-    /// [`Self::serious_in_window`], which is the 383.51 licence ladder and
-    /// counts every one.
+    /// the review window AND since the review began. Distinct from
+    /// [`Self::serious_in_window`], which is the 383.51 licence ladder, looks
+    /// back three years and counts every one.
     pub fn serious_in_review_window(&self, game_hours: f64) -> i64 {
-        self.serious_within(game_hours, SERIOUS_WINDOW_DAYS)
+        self.serious_within(game_hours, REVIEW_WINDOW_DAYS)
     }
 
     /// The career hour at which the oldest citation or serious violation
     /// still in the window leaves it, or `None` when the window is empty.
     /// This is the date a record-based hold can honestly promise.
     pub fn window_ages_out_at(&self, game_hours: f64) -> Option<f64> {
-        let window = SERIOUS_WINDOW_DAYS as f64 * HOURS_PER_DAY;
+        let window = REVIEW_WINDOW_DAYS as f64 * HOURS_PER_DAY;
         let cutoff = self.review_cutoff(game_hours);
         self.citation_times
             .iter()
