@@ -87,10 +87,12 @@ release tooling) without adding one.
 
 - Add a bullet under `## Unreleased` in the fitting section (`Added`,
   `Changed`, `Fixed`, and so on).
-- Write for players, not maintainers: a bold lead sentence, then plain
-  language about what they will hear or notice in the game. Match the voice
-  of the existing entries; they are read aloud by screen readers, so avoid
-  jargon, tables, and decorative symbols.
+- Write for players, not maintainers: a bold lead sentence that says what
+  is different now, then at most one sentence about what they will hear or
+  notice. Under 25 words. Entries are read aloud by screen readers, so avoid
+  jargon, tables, and decorative symbols. The full recipe, and where the
+  rationale and sub-cases go instead, is in
+  `.claude/skills/writing-changelog-entries/SKILL.md`.
 - A change with nothing player-facing in it (internal refactors, CI, tests,
   tooling) can skip the entry by putting `[skip changelog]` or
   `changelog: none` in every commit message of the pull request.

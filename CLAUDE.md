@@ -86,9 +86,12 @@ from commit subjects. CI fails any PR that changes user-facing paths
 (`src/`, `docs/`, `CHANGELOG.md`, `README.md`, release tooling) without one.
 
 - Player-facing change: add a bullet under `## Unreleased` in the fitting
-  section (`Added`, `Changed`, `Fixed`, ...). Bold lead sentence, then plain
-  player language about what they will hear or notice. Entries are read
-  aloud by screen readers -- no jargon, tables, or decorative symbols.
+  section (`Added`, `Changed`, `Fixed`, ...). A bold lead sentence that
+  says what is different now, then at most one sentence about what the
+  player will hear or notice; under 25 words. Entries are read aloud by
+  screen readers -- no jargon, tables, or decorative symbols. Follow the
+  `writing-changelog-entries` skill in `.claude/skills/`; it says where the
+  rationale, mechanism and sub-cases go instead.
 - Nothing player-facing (refactors, CI, tests, tooling): put
   `[skip changelog]` or `changelog: none` in every commit message.
 
