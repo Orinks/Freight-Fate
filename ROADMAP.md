@@ -70,6 +70,17 @@ These steps remain open even where a related implementation bullet is checked:
       release; the place-callouts ladder rides the release merge to dev.
 - [ ] The physical-Mac VoiceOver listening pass on the Mac release
       staging, and the owner voice pass over seven achievement titles.
+- [ ] Cut the stable notes from the rewritten Unreleased block
+      (2026-09-14: 718 bullets at a median of 85 words became 774 at 27,
+      one heading per section). Before cutting: drop the tester-line
+      bullets that are false at release (the staging orinks.net copy, the
+      1.9 tester snapshots, the Update channel developer-snapshots row,
+      the "1.9 updates look for tester builds" fix), and settle the pairs
+      the rewrite could not from the code: fuel counting toward the
+      truck's weight against the 80,000-pound dispatch cap; curve speed
+      assistance "engine brake first" (Added) against "the engine brake
+      is for hills, not corners" (Fixed); the Learn game sounds collision
+      entry, which still explains itself by the retired terse mode.
 
 #### Player-impacting release blockers
 
