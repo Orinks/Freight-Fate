@@ -65,12 +65,20 @@ pub static MENU_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
 });
 
 pub static MENU_ROTATION_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
-    tracks(&[(
-        "menu_urban_roll",
-        "Urban Roll",
-        "Easy city-groove menu bed",
-        114.5,
-    )])
+    tracks(&[
+        (
+            "menu_urban_roll",
+            "Urban Roll",
+            "Easy city-groove menu bed",
+            114.5,
+        ),
+        (
+            "menu_d_major_medley",
+            "D-Major Medley",
+            "Instrumental medley menu bed",
+            238.8,
+        ),
+    ])
 });
 
 pub static DAY_DRIVE_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
@@ -80,6 +88,12 @@ pub static DAY_DRIVE_TRACKS: Lazy<Vec<MusicTrack>> = Lazy::new(|| {
             "Open Road",
             "Easy mid-tempo groove for long hauls",
             131.6,
+        ),
+        (
+            "drive_bossa_to_blues",
+            "From Bossa to Blues",
+            "Bossa-to-blues instrumental drive bed",
+            223.2,
         ),
         (
             "drive_desert_two_lane",

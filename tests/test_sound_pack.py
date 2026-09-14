@@ -195,6 +195,10 @@ def test_committed_pack_has_freight_fate_header():
 def test_committed_music_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_MUSIC_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_MUSIC_PACK_PATH.read_bytes()
+    # Repacked 2026-09-13 for two owner-supplied instrumentals, D-Major
+    # Medley (a menu bed) and From Bossa to Blues (a day drive bed):
+    # 378 -> 380 entries, merged into the prior pack.
+    #
     # Repacked 2026-09-11 for the gospel, tejano, synthwave and Night Line
     # song batch (nineteen songs, see CHANGELOG Unreleased): 359 -> 378
     # entries, merged into the prior pack rather than rebuilt.
@@ -206,10 +210,10 @@ def test_committed_music_pack_has_freight_fate_header():
     # Split out of sounds.pak on 2026-08-14 alongside the radio
     # station-identity batch: 356 entries, the music/ subtree plus the new
     # station jingles and songs.
-    assert len(pack_bytes) == 309_673_046
+    assert len(pack_bytes) == 314_846_192
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "9b7c9123e8b7fc47168ada961cbacd1bdeca3fcc788e77537cc571a5b8187e4b"
+        "19e6d11cf9402484f712cbc037167055804cee3c71fd403fb0f7303fa66d57b2"
     )
 
 

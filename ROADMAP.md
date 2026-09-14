@@ -255,6 +255,11 @@ its status or release decision.
       ended before the stamp existed read as not seen on duty yet until
       their next one ends.
 
+- [x] Two owner-supplied instrumentals in the music pack: D-Major Medley
+      in the menu rotation, From Bossa to Blues in the day drive pool (so
+      the Roadhouse plays it). Pack re-pinned at 380 entries and
+      republished.
+
 ### September 12 long sessions and speech
 
 - [x] The three-second voice health probe re-published the whole speech

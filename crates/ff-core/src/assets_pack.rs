@@ -973,11 +973,11 @@ mod tests {
         // station jingles and songs. 358 since 2026-08-26 (Dangerous Dan,
         // Dial-up Summer); 359 since 2026-08-30, when Four Sources and the
         // Truth joined the country pool; 378 since 2026-09-11 (the gospel,
-        // tejano, synthwave and Night Line song batch). Only the size and
-        // header are checked here: hashing 310 MB is the Python suite's job,
-        // once.
+        // tejano, synthwave and Night Line song batch); 380 since 2026-09-13
+        // (D-Major Medley and From Bossa to Blues). Only the size and header
+        // are checked here: hashing 315 MB is the Python suite's job, once.
         let len = std::fs::metadata(&path).unwrap().len();
-        assert_eq!(len, 309_673_046);
+        assert_eq!(len, 314_846_192);
         let mut head = [0u8; 6];
         std::fs::File::open(&path)
             .unwrap()
