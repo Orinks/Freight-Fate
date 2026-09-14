@@ -525,10 +525,11 @@ settlement uses the owned trailer reserve instead of a trailer-program charge.
 
 Deliveries earn money, experience, reputation, and career stats. Your driving
 record counts against reputation too: every citation on the record costs
-four points and every serious violation ten for the three years a carrier's
-review looks back, a major offense twenty for good, so a bad record shows on
-the number dispatch, the shippers and the business gates all read, and the
-points come back as the record ages out. Every settled
+four points and every serious violation ten for a game year, a major offense
+twenty for good, so a bad record shows on the number dispatch, the shippers
+and the business gates all read, and the points come back a year of game
+time after each one. The carrier's record review and the insurer still look
+back three years. Every settled
 load teaches a base amount of experience on top of its miles, on-time streaks
 compound the lesson, delivering the cargo undamaged adds a bonus, and specialty
 endorsement freight teaches half again as much per mile. Every level up hands

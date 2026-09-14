@@ -245,15 +245,24 @@ its status or release decision.
 
 ### September 14 reputation reads the record
 
-- [x] Reputation is the delivery ledger less the driving record inside the
-      391.25 review window (4 per citation, 10 per serious violation, 20 per
+- [x] Reputation is the delivery ledger less the driving record inside a
+      ONE-GAME-YEAR window (4 per citation, 10 per serious violation, 20 per
       major offense for life, capped at 60), read by every gate, the trust
       band, the pay bonus, the stats screen and the public profile (the save
       now carries `career.standing`; invariants regenerated on both sides).
       The raw ledger is untouched, so an aged-out record gives the points
       back. Owner ruling 2026-09-14 after Jess read 98 beside three serious
       violations. Cargo claims already hit the ledger directly and were left
-      out of the penalty.
+      out of the penalty. The window is a year, not the review's three,
+      because the clock only moves on the road: staging shows about a game
+      day per delivery, so three years outlasts every career played.
+- [ ] Audit of every wait keyed to game time (2026-09-14): the 383.51 CDL
+      ladder and the 391.25 carrier review and insurer surcharge still use a
+      three-year window, which at a day per delivery never ages out; the
+      hazmat (30 days) and TWIC (20 days) background checks and the 60/120
+      day suspensions are reachable and the suspension can be waited out at
+      the terminal. Decide whether the review and insurer windows follow the
+      reputation window to a game year.
 
 ### September 13 driver directory
 

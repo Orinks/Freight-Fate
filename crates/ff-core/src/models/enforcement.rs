@@ -266,13 +266,19 @@ pub const REPUTATION_TERMINATION: f64 = 8.0;
 // violation never touched it at all: a driver with two citations, three
 // serious violations and seven claims read 98 beside that record (owner,
 // 2026-09-14). The reputation the game shows, gates on and pays a trust bonus
-// for is the ledger LESS the record still inside the carrier's three-year
-// review window (49 CFR 391.25, the same window the record review reads), so
-// a bad CDL record shows on the number everyone reads and ages off it the way
-// it ages off the review. A major offense counts for life, the way it stays
-// on a motor vehicle record. Capped so the record alone cannot zero a driver
-// -- the ledger still has to have been spent too -- and the ledger itself is
-// never written down for it, so a record that ages out gives the points back.
+// for is the ledger LESS the record still inside a window, so a bad CDL
+// record shows on the number everyone reads and ages off it again. A major
+// offense counts for life, the way it stays on a motor vehicle record. Capped
+// so the record alone cannot zero a driver -- the ledger still has to have
+// been spent too -- and the ledger itself is never written down for it, so a
+// record that ages out gives the points back.
+//
+// The window is ONE game year, not the review's three: the clock only moves
+// while the truck rolls or rests, so a delivery is about a game day and a
+// three-year window is longer than any career yet played -- a weight that
+// never lifts is a lifetime mark by another name. A year is long enough to
+// outlast a bad month and short enough to be driven off (owner, 2026-09-14).
+pub const REPUTATION_WINDOW_DAYS: i64 = 365;
 pub const RECORD_CITATION_REPUTATION: f64 = 4.0;
 pub const RECORD_SERIOUS_REPUTATION: f64 = 10.0;
 pub const RECORD_MAJOR_REPUTATION: f64 = 20.0;
@@ -280,8 +286,10 @@ pub const RECORD_REPUTATION_CAP: f64 = 60.0;
 
 /// What the driving record costs off reputation right now.
 pub fn record_reputation_penalty(record: &DrivingRecord, game_hours: f64) -> f64 {
-    let penalty = RECORD_CITATION_REPUTATION * record.citations_in_window(game_hours) as f64
-        + RECORD_SERIOUS_REPUTATION * record.serious_in_review_window(game_hours) as f64
+    let penalty = RECORD_CITATION_REPUTATION
+        * record.citations_within(game_hours, REPUTATION_WINDOW_DAYS) as f64
+        + RECORD_SERIOUS_REPUTATION
+            * record.serious_within(game_hours, REPUTATION_WINDOW_DAYS) as f64
         + RECORD_MAJOR_REPUTATION * record.major_count() as f64;
     penalty.min(RECORD_REPUTATION_CAP)
 }

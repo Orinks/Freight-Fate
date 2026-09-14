@@ -104,9 +104,8 @@
 ### Changed
 
 - **A bad driving record now shows on your reputation.** Every citation
-  still on the record costs four reputation points and every serious
-  violation ten, for the three years a carrier's review looks back; a
-  major offense costs twenty for good. Dispatch trust, the load board, the
+  on the record costs four reputation points and every serious violation
+  ten for a year of game time; a major offense costs twenty for good. Dispatch trust, the load board, the
   trust pay bonus, the owner-operator and authority gates, and the number
   on your career stats and public profile all read the adjusted figure,
   and the points come back as the record ages out. A driver who runs a

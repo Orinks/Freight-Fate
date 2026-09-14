@@ -47,13 +47,19 @@ fn citations_and_serious_violations_come_off_the_number_everyone_reads() {
 }
 
 #[test]
-fn the_record_ages_off_reputation_as_it_ages_off_the_review() {
+fn the_record_lifts_off_reputation_after_a_game_year_though_the_review_still_sees_it() {
     let mut p = a_driver_at(90.0);
     let booked = p.game_hours;
     p.driving_record.record_serious_violation(booked);
     assert_eq!(p.standing(), 80.0);
-    p.game_hours = booked + (SERIOUS_WINDOW_DAYS as f64 + 1.0) * HOURS_PER_DAY;
+    // Most of a year on: still weighing.
+    p.game_hours = booked + 300.0 * HOURS_PER_DAY;
+    assert_eq!(p.standing(), 80.0);
+    // A year and a day: the points are back, while the carrier's three-year
+    // review and the insurer still count it.
+    p.game_hours = booked + (REPUTATION_WINDOW_DAYS as f64 + 1.0) * HOURS_PER_DAY;
     assert_eq!(p.standing(), 90.0);
+    assert_eq!(p.driving_record.serious_in_review_window(p.game_hours), 1);
 }
 
 #[test]

@@ -92,16 +92,37 @@ impl DrivingRecord {
     /// The start of the carrier's review window: three years back, or the
     /// hour the review began for this career, whichever is later.
     fn review_cutoff(&self, game_hours: f64) -> f64 {
-        (game_hours - SERIOUS_WINDOW_DAYS as f64 * HOURS_PER_DAY).max(self.review_started_h)
+        self.cutoff_days_back(game_hours, SERIOUS_WINDOW_DAYS)
     }
 
-    /// Citations still inside the three-year window a carrier reviews.
-    pub fn citations_in_window(&self, game_hours: f64) -> i64 {
-        let cutoff = self.review_cutoff(game_hours);
+    /// `days` back from now, floored at the hour the review began, so a
+    /// window of any length never reaches a violation the driver was never
+    /// warned counted.
+    fn cutoff_days_back(&self, game_hours: f64, days: i64) -> f64 {
+        (game_hours - days as f64 * HOURS_PER_DAY).max(self.review_started_h)
+    }
+
+    /// Citations inside the last `days`, since the review began.
+    pub fn citations_within(&self, game_hours: f64, days: i64) -> i64 {
+        let cutoff = self.cutoff_days_back(game_hours, days);
         self.citation_times
             .iter()
             .filter(|&&at| at >= cutoff)
             .count() as i64
+    }
+
+    /// Serious violations inside the last `days`, since the review began.
+    pub fn serious_within(&self, game_hours: f64, days: i64) -> i64 {
+        let cutoff = self.cutoff_days_back(game_hours, days);
+        self.serious_violations
+            .iter()
+            .filter(|&&at| at >= cutoff)
+            .count() as i64
+    }
+
+    /// Citations still inside the three-year window a carrier reviews.
+    pub fn citations_in_window(&self, game_hours: f64) -> i64 {
+        self.citations_within(game_hours, SERIOUS_WINDOW_DAYS)
     }
 
     /// Serious violations the carrier's review and the insurer count: inside
@@ -109,11 +130,7 @@ impl DrivingRecord {
     /// [`Self::serious_in_window`], which is the 383.51 licence ladder and
     /// counts every one.
     pub fn serious_in_review_window(&self, game_hours: f64) -> i64 {
-        let cutoff = self.review_cutoff(game_hours);
-        self.serious_violations
-            .iter()
-            .filter(|&&at| at >= cutoff)
-            .count() as i64
+        self.serious_within(game_hours, SERIOUS_WINDOW_DAYS)
     }
 
     /// The career hour at which the oldest citation or serious violation
