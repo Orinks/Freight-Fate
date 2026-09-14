@@ -192,18 +192,12 @@ pub const EFFECTS: [(WeatherKind, WeatherEffects); 9] = [
             "ice",
         ),
     ),
+    // Fog has no sound of its own: no bed plays, and the road tells the
+    // story through the visibility calls and the wet tires (owner ask,
+    // 2026-09-13; the fog-horn loop it used to carry is still in the pack).
     (
         WeatherKind::Fog,
-        WeatherEffects::new(
-            0.92,
-            1.00,
-            0.3,
-            Some("weather/fog_horn"),
-            0.1,
-            40.0,
-            0.0,
-            "wet",
-        ),
+        WeatherEffects::new(0.92, 1.00, 0.3, None, 0.1, 40.0, 0.0, "wet"),
     ),
     (
         WeatherKind::Wind,

@@ -103,6 +103,10 @@
 
 ### Changed
 
+- **Fog is silent now.** The distant fog horn that used to play under a
+  foggy drive is gone; fog has no sound of its own, so you hear it the way
+  you would in the cab: the visibility calls and the wet road.
+
 - **Station breaks run more like radio.** Every twelve songs a station now
   airs two host breaks, four station IDs and three commercials, with the
   commercials in stopsets of two and one, each followed by the station

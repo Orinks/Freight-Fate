@@ -53,7 +53,7 @@ EFFECTS: dict[WeatherKind, WeatherEffects] = {
     ),
     WeatherKind.SNOW: WeatherEffects(0.45, 1.08, 2.0, "weather/snow_wind", 0.5, 35, 0.0, "snow"),
     WeatherKind.ICE: WeatherEffects(0.15, 1.02, 3.0, "weather/rain_light", 0.2, 20, 0.0, "ice"),
-    WeatherKind.FOG: WeatherEffects(0.92, 1.00, 0.3, "weather/fog_horn", 0.1, 40, 0.0, "wet"),
+    WeatherKind.FOG: WeatherEffects(0.92, 1.00, 0.3, None, 0.1, 40, 0.0, "wet"),
     WeatherKind.WIND: WeatherEffects(0.90, 1.25, 7.0, None, 0.9, 55),
 }
 
