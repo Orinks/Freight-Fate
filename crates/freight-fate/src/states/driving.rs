@@ -768,6 +768,7 @@ pub struct DrivingState {
     pub auto_jake_cooldown_s: f64, // rate limit between stage steps
     pub shift_recover_t: f64, // 0->1 recovery progress after an automatic shift ends
     pub shift_hold_rpm: Option<f64>, // engine voice held here through a shift
+    pub manual_engage_clunk_pending: bool, // a manual shift's second clunk, owed at engagement
     // Smooth only the audible engine load. Physics keeps the raw throttle,
     // while small controller and cruise changes blend into the engine bed.
     pub engine_audio_throttle: f64,

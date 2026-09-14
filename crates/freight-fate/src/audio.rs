@@ -504,6 +504,10 @@ pub trait Audio {
     }
     fn set_loop_volume(&mut self, channel: u32, volume: f64);
     fn set_loop_pan(&mut self, channel: u32, pan: f64);
+    /// Playback-rate multiplier for a running loop: 1.0 is as recorded,
+    /// 0.75 a quarter lower in pitch. A backend without pitch control (the
+    /// null one, the fakes) ignores it.
+    fn set_loop_rate(&mut self, _channel: u32, _rate: f64) {}
     fn stop_loop_with(&mut self, channel: u32, fade_ms: u32);
     fn stop_loop(&mut self, channel: u32) {
         self.stop_loop_with(channel, 300);

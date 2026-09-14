@@ -567,6 +567,10 @@ impl Audio for AudioEngine {
         self.backend.set_loop_pan(channel, pan);
     }
 
+    fn set_loop_rate(&mut self, channel: u32, rate: f64) {
+        self.backend.set_loop_rate(channel, rate);
+    }
+
     fn stop_loop_with(&mut self, channel: u32, fade_ms: u32) {
         self.backend.stop_loop(channel, fade_ms);
     }

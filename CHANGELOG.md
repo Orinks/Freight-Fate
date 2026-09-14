@@ -103,6 +103,14 @@
 
 ### Changed
 
+- **The Jake brake now follows your revs.** Its growl rises and falls in
+  pitch with the engine instead of holding one note, so on a manual you
+  can hear a gear running down toward the shift point and hear the
+  downshift bring the revs back up.
+- **Manual shifts clunk twice, like the automatic.** The lever clunks
+  when you select the gear, and a softer second clunk plays when the
+  clutch comes back in and the gear takes.
+
 - **Fog is silent now.** The distant fog horn that used to play under a
   foggy drive is gone; fog has no sound of its own, so you hear it the way
   you would in the cab: the visibility calls and the wet road.

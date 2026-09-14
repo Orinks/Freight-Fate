@@ -182,6 +182,17 @@ pub const JAKE_LOOP_RPMS: [i64; 6] = [1200, 1400, 1600, 1800, 2000, 2200];
 // recording of a real low stage -- do not dramatize what we cannot confirm.
 pub const JAKE_STAGE_GAIN: [f64; 3] = [0.25, 0.65, 1.0];
 pub const JAKE_MIN_RPM: f64 = 950.0;
+// Both jake voices are 1600 rpm cuts (the one real recording and the one
+// synth kept beside it), and one voice stands for every band, so the growl
+// used to sit on one note however the revs moved. It is re-pitched from
+// this native speed every frame instead: a downshift on a grade now climbs
+// with the revs and a gear run down to the shift point falls with them,
+// which is what a manual driver listens for. Clamped so 950 rpm and redline
+// stay inside what a re-pitched recording can carry without sounding like
+// tape.
+pub const JAKE_VOICE_NATIVE_RPM: f64 = 1600.0;
+pub const JAKE_RATE_MIN: f64 = 0.55;
+pub const JAKE_RATE_MAX: f64 = 1.4;
 
 // How far over a curve's advisory speed the truck has to be before the curve
 // assist reaches for the retarder. The engine brake is for shedding real

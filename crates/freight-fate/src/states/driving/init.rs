@@ -617,6 +617,7 @@ impl DrivingState {
             auto_jake_cooldown_s: 0.0,
             shift_recover_t: 1.0,
             shift_hold_rpm: None,
+            manual_engage_clunk_pending: false,
             engine_audio_throttle: 0.0,
             reverse_brake_held: false,
             reverse_accel_held: false,

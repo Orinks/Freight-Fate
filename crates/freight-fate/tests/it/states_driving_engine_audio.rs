@@ -31,7 +31,9 @@ use freight_fate::audio::{
 };
 use freight_fate::playtest::harness::{PlaytestHarness, StartDelivery};
 use freight_fate::states::driving_core::shut_down_engine;
-use freight_fate::states::driving_updates::{SHIFT_END_CLUNK_VOLUME, SHIFT_LOAD_CAP};
+use freight_fate::states::driving_updates::{
+    JAKE_RATE_MAX, SHIFT_END_CLUNK_VOLUME, SHIFT_LOAD_CAP,
+};
 
 // -- the recording backend --------------------------------------------------------------
 
@@ -61,6 +63,7 @@ struct Calls {
 enum LoopCall {
     Start(u32, String, f64),
     Volume(u32, f64),
+    Rate(u32, f64),
     Stop(u32),
 }
 
@@ -137,6 +140,12 @@ impl Audio for TrackingAudio {
             .push(LoopCall::Volume(channel, volume));
     }
     fn set_loop_pan(&mut self, _channel: u32, _pan: f64) {}
+    fn set_loop_rate(&mut self, channel: u32, rate: f64) {
+        self.log
+            .borrow_mut()
+            .loops
+            .push(LoopCall::Rate(channel, rate));
+    }
     fn stop_loop_with(&mut self, channel: u32, _fade_ms: u32) {
         self.log.borrow_mut().loops.push(LoopCall::Stop(channel));
     }
@@ -480,6 +489,139 @@ fn test_jake_growl_follows_stage_rpm_and_cuts_through_shifts() {
         "{:#?}",
         loops(&log)
     );
+}
+
+/// The last playback rate set on the jake channel, if any.
+fn jake_rate(log: &Log) -> Option<f64> {
+    loops(log).into_iter().rev().find_map(|call| match call {
+        LoopCall::Rate(CH_JAKE, rate) => Some(rate),
+        _ => None,
+    })
+}
+
+#[test]
+fn test_jake_pitch_follows_the_revs_so_a_manual_driver_can_hear_the_shift_point() {
+    // One 1600 rpm cut stands for every band, so the growl used to hold one
+    // note however the revs moved. Now it is re-pitched from that native
+    // speed every frame: a gear run down toward the shift point falls in
+    // pitch, and the downshift brings it back up (tester ask, 2026-09-14).
+    let (mut harness, log) = a_drive("Jake Pitch");
+    harness.with_drive(|drive, _| {
+        let truck = drive.truck_mut();
+        truck.set_air_ready(false);
+        truck.start_engine();
+        truck.transmission.automatic = false;
+        truck.transmission.gear = 8;
+        truck.velocity_mps = 20.0;
+        truck.throttle = 0.0;
+        truck.engine_brake_stage = 3;
+        truck.rpm = 1600.0;
+    });
+    log.borrow_mut().loops.clear();
+    update_audio(&mut harness, 0.0);
+    assert!(jake_start(&log).is_some(), "the growl started");
+    assert!(
+        close(jake_rate(&log).unwrap(), 1.0),
+        "{:?}",
+        jake_rate(&log)
+    );
+
+    // Revs falling in the same gear: the note falls with them.
+    log.borrow_mut().loops.clear();
+    harness.with_drive(|drive, _| drive.truck_mut().rpm = 1200.0);
+    update_audio(&mut harness, 0.0);
+    assert!(
+        close(jake_rate(&log).unwrap(), 0.75),
+        "{:?}",
+        jake_rate(&log)
+    );
+
+    // The downshift lands the revs high again: the note climbs.
+    harness.with_drive(|drive, _| drive.truck_mut().rpm = 2000.0);
+    update_audio(&mut harness, 0.0);
+    assert!(
+        close(jake_rate(&log).unwrap(), 1.25),
+        "{:?}",
+        jake_rate(&log)
+    );
+
+    // Just above the jake floor it still tracks; past redline the pitch
+    // stops at the clamp rather than sliding into tape territory.
+    harness.with_drive(|drive, _| drive.truck_mut().rpm = 960.0);
+    update_audio(&mut harness, 0.0);
+    assert!(
+        close(jake_rate(&log).unwrap(), 0.6),
+        "{:?}",
+        jake_rate(&log)
+    );
+    harness.with_drive(|drive, _| drive.truck_mut().rpm = 2400.0);
+    update_audio(&mut harness, 0.0);
+    assert!(
+        close(jake_rate(&log).unwrap(), JAKE_RATE_MAX),
+        "{:?}",
+        jake_rate(&log)
+    );
+}
+
+#[test]
+fn test_manual_shift_clunks_at_the_lever_and_again_when_the_gear_takes() {
+    // Automatic shifts are kachunk -- sigh -- kachunk; a manual one used to
+    // be a single clunk at the lever and silence when the clutch came back
+    // in (tester ask, 2026-09-14). The second clunk waits for the gear to
+    // actually take: clutch in, lever time over.
+    let (mut harness, log) = a_drive("Manual Clunk");
+    harness.with_drive(|drive, _| {
+        let truck = drive.truck_mut();
+        truck.set_air_ready(false);
+        truck.start_engine();
+        truck.transmission.automatic = false;
+        truck.transmission.gear = 4;
+        truck.velocity_mps = 12.0;
+        truck.rpm = 1500.0;
+        truck.transmission.clutch = 1.0; // pedal down
+    });
+    log.borrow_mut().banks.clear();
+    harness.with_drive(|drive, ctx| drive.manual_shift(ctx, 5));
+    assert_eq!(
+        log.borrow().banks.as_slice(),
+        &[("vehicle/shift_manual".to_string(), 1.0)],
+        "the lever clunk, at full level"
+    );
+
+    // Clutch still down through the lever time: nothing engages, nothing
+    // plays.
+    log.borrow_mut().banks.clear();
+    update_audio(&mut harness, 0.0);
+    assert!(log.borrow().banks.is_empty(), "{:#?}", log.borrow().banks);
+
+    // Clutch back in and the lever time up: the gear takes.
+    harness.with_drive(|drive, _| {
+        drive.truck_mut().transmission.clutch = 0.0;
+        drive.truck_mut().transmission.shift_timer = 0.0;
+    });
+    update_audio(&mut harness, 0.0);
+    assert_eq!(
+        log.borrow().banks.as_slice(),
+        &[("vehicle/shift_manual".to_string(), SHIFT_END_CLUNK_VOLUME)],
+        "the engagement clunk, softer"
+    );
+
+    // Once only.
+    log.borrow_mut().banks.clear();
+    update_audio(&mut harness, 0.0);
+    assert!(log.borrow().banks.is_empty(), "{:#?}", log.borrow().banks);
+
+    // A shift taken to neutral engages nothing, so it owes nothing.
+    harness.with_drive(|drive, _| {
+        drive.truck_mut().transmission.clutch = 1.0;
+        drive.manual_engage_clunk_pending = true;
+        drive.truck_mut().transmission.gear = 0;
+        drive.truck_mut().transmission.clutch = 0.0;
+        drive.truck_mut().transmission.shift_timer = 0.0;
+    });
+    log.borrow_mut().banks.clear();
+    update_audio(&mut harness, 0.0);
+    assert!(log.borrow().banks.is_empty(), "{:#?}", log.borrow().banks);
 }
 
 /// The key the jake channel was last started on, if it was started.

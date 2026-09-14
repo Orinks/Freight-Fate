@@ -257,6 +257,7 @@ pub trait AudioBackend {
     fn start_loop(&mut self, _channel: u32, _key: &str, _volume: f64, _fade_ms: u32) {}
     fn set_loop_volume(&mut self, _channel: u32, _volume: f64) {}
     fn set_loop_pan(&mut self, _channel: u32, _pan: f64) {}
+    fn set_loop_rate(&mut self, _channel: u32, _rate: f64) {}
     fn stop_loop(&mut self, _channel: u32, _fade_ms: u32) {}
     /// The `(key, gain)` sounding on a loop slot, for the facade's live
     /// jake re-voice (the Python facade read `_loops[CH_JAKE]`).

@@ -286,8 +286,12 @@ impl DrivingState {
             gear == REVERSE && self.trip.truck.speed_mph() > REVERSE_ENGAGE_MAX_MPH;
         let result = self.trip.truck.request_gear(gear);
         if result.ok {
+            // The lever: kachunk. The second half -- the gear taking as the
+            // clutch comes back in -- is played by update_audio when it
+            // actually happens, the way an automatic's engagement is.
             ctx.audio
                 .play_bank("vehicle/shift_manual", "vehicle/gear_shift");
+            self.manual_engage_clunk_pending = true;
             ctx.say(&result.message);
             if let Some(tutorial) = self.tutorial.as_mut() {
                 tutorial.on_gear_engaged(ctx);

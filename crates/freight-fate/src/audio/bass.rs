@@ -512,6 +512,32 @@ impl BassBackend {
         );
     }
 
+    /// Re-pitch a running loop to `rate` times its recorded speed.
+    ///
+    /// The recording's own sample rate is read once and remembered on the
+    /// entry (the road loop does the same), so every later call is one
+    /// attribute slide. A short slide rather than a snap: the jake growl
+    /// calls this every frame on a descent, and stepped frequency jumps on
+    /// a sustained tone are audible as zipper noise.
+    pub(super) fn set_loop_rate(&mut self, channel: u32, rate: f64) {
+        let Some(entry) = self.loops.get_mut(&channel) else {
+            return;
+        };
+        let handle = entry.stream.handle();
+        let base_freq = match entry.base_freq {
+            Some(base) => base,
+            None => match get_frequency(handle) {
+                Ok(base) => {
+                    entry.base_freq = Some(base);
+                    base
+                }
+                Err(_) => return,
+            },
+        };
+        // A dying stream drops its pitch silently; the volume path logs.
+        let _ = slide(handle, BASS_ATTRIB_FREQ, base_freq * rate.max(0.05), 120);
+    }
+
     pub(super) fn stop_loop(&mut self, channel: u32, fade_ms: u32) {
         if let Some((_key, handle)) = self.releasing.remove(&channel) {
             // Cut the ringing-out tail too, if BASS has not finished it.

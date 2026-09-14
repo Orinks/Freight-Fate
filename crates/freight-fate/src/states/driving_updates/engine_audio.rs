@@ -14,8 +14,9 @@ use crate::states::driving_core::*;
 use crate::states::driving_updates::{
     shift_recovery_curve, AIR_FILL_REARM_PSI, AIR_FILL_VOLUME, AUTO_JAKE_OVER_MPH,
     AUTO_JAKE_RELEASE_MPH, AUTO_JAKE_STEP_S, AUTO_JAKE_UNDER_MPH, ENGINE_LOAD_SMOOTH_S,
-    JAKE_LOOP_RPMS, JAKE_MIN_RPM, JAKE_STAGE_GAIN, SHIFT_DISENGAGE_DUCK, SHIFT_END_CLUNK_VOLUME,
-    SHIFT_LOAD_CAP, SHIFT_LOAD_RECOVERY_S,
+    JAKE_LOOP_RPMS, JAKE_MIN_RPM, JAKE_RATE_MAX, JAKE_RATE_MIN, JAKE_STAGE_GAIN,
+    JAKE_VOICE_NATIVE_RPM, SHIFT_DISENGAGE_DUCK, SHIFT_END_CLUNK_VOLUME, SHIFT_LOAD_CAP,
+    SHIFT_LOAD_RECOVERY_S,
 };
 
 impl DrivingState {
@@ -244,6 +245,24 @@ impl DrivingState {
             self.shift_hold_rpm = None;
         }
         ctx.audio.set_engine_duck(duck);
+        // A manual shift is kachunk -- sigh -- kachunk too. The lever played
+        // at the request; this is the gear taking, the moment the clutch is
+        // back in and the lever time is up. Owed only while a gear is still
+        // selected: a shift taken to neutral engages nothing.
+        if !automatic && self.manual_engage_clunk_pending {
+            let tr = &self.trip.truck.transmission;
+            if tr.in_neutral() {
+                self.manual_engage_clunk_pending = false;
+            } else if !tr.shifting() && tr.clutch <= 0.5 {
+                ctx.audio.play_bank_with(
+                    "vehicle/shift_manual",
+                    "vehicle/gear_shift",
+                    SHIFT_END_CLUNK_VOLUME,
+                    0.0,
+                );
+                self.manual_engage_clunk_pending = false;
+            }
+        }
         let target_load = self.trip.truck.throttle.clamp(0.0, 1.0);
         if dt <= 0.0 {
             // Direct callers and tests use a zero-length update to request an
@@ -349,6 +368,13 @@ impl DrivingState {
             } else {
                 ctx.audio.set_loop_volume(CH_JAKE, volume);
             }
+            // Pitch follows the revs, not the band: the one voice that
+            // sounds is a 1600 rpm cut whatever band was asked for, so
+            // without this the growl held one note down a whole grade and a
+            // manual driver had nothing to shift by (tester ask,
+            // 2026-09-14).
+            let rate = (rpm / JAKE_VOICE_NATIVE_RPM).clamp(JAKE_RATE_MIN, JAKE_RATE_MAX);
+            ctx.audio.set_loop_rate(CH_JAKE, rate);
         } else if self.jake_cue_key.is_some() {
             ctx.audio.stop_loop_with(CH_JAKE, 150);
             self.jake_cue_key = None;

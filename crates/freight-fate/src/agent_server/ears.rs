@@ -232,6 +232,9 @@ impl Audio for TeeAudio {
     fn set_loop_pan(&mut self, channel: u32, pan: f64) {
         self.inner.set_loop_pan(channel, pan);
     }
+    fn set_loop_rate(&mut self, channel: u32, rate: f64) {
+        self.inner.set_loop_rate(channel, rate);
+    }
     fn stop_loop_with(&mut self, channel: u32, fade_ms: u32) {
         self.loop_keys.remove(&channel);
         self.inner.stop_loop_with(channel, fade_ms);
