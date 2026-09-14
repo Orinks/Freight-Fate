@@ -123,6 +123,39 @@ def test_first_career_snapshot_notes_fit_github_without_cutting_entries(tmp_path
     assert emitted <= source
 
 
+def test_later_snapshot_notes_are_bounded_too(tmp_path, monkeypatch):
+    # A rewrite of the curated entries makes every bullet read as new to the
+    # previous tag; the page must still fit, and say where the rest is.
+    release_notes = load_release_notes_module()
+    repo = make_repo(tmp_path, changelog("### Added\n- **Old wording.** Long ago.\n"))
+    git(repo, "tag", "nightly-20260615")
+    added_entries = "\n".join(
+        f"- **Career improvement {index}.** " + ("Player-facing detail. " * 90)
+        for index in range(100)
+    )
+    fixed_entries = "\n".join(
+        f"- **Career fix {index}.** " + ("Clear fix detail. " * 90) for index in range(100)
+    )
+    (repo / "CHANGELOG.md").write_text(
+        changelog(f"### Added\n{added_entries}\n\n### Fixed\n{fixed_entries}\n"),
+        encoding="utf-8",
+    )
+    commit(repo, "docs: rewrite every entry")
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.nightly_notes(previous_tag="nightly-20260615")
+
+    assert len(notes) <= release_notes.GITHUB_RELEASE_NOTES_SAFE_CHARACTERS
+    assert "## Changes since the previous snapshot" in notes
+    assert "\n## Added\n" in notes
+    assert "\n## Fixed\n" in notes
+    assert "**Career improvement 0.**" in notes
+    assert "**Career fix 0.**" in notes
+    assert "## Complete change list" in notes
+    assert "This snapshot carries" in notes
+    assert "**Old wording.**" not in notes
+
+
 def test_release_notes_size_check_rejects_oversized_input(tmp_path, capsys):
     release_notes = load_release_notes_module()
     notes = tmp_path / "notes.md"

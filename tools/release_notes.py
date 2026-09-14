@@ -29,6 +29,14 @@ FIRST_SNAPSHOT_COMPLETE_LIST = (
     "GitHub release page. Read `CHANGELOG.md` in the download for the complete "
     "curated list."
 )
+# A later snapshot can overflow too: a busy stretch, or a rewrite of the
+# curated entries, which makes every bullet read as new to the previous tag.
+SNAPSHOT_COMPLETE_LIST = (
+    "## Complete change list\n\n"
+    "This snapshot carries more player-facing changes than fit on the GitHub "
+    "release page. Read `CHANGELOG.md` in the download for the complete "
+    "curated list."
+)
 SECTION_ORDER = ("Added", "Changed", "Improved", "Fixed", "Removed", "Deprecated", "Security")
 PLAYER_FACING_SECTIONS = SECTION_ORDER + ("Compatibility",)
 INTERNAL_SECTIONS = (
@@ -309,8 +317,30 @@ def bounded_first_snapshot_sections(
     sections: list[ChangelogSection],
 ) -> tuple[list[ChangelogSection], bool]:
     """Keep complete recent entries from every section within GitHub's limit."""
+    return bounded_sections(
+        sections,
+        "Changes in this snapshot",
+        FIRST_SNAPSHOT_COMPLETE_LIST,
+        section_heading_level=3,
+    )
+
+
+def bounded_sections(
+    sections: list[ChangelogSection],
+    changes_heading: str,
+    footer: str,
+    *,
+    section_heading_level: int,
+) -> tuple[list[ChangelogSection], bool]:
+    """Keep complete recent entries from every section within GitHub's limit.
+
+    Returns the sections to publish and whether anything was left out; when
+    something was, the caller appends ``footer`` so the page says where the
+    rest is. Entries are taken in file order, round-robin across sections, so
+    the newest of every kind survives rather than all of one section.
+    """
     if first_snapshot_fits(
-        format_nightly_notes(sections, "Changes in this snapshot", section_heading_level=3)
+        format_nightly_notes(sections, changes_heading, section_heading_level=section_heading_level)
     ):
         return sections, False
 
@@ -333,9 +363,9 @@ def bounded_first_snapshot_sections(
             selected[index].append(entry)
             candidate = format_nightly_notes(
                 selected_sections(),
-                "Changes in this snapshot",
-                FIRST_SNAPSHOT_COMPLETE_LIST,
-                section_heading_level=3,
+                changes_heading,
+                footer,
+                section_heading_level=section_heading_level,
             )
             if first_snapshot_fits(candidate):
                 offsets[index] += 1
@@ -366,16 +396,17 @@ def nightly_notes(
     changes_heading = (
         "Changes in this snapshot" if first_snapshot else "Changes since the previous snapshot"
     )
-    footer = ""
-    if first_snapshot:
-        sections, was_bounded = bounded_first_snapshot_sections(sections)
-        if was_bounded:
-            footer = FIRST_SNAPSHOT_COMPLETE_LIST
+    section_heading_level = 3 if first_snapshot else 2
+    complete_list = FIRST_SNAPSHOT_COMPLETE_LIST if first_snapshot else SNAPSHOT_COMPLETE_LIST
+    sections, was_bounded = bounded_sections(
+        sections, changes_heading, complete_list, section_heading_level=section_heading_level
+    )
+    footer = complete_list if was_bounded else ""
     return format_nightly_notes(
         sections,
         changes_heading,
         footer,
-        section_heading_level=3 if first_snapshot else 2,
+        section_heading_level=section_heading_level,
     )
 
 
