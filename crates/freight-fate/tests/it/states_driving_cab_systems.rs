@@ -13,6 +13,7 @@
 use ff_core::music::music_track_duration_s;
 use ff_core::sim::weather::WeatherKind;
 
+use freight_fate::online_presence::PAUSED_ACTIVITY;
 use freight_fate::playtest::harness::{key_event, PlaytestHarness, StartDelivery};
 use freight_fate::states::base::{Key, State};
 use freight_fate::states::driving_menu_states::DrivingStatusState;
@@ -145,23 +146,30 @@ fn test_drive_music_advances_to_next_track_while_paused() {
 // -- the drivers board -------------------------------------------------------------------
 
 #[test]
-fn test_pause_menu_reports_off_duty_to_the_drivers_board() {
+fn test_pause_menu_stays_on_the_drivers_board_as_paused() {
     let mut harness = a_drive("Board Pause");
-    let has_board = harness.with_drive(|d, ctx| d.online_presence_state(ctx).is_some());
-    assert!(has_board, "a rolling drive is on the public board");
+    let drive_detail = harness.with_drive(|d, ctx| {
+        d.online_presence_state(ctx)
+            .expect("a rolling drive is on the public board")
+            .detail
+    });
 
     harness.with_drive(|drive, ctx| drive.push_pause_menu(ctx));
     assert!(harness.state_is::<PauseMenuState>());
 
-    // Paused players leave the public board like an off-duty sign-off...
+    // A pause is not the end of a shift: the player stays on the public
+    // board, shown as paused over the drive's own detail, so nobody's duty
+    // watch calls them off duty for a bathroom break...
     let (board, discord) = harness.with_state::<PauseMenuState, _>(|state, ctx| {
         (state.online_presence(ctx), state.presence(ctx))
     });
-    assert!(board.is_none());
-    // ...while Discord presence still tells friends the game is paused.
+    let board = board.expect("a paused drive stays on the public board");
+    assert_eq!(board.activity, PAUSED_ACTIVITY);
+    assert_eq!(board.detail, drive_detail);
+    // ...and Discord presence tells friends the game is paused too.
     assert_eq!(
         discord.expect("Discord presence stays on").activity,
-        "Paused"
+        PAUSED_ACTIVITY
     );
 }
 

@@ -74,18 +74,28 @@ pub const MIN_CHANGE_INTERVAL_S: f64 = 15.0;
 // bouncing the driver off and back onto the public board.
 pub const OFF_DUTY_GRACE_S: f64 = 20.0;
 
-// A truck parked on the road with the game left running (not paused -- pausing
-// already counts as off duty) reports the identical snapshot for hours, and
-// would squat the live board indefinitely while its heartbeats run up the
-// site's largest database cost. After this long without any snapshot change
-// the service signs off and goes quiet; any change -- rolling again, a new
-// leg, pulling into a stop -- re-lists the driver within
+// A truck parked on the road with the game left running reports the identical
+// snapshot for hours, and would squat the live board indefinitely while its
+// heartbeats run up the site's largest database cost. After this long without
+// any snapshot change the service signs off and goes quiet; any change --
+// rolling again, a new leg, pulling into a stop -- re-lists the driver within
 // MIN_CHANGE_INTERVAL_S. While actually driving the snapshot ticks every five
 // percent of route progress (deadheads included), which even the longest haul
 // clears in well under this window. The server hides idle rows on the same
 // clock (PRESENCE_IDLE_MS in orinks-net's freightFate.ts) so older builds
 // that never stop beating age off the board too.
 pub const IDLE_SIGNOFF_S: f64 = 30.0 * 60.0;
+
+// The pause menu's on-duty activity. A pause is not the end of a shift, so a
+// paused player stays on the drivers list (and nobody's duty watch calls them
+// off duty for a bathroom break) -- but a paused game has nothing new to say,
+// so the service posts this snapshot once and then sends no heartbeats at
+// all. The server holds a row that said this for the idle window instead of
+// the heartbeat one (PAUSED_ACTIVITY in orinks-net's freightFate.ts; keep the
+// two strings equal), so after IDLE_SIGNOFF_S the pause ages off like a
+// parked truck, with the one idle sign-off this service sends anyway.
+// Resuming is a change like any other and re-lists the driver in seconds.
+pub const PAUSED_ACTIVITY: &str = "Paused";
 
 const WORKER_TICK_S: f64 = HEARTBEAT_INTERVAL_S;
 
@@ -697,6 +707,16 @@ impl Inner {
         if !pending && !st.on_board && idle_for(&st, now) >= self.idle_signoff {
             return WORKER_TICK_S;
         }
+        // Paused and listed as such: nothing to send until the idle sign-off.
+        if !pending
+            && st.on_board
+            && st
+                .desired
+                .as_ref()
+                .is_some_and(|d| d.activity == PAUSED_ACTIVITY)
+        {
+            return (self.idle_signoff - idle_for(&st, now)).max(0.05);
+        }
         let Some(last_send_t) = st.last_send_t else {
             return WORKER_TICK_S;
         };
@@ -770,6 +790,11 @@ impl Inner {
         }
         let due = if changed && since_send.is_none_or(|s| s >= self.min_change) {
             true // send the change now
+        } else if desired.activity == PAUSED_ACTIVITY {
+            // A paused game has said its one word; the server holds a paused
+            // row for the idle window without beats, and the idle sign-off
+            // above is the next thing it hears.
+            false
         } else {
             // steady-state heartbeat keeps the TTL alive
             since_send.is_none_or(|s| s >= self.heartbeat)

@@ -8,6 +8,7 @@ use crate::app::{GameContext, Say};
 use crate::controller::{ControllerAction, ControllerButton};
 use crate::discord_presence::PresenceState;
 use crate::impl_state_for_menu;
+use crate::online_presence::PAUSED_ACTIVITY;
 use crate::states::base::{end_sentence, InputEvent, Menu, MenuCore, MenuItem};
 use crate::states::city::CityMenuState;
 use crate::states::driving::DrivingState;
@@ -612,15 +613,25 @@ impl Menu for PauseMenuState {
             .driving
             .read(|d| d.presence_state(ctx).map(|p| p.detail).unwrap_or_default())
             .unwrap_or_default();
-        Some(PresenceState::new("Paused", &detail))
+        Some(PresenceState::new(PAUSED_ACTIVITY, &detail))
     }
 
-    fn online_presence(&self, _ctx: &GameContext) -> Option<PresenceState> {
-        // A paused player is not actively hauling, so they leave the public
-        // drivers board as though they went off duty; the service's off-duty
-        // grace absorbs a quick pause-and-resume without bouncing the row.
-        // Discord presence (above) still shows "Paused" while the menu is up.
-        None
+    fn online_presence(&self, ctx: &GameContext) -> Option<PresenceState> {
+        // A pause is not the end of a shift: the player stays on the public
+        // drivers list, shown as paused over the drive's own detail, and
+        // nobody's duty watch calls them off duty for a bathroom break. The
+        // service posts this once and then stops heartbeating (see
+        // PAUSED_ACTIVITY); a pause left for half an hour ages off the list
+        // like a parked truck.
+        let detail = self
+            .driving
+            .read(|d| {
+                d.online_presence_state(ctx)
+                    .map(|p| p.detail)
+                    .unwrap_or_default()
+            })
+            .unwrap_or_default();
+        Some(PresenceState::new(PAUSED_ACTIVITY, &detail))
     }
 
     fn handle_controller(&mut self, ctx: &mut GameContext, event: &InputEvent) {

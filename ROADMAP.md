@@ -266,6 +266,18 @@ its status or release decision.
       carrier. Lifetime counts (claims, terminations, repossessions, fatigue,
       out-of-service) stay lifetime by design.
 
+### September 14 pause stays on duty
+
+- [x] Pausing keeps the driver on the drivers list, shown as paused, instead
+      of signing them off after twenty seconds and back on at resume (which
+      read "went off duty" and "is on duty" to everyone's duty watch for a
+      bathroom break). The game posts the pause once and sends no
+      heartbeats while paused; the server holds a paused row for the
+      thirty-minute idle window instead of the six-minute heartbeat one,
+      so a pause left for good ages off like a parked truck, dated at the
+      pause. Server side deployed first; builds before it keep the old
+      behaviour.
+
 ### September 13 driver directory
 
 - [x] A driver directory beside Drivers on duty, in the game and on

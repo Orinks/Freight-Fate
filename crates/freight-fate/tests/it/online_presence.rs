@@ -20,7 +20,7 @@ use freight_fate::online_presence::{
     request_headers, set_profile_sharing, verify_identity, IdentityStore, MastodonStatus,
     MemoryStore, OnlineIdentity, OnlinePresence, OnlinePresenceOptions, RefusingStore, SecretStore,
     HEARTBEAT_INTERVAL_S, IDLE_SIGNOFF_S, MIN_CHANGE_INTERVAL_S, OFF_DUTY_GRACE_S, PACKAGE_VERSION,
-    TOKEN_SERVICE,
+    PAUSED_ACTIVITY, TOKEN_SERVICE,
 };
 use freight_fate::updater::BuildInfo;
 
@@ -34,6 +34,10 @@ fn driving() -> PresenceState {
 
 fn resting() -> PresenceState {
     PresenceState::new("Resting at a stop", "steel coils, 45% there")
+}
+
+fn paused() -> PresenceState {
+    PresenceState::new(PAUSED_ACTIVITY, "steel coils, 45% there")
 }
 
 /// A synchronous (non-threaded) service wired to a fake transport.
@@ -330,6 +334,70 @@ fn test_snapshot_change_relists_an_idle_driver() {
     clock.advance(HEARTBEAT_INTERVAL_S);
     service.pump();
     assert_eq!(last_activity(&transport), resting().activity);
+}
+
+#[test]
+fn test_pause_posts_once_then_sends_no_heartbeats() {
+    // A pause is not the end of a shift, so the driver must not sign off --
+    // but a paused game has nothing new to say, so it must not spend a
+    // heartbeat every two and a half minutes saying it either. The server
+    // holds a paused row for the idle window without beats.
+    let transport = FakeTransport::new();
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    service.update(Some(driving()));
+    clock.advance(MIN_CHANGE_INTERVAL_S);
+
+    service.update(Some(paused()));
+    service.pump();
+    assert_eq!(last_activity(&transport), PAUSED_ACTIVITY);
+    let sent = transport.posts().len();
+
+    // Heartbeat slots come and go: nothing is posted, and nothing is a
+    // sign-off. Any other snapshot would have beaten here (see
+    // test_identical_state_reposts_only_on_the_heartbeat).
+    for _ in 0..4 {
+        clock.advance(HEARTBEAT_INTERVAL_S);
+        service.pump();
+    }
+    assert_eq!(transport.posts().len(), sent);
+
+    // Resuming is a change like any other: the driver never left, and the
+    // heartbeats pick up again from there.
+    service.update(Some(driving()));
+    clock.advance(MIN_CHANGE_INTERVAL_S);
+    service.pump();
+    assert_eq!(last_activity(&transport), driving().activity);
+    clock.advance(HEARTBEAT_INTERVAL_S);
+    service.pump();
+    assert_eq!(last_activity(&transport), driving().activity);
+    assert_eq!(transport.posts().len(), sent + 2);
+}
+
+#[test]
+fn test_pause_left_for_the_idle_window_signs_off_once() {
+    // A pause left for half an hour ages off the server's list like a
+    // parked truck; the service sends the same single sign-off it does for
+    // one, and then stays quiet.
+    let transport = FakeTransport::new();
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    service.update(Some(driving()));
+    clock.advance(MIN_CHANGE_INTERVAL_S);
+    service.update(Some(paused()));
+    service.pump();
+    assert_eq!(last_activity(&transport), PAUSED_ACTIVITY);
+    let sent = transport.posts().len();
+
+    clock.advance(IDLE_SIGNOFF_S);
+    service.pump();
+    assert_eq!(last_activity(&transport), "");
+    assert_eq!(transport.posts().len(), sent + 1);
+    clock.advance(HEARTBEAT_INTERVAL_S * 2.0);
+    service.pump();
+    assert_eq!(transport.posts().len(), sent + 1);
 }
 
 #[test]

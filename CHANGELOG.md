@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Changed
+
+- **Pausing no longer takes you off duty.** You stay on the drivers list,
+  shown as paused. A pause left for half an hour drops off it the way a
+  parked truck does.
+
 ### Added
 
 - **A driver directory, under Online next to Drivers on duty.** It lists

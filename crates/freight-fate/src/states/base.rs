@@ -454,9 +454,9 @@ pub trait State: AsAny {
     /// The on-duty snapshot for the live drivers board, or None.
     ///
     /// Only the active hauling states (driving, pulled over, resting,
-    /// delivering) report themselves; everything else -- including the
-    /// pause menu, which counts as off duty -- returns None so the player
-    /// drops off the public board when they are not actively on a job.
+    /// delivering, and the pause menu over any of them, which reports
+    /// `PAUSED_ACTIVITY`) report themselves; everything else returns None so
+    /// the player drops off the public board when they are not on a job.
     fn online_presence(&self, _ctx: &GameContext) -> Option<PresenceState> {
         None
     }
