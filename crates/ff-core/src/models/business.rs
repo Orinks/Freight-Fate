@@ -250,7 +250,7 @@ pub fn authority_readiness_eligibility<P: BusinessProfile + ?Sized>(
     if career.deliveries < AUTHORITY_READY_DELIVERIES {
         reasons.push(format!("Complete {AUTHORITY_READY_DELIVERIES} deliveries."));
     }
-    if career.reputation < AUTHORITY_READY_REPUTATION {
+    if profile.career_reputation() < AUTHORITY_READY_REPUTATION {
         reasons.push(format!(
             "Build reputation to {}.",
             fmt_f(AUTHORITY_READY_REPUTATION, 0)
@@ -301,7 +301,7 @@ pub fn authority_activation_eligibility<P: BusinessProfile + ?Sized>(
             "Complete {AUTHORITY_ACTIVATION_DELIVERIES} deliveries."
         ));
     }
-    if career.reputation < AUTHORITY_ACTIVATION_REPUTATION {
+    if profile.career_reputation() < AUTHORITY_ACTIVATION_REPUTATION {
         reasons.push(format!(
             "Build reputation to {}.",
             fmt_f(AUTHORITY_ACTIVATION_REPUTATION, 0)
@@ -355,7 +355,7 @@ pub fn owner_operator_eligibility<P: BusinessProfile + ?Sized>(profile: &P) -> (
     if career.deliveries < OWNER_OPERATOR_DELIVERIES {
         reasons.push(format!("Complete {OWNER_OPERATOR_DELIVERIES} deliveries."));
     }
-    if career.reputation < OWNER_OPERATOR_REPUTATION {
+    if profile.career_reputation() < OWNER_OPERATOR_REPUTATION {
         reasons.push(format!(
             "Build reputation to {}.",
             fmt_f(OWNER_OPERATOR_REPUTATION, 0)

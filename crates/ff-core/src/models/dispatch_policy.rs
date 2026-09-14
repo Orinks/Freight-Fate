@@ -54,7 +54,7 @@ pub fn dispatch_policy<P: CareerProfile + ?Sized>(profile: &P) -> DispatchPolicy
     }
     let career = profile.career();
     let level = career.level();
-    let reputation = career.reputation;
+    let reputation = profile.career_reputation();
     let mut budget = NEW_HIRE_DECLINE_BUDGET
         + if level >= REGIONAL_REGULAR_LEVEL {
             1

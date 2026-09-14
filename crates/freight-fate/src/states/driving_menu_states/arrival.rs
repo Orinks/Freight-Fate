@@ -329,7 +329,7 @@ impl ArrivalState {
         let owned_trailers: Vec<String> = profile_of(ctx).owned_trailers.clone();
         let owned_refs: Vec<&str> = owned_trailers.iter().map(String::as_str).collect();
         let carrier_key = profile_of(ctx).carrier_key.clone();
-        let reputation_before = profile_of(ctx).career.reputation;
+        let reputation_before = profile_of(ctx).standing();
         let transponder = has_weigh_station_transponder(profile_of(ctx));
         let record_surcharge = enforcement::record_insurance_surcharge(profile_of(ctx));
         let business_status = profile_of(ctx).business_status.clone();

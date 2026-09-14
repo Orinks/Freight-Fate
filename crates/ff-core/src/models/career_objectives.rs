@@ -77,7 +77,7 @@ fn company_driver_objective<P: CareerProfile + ?Sized>(profile: &P) -> CareerObj
             guidance.recommendation_label,
         );
     }
-    if profile.career().reputation < 70.0 {
+    if profile.career_reputation() < 70.0 {
         return CareerObjective::new(
             "Build dispatcher trust",
             format!(

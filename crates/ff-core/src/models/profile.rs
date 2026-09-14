@@ -518,6 +518,19 @@ impl Default for Profile {
 pub const RECENT_LANES_KEPT: usize = 6;
 
 impl Profile {
+    /// The reputation everyone reads and every gate checks: the delivery
+    /// ledger (`career.reputation`) less what the driving record still inside
+    /// the review window costs, see `enforcement::standing_reputation`. The
+    /// ledger keeps earning underneath, so an aged-out record gives the
+    /// points back.
+    pub fn standing(&self) -> f64 {
+        crate::models::enforcement::standing_reputation(
+            self.career.reputation,
+            &self.driving_record,
+            self.game_hours,
+        )
+    }
+
     /// `Profile()`.
     pub fn new() -> Self {
         Self::default()

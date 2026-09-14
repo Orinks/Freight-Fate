@@ -243,6 +243,18 @@ its status or release decision.
       time-weighted 24 months, and driving under an out-of-service order is
       a disqualifying offense (383.51 Table 4) the game does not model.
 
+### September 14 reputation reads the record
+
+- [x] Reputation is the delivery ledger less the driving record inside the
+      391.25 review window (4 per citation, 10 per serious violation, 20 per
+      major offense for life, capped at 60), read by every gate, the trust
+      band, the pay bonus, the stats screen and the public profile (the save
+      now carries `career.standing`; invariants regenerated on both sides).
+      The raw ledger is untouched, so an aged-out record gives the points
+      back. Owner ruling 2026-09-14 after Jess read 98 beside three serious
+      violations. Cargo claims already hit the ledger directly and were left
+      out of the penalty.
+
 ### September 13 driver directory
 
 - [x] A driver directory beside Drivers on duty, in the game and on

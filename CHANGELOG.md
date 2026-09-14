@@ -103,6 +103,14 @@
 
 ### Changed
 
+- **A bad driving record now shows on your reputation.** Every citation
+  still on the record costs four reputation points and every serious
+  violation ten, for the three years a carrier's review looks back; a
+  major offense costs twenty for good. Dispatch trust, the load board, the
+  trust pay bonus, the owner-operator and authority gates, and the number
+  on your career stats and public profile all read the adjusted figure,
+  and the points come back as the record ages out. A driver who runs a
+  clean record notices nothing.
 - **The Jake brake now follows your revs.** Its growl rises and falls in
   pitch with the engine instead of holding one note, so on a manual you
   can hear a gear running down toward the shift point and hear the

@@ -176,7 +176,7 @@ impl TrafficStopState {
 
     /// Decide the outcome and apply any ticket immediately.
     fn resolve(&mut self, ctx: &mut GameContext, d: &mut DrivingState) {
-        let rep = profile_of(ctx).career.reputation;
+        let rep = profile_of(ctx).standing();
         let first = d.speeding_tickets == 0;
         // A warning for a first, marginal stop, or for a well-regarded driver
         // who pulled over promptly and wasn't egregiously over; otherwise a

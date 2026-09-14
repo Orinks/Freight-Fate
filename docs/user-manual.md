@@ -523,7 +523,12 @@ direct freight gross, and the row includes a short take-home estimate before
 any pay advance. If you own a matching trailer, the job row says so and
 settlement uses the owned trailer reserve instead of a trailer-program charge.
 
-Deliveries earn money, experience, reputation, and career stats. Every settled
+Deliveries earn money, experience, reputation, and career stats. Your driving
+record counts against reputation too: every citation on the record costs
+four points and every serious violation ten for the three years a carrier's
+review looks back, a major offense twenty for good, so a bad record shows on
+the number dispatch, the shippers and the business gates all read, and the
+points come back as the record ages out. Every settled
 load teaches a base amount of experience on top of its miles, on-time streaks
 compound the lesson, delivering the cargo undamaged adds a bonus, and specialty
 endorsement freight teaches half again as much per mile. Every level up hands

@@ -258,6 +258,42 @@ pub const REPUTATION_GUARDED: f64 = 28.0;
 pub const REPUTATION_POOR: f64 = 16.0;
 /// A company driver below this has run out of carrier patience.
 pub const REPUTATION_TERMINATION: f64 = 8.0;
+
+// -- the driving record's weight on reputation --------------------------------
+//
+// The delivery ledger (+2 on time, -4 late, claims and stops on top) pins at
+// 100 for anyone who runs a lot of loads, and a citation or a serious
+// violation never touched it at all: a driver with two citations, three
+// serious violations and seven claims read 98 beside that record (owner,
+// 2026-09-14). The reputation the game shows, gates on and pays a trust bonus
+// for is the ledger LESS the record still inside the carrier's three-year
+// review window (49 CFR 391.25, the same window the record review reads), so
+// a bad CDL record shows on the number everyone reads and ages off it the way
+// it ages off the review. A major offense counts for life, the way it stays
+// on a motor vehicle record. Capped so the record alone cannot zero a driver
+// -- the ledger still has to have been spent too -- and the ledger itself is
+// never written down for it, so a record that ages out gives the points back.
+pub const RECORD_CITATION_REPUTATION: f64 = 4.0;
+pub const RECORD_SERIOUS_REPUTATION: f64 = 10.0;
+pub const RECORD_MAJOR_REPUTATION: f64 = 20.0;
+pub const RECORD_REPUTATION_CAP: f64 = 60.0;
+
+/// What the driving record costs off reputation right now.
+pub fn record_reputation_penalty(record: &DrivingRecord, game_hours: f64) -> f64 {
+    let penalty = RECORD_CITATION_REPUTATION * record.citations_in_window(game_hours) as f64
+        + RECORD_SERIOUS_REPUTATION * record.serious_in_review_window(game_hours) as f64
+        + RECORD_MAJOR_REPUTATION * record.major_count() as f64;
+    penalty.min(RECORD_REPUTATION_CAP)
+}
+
+/// The reputation everyone reads: the delivery ledger less the record.
+pub fn standing_reputation(ledger: f64, record: &DrivingRecord, game_hours: f64) -> f64 {
+    (ledger - record_reputation_penalty(record, game_hours)).clamp(0.0, 100.0)
+}
+
+#[cfg(test)]
+mod standing_tests;
+
 /// The fleet a terminated driver can still get hired by.
 pub const LAST_CHANCE_CARRIER_KEY: &str = "great_lakes_training";
 pub const LAST_CHANCE_CARRIER_NAME: &str = "Great Lakes Training Transport";

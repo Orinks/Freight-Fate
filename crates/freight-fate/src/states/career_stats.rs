@@ -119,7 +119,7 @@ impl CareerStatsState {
                 "Level {level} driver, {} experience{next}",
                 fmt_f(career.xp, 0)
             ),
-            format!("Reputation: {} out of 100", fmt_f(career.reputation, 0)),
+            format!("Reputation: {} out of 100", fmt_f(p.standing(), 0)),
             enforcement::dispatch_trust_line(p),
             enforcement::career_menu_status(p),
             enforcement::standing_text(p),

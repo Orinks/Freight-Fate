@@ -204,7 +204,7 @@ pub(crate) fn award_arrival_achievements(
             push(&mut ids, badge);
         }
     }
-    let reputation = profile_of(ctx).career.reputation;
+    let reputation = profile_of(ctx).standing();
     if reputation >= 100.0 {
         push(&mut ids, "top_reputation");
     }

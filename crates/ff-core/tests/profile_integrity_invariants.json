@@ -1117,6 +1117,7 @@
     "pending_credentials",
     "purchased_endorsements",
     "reputation",
+    "standing",
     "total_earnings",
     "total_miles",
     "unacknowledged_grants",

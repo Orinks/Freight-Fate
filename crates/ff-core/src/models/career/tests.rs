@@ -379,6 +379,7 @@ fn test_career_round_trips_through_asdict_json() {
         vec![
             "xp",
             "reputation",
+            "standing",
             "deliveries",
             "on_time_deliveries",
             "total_miles",

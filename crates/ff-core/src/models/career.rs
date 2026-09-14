@@ -226,8 +226,14 @@ pub struct PendingCredential {
 #[serde(default)]
 pub struct Career {
     pub xp: f64,
-    /// 0..100
+    /// 0..100: the delivery ledger. What the game shows and gates on is
+    /// `Profile::standing`, this less the driving record; readers in the game
+    /// go through that, never this field directly.
     pub reputation: f64,
+    /// `Profile::standing` as of the last save, refreshed every time the
+    /// profile is written (see `to_unsigned_dict`) so the public profile on
+    /// orinks.net shows the same number the game does. Never read back.
+    pub standing: f64,
     pub deliveries: i64,
     pub on_time_deliveries: i64,
     pub total_miles: f64,
@@ -252,6 +258,7 @@ impl Default for Career {
         Career {
             xp: 0.0,
             reputation: 50.0,
+            standing: 50.0,
             deliveries: 0,
             on_time_deliveries: 0,
             total_miles: 0.0,

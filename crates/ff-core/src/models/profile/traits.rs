@@ -23,8 +23,10 @@ use crate::models::trucks::truck_model;
 use crate::music::MenuMusicProfile;
 
 impl StandingProfile for Profile {
+    /// Dispatch trust, the termination floor and the business gates all read
+    /// the record-adjusted number, never the raw ledger.
     fn career_reputation(&self) -> f64 {
-        self.career.reputation
+        self.standing()
     }
     fn career_deliveries(&self) -> i64 {
         self.career.deliveries
@@ -132,6 +134,9 @@ impl SolvencyProfile for Profile {
 }
 
 impl SafetyRecordProfile for Profile {
+    /// The raw ledger on purpose: the selection score already weighs the
+    /// citations and violations themselves, so feeding it the record-adjusted
+    /// number would count every one of them twice.
     fn career_reputation(&self) -> f64 {
         self.career.reputation
     }

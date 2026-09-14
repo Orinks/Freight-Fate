@@ -272,7 +272,7 @@ pub fn dispatch_cache_key(p: &Profile) -> Value {
     // the trust that built it.
     key.insert(
         "trust".into(),
-        Value::from(enforcement::trust_band(p.career.reputation)),
+        Value::from(enforcement::trust_band(p.standing())),
     );
     key.insert(
         "force_dest".into(),
@@ -391,7 +391,7 @@ pub fn open_freight_market(ctx: &mut GameContext) -> Vec<Job> {
                         // down.
                         count: enforcement::board_offers_for_reputation(
                             board_offer_count(p.career.level()) as i64,
-                            p.career.reputation,
+                            p.standing(),
                         )
                         .max(0) as usize,
                         level: p.career.level(),

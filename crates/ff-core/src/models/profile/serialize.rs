@@ -142,10 +142,14 @@ impl Profile {
             "owner_operator_declined".into(),
             Value::from(self.owner_operator_declined),
         );
-        d.insert(
-            "career".into(),
-            serde_json::to_value(&self.career).expect("a career serialises"),
-        );
+        d.insert("career".into(), {
+            let mut career = serde_json::to_value(&self.career).expect("a career serialises");
+            // The number the public profile shows, computed here rather
+            // than kept current in memory: the record and the clock both
+            // move it, and the save is the only reader.
+            career["standing"] = Value::from(self.standing());
+            career
+        });
         d.insert(
             "driving_record".into(),
             serde_json::to_value(&self.driving_record).expect("a driving record serialises"),
