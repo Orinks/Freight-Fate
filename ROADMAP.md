@@ -38,6 +38,9 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Keep the exit blinker repeating on the right until ramp entry, cancellation,
+      or a missed exit; stop canceled-exit guidance until the driver signals again.
+
 - [ ] Validate the Windows portable snapshot on a clean Windows installation
       without a separately installed Visual C++ redistributable; the build
       runner's smoke test alone cannot establish this.

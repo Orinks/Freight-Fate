@@ -88,8 +88,16 @@ impl DrivingState {
                 return;
             }
             self.exit_signal_on = false;
+            ctx.audio.release_cue("vehicle/turn_signal");
+            ctx.audio.release_cue(STEER_CUE_HOLD);
+            self.steer_cue_active = false;
+            self.steer_cue_hold_s = 0.0;
             self.exit_cancel_armed = false;
             self.exit_signal_canceled = true;
+            self.canceled_exit_key = Some(Self::destination_exit_key(&stop));
+            self.exit_stop = None;
+            self.trip.exit_approach_mi = None;
+            self.reset_exit_lane_state();
             // Letting the cap linger would leave automatic control crawling
             // at ramp speed down the open highway after the driver begged off.
             self.cruise_exit_mph = None;
@@ -98,18 +106,12 @@ impl DrivingState {
             if canceled_selected {
                 self.clear_selected_stop_intent();
             }
-            let planned = if canceled_selected {
-                " Facility stopping assistance disarmed for this exit. Your planned stop remains \
-                 on the route map."
-            } else {
-                ""
-            };
-            let message = format!("Signal canceled.{planned}");
-            self.set_status(message.clone());
-            self.say_plain(ctx, message);
+            self.set_status("Signal canceled.");
+            self.say_plain(ctx, "Signal canceled.");
             return;
         }
         self.exit_signal_on = true;
+        self.canceled_exit_key = None;
         self.exit_cancel_armed = false;
         self.exit_signal_canceled = false;
         // The player just signalled for an exit; count it toward retiring the
@@ -121,7 +123,8 @@ impl DrivingState {
         // this the milestones already spoken stay marked and the second
         // approach runs silent.
         self.exit_countdown_said.clear();
-        ctx.audio.play_with("vehicle/signal_tone", 0.7, 0.6);
+        self.steer_cue_timer = 0.0;
+        self.update_steering_lane_cue(ctx, 0.0);
         let head = if scale_claimed.is_some() {
             format!("Signal on for the scale exit: {},", stop.name)
         } else if stop.stop_type == "delivery_destination" {

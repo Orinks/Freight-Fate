@@ -396,9 +396,8 @@ impl DrivingState {
         self.update_edge_ladder_audio(ctx);
         self.update_transverse_strips(ctx);
         self.update_lane_locator_audio(ctx, dt);
-        // After the locator, which owns the tock whenever the driver asked for
-        // it, and after update_exit_preparation has settled this frame's
-        // alignment -- so the click lands on the frame the exit lane is set.
+        // Exit signaling owns the blinker independently of the locator and
+        // alignment. Ordinary steering clicks still defer to the locator.
         self.update_steering_lane_cue(ctx, dt);
         if rumble > 0.0 && ctx.settings.lane_is_manual() {
             // Harsh, continuous pad buzz while over the rumble strip; refreshed

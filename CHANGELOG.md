@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Changed
+
+- **The exit blinker keeps clicking until you take, cancel, or miss the exit.**
+
+- **Canceling an exit stops its countdown and lane guidance until you signal again.**
+
 ### Added
 
 - **Career stats opens your citations and violations, newest first.** Each

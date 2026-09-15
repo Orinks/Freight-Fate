@@ -381,16 +381,8 @@ fn test_x_cancel_clears_explicit_assist_but_keeps_route_plan() {
         Some(stop.key())
     );
     let said = last(&harness);
-    assert!(said.contains("Signal canceled."), "{said}");
-    assert!(
-        said.to_lowercase().contains("planned stop remains"),
-        "{said}"
-    );
-    assert!(
-        said.contains("Facility stopping assistance disarmed"),
-        "{said}"
-    );
-    assert!(said.contains("disarmed for this exit"), "{said}");
+    assert_eq!(said, "Signal canceled.");
+    assert!(harness.read_drive(|d| d.exit_stop.is_none()));
 
     press_t(&mut harness);
     assert_eq!(
