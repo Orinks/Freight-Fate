@@ -412,6 +412,14 @@
 
 ### Changed
 
+- **Time and weather, Trip status, Career plan, and the first-day briefing
+  are screens of lines now.** Up and Down read one line at a time, and Enter
+  repeats it.
+
+- **The logbook opens with what you are doing and since when, then your
+  limits one per line.** Entries read newest first, each led by what you were
+  doing.
+
 - **The construction warning says the speed drops one mile before the work
   zone, then again inside it.** The mile ahead of the work is no longer
   called the taper.

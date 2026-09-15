@@ -518,6 +518,30 @@ impl SimpleMenuState {
             rows,
         }
     }
+
+    /// A screen of spoken lines: Up and Down read them one at a time, Enter
+    /// repeats the line under focus, Back returns. The shape every readout
+    /// takes (the driving status screens, the logbook), so a screen that
+    /// used to be one long sentence can be re-read a line at a time.
+    pub fn readout(title: &str, lines: Vec<String>) -> Self {
+        let mut rows: Vec<MenuItem<SimpleMenuState>> = lines
+            .into_iter()
+            .map(|line| {
+                let spoken = line.clone();
+                MenuItem::new(line, move |_s: &mut SimpleMenuState, ctx| ctx.say(&spoken))
+                    .help("Repeat this line.")
+            })
+            .collect();
+        rows.push(
+            MenuItem::new("Back", |s: &mut SimpleMenuState, ctx| s.go_back(ctx))
+                .help("Return to the previous menu."),
+        );
+        let mut screen = Self::new(title, rows);
+        screen.menu = screen.menu.with_intro_help(
+            "Up and Down read a line at a time, Enter repeats it, Escape goes back.",
+        );
+        screen
+    }
 }
 
 impl Menu for SimpleMenuState {

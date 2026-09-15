@@ -277,6 +277,21 @@ its status or release decision.
       carrier. Lifetime counts (claims, terminations, repossessions, fatigue,
       out-of-service) stay lifetime by design.
 
+### September 14 screens of lines
+
+- [x] Four screens that answered with one long sentence are lists of lines
+      on the shared readout screen (`SimpleMenuState::readout`): Time and
+      weather, Trip status, Career plan, and the first-day briefing. The
+      logbook drops its duplicated status and its heading row, splits the
+      hours limits one per line, and reads entries newest first, led by the
+      status. Business status rows, action results, and the driving readout
+      keys stay single answers on purpose.
+- [ ] Citations and serious violations are counts and timestamps on the
+      driving record; nothing records the reason, the fine, the date, or the
+      road. Showing "why" under Career stats needs each one recorded as an
+      entry, which is a save-format change and a cloud validator field
+      (staging regen before a tester build).
+
 ### September 14 work zone approach
 
 - [x] Automatic speed control follows the warning's two numbers: cruise

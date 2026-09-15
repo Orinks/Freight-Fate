@@ -22,12 +22,12 @@ use crate::cloud_saves::{
 use crate::discord_presence::PresenceState;
 use crate::impl_state_for_menu;
 use crate::meaningful_play::MeaningfulPlayReason;
-use crate::states::base::{Label, Menu, MenuCore, MenuItem};
+use crate::states::base::{Label, Menu, MenuCore, MenuItem, SimpleMenuState};
 use crate::states::career_setback::CareerSetbackNoticeState;
 use crate::states::career_stats::{fully_rested, CareerStatsState};
-use crate::states::city::weather::speak_time_and_weather;
+use crate::states::city::weather::time_and_weather_lines;
 use crate::states::city::{
-    base_menu_enter, board_candidates, first_day_guidance_active, first_day_orientation_message,
+    base_menu_enter, board_candidates, first_day_guidance_active, first_day_orientation_lines,
     home_terminal, open_freight_market, profile, profile_mut, record_city_duty,
     terminal_objective_clause, BobtailDestState, BusinessStatusState, EndorsementCourseState,
     GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S, BOBTAIL_RANGE_MI,
@@ -100,13 +100,13 @@ impl CityMenuState {
     }
 
     fn first_day_briefing(&mut self, ctx: &mut GameContext) {
-        let text = first_day_orientation_message(ctx, "");
-        ctx.say(&text);
+        let lines = first_day_orientation_lines(ctx, "");
+        ctx.push_state(SimpleMenuState::readout("First-day briefing", lines));
     }
 
     fn career_plan(&mut self, ctx: &mut GameContext) {
-        let text = career_objective(profile(ctx)).spoken_summary();
-        ctx.say(&text);
+        let lines = career_objective(profile(ctx)).spoken_lines();
+        ctx.push_state(SimpleMenuState::readout("Career plan", lines));
     }
 
     fn truck_dealer(&mut self, ctx: &mut GameContext) {
@@ -250,7 +250,8 @@ impl CityMenuState {
     }
 
     fn time_weather(&mut self, ctx: &mut GameContext) {
-        speak_time_and_weather(ctx);
+        let lines = time_and_weather_lines(ctx);
+        ctx.push_state(SimpleMenuState::readout("Time and weather", lines));
     }
 
     /// `_sleep`: a full night in the terminal bunk room.

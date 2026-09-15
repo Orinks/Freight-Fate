@@ -1,4 +1,6 @@
-//! The terminal's "Time and weather" readout (`CityMenuState._time_weather`).
+//! The terminal's "Time and weather" screen (`CityMenuState._time_weather`):
+//! the clock, the calendar, the career day, and the sky over the city, one
+//! line each.
 
 use ff_core::music::crc32;
 use ff_core::pyfmt::fmt_f;
@@ -22,7 +24,7 @@ struct LiveReading {
     observed_temperature: Option<f64>,
 }
 
-pub(crate) fn speak_time_and_weather(ctx: &mut GameContext) {
+pub(crate) fn time_and_weather_lines(ctx: &mut GameContext) -> Vec<String> {
     let world = ctx.world;
     let (city_key, city_name, region, lat, lon, game_hours, calendar_hours, day) = {
         let p = profile(ctx);
@@ -176,15 +178,20 @@ pub(crate) fn speak_time_and_weather(ctx: &mut GameContext) {
     if last_known && refreshing {
         freshness.push_str(" Live weather is updating.");
     }
-    ctx.say(&format!(
-        "It is {} {}, {}, \
-         {}, in {}, \
-         day {day} of your career. \
-         {source} in {city_name}: {desc}.{freshness}",
-        clock_text(hour),
-        zone.name,
-        time_of_day(hour),
-        date_text(season_hours),
-        season(season_hours),
-    ));
+    let mut lines = vec![
+        format!(
+            "It is {} {}, {}.",
+            clock_text(hour),
+            zone.name,
+            time_of_day(hour)
+        ),
+        format!("{}, {}.", date_text(season_hours), season(season_hours)),
+        format!("Day {day} of your career."),
+        format!("{source} in {city_name}: {desc}."),
+    ];
+    let freshness = freshness.trim();
+    if !freshness.is_empty() {
+        lines.push(freshness.to_string());
+    }
+    lines
 }

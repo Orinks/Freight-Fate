@@ -23,7 +23,7 @@ use ff_core::models::profile::Profile;
 use ff_core::models::solvency;
 use ff_core::models::start_options::pay_plan_for_key;
 use freight_fate::app::testing::TestApp;
-use freight_fate::states::base::{Key, Menu};
+use freight_fate::states::base::{Key, Menu, SimpleMenuState};
 use freight_fate::states::career_setback::CareerSetbackNoticeState;
 use freight_fate::states::city::{
     dispatch_cache_key, open_freight_market, relay_load_for_board, CityMenuState, JobBoardState,
@@ -1259,9 +1259,11 @@ fn test_terminal_career_plan_is_keyboard_reachable_and_spoken() {
     key(&mut app, Key::Down);
     key(&mut app, Key::Return);
 
-    let said = app.main_lines().last().cloned().unwrap();
-    assert!(said.starts_with("First dispatch."));
-    assert!(said.contains("short standard load"));
+    // The plan opens as a screen of lines, the step first.
+    assert!(is::<SimpleMenuState>(&app));
+    let rows = labels::<SimpleMenuState>(&app);
+    assert_eq!(rows[0], "First dispatch.");
+    assert!(rows.join(" ").contains("short standard load"), "{rows:?}");
 }
 
 #[test]
@@ -1280,11 +1282,17 @@ fn test_terminal_career_plan_speaks_senior_company_level_guidance() {
     app.push_state(city);
     select::<CityMenuState>(&mut app, "Career plan");
 
-    let said = app.main_lines().last().cloned().unwrap();
-    assert!(said.starts_with("Run like a senior company driver."));
-    assert!(said.contains("premium lanes"));
-    assert!(said.contains("premium freight"));
-    assert!(said.contains("Senior company status is about consistency"));
+    // The plan is a screen of lines now, read one at a time.
+    assert!(is::<SimpleMenuState>(&app));
+    let rows = labels::<SimpleMenuState>(&app);
+    let said = rows.join(" ");
+    assert_eq!(rows[0], "Run like a senior company driver.");
+    assert!(said.contains("premium lanes"), "{said}");
+    assert!(said.contains("premium freight"), "{said}");
+    assert!(
+        said.contains("Senior company status is about consistency"),
+        "{said}"
+    );
 }
 
 #[test]

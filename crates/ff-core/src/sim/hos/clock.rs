@@ -706,6 +706,30 @@ impl HosClock {
     // clock so the spoken number stays true if the limits ever move.
 
     /// (driving, duty window, break) hours left, floored at zero.
+    /// The summary one limit per line, for the logbook: driving left, the
+    /// break, the duty window, and a pending split. Enforcement off and a
+    /// violation each stay one line, because each is one fact.
+    pub fn summary_lines(&self, mode: &str) -> Vec<String> {
+        if is_non_enforced(mode) || self.in_violation(mode) {
+            return vec![self.summary(mode)];
+        }
+        let (drive_left, duty_left, break_left) = self.hours_left(mode);
+        let mut lines = vec![format!("Driving left: {} hours.", fmt_f(drive_left, 1))];
+        if duty_left <= break_left {
+            lines.push(format!("Duty window left: {} hours.", fmt_f(duty_left, 1)));
+        } else {
+            lines.push(format!("Break due in {} hours.", fmt_f(break_left, 1)));
+            lines.push(format!(
+                "Duty window closes in {} hours.",
+                fmt_f(duty_left, 1)
+            ));
+        }
+        if let Some(pending) = self.split_pending_summary() {
+            lines.push(pending.to_string());
+        }
+        lines
+    }
+
     fn hours_left(&self, mode: &str) -> (f64, f64, f64) {
         let (drive_limit, duty_limit, break_after) =
             limits(mode).expect("HOS mode is realistic or relaxed");

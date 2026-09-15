@@ -9,7 +9,7 @@ use crate::controller::{ControllerAction, ControllerButton};
 use crate::discord_presence::PresenceState;
 use crate::impl_state_for_menu;
 use crate::online_presence::PAUSED_ACTIVITY;
-use crate::states::base::{end_sentence, InputEvent, Menu, MenuCore, MenuItem};
+use crate::states::base::{end_sentence, InputEvent, Menu, MenuCore, MenuItem, SimpleMenuState};
 use crate::states::city::CityMenuState;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::{
@@ -383,35 +383,10 @@ impl PauseMenuState {
     }
 
     fn status(&mut self, ctx: &mut GameContext) {
-        let Some(text) = self.driving.with(ctx, |d, ctx| {
-            let hours_used = d.trip.game_minutes / 60.0;
-            if d.phase == DRIVE_PHASE_PICKUP {
-                return format!(
-                    "Driving to pickup at {}. {} tons of {} are assigned for {}. {} {} hours \
-                     used. {}.",
-                    d.pickup_facility_text(ctx),
-                    fmt_f(d.job.weight_tons, 0),
-                    d.job.cargo.label,
-                    d.job.spoken_destination(),
-                    d.pickup_progress_summary(ctx),
-                    fmt_f(hours_used, 1),
-                    d.air_status_text(false)
-                );
-            }
-            format!(
-                "Hauling {} tons of {} to {}. {} {} hours used of {}. {}.",
-                fmt_f(d.job.weight_tons, 0),
-                d.job.cargo.label,
-                d.job.spoken_destination(),
-                d.trip.progress_summary(ctx.settings.imperial_units),
-                fmt_f(hours_used, 1),
-                fmt_f(d.job.deadline_game_h, 0),
-                d.air_status_text(false)
-            )
-        }) else {
+        let Some(lines) = self.driving.with(ctx, |d, ctx| trip_status_lines(d, ctx)) else {
             return;
         };
-        ctx.say(&text);
+        ctx.push_state(SimpleMenuState::readout("Trip status", lines));
     }
 
     fn abandon(&mut self, ctx: &mut GameContext) {
@@ -559,6 +534,41 @@ fn install_chains_label(d: &DrivingState) -> String {
         "Install snow chains{when}: about {} minutes",
         fmt_f(minutes, 0)
     )
+}
+
+/// The pause menu's Trip status, one line each: the load, where it is going,
+/// how far along, the hours, and the air.
+pub fn trip_status_lines(d: &DrivingState, ctx: &GameContext) -> Vec<String> {
+    let hours_used = d.trip.game_minutes / 60.0;
+    if d.phase == DRIVE_PHASE_PICKUP {
+        return vec![
+            format!("Driving to pickup at {}.", d.pickup_facility_text(ctx)),
+            format!(
+                "{} tons of {} are assigned for {}.",
+                fmt_f(d.job.weight_tons, 0),
+                d.job.cargo.label,
+                d.job.spoken_destination()
+            ),
+            d.pickup_progress_summary(ctx),
+            format!("{} hours used.", fmt_f(hours_used, 1)),
+            format!("{}.", d.air_status_text(false)),
+        ];
+    }
+    vec![
+        format!(
+            "Hauling {} tons of {} to {}.",
+            fmt_f(d.job.weight_tons, 0),
+            d.job.cargo.label,
+            d.job.spoken_destination()
+        ),
+        d.trip.progress_summary(ctx.settings.imperial_units),
+        format!(
+            "{} hours used of {}.",
+            fmt_f(hours_used, 1),
+            fmt_f(d.job.deadline_game_h, 0)
+        ),
+        format!("{}.", d.air_status_text(false)),
+    ]
 }
 
 impl Menu for PauseMenuState {

@@ -218,10 +218,12 @@ After the home terminal is chosen, the terminal repeats a first-day briefing
 until the first dispatch is accepted. It names the carrier or owner-operator
 setup, the current terminal, who pays normal equipment costs, and the first
 objective: choose an unlocked dispatch, reach the shipper, and start a clean
-record with dispatch.
+record with dispatch. The briefing opens as a screen of lines, so any sentence
+can be read again with the arrows.
 
-After that first dispatch, the terminal adds **Career plan**. This speaks the
-current career objective and how it should shape dispatch choices. Early
+After that first dispatch, the terminal adds **Career plan**. This opens the
+current career objective as a screen of lines, the step first, then how it
+should shape dispatch choices. Early
 company drivers work through probation loads, dispatcher trust, safe service,
 and better carrier lanes. Owner-operators hear reminders about working capital,
 fuel, repairs, trailer costs, and cash reserves before moving toward stronger
@@ -313,8 +315,8 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Career stats | Review level, reputation, deliveries, career totals, the endorsements you hold, your dispatch trust, your safety record and CDL status, and any balance you owe. |
 | Endorsement courses | Pay for refrigerated, heavy-haul, high-value, or tank training early; the carrier sponsors each course for free at its unlock level. |
 | Truck status | Review truck model, fuel, tank size, damage and its band, tire wear, and road grime. |
-| Time and weather | Review the clock, career day, and current city weather. |
-| Logbook | Review your recent Record of Duty Status entries. |
+| Time and weather | A screen of lines: the clock, the date and season, the career day, and the weather in the city, with the live reading's age when there is one. |
+| Logbook | Review your Record of Duty Status: what you are doing now, your hours limits, today's totals, and the recent entries. |
 | Sleep 10 hours | Rest at the terminal and reset hours of service. |
 | Save game | Save the current career. |
 | Settings | Open settings categories. |
@@ -1382,7 +1384,11 @@ The Logbook is the spoken Record of Duty Status behind that clock. It records a
 rolling timeline of driving, on-duty work, off-duty breaks, and sleeper-berth
 rest, with the time, location, and a short note such as fuel stop, loading, or
 out-of-service order. Open **Logbook** from the terminal, or open **Tab** while
-driving and choose **Logbook**, to review today's totals and recent entries.
+driving and choose **Logbook**. The first line is what you are doing now and
+since when. Then come your limits, one per line: driving left, when the break
+is due, and when the duty window closes. Today's totals follow on one line,
+and after them the recent entries, newest first, each led by what you were
+doing.
 
 Fatigue rises while driving, faster at night. Drowsiness adds yawn and rumble
 strip cues and makes hazards harder to react to. Once fatigue is severe you
@@ -1454,7 +1460,7 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | Choice | What It Does |
 | --- | --- |
 | Resume driving | Return to the active drive. |
-| Trip status | Review cargo, objective, route progress, time used, and air status. |
+| Trip status | A screen of lines: the load, where it is going, how far along you are, the hours used, and the air. |
 | Controls and help | Open the how-to-play reference at the driving keys, page by page, without leaving the drive. |
 | Call a roadside mechanic | Patch severe truck damage enough to continue, at a high cost. |
 | Install snow chains | While stopped with chains in the side box: hang the chains. Takes real minutes, more in the dark, logged as on-duty work. |
