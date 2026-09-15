@@ -55,6 +55,53 @@ fn a_drive_to(app: &mut TestApp, city: &str, location_name: &str) -> Option<Driv
     Some(drive)
 }
 
+/// The percent the board and the readouts publish covers the whole run.
+///
+/// On the street chain in to the dock the active trip is the streets alone,
+/// and read on its own it had the drivers board saying "100% there" for the
+/// whole last mile (Josh, 15 September). The highway is done but the streets
+/// are not, so the figure sits just under 100 and climbs to it at the gate.
+#[test]
+fn test_progress_on_the_last_mile_streets_counts_the_whole_run() {
+    let world = get_world();
+    let Some((city, location)) = a_turn_level_facility(world) else {
+        return; // no turn-level facility approaches in the shipped data
+    };
+    let mut app = TestApp::new();
+    let Some(mut d) = a_drive_to(&mut app, &city, &location) else {
+        return; // no corridor route from Denver to that city
+    };
+    d.trip.position_mi = d.trip.total_miles();
+    d.destination_exit_taken = true;
+    assert_eq!(d.trip.progress_percent(), 100);
+
+    assert!(d.begin_surface_chain(&mut app.ctx, false));
+    // A long run's last mile rounds to 100; the readout holds at 99 until
+    // the truck is actually at the gate, and the board at 95.
+    let at_start = d.journey_progress_percent();
+    assert!((90..=99).contains(&at_start), "{at_start}");
+    let detail = d
+        .presence_state(&app.ctx)
+        .expect("a drive has presence")
+        .detail;
+    assert!(detail.contains("95% there"), "{detail}");
+
+    d.trip.position_mi = d.trip.total_miles() / 2.0;
+    let halfway = d.journey_progress_percent();
+    assert!(
+        (at_start..=99).contains(&halfway),
+        "{at_start} -> {halfway}"
+    );
+
+    d.trip.position_mi = d.trip.total_miles();
+    assert_eq!(d.journey_progress_percent(), 100);
+    let detail = d
+        .presence_state(&app.ctx)
+        .expect("a drive has presence")
+        .detail;
+    assert!(detail.contains("100% there"), "{detail}");
+}
+
 #[test]
 fn test_chain_swaps_to_streets_and_keeps_the_clock() {
     let world = get_world();

@@ -156,12 +156,12 @@ impl DrivingState {
                 let ahead = self.closing_text(at_mi - self.trip.position_mi);
                 format!(
                     "{} percent there, {ahead} to {spoken_name}.",
-                    self.trip.progress_percent()
+                    self.journey_progress_percent()
                 )
             }
             None => format!(
                 "{} percent there, {} left.",
-                self.trip.progress_percent(),
+                self.journey_progress_percent(),
                 self.closing_text(self.trip.remaining_miles())
             ),
         };

@@ -3,7 +3,7 @@
 
 use ff_core::models::business::player_pays_operating_costs;
 use ff_core::models::trucks::TRUCK_CATALOG;
-use ff_core::pyfmt::fmt_grouped;
+use ff_core::pyfmt::{fmt_grouped, round_py_int};
 use ff_core::sim::hos::{clock_text, time_of_day};
 use ff_core::sim::trip_models::Zone;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
@@ -446,13 +446,45 @@ impl DrivingState {
             .unwrap_or("")
     }
 
-    pub fn presence_state(&self, ctx: &GameContext) -> Option<PresenceState> {
-        let total = if self.trip.total_miles() == 0.0 {
-            1.0
+    /// How far along the whole run the truck is, streets included, in 0..1.
+    ///
+    /// The active trip is only part of the run while a street chain is on:
+    /// the streets out of the origin yard before the highway, or the streets
+    /// in to the dock after it, with the highway trip parked in
+    /// `highway_trip` either way. Read on its own, the active trip had the
+    /// board saying "100% there" for the whole last-mile chain and racing
+    /// 0 to 100 on the two miles out of the yard, so every percent the game
+    /// publishes -- the drivers board, Discord, Trip status, the R key --
+    /// measures against the highway and the streets together.
+    pub fn journey_progress_fraction(&self) -> f64 {
+        let (mut done, mut total) = (self.trip.position_mi, self.trip.total_miles());
+        if let Some(highway) = &self.highway_trip {
+            done += highway.position_mi;
+            total += highway.total_miles();
+        }
+        if total <= 0.0 {
+            return 0.0;
+        }
+        (done / total).clamp(0.0, 1.0)
+    }
+
+    /// `journey_progress_fraction` as the whole percent the readouts speak.
+    ///
+    /// Never 100 before the gate: the last mile of streets is a tenth of a
+    /// percent of a long run, and rounding said "100 percent there" for all
+    /// of it. 100 means arrived.
+    pub fn journey_progress_percent(&self) -> i64 {
+        let fraction = self.journey_progress_fraction();
+        let pct = round_py_int(100.0 * fraction).clamp(0, 100);
+        if fraction < 1.0 {
+            pct.min(99)
         } else {
-            self.trip.total_miles()
-        };
-        let fraction = self.trip.position_mi / total;
+            pct
+        }
+    }
+
+    pub fn presence_state(&self, ctx: &GameContext) -> Option<PresenceState> {
+        let fraction = self.journey_progress_fraction();
         let moving = self.trip.truck.speed_mph() >= 1.0;
         let truck_label = ctx
             .profile

@@ -137,7 +137,10 @@ pub fn driving_presence(
     truck_label: &str,
 ) -> PresenceState {
     let clamped = fraction.clamp(0.0, 1.0);
+    // Never "100% there" before the gate: the streets in to the dock round
+    // to it on any long run, and a driver still on them is not there yet.
     let pct = (round_py_int(clamped * 20.0) * 5).clamp(0, 100);
+    let pct = if clamped < 1.0 { pct.min(95) } else { pct };
     if phase == "pickup" {
         let activity = if origin.is_empty() {
             "Deadheading to a pickup".to_string()

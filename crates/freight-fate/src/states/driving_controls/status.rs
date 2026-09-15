@@ -69,7 +69,10 @@ impl DrivingState {
             ),
             format!("Limit: {}{zone}", ctx.settings.speed_text(limit)),
             self.trip.npc_traffic_status(),
-            format!("Progress: {} percent there", self.trip.progress_percent()),
+            format!(
+                "Progress: {} percent there",
+                self.journey_progress_percent()
+            ),
             format!("Route: {progress}"),
             self.career_status_line(ctx),
             format!(

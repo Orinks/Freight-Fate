@@ -1382,6 +1382,10 @@
 
 ### Fixed
 
+- **The percent there counts the whole run, streets included, and never
+  says 100 before the gate.** On the last mile of streets the drivers board
+  used to say 100 percent there.
+
 - **Control now silences the last-stop warning for good.** It used to come
   back whole on every press, and the same goes for wear warnings.
 

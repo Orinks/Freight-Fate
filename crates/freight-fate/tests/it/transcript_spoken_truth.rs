@@ -177,7 +177,7 @@ fn truth(harness: &mut PlaytestHarness) -> Truth {
         let (limit, _) = d.trip.speed_limit_at(d.trip.position_mi);
         let ramp_cap = d.ramp_approach_cap_mph();
         let remaining = d.trip.remaining_miles();
-        let progress = d.trip.progress_percent() as f64;
+        let progress = d.journey_progress_percent() as f64;
         let zone = d
             .trip
             .next_zone_within(15.0)
