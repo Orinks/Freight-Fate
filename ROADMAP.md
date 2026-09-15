@@ -41,6 +41,9 @@ bookmarks usable.
 - [x] Start the route readout directly with the location or arrival information
       on facility approaches, city streets, and at the gate.
 
+- [x] Keep the exit blinker repeating on the right until ramp entry, cancellation,
+      or a missed exit; stop canceled-exit guidance until the driver signals again.
+
 - [ ] Validate the Windows portable snapshot on a clean Windows installation
       without a separately installed Visual C++ redistributable; the build
       runner's smoke test alone cannot establish this.

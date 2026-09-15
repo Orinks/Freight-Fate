@@ -253,13 +253,14 @@ const LANE: SoundCategory = SoundCategory {
             "Mechanical relay clicks. During a full-assist lane change they \
              come from the side you are moving toward. With lane keeping \
              partial or off, they follow your position within the lane while \
-             you steer or line up for an exit. Each recording finishes before \
-             repeating. The clicks stop when the move ends or the exit \
-             position is set. A quieter centered signal tone confirms the \
+             you steer. Signaling for an exit starts steady clicks on the right \
+             until you take the ramp, cancel, or miss the exit, even after the \
+             exit lane is set. Each recording finishes before repeating. \
+             Ordinary steering clicks stop when the move ends. A quieter centered signal tone confirms the \
              steering cue ending; an assisted lane change ends with the \
              sound of tires crossing the painted line.",
         )
-        .when("The automatic steering cue is silent while the I-key locator is on."),
+        .when("The I-key locator silences ordinary steering clicks, but not an armed exit signal."),
         SoundEntry::new(
             "Signal tone",
             &[
@@ -281,8 +282,8 @@ const LANE: SoundCategory = SoundCategory {
              coming up a ramp, or taking the exit the route asked for. The \
              quieter one from straight ahead is the same signal cancelling \
              itself, the way it does in a truck when the wheel comes back: \
-             the move is finished. After an exit line-up that click is the \
-             word that you are far enough over.",
+             the move is finished. Exit lane readiness is announced separately; \
+             the exit blinker continues until the ramp or cancellation.",
         ),
     ],
 };

@@ -220,7 +220,7 @@ fn test_x_signals_for_upcoming_route_exit_without_taking_it() {
     press_x(&mut harness);
 
     harness.read_drive(|d| {
-        assert!(d.exit_stop.is_some());
+        assert!(d.exit_stop.is_none());
         assert!(!d.exit_signal_on);
     });
     assert!(
@@ -331,14 +331,13 @@ fn test_canceled_exit_signal_does_not_prompt_lane_prep() {
     let mut harness = a_drive("Exits");
     harness.app.ctx.settings.lane_keeping = "partial".to_string();
     let stop = first_stop(&harness);
-    let key = stop.key();
     let at = stop.at_mi;
     harness.with_drive(move |d, _| d.trip.position_mi = at - 1.5);
 
     press_x(&mut harness);
     press_x(&mut harness);
     harness.read_drive(|d| {
-        assert_eq!(d.exit_stop.as_ref().map(|s| s.key()), Some(key.clone()));
+        assert!(d.exit_stop.is_none());
         assert!(!d.exit_signal_on);
     });
 
@@ -378,27 +377,63 @@ fn test_canceled_destination_exit_signal_stays_on_highway() {
     assert!(harness.read_drive(|d| d.exit_signal_on));
     press_x(&mut harness);
     let taken = stop.clone();
+    assert!(said_any(&harness, "Signal canceled."));
+    harness.clear_speech();
     harness.with_drive(move |d, ctx| {
-        assert!(d.exit_stop.is_some());
+        assert!(d.exit_stop.is_none());
         assert!(!d.exit_signal_on);
         assert!(!d.exit_intent_ready(ctx, &taken));
+        assert_eq!(d.exit_lane_alignment, 0.0);
+        assert!(d.cruise_exit_mph.is_none());
+        d.check_destination_exit(ctx);
+        assert!(
+            d.exit_stop.is_none(),
+            "the scanner must not recreate the watcher"
+        );
+        d.trip.position_mi = at - 0.5;
+        d.check_destination_exit(ctx);
+        d.update_exit(ctx, 0.0, DT);
+        assert!(d.exit_stop.is_none());
         d.trip.position_mi = at;
     });
+    assert!(
+        spoken(&harness).is_empty(),
+        "the canceled countdown must stay silent"
+    );
 
     frame(&mut harness, DT);
 
     assert!(harness.read_drive(|d| d.ramp_mi.is_none()));
     assert!(
-        spoken(&harness)
-            .iter()
-            .any(|line| line.to_lowercase().contains("signal")),
+        !said_any(&harness, "stayed on the highway"),
         "{:?}",
         spoken(&harness)
     );
-    assert!(
-        said_any(&harness, "stayed on the highway"),
-        "{:?}",
-        spoken(&harness)
+}
+
+#[test]
+fn canceled_destination_exit_can_be_explicitly_signaled_again() {
+    let mut harness = a_drive("Rearm canceled exit");
+    let stop = destination_exit(&mut harness);
+    harness.with_drive(|d, _| {
+        d.trip.position_mi = stop.at_mi - 2.0;
+        d.truck_mut().velocity_mps = 12.0;
+    });
+    press_x(&mut harness);
+    press_x(&mut harness);
+    assert!(harness.read_drive(|d| d.exit_stop.is_none()));
+    harness.clear_speech();
+    harness.with_drive(|d, ctx| {
+        d.check_destination_exit(ctx);
+        d.update_exit(ctx, 0.0, DT);
+    });
+    assert!(spoken(&harness).is_empty());
+    press_x(&mut harness);
+    assert!(harness.read_drive(|d| d.exit_signal_on));
+    assert!(harness.read_drive(|d| d.canceled_exit_key.is_none()));
+    assert_eq!(
+        harness.read_drive(|d| d.exit_stop.as_ref().map(|s| s.at_mi)),
+        Some(stop.at_mi)
     );
 }
 
