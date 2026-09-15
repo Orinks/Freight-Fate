@@ -7,11 +7,13 @@
 - **Career stats opens your citations and violations, newest first.** Each
   says what it was, why, what it cost, when, and where.
 
-- **Every driving key and pad button can be moved.** Settings, Gameplay,
-  Controls has Keyboard shortcuts and Controller buttons for it.
+- **You can change which key or pad button each driving control uses.**
+  Settings, Gameplay, Controls, then Keyboard shortcuts or Controller
+  buttons.
 
-- **The F1 help, How to play, and the spoken prompts name your own keys.**
-  With a controller in use, How to play names the pad button instead.
+- **After you change a key, the F1 help, How to play, and the spoken
+  prompts say the new one.** With a controller in use, How to play names
+  the pad button instead.
 
 - **A driver directory sits under Online, next to Drivers on duty.** It
   lists every driver with a public profile, and Enter on a driver reads
