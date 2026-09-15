@@ -472,9 +472,9 @@ fn test_hos_summary_includes_time_units() {
 
     let summary = c.summary("realistic");
 
-    assert!(summary.contains("9.0 hours of driving left"));
-    assert!(summary.contains("break due in 6.0 hours"));
-    assert!(summary.contains("duty window closes in 12.0 hours"));
+    assert!(summary.contains("9 hours of driving left"));
+    assert!(summary.contains("break due in 6 hours"));
+    assert!(summary.contains("duty window closes in 12 hours"));
 }
 
 #[test]
@@ -585,12 +585,9 @@ fn test_break_key_leads_with_the_break_and_counts_driving_time() {
 
     assert_eq!(
         c.break_summary("realistic", false),
-        "Break due in 6.0 hours of driving."
+        "Break due in 6 hours of driving."
     );
-    assert_eq!(
-        c.break_summary("realistic", true),
-        "Break due in 6.0 hours."
-    );
+    assert_eq!(c.break_summary("realistic", true), "Break due in 6 hours.");
 }
 
 #[test]
@@ -676,11 +673,11 @@ fn test_drive_time_key_names_both_clocks_and_leads_with_driving_time() {
 
     assert_eq!(
         c.drive_time_summary("realistic", false),
-        "Driving time left: 6.0 hours. Duty window closes in 9.0 hours."
+        "Driving time left: 6 hours. Duty window closes in 9 hours."
     );
     assert_eq!(
         c.drive_time_summary("realistic", true),
-        "Driving time left: 6.0 hours, duty window 9.0 hours."
+        "Driving time left: 6 hours, duty window 9 hours."
     );
 }
 
@@ -1064,6 +1061,12 @@ fn clock_text_pads_minutes_and_wraps_negative_hours() {
     assert_eq!(duration_text(0.4), "24 minutes");
     assert_eq!(duration_text(1.25), "1.2 hours");
     assert_eq!(duration_text(-3.0), "0 minutes");
+    // Whole hours are whole: "three point zero hours" read aloud was the
+    // owner's complaint (2026-09-14).
+    assert_eq!(duration_text(3.0), "3 hours");
+    assert_eq!(duration_text(1.0), "1 hour");
+    assert_eq!(duration_text(1.0 / 60.0), "1 minute");
+    assert_eq!(duration_text(2.96), "3 hours");
     assert_eq!(
         duty_status_label("on_duty_not_driving"),
         "on duty, not driving"
@@ -1348,7 +1351,7 @@ fn arrival_note_spells_the_gap_in_hours() {
     let clock = HosClock::new();
     assert_eq!(
         clock.arrival_note("realistic", 10.0 * 60.0),
-        " Your break comes about 2.0 hours before you would reach it."
+        " Your break comes about 2 hours before you would reach it."
     );
     assert_eq!(
         clock.arrival_note("realistic", 60.0),

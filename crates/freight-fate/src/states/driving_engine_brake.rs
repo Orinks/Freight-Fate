@@ -474,6 +474,13 @@ impl DrivingState {
                                    // citation on the record, and the next citation of any kind costs
                                    // more for it.
             profile.driving_record.record_citation_at(fine, hours);
+            profile.driving_record.note(
+                ff_core::models::enforcement::RECORD_CITATION,
+                "Engine brake in a no engine brake zone",
+                fine,
+                hours,
+                city,
+            );
         }
         ctx.audio.play("ui/error");
         ctx.controller.rumble.alert();

@@ -568,7 +568,13 @@ impl DrivingState {
         // spoken but never booked, so a career of chain-law tickets still
         // read as a clean safety record (owner report, 2026-09-12). Not a
         // serious violation under 49 CFR 383.51 Table 2, so no ladder text.
-        self.log_enforcement(ctx, fine, false, false);
+        self.log_enforcement(
+            ctx,
+            fine,
+            false,
+            false,
+            &format!("No chains under a level {level} chain law"),
+        );
         ctx.audio.play("ui/error");
         // A citation is money, not an act-now warning: ROUTE's never-dropped
         // queue instead of an interrupt that could erase one.

@@ -286,11 +286,15 @@ its status or release decision.
       hours limits one per line, and reads entries newest first, led by the
       status. Business status rows, action results, and the driving readout
       keys stay single answers on purpose.
-- [ ] Citations and serious violations are counts and timestamps on the
-      driving record; nothing records the reason, the fine, the date, or the
-      road. Showing "why" under Career stats needs each one recorded as an
-      entry, which is a save-format change and a cloud validator field
-      (staging regen before a tester build).
+- [x] Every citation and violation booked at the wheel keeps its reason,
+      fine, game hour and place as a record entry (the last 60), and Career
+      stats opens them newest first. Counts from before this build read as
+      "recorded before reasons were kept". The entries ride inside the
+      record, which the cloud validator already knows as one top-level
+      field, so no validator change was needed.
+- [x] Whole hours are spoken whole ("3 hours", "1 hour") by the one helper
+      every hours answer shares; the hours summary and the logbook read
+      through it too.
 
 ### September 14 work zone approach
 

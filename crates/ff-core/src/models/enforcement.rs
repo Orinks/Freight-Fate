@@ -41,7 +41,10 @@ mod record;
 #[cfg(test)]
 mod tests;
 
-pub use record::{seed_record_from_save, DrivingRecord};
+pub use record::{
+    seed_record_from_save, DrivingRecord, RecordEntry, RECORD_CITATION, RECORD_ENTRIES_KEPT,
+    RECORD_FATIGUE, RECORD_MAJOR, RECORD_SERIOUS,
+};
 
 use crate::models::business_constants::is_owner_operator;
 use crate::models::solvency::{debt_owed, debt_rung, money_text};

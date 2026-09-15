@@ -12,6 +12,30 @@ use super::{
 };
 use crate::models::save_migration::{json_f64, json_i64};
 
+/// One line of the record as the driver can read it back: what it was,
+/// why, what it cost, when, and where. The counts and timestamps above are
+/// what the ladder and the review are computed from; these are the reasons
+/// behind them, kept only since this build (owner, 2026-09-14), so a
+/// count can exceed the entries that explain it and the screen says so.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[serde(default)]
+pub struct RecordEntry {
+    /// `RECORD_CITATION`, `RECORD_SERIOUS`, `RECORD_MAJOR` or `RECORD_FATIGUE`.
+    pub kind: String,
+    pub reason: String,
+    pub fine: f64,
+    pub game_hours: f64,
+    pub place: String,
+}
+
+pub const RECORD_CITATION: &str = "citation";
+pub const RECORD_SERIOUS: &str = "serious";
+pub const RECORD_MAJOR: &str = "major";
+pub const RECORD_FATIGUE: &str = "fatigue";
+
+/// How many explained entries the record keeps; the oldest fall off first.
+pub const RECORD_ENTRIES_KEPT: usize = 60;
+
 /// What the licence file remembers about this driver, for the whole career.
 ///
 /// Times are career game hours -- the same clock `Profile.game_hours` runs
@@ -68,6 +92,8 @@ pub struct DrivingRecord {
     /// A career that predates the record loaded with offenses already on it and
     /// has not yet heard the one-time explanation of where it now stands.
     pub notice_pending: bool,
+    /// The explained entries, oldest first (see [`RecordEntry`]).
+    pub entries: Vec<RecordEntry>,
 }
 
 impl DrivingRecord {
@@ -187,6 +213,33 @@ impl DrivingRecord {
     pub fn record_citation(&mut self, fine: f64) {
         self.citations += 1;
         self.fines_paid += fine.max(0.0);
+    }
+
+    /// Keep the reason behind a count just booked. Never changes the counts
+    /// or the ladder; those are the `record_*` methods' business.
+    pub fn note(&mut self, kind: &str, reason: &str, fine: f64, game_hours: f64, place: &str) {
+        self.entries.push(RecordEntry {
+            kind: kind.to_string(),
+            reason: reason.to_string(),
+            fine,
+            game_hours,
+            place: place.to_string(),
+        });
+        let extra = self.entries.len().saturating_sub(RECORD_ENTRIES_KEPT);
+        if extra > 0 {
+            self.entries.drain(..extra);
+        }
+    }
+
+    /// Citations the counts know about that no entry explains: booked before
+    /// reasons were kept, or fallen off the end of the list.
+    pub fn unexplained_citations(&self) -> i64 {
+        let explained = self
+            .entries
+            .iter()
+            .filter(|e| e.kind != RECORD_FATIGUE)
+            .count() as i64;
+        (self.citations - explained).max(0)
     }
 
     /// Book a citation at career hour `game_hours`, so the carrier's review

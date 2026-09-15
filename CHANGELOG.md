@@ -4,6 +4,9 @@
 
 ### Added
 
+- **Career stats opens your citations and violations, newest first.** Each
+  says what it was, why, what it cost, when, and where.
+
 - **Every driving key and pad button can be moved.** Settings, Gameplay,
   Controls has Keyboard shortcuts and Controller buttons for it.
 
@@ -411,6 +414,9 @@
   trailer's weight, so the truck pulls away quicker and stops shorter.
 
 ### Changed
+
+- **Whole hours are spoken as whole numbers.** Three hours is "3 hours"
+  now, never "three point zero".
 
 - **Time and weather, Trip status, Career plan, and the first-day briefing
   are screens of lines now.** Up and Down read one line at a time, and Enter

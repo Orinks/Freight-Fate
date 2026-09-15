@@ -130,7 +130,7 @@ fn test_logbook_totals_are_one_line_and_entries_read_newest_first() {
         .iter()
         .find(|l| l.starts_with("Today: "))
         .expect("a totals line");
-    assert!(totals.contains("driving 3.0 hours"), "{totals}");
+    assert!(totals.contains("driving 3 hours"), "{totals}");
     assert!(totals.contains("sleeper berth"), "{totals}");
     // No heading row; the entries follow the totals, newest first, each led
     // by what the driver was doing.
@@ -139,10 +139,10 @@ fn test_logbook_totals_are_one_line_and_entries_read_newest_first() {
         "{lines:?}"
     );
     let at = lines.iter().position(|l| l.starts_with("Today: ")).unwrap();
-    assert_eq!(lines[at + 1], "Driving, 7 AM to 10 AM, 3.0 hours, I-90.");
+    assert_eq!(lines[at + 1], "Driving, 7 AM to 10 AM, 3 hours, I-90.");
     assert_eq!(
         lines[at + 2],
-        "On duty, not driving, 6 AM to 7 AM, 1.0 hours, Chicago, pre-trip."
+        "On duty, not driving, 6 AM to 7 AM, 1 hour, Chicago, pre-trip."
     );
     assert!(lines[at + 3].starts_with("Off duty, "), "{lines:?}");
     assert_eq!(lines.len(), at + 4, "{lines:?}");

@@ -486,7 +486,7 @@ impl DrivingState {
         };
         // Not a serious violation under 49 CFR 383.51 Table 2: the citation
         // goes on the record and scales the next fine, nothing more.
-        self.log_enforcement(ctx, fine, false, false);
+        self.log_enforcement(ctx, fine, false, false, &format!("Ran {offense}"));
         ctx.audio.play("ui/error");
         ctx.say_event_with(
             format!(

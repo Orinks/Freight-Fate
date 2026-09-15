@@ -736,7 +736,13 @@ impl DrivingState {
             Some(post) => format!("A trooper working this {} saw it", post.reason()),
             None => "The work crew called it in".to_string(),
         };
-        let ladder = self.log_enforcement(ctx, fine, true, false);
+        let ladder = self.log_enforcement(
+            ctx,
+            fine,
+            true,
+            false,
+            "Drove through the barrels in a work zone",
+        );
         ctx.audio.play("ui/error");
         let tail = if ladder.is_empty() {
             String::new()

@@ -224,6 +224,59 @@ impl DrivingState {
 
     /// `_speak_current_state()`: Alt+1, the state the truck is in, and nothing
     /// else.
+    /// Where the truck is, for the record: the road, the nearest town when
+    /// one is close, and the state. "I-90 East near Gary, Indiana."
+    pub fn record_place(&mut self, ctx: &GameContext) -> String {
+        let Some(frame) = self.highway_frame() else {
+            let street = self.street_under_the_wheels();
+            let city = self.local_route_city();
+            let spoken = if city.is_empty() {
+                String::new()
+            } else {
+                ctx.world.spoken_city(&city, Some(true))
+            };
+            return match (street.is_empty(), spoken.is_empty()) {
+                (false, false) => format!("{street} in {spoken}"),
+                (false, true) => street,
+                (true, false) => spoken,
+                (true, true) => String::new(),
+            };
+        };
+        let heading = leg_heading(
+            ctx.world,
+            &frame.leg.highway,
+            &frame.from_city,
+            &frame.toward_city,
+        );
+        let mut place = format!("{} {heading}", frame.leg.highway)
+            .trim()
+            .to_string();
+        let mut nearest: Option<(f64, String)> = None;
+        for landmark in frame.leg.landmarks() {
+            if landmark.category != "village" {
+                continue;
+            }
+            let along = landmark.at_mi - frame.native_offset;
+            let away = (along.powi(2) + landmark.off_mi.powi(2)).sqrt();
+            if nearest.as_ref().is_none_or(|found| away < found.0) {
+                nearest = Some((away, landmark.name.clone()));
+            }
+        }
+        if let Some((away, town)) = nearest {
+            if away <= NEAREST_TOWN_MI {
+                place = format!("{place} near {town}");
+            }
+        }
+        let mut state = leg_state_at(&frame.leg, frame.native_offset);
+        if state.is_empty() {
+            state = city_state(ctx, &frame.toward_city);
+        }
+        if !state.is_empty() {
+            place = format!("{place}, {state}");
+        }
+        place
+    }
+
     pub fn speak_current_state(&mut self, ctx: &mut GameContext) {
         let state = match self.highway_frame() {
             None => {

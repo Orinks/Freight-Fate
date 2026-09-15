@@ -227,7 +227,8 @@ impl TrafficStopState {
         }
         ctx.audio.play("ui/error");
         let serious = enforcement::is_serious_speed(self.over) || self.warned;
-        let ladder = d.log_enforcement(ctx, fine, serious, false);
+        let reason = format!("Speeding, {over_text} over the {limit_text} limit");
+        let ladder = d.log_enforcement(ctx, fine, serious, false, &reason);
         self.outcome_text = format!(
             "{over_text} over the {limit_text} limit. Speeding ticket: {} dollars, paid on the \
              spot, and a reputation hit.{}",
@@ -377,7 +378,8 @@ impl EnforcementStopState {
             p.career.reputation = (p.career.reputation - hit).max(0.0);
         }
         ctx.audio.play("ui/error");
-        let ladder = d.log_enforcement(ctx, self.fine, self.warned, false);
+        let reason = self.menu.title.clone();
+        let ladder = d.log_enforcement(ctx, self.fine, self.warned, false, &reason);
         self.outcome_text = format!(
             "Fine: {} dollars, paid on the spot, and a reputation hit.{}",
             fmt_grouped(self.fine, 0),
@@ -578,7 +580,7 @@ impl FelonyStopState {
         }
         // The part that used to go nowhere: fleeing a stop in a commercial
         // vehicle is a major offense, and the licence answers for it.
-        self.standing_text = d.log_enforcement(ctx, fine, false, true);
+        self.standing_text = d.log_enforcement(ctx, fine, false, true, "Ran from a traffic stop");
         // add_damage, not a raw assignment: spike damage has to cross the
         // bands so a spiked truck can go out of service like any other wreck.
         d.trip.truck.add_damage(FAILURE_TO_STOP_DAMAGE_PCT, true);

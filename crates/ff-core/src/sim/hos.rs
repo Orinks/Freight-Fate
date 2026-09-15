@@ -120,12 +120,24 @@ fn positive_minutes(minutes: f64) -> f64 {
     minutes
 }
 
+/// A span of time as it is spoken: minutes under an hour, whole hours as a
+/// whole number ("3 hours", never "three point zero"), the rest to a tenth.
 pub fn duration_text(hours: f64) -> String {
     let minutes = pyjson::py_max(0.0, hours * 60.0);
     if minutes < 60.0 {
-        return format!("{} minutes", fmt_f(minutes, 0));
+        let text = fmt_f(minutes, 0);
+        return if text == "1" {
+            "1 minute".to_string()
+        } else {
+            format!("{text} minutes")
+        };
     }
-    format!("{} hours", fmt_f(minutes / 60.0, 1))
+    let text = fmt_f(minutes / 60.0, 1);
+    match text.strip_suffix(".0") {
+        Some("1") => "1 hour".to_string(),
+        Some(whole) => format!("{whole} hours"),
+        None => format!("{text} hours"),
+    }
 }
 
 // ---------------------------------------------------------------------------

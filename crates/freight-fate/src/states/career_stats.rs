@@ -11,7 +11,8 @@ use ff_core::pyfmt::{fmt_f, fmt_grouped};
 
 use crate::app::GameContext;
 use crate::impl_state_for_menu;
-use crate::states::base::{Menu, MenuCore, MenuItem};
+use crate::states::base::{Menu, MenuCore, MenuItem, SimpleMenuState};
+use ff_core::sim::hos::clock_text;
 
 /// Fresh hours of service and zero fatigue: sleeping gains nothing but time.
 pub fn fully_rested(profile: &Profile) -> bool {
@@ -187,6 +188,16 @@ impl Menu for CareerStatsState {
             })
             .collect();
         items.push(
+            MenuItem::new("Citations and violations", |_s: &mut Self, ctx| {
+                let lines = record_lines(ctx);
+                ctx.push_state(SimpleMenuState::readout("Citations and violations", lines));
+            })
+            .help(
+                "Open the list, newest first: what it was, why, what it cost, when, \
+                 and where.",
+            ),
+        );
+        items.push(
             MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx))
                 .help("Back to the terminal menu."),
         );
@@ -195,3 +206,54 @@ impl Menu for CareerStatsState {
 }
 
 impl_state_for_menu!(CareerStatsState);
+
+/// The record's entries as spoken lines, newest first, then the counts that
+/// no entry explains.
+pub fn record_lines(ctx: &GameContext) -> Vec<String> {
+    let Some(p) = ctx.profile.as_ref() else {
+        return Vec::new();
+    };
+    let record = &p.driving_record;
+    let mut lines: Vec<String> = record
+        .entries
+        .iter()
+        .rev()
+        .map(|entry| {
+            let what = match entry.kind.as_str() {
+                enforcement::RECORD_SERIOUS => "Serious violation",
+                enforcement::RECORD_MAJOR => "Major offense",
+                enforcement::RECORD_FATIGUE => "Safety incident",
+                _ => "Citation",
+            };
+            let day = (entry.game_hours / 24.0).floor() as i64 + 1;
+            let mut line = format!(
+                "{what}, day {day}, {}: {}.",
+                clock_text(entry.game_hours),
+                entry.reason
+            );
+            if entry.fine > 0.0 {
+                line.push_str(&format!(" {} dollars.", fmt_grouped(entry.fine, 0)));
+            }
+            if !entry.place.is_empty() {
+                line.push_str(&format!(" On {}.", entry.place));
+            }
+            line
+        })
+        .collect();
+    let unexplained = record.unexplained_citations();
+    if unexplained > 0 {
+        lines.push(format!(
+            "{} earlier {} recorded before reasons were kept.",
+            unexplained,
+            if unexplained == 1 {
+                "citation"
+            } else {
+                "citations"
+            }
+        ));
+    }
+    if lines.is_empty() {
+        lines.push("No citations or violations on your record.".to_string());
+    }
+    lines
+}

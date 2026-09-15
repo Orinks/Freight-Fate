@@ -127,15 +127,26 @@ impl DrivingState {
         fine: f64,
         serious: bool,
         major: bool,
+        reason: &str,
     ) -> String {
         if ctx.profile.is_none() || self.enforcement_bypassed(ctx) {
             // the debug hours modes freeze the ladder as well as the stop
             return String::new();
         }
         let hours = record_hours(ctx, self);
-        profile_mut_of(ctx)
-            .driving_record
-            .record_citation_at(fine, hours);
+        let place = self.record_place(ctx);
+        let kind = if major {
+            enforcement::RECORD_MAJOR
+        } else if serious {
+            enforcement::RECORD_SERIOUS
+        } else {
+            enforcement::RECORD_CITATION
+        };
+        {
+            let record = &mut profile_mut_of(ctx).driving_record;
+            record.record_citation_at(fine, hours);
+            record.note(kind, reason, fine, hours, &place);
+        }
         let text = if major {
             let kind = profile_mut_of(ctx)
                 .driving_record
@@ -165,9 +176,18 @@ impl DrivingState {
     pub fn log_fatigue_event(&mut self, ctx: &mut GameContext) -> String {
         let hours = record_hours(ctx, self);
         let hit = enforcement::FATIGUE_EVENT_REPUTATION_HIT;
-        let (count, serious) = profile_mut_of(ctx)
-            .driving_record
-            .record_fatigue_event(hours);
+        let place = self.record_place(ctx);
+        let (count, serious) = {
+            let record = &mut profile_mut_of(ctx).driving_record;
+            let booked = record.record_fatigue_event(hours);
+            let kind = if booked.1 > 0 {
+                enforcement::RECORD_SERIOUS
+            } else {
+                enforcement::RECORD_FATIGUE
+            };
+            record.note(kind, "Ran off the road asleep", 0.0, hours, &place);
+            booked
+        };
         let text = if count < enforcement::FATIGUE_EVENTS_BEFORE_SERIOUS {
             format!(
                 "Running off the road asleep is a preventable safety incident and it goes on \

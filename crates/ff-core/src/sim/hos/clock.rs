@@ -680,20 +680,20 @@ impl HosClock {
         if duty_left <= break_left {
             return format!(
                 "ELD status {status}. Hours of service: \
-                 {} hours of driving left, \
-                 {} hours of duty window left.{suffix}",
-                fmt_f(drive_left, 1),
-                fmt_f(duty_left, 1),
+                 {} of driving left, \
+                 {} of duty window left.{suffix}",
+                duration_text(drive_left),
+                duration_text(duty_left),
             );
         }
         format!(
             "ELD status {status}. Hours of service: \
-             {} hours of driving left, \
-             break due in {} hours, \
-             duty window closes in {} hours.{suffix}",
-            fmt_f(drive_left, 1),
-            fmt_f(break_left, 1),
-            fmt_f(duty_left, 1),
+             {} of driving left, \
+             break due in {}, \
+             duty window closes in {}.{suffix}",
+            duration_text(drive_left),
+            duration_text(break_left),
+            duration_text(duty_left),
         )
     }
 
@@ -714,14 +714,14 @@ impl HosClock {
             return vec![self.summary(mode)];
         }
         let (drive_left, duty_left, break_left) = self.hours_left(mode);
-        let mut lines = vec![format!("Driving left: {} hours.", fmt_f(drive_left, 1))];
+        let mut lines = vec![format!("Driving left: {}.", duration_text(drive_left))];
         if duty_left <= break_left {
-            lines.push(format!("Duty window left: {} hours.", fmt_f(duty_left, 1)));
+            lines.push(format!("Duty window left: {}.", duration_text(duty_left)));
         } else {
-            lines.push(format!("Break due in {} hours.", fmt_f(break_left, 1)));
+            lines.push(format!("Break due in {}.", duration_text(break_left)));
             lines.push(format!(
-                "Duty window closes in {} hours.",
-                fmt_f(duty_left, 1)
+                "Duty window closes in {}.",
+                duration_text(duty_left)
             ));
         }
         if let Some(pending) = self.split_pending_summary() {
@@ -922,8 +922,8 @@ impl HosClock {
             _ => "break",
         };
         format!(
-            " Your {limit_name} comes about {} hours before you would reach it.",
-            fmt_f(gap_h, 1)
+            " Your {limit_name} comes about {} before you would reach it.",
+            duration_text(gap_h)
         )
     }
 
