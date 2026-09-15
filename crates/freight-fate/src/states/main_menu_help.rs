@@ -2,8 +2,17 @@
 //! [`HelpState`] reader (port of `freight_fate/states/main_menu_help.py`).
 
 use crate::app::GameContext;
+use crate::bindings::Action;
 use crate::states::base::{InputEvent, Key, State};
+use crate::states::main_menu::ShortcutDevice;
 
+/// Control names in the page text are `{{id}}` placeholders (`{{engine}}`,
+/// `{{pad:fuel}}`, `{{key:horn}}`) resolved at render time against the
+/// player's own shortcuts. A bare id follows the device in use: the pad
+/// button when a controller is active and the control has one, else the
+/// keyboard key. `pad:` and `key:` pin a device (the Controller page
+/// describes the pad whatever you are holding). See
+/// [`crate::bindings`] for the ids.
 pub static HELP_PAGES: &[(&str, &[&str])] = &[
     (
         "The goal",
@@ -56,7 +65,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "Full keeps the truck centered and takes your exits, including the destination exit, with no signal and no exit lane.",
             "Partial adds gentle drift with generous steering help. A short beep comes from the side you drift toward; steer away from it. A softer chime means you are centered again.",
             "Off drifts like a real wheel, with rumble-strip warnings and consequences, and every exit needs its signal and its exit lane.",
-            "Lane changes: on partial or off, hold the steer across the lane line; on full, tap Left or Right.",
+            "Lane changes: on partial or off, hold the steer across the lane line; on full, tap {{steer_left}} or {{steer_right}}.",
             "Discord presence shows your broad activity in Discord: the main menu, a route, resting, with the route and cargo. Never your saves or personal details. On by default; nothing happens if Discord is closed.",
             "Profile sharing can show a driver name you choose, your route, cargo, rough progress, achievements, road-journal posts, career totals, your truck, and your last-saved city on orinks.net. Full saves and precise location stay private.",
             "Nothing is shared until you set it up: the first time, your browser opens to pick that driver name and confirm. Connecting the account turns Profile sharing on and starts backing your careers up; each is its own row on the Online menu.",
@@ -68,64 +77,64 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
     (
         "Driving basics",
         &[
-            "E starts the engine. To shut it down, slow below 5 miles per hour first.",
+            "{{engine}} starts the engine. To shut it down, slow below 5 miles per hour first.",
             "Air brakes need pressure before the truck can move: start the engine and wait for air pressure to reach 100 psi.",
-            "Press P to release or set the parking brake. On low air, keep the parking brake set until pressure builds. Hard repeated braking uses air faster.",
-            "Hold the Up arrow to accelerate, the Down arrow to brake.",
-            "In automatic, once stopped, keep holding the Down arrow to back up slowly. Touch the Up arrow to brake and return to forward.",
-            "Hold B for the emergency brake, the hardest possible stop.",
-            "K starts automatic speed control: adaptive cruise with a three second clear-weather gap. Rain, snow, fog, or low visibility increase the following gap. It slows for traffic ahead but does not steer.",
+            "Press {{parking_brake}} to release or set the parking brake. On low air, keep the parking brake set until pressure builds. Hard repeated braking uses air faster.",
+            "Hold {{accelerate}} to accelerate, {{brake}} to brake.",
+            "In automatic, once stopped, keep holding {{brake}} to back up slowly. Touch {{accelerate}} to brake and return to forward.",
+            "Hold {{emergency_brake}} for the emergency brake, the hardest possible stop.",
+            "{{cruise}} starts automatic speed control: adaptive cruise with a three second clear-weather gap. Rain, snow, fog, or low visibility increase the following gap. It slows for traffic ahead but does not steer.",
             "Plus and minus, including the keypad keys, raise and lower the open-road cruise target by five miles per hour, even while the speed keeper is handling a low-speed zone. Control with plus or minus moves it by one.",
-            "Space includes the active speed-control mode and target in the speed readout.",
+            "{{speed}} includes the active speed-control mode and target in the speed readout.",
             "Cruise looks ahead for sharp posted-limit drops and never holds more than five over the posted limit.",
             "The speed keeper handles low-speed local roads, like facility access roads, construction zones, or heavy traffic, then cruise resumes. The keeper eases off early for the next turn or the next lower limit.",
-            "Press K again or touch the brakes to cancel the session. At the planned pickup it pauses instead and resumes once the loaded truck is rolling.",
-            "The in-cab radio: M toggles it, Page Down and Page Up tune, Shift with either changes the radio volume, Y reads status. The radio has its own help page.",
+            "Press {{cruise}} again or touch the brakes to cancel the session. At the planned pickup it pauses instead and resumes once the loaded truck is rolling.",
+            "The in-cab radio: {{radio}} toggles it, Page Down and Page Up tune, Shift with either changes the radio volume, {{radio_status}} reads status. The radio has its own help page.",
             "In automatic the truck shifts for itself.",
-            "Manual: hold Left Shift for the clutch, then W shifts up, Q shifts down, N is neutral, Backspace is reverse. From neutral or reverse, W selects first gear.",
-            "J toggles the engine brake for long downhill grades; while it is on, 1, 2, and 3 select two, four, or six cylinders. J re-engages at the stage you last selected.",
+            "Manual: hold Left Shift for the clutch, then {{shift_up}} shifts up, {{shift_down}} shifts down, {{neutral}} is neutral, {{reverse}} is reverse. From neutral or reverse, {{shift_up}} selects first gear.",
+            "{{engine_brake}} toggles the engine brake for long downhill grades; while it is on, {{jake_stage_1}}, {{jake_stage_2}}, and {{jake_stage_3}} select two, four, or six cylinders. {{engine_brake}} re-engages at the stage you last selected.",
             "Towns ban engine braking as noise: inside a no engine brake zone you are warned first, then fined if it stays on. Downgrades and emergencies are exempt.",
             "Curve speed assistance takes a bend on the service brakes, never the engine brake. On a real downgrade it does raise the jake.",
             "Inside a no engine brake zone, cruise and curve speed assistance keep the jake off and hold speed with the brakes, except on real downgrades.",
-            "Hold H to sound the horn; release to stop it.",
+            "Hold {{horn}} to sound the horn; release to stop it.",
             "Learn game sounds, on the pause menu, plays every cue on demand with what it means.",
         ],
     ),
     (
         "Driving information keys",
         &[
-            "Space speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state.",
-            "S speaks the posted speed limit here, the zone if any, and how far over you are.",
-            "D speaks one safe-speed number for right now, with weather grip and an armed exit ramp already in it.",
-            "G speaks the grade under the wheels, how far it runs, whether the truck is holding, pulling, or losing it, and the next grade ahead.",
-            "Steep grades of three percent or more announce themselves ahead, except on quiet or urgent only speech, where G answers on demand.",
-            "Tab opens a driving status menu for route, driver, map, and the Driver apps tablet: Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD, each read line by line.",
-            "F speaks fuel level and range.",
-            "C speaks the clock, your deadline, and the one hours limit that comes first.",
+            "{{speed}} speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state.",
+            "{{speed_limit}} speaks the posted speed limit here, the zone if any, and how far over you are.",
+            "{{safe_speed}} speaks one safe-speed number for right now, with weather grip and an armed exit ramp already in it.",
+            "{{grade}} speaks the grade under the wheels, how far it runs, whether the truck is holding, pulling, or losing it, and the next grade ahead.",
+            "Steep grades of three percent or more announce themselves ahead, except on quiet or urgent only speech, where {{grade}} answers on demand.",
+            "{{status}} opens a driving status menu for route, driver, map, and the Driver apps tablet: Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD, each read line by line.",
+            "{{fuel}} speaks fuel level and range.",
+            "{{clock}} speaks the clock, your deadline, and the one hours limit that comes first.",
             "Three keys answer one hours question each.",
-            "Alt A speaks time at the wheel so far and time on duty this shift.",
-            "Alt S speaks when your 30 minute break is due, or that a break will not help.",
-            "Alt D speaks what ends this shift, driving time and duty window both, and where you can legally stop before it.",
+            "{{hos_wheel}} speaks time at the wheel so far and time on duty this shift.",
+            "{{hos_break}} speaks when your 30 minute break is due, or that a break will not help.",
+            "{{hos_drive}} speaks what ends this shift, driving time and duty window both, and where you can legally stop before it.",
             "With enforcement off each of the three says so.",
-            "R speaks how far along you are and how far is left, then the road, the state, and the city you are heading toward. With a planned stop set, it counts down to that stop instead.",
+            "{{route}} speaks how far along you are and how far is left, then the road, the state, and the city you are heading toward. With a planned stop set, it counts down to that stop instead.",
             "Four keys answer one part of that each.",
-            "Alt 1 speaks the state you are in.",
-            "Alt 2 speaks the road you are on, signed the way you would read it.",
-            "Alt 3 speaks the town you are in, or the nearest one and how far off the road it sits.",
-            "Alt 4 speaks the direction you are travelling.",
-            "The keypad numbers work the same way.",
-            "X signals for the next announced route exit, or cancels that signal.",
-            "L speaks which lane you are in and your position inside it.",
-            "I turns the lane locator on and off: a soft tock once a beat, panned to where the truck sits in its lane. It needs lane keeping on partial or off.",
+            "{{place_state}} speaks the state you are in.",
+            "{{place_road}} speaks the road you are on, signed the way you would read it.",
+            "{{place_town}} speaks the town you are in, or the nearest one and how far off the road it sits.",
+            "{{place_direction}} speaks the direction you are travelling.",
+            "At the default keys, the keypad numbers work the same way.",
+            "{{take_exit}} signals for the next announced route exit, or cancels that signal.",
+            "{{lane}} speaks which lane you are in and your position inside it.",
+            "{{lane_locator}} turns the lane locator on and off: a soft tock once a beat, panned to where the truck sits in its lane. It needs lane keeping on partial or off.",
             "Drift beeps come from the side you drift toward; steer away from the beep. A softer chime means you are centered again.",
-            "V speaks the weather and the forecast.",
-            "A repeats the last driving announcement.",
-            "Alt C repeats the last CB chatter on its own, with the distance as it is now, and says so once you have passed what the CB called.",
+            "{{weather}} speaks the weather and the forecast.",
+            "{{last_announcement}} repeats the last driving announcement.",
+            "{{cb}} repeats the last CB chatter on its own, with the distance as it is now, and says so once you have passed what the CB called.",
             "Comma repeats what was just said and keeps stepping back; Period moves forward again. Control with Comma or Period jumps to the oldest or newest message, the bracket keys switch between all messages, general messages, and driving events, and Control C copies the one you are on.",
-            "U speaks the road ahead that no other key answers: the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that demands slowing.",
+            "{{upcoming}} speaks the road ahead that no other key answers: the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that demands slowing.",
             "Left or Right Control stops the driving event voice.",
             "Escape opens the pause menu.",
-            "The keys named here are the defaults. Every driving key and pad button can be moved under Settings, Gameplay, Controls, then Keyboard shortcuts or Controller buttons.",
+            "The keys named here are yours: every driving key and pad button can be moved under Settings, Gameplay, Controls, then Keyboard shortcuts or Controller buttons, and this page follows the move. With a controller in use it names the button where there is one.",
         ],
     ),
     (
@@ -135,10 +144,10 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "Button names use the Xbox layout: A, B, X, Y, the bumpers, and the D-pad.",
             "In menus: D-pad up and down move, D-pad left and right adjust an option, A confirms like Enter, B goes back like Escape, Back reads help like F1. While the driving voice is speaking, Back stops it instead.",
             "Driving: right trigger is the gas, left trigger the brake; the left trigger fully in is the hardest stop. The left stick steers.",
-            "Hold the left bumper for the clutch; A shifts up, X shifts down. Y starts automatic speed control. B speaks your speed.",
-            "Click the left stick for the horn, the right stick for the engine brake. Start pauses and unpauses.",
-            "D-pad up reads your route and current location, down signals for the next exit, left the weather, right the clock with your full hours of service.",
-            "Hold the right bumper for the second layer: plus A starts or stops the engine, plus B reads fuel, plus X reads the posted speed limit here and how far over you are, plus Y sets or releases the parking brake, plus D-pad up reads the next listed exit, plus D-pad down opens route-stop actions or emergency shoulder sleep when fully stopped away from route points, plus D-pad left and right lower and raise the open-road cruise target, and plus Start opens the status menu.",
+            "Hold the left bumper for the clutch; {{pad:shift_up}} shifts up, {{pad:shift_down}} shifts down. {{pad:cruise}} starts automatic speed control. {{pad:speed}} speaks your speed.",
+            "{{pad:horn}} sounds the horn, {{pad:engine_brake}} the engine brake. Start pauses and unpauses.",
+            "{{pad:route}} reads your route and current location, {{pad:take_exit}} signals for the next exit, {{pad:weather}} the weather, {{pad:clock}} the clock with your full hours of service.",
+            "Hold the right bumper for the second layer. {{pad:engine}} starts or stops the engine, {{pad:fuel}} reads fuel, {{pad:speed_limit}} reads the posted speed limit here and how far over you are, {{pad:parking_brake}} sets or releases the parking brake, {{pad:rest}} opens route-stop actions or emergency shoulder sleep when fully stopped away from route points, {{pad:cruise_down}} and {{pad:cruise_up}} lower and raise the open-road cruise target, and {{pad:status}} opens the status menu.",
         ],
     ),
     (
@@ -148,33 +157,33 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "GPS announces state lines, intermediate places, traffic, highway changes, and rest-stop exits.",
             "Grades and terrain come from the route. Weather, traffic, and construction still vary by time, place, and seed. Rush hours can make metro corridors busier.",
             "Weather matters: well over the safe speed on a slick road risks losing traction; wind and storms add drag that costs speed and fuel; low visibility shortens the warning before a hazard.",
-            "Your career runs on a calendar that starts in spring and advances as you drive, rest, and sleep, so the season and weather change through the year. The date is spoken with the clock on C, in the Tab status menu, and at the terminal.",
+            "Your career runs on a calendar that starts in spring and advances as you drive, rest, and sleep, so the season and weather change through the year. The date is spoken with the clock on {{clock}}, in the {{status}} status menu, and at the terminal.",
             "Posted limits come from real map data and change along the corridor. A change is announced as reduced or raised, named near a city. Limits also drop in construction and traffic zones.",
             "Congestion follows real traffic volumes: busy metro stretches jam at weekday rush hour, about seven to nine in the morning and four to six thirty in the evening, and flow free late at night and on weekend mornings.",
             "Enforcement posts sit along the road: median crossovers, weigh station aprons, construction zone details, city units. Most are empty. A post with somebody in it makes a sound before it can see you.",
             "Whether an officer notices you is graded. Five over is seen and ignored; twenty over is certain. A crest blocks a laser, fog blinds an officer's eyes and barely touches radar, and running in a pack at the pack's speed lowers your odds. Officers also see visible damage, no chains inside a chain control, and following far too close.",
-            "When a trooper lights you up: signal with X and brake to a stop on the shoulder for a license and logbook check ending in a ticket or a warning. Ignoring the lights is evasion and costs far more.",
+            "When a trooper lights you up: signal with {{take_exit}} and brake to a stop on the shoulder for a license and logbook check ending in a ticket or a warning. Ignoring the lights is evasion and costs far more.",
             "Fines are real money: a few hundred dollars for lights, thousands for unsafe equipment or running an open scale. Each citation already on your record makes the next one dearer, up to double after your third. A fine inside a construction zone is doubled on top of that.",
             "Some tickets cost more than money. Fifteen or more over the limit, rolling through a failure-to-stop warning, driving through the barrels, and a second run off the road asleep are serious violations. Two inside three years suspend your CDL for sixty days, and you cannot take a load while it runs; a third costs a hundred and twenty. Running from a stop is a major offense: a year the first time, for life the second.",
-            "CB chatter passes on what other drivers have seen. It says how sure it is, it is sometimes stale, and it never claims the road is clear. The status menu lets you review that chatter with the route guidance; Alt C says the last CB call again.",
+            "CB chatter passes on what other drivers have seen. It says how sure it is, it is sometimes stale, and it never claims the road is clear. The status menu lets you review that chatter with the route guidance; {{cb}} says the last CB call again.",
             "Hazards come from traffic ahead: slow lead vehicles, merging traffic, lane restrictions, and queues. Nearby vehicles merge, brake, pass, or slow in your lane. Adaptive cruise follows them; you still steer and manage space.",
             "Highway stops use clear place names and list the actions available there: fuel, eat, rest, save, inspect, or call for help, depending on the stop.",
             "Toll roads, plazas, and electronic gantries are announced. Tolls and approved company charges are paid or reimbursed at settlement, listed separately from fines an earlier load could not cover. Service plazas on toll roads work like stops.",
             "Brake now means slow below twenty five miles per hour quickly to avoid a collision.",
-            "Change lanes or brake means a fixed object in your lane. The call ends by naming the open lane: left lane open, right lane open, or either lane open. With lane keeping on partial or off, steer across the lane line; on full, tap Left or Right. Braking works too, but takes nearly a full stop before you can ease around.",
+            "Change lanes or brake means a fixed object in your lane. The call ends by naming the open lane: left lane open, right lane open, or either lane open. With lane keeping on partial or off, steer across the lane line; on full, tap {{steer_left}} or {{steer_right}}. Braking works too, but takes nearly a full stop before you can ease around.",
             "Brake with no lane open means nowhere to go around: brake, and do not reach for a lane change.",
-            "Lane counts come from real map data, from one lane your side up to several. The drive says when the road widens or narrows, and L speaks which lane you are in. Exits leave from the right lane. Keep right except to pass.",
+            "Lane counts come from real map data, from one lane your side up to several. The drive says when the road widens or narrows, and {{lane}} speaks which lane you are in. Exits leave from the right lane. Keep right except to pass.",
             "Construction sometimes closes a lane, never where the road runs one lane your side. The taper callout names the closed side; driving through the barrels means truck damage, a citation, and a serious violation.",
             "Rest stops sit at highway exits, announced a few miles out, with one-mile exit cues and turn guidance.",
-            "While rolling toward a sleep-capable stop, T plans that stop and names the distance, exit, and whether stopping assistance is on. T never signals: press X to take the exit.",
-            "X signals or cancels the exit. Slow to forty five for the ramp and set up the exit lane unless lane keeping is on full. Too fast and you miss the exit. Off the ramp, brake to a stop for the rest stop menu: refuel, take a break, sleep, or save.",
+            "While rolling toward a sleep-capable stop, {{rest}} plans that stop and names the distance, exit, and whether stopping assistance is on. {{rest}} never signals: press {{take_exit}} to take the exit.",
+            "{{take_exit}} signals or cancels the exit. Slow to forty five for the ramp and set up the exit lane unless lane keeping is on full. Too fast and you miss the exit. Off the ramp, brake to a stop for the rest stop menu: refuel, take a break, sleep, or save.",
             "Most ramps end at a traffic light or a stop sign, called out on the way down. Lights cycle green, yellow, red, and every change is spoken. Yellow means stop unless you are already at the light.",
             "Red light or stop sign: full stop at the bar, then go on green or in a clear gap. Rolling through draws horns; blowing through at speed means cross traffic clips the trailer.",
-            "Destination exits are announced with their signed exit and toward cities. Use X for the destination signal unless lane keeping is on full, which takes it for you. Off the highway, brake to a stop at the receiver gate.",
+            "Destination exits are announced with their signed exit and toward cities. Use {{take_exit}} for the destination signal unless lane keeping is on full, which takes it for you. Off the highway, brake to a stop at the receiver gate.",
             "Miss the destination exit and dispatch loops you back through the next safe turnaround.",
             "Ordinary pass-by exits are not spoken; the status screen lists the next exit.",
-            "Fully stopped at a route stop, T opens its menu. Fully stopped away from route points, T opens the emergency shoulder-sleep warning instead; nearby route points always take priority.",
-            "Miss a stop and T plans the next sleep-capable one. Already safely stopped at the missed route point, T opens its menu.",
+            "Fully stopped at a route stop, {{rest}} opens its menu. Fully stopped away from route points, {{rest}} opens the emergency shoulder-sleep warning instead; nearby route points always take priority.",
+            "Miss a stop and {{rest}} plans the next sleep-capable one. Already safely stopped at the missed route point, {{rest}} opens its menu.",
             "Fuel prices vary by region. Company drivers fuel on the carrier card; owner-operators pay their own diesel.",
             "Running out of fuel means a roadside rescue: owner-operators pay, company drivers take a service-record hit.",
             "A badly damaged truck: the pause menu calls a roadside mechanic for a pricey field repair.",
@@ -187,13 +196,13 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "Eleven hours of driving after ten consecutive hours off duty, inside a fourteen hour duty window.",
             "A thirty minute break is required after eight cumulative hours of driving. Any thirty consecutive non-driving minutes count: loading, fueling, inspection, or a rest-stop break.",
             "Spoken warnings come at two hours, one hour, and thirty minutes left.",
-            "Alt A reads time at the wheel, Alt S when the break is due, Alt D what ends the shift. C reads the clock and the nearest limit; the Tab status menu holds the whole hours report.",
+            "{{hos_wheel}} reads time at the wheel, {{hos_break}} when the break is due, {{hos_drive}} what ends the shift. {{clock}} reads the clock and the nearest limit; the {{status}} status menu holds the whole hours report.",
             "Sleeping ten hours at a rest stop or a terminal starts a fresh shift.",
             "At sleep-capable truck parking, the sleeper berth offers two, three, seven, or eight hours to build a legal split, or ten hours for the full reset.",
             "Driving past a limit risks inspections, fines, and out-of-service orders.",
             "Fatigue builds as you drive, faster at night. A drowsy driver yawns, drifts onto the rumble strip, and reacts late.",
             "Late at night, truck parking may be full. A full lot still sells diesel.",
-            "Stopped on the open road with no stop nearby, T or the pause menu offers emergency shoulder sleep: a legal ten-hour reset with poor rest, a possible parking ticket or minor damage, and the deadline keeps running.",
+            "Stopped on the open road with no stop nearby, {{rest}} or the pause menu offers emergency shoulder sleep: a legal ten-hour reset with poor rest, a possible parking ticket or minor damage, and the deadline keeps running.",
             "A basic break or fuel stop with no overnight parking offers Sleep 10 hours in the lot: cramped and poor.",
             "A motel room near the lot costs your own money for the same legal reset with full rest, and is offered when parking is full.",
             "Sleep-capable parking gives the best, fully-rested ten-hour sleep.",
@@ -205,10 +214,10 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
         "The in-cab radio",
         &[
             "The radio is optional; speech and safety cues always come first. It has power only while the engine runs.",
-            "M toggles the radio. Page Down tunes to the next station, Page Up to the previous; semicolon and apostrophe do the same.",
-            "Control with any of those jumps a whole category, like AFN to terrestrial. Shift with any of those changes the radio volume in 10 percent steps, on or off. Y speaks the station, signal, volume, and streamer-safe status.",
+            "{{radio}} toggles the radio. Page Down tunes to the next station, Page Up to the previous; semicolon and apostrophe do the same.",
+            "Control with any of those jumps a whole category, like AFN to terrestrial. Shift with any of those changes the radio volume in 10 percent steps, on or off. {{radio_status}} speaks the station, signal, volume, and streamer-safe status.",
             "M3U playlist files in the Playlists folder next to your saves each become a station under Your playlists. They play only with streamer-safe mode off.",
-            "The Tab status menu has a Radio screen listing receivable stations.",
+            "The {{status}} status menu has a Radio screen listing receivable stations.",
             "The Freight Fate Roadhouse plays road music everywhere, day and night, with a host between songs. The Night Line does the same after dark, quieter.",
             "Fictional regional stations cover markets across the map with country, classic rock, and blues and soul.",
             "Stations behave like real FM signals: clear near their market, static at the fringe, gone past the edge. The terrestrial category lists the strongest signal first, and the radio turns on to a station that plays clean.",
@@ -275,6 +284,65 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
     ),
 ];
 
+/// One line of the manual with its control names filled in for this
+/// player and device. A placeholder that names nothing the table knows is
+/// left as written, so a typo reads aloud in a test instead of vanishing.
+pub fn render_help_line(ctx: &GameContext, template: &str) -> String {
+    let mut out = String::with_capacity(template.len());
+    let mut rest = template;
+    while let Some(start) = rest.find("{{") {
+        let Some(len) = rest[start..].find("}}") else {
+            break;
+        };
+        out.push_str(&rest[..start]);
+        let token = &rest[start + 2..start + len];
+        let (device, id) = match token.split_once(':') {
+            Some(("pad", id)) => (Some(ShortcutDevice::Controller), id),
+            Some(("key", id)) => (Some(ShortcutDevice::Keyboard), id),
+            _ => (None, token),
+        };
+        let name = match Action::from_id(id) {
+            Some(action) => match device {
+                Some(ShortcutDevice::Controller) => ctx.bindings.pad_spoken(action),
+                Some(ShortcutDevice::Keyboard) => ctx.bindings.spoken(action),
+                None => ctx.control_name(action),
+            },
+            None => format!("{{{{{token}}}}}"),
+        };
+        // A name opening the line opens a sentence: "the A button" reads
+        // "The A button" there and nowhere else.
+        if out.is_empty() {
+            let mut chars = name.chars();
+            if let Some(first) = chars.next() {
+                out.extend(first.to_uppercase());
+                out.push_str(chars.as_str());
+            }
+        } else {
+            out.push_str(&name);
+        }
+        rest = &rest[start + len + 2..];
+    }
+    out.push_str(rest);
+    out
+}
+
+/// One page, rendered: its title and lines.
+pub fn help_page(ctx: &GameContext, page: usize) -> (&'static str, Vec<String>) {
+    let (title, lines) = HELP_PAGES[page.min(HELP_PAGES.len() - 1)];
+    (
+        title,
+        lines
+            .iter()
+            .map(|line| render_help_line(ctx, line))
+            .collect(),
+    )
+}
+
+/// Every page, rendered.
+pub fn help_pages(ctx: &GameContext) -> Vec<(&'static str, Vec<String>)> {
+    (0..HELP_PAGES.len()).map(|i| help_page(ctx, i)).collect()
+}
+
 /// Index of the driving-keys page, so callers can open help straight to it.
 pub fn controls_help_page() -> usize {
     HELP_PAGES
@@ -335,7 +403,7 @@ impl State for HelpState {
         let Some((key, _, _)) = event.key_down() else {
             return;
         };
-        let (title, lines) = HELP_PAGES[self.page];
+        let (title, lines) = help_page(ctx, self.page);
         match key {
             Key::Escape => {
                 ctx.audio.play("ui/menu_back");
@@ -356,11 +424,11 @@ impl State for HelpState {
             }
             Key::Down => {
                 self.line = (self.line + 1).min(lines.len() as i64 - 1);
-                ctx.say(lines[self.line as usize]);
+                ctx.say(&lines[self.line as usize]);
             }
             Key::Up => {
                 self.line = (self.line - 1).max(0);
-                ctx.say(lines[self.line as usize]);
+                ctx.say(&lines[self.line as usize]);
             }
             Key::Return | Key::KpEnter | Key::Space => {
                 ctx.say(&format!("{title}. {}", lines.join(" ")));
@@ -369,8 +437,8 @@ impl State for HelpState {
         }
     }
 
-    fn lines(&self, _ctx: &GameContext) -> Vec<String> {
-        let (title, lines) = HELP_PAGES[self.page];
+    fn lines(&self, ctx: &GameContext) -> Vec<String> {
+        let (title, lines) = help_page(ctx, self.page);
         let mut out = vec![
             format!(
                 "How to play - {title} ({}/{})",

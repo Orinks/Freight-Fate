@@ -5,7 +5,8 @@ use serde_json::{json, Map, Value};
 
 use crate::states::base::{Key, Mods};
 
-use super::{Command, CruiseTarget, Request};
+use super::{Command, CruiseTarget, KeySpec, Request};
+use crate::bindings::Action;
 
 const SERVER_NAME: &str = "freight-fate-agent";
 const PROTOCOL_VERSION: &str = "2025-06-18";
@@ -74,7 +75,9 @@ fn tools_list() -> Value {
             "Tap a key, as a player would: letters a-z, digits, up, down, left, right, \
              enter, escape, space, tab, backspace, home, end, pageup, pagedown, f1, f2, \
              control, plus, minus, comma, period. Use modifiers for chords such as Alt+A, \
-             Shift+K, or Ctrl+Plus. The game \
+             Shift+K, or Ctrl+Plus. Or name a driving control by its shortcut id \
+             (engine, cruise, take_exit, rest, fuel, ...) to press whatever key this \
+             player has it on, chord included. The game \
              starts at its real title menu; menus use arrows and enter, and the drive \
              uses the game's own key bindings. After pressing, wait a beat and listen.",
             json!({
@@ -364,9 +367,15 @@ pub fn serve_lines<R: BufRead, W: Write>(reader: R, out: &mut W, requests: &mpsc
 
 /// One tool call as the game loop will see it, or why it cannot be.
 pub fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, String> {
-    let key_arg = |args: &Map<String, Value>| -> Result<(Key, Option<char>), String> {
+    let key_arg = |args: &Map<String, Value>| -> Result<KeySpec, String> {
         let name = args.get("key").and_then(Value::as_str).unwrap_or("");
-        parse_key(name).ok_or_else(|| format!("{name:?} is not a key this server knows"))
+        if let Some((key, text)) = parse_key(name) {
+            return Ok(KeySpec::Key { key, text });
+        }
+        Action::from_id(&name.to_ascii_lowercase())
+            .filter(|action| action.on_keyboard())
+            .map(KeySpec::Action)
+            .ok_or_else(|| format!("{name:?} is not a key or a driving control this server knows"))
     };
     let modifiers = |args: &Map<String, Value>| -> Result<Mods, String> {
         let mut mods = Mods::NONE;
@@ -388,23 +397,17 @@ pub fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, S
         Ok(mods)
     };
     match name {
-        "press" => {
-            let (key, text) = key_arg(args)?;
-            Ok(Command::Press {
-                key,
-                text,
-                mods: modifiers(args)?,
-                times: args.get("times").and_then(Value::as_i64).unwrap_or(1),
-            })
-        }
-        "hold" => {
-            let (key, text) = key_arg(args)?;
-            Ok(Command::Hold { key, text })
-        }
-        "release" => {
-            let (key, _) = key_arg(args)?;
-            Ok(Command::Release { key })
-        }
+        "press" => Ok(Command::Press {
+            key: key_arg(args)?,
+            mods: modifiers(args)?,
+            times: args.get("times").and_then(Value::as_i64).unwrap_or(1),
+        }),
+        "hold" => Ok(Command::Hold {
+            key: key_arg(args)?,
+        }),
+        "release" => Ok(Command::Release {
+            key: key_arg(args)?,
+        }),
         "wait" => {
             let seconds = args.get("seconds").and_then(Value::as_f64).unwrap_or(0.0);
             if seconds <= 0.0 {
@@ -413,12 +416,12 @@ pub fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, S
             Ok(Command::Wait { seconds })
         }
         "pedal" => {
-            let (key, text) = key_arg(args)?;
+            let key = key_arg(args)?;
             let seconds = args.get("seconds").and_then(Value::as_f64).unwrap_or(0.0);
             if seconds <= 0.0 {
                 return Err("pedal needs a positive number of seconds".to_string());
             }
-            Ok(Command::Pedal { key, text, seconds })
+            Ok(Command::Pedal { key, seconds })
         }
         "wait_for" => {
             let seconds = args.get("seconds").and_then(Value::as_f64).unwrap_or(0.0);
@@ -642,17 +645,16 @@ mod tests {
 
         let command = build_command("press", &args).unwrap();
 
-        let Command::Press {
-            key,
-            text,
-            mods,
-            times,
-        } = command
-        else {
+        let Command::Press { key, mods, times } = command else {
             panic!("press tool did not build a press command");
         };
-        assert_eq!(key, Key::A);
-        assert_eq!(text, Some('a'));
+        assert_eq!(
+            key,
+            KeySpec::Key {
+                key: Key::A,
+                text: Some('a')
+            }
+        );
         assert_eq!(
             mods,
             Mods {
@@ -662,6 +664,22 @@ mod tests {
             }
         );
         assert_eq!(times, 1);
+    }
+
+    #[test]
+    fn press_command_takes_a_driving_control_by_id() {
+        let args = serde_json::from_value(json!({"key": "engine"})).unwrap();
+        let Command::Press { key, .. } = build_command("press", &args).unwrap() else {
+            panic!("press tool did not build a press command");
+        };
+        assert_eq!(key, KeySpec::Action(Action::Engine));
+        // A pad-only control has no key to press.
+        let args = serde_json::from_value(json!({"key": "cruise_up"})).unwrap();
+        let error = match build_command("press", &args) {
+            Ok(_) => panic!("a pad-only control was accepted as a key"),
+            Err(error) => error,
+        };
+        assert!(error.contains("not a key or a driving control"), "{error}");
     }
 
     #[test]

@@ -183,6 +183,12 @@ impl PlayerInputFrame<'_> {
         self.app.driving_observation()
     }
 
+    /// The player's own shortcut table, for a tool call that names a
+    /// control rather than a key.
+    pub fn bindings(&self) -> &crate::bindings::KeyBindings {
+        &self.app.ctx.bindings
+    }
+
     pub fn queue_player_input(&mut self, event: InputEvent) {
         self.app.queue_player_input(event);
     }

@@ -19,7 +19,7 @@ use freight_fate::playtest::harness::{key_event, PlaytestHarness, StartDelivery}
 use freight_fate::states::base::{Key, Menu};
 use freight_fate::states::city::JobBoardState;
 use freight_fate::states::city_pickup::route_planning_summary;
-use freight_fate::states::main_menu::HELP_PAGES;
+use freight_fate::states::main_menu::help_pages;
 
 // -- rigging -------------------------------------------------------------------------
 
@@ -139,10 +139,10 @@ fn test_driving_f1_describes_safe_shutdown_and_destination_parking() {
 
 #[test]
 fn test_how_to_play_documents_new_gameplay_systems() {
-    let help_text: String = HELP_PAGES
-        .iter()
-        .flat_map(|(_title, lines)| lines.iter())
-        .cloned()
+    let app = TestApp::new();
+    let help_text: String = help_pages(&app.ctx)
+        .into_iter()
+        .flat_map(|(_title, lines)| lines)
         .collect::<Vec<_>>()
         .join(" ")
         .to_lowercase();

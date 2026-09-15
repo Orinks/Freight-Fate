@@ -45,6 +45,7 @@
 use std::sync::mpsc;
 
 use crate::app::{App, PlayerInputFrame};
+use crate::bindings::{key_saved_name, Action, KeyBindings};
 use crate::states::base::{InputEvent, Key, Mods};
 
 /// One `wait` may hold the wheel for at most this much real time.
@@ -76,19 +77,48 @@ use ears::drain_ears;
 use protocol::{discover, serve};
 // -- commands between the MCP thread and the game loop --------------------------------
 
+/// What a key tool was asked to press: a key by name, or a driving control
+/// by its shortcut id, resolved against the player's own table when the
+/// loop runs it (so a sandbox with moved keys is driven the way its player
+/// would drive it).
+#[derive(Clone, Debug, PartialEq)]
+pub enum KeySpec {
+    Key { key: Key, text: Option<char> },
+    Action(Action),
+}
+
+impl KeySpec {
+    /// The key, its typed character, and the modifiers the chord carries.
+    /// A control the keyboard does not have (the pad-only ones) is refused.
+    pub fn resolve(&self, bindings: &KeyBindings) -> Result<(Key, Option<char>, Mods), String> {
+        match self {
+            KeySpec::Key { key, text } => Ok((*key, *text, Mods::NONE)),
+            KeySpec::Action(action) => {
+                let chord = bindings
+                    .chords(*action)
+                    .into_iter()
+                    .next()
+                    .ok_or_else(|| format!("{} has no keyboard key", action.label()))?;
+                let text = key_saved_name(chord.key)
+                    .filter(|name| name.chars().count() == 1)
+                    .and_then(|name| name.chars().next());
+                Ok((chord.key, text, chord.mods))
+            }
+        }
+    }
+}
+
 pub enum Command {
     Press {
-        key: Key,
-        text: Option<char>,
+        key: KeySpec,
         mods: Mods,
         times: i64,
     },
     Hold {
-        key: Key,
-        text: Option<char>,
+        key: KeySpec,
     },
     Release {
-        key: Key,
+        key: KeySpec,
     },
     /// Put the sandbox career in any situation and reopen the terminal on
     /// it (`playtest::scenario`). Scenario staging, not play.
@@ -102,8 +132,7 @@ pub enum Command {
     /// throttle tap overshot the limit and every brake landed late (agent
     /// drive, 2026-09-02). Replies after the release with what was heard.
     Pedal {
-        key: Key,
-        text: Option<char>,
+        key: KeySpec,
         seconds: f64,
     },
     /// Run until a line carrying `text` is heard, or a menu opens, or the
@@ -458,12 +487,19 @@ impl AgentPolicy {
             };
             let reply = request.reply;
             match request.command {
-                Command::Press {
-                    key,
-                    text,
-                    mods,
-                    times,
-                } => {
+                Command::Press { key, mods, times } => {
+                    let (key, text, chord_mods) = match key.resolve(input.bindings()) {
+                        Ok(resolved) => resolved,
+                        Err(text) => {
+                            let _ = reply.send(Err(text));
+                            continue;
+                        }
+                    };
+                    let mods = Mods {
+                        shift: mods.shift || chord_mods.shift,
+                        ctrl: mods.ctrl || chord_mods.ctrl,
+                        alt: mods.alt || chord_mods.alt,
+                    };
                     for _ in 0..times.clamp(1, 50) {
                         self.scripted
                             .push_back(vec![InputEvent::KeyDown { key, mods, text }]);
@@ -476,7 +512,14 @@ impl AgentPolicy {
                             .to_string(),
                     ));
                 }
-                Command::Hold { key, text } => {
+                Command::Hold { key } => {
+                    let (key, text, _) = match key.resolve(input.bindings()) {
+                        Ok(resolved) => resolved,
+                        Err(text) => {
+                            let _ = reply.send(Err(text));
+                            continue;
+                        }
+                    };
                     if !self.held.contains(&key) {
                         self.held.push(key);
                     }
@@ -488,6 +531,13 @@ impl AgentPolicy {
                     let _ = reply.send(Ok("held down.".to_string()));
                 }
                 Command::Release { key } => {
+                    let (key, _, _) = match key.resolve(input.bindings()) {
+                        Ok(resolved) => resolved,
+                        Err(text) => {
+                            let _ = reply.send(Err(text));
+                            continue;
+                        }
+                    };
                     self.held.retain(|held| *held != key);
                     input.queue_player_input(InputEvent::KeyUp {
                         key,
@@ -501,7 +551,14 @@ impl AgentPolicy {
                     self.wait_until(seconds, Until::Elapsed, false, reply);
                     break;
                 }
-                Command::Pedal { key, text, seconds } => {
+                Command::Pedal { key, seconds } => {
+                    let (key, text, _) = match key.resolve(input.bindings()) {
+                        Ok(resolved) => resolved,
+                        Err(text) => {
+                            let _ = reply.send(Err(text));
+                            continue;
+                        }
+                    };
                     if self.timed_hold.is_some() {
                         let _ = reply.send(Err(
                             "A pedal is already down; its reply arrives when it lifts.".to_string(),

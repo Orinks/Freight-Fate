@@ -9,12 +9,13 @@ use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Menu;
 use freight_fate::states::driving_core::profile_mut_of;
 use freight_fate::states::driving_pause_states::{mechanic_label, PauseMenuState};
-use freight_fate::states::main_menu::{controls_help_page, HelpState, HELP_PAGES};
+use freight_fate::states::main_menu::{controls_help_page, help_pages, HelpState, HELP_PAGES};
 
 #[test]
 fn test_controls_help_page_points_at_the_driving_keys() {
+    let app = TestApp::new();
     let idx = controls_help_page();
-    let (title, lines) = HELP_PAGES[idx];
+    let (title, lines) = help_pages(&app.ctx).swap_remove(idx);
     assert_eq!(title, "Driving information keys");
     // The new keys are documented there.
     let joined = lines.join(" ");
@@ -40,6 +41,7 @@ fn test_controls_help_page_points_at_the_driving_keys() {
         .find(|line| line.starts_with("U speaks"))
         .unwrap()
         .to_lowercase();
+    let _ = HELP_PAGES;
     for word in ["patrol", "police", "bear"] {
         assert!(!u_line.contains(word));
     }
@@ -54,15 +56,18 @@ fn test_controls_help_page_points_at_the_driving_keys() {
 
 #[test]
 fn test_help_pages_explain_t_roadside_sleep_and_poi_priority() {
-    let joined = HELP_PAGES
-        .iter()
-        .flat_map(|(_title, lines)| lines.iter().copied())
-        .collect::<Vec<&str>>()
+    let app = TestApp::new();
+    let joined = help_pages(&app.ctx)
+        .into_iter()
+        .flat_map(|(_title, lines)| lines)
+        .collect::<Vec<String>>()
         .join(" ");
     assert!(joined.contains("T opens the emergency shoulder-sleep warning"));
     assert!(joined.contains("nearby route points always take priority"));
     assert!(joined.contains("T or the pause menu offers emergency shoulder sleep"));
-    assert!(joined.contains("plus D-pad down opens route-stop actions or emergency shoulder sleep"));
+    assert!(joined.contains(
+        "right bumper plus D-pad down opens route-stop actions or emergency shoulder sleep"
+    ));
 }
 
 #[test]

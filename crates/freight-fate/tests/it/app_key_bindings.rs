@@ -5,13 +5,15 @@
 use crate::states_driving_menus_support::{a_drive, key as key_event, last, with_drive};
 use crate::states_main_menu_support::*;
 use ff_core::input_hints::CONTROLLER;
+use freight_fate::agent_server::{build_command, Command, KeySpec};
 use freight_fate::app::testing::TestApp;
 use freight_fate::bindings::Action;
 use freight_fate::controller::fakes::FakePad;
 use freight_fate::controller::ControllerButton;
 use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::main_menu::{
-    SettingsCategoryState, ShortcutDevice, ShortcutsState, HELP_PAGES,
+    help_page, help_pages, render_help_line, SettingsCategoryState, ShortcutDevice, ShortcutsState,
+    HELP_PAGES,
 };
 
 type Shortcuts = ShortcutsState;
@@ -357,14 +359,156 @@ fn test_controller_help_and_hints_name_the_moved_button() {
 }
 
 #[test]
-fn test_the_static_help_page_points_at_the_shortcut_screens() {
-    let joined = HELP_PAGES
-        .iter()
-        .flat_map(|(_title, lines)| lines.iter().copied())
-        .collect::<Vec<&str>>()
+fn test_the_help_page_points_at_the_shortcut_screens() {
+    let app = TestApp::new();
+    let joined = help_pages(&app.ctx)
+        .into_iter()
+        .flat_map(|(_title, lines)| lines)
+        .collect::<Vec<String>>()
         .join(" ");
     assert!(
         joined.contains("Keyboard shortcuts or Controller buttons"),
         "{joined}"
+    );
+}
+
+// -- the How to play pages follow the table and the device --------------------------------
+
+#[test]
+fn test_every_help_placeholder_names_a_control() {
+    let app = TestApp::new();
+    for (title, lines) in help_pages(&app.ctx) {
+        for line in lines {
+            assert!(!line.contains("{{"), "{title}: {line}");
+        }
+    }
+    // The static text carries placeholders, so a raw read is not a manual.
+    assert!(HELP_PAGES
+        .iter()
+        .flat_map(|(_, lines)| lines.iter())
+        .any(|line| line.contains("{{engine}}")));
+}
+
+#[test]
+fn test_help_pages_name_the_moved_key() {
+    let mut app = TestApp::new();
+    let (_, lines) = help_page(
+        &app.ctx,
+        freight_fate::states::main_menu::controls_help_page(),
+    );
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.starts_with("S speaks the posted speed limit")),
+        "{lines:?}"
+    );
+    app.ctx.settings.key_bindings = "speed_limit=alt+z;engine=f5".to_string();
+    app.ctx.apply_bindings();
+    let (_, lines) = help_page(
+        &app.ctx,
+        freight_fate::states::main_menu::controls_help_page(),
+    );
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.starts_with("Alt Z speaks the posted speed limit")),
+        "{lines:?}"
+    );
+    assert!(
+        !lines.iter().any(|l| l.starts_with("S speaks")),
+        "{lines:?}"
+    );
+    assert_eq!(
+        render_help_line(&app.ctx, "{{engine}} starts the engine."),
+        "F5 starts the engine."
+    );
+    // A pinned device ignores the one in use; an unknown id reads aloud.
+    assert_eq!(
+        render_help_line(&app.ctx, "{{pad:engine}} starts it."),
+        "Right bumper plus A starts it."
+    );
+    assert_eq!(
+        render_help_line(&app.ctx, "{{teleport}} beams."),
+        "{{teleport}} beams."
+    );
+}
+
+#[test]
+fn test_help_pages_follow_the_controller_when_it_is_in_use() {
+    let mut app = TestApp::new();
+    force_controller(&mut app);
+    let (_, lines) = help_page(
+        &app.ctx,
+        freight_fate::states::main_menu::controls_help_page(),
+    );
+    // A control the pad has names the button; one it lacks keeps the key.
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.starts_with("Right bumper plus X speaks the posted speed limit")),
+        "{lines:?}"
+    );
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.starts_with("The B button speaks your speed")),
+        "{lines:?}"
+    );
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.starts_with("Alt A speaks time at the wheel")),
+        "{lines:?}"
+    );
+    // The How to play screen itself reads the rendered line.
+    let mut help = freight_fate::states::main_menu::HelpState::at_page(
+        freight_fate::states::main_menu::controls_help_page(),
+    );
+    app.clear_speech();
+    freight_fate::states::base::State::handle_event(
+        &mut help,
+        &mut app.ctx,
+        &InputEvent::key(Key::Down),
+    );
+    freight_fate::states::base::State::handle_event(
+        &mut help,
+        &mut app.ctx,
+        &InputEvent::key(Key::Down),
+    );
+    assert!(
+        last(&app).starts_with("Right bumper plus X speaks"),
+        "{}",
+        last(&app)
+    );
+}
+
+// -- the agent server presses a control by name ------------------------------------------
+
+#[test]
+fn test_press_tool_resolves_a_control_through_the_players_table() {
+    let mut app = TestApp::new();
+    let args = serde_json::from_value(serde_json::json!({"key": "cruise_resume"})).unwrap();
+    let Command::Press { key, .. } = build_command("press", &args).unwrap() else {
+        panic!("not a press");
+    };
+    assert_eq!(key, KeySpec::Action(Action::CruiseResume));
+    assert_eq!(
+        key.resolve(&app.ctx.bindings).unwrap(),
+        (Key::K, Some('k'), Mods::SHIFT)
+    );
+    app.ctx.settings.key_bindings = "cruise_resume=f7".to_string();
+    app.ctx.apply_bindings();
+    assert_eq!(
+        key.resolve(&app.ctx.bindings).unwrap(),
+        (Key::F7, None, Mods::NONE)
+    );
+    // A key by name is untouched by the table.
+    let plain = KeySpec::Key {
+        key: Key::K,
+        text: Some('k'),
+    };
+    assert_eq!(
+        plain.resolve(&app.ctx.bindings).unwrap(),
+        (Key::K, Some('k'), Mods::NONE)
     );
 }

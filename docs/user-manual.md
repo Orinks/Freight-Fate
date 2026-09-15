@@ -608,7 +608,9 @@ position. Otherwise the game uses the simulated forecast.
 Driving controls are active while the road view is focused. The keys and
 buttons below are the defaults: every one of them can be moved to another key
 or pad button under Settings, Gameplay, Controls, then Keyboard shortcuts or
-Controller buttons, and the F1 help and the spoken prompts follow the move.
+Controller buttons, and the F1 help, the How to play pages and the spoken
+prompts follow the move. With a controller in use, How to play names the pad
+button wherever the pad has one.
 
 | Key | Action |
 | --- | --- |

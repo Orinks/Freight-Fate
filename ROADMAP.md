@@ -289,11 +289,13 @@ its status or release decision.
       by design: Escape, Enter, F1, the Control keys, Shift and the left
       bumper as the clutch, plus and minus, the radio dial keys, message
       review, Start and Back on the pad, and every menu key.
-- [ ] The How to play pages still list the default keys with one pointer
-      line; rendering them from the live table would let a moved key read
-      right there too.
-- [ ] The agent server's `press` tool speaks default key names; a sandbox
-      with moved keys needs the tool to accept action names as well.
+- [x] The How to play pages render every control name from the live table
+      (`{{id}}` placeholders in `main_menu_help.rs`), following the device
+      in use: the pad button when a controller is active and the control
+      has one, else the keyboard key. The Controller page pins pad names.
+- [x] The agent server's `press`, `hold`, `release` and `pedal` tools take a
+      control's shortcut id as well as a key name, resolved against the
+      sandbox player's own table, chord included.
 
 ### September 14 pause stays on duty
 

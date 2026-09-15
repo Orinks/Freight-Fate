@@ -8,6 +8,9 @@
   Controls now has Keyboard shortcuts and Controller buttons; the F1 help
   and the spoken prompts name the key you chose.
 
+- **How to play names your own keys.** With a controller in use its pages
+  name the pad button instead, wherever the pad has one.
+
 - **A driver directory sits under Online, next to Drivers on duty.** It
   lists every driver with a public profile, and Enter on a driver reads
   their profile.
