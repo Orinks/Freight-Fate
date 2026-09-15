@@ -1,13 +1,6 @@
 # Read by tools/release_notes.py (see republished_entries): the changelog at
-# this commit was a rewrite of the Unreleased block, so a snapshot must not
-# list its entries as new. The "new" lines name, by bold lead, the entries
-# that were added after the previous snapshot and before the rewrite; those
-# still go out. Delete this file once a snapshot tag carries the rewritten
-# text (the first snapshot after 2026-09-14).
-ref = a4cde685
-new = Pausing no longer takes you off duty.
-new = A bad driving record now shows on your reputation.
-new = The carrier's record review and the insurer look back one game year.
-new = The engine brake now follows your revs.
-new = Manual shifts clunk twice, like the automatic.
-new = Fog is silent now.
+# this commit only reworded two entries the 2026-09-15 snapshot already
+# carried, so a snapshot must not list them as new. Delete this file once a
+# snapshot tag carries the reworded text (the first snapshot after
+# 2026-09-15).
+ref = d0563bb8
