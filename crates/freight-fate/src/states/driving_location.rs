@@ -76,7 +76,7 @@ impl DrivingState {
         // miles remaining" that never move (playtest 2026-07-22). The only
         // honest route status left is the gate.
         if let Some(gate) = self.arrival_gate_query_text(ctx) {
-            ctx.say(&format!("Route status: you have arrived. {gate}"));
+            ctx.say(&format!("You have arrived. {gate}"));
             return;
         }
         // On the facility approach, the highway framing is a lie: the driver
@@ -472,7 +472,7 @@ impl DrivingState {
         // gate"), so it starts like one; "half a mile" after the full stop
         // read as a run-on (agent playtest, 2026-09-02).
         let parts = [
-            format!("Route status: {where_text}."),
+            format!("{where_text}."),
             format!(
                 "{} to {target}.",
                 crate::states::city::py_capitalize(&self.closing_text(distance.max(0.0)))

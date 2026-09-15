@@ -38,6 +38,9 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Start the route readout directly with the location or arrival information
+      on facility approaches, city streets, and at the gate.
+
 - [ ] Validate the Windows portable snapshot on a clean Windows installation
       without a separately installed Visual C++ redistributable; the build
       runner's smoke test alone cannot establish this.

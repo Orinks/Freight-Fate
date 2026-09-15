@@ -124,7 +124,7 @@ fn test_route_key_answers_with_the_gate_on_the_facility_approach() {
 
     let report = last(&app);
     assert!(
-        report.starts_with("Route status: off the highway, on the facility approach"),
+        report.starts_with("off the highway, on the facility approach"),
         "{report}"
     );
     assert!(!report.contains("I-90"), "{report}");
@@ -173,7 +173,7 @@ fn test_route_key_answers_with_the_gate_when_the_route_has_ended() {
 
     let report = last(&app);
     assert!(
-        report.starts_with("Route status: you have arrived"),
+        report.starts_with("You have arrived"),
         "{report}"
     );
     assert!(report.contains("Stop to dock"), "{report}");
@@ -290,7 +290,7 @@ fn test_route_key_counts_down_to_the_on_ramp_leaving_the_origin_gate() {
 
     let report = last(&app);
     assert!(
-        report.starts_with("Route status: on city streets,"),
+        report.starts_with("on city streets,"),
         "{report}"
     );
     assert!(
@@ -337,7 +337,7 @@ fn test_route_key_answers_the_pickup_drive_as_city_streets() {
 
     let report = last(&app);
     assert!(
-        report.starts_with("Route status: on city streets,"),
+        report.starts_with("on city streets,"),
         "{report}"
     );
     assert!(report.contains("200 feet to the gate at"), "{report}");
