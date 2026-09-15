@@ -4,6 +4,10 @@
 
 ### Changed
 
+- **The exit blinker keeps clicking until you take, cancel, or miss the exit.**
+
+- **Canceling an exit stops its countdown and lane guidance until you signal again.**
+
 - **Route status starts with your location or arrival information instead of saying "Route status."**
 
 ### Added

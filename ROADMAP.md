@@ -38,6 +38,9 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Keep the exit blinker repeating on the right until ramp entry, cancellation,
+      or a missed exit; stop canceled-exit guidance until the driver signals again.
+
 - [x] Start the route readout directly with the location or arrival information
       on facility approaches, city streets, and at the gate.
 

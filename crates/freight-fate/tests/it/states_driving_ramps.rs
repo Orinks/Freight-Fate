@@ -1034,11 +1034,8 @@ fn test_canceling_the_plan_gives_the_road_back() {
     //
     // The clock drops out of compression while the truck is approaching an
     // exit it has signalled for, so the approach is driven in real time and
-    // the braking is winnable. The stop itself is deliberately kept after a
-    // cancel, so passing it can say the exit went by unused -- but that made
-    // a canceled signal read as a live approach, and the road stayed in real
-    // time until the exit was behind. Canceling means staying on the highway,
-    // and the highway gets its pace back at once.
+    // the braking is winnable. Canceling clears both the active stop and its
+    // approach immediately, so the highway gets its pace back at once.
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
     let mut stop = a_stop(d.trip.position_mi + 4.0);
@@ -1055,11 +1052,8 @@ fn test_canceling_the_plan_gives_the_road_back() {
     // Second press: the plan is off, and the exit is still ahead.
     d.toggle_exit_signal(&mut app.ctx);
     assert!(!d.exit_signal_on);
-    assert_eq!(
-        d.exit_stop.as_ref().map(|s| s.key()),
-        Some(stop.key()),
-        "the stop is kept so passing it can say so"
-    );
+    assert!(d.exit_stop.is_none());
+    assert!(d.trip.exit_approach_mi.is_none());
     d.update_exit(&mut app.ctx, 0.0, 0.0);
     assert!(d.trip.exit_approach_mi.is_none());
 }
