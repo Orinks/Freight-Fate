@@ -24,8 +24,7 @@
 //! | `monkeypatch.setattr(pygame.key, "get_pressed", ...)` | `ctx.input.press(Key::X, Mods::SHIFT)`, the real held key |
 
 use ff_core::models::enforcement::{
-    citation_fine, speeding_citation_fine, FAILURE_TO_STOP_CITATION_FINE, UNSAFE_DAMAGE_FINE,
-    WEIGH_STATION_BYPASS_FINE,
+    citation_fine, speeding_citation_fine, UNSAFE_DAMAGE_FINE, WEIGH_STATION_BYPASS_FINE,
 };
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
@@ -45,7 +44,7 @@ use freight_fate::states::city::CityMenuState;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{
     DRIVE_PHASE_DELIVERY, INSPECTION_MIN, PULL_OVER_CLEAN_STOP_WARN_CHANCE,
-    PULL_OVER_FULL_COMPLIANCE, PULL_OVER_LIGHTS,
+    PULL_OVER_FULL_COMPLIANCE, PULL_OVER_LIGHTS, PURSUIT_RUN_S,
 };
 use freight_fate::states::driving_rest_states::{
     EnforcementStopState, FelonyStopState, TrafficStopState,
@@ -366,11 +365,12 @@ fn test_first_marginal_stop_is_a_warning() {
 }
 
 #[test]
-fn test_accelerating_away_ends_in_a_forced_stop_not_a_felony() {
-    // Not stopping is not running: troopers force it and write a citation.
-    // Reaching a felony by never braking used to be possible in about five
-    // seconds, while the trigger message was still being spoken. A pursuit is
-    // now only reachable by holding the run key on purpose.
+fn test_accelerating_away_past_the_final_warning_is_running() {
+    // Accelerating away with the lights behind you, never a brake, is
+    // running -- but only once the final warning has said so and the truck
+    // has kept it up for the required seconds after it. Reaching a felony
+    // used to be possible in about five seconds, while the trigger message
+    // was still being spoken; the warning comes first now, every time.
     let mut app = TestApp::new();
     let mut drive = a_drive(&mut app, Some(1.0));
     let limit = speed_for(&mut drive, &mut app, 25.0);
@@ -386,26 +386,32 @@ fn test_accelerating_away_ends_in_a_forced_stop_not_a_felony() {
         .reputation;
 
     let base = mph_to_mps(limit + 25.0);
+    let mut seconds = 0;
     for i in 0..40 {
         drive.trip.truck.velocity_mps = base + mph_to_mps(f64::from(i + 1));
         drive.update_pull_over(&mut app.ctx, 1.0, false);
+        seconds += 1;
         if drive.pull_over.is_none() {
             break;
         }
     }
     app.ctx.run_deferred();
 
-    assert!(!top_is::<FelonyStopState>(&app));
-    assert!(top_is::<EnforcementStopState>(&app));
-    assert_eq!(drive.failure_to_stop_count, 0); // no pursuit was ever started
-    assert_eq!(drive.trip.truck.velocity_mps, 0.0); // and the truck is stopped
-    let fine = with_top::<EnforcementStopState, _>(&mut app, |stop, _| stop.fine);
+    assert!(top_is::<FelonyStopState>(&app));
+    assert!(!top_is::<EnforcementStopState>(&app));
+    // The final warning spoke, and the run was counted after it.
+    assert!(
+        spoken(&app)
+            .iter()
+            .any(|line| line.contains("Slow down now or you are running from the police")),
+        "{:#?}",
+        spoken(&app)
+    );
+    assert!(seconds as f64 > PURSUIT_RUN_S, "{seconds}");
     let p = app.ctx.profile.as_ref().expect("a career");
     assert!(p.money < money_before);
     assert!(p.career.reputation < rep_before);
-    assert!(fine >= FAILURE_TO_STOP_CITATION_FINE, "{fine}");
-    // It is still a serious violation on the record.
-    assert!(p.driving_record.serious_in_window(p.game_hours) >= 1);
+    assert_eq!(p.driving_record.major_count(), 1);
 }
 
 #[test]
@@ -459,7 +465,7 @@ fn test_failure_to_stop_gives_staged_warnings() {
     assert!(
         spoken(&app)
             .iter()
-            .any(|line| line.contains("Final failure-to-stop warning")),
+            .any(|line| line.contains("Final warning. Slow down now")),
         "{:#?}",
         spoken(&app)
     );

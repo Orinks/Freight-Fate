@@ -32,7 +32,6 @@ use freight_fate::controller::{fakes::FakePad, ControllerAxis};
 use freight_fate::playtest::breaker::force_grade;
 use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
-use freight_fate::states::driving_core::PURSUIT_HOLD_S;
 use freight_fate::states::driving_core::{
     hos_mut_of, profile_mut_of, HazardShape, DRIVE_PHASE_DELIVERY, EXIT_LANE_READY,
     LANE_TAP_CHANGE_S, MICROSLEEP_BASE_GM, MICROSLEEP_MIN_GM, STEER_CUE_ARM_S, STEER_CUE_HOLD,

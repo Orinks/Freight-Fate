@@ -370,7 +370,7 @@ impl DrivingState {
             failure_to_stop_count: 0,
             pull_over_grace_s: 0.0,
             pull_over_forced_s: 0.0,
-            pursuit_hold_s: 0.0,
+            pull_over_run_s: 0.0,
             record_events: Vec::new(),
             fatigue_events: 0,
             weigh_station_notice_key: String::new(),

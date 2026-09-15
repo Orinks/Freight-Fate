@@ -637,9 +637,14 @@ pub const PULL_OVER_FIRST_WARNING_S: f64 = 8.0;
 pub const PULL_OVER_FINAL_WARNING_S: f64 = 16.0;
 // After the final warning, this long before troopers force the stop.
 pub const PULL_OVER_FORCED_STOP_S: f64 = 10.0;
-// Running is a felony, so it takes a deliberate held input and never happens
-// by hesitating. Doubled when the next one would be a lifetime disqualification.
-pub const PURSUIT_HOLD_S: f64 = 3.0;
+// Running is judged by conduct after the final warning: this many real
+// seconds holding speed or accelerating, unbraked, at or above the floor,
+// and troopers call it a pursuit. Any brake resets it, so a driver who is
+// trying to stop can never reach a felony; the slow roll and the coast-down
+// end in the forced stop instead. Doubled when the next one would be a
+// lifetime disqualification.
+pub const PURSUIT_RUN_S: f64 = 12.0;
+pub const PURSUIT_RUN_MIN_MPH: f64 = 30.0;
 pub const FAILURE_TO_STOP_DAMAGE_PCT: f64 = 12.0;
 pub const FAILURE_TO_STOP_PROCESSING_MIN: f64 = 180.0;
 pub const WEIGH_STATION_NOTICE_MI: f64 = 2.0;

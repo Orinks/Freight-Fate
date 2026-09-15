@@ -607,17 +607,19 @@ fn test_a_clean_stop_opens_the_traffic_stop_screen() {
 }
 
 #[test]
-fn test_running_from_the_stop_is_a_held_choice() {
-    // `_update_pursuit_optin`: holding shift+X through the warning is the
-    // only road to a felony, and it pushes `FelonyStopState`.
+fn test_running_from_the_stop_is_conduct() {
+    // `update_pursuit_by_conduct`: holding highway speed, unbraked, past the
+    // final warning is the road to a felony, and it pushes `FelonyStopState`.
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
-    d.trip.truck.velocity_mps = mph_to_mps(60.0);
     d.begin_pull_over(&mut app.ctx, 55.0);
     d.pull_over_grace_s = 0.0;
-    app.ctx.input.press(Key::X, Mods::SHIFT);
-    for _ in 0..(PURSUIT_HOLD_S * 60.0) as i32 + 10 {
-        d.update_pursuit_optin(&mut app.ctx, 1.0 / 60.0);
+    for _ in 0..(60.0 * 60.0) as i32 {
+        d.trip.truck.velocity_mps = mph_to_mps(60.0);
+        d.update_pull_over(&mut app.ctx, 1.0 / 60.0, false);
+        if d.pull_over.is_none() {
+            break;
+        }
     }
     assert!(d.pull_over.is_none());
     app.ctx.run_deferred();
@@ -625,7 +627,7 @@ fn test_running_from_the_stop_is_a_held_choice() {
         app.ctx
             .state()
             .is_some_and(|s| s.borrow().as_any().is::<FelonyStopState>()),
-        "holding shift+X through the warning is the only road to a felony"
+        "holding speed through the final warning is the road to a felony"
     );
 }
 

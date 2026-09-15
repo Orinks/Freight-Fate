@@ -1,12 +1,11 @@
 //! The pull-over itself: its compliance tracker, the staged failure-to-stop
-//! warnings, the roadside screens a settled stop pushes, and the deliberate
-//! opt-in to run from one.
+//! warnings, the roadside screens a settled stop pushes, and the conduct
+//! that turns one into a pursuit.
 
 use ff_core::models::enforcement::FAILURE_TO_STOP_CITATION_FINE;
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
-use crate::bindings::Action;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_updates::live;
@@ -29,7 +28,7 @@ impl DrivingState {
     /// coasting, and failing to signal (deductions stack); a full stop opens
     /// the roadside stop and zeroing it out, or two miles of rolling, ends
     /// in troopers forcing the stop: a failure-to-stop citation, never a
-    /// felony. The felony is the held opt-in in `update_pursuit_optin`.
+    /// felony. The felony is conduct, in `update_pursuit_by_conduct`.
     pub fn update_pull_over(&mut self, ctx: &mut GameContext, dt: f64, service_braking: bool) {
         if self.pull_over.is_none() {
             return;
@@ -92,11 +91,11 @@ impl DrivingState {
             delta -= PULL_OVER_NOSIGNAL_RATE * dt;
         }
         self.pull_over_compliance = (self.pull_over_compliance + delta).clamp(0.0, 1.0);
-        // Running is a choice, never a consequence of hesitating: only the
-        // held opt-in below starts a pursuit.
-        self.update_pursuit_optin(ctx, dt);
+        // Running is judged by what the truck does after the final warning,
+        // never by hesitating before it.
+        let running = self.update_pursuit_by_conduct(ctx, dt, service_braking, accel_mph_s, speed);
         if self.pull_over.is_none() {
-            return; // the opt-in fired
+            return; // the pursuit fired
         }
         // The warnings are on a real-time cadence now. They used to be keyed
         // to trip miles, which compression could burn through before the
@@ -110,13 +109,17 @@ impl DrivingState {
         // Not stopping is not running. A zeroed tracker or two miles of
         // rolling ends in troopers boxing you in: a failure-to-stop citation
         // and a forced stop, which is expensive and goes on the record -- but
-        // it is not a felony, and it cannot end a career by inattention.
+        // it is not a felony, and it cannot end a career by inattention. A
+        // truck holding speed past the final warning is being judged by the
+        // pursuit tracker instead, so the forced stop waits on that.
         if self.pull_over_compliance <= 0.0 || distance >= PULL_OVER_IGNORE_MI {
             // Escalate through the warnings rather than jumping to the last
             // one: the player hears it getting worse before it is over.
             let final_warning = self.pull_over_warning_level >= 1;
             self.warn_failure_to_stop(ctx, final_warning);
-            self.pull_over_forced_s += dt;
+            if !running {
+                self.pull_over_forced_s += dt;
+            }
             if self.pull_over_forced_s >= PULL_OVER_FORCED_STOP_S {
                 self.fail_to_stop(ctx);
             }
@@ -132,9 +135,15 @@ impl DrivingState {
         }
         self.pull_over_warning_level = level;
         let message = if final_warning {
-            "Final failure-to-stop warning. Stop now or troopers end it with spike strips and \
-             felony charges."
-                .to_string()
+            // The one line that has to be heard: what running is, and what
+            // it costs this driver. The pursuit tracker starts on it.
+            let cost = if profile_of(ctx).driving_record.major_count() >= 1 {
+                "A second major offense disqualifies your CDL for life, and this career will \
+                 not drive again."
+            } else {
+                "It is a felony, it cancels this load, and it disqualifies your CDL for a year."
+            };
+            format!("Final warning. Slow down now or you are running from the police. {cost}")
         } else if self.pull_over_signaled {
             "Signaled, but still moving with lights behind you. Stop on the shoulder.".to_string()
         } else {
@@ -173,7 +182,7 @@ impl DrivingState {
         self.refresh_live_facts();
         self.end_stop_audio(ctx);
         self.settle_engine_to_idle(ctx);
-        self.pursuit_hold_s = 0.0;
+        self.pull_over_run_s = 0.0;
         // Rolling on through a spoken failure-to-stop warning before finally
         // pulling in is reckless-class behavior, and the record says so.
         let warned = self.pull_over_warning_level > 0;
@@ -232,61 +241,56 @@ impl DrivingState {
         ctx.save_profile();
     }
 
-    /// How long the run key must be held. A lifetime disqualification is
-    /// the harshest outcome in the game, so it takes twice as long to choose.
-    pub fn pursuit_hold_required_s(&self, ctx: &GameContext) -> f64 {
+    /// How long the truck must hold speed past the final warning. A lifetime
+    /// disqualification is the harshest outcome in the game, so it takes
+    /// twice as long to earn.
+    pub fn pursuit_run_required_s(&self, ctx: &GameContext) -> f64 {
         let second = ctx
             .profile
             .as_ref()
             .is_some_and(|profile| profile.driving_record.major_count() >= 1);
-        PURSUIT_HOLD_S * if second { 2.0 } else { 1.0 }
+        PURSUIT_RUN_S * if second { 2.0 } else { 1.0 }
     }
 
-    /// Running from a stop: an affirmative held choice, never an accident.
+    /// Running from a stop, judged by conduct: past the final warning, a
+    /// truck that holds speed or accelerates, unbraked, at or above the
+    /// floor is running, and troopers call the pursuit once it has done so
+    /// for the required seconds.
     ///
-    /// A driver who is complying but disoriented -- holding a steady speed
-    /// while the instruction is still being read out -- must never be able to
-    /// reach a felony. So the tracker running out is a citation and a forced
-    /// stop, and the only road to a pursuit is holding this key after being
-    /// told exactly what it costs.
-    pub fn update_pursuit_optin(&mut self, ctx: &mut GameContext, dt: f64) {
-        if self.enforcement_bypassed(ctx) {
-            return;
+    /// Nobody who is trying to comply can get here. Any brake zeroes the
+    /// count, and so does dropping under the floor; slowing while still
+    /// above it pauses the count. All of those end in the forced stop, a
+    /// citation and a serious violation, never a felony. Returns whether the
+    /// truck counted as running this frame, which is what holds the forced
+    /// stop off: the two never race, because a truck is being judged by one
+    /// or the other. The held opt-in this replaces (Shift with the exit key)
+    /// asked the player to choose a felony out loud, and nobody ever did;
+    /// the felony, the year and the lifetime disqualification were dead
+    /// content (owner ruling, 2026-09-15).
+    pub fn update_pursuit_by_conduct(
+        &mut self,
+        ctx: &mut GameContext,
+        dt: f64,
+        service_braking: bool,
+        accel_mph_s: f64,
+        speed_mph: f64,
+    ) -> bool {
+        if self.enforcement_bypassed(ctx) || self.pull_over_warning_level < 2 {
+            return false;
         }
-        let holding = ctx.bindings.pressed(&ctx.input, Action::RunFromStop);
-        if !holding {
-            if self.pursuit_hold_s > 0.0 {
-                self.pursuit_hold_s = 0.0;
-                ctx.say_event_with(
-                    "Not running. Stop on the shoulder.",
-                    SayEvent::new().category(SpeechCategory::Confirmation),
-                );
-            }
-            return;
+        if service_braking || speed_mph < PURSUIT_RUN_MIN_MPH {
+            self.pull_over_run_s = 0.0;
+            return false;
         }
-        let required = self.pursuit_hold_required_s(ctx);
-        if self.pursuit_hold_s <= 0.0 {
-            let hint = ctx.control_hint("take_exit");
-            let major_count = profile_of(ctx).driving_record.major_count();
-            let cost = if major_count >= 1 {
-                "A second major offense disqualifies your CDL for life, and this career will not \
-                 drive again."
-            } else {
-                "It is a felony, it cancels this load, and it disqualifies your CDL for a year."
-            };
-            ctx.say_event_with(
-                format!(
-                    "Hold shift {hint} for {required:.0} seconds to run. {cost} Let go now to \
-                     stop instead."
-                ),
-                SayEvent::new().category(SpeechCategory::Safety),
-            );
+        if accel_mph_s < -PULL_OVER_ACCEL_EPS_MPH_S {
+            return false; // slowing: the count waits
         }
-        self.pursuit_hold_s += dt;
-        if self.pursuit_hold_s >= required {
-            self.pursuit_hold_s = 0.0;
+        self.pull_over_run_s += dt;
+        if self.pull_over_run_s >= self.pursuit_run_required_s(ctx) {
+            self.pull_over_run_s = 0.0;
             self.evade_pull_over(ctx);
         }
+        true
     }
 
     /// Never pulled over, but never ran either: troopers force the stop.
@@ -301,7 +305,7 @@ impl DrivingState {
         self.refresh_live_facts();
         self.end_stop_audio(ctx);
         self.reset_pull_over_tracker();
-        self.pursuit_hold_s = 0.0;
+        self.pull_over_run_s = 0.0;
         self.trip.truck.brake = 1.0;
         self.trip.truck.velocity_mps = 0.0;
         self.trip.truck.set_parking_brake();
@@ -331,16 +335,16 @@ impl DrivingState {
         self.commit_resolved_stop(ctx);
     }
 
-    /// The player chose to run and held the key through the warning: spike
-    /// strips end it, logged as a major offense with a heavy fine, reputation
-    /// hit, and load consequences.
+    /// The truck ran past the final warning: spike strips end it, logged as
+    /// a major offense with a heavy fine, reputation hit, and load
+    /// consequences.
     pub fn evade_pull_over(&mut self, ctx: &mut GameContext) {
         self.pull_over = None;
         self.trip.pull_over_active = false;
         self.refresh_live_facts();
         self.end_stop_audio(ctx);
         self.reset_pull_over_tracker();
-        self.pursuit_hold_s = 0.0;
+        self.pull_over_run_s = 0.0;
         ctx.audio.play("events/spike_strip");
         self.push_felony_stop_state(ctx);
     }

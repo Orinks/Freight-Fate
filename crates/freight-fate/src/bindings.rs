@@ -46,8 +46,6 @@ pub enum Action {
     EmergencyBrake,
     SteerLeft,
     SteerRight,
-    /// Held with the exit key after a trooper's stop order: run from it.
-    RunFromStop,
     Engine,
     ParkingBrake,
     Horn,
@@ -277,13 +275,6 @@ const TABLE: &[Row] = &[
         "steer_right",
         "Steer right",
         &[Chord::plain(Key::Right)],
-        &[],
-    ),
-    (
-        Action::RunFromStop,
-        "run_from_stop",
-        "Run from a trooper's stop, held",
-        &[Chord::shift(Key::X)],
         &[],
     ),
     (

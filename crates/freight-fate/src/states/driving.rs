@@ -283,8 +283,9 @@ pub struct DrivingState {
     pub pull_over_grace_s: f64,
     // How long the stop has stayed unresolved past the final warning.
     pub pull_over_forced_s: f64,
-    // How long the deliberate run key has been held down.
-    pub pursuit_hold_s: f64,
+    // Real seconds the truck has held speed, unbraked, past the final
+    // warning: the road to a pursuit. Any brake zeroes it.
+    pub pull_over_run_s: f64,
     // Ladder movement spoken during this trip, restated once at the
     // delivery summary so nothing about your standing is heard only
     // on a road the player has already left.

@@ -417,6 +417,10 @@
 
 ### Changed
 
+- **Running from the police is what the truck does, not a key.** Hold speed
+  for twelve seconds after the final warning, unbraked, and it is a pursuit,
+  while a touch of the brake is a forced stop.
+
 - **Whole hours are spoken as whole numbers.** Three hours is "3 hours"
   now, never "three point zero".
 
@@ -1379,6 +1383,11 @@
 
 - **If you were playing on terse you are now on Quiet, and normal lands on
   Standard.**
+
+### Removed
+
+- **The Shift and exit key hold to run from a trooper is gone.** Running is judged
+  by how you drive after the final warning.
 
 ### Fixed
 

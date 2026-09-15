@@ -273,20 +273,15 @@ fn test_a_moved_pedal_is_the_one_polled() {
     app.ctx.input.press(Key::W, Mods::NONE);
     assert!(app.ctx.bindings.pressed(&app.ctx.input, Action::Accelerate));
     // A held chord needs its modifier down too.
-    app.ctx.settings.key_bindings = "run_from_stop=alt+x".to_string();
+    app.ctx.input.release(Key::W, Mods::NONE);
+    app.ctx.settings.key_bindings = "accelerate=alt+x".to_string();
     app.ctx.apply_bindings();
     app.ctx.input.press(Key::X, Mods::NONE);
-    assert!(!app
-        .ctx
-        .bindings
-        .pressed(&app.ctx.input, Action::RunFromStop));
+    assert!(!app.ctx.bindings.pressed(&app.ctx.input, Action::Accelerate));
     app.ctx.input.release(Key::X, Mods::NONE);
     app.ctx.input.press(Key::LAlt, Mods::ALT);
     app.ctx.input.press(Key::X, Mods::ALT);
-    assert!(app
-        .ctx
-        .bindings
-        .pressed(&app.ctx.input, Action::RunFromStop));
+    assert!(app.ctx.bindings.pressed(&app.ctx.input, Action::Accelerate));
 }
 
 #[test]
