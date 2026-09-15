@@ -431,6 +431,7 @@ impl DrivingState {
     pub fn restricted_zone_limit_ahead(&mut self, ctx: &mut GameContext) -> Option<(f64, String)> {
         if !self.speed_control_armed || !ctx.settings.speed_keeper {
             self.construction_slowdown = None;
+            self.construction_taper_stage = None;
             return None;
         }
         let position = self.trip.position_mi;
@@ -443,14 +444,14 @@ impl DrivingState {
             Some((end_mi, limit_mph, reason)) if position < end_mi => (limit_mph, reason),
             _ => {
                 self.construction_slowdown = None;
+                self.construction_taper_stage = None;
                 let lookahead_mi = self.trip.zone_warning_lookahead_mi();
-                // Aim at the zone itself, skipping the merge taper in front of
-                // a work zone exactly as the spoken zone warning does. The
-                // taper starts earlier and posts a higher limit: slowing to the
-                // taper's number still reached the barrels too fast, and
-                // slowing on the taper's position had cruise easing before the
-                // player was told why. Heavy traffic posts no taper, so it is
-                // simply the zone.
+                // Aim at the zone itself, which is what the spoken warning
+                // names and where the number has to be met; the merge taper
+                // in front of it is the first stage of the same slowdown (see
+                // below), never the whole of it -- slowing only to the
+                // taper's number reached the barrels too fast. Heavy traffic
+                // posts no taper, so it is simply the zone.
                 let zone = self
                     .trip
                     .zones
@@ -469,8 +470,45 @@ impl DrivingState {
                 }
                 self.construction_slowdown =
                     Some((zone.end_mi, zone.limit_mph, zone.reason.clone()));
+                // The warning promises two numbers for a work zone: the
+                // taper's, then the zone's. Cruise used to take the zone's
+                // from the moment the warning landed -- miles out under
+                // compression -- so a driver told "55 at the taper, then 45"
+                // was crawling at 45 long before the taper (owner,
+                // 2026-09-14). Ease to the taper's number first, and to the
+                // zone's once the barrels are inside braking distance.
+                self.construction_taper_stage = self
+                    .trip
+                    .zones
+                    .iter()
+                    .find(|z| {
+                        z.reason == "construction merge"
+                            && (z.end_mi - zone.start_mi).abs() < 0.01
+                            && z.limit_mph > zone.limit_mph
+                    })
+                    .map(|taper| (zone.start_mi, taper.limit_mph));
                 (zone.limit_mph, zone.reason)
             }
+        };
+        let limit_mph = match self.construction_taper_stage {
+            Some((barrels_mi, taper_mph)) if position < barrels_mi => {
+                let speed = self.trip.truck.speed_mph();
+                if barrels_mi - position > self.acc_limit_lookahead_mi(speed, limit_mph) {
+                    taper_mph
+                } else {
+                    // The zone stage, latched: as cruise sheds toward the
+                    // zone's number the braking window shrinks, and without
+                    // the latch the target climbed back to the taper's over
+                    // the last yards.
+                    self.construction_taper_stage = None;
+                    limit_mph
+                }
+            }
+            Some(_) => {
+                self.construction_taper_stage = None;
+                limit_mph
+            }
+            None => limit_mph,
         };
         let (current_limit, _) = self.trip.speed_limit_at(position);
         if limit_mph < current_limit {
@@ -609,13 +647,38 @@ impl DrivingState {
                 }
             }
         }
-        let (limit, _) = self.trip.speed_limit_at(position);
-        let horizon = self.trip.total_miles().min(position + KEEPER_EASE_MAX_MI);
+        let (limit, under_reason) = self.trip.speed_limit_at(position);
+        // A merge taper exists for one thing: shedding to the work zone's
+        // number by the barrels. Taking the taper over from cruise at its
+        // start and then holding the taper's number until the ease window
+        // opened lost a third of a mile of it, and the window itself was
+        // sized a quarter short of what the truck sheds at standard pacing:
+        // the barrels came at 47 against a posted 45 (owner, 2026-09-14).
+        // On a taper the shed starts at once and reaches to its end.
+        let taper_end = if under_reason.as_deref() == Some("construction merge") {
+            self.trip
+                .zones
+                .iter()
+                .find(|z| {
+                    z.reason == "construction merge"
+                        && z.start_mi <= position
+                        && position < z.end_mi
+                })
+                .map(|z| z.end_mi)
+        } else {
+            None
+        };
+        let mut horizon = self.trip.total_miles().min(position + KEEPER_EASE_MAX_MI);
+        if let Some(end) = taper_end {
+            horizon = horizon.max(self.trip.total_miles().min(end + KEEPER_LIMIT_PROBE_MI));
+        }
         let mut probe = position + KEEPER_LIMIT_PROBE_MI;
         let scale = self.trip.effective_time_scale();
         while probe <= horizon + 1e-6 {
             let (posted, reason) = self.trip.speed_limit_at(probe);
-            if posted < limit && probe - position <= self.keeper_ease_mi(posted, scale) {
+            let in_window = probe - position <= self.keeper_ease_mi(posted, scale);
+            let taper_shed = taper_end.is_some_and(|end| probe <= end + KEEPER_LIMIT_PROBE_MI);
+            if posted < limit && (in_window || taper_shed) {
                 let lower = demand.as_ref().is_none_or(|d| posted < d.1);
                 if lower {
                     demand = Some((

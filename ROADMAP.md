@@ -277,6 +277,19 @@ its status or release decision.
       carrier. Lifetime counts (claims, terminations, repossessions, fatigue,
       out-of-service) stay lifetime by design.
 
+### September 14 work zone approach
+
+- [x] Automatic speed control follows the warning's two numbers: cruise
+      eases to the taper's 55 first, then to the zone's 45 once the barrels
+      are inside the larger of its braking window and the keeper's ease
+      distance; the keeper, which takes the taper over at its start, sheds
+      for the barrels from that moment instead of holding the taper's
+      number until its 0.75-mile window opened. Measured at standard
+      pacing: entry 47.2 before, 45.7 after (owner report).
+- [ ] The construction warning says "55 at the taper" for every work zone,
+      including real 511 zones, which are placed with no merge taper. The
+      wording should follow the zone that was actually laid.
+
 ### September 14 keyboard shortcuts and controller buttons
 
 - [x] Every discrete driving control resolves through one table

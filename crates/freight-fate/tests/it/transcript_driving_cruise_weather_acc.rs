@@ -968,6 +968,60 @@ fn test_cruise_pre_brakes_for_heavy_traffic_like_a_work_zone() {
 }
 
 #[test]
+fn test_cruise_eases_to_the_taper_speed_first_then_the_work_zone_at_the_barrels() {
+    // The warning promises two numbers: the taper's, then the work zone's.
+    // Cruise used to aim at the work zone's from the moment the warning
+    // landed, miles out, so a driver told "55 at the taper, then 45" was
+    // already at 45 long before the taper (owner, 2026-09-14).
+    let mut harness = bench_drive("Taper Stage", 70.0, 0.0);
+    press(&mut harness, Key::E, None);
+    harness.with_drive(|d, _| {
+        d.truck_mut().transmission.gear = 10;
+        d.truck_mut().velocity_mps = 31.3; // ~70 mph
+    });
+    press(&mut harness, Key::K, None);
+
+    let barrels = harness.read_drive(|d| d.trip.position_mi) + 1.5;
+    let taper = Zone::new(barrels - 1.0, barrels, 55.0, "construction merge");
+    let work = Zone::new(barrels, barrels + 3.0, 45.0, "construction");
+    let announced = work.clone();
+    harness.with_drive(move |d, _| {
+        d.trip.zones.push(taper.clone());
+        d.trip.zones.push(work.clone());
+        d.trip.announced_zone_warnings.insert(zone_key(&announced));
+    });
+
+    // A mile and a half out at 70: the taper's number, as the warning said.
+    assert_eq!(
+        harness.with_drive(|d, ctx| d.restricted_zone_limit_ahead(ctx)),
+        Some((55.0, "construction".to_string()))
+    );
+    assert_eq!(
+        harness.with_drive(|d, ctx| d.acc_posted_limit_ahead(ctx)),
+        (55.0, Some("construction".to_string()))
+    );
+    // Down to 55 and inside braking distance of the barrels: the zone's.
+    harness.with_drive(move |d, _| {
+        d.truck_mut().velocity_mps = 24.6; // ~55 mph
+        d.trip.position_mi = barrels - 0.2;
+    });
+    assert_eq!(
+        harness.with_drive(|d, ctx| d.restricted_zone_limit_ahead(ctx)),
+        Some((45.0, "construction".to_string()))
+    );
+    // Once the zone stage has begun it holds: slowing shrinks the braking
+    // window, and the target must not climb back to 55 over the last yards.
+    harness.with_drive(move |d, _| {
+        d.truck_mut().velocity_mps = 20.6; // ~46 mph
+        d.trip.position_mi = barrels - 0.6;
+    });
+    assert_eq!(
+        harness.with_drive(|d, ctx| d.restricted_zone_limit_ahead(ctx)),
+        Some((45.0, "construction".to_string()))
+    );
+}
+
+#[test]
 fn test_speed_control_restores_cruise_target_after_zone() {
     let mut harness = bench_drive("Restore Target", 65.0, 0.0);
     release_keys(&mut harness);

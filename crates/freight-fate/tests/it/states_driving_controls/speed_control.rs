@@ -292,6 +292,36 @@ fn test_speed_keeper_ease_window_follows_the_driving_mode() {
 }
 
 #[test]
+fn test_the_keeper_sheds_for_the_barrels_from_the_start_of_a_merge_taper() {
+    // A merge taper is a mile of road that exists for one shed. The keeper
+    // used to take it over from cruise and hold the taper's number until its
+    // ordinary ease window opened, then meet the barrels two over (owner,
+    // 2026-09-14). On a taper the work zone's number is in demand at once.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.speed_keeper = true;
+    d.speed_control_armed = true;
+    d.keeper_mph = Some(55.0);
+    d.trip.zones = vec![
+        Zone::new(5.0, 6.0, 55.0, "construction merge"),
+        Zone::new(6.0, 8.0, 45.0, "construction"),
+    ];
+    d.trip.truck.velocity_mps = 52.0 / freight_fate::states::driving_core::MPH_PER_MPS;
+    // Just inside the taper, a whole mile from the barrels: further than the
+    // keeper's own ease window reaches, and still the answer.
+    d.trip.position_mi = 5.02;
+    assert_eq!(
+        d.keeper_speed_ahead(&mut app.ctx),
+        Some((45.0, "construction".to_string()))
+    );
+    // Ahead of the taper the ordinary window still governs: a mile and a
+    // half from the barrels on the open corridor is not yet the keeper's.
+    d.keeper_ease_target = None;
+    d.trip.position_mi = 4.5;
+    assert_eq!(d.keeper_speed_ahead(&mut app.ctx), None);
+}
+
+#[test]
 fn test_the_restricted_zone_look_ahead_waits_for_the_spoken_warning() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);

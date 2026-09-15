@@ -508,6 +508,7 @@ impl DrivingState {
             acc_limit_cap_said: None,
             acc_weather_cap_said: None,
             construction_slowdown: None,
+            construction_taper_stage: None,
             acc_limit_hold: None,
             acc_follow_cue_s: 0.0,
             descent_control_active: false,

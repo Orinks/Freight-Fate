@@ -549,6 +549,11 @@ pub struct DrivingState {
     // (end mile, limit, reason) of a restricted zone cruise has begun
     // slowing for -- a work zone or heavy traffic.
     pub construction_slowdown: Option<(f64, f64, String)>,
+    /// `(barrels mile, taper limit)` while cruise is still on the merge
+    /// taper's number ahead of that zone; cleared the moment the zone's own
+    /// number takes over, so the target never climbs back as the braking
+    /// window shrinks.
+    pub construction_taper_stage: Option<(f64, f64)>,
     /// A lower posted limit adaptive cruise is already easing for:
     /// `(start_mi, limit_mph, reason)`, held until the truck reaches it.
     /// The lookahead is a braking distance that shrinks as cruise slows,

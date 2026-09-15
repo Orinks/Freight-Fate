@@ -1362,6 +1362,10 @@
 
 ### Fixed
 
+- **Automatic speed control eases to the taper speed first and meets the work
+  zone speed at the barrels.** It used to drop to the work zone number miles
+  early, then arrive a little over it.
+
 - **The game no longer uses up Windows a little at a time while it sits
   open.** A session that runs all day stays the size it started at.
 
