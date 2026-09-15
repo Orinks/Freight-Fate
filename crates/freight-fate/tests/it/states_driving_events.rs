@@ -1643,6 +1643,9 @@ fn test_a_ramp_terminal_call_never_speaks_a_limit_it_does_not_have() {
         d.announce_ramp_terminal(&mut app.ctx);
         let said = app.event_lines();
         assert!(!said.is_empty(), "{control} says nothing at all");
+        if control == "signal" {
+            assert_eq!(said, vec!["Light green."]);
+        }
         // Every line the call put on the channel, not just the last: the
         // terminal call can hand back a line it interrupted, so `[-1]` (what
         // the Python stub read) is not always the one under test here.
@@ -1661,15 +1664,27 @@ fn test_a_ramp_terminal_call_never_speaks_a_limit_it_does_not_have() {
             );
         }
 
-        // And with a real number it still says it.
+        // Signs still name a valid limit; signals announce only their color.
         app.clear_speech();
         let pos = d.trip.position_mi;
         d.trip
             .zones
             .push(Zone::new(pos + 0.02, pos + 1.0, 45.0, "city street"));
         d.ramp_light_announced = false;
+        if control == "signal" {
+            // Change color so the speech pacer does not suppress a duplicate.
+            d.ramp_light_offset_s = 0.0;
+        }
         d.announce_ramp_terminal(&mut app.ctx);
         let said = app.event_lines();
+        if control == "signal" {
+            assert!(said.iter().any(|line| line == "Light red."));
+            // An interrupted green call may be requeued after the red call.
+            assert!(said
+                .iter()
+                .all(|line| matches!(line.as_str(), "Light red." | "Light green.")));
+            continue;
+        }
         assert!(
             said.iter().any(|line| line.contains("45 miles per hour")),
             "{control}: {said:?}"

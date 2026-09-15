@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- **Traffic lights announce only their color, and the approach countdown says only the distance.**
+
 ### Added
 
 - **Career stats opens your citations and violations, newest first.** Each

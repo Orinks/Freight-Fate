@@ -38,6 +38,9 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Keep traffic light approaches and changes brief: Light red, Light yellow,
+      Light green; retain the distance countdown without "to the bar."
+
 - [ ] Validate the Windows portable snapshot on a clean Windows installation
       without a separately installed Visual C++ redistributable; the build
       runner's smoke test alone cannot establish this.
