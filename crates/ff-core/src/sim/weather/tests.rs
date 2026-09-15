@@ -1109,7 +1109,7 @@ fn closure_part(zone: &crate::sim::trip_models::Zone) -> String {
             } else {
                 ("left", "right")
             };
-            format!("The {shut} lane is closed, merge {keep} at the taper. ")
+            format!("The {shut} lane is closed, merge {keep} before the work zone. ")
         }
     }
 }
@@ -1984,7 +1984,7 @@ fn test_construction_zone_warns_before_entry() {
     assert_eq!(
         warnings,
         vec![format!(
-            "In {}, construction ahead. {}Speed limit {:.0} at the taper, then {:.0} through the work zone.",
+            "In {}, construction ahead. {}Speed limit {:.0} from one mile out, then {:.0} through the work zone.",
             trip.ahead_text(lookahead),
             closure_part(&zone),
             CONSTRUCTION_TAPER_LIMIT_MPH,
@@ -2105,7 +2105,7 @@ fn test_construction_zone_speeding_fine_waits_for_grace_distance() {
     assert_eq!(
         construction_cues,
         vec![format!(
-            "In 2 miles, construction ahead. {}Speed limit {:.0} at the taper, then {:.0} through the work zone.",
+            "In 2 miles, construction ahead. {}Speed limit {:.0} from one mile out, then {:.0} through the work zone.",
             closure_part(&zone),
             CONSTRUCTION_TAPER_LIMIT_MPH,
             zone.limit_mph

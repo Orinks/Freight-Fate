@@ -262,7 +262,7 @@ fn test_upcoming_key_reports_an_imposed_limit_ahead() {
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &key(Key::U));
     let said = last(&app);
-    assert!(said.contains("construction taper"), "{said}");
+    assert!(said.contains("reduced speed for construction"), "{said}");
     assert!(said.contains("right lane closed, merge left"), "{said}");
     assert!(said.contains("speed limit 55"), "{said}");
     // "construction zone" is the canonical spoken noun (docs/ontology.md).

@@ -600,7 +600,7 @@ fn test_metric_zone_warning_uses_metric_speed_limit() {
     let blob = msgs.join(" ");
     // 55/45 mph rendered as km/h
     assert!(
-        blob.contains("Speed limit 89 at the taper, then 72"),
+        blob.contains("Speed limit 89 from 2 kilometers out, then 72"),
         "{blob}"
     );
     assert!(

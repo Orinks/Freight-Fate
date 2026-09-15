@@ -565,7 +565,7 @@ impl DrivingState {
                     "all lanes open".to_string()
                 };
                 parts.push(format!(
-                    "construction taper in {}, {merge}, speed limit {}, then construction zone {}",
+                    "reduced speed for construction in {}, {merge}, speed limit {}, then construction zone {}",
                     ctx.settings.distance_text(zone.start_mi - pos, true),
                     ctx.settings.speed_text(zone.limit_mph),
                     ctx.settings.speed_text(paired.limit_mph)

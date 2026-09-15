@@ -713,7 +713,7 @@ fn test_a_construction_zone_line_is_rescued_once_like_any_other() {
 #[test]
 fn test_the_merge_taper_line_is_rescued_once_too() {
     let taper =
-        "Construction merge taper. The right lane closes ahead; merge left now. Speed limit 55.";
+        "Reduced speed for construction. The right lane closes ahead; merge left now. Speed limit 55.";
     let (mut pacer, _) = make_pacer();
     flush_at(&mut pacer, taper, EventPriority::Route);
     let mut rescues = 0;

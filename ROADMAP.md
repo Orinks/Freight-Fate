@@ -286,6 +286,12 @@ its status or release decision.
       for the barrels from that moment instead of holding the taper's
       number until its 0.75-mile window opened. Measured at standard
       pacing: entry 47.2 before, 45.7 after (owner report).
+- [x] The mile ahead of a work zone is spoken as the reduced-speed approach
+      ("speed limit 55 from one mile out, then 45 through the work zone";
+      entry "Reduced speed for construction"), matching how a real
+      interstate work zone steps its limit down through its advance warning
+      area. "Taper" now names only the short merge at its end, as in MUTCD
+      Part 6, where the traffic-squeeze advisory still uses it.
 
 ### September 14 keyboard shortcuts and controller buttons
 

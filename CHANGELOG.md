@@ -412,6 +412,10 @@
 
 ### Changed
 
+- **The construction warning says the speed drops one mile before the work
+  zone, then again inside it.** The mile ahead of the work is no longer
+  called the taper.
+
 - **Pausing no longer takes you off duty.** You stay on the drivers list,
   shown as paused.
 

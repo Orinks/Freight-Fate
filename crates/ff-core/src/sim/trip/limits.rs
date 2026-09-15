@@ -44,7 +44,7 @@ impl Trip {
         if zone.reason == "construction" {
             let merge_part = if zone.closed_side.is_some() {
                 let (shut, keep) = Self::closure_phrases(zone);
-                format!("The {shut} lane is closed, merge {keep} at the taper. ")
+                format!("The {shut} lane is closed, merge {keep} before the work zone. ")
             } else {
                 "All lanes open through the work. ".to_string()
             };
@@ -59,10 +59,16 @@ impl Trip {
             // something when a real emergency uses it. The heavy-traffic and
             // generic zone warnings below have always opened with the
             // distance; this one was the odd sibling out.
+            // The mile ahead of the work is the reduced-speed approach, the
+            // way a real interstate work zone steps its limit down through
+            // its advance warning area; the taper is the short merge at the
+            // end of it (MUTCD Part 6), so the word is kept for that spot
+            // alone (owner ruling, 2026-09-14).
             return format!(
-                "In {}, construction ahead. {merge_part}Speed limit {} at the taper, then {} through the work zone.",
+                "In {}, construction ahead. {merge_part}Speed limit {} from {} out, then {} through the work zone.",
                 self.ahead_text(ahead),
                 self.speed_value(CONSTRUCTION_TAPER_LIMIT_MPH),
+                self.ahead_text(CONSTRUCTION_TAPER_MI),
                 self.speed_value(zone.limit_mph)
             );
         }
@@ -100,12 +106,12 @@ impl Trip {
             if zone.closed_side.is_some() {
                 let (shut, keep) = Self::closure_phrases(zone);
                 return format!(
-                    "Construction merge taper. The {shut} lane closes ahead, merge {keep}. Speed limit {}.",
+                    "Reduced speed for construction. The {shut} lane closes ahead, merge {keep}. Speed limit {}.",
                     self.speed_value(zone.limit_mph)
                 );
             }
             return format!(
-                "Construction merge taper. Flagger ahead. Speed limit {}.",
+                "Reduced speed for construction. Flagger ahead. Speed limit {}.",
                 self.speed_value(zone.limit_mph)
             );
         }

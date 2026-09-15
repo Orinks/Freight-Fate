@@ -969,10 +969,12 @@ around slower traffic, you hear when the lane you came out of is open again:
 you get past, only while it is still true, and never about a lane roadwork has
 closed. If you missed it, or want to know before you commit, press L.
 
-Construction and traffic zones lower the speed limit. A construction zone may
-begin with a merge or flagger taper before the lower limit inside it, and may
-cone off a lane -- but only where you have another lane on your side for the
-whole signed stretch, taper included. On a road that runs one lane your way,
+Construction and traffic zones lower the speed limit. A construction zone
+begins with a mile of reduced speed before the lower limit inside it, the way
+a real work zone steps its limit down. The merge or the flagger sits at the
+end of that mile. A zone may cone off a lane -- but only where you have
+another lane on your side for the whole signed stretch, approach included. On
+a road that runs one lane your way,
 the work still happens with every lane open. You will never be ordered out of
 a lane you cannot leave.
 
