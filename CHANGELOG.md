@@ -1382,6 +1382,10 @@
 
 ### Fixed
 
+- **Your public profile and cloud backup name the truck you drive now.**
+  A company driver promoted to a new fleet used to keep the old yard's
+  tractor on the page.
+
 - **Automatic speed control eases to the taper speed first and meets the work
   zone speed at the barrels.** It used to drop to the work zone number miles
   early, then arrive a little over it.

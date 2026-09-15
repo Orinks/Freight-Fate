@@ -85,7 +85,12 @@ impl Profile {
             Value::from(self.calendar_offset_days),
         );
         d.insert("tutorial_done".into(), Value::from(self.tutorial_done));
-        d.insert("truck".into(), Value::from(self.truck.as_str()));
+        // The tractor the driver is actually in, not the raw field: a company
+        // driver's assignment follows their level and the field only changes
+        // when dispatch writes a slip seat, a spare or a status change into
+        // it, so a promoted driver kept an old yard's truck in the save for
+        // good. Reading it back yields the same key, so this is idempotent.
+        d.insert("truck".into(), Value::from(self.active_truck_key()));
         d.insert("owned_trucks".into(), strings(&self.owned_trucks));
         let conditions: Map<String, Value> = self
             .truck_conditions

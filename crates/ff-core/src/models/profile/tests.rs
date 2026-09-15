@@ -580,6 +580,34 @@ fn test_company_driver_condition_keys_under_the_assigned_rig() {
     assert!(!p.truck_conditions.contains_key("heavy_hauler"));
 }
 
+/// The saved truck is the one the driver is actually in.
+///
+/// A company driver's tractor follows their level, but the `truck` field only
+/// changed when dispatch wrote a slip seat, a spare, or a status change into
+/// it. A driver promoted out of the long-haul yard kept "aero_cruiser" in
+/// the save for good, and every reader of the save -- the cloud backup, the
+/// public profile -- reported a tractor they no longer drove.
+#[test]
+fn test_saved_truck_is_the_one_the_company_driver_actually_drives() {
+    with_data_dir(|_| {
+        let mut p = Profile::named("Promoted");
+        p.business_status = COMPANY_DRIVER.to_string();
+        p.career.xp = crate::models::career::LEVEL_XP[12]; // level 13: premium fleet
+        p.truck = "aero_cruiser".to_string(); // the long-haul assignment, levels 9 to 12
+
+        let assigned = p.active_truck_key();
+        assert_ne!(assigned, "aero_cruiser");
+        assert_eq!(p.to_dict()["truck"], assigned);
+
+        // An owner-operator's truck is their own and is written as is.
+        let mut o = Profile::named("Owner");
+        o.business_status = LEASED_OWNER_OPERATOR.to_string();
+        o.truck = "aero_cruiser".to_string();
+        o.owned_trucks = vec!["aero_cruiser".to_string()];
+        assert_eq!(o.to_dict()["truck"], "aero_cruiser");
+    });
+}
+
 #[test]
 fn test_legacy_flat_condition_fans_out_to_every_owned_truck() {
     let value = json!({
