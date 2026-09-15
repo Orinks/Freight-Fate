@@ -1014,10 +1014,16 @@ key as an exit), brake to a stop on the shoulder, and sit through a license and
 logbook check that reads your recent duty entries before ending in an
 on-the-spot ticket or a warning.
 Ignoring the lights starts as a failure-to-stop warning, then a final warning.
-Keep driving past that and troopers end the stop with spike strips. A felony
-stop adds truck damage, a major fine, a reputation hit, several hours of
-processing time, and cancels the active loaded run. You are released back to the
-terminal so you can repair, rest, and choose what to do next. Speeding is charged only when a trooper catches it.
+Keep driving past that, or roll two miles with the lights behind you, and
+troopers box the truck in and stop it: a failure-to-stop citation and a
+serious violation on your record, but not a felony. Nobody runs from the
+police by accident. Running is a deliberate choice: hold Shift with the exit
+key after the stop order, the cab tells you exactly what it costs, and only a
+hold of several seconds starts a pursuit. A pursuit ends in a felony stop that
+adds truck damage, a major fine, a reputation hit, several hours of processing
+time, and cancels the active loaded run. You are released back to the terminal
+so you can repair, rest, and choose what to do next. Speeding is charged only
+when a trooper catches it.
 What each of those costs, and what it puts on your record, is under
 Enforcement, Your Record, And Your CDL.
 Open weigh stations also matter: the game warns you before the scale, and if

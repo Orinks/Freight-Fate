@@ -27,10 +27,9 @@ impl DrivingState {
     /// Judge the stop by behavior, and warn by distance. A compliance
     /// tracker (0..1) rises with braking and falls with accelerating,
     /// coasting, and failing to signal (deductions stack); a full stop opens
-    /// the roadside stop and zeroing it out ends in a felony. On top of that,
-    /// the staged failure-to-stop warnings still speak as the miles roll by,
-    /// and simply driving miles on with the lights behind you is a felony
-    /// regardless of the tracker.
+    /// the roadside stop and zeroing it out, or two miles of rolling, ends
+    /// in troopers forcing the stop: a failure-to-stop citation, never a
+    /// felony. The felony is the held opt-in in `update_pursuit_optin`.
     pub fn update_pull_over(&mut self, ctx: &mut GameContext, dt: f64, service_braking: bool) {
         if self.pull_over.is_none() {
             return;

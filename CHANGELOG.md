@@ -1382,6 +1382,9 @@
 
 ### Fixed
 
+- **The manual says what ignoring a trooper's lights costs.** A forced stop
+  and a serious violation; a felony only if you choose to run.
+
 - **The percent there counts the whole run, streets included, and never
   says 100 before the gate.** On the last mile of streets the drivers board
   used to say 100 percent there.
