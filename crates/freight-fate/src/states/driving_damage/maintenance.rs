@@ -182,6 +182,18 @@ impl DrivingState {
         }
     }
 
+    /// The player cut a wear warning off: it counts as heard, so the
+    /// component is not warned about again at this level.
+    pub(crate) fn acknowledge_maintenance_warnings(&mut self) {
+        for index in 0..MAINTENANCE_COMPONENTS.len() {
+            let pending = self.maintenance_pending_levels[index];
+            if pending != 0 {
+                self.maintenance_levels[index] = pending;
+                self.maintenance_pending_levels[index] = 0;
+            }
+        }
+    }
+
     pub fn prepare_warning_speech_pause(&mut self, ctx: &mut GameContext) {
         self.settle_last_hos_stop_warning(ctx, true);
         self.settle_maintenance_warnings(ctx, true);

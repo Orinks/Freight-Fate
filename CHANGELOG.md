@@ -1382,6 +1382,9 @@
 
 ### Fixed
 
+- **Control now silences the last-stop warning for good.** It used to come
+  back whole on every press, and the same goes for wear warnings.
+
 - **Your public profile and cloud backup name the truck you drive now.**
   A company driver promoted to a new fleet used to keep the old yard's
   tractor on the page.

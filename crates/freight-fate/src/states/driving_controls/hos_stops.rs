@@ -31,6 +31,28 @@ impl DrivingState {
         self.hos_stop_warning_pending = None;
     }
 
+    /// The player cut the warning off: that counts as having heard it.
+    ///
+    /// An interrupted warning is otherwise said again in full, which is
+    /// right when another line cut it and wrong when the player did --
+    /// every press of Control brought the whole line back, as many times
+    /// as it was pressed (Shane's log, 12 September).
+    pub(crate) fn acknowledge_last_hos_stop_warning(&mut self, ctx: &mut GameContext) {
+        let Some(key) = self.hos_stop_warning_pending.take() else {
+            return;
+        };
+        if !hos_of(ctx).warned.contains(&key) {
+            hos_mut_of(ctx).warned.push(key);
+        }
+    }
+
+    /// Everything a player's stop-speech key settles at once.
+    pub(crate) fn warnings_stopped_by_player(&mut self, ctx: &mut GameContext) {
+        self.note_critical_speech_stopped();
+        self.acknowledge_last_hos_stop_warning(ctx);
+        self.acknowledge_maintenance_warnings();
+    }
+
     pub fn hos_stop_advice(&self, ctx: &GameContext) -> Option<HosStopAdvice> {
         let (trip, local_drive_min) = if self.departure_chain {
             let highway = self.highway_trip.as_ref()?;

@@ -234,6 +234,34 @@ fn paused_unheard_last_stop_warning_retries_after_saved_resume() {
     );
 }
 
+/// Control cutting the warning off counts as hearing it.
+///
+/// An interrupted warning is said again in full, which is right when
+/// another line cut it and wrong when the player did: every press of
+/// Control brought the whole line back (Shane, 12 September).
+#[test]
+fn control_silences_the_last_stop_warning_for_good() {
+    let mut h = drive(20.0);
+    h.with_drive(|d, ctx| {
+        ctx.profile.as_mut().unwrap().hos.duty_min = 13.0 * 60.0 + 40.0;
+        d.trip.position_mi = 16.0;
+        d.trip.stops = vec![stop("Silenced stop", 20.0, "sleep")];
+        d.warn_last_hos_stop(ctx);
+    });
+    assert!(h.transcript_text().contains("Silenced stop"));
+
+    h.key(InputEvent::key(Key::LCtrl));
+    h.clear_speech();
+    for _ in 0..3 {
+        h.with_drive(|d, ctx| d.warn_last_hos_stop(ctx));
+    }
+    assert!(
+        !h.transcript_text().contains("Silenced stop"),
+        "{}",
+        h.transcript_text()
+    );
+}
+
 #[test]
 fn hos_and_all_maintenance_warnings_finish_without_competing() {
     let mut h = drive(20.0);

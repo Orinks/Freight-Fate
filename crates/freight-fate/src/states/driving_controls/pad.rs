@@ -65,7 +65,7 @@ impl DrivingState {
                     // wanted quiet with a paragraph of help.
                     if ctx.event_voice_busy() {
                         ctx.stop_event_speech();
-                        self.note_critical_speech_stopped();
+                        self.warnings_stopped_by_player(ctx);
                         self.set_status("Event voice stopped.");
                     } else {
                         self.speak_controller_help(ctx);

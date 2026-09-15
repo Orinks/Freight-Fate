@@ -58,7 +58,7 @@ impl DrivingState {
 
         if matches!(key, Key::LCtrl | Key::RCtrl) {
             ctx.stop_event_speech();
-            self.note_critical_speech_stopped();
+            self.warnings_stopped_by_player(ctx);
             self.set_status("Event voice stopped.");
             return;
         }
