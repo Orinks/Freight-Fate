@@ -802,12 +802,12 @@ fn test_great_falls_signal_stop_does_not_become_a_two_mph_destination_crawl() {
     harness.result().assert_ordered(&[
         "Route-transition assistance braking for the light.",
         "Stopped at the red light. Assistance is holding the brakes for green.",
-        "Green light. Facility stopping assistance is taking you to the entrance.",
+        "Light green.",
         "Pulling into construction materials yard Great Falls Materials Yard",
         "At construction materials yard Great Falls Materials Yard in Great Falls.",
     ]);
-    // One handoff, announced once: the release named the assist, so the
-    // latch a frame later does not announce it again.
+    // The green release activates the handoff with only the light color;
+    // the latch a frame later must not add another announcement.
     let heard = harness.transcript();
     assert!(
         !heard

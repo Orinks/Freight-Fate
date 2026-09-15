@@ -38,6 +38,9 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Keep traffic light approaches and changes brief: Light red, Light yellow,
+      Light green; retain the distance countdown without "to the bar."
+
 - [x] Start the route readout directly with the location or arrival information
       on facility approaches, city streets, and at the gate.
 

@@ -4,6 +4,8 @@
 
 ### Changed
 
+- **Traffic lights announce only their color, and the approach countdown says only the distance.**
+
 - **Route status starts with your location or arrival information instead of saying "Route status."**
 
 - **The exit blinker keeps clicking until you take, cancel, or miss the exit.**
