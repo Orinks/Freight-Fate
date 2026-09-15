@@ -396,6 +396,7 @@ pub struct DrivingState {
     pub selected_stop_assist_brake: f64,
     pub exit_signal_on: bool,
     pub exit_signal_canceled: bool,
+    pub canceled_exit_key: Option<String>, // do not rediscover a deliberately canceled exit
     pub exit_lane_alignment: f64,
     pub exit_lane_prompt_said: bool,
     pub exit_lane_ready_said: bool,
@@ -753,6 +754,7 @@ pub struct DrivingState {
     // while a lane move is underway it runs on its own and ends with the
     // signal cancelling. See _update_steering_lane_cue.
     pub steer_cue_active: bool,
+    pub exit_blinker_active: bool, // retain ownership until a held wheel is released
     pub steer_cue_timer: f64,
     pub steer_cue_hold_s: f64, // how long the wheel has been held this way
     pub curve_run: Option<CurveRun>, // the bend underway, and how it is going

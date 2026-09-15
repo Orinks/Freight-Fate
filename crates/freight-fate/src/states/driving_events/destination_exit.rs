@@ -156,6 +156,9 @@ impl DrivingState {
             return;
         }
         let key = Self::destination_exit_key(&stop);
+        if self.canceled_exit_key.as_ref() == Some(&key) {
+            return;
+        }
         if key != self.destination_exit_announced_key {
             self.destination_exit_announced_key = key;
             // The exact exit stays answerable for a human reaction window even

@@ -379,22 +379,28 @@ impl DrivingState {
     /// Advance an assist-off tap change: signal clicks, then the flip.
     pub fn update_tap_lane_change(&mut self, ctx: &mut GameContext, dt: f64) {
         let Some(mut target) = self.lane_change_target else {
-            if !self.steer_cue_active {
+            if !self.steer_cue_active && !self.exit_blinker_on() {
                 ctx.audio.release_cue("vehicle/turn_signal");
             }
             return;
         };
         let pan = if target > self.lane.lane { -0.6 } else { 0.6 };
-        ctx.audio.update_cue("vehicle/turn_signal", 0.8, pan);
+        if !self.exit_blinker_on() {
+            ctx.audio.update_cue("vehicle/turn_signal", 0.8, pan);
+        }
         self.lane_signal_timer += dt;
         if self.lane_signal_timer >= LANE_SIGNAL_CLICK_S {
             self.lane_signal_timer = 0.0;
-            ctx.audio.play_if_idle("vehicle/turn_signal", 0.8, pan);
+            if !self.exit_blinker_on() {
+                ctx.audio.play_if_idle("vehicle/turn_signal", 0.8, pan);
+            }
         }
         self.lane_change_timer -= dt;
         if self.lane_change_timer <= 0.0 {
             self.lane_change_target = None;
-            ctx.audio.release_cue("vehicle/turn_signal");
+            if !self.exit_blinker_on() {
+                ctx.audio.release_cue("vehicle/turn_signal");
+            }
             target = target.min(self.lane.lane_count - 1);
             // Check the closure again on arrival, not just when the key was
             // pressed. A change takes seconds, and in those seconds the truck

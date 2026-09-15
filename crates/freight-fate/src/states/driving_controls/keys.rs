@@ -299,7 +299,9 @@ impl DrivingState {
         self.lane_change_timer = LANE_TAP_CHANGE_S;
         self.lane_signal_timer = 0.0;
         let pan = if direction > 0 { -0.6 } else { 0.6 };
-        ctx.audio.play_if_idle("vehicle/turn_signal", 0.8, pan);
+        if !self.exit_blinker_on() {
+            ctx.audio.play_if_idle("vehicle/turn_signal", 0.8, pan);
+        }
         ctx.say(&format!(
             "Changing to the {} lane.",
             lane_label(target, lane_count)
