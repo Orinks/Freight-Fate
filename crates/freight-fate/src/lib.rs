@@ -5,6 +5,7 @@ pub mod account_achievements;
 pub mod agent_server;
 pub mod app;
 pub mod audio;
+pub mod bindings;
 pub mod browser;
 pub mod cloud_saves;
 pub mod controller;

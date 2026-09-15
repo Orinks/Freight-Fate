@@ -18,7 +18,7 @@ pub const KEYBOARD: &str = "keyboard";
 pub const CONTROLLER: &str = "controller";
 
 /// action -> (keyboard phrase, controller phrase)
-const HINTS: &[(&str, (&str, &str))] = &[
+pub const HINTS: &[(&str, (&str, &str))] = &[
     ("accelerate", ("the Up arrow", "the right trigger")),
     ("brake", ("the Down arrow", "the left trigger")),
     ("emergency_brake", ("B", "the left trigger fully")),

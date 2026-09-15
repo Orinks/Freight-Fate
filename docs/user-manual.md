@@ -605,7 +605,10 @@ position. Otherwise the game uses the simulated forecast.
 
 ## Driving controls
 
-Driving controls are active while the road view is focused:
+Driving controls are active while the road view is focused. The keys and
+buttons below are the defaults: every one of them can be moved to another key
+or pad button under Settings, Gameplay, Controls, then Keyboard shortcuts or
+Controller buttons, and the F1 help and the spoken prompts follow the move.
 
 | Key | Action |
 | --- | --- |
@@ -1642,6 +1645,8 @@ quiets it, and settling back under the limit disarms it.
 | Automatic direction changes | In an automatic, both styles now change direction the same way: a fresh press held at a standstill. A brake held through a stop just holds the truck. The setting remains for familiarity. |
 | Controller | Accept controller input alongside the keyboard. The keyboard always stays active. |
 | Haptics | Use controller vibration for hazards, hard braking, rumble strips, and road seams. |
+| Keyboard shortcuts | One row per driving control, naming the key it is on. Enter on a row, then press the key you want, with Shift, Control, or Alt held if you want a chord. A key another control already has is refused by name; Escape keeps the current key. The pause key, Enter, F1, the Control keys that stop the voice, plus and minus, the radio dial keys, and the message review keys stay fixed. A last row puts every key back to its default. |
+| Controller buttons | The same for the pad. Enter on a row, then press the button you want, with the right bumper held for the second layer. Press the button the row already has to keep it. Start, Back, the bumpers, the triggers, and the sticks stay fixed. |
 
 ### Audio settings
 

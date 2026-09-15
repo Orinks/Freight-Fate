@@ -13,6 +13,7 @@ use super::settings_actions::{
     descent_level_label, event_voice_label, hos_label, lane_keeping_label, output_label,
     pace_label, update_channel,
 };
+use super::shortcuts::{ShortcutDevice, ShortcutsState};
 use crate::app::GameContext;
 use crate::states::base::{Label, Menu, MenuItem};
 use crate::states::update::UpdateCheckState;
@@ -579,6 +580,28 @@ impl SettingsCategoryState {
                     adjust(|s, ctx, d| s.toggle_haptics(ctx, d)),
                     "Controller rumble for hazards, hard braking, the rumble \
                      strip, and road seams. Needs a controller connected.",
+                ),
+                // Enter opens each; Left and Right have nothing to step through,
+                // and the adjust table above stops before these rows.
+                MenuItem::new(
+                    "Keyboard shortcuts",
+                    |_s: &mut SettingsCategoryState, ctx| {
+                        ctx.push_state(ShortcutsState::new(ShortcutDevice::Keyboard))
+                    },
+                )
+                .help(
+                    "Move any driving key to another key. Enter on a control, then \
+                     press the key you want for it.",
+                ),
+                MenuItem::new(
+                    "Controller buttons",
+                    |_s: &mut SettingsCategoryState, ctx| {
+                        ctx.push_state(ShortcutsState::new(ShortcutDevice::Controller))
+                    },
+                )
+                .help(
+                    "Move any driving control to another pad button, plain or with \
+                     the right bumper held.",
                 ),
                 // The speed keeper moved to Driving assistance: it holds a speed
                 // for you, which is what every other row on that screen does.

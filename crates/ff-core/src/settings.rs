@@ -616,6 +616,13 @@ settings_fields! {
     /// of its own -- and so a player two layouts behind hears both moves
     /// instead of only the newest.
     settings_layout_notice_from: i64 = -1 => int_strict,
+    /// Driving controls the player moved to other keys, as `action=chord`
+    /// pairs joined with semicolons (`engine=z;cruise_resume=shift+o`);
+    /// empty means every key is at its default. The game crate's
+    /// `bindings` module owns the vocabulary.
+    key_bindings: String = "" => str_plain,
+    /// The same for pad buttons (`engine=mod+a;horn=paddle_1`).
+    pad_bindings: String = "" => str_plain,
 }
 
 impl Settings {

@@ -43,6 +43,7 @@ use ff_core::speech_text::achievement_announced;
 
 use crate::account_achievements::AccountAchievements;
 use crate::audio::{Audio, VolumeUpdate};
+use crate::bindings::KeyBindings;
 use crate::cloud_saves::{BackupAnnouncements, CloudSaves};
 use crate::controller::ControllerManager;
 use crate::discord_presence::DiscordPresence;
@@ -131,6 +132,9 @@ pub struct GameContext {
     pub audio: Box<dyn Audio>,
     pub controller: ControllerManager,
     pub settings: Settings,
+    /// Which key and pad button does what at the wheel, rebuilt from
+    /// `settings` by `apply_bindings` whenever the player moves one.
+    pub bindings: KeyBindings,
     pub world: &'static World,
     pub economy: Economy,
     pub profile: Option<Profile>,
@@ -232,6 +236,7 @@ impl GameContext {
             speech: parts.speech,
             audio: parts.audio,
             controller: parts.controller,
+            bindings: KeyBindings::from_settings(&parts.settings),
             settings: parts.settings,
             world: parts.world,
             economy: parts.economy,
@@ -753,9 +758,21 @@ impl GameContext {
             .set_haptics_enabled(self.settings.haptics_enabled);
     }
 
-    /// Name a control for a spoken prompt, following the active device.
+    /// Rebuild the control table from the settings (after the player moves
+    /// a shortcut, or resets them).
+    pub fn apply_bindings(&mut self) {
+        self.bindings = KeyBindings::from_settings(&self.settings);
+    }
+
+    /// Name a control for a spoken prompt, following the active device and
+    /// whatever key or button the player has it on.
     pub fn control_hint(&self, action: &str) -> String {
-        self.controller.hint(action)
+        let moved = if self.controller.device() == ff_core::input_hints::CONTROLLER {
+            self.bindings.hint_pad_phrase(action)
+        } else {
+            self.bindings.hint_key_phrase(action)
+        };
+        moved.unwrap_or_else(|| self.controller.hint(action))
     }
 
     pub fn apply_speech(&mut self) {

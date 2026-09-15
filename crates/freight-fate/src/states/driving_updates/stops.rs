@@ -6,7 +6,7 @@ use ff_core::models::enforcement::FAILURE_TO_STOP_CITATION_FINE;
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
-use crate::states::base::Key;
+use crate::bindings::Action;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_updates::live;
@@ -254,7 +254,7 @@ impl DrivingState {
         if self.enforcement_bypassed(ctx) {
             return;
         }
-        let holding = ctx.input.is_pressed(Key::X) && ctx.input.mods().shift;
+        let holding = ctx.bindings.pressed(&ctx.input, Action::RunFromStop);
         if !holding {
             if self.pursuit_hold_s > 0.0 {
                 self.pursuit_hold_s = 0.0;

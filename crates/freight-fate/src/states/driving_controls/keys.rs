@@ -2,11 +2,10 @@
 //! wheel, plus the assist-off tap lane change the arrows fall back to.
 
 use crate::app::GameContext;
+use crate::bindings::Action;
 use crate::states::base::{InputEvent, Key};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
-
-use super::{place_fact, PlaceFact};
 
 impl DrivingState {
     /// `handle_event(event)`.
@@ -20,16 +19,30 @@ impl DrivingState {
         ctx.player_asked_end(previous);
     }
 
-    /// `_handle_key(event)`: the table itself, in source order.
+    /// `_handle_key(event)`: the table itself.
     ///
-    /// The order is load-bearing in three places and is reproduced exactly:
-    /// `Alt` with a number is checked BEFORE the jake stages, the `+`/`-`
-    /// keys fall back to the typed character, and the radio dial reads Ctrl
-    /// before Shift so `Ctrl+Shift` still jumps a category.
+    /// Every key first resolves to the [`Action`] the player has it on
+    /// (`ctx.bindings`), so a moved shortcut lands here without the table
+    /// knowing. The fixed keys -- Control to stop the voice, Escape to pause,
+    /// plus and minus, the radio dial, Enter, F1 -- are matched on the key
+    /// itself, the way they always were. Three orderings are load-bearing and
+    /// kept: a chord is tried before the bare key (so Alt with a number reads
+    /// a place instead of changing the engine brake), `+`/`-` fall back to the
+    /// typed character, and the radio dial reads Ctrl before Shift so
+    /// `Ctrl+Shift` still jumps a category.
     pub(crate) fn handle_key(&mut self, ctx: &mut GameContext, event: &InputEvent) {
-        if let InputEvent::KeyUp { key: Key::H, .. } = event {
-            ctx.audio.horn_stop();
-            self.trip.truck.horn_on = false;
+        if let InputEvent::KeyUp { key, .. } = event {
+            // Modifiers are ignored on the way up: a horn on Alt H must stop
+            // whichever of the two keys lifts first.
+            if ctx
+                .bindings
+                .chords(Action::Horn)
+                .iter()
+                .any(|c| c.key == *key)
+            {
+                ctx.audio.horn_stop();
+                self.trip.truck.horn_on = false;
+            }
             return;
         }
         let Some((key, mods, text)) = event.key_down() else {
@@ -47,167 +60,40 @@ impl DrivingState {
             ctx.stop_event_speech();
             self.note_critical_speech_stopped();
             self.set_status("Event voice stopped.");
-        } else if key == Key::Escape {
+            return;
+        }
+        if key == Key::Escape {
             ctx.audio.horn_stop();
             self.trip.truck.horn_on = false;
             self.push_pause_menu(ctx);
-        } else if key == Key::E {
-            self.toggle_engine(ctx);
-        } else if key == Key::N && !automatic {
-            let result = self.trip.truck.transmission.request_gear(0);
-            if result.ok {
-                ctx.audio
-                    .play_bank("vehicle/shift_manual", "vehicle/gear_shift");
-                ctx.say("Neutral.");
-            }
-        } else if key == Key::Backspace && !automatic {
-            self.manual_shift(ctx, REVERSE);
-        } else if key == Key::W && !automatic {
-            let tr = &self.trip.truck.transmission;
-            if tr.in_reverse() || tr.in_neutral() {
-                self.manual_shift(ctx, 1);
-            } else if tr.gear < 10 {
-                let next = tr.gear + 1;
-                self.manual_shift(ctx, next);
-            }
-        } else if key == Key::Q
-            && !automatic
-            && !self.trip.truck.transmission.in_neutral()
-            && self.trip.truck.transmission.gear > 1
-        {
-            let next = self.trip.truck.transmission.gear - 1;
-            self.manual_shift(ctx, next);
-        } else if key == Key::J {
-            if mods.alt {
-                self.toggle_auto_jake_enabled(ctx);
-            } else {
-                self.toggle_engine_brake(ctx);
-            }
-        } else if let (Some(fact), true) = (place_fact(key), mods.alt) {
-            // Checked ahead of the jake stages on purpose: Alt with a number
-            // used to fall through to them, so a driver reaching for "what
-            // state am I in" changed the engine brake instead.
-            match fact {
-                PlaceFact::State => self.speak_current_state(ctx),
-                PlaceFact::Road => self.speak_current_road(ctx),
-                PlaceFact::Town => self.speak_current_town(ctx),
-                PlaceFact::Direction => self.speak_current_direction(ctx),
-            }
-        } else if matches!(key, Key::Num1 | Key::Num2 | Key::Num3) {
-            let stage = match key {
-                Key::Num1 => 1,
-                Key::Num2 => 2,
-                _ => 3,
-            };
-            self.select_jake_stage(ctx, stage);
-        } else if key == Key::P {
-            self.toggle_parking_brake(ctx);
-        } else if key == Key::H {
-            ctx.audio.horn_start();
-            self.trip.truck.horn_on = true;
-            self.horn_scare_animals(ctx);
-        } else if key == Key::T {
-            if mods.alt {
-                // The AMT's manual-mode button: flips the transmission
-                // setting; the existing manual shift controls take over.
-                ctx.settings.automatic_transmission = !ctx.settings.automatic_transmission;
-            } else if self.manual_facility_arrival_ready(ctx) {
-                self.open_ready_facility_arrival(ctx);
-            } else {
-                self.try_rest_stop(ctx);
-            }
-        } else if key == Key::X {
-            if self.pull_over.is_some() {
-                self.signal_pull_over(ctx);
-            } else {
-                self.take_exit(ctx);
-            }
-        } else if key == Key::K {
-            if mods.shift {
-                self.resume_cruise(ctx);
-            } else {
-                self.toggle_cruise(ctx);
-            }
-        } else if plus {
+            return;
+        }
+        if let Some(action) = ctx.bindings.action_for(key, mods) {
+            self.run_key_action(ctx, action);
+            return;
+        }
+        if plus {
             self.adjust_cruise(ctx, 1, mods.ctrl);
         } else if minus {
             self.adjust_cruise(ctx, -1, mods.ctrl);
-        } else if key == Key::Left && ctx.settings.lane_is_automated() {
-            self.tap_lane_change(ctx, 1);
-        } else if key == Key::Right && ctx.settings.lane_is_automated() {
-            self.tap_lane_change(ctx, -1);
-        } else if key == Key::Space {
-            self.speak_speed(ctx);
         } else if matches!(key, Key::Return | Key::KpEnter) {
             if self.assisted_facility_confirmation_ready(ctx) {
                 self.open_ready_facility_arrival(ctx);
             }
-        } else if key == Key::Tab {
-            self.push_driving_status(ctx);
-        } else if key == Key::F {
-            self.speak_fuel(ctx);
-        } else if key == Key::C {
-            if mods.alt {
-                // C for the CB, on the Alt layer that already answers one
-                // narrow question at a time (Alt A/S/D hours, Alt 1 to 4
-                // place). Plain C stays the clock, the same way plain S, D,
-                // A, J and T keep theirs.
-                self.speak_last_cb_chatter(ctx);
-            } else {
-                self.speak_clock(ctx, false);
-            }
-        } else if key == Key::R {
-            // Shift+R used to read the next listed exit. Removed 2026-08-17:
-            // the exit list is reference material the drive never asks the
-            // player to act on, and it stays reachable on the status screen,
-            // which is where reference material belongs. R answers the same
-            // thing shifted or not, so a stray Shift is not silence.
-            self.speak_route_status(ctx);
-        } else if key == Key::V {
-            self.speak_weather(ctx);
-        } else if key == Key::L {
-            let text = self.lane_status_text();
-            ctx.say(&text);
-        } else if key == Key::S {
-            if mods.alt {
-                self.speak_hos_break(ctx);
-            } else {
-                self.speak_speed_limit(ctx);
-            }
-        } else if key == Key::D {
-            if mods.alt {
-                self.speak_hos_drive_left(ctx);
-            } else {
-                self.speak_safe_speed(ctx);
-            }
-        } else if key == Key::A {
-            if mods.alt {
-                self.speak_hos_wheel_time(ctx);
-            } else {
-                self.speak_last_announcement(ctx);
-            }
-        } else if key == Key::G {
-            self.speak_grade(ctx);
-        } else if key == Key::I {
-            self.toggle_lane_locator(ctx);
-        } else if key == Key::U {
-            self.speak_upcoming(ctx, 15.0);
-        } else if key == Key::M {
-            self.toggle_radio(ctx);
-        } else if key == Key::O {
-            self.toggle_radio_favorite(ctx);
         } else if matches!(key, Key::PageUp | Key::Semicolon) {
             // Page Down walks to the next station, Page Up to the previous,
             // matching the help browser's Page Up and Page Down paging; with
             // Ctrl they leap a whole category (25 AFN stations in a row buried
             // terrestrial for a linear tune). Semicolon and apostrophe stay as
             // secondary dial keys: Page keys are Fn chords on many laptops and
-            // missing on 60 percent keyboards, and there is no key remapping.
-            // The dial originally lived on the brackets, which message review
-            // now uses to switch categories. Shift raises or lowers the radio
-            // volume instead of tuning (Jerry's request) -- checked only when
-            // Ctrl is absent, so Ctrl+Shift still falls through to Ctrl's own
-            // category jump exactly as it did before Shift existed.
+            // missing on 60 percent keyboards, which is also why the dial is
+            // not on the shortcuts screen -- one chosen key would drop the
+            // fallbacks. The dial originally lived on the brackets, which
+            // message review now uses to switch categories. Shift raises or
+            // lowers the radio volume instead of tuning (Jerry's request) --
+            // checked only when Ctrl is absent, so Ctrl+Shift still falls
+            // through to Ctrl's own category jump exactly as it did before
+            // Shift existed.
             if mods.ctrl {
                 self.jump_radio_category(ctx, -1);
             } else if mods.shift {
@@ -223,14 +109,139 @@ impl DrivingState {
             } else {
                 self.tune_radio(ctx, 1);
             }
-        } else if key == Key::Y {
-            if mods.shift {
-                self.speak_radio_now_playing(ctx);
-            } else {
-                self.speak_radio_status(ctx);
-            }
         } else if key == Key::F1 {
             self.speak_driving_help(ctx);
+        }
+    }
+
+    /// One keyboard action, whatever key it arrived on.
+    ///
+    /// The held controls (pedals, steering, the emergency brake, the
+    /// trooper run) are polled each frame through the same table and do
+    /// nothing here; steering's tap is the exception, because with lane
+    /// keeping on full a tap of the steering key changes lanes.
+    fn run_key_action(&mut self, ctx: &mut GameContext, action: Action) {
+        let automatic = self.trip.truck.transmission.automatic;
+        match action {
+            Action::Engine => self.toggle_engine(ctx),
+            Action::Neutral => {
+                if automatic {
+                    return;
+                }
+                let result = self.trip.truck.transmission.request_gear(0);
+                if result.ok {
+                    ctx.audio
+                        .play_bank("vehicle/shift_manual", "vehicle/gear_shift");
+                    ctx.say("Neutral.");
+                }
+            }
+            Action::Reverse => {
+                if !automatic {
+                    self.manual_shift(ctx, REVERSE);
+                }
+            }
+            Action::ShiftUp => {
+                if automatic {
+                    return;
+                }
+                let tr = &self.trip.truck.transmission;
+                if tr.in_reverse() || tr.in_neutral() {
+                    self.manual_shift(ctx, 1);
+                } else if tr.gear < 10 {
+                    let next = tr.gear + 1;
+                    self.manual_shift(ctx, next);
+                }
+            }
+            Action::ShiftDown => {
+                let tr = &self.trip.truck.transmission;
+                if !automatic && !tr.in_neutral() && tr.gear > 1 {
+                    let next = tr.gear - 1;
+                    self.manual_shift(ctx, next);
+                }
+            }
+            Action::EngineBrake => self.toggle_engine_brake(ctx),
+            Action::AutoJake => self.toggle_auto_jake_enabled(ctx),
+            Action::PlaceState => self.speak_current_state(ctx),
+            Action::PlaceRoad => self.speak_current_road(ctx),
+            Action::PlaceTown => self.speak_current_town(ctx),
+            Action::PlaceDirection => self.speak_current_direction(ctx),
+            Action::JakeStage1 => self.select_jake_stage(ctx, 1),
+            Action::JakeStage2 => self.select_jake_stage(ctx, 2),
+            Action::JakeStage3 => self.select_jake_stage(ctx, 3),
+            Action::CycleJake => self.cycle_jake_stage(ctx),
+            Action::ParkingBrake => self.toggle_parking_brake(ctx),
+            Action::Horn => {
+                ctx.audio.horn_start();
+                self.trip.truck.horn_on = true;
+                self.horn_scare_animals(ctx);
+            }
+            Action::TransmissionMode => {
+                // The AMT's manual-mode button: flips the transmission
+                // setting; the existing manual shift controls take over.
+                ctx.settings.automatic_transmission = !ctx.settings.automatic_transmission;
+            }
+            Action::Rest => {
+                if self.manual_facility_arrival_ready(ctx) {
+                    self.open_ready_facility_arrival(ctx);
+                } else {
+                    self.try_rest_stop(ctx);
+                }
+            }
+            Action::TakeExit => {
+                if self.pull_over.is_some() {
+                    self.signal_pull_over(ctx);
+                } else {
+                    self.take_exit(ctx);
+                }
+            }
+            Action::Cruise => self.toggle_cruise(ctx),
+            Action::CruiseResume => self.resume_cruise(ctx),
+            Action::CruiseUp => self.adjust_cruise(ctx, 1, false),
+            Action::CruiseDown => self.adjust_cruise(ctx, -1, false),
+            Action::SteerLeft => {
+                if ctx.settings.lane_is_automated() {
+                    self.tap_lane_change(ctx, 1);
+                }
+            }
+            Action::SteerRight => {
+                if ctx.settings.lane_is_automated() {
+                    self.tap_lane_change(ctx, -1);
+                }
+            }
+            Action::Speed => self.speak_speed(ctx),
+            Action::Status => self.push_driving_status(ctx),
+            Action::Fuel => self.speak_fuel(ctx),
+            // C for the CB, on the Alt layer that already answers one
+            // narrow question at a time (Alt A/S/D hours, Alt 1 to 4
+            // place). Plain C stays the clock, the same way plain S, D,
+            // A, J and T keep theirs.
+            Action::Cb => self.speak_last_cb_chatter(ctx),
+            Action::Clock => self.speak_clock(ctx, false),
+            // Shift+R used to read the next listed exit. Removed 2026-08-17:
+            // the exit list is reference material the drive never asks the
+            // player to act on, and it stays reachable on the status screen,
+            // which is where reference material belongs. R answers the same
+            // thing shifted or not, so a stray Shift is not silence.
+            Action::Route => self.speak_route_status(ctx),
+            Action::Weather => self.speak_weather(ctx),
+            Action::Lane => {
+                let text = self.lane_status_text();
+                ctx.say(&text);
+            }
+            Action::HosBreak => self.speak_hos_break(ctx),
+            Action::SpeedLimit => self.speak_speed_limit(ctx),
+            Action::HosDrive => self.speak_hos_drive_left(ctx),
+            Action::SafeSpeed => self.speak_safe_speed(ctx),
+            Action::HosWheel => self.speak_hos_wheel_time(ctx),
+            Action::LastAnnouncement => self.speak_last_announcement(ctx),
+            Action::Grade => self.speak_grade(ctx),
+            Action::LaneLocator => self.toggle_lane_locator(ctx),
+            Action::Upcoming => self.speak_upcoming(ctx, 15.0),
+            Action::Radio => self.toggle_radio(ctx),
+            Action::RadioFavorite => self.toggle_radio_favorite(ctx),
+            Action::RadioNowPlaying => self.speak_radio_now_playing(ctx),
+            Action::RadioStatus => self.speak_radio_status(ctx),
+            Action::Accelerate | Action::Brake | Action::EmergencyBrake | Action::RunFromStop => {}
         }
     }
 

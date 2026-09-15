@@ -39,8 +39,6 @@ pub mod pending;
 pub mod status;
 pub mod vehicle;
 
-use crate::states::base::Key;
-
 /// Wear meters join the status readout once they're worth planning around.
 pub const WEAR_STATUS_PCT: f64 = 50.0;
 
@@ -54,26 +52,3 @@ pub const SAFE_SPEED_CURVE_MI: f64 = 0.5;
 /// The most clauses the U readout may ever speak: the ramp control ahead,
 /// the next imposed limit, the next stop, and the next demanding bend.
 pub const UPCOMING_MAX_CLAUSES: usize = 4;
-
-/// One fact about where the truck is, answered by Alt with a number
-/// (`PLACE_KEYS`).
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum PlaceFact {
-    State,
-    Road,
-    Town,
-    Direction,
-}
-
-/// `PLACE_KEYS`: Alt with a number speaks one fact about where the truck is
-/// and stops (Tim K., 2026-08-16). Four keys in the order he asked for them,
-/// keypad included so the number row is not the only way in.
-pub fn place_fact(key: Key) -> Option<PlaceFact> {
-    match key {
-        Key::Num1 | Key::Kp1 => Some(PlaceFact::State),
-        Key::Num2 | Key::Kp2 => Some(PlaceFact::Road),
-        Key::Num3 | Key::Kp3 => Some(PlaceFact::Town),
-        Key::Num4 | Key::Kp4 => Some(PlaceFact::Direction),
-        _ => None,
-    }
-}

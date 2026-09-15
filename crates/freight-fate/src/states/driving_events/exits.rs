@@ -7,7 +7,7 @@ use ff_core::sim::trip_models::{
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent};
-use crate::states::base::Key;
+use crate::bindings::Action;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_updates::live;
@@ -544,8 +544,8 @@ impl DrivingState {
             return;
         }
 
-        let right = ctx.input.is_pressed(Key::Right);
-        let left = ctx.input.is_pressed(Key::Left);
+        let right = ctx.bindings.pressed(&ctx.input, Action::SteerRight);
+        let left = ctx.bindings.pressed(&ctx.input, Action::SteerLeft);
         // A quick tap is how full-lane-keeping players change lanes; when the
         // lane work is yours it only nudges the wheel and the exit lane never
         // builds. Two taps on one approach earn the how-to, once, so the

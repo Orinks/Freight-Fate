@@ -6,6 +6,7 @@ use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent, TRANSCRIPT_TARGET};
 use crate::audio::CH_BRAKE;
+use crate::bindings::Action;
 use crate::states::base::Key;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
@@ -173,9 +174,9 @@ impl DrivingState {
             0.0
         };
         let pad_brake = if pad_on { ctx.controller.brake() } else { 0.0 };
-        let key_up = ctx.input.is_pressed(Key::Up);
-        let mut key_down = ctx.input.is_pressed(Key::Down);
-        let b_held = ctx.input.is_pressed(Key::B);
+        let key_up = ctx.bindings.pressed(&ctx.input, Action::Accelerate);
+        let mut key_down = ctx.bindings.pressed(&ctx.input, Action::Brake);
+        let b_held = ctx.bindings.pressed(&ctx.input, Action::EmergencyBrake);
         // A latched brake reads as held right here, so everything
         // downstream -- the reverse gesture, cruise cancel, the hazard's
         // brake answer -- sees one truth. Microsleeps stay on the raw
@@ -411,6 +412,9 @@ impl DrivingState {
             );
         }
 
+        // The clutch is fixed on Shift, read as the key itself: the held-key
+        // tracker sees the key before any modifier flag, and the harness holds
+        // it the same way.
         let clutch_pressed = ctx.input.is_pressed(Key::LShift) || ctx.input.is_pressed(Key::RShift);
         let mut clutch_val: f64 = if clutch_pressed { 1.0 } else { 0.0 };
         if pad_on {

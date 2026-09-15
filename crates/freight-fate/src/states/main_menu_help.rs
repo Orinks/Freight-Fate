@@ -125,6 +125,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "U speaks the road ahead that no other key answers: the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that demands slowing.",
             "Left or Right Control stops the driving event voice.",
             "Escape opens the pause menu.",
+            "The keys named here are the defaults. Every driving key and pad button can be moved under Settings, Gameplay, Controls, then Keyboard shortcuts or Controller buttons.",
         ],
     ),
     (

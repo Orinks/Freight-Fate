@@ -210,6 +210,8 @@ fn gameplay_subcategory_rows(category: &str) -> &'static [&'static str] {
             "Automatic direction changes",
             "Controller",
             "Haptics",
+            "Keyboard shortcuts",
+            "Controller buttons",
             "Back",
         ],
         _ => unreachable!(),
@@ -935,9 +937,13 @@ fn test_every_row_answers_the_arrow_keys() {
     let mut app = TestApp::new();
     for category in ["assistance", "difficulty", "world", "controls", "audio"] {
         app.push_state(SettingsCategoryState::new(category));
+        // Rows that open another screen on Enter hold no value for the
+        // arrows to step; they sit after every adjustable row so the two
+        // lists still line up.
+        let opens_a_screen = ["Back", "Keyboard shortcuts", "Controller buttons"];
         let rows: Vec<String> = labels::<Cat>(&app)
             .into_iter()
-            .filter(|label| label != "Back")
+            .filter(|label| !opens_a_screen.contains(&label.as_str()))
             .collect();
         let mut deaf = Vec::new();
         for (i, row) in rows.iter().enumerate() {

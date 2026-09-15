@@ -159,6 +159,7 @@ time is a view, via `Trip.local_hour`.
 | Speech | -- | `speech.py` |
 | States | `State` and subclasses | `states/` |
 | Playtest levers | -- | `playtest_levers.py` |
+| Keyboard shortcuts and controller buttons | `Action`, `Chord`, `PadChord`, `KeyBindings` | `bindings.rs` (game crate) |
 
 ### Roadside colour
 
@@ -223,6 +224,8 @@ from the words, and synonyms cost them a re-read.
 | Concept | Say | Avoid | Internal name |
 | --- | --- | --- | --- |
 | The haul contract | job | gig, run, assignment | `Job` |
+| A driving control moved to another key | keyboard shortcut (the screen), the key it is on ("Engine on or off: E") | binding, mapping, keybind, hotkey | `bindings::Action`, `KeyBindings` |
+| The same on the pad | controller button; right bumper plus «button» for the second layer | modified button, layer two, chord | `bindings::PadChord` |
 | The freight itself | cargo, the load | payload, goods | `CargoType`, `Job.cargo` |
 | The board of offers | dispatch board | job list, load board | `JobBoard` |
 | The vehicle | truck | rig (except as noted) | `TruckModel` |

@@ -80,15 +80,16 @@ fn old_stopping_toggles_migrate_to_the_one_facility_assist() {
 // -- the field table -----------------------------------------------------------
 
 #[test]
-fn the_struct_carries_the_seventy_seven_persisted_fields_in_python_order() {
+fn the_struct_carries_the_seventy_nine_persisted_fields_in_python_order() {
     // 73 came over from the Python dataclass; backup_announcements,
     // duty_notifications and braille_only (2026-09-02) and real_fuel_prices
-    // (2026-09-12) were added on the Rust side.
-    assert_eq!(Settings::FIELD_NAMES.len(), 77);
+    // (2026-09-12) and the two shortcut tables (2026-09-14) were added on
+    // the Rust side.
+    assert_eq!(Settings::FIELD_NAMES.len(), 79);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
     assert_eq!(Settings::FIELD_NAMES[76], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 77);
+    assert_eq!(pairs.len(), 79);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -134,14 +135,15 @@ fn the_defaults_match_the_python_dataclass() {
         "profile_sharing_pending_off": false, "cloud_saves": false,
         "mastodon_sharing": false, "mastodon_linked": false, "mastodon_linked_handle": "",
         "controller_enabled": true, "haptics_enabled": true, "online_offer_seen": false,
-        "settings_version": 3, "settings_layout_notice_from": -1
+        "settings_version": 3, "settings_layout_notice_from": -1,
+        "key_bindings": "", "pad_bindings": ""
     }"#,
     )
     .unwrap();
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 77);
+    assert_eq!(expected.len(), 79);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }
@@ -153,9 +155,7 @@ fn the_file_text_is_what_json_dump_wrote() {
     let s = Settings::default();
     let text = s.to_file_text();
     assert!(text.starts_with("{\n  \"online_services\": true,\n  \"imperial_units\": true,\n"));
-    assert!(text.ends_with(
-        "  \"settings_layout_notice_from\": -1,\n  \"steering_assist\": \"realistic\"\n}"
-    ));
+    assert!(text.ends_with("  \"pad_bindings\": \"\",\n  \"steering_assist\": \"realistic\"\n}"));
     assert!(text.contains("\n  \"time_scale\": 10.0,\n"));
     assert!(text.contains("\n  \"radio_volume\": 0.25,\n"));
     // ensure_ascii: a non-ASCII voice name is escaped the way Python wrote it.

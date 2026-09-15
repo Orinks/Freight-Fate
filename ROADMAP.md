@@ -277,6 +277,24 @@ its status or release decision.
       carrier. Lifetime counts (claims, terminations, repossessions, fatigue,
       out-of-service) stay lifetime by design.
 
+### September 14 keyboard shortcuts and controller buttons
+
+- [x] Every discrete driving control resolves through one table
+      (`crates/freight-fate/src/bindings.rs`) the player edits from
+      Settings, Gameplay, Controls: Keyboard shortcuts and Controller
+      buttons, one row per control, Enter then a press to move it, refusals
+      by name for a taken or fixed key, a reset row. Saved as two text fields
+      in the settings file. The F1 help, the spoken "press X to" prompts, and
+      the mastery counter that retires them all follow the moved key. Fixed
+      by design: Escape, Enter, F1, the Control keys, Shift and the left
+      bumper as the clutch, plus and minus, the radio dial keys, message
+      review, Start and Back on the pad, and every menu key.
+- [ ] The How to play pages still list the default keys with one pointer
+      line; rendering them from the live table would let a moved key read
+      right there too.
+- [ ] The agent server's `press` tool speaks default key names; a sandbox
+      with moved keys needs the tool to accept action names as well.
+
 ### September 14 pause stays on duty
 
 - [x] Pausing keeps the driver on the drivers list, shown as paused, instead

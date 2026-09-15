@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Every driving key and pad button can be moved.** Settings, Gameplay,
+  Controls now has Keyboard shortcuts and Controller buttons; the F1 help
+  and the spoken prompts name the key you chose.
+
 - **A driver directory sits under Online, next to Drivers on duty.** It
   lists every driver with a public profile, and Enter on a driver reads
   their profile.

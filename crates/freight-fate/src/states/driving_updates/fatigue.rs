@@ -4,7 +4,7 @@ use ff_core::models::enforcement;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent};
-use crate::states::base::Key;
+use crate::bindings::Action;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
@@ -201,10 +201,10 @@ impl DrivingState {
         // counts as a reaction, so a held trigger does too.
         let pad_reacted = ctx.controller.active()
             && (ctx.controller.steering().abs() > 0.0 || ctx.controller.brake() > 0.05);
-        let reacted = ctx.input.is_pressed(Key::Left)
-            || ctx.input.is_pressed(Key::Right)
-            || ctx.input.is_pressed(Key::Down)
-            || ctx.input.is_pressed(Key::B)
+        let reacted = ctx.bindings.pressed(&ctx.input, Action::SteerLeft)
+            || ctx.bindings.pressed(&ctx.input, Action::SteerRight)
+            || ctx.bindings.pressed(&ctx.input, Action::Brake)
+            || ctx.bindings.pressed(&ctx.input, Action::EmergencyBrake)
             || pad_reacted;
         if reacted {
             self.resolve_microsleep(ctx, false);

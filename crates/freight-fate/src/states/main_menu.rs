@@ -43,6 +43,7 @@ mod careers;
 mod settings;
 mod settings_actions;
 mod settings_items;
+mod shortcuts;
 
 pub use achievements::{AchievementCareerState, AchievementCategoryState, AchievementsState};
 pub use careers::{
@@ -51,6 +52,7 @@ pub use careers::{
 pub use settings::{
     GameplaySettingsState, SettingsCategoryState, SettingsState, SETTINGS_LAYOUT_NOTICES,
 };
+pub use shortcuts::{ShortcutDevice, ShortcutsState};
 
 pub use crate::states::main_menu_career::{
     region_menu_name, CareerStartState, HomeCityState, HomeTerminalState,
