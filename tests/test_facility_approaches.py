@@ -28,9 +28,9 @@ def test_facility_approach_data_covers_full_facility_set(world):
     assert coverage["facilities"] == 5037
     # Synced with facility_endpoints after far-pin regeocode (419 estimated).
     assert coverage["source_backed_endpoints"] == 2779
-    assert coverage["road_snapped"] == 1839
-    assert coverage["turn_level"] == 1647
-    assert coverage["nearest_road_fallback"] == 940
+    assert coverage["road_snapped"] == 1908
+    assert coverage["turn_level"] == 1713
+    assert coverage["nearest_road_fallback"] == 871
     assert coverage["representative_fallback"] == 2258
     assert coverage["gate_yard_dock_hints"] == 0
 

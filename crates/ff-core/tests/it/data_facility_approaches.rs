@@ -31,9 +31,9 @@ fn test_facility_approach_data_covers_full_facility_set() {
     assert_eq!(coverage["facilities"], 5037);
     // Synced with facility_endpoints after far-pin regeocode (419 estimated).
     assert_eq!(coverage["source_backed_endpoints"], 2779);
-    assert_eq!(coverage["road_snapped"], 1579);
-    assert_eq!(coverage["turn_level"], 1415);
-    assert_eq!(coverage["nearest_road_fallback"], 1200);
+    assert_eq!(coverage["road_snapped"], 1908);
+    assert_eq!(coverage["turn_level"], 1713);
+    assert_eq!(coverage["nearest_road_fallback"], 871);
     assert_eq!(coverage["representative_fallback"], 2258);
     assert_eq!(coverage["gate_yard_dock_hints"], 0);
 
@@ -186,7 +186,8 @@ fn test_facility_route_keeps_existing_fallback_when_no_source_geometry() {
 /// "a side street", but `facility_approaches.json` was baked before that
 /// and still carries the literal as a road name. Whatever the bake says,
 /// the truck never speaks it: a road with no name is said to be what it
-/// is, on the arrival chain and on the reversed departure chain alike.
+/// is, on the arrival chain and on the reversed departure chain alike. The
+/// 2026-09-16 Illinois re-route baked that last block as "a service road".
 #[test]
 fn test_facility_chains_never_say_unnamed_public_road() {
     let w = world();
@@ -233,11 +234,11 @@ fn test_facility_chains_never_say_unnamed_public_road() {
         .facility_approach_route("chicago_il_us", "Chicago Cross-Dock")
         .expect("approach route");
     let last = arrival.legs.last().expect("a turn-level chain");
-    assert_eq!(last.highway, "a side street");
-    assert_eq!(last.local_cue, "Turn left onto a side street.");
+    assert_eq!(last.highway, "a service road");
+    assert_eq!(last.local_cue, "Turn left onto a service road.");
     let departure = w
         .facility_departure_route("chicago_il_us", "Chicago Cross-Dock")
         .expect("departure route")
         .expect("a multi-leg chain");
-    assert_eq!(departure.legs[0].local_cue, "Start on a side street.");
+    assert_eq!(departure.legs[0].local_cue, "Start on a service road.");
 }

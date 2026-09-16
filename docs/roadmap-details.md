@@ -7262,10 +7262,19 @@ city service drives below.)
       `generated.regeocode_far_pins` survives. A 24-state Geofabrik route
       sweep on 2026-09-16 moved the file from 1,415 to 1,647 chains of
       5,037 facilities (28 to 33 percent) and pinned coverage counts with
-      it; 92 newly eligible types now have turn-level streets. Still open:
-      remaining unextracted states (CA/TX/NY and peers), path failures in
-      swept states, endpoint re-sweep for steel/auto/chemical name matches,
-      and the deferred 419 estimated-near-city residuals.
+      it; 92 newly eligible types now have turn-level streets. A
+      California, New York and Texas sweep the same day (419 routable
+      targets: 185, 58, 176) took it to 1,713 chains (34 percent) with the
+      Python and Rust coverage pins moved to match: California 103 to 130
+      of 316, New York 37 to 46 of 76, Texas 81 to 111 of 412; 287 new
+      chains, no prior chain demoted, facilities outside the batch
+      untouched. `generated.states` now lists all 49 (48 plus DC), so
+      extract coverage is complete. Still open: path failures in swept
+      states (the CA/NY/TX batch alone left 88 source-backed endpoints
+      with no connected public-road path and 44 whose only path is a
+      single segment under `MIN_CHAIN_ROUTE_MI`, both kept as fallbacks),
+      endpoint re-sweep for steel/auto/chemical name matches, and the
+      deferred 419 estimated-near-city residuals.
 - [x] **Street cue pacing and clean spoken names.** Street cues pace one
       maneuver at a time with a block-scale lookahead (a departure used to
       read the whole itinerary in one burst), and spoken street names trim

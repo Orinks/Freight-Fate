@@ -4,6 +4,8 @@
 
 ### Changed
 
+- **More California, New York and Texas pickups and drops start with street-by-street directions out of the facility.** Fewer departures leave straight onto the highway.
+
 - **Duff-shared sound cues are N/A for the public-build gate.** They are dropped from the release-blocker list; no replacement work is owed for that audit row.
 
 ### Fixed

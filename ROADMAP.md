@@ -125,16 +125,22 @@ These items are part of the release-gate sweep:
       keep their rows). A 24-state Geofabrik route sweep on 2026-09-16
       raised the file from 1,415 to 1,647 chains of 5,037 facilities (28
       to 33 percent); 92 of the newly eligible types now carry turn-level
-      streets. About 67 percent of facilities still depart straight onto
-      the highway. Leftovers: CA/TX/NY and other unextracted states, path
-      failures inside swept states, and the deferred 419 estimated-near-city
-      residuals.
+      streets. A California, New York and Texas sweep the same day took
+      it to 1,713 chains (34 percent): California 103 to 130 of 316, New
+      York 37 to 46 of 76, Texas 81 to 111 of 412. Every state on the map
+      (48 plus DC) is in the extract set now. About 66 percent of facilities
+      still depart straight onto the highway. Leftovers: path failures
+      inside swept states (in CA/NY/TX alone, 88 source-backed endpoints
+      with no connected public-road path and 44 whose path is one block
+      under the chain floor), the endpoint re-sweep for steel/auto/chemical
+      name matches, and the deferred 419 estimated-near-city residuals.
 
 #### World data and sound licensing blockers
 
 World-data geometry for 1.9 (curves, refuse legs, far approach pins)
 closed 2026-09-16 on feat/career-1.9. Departure chains are the last open
-world-data item (see above).
+world-data item (see above): every state has been swept once, and the
+leftovers are path failures inside swept states and the endpoint re-sweep.
 
 - [x] ~250 legs' curves/limits/ramps still describe pre-repair geometry
       -- CLOSED 2026-09-16: curves-only re-bake, refuse-collateral mismatch
