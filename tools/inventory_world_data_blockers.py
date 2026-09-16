@@ -149,10 +149,10 @@ def inventory_pre_repair_curves() -> dict[str, Any]:
         "with_ramps": sum(1 for row in mismatch if ramp_by.get(row["leg"])),
         "legs": mismatch,
         "entrypoint": (
-            "curves-only re-bake still needed on tools/bake_curve_geometry.py "
-            "(skip query_leg_ways / bake_speed_limits / harvest_ramps); "
-            "today: uv run python tools/bake_curve_geometry.py --from-archive "
-            "--only <legs> still hits Overpass for limits/ramps"
+            "uv run python tools/bake_curve_geometry.py --curves-only --from-archive "
+            "--only <legs>  "
+            "(re-detects curves from archived geometry; skips query_leg_ways / "
+            "bake_speed_limits / harvest_ramps; writes only gameplay/curves.jsonl)"
         ),
     }
 
