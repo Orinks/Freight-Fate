@@ -145,6 +145,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import straw_curve_sample as scs  # noqa: E402
 from world_source import load_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -249,6 +250,49 @@ def corridor_class(coverage: dict[str, dict], leg: str) -> str | None:
     return max(classes.items(), key=lambda kv: (kv[1], kv[0]))[0]
 
 
+def _shield_matches_leg(fact: dict, highway: str) -> bool:
+    """True when a reading names this leg's shield, or names nothing.
+
+    An empty ref is the urban-freeway residual the bake leaves alone: a
+    motorway way with no ``ref`` cannot be told from the Interstate. A ref
+    that names a *different* route (CT 8 on an I-84 leg, I-287 on an I-95
+    leg) is another freeway the route touched, not this Interstate's
+    mainline.
+    """
+    ref = fact.get("near_ref") or ""
+    if not ref.strip():
+        return True
+    return any(scs.matches_shield(name, highway) for name in ref.split(";"))
+
+
+def _made_of_for_leg(
+    coverage: dict[str, dict],
+    leg: str,
+    highway: str,
+) -> str | None:
+    """Corridor class, with a thin-freeway Interstate fallback.
+
+    A curated Interstate whose route is mostly US/state road (I-87 riding
+    US-7 end to end) has ``corridor_class`` trunk/primary. Judging against
+    that class keeps those bends as mainline -- right for the road under
+    the tires, wrong for every consumer that asks "is this Interstate
+    mainline?" via the leg's I- label (pacenote rate, the slowdown test).
+
+    When an I-labelled leg rides a freeway for under half its miles, judge
+    bends against ``motorway`` instead so the US/town road reads
+    off-corridor. Legs that really are freeway keep ``corridor_class``.
+    """
+    made_of = corridor_class(coverage, leg)
+    is_interstate = highway.upper().startswith("I-")
+    if made_of is None:
+        return FREEWAY_CLASS if is_interstate else None
+    if is_interstate:
+        cov = freeway_coverage(coverage, leg)
+        if cov is None or cov < 0.5:
+            return FREEWAY_CLASS
+    return made_of
+
+
 def classify(fact: dict, made_of: str | None) -> tuple[bool, str]:
     """``(is connector, why)`` for one curve, from its OSM reading alone.
 
@@ -303,17 +347,28 @@ def reclassify(facts_path: Path) -> dict:
         fact = facts.get((leg, row["seq"]))
         is_conn, why = (False, "")
         if fact is not None:
-            made_of = corridor_class(coverage, leg)
-            if made_of is None:
-                # Nothing read about this leg's road: fall back to the label,
-                # which is what the rule used before it could read the road.
-                made_of = FREEWAY_CLASS if highway.get(leg, "").upper().startswith("I-") else None
+            road = highway.get(leg, "")
+            made_of = _made_of_for_leg(coverage, leg, road)
             is_conn, why = classify(fact, made_of)
+            # Interstate label + motorway reading that does not name this
+            # shield: another freeway, not this Interstate's mainline.
+            if (
+                not is_conn
+                and road.upper().startswith("I-")
+                and fact.get("near_hw") == FREEWAY_CLASS
+                and not _shield_matches_leg(fact, road)
+            ):
+                is_conn, why = True, "osm:off-corridor"
         if not why:
             # Nothing was read here -- no extract, or no road within the
             # corridor. Keep exactly what the sweep said; absence of a reading
-            # must never be read as "mainline".
+            # must never be read as "mainline". Also keep a prior osm:
+            # reading when this run's facts shard simply does not cover the
+            # leg (partial re-bakes): dropping those would silently turn
+            # mid-leg interchange arcs back into mainline.
             unread += 1
+            if prior in ("osm:ramp", "osm:off-corridor"):
+                is_conn, why = True, prior
         if was and not is_conn:
             # Only ever ADD. The positional window sees city geometry the
             # class reading can miss, so its verdict is never overturned.
