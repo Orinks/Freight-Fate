@@ -16052,6 +16052,60 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Love's Travel Stop Corbin",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Love's official locator / harvest places Love's Travel Stop Corbin on I-75 Exit 29; KEEP tractor_trailer 2026-09-16 \u2014 remapped from retired morristown\u2192london onto live london\u2192knoxville; parking=likely; projected at_mi=10.9 off_mi=0.44",
+          "at_mi": 10.9,
+          "lat": 36.977491,
+          "lon": -84.116242
+        },
+        {
+          "name": "Pilot Travel Center Corbin",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Pilot Flying J official locator / harvest places Pilot Travel Center Corbin on I-75 Exit 29; KEEP tractor_trailer 2026-09-16 \u2014 remapped from retired morristown\u2192london onto live london\u2192knoxville; parking=confirmed; projected at_mi=11.7 off_mi=0.43",
+          "at_mi": 11.7,
+          "lat": 36.97511182002901,
+          "lon": -84.10778245470296
+        },
+        {
           "name": "Sunoco",
           "type": "fuel_station",
           "at_mi": 24.5,

@@ -24,7 +24,9 @@
 
 ### Added
 
-- **Pilot, Love's, and Flying J travel centers on thin US-hwy tractor-fuel legs.** Clovis (US-380), Rapid City (US-14), Dodge City (US-183), Norfolk (US-81), Benson #9/#460 and Tucson (AZ-80), Lufkin (US-96), Columbia Falls (US-2), Mayer (AZ-69), and Missoula (US-93). Tractor-trailer keep; Corsicana dealer and OSM Petro Mayer not added; Corbin held.
+- **Pilot, Love's, and Flying J travel centers on thin US-hwy tractor-fuel legs.** Clovis (US-380), Rapid City (US-14), Dodge City (US-183), Norfolk (US-81), Benson #9/#460 and Tucson (AZ-80), Lufkin (US-96), Columbia Falls (US-2), Mayer (AZ-69), and Missoula (US-93). Tractor-trailer keep; Corsicana dealer and OSM Petro Mayer not added.
+
+- **Love's and Pilot Travel Centers at Corbin on I-75.** london→knoxville (I-75 Exit 29) at 10.9 / 11.7 mi; tractor-trailer keep; parking likely / confirmed. Remapped onto the live corridor after morristown→london retired.
 
 - **Little America Travel Center pull-ins at Cheyenne and Flagstaff.** Cheyenne (I-80 Exit 358/359) on cheyenne→laramie, cheyenne→salt_lake, and rock_springs→cheyenne; Flagstaff (2515 E Butler) on camp_verde→flagstaff, flagstaff→kingman, and flagstaff→winslow. Tractor-trailer travel-center actions; hotels and unrelated Little America sites stay off the map.
 
