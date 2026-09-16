@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Wall Drug corridor boards again cover Wyoming as well as South Dakota and western Minnesota.** Montana stays out.
+
 ### Changed
 
 - **Traffic lights announce only their color, and the approach countdown says only the distance.**

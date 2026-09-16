@@ -30,11 +30,10 @@ use crate::sim_support::{make_trip_with, world};
 /// the town's own state, plus the states the corridor enters it from.
 const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     // -- Interstate 90 -----------------------------------------------------
-    // Wall, South Dakota. Minnesota is the I-90 approach from the east;
-    // Wyoming is the neighbouring approach from the west. Montana is too
-    // far west -- a tester hit there is a fail. Placement itself keeps the
-    // boards on SD and MN only.
-    ("Wall Drug", &["SD", "MN"]),
+    // Wall, South Dakota. Official campaign boards cover SD / WY / western
+    // MN (Argus Leader; Greybull WY ~394 mi). Montana is too far west -- a
+    // tester hit there is a fail. Placement matches SD+WY+MN.
+    ("Wall Drug", &["SD", "WY", "MN"]),
     ("Boston ahead", &["MA", "NY", "CT", "RI", "NH"]),
     ("Wyoming, Land of the Buffalo", &["WY", "MT", "SD"]),
     ("Idaho panhandle", &["ID", "WA", "MT"]),

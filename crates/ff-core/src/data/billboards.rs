@@ -432,11 +432,11 @@ const fn approaching(text: &'static str, cities: &'static [&'static str]) -> Cor
 // roadside is not true beside a different road that happens to share a number.
 pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     ("I-90", &[
-        // Wall Drug is Wall, South Dakota. The Minnesota approach is honest
-        // I-90 from the east. Montana is too far west to claim it, and
-        // Wyoming I-90 is still western I-90, so both stay off.
-        in_states("Free ice water at Wall Drug. Only three hundred miles. You're basically there.", &["SD", "MN"]),
-        in_states("Wall Drug. Five-cent coffee since your grandfather was your age.", &["SD", "MN"]),
+        // Wall Drug is Wall, South Dakota. Official campaign boards cover
+        // SD / WY / western MN (Argus Leader); farthest cited is Greybull WY
+        // ~394 mi. Montana stays off -- too far west of the real pool.
+        in_states("Free ice water at Wall Drug. Only three hundred miles. You're basically there.", &["SD", "WY", "MN"]),
+        in_states("Wall Drug. Five-cent coffee since your grandfather was your age.", &["SD", "WY", "MN"]),
         // Landmark attraction -- Cleveland's ticketed Rock Hall.
         approaching("Cleveland ahead. The Rock and Roll Hall of Fame sits on the lake. Chuck Berry, Aretha Franklin, and a glass pyramid you can actually visit.", &["cleveland_oh_us"]),
         // Song tributes -- Boston (The Willis Brothers), Moorcroft, Wyoming
@@ -1197,7 +1197,7 @@ mod tests {
     }
 
     #[test]
-    fn test_wall_drug_stays_on_south_dakota_and_the_minnesota_approach() {
+    fn test_wall_drug_stays_on_south_dakota_wyoming_and_minnesota() {
         let signs: Vec<_> = corridor_signs("I-90")
             .iter()
             .filter(|s| s.text.contains("Wall Drug"))
@@ -1206,7 +1206,7 @@ mod tests {
         for sign in signs {
             assert_eq!(
                 sign.anchor,
-                SignAnchor::States(&["SD", "MN"]),
+                SignAnchor::States(&["SD", "WY", "MN"]),
                 "{}",
                 sign.text
             );

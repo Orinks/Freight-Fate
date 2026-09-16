@@ -25,7 +25,7 @@ KILLED:
 - TRUCKER "Lumper service, next warehouse…"
 - I-35 "McAllen ahead…" (McAllen is I-2/I-69C/US-281; I-35 ends Laredo). Not relocated onto an unmapped shield. Laredo + San Antonio keep I-35 Tejano.
 
-STILL OUT: lyrics, META growth, Music Highway paid ads, Rock City on I-75, Wall Drug MT (WY stays as previously cut).
+STILL OUT: lyrics, META growth, Music Highway paid ads, Rock City on I-75, Wall Drug MT only (WY restored — Argus Leader campaign SD/WY/western MN; Greybull WY ~394 mi).
 
 ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den / next-exit register (superstore, bookstore, gentleman's club, XXX theater). No graphic sex-act copy, no real-chain slogans, no named towns.
 
