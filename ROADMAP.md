@@ -114,26 +114,45 @@ These items are part of the release-gate sweep:
       confirmations) now ducks the bed the same way when game sounds step
       back for speech is on. Absolute levels were never low; relative
       masking under the unducked road bed was.
-- [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE:
-      the real-zone floor and the merge-free opening miles landed
-      2026-08-16; what remains is departure chains for the other 72
-      percent of facilities, a data project.
+- [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE;
+      last open world-data item for 1.9. The real-zone floor and the
+      merge-free opening miles landed 2026-08-16; what remains is departure
+      chains for the other 72 percent of facilities, a data project.
+      Builder side landed 2026-09-16: the turn-level route pass now takes
+      cold storage, food processors, grocery DCs, grain elevators and ports,
+      and a state batch merges into the checked-in file instead of
+      rebuilding it (a prior chain is never demoted, untried facilities
+      keep their rows). The route sweep over the state extracts has not run
+      yet, so the file is still 1,415 chains of 5,037 facilities (28
+      percent); 492 source-backed facilities of the newly eligible types
+      are the first batch.
 
 #### World data and sound licensing blockers
 
-- [ ] ~250 legs' curves/limits/ramps still describe pre-repair
-      geometry (re-bake over the 210 repaired legs; finish the 250).
-- [ ] 33 legs a truck router would refuse.
-- [ ] 776 facility approach pins land too far out (the 35-mile
-      deadhead); blanket 25-mph approach streets for miles.
+World-data geometry for 1.9 (curves, refuse legs, far approach pins)
+closed 2026-09-16 on feat/career-1.9. Departure chains are the last open
+world-data item (see above).
+
+- [x] ~250 legs' curves/limits/ramps still describe pre-repair geometry
+      -- CLOSED 2026-09-16: curves-only re-bake, refuse-collateral mismatch
+      25 to 0, connectors and screens restored; curve inventory green.
+- [x] 33 legs a truck router would refuse -- CLOSED 2026-09-16: 25 adopted
+      truck-legal geometry with paid miles synced to path length; 8 leftovers
+      retired (no silent drop). Refuse inventory 0.
+- [x] 776 facility approach pins land too far out -- CLOSED 2026-09-16: far
+      pins regeocoded within city bounds (776 to 0); estimated-near-city
+      honesty gates landed. Residual estimated pins and OSM source_backed
+      quality follow-up deferred, not a far-pin blocker.
 - [ ] The Duff-shared sound cues flagged unlicensed by the provenance
       audit -- cannot ship in a public build (separate from the
-      resolved Splice matter; owner may already know better).
+      resolved Splice matter; owner may already know better). Sound
+      licensing, not world data.
 - [ ] Colorado's live traffic and construction are dead (CARS GraphQL
       retired; COtrip's WZDx feed wants a registered key, as do Ohio,
-      Oregon, Texas, Virginia, Michigan and Illinois). The 2026-09-12 FHWA
-      registry sweep put every keyless statewide feed in: 29 states carry
-      live construction now, 15 of them new that day.
+      Oregon, Texas, Virginia, Michigan and Illinois). PARKED for 1.9 Oct 4
+      (owner): keyed WZDx states out of scope; keyless statewide feeds stay.
+      The 2026-09-12 FHWA registry sweep put every keyless statewide feed
+      in: 29 states carry live construction now, 15 of them new that day.
 
 #### Owner decisions
 
