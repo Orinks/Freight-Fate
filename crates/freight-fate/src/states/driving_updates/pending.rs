@@ -22,4 +22,7 @@ pub struct EnforcementStopParams {
     pub warned: bool,
     pub construction_zone: bool,
     pub inspection_on_stop: bool,
+    /// A routine roadside inspection: the stop IS the inspection, at this
+    /// level, and the report decides the fine, not the caller.
+    pub inspection_level: Option<ff_core::sim::roadside_inspection::InspectionLevel>,
 }

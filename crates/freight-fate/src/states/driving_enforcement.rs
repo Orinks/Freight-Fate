@@ -38,8 +38,11 @@
 //! hold, the road sample, and the per-frame draw).
 
 mod cues;
+mod inspections;
 mod scales;
 mod watch;
+
+pub use inspections::roadside_inspection_scale_for;
 
 use crate::app::GameContext;
 use crate::states::driving::DrivingState;

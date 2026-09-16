@@ -202,6 +202,8 @@ impl DrivingState {
                     warned,
                     construction_zone,
                     inspection_on_stop: kind == "weigh_station_bypass",
+                    inspection_level: (kind == "roadside_inspection")
+                        .then_some(ff_core::sim::roadside_inspection::InspectionLevel::DriverOnly),
                 },
             );
             self.commit_resolved_stop(ctx);
@@ -330,6 +332,7 @@ impl DrivingState {
                 warned: true,
                 construction_zone,
                 inspection_on_stop: false,
+                inspection_level: None,
             },
         );
         self.commit_resolved_stop(ctx);

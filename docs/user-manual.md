@@ -1037,6 +1037,24 @@ the lane is enough; the scale's own exit ramp is the sanctioned way in. A
 visibly
 unsafe truck can also draw a safety stop when you pass active enforcement, so
 repair severe damage before pushing through patrol corridors.
+
+Inspections are real. A clean record is waved through an open scale nearly
+every time; a record carrying citations or out-of-service history is
+pulled into the lane, and the lane is a Level 1 inspection: driver,
+paperwork, a walk-around and a look under the truck, about 45 minutes on
+duty. Worn tires, brakes near their limit, body damage and whatever the
+last driver left on a hooked trailer get written up, with a fine and a
+citation on your record. A critical item, a bald tire, brakes out of
+adjustment, damage past the safe limit, parks the truck until a roadside
+mechanic fixes it. A clean Level 1 earns an inspection decal that gets you
+waved past open scales for three months unless your record is targeted.
+A trooper can also pull a legal driver in for a routine Level 3, licence
+and paperwork only, about 15 minutes; a clean one costs nothing else. The
+odds ride your record, and triple during Roadcheck week in May, which the
+CB announces. Walk around the truck first: at the terminal and at any
+stop, the Walk around the truck row spends 15 minutes on duty and reads
+out exactly what an inspector would find, so nothing on the report is a
+surprise.
 In low-speed local roads such as facility access, construction, or heavy
 traffic, automatic speed control uses the speed keeper instead. It switches
 back to adaptive cruise when the open road begins. If you start it during the
@@ -1174,6 +1192,7 @@ Stop actions depend on that stop's data. A stop may offer:
 - Repairs and rig care.
 - Roadside assistance or towing.
 - Inspection check-in.
+- Walk around the truck.
 - Save point.
 
 Meals, drinks, and showers are purchases with spoken effects and clocks

@@ -15,6 +15,7 @@ use ff_core::models::solvency;
 use ff_core::music::{select_menu_music_sequence, MenuMusicProfile};
 use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_n};
 use ff_core::sim::hos::{clock_text, time_of_day};
+use ff_core::sim::roadside_inspection::walk_around;
 use ff_core::sim::timezones::{city_zone, to_local, TimeZone, EASTERN};
 
 use crate::app::{GameContext, Say};
@@ -254,6 +255,47 @@ impl CityMenuState {
     fn time_weather(&mut self, ctx: &mut GameContext) {
         let lines = time_and_weather_lines(ctx);
         ctx.push_state(SimpleMenuState::readout("Time and weather", lines));
+    }
+
+    /// The driver's own pre-trip on the tractor, before a load is hooked:
+    /// the same items a Level 1 inspector reads, fifteen minutes on duty.
+    fn walk_around(&mut self, ctx: &mut GameContext) {
+        let (start, lines) = {
+            let p = profile(ctx);
+            (
+                p.game_hours,
+                walk_around(
+                    p.tire_wear_pct(),
+                    p.brake_wear_pct(),
+                    p.truck_damage_pct(),
+                    None,
+                ),
+            )
+        };
+        let end = {
+            let p = profile_mut(ctx);
+            p.game_hours += crate::states::driving_core::WALK_AROUND_MIN / 60.0;
+            p.hos.on_duty(crate::states::driving_core::WALK_AROUND_MIN);
+            p.game_hours
+        };
+        record_city_duty(
+            ctx,
+            "on_duty_not_driving",
+            start,
+            end,
+            "pre-trip walk-around",
+        );
+        ctx.save_profile();
+        let body = if lines.is_empty() {
+            "Nothing to write up: tires, brakes and the body would all pass.".to_string()
+        } else {
+            lines.join(" ")
+        };
+        ctx.audio.play("ui/notify");
+        ctx.say(&format!(
+            "Walk-around done, 15 minutes. {body} No trailer is hooked yet; walk around it again \
+             at the first stop after pickup."
+        ));
     }
 
     /// `_sleep`: a full night in the terminal bunk room.
@@ -761,6 +803,15 @@ impl Menu for CityMenuState {
         items.push(
             MenuItem::new("Truck status", |s: &mut Self, ctx| s.truck_status(ctx))
                 .help("Assignment, eligibility, fuel, condition, wear, grime, and snow chains."),
+        );
+        items.push(
+            MenuItem::new("Walk around the truck", |s: &mut Self, ctx| {
+                s.walk_around(ctx)
+            })
+            .help(
+                "A pre-trip walk-around: what a roadside inspector would find on the tractor. \
+                 Fifteen minutes on duty.",
+            ),
         );
         items.push(
             MenuItem::new("Time and weather", |s: &mut Self, ctx| s.time_weather(ctx))

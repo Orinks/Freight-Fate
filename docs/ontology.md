@@ -301,6 +301,12 @@ from the words, and synonyms cost them a re-read.
 | The fleet or self-purchased equipment that gets a weigh-in-motion verdict before an open scale, instead of every truck being demanded in | transponder | PrePass, bypass reader, weigh-in-motion unit | `business.has_weigh_station_transponder`, `business.WEIGH_STATION_TRANSPONDER_LEVEL` |
 | The transponder's verdict clearing a truck to keep rolling past an open scale | Scale green light | bypass cleared, waved through | `events/scale_green`, `_resolve_transponder_verdict` |
 | The transponder's verdict sending a truck into the scale anyway | Scale red light | red-lighted, called in | `events/scale_red`, `_resolve_transponder_verdict` |
+| An officer going over the truck, the driver's papers, or both, at a scale or on the shoulder | roadside inspection; "Level 1 full inspection", "Level 2 walk-around inspection", "Level 3 driver inspection" for the kind | DOT inspection, safety check, CVSA inspection, audit | `sim/roadside_inspection::InspectionLevel`, `DrivingState::settle_inspection` |
+| The item an inspector writes up | written up for ...; the finding itself is the noun ("brakes out of adjustment") | violation, defect code, OOS item | `roadside_inspection::Finding` |
+| A critical item that parks the truck until it is fixed | out of service until repaired | OOS, red-tagged, grounded | `Finding::out_of_service`, `Repair` |
+| The sticker a clean Level 1 earns, good for three months of being waved past open scales | inspection decal; "the decal on the windshield" | CVSA sticker, decal, bypass sticker | `DrivingRecord::decal_until_h`, `DECAL_VALID_HOURS` |
+| The driver's own pre-trip check of the same items | walk-around; "Walk around the truck" is the row | pre-trip, DVIR, pre-trip inspection, vehicle check | `roadside_inspection::walk_around`, `WALK_AROUND_MIN` |
+| The three days in May when every inspector is on the road | Roadcheck week | blitz, inspection blitz, Roadcheck event | `roadside_inspection::roadcheck_blitz`, `Trip::roadcheck_blitz` |
 | Drivers talking about enforcement on the radio | CB chatter | radio talk, scanner, traffic | `cb_patrol_message` |
 | A CB report nobody has verified | unconfirmed | rumor, maybe, possible, unreliable | `_cb_confidence` |
 | The last CB call said again because the driver asked for it | repeat the CB chatter | CB replay, rewind, play back the CB, last CB | `DrivingState::speak_last_cb_chatter` (Alt C) |

@@ -187,6 +187,16 @@ impl DrivingState {
                 ..Default::default()
             },
         );
+        // How often a trooper pulls this driver in for a routine inspection
+        // rides the safety record from the first mile.
+        {
+            let (scale, blitz) = crate::states::driving_enforcement::roadside_inspection_scale_for(
+                ctx,
+                trip.truck.damage_pct,
+            );
+            trip.roadside_inspection_scale = scale;
+            trip.roadcheck_blitz = blitz;
+        }
         if ctx.settings.time_scale == 1.0 && start_hour.is_none() {
             let local_hour = profile_of(ctx).calendar_game_hours().rem_euclid(24.0);
             let reference_hour = (local_hour - trip.start_timezone.offset_h).rem_euclid(24.0);
@@ -487,6 +497,7 @@ impl DrivingState {
             climb_beaten_s: 0.0,
             descent_cue_s: 0.0,
             trailer_refused: false,
+            trailer_repaired: false,
             nice_speed_mi: 0.0,
             jake_descent_mi: 0.0,
             radio_states_station: String::new(),

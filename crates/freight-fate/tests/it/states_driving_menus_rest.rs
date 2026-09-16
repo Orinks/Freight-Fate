@@ -13,11 +13,12 @@ use ff_core::models::economy::{PAY_ADVANCE_ELIGIBLE_BELOW, PAY_ADVANCE_LIMIT};
 use ff_core::sim::hos;
 use ff_core::sim::trip_models::RoadStop;
 
+use ff_core::sim::roadside_inspection::{InspectionLevel, DECAL_VALID_HOURS, OUT_OF_SERVICE_FINE};
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Menu;
 use freight_fate::states::driving_core::{
-    INSPECTION_MIN, ROAD_BRAKE_COST_PER_PCT, ROAD_TIRE_COST_PER_PCT,
-    ROAD_TIRE_SPECIALIST_COST_PER_PCT, WAVE_THROUGH_MIN,
+    FIELD_REPAIR_DAMAGE_PCT, INSPECTION_MIN, MECHANIC_WAIT_MIN, ROAD_BRAKE_COST_PER_PCT,
+    ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_SPECIALIST_COST_PER_PCT, WALK_AROUND_MIN, WAVE_THROUGH_MIN,
 };
 use freight_fate::states::driving_menu_states::DriveRef;
 use freight_fate::states::driving_pause_states::{
@@ -851,12 +852,18 @@ fn test_scale_wave_through_is_two_minutes_not_fifteen() {
     let selected = drive_and_ctx(&drive, &mut app, |d, ctx| {
         d.scale_selects_driver(ctx, &stop)
     });
+    // A sound truck: the lane is the Level 1's own minutes and nothing more.
+    with_drive(&drive, |d| {
+        d.trip.truck.tire_wear_pct = 0.0;
+        d.trip.truck.brake_wear_pct = 0.0;
+        d.trip.truck.damage_pct = 0.0;
+    });
     let before = with_drive(&drive, |d| d.trip.game_minutes);
     let mut state = rest_stop_at(&mut app, &drive, stop);
     activate(&mut state, &mut app.ctx, "Check in at inspection station");
     let after = with_drive(&drive, |d| d.trip.game_minutes);
     let expected = if selected {
-        INSPECTION_MIN
+        InspectionLevel::Full.minutes()
     } else {
         WAVE_THROUGH_MIN
     };
@@ -877,7 +884,10 @@ fn test_scale_check_in_is_removed_after_one_completed_inspection() {
 
     activate(&mut state, &mut app.ctx, "Check in at inspection station");
 
-    assert_eq!(labels(&state, &app.ctx), vec!["Back to the road"]);
+    assert_eq!(
+        labels(&state, &app.ctx),
+        vec!["Walk around the truck", "Back to the road"]
+    );
 }
 
 #[test]
@@ -898,11 +908,136 @@ fn test_a_targeted_record_takes_the_inspection_lane() {
     app.clear_speech();
     activate(&mut state, &mut app.ctx, "Check in at inspection station");
     let after = with_drive(&drive, |d| d.trip.game_minutes);
+    // Seventy percent damage is past the safe limit: the Level 1 parks the
+    // truck until the roadside mechanic patches it.
+    let expected = InspectionLevel::Full.minutes() + MECHANIC_WAIT_MIN;
     assert!(
-        (after - before - INSPECTION_MIN).abs() < 1e-6,
-        "targeted record burned {} minutes",
+        (after - before - expected).abs() < 1e-6,
+        "targeted record burned {} minutes, expected {expected}",
         after - before
     );
     let said = app.main_lines().join(" ");
     assert!(said.contains("inspection lane"), "{said}");
+    assert!(said.contains("body damage past the safe limit"), "{said}");
+    assert!(said.contains("Out of service until repaired"), "{said}");
+    assert!(with_drive(&drive, |d| d.trip.truck.damage_pct) <= FIELD_REPAIR_DAMAGE_PCT);
+    assert_eq!(
+        app.ctx.profile.as_ref().unwrap().driving_record.citations,
+        7
+    );
+}
+
+#[test]
+fn test_bald_tires_in_the_lane_are_out_of_service_until_replaced() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
+    {
+        let p = app.ctx.profile.as_mut().expect("a career");
+        p.career.reputation = 10.0;
+        p.driving_record.citations = 6;
+        p.out_of_service_events = 3;
+    }
+    with_drive(&drive, |d| {
+        d.trip.truck.tire_wear_pct = 95.0;
+        d.trip.truck.brake_wear_pct = 0.0;
+        d.trip.truck.damage_pct = 0.0;
+    });
+    let money_before = app.ctx.profile.as_ref().unwrap().money;
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = a_scale_stop(at);
+    let mut state = rest_stop_at(&mut app, &drive, stop);
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Check in at inspection station");
+    let said = app.main_lines().join(" ");
+    assert!(
+        said.contains("a tire below the minimum tread depth"),
+        "{said}"
+    );
+    assert!(said.contains("new tires"), "{said}");
+    assert_eq!(with_drive(&drive, |d| d.trip.truck.tire_wear_pct), 0.0);
+    // A company driver pays the fine; the carrier's breakdown account pays
+    // the tires.
+    let money_after = app.ctx.profile.as_ref().unwrap().money;
+    assert!(
+        (money_before - money_after - OUT_OF_SERVICE_FINE).abs() < 1e-6,
+        "{money_before} -> {money_after}"
+    );
+}
+
+#[test]
+fn test_a_clean_level_one_earns_a_decal_that_waves_the_next_scale_through() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
+    with_drive(&drive, |d| {
+        d.trip.truck.tire_wear_pct = 0.0;
+        d.trip.truck.brake_wear_pct = 0.0;
+        d.trip.truck.damage_pct = 0.0;
+    });
+    let outcome = drive_and_ctx(&drive, &mut app, |d, ctx| {
+        let report = d.inspection_report(ctx, InspectionLevel::Full);
+        assert!(report.clean(), "{:?}", report.findings);
+        d.settle_inspection(ctx, &report)
+    });
+    assert!(
+        outcome.contains("Clean Level 1 full inspection"),
+        "{outcome}"
+    );
+    assert!(outcome.contains("inspection decal"), "{outcome}");
+    let until = app
+        .ctx
+        .profile
+        .as_ref()
+        .unwrap()
+        .driving_record
+        .decal_until_h;
+    assert!(until > DECAL_VALID_HOURS - 1.0, "{until}");
+
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = a_scale_stop(at);
+    let before = with_drive(&drive, |d| d.trip.game_minutes);
+    let mut state = rest_stop_at(&mut app, &drive, stop);
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Check in at inspection station");
+    let after = with_drive(&drive, |d| d.trip.game_minutes);
+    assert!(
+        (after - before - WAVE_THROUGH_MIN).abs() < 1e-6,
+        "{}",
+        after - before
+    );
+    let said = app.main_lines().join(" ");
+    assert!(said.contains("decal on the windshield"), "{said}");
+}
+
+#[test]
+fn test_the_walk_around_says_what_an_inspector_would_find_first() {
+    let mut app = TestApp::new();
+    let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
+    with_drive(&drive, |d| {
+        d.trip.truck.tire_wear_pct = 92.0;
+        d.trip.truck.brake_wear_pct = 80.0;
+        d.trip.truck.damage_pct = 0.0;
+    });
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let stop = travel_center("Flying J", at);
+    let before = with_drive(&drive, |d| d.trip.game_minutes);
+    let mut state = rest_stop_at(&mut app, &drive, stop);
+    app.clear_speech();
+    activate(&mut state, &mut app.ctx, "Walk around the truck");
+    let after = with_drive(&drive, |d| d.trip.game_minutes);
+    assert!(
+        (after - before - WALK_AROUND_MIN).abs() < 1e-6,
+        "{}",
+        after - before
+    );
+    let said = app.main_lines().join(" ");
+    assert!(
+        said.contains(
+            "a tire below the minimum tread depth: an inspector would park you for this."
+        ),
+        "{said}"
+    );
+    assert!(
+        said.contains("brakes close to the adjustment limit: an inspector would write this up."),
+        "{said}"
+    );
 }

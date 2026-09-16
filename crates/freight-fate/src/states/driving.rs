@@ -508,6 +508,9 @@ pub struct DrivingState {
     // A trailer refused at the shipper: the yard swapped it, so the box
     // under the truck is sound and no scale house should say otherwise.
     pub trailer_refused: bool,
+    // The hooked trailer's defect was fixed on the shoulder after an
+    // inspector parked the truck for it: no later inspection finds it again.
+    pub trailer_repaired: bool,
     pub nice_speed_mi: f64,   // distance held at a very particular speed
     pub jake_descent_mi: f64, // downgrade held on the engine alone
     pub radio_states_station: String, // station the state tally belongs to

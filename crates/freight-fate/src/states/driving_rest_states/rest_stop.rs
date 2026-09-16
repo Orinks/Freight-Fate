@@ -6,6 +6,7 @@ use ff_core::data::buffs::{buffs_for_stop, Buff};
 use ff_core::models::solvency;
 use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_int, round_py_n};
 use ff_core::sim::hos;
+use ff_core::sim::roadside_inspection::InspectionLevel;
 use ff_core::sim::trip_models::RoadStop;
 use serde_json::json;
 
@@ -19,9 +20,9 @@ use crate::states::driving_core::{
     advance_rest_clock, clock_text, deadline_text, hos_mut_of, hos_of, pay_advance_grant,
     pay_advance_unavailable_reason, player_pays_operating_costs, poi_ambient_key, profile_mut_of,
     profile_of, record_inspection, road_repair_cost, shut_down_engine, wake_air_instruction,
-    RigBuff, FIELD_REPAIR_DAMAGE_PCT, INSPECTION_MIN, MECHANIC_CALLOUT_FEE, MECHANIC_WAIT_MIN,
-    MOTEL_COST, ROAD_BRAKE_COST_PER_PCT, ROAD_BRAKE_MIN, ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_MIN,
-    ROAD_TIRE_SPECIALIST_COST_PER_PCT, ROAD_TIRE_SPECIALIST_MIN, WAVE_THROUGH_MIN,
+    RigBuff, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE, MECHANIC_WAIT_MIN, MOTEL_COST,
+    ROAD_BRAKE_COST_PER_PCT, ROAD_BRAKE_MIN, ROAD_TIRE_COST_PER_PCT, ROAD_TIRE_MIN,
+    ROAD_TIRE_SPECIALIST_COST_PER_PCT, ROAD_TIRE_SPECIALIST_MIN, WALK_AROUND_MIN, WAVE_THROUGH_MIN,
 };
 use crate::states::driving_menu_states::{keep_rows, DriveRef};
 use crate::states::driving_rest_states::fuel_pump::FuelPump;
@@ -353,6 +354,15 @@ impl RestStopState {
                 .help("Records the inspection check-in."),
             );
         }
+        items.push(
+            MenuItem::new("Walk around the truck", |s: &mut Self, ctx| {
+                s.walk_around(ctx)
+            })
+            .help(
+                "A pre-trip walk-around: what an inspector would find on the tractor and the \
+                 trailer. Fifteen minutes on duty.",
+            ),
+        );
         if has("save") {
             items.push(
                 MenuItem::new("Save at this stop", |s: &mut Self, ctx| {
@@ -1052,31 +1062,57 @@ impl RestStopState {
 
     fn inspect(&mut self, ctx: &mut GameContext) {
         let stop = self.stop.clone();
-        let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
+        let Some((text, waved)) = self.driving.clone().with(ctx, |d, ctx| {
             ctx.audio.play("ui/notify");
+            // A valid decal is waved through on sight (CVSA Operational
+            // Policy 5), unless the record is targeted.
+            if d.decal_waves_through(ctx) {
+                advance_rest_clock(d, ctx, WAVE_THROUGH_MIN, None, "");
+                hos_mut_of(ctx).on_duty(WAVE_THROUGH_MIN);
+                return (
+                    format!(
+                        "Inspection check-in complete at {}. The inspection decal on the \
+                         windshield gets you waved straight back onto the highway. It is {}. {}",
+                        stop.spoken_name(),
+                        clock_text(d.trip.local_hour()),
+                        deadline_text(d, ctx)
+                    ),
+                    true,
+                );
+            }
             // Whether the screening lane waves you through or pulls you in is
             // the safety record's job. A clean career is waved through nearly
             // every time; a career carrying citations, out-of-service history
             // and a beaten-up truck is pulled in at every open scale.
-            let selected = d.scale_selects_driver(ctx, &stop);
-            let minutes = if selected {
-                INSPECTION_MIN
-            } else {
-                WAVE_THROUGH_MIN
-            };
-            advance_rest_clock(d, ctx, minutes, None, "");
-            hos_mut_of(ctx).on_duty(minutes);
-            let outcome = if selected {
-                "Officers pull you into the inspection lane."
-            } else {
-                "Officers wave you straight back onto the highway."
-            };
-            format!(
-                "Inspection check-in complete at {}. {outcome} {} It is {}. {}",
-                stop.spoken_name(),
-                d.safety_record_line(ctx),
-                clock_text(d.trip.local_hour()),
-                deadline_text(d, ctx)
+            if !d.scale_selects_driver(ctx, &stop) {
+                advance_rest_clock(d, ctx, WAVE_THROUGH_MIN, None, "");
+                hos_mut_of(ctx).on_duty(WAVE_THROUGH_MIN);
+                return (
+                    format!(
+                        "Inspection check-in complete at {}. Officers wave you straight back \
+                         onto the highway. {} It is {}. {}",
+                        stop.spoken_name(),
+                        d.safety_record_line(ctx),
+                        clock_text(d.trip.local_hour()),
+                        deadline_text(d, ctx)
+                    ),
+                    true,
+                );
+            }
+            // The lane is a real Level 1: driver, paperwork, walk-around and
+            // under the truck, settled where it stands.
+            let report = d.inspection_report(ctx, InspectionLevel::Full);
+            let outcome = d.settle_inspection(ctx, &report);
+            (
+                format!(
+                    "Inspection check-in complete at {}. Officers pull you into the inspection \
+                     lane. {outcome} {} It is {}. {}",
+                    stop.spoken_name(),
+                    d.safety_record_line(ctx),
+                    clock_text(d.trip.local_hour()),
+                    deadline_text(d, ctx)
+                ),
+                false,
             )
         }) else {
             return;
@@ -1085,7 +1121,42 @@ impl RestStopState {
         self.refresh(ctx, true);
         ctx.say(&text);
         ctx.say_with(self.current_text(ctx), Say::queued().review(false));
-        record_inspection(ctx);
+        if waved {
+            record_inspection(ctx);
+        }
+    }
+
+    /// The driver's own pre-trip: what an inspector would find on the
+    /// tractor and the hooked trailer, before an inspector does.
+    fn walk_around(&mut self, ctx: &mut GameContext) {
+        let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
+            let lines = d.walk_around_lines(ctx);
+            advance_rest_clock(
+                d,
+                ctx,
+                WALK_AROUND_MIN,
+                Some("on_duty_not_driving"),
+                "pre-trip walk-around",
+            );
+            hos_mut_of(ctx).on_duty(WALK_AROUND_MIN);
+            let body = if lines.is_empty() {
+                "Nothing to write up: tires, brakes, lights and the trailer would all pass."
+                    .to_string()
+            } else {
+                lines.join(" ")
+            };
+            format!(
+                "Walk-around done, {} minutes. {body} It is {}. {}",
+                fmt_f(WALK_AROUND_MIN, 0),
+                clock_text(d.trip.local_hour()),
+                deadline_text(d, ctx)
+            )
+        }) else {
+            return;
+        };
+        ctx.audio.play("ui/notify");
+        ctx.say(&text);
+        ctx.say_with(self.current_text(ctx), Say::queued().review(false));
     }
 }
 

@@ -92,6 +92,11 @@ pub struct DrivingRecord {
     /// A career that predates the record loaded with offenses already on it and
     /// has not yet heard the one-time explanation of where it now stands.
     pub notice_pending: bool,
+    /// Career game hour the inspection decal on the windshield expires; zero
+    /// when there is none. A clean Level 1 inspection earns it, and an open
+    /// scale waves a decaled truck through unless the record is targeted
+    /// (CVSA Operational Policy 5).
+    pub decal_until_h: f64,
     /// The explained entries, oldest first (see [`RecordEntry`]).
     pub entries: Vec<RecordEntry>,
 }

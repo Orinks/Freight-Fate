@@ -1023,7 +1023,7 @@ impl DrivingState {
 
     /// What an inspector would write up on the trailer, if anything.
     pub fn hooked_trailer_defect(&self, ctx: &GameContext) -> Option<String> {
-        if ctx.profile.is_none() || self.trailer_refused {
+        if ctx.profile.is_none() || self.trailer_refused || self.trailer_repaired {
             return None;
         }
         let plan = pickup_plan(&self.job, profile_of(ctx));
@@ -1047,6 +1047,21 @@ impl DrivingState {
             return;
         }
         self.enforcement_events.insert(event_key);
+        match event.data.context.as_deref() {
+            // CB heads-up, not a stop: Roadcheck week is on.
+            Some("roadcheck_notice") => {
+                let mut opts = SayEvent::queued().priority(EventPriority::Route);
+                opts.category = Self::event_category(event);
+                ctx.say_event_with(event.text(), opts);
+                return;
+            }
+            // A legal driver's routine Level 3: the stop is the inspection.
+            Some("routine_inspection") => {
+                self.begin_routine_inspection(ctx);
+                return;
+            }
+            _ => {}
+        }
         let mode = ctx.settings.hos_mode.clone();
         let fine = hos::hos_fine(&mode, self.hos_fine_count);
         self.hos_fine_count += 1;

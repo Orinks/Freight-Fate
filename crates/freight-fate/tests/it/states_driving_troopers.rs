@@ -34,6 +34,7 @@ use ff_core::sim::enforcement_observe::OBSERVE_HOLD_MI;
 use ff_core::sim::enforcement_posts::{
     method_by_kind, EnforcementPost, KIND_FIXED_SCALE, KIND_MEDIAN, KIND_SCALE_APRON,
 };
+use ff_core::sim::roadside_inspection::InspectionLevel;
 use ff_core::sim::trip_models::{RoadStop, Zone};
 use ff_core::sim::weather::WeatherKind;
 
@@ -1126,6 +1127,7 @@ fn test_out_of_service_stop_shuts_down_the_engine() {
             warned: false,
             construction_zone: false,
             inspection_on_stop: false,
+            inspection_level: None,
         },
     );
     app.ctx.run_deferred();
@@ -1160,4 +1162,52 @@ fn test_ticket_counters_survive_snapshot() {
 /// `f"{amount:,.0f}"`: the grouped whole-dollar form the spoken lines use.
 fn fmt_grouped_0(amount: f64) -> String {
     ff_core::pyfmt::fmt_grouped(amount, 0)
+}
+
+// -- the routine roadside inspection ----------------------------------------------------
+
+#[test]
+fn test_a_routine_level_three_on_a_legal_driver_costs_the_minutes_and_nothing_else() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, None);
+    drive.trip.truck.tire_wear_pct = 100.0; // a Level 3 never looks at the equipment
+    let money_before = app.ctx.profile.as_ref().unwrap().money;
+    let citations_before = app.ctx.profile.as_ref().unwrap().driving_record.citations;
+    let minutes_before = drive.trip.game_minutes;
+
+    drive.push_enforcement_stop_state(
+        &mut app.ctx,
+        EnforcementStopParams {
+            title: "Roadside inspection".to_string(),
+            summary: "Routine roadside inspection, Level 3.".to_string(),
+            fine: 0.0,
+            reputation_hit: 0.0,
+            signaled: true,
+            return_message: "Back on the highway.".to_string(),
+            out_of_service: false,
+            warned: false,
+            construction_zone: false,
+            inspection_on_stop: false,
+            inspection_level: Some(InspectionLevel::DriverOnly),
+        },
+    );
+    app.ctx.run_deferred();
+
+    let text =
+        with_top::<EnforcementStopState, _>(&mut app, |stop, _| stop.outcome_text().to_string());
+    assert!(text.contains("Clean Level 3 driver inspection"), "{text}");
+    let p = app.ctx.profile.as_ref().unwrap();
+    assert_eq!(p.money, money_before);
+    assert_eq!(p.driving_record.citations, citations_before);
+    assert!(
+        (drive.trip.game_minutes - minutes_before - InspectionLevel::DriverOnly.minutes()).abs()
+            < 1e-6
+    );
+    assert_eq!(
+        p.achievement_stats
+            .get("inspections_passed")
+            .and_then(|v| v.as_i64())
+            .unwrap_or(0),
+        1
+    );
 }

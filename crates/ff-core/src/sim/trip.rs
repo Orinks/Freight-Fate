@@ -253,6 +253,14 @@ pub struct Trip {
     pub waiting: bool,
     /// set by the UI layer; gates inspections
     pub hos_violation: bool,
+    /// How much more often than a clean driver a routine roadside inspection
+    /// stops this truck (`roadside_inspection::roadside_inspection_scale`):
+    /// set by the UI layer from the safety record, the hours mode and the
+    /// calendar; zero switches the routine stops off.
+    pub roadside_inspection_scale: f64,
+    /// The career clock is inside CVSA's Roadcheck blitz: the CB says so
+    /// once, early in the run. Set by the UI layer with the scale above.
+    pub roadcheck_blitz: bool,
     pub seed: Option<i64>,
     pub rng: PyRandom,
     pub insp_rng: PyRandom,
@@ -417,6 +425,8 @@ impl Trip {
             facility_leg: 0,
             waiting: false,
             hos_violation: false,
+            roadside_inspection_scale: 1.0,
+            roadcheck_blitz: false,
             seed,
             rng: make_rng(None),
             insp_rng: make_rng(Some(0x5EED)),

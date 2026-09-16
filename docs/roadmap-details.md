@@ -6049,7 +6049,10 @@ repository root; Markdown links are relative to this document.
       typed enforcement posts replacing `PatrolWindow` with an observation
       model (geometry, line of sight, weather, traffic cover, severity);
       the full inspection ladder (Levels I/II/V, vehicle out-of-service,
-      roadside repair, scale weighing and overweight); staged pursuit with
+      roadside repair, scale weighing and overweight -- the Level I lane,
+      the routine Level III, out-of-service repair, the decal and the
+      walk-around landed 2026-09-16, see ROADMAP; Level II/V on the road
+      and the CMV-unit posts inspecting are still open); staged pursuit with
       a surrender branch and telegraphed spike deployment; urban units
       giving the engine-brake citation a body; ports of entry. Phase 0
       (data + RNG split + pull-over persistence + control hints) and the

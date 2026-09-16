@@ -290,6 +290,24 @@ its status or release decision.
       elevators, ports, airports and yards. Measured: placarded 10 percent
       and fuel 2.6 percent of a level-18 holder's offers map-wide, seven in
       ten Houston boards carry one; pinned in the jobs tests.
+- [x] Roadside inspections (owner approval 2026-09-16). Nobody was ever
+      inspected: the random roadside check fired only over hours, and the
+      scale lane was a fifteen-minute wait that credited a pass. Now the
+      lane is a Level 1 (CVSA levels; decal per Operational Policy 5,
+      three months), a roving trooper runs a routine Level 3 on a legal
+      driver at a rate that rides the safety-record band (clean 1x,
+      watched 2x, targeted 4x, Roadcheck week 3x, relaxed halves), a
+      critical item parks the truck until the roadside mechanic fixes
+      it, and a walk-around row at the terminal and every stop reads
+      the same items first. ASSUMED and adjustable in
+      `sim/roadside_inspection.rs`: the wear percentages standing in
+      for tread depth and brake stroke (75 citation, 90 out of
+      service), the fines (150 equipment, 300 critical), the durations
+      (45/30/15 minutes) and the 6,000-mile clean-driver interval (the
+      real rate is about one per driver-year, which a career here
+      never reaches). Not built: Level 2 and Level 5 on the road, the
+      CMV-unit posts still only ticket, cargo securement (no data),
+      and a CSA-style carrier score.
 - [x] A career that is over stays readable (owner ruling 2026-09-12, over
       automatic deletion): the second major offense lands as a terminal
       notice, the greeting says the career is over, the buy-in waits for a

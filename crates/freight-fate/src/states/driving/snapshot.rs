@@ -187,6 +187,7 @@ impl DrivingState {
         out.insert("route_kind".to_string(), json!(route_kind));
         out.insert("navigation_schema".to_string(), json!(1));
         out.insert("trailer_refused".to_string(), json!(self.trailer_refused));
+        out.insert("trailer_repaired".to_string(), json!(self.trailer_repaired));
         out.insert("trip_seed".to_string(), json!(self.trip_seed));
         out.insert("start_hour".to_string(), json!(self.trip.start_hour));
         out.insert("position_mi".to_string(), json!(self.trip.position_mi));
@@ -393,6 +394,7 @@ impl DrivingState {
         // Chains stay on the drives across a save; absent on older saves.
         state.trip.truck.chains_on = b(data, "chains_on", false);
         state.trailer_refused = b(data, "trailer_refused", false);
+        state.trailer_repaired = b(data, "trailer_repaired", false);
         state.rig_buffs = data
             .get("rig_buffs")
             .cloned()

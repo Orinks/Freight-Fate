@@ -145,3 +145,57 @@ fn test_cb_radio_post_warning_only_fires_once() {
 // - the stop, the ticket, the scale bypass, the unsafe-equipment stop, the
 //   construction-zone doubling, the compliance tracker and running from a
 //   stop -- `crates/freight-fate/tests/states_driving_troopers.rs`.
+
+// -- the routine inspection roll ----------------------------------------------------------
+
+fn routine_inspections_over(miles: f64, scale: f64) -> usize {
+    let mut t = trip();
+    t.roadside_inspection_scale = scale;
+    t.events.clear();
+    let mut driven = 0.0;
+    while driven < miles {
+        t.position_mi += 5.0;
+        driven += 5.0;
+        t.check_inspections(5.0);
+    }
+    t.events
+        .iter()
+        .filter(|e| e.data.context.as_deref() == Some("routine_inspection"))
+        .count()
+}
+
+#[test]
+fn test_a_legal_driver_meets_the_occasional_routine_inspection() {
+    // Zero scale is off; a targeted record over a long run meets several.
+    assert_eq!(routine_inspections_over(2_000.0, 0.0), 0);
+    let targeted = routine_inspections_over(2_000.0, 4.0);
+    assert!(
+        targeted >= 1,
+        "{targeted} routine inspections in 2,000 miles at 4x"
+    );
+    let clean = routine_inspections_over(2_000.0, 1.0);
+    assert!(clean <= targeted, "clean {clean} vs targeted {targeted}");
+}
+
+#[test]
+fn test_roadcheck_week_is_announced_once_on_the_cb() {
+    let mut t = trip();
+    t.roadcheck_blitz = true;
+    t.roadside_inspection_scale = 0.0;
+    t.events.clear();
+    for _ in 0..40 {
+        t.position_mi += 5.0;
+        t.check_inspections(5.0);
+    }
+    let notices: Vec<_> = t
+        .events
+        .iter()
+        .filter(|e| e.data.context.as_deref() == Some("roadcheck_notice"))
+        .collect();
+    assert_eq!(notices.len(), 1);
+    assert!(
+        notices[0].text().contains("Roadcheck"),
+        "{}",
+        notices[0].text()
+    );
+}

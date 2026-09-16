@@ -39,6 +39,16 @@
 
 ### Added
 
+- **The scale's inspection lane is a real Level 1 inspection.** Worn tires, brakes, damage and trailer defects are written up; a critical one parks you.
+
+- **A clean Level 1 earns an inspection decal.** Open scales wave you through for three months unless your record is targeted.
+
+- **Troopers now pull legal drivers in for routine Level 3 inspections.** Licence and paperwork, fifteen minutes; a clean one costs nothing else.
+
+- **Roadcheck week in May triples inspection odds, and the CB warns you.**
+
+- **Walk around the truck before an inspector does.** The new row at the terminal and every stop reads out what an inspector would find.
+
 - **Pilot, Love's and Flying J travel centers now stand on ten thin US highway runs.** Clovis, Rapid City, Dodge City, Norfolk, Benson, Tucson, Lufkin, Columbia Falls, Mayer and Missoula each gain a tractor-trailer fuel stop.
 
 - **Love's and Pilot travel centers now sit at Corbin on I-75, between London and Knoxville.** Both take a tractor-trailer and both offer truck parking.
