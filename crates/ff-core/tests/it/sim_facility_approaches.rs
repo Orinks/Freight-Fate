@@ -61,10 +61,13 @@ fn test_long_synthetic_approach_steps_down_45_25_15() {
     // gate. A blanket 25 for six-plus miles was a crawl no city posts.
     let w = world();
     // Madison Cold Storage became estimated-near-city @2.1 mi after far-pin
-    // regeocode; Kenosha Dry Warehouse still has a long synthetic approach.
+    // regeocode, and the 2026-09-16 route sweep gave Kenosha Dry Warehouse
+    // a real 0.8-mile chain. Payson Quarry has no source-backed endpoint, so
+    // no sweep can route it: its 3.5-mile representative approach stays
+    // synthetic.
     let route = w
-        .facility_approach_route("kenosha_wi_us", "Kenosha Dry Warehouse")
-        .expect("Kenosha Dry Warehouse has an approach route");
+        .facility_approach_route("payson_az_us", "Payson Quarry")
+        .expect("Payson Quarry has an approach route");
     assert!(route.miles() > 3.0); // long synthetic approach (clamped to Josh's band)
     let mut truck = TruckState::default();
     truck.transmission.automatic = true;
