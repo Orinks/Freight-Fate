@@ -210,44 +210,24 @@ impl DrivingState {
             // The wait at the stop bar ends; the driveway is just ahead.
             self.ramp_waiting_at_light = false;
             self.ramp_terminal_done = true;
+            if self.approach_pull_ahead_available(ctx) {
+                self.approach_pull_ahead = true;
+            }
             ctx.audio.play_with("events/ramp_light_green", 0.8, 0.0);
-            let message = self.terminal_release_text(ctx, "Green light.", false);
-            self.say_route_navigation(ctx, &message);
+            self.say_route_navigation(ctx, "Light green.");
             return;
         }
-        // Every phase change speaks. The light is an instruction, not
-        // ambiance: a silent flip back to red between the spoken green and
-        // the stop bar cost real playtesters real trailer damage. The wording
-        // is distance-aware: a screen shows where the stop bar is, so speech
-        // has to say whether the driver has reached it.
-        //
-        // ROUTE, for the same reason the comment above gives. Left at the
-        // AMBIENT default, this whole family waited the full stale budget
-        // behind whatever was speaking, and on a real ramp the pacer dropped
-        // the assist's own "braking for the light" sixteen milliseconds after
-        // the yellow call, then "through on the yellow" behind it -- so the
-        // truck braked for the light and the driver was told none of it
-        // (owner playtest, 2026-08-15).
-        let short = self.ramp_mi.unwrap_or(0.0) > RAMP_ACCESS_MI;
+        // Keep every phase change on the route channel so the driver hears
+        // it promptly, with only the color in the cycling announcement.
         if phase == "red" {
             ctx.audio.play_with("events/ramp_light_red", 0.7, 0.0);
-            self.say_route_navigation(ctx, "Light ahead turns red.");
+            self.say_route_navigation(ctx, "Light red.");
         } else if phase == "yellow" {
             ctx.audio.play_with("ui/notify", 0.7, 0.0);
-            let message = if short {
-                "Light ahead turns yellow. Red by the time you reach it."
-            } else {
-                "Light turns yellow at the bar."
-            };
-            self.say_route_navigation(ctx, message);
+            self.say_route_navigation(ctx, "Light yellow.");
         } else {
             ctx.audio.play_with("events/ramp_light_green", 0.7, 0.0);
-            let message = if short {
-                "Light ahead turns green."
-            } else {
-                "Light turns green at the bar."
-            };
-            self.say_route_navigation(ctx, message);
+            self.say_route_navigation(ctx, "Light green.");
         }
     }
 
@@ -555,17 +535,7 @@ impl DrivingState {
                 && !self.ramp_gap_milestones_said.contains(&threshold)
             {
                 self.ramp_gap_milestones_said.insert(threshold);
-                if self.terse_speech(ctx) {
-                    // The distance, and nothing else. Quiet gets ONE call for
-                    // the whole approach, and by the time it lands the driver
-                    // has already been told this is a bar and what the limit
-                    // is -- so repeating either of those is the wordiness the
-                    // rung exists to remove (owner, 2026-08-21, replacing the
-                    // compact-line spec of 2026-07-23 for this line only).
-                    self.say_route_navigation(ctx, &format!("{threshold} {unit_word}."));
-                    return;
-                }
-                self.say_route_navigation(ctx, &format!("{threshold} {unit_word} to the bar."));
+                self.say_route_navigation(ctx, &format!("{threshold} {unit_word}."));
                 return;
             }
         }
@@ -747,41 +717,7 @@ impl DrivingState {
                 0.8,
                 0.0,
             );
-            if terse {
-                // The limit clause is CONDITIONAL, like every other one built
-                // from this text. `approach_limit_text` deliberately returns
-                // nothing when it cannot trust the number -- better no clause
-                // than a wrong one -- and interpolating that gave quiet
-                // drivers a sentence with a hole in it: "Light at ramp end,
-                // green. Limit ." (Shane P, 2026-08-23). The stop, yield and
-                // roundabout branches below always guarded it; this one did
-                // not.
-                let limit_clause = if limit_text.is_empty() {
-                    String::new()
-                } else {
-                    format!(" Limit {limit_text}.")
-                };
-                self.say_route_navigation(
-                    ctx,
-                    &format!("Light at ramp end, {phase}.{limit_clause}"),
-                );
-                return;
-            }
-            // "Brake to a stop" alone invites stopping right here, a quarter
-            // mile short of the bar; the stop belongs at the light.
-            let message = if phase == "red" {
-                "Traffic light at the end of the ramp, red."
-            } else if phase == "yellow" {
-                "Traffic light at the end of the ramp, yellow. Red by the time you reach it."
-            } else {
-                "Traffic light at the end of the ramp, green."
-            };
-            let approach_clause = if limit_text.is_empty() {
-                String::new()
-            } else {
-                format!(" Speed limit {limit_text} on the approach.")
-            };
-            self.say_route_navigation(ctx, &format!("{message}{approach_clause}"));
+            self.say_route_navigation(ctx, &format!("Light {phase}."));
         } else if self.ramp_control == "stop" {
             ctx.audio.play_with("ui/notify", 0.7, 0.0);
             if terse {
