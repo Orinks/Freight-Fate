@@ -830,8 +830,20 @@ fn test_business_status_lets_a_qualified_driver_stay_a_company_driver() {
 
     assert!(profile(&app).owner_operator_declined);
     assert_eq!(profile(&app).business_status, COMPANY_DRIVER);
+    assert_eq!(
+        ff_core::models::business::display_rank_for(profile(&app)).title,
+        "Company Fleet Captain"
+    );
     let said = app.main_lines().join(" ");
     assert!(said.contains("Staying a company driver"), "{said}");
+    app.clear_speech();
+    select::<BusinessStatusState>(&mut app, "Carrier and rank");
+    let rank_said = app.main_lines().join(" ");
+    assert!(rank_said.contains("Company Fleet Captain"), "{rank_said}");
+    assert!(
+        !rank_said.contains("Leased-On Owner-Operator"),
+        "{rank_said}"
+    );
     let rows = labels::<BusinessStatusState>(&app);
     assert!(
         rows.iter()
@@ -904,6 +916,10 @@ fn test_business_status_lets_an_owner_operator_go_back_to_company_driving() {
     assert!(profile(&app).visible_owned_trucks().is_empty());
     approx(profile(&app).money, money_after_buy_in + expected_back);
     assert_eq!(profile(&app).driving_record.repossessions, 0);
+    assert!(
+        profile(&app).owner_operator_declined,
+        "returned company drivers use company rank titles and goals"
+    );
     let said = app.main_lines().join(" ");
     assert!(said.contains("company driver again"), "{said}");
     let rows = labels::<BusinessStatusState>(&app);

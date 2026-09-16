@@ -359,13 +359,17 @@ stays focused on driving.
 
 You never have to take the buy-in. Once it opens, **Business status** offers
 Stay a company driver: the career plan and the business reminders stop
-pointing you at the truck, and the buy-in row stays there for later. Reopen
-the owner-operator plan turns the reminders back on. An owner-operator who
-wants out chooses Go back to company driving on the same screen. It asks
+pointing you at the truck, and the buy-in row stays there for later. Your
+spoken rank titles and goals also switch to the company career ladder
+(senior company and fleet ranks such as Company Fleet Captain and Freight
+Fate Company Driver) instead of owner-operator prep or independent titles.
+Reopen the owner-operator plan turns the reminders back on. An owner-operator
+who wants out chooses Go back to company driving on the same screen. It asks
 twice; the carrier takes every tractor and trailer you own, pays you for them
 (the buy-in tractor for what you paid, anything bought since at its used
-value), and puts you back in a carrier tractor on company wages. Nothing goes
-on your record, and the buy-in stays open if you change your mind again.
+value), and puts you back in a carrier tractor on company wages with company
+rank titles again. Nothing goes on your record, and the buy-in stays open if
+you change your mind again.
 
 At level 21, established owner-operators can set aside an authority prep reserve
 from **Business status** after enough deliveries, reputation, and working

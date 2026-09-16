@@ -1,7 +1,9 @@
 //! The hub screen while parked at a company terminal or yard
 //! (`CityMenuState`).
 
-use ff_core::models::business::{is_owner_operator, status_label, COMPANY_DRIVER};
+use ff_core::models::business::{
+    display_rank_for, is_owner_operator, status_label, COMPANY_DRIVER,
+};
 use ff_core::models::career_objectives::career_objective;
 use ff_core::models::career_training::{
     is_company_training_profile, training_guidance, TrainingStage,
@@ -631,7 +633,7 @@ impl Menu for CityMenuState {
                 .unwrap_or_else(|_| (p.current_city.clone(), String::new()));
             let terminal = home_terminal(ctx);
             let business = status_label(&p.business_status);
-            let rank = p.career.rank();
+            let rank = display_rank_for(p);
             let first_day = terminal_objective_clause(p);
             // A licence that is not clear is said here, every time, because it
             // decides what the rest of this screen can do. A career that is

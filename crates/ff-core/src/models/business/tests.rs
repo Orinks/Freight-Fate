@@ -441,6 +441,39 @@ fn test_a_company_driver_who_chose_to_stay_is_not_nudged_toward_the_buy_in() {
     assert!(summary.contains("by choice"), "{summary}");
     assert!(summary.contains("stays open here"), "{summary}");
     assert!(!summary.contains("You qualify"), "{summary}");
+    // Titles follow the company ladder, not the owner-operator arc.
+    let rank = display_rank_for(&p);
+    assert_eq!(rank.title, "Company Fleet Captain");
+    assert!(!summary.contains("Leased-On Owner-Operator"), "{summary}");
+    assert!(summary.contains("Company Fleet Captain"), "{summary}");
+    let unlock = next_business_unlock(&p);
+    assert!(
+        unlock.contains("Veteran Company Hauler") || unlock.contains("top career"),
+        "{unlock}"
+    );
+    assert!(!unlock.contains("Settled Owner-Operator"), "{unlock}");
+}
+
+#[test]
+fn test_declined_company_path_titles_differ_from_owner_operator_titles() {
+    use crate::models::business_constants::COMPANY_DRIVER;
+    use crate::models::career_ladder::{
+        company_rank_for_level, display_rank_for_level, rank_for_level,
+    };
+
+    for level in [15_i64, 18, 20, 25, 30] {
+        let oo = rank_for_level(level).title;
+        let company = company_rank_for_level(level).title;
+        assert_ne!(oo, company, "level {level}");
+        assert_eq!(
+            display_rank_for_level(level, COMPANY_DRIVER, true).title,
+            company
+        );
+        assert_eq!(
+            display_rank_for_level(level, LEASED_OWNER_OPERATOR, false).title,
+            oo
+        );
+    }
 }
 
 #[test]

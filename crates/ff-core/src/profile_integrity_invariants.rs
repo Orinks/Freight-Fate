@@ -86,6 +86,8 @@ pub struct CatalogInputs {
     pub achievement_categories: Vec<(String, String)>,
     /// Career titles from `CAREER_RANKS`, in exact level order.
     pub career_titles: Vec<String>,
+    /// Company-path titles from `COMPANY_CAREER_RANKS`, in exact level order.
+    pub company_career_titles: Vec<String>,
     /// Career-start key and carrier name from `START_OPTIONS`.
     pub carrier_labels: Vec<(String, String)>,
     /// Public trailer details from `TRAILER_CATALOG`.
@@ -143,7 +145,7 @@ impl CatalogInputs {
             Career, DELIVERY_COMPLETION_XP, LEVEL_XP, XP_CLEAN_BONUS, XP_PER_MILE_ON_TIME,
             XP_SPECIALTY_MULT, XP_STREAK_MAX_BONUS,
         };
-        use crate::models::career_ladder::CAREER_RANKS;
+        use crate::models::career_ladder::{CAREER_RANKS, COMPANY_CAREER_RANKS};
         use crate::models::carrier_fleet::FLEET_TIERS;
         use crate::models::credentials::CREDENTIALS;
         use crate::models::economy::PAY_ADVANCE_LIMIT;
@@ -202,6 +204,10 @@ impl CatalogInputs {
                 .map(|category| (category.id.to_string(), category.title.to_string()))
                 .collect(),
             career_titles: CAREER_RANKS
+                .iter()
+                .map(|rank| rank.title.to_string())
+                .collect(),
+            company_career_titles: COMPANY_CAREER_RANKS
                 .iter()
                 .map(|rank| rank.title.to_string())
                 .collect(),
@@ -481,6 +487,10 @@ pub fn invariant_data(data_root: &Path, inputs: &CatalogInputs) -> Result<Value,
         "careerTitles".into(),
         Value::from(inputs.career_titles.clone()),
     );
+    out.insert(
+        "companyCareerTitles".into(),
+        Value::from(inputs.company_career_titles.clone()),
+    );
     out.insert("carrierLabels".into(), Value::Object(carrier_labels));
     out.insert("cityLabels".into(), Value::Object(city_labels));
     // The economy terms the cloud-save validator needs to tell an edited
@@ -647,6 +657,7 @@ mod tests {
             )],
             achievement_categories: vec![("road".into(), "Out on the Road".into())],
             career_titles: vec!["Yard Trainee".into()],
+            company_career_titles: vec!["Yard Trainee".into()],
             carrier_labels: vec![("northstar".into(), "Northstar Freight Lines".into())],
             trailers: vec![TrailerRow {
                 key: "dry_van".into(),

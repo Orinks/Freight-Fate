@@ -112,6 +112,7 @@ fn the_fixture_carries_the_live_catalog_figures() {
         "achievementDetails",
         "achievementCategories",
         "careerTitles",
+        "companyCareerTitles",
         "carrierLabels",
         "trailerCatalog",
         "truckPrices",
@@ -127,7 +128,7 @@ fn the_fixture_carries_the_live_catalog_figures() {
 #[test]
 fn the_public_profile_catalogs_are_derived_from_live_game_catalogs() {
     use ff_core::achievements::{ACHIEVEMENTS, CATEGORIES};
-    use ff_core::models::career_ladder::CAREER_RANKS;
+    use ff_core::models::career_ladder::{CAREER_RANKS, COMPANY_CAREER_RANKS};
     use ff_core::models::start_options::all_start_options;
     use ff_core::models::trailers::TRAILER_CATALOG;
 
@@ -136,6 +137,11 @@ fn the_public_profile_catalogs_are_derived_from_live_game_catalogs() {
 
     let titles: Vec<&str> = CAREER_RANKS.iter().map(|rank| rank.title).collect();
     assert_eq!(exported["careerTitles"], serde_json::json!(titles));
+    let company_titles: Vec<&str> = COMPANY_CAREER_RANKS.iter().map(|rank| rank.title).collect();
+    assert_eq!(
+        exported["companyCareerTitles"],
+        serde_json::json!(company_titles)
+    );
 
     for option in all_start_options() {
         assert_eq!(

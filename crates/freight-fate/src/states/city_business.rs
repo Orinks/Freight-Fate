@@ -138,6 +138,9 @@ impl BusinessStatusState {
         }
         self.return_armed = false;
         let lines = apply_return_to_company_driving(profile_mut(ctx));
+        // Same choice as Stay a company driver: titles and goals follow the
+        // company ladder; the buy-in stays open under Business status.
+        profile_mut(ctx).owner_operator_declined = true;
         save_business_change(ctx);
         ctx.audio.play("ui/cash");
         ctx.say(&lines.join(" "));

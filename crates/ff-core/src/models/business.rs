@@ -7,7 +7,10 @@
 //! reputation, cash, and miles behind it.
 
 use crate::models::career::CareerProfile;
-use crate::models::career_ladder::{next_rank_for_level, rank_for_level, STARTER_CARRIER_NAME};
+use crate::models::career_ladder::{
+    display_rank_for_level, next_company_rank_for_level, next_display_rank_for_level,
+    next_rank_for_level, rank_for_level, STARTER_CARRIER_NAME,
+};
 use crate::models::enforcement::StandingProfile;
 use crate::models::jobs::Job;
 use crate::models::solvency::debt_line;
@@ -377,7 +380,7 @@ pub fn owner_operator_eligibility<P: BusinessProfile + ?Sized>(profile: &P) -> (
 }
 
 pub fn business_path_label<P: BusinessProfile + ?Sized>(profile: &P) -> String {
-    let rank = rank_for_level(profile.career().level());
+    let rank = display_rank_for(profile);
     let option = option_for_profile(profile);
     format!(
         "{}. Level {}: {}. {}. {}",
@@ -448,7 +451,7 @@ pub fn next_business_unlock<P: BusinessProfile + ?Sized>(profile: &P) -> String 
 /// The next rung of the ladder read as a company career: what a driver who
 /// turned the buy-in down hears in place of the offer.
 fn company_ladder_next(level: i64) -> String {
-    match next_rank_for_level(level) {
+    match next_company_rank_for_level(level) {
         None => "You are at the top career rank. The owner-operator buy-in stays open under                  Business status if you ever want it."
             .to_string(),
         Some(next_rank) => format!(
@@ -456,6 +459,35 @@ fn company_ladder_next(level: i64) -> String {
             next_rank.level, next_rank.title, next_rank.unlock
         ),
     }
+}
+
+/// Rank title/stage for spoken Business status and path labels.
+pub fn display_rank_for<P: CareerProfile + ?Sized>(
+    profile: &P,
+) -> &'static crate::models::career_ladder::CareerRank {
+    display_rank_for_level(
+        profile.career().level(),
+        profile.business_status(),
+        profile.owner_operator_declined(),
+    )
+}
+
+pub fn next_display_rank_for<P: CareerProfile + ?Sized>(
+    profile: &P,
+) -> Option<&'static crate::models::career_ladder::CareerRank> {
+    next_display_rank_for_level(
+        profile.career().level(),
+        profile.business_status(),
+        profile.owner_operator_declined(),
+    )
+}
+
+pub fn uses_company_career_ranks_for<P: CareerProfile + ?Sized>(profile: &P) -> bool {
+    crate::models::career_ladder::uses_company_career_ranks(
+        profile.career().level(),
+        profile.business_status(),
+        profile.owner_operator_declined(),
+    )
 }
 
 pub fn business_status_summary<P: BusinessProfile + ?Sized>(profile: &P) -> String {
@@ -473,7 +505,7 @@ pub fn business_status_summary<P: BusinessProfile + ?Sized>(profile: &P) -> Stri
 
 fn business_status_summary_inner<P: BusinessProfile + ?Sized>(profile: &P) -> String {
     let status = profile.business_status();
-    let rank = rank_for_level(profile.career().level());
+    let rank = display_rank_for(profile);
     if is_owner_operator(status) {
         let transponder = if has_weigh_station_transponder(profile) {
             "Weigh station transponder subscription is active. "

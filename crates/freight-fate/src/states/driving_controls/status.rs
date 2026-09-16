@@ -1,6 +1,7 @@
 //! The Tab status screen's browse, and the two readouts it shares with the
 //! spoken keys: the gear name and the air-brake sentence.
 
+use ff_core::models::business::display_rank_for;
 use ff_core::models::career::xp_to_next_level;
 use ff_core::pyfmt::fmt_grouped;
 
@@ -32,14 +33,16 @@ impl DrivingState {
     /// again on 2026-08-20 ("this is still not in this build"), and he was
     /// exactly right. The status browse is where a driver asks mid-run.
     pub fn career_status_line(&self, ctx: &GameContext) -> String {
-        let career = &profile_of(ctx).career;
+        let profile = profile_of(ctx);
+        let career = &profile.career;
         let owed = xp_to_next_level(career.xp);
         let level = career.level();
+        let title = display_rank_for(profile).title;
         let tail = match owed {
             Some(owed) => format!("{} experience to level {}", fmt_grouped(owed, 0), level + 1),
             None => "top career level".to_string(),
         };
-        format!("Career: level {level}, {}. {tail}.", career.rank().title)
+        format!("Career: level {level}, {title}. {tail}.")
     }
 
     /// `status_lines()`: the Tab status screen's browse.
