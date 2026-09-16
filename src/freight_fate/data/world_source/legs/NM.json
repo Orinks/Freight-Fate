@@ -34960,6 +34960,60 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Pilot Travel Center Clovis",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1118 in Clovis, NM with 29 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=112.0 off_mi=1.37",
+          "at_mi": 112.0,
+          "lat": 34.39529214534171,
+          "lon": -103.15286499814758
+        },
+        {
+          "name": "Love's Travel Stop Clovis",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Love's official store feed lists store 329 in Clovis, NM on Hwy 60; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=112.5 off_mi=0.88",
+          "at_mi": 112.5,
+          "lat": 34.394791,
+          "lon": -103.144305
+        },
+        {
           "name": "Conoco",
           "type": "fuel_station",
           "at_mi": 119.4,

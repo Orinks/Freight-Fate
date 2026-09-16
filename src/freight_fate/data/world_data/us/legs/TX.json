@@ -125188,11 +125188,8 @@
       },
       "stops": [
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the lufkin_tx_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "name": "Pilot Travel Center Lufkin",
+          "type": "truck_stop",
           "actions": [
             "park",
             "save",
@@ -125206,9 +125203,43 @@
             "food",
             "parking"
           ],
-          "lat": 31.3173,
-          "lon": -94.69909,
-          "vehicle_access": "tractor_trailer"
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1023 in Lufkin, TX with 47 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=2.5 off_mi=0.05",
+          "at_mi": 2.5,
+          "lat": 31.317649847340558,
+          "lon": -94.69881432944776
+        },
+        {
+          "name": "Love's Travel Stop Lufkin",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Love's official store feed lists store 290 in Lufkin, TX on US Hwy 59/69/Loop 287; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=3.0 off_mi=0.87",
+          "at_mi": 3.0,
+          "lat": 31.328488,
+          "lon": -94.689716
         },
         {
           "name": "Shell",

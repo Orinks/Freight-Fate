@@ -16043,11 +16043,8 @@
       },
       "stops": [
         {
-          "name": "Love's Travel Stop",
-          "type": "service_plaza",
-          "at_mi": 1.22,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the norfolk_ne_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "name": "Love's Travel Stop Norfolk",
+          "type": "truck_stop",
           "actions": [
             "park",
             "save",
@@ -16061,9 +16058,16 @@
             "food",
             "parking"
           ],
-          "lat": 42.0118,
-          "lon": -97.42815,
-          "vehicle_access": "tractor_trailer"
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Love's official store feed lists store 680 in Norfolk, NE on Hwy 81; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=2.5 off_mi=0.47",
+          "at_mi": 2.5,
+          "lat": 42.011302,
+          "lon": -97.427622
         },
         {
           "name": "AJ's C-store",

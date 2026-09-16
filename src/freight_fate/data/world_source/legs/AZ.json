@@ -8316,11 +8316,8 @@
           "vehicle_access": "bobtail_only"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 114.54,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "name": "Love's Travel Stop Benson #9",
+          "type": "truck_stop",
           "actions": [
             "park",
             "save",
@@ -8334,9 +8331,70 @@
             "food",
             "parking"
           ],
-          "lat": 32.1254767,
-          "lon": -110.873428,
-          "vehicle_access": "tractor_trailer"
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Love's official store feed lists store 9 in Benson, AZ on I-10; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=80.0 off_mi=0.08",
+          "at_mi": 80.0,
+          "lat": 31.962166,
+          "lon": -110.346561
+        },
+        {
+          "name": "Love's Travel Stop Benson #460",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Love's official store feed lists store 460 in Benson, AZ on I-10; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=80.0 off_mi=0.07",
+          "at_mi": 80.0,
+          "lat": 31.962406,
+          "lon": -110.344844
+        },
+        {
+          "name": "Pilot Travel Center Tucson",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 593 in Tucson, AZ with 83 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=114.0 off_mi=0.73",
+          "at_mi": 114.0,
+          "lat": 32.125744602509016,
+          "lon": -110.87417533995057
         },
         {
           "name": "QuikTrip",
@@ -36014,6 +36072,60 @@
           "lat": 34.39868,
           "lon": -112.22895,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Love's Travel Stop Mayer",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Love's official store feed lists store 722 in Mayer, AZ on I-17; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=35.0 off_mi=0.44",
+          "at_mi": 35.0,
+          "lat": 34.334818,
+          "lon": -112.117712
+        },
+        {
+          "name": "Pilot Travel Center Mayer",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 1175 in Mayer, AZ with 25 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=35.0 off_mi=0.24",
+          "at_mi": 35.0,
+          "lat": 34.32741874206012,
+          "lon": -112.11799225871981
         },
         {
           "name": "Sunset Point Rest Area",

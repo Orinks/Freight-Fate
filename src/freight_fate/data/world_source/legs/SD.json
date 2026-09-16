@@ -9801,11 +9801,8 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "Pilot Travel Center",
-          "type": "service_plaza",
-          "at_mi": 178.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rapid_city_sd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
-          "parking": "likely",
+          "name": "Flying J Licensed Location Rapid City",
+          "type": "truck_stop",
           "actions": [
             "park",
             "save",
@@ -9819,9 +9816,43 @@
             "food",
             "parking"
           ],
-          "lat": 44.11306,
-          "lon": -103.27354,
-          "vehicle_access": "tractor_trailer"
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Pilot Flying J official locator lists Flying J Licensed Location store 931 in Rapid City, SD with 125 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=172.0 off_mi=0.38",
+          "at_mi": 172.0,
+          "lat": 44.103422478945994,
+          "lon": -103.14955142195129
+        },
+        {
+          "name": "Pilot Travel Center Rapid City",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 918 in Rapid City, SD with 75 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=176.5 off_mi=1.93",
+          "at_mi": 176.5,
+          "lat": 44.11272659584743,
+          "lon": -103.2730744950718
         }
       ],
       "lanes": 2

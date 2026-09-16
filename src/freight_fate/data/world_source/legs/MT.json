@@ -45202,6 +45202,60 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "Love's Travel Stop Missoula",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Love's official store feed lists store 753 in Missoula, MT on I-90; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=likely; projected at_mi=10.0 off_mi=0.29",
+          "at_mi": 10.0,
+          "lat": 46.947602,
+          "lon": -114.133598
+        },
+        {
+          "name": "Flying J Licensed Location Missoula",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Pilot Flying J official locator lists Flying J Licensed Location store 914 in Missoula, MT with 125 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=10.5 off_mi=0.11",
+          "at_mi": 10.5,
+          "lat": 46.95510997530376,
+          "lon": -114.13232162153055
+        },
+        {
           "name": "Mission Mountains Viewpoint and Picnic Area",
           "type": "public_rest_area",
           "at_mi": 54.0,
@@ -48155,6 +48209,33 @@
           "lat": 48.41526,
           "lon": -114.04945,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Pilot Licensed Location Columbia Falls",
+          "type": "truck_stop",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "source": "Pilot Flying J official locator lists Pilot Licensed Location store 922 in Columbia Falls, MT with 20 public truck parking spaces; KEEP tractor_trailer 2026-09-16 \u2014 official chain locator; parking=confirmed; projected at_mi=145.5 off_mi=0.05",
+          "at_mi": 145.5,
+          "lat": 48.3699566206542,
+          "lon": -114.23971898413087
         },
         {
           "name": "Skip's Tire & Auto Care",

@@ -24,6 +24,8 @@
 
 ### Added
 
+- **Pilot, Love's, and Flying J travel centers on thin US-hwy tractor-fuel legs.** Clovis (US-380), Rapid City (US-14), Dodge City (US-183), Norfolk (US-81), Benson #9/#460 and Tucson (AZ-80), Lufkin (US-96), Columbia Falls (US-2), Mayer (AZ-69), and Missoula (US-93). Tractor-trailer keep; Corsicana dealer and OSM Petro Mayer not added; Corbin held.
+
 - **Little America Travel Center pull-ins at Cheyenne and Flagstaff.** Cheyenne (I-80 Exit 358/359) on cheyenne→laramie, cheyenne→salt_lake, and rock_springs→cheyenne; Flagstaff (2515 E Butler) on camp_verde→flagstaff, flagstaff→kingman, and flagstaff→winslow. Tractor-trailer travel-center actions; hotels and unrelated Little America sites stay off the map.
 
 - **Little America's Fuel Center is a pull-in on I-80 west of Rock Springs.** OSM name (public Overpass), tractor-trailer travel-center actions, on rock_springs→salt_lake and cheyenne→salt_lake; rawlins→rock_springs skipped.
