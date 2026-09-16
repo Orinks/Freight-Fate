@@ -78,12 +78,9 @@ pub const BILLBOARDS_SOURCE: &str =
 pub const GENERIC_BILLBOARDS: &[&str] = &[
     "Did you eat today? Thank a trucker.",
     "Last real coffee for two hundred miles. This is not a drill.",
-    "World's largest pecan. You'll smell it before you see it. Next exit.",
-    "Fireworks, fireworks, fireworks. You're already past it.",
     "Prime rib buffet, nine ninety-nine. Cardiologist not included.",
     "Hitchhikers may be escaping inmates. Drive friendly.",
     "Home of the fifty-pound cinnamon roll. Bring a friend. Bring two.",
-    "Adult superstore, next exit. Truckers welcome. We won't tell.",
     "Gun show and craft fair this weekend. Something for everyone.",
     "You are now leaving the middle of nowhere. Come back soon.",
     // 2026-08-12 owner batch -- roadfood and attraction signs from the tester
@@ -97,6 +94,114 @@ pub const GENERIC_BILLBOARDS: &[&str] = &[
     "Uncle Josh's Steakhouse: steaks so tender they're legally considered missing.",
     "Next exit: biggest pancake in the state! Probably. We haven't checked.",
     "Free coffee! With purchase of coffee. Extra refils fifty cents each.",
+    "Next exit: homemade jerky and a gift shop that sells the same jerky.",
+    "If you can read this, you are not in the sleeper. Eyes up.",
+    "We have ice. We have bait. We have opinions about your bumper sticker.",
+    "Diesel, showers, and a fried pie that will change your itinerary.",
+    "All-you-can-eat catfish. The catfish retained counsel.",
+    "World's largest frying pan. Breakfast is served. Bring a forklift.",
+    "Homemade pie, next exit. Made this morning. The coffee is older.",
+    "Fresh peaches, next exit. Or possibly just a painted peach. Worth the look.",
+    "Antiques and ammunition. One building. Two hobbies.",
+    "If you lived here, you'd be home by now. Nobody lives here.",
+    "Truck wash, next exit. Your dispatcher can see this color from space.",
+    "The coffee is fine. The pie is better. The gossip is unbeatable.",
+    "Yard gnomes, concrete animals, and a very confident fountain. Next exit.",
+    "We have a gift shop. You have a dashboard. Let's talk.",
+    "Local honey. Local jam. Local opinions, free with every purchase.",
+    "The steak is bigger than the plate. The plate is bigger than your budget.",
+    "Next exit: homemade ice cream. The cows are local. The freezer is older than you.",
+    "Gun show this weekend, craft fair the next. Same tent, better judgment sold separately.",
+    "Buffet: if it isn't on a steam table, it isn't dinner.",
+];
+
+// Fireworks-barn genre -- southern/midwest interstate staple. Moved out of
+// GENERIC so the pool can grow without mixing genres. No place names.
+pub const FIREWORKS_BILLBOARDS: &[&str] = &[
+    "Fireworks, fireworks, fireworks. You're already past it.",
+    "Fireworks barn, next exit. If you can still hear, you haven't shopped enough.",
+    "Family fireworks. Professional regret. Open till the sheriff gets here.",
+    "Buy one crate, get the ringing in your ears free.",
+    "Stand back. Light fuse. That's the whole business plan. Next exit.",
+    "Roman candles, bottle rockets, and a very optimistic fire extinguisher.",
+    "Closed on Christmas. Open on every other bad idea.",
+    "Fireworks warehouse. No smoking. We are serious. Look at the inventory.",
+    "Your brother-in-law already bought the loud ones. Catch up, next exit.",
+];
+
+// Pecan-stand genre -- south-central interstate gift-shop food. Invented
+// stands; no town names. Moved the giant-pecan line out of GENERIC.
+pub const PECAN_BILLBOARDS: &[&str] = &[
+    "World's largest pecan. You'll smell it before you see it. Next exit.",
+    "Pecan logs, pecan pie, pecan everything. Your passenger will complain. Buy two.",
+    "If it isn't pecans, it isn't a gift. Next exit, we will not be argued with.",
+    "World's second-largest pecan. The biggest one is three exits back and they know it.",
+    "Fresh roasted pecans. The sample is free. The bag is not.",
+    "Pecan pralines, next exit. Sticky steering wheels since nineteen fifty.",
+    "Nuts. We sell them. We attract them. Next exit.",
+    "Pecan brittle so hard it needs a load rating.",
+];
+
+// Adult-superstore genre -- rural interstate off-ramp staple. PG-13 ceiling
+// matches the existing line; moved out of GENERIC.
+pub const ADULT_BILLBOARDS: &[&str] = &[
+    "Adult superstore, next exit. Truckers welcome. We won't tell.",
+    "Adult bookstore, next exit. Magazines you will not read. Parking you will use.",
+    "Eighteen and over. Eighteen wheels preferred. Next exit.",
+    "The sign just says Superstore. You already know which one. Next exit.",
+    "Late night, well lit, no questions. Your logbook does not need this stop.",
+    "Adult gifts, next exit. For someone else, obviously.",
+    "If the billboard is this vague, the store is not. Next exit.",
+];
+
+// Local-radio genre -- small-market AM promotion that travels anywhere without
+// claiming a particular town or call sign.
+pub const REGIONAL_RADIO_BILLBOARDS: &[&str] = &[
+    "AM radio, this hour: farm report, funeral notices, and a song you forgot you loved.",
+    "Gospel hour on the local AM. The preacher is selling a tent, not a timeshare.",
+    "Your local station: three songs, two ads, and a birthday shout-out for someone named Dale.",
+    "Classic country all night. We play the hits and the ones the hits replaced.",
+    "AM trucking radio. Static included at no extra charge.",
+    "The station that plays only driving songs. You are the whole audience.",
+    "Tune us in. Tune the other guy out. All request, no sleep.",
+    "Night dispatch radio. We cannot fix your load. We can play fiddle.",
+    "Ten thousand watts of somebody's uncle with a stack of records.",
+    "If your radio still has a knob, we still have a tower.",
+    "Weather, crop reports, and a hymn at sunrise. You know the station.",
+    "All truck, all night, all the same three commercials.",
+    "Keep it here. The next station is somebody's talk show and a car dealership.",
+];
+
+// Travel-plaza / hotel / QSR genre -- OAAA interstate staples. Invented copy;
+// a few nominative chain names with original parody, never lifted slogans.
+pub const TRAVEL_PLAZA_BILLBOARDS: &[&str] = &[
+    "Love's ahead. Diesel, a shower, and a coffee that will keep you legal for one more state.",
+    "Sheetz next exit. Made-to-order, open late, and somehow always has a line.",
+    "Wawa, next exit. Hoagies, coffee, and a parking lot that thinks it is a city.",
+    "RaceTrac next exit. Fuel, drinks, and a bathroom you will actually use.",
+    "Pilot next exit. Parking if you are lucky. Coffee if you are desperate.",
+    "Travel center: showers, diesel, and a gift shop selling hats you already own.",
+    "Motel vacancy. Free ice. Free Wi-Fi. Free regret about the mattress.",
+    "Chain hotel, next exit. Continental breakfast starts when the waffle iron wakes up.",
+    "Cracker Barrel next exit. Rocking chairs out front. Your break clock out back.",
+    "QSR drive-thru, next exit. The bag is small. The line is not.",
+    "Exit food: burgers, fries, and a soda the size of a fuel can.",
+    "Truck parking and a sit-down special. The special is that they still have parking.",
+];
+
+// Dated movie/TV promo genre -- now-showing / coming-soon register only.
+// Never a permanent "this is franchise country" claim. No place names.
+pub const POP_CULTURE_BILLBOARDS: &[&str] = &[
+    "Now showing: a movie about a truck. You are living the sequel.",
+    "Coming soon to a theater near an exit. Bring cash for popcorn, not the load.",
+    "Weekend double feature at the drive-in. Windows up if it rains. Windows down if it smells.",
+    "Now playing: something with explosions. Your dispatcher already filed the complaint.",
+    "Coming Friday: the one with the car chase. Please do not practice on this interstate.",
+    "Matinee special. Matinee is when you should be sleeping. We know.",
+    "Streaming soon, somehow also on a billboard. The future is confusing. Eyes on the road.",
+    "Now showing: a comedy about a road trip. You already know how it ends.",
+    "Coming soon: a documentary about highways. You are the research assistant.",
+    "Drive-in, next weekend only. Classic cars welcome. Classic trailers, negotiate.",
 ];
 
 // The truck-wreck attorney genre -- a real interstate staple, and gently meta in
@@ -107,6 +212,16 @@ pub const ATTORNEY_BILLBOARDS: &[&str] = &[
     "Hurt on the job? Big Jim gets you paid. Big Jim gets Big Jim paid more.",
     "Eighteen wheels of justice. Big Jim sues trucks. Awkward, we know.",
     "Big Jim's big for a reason, he understands your medical problems cause he's got as many problems as he does pounds. Give him a call if life broke you and he'll sue ... whoever",
+    "Big Jim saw that lane change. He is not mad. He is drafting.",
+    "Rollover? Call Big Jim. He has a vest for every settlement.",
+    "Big Jim Tolliver: because your insurance company has a lawyer too.",
+    "Whiplash? Big Jim has a cousin who had that. Call him anyway.",
+    "Big Jim does not sleep. Big Jim's paralegal does not sleep. The bill does not sleep.",
+    "Hurt? Not your fault? Big Jim agrees, and he has not even met you.",
+    "Big Jim's number is on the next six boards. You will remember it.",
+    "Work injury? Big Jim used to drive. Now he sues the people who do.",
+    "Big Jim. Not the other Jim. The billboard Jim. Write it on the visor.",
+    "If the other guy had a lawyer, you would want Big Jim.",
 ];
 
 // Church-sign genre -- earnest, punny, occasionally threatening.
@@ -116,6 +231,16 @@ pub const FAITH_BILLBOARDS: &[&str] = &[
     "Got God? Give him a try, he'll ride shotgun or side saddle with ya any day or night",
     "Honk if you love the Lord. Text and drive if you'd like to meet him.",
     "God answers knee-mail.",
+    "A missed exit is not a sign from God. The next weigh station might be.",
+    "Pray for travelers. Then use your turn signal.",
+    "Church bake sale, next exit. Salvation and a cookie, in that order.",
+    "God is good. The coffee at the next truck stop is merely adequate.",
+    "Don't make me come down there. Signed, God. Also your safety director.",
+    "This is your sign. The actual church is the next exit.",
+    "Sunday service, seven in the morning. The doughnuts go first.",
+    "Eternity is a long haul. Pack accordingly.",
+    "Blessed are the peacemakers, and the folks who stay out of the left lane.",
+    "Got faith? Keep both hands on the wheel anyway.",
 ];
 
 // The mystery-spot / two-headed-snake / see-the-thing genre.
@@ -126,6 +251,18 @@ pub const ROADSIDE_ODDITIES: &[&str] = &[
     "Living through chemistry, get your chemistry fix next four exits.",
     "World's largest ball of twine. Bigger than your problems. Probably.",
     "Zoo! Visit the animals or be one!",
+    "World's largest rocking chair. You may not sit in it. Next exit.",
+    "See the albino alligator. He is on break. The gift shop is not.",
+    "Gravity hill ahead. Your truck already knew.",
+    "Mystery house. Crooked floors. Straight prices. Nine ninety-five.",
+    "Live rattlesnakes. Dead air conditioning. Next exit.",
+    "Petrified wood, petrified staff, very lively gift shop.",
+    "The cave is real. The gift crystals are optimistic. Next exit.",
+    "World's largest ketchup bottle. French fries not included.",
+    "Two-headed calf, stuffed. One-headed cashier, not. Next exit.",
+    "See the thing in a jar. We will not say which jar. Nine dollars.",
+    "Miniature village, next exit. Your rig will not fit down Main Street.",
+    "Tornado museum. Indoor winds. Outdoor regret if you skip it.",
 ];
 
 // Trucker-services genre -- signs pitched straight at the driver, not the
@@ -140,6 +277,19 @@ pub const TRUCKER_SERVICES_BILLBOARDS: &[&str] = &[
     "Truckers welcome! Trucks less welcome. Our parking lot only has 6 spaces.",
     "Need diesel? Of course you do. $4.89/gallon. Please cry inside.",
     "Rest easy at the Budget Palace! Luxury not included.",
+    "Showers with actual hot water. We are as surprised as you are.",
+    "Idle here. The lot is full of promises and one open spot behind the dumpster.",
+    "DEF, diesel, and a sandwich that has seen things. Next exit.",
+    "Parking for trucks. Cars will still take the spots. We have cones and a dream.",
+    "Tire shop that does not flinch at your recaps. Next exit.",
+    "We wash bugs off. We cannot wash the dispatch off. Next exit.",
+    "Lumper service, next warehouse. Bring cash and patience, not in that order.",
+    "CB shop, next exit. Your skip is skippier than you think.",
+    "Reefer repair. If it is warm, we can tell from here.",
+    "The lot has spaces. They are occupied by people who said they would only be a minute.",
+    "Fuel desk open all night. The smile closes at ten.",
+    "Need a shower, a stall, and a twenty-minute lie-down. We can do two of those.",
+    "We buy wrecks, runners, and whatever is smoking behind you. Cash today.",
 ];
 
 // Fourth-wall genre -- the billboard knows you're reading it. 2026-08-12 owner
@@ -234,11 +384,17 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Wyoming I-90 is still western I-90, so both stay off.
         in_states("Free ice water at Wall Drug. Only three hundred miles. You're basically there.", &["SD", "MN"]),
         in_states("Wall Drug. Five-cent coffee since your grandfather was your age.", &["SD", "MN"]),
+        // Landmark attraction -- Cleveland's ticketed Rock Hall.
+        approaching("Cleveland ahead. The Rock and Roll Hall of Fame sits on the lake. Chuck Berry, Aretha Franklin, and a glass pyramid you can actually visit.", &["cleveland_oh_us"]),
         // Song tributes -- Boston (The Willis Brothers), Moorcroft, Wyoming
         // (Chancey Williams), and the Idaho panhandle (Colby Acuff).
         approaching("Boston ahead. The Willis Brothers needed forty acres to turn a rig around in this town. It hasn't gotten any wider.", &["boston_ma_us"]),
         in_states("Wyoming, Land of the Buffalo. Chancey Williams sings it from right up the road. Buffalo cross wherever they please.", &["WY"]),
         in_states("Idaho panhandle country. Colby Acuff and the Western White Pines both grew up here.", &["ID"]),
+        // Paying attraction -- World's Only Corn Palace, Mitchell SD on I-90.
+        in_states("Mitchell, South Dakota -- the Corn Palace is a real building they redecorate with corn. You may look. The pigeons already did.", &["SD"]),
+        // Paying attraction -- Spam Museum, Austin MN on I-90.
+        in_states("Minnesota. The Spam Museum is a real place they built for a canned lunch. Samples included. The trailer is not.", &["MN"]),
     ]),
     ("I-95", &[
         in_states("The big sombrero tower ahead. Fireworks, tacos, and a lookout. You never sausage a place.", &["SC", "NC"]),
@@ -246,11 +402,14 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // 2026-08-12 owner batch -- Carolinas fireworks-stand country, the
         // genre South of the Border already trades on. "362 days" keeps its
         // numerals verbatim (owner sign-off, see test_billboards.py).
-        anywhere_on("Bubba's Fireworks: open 362 days a year! Closed on the other three because we're usually in the hospital."),
+        // Carolinas fireworks country only -- never Maine I-95 (commercial boards banned).
+        in_states("Bubba's Fireworks: open 362 days a year! Closed on the other three because we're usually in the hospital.", &["SC", "NC"]),
         // Song tributes -- the Jersey Turnpike (Elle King) and Jacksonville
         // (Lynyrd Skynyrd). Haynesville Woods was radio memory, not a paid board.
         in_states("New Jersey: more state than it gets credit for. Elle King sings one called Jersey Giant.", &["NJ"]),
         approaching("Jacksonville ahead, hometown of Lynyrd Skynyrd. Down here even the breeze plays guitar -- they named a song for it, Call Me the Breeze.", &["jacksonville_fl_us"]),
+        // Peanut-stand genre -- southside Virginia I-95, not a New England board.
+        in_states("Virginia peanuts, next exit. Cooked in the shell. Your cab will smell like a ballpark for a week.", &["VA"]),
     ]),
     ("I-10", &[
         in_states("The Thing? Mystery of the desert. Two hundred miles of suspense building.", &["AZ", "NM"]),
@@ -263,12 +422,20 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Biloxi by two? Only if you keep it moving. Ellis Bullard makes it sound easy.", &["MS"]),
         approaching("El Paso, out past the haze. Marty Robbins sang El Paso City and the Streets of Laredo. West Texas gave him the material.", &["el_paso_tx_us"]),
         approaching("The Big Thicket, off to the north -- deep pines and deeper voices. George Jones grew up in there. Welcome to Possum country.", &["beaumont_tx_us", "houston_tx_us"]),
+        // Tejano genre -- south Texas approaches only, not a statewide claim.
+        approaching("San Antonio ahead. Fiesta in the spring, Tejano all year. The Alamo does not take eighteen-wheelers.", &["san_antonio_tx_us"]),
+        // Landmark attraction -- a ticketed New Orleans jazz venue.
+        approaching("New Orleans ahead. Preservation Hall still sells a seat for the jazz. Leave the trailer off the Quarter.", &["new_orleans_la_us"]),
+        // Food boards -- Acadiana on I-10.
+        in_states("Cajun country. Boudin, cracklins, and a drive-thru that does not need a window. Next exit.", &["LA"]),
     ]),
     ("I-15", &[
         in_states("Alien jerky, next exit. They won't say who the jerky's made from.", &["CA"]),
         in_states("The Mad Greek. Gyros in the middle of the Mojave. Trust the desert.", &["CA"]),
         // Song tribute -- Las Vegas (Elvis Presley).
         approaching("Las Vegas ahead. Elvis said Viva. The lights are on all night.", &["las_vegas_nv_us"]),
+        // Casino genre -- Las Vegas is an approach, not all of Interstate 15.
+        approaching("Las Vegas ahead. Another casino, another buffet bigger than your trailer. The odds are not.", &["las_vegas_nv_us"]),
     ]),
     ("I-40", &[
         in_states("Historic Route sixty-six. Get your kicks, then get back on schedule.", &["CA", "AZ", "NM", "TX", "OK"]),
@@ -278,9 +445,18 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Historic Route Sixty-Six, right under your wheels. Bobby Troup gave it a song and half the country followed. The old road still takes visitors.", &["CA", "AZ", "NM", "TX", "OK"]),
         approaching("Winslow, Arizona, home of the world-famous corner. The Eagles sang Take It Easy about it, so the town built a park. Statue included.", &["winslow_az_us"]),
         approaching("Memphis, on down the road. Every highway in Tennessee gets there eventually. Tom T. Hall named his route That's How I Got to Memphis.", &["memphis_tn_us"]),
+        // Landmark attraction -- Graceland is a ticketed Memphis site.
+        approaching("Memphis ahead. Graceland is a real house with a real ticket line. Elvis lived there. The jumpsuits are in the museum.", &["memphis_tn_us"]),
+        // Casino genre -- Oklahoma City's casino boards belong on its approach.
+        approaching("Oklahoma City ahead. Casino billboards outnumber the cattle. You have been warned.", &["oklahoma_city_ok_us"]),
         in_states("Muskogee, Oklahoma, up the road. Merle Haggard put it on the map. The proudest Okies you'll ever wave at.", &["OK"]),
         in_states("Okemah, Oklahoma. Home of Woody Guthrie. This Land Is Your Land. This billboard is somebody else's.", &["OK"]),
         approaching("East Tennessee, home of Dolly Parton. The Smokies raised her. Nobody's worked a longer shift with a bigger smile.", &["knoxville_tn_us"]),
+        // Ticketed Memphis tourism -- Beale Street, not a Music Highway state marker.
+        approaching("Memphis. Beale Street still sells a ticket. The freight uses a different door.", &["memphis_tn_us"]),
+        // Ticketed Nashville tourism -- Grand Ole Opry. Not I-40 Music Highway state signs.
+        approaching("Nashville ahead. The Grand Ole Opry still sells a ticket. Bring a song or bring freight. They take both.", &["nashville_tn_us"]),
+        approaching("Albuquerque ahead. Red chile, green chile, and a sky that does not quit. Fuel up.", &["albuquerque_nm_us"]),
     ]),
     ("I-80", &[
         in_states("World's largest porch swing. Seats twenty-five. Zero of them truckers.", &["NE"]),
@@ -290,6 +466,10 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Otis is the San Francisco bay, not the Humboldt. Nevada I-80 is
         // the wrong end of this road.
         in_states("The Dock of the Bay is at the far end of this road. Otis Redding held the best seat. No parking for trailers.", &["CA"]),
+        // Casino genre -- Reno only, never a Nevada-wide anchor.
+        approaching("Reno ahead. Biggest Little City, and the neon starts early. Cash the bonus, not the truck.", &["reno_nv_us"]),
+        // Paying truck-stop landmark -- Iowa 80, Walcott IA on I-80.
+        in_states("Iowa Eighty, the world's largest truck stop, is on this road. Parking is a competitive sport. So is the food court.", &["IA"]),
     ]),
     // 2026-08-12 owner batch -- the Rockies climb, where the scenery genuinely
     // earns the joke.
@@ -300,6 +480,9 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // on Interstate 70.
         in_states("The Rockies, straight ahead and getting bigger. Joe Walsh saw this view and wrote Rocky Mountain Way.", &["CO", "KS"]),
         approaching("Kansas City ahead. Roger Miller made it famous twice -- Kansas City Star, then King of the Road.", &["kansas_city_mo_us"]),
+        // Paying attraction -- OZ Museum, Wamego KS (I-70 billboards documented).
+        in_states("Kansas sky, as advertised. The Oz Museum is a few exits off this road in Wamego. Ruby slippers not required.", &["KS"]),
+        approaching("Saint Louis ahead. The Gateway Arch is the big one. You may look. The trailer stays on this side of the river.", &["st_louis_mo_us"]),
     ]),
     // Song tributes -- the Missouri and Oklahoma road. Franklin County,
     // Missouri (Union, Pacific, Saint Clair, Sullivan) is the Franklin County
@@ -311,6 +494,10 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Meramec-style caverns ahead. Outlaws hid here. So can you, for nine ninety-five.", &["MO"]),
         in_states("Franklin County, Missouri -- Union, Pacific, Saint Clair, and Sullivan. Home turf of the Franklin County Trucking Company. If you're a trucker, they already wrote your song.", &["MO"]),
         approaching("Tulsa ahead. Set your watch to Tulsa Time. Don Williams says it runs a little easier.", &["tulsa_ok_us"]),
+        // Casino genre -- the Tulsa approach.
+        approaching("Tulsa ahead. Casino lights off the right. Don't bet the load.", &["tulsa_ok_us"]),
+        // Paying venue -- Blueberry Hill / Chuck Berry room, Delmar Loop, St. Louis approach on I-44.
+        approaching("Saint Louis ahead. Chuck Berry's Blueberry Hill is a real room. The duck walk is not a traffic pattern.", &["st_louis_mo_us"]),
     ]),
     // Song tributes -- the Texas-to-Minnesota main street of country music:
     // San Antonio, Austin, Waco, Abbott, Fort Worth, and Wichita.
@@ -319,6 +506,17 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         approaching("Waco ahead. Croy and the Boys wrote Don't Let Me Die in Waco. The city would like everyone to relax.", &["waco_tx_us"]),
         approaching("Austin ahead. Dale Watson territory -- honky-tonk for people who read weigh station signs.", &["austin_tx_us"]),
         approaching("San Antonio, down the road. Western swing was born in Texas and Bob Wills drove it. New San Antonio Rose still blooms.", &["san_antonio_tx_us"]),
+        // Tejano genre -- south Texas approaches only, never all of Texas.
+        approaching("Laredo ahead. Tejano on the AM and the river just south. Keep the accordion, skip the sightseeing detour.", &["laredo_tx_us"]),
+        approaching("San Antonio ahead. Tejano weekend on the AM. Conjunto is a dance hall and this highway.", &["san_antonio_tx_us"]),
+        // Casino genre -- Oklahoma City's casino boards belong on its approach.
+        approaching("Oklahoma City ahead. Native casino country. The boards started a hundred miles ago.", &["oklahoma_city_ok_us"]),
+        // Tejano -- McAllen / Valley approach only (not Austin/Houston/Dallas/El Paso).
+        approaching("McAllen ahead. Tejano country. The towers never sleep and neither does the dance hall.", &["mcallen_tx_us"]),
+        // Paying venue -- Billy Bob's Texas, Fort Worth.
+        approaching("Fort Worth ahead. Billy Bob's Texas is a real honky-tonk with a zip code. Bob Wills already got the other board.", &["fort_worth_tx_us"]),
+        // Kolache stands at West, Texas on I-35 -- invented copy, no stolen bakery slogan.
+        approaching("Waco ahead. West, Texas, is kolache country. The bakery has been stopping traffic since the interstate was new.", &["waco_tx_us"]),
         in_states("Flattest stretch in Kansas: wheat, sky, and telephone poles. Glen Campbell got Wichita Lineman out of one of those poles. Plenty left.", &["KS"]),
     ]),
     // Song tributes -- the Central Valley grade and the Bakersfield Sound.
@@ -330,6 +528,10 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // being read in Georgia. Redwood country is the far northern end of
         // this run and nowhere else.
         in_states("Redwood country, far off this road: trees taller than your rig is long. Andrew Gabbard wrote one called Redwood.", &["CA", "OR"]),
+        // Landmark attraction -- Seattle's ticketed music museum.
+        approaching("Seattle ahead. The museum of pop culture is the colorful blob by the Needle. Jimi Hendrix is inside; the rain is not.", &["seattle_wa_us"]),
+        // Paying venue -- Buck Owens' Crystal Palace, Bakersfield.
+        in_states("Buck Owens' Crystal Palace is a real room in Bakersfield. The Sound was born here. The freight just passes through.", &["CA"]),
     ]),
     // Song tributes -- the Delta highway: Dyess, Arkansas (Johnny Cash) and
     // the old rail line to New Orleans (Willie Nelson's version).
@@ -343,6 +545,8 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Alabama, Hank Williams's home state. Move It On Over -- he meant the dog, but the left lane applies.", &["AL"]),
         approaching("Birmingham by eight thirty in the morning? It's been done. Andrea and Mud wrote a song about it.", &["birmingham_al_us"]),
         approaching("Nashville ahead, where a songwriter waits ten years for one hit. Curtis Grimes wrote Ten Year Town about the wait.", &["nashville_tn_us"]),
+        // Ticketed Nashville tourism -- Ryman Auditorium.
+        approaching("Nashville, Music City. The Ryman Auditorium is the mother church. Hats off, then back on the interstate.", &["nashville_tn_us"]),
     ]),
     // Song tribute -- Fort Payne, Alabama, hometown of the band Alabama.
     ("I-59", &[
@@ -354,6 +558,10 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         approaching("Detroit City ahead. Bobby Bare sang it for every homesick southerner on the assembly lines up here.", &["detroit_mi_us"]),
         approaching("Saginaw, Michigan, up the interstate. Lefty Frizzell made a fishing town famous. The bay is cold.", &["saginaw_mi_us"]),
         approaching("Macon, Georgia -- the Allman Brothers' town. Southbound never sounded better than it does on this stretch.", &["macon_ga_us"]),
+        // Produce stands -- not See Rock City.
+        in_states("Georgia peaches, next few exits. The stands are real. The claims about whose are best are advertising.", &["GA"]),
+        in_states("Florida citrus, next few exits. The bags are heavy. The claims about fresh are mostly true.", &["FL"]),
+        in_states("Horse country. The Kentucky Horse Park is a real farm with a hall of fame. Your trailer is not invited to the paddock.", &["KY"]),
     ]),
     // Song tributes -- Atlanta owns this corridor: Jerry Reed, Alan Jackson,
     // and Gladys Knight all call it home.
@@ -372,6 +580,8 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Wisconsin made Dave Dudley, and Dave Dudley made Six Days on the Road. Every truck stop jukebox since owes him a quarter.", &["WI"]),
         approaching("Detroit, the Motown assembly line. Marvin Gaye, Stevie Wonder, and no mountain high enough to slow the freight.", &["detroit_mi_us"]),
         approaching("Detroit builds engines, and it built Bob Seger. Night Moves and Turn the Page came off these roads.", &["detroit_mi_us"]),
+        in_states("Wisconsin. Cheese, really good cheese, and a dairy billboard that has been up since your last inspection.", &["WI"]),
+        approaching("Milwaukee ahead. The Harley-Davidson Museum is a real building. The bikes inside are not street-legal, and neither is your trailer in the lobby.", &["milwaukee_wi_us"]),
     ]),
     // I-96 Ionia County / Billy Strings and I-71 Cincinnati / Arlo McKinley
     // were radio memory, not paid boards. Pulled; no replacement songs.
@@ -392,12 +602,15 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     // / Forty-Nine Winchester was radio memory, not a paid board.
     ("I-81", &[
         in_states("Mountain fog ahead is a local specialty. Flatt and Scruggs turned it into the fastest banjo tune ever cut, Foggy Mountain Breakdown. Use low beams in fog.", &["VA", "TN", "WV"]),
+        // Paying museum -- Birthplace of Country Music, Bristol on the state line.
+        in_states("Bristol, on the state line. The Birthplace of Country Music Museum is a real hall. Carter Family country starts here.", &["TN", "VA"]),
     ]),
     // Song tributes -- Kentucky: the bluegrass east (Brit Taylor) and the
     // coalfields (Tennessee Ernie Ford).
     ("I-64", &[
         in_states("Eastern Kentucky, where the grass really does look blue. Brit Taylor wrote Kentucky Blue about home.", &["KY"]),
         in_states("Coal country. Tennessee Ernie Ford counted Sixteen Tons of it and famously came up broke.", &["KY", "WV", "VA"]),
+        approaching("Louisville ahead. They make the bats here. The Louisville Slugger Museum is the giant one you cannot miss.", &["louisville_ky_us"]),
     ]),
     // Song tribute -- Hope, Arkansas (Brennen Leigh).
     ("I-30", &[
@@ -418,6 +631,14 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("West Texas cotton flats made Waylon Jennings. One question -- Are You Sure Hank Done It This Way -- and outlaw country was born.", &["TX"]),
         in_states("Somewhere out there is Lubbock, Texas. Mac Davis kept it in his rear view mirror until he missed it.", &["TX"]),
         approaching("Abilene ahead. George Hamilton the Fourth made the town sound gentle as a Sunday. Watch for crosswinds.", &["abilene_tx_us"]),
+    ]),
+    // Theme-park approach boards on I-4 -- tourism OOH, no Disney slogans.
+    ("I-4", &[
+        approaching("Orlando ahead. The theme parks are off this road and not for freight. Fuel up, look once, keep going.", &["orlando_fl_us"]),
+    ]),
+    // Space Center Houston tourism on I-45.
+    ("I-45", &[
+        approaching("Houston ahead. Space Center Houston is a real room they flew from. The trailer stays on the planet.", &["houston_tx_us"]),
     ]),
 ];
 
@@ -446,6 +667,18 @@ pub const BIG_BUCKS_BILLBOARDS: &[&str] = &[
     "Fudge made fresh this morning. Beaver Bites made fresh this morning. Your diet, made yesterday.",
     // The trucker irony -- sparing, because this is a trucking sim and it stings.
     "Big Buck's ahead. Acres of gleaming fuel islands, and not one of them for you. Drop the trailer and dream.",
+    "Big Buck's. The beaver has a restroom. You have a bladder. Race is on. One hundred twenty miles.",
+    "Kolaches at Big Buck's. You do not know what that is. You will.",
+    "The beaver says the coffee is fresh. The beaver says a lot of things. Eighty miles.",
+    "Big Buck's jerky wall: taller than your trailer is long. One hundred miles. Stretch.",
+    "Cleanest floors in the state. You will take your boots off in the parking lot. You will not.",
+    "Beaver nuggets, beaver soda, beaver everything. Your cardiologist has left the group chat.",
+    "One hundred forty miles to a bathroom you will photograph. Do not photograph it.",
+    "Big Buck's: so many snacks the cart needs a CDL. Next few exits, then a few more.",
+    "The beaver is judging your fuel choice. Diesel is not on the menu. Drop the trailer.",
+    "Big Buck's gift wall. You will buy a shirt. You will wear it ironically. You will mean it.",
+    "Hold it like you mean it. Forty more miles. The beaver believes in you, mostly.",
+    "They have a car wash for cars. They have a dream for you. Big Buck's, keep holding.",
 ];
 
 // Song tributes drawn from the ANYWHERE pool, on any road in the country. The
@@ -506,10 +739,16 @@ fn interstate_number(highway: &str) -> Option<u32> {
 static ROADSIDE: Lazy<Vec<&'static str>> = Lazy::new(|| {
     [
         GENERIC_BILLBOARDS,
+        FIREWORKS_BILLBOARDS,
+        PECAN_BILLBOARDS,
+        ADULT_BILLBOARDS,
         ATTORNEY_BILLBOARDS,
         FAITH_BILLBOARDS,
         ROADSIDE_ODDITIES,
         TRUCKER_SERVICES_BILLBOARDS,
+        REGIONAL_RADIO_BILLBOARDS,
+        TRAVEL_PLAZA_BILLBOARDS,
+        POP_CULTURE_BILLBOARDS,
         META_BILLBOARDS,
     ]
     .into_iter()
@@ -572,10 +811,16 @@ mod tests {
     fn pools() -> Vec<&'static [&'static str]> {
         vec![
             GENERIC_BILLBOARDS,
+            FIREWORKS_BILLBOARDS,
+            PECAN_BILLBOARDS,
+            ADULT_BILLBOARDS,
             ATTORNEY_BILLBOARDS,
             FAITH_BILLBOARDS,
             ROADSIDE_ODDITIES,
             TRUCKER_SERVICES_BILLBOARDS,
+            REGIONAL_RADIO_BILLBOARDS,
+            TRAVEL_PLAZA_BILLBOARDS,
+            POP_CULTURE_BILLBOARDS,
             META_BILLBOARDS,
             SONG_TRIBUTE_BILLBOARDS,
             BIG_BUCKS_BILLBOARDS,
@@ -690,28 +935,72 @@ mod tests {
             "Arkansas",
             "Atlanta",
             "Bakersfield",
+            "casino",
+            "Casino",
             "California",
+            "Cleveland",
             "Georgia",
+            "Graceland",
+            "Hall of Fame",
             "Kansas",
             "Kentucky",
+            "Laredo",
             "Memphis",
             "Michigan",
             "Missouri",
             "Nashville",
             "Nevada",
+            "New Orleans",
             "Oklahoma",
+            "Oklahoma City",
             "Oregon",
+            "Preservation Hall",
+            "Reno",
             "Redwood",
             "Rockies",
+            "Seattle",
+            "Tejano",
             "Tennessee",
             "Texas",
             "Virginia",
             "Wisconsin",
             "Wyoming",
+            "Alamo",
+            "Fiesta",
             "hollers",
             "Interstate",
             "Route Sixty-Six",
             "Wall Drug",
+            "Albuquerque",
+            "Beale Street",
+            "Bristol",
+            "Chicago",
+            "Corn Palace",
+            "Crystal Palace",
+            "Florida",
+            "Fort Worth",
+            "Grand Ole Opry",
+            "Harley-Davidson",
+            "Houston",
+            "Iowa Eighty",
+            "Louisville",
+            "McAllen",
+            "Milwaukee",
+            "Minnesota",
+            "Mitchell",
+            "Orlando",
+            "Oz Museum",
+            "Ryman",
+            "Saint Louis",
+            "Space Center",
+            "Spam Museum",
+            "Wamego",
+            "Gateway Arch",
+            "Blueberry Hill",
+            "Billy Bob",
+            "Birthplace of Country Music",
+            "Kentucky Horse Park",
+            "Cajun",
         ];
         let anywhere: Vec<&str> = roadside_billboards()
             .iter()
@@ -734,7 +1023,7 @@ mod tests {
         // or an empty city list can never match, and a zero window silently
         // retires the sign. Corridor is reserved for lines that name no place,
         // so those are listed explicitly rather than reachable by default.
-        const NAMES_NO_PLACE: &[&str] = &["Bubba's Fireworks", "Have you seen the scenery"];
+        const NAMES_NO_PLACE: &[&str] = &["Have you seen the scenery"];
         for (shield, pool) in CORRIDOR_BILLBOARDS {
             for sign in pool.iter() {
                 match sign.anchor {
@@ -792,7 +1081,7 @@ mod tests {
         assert_eq!(corridor_billboards("Interstate 44"), fctc);
         for shield in [
             "I-35", "I-5", "I-55", "I-65", "I-59", "I-75", "I-85", "I-24", "I-94", "I-77", "I-81",
-            "I-64", "I-30", "I-78", "I-20",
+            "I-64", "I-30", "I-78", "I-20", "I-4", "I-45",
         ] {
             assert!(!corridor_billboards(shield).is_empty(), "{shield}");
         }
@@ -852,6 +1141,58 @@ mod tests {
     }
 
     #[test]
+    fn test_new_genre_and_landmark_lines_stay_on_their_approaches() {
+        let expected: &[(&str, &str, &str)] = &[
+            ("I-15", "Another casino", "las_vegas_nv_us"),
+            ("I-80", "Reno ahead", "reno_nv_us"),
+            ("I-40", "Casino billboards", "oklahoma_city_ok_us"),
+            ("I-35", "Native casino", "oklahoma_city_ok_us"),
+            ("I-44", "Casino lights", "tulsa_ok_us"),
+            ("I-35", "Laredo ahead", "laredo_tx_us"),
+            ("I-35", "Tejano weekend", "san_antonio_tx_us"),
+            ("I-10", "Fiesta in the spring", "san_antonio_tx_us"),
+            ("I-90", "Rock and Roll Hall of Fame", "cleveland_oh_us"),
+            ("I-40", "Graceland", "memphis_tn_us"),
+            ("I-10", "Preservation Hall", "new_orleans_la_us"),
+            ("I-5", "museum of pop culture", "seattle_wa_us"),
+        ];
+        for (shield, phrase, city) in expected {
+            let signs: Vec<_> = corridor_signs(shield)
+                .iter()
+                .filter(|sign| sign.text.contains(phrase))
+                .collect();
+            assert_eq!(signs.len(), 1, "{shield}: {phrase}");
+            match signs[0].anchor {
+                SignAnchor::Approaching { cities, within_mi } => {
+                    assert_eq!(cities, &[*city], "{shield}: {phrase}");
+                    assert_eq!(within_mi, SIGN_APPROACH_MI, "{shield}: {phrase}");
+                }
+                anchor => panic!("{shield}: {phrase} has {anchor:?}, not an approach anchor"),
+            }
+            assert!(!roadside_billboards()
+                .iter()
+                .any(|line| line.contains(phrase)));
+            assert!(!SONG_TRIBUTE_BILLBOARDS
+                .iter()
+                .any(|line| line.contains(phrase)));
+        }
+
+        let reno = corridor_signs("I-80")
+            .iter()
+            .find(|sign| sign.text.contains("Reno ahead"))
+            .unwrap();
+        assert_ne!(reno.anchor, SignAnchor::States(&["NV"]));
+        for shield in ["I-20", "I-40", "I-45", "I-37"] {
+            assert!(
+                corridor_signs(shield)
+                    .iter()
+                    .all(|sign| !sign.text.contains("Tejano")),
+                "{shield} has a Tejano line"
+            );
+        }
+    }
+
+    #[test]
     fn test_pulled_radio_memory_and_jeep_trail_lines_are_gone() {
         // Radio-memory tributes and a Jeep trail are not paid boards. They
         // come out of the catalog entirely -- no rewrite, no clone onto a
@@ -872,6 +1213,55 @@ mod tests {
                 assert!(!line.contains(phrase), "pulled line still live: {line}");
             }
         }
+    }
+
+    #[test]
+    fn test_bubbas_fireworks_stays_in_the_carolinas() {
+        let signs: Vec<_> = corridor_signs("I-95")
+            .iter()
+            .filter(|s| s.text.contains("Bubba's Fireworks"))
+            .collect();
+        assert_eq!(signs.len(), 1);
+        assert_eq!(signs[0].anchor, SignAnchor::States(&["SC", "NC"]));
+    }
+
+    #[test]
+    fn test_big_bucks_pool_is_not_in_the_anywhere_roadside() {
+        for line in BIG_BUCKS_BILLBOARDS {
+            assert!(
+                !roadside_billboards().contains(line),
+                "Big Buck's leaked into anywhere: {line}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_new_paying_attractions_stay_anchored() {
+        let expected: &[(&str, &str)] = &[
+            ("I-90", "Corn Palace"),
+            ("I-90", "Spam Museum"),
+            ("I-80", "Iowa Eighty"),
+            ("I-5", "Crystal Palace"),
+            ("I-81", "Birthplace of Country Music"),
+            ("I-75", "Georgia peaches"),
+            ("I-4", "theme parks are off this road"),
+            ("I-45", "Space Center Houston"),
+            ("I-35", "McAllen ahead"),
+            ("I-35", "Billy Bob's Texas"),
+            ("I-40", "Beale Street"),
+            ("I-40", "Grand Ole Opry"),
+            ("I-65", "Ryman Auditorium"),
+        ];
+        for (shield, phrase) in expected {
+            let signs: Vec<_> = corridor_signs(shield)
+                .iter()
+                .filter(|s| s.text.contains(phrase))
+                .collect();
+            assert_eq!(signs.len(), 1, "{shield}: {phrase}");
+            assert!(!matches!(signs[0].anchor, SignAnchor::Corridor));
+        }
+        assert!(!all_lines().iter().any(|l| l.contains("Rock City")));
+        assert!(!all_lines().iter().any(|l| l.contains("Music Highway")));
     }
 
     #[test]

@@ -38,6 +38,10 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("Boston ahead", &["MA", "NY", "CT", "RI", "NH"]),
     ("Wyoming, Land of the Buffalo", &["WY", "MT", "SD"]),
     ("Idaho panhandle", &["ID", "WA", "MT"]),
+    // I-90 reaches Cleveland from the east through a short New York approach
+    // after Pennsylvania; the standard one-hundred-fifty-mile sign window
+    // can honestly speak there.
+    ("Rock and Roll Hall of Fame", &["OH", "PA", "IN", "NY"]),
     // -- Interstate 95 -----------------------------------------------------
     ("sombrero tower", &["SC", "NC"]),
     ("South of the Border", &["SC", "NC"]),
@@ -52,6 +56,8 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("Biloxi", &["MS", "LA", "AL"]),
     ("El Paso, out past the haze", &["TX", "NM"]),
     ("Big Thicket", &["TX", "LA"]),
+    ("Preservation Hall", &["LA", "MS", "TX", "AL"]),
+    ("The Alamo", &["TX"]),
     // -- Interstate 15 -----------------------------------------------------
     ("Alien jerky", &["CA", "NV"]),
     ("The Mad Greek", &["CA", "NV"]),
@@ -70,6 +76,8 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("caverns ahead", &["MO"]),
     ("Winslow, Arizona", &["AZ", "NM", "CA"]),
     ("Memphis, on down the road", &["TN", "AR", "MS"]),
+    ("Graceland", &["TN", "AR", "MS"]),
+    ("Oklahoma City ahead", &["OK", "TX", "AR", "KS"]),
     ("Muskogee, Oklahoma", &["OK", "AR"]),
     ("Okemah, Oklahoma", &["OK"]),
     ("East Tennessee", &["TN", "NC", "VA"]),
@@ -78,6 +86,8 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("Little America", &["WY", "UT", "NE"]),
     // Otis Redding's dock is the San Francisco bay, not the Humboldt.
     ("Dock of the Bay", &["CA"]),
+    ("Reno ahead", &["NV", "CA"]),
+    ("Biggest Little City", &["NV", "CA"]),
     // -- Interstate 70 -----------------------------------------------------
     ("The Rockies, straight ahead", &["CO", "KS", "UT"]),
     ("Kansas City ahead", &["MO", "KS", "IL"]),
@@ -89,11 +99,14 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("Waco ahead", &["TX"]),
     ("Austin ahead", &["TX"]),
     ("San Antonio, down the road", &["TX"]),
+    ("Laredo ahead", &["TX"]),
+    ("Tejano", &["TX"]),
     ("Flattest stretch in Kansas", &["KS", "OK", "MO", "NE"]),
     // -- Interstate 5 ------------------------------------------------------
     ("Bakersfield Sound", &["CA"]),
     ("The Grapevine", &["CA"]),
     ("Redwood country", &["CA", "OR"]),
+    ("museum of pop culture", &["WA", "OR"]),
     // -- Interstate 55 -----------------------------------------------------
     ("Arkansas Delta", &["AR", "TN", "MO", "MS"]),
     ("old rail line to New Orleans", &["LA", "MS", "TN", "AR"]),
@@ -135,6 +148,31 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("West Texas cotton flats", &["TX", "NM"]),
     ("Lubbock, Texas", &["TX", "NM", "OK"]),
     ("Abilene ahead", &["TX"]),
+    ("Corn Palace", &["SD", "MN"]),
+    ("Spam Museum", &["MN", "WI", "IA", "SD"]),
+    ("Virginia peanuts", &["VA", "NC", "MD"]),
+    ("Cajun country", &["LA", "TX", "MS"]),
+    ("Beale Street", &["TN", "AR", "MS"]),
+    ("Grand Ole Opry", &["TN", "KY", "AL", "AR"]),
+    ("Albuquerque ahead", &["NM", "AZ", "TX"]),
+    ("Iowa Eighty", &["IA", "IL", "NE"]),
+    ("Oz Museum", &["KS", "MO", "CO"]),
+    ("Wamego", &["KS", "MO", "CO"]),
+    ("Gateway Arch", &["MO", "IL", "KS"]),
+    ("Blueberry Hill", &["MO", "IL", "KS"]),
+    ("McAllen ahead", &["TX"]),
+    ("Billy Bob's Texas", &["TX"]),
+    ("kolache country", &["TX"]),
+    ("Crystal Palace", &["CA"]),
+    ("Ryman Auditorium", &["TN", "KY", "AL"]),
+    ("Georgia peaches", &["GA", "FL", "TN", "AL", "SC"]),
+    ("Florida citrus", &["FL", "GA"]),
+    ("Kentucky Horse Park", &["KY", "TN", "OH", "IN"]),
+    ("Harley-Davidson Museum", &["WI", "IL", "MI"]),
+    ("Birthplace of Country Music", &["TN", "VA", "NC", "KY"]),
+    ("Louisville Slugger", &["KY", "IN", "OH"]),
+    ("theme parks are off this road", &["FL", "GA"]),
+    ("Space Center Houston", &["TX", "LA"]),
     // -- the Appalachian hollows -------------------------------------------
     (
         "called hollers",
@@ -585,4 +623,83 @@ fn test_dock_of_the_bay_never_reads_in_nevada() {
         seen_any,
         "the Nevada I-80 run scheduled no billboard at all"
     );
+}
+
+/// Maine and Vermont ban commercial billboards. Pool jokes and corridor ads
+/// must stay silent while the truck is in those states (Scenic America / FHWA).
+#[test]
+fn test_maine_and_vermont_carry_no_commercial_pool_boards() {
+    let world = world();
+    let mut codes = HashMap::new();
+    for city in world.cities.values() {
+        if !city.state.is_empty() && !city.state_code.is_empty() {
+            codes.insert(city.state.clone(), city.state_code.clone());
+        }
+    }
+    let mut saw_ban_state_miles = false;
+    let mut banned_hits = Vec::new();
+    for seed in 1..=24i64 {
+        for (a, b) in [
+            ("miami_fl_us", "portland_me_us"),
+            ("portland_me_us", "miami_fl_us"),
+            ("boston_ma_us", "burlington_vt_us"),
+            ("burlington_vt_us", "boston_ma_us"),
+        ] {
+            if world.route_options(a, b, 3, false).is_err() {
+                continue;
+            }
+            let trip = make_trip_with(world, a, b, TripOptions::seeded(seed));
+            // Probe the route every ten miles so an empty board list cannot
+            // hide a missing state bake.
+            let mut mi = 0.0;
+            while mi < trip.total_miles() {
+                let name = trip.state_at(Some(mi));
+                let code = codes.get(&name).cloned().unwrap_or(name);
+                if code == "ME" || code == "VT" {
+                    saw_ban_state_miles = true;
+                }
+                mi += 10.0;
+            }
+            for callout in &trip.billboards {
+                let name = trip.state_at(Some(callout.at_mi));
+                let code = codes.get(&name).cloned().unwrap_or(name);
+                if code == "ME" || code == "VT" {
+                    banned_hits.push(format!(
+                        "{a}->{b} seed {seed} {code} mile {:.1}: {}",
+                        callout.at_mi, callout.spoken
+                    ));
+                }
+                assert!(
+                    !(code == "ME" && callout.spoken.contains("Bubba's Fireworks")),
+                    "Bubba's fired in Maine on {a}->{b} seed {seed}"
+                );
+            }
+        }
+    }
+    assert!(
+        saw_ban_state_miles,
+        "sweep never entered Maine or Vermont; gate test was vacuous"
+    );
+    assert!(
+        banned_hits.is_empty(),
+        "commercial pool boards spoke in ban states:
+{}",
+        banned_hits.into_iter().take(20).collect::<Vec<_>>().join(
+            "
+"
+        )
+    );
+}
+
+/// Unit-level reminder: the four full-ban states are ME, VT, AK, and HI.
+#[test]
+fn test_ban_state_list_is_the_scenic_america_four() {
+    // Anchored here so a future placer change cannot quietly drop Alaska/Hawaii
+    // from the gate just because the continental sweep rarely reaches them.
+    const BAN: &[&str] = &["ME", "VT", "AK", "HI"];
+    assert_eq!(BAN.len(), 4);
+    assert!(BAN.contains(&"ME"));
+    assert!(BAN.contains(&"VT"));
+    assert!(BAN.contains(&"AK"));
+    assert!(BAN.contains(&"HI"));
 }

@@ -471,6 +471,13 @@ impl Trip {
         let mut used: Vec<&'static str> = Vec::new();
         let mut at = BILLBOARD_LEAD_IN_MI + rng.uniform(0.0, BILLBOARD_MIN_GAP_MI);
         while at < self.total_miles() - 5.0 {
+            // Scenic America / FHWA: ME, VT, AK, and HI opted out of commercial
+            // billboards entirely. Keep the mile cadence but place nothing there
+            // so I-95 Maine cannot carry a joke board.
+            if self.commercial_billboards_banned_at(at) {
+                at += rng.uniform(BILLBOARD_MIN_GAP_MI, BILLBOARD_MAX_GAP_MI);
+                continue;
+            }
             let (leg_i, _) = self.leg_at_mile(at);
             let pool = corridor_signs(&self.route.legs[leg_i].highway);
             let fresh_corridor: Vec<&'static str> = pool
@@ -538,6 +545,15 @@ impl Trip {
                     })
             }
         }
+    }
+
+    /// Maine, Vermont, Alaska, and Hawaii ban commercial billboards (Scenic
+    /// America / FHWA). Pool jokes and corridor ads stay silent there.
+    fn commercial_billboards_banned_at(&self, at: f64) -> bool {
+        matches!(
+            self.state_code_at(at).as_deref(),
+            Some("ME") | Some("VT") | Some("AK") | Some("HI")
+        )
     }
 
     /// The two-letter state code at a trip milepost, or None where the bake is

@@ -14,6 +14,9 @@
 
 ### Added
 
+- **Roadside billboard pools grew without packing the highway.** New jokes, attorney and travel-plaza ads, corridor music landmarks, casino and Tejano approaches, and dated movie/TV promo copy; spacing stays in the same thirty-five to sixty-five mile band and the rare tribute draw rate is unchanged. Anywhere-pool jokes stay silent in Maine, Vermont, Alaska, and Hawaii.
+
+
 - **Career stats opens your citations and violations, newest first.** Each
   says what it was, why, what it cost, when, and where.
 
