@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- **Duff-shared sound cues are N/A for the public-build gate.** They are dropped from the release-blocker list; no replacement work is owed for that audit row.
+
 ### Fixed
 
 - **Estimated-near-city facility pins are labeled estimated so approach miles greater than zero stay honest.** Coverage counts are synced; those pins are not claimed as OSM-matched docks.
