@@ -7736,6 +7736,21 @@
       "miles": 382,
       "stops": [
         {
+          "name": "I-94 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 47.9,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Kwik Trip",
           "type": "travel_center",
           "at_mi": 69.0,
@@ -7757,6 +7772,32 @@
           "lat": 43.6741223,
           "lon": -87.7582814,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 125.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.87065,
+          "lon": -87.94093,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Pilot Travel Center Oak Creek",
@@ -7784,6 +7825,58 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Petro Stopping Centers",
+          "type": "service_plaza",
+          "at_mi": 132.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.77660114645639,
+          "lon": -87.95369079670778,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Kenosha Truck Stop",
+          "type": "service_plaza",
+          "at_mi": 142.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.61533,
+          "lon": -87.94984,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Road Ranger",
@@ -7835,6 +7928,85 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 236.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.57258,
+          "lon": -87.40132,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 263.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.65215,
+          "lon": -86.8959,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "TA Sawyer",
+          "type": "travel_center",
+          "at_mi": 270.4,
+          "source": "TravelCenters of America TA Sawyer, I-94 Exit 12, 155 truck parking spaces: https://www.ta-petro.com/location/mi/ta-sawyer/ Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.72337837978777,
+          "lon": -86.80488110580704
+        },
+        {
           "name": "Pilot Travel Center Benton Harbor",
           "type": "travel_center",
           "at_mi": 301.4,
@@ -7882,21 +8054,6 @@
           ],
           "lat": 42.74123,
           "lon": -86.07075,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "I-94 Weigh Station",
-          "type": "weigh_station",
-          "at_mi": 47.9,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
-          "actions": [
-            "inspect"
-          ],
-          "services": [],
-          "parking": "none",
-          "directions": [
-            "both"
-          ],
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -17757,6 +17914,35 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Pilot Travel Center Oak Creek",
+          "type": "travel_center",
+          "at_mi": 23.6,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 40 in Oak Creek, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/oak-creek/2031-w-ryan-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.8264923264916,
+          "lon": -87.95264856479447
+        },
+        {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
           "at_mi": 30.0,
@@ -22085,6 +22271,76 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "Petro Stopping Centers",
+          "type": "service_plaza",
+          "at_mi": 37.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.72452166154273,
+          "lon": -88.99091943750004,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "I-90 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 46.7,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center Beloit",
+          "type": "travel_center",
+          "at_mi": 52.4,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 289 in Beloit, WI with 55 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/beloit/3001-milwaukee-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.512486709486794,
+          "lon": -88.97899415612892
+        },
+        {
           "name": "Pilot Dealer Belvidere",
           "type": "travel_center",
           "at_mi": 78.5,
@@ -22131,21 +22387,6 @@
           ],
           "lat": 41.83106,
           "lon": -87.69442,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "I-90 Weigh Station",
-          "type": "weigh_station",
-          "at_mi": 46.7,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
-          "actions": [
-            "inspect"
-          ],
-          "services": [],
-          "parking": "none",
-          "directions": [
-            "both"
-          ],
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -23736,6 +23977,61 @@
       "terrain": "flat",
       "stops": [
         {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 13.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.87065,
+          "lon": -87.94093,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center Oak Creek",
+          "type": "travel_center",
+          "at_mi": 17.0,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 40 in Oak Creek, WI with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wi/oak-creek/2031-w-ryan-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.8264923264916,
+          "lon": -87.95264856479447
+        },
+        {
           "name": "Petro Stopping Centers",
           "type": "service_plaza",
           "at_mi": 22.5,
@@ -23757,6 +24053,32 @@
           "lat": 42.72421,
           "lon": -87.95575,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Kenosha Truck Stop",
+          "type": "service_plaza",
+          "at_mi": 31.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.61533,
+          "lon": -87.94984,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Kenosha Safety Rest Area",
@@ -35362,6 +35684,32 @@
           "lat": 44.26151,
           "lon": -88.32484,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Depere Superstore",
+          "type": "service_plaza",
+          "at_mi": 43.9,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 44.45223,
+          "lon": -88.0918896,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -38080,6 +38428,33 @@
           "lat": 44.96307,
           "lon": -89.63944,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Kwik Trip Abbotsford",
+          "type": "truck_stop",
+          "at_mi": 42.9,
+          "source": "Kwik Trip #885, 301 Elderberry Rd, WIS-29 Exit 132, Abbotsford, WI -- 24hr diesel, 5 fuel lanes, 15 truck spaces, CAT scales, showers and truckers lounge midway on WIS-29; accessed 2026-07-03: https://www.truckstopsandservices.com/location_details.php?id=47754 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 44.94377017611447,
+          "lon": -90.4776054347661
         },
         {
           "name": "Kwik Trip",

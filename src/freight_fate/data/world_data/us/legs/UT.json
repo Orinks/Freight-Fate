@@ -1515,6 +1515,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "TA Travel Center",
+          "type": "service_plaza",
+          "at_mi": 19.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.849408547573546,
+          "lon": -112.84350769276755,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Lunt Park South Rest Area",
           "type": "public_rest_area",
           "at_mi": 28.5,
@@ -1534,6 +1560,34 @@
           "lon": -112.73793,
           "parking_spaces": 20,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "ONE9 Dealer Parowan",
+          "type": "travel_center",
+          "at_mi": 35.1,
+          "source": "Pilot Flying J official locator lists ONE9 Dealer store 1480 in Parowan, UT with 15 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ut/parowan/30-w-800-north Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.05015768541782,
+          "lon": -112.70126639138213
         },
         {
           "name": "Flying J - Beaver",
@@ -9194,6 +9248,29 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "Crescent Junction Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 32.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 38.93795,
+          "lon": -109.82783,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Eagles Landing Travel Plaza",
           "type": "service_plaza",
           "at_mi": 51.0,
@@ -10201,6 +10278,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Shell Truck Lanes",
+          "type": "travel_center",
+          "at_mi": 9.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.82228,
+          "lon": -111.83597,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Maverik",
           "type": "fuel_station",
           "at_mi": 20.5,
@@ -10219,6 +10322,58 @@
           "lat": 39.97599,
           "lon": -111.76978,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Love's Diesel Lanes",
+          "type": "travel_center",
+          "at_mi": 35.9,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.1629727,
+          "lon": -111.6518549,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flying J Truck Lanes",
+          "type": "travel_center",
+          "at_mi": 37.4,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the provo_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.18715,
+          "lon": -111.64126,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -11900,6 +12055,84 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 17.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.439640034161954,
+          "lon": -112.05674687880749,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Love's Travel Stop Brigham City",
+          "type": "travel_center",
+          "at_mi": 23.9,
+          "source": "Love's official store feed lists store 686 in Brigham City, UT on I-15, exit 363; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.530380515826,
+          "lon": -112.06562256395003
+        },
+        {
+          "name": "Brigham (SB)",
+          "type": "public_rest_area",
+          "at_mi": 25.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Brigham (SB) on I-15 in Brigham City, UT with 12 truck parking spaces, mile post 367; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.55540374707836,
+          "lon": -112.06904641941142
+        },
+        {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
           "at_mi": 25.8,
@@ -11923,6 +12156,55 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Cherry Creek Rest Area, I-15 Northbound",
+          "type": "public_rest_area",
+          "at_mi": 66.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 42.10048,
+          "lon": -112.21503,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flags West Truck Stop",
+          "type": "service_plaza",
+          "at_mi": 90.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.4297205,
+          "lon": -112.1782566,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Flying J Travel Center",
           "type": "service_plaza",
           "at_mi": 103.2,
@@ -11944,6 +12226,35 @@
           "lat": 42.65993,
           "lon": -112.20649,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Flying J Travel Center McCammon",
+          "type": "travel_center",
+          "at_mi": 108.0,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 641 in McCammon, ID with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (2.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/id/mccammon/587-e-us-30 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.68312928798068,
+          "lon": -112.21811895283284
         }
       ],
       "divided": true,
@@ -12025,6 +12336,107 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Flying J Truck Lanes",
+          "type": "travel_center",
+          "at_mi": 94.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.4239815,
+          "lon": -112.0517075,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 99.9,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.5087867,
+          "lon": -112.0545176,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Brigham City Welcome Center, I-15 Southbound",
+          "type": "public_rest_area",
+          "at_mi": 103.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 41.55287,
+          "lon": -112.07005,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 150.9,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.9633407,
+          "lon": -112.7095501,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Flying J Travel Center Snowville",
           "type": "travel_center",
           "at_mi": 152.0,
@@ -12071,6 +12483,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 223.6,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.5649976,
+          "lon": -113.7406865,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Love's Travel Stop Heyburn",
           "type": "travel_center",
           "at_mi": 224.0,
@@ -12097,6 +12535,86 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Love's Travel Stop Heyburn",
+          "type": "travel_center",
+          "at_mi": 246.9,
+          "source": "Love's official store feed lists store 334 in Heyburn, ID on I-84, exit 211/US Hwy-30; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.57604790645402,
+          "lon": -114.19170954769783
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 259.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.628262409564776,
+          "lon": -114.40593634500793,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Mr. Gas",
+          "type": "service_plaza",
+          "at_mi": 268.7,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.7228062,
+          "lon": -114.5420893,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
           "at_mi": 294.5,
@@ -12118,6 +12636,58 @@
           "lat": 42.9252542,
           "lon": -114.9398455,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop Bliss",
+          "type": "travel_center",
+          "at_mi": 297.3,
+          "source": "Love's official store feed lists store 812 in Bliss, ID on I-84, exit 141/US Hwy 30; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.6 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.93792883847231,
+          "lon": -114.99538665958237
+        },
+        {
+          "name": "Bliss W",
+          "type": "public_rest_area",
+          "at_mi": 301.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Bliss W on I-84W in Mellon Valley, ID with 49 truck parking spaces, mile post 133; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.93892256938626,
+          "lon": -115.07103440171676
         },
         {
           "name": "Bliss Rest Area, I-84 Eastbound",
@@ -12160,6 +12730,58 @@
           "lat": 43.1419207,
           "lon": -115.6634536,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Mr Gas Travel Center",
+          "type": "service_plaza",
+          "at_mi": 375.6,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.5112243,
+          "lon": -116.147536,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 380.7,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the boise_id_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.57118,
+          "lon": -116.1895,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "TA Travel Center",
@@ -19673,6 +20295,109 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Shell Truck Lanes",
+          "type": "travel_center",
+          "at_mi": 32.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.82228,
+          "lon": -111.83597,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 42.2,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nephi_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.68564,
+          "lon": -111.83629,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flying J Dealer Scipio",
+          "type": "travel_center",
+          "at_mi": 69.9,
+          "source": "Pilot Flying J official locator lists Flying J Dealer store 510 in Scipio, UT with 35 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ut/scipio/810-n-800-w-st Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.348283974288094,
+          "lon": -112.0804214705294
+        },
+        {
+          "name": "Eagles Landing Flying J Diesel Lanes",
+          "type": "fuel_station",
+          "at_mi": 76.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ],
+          "lat": 39.25566,
+          "lon": -112.11611,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Love's",
           "type": "travel_center",
           "at_mi": 104.0,
@@ -19717,6 +20442,84 @@
           "lat": 38.29244,
           "lon": -112.65283,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "ONE9 Dealer Parowan",
+          "type": "travel_center",
+          "at_mi": 172.5,
+          "source": "Pilot Flying J official locator lists ONE9 Dealer store 1480 in Parowan, UT with 15 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ut/parowan/30-w-800-north Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.05015768541782,
+          "lon": -112.70126639138213
+        },
+        {
+          "name": "Lunt Park South Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 177.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Lunt Park (NB) with 20 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 37.98253,
+          "lon": -112.73793,
+          "parking_spaces": 20,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "TA Travel Center",
+          "type": "service_plaza",
+          "at_mi": 188.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.849408547573546,
+          "lon": -112.84350769276755,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Love's Travel Stop",
@@ -19775,6 +20578,60 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Echo Canyon (EB)",
+          "type": "public_rest_area",
+          "at_mi": 68.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Echo Canyon (EB) on I-80 in Echo, UT with 5 truck parking spaces, mile post 169; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.5 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 22,
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.99780543830506,
+          "lon": -111.39376183001151
+        },
+        {
+          "name": "Pilot Travel Center Evanston",
+          "type": "travel_center",
+          "at_mi": 100.4,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 141 in Evanston, WY with 75 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (7.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/evanston/289-bear-river-dr Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.268163855445486,
+          "lon": -110.94113426495075
+        },
+        {
           "name": "Flying J Travel Center",
           "type": "service_plaza",
           "at_mi": 100.9,
@@ -19794,6 +20651,83 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "TA Travel Center",
+          "type": "service_plaza",
+          "at_mi": 126.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.32376963028903,
+          "lon": -110.47503888105355,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "North Lyman Rest area",
+          "type": "public_rest_area",
+          "at_mi": 138.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists North Lyman Rest area on I-80 in NA, WY with 8 truck parking spaces, mile post Exit 41; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.37444604418816,
+          "lon": -110.2472019049729
+        },
+        {
+          "name": "Little America's Fuel Center",
+          "type": "truck_stop",
+          "source": "OSM name via public Overpass (kumi.systems) 2026-09-16: node 4772016826 amenity=fuel name=\"Little America's Fuel Center\" fuel:HGV_diesel=yes @ 41.54442,-109.85551; I-80 Exit 68, Little America WY; official travel center https://wyoming.littleamerica.com/travel-center/ (6945 WY-374, Little America, WY 82929); Rocky Mountain Truck Centers on site Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "at_mi": 163.5,
+          "lat": 41.54248607128219,
+          "lon": -109.84776108976962
         },
         {
           "name": "Love's Travel Stop",
@@ -19842,6 +20776,34 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Flying J Travel Center Rock Springs",
+          "type": "travel_center",
+          "at_mi": 206.7,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 764 in Rock Springs, WY with 84 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (4.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rock-springs/650-stagecoach-blvd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.61840335751317,
+          "lon": -109.11433065386703
+        },
+        {
           "name": "Bitter Creek Rest Area (westbound)",
           "type": "public_rest_area",
           "at_mi": 235.5,
@@ -19883,6 +20845,31 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Turnout westbound",
+          "type": "public_rest_area",
+          "at_mi": 283.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Turnout westbound on I-80 in NA, WY with 16 truck parking spaces, mile post MM 190; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 16,
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.733832999649955,
+          "lon": -107.7034983153973
+        },
+        {
           "name": "Flying J Travel Center Rawlins",
           "type": "travel_center",
           "at_mi": 303.6,
@@ -19910,6 +20897,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 304.1,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.7790087,
+          "lon": -107.3088341,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "TA",
           "type": "service_plaza",
           "at_mi": 308.0,
@@ -19931,6 +20944,35 @@
           "lat": 41.7749043,
           "lon": -107.2239957,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Flying J Travel Center Rawlins",
+          "type": "travel_center",
+          "at_mi": 313.8,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 763 in Rawlins, WY with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (5.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/wy/rawlins/i-80-johnson-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.77941486298721,
+          "lon": -107.1250208015573
         },
         {
           "name": "Fort Steele Rest Area",
@@ -19973,6 +21015,32 @@
           "lon": -106.2852736,
           "vehicle_access": "tractor_trailer",
           "parking_spaces": 25
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 404.6,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the laramie_wy_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.32702,
+          "lon": -105.61119,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         }
       ],
       "corridor": {
@@ -27988,6 +29056,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Love's Diesel Lanes",
+          "type": "travel_center",
+          "at_mi": 5.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.1629727,
+          "lon": -111.6518549,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Shell Truck Lanes",
           "type": "travel_center",
           "at_mi": 29.0,
@@ -28009,6 +29103,60 @@
           "lat": 39.82228,
           "lon": -111.83597,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 42.4,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nephi_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.68564,
+          "lon": -111.83629,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flying J Dealer Scipio",
+          "type": "travel_center",
+          "at_mi": 70.0,
+          "source": "Pilot Flying J official locator lists Flying J Dealer store 510 in Scipio, UT with 35 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ut/scipio/810-n-800-w-st Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.348283974288094,
+          "lon": -112.0804214705294
         },
         {
           "name": "Eagles Landing Flying J Diesel Lanes",
@@ -28073,6 +29221,34 @@
           "lat": 38.2924375,
           "lon": -112.6528327,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "ONE9 Dealer Parowan",
+          "type": "travel_center",
+          "at_mi": 172.5,
+          "source": "Pilot Flying J official locator lists ONE9 Dealer store 1480 in Parowan, UT with 15 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ut/parowan/30-w-800-north Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.05015768541782,
+          "lon": -112.70126639138213
         },
         {
           "name": "Lunt Park South Rest Area",
@@ -35051,6 +36227,34 @@
           "lat": 39.25566,
           "lon": -112.11611,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Flying J Dealer Scipio",
+          "type": "travel_center",
+          "at_mi": 48.8,
+          "source": "Pilot Flying J official locator lists Flying J Dealer store 510 in Scipio, UT with 35 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ut/scipio/810-n-800-w-st Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.348283974288094,
+          "lon": -112.0804214705294
         },
         {
           "name": "Flying J Truck Lanes",
@@ -42199,6 +43403,110 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Flying J Truck Lanes",
+          "type": "travel_center",
+          "at_mi": 47.5,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the provo_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.18715,
+          "lon": -111.64126,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Love's Diesel Lanes",
+          "type": "travel_center",
+          "at_mi": 49.1,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.1629727,
+          "lon": -111.6518549,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Shell Truck Lanes",
+          "type": "travel_center",
+          "at_mi": 75.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.82228,
+          "lon": -111.83597,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 85.8,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the nephi_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.68564,
+          "lon": -111.83629,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Flying J Dealer Scipio",
           "type": "travel_center",
           "at_mi": 113.5,
@@ -42223,6 +43531,29 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Eagles Landing Flying J Diesel Lanes",
+          "type": "fuel_station",
+          "at_mi": 120.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ],
+          "lat": 39.25566,
+          "lon": -112.11611,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Love's",
@@ -42295,6 +43626,56 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Lunt Park South Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 220.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Lunt Park (NB) with 20 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 37.98253,
+          "lon": -112.73793,
+          "parking_spaces": 20,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "TA Travel Center",
+          "type": "service_plaza",
+          "at_mi": 231.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.849408547573546,
+          "lon": -112.84350769276755,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Love's Travel Stop",
@@ -43446,6 +44827,32 @@
       },
       "stops": [
         {
+          "name": "Sapp Brothers Travel Center",
+          "type": "service_plaza",
+          "at_mi": 1.2,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the salt_lake_city_ut_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.76055342139028,
+          "lon": -111.90967348982,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Flying J Travel Center",
           "type": "service_plaza",
           "at_mi": 10.0,
@@ -43467,6 +44874,52 @@
           "lat": 40.83584,
           "lon": -111.93358,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Flying J",
+          "type": "fuel_station",
+          "at_mi": 27.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.11724923496724,
+          "lon": -111.90892112462916,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Weber Canyon Rest Area, I-84 Eastbound",
+          "type": "public_rest_area",
+          "at_mi": 27.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.129109167240905,
+          "lon": -111.90864663147447,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "ONE9 Travel Center",

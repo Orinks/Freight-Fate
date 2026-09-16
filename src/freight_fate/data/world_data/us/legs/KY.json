@@ -18577,6 +18577,33 @@
       },
       "stops": [
         {
+          "name": "Love's Travel Stop Memphis",
+          "type": "travel_center",
+          "at_mi": 13.2,
+          "source": "Love's official Memphis, Indiana location page lists I-65 Exit 16 and truck parking; at_mi estimated from Indiana I-65 exit distance south of Indianapolis, accessed 2026-06-17: https://www.loves.com/locations/in/memphis/loves-travel-stop-memphis-355 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.435445846700034,
+          "lon": -85.76518251861644
+        },
+        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 18.0,
@@ -19730,6 +19757,58 @@
           "lat": 37.9801,
           "lon": -85.69456,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 30.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.84269137158655,
+          "lon": -85.71597564211321,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 32.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.82191311918584,
+          "lon": -85.73372777451286,
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -28950,6 +29029,32 @@
           "lat": 37.05087,
           "lon": -88.65298,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 75.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.249616024745734,
+          "lon": -87.44982548353565,
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": false,

@@ -1291,6 +1291,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Casey's Truck Stop",
+          "type": "service_plaza",
+          "at_mi": 30.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.43149887690661,
+          "lon": -93.57020932449626,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "I-35 Dows Rest Stop",
           "type": "public_rest_area",
           "at_mi": 45.5,
@@ -1309,6 +1335,34 @@
           "lat": 42.67191,
           "lon": -93.46077,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop Ellsworth",
+          "type": "travel_center",
+          "at_mi": 65.1,
+          "source": "Love's official store feed lists store 684 in Ellsworth, IA on I-35, exit 133/IA Hwy-175; at_mi estimated by projecting source coordinates onto checked-in route geometry (6.4 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.88309564017818,
+          "lon": -93.35065141589834
         }
       ],
       "divided": true,
@@ -3809,6 +3863,32 @@
           "lat": 41.66117,
           "lon": -91.25075,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 68.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.61451,
+          "lon": -90.78219,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         }
       ],
       "corridor": {
@@ -5369,6 +5449,32 @@
       "highway": "US-30",
       "miles": 122,
       "stops": [
+        {
+          "name": "Meskwaki Travel Plaza",
+          "type": "travel_center",
+          "at_mi": 58.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.99884,
+          "lon": -92.67441,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
         {
           "name": "Kwik Star",
           "type": "fuel_station",
@@ -13317,6 +13423,58 @@
           "lat": 41.691,
           "lon": -92.06721,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "BP",
+          "type": "travel_center",
+          "at_mi": 127.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.66117,
+          "lon": -91.25075,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 152.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.61451,
+          "lon": -90.78219,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Iowa 80 Truckstop",
@@ -22364,6 +22522,35 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Flying J Dealer Avoca",
+          "type": "travel_center",
+          "at_mi": 91.7,
+          "source": "Pilot Flying J official locator lists Flying J Dealer store 893 in Avoca, IA with 200 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.7 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ia/avoca/7005-n-chestnut-st Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.49752455050422,
+          "lon": -95.35233149368861
+        },
+        {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
           "at_mi": 98.0,
@@ -28342,6 +28529,33 @@
           "lat": 41.691,
           "lon": -92.06721,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Love's Travel Stop Newton",
+          "type": "travel_center",
+          "at_mi": 80.6,
+          "source": "Love's Travel Stop Newton official location page, I-80 Exit 168, lists truck-service amenities: https://www.loves.com/locations/ia/newton/loves-travel-stop-newton-361 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking": "confirmed",
+          "directions": [
+            "both"
+          ],
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.68364028683047,
+          "lon": -93.05469203009093
         }
       ],
       "divided": true,
@@ -34170,6 +34384,32 @@
         }
       },
       "stops": [
+        {
+          "name": "Coffee Cub Travel Plaza - TA Express",
+          "type": "service_plaza",
+          "at_mi": 34.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.82929217611174,
+          "lon": -96.79611988874747,
+          "directions": [
+            "both"
+          ]
+        },
         {
           "name": "Love's Travel Stop",
           "type": "travel_center",

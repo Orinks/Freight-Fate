@@ -5443,6 +5443,82 @@
       },
       "stops": [
         {
+          "name": "I-90W truck parking near White Lake",
+          "type": "public_rest_area",
+          "at_mi": 32.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-90W truck parking near White Lake on I-90W in White Lake, SD with 9 truck parking spaces, mile post 301; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.4 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 9,
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.70854809960356,
+          "lon": -98.6520989776728
+        },
+        {
+          "name": "Love's",
+          "type": "travel_center",
+          "at_mi": 48.3,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.7365664,
+          "lon": -98.9565376,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "I-90W truck parking near Presho",
+          "type": "public_rest_area",
+          "at_mi": 113.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-90W truck parking near Presho on I-90W in Presho, SD with 13 truck parking spaces, mile post 221; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 13,
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.90468627766772,
+          "lon": -100.16873006951874
+        },
+        {
           "name": "I-90E truck parking near Presho",
           "type": "public_rest_area",
           "at_mi": 114.6,
@@ -5487,6 +5563,30 @@
           "lat": 43.8861261,
           "lon": -100.70499,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-90W truck parking near Cactus Flats",
+          "type": "public_rest_area",
+          "at_mi": 196.1,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-90W truck parking near Cactus Flats on I-90W in Cactus Flats, SD with 10 truck parking spaces, mile post 137; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.83612292807733,
+          "lon": -101.78745473420965
         },
         {
           "name": "Wall Drug",
@@ -16765,6 +16865,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 6.8,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 44.1034616,
+          "lon": -103.1493874,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
           "at_mi": 10.0,
@@ -16856,6 +16982,31 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "I-90E truck parking near Presho",
+          "type": "public_rest_area",
+          "at_mi": 163.6,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-90E truck parking near Presho on I-90E in Presho, SD with 16 truck parking spaces, mile post 218; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 16,
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.91248928553491,
+          "lon": -100.19111647710753
+        },
+        {
           "name": "I-90W truck parking near Presho",
           "type": "public_rest_area",
           "at_mi": 164.9,
@@ -16923,6 +17074,29 @@
           "curation": "curated",
           "parking_spaces": 9,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Salem Rest Area Eastbound",
+          "type": "public_rest_area",
+          "at_mi": 308.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 43.66586,
+          "lon": -97.42355,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -24733,6 +24907,34 @@
       },
       "stops": [
         {
+          "name": "Love's Travel Stop",
+          "type": "travel_center",
+          "at_mi": 50.9,
+          "source": "Real-world I-29/I-80 travel center, verified against operator/truck-stop directory listings (development-time); curated into a gameplay POI. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "showers",
+            "scale"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.83955650207157,
+          "lon": -96.79587349194709,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Coffee Cub Travel Plaza - TA Express",
           "type": "service_plaza",
           "at_mi": 51.7,
@@ -24807,6 +25009,21 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "I-29 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 100.8,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Pilot",
           "type": "fuel_station",
           "at_mi": 180.0,
@@ -24824,21 +25041,6 @@
           ],
           "lat": 41.23562,
           "lon": -95.87878,
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "I-29 Weigh Station",
-          "type": "weigh_station",
-          "at_mi": 100.8,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
-          "actions": [
-            "inspect"
-          ],
-          "services": [],
-          "parking": "none",
-          "directions": [
-            "both"
-          ],
           "vehicle_access": "tractor_trailer"
         }
       ],

@@ -5845,6 +5845,44 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "I-70 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 23.9,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Truck Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 36.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.370389241188654,
+          "lon": -77.20485415234579,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "South Mountain Welcome Center",
           "type": "public_rest_area",
           "at_mi": 61.8,
@@ -5861,6 +5899,32 @@
             "restrooms"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 76.2,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the hagerstown_md_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.62906,
+          "lon": -77.78268,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Pilot Travel Center Hagerstown",
@@ -5958,21 +6022,6 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "I-70 Weigh Station",
-          "type": "weigh_station",
-          "at_mi": 23.9,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
-          "actions": [
-            "inspect"
-          ],
-          "services": [],
-          "parking": "none",
-          "directions": [
-            "both"
-          ],
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -15713,6 +15762,29 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "South Mountain Welcome Center",
+          "type": "public_rest_area",
+          "at_mi": 12.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.51568926651509,
+          "lon": -77.5964370851799,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Truck Rest Area",
           "type": "public_rest_area",
           "at_mi": 37.5,
@@ -17434,6 +17506,32 @@
             "scale"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Petro Stopping Centers",
+          "type": "service_plaza",
+          "at_mi": 58.2,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the carlisle_pa_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.23098,
+          "lon": -77.14084,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,

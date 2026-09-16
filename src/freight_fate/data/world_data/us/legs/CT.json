@@ -1624,6 +1624,32 @@
           "lat": 41.59223,
           "lon": -73.1076,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "TA Travel Center",
+          "type": "service_plaza",
+          "at_mi": 37.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.56517,
+          "lon": -72.90972,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -4596,6 +4622,33 @@
       },
       "stops": [
         {
+          "name": "Madison Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 15.3,
+          "source": "Connecticut Service Plazas official corridor listing for I-95 Madison services, accessed 2026-06-16: https://ctserviceplazas.com/ Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.57402176675936,
+          "lon": -72.72124856450802
+        },
+        {
           "name": "Rest Area CT-15 (South Bound)",
           "type": "service_plaza",
           "at_mi": 27.7,
@@ -4642,6 +4695,102 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot",
+          "type": "travel_center",
+          "at_mi": 46.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.23658,
+          "lon": -73.02254,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Rest Area CT-15 (South Bound)",
+          "type": "public_rest_area",
+          "at_mi": 48.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.23750129190995,
+          "lon": -73.05789062135072,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "RT. 15 New Canaan NB Service Plaza",
+          "type": "public_rest_area",
+          "at_mi": 69.7,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.114163830601974,
+          "lon": -73.38941855478744,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "CT Service Plaza- Darien SB",
+          "type": "public_rest_area",
+          "at_mi": 73.0,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists CT Service Plaza- Darien SB on I-95S in Darien, CT with 70 truck parking spaces, mile post 10; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.09743804329619,
+          "lon": -73.44210161049223
         }
       ],
       "divided": true,
@@ -7322,6 +7471,61 @@
       },
       "stops": [
         {
+          "name": "Pilot Travel Center Milford",
+          "type": "travel_center",
+          "at_mi": 3.6,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.283304465378514,
+          "lon": -72.95185740834604
+        },
+        {
+          "name": "Pilot",
+          "type": "travel_center",
+          "at_mi": 8.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.23658,
+          "lon": -73.02254,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Rest Area CT-15 (South Bound)",
           "type": "public_rest_area",
           "at_mi": 10.5,
@@ -8527,6 +8731,29 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Wallingford Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 15.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.47763785221052,
+          "lon": -72.7714217698114,
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -10654,6 +10881,107 @@
         }
       },
       "stops": [
+        {
+          "name": "Pilot Travel Center Milford",
+          "type": "travel_center",
+          "at_mi": 3.6,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.283304465378514,
+          "lon": -72.95185740834604
+        },
+        {
+          "name": "Pilot",
+          "type": "travel_center",
+          "at_mi": 8.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.23658,
+          "lon": -73.02254,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Rest Area CT-15 (South Bound)",
+          "type": "public_rest_area",
+          "at_mi": 10.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.23750129190995,
+          "lon": -73.05789062135072,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "RT. 15 New Canaan NB Service Plaza",
+          "type": "public_rest_area",
+          "at_mi": 31.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.114163830601974,
+          "lon": -73.38941855478744,
+          "directions": [
+            "both"
+          ]
+        },
         {
           "name": "CT Service Plaza- Darien SB",
           "type": "public_rest_area",

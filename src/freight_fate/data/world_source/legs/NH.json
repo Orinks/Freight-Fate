@@ -14326,6 +14326,56 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Irving",
+          "type": "travel_center",
+          "at_mi": 5.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.12883031856879,
+          "lon": -70.71855423880714,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "I-95 truck parking near Kittery",
+          "type": "public_rest_area",
+          "at_mi": 6.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95 truck parking near Kittery on I-95 N in Kittery, ME with 75 truck parking spaces, mile post NA; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.6 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.1424752637352,
+          "lon": -70.69550122807563
+        },
+        {
           "name": "I-95 truck parking near Kennebunk",
           "type": "public_rest_area",
           "at_mi": 27.2,
@@ -14347,6 +14397,32 @@
           "curation": "curated",
           "parking_spaces": 40,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Kennebunk Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 27.4,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.410105,
+          "lon": -70.5588919,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,

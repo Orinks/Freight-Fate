@@ -6149,6 +6149,29 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "South Mountain Welcome Center",
+          "type": "public_rest_area",
+          "at_mi": 60.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.51568926651509,
+          "lon": -77.5964370851799,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 71.0,
@@ -9236,6 +9259,31 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-95N truck parking near Lower Chichester",
+          "type": "public_rest_area",
+          "at_mi": 123.8,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-95N truck parking near Lower Chichester on I-95N in Lower Chichester, PA with 11 truck parking spaces, mile post 1; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 11,
+          "vehicle_access": "tractor_trailer",
+          "lat": 39.82393390995607,
+          "lon": -75.43929302007572
         }
       ],
       "divided": true,

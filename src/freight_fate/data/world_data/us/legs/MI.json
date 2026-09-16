@@ -1151,6 +1151,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "TA Travel Center",
+          "type": "service_plaza",
+          "at_mi": 70.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.10695,
+          "lon": -84.98905,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "truck parking",
           "type": "truck_parking",
           "at_mi": 87.6,
@@ -3495,6 +3521,90 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "I-96E truck parking near Oak Grove",
+          "type": "public_rest_area",
+          "at_mi": 31.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-96E truck parking near Oak Grove on I-96E in Oak Grove, MI with 21 truck parking spaces, mile post 135; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.60695375139988,
+          "lon": -83.96654878447177
+        },
+        {
+          "name": "truck parking",
+          "type": "truck_parking",
+          "at_mi": 32.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.61912671245196,
+          "lon": -83.99587486020376,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "I-96 Weigh Station (mile 40)",
+          "type": "weigh_station",
+          "at_mi": 39.9,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Okemos Rest Area 811",
+          "type": "public_rest_area",
+          "at_mi": 52.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.67024448371126,
+          "lon": -84.36175503496561,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Flying J Travel Center",
           "type": "service_plaza",
           "at_mi": 79.8,
@@ -3518,6 +3628,72 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "truck parking",
+          "type": "truck_parking",
+          "at_mi": 86.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "lat": 42.84887,
+          "lon": -84.85476,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "I-96 Weigh Station (mile 96)",
+          "type": "weigh_station",
+          "at_mi": 96.1,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "ONE9 Travel Center Ionia",
+          "type": "travel_center",
+          "at_mi": 99.0,
+          "source": "Pilot Flying J official locator lists ONE9 Travel Center store 23 in Ionia, MI with 20 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.8 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/ionia/7205-s-state-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.879058661825795,
+          "lon": -85.0832549575987
+        },
+        {
           "name": "Saranac Rest Area 532",
           "type": "public_rest_area",
           "at_mi": 106.4,
@@ -3532,36 +3708,6 @@
           "services": [
             "parking",
             "restrooms"
-          ],
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "I-96 Weigh Station (mile 40)",
-          "type": "weigh_station",
-          "at_mi": 39.9,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
-          "actions": [
-            "inspect"
-          ],
-          "services": [],
-          "parking": "none",
-          "directions": [
-            "both"
-          ],
-          "vehicle_access": "tractor_trailer"
-        },
-        {
-          "name": "I-96 Weigh Station (mile 96)",
-          "type": "weigh_station",
-          "at_mi": 96.1,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
-          "actions": [
-            "inspect"
-          ],
-          "services": [],
-          "parking": "none",
-          "directions": [
-            "both"
           ],
           "vehicle_access": "tractor_trailer"
         }
@@ -5670,6 +5816,52 @@
         {
           "name": "truck parking",
           "type": "truck_parking",
+          "at_mi": 26.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.57868953571671,
+          "lon": -83.8894251190557,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "I-96E truck parking near Oak Grove",
+          "type": "public_rest_area",
+          "at_mi": 31.2,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-96E truck parking near Oak Grove on I-96E in Oak Grove, MI with 21 truck parking spaces, mile post 135; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.60695375139988,
+          "lon": -83.96654878447177
+        },
+        {
+          "name": "truck parking",
+          "type": "truck_parking",
           "at_mi": 33.0,
           "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
           "parking": "limited",
@@ -5698,6 +5890,29 @@
             "both"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Okemos Rest Area 811",
+          "type": "public_rest_area",
+          "at_mi": 52.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.67024448371126,
+          "lon": -84.36175503496561,
+          "directions": [
+            "both"
+          ]
         }
       ],
       "corridor": {
@@ -8883,6 +9098,52 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Chelsea Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 57.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.2947424728084,
+          "lon": -84.02102953784609,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Grass Lake Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 69.7,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.290729679133584,
+          "lon": -84.26517205673758,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "The 115 Truck Stop",
           "type": "truck_parking",
           "at_mi": 100.0,
@@ -8900,6 +9161,58 @@
           "lat": 42.2847297,
           "lon": -84.8637786,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 104.1,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.2793966,
+          "lon": -84.9306198,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 112.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.30304,
+          "lon": -85.08257,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Pilot Travel Center Battle Creek",
@@ -8925,6 +9238,35 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center Benton Harbor",
+          "type": "travel_center",
+          "at_mi": 186.4,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 666 in Benton Harbor, MI with 135 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/benton-harbor/1860-e-napier-ave Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.06744300917311,
+          "lon": -86.43871848631544
         },
         {
           "name": "TA Sawyer",
@@ -15301,6 +15643,34 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Love's Travel Stop Frenchtown",
+          "type": "travel_center",
+          "at_mi": 32.9,
+          "source": "Love's official store feed lists store 645 in Frenchtown, MI on I-75, exit 18/Nadeau Rd; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.97255486406573,
+          "lon": -83.34357089033355
+        },
+        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 42.0,
@@ -15320,6 +15690,29 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Monroe Welcome Center 823",
+          "type": "public_rest_area",
+          "at_mi": 43.4,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.833953949303975,
+          "lon": -83.42671538392497,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Erie Islands Service Plaza",
@@ -16563,6 +16956,64 @@
       },
       "stops": [
         {
+          "name": "Flying J Travel Center Woodhaven",
+          "type": "travel_center",
+          "at_mi": 15.8,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 895 in Woodhaven, MI with 254 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/woodhaven/21055-west-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.199799425892586,
+          "lon": -83.23829074188153
+        },
+        {
+          "name": "Pilot Travel Center Monroe",
+          "type": "travel_center",
+          "at_mi": 31.1,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 24 in Monroe, MI with 20 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mi/monroe/1100-n-dixie-hwy Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.999794246332556,
+          "lon": -83.31958009279177
+        },
+        {
           "name": "Love's Travel Stop Frenchtown",
           "type": "travel_center",
           "at_mi": 33.3,
@@ -16587,6 +17038,32 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 42.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.85400057969249,
+          "lon": -83.41299550011807,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Monroe Welcome Center 823",
@@ -28465,6 +28942,29 @@
       },
       "stops": [
         {
+          "name": "Saranac Rest Area 532",
+          "type": "public_rest_area",
+          "at_mi": 26.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.87933730007343,
+          "lon": -85.22781315173019,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "ONE9 Travel Center Ionia",
           "type": "travel_center",
           "at_mi": 33.8,
@@ -28490,6 +28990,69 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-96 Weigh Station (mile 37)",
+          "type": "weigh_station",
+          "at_mi": 36.7,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "truck parking",
+          "type": "truck_parking",
+          "at_mi": 45.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "lat": 42.84887,
+          "lon": -84.85476,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 56.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.78792,
+          "lon": -84.67796,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Flying J Travel Center Grand Ledge",
@@ -28537,21 +29100,6 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "I-96 Weigh Station (mile 37)",
-          "type": "weigh_station",
-          "at_mi": 36.7,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
-          "actions": [
-            "inspect"
-          ],
-          "services": [],
-          "parking": "none",
-          "directions": [
-            "both"
-          ],
-          "vehicle_access": "tractor_trailer"
-        },
-        {
           "name": "I-96 Weigh Station (mile 92)",
           "type": "weigh_station",
           "at_mi": 91.8,
@@ -28565,6 +29113,74 @@
             "both"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "truck parking",
+          "type": "truck_parking",
+          "at_mi": 99.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.61912671245196,
+          "lon": -83.99587486020376,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "I-96E truck parking near Oak Grove",
+          "type": "public_rest_area",
+          "at_mi": 101.3,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-96E truck parking near Oak Grove on I-96E in Oak Grove, MI with 21 truck parking spaces, mile post 135; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.60695375139988,
+          "lon": -83.96654878447177
+        },
+        {
+          "name": "truck parking",
+          "type": "truck_parking",
+          "at_mi": 105.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.57868953571671,
+          "lon": -83.8894251190557,
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -34569,6 +35185,29 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Chelsea Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 21.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.2947424728084,
+          "lon": -84.02102953784609,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 27.8,
@@ -35840,6 +36479,28 @@
       },
       "stops": [
         {
+          "name": "The 115 Truck Stop",
+          "type": "truck_parking",
+          "at_mi": 26.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "lat": 42.2847297,
+          "lon": -84.8637786,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
           "at_mi": 33.0,
@@ -35859,6 +36520,59 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 37.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.30304,
+          "lon": -85.08257,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center Battle Creek",
+          "type": "travel_center",
+          "at_mi": 46.0,
+          "source": "Pilot Travel Center Battle Creek, MI, I-94, truck parking: https://locations.pilotflyingj.com/us/mi/battle-creek/15901-11-mile-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.26508570543266,
+          "lon": -85.22587373955389
         }
       ],
       "divided": true,
@@ -38894,6 +39608,33 @@
       },
       "stops": [
         {
+          "name": "Pilot Travel Center Battle Creek",
+          "type": "travel_center",
+          "at_mi": 19.9,
+          "source": "Pilot Travel Center Battle Creek, MI, I-94, truck parking: https://locations.pilotflyingj.com/us/mi/battle-creek/15901-11-mile-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.26508570543266,
+          "lon": -85.22587373955389
+        },
+        {
           "name": "Pilot Travel Center",
           "type": "service_plaza",
           "at_mi": 28.0,
@@ -38938,6 +39679,51 @@
           "lat": 42.2793966,
           "lon": -84.9306198,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "The 115 Truck Stop",
+          "type": "truck_parking",
+          "at_mi": 39.6,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "lat": 42.2847297,
+          "lon": -84.8637786,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Grass Lake Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 71.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.290729679133584,
+          "lon": -84.26517205673758,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Chelsea Rest Area",
@@ -40716,6 +41502,34 @@
             "scale"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "travel_center",
+          "at_mi": 46.3,
+          "source": "Love's/Pilot travel center on the corridor (both operate throughout IL/MI), verified against operator directory listings (development-time); curated into a gameplay POI. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "showers",
+            "scale"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.914063606748066,
+          "lon": -85.67806897730111,
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -41769,6 +42583,66 @@
       "miles": 94,
       "stops": [
         {
+          "name": "Okemos Rest Area 811",
+          "type": "public_rest_area",
+          "at_mi": 13.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.67024448371126,
+          "lon": -84.36175503496561,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "I-96 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 25.1,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "truck parking",
+          "type": "truck_parking",
+          "at_mi": 33.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.61912671245196,
+          "lon": -83.99587486020376,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "I-96E truck parking near Oak Grove",
           "type": "public_rest_area",
           "at_mi": 34.9,
@@ -41791,19 +42665,26 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "I-96 Weigh Station",
-          "type": "weigh_station",
-          "at_mi": 25.1,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "name": "truck parking",
+          "type": "truck_parking",
+          "at_mi": 39.5,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
           "actions": [
-            "inspect"
+            "park",
+            "save",
+            "break",
+            "sleep"
           ],
-          "services": [],
-          "parking": "none",
+          "services": [
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.57868953571671,
+          "lon": -83.8894251190557,
           "directions": [
             "both"
-          ],
-          "vehicle_access": "tractor_trailer"
+          ]
         }
       ],
       "corridor": {
@@ -43624,6 +44505,32 @@
       "miles": 68,
       "stops": [
         {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 11.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.78792,
+          "lon": -84.67796,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "truck parking",
           "type": "truck_parking",
           "at_mi": 17.0,
@@ -43640,6 +44547,21 @@
           ],
           "lat": 42.84887,
           "lon": -84.85476,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-96 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 31.0,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
           "vehicle_access": "tractor_trailer"
         },
         {
@@ -43670,19 +44592,27 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "I-96 Weigh Station",
-          "type": "weigh_station",
-          "at_mi": 31.0,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "name": "Saranac Rest Area 532",
+          "type": "public_rest_area",
+          "at_mi": 41.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
           "actions": [
-            "inspect"
+            "park",
+            "save",
+            "break",
+            "sleep"
           ],
-          "services": [],
-          "parking": "none",
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.87933730007343,
+          "lon": -85.22781315173019,
           "directions": [
             "both"
-          ],
-          "vehicle_access": "tractor_trailer"
+          ]
         }
       ],
       "corridor": {
@@ -46170,6 +47100,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 47.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.30304,
+          "lon": -85.08257,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Battle Creek Rest Area",
           "type": "public_rest_area",
           "at_mi": 57.0,
@@ -47902,6 +48858,32 @@
           "lat": 46.50427,
           "lon": -87.36253,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Jubilee Foods Ishpeming",
+          "type": "truck_stop",
+          "at_mi": 16.2,
+          "source": "Jubilee Foods, 900 US-41 W, Ishpeming, MI -- diesel with truck and overnight parking on the US-41 approach to Marquette; accessed 2026-07-03: https://truckmap.com/place/jubilee-foods-900-us-41-w-ishpeming-mi-49849-usa Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 46.48961742918814,
+          "lon": -87.70808736881608
         },
         {
           "name": "Krist Foodmart L'Anse",
@@ -51940,6 +52922,34 @@
             "scale"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "travel_center",
+          "at_mi": 65.6,
+          "source": "Love's/Pilot travel center on the corridor (both operate throughout IL/MI), verified against operator directory listings (development-time); curated into a gameplay POI. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "showers",
+            "scale"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.62277289181014,
+          "lon": -85.6622168046413,
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,

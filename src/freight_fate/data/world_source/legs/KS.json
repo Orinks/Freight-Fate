@@ -7503,6 +7503,62 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Flying J Travel Center Emporia",
+          "type": "travel_center",
+          "at_mi": 9.0,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 658 in Emporia, KS with 74 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ks/emporia/4215-w-us-50 Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.35280324049797,
+          "lon": -96.28703936644129
+        },
+        {
+          "name": "Love's Travel Stop Cassoday",
+          "type": "travel_center",
+          "at_mi": 41.6,
+          "source": "Love's official store feed lists store 176 in Cassoday, KS on I-35, exit Mile 97; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.02629485436191,
+          "lon": -96.66233319409614
+        },
+        {
           "name": "Towanda Service Area",
           "type": "service_plaza",
           "at_mi": 67.5,
@@ -9350,6 +9406,32 @@
         },
         {
           "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 67.3,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the liberal_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 37.04404,
+          "lon": -100.90188,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Love's Travel Stop",
           "type": "travel_center",
           "at_mi": 80.0,
           "source": "Love's/Pilot travel center on the corridor (both dominant in the KS/OK/TX plains), verified against operator directory listings (development-time); curated into a gameplay POI.",
@@ -10059,6 +10141,32 @@
           "lat": 37.96095,
           "lon": -100.83243,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "TA Travel Center",
+          "type": "service_plaza",
+          "at_mi": 3.0,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the garden_city_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 38.00545,
+          "lon": -100.88502,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "TA Travel Center",
@@ -28166,6 +28274,33 @@
       },
       "stops": [
         {
+          "name": "Towanda Service Area",
+          "type": "service_plaza",
+          "at_mi": 21.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Towanda Service Area EB WB with 65 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 37.76673,
+          "lon": -96.98109,
+          "parking_spaces": 65,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Love's Travel Stop Cassoday",
           "type": "travel_center",
           "at_mi": 47.3,
@@ -28216,6 +28351,32 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 83.5,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the emporia_ks_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 38.41117,
+          "lon": -96.23738,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "TA Travel Center",

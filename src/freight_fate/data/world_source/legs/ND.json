@@ -6479,6 +6479,58 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Big Chief Truck & Auto Plaza",
+          "type": "truck_stop",
+          "at_mi": 65.2,
+          "source": "Big Chief Truck/Auto Plaza, Fergus Falls, I-94 exit 61 -- 24/7 independent truck stop with restaurant. Real-world stop verified against operator and truck-stop directory listings (development-time); curated into a gameplay POI with a clean name. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 46.19970975917187,
+          "lon": -96.00334721281308,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Truckers Inn",
+          "type": "truck_stop",
+          "at_mi": 131.5,
+          "source": "Truckers Inn, Sauk Centre, I-94 & US-71 -- 24/7 fuel, restaurant and truck repair since 1968. Real-world stop verified against operator and truck-stop directory listings (development-time); curated into a gameplay POI with a clean name. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 45.710381848353975,
+          "lon": -94.92163130052363,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
           "at_mi": 166.0,

@@ -9869,6 +9869,34 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Love's Travel Stop New Florence",
+          "type": "travel_center",
+          "at_mi": 63.5,
+          "source": "Love's official store feed lists store 788 in New Florence, MO on I-70, exit 175/Hwy 19 S; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.835708477920925,
+          "lon": -91.22078712519014
+        },
+        {
           "name": "Mr. Fuel Travel Center",
           "type": "service_plaza",
           "at_mi": 75.0,
@@ -11433,6 +11461,35 @@
       },
       "stops": [
         {
+          "name": "Flying J Travel Center Joplin",
+          "type": "travel_center",
+          "at_mi": 10.2,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 669 in Joplin, MO with 160 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.1 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/mo/joplin/11570-hwy-ff Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.07022554523422,
+          "lon": -94.40142254984025
+        },
+        {
           "name": "Flying J Travel Center",
           "type": "travel_center",
           "at_mi": 40.0,
@@ -11454,6 +11511,32 @@
             "scale"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "TA Travel Center",
+          "type": "service_plaza",
+          "at_mi": 45.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.10487598209614,
+          "lon": -93.78204917847944,
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -35330,6 +35413,32 @@
             "scale"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "B&D Auto/Truck Plaza",
+          "type": "service_plaza",
+          "at_mi": 57.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.67659565376758,
+          "lon": -92.64322439211466,
+          "directions": [
+            "both"
+          ]
         }
       ],
       "divided": true,
@@ -46765,6 +46874,34 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Love's Travel Stop",
+          "type": "travel_center",
+          "at_mi": 56.0,
+          "source": "Real-world I-44 travel center, verified against operator/truck-stop directory listings (development-time); curated into a gameplay POI. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "showers",
+            "scale"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.70034465469524,
+          "lon": -92.62439982831698,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Love's Travel Stop Rolla",
           "type": "travel_center",
           "at_mi": 113.8,
@@ -46789,6 +46926,32 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's",
+          "type": "travel_center",
+          "at_mi": 113.9,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rolla_mo_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 37.98186,
+          "lon": -91.71896,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Flying J Travel Center Sullivan",
@@ -49208,6 +49371,34 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "travel_center",
+          "at_mi": 35.5,
+          "source": "Real-world I-44 travel center, verified against operator/truck-stop directory listings (development-time); curated into a gameplay POI. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "showers",
+            "scale"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 37.08172146714217,
+          "lon": -93.86828887788566,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Flying J Travel Center Joplin",
@@ -54235,6 +54426,32 @@
           "lat": 38.65047,
           "lon": -90.13134,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Mr. Fuel Travel Center",
+          "type": "service_plaza",
+          "at_mi": 49.8,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 38.829728483849614,
+          "lon": -91.01419502570822,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Love's Travel Stop New Florence",

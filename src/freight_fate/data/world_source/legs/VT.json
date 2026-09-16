@@ -5498,6 +5498,31 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Waterbury South Parking Area",
+          "type": "public_rest_area",
+          "at_mi": 23.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Waterbury South Parking Area on I-89S in Waterbury, VT with 3 truck parking spaces, mile post 66; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.8 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 3,
+          "vehicle_access": "tractor_trailer",
+          "lat": 44.361385046104445,
+          "lon": -72.80984167413389
+        },
+        {
           "name": "Vermont Welcome Center - Sharon",
           "type": "public_rest_area",
           "at_mi": 83.0,

@@ -3285,6 +3285,58 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Lee Service Plaza Eastbound",
+          "type": "service_plaza",
+          "at_mi": 43.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.29695,
+          "lon": -73.27476,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Blandford Service Plaza Eastbound",
+          "type": "service_plaza",
+          "at_mi": 66.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.17200323418928,
+          "lon": -72.9021662886423,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Roady's Truck Stops",
           "type": "travel_center",
           "at_mi": 83.2,
@@ -8627,6 +8679,84 @@
           "lat": 42.63499,
           "lon": -73.75477,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 27.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.40382387626439,
+          "lon": -73.51795354597067,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Lee Service Plaza Eastbound",
+          "type": "service_plaza",
+          "at_mi": 42.7,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.29695,
+          "lon": -73.27476,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Blandford Service Plaza Eastbound",
+          "type": "service_plaza",
+          "at_mi": 65.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.17200323418928,
+          "lon": -72.9021662886423,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Pilot Travel Center Chicopee",
@@ -20217,6 +20347,33 @@
         {
           "name": "Angola Travel Plaza",
           "type": "service_plaza",
+          "at_mi": 21.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Angola Travel Plaza EB with 40 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "parking_spaces": 40,
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.64134778862829,
+          "lon": -78.98117785722994,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Angola Travel Plaza",
+          "type": "service_plaza",
           "at_mi": 27.0,
           "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
           "parking": "likely",
@@ -20262,6 +20419,32 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 68.7,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.27193572605037,
+          "lon": -79.72539661148352,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Love's Travel Stop Austinburg",
@@ -26804,6 +26987,61 @@
       },
       "stops": [
         {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 29.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.98675408394173,
+          "lon": -78.46064798278911,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Flying J Travel Center Corfu",
+          "type": "travel_center",
+          "at_mi": 31.8,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 693 in Corfu, NY with 111 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ny/corfu/8484-alleghany-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.00280034725901,
+          "lon": -78.41349301033081
+        },
+        {
           "name": "Pembroke Service Area",
           "type": "service_plaza",
           "at_mi": 39.8,
@@ -26874,6 +27112,62 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Love's Travel Stop Waterloo",
+          "type": "travel_center",
+          "at_mi": 117.3,
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.967892864519534,
+          "lon": -76.84617966436133
+        },
+        {
+          "name": "Love's Travel Stop Waterloo",
+          "type": "travel_center",
+          "at_mi": 125.7,
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.00887626453801,
+          "lon": -76.69805014042562
+        },
+        {
           "name": "Junius Ponds Service Area",
           "type": "service_plaza",
           "at_mi": 126.49,
@@ -26898,6 +27192,33 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Port Byron Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 127.7,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.02396,
+          "lon": -76.67119,
+          "parking_spaces": 24,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Indian Castle Travel Plaza",
@@ -28471,6 +28792,32 @@
       },
       "stops": [
         {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 25.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.98675408394173,
+          "lon": -78.46064798278911,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Flying J Travel Center Corfu",
           "type": "travel_center",
           "at_mi": 27.9,
@@ -28496,6 +28843,34 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pembroke Service Area",
+          "type": "service_plaza",
+          "at_mi": 35.5,
+          "source": "New York State Thruway Authority official service-area listing identifies Pembroke Service Area on I-90/NYS Thruway near milepost 397; at_mi estimated from Buffalo-to-New York checked route geometry, accessed 2026-06-17: https://www.thruway.ny.gov/travelers/service-areas Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.01621143446517,
+          "lon": -78.2640796796851
         },
         {
           "name": "Ontario Travel Plaza",
@@ -38207,6 +38582,68 @@
       },
       "stops": [
         {
+          "name": "I-95 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 21.7,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "CT Service Plaza- Darien SB",
+          "type": "public_rest_area",
+          "at_mi": 34.9,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists CT Service Plaza- Darien SB on I-95S in Darien, CT with 70 truck parking spaces, mile post 10; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.09743804329619,
+          "lon": -73.44210161049223
+        },
+        {
+          "name": "RT. 15 New Canaan NB Service Plaza",
+          "type": "public_rest_area",
+          "at_mi": 38.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.114163830601974,
+          "lon": -73.38941855478744,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Pilot",
           "type": "travel_center",
           "at_mi": 58.6,
@@ -38228,6 +38665,84 @@
           "lat": 41.23658,
           "lon": -73.02254,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Rest Area CT-15 (South Bound)",
+          "type": "public_rest_area",
+          "at_mi": 58.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Mile carried across proportionally when the leg was rerouted. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.23750129190995,
+          "lon": -73.05789062135072,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Pilot Travel Center Milford",
+          "type": "travel_center",
+          "at_mi": 65.8,
+          "source": "Pilot Flying J official locator lists Pilot Travel Center store 255 in Milford, CT with 150 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (3.2 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ct/milford/433-old-gate-ln Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.283304465378514,
+          "lon": -72.95185740834604
+        },
+        {
+          "name": "Rest Area CT-15 (South Bound)",
+          "type": "service_plaza",
+          "at_mi": 79.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.42561400917265,
+          "lon": -72.82101421198672,
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Madison Service Plaza",
@@ -38280,19 +38795,30 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "I-95 Weigh Station",
-          "type": "weigh_station",
-          "at_mi": 21.7,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "name": "Newton Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 192.3,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
           "actions": [
-            "inspect"
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
           ],
-          "services": [],
-          "parking": "none",
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.3303416,
+          "lon": -71.2547139,
+          "vehicle_access": "tractor_trailer",
           "directions": [
             "both"
-          ],
-          "vehicle_access": "tractor_trailer"
+          ]
         }
       ],
       "divided": true,
@@ -39830,6 +40356,30 @@
       },
       "stops": [
         {
+          "name": "CT Service Plaza- Darien SB",
+          "type": "public_rest_area",
+          "at_mi": 34.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists CT Service Plaza- Darien SB on I-95S in Darien, CT with 70 truck parking spaces, mile post 10; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 41.09743804329619,
+          "lon": -73.44210161049223
+        },
+        {
           "name": "RT. 15 New Canaan NB Service Plaza",
           "type": "public_rest_area",
           "at_mi": 37.5,
@@ -39882,6 +40432,33 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Alexander Hamilton Service Area",
+          "type": "service_plaza",
+          "at_mi": 17.9,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Alexander Hamilton with 33 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.76934,
+          "lon": -74.065,
+          "parking_spaces": 33,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Woodrow Wilson Service Area",
@@ -48232,6 +48809,60 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 38.6,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.95515329416576,
+          "lon": -76.98401876955157,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Love's Travel Stop Waterloo",
+          "type": "travel_center",
+          "at_mi": 45.6,
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.967892864519534,
+          "lon": -76.84617966436133
+        },
+        {
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 53.55,
@@ -48256,6 +48887,61 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Junius Ponds Service Area",
+          "type": "service_plaza",
+          "at_mi": 54.1,
+          "source": "New York State Thruway Authority official service-area listing identifies Junius Ponds Service Area on I-90/NYS Thruway at milepost 324 between exits 41 and 42; at_mi estimated from checked route geometry, accessed 2026-06-17: https://www.thruway.ny.gov/travelers/service-areas Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.014967597448035,
+          "lon": -76.68917769224059
+        },
+        {
+          "name": "Port Byron Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 55.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.02396,
+          "lon": -76.67119,
+          "parking_spaces": 24,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "DeWitt Travel Plaza",
@@ -48347,6 +49033,32 @@
           "lon": -73.9184666,
           "vehicle_access": "tractor_trailer",
           "parking_spaces": 65
+        },
+        {
+          "name": "Plaza 23 Truck Stop",
+          "type": "travel_center",
+          "at_mi": 227.5,
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the albany_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.63499,
+          "lon": -73.75477,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         },
         {
           "name": "Ulster Travel Plaza",
@@ -50680,6 +51392,199 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Junius Ponds Service Area",
+          "type": "service_plaza",
+          "at_mi": 31.5,
+          "source": "New York State Thruway Authority official service-area listing identifies Junius Ponds Service Area on I-90/NYS Thruway at milepost 324 between exits 41 and 42; at_mi estimated from checked route geometry, accessed 2026-06-17: https://www.thruway.ny.gov/travelers/service-areas Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.014967597448035,
+          "lon": -76.68917769224059
+        },
+        {
+          "name": "Love's Travel Stop Waterloo",
+          "type": "travel_center",
+          "at_mi": 32.2,
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.00887626453801,
+          "lon": -76.69805014042562
+        },
+        {
+          "name": "Love's Travel Stop Waterloo",
+          "type": "travel_center",
+          "at_mi": 40.2,
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.7 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.967892864519534,
+          "lon": -76.84617966436133
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 47.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.95515329416576,
+          "lon": -76.98401876955157,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Clifton Springs Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 57.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.97274,
+          "lon": -77.17343,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Pembroke Service Area",
+          "type": "service_plaza",
+          "at_mi": 113.7,
+          "source": "New York State Thruway Authority official service-area listing identifies Pembroke Service Area on I-90/NYS Thruway near milepost 397; at_mi estimated from Buffalo-to-New York checked route geometry, accessed 2026-06-17: https://www.thruway.ny.gov/travelers/service-areas Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.01621143446517,
+          "lon": -78.2640796796851
+        },
+        {
+          "name": "Flying J Travel Center Corfu",
+          "type": "travel_center",
+          "at_mi": 121.5,
+          "source": "Pilot Flying J official locator lists Flying J Travel Center store 693 in Corfu, NY with 111 public truck parking spaces; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.9 mi from simplified corridor line), accessed 2026-06-17: https://locations.pilotflyingj.com/us/ny/corfu/8484-alleghany-rd Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "restrooms",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.00280034725901,
+          "lon": -78.41349301033081
+        },
+        {
           "name": "Flying J Travel Center",
           "type": "service_plaza",
           "at_mi": 124.1,
@@ -52782,6 +53687,89 @@
       "miles": 86,
       "stops": [
         {
+          "name": "Port Byron Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 30.3,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Port Byron with 24 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.02396,
+          "lon": -76.67119,
+          "parking_spaces": 24,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Junius Ponds Service Area",
+          "type": "service_plaza",
+          "at_mi": 31.4,
+          "source": "New York State Thruway Authority official service-area listing identifies Junius Ponds Service Area on I-90/NYS Thruway at milepost 324 between exits 41 and 42; at_mi estimated from checked route geometry, accessed 2026-06-17: https://www.thruway.ny.gov/travelers/service-areas Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.014967597448035,
+          "lon": -76.68917769224059
+        },
+        {
+          "name": "Love's Travel Stop Waterloo",
+          "type": "travel_center",
+          "at_mi": 32.2,
+          "source": "Love's official store feed lists store 820 in Waterloo, NY on I-90, exit 41 SWC; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://www.loves.com/api/fetch_stores Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "likely",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 43.00887626453801,
+          "lon": -76.69805014042562
+        },
+        {
           "name": "Love's Travel Stop Waterloo",
           "type": "travel_center",
           "at_mi": 40.2,
@@ -52806,6 +53794,58 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 47.2,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 42.95515329416576,
+          "lon": -76.98401876955157,
+          "directions": [
+            "both"
+          ]
+        },
+        {
+          "name": "Clifton Springs Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 57.0,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.97274,
+          "lon": -77.17343,
+          "vehicle_access": "tractor_trailer",
+          "directions": [
+            "both"
+          ]
         }
       ],
       "corridor": {

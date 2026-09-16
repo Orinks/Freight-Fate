@@ -3497,6 +3497,32 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 55.1,
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.66980466042937,
+          "lon": -75.13440097001966,
+          "directions": [
+            "both"
+          ]
+        },
+        {
           "name": "Allentown Service Plaza",
           "type": "service_plaza",
           "at_mi": 81.0,
@@ -4622,6 +4648,33 @@
           "lon": -74.065,
           "parking_spaces": 33,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Vince Lombardi Service Area",
+          "type": "service_plaza",
+          "at_mi": 14.5,
+          "source": "New Jersey Turnpike Authority service area listing and development-time Overpass/OSM corridor review. Opposite-direction copy onto overlapping same-highway partner; curated 2026-09-16.",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 40.81923859388657,
+          "lon": -74.03997480593861
         }
       ],
       "divided": true,
