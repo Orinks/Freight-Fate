@@ -3,7 +3,7 @@
 //! plus the per-tick checks that walk those schedules (the placement half of
 //! `trip.py`).
 
-use crate::data::billboards::{corridor_signs, random_billboard, SignAnchor};
+use crate::data::billboards::{corridor_signs, random_billboard, regional_genre_signs, SignAnchor};
 use crate::data::curves::{route_curves, RouteCurve};
 use crate::pyfmt::{fmt_f, py_str_float};
 use crate::pyrandom::PyRandom;
@@ -482,6 +482,7 @@ impl Trip {
             let pool = corridor_signs(&self.route.legs[leg_i].highway);
             let fresh_corridor: Vec<&'static str> = pool
                 .iter()
+                .chain(regional_genre_signs().iter())
                 .filter(|sign| !used.contains(&sign.text) && self.sign_belongs_at(&sign.anchor, at))
                 .map(|sign| sign.text)
                 .collect();

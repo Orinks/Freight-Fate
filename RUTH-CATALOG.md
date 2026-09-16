@@ -7,8 +7,29 @@ For Chelsea → Ruth. Every NEW line since origin/feat/career-1.9 tip (c57a13bc 
 - I-40 TN was **not** used as Music Highway paid ads. Beale Street / Graceland / Grand Ole Opry / Ryman are ticketed tourism Approaching only.
 - See Rock City absent. META unchanged. SONG_TRIBUTE still only Hank Snow + Del Reeves. `TRIBUTE_DRAW_CHANCE` still 0.1. Density still 35–65 mi.
 - Big Buck's remains approach-only (not in ROADSIDE).
+- ADULT is always eligible wherever commercial boards are legal. No settings switch, content filter, or default-off path.
 
-## Counts: 172 new lines
+## Ruth cut (2026-09-16)
+KEEP: GENERIC; ATTORNEY Big Jim; FAITH; ODDITIES; TRUCKER except lumper; RADIO; POP_CULTURE generic dated theatrical-drive-in; BIG_BUCKS approach; corridor ticketed tourism+produce+Tejano SA-Laredo+casinos+Iowa 80+OZ Wamego+Arch+Blueberry Hill+Billy Bob's+Crystal Palace+MoPOP+Harley+Slugger+Space Center+Horse Park+Bristol museum+Corn Palace+Spam+Graceland/Beale/Opry/Ryman+Orlando no-Disney-slogans.
+
+MOVED (Anywhere → States, wired through `regional_genre_signs` + `place_billboards` / `corridor_signs` filter):
+- FIREWORKS → AL/AR/FL/GA/IA/IL/IN/KS/KY/LA/MI/MO/MS/NC/OH/OK/PA/SC/TN/TX/VA/WI/WV (southern/midwest fireworks-stand country). Bubba's stays SC+NC on I-95.
+- PECAN → TX/GA/LA/AL/MS.
+- Sheetz → PA/OH/WV/MD/VA/NC/MI.
+- Wawa → FL/NJ/PA/VA/MD/DE (mid-Atlantic + FL, not AZ).
+- RaceTrac → AL/AR/FL/GA/KY/LA/MS/NC/SC/TN/TX/VA (southeast + Texas).
+- Cracker Barrel → South/Midwest (AL AR FL GA IA IL IN KS KY LA MI MN MO MS NC NE OH OK SC TN TX VA WI WV).
+- Love's / Pilot / generic travel-center / motel / QSR stay Anywhere.
+
+KILLED:
+- TRUCKER "Lumper service, next warehouse…"
+- I-35 "McAllen ahead…" (McAllen is I-2/I-69C/US-281; I-35 ends Laredo). Not relocated onto an unmapped shield. Laredo + San Antonio keep I-35 Tejano.
+
+STILL OUT: lyrics, META growth, Music Highway paid ads, Rock City on I-75, Wall Drug MT (WY stays as previously cut).
+
+ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den / next-exit register (superstore, bookstore, gentleman's club, XXX theater). No graphic sex-act copy, no real-chain slogans, no named towns.
+
+## Counts: 186 live new lines (172 draft − 1 lumper − 1 McAllen + 15 net ADULT adds; several relocated off Anywhere)
 
 | Pool | Exact text | SignAnchor | Research |
 |---|---|---|---|
@@ -31,30 +52,45 @@ For Chelsea → Ruth. Every NEW line since origin/feat/career-1.9 tip (c57a13bc 
 | GENERIC | Next exit: homemade ice cream. The cows are local. The freezer is older than you. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | Gun show this weekend, craft fair the next. Same tent, better judgment sold separately. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
 | GENERIC | Buffet: if it isn't on a steam table, it isn't dinner. | Anywhere | invented Americana / roadfood boards (OAAA restaurant/service genre) |
-| FIREWORKS | Fireworks, fireworks, fireworks. You're already past it. | Anywhere | southern/midwest fireworks-barn OOH; state-line stand genre |
-| FIREWORKS | Fireworks barn, next exit. If you can still hear, you haven't shopped enough. | Anywhere | southern/midwest fireworks-barn OOH; state-line stand genre |
-| FIREWORKS | Family fireworks. Professional regret. Open till the sheriff gets here. | Anywhere | southern/midwest fireworks-barn OOH; state-line stand genre |
-| FIREWORKS | Buy one crate, get the ringing in your ears free. | Anywhere | southern/midwest fireworks-barn OOH; state-line stand genre |
-| FIREWORKS | Stand back. Light fuse. That's the whole business plan. Next exit. | Anywhere | southern/midwest fireworks-barn OOH; state-line stand genre |
-| FIREWORKS | Roman candles, bottle rockets, and a very optimistic fire extinguisher. | Anywhere | southern/midwest fireworks-barn OOH; state-line stand genre |
-| FIREWORKS | Closed on Christmas. Open on every other bad idea. | Anywhere | southern/midwest fireworks-barn OOH; state-line stand genre |
-| FIREWORKS | Fireworks warehouse. No smoking. We are serious. Look at the inventory. | Anywhere | southern/midwest fireworks-barn OOH; state-line stand genre |
-| FIREWORKS | Your brother-in-law already bought the loud ones. Catch up, next exit. | Anywhere | southern/midwest fireworks-barn OOH; state-line stand genre |
-| PECAN | World's largest pecan. You'll smell it before you see it. Next exit. | Anywhere | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
-| PECAN | Pecan logs, pecan pie, pecan everything. Your passenger will complain. Buy two. | Anywhere | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
-| PECAN | If it isn't pecans, it isn't a gift. Next exit, we will not be argued with. | Anywhere | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
-| PECAN | World's second-largest pecan. The biggest one is three exits back and they know it. | Anywhere | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
-| PECAN | Fresh roasted pecans. The sample is free. The bag is not. | Anywhere | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
-| PECAN | Pecan pralines, next exit. Sticky steering wheels since nineteen fifty. | Anywhere | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
-| PECAN | Nuts. We sell them. We attract them. Next exit. | Anywhere | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
-| PECAN | Pecan brittle so hard it needs a load rating. | Anywhere | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
-| ADULT | Adult superstore, next exit. Truckers welcome. We won't tell. | Anywhere | rural interstate adult-superstore off-ramp OOH genre |
-| ADULT | Adult bookstore, next exit. Magazines you will not read. Parking you will use. | Anywhere | rural interstate adult-superstore off-ramp OOH genre |
-| ADULT | Eighteen and over. Eighteen wheels preferred. Next exit. | Anywhere | rural interstate adult-superstore off-ramp OOH genre |
-| ADULT | The sign just says Superstore. You already know which one. Next exit. | Anywhere | rural interstate adult-superstore off-ramp OOH genre |
-| ADULT | Late night, well lit, no questions. Your logbook does not need this stop. | Anywhere | rural interstate adult-superstore off-ramp OOH genre |
-| ADULT | Adult gifts, next exit. For someone else, obviously. | Anywhere | rural interstate adult-superstore off-ramp OOH genre |
-| ADULT | If the billboard is this vague, the store is not. Next exit. | Anywhere | rural interstate adult-superstore off-ramp OOH genre |
+| FIREWORKS | Fireworks, fireworks, fireworks. You're already past it. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
+| FIREWORKS | Fireworks barn, next exit. If you can still hear, you haven't shopped enough. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
+| FIREWORKS | Family fireworks. Professional regret. Open till the sheriff gets here. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
+| FIREWORKS | Buy one crate, get the ringing in your ears free. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
+| FIREWORKS | Stand back. Light fuse. That's the whole business plan. Next exit. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
+| FIREWORKS | Roman candles, bottle rockets, and a very optimistic fire extinguisher. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
+| FIREWORKS | Closed on Christmas. Open on every other bad idea. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
+| FIREWORKS | Fireworks warehouse. No smoking. We are serious. Look at the inventory. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
+| FIREWORKS | Your brother-in-law already bought the loud ones. Catch up, next exit. | States ['AL','AR','FL','GA','IA','IL','IN','KS','KY','LA','MI','MO','MS','NC','OH','OK','PA','SC','TN','TX','VA','WI','WV'] (MOVED off Anywhere) | southern/midwest fireworks-barn OOH; state-line stand genre |
+| PECAN | World's largest pecan. You'll smell it before you see it. Next exit. | States ['AL','GA','LA','MS','TX'] (MOVED off Anywhere) | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
+| PECAN | Pecan logs, pecan pie, pecan everything. Your passenger will complain. Buy two. | States ['AL','GA','LA','MS','TX'] (MOVED off Anywhere) | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
+| PECAN | If it isn't pecans, it isn't a gift. Next exit, we will not be argued with. | States ['AL','GA','LA','MS','TX'] (MOVED off Anywhere) | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
+| PECAN | World's second-largest pecan. The biggest one is three exits back and they know it. | States ['AL','GA','LA','MS','TX'] (MOVED off Anywhere) | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
+| PECAN | Fresh roasted pecans. The sample is free. The bag is not. | States ['AL','GA','LA','MS','TX'] (MOVED off Anywhere) | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
+| PECAN | Pecan pralines, next exit. Sticky steering wheels since nineteen fifty. | States ['AL','GA','LA','MS','TX'] (MOVED off Anywhere) | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
+| PECAN | Nuts. We sell them. We attract them. Next exit. | States ['AL','GA','LA','MS','TX'] (MOVED off Anywhere) | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
+| PECAN | Pecan brittle so hard it needs a load rating. | States ['AL','GA','LA','MS','TX'] (MOVED off Anywhere) | south-central pecan-stand interstate ads; giant-pecan rivalry (Seguin/Brunswick real; copy unnamed) |
+| ADULT | Adult superstore, next exit. Truckers welcome. We will not tell. | Anywhere | rural interstate adult-superstore off-ramp OOH; Lion's Den opaque next-exit register; invented copy (Grok Build 2026-09-16) |
+| ADULT | Adult bookstore, next exit. Magazines you will not read. Parking you will use. | Anywhere | adult-bookstore off-ramp OOH; opaque teasing; invented copy (Grok Build) |
+| ADULT | Eighteen and over. Eighteen wheels preferred. Next exit. | Anywhere | adult-superstore trucker-welcome register (Grok Build) |
+| ADULT | The sign just says Superstore. You already know which one. Next exit. | Anywhere | opaque superstore vinyl; families on the same road (Grok Build) |
+| ADULT | Late night, well lit, no questions. Your logbook does not need this stop. | Anywhere | late-night adult-superstore OOH (Grok Build) |
+| ADULT | Adult gifts, next exit. For someone else, obviously. | Anywhere | adult-gift/novelty off-ramp register (Grok Build) |
+| ADULT | If the billboard is this vague, the store is not. Next exit. | Anywhere | opaque-on-purpose highway vinyl (Grok Build) |
+| ADULT | Gentleman's club, next exit. Cold beer. Warm welcome. Dispatch stays outside. | Anywhere | gentleman's-club interstate off-ramp OOH; invented (Grok Build) |
+| ADULT | XXX theater, next exit. Dark room. Cheap seats. Nobody looking at you. | Anywhere | XXX/adult theater roadside placard register (Grok Build) |
+| ADULT | Open all night. Cash if you prefer. Adult superstore, next exit. | Anywhere | all-night adult-superstore OOH (Grok Build) |
+| ADULT | Adult bookstore, next exit. The back room is in the back. You already knew. | Anywhere | adult-bookstore back-room wink; not a sex-act line (Grok Build) |
+| ADULT | No cover for truckers. Cover your tracks yourself. Next exit. | Anywhere | gentleman's-club trucker-cover register (Grok Build) |
+| ADULT | Feature starts when you sit down. Adult theater, next exit. | Anywhere | adult theater continuous-show placard (Grok Build) |
+| ADULT | We sell what the other stores will not name. Superstore, next exit. | Anywhere | adult-superstore opaque inventory tease (Grok Build) |
+| ADULT | Your CB will not mention this stop. Adult superstore, next exit. | Anywhere | trucker-welcome adult-superstore OOH (Grok Build) |
+| ADULT | Last chance before morning. Gentleman's club, next exit. Last call is whenever. | Anywhere | late-night gentleman's-club OOH (Grok Build) |
+| ADULT | Locked cabinet. Open mind. Adult bookstore, next exit. | Anywhere | adult-bookstore locked-cabinet register (Grok Build) |
+| ADULT | Couples welcome. Couples optional. Next exit. | Anywhere | club/superstore couples-welcome tease (Grok Build) |
+| ADULT | Big lot. Tall doors. Adult superstore. You will fit. | Anywhere | trucker-lot adult-superstore OOH (Grok Build) |
+| ADULT | Continuous shows. Discreet exits. XXX theater, next exit. | Anywhere | XXX theater continuous-show placard (Grok Build) |
+| ADULT | Stage is small. Tips are not. Gentleman's club, next exit. | Anywhere | gentleman's-club stage/tips register; not graphic (Grok Build) |
+| ADULT | Come for the magazines. Leave with a bag you will hide. Bookstore, next exit. | Anywhere | adult-bookstore bag-in-the-cab tease (Grok Build) |
 | ATTORNEY | Big Jim saw that lane change. He is not mad. He is drafting. | Anywhere | OAAA #1 Legal Services; truck-wreck PI bulletin genre; Big Jim invented |
 | ATTORNEY | Rollover? Call Big Jim. He has a vest for every settlement. | Anywhere | OAAA #1 Legal Services; truck-wreck PI bulletin genre; Big Jim invented |
 | ATTORNEY | Big Jim Tolliver: because your insurance company has a lawyer too. | Anywhere | OAAA #1 Legal Services; truck-wreck PI bulletin genre; Big Jim invented |
@@ -93,7 +129,7 @@ For Chelsea → Ruth. Every NEW line since origin/feat/career-1.9 tip (c57a13bc 
 | TRUCKER | Parking for trucks. Cars will still take the spots. We have cones and a dream. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER | Tire shop that does not flinch at your recaps. Next exit. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER | We wash bugs off. We cannot wash the dispatch off. Next exit. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
-| TRUCKER | Lumper service, next warehouse. Bring cash and patience, not in that order. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
+| TRUCKER (KILLED) | Lumper service, next warehouse. Bring cash and patience, not in that order. | KILLED | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER | CB shop, next exit. Your skip is skippier than you think. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER | Reefer repair. If it is warm, we can tell from here. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
 | TRUCKER | The lot has spaces. They are occupied by people who said they would only be a minute. | Anywhere | truck-stop service OOH (showers, parking, DEF, tire, lumper) |
@@ -114,14 +150,14 @@ For Chelsea → Ruth. Every NEW line since origin/feat/career-1.9 tip (c57a13bc 
 | RADIO | All truck, all night, all the same three commercials. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
 | RADIO | Keep it here. The next station is somebody's talk show and a car dealership. | Anywhere | regional AM/FM station frequency+format boards (no real call signs) |
 | TRAVEL_PLAZA | Love's ahead. Diesel, a shower, and a coffee that will keep you legal for one more state. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
-| TRAVEL_PLAZA | Sheetz next exit. Made-to-order, open late, and somehow always has a line. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
-| TRAVEL_PLAZA | Wawa, next exit. Hoagies, coffee, and a parking lot that thinks it is a city. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
-| TRAVEL_PLAZA | RaceTrac next exit. Fuel, drinks, and a bathroom you will actually use. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
+| TRAVEL_PLAZA | Sheetz next exit. Made-to-order, open late, and somehow always has a line. | States ['PA','OH','WV','MD','VA','NC','MI'] (MOVED off Anywhere) | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
+| TRAVEL_PLAZA | Wawa, next exit. Hoagies, coffee, and a parking lot that thinks it is a city. | States ['FL','NJ','PA','VA','MD','DE'] (MOVED off Anywhere) | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
+| TRAVEL_PLAZA | RaceTrac next exit. Fuel, drinks, and a bathroom you will actually use. | States ['AL','AR','FL','GA','KY','LA','MS','NC','SC','TN','TX','VA'] (MOVED off Anywhere) | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Pilot next exit. Parking if you are lucky. Coffee if you are desperate. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Travel center: showers, diesel, and a gift shop selling hats you already own. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Motel vacancy. Free ice. Free Wi-Fi. Free regret about the mattress. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Chain hotel, next exit. Continental breakfast starts when the waffle iron wakes up. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
-| TRAVEL_PLAZA | Cracker Barrel next exit. Rocking chairs out front. Your break clock out back. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
+| TRAVEL_PLAZA | Cracker Barrel next exit. Rocking chairs out front. Your break clock out back. | States South/Midwest (MOVED off Anywhere) | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | QSR drive-thru, next exit. The bag is small. The line is not. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Exit food: burgers, fries, and a soda the size of a fuel can. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
 | TRAVEL_PLAZA | Truck parking and a sit-down special. The special is that they still have parking. | Anywhere | OAAA hotels/QSR + Love's MegaBrands #46; Sheetz/Wawa/RaceTrac/Pilot nominative original copy |
@@ -169,7 +205,7 @@ For Chelsea → Ruth. Every NEW line since origin/feat/career-1.9 tip (c57a13bc 
 | CORRIDOR I-35 | Laredo ahead. Tejano on the AM and the river just south. Keep the accordion, skip the sightseeing detour. | Approaching ['laredo_tx_us'] | I-35 south Texas Tejano/Spanish radio + tourism OOH |
 | CORRIDOR I-35 | San Antonio ahead. Tejano weekend on the AM. Conjunto is a dance hall and this highway. | Approaching ['san_antonio_tx_us'] | I-35 south Texas Tejano/Spanish radio + tourism OOH |
 | CORRIDOR I-35 | Oklahoma City ahead. Native casino country. The boards started a hundred miles ago. | Approaching ['oklahoma_city_ok_us'] | I-35 casino approach OOH (OK tribal / NV Strip-Reno) |
-| CORRIDOR I-35 | McAllen ahead. Tejano country. The towers never sleep and neither does the dance hall. | Approaching ['mcallen_tx_us'] | I-35 south Texas Tejano/Spanish radio + tourism OOH |
+| CORRIDOR I-35 (KILLED) | McAllen ahead. Tejano country. The towers never sleep and neither does the dance hall. | KILLED (I-35 does not reach McAllen) | I-35 south Texas Tejano/Spanish radio + tourism OOH |
 | CORRIDOR I-35 | Fort Worth ahead. Billy Bob's Texas is a real honky-tonk with a zip code. Bob Wills already got the other board. | Approaching ['fort_worth_tx_us'] | Billy Bob's Texas, Fort Worth — paying honky-tonk |
 | CORRIDOR I-35 | Waco ahead. West, Texas, is kolache country. The bakery has been stopping traffic since the interstate was new. | Approaching ['waco_tx_us'] | West TX kolache stands on I-35 (Czech Stop genre); original copy |
 | CORRIDOR I-5 | Seattle ahead. The museum of pop culture is the colorful blob by the Needle. Jimi Hendrix is inside; the rain is not. | Approaching ['seattle_wa_us'] | MoPOP Seattle — paying museum by Space Needle |

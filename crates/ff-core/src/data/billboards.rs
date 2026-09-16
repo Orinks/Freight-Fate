@@ -23,8 +23,9 @@
 //!   church signs, roadside oddities), drawn from a seeded per-trip RNG so a
 //!   drive is deterministic and offline. THE ONLY THING THAT MAY GO IN THESE
 //!   POOLS is a line that would be true beside any road in the country: an
-//!   invented diner, a fireworks outlet, a joke about the road. A line naming
-//!   a real town, region, exit or attraction belongs to a corridor, not here.
+//!   invented diner, a joke about the road, an adult superstore that names no
+//!   town. A line naming a real town, region, exit, attraction, or a regional
+//!   chain belongs to a corridor or a state-gated genre pool, not here.
 //! * PLACED -- `CORRIDOR_BILLBOARDS` maps an interstate shield to signs for
 //!   the real roadside culture of that route, so a South Dakota Interstate 90
 //!   run passes the "free ice water, three hundred miles to go" genre and a
@@ -116,7 +117,8 @@ pub const GENERIC_BILLBOARDS: &[&str] = &[
 ];
 
 // Fireworks-barn genre -- southern/midwest interstate staple. Moved out of
-// GENERIC so the pool can grow without mixing genres. No place names.
+// GENERIC so the pool can grow without mixing genres. No place names. Copy
+// lives here; placement is state-gated via `regional_genre_signs` (not Anywhere).
 pub const FIREWORKS_BILLBOARDS: &[&str] = &[
     "Fireworks, fireworks, fireworks. You're already past it.",
     "Fireworks barn, next exit. If you can still hear, you haven't shopped enough.",
@@ -130,7 +132,7 @@ pub const FIREWORKS_BILLBOARDS: &[&str] = &[
 ];
 
 // Pecan-stand genre -- south-central interstate gift-shop food. Invented
-// stands; no town names. Moved the giant-pecan line out of GENERIC.
+// stands; no town names. Copy lives here; placement is TX/GA/LA/AL/MS only.
 pub const PECAN_BILLBOARDS: &[&str] = &[
     "World's largest pecan. You'll smell it before you see it. Next exit.",
     "Pecan logs, pecan pie, pecan everything. Your passenger will complain. Buy two.",
@@ -142,16 +144,35 @@ pub const PECAN_BILLBOARDS: &[&str] = &[
     "Pecan brittle so hard it needs a load rating.",
 ];
 
-// Adult-superstore genre -- rural interstate off-ramp staple. PG-13 ceiling
-// matches the existing line; moved out of GENERIC.
+// Adult-superstore / gentleman's-club / adult-bookstore / XXX-theater genre --
+// rural interstate off-ramp staple. Opaque teasing register (Lion's Den
+// next-exit vinyl): families share the road, so the board is vaguer than the
+// store. Invented copy, no real-chain slogans, no named towns. Always eligible
+// wherever commercial boards are legal (ME/VT/AK/HI gate). Grok Build rewrite
+// 2026-09-16.
 pub const ADULT_BILLBOARDS: &[&str] = &[
-    "Adult superstore, next exit. Truckers welcome. We won't tell.",
+    "Adult superstore, next exit. Truckers welcome. We will not tell.",
     "Adult bookstore, next exit. Magazines you will not read. Parking you will use.",
     "Eighteen and over. Eighteen wheels preferred. Next exit.",
     "The sign just says Superstore. You already know which one. Next exit.",
     "Late night, well lit, no questions. Your logbook does not need this stop.",
     "Adult gifts, next exit. For someone else, obviously.",
     "If the billboard is this vague, the store is not. Next exit.",
+    "Gentleman's club, next exit. Cold beer. Warm welcome. Dispatch stays outside.",
+    "XXX theater, next exit. Dark room. Cheap seats. Nobody looking at you.",
+    "Open all night. Cash if you prefer. Adult superstore, next exit.",
+    "Adult bookstore, next exit. The back room is in the back. You already knew.",
+    "No cover for truckers. Cover your tracks yourself. Next exit.",
+    "Feature starts when you sit down. Adult theater, next exit.",
+    "We sell what the other stores will not name. Superstore, next exit.",
+    "Your CB will not mention this stop. Adult superstore, next exit.",
+    "Last chance before morning. Gentleman's club, next exit. Last call is whenever.",
+    "Locked cabinet. Open mind. Adult bookstore, next exit.",
+    "Couples welcome. Couples optional. Next exit.",
+    "Big lot. Tall doors. Adult superstore. You will fit.",
+    "Continuous shows. Discreet exits. XXX theater, next exit.",
+    "Stage is small. Tips are not. Gentleman's club, next exit.",
+    "Come for the magazines. Leave with a bag you will hide. Bookstore, next exit.",
 ];
 
 // Local-radio genre -- small-market AM promotion that travels anywhere without
@@ -175,18 +196,51 @@ pub const REGIONAL_RADIO_BILLBOARDS: &[&str] = &[
 // Travel-plaza / hotel / QSR genre -- OAAA interstate staples. Invented copy;
 // a few nominative chain names with original parody, never lifted slogans.
 pub const TRAVEL_PLAZA_BILLBOARDS: &[&str] = &[
+    // Love's / Pilot: national travel-center chains. Broad Anywhere is honest.
     "Love's ahead. Diesel, a shower, and a coffee that will keep you legal for one more state.",
-    "Sheetz next exit. Made-to-order, open late, and somehow always has a line.",
-    "Wawa, next exit. Hoagies, coffee, and a parking lot that thinks it is a city.",
-    "RaceTrac next exit. Fuel, drinks, and a bathroom you will actually use.",
     "Pilot next exit. Parking if you are lucky. Coffee if you are desperate.",
+    // Generic travel-center / motel / QSR -- invented, no regional chain.
     "Travel center: showers, diesel, and a gift shop selling hats you already own.",
     "Motel vacancy. Free ice. Free Wi-Fi. Free regret about the mattress.",
     "Chain hotel, next exit. Continental breakfast starts when the waffle iron wakes up.",
-    "Cracker Barrel next exit. Rocking chairs out front. Your break clock out back.",
     "QSR drive-thru, next exit. The bag is small. The line is not.",
     "Exit food: burgers, fries, and a soda the size of a fuel can.",
     "Truck parking and a sit-down special. The special is that they still have parking.",
+];
+
+// Named regional chains. Copy is nominative original parody; placement is
+// state-gated in `regional_genre_signs` because these brands do not exist
+// beside every American interstate.
+pub const SHEETZ_BILLBOARD: &str =
+    "Sheetz next exit. Made-to-order, open late, and somehow always has a line.";
+pub const WAWA_BILLBOARD: &str =
+    "Wawa, next exit. Hoagies, coffee, and a parking lot that thinks it is a city.";
+pub const RACETRAC_BILLBOARD: &str =
+    "RaceTrac next exit. Fuel, drinks, and a bathroom you will actually use.";
+pub const CRACKER_BARREL_BILLBOARD: &str =
+    "Cracker Barrel next exit. Rocking chairs out front. Your break clock out back.";
+
+/// Southern/midwest fireworks-stand country. Consumer fireworks barns are an
+/// interstate staple here; New England and the far West are not that genre.
+/// Bubba's on I-95 stays SC+NC on top of this list.
+pub const FIREWORKS_STAND_STATES: &[&str] = &[
+    "AL", "AR", "FL", "GA", "IA", "IL", "IN", "KS", "KY", "LA", "MI", "MO", "MS", "NC", "OH", "OK",
+    "PA", "SC", "TN", "TX", "VA", "WI", "WV",
+];
+
+/// South-central pecan-stand country (Ruth: TX/GA/LA/AL/MS).
+pub const PECAN_STATES: &[&str] = &["AL", "GA", "LA", "MS", "TX"];
+
+pub const SHEETZ_STATES: &[&str] = &["MD", "MI", "NC", "OH", "PA", "VA", "WV"];
+pub const WAWA_STATES: &[&str] = &["DE", "FL", "MD", "NJ", "PA", "VA"];
+/// RaceTrac's real southeast-plus-Texas footprint.
+pub const RACETRAC_STATES: &[&str] = &[
+    "AL", "AR", "FL", "GA", "KY", "LA", "MS", "NC", "SC", "TN", "TX", "VA",
+];
+/// Cracker Barrel as a South/Midwest roadside, not a West-Coast or New England board.
+pub const CRACKER_BARREL_STATES: &[&str] = &[
+    "AL", "AR", "FL", "GA", "IA", "IL", "IN", "KS", "KY", "LA", "MI", "MN", "MO", "MS", "NC", "NE",
+    "OH", "OK", "SC", "TN", "TX", "VA", "WI", "WV",
 ];
 
 // Dated movie/TV promo genre -- now-showing / coming-soon register only.
@@ -283,7 +337,6 @@ pub const TRUCKER_SERVICES_BILLBOARDS: &[&str] = &[
     "Parking for trucks. Cars will still take the spots. We have cones and a dream.",
     "Tire shop that does not flinch at your recaps. Next exit.",
     "We wash bugs off. We cannot wash the dispatch off. Next exit.",
-    "Lumper service, next warehouse. Bring cash and patience, not in that order.",
     "CB shop, next exit. Your skip is skippier than you think.",
     "Reefer repair. If it is warm, we can tell from here.",
     "The lot has spaces. They are occupied by people who said they would only be a minute.",
@@ -511,8 +564,9 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         approaching("San Antonio ahead. Tejano weekend on the AM. Conjunto is a dance hall and this highway.", &["san_antonio_tx_us"]),
         // Casino genre -- Oklahoma City's casino boards belong on its approach.
         approaching("Oklahoma City ahead. Native casino country. The boards started a hundred miles ago.", &["oklahoma_city_ok_us"]),
-        // Tejano -- McAllen / Valley approach only (not Austin/Houston/Dallas/El Paso).
-        approaching("McAllen ahead. Tejano country. The towers never sleep and neither does the dance hall.", &["mcallen_tx_us"]),
+        // McAllen is I-2 / I-69C / US-281, not Interstate 35 (I-35 ends at
+        // Laredo). The Valley Tejano board was killed rather than moved onto
+        // an unmapped shield. Laredo and San Antonio keep the I-35 Tejano lane.
         // Paying venue -- Billy Bob's Texas, Fort Worth.
         approaching("Fort Worth ahead. Billy Bob's Texas is a real honky-tonk with a zip code. Bob Wills already got the other board.", &["fort_worth_tx_us"]),
         // Kolache stands at West, Texas on I-35 -- invented copy, no stolen bakery slogan.
@@ -739,8 +793,6 @@ fn interstate_number(highway: &str) -> Option<u32> {
 static ROADSIDE: Lazy<Vec<&'static str>> = Lazy::new(|| {
     [
         GENERIC_BILLBOARDS,
-        FIREWORKS_BILLBOARDS,
-        PECAN_BILLBOARDS,
         ADULT_BILLBOARDS,
         ATTORNEY_BILLBOARDS,
         FAITH_BILLBOARDS,
@@ -788,6 +840,36 @@ pub fn corridor_signs(highway: &str) -> &'static [CorridorSign] {
         .find(|(shield, _)| interstate_number(shield) == Some(number))
         .map(|(_, pool)| *pool)
         .unwrap_or(&[])
+}
+
+/// State-gated genre signs that are true on any interstate inside those
+/// states -- fireworks barns, pecan stands, and named regional travel plazas.
+/// The placer concatenates this with `corridor_signs` so a fireworks barn can
+/// speak on I-26 in South Carolina even though that shield has no authored
+/// corridor pool.
+static REGIONAL_GENRE: Lazy<Vec<CorridorSign>> = Lazy::new(|| {
+    let mut out = Vec::new();
+    for text in FIREWORKS_BILLBOARDS {
+        out.push(CorridorSign {
+            text,
+            anchor: SignAnchor::States(FIREWORKS_STAND_STATES),
+        });
+    }
+    for text in PECAN_BILLBOARDS {
+        out.push(CorridorSign {
+            text,
+            anchor: SignAnchor::States(PECAN_STATES),
+        });
+    }
+    out.push(in_states(SHEETZ_BILLBOARD, SHEETZ_STATES));
+    out.push(in_states(WAWA_BILLBOARD, WAWA_STATES));
+    out.push(in_states(RACETRAC_BILLBOARD, RACETRAC_STATES));
+    out.push(in_states(CRACKER_BARREL_BILLBOARD, CRACKER_BARREL_STATES));
+    out
+});
+
+pub fn regional_genre_signs() -> &'static [CorridorSign] {
+    &REGIONAL_GENRE
 }
 
 /// Just the copy from `corridor_signs`, with the anchors dropped -- for
@@ -844,6 +926,13 @@ mod tests {
         for (_, pool) in CORRIDOR_BILLBOARDS {
             out.extend(pool.iter().map(|sign| sign.text));
         }
+        out.extend(regional_genre_signs().iter().map(|sign| sign.text));
+        out.extend([
+            SHEETZ_BILLBOARD,
+            WAWA_BILLBOARD,
+            RACETRAC_BILLBOARD,
+            CRACKER_BARREL_BILLBOARD,
+        ]);
         out
     }
 
@@ -1001,6 +1090,10 @@ mod tests {
             "Birthplace of Country Music",
             "Kentucky Horse Park",
             "Cajun",
+            "Sheetz",
+            "Wawa",
+            "RaceTrac",
+            "Cracker Barrel",
         ];
         let anywhere: Vec<&str> = roadside_billboards()
             .iter()
@@ -1024,32 +1117,39 @@ mod tests {
         // retires the sign. Corridor is reserved for lines that name no place,
         // so those are listed explicitly rather than reachable by default.
         const NAMES_NO_PLACE: &[&str] = &["Have you seen the scenery"];
+        let mut signs: Vec<(&str, &CorridorSign)> = Vec::new();
         for (shield, pool) in CORRIDOR_BILLBOARDS {
             for sign in pool.iter() {
-                match sign.anchor {
-                    SignAnchor::Corridor => assert!(
-                        NAMES_NO_PLACE.iter().any(|k| sign.text.contains(k)),
-                        "{shield}: unanchored line names a place: {}",
-                        sign.text
-                    ),
-                    SignAnchor::States(states) => {
-                        assert!(!states.is_empty(), "{shield}: {}", sign.text);
-                        for state in states {
-                            assert_eq!(state.len(), 2, "{shield}: {state}");
-                            assert!(state.chars().all(|c| c.is_ascii_uppercase()));
-                        }
+                signs.push((shield, sign));
+            }
+        }
+        for sign in regional_genre_signs() {
+            signs.push(("regional", sign));
+        }
+        for (shield, sign) in signs {
+            match sign.anchor {
+                SignAnchor::Corridor => assert!(
+                    NAMES_NO_PLACE.iter().any(|k| sign.text.contains(k)),
+                    "{shield}: unanchored line names a place: {}",
+                    sign.text
+                ),
+                SignAnchor::States(states) => {
+                    assert!(!states.is_empty(), "{shield}: {}", sign.text);
+                    for state in states {
+                        assert_eq!(state.len(), 2, "{shield}: {state}");
+                        assert!(state.chars().all(|c| c.is_ascii_uppercase()));
                     }
-                    SignAnchor::Approaching { cities, within_mi } => {
-                        assert!(!cities.is_empty(), "{shield}: {}", sign.text);
-                        for city in cities {
-                            // A world key, not a spoken name -- the placer
-                            // matches it against the route's own city list.
-                            assert!(city.ends_with("_us"), "{shield}: {city}");
-                        }
-                        // The window has to outrun the sign spacing, or an
-                        // anchored line gets at most one chance per trip.
-                        assert!(within_mi > 65.0, "{shield}: {within_mi}");
+                }
+                SignAnchor::Approaching { cities, within_mi } => {
+                    assert!(!cities.is_empty(), "{shield}: {}", sign.text);
+                    for city in cities {
+                        // A world key, not a spoken name -- the placer
+                        // matches it against the route's own city list.
+                        assert!(city.ends_with("_us"), "{shield}: {city}");
                     }
+                    // The window has to outrun the sign spacing, or an
+                    // anchored line gets at most one chance per trip.
+                    assert!(within_mi > 65.0, "{shield}: {within_mi}");
                 }
             }
         }
@@ -1246,7 +1346,6 @@ mod tests {
             ("I-75", "Georgia peaches"),
             ("I-4", "theme parks are off this road"),
             ("I-45", "Space Center Houston"),
-            ("I-35", "McAllen ahead"),
             ("I-35", "Billy Bob's Texas"),
             ("I-40", "Beale Street"),
             ("I-40", "Grand Ole Opry"),
@@ -1262,6 +1361,78 @@ mod tests {
         }
         assert!(!all_lines().iter().any(|l| l.contains("Rock City")));
         assert!(!all_lines().iter().any(|l| l.contains("Music Highway")));
+        assert!(
+            !all_lines().iter().any(|l| l.contains("McAllen ahead")),
+            "I-35 McAllen board must stay killed"
+        );
+        assert!(
+            !all_lines().iter().any(|l| l.contains("Lumper service")),
+            "lumper line must stay dropped"
+        );
+    }
+
+    #[test]
+    fn test_ruth_cut_moves_fireworks_pecan_and_named_plazas_off_anywhere() {
+        for line in FIREWORKS_BILLBOARDS
+            .iter()
+            .chain(PECAN_BILLBOARDS)
+            .copied()
+            .chain([
+                SHEETZ_BILLBOARD,
+                WAWA_BILLBOARD,
+                RACETRAC_BILLBOARD,
+                CRACKER_BARREL_BILLBOARD,
+            ])
+        {
+            assert!(
+                !roadside_billboards().contains(&line),
+                "still in Anywhere roadside: {line}"
+            );
+        }
+        // Love's / Pilot / generic plaza stay national.
+        assert!(roadside_billboards()
+            .iter()
+            .any(|l| l.contains("Love's ahead")));
+        assert!(roadside_billboards()
+            .iter()
+            .any(|l| l.contains("Pilot next exit")));
+        assert!(roadside_billboards()
+            .iter()
+            .any(|l| l.contains("Travel center:")));
+
+        let regional = regional_genre_signs();
+        for line in FIREWORKS_BILLBOARDS {
+            let sign = regional.iter().find(|s| s.text == *line).expect(line);
+            assert_eq!(
+                sign.anchor,
+                SignAnchor::States(FIREWORKS_STAND_STATES),
+                "{line}"
+            );
+        }
+        for line in PECAN_BILLBOARDS {
+            let sign = regional.iter().find(|s| s.text == *line).expect(line);
+            assert_eq!(sign.anchor, SignAnchor::States(PECAN_STATES), "{line}");
+        }
+        let named = [
+            (SHEETZ_BILLBOARD, SHEETZ_STATES),
+            (WAWA_BILLBOARD, WAWA_STATES),
+            (RACETRAC_BILLBOARD, RACETRAC_STATES),
+            (CRACKER_BARREL_BILLBOARD, CRACKER_BARREL_STATES),
+        ];
+        for (line, states) in named {
+            let sign = regional.iter().find(|s| s.text == line).expect(line);
+            assert_eq!(sign.anchor, SignAnchor::States(states), "{line}");
+        }
+        assert_eq!(ADULT_BILLBOARDS.len(), 22);
+        assert!(roadside_billboards()
+            .iter()
+            .any(|l| l.contains("Adult superstore")));
+        // Always-on adult pool: no settings/toggle copy leaked into the catalog.
+        for line in all_lines() {
+            let lower = line.to_lowercase();
+            assert!(!lower.contains("content filter"));
+            assert!(!lower.contains("adult billboards off"));
+        }
     }
 
     #[test]

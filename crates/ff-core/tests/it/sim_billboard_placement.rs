@@ -160,7 +160,6 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("Wamego", &["KS", "MO", "CO"]),
     ("Gateway Arch", &["MO", "IL", "KS"]),
     ("Blueberry Hill", &["MO", "IL", "KS"]),
-    ("McAllen ahead", &["TX"]),
     ("Billy Bob's Texas", &["TX"]),
     ("kolache country", &["TX"]),
     ("Crystal Palace", &["CA"]),
@@ -173,6 +172,33 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     ("Louisville Slugger", &["KY", "IN", "OH"]),
     ("theme parks are off this road", &["FL", "GA"]),
     ("Space Center Houston", &["TX", "LA"]),
+    // Named regional travel plazas -- honest footprints, not national Anywhere.
+    ("Sheetz", &["PA", "OH", "WV", "MD", "VA", "NC", "MI"]),
+    ("Wawa", &["FL", "NJ", "PA", "VA", "MD", "DE"]),
+    (
+        "RaceTrac",
+        &[
+            "AL", "AR", "FL", "GA", "KY", "LA", "MS", "NC", "SC", "TN", "TX", "VA",
+        ],
+    ),
+    (
+        "Cracker Barrel",
+        &[
+            "AL", "AR", "FL", "GA", "IA", "IL", "IN", "KS", "KY", "LA", "MI", "MN", "MO", "MS",
+            "NC", "NE", "OH", "OK", "SC", "TN", "TX", "VA", "WI", "WV",
+        ],
+    ),
+    // Fireworks-barn genre (includes Bubba's SC+NC, a subset).
+    (
+        "Fireworks",
+        &[
+            "AL", "AR", "FL", "GA", "IA", "IL", "IN", "KS", "KY", "LA", "MI", "MO", "MS", "NC",
+            "OH", "OK", "PA", "SC", "TN", "TX", "VA", "WI", "WV",
+        ],
+    ),
+    ("pecan", &["AL", "GA", "LA", "MS", "TX"]),
+    ("Pecan", &["AL", "GA", "LA", "MS", "TX"]),
+    ("Nuts. We sell them", &["AL", "GA", "LA", "MS", "TX"]),
     // -- the Appalachian hollows -------------------------------------------
     (
         "called hollers",
