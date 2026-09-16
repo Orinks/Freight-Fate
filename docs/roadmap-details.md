@@ -7252,12 +7252,25 @@ city service drives below.)
       per-state progress. Still open below: widening the high-confidence
       facility-type set for turn geometry (grain elevators, cold storage).
 - [ ] **Turn geometry for more facility types.** The turn-level route pass
-      still limits itself to the original high-confidence type set (yards,
-      cross-docks, warehouses, plants, ramps, parcel hubs). Grain
-      elevators, cold storage, and food processors now have source-backed
-      endpoints at scale -- extend `HIGH_CONFIDENCE_TYPES` in
-      `tools/build_facility_approaches.py` after judging spoken-name
-      quality on a sample.
+      used to limit itself to the original high-confidence type set (yards,
+      cross-docks, warehouses, plants, ramps, parcel hubs). On 2026-09-16
+      `HIGH_CONFIDENCE_TYPES` in `tools/build_facility_approaches.py` grew
+      to cold storage, food processors, grocery DCs, grain elevators, ports
+      and port terminals after reading the type-excluded endpoint names
+      (Americold, Dot Foods, US Foods read as the business they are).
+      Steel, automotive and chemical/petroleum terminals stay out: their
+      endpoints were name-substring matches ("Steele Street", "Assembly of
+      God", "Refinery Ballpark"), and a share of port endpoints are rail
+      subdivisions and bus terminals the endpoint sweep matched on
+      "terminal" -- both want an endpoint re-sweep before a street chain
+      guides the truck to them. The builder also merges a state batch into
+      the checked-in file by default (`--merge-existing`): a prior chain is
+      never demoted, facilities the batch did not attempt keep their rows
+      (the 419 estimated-near-city residuals included), and
+      `generated.regeocode_far_pins` survives. Still to do: run the sweep
+      over the state extracts (492 source-backed facilities of the new
+      types are eligible today; the file is still 1,415 chains of 5,037)
+      and move the pinned coverage counts.
 - [x] **Street cue pacing and clean spoken names.** Street cues pace one
       maneuver at a time with a block-scale lookahead (a departure used to
       read the whole itinerary in one burst), and spoken street names trim

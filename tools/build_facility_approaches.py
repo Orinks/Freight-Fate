@@ -6,6 +6,14 @@ build-time only and uses local OSM extracts; it never calls live routing APIs.
 Example:
     uv run --group tooling python tools/build_facility_approaches.py \
       --cache-dir C:\Users\joshu\.cache\freight-fate-osm\regions --write
+
+Batches merge by default (``--merge-existing``): the checked-in file is the
+base, and a run over a few states can only add or refresh what it actually
+routed. A turn-level chain is never replaced by a fallback, a facility this
+run did not attempt keeps its record byte for byte (so the estimated-near-city
+residuals from the far-pin regeocode keep their honest reason), and the
+``generated.regeocode_far_pins`` block survives. ``--no-merge-existing``
+is the old whole-file rebuild.
 """
 
 from __future__ import annotations
@@ -14,6 +22,7 @@ import argparse
 import importlib.util
 import json
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -36,16 +45,31 @@ MIN_PLAYABLE_ROUTE_MI = 2.0
 MIN_CHAIN_ROUTE_MI = 0.5
 RAW_MARKERS = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/", "relation/")
 HIGH_CONFIDENCE_TYPES = {
+    "cold_storage",
     "company_yard",
     "cross_dock",
     "distribution",
     "dry_warehouse",
+    "farm_elevator",
+    "food_processor",
+    "grocery_retail_dc",
     "intermodal_ramp",
     "manufacturing_plant",
     "parcel_hub",
+    "port",
+    "port_terminal",
     "terminal",
     "warehouse",
 }
+# Widened 2026-09-16 after reading the type-excluded endpoint names: cold
+# storage, food processors, grocery DCs and grain elevators name the
+# business they are (Americold, Dot Foods, US Foods). Ports are in on the
+# roadmap's say-so, though a share of their endpoints are rail subdivisions
+# and transit terminals the endpoint sweep matched on "terminal". Left out on
+# purpose: steel_industrial, automotive_plant and chemical_petroleum_terminal,
+# whose endpoints were matched by name substring ("Steele Street", "Assembly
+# of God", "Refinery Ballpark") -- a confident street chain to the wrong door
+# is worse than the fallback. Widen those after the endpoint re-sweep.
 
 
 @dataclass(frozen=True)
@@ -83,7 +107,16 @@ def build_facility_approaches(
     *,
     states: tuple[str, ...] = DEFAULT_STATES,
     max_route_mi: float = MAX_ROUTE_MI,
+    existing: dict[str, Any] | None = None,
+    accessed: str = ACCESSED_DATE,
 ) -> dict[str, Any]:
+    """Route the batch and return the payload to write.
+
+    With ``existing`` (the checked-in payload) the result is a merge: only
+    facilities this run attempted, or found new geometry for, change; see
+    :func:`merge_existing` for the rules. Without it the payload is a whole
+    rebuild in which every facility outside the batch is a fallback record.
+    """
     local_geometry = _load_local_geometry_tool()
     targets = collect_targets()
     state_set = set(states)
@@ -97,6 +130,9 @@ def build_facility_approaches(
         and target.local_approach_miles <= max_route_mi
     ]
     routed: dict[str, Any] = {}
+    # Facilities a state extract was actually searched for; a missing extract
+    # leaves its state's facilities unattempted so a merge keeps their rows.
+    attempted: set[str] = set()
     sources: list[dict[str, Any]] = []
     for state_index, state in enumerate(states, start=1):
         extract = local_geometry.state_extract_path(cache_dir, state)
@@ -105,20 +141,22 @@ def build_facility_approaches(
             _geometry_target(local_geometry, target) for target in routable if target.state == state
         ]
         print(
-            f"[{state_index}/{len(states)}] {state}: {len(state_targets)} routable targets",
+            f"[{state_index}/{len(states)}] {state}: {len(state_targets)} routable targets"
+            + ("" if extract.exists() else " (extract missing, skipped)"),
             flush=True,
         )
         if extract.exists() and state_targets:
+            attempted.update(target.target_id for target in state_targets)
             routed.update(local_geometry.route_state_targets(extract, state_targets))
 
     approaches = {
         target.facility_id: approach_record(target, routed.get(target.facility_id), state_set)
         for target in targets
     }
-    return {
+    payload = {
         "version": 1,
         "generated": {
-            "accessed": ACCESSED_DATE,
+            "accessed": accessed,
             "family": "OpenStreetMap local Geofabrik extracts plus checked-in facility endpoints",
             "source_policy": "Build-time only; runtime reads this compact checked-in file.",
             "states": list(states),
@@ -133,6 +171,74 @@ def build_facility_approaches(
                 "future source data explicitly proves it."
             ),
         },
+        "sources": sources,
+        "coverage": coverage_summary(approaches),
+        "approaches": approaches,
+    }
+    if existing is None:
+        return payload
+    return merge_existing(existing, payload, attempted, accessed=accessed)
+
+
+def merge_existing(
+    existing: dict[str, Any],
+    fresh: dict[str, Any],
+    attempted: set[str],
+    *,
+    accessed: str = ACCESSED_DATE,
+) -> dict[str, Any]:
+    """Fold a batch payload into the checked-in one without losing chains.
+
+    Per facility, in order: a facility the batch routed to turn level takes
+    the fresh record; a prior turn-level chain the batch could not better is
+    kept (so ``turn_level`` never falls below the base file); a facility the
+    batch attempted and still could not route takes the fresh fallback, whose
+    reason is this run's real routing outcome; anything else keeps its prior
+    record untouched, which is what protects the estimated-near-city
+    residuals and every state outside the batch. Facilities the world no
+    longer knows drop, as in a whole rebuild. ``generated`` keeps every prior
+    key the batch does not own (``regeocode_far_pins`` included), the state
+    list becomes the union, and ``merge`` records what the batch did.
+    """
+    prior = existing.get("approaches") or {}
+    summary = {"new_geometry": 0, "kept_turn_level": 0, "refreshed": 0, "kept": 0, "added": 0}
+    approaches: dict[str, Any] = {}
+    for facility_id, record in fresh["approaches"].items():
+        old = prior.get(facility_id)
+        if old is None:
+            approaches[facility_id] = record
+            summary["added"] += 1
+        elif record["turn_level"]:
+            approaches[facility_id] = record
+            summary["new_geometry"] += 1
+        elif old.get("turn_level"):
+            approaches[facility_id] = old
+            summary["kept_turn_level"] += 1
+        elif facility_id in attempted:
+            approaches[facility_id] = record
+            summary["refreshed"] += 1
+        else:
+            approaches[facility_id] = old
+            summary["kept"] += 1
+
+    batch_states = list(fresh["generated"]["states"])
+    generated = dict(existing.get("generated") or {})
+    for key in ("family", "source_policy", "road_policy", "gate_policy", "max_route_mi"):
+        generated[key] = fresh["generated"][key]
+    generated["states"] = sorted(set(generated.get("states") or []) | set(batch_states))
+    generated["merge"] = {"accessed": accessed, "batch_states": batch_states, **summary}
+
+    batch_state_set = set(batch_states)
+    sources = [
+        source
+        for source in existing.get("sources") or []
+        if source.get("state") not in batch_state_set
+    ] + list(fresh["sources"])
+    sources.sort(key=lambda source: str(source.get("state", "")))
+
+    return {
+        "version": fresh["version"],
+        "generated": generated,
         "sources": sources,
         "coverage": coverage_summary(approaches),
         "approaches": approaches,
@@ -325,14 +431,55 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=FACILITY_APPROACHES_PATH)
     parser.add_argument("--states", nargs="*", default=list(DEFAULT_STATES))
     parser.add_argument("--max-route-mi", type=float, default=MAX_ROUTE_MI)
+    parser.add_argument(
+        "--merge-existing",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Fold this batch into --existing instead of rebuilding the whole file "
+            "(default on; a batch can then only add or refresh what it routed)"
+        ),
+    )
+    parser.add_argument(
+        "--existing",
+        type=Path,
+        default=FACILITY_APPROACHES_PATH,
+        help="Base payload for --merge-existing (default: the checked-in file)",
+    )
+    parser.add_argument(
+        "--accessed",
+        default=time.strftime("%Y-%m-%d"),
+        help="Date stamped on this batch (default: today)",
+    )
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
+
+    existing = None
+    if args.merge_existing and args.existing.exists():
+        existing = json.loads(args.existing.read_text(encoding="utf-8"))
+        print("Coverage before (base file):", flush=True)
+        print(json.dumps(existing.get("coverage") or {}, indent=2, sort_keys=True))
+    elif args.merge_existing:
+        print(f"No base file at {args.existing}; building the whole file.", flush=True)
 
     payload = build_facility_approaches(
         args.cache_dir,
         states=tuple(args.states),
         max_route_mi=args.max_route_mi,
+        existing=existing,
+        accessed=args.accessed,
     )
+    if existing is not None:
+        print("Merge:", json.dumps(payload["generated"]["merge"], sort_keys=True), flush=True)
+        before = int((existing.get("coverage") or {}).get("turn_level") or 0)
+        after = payload["coverage"]["turn_level"]
+        print(f"turn_level {before} -> {after}", flush=True)
+        if after < before:
+            # merge_existing keeps every prior chain, so this cannot happen;
+            # refusing to write is cheaper than shipping a silent regression.
+            print("Refusing to write: merged turn_level fell below the base file.", flush=True)
+            return 1
+        print("Coverage after (merged):", flush=True)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))
     if args.write:
         args.output.write_text(

@@ -275,6 +275,170 @@ def test_build_tool_says_what_an_unnamed_road_is(tmp_path, monkeypatch):
     assert [segment["speed_mph"] for segment in record["segments"]] == [25.0, 15.0, 15.0]
 
 
+def _approach_stub(facility_id, *, turn_level, reason="", source_backed=True, estimated=False):
+    return {
+        "facility_id": facility_id,
+        "turn_level": turn_level,
+        "road_snapped": turn_level,
+        "fallback": not turn_level,
+        "fallback_reason": reason,
+        "estimated": estimated,
+        "endpoint_source_backed": source_backed,
+        "representative_fallback": not source_backed,
+        "gate_hint": False,
+        "yard_hint": False,
+        "dock_hint": False,
+    }
+
+
+def test_merge_existing_keeps_chains_and_deferred_residuals_across_a_partial_batch():
+    """A state batch used to rebuild the whole file, so every chain outside
+    the batch became a fallback row. The merge keeps prior turn-level chains,
+    leaves facilities the batch never attempted byte for byte (the 419
+    estimated-near-city residuals from the far-pin regeocode included), and
+    only refreshes fallback rows the batch really tried to route."""
+    tool = _load_tool()
+    residual_reason = (
+        "Re-geocode within city bounds found no high-confidence OSM name+type match "
+        "inside 6.4 mi; estimated near city pending better source evidence."
+    )
+    outside = "Source-backed endpoint is outside this bounded Midwest road-snap batch."
+    no_path = (
+        "No connected public-road path was found between the city context and sourced endpoint."
+    )
+    existing = {
+        "version": 1,
+        "generated": {
+            "accessed": "2026-06-27",
+            "states": ["Ohio", "Texas"],
+            "regeocode_far_pins": {"estimated_near_city": 419, "matched": 357},
+        },
+        "sources": [{"state": "Ohio", "file": "old-ohio"}, {"state": "Texas", "file": "texas"}],
+        "coverage": {},
+        "approaches": {
+            "tx:chain": _approach_stub("tx:chain", turn_level=True),
+            "tx:residual": _approach_stub(
+                "tx:residual",
+                turn_level=False,
+                reason=residual_reason,
+                source_backed=False,
+                estimated=True,
+            ),
+            "oh:chain": _approach_stub("oh:chain", turn_level=True),
+            "oh:untried": _approach_stub("oh:untried", turn_level=False, reason=outside),
+            "oh:new": _approach_stub("oh:new", turn_level=False, reason=outside),
+            "oh:retired": _approach_stub("oh:retired", turn_level=False, reason=outside),
+        },
+    }
+    fresh = {
+        "version": 1,
+        "generated": {
+            "accessed": "2026-09-16",
+            "family": "f",
+            "source_policy": "s",
+            "road_policy": "r",
+            "gate_policy": "g",
+            "max_route_mi": 18.0,
+            "states": ["Ohio"],
+        },
+        "sources": [{"state": "Ohio", "file": "new-ohio"}],
+        "coverage": {},
+        "approaches": {
+            # Texas is outside this batch: the whole-file path would demote
+            # its chain and overwrite the residual's honest reason.
+            "tx:chain": _approach_stub("tx:chain", turn_level=False, reason=outside),
+            "tx:residual": _approach_stub(
+                "tx:residual",
+                turn_level=False,
+                reason="Facility endpoint is representative fallback, so source-backed "
+                "routing is not claimed.",
+                source_backed=False,
+            ),
+            # Ohio was attempted: a chain that failed to re-route stays a
+            # chain, a fallback that was tried takes the run's real outcome.
+            "oh:chain": _approach_stub("oh:chain", turn_level=False, reason=no_path),
+            "oh:untried": _approach_stub("oh:untried", turn_level=False, reason=outside),
+            "oh:new": _approach_stub("oh:new", turn_level=True),
+            "oh:added": _approach_stub("oh:added", turn_level=True),
+        },
+    }
+
+    merged = tool.merge_existing(
+        existing, fresh, {"oh:chain", "oh:new", "oh:added"}, accessed="2026-09-16"
+    )
+    rows = merged["approaches"]
+
+    assert rows["tx:chain"] is existing["approaches"]["tx:chain"]
+    assert rows["tx:residual"] is existing["approaches"]["tx:residual"]
+    assert rows["tx:residual"]["fallback_reason"] == residual_reason
+    assert rows["oh:chain"] is existing["approaches"]["oh:chain"]
+    assert rows["oh:untried"] is existing["approaches"]["oh:untried"]
+    assert rows["oh:new"]["turn_level"]
+    assert rows["oh:added"]["turn_level"]
+    assert "oh:retired" not in rows
+    assert merged["coverage"]["turn_level"] == 4
+    assert merged["coverage"]["facilities"] == 6
+
+    generated = merged["generated"]
+    assert generated["regeocode_far_pins"] == {"estimated_near_city": 419, "matched": 357}
+    assert generated["accessed"] == "2026-06-27"
+    assert generated["states"] == ["Ohio", "Texas"]
+    assert generated["merge"] == {
+        "accessed": "2026-09-16",
+        "batch_states": ["Ohio"],
+        "new_geometry": 1,
+        "kept_turn_level": 2,
+        "refreshed": 0,
+        "kept": 2,
+        "added": 1,
+    }
+    assert [source["file"] for source in merged["sources"]] == ["new-ohio", "texas"]
+
+
+def test_merge_existing_refreshes_only_what_the_batch_attempted():
+    tool = _load_tool()
+    outside = "Source-backed endpoint is outside this bounded Midwest road-snap batch."
+    no_path = (
+        "No connected public-road path was found between the city context and sourced endpoint."
+    )
+    existing = {
+        "generated": {"states": ["Ohio"]},
+        "sources": [],
+        "approaches": {
+            "oh:tried": _approach_stub("oh:tried", turn_level=False, reason=outside),
+            "oh:missing_extract": _approach_stub(
+                "oh:missing_extract", turn_level=False, reason=outside
+            ),
+        },
+    }
+    fresh = {
+        "version": 1,
+        "generated": {
+            "family": "f",
+            "source_policy": "s",
+            "road_policy": "r",
+            "gate_policy": "g",
+            "max_route_mi": 18.0,
+            "states": ["Ohio", "Indiana"],
+        },
+        "sources": [],
+        "approaches": {
+            "oh:tried": _approach_stub("oh:tried", turn_level=False, reason=no_path),
+            "oh:missing_extract": _approach_stub(
+                "oh:missing_extract", turn_level=False, reason=no_path
+            ),
+        },
+    }
+
+    merged = tool.merge_existing(existing, fresh, {"oh:tried"})
+
+    assert merged["approaches"]["oh:tried"]["fallback_reason"] == no_path
+    assert merged["approaches"]["oh:missing_extract"]["fallback_reason"] == outside
+    assert merged["generated"]["states"] == ["Indiana", "Ohio"]
+    assert merged["generated"]["merge"]["refreshed"] == 1
+    assert merged["generated"]["merge"]["kept"] == 1
+
+
 def test_facility_approach_status_names_the_dock_not_the_town():
     # Owner playtest 2026-07-19: 14 miles of "toward Camp Verde" while
     # pulling out of Camp Verde for its own warehouse read as a wrong turn.
