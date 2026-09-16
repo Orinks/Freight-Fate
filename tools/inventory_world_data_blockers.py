@@ -48,16 +48,7 @@ REFUSE_DOC = ROOT / "docs/truck-router-refuse-legs.md"
 # markdown when the doc is absent; the doc is canonical for retirement notes.
 # Leftovers only (A->B drift from docs/truck-router-refuse-legs.md). The 25
 # corridor-via adopts are no longer refuse.
-TRUCK_ROUTER_REFUSE: tuple[tuple[str, float], ...] = (
-    ("hazard_ky_us:london_ky_us", 83.8),
-    ("evansville_in_us:clarksville_tn_us", 57.4),
-    ("charleston_wv_us:pikeville_ky_us", 38.8),
-    ("evansville_in_us:nashville_tn_us", 27.6),
-    ("chico_ca_us:santa_rosa_ca_us", 15.9),
-    ("pikeville_ky_us:hazard_ky_us", 12.6),
-    ("morristown_tn_us:london_ky_us", 42.9),
-    ("clarksville_tn_us:louisville_ky_us", -7.0),
-)
+TRUCK_ROUTER_REFUSE: tuple[tuple[str, float], ...] = ()
 
 APPROACH_FAR_MI = 8.0
 

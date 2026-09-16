@@ -1,13 +1,11 @@
 # Truck-router refuse legs (Career 1.9 world-data)
 
-Owner decision still needed on the leftovers below. On each of those legs the
-loaded-semi truck profile cannot honestly follow the archived corridor inside
-the 6 percent `tools/repair_geometry.py` adoption screen -- even when pinned
-with intermediate vias. Refuse means the geometry cannot be truck-followed as
-drawn; it is not merely "router ≠ old paid number." Either the road needs a
-truck-legal path (with paid miles then set to that path), or the leg should be
-retired/split. Pay and deadlines hang off mileage, so this is not a silent
-auto-fix.
+All eight leftovers were **retired** from the career network (owner option 3).
+Background: on each of those legs the loaded-semi truck profile could not
+honestly follow the archived corridor inside the 6 percent
+`tools/repair_geometry.py` adoption screen -- even when pinned with intermediate
+vias. Edges were dropped rather than remileaged or resplit. Pay and deadlines
+hang off mileage, so this was not a silent auto-fix.
 
 ## Fixed (25) -- corridor-pinned truck geometry
 
@@ -51,20 +49,28 @@ Measured 2026-09-16 against `https://valhalla1.openstreetmap.de`.
 | santa_ana_ca_us:lancaster_ca_us | archive_2 | +2.7% |
 | paintsville_ky_us:pikeville_ky_us | archive_6 | +5.7% |
 
-## Leftovers (8) -- still refuse
+## Retired (8) -- dropped from career network
 
-| leg | A→B drift | best corridor-via | why still refuse |
+Owner chose option 3 (retire). Directed edges removed from
+`world_source/legs/{KY,TN,IN,WV,CA}.json` on 2026-09-16; no new via/split
+cities. Connectivity alts already existed (prior dry-run). Geometry archive
+and gameplay jsonl rows for these leg ids scrubbed. Matching directed edges
+also dropped from `world_data/us/legs/{KY,TN,IN,WV,CA}.json` (whole-edge
+removal only; stop arrays on remaining legs untouched). Full `index_world`
+not run.
+
+| leg | prior A→B drift | prior best corridor-via | retired |
 | --- | ---: | ---: | --- |
-| hazard_ky_us:london_ky_us | +83.8% | +138% | Corridor (KY-80) is not truck-followable at paid length; pinned vias make the truck wander longer, not shorter. Mileage fix or retire/split needs owner. |
-| evansville_in_us:clarksville_tn_us | +57.4% | +52.4% | I-69 corridor still ~52% long under truck costing; no via set lands inside 6%. |
-| charleston_wv_us:pikeville_ky_us | +38.8% | +109% | US-119 archive pins do not yield a truck route near paid miles (often no route / long detour). |
-| evansville_in_us:nashville_tn_us | +27.6% | +60.5% | US-431 corridor under truck costing stays ≥60% over paid. |
-| chico_ca_us:santa_rosa_ca_us | +15.9% | +24.7% | Archive vias mostly fail (400) or lengthen further; unconstrained +15.9% over screen. |
-| pikeville_ky_us:hazard_ky_us | +12.6% | +12.6% | KY-80 truck route stuck ~+12.6% over paid regardless of via count. |
-| morristown_tn_us:london_ky_us | +42.9% | +11.5% | Best corridor pin still +11.5% (over 6% screen). |
-| clarksville_tn_us:louisville_ky_us | -7.0% | +6.6% | Best corridor pin +6.6% -- just over the adoption screen. |
+| hazard_ky_us:london_ky_us | +83.8% | +138% | yes |
+| evansville_in_us:clarksville_tn_us | +57.4% | +52.4% | yes |
+| charleston_wv_us:pikeville_ky_us | +38.8% | +109% | yes |
+| evansville_in_us:nashville_tn_us | +27.6% | +60.5% | yes |
+| chico_ca_us:santa_rosa_ca_us | +15.9% | +24.7% | yes |
+| pikeville_ky_us:hazard_ky_us | +12.6% | +12.6% | yes |
+| morristown_tn_us:london_ky_us | +42.9% | +11.5% | yes |
+| clarksville_tn_us:louisville_ky_us | -7.0% | +6.6% | yes |
 
-## Retirement options (pick per leftover, owner)
+## Retirement options (historical)
 
 1. **Keep road, fix mileage** -- when the archived line is the intended road
    and the paid miles are stale. Use `tools/repair_leg_mileage.py` / curated
@@ -76,8 +82,8 @@ Measured 2026-09-16 against `https://valhalla1.openstreetmap.de`.
    the adopted archive length. `tools/reroute_leg.py` changes miles and drops
    enrichment -- prefer a geometry-archive adopt plus mileage sync.
 3. **Retire / split the leg** -- when neither road nor mileage should stand
-   (corridor does not exist for trucks as drawn). Needs an owner call on
-   network shape; do not silently drop a freight node pair.
+   (corridor does not exist for trucks as drawn). **Applied to all 8 leftovers
+   above** -- edges dropped; no silent split cities.
 
 ## Out of scope here
 
