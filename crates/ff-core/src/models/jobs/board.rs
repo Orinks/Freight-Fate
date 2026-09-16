@@ -12,9 +12,10 @@ use crate::models::business_constants::DIRECT_FREIGHT_PAY_MULT;
 use crate::models::jobs::{
     cargo_type, dispatch_deadline_hours, facility_cargo, market_tag_cargo_bonus,
     minimum_pay_for_level, plan_hos, CargoType, Job, CARGO_CATALOG, DEADLINE_DISPATCH_SLACK_RANGE,
-    FACILITY_SELECTION_WEIGHTS, HOOKUP_FEE, LEVEL_DISTANCE_CAPS, LEVEL_DISTANCE_CAP_STEP_MI,
-    LONG_HAUL_MILES, MAX_DISPATCH_DISTANCE_MI, MIN_JOB_DISTANCE_MI, PREMIUM_LANE_LEVEL,
-    PREMIUM_LANE_LONG_HAUL_BIAS, SPECIALIZED_FREIGHT_LEVEL, SPECIALIZED_FREIGHT_WEIGHT,
+    FACILITY_SELECTION_WEIGHTS, HELD_CREDENTIAL_CARGO_WEIGHT, HELD_CREDENTIAL_FACILITY_BONUS,
+    HOOKUP_FEE, LEVEL_DISTANCE_CAPS, LEVEL_DISTANCE_CAP_STEP_MI, LONG_HAUL_MILES,
+    MAX_DISPATCH_DISTANCE_MI, MIN_JOB_DISTANCE_MI, PREMIUM_LANE_LEVEL, PREMIUM_LANE_LONG_HAUL_BIAS,
+    SPECIALIZED_FREIGHT_LEVEL, SPECIALIZED_FREIGHT_WEIGHT,
 };
 use crate::models::market::Market;
 use crate::models::start_options::{start_option, DEFAULT_START_KEY};
@@ -178,11 +179,13 @@ impl<'w> JobBoard<'w> {
         // collapses to one back-and-forth city (a start with a single nearby
         // neighbour used to be locked into one route). Nearer cities stay likelier.
         let dest_cycle = self.spread_destinations(&city, &reachable, level, count, carrier_key);
+        let held: Vec<&str> = endorsements.iter().map(AsRef::as_ref).collect();
         let mut attempts = 0;
         while jobs.len() < count && attempts < count * 30 {
             attempts += 1;
-            let location = self.choose_origin_location(city_obj, level, carrier_key);
-            let cargo_key = self.choose_cargo_for_location(city_obj, location, level, carrier_key);
+            let location = self.choose_origin_location(city_obj, level, carrier_key, &held);
+            let cargo_key =
+                self.choose_cargo_for_location(city_obj, location, level, carrier_key, &held);
             let cargo = cargo_type(cargo_key).expect("a catalog cargo key");
             let locked = !cargo.missing_credentials(endorsements).is_empty();
             // a locked job may appear once in a while as a teaser, otherwise skip
@@ -253,9 +256,11 @@ impl<'w> JobBoard<'w> {
             .iter()
             .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))?
             .clone();
+        let held: Vec<&str> = endorsements.iter().map(AsRef::as_ref).collect();
         for _ in 0..30 {
-            let location = self.choose_origin_location(city_obj, level, carrier_key);
-            let cargo_key = self.choose_cargo_for_location(city_obj, location, level, carrier_key);
+            let location = self.choose_origin_location(city_obj, level, carrier_key, &held);
+            let cargo_key =
+                self.choose_cargo_for_location(city_obj, location, level, carrier_key, &held);
             let cargo = cargo_type(cargo_key).expect("a catalog cargo key");
             if !cargo.missing_credentials(endorsements).is_empty() {
                 continue;
@@ -443,6 +448,7 @@ impl<'w> JobBoard<'w> {
         city: &'c City,
         level: i64,
         carrier_key: &str,
+        held: &[&str],
     ) -> &'c Location {
         let mut plausible: Vec<&Location> = city
             .locations
@@ -457,10 +463,35 @@ impl<'w> JobBoard<'w> {
         }
         let weights: Vec<f64> = plausible
             .iter()
-            .map(|location| Self::facility_weight(city, location, carrier_key))
+            .map(|location| {
+                let mut weight = Self::facility_weight(city, location, carrier_key);
+                // A shipper of freight this driver is credentialed for is
+                // where dispatch sends this driver first.
+                if Self::cargo_for_location(location, "ships", Some(level))
+                    .iter()
+                    .any(|key| Self::credentialed_and_held(key, held))
+                {
+                    weight += HELD_CREDENTIAL_FACILITY_BONUS;
+                }
+                weight
+            })
             .collect();
         let idx = self.rng.choices_indices_weighted(&weights, 1)[0];
         plausible[idx]
+    }
+
+    /// The cargo asks for a course-earned credential (one no level grants:
+    /// hazmat, doubles, TWIC, LCV) and the driver holds everything it asks
+    /// for. Level-granted certificates are not the point: every level-18
+    /// driver holds refrigerated and high-value, so favouring their freight
+    /// would favour most of the board.
+    fn credentialed_and_held(cargo_key: &str, held: &[&str]) -> bool {
+        cargo_type(cargo_key).is_some_and(|cargo| {
+            cargo.credentials.iter().any(|key| {
+                crate::models::credentials::credential(key)
+                    .is_some_and(|credential| credential.grant_level.is_none())
+            }) && cargo.missing_credentials(held).is_empty()
+        })
     }
 
     fn choose_cargo_for_location(
@@ -469,6 +500,7 @@ impl<'w> JobBoard<'w> {
         location: &Location,
         level: i64,
         carrier_key: &str,
+        held: &[&str],
     ) -> &'static str {
         let mut cargo_keys = Self::cargo_for_location(location, "ships", Some(level));
         if cargo_keys.is_empty() {
@@ -480,7 +512,14 @@ impl<'w> JobBoard<'w> {
         }
         let weights: Vec<f64> = cargo_keys
             .iter()
-            .map(|key| Self::cargo_weight(city, key, carrier_key, level))
+            .map(|key| {
+                let weight = Self::cargo_weight(city, key, carrier_key, level);
+                if Self::credentialed_and_held(key, held) {
+                    weight * HELD_CREDENTIAL_CARGO_WEIGHT
+                } else {
+                    weight
+                }
+            })
             .collect();
         let idx = self.rng.choices_indices_weighted(&weights, 1)[0];
         cargo_keys[idx]

@@ -651,6 +651,14 @@ pub const BASE_BOARD_OFFERS: usize = 5;
 // favored on the board.
 pub const SPECIALIZED_FREIGHT_LEVEL: i64 = 11;
 pub const SPECIALIZED_FREIGHT_WEIGHT: f64 = 1.25;
+// A driver who holds every credential a cargo class asks for is the driver
+// dispatch calls for it. Before 2026-09-16 the board offered a hazmat holder
+// 1.2 percent placarded and 0.25 percent bulk fuel map-wide (zero of 1,186
+// staging deliveries), so the course and background check never paid back.
+// The cargo weight multiplies at the shipper, and the shipper itself is
+// favoured when it ships something the driver is credentialed for.
+pub const HELD_CREDENTIAL_CARGO_WEIGHT: f64 = 4.0;
+pub const HELD_CREDENTIAL_FACILITY_BONUS: f64 = 1.5;
 pub const PREMIUM_LANE_LEVEL: i64 = 12;
 pub const PREMIUM_LANE_LONG_HAUL_BIAS: f64 = 0.5;
 

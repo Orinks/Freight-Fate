@@ -279,6 +279,17 @@ its status or release decision.
       reserve carries a surcharge (a tenth per citation, a third per serious,
       capped at double, ASSUMED); the record line and the terminal greeting
       read the live consequence.
+- [x] Endorsement freight reaches the drivers who hold it (owner approval
+      2026-09-16). Staging had 1,186 deliveries and not one placarded or
+      bulk-fuel load: the board offered a hazmat holder 1.2 percent placarded
+      and 0.25 percent fuel map-wide, and both needed a chemical terminal at
+      each end. A cargo that asks for a course-earned credential (hazmat,
+      doubles, TWIC, LCV) now weighs four times at the shipper when the
+      driver holds it and the shipper itself is favoured; fuel and placarded
+      loads also ship from ports and elevators and land at plants, quarries,
+      elevators, ports, airports and yards. Measured: placarded 10 percent
+      and fuel 2.6 percent of a level-18 holder's offers map-wide, seven in
+      ten Houston boards carry one; pinned in the jobs tests.
 - [x] A career that is over stays readable (owner ruling 2026-09-12, over
       automatic deletion): the second major offense lands as a terminal
       notice, the greeting says the career is over, the buy-in waits for a

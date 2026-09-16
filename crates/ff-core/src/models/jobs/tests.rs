@@ -1104,3 +1104,93 @@ fn test_dispatched_loads_stay_at_or_under_eighty_thousand_pounds() {
         );
     }
 }
+
+// -- Endorsement freight shows up for the drivers who hold the credential ----
+
+/// Every credential a level-18 company driver can hold short of TWIC and LCV.
+const LADDER: &[&str] = &[
+    "refrigerated",
+    "flatbed_securement",
+    "heavy_haul",
+    "high_value",
+    "doubles_triples",
+    "tank",
+    "hazmat",
+];
+
+/// One board in every eighth city across the map (a stride keeps this under
+/// twenty seconds; the whole map took two minutes): `(offers, count per
+/// cargo key)`.
+fn cargo_mix(
+    endorsements: &[&str],
+    level: i64,
+) -> (usize, std::collections::BTreeMap<&'static str, usize>) {
+    let mut mix = std::collections::BTreeMap::new();
+    let mut total = 0usize;
+    for (index, key) in world().cities.keys().enumerate().step_by(8) {
+        for job in offers(index as i64 * 7 + 1, key, endorsements, level) {
+            *mix.entry(job.cargo.key).or_insert(0) += 1;
+            total += 1;
+        }
+    }
+    (total, mix)
+}
+
+fn share(mix: &(usize, std::collections::BTreeMap<&'static str, usize>), key: &str) -> f64 {
+    mix.1.get(key).copied().unwrap_or(0) as f64 / mix.0 as f64
+}
+
+#[test]
+fn hazmat_and_tank_holders_see_placarded_and_fuel_freight_map_wide() {
+    // 2026-09-16: nobody on staging had ever hauled a placarded or bulk fuel
+    // load, because the board offered a hazmat holder 1.2 percent placarded
+    // and 0.25 percent fuel map-wide. A credential the driver paid a
+    // background check for has to pay back on the board.
+    let held = cargo_mix(LADDER, 18);
+    eprintln!("level-18 holder mix over {} offers: {:?}", held.0, held.1);
+    assert!(
+        share(&held, "hazardous") >= 0.06,
+        "placarded share {:.3} of {} offers",
+        share(&held, "hazardous"),
+        held.0
+    );
+    assert!(
+        share(&held, "fuel_bulk") >= 0.02,
+        "bulk fuel share {:.3} of {} offers",
+        share(&held, "fuel_bulk"),
+        held.0
+    );
+    // Without the H endorsement the same freight stays the occasional
+    // locked teaser it always was.
+    let without: Vec<&str> = LADDER.iter().copied().filter(|k| *k != "hazmat").collect();
+    let missing = cargo_mix(&without, 18);
+    assert!(
+        share(&missing, "hazardous") <= 0.02,
+        "placarded share without hazmat {:.3}",
+        share(&missing, "hazardous")
+    );
+    assert!(
+        share(&missing, "fuel_bulk") <= 0.01,
+        "bulk fuel share without hazmat {:.3}",
+        share(&missing, "fuel_bulk")
+    );
+}
+
+#[test]
+fn a_gulf_coast_board_usually_carries_placarded_or_fuel_freight_for_a_holder() {
+    let boards = 40;
+    let mut carrying = 0;
+    for seed in 0..boards {
+        let jobs = offers(seed, "Houston", LADDER, 18);
+        if jobs
+            .iter()
+            .any(|job| matches!(job.cargo.key, "hazardous" | "fuel_bulk"))
+        {
+            carrying += 1;
+        }
+    }
+    assert!(
+        carrying * 10 >= boards * 7,
+        "{carrying} of {boards} Houston boards carried placarded or fuel freight"
+    );
+}
