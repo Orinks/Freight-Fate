@@ -363,20 +363,33 @@ mod tests {
 
     #[test]
     fn test_the_baked_i5_leg_loads_with_no_impossible_slope() {
+        // Load-time screen on a real I-5 bake: ORS spikes above the interstate
+        // ceiling must clamp, not ship as physics.
+        //
+        // Originally pinned to Chico->Santa Rosa, the only leg that still
+        // carried the world-worst +14.42 percent I-5 record. That directed
+        // edge was retired with the truck-router refuse leftovers, and no
+        // surviving bake still holds a >14 percent interstate spike. The
+        // Grapevine (Bakersfield->Los Angeles) still has short ORS spans
+        // past 7 percent on live I-5, so the same screening property holds.
         let text = read_data_text("world_data/us/legs/CA.json").expect("CA shard");
         let data: serde_json::Value = serde_json::from_str(&text).unwrap();
         let leg = data["legs"]
             .as_array()
             .unwrap()
             .iter()
-            .find(|lg| lg["from"] == "chico_ca_us" && lg["to"] == "santa_rosa_ca_us")
-            .expect("the I-5 fixture leg");
+            .find(|lg| lg["from"] == "bakersfield_ca_us" && lg["to"] == "los_angeles_ca_us")
+            .expect("the I-5 Grapevine fixture leg");
+        assert_eq!(leg["highway"], "I-5");
         let raw = leg["corridor"]["grade_segments"].as_array().unwrap();
         let worst_raw = raw
             .iter()
             .map(|g| g["avg_grade_pct"].as_f64().unwrap().abs())
             .fold(0.0, f64::max);
-        assert!(worst_raw > 14.0, "fixture no longer has the artifact");
+        assert!(
+            worst_raw > class_ceiling_pct("interstate"),
+            "fixture no longer has an over-ceiling ORS spike"
+        );
 
         let built = build_leg_corridor(
             &leg["corridor"],
