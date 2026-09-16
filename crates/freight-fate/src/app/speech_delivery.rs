@@ -312,6 +312,9 @@ impl GameContext {
             }
             if self.settings.speech_disposition(category) == Disposition::Earcon {
                 self.play_ladder_earcon(category);
+                // The cue is standing in for the words, so it gets the room
+                // the words would have had (see engage_earcon_duck).
+                self.engage_earcon_duck();
             }
             self.event_pacer.note_silenced(&text, None);
             transcript!(

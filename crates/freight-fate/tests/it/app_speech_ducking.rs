@@ -11,7 +11,7 @@
 use ff_core::settings::Settings;
 use ff_core::speech_pacing::{monotonic_seconds, SpeechCategory};
 use freight_fate::app::testing::{AudioLog, FakeClock, TestApp};
-use freight_fate::app::SayEvent;
+use freight_fate::app::{Say, SayEvent};
 use freight_fate::audio::{EARCON_DUCK_S, SPEECH_DUCK_LEVEL};
 
 fn rig(app: &mut TestApp) -> (AudioLog, FakeClock) {
@@ -158,6 +158,52 @@ fn test_with_ducking_off_an_earcon_leaves_the_mix_alone() {
     app.ctx.say_event_with(
         "Automatic braking.",
         SayEvent::queued().category(SpeechCategory::Confirmation),
+    );
+
+    assert!(
+        audio.borrow().ducks.is_empty(),
+        "the mix was stepped back anyway: {:?}",
+        audio.borrow().ducks
+    );
+    assert!(!app.ctx.speech_ducked());
+    app.shutdown();
+}
+
+#[test]
+fn test_a_say_path_earcon_gets_the_same_room_as_an_event_one() {
+    // Cruise and stop confirmations ride say_with, not say_event. The Aug 19
+    // earcon duck covered only the event channel, so quiet-mode notes on the
+    // main say path still played against the full road bed.
+    let mut app = TestApp::new();
+    let audio = app.record_audio();
+    app.ctx.settings.duck_audio_for_speech = true;
+    app.ctx.settings.driving_speech = "quiet".to_string();
+
+    app.ctx.say_with(
+        "Cruise set.",
+        Say::new().category(SpeechCategory::Confirmation),
+    );
+
+    let ducks = audio.borrow().ducks.clone();
+    assert!(
+        !ducks.is_empty(),
+        "the say-path earcon played against an unducked mix"
+    );
+    assert_eq!(*ducks.last().unwrap(), SPEECH_DUCK_LEVEL);
+    assert!(app.ctx.speech_ducked());
+    app.shutdown();
+}
+
+#[test]
+fn test_with_ducking_off_a_say_path_earcon_leaves_the_mix_alone() {
+    let mut app = TestApp::new();
+    let audio = app.record_audio();
+    app.ctx.settings.duck_audio_for_speech = false;
+    app.ctx.settings.driving_speech = "quiet".to_string();
+
+    app.ctx.say_with(
+        "Cruise set.",
+        Say::new().category(SpeechCategory::Confirmation),
     );
 
     assert!(

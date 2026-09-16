@@ -312,6 +312,9 @@ class GameContext:
                 return
             if self.settings.speech_disposition(category) is Disposition.EARCON:
                 self._play_ladder_earcon(category)
+                # The cue is standing in for the words, so it gets the room
+                # the words would have had (see _engage_earcon_duck).
+                self._engage_earcon_duck()
             self._event_pacer.note_silenced(text)
             transcript.info("[ladder] %s silenced: %s", self.settings.driving_speech, text)
             if review:

@@ -103,8 +103,11 @@ These items are part of the release-gate sweep:
       hazard warnings retain service-braking and reaction time; emergency
       braking has its own stopping estimate.
 
-- [ ] Testers hear sounds quieter at the quiet speech rung; three
-      suspects eliminated, still unexplained.
+- [x] Testers hear sounds quieter at the quiet speech rung -- the Aug 19
+      earcon duck covered say_event; the main say path (cruise/stop
+      confirmations) now ducks the bed the same way when game sounds step
+      back for speech is on. Absolute levels were never low; relative
+      masking under the unducked road bed was.
 - [ ] Departing straight into a hazard at route mile zero -- MOSTLY DONE:
       the real-zone floor and the merge-free opening miles landed
       2026-08-16; what remains is departure chains for the other 72

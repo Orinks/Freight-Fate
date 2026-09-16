@@ -1395,6 +1395,8 @@
 
 ### Fixed
 
+- **Quiet-mode confirmation notes on the main say path get the same room as event ones.** With Game sounds step back for speech on, cruise and stop confirmations that become earcons at quiet no longer play against the full road bed. This is the mix stepping back under the cue, not Gameplay cues volume getting quieter.
+
 - **Driving out of a station's range now says so and retunes the radio.**
   The old station used to keep playing at full volume while the drivers
   board named a station you were not hearing.
