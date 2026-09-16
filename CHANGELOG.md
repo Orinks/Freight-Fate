@@ -8,6 +8,8 @@
 
 - **Curve connectors and artifact screens catch up after the offline curve re-bake.** The 205 legs whose archive line no longer matched the baked curves were re-swept from geometry; Valhalla road-class readings then mark interchange ramps and town streets as connectors with a named source again, and the artifact screen drops departure hairpins and sub-50 ft radii. Interstate mainline asks a truck to slow about once per hundred-plus miles again. Glenwood Canyon and US-550 switchbacks stay.
 
+- **Twenty-five more curve mismatches from the truck-router geometry adopts are re-baked offline.** Curves-only from archived geometry, then Valhalla connector reclass and the artifact screen so CI curve tests stay green. Glenwood Canyon and US-550 switchbacks stay.
+
 
 ### Changed
 
