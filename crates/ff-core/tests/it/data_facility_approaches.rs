@@ -29,11 +29,12 @@ fn test_facility_approach_data_covers_full_facility_set() {
     let coverage = &data["coverage"];
 
     assert_eq!(coverage["facilities"], 5037);
-    assert_eq!(coverage["source_backed_endpoints"], 3198);
+    // Synced with facility_endpoints after far-pin regeocode (419 estimated).
+    assert_eq!(coverage["source_backed_endpoints"], 2779);
     assert_eq!(coverage["road_snapped"], 1579);
     assert_eq!(coverage["turn_level"], 1415);
-    assert_eq!(coverage["nearest_road_fallback"], 1619);
-    assert_eq!(coverage["representative_fallback"], 1839);
+    assert_eq!(coverage["nearest_road_fallback"], 1200);
+    assert_eq!(coverage["representative_fallback"], 2258);
     assert_eq!(coverage["gate_yard_dock_hints"], 0);
 
     // The 2026-07-14 regen keys records by current slug facility ids and

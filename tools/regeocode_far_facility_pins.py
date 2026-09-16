@@ -188,6 +188,7 @@ def estimated_near_city(target: FarTarget, endpoints_tool) -> dict[str, Any]:
     # Floor at bake minimum so synthetic approaches stay in Josh's band.
     record["approach_miles"] = 2.1
     record["approach_road"] = "local facility access road"
+    record["estimated"] = True
     record["source_note"] = (
         f"Estimated-near-city placement for {target.facility_name} in {target.city}; "
         "prior source-backed pin sat past 8 approach miles and no in-bound OSM "
@@ -226,6 +227,7 @@ def matched_record(target: FarTarget, candidate, endpoints_tool) -> dict[str, An
             "Re-geocoded freight facility endpoint within city bounds from OpenStreetMap; "
             f"matched to {target.facility_type} by {candidate.mapping}; "
             f"prior pin had approach_miles={target.old.get('approach_miles')}; "
+            "road snapping, gates, yards, and docks are not claimed by this layer; "
             f"accessed {ACCESSED_DATE}."
         ),
     }
@@ -396,6 +398,27 @@ def regeocode(
 
     approaches_payload = dict(approaches_payload)
     approaches_payload["approaches"] = approaches
+    approaches_payload["coverage"] = {
+        "facilities": len(approaches),
+        "source_backed_endpoints": sum(
+            1 for item in approaches.values() if item.get("endpoint_source_backed")
+        ),
+        "road_snapped": sum(1 for item in approaches.values() if item.get("road_snapped")),
+        "turn_level": sum(1 for item in approaches.values() if item.get("turn_level")),
+        "nearest_road_fallback": sum(
+            1
+            for item in approaches.values()
+            if item.get("endpoint_source_backed") and not item.get("road_snapped")
+        ),
+        "representative_fallback": sum(
+            1 for item in approaches.values() if item.get("representative_fallback")
+        ),
+        "gate_yard_dock_hints": sum(
+            1
+            for item in approaches.values()
+            if item.get("gate_hint") or item.get("yard_hint") or item.get("dock_hint")
+        ),
+    }
     agen = dict(approaches_payload.get("generated") or {})
     agen["regeocode_far_pins"] = gen["regeocode_far_pins"]
     approaches_payload["generated"] = agen

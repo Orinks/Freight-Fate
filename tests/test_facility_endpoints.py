@@ -26,8 +26,10 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
     coverage = data["coverage"]
 
     assert coverage["facilities"] == 5037
-    assert coverage["source_backed"] == 3198
-    assert coverage["fallback"] == 1839
+    # After far-pin regeocode: 357 OSM rematches stayed source-backed; 419
+    # unresolvable pins became estimated-near-city fallbacks (2779/2258).
+    assert coverage["source_backed"] == 2779
+    assert coverage["fallback"] == 2258
     assert coverage["nearest_road_context"] == 0
     assert coverage["turn_level_geometry"] == 0
     assert coverage["gate_yard_dock_hints"] == 0
@@ -85,7 +87,14 @@ def test_facility_endpoint_records_are_clean_and_honest(world):
             assert record["fallback"]
             assert record["fallback_reason"]
             assert record["source_type"] == "representative_fallback"
-            assert record["approach_miles"] == 0.0
+            if record.get("estimated"):
+                # Estimated-near-city pins keep a real offset; they must not
+                # claim source-backed OSM at zero miles.
+                assert record["approach_miles"] > 0
+                assert "Estimated-near-city" in record["source_note"]
+                assert "estimated near city" in record["fallback_reason"].lower()
+            else:
+                assert record["approach_miles"] == 0.0
 
 
 def test_facility_route_prefers_source_backed_endpoint_when_available(world):

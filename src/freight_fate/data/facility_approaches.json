@@ -215263,10 +215263,10 @@
   "coverage": {
     "facilities": 5037,
     "gate_yard_dock_hints": 0,
-    "nearest_road_fallback": 1619,
-    "representative_fallback": 1839,
+    "nearest_road_fallback": 1200,
+    "representative_fallback": 2258,
     "road_snapped": 1579,
-    "source_backed_endpoints": 3198,
+    "source_backed_endpoints": 2779,
     "turn_level": 1415
   },
   "generated": {

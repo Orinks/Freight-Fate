@@ -60,9 +60,11 @@ fn test_long_synthetic_approach_steps_down_45_25_15() {
     // is an access road -- 45 wide out, 25 for the last two miles, 15 at the
     // gate. A blanket 25 for six-plus miles was a crawl no city posts.
     let w = world();
+    // Madison Cold Storage became estimated-near-city @2.1 mi after far-pin
+    // regeocode; Kenosha Dry Warehouse still has a long synthetic approach.
     let route = w
-        .facility_approach_route("madison_wi_us", "Madison Cold Storage")
-        .expect("Madison Cold Storage has an approach route");
+        .facility_approach_route("kenosha_wi_us", "Kenosha Dry Warehouse")
+        .expect("Kenosha Dry Warehouse has an approach route");
     assert!(route.miles() > 3.0); // long synthetic approach (clamped to Josh's band)
     let mut truck = TruckState::default();
     truck.transmission.automatic = true;

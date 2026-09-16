@@ -23,8 +23,10 @@ fn test_facility_endpoint_data_covers_supported_facilities() {
     let coverage = &data["coverage"];
 
     assert_eq!(coverage["facilities"], 5037);
-    assert_eq!(coverage["source_backed"], 3198);
-    assert_eq!(coverage["fallback"], 1839);
+    // After far-pin regeocode: 357 OSM rematches stayed source-backed; 419
+    // unresolvable pins became estimated-near-city fallbacks (2779/2258).
+    assert_eq!(coverage["source_backed"], 2779);
+    assert_eq!(coverage["fallback"], 2258);
     assert_eq!(coverage["nearest_road_context"], 0);
     assert_eq!(coverage["turn_level_geometry"], 0);
     assert_eq!(coverage["gate_yard_dock_hints"], 0);
@@ -96,7 +98,26 @@ fn test_facility_endpoint_records_are_clean_and_honest() {
             assert!(record["fallback"].as_bool().unwrap());
             assert!(!record["fallback_reason"].as_str().unwrap().is_empty());
             assert_eq!(record["source_type"], "representative_fallback");
-            assert_eq!(record["approach_miles"].as_f64().unwrap(), 0.0);
+            let estimated = record
+                .get("estimated")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
+            if estimated {
+                // Estimated-near-city pins keep a real offset; they must not
+                // claim source-backed OSM at zero miles.
+                assert!(record["approach_miles"].as_f64().unwrap() > 0.0);
+                assert!(record["source_note"]
+                    .as_str()
+                    .unwrap()
+                    .contains("Estimated-near-city"));
+                assert!(record["fallback_reason"]
+                    .as_str()
+                    .unwrap()
+                    .to_lowercase()
+                    .contains("estimated near city"));
+            } else {
+                assert_eq!(record["approach_miles"].as_f64().unwrap(), 0.0);
+            }
         }
     }
 }

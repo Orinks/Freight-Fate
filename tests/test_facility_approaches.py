@@ -26,11 +26,12 @@ def test_facility_approach_data_covers_full_facility_set(world):
     coverage = data["coverage"]
 
     assert coverage["facilities"] == 5037
-    assert coverage["source_backed_endpoints"] == 3198
+    # Synced with facility_endpoints after far-pin regeocode (419 estimated).
+    assert coverage["source_backed_endpoints"] == 2779
     assert coverage["road_snapped"] == 1579
     assert coverage["turn_level"] == 1415
-    assert coverage["nearest_road_fallback"] == 1619
-    assert coverage["representative_fallback"] == 1839
+    assert coverage["nearest_road_fallback"] == 1200
+    assert coverage["representative_fallback"] == 2258
     assert coverage["gate_yard_dock_hints"] == 0
 
     # The 2026-07-14 regen keys records by current slug facility ids and
@@ -312,7 +313,9 @@ def test_long_synthetic_approach_steps_down_45_25_15(world):
     from freight_fate.sim.vehicle import TruckState
     from freight_fate.sim.weather import WeatherSystem
 
-    route = world.facility_approach_route("madison_wi_us", "Madison Cold Storage")
+    # Madison Cold Storage became estimated-near-city @2.1 mi after far-pin
+    # regeocode; Kenosha Dry Warehouse still has a long synthetic approach.
+    route = world.facility_approach_route("kenosha_wi_us", "Kenosha Dry Warehouse")
     assert route.miles > 3.0  # long synthetic approach (clamped to Josh's band)
     truck = TruckState()
     truck.transmission.automatic = True
